@@ -1,0 +1,12 @@
+rootProject.name = "Sphinx"
+
+////////////////////////////////
+//////////// Sphinx ////////////
+////////////////////////////////
+include ':sphinx:sphinx'
+include ':sphinx:android:common:resources'
+
+// Activities
+include ':sphinx:android:activitymain'
+
+// Screens

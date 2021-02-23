@@ -1,0 +1,102 @@
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+buildscript {
+    apply from: rootProject.file('gradle/dependencies.gradle')
+
+    repositories {
+        mavenCentral()
+        google()
+        gradlePluginPortal()
+    }
+
+    dependencies {
+        classpath plugin.androidGradle
+        classpath plugin.google.hilt
+        classpath plugin.gradleVersions
+        classpath plugin.kotlin.gradle
+        classpath plugin.square.exhaustive
+
+        // NOTE: Do not place your application dependencies here; they belong
+        // in the individual module build.gradle files
+    }
+}
+
+allprojects {
+    repositories {
+        mavenCentral()
+        google()
+
+        // TODO:
+        //  Remove once https://github.com/kirich1409/ViewBindingPropertyDelegate/issues/39
+        //  is resolved
+        jcenter()
+    }
+
+    tasks.withType(Test) {
+        maxHeapSize = "4096m"
+    }
+
+    plugins.withId("com.android.library") {
+        extensions.getByName("android").compileOptions {
+            sourceCompatibility JavaVersion.VERSION_1_8
+            targetCompatibility JavaVersion.VERSION_1_8
+        }
+    }
+
+    plugins.withId("kotlin") {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+
+    tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
+        kotlinOptions {
+            jvmTarget = JavaVersion.VERSION_1_8
+            freeCompilerArgs += [
+                    "-Xinline-classes",
+                    "-Xopt-in=kotlin.RequiresOptIn",
+                    '-Xopt-in=kotlin.time.ExperimentalTime',
+                    '-Xopt-in=kotlinx.coroutines.ExperimentalCoroutinesApi',
+            ]
+        }
+    }
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}
+
+////////////////////////////////////////////////////////////////////////////
+/// Gradle Versions: https://github.com/ben-manes/gradle-versions-plugin ///
+////////////////////////////////////////////////////////////////////////////
+
+apply plugin: 'com.github.ben-manes.versions'
+
+def isNonStable = { String version ->
+    def stableKeyword = ['RELEASE', 'FINAL', 'GA'].any { it -> version.toUpperCase().contains(it) }
+    def regex = /^[0-9,.v-]+(-r)?$/
+    return !stableKeyword && !(version ==~ regex)
+}
+
+tasks.named("dependencyUpdates").configure {
+    checkForGradleUpdate = true
+
+    // Example 1: reject all non stable versions
+    rejectVersionIf {
+        isNonStable(candidate.version)
+    }
+
+    // Example 2: disallow release candidates as upgradable versions from stable versions
+    rejectVersionIf {
+        isNonStable(candidate.version) && !isNonStable(currentVersion)
+    }
+
+    // Example 3: using the full syntax
+    resolutionStrategy {
+        componentSelection {
+            all {
+                if (isNonStable(candidate.version) && !isNonStable(currentVersion)) {
+                    reject('Release candidate')
+                }
+            }
+        }
+    }
+}
