@@ -1,15 +1,12 @@
 plugins {
     id 'com.android.library'
-    id 'dagger.hilt.android.plugin'
     id 'kotlin-android'
-    id 'kotlin-kapt'
 }
 
 android {
     compileSdkVersion versions.compileSdk
     buildToolsVersion versions.buildTools
 
-    buildFeatures.viewBinding = true
     defaultConfig {
         minSdkVersion versions.minSdk
         targetSdkVersion versions.compileSdk
@@ -30,19 +27,6 @@ android {
 
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
-    // KotlinAndroid
-    implementation project(path: ':android:features:android-feature-screens')
-
-    // Sphinx
-    implementation project(path: ':sphinx:android:common:resources')
-
-    implementation deps.androidx.lifecycle.hilt
-    implementation deps.google.hilt
-    kapt kaptDeps.google.hilt
-
-    testImplementation testDeps.junit
-
-    androidTestImplementation testDeps.androidx.core
-    androidTestImplementation testDeps.androidx.espresso
-    androidTestImplementation testDeps.androidx.junit
+//    implementation deps.google.hilt
+    implementation deps.javax.inject
 }
