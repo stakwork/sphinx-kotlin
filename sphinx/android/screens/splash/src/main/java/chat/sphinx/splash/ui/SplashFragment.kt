@@ -1,4 +1,4 @@
-package chat.sphinx.splash
+package chat.sphinx.splash.ui
 
 import android.graphics.Rect
 import android.os.Bundle
@@ -6,6 +6,7 @@ import android.view.View
 import android.widget.Space
 import androidx.fragment.app.Fragment
 import by.kirich1409.viewbindingdelegate.viewBinding
+import chat.sphinx.splash.R
 import chat.sphinx.splash.databinding.FragmentSplashBinding
 import dagger.hilt.android.AndroidEntryPoint
 
