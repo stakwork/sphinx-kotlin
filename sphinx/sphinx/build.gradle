@@ -59,7 +59,6 @@ android {
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation project(path: ':sphinx:android:activitymain')
-    implementation deps.androidx.appCompat
 
     implementation deps.google.hilt
     kapt kaptDeps.google.hilt

@@ -1,6 +1,7 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
     apply from: rootProject.file('gradle/dependencies.gradle')
+    apply from: rootProject.file('kotlin-android/gradle/dependencies.gradle')
 
     repositories {
         mavenCentral()
