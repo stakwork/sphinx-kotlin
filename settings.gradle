@@ -10,7 +10,7 @@ include ':sphinx:android:common:resources'
 include ':sphinx:android:activitymain'
 
 // Screens
-
+include ':sphinx:android:screens:splash'
 
 ////////////////////////////////////////
 //////////// Kotlin Android ////////////
