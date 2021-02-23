@@ -9,6 +9,7 @@ android {
     compileSdkVersion versions.compileSdk
     buildToolsVersion versions.buildTools
 
+    buildFeatures.viewBinding = true
     defaultConfig {
         minSdkVersion versions.minSdk
         targetSdkVersion versions.compileSdk
@@ -30,11 +31,10 @@ android {
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
     // KotlinAndroid
-    api project(path: ':android:features:android-feature-activity')
+    implementation project(path: ':android:features:android-feature-screens')
 
     // Sphinx
-    api project(path: ':sphinx:android:common:resources')
-    api project(path: ':sphinx:android:screens:splash')
+    implementation project(path: ':sphinx:android:common:resources')
 
     implementation deps.androidx.lifecycle.hilt
     kapt kaptDeps.androidx.lifecycle.hilt
