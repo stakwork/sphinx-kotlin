@@ -1,0 +1,38 @@
+name: Testing Workflow
+
+on:
+  pull_request:
+    branches:
+      - develop
+
+jobs:
+  testing:
+    name: Lint Check and Testing
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Chekout Repo
+        uses: actions/checkout@v2
+        with:
+          submodules: true
+
+      - name: Validate Gradle Wrapper
+        uses: gradle/wrapper-validation-action@v1
+
+      - name: Set up JDK 1.8
+        uses: actions/setup-java@v1
+        with:
+          java-version: 1.8
+
+      - name: Run Android Linter
+        run: ./gradlew lintDebug
+
+      - name: Run Unit Tests
+        run: ./gradlew testDebugUnitTest
+
+      - name: Assemble Debug APK
+        run: ./gradlew assembleDebug
+
+      - name: Assemble Debug Test APK
+        run: ./gradlew assembleDebugAndroidTest
