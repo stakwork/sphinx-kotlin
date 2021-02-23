@@ -10,3 +10,122 @@ include ':sphinx:android:common:resources'
 include ':sphinx:android:activitymain'
 
 // Screens
+
+
+////////////////////////////////////////
+//////////// Kotlin Android ////////////
+////////////////////////////////////////
+
+/////////////////////////
+/// :android:concepts ///
+/////////////////////////
+include ':android:concepts:android-concept-views'
+project(':android:concepts:android-concept-views').projectDir =
+        file(new File(rootDir, 'kotlin-android/android/concepts/android-concept-views'))
+
+/////////////////////////
+/// :android:features ///
+/////////////////////////
+include ':android:features:android-feature-activity'
+project(':android:features:android-feature-activity').projectDir =
+        file(new File(rootDir, 'kotlin-android/android/features/android-feature-activity'))
+include ':android:features:authentication:android-feature-authentication-core'
+project(':android:features:authentication:android-feature-authentication-core').projectDir =
+        file(new File(rootDir, 'kotlin-android/android/features/authentication/android-feature-authentication-core'))
+include ':android:features:android-feature-navigation'
+project(':android:features:android-feature-navigation').projectDir =
+        file(new File(rootDir, 'kotlin-android/android/features/android-feature-navigation'))
+include ':android:features:android-feature-screens'
+project(':android:features:android-feature-screens').projectDir =
+        file(new File(rootDir, 'kotlin-android/android/features/android-feature-screens'))
+include ':android:features:android-feature-toast-utils'
+project(':android:features:android-feature-toast-utils').projectDir =
+        file(new File(rootDir, 'kotlin-android/android/features/android-feature-toast-utils'))
+include ':android:features:android-feature-viewmodel'
+project(':android:features:android-feature-viewmodel').projectDir =
+        file(new File(rootDir, 'kotlin-android/android/features/android-feature-viewmodel'))
+
+//////////////////////
+/// :kotlin:common ///
+//////////////////////
+include ':kotlin:common:build-config'
+project(':kotlin:common:build-config').projectDir =
+        file(new File(rootDir, 'kotlin-android/kotlin/common/build-config'))
+
+////////////////////////
+/// :kotlin:concepts ///
+////////////////////////
+include ':kotlin:concepts:authentication:concept-authentication'
+project(':kotlin:concepts:authentication:concept-authentication').projectDir =
+        file(new File(rootDir, 'kotlin-android/kotlin/concepts/authentication/concept-authentication'))
+include ':kotlin:concepts:authentication:concept-authentication-core'
+project(':kotlin:concepts:authentication:concept-authentication-core').projectDir =
+        file(new File(rootDir, 'kotlin-android/kotlin/concepts/authentication/concept-authentication-core'))
+include ':kotlin:concepts:authentication:concept-encryption-key'
+project(':kotlin:concepts:authentication:concept-encryption-key').projectDir =
+        file(new File(rootDir, 'kotlin-android/kotlin/concepts/authentication/concept-encryption-key'))
+include ':kotlin:concepts:concept-coroutines'
+project(':kotlin:concepts:concept-coroutines').projectDir =
+        file(new File(rootDir, 'kotlin-android/kotlin/concepts/concept-coroutines'))
+include ':kotlin:concepts:concept-foreground-state'
+project(':kotlin:concepts:concept-foreground-state').projectDir =
+        file(new File(rootDir, 'kotlin-android/kotlin/concepts/concept-foreground-state'))
+include ':kotlin:concepts:concept-navigation'
+project(':kotlin:concepts:concept-navigation').projectDir =
+        file(new File(rootDir, 'kotlin-android/kotlin/concepts/concept-navigation'))
+include ':kotlin:concepts:concept-views'
+project(':kotlin:concepts:concept-views').projectDir =
+        file(new File(rootDir, 'kotlin-android/kotlin/concepts/concept-views'))
+
+//////////////////////
+/// :kotlin:crypto ///
+//////////////////////
+include ':kotlin:crypto:bouncycastle-ktx'
+project(':kotlin:crypto:bouncycastle-ktx').projectDir =
+        file(new File(rootDir, 'kotlin-android/kotlin/crypto/bouncycastle-ktx'))
+include ':kotlin:crypto:k-openssl'
+project(':kotlin:crypto:k-openssl').projectDir =
+        file(new File(rootDir, 'kotlin-android/kotlin/crypto/k-openssl'))
+include ':kotlin:crypto:k-openssl-common'
+project(':kotlin:crypto:k-openssl-common').projectDir =
+        file(new File(rootDir, 'kotlin-android/kotlin/crypto/k-openssl-common'))
+
+////////////////////////
+/// :kotlin:encoders ///
+////////////////////////
+include ':kotlin:encoders:base32'
+project(':kotlin:encoders:base32').projectDir =
+        file(new File(rootDir, 'kotlin-android/kotlin/encoders/base32'))
+include ':kotlin:encoders:base64'
+project(':kotlin:encoders:base64').projectDir =
+        file(new File(rootDir, 'kotlin-android/kotlin/encoders/base64'))
+
+////////////////////////
+/// :kotlin:features ///
+////////////////////////
+include ':kotlin:features:authentication:feature-authentication-core'
+project(':kotlin:features:authentication:feature-authentication-core').projectDir =
+        file(new File(rootDir, 'kotlin-android/kotlin/features/authentication/feature-authentication-core'))
+include ':kotlin:features:authentication:feature-authentication-view'
+project(':kotlin:features:authentication:feature-authentication-view').projectDir =
+        file(new File(rootDir, 'kotlin-android/kotlin/features/authentication/feature-authentication-view'))
+include ':kotlin:features:feature-foreground-state'
+project(':kotlin:features:feature-foreground-state').projectDir =
+        file(new File(rootDir, 'kotlin-android/kotlin/features/feature-foreground-state'))
+include ':kotlin:features:feature-navigation'
+project(':kotlin:features:feature-navigation').projectDir =
+        file(new File(rootDir, 'kotlin-android/kotlin/features/feature-navigation'))
+
+////////////////////
+/// :kotlin:test ///
+////////////////////
+include ':kotlin:test:test-concept-coroutines'
+project(':kotlin:test:test-concept-coroutines').projectDir =
+        file(new File(rootDir, 'kotlin-android/kotlin/test/test-concept-coroutines'))
+include ':kotlin:test:test-k-openssl'
+project(':kotlin:test:test-k-openssl').projectDir =
+        file(new File(rootDir, 'kotlin-android/kotlin/test/test-k-openssl'))
+
+
+//include ':sample'
+//project(':sample').projectDir = file(new File(rootDir, 'kotlin-android/sample'))
