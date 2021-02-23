@@ -2,7 +2,9 @@ package chat.sphinx.activitymain.di
 
 import androidx.navigation.NavController
 import chat.sphinx.activitymain.navigation.MainNavigationDriver
+import chat.sphinx.activitymain.navigation.SplashNavigatorImpl
 import chat.sphinx.annotation_hilt.navigation.MainDriver
+import chat.sphinx.splash.navigation.SplashNavigator
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -19,4 +21,10 @@ object NavigationModule {
         mainNavigationDriver: MainNavigationDriver
     ): BaseNavigationDriver<NavController> =
         mainNavigationDriver
+
+    @Provides
+    fun provideSplashNavigator(
+        splashNavigatorImpl: SplashNavigatorImpl
+    ): SplashNavigator =
+        splashNavigatorImpl
 }
