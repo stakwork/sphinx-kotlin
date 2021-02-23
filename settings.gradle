@@ -4,6 +4,7 @@ rootProject.name = "Sphinx"
 //////////// Sphinx ////////////
 ////////////////////////////////
 include ':sphinx:sphinx'
+include ':sphinx:android:common:annotation-hilt'
 include ':sphinx:android:common:resources'
 
 // Activities
