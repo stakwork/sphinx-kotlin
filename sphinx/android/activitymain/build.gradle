@@ -37,7 +37,6 @@ dependencies {
     api project(path: ':sphinx:android:screens:splash')
 
     implementation deps.androidx.lifecycle.hilt
-    kapt kaptDeps.androidx.lifecycle.hilt
     implementation deps.google.hilt
     kapt kaptDeps.google.hilt
 

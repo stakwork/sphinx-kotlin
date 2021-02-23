@@ -152,13 +152,8 @@ ext.testDeps = [
  * }
  * */
 ext.kaptDeps = [
-    androidx: [
-        lifecycle: [
-            hilt: "androidx.hilt:hilt-compiler:${versions.hiltJetpack}",
-        ],
-    ],
     google: [
-        hilt: "com.google.dagger:hilt-android-compiler:${versions.hilt}",
+        hilt: "com.google.dagger:hilt-compiler:${versions.hilt}",
     ],
     square: [
         moshiCodegen: "com.squareup.moshi:moshi-kotlin-codegen:${versions.moshi}",
