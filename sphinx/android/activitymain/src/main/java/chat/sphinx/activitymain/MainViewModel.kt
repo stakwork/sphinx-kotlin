@@ -9,7 +9,7 @@ import javax.inject.Inject
 @HiltViewModel
 class MainViewModel @Inject constructor(
     override val navigationDriver: MainActivityNavigationDriver
-): ViewModel(), NavigationViewModel
+): ViewModel(), NavigationViewModel<MainActivityNavigationDriver>
 {
 
 }
