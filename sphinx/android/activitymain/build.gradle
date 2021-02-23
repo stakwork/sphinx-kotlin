@@ -34,6 +34,7 @@ dependencies {
     api project(path: ':android:features:android-feature-activity')
 
     // Sphinx
+    api project(path: ':sphinx:android:common:annotation-hilt')
     api project(path: ':sphinx:android:common:resources')
     api project(path: ':sphinx:android:screens:splash')
 
