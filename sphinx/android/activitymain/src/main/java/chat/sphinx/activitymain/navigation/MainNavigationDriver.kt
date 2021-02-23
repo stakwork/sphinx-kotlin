@@ -7,7 +7,7 @@ import io.matthewnelson.feature_navigation.NavigationDriver
 import javax.inject.Inject
 
 @ActivityRetainedScoped
-class MainActivityNavigationDriver @Inject constructor(
+class MainNavigationDriver @Inject constructor(
 
 ): NavigationDriver<NavController>(replayCacheSize = 5)
 {
