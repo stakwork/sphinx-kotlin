@@ -37,6 +37,8 @@ dependencies {
     api project(path: ':sphinx:android:common:annotation-hilt')
     api project(path: ':sphinx:android:common:resources')
     api project(path: ':sphinx:android:screens:splash')
+    implementation deps.chrisbanes.insetter
+    implementation deps.chrisbanes.insetterWidgets
 
     implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt
