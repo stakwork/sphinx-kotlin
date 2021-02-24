@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="on_board_welcome">Welcome</string>
+    <string name="on_board_welcome_info">Paste the invitation text\nor scan the QR code</string>
+    <string name="on_board_edit_text_hint">Enter Code ...</string>
+</resources>
