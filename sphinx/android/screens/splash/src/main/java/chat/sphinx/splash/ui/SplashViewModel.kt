@@ -1,13 +1,14 @@
 package chat.sphinx.splash.ui
 
+import android.content.Context
 import android.os.SystemClock
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.splash.navigation.SplashNavigator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.MotionLayoutViewModel
+import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
-import io.matthewnelson.concept_views.sideeffect.SideEffect
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -18,8 +19,8 @@ internal class SplashViewModel @Inject constructor(
     private val navigator: SplashNavigator
 ): MotionLayoutViewModel<
         Any,
-        Nothing,
-        SideEffect<Nothing>,
+        Context,
+        SplashSideEffect,
         SplashViewState
         >(SplashViewState.Idle)
 {
@@ -56,7 +57,12 @@ internal class SplashViewModel @Inject constructor(
                         // start onboard anim
     }
 
-    fun navigateToScanner() {}
+    // TODO: Limit to not cause buffer overflow and crash.
+    fun navigateToScanner() {
+        viewModelScope.launch(dispatchers.mainImmediate) {
+            submitSideEffect(SplashSideEffect.NotImplementedYet)
+        }
+    }
 
     fun processUserInput(input: String) {
         // If invite code

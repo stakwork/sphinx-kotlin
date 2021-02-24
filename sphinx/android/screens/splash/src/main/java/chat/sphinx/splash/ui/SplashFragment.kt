@@ -1,5 +1,6 @@
 package chat.sphinx.splash.ui
 
+import android.content.Context
 import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.fragment.app.viewModels
 import by.kirich1409.viewbindingdelegate.viewBinding
@@ -14,8 +15,8 @@ import javax.annotation.meta.Exhaustive
 @AndroidEntryPoint
 internal class SplashFragment: MotionLayoutFragment<
         Any,
-        Nothing,
-        SideEffect<Nothing>,
+        Context,
+        SplashSideEffect,
         SplashViewState,
         SplashViewModel,
         FragmentSplashBinding
@@ -28,8 +29,9 @@ internal class SplashFragment: MotionLayoutFragment<
     ////////////////////
     /// Side Effects ///
     ////////////////////
-    override suspend fun onSideEffectCollect(sideEffect: SideEffect<Nothing>) {}
-    override fun subscribeToSideEffectSharedFlow() {}
+    override suspend fun onSideEffectCollect(sideEffect: SplashSideEffect) {
+        sideEffect.execute(binding.root.context)
+    }
 
     //////////////////
     /// View State ///
