@@ -58,6 +58,10 @@ android {
 
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
+    // KotlinAndroid
+    implementation project(path: ':android:features:android-feature-screens')
+
+    // Sphinx
     implementation project(path: ':sphinx:android:activitymain')
 
     implementation deps.google.hilt

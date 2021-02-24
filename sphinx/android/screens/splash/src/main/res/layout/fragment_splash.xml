@@ -1,31 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.motion.widget.MotionLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_motion_splash"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".SplashFragment">
+    android:background="@drawable/background_splash"
+    app:layoutDescription="@xml/motion_scene_splash"
+    tools:context=".ui.SplashFragment">
 
-    <!-- Space height gets adjusted programmatically to whatever the device's
-         status bar height is to ensure the logo doesn't at startup -->
 
-    <Space
-        android:id="@+id/space_splash_status_bar"
-        android:layout_width="match_parent"
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guide_line_horizontal_mid"
+        android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent=".5" />
 
-    <!-- TODO: Add splash screen drawable -->
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/image_view_splash_logo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:src="@drawable/sphinx_white_logo"
+        app:layout_constraintBottom_toBottomOf="@+id/guide_line_horizontal_mid"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/space_splash_status_bar"
+        app:layout_constraintTop_toTopOf="@+id/guide_line_horizontal_mid"
         tools:ignore="ContentDescription" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <!-- Background showing is just from tools attribute -->
+    <include
+        android:id="@+id/layout_on_board"
+        layout="@layout/layout_on_board_input"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@+id/image_view_splash_logo" />
+
+</androidx.constraintlayout.motion.widget.MotionLayout>

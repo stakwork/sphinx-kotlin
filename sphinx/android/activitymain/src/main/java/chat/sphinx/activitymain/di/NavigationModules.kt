@@ -9,11 +9,12 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ActivityRetainedComponent
+import dagger.hilt.android.components.ViewModelComponent
 import io.matthewnelson.concept_navigation.BaseNavigationDriver
 
 @Module
 @InstallIn(ActivityRetainedComponent::class)
-object NavigationModule {
+object ActivityRetainedModule {
 
     @Provides
     @MainDriver
@@ -21,6 +22,11 @@ object NavigationModule {
         mainNavigationDriver: MainNavigationDriver
     ): BaseNavigationDriver<NavController> =
         mainNavigationDriver
+}
+
+@Module
+@InstallIn(ViewModelComponent::class)
+object ViewModelModule {
 
     @Provides
     fun provideSplashNavigator(
