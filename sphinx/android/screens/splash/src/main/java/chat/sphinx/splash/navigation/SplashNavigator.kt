@@ -8,5 +8,6 @@ abstract class SplashNavigator(
     navigationDriver: BaseNavigationDriver<NavController>
 ): Navigator<NavController>(navigationDriver)
 {
-
+    abstract suspend fun toScanner()
+    abstract suspend fun toHomeScreen(privateMode: Boolean = false)
 }

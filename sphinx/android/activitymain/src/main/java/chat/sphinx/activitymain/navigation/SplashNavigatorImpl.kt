@@ -8,5 +8,6 @@ import javax.inject.Inject
 class SplashNavigatorImpl @Inject constructor(
     navigationDriver: MainNavigationDriver
 ): SplashNavigator(navigationDriver) {
-
+    override suspend fun toScanner() {}
+    override suspend fun toHomeScreen(privateMode: Boolean) {}
 }
