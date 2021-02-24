@@ -87,6 +87,6 @@
         android:id="@+id/transition_splash_set1_to_set2"
         app:constraintSetEnd="@+id/motion_scene_splash_set2"
         app:constraintSetStart="@+id/motion_scene_splash_set1"
-        app:motionInterpolator="linear" />
+        app:motionInterpolator="easeIn" />
 
 </MotionScene>
