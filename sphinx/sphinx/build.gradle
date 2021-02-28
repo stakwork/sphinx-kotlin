@@ -59,6 +59,7 @@ android {
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
     // KotlinAndroid
+    implementation project(path: ':android:features:authentication:android-feature-authentication-core')
     implementation project(path: ':android:features:android-feature-screens')
 
     // Sphinx
