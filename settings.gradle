@@ -1,3 +1,4 @@
+include ':test-feature-authentication-core'
 rootProject.name = "Sphinx"
 
 ////////////////////////////////
@@ -123,6 +124,9 @@ project(':kotlin:features:feature-navigation').projectDir =
 include ':kotlin:test:test-concept-coroutines'
 project(':kotlin:test:test-concept-coroutines').projectDir =
         file(new File(rootDir, 'kotlin-android/kotlin/test/test-concept-coroutines'))
+include ':kotlin:test:test-feature-authentication-core'
+project(':kotlin:test:test-feature-authentication-core').projectDir =
+        file(new File(rootDir, 'kotlin-android/kotlin/test/test-feature-authentication-core'))
 include ':kotlin:test:test-k-openssl'
 project(':kotlin:test:test-k-openssl').projectDir =
         file(new File(rootDir, 'kotlin-android/kotlin/test/test-k-openssl'))
