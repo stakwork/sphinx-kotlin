@@ -8,6 +8,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.MotionLayoutViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.android_feature_viewmodel.updateViewState
+import io.matthewnelson.concept_authentication.coordinator.AuthenticationCoordinator
+import io.matthewnelson.concept_authentication.data.AuthenticationStorage
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -16,6 +18,8 @@ import javax.inject.Inject
 @HiltViewModel
 internal class SplashViewModel @Inject constructor(
     private val dispatchers: CoroutineDispatchers,
+    private val authenticationCoordinator: AuthenticationCoordinator,
+    private val authenticationStorage: AuthenticationStorage,
     private val navigator: SplashNavigator
 ): MotionLayoutViewModel<
         Any,
