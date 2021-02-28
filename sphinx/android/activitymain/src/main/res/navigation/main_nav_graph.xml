@@ -5,6 +5,8 @@
     android:id="@+id/main_nav_graph"
     app:startDestination="@+id/navigation_splash_fragment">
 
+    <include app:graph="@navigation/authentication_nav_graph" />
+
     <fragment
         android:id="@+id/navigation_splash_fragment"
         android:name="chat.sphinx.splash.ui.SplashFragment"
