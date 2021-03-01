@@ -10,6 +10,7 @@ import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.splash.R
 import chat.sphinx.splash.databinding.FragmentSplashBinding
 import dagger.hilt.android.AndroidEntryPoint
+import io.matthewnelson.android_feature_screens.navigation.CloseAppOnBackPress
 import io.matthewnelson.android_feature_screens.ui.motionlayout.MotionLayoutFragment
 import io.matthewnelson.android_feature_viewmodel.currentViewState
 import io.matthewnelson.android_feature_viewmodel.updateViewState
@@ -34,6 +35,7 @@ internal class SplashFragment: MotionLayoutFragment<
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        OnBackPress(binding.root.context).addCallback(viewLifecycleOwner, requireActivity())
         lifecycleScope.launch { onViewStateFlowCollect(viewModel.currentViewState) }
     }
 
@@ -105,5 +107,16 @@ internal class SplashFragment: MotionLayoutFragment<
 
     override fun getMotionLayouts(): Array<MotionLayout> {
         return arrayOf(binding.layoutMotionSplash)
+    }
+
+    private inner class OnBackPress(context: Context): CloseAppOnBackPress(context) {
+        override fun handleOnBackPressed() {
+            if (viewModel.layoutViewStateContainer.value is OnBoardLayoutViewState.Decrypt) {
+                binding.layoutOnBoard.editTextCodeInput.setText("")
+                viewModel.layoutViewStateContainer.updateViewState(OnBoardLayoutViewState.InputCode)
+            } else {
+                super.handleOnBackPressed()
+            }
+        }
     }
 }
