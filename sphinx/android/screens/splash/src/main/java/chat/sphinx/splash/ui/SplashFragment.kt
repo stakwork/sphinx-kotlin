@@ -39,6 +39,17 @@ internal class SplashFragment: MotionLayoutFragment<
         lifecycleScope.launch { onViewStateFlowCollect(viewModel.currentViewState) }
     }
 
+    private inner class OnBackPress(context: Context): CloseAppOnBackPress(context) {
+        override fun handleOnBackPressed() {
+            if (viewModel.layoutViewStateContainer.value is OnBoardLayoutViewState.Decrypt) {
+                binding.layoutOnBoard.editTextCodeInput.setText("")
+                viewModel.layoutViewStateContainer.updateViewState(OnBoardLayoutViewState.InputCode)
+            } else {
+                super.handleOnBackPressed()
+            }
+        }
+    }
+
     ////////////////////
     /// Side Effects ///
     ////////////////////
@@ -58,6 +69,15 @@ internal class SplashFragment: MotionLayoutFragment<
         }
     }
 
+    private suspend fun onOnBoardLayoutViewStateCollect(viewState: OnBoardLayoutViewState) {
+        viewState.setInfoText(binding.layoutOnBoard.textViewWelcomeInfo)
+        viewState.setScannerButton(viewModel, binding.layoutOnBoard.imageButtonScanner)
+        viewState.setEditTextInput(viewModel, binding.layoutOnBoard.editTextCodeInput)
+    }
+
+    /////////////////////
+    /// Motion Layout ///
+    /////////////////////
     override suspend fun onViewStateFlowCollect(viewState: SplashViewState) {
         @Exhaustive
         when (viewState) {
@@ -87,12 +107,6 @@ internal class SplashFragment: MotionLayoutFragment<
         }
     }
 
-    private suspend fun onOnBoardLayoutViewStateCollect(viewState: OnBoardLayoutViewState) {
-        viewState.setInfoText(binding.layoutOnBoard.textViewWelcomeInfo)
-        viewState.setScannerButton(viewModel, binding.layoutOnBoard.imageButtonScanner)
-        viewState.setEditTextInput(viewModel, binding.layoutOnBoard.editTextCodeInput)
-    }
-
     override fun onTransitionCompleted(motionLayout: MotionLayout?, currentId: Int) {
         if (currentId == SplashViewState.StartScene.endSetId) {
             removeTransitionListener(binding.layoutMotionSplash)
@@ -107,16 +121,5 @@ internal class SplashFragment: MotionLayoutFragment<
 
     override fun getMotionLayouts(): Array<MotionLayout> {
         return arrayOf(binding.layoutMotionSplash)
-    }
-
-    private inner class OnBackPress(context: Context): CloseAppOnBackPress(context) {
-        override fun handleOnBackPressed() {
-            if (viewModel.layoutViewStateContainer.value is OnBoardLayoutViewState.Decrypt) {
-                binding.layoutOnBoard.editTextCodeInput.setText("")
-                viewModel.layoutViewStateContainer.updateViewState(OnBoardLayoutViewState.InputCode)
-            } else {
-                super.handleOnBackPressed()
-            }
-        }
     }
 }
