@@ -1,15 +1,21 @@
 package chat.sphinx.splash.ui
 
 import android.content.Context
+import android.os.Bundle
+import android.view.View
 import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.splash.R
 import chat.sphinx.splash.databinding.FragmentSplashBinding
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.motionlayout.MotionLayoutFragment
+import io.matthewnelson.android_feature_viewmodel.currentViewState
 import io.matthewnelson.android_feature_viewmodel.updateViewState
-import io.matthewnelson.concept_views.sideeffect.SideEffect
+import io.matthewnelson.concept_views.viewstate.collect
+import io.matthewnelson.concept_views.viewstate.value
+import kotlinx.coroutines.launch
 import javax.annotation.meta.Exhaustive
 
 @AndroidEntryPoint
@@ -26,6 +32,11 @@ internal class SplashFragment: MotionLayoutFragment<
     override val binding: FragmentSplashBinding by viewBinding(FragmentSplashBinding::bind)
     override val viewModel: SplashViewModel by viewModels()
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        lifecycleScope.launch { onViewStateFlowCollect(viewModel.currentViewState) }
+    }
+
     ////////////////////
     /// Side Effects ///
     ////////////////////
@@ -36,33 +47,48 @@ internal class SplashFragment: MotionLayoutFragment<
     //////////////////
     /// View State ///
     //////////////////
+    override fun subscribeToViewStateFlow() {
+        super.subscribeToViewStateFlow()
+        lifecycleScope.launchWhenStarted {
+            viewModel.layoutViewStateContainer.collect { viewState ->
+                onOnBoardLayoutViewStateCollect(viewState)
+            }
+        }
+    }
+
     override suspend fun onViewStateFlowCollect(viewState: SplashViewState) {
         @Exhaustive
         when (viewState) {
-            is SplashViewState.Idle -> {
-                binding.layoutOnBoard.editTextCodeInput.let { editText ->
-                    editText.isEnabled = false
-                }
-                binding.layoutOnBoard.imageButtonScanner.let { imageButton ->
-                    imageButton.isEnabled = false
-                    imageButton.setOnClickListener(null)
-                }
-            }
+            is SplashViewState.Idle -> {}
             is SplashViewState.StartScene -> {
-                binding.layoutOnBoard.editTextCodeInput.let { editText ->
-                    editText.isEnabled = true
-                }
-                binding.layoutOnBoard.imageButtonScanner.let { imageButton ->
-                    imageButton.isEnabled = true
-                    imageButton.setOnClickListener {
-                        viewModel.navigateToScanner()
-                    }
-                }
                 setTransitionListener(binding.layoutMotionSplash)
                 viewState.transitionToEndSet(binding.layoutMotionSplash)
             }
-            is SplashViewState.SceneFinished -> {}
+            is SplashViewState.SceneFinished -> {
+                viewModel.layoutViewStateContainer.value.let { layoutViewState ->
+                    @Exhaustive
+                    when (layoutViewState) {
+                        is OnBoardLayoutViewState.Decrypt -> {
+                            onOnBoardLayoutViewStateCollect(layoutViewState)
+                        }
+                        is OnBoardLayoutViewState.Hidden -> {
+                            viewModel.layoutViewStateContainer.updateViewState(
+                                OnBoardLayoutViewState.InputCode
+                            )
+                        }
+                        is OnBoardLayoutViewState.InputCode -> {
+                            onOnBoardLayoutViewStateCollect(layoutViewState)
+                        }
+                    }
+                }
+            }
         }
+    }
+
+    private suspend fun onOnBoardLayoutViewStateCollect(viewState: OnBoardLayoutViewState) {
+        viewState.setInfoText(binding.layoutOnBoard.textViewWelcomeInfo)
+        viewState.setScannerButton(viewModel, binding.layoutOnBoard.imageButtonScanner)
+        viewState.setEditTextInput(viewModel, binding.layoutOnBoard.editTextCodeInput)
     }
 
     override fun onTransitionCompleted(motionLayout: MotionLayout?, currentId: Int) {
