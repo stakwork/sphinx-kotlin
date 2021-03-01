@@ -11,8 +11,14 @@ import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_authentication.coordinator.AuthenticationCoordinator
 import io.matthewnelson.concept_authentication.data.AuthenticationStorage
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
+import io.matthewnelson.concept_views.viewstate.ViewStateContainer
+import io.matthewnelson.k_openssl_common.extensions.decodeToString
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import okio.base64.decodeBase64ToArray
+import org.cryptonode.jncryptor.AES256JNCryptor
+import org.cryptonode.jncryptor.CryptorException
 import javax.inject.Inject
 
 @HiltViewModel
@@ -68,10 +74,103 @@ internal class SplashViewModel @Inject constructor(
         }
     }
 
-    fun processUserInput(input: String) {
-        // If invite code
-        // If account restore
-        // else error
+    fun processUserInput(input: String?) {
+        if (input.isNullOrEmpty()) {
+            viewModelScope.launch(dispatchers.mainImmediate) {
+                submitSideEffect(SplashSideEffect.InputNullOrEmpty)
+            }
+            return
+        }
+
+        // Invite Code
+        if (input.length == 40) {
+            // TODO: Implement
+            viewModelScope.launch(dispatchers.mainImmediate) {
+                submitSideEffect(SplashSideEffect.NotImplementedYet)
+            }
+            return
+        }
+
+        input.decodeBase64ToArray()?.decodeToString()?.split("::")?.let { decodedSplit ->
+            if (decodedSplit.size == 2) {
+
+                OnBoardLayoutViewState.StringInputType.fromString(decodedSplit.elementAt(0))?.let { type ->
+
+                    if (type is OnBoardLayoutViewState.StringInputType.Ip) {
+                        // TODO: Implement
+                        viewModelScope.launch(dispatchers.mainImmediate) {
+                            submitSideEffect(SplashSideEffect.NotImplementedYet)
+                        }
+                        return
+                    }
+
+                    decodedSplit.elementAt(1).decodeBase64ToArray()?.let { toDecryptByteArray ->
+
+                        layoutViewStateContainer.updateViewState(
+                            OnBoardLayoutViewState.Decrypt(
+                                type,
+                                toDecryptByteArray
+                            )
+                        )
+                        return
+                    } // data to decrypt was not base64 encoded
+
+                } // input type not recognized
+
+            } // input not properly formatted `type::data`
+        }
+
+        viewModelScope.launch(dispatchers.mainImmediate) {
+            submitSideEffect(SplashSideEffect.InvalidCode)
+        }
+    }
+
+    private var decryptionJob: Job? = null
+    fun decryptInput(decryptViewState: OnBoardLayoutViewState.Decrypt, password: String?) {
+        if (password == null || password.isEmpty()) {
+            viewModelScope.launch(dispatchers.mainImmediate) {
+                submitSideEffect(SplashSideEffect.InputNullOrEmpty)
+            }
+            return
+        }
+
+        if (decryptionJob?.isActive == true) {
+            return
+        }
+
+        var decryptionJobException: Exception? = null
+        decryptionJob = viewModelScope.launch(dispatchers.default) {
+            try {
+                val decryptedSplit = AES256JNCryptor()
+                    .decryptData(decryptViewState.toDecrypt, password.toCharArray())
+                    .decodeToString()
+                    .split("::")
+
+                if (
+                    decryptViewState.stringInputType is OnBoardLayoutViewState.StringInputType.Keys &&
+                    decryptedSplit.size != 4
+                ) {
+                    throw IllegalArgumentException(
+                        "Not enough arguments for decrypted StringInputType - " +
+                                decryptViewState.stringInputType.value
+                    )
+                }
+
+                // TODO: Implement
+            } catch (e: CryptorException) {
+                decryptionJobException = e
+            } catch (e: IllegalArgumentException) {
+                decryptionJobException = e
+            }
+        }
+
+        viewModelScope.launch(dispatchers.mainImmediate) {
+            decryptionJob?.join()
+            decryptionJobException?.let { exception ->
+                exception.printStackTrace()
+                submitSideEffect(SplashSideEffect.DecryptionFailure)
+            }
+        }
     }
 
     // TODO: Temporary until Authentication gets built out.
@@ -81,6 +180,11 @@ internal class SplashViewModel @Inject constructor(
             delay(375L)
             updateViewState(SplashViewState.StartScene)
         }
+    }
+
+    @Suppress("RemoveExplicitTypeArguments")
+    val layoutViewStateContainer: ViewStateContainer<OnBoardLayoutViewState> by lazy {
+        ViewStateContainer<OnBoardLayoutViewState>(OnBoardLayoutViewState.Hidden)
     }
 
     // Unused
