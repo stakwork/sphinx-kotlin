@@ -10,4 +10,5 @@ abstract class SplashNavigator(
 {
     abstract suspend fun toScanner()
     abstract suspend fun toHomeScreen(privateMode: Boolean = false)
+    abstract suspend fun toOnBoard(input: String)
 }
