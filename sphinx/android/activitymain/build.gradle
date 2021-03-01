@@ -36,6 +36,7 @@ dependencies {
     // Sphinx
     api project(path: ':sphinx:android:common:resources')
     api project(path: ':sphinx:android:screens:authentication')
+    api project(path: ':sphinx:android:screens:onboard')
     api project(path: ':sphinx:android:screens:splash')
     implementation deps.chrisbanes.insetter
     implementation deps.chrisbanes.insetterWidgets
