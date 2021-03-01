@@ -64,6 +64,7 @@ ext.deps = [
     javax: [
         inject: "javax.inject:javax.inject:1",
     ],
+    jncryptor: "org.cryptonode.jncryptor:jncryptor:1.2.0",
     kotlin: [
         coroutinesAndroid: "org.jetbrains.kotlinx:kotlinx-coroutines-android:${versions.coroutines}",
         coroutinesCore: "org.jetbrains.kotlinx:kotlinx-coroutines-core:${versions.coroutines}",
