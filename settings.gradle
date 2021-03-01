@@ -12,6 +12,7 @@ include ':sphinx:android:activitymain'
 
 // Screens
 include ':sphinx:android:screens:authentication'
+include ':sphinx:android:screens:onboard'
 include ':sphinx:android:screens:splash'
 
 ////////////////////////////////////////
