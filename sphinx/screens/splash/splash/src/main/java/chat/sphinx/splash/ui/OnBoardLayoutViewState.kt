@@ -65,40 +65,7 @@ internal sealed class OnBoardLayoutViewState: ViewState<OnBoardLayoutViewState>(
         }
     }
 
-    sealed class StringInputType {
-
-        companion object {
-            private const val KEYS = "keys"
-            private const val IP = "ip"
-
-            fun fromString(value: String): StringInputType? =
-                when (value) {
-                    KEYS -> {
-                        Keys
-                    }
-                    IP -> {
-                        Ip
-                    }
-                    else -> {
-                        null
-                    }
-                }
-        }
-
-        abstract val value: String
-
-        object Keys: StringInputType() {
-            override val value: String
-                get() = KEYS
-        }
-
-        object Ip: StringInputType() {
-            override val value: String
-                get() = IP
-        }
-    }
-
-    class Decrypt(val stringInputType: StringInputType, val toDecrypt: ByteArray): OnBoardLayoutViewState() {
+    class DecryptKeys(val toDecrypt: ByteArray): OnBoardLayoutViewState() {
         override fun setInfoText(textView: TextView) {
             textView.text = textView.context.getString(R.string.on_board_welcome_info_decrypt)
         }

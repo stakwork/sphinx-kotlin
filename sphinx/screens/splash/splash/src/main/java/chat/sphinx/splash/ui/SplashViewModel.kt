@@ -94,28 +94,22 @@ internal class SplashViewModel @Inject constructor(
         input.decodeBase64ToArray()?.decodeToString()?.split("::")?.let { decodedSplit ->
             if (decodedSplit.size == 2) {
 
-                OnBoardLayoutViewState.StringInputType.fromString(decodedSplit.elementAt(0))?.let { type ->
-
-                    if (type is OnBoardLayoutViewState.StringInputType.Ip) {
-                        // TODO: Implement
-                        viewModelScope.launch(dispatchers.mainImmediate) {
-                            submitSideEffect(SplashSideEffect.NotImplementedYet)
-                        }
-                        return
+                if (decodedSplit.elementAt(0) == "ip") {
+                    // TODO: Implement
+                    viewModelScope.launch(dispatchers.mainImmediate) {
+                        submitSideEffect(SplashSideEffect.NotImplementedYet)
                     }
+                    return
+                }
 
+                if (decodedSplit.elementAt(0) == "keys") {
                     decodedSplit.elementAt(1).decodeBase64ToArray()?.let { toDecryptByteArray ->
-
                         layoutViewStateContainer.updateViewState(
-                            OnBoardLayoutViewState.Decrypt(
-                                type,
-                                toDecryptByteArray
-                            )
+                            OnBoardLayoutViewState.DecryptKeys(toDecryptByteArray)
                         )
                         return
-                    } // data to decrypt was not base64 encoded
-
-                } // input type not recognized
+                    }
+                }
 
             } // input not properly formatted `type::data`
         }
@@ -126,7 +120,7 @@ internal class SplashViewModel @Inject constructor(
     }
 
     private var decryptionJob: Job? = null
-    fun decryptInput(decryptViewState: OnBoardLayoutViewState.Decrypt, password: String?) {
+    fun decryptInput(decryptKeysViewState: OnBoardLayoutViewState.DecryptKeys, password: String?) {
         if (password == null || password.isEmpty()) {
             viewModelScope.launch(dispatchers.mainImmediate) {
                 submitSideEffect(SplashSideEffect.InputNullOrEmpty)
@@ -142,18 +136,12 @@ internal class SplashViewModel @Inject constructor(
         decryptionJob = viewModelScope.launch(dispatchers.default) {
             try {
                 val decryptedSplit = AES256JNCryptor()
-                    .decryptData(decryptViewState.toDecrypt, password.toCharArray())
+                    .decryptData(decryptKeysViewState.toDecrypt, password.toCharArray())
                     .decodeToString()
                     .split("::")
 
-                if (
-                    decryptViewState.stringInputType is OnBoardLayoutViewState.StringInputType.Keys &&
-                    decryptedSplit.size != 4
-                ) {
-                    throw IllegalArgumentException(
-                        "Not enough arguments for decrypted StringInputType - " +
-                                decryptViewState.stringInputType.value
-                    )
+                if (decryptedSplit.size != 4) {
+                    throw IllegalArgumentException("Decrypted keys do not contain enough arguments")
                 }
 
                 // TODO: Implement

@@ -41,7 +41,7 @@ internal class SplashFragment: MotionLayoutFragment<
 
     private inner class OnBackPress(context: Context): CloseAppOnBackPress(context) {
         override fun handleOnBackPressed() {
-            if (viewModel.layoutViewStateContainer.value is OnBoardLayoutViewState.Decrypt) {
+            if (viewModel.layoutViewStateContainer.value is OnBoardLayoutViewState.DecryptKeys) {
                 binding.layoutOnBoard.editTextCodeInput.setText("")
                 viewModel.layoutViewStateContainer.updateViewState(OnBoardLayoutViewState.InputCode)
             } else {
@@ -90,7 +90,7 @@ internal class SplashFragment: MotionLayoutFragment<
                 viewModel.layoutViewStateContainer.value.let { layoutViewState ->
                     @Exhaustive
                     when (layoutViewState) {
-                        is OnBoardLayoutViewState.Decrypt -> {
+                        is OnBoardLayoutViewState.DecryptKeys -> {
                             onOnBoardLayoutViewStateCollect(layoutViewState)
                         }
                         is OnBoardLayoutViewState.Hidden -> {
