@@ -1,22 +1,19 @@
-package chat.sphinx.authentication
+package chat.sphinx.feature_background_login
 
-import chat.sphinx.background_login.BackgroundLoginHandler
+import chat.sphinx.concept_background_login.BackgroundLoginHandler
 import io.matthewnelson.concept_authentication.coordinator.AuthenticationCoordinator
 import io.matthewnelson.concept_authentication.coordinator.AuthenticationRequest
 import io.matthewnelson.concept_authentication.coordinator.AuthenticationResponse
 import io.matthewnelson.concept_authentication.data.AuthenticationStorage
-import io.matthewnelson.concept_authentication.state.AuthenticationState
 import io.matthewnelson.concept_encryption_key.EncryptionKey
 import io.matthewnelson.k_openssl_common.annotations.RawPasswordAccess
 import io.matthewnelson.k_openssl_common.clazzes.Password
 import kotlinx.coroutines.flow.first
-import javax.inject.Inject
 
-// Unscoped
-class SphinxBackgroundLoginHandler @Inject constructor(
+class BackgroundLoginHandlerImpl(
     private val authenticationCoordinator: AuthenticationCoordinator,
     private val authenticationStorage: AuthenticationStorage
-): BackgroundLoginHandler {
+): BackgroundLoginHandler() {
 
     companion object {
         const val BACKGROUND_LOGIN = "BACKGROUND_LOGIN"

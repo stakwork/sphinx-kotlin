@@ -64,7 +64,7 @@ dependencies {
 
     // Sphinx
     implementation project(path: ':sphinx:activity:main:activitymain')
-    implementation project(path: ':sphinx:application:data:background-login')
+    implementation project(path: ':sphinx:application:data:features:feature-background-login')
 
     implementation deps.google.hilt
     kapt kaptDeps.google.hilt
