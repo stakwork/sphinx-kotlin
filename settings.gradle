@@ -5,6 +5,7 @@ rootProject.name = "Sphinx"
 ////////////////////////////////
 include ':sphinx:application:sphinx'
 include ':sphinx:application:common:resources'
+include ':sphinx:application:data:background-login'
 
 // Activities
 include ':sphinx:activity:main:activitymain'
