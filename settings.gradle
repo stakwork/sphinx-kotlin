@@ -3,16 +3,16 @@ rootProject.name = "Sphinx"
 ////////////////////////////////
 //////////// Sphinx ////////////
 ////////////////////////////////
-include ':sphinx:sphinx'
-include ':sphinx:android:common:resources'
+include ':sphinx:application:sphinx'
+include ':sphinx:application:common:resources'
 
 // Activities
-include ':sphinx:android:activitymain'
+include ':sphinx:activity:main:activitymain'
 
 // Screens
-include ':sphinx:android:screens:authentication'
-include ':sphinx:android:screens:onboard'
-include ':sphinx:android:screens:splash'
+include ':sphinx:screens:authentication:authentication'
+include ':sphinx:screens:onboard:onboard'
+include ':sphinx:screens:splash:splash'
 
 ////////////////////////////////////////
 //////////// Kotlin Android ////////////
