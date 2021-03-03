@@ -9,6 +9,7 @@
 
     <string name="side_effect_decryption_failure">Failed to decrypt</string>
     <string name="side_effect_empty_input">Input must not be empty</string>
+    <string name="side_effect_pin_length">Invalid PIN length</string>
     <string name="side_effect_invalid_code">Invalid Code</string>
     <string name="side_effect_feature_not_implemented">That feature is not yet implemented</string>
 </resources>

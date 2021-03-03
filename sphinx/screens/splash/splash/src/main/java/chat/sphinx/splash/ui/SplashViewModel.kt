@@ -3,6 +3,7 @@ package chat.sphinx.splash.ui
 import android.content.Context
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_background_login.BackgroundLoginHandler
+import chat.sphinx.key_restore.KeyRestore
 import chat.sphinx.splash.navigation.SplashNavigator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.MotionLayoutViewModel
@@ -13,8 +14,10 @@ import io.matthewnelson.concept_authentication.coordinator.AuthenticationRequest
 import io.matthewnelson.concept_authentication.coordinator.AuthenticationResponse
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
+import io.matthewnelson.k_openssl_common.clazzes.Password
 import io.matthewnelson.k_openssl_common.extensions.decodeToString
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import okio.base64.decodeBase64ToArray
@@ -25,10 +28,11 @@ import javax.inject.Inject
 
 @HiltViewModel
 internal class SplashViewModel @Inject constructor(
-    private val dispatchers: CoroutineDispatchers,
     private val authenticationCoordinator: AuthenticationCoordinator,
     private val backgroundLoginHandler: BackgroundLoginHandler,
-    private val navigator: SplashNavigator
+    private val dispatchers: CoroutineDispatchers,
+    private val keyRestore: KeyRestore,
+    private val navigator: SplashNavigator,
 ): MotionLayoutViewModel<
         Any,
         Context,
@@ -62,6 +66,7 @@ internal class SplashViewModel @Inject constructor(
                                 // User has authenticated
                             }
                             is AuthenticationResponse.Success.Authenticated -> {
+                                // Prime relay cache data before navigating (takes an extra ~ .3s)
                                 navigator.toHomeScreen()
                             }
                             is AuthenticationResponse.Success.Key -> {
@@ -130,12 +135,23 @@ internal class SplashViewModel @Inject constructor(
     }
 
     private var decryptionJob: Job? = null
-    fun decryptInput(decryptKeysViewState: OnBoardLayoutViewState.DecryptKeys, password: String?) {
+    fun decryptInput(
+        decryptKeysViewState: OnBoardLayoutViewState.DecryptKeys,
+        password: String?
+    ) {
         if (password == null || password.isEmpty()) {
             viewModelScope.launch(dispatchers.mainImmediate) {
                 submitSideEffect(SplashSideEffect.InputNullOrEmpty)
             }
             return
+        }
+
+        // TODO: Replace with automatic launching upon entering the 6th PIN character
+        //  when Authentication View's Layout gets incorporated
+        if (password.length != 6 /*TODO: https://github.com/stakwork/sphinx-kotlin/issues/9*/) {
+            viewModelScope.launch(dispatchers.mainImmediate) {
+                submitSideEffect(SplashSideEffect.InvalidPinLength)
+            }
         }
 
         if (decryptionJob?.isActive == true) {
@@ -154,7 +170,20 @@ internal class SplashViewModel @Inject constructor(
                     throw IllegalArgumentException("Decrypted keys do not contain enough arguments")
                 }
 
-                // TODO: Implement
+                // TODO: Ask to use Tor before any network calls go out.
+                // TODO: Hit relayUrl to verify creds work
+
+                keyRestore.restoreKeys(
+                    privateKey = Password(decryptedSplit[0].toCharArray()),
+                    publicKey = Password(decryptedSplit[1].toCharArray()),
+                    userPin = password.toCharArray(),
+                    relayUrl = decryptedSplit[2],
+                    jwt = decryptedSplit[3],
+                ).collect { flowResponse ->
+                    // TODO: Implement in Authentication View when it get's built/refactored
+                }
+
+                // TODO: on success, show snackbar to clear clipboard
             } catch (e: CryptorException) {
                 decryptionJobException = e
             } catch (e: IllegalArgumentException) {
