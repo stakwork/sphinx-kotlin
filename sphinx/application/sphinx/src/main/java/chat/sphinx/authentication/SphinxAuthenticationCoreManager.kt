@@ -3,6 +3,7 @@ package chat.sphinx.authentication
 import android.app.Application
 import io.matthewnelson.android_feature_authentication_core.components.AuthenticationCoreManagerAndroid
 import io.matthewnelson.android_feature_authentication_core.components.AuthenticationManagerInitializerAndroid
+import io.matthewnelson.concept_authentication.state.AuthenticationState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.k_openssl_common.clazzes.HashIterations
 import javax.inject.Inject
@@ -26,4 +27,8 @@ class SphinxAuthenticationCoreManager @Inject constructor(
     )
 ) {
     override val logOutWhenApplicationIsClearedFromRecentsTray: Boolean = false
+
+    fun logOut() {
+        updateAuthenticationState(AuthenticationState.Required.InitialLogIn)
+    }
 }
