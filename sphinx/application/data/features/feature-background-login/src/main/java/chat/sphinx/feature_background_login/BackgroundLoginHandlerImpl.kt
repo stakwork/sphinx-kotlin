@@ -26,14 +26,18 @@ class BackgroundLoginHandlerImpl(
     }
 
     @Synchronized
-    override suspend fun attemptBackgroundLogin(): EncryptionKey? {
+    override suspend fun attemptBackgroundLogin(
+        updateLastLoginTimeOnSuccess: Boolean
+    ): EncryptionKey? {
 
         // Check if we're already logged in
         authenticationManager.getEncryptionKey()?.let { encryptionKey ->
-            timeoutSettingsCache?.let { timeout ->
-                // if our cache isn't null, update our string with the new login time
-                updateSettingsImpl(timeout, encryptionKey)
-            } ?: updateLoginTime()
+            if (updateLastLoginTimeOnSuccess) {
+                timeoutSettingsCache?.let { timeout ->
+                    // if our cache isn't null, update our string with the new login time
+                    updateSettingsImpl(timeout, encryptionKey)
+                } ?: updateLoginTime()
+            }
             return encryptionKey
         }
 
@@ -72,10 +76,12 @@ class BackgroundLoginHandlerImpl(
                                         if (response is AuthenticationResponse.Success.Key) {
                                             // Update our persisted string value with new
                                             // login time.
-                                            updateSettingsImpl(
-                                                timeoutSettingHours.toInt(),
-                                                response.encryptionKey
-                                            )
+                                            if (updateLastLoginTimeOnSuccess) {
+                                                updateSettingsImpl(
+                                                    timeoutSettingHours.toInt(),
+                                                    response.encryptionKey
+                                                )
+                                            }
                                             response.encryptionKey
                                         } else {
                                             // Error validating the private key stored here

@@ -4,7 +4,14 @@ import io.matthewnelson.concept_encryption_key.EncryptionKey
 
 abstract class BackgroundLoginHandler {
 
-    abstract suspend fun attemptBackgroundLogin(): EncryptionKey?
+    /**
+     * [updateLastLoginTimeOnSuccess] will update the AuthenticationStorage with a successful login
+     * such that last login time can be updated only when desired (on a splash screen,
+     * and not if handling notifications or something).
+     * */
+    abstract suspend fun attemptBackgroundLogin(
+        updateLastLoginTimeOnSuccess: Boolean = false
+    ): EncryptionKey?
 
     abstract suspend fun updateLoginTime(): Boolean
 

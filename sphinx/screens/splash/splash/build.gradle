@@ -37,7 +37,7 @@ dependencies {
 
     // Sphinx
     implementation project(path: ':sphinx:application:common:resources')
-    implementation project(path: ':sphinx:application:data:background-login')
+    implementation project(path: ':sphinx:application:data:concepts:concept-background-login')
     implementation deps.jncryptor
 
     implementation deps.androidx.lifecycle.hilt

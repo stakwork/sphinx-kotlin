@@ -1,9 +1,8 @@
 package chat.sphinx.splash.ui
 
 import android.content.Context
-import android.os.SystemClock
 import androidx.lifecycle.viewModelScope
-import chat.sphinx.background_login.BackgroundLoginHandler
+import chat.sphinx.concept_background_login.BackgroundLoginHandler
 import chat.sphinx.splash.navigation.SplashNavigator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.MotionLayoutViewModel
@@ -16,7 +15,6 @@ import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import io.matthewnelson.k_openssl_common.extensions.decodeToString
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import okio.base64.decodeBase64ToArray
@@ -47,7 +45,9 @@ internal class SplashViewModel @Inject constructor(
         }
 
         viewModelScope.launch(dispatchers.mainImmediate) {
-            backgroundLoginHandler.attemptBackgroundLogin()?.let {
+            backgroundLoginHandler.attemptBackgroundLogin(
+                updateLastLoginTimeOnSuccess = true
+            )?.let {
                 navigator.toHomeScreen()
             } ?: let {
                 if (authenticationCoordinator.isAnEncryptionKeySet()) {
