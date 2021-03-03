@@ -65,11 +65,15 @@ dependencies {
     // Sphinx
     implementation project(path: ':sphinx:activity:main:activitymain')
     implementation project(path: ':sphinx:application:data:features:feature-background-login')
+    implementation project(path: ':sphinx:application:data:features:feature-relay')
+    implementation project(path: ':sphinx:screens:splash:key-restore')
 
     implementation deps.google.hilt
     kapt kaptDeps.google.hilt
 
-    testImplementation testDeps.junit
+    testImplementation project(path: ':kotlin:test:test-concept-coroutines')
+    testImplementation testDeps.robolectric
+    testImplementation testDeps.androidx.core
 
     androidTestImplementation testDeps.androidx.core
     androidTestImplementation testDeps.androidx.espresso
