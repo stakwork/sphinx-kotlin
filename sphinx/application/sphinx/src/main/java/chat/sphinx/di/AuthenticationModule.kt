@@ -4,7 +4,9 @@ import chat.sphinx.authentication.SphinxAuthenticationCoreManager
 import chat.sphinx.authentication.SphinxAuthenticationCoreStorage
 import chat.sphinx.feature_background_login.BackgroundLoginHandlerImpl
 import chat.sphinx.authentication.SphinxEncryptionKeyHandler
+import chat.sphinx.authentication.SphinxKeyRestore
 import chat.sphinx.concept_background_login.BackgroundLoginHandler
+import chat.sphinx.key_restore.KeyRestore
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -53,4 +55,10 @@ object AuthenticationModule {
             authenticationCoreManager,
             authenticationStorage
         )
+
+    @Provides
+    fun provideKeyRestore(
+        sphinxKeyRestore: SphinxKeyRestore
+    ): KeyRestore =
+        sphinxKeyRestore
 }
