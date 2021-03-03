@@ -1,57 +1,44 @@
 package chat.sphinx.feature_background_login
 
 import chat.sphinx.concept_background_login.BackgroundLoginHandler
-import io.matthewnelson.concept_authentication.coordinator.AuthenticationCoordinator
 import io.matthewnelson.concept_authentication.coordinator.AuthenticationRequest
 import io.matthewnelson.concept_authentication.coordinator.AuthenticationResponse
 import io.matthewnelson.concept_authentication.data.AuthenticationStorage
 import io.matthewnelson.concept_encryption_key.EncryptionKey
+import io.matthewnelson.feature_authentication_core.AuthenticationCoreManager
 import io.matthewnelson.k_openssl_common.annotations.RawPasswordAccess
 import io.matthewnelson.k_openssl_common.clazzes.Password
 import kotlinx.coroutines.flow.first
 
 class BackgroundLoginHandlerImpl(
-    private val authenticationCoordinator: AuthenticationCoordinator,
+    private val authenticationManager: AuthenticationCoreManager,
     private val authenticationStorage: AuthenticationStorage
 ): BackgroundLoginHandler() {
 
     companion object {
-        const val BACKGROUND_LOGIN = "BACKGROUND_LOGIN"
-        const val DELIMINATOR = "|-SAFU-|"
+        const val BACKGROUND_LOGIN_KEY = "BACKGROUND_LOGIN"
+        private const val DELIMINATOR = "|-SAFU-|"
         private const val NULL = "NULL"
-        private const val DEFAULT_TIMEOUT = 12
+        const val DEFAULT_TIMEOUT = 12
 
         @Volatile
         private var timeoutSettingsCache: Int? = null
     }
 
-    private suspend fun retrieveEncryptionKeyIfLoggedIn(): EncryptionKey? =
-        authenticationCoordinator.submitAuthenticationRequest(
-            AuthenticationRequest.GetEncryptionKey(
-                navigateToAuthenticationViewOnFailure = false
-            )
-        ).first().let { response ->
-            if (response is AuthenticationResponse.Success.Key) {
-                response.encryptionKey
-            } else {
-                null
-            }
-        }
-
     @Synchronized
     override suspend fun attemptBackgroundLogin(): EncryptionKey? {
 
         // Check if we're already logged in
-        retrieveEncryptionKeyIfLoggedIn()?.let { encryptionKey ->
+        authenticationManager.getEncryptionKey()?.let { encryptionKey ->
             timeoutSettingsCache?.let { timeout ->
                 // if our cache isn't null, update our string with the new login time
                 updateSettingsImpl(timeout, encryptionKey)
-            }
+            } ?: updateLoginTime()
             return encryptionKey
         }
 
         // Try to pull key from AuthenticationStorage and login with it
-        return authenticationStorage.getString(BACKGROUND_LOGIN, null)?.let { bgLoginString ->
+        return authenticationStorage.getString(BACKGROUND_LOGIN_KEY, null)?.let { bgLoginString ->
 
             bgLoginString.split(DELIMINATOR).let { splits ->
 
@@ -76,10 +63,11 @@ class BackgroundLoginHandlerImpl(
                                 (System.currentTimeMillis() - lastLoginTimeMillis.toLong()) <
                                         (timeoutSettingHours.toLong() * 3_600_000) -> {
 
-                                    authenticationCoordinator.submitAuthenticationRequest(
-                                        AuthenticationRequest.LogIn(
-                                            privateKey = Password(privateKeyString.toCharArray())
-                                        )
+                                    val privateKey = Password(privateKeyString.toCharArray())
+                                    val request = AuthenticationRequest.LogIn(privateKey)
+                                    authenticationManager.authenticate(
+                                        privateKey,
+                                        request
                                     ).first().let { response ->
                                         if (response is AuthenticationResponse.Success.Key) {
                                             // Update our persisted string value with new
@@ -118,10 +106,10 @@ class BackgroundLoginHandlerImpl(
 
     @Synchronized
     override suspend fun updateLoginTime(): Boolean {
-        return retrieveEncryptionKeyIfLoggedIn()?.let { encryptionKey ->
+        return authenticationManager.getEncryptionKey()?.let { encryptionKey ->
             // We're logged in and can update the setting, otherwise, don't
             val timeoutSetting = timeoutSettingsCache
-                ?: authenticationStorage.getString(BACKGROUND_LOGIN, null)
+                ?: authenticationStorage.getString(BACKGROUND_LOGIN_KEY, null)
                     ?.split(DELIMINATOR)
                     ?.elementAtOrNull(0)
                     ?.toInt()
@@ -135,7 +123,7 @@ class BackgroundLoginHandlerImpl(
     @Synchronized
     override suspend fun getTimeOutSetting(): Int {
         return timeoutSettingsCache ?: let {
-            authenticationStorage.getString(BACKGROUND_LOGIN, null)
+            authenticationStorage.getString(BACKGROUND_LOGIN_KEY, null)
                 ?.split(DELIMINATOR)
                 ?.elementAtOrNull(0)
                 ?.toInt()
@@ -146,7 +134,7 @@ class BackgroundLoginHandlerImpl(
 
     @Synchronized
     override suspend fun updateSetting(pinTimeOutHours: Int): Boolean {
-        return retrieveEncryptionKeyIfLoggedIn()?.let { encryptionKey ->
+        return authenticationManager.getEncryptionKey()?.let { encryptionKey ->
             // We're logged in and can update the setting, otherwise, don't
             updateSettingsImpl(pinTimeOutHours, encryptionKey)
             true
@@ -186,6 +174,6 @@ class BackgroundLoginHandlerImpl(
             sb.append(encryptionKey?.privateKey?.value?.joinToString("") ?: NULL)
         }
 
-        authenticationStorage.putString(BACKGROUND_LOGIN, sb.toString())
+        authenticationStorage.putString(BACKGROUND_LOGIN_KEY, sb.toString())
     }
 }

@@ -5,6 +5,7 @@ plugins {
 
 dependencies {
     api project(path: ':sphinx:application:data:concepts:concept-background-login')
-    api project(path: ':kotlin:concepts:authentication:concept-authentication')
-    implementation deps.kotlin.coroutinesCore
+    implementation project(path: ':kotlin:features:authentication:feature-authentication-core')
+
+    testImplementation project(path: ':kotlin:test:test-feature-authentication-core')
 }

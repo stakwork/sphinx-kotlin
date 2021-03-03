@@ -18,7 +18,7 @@ import io.matthewnelson.feature_authentication_core.AuthenticationCoreManager
 
 @Module
 @InstallIn(SingletonComponent::class)
-object AuthenticationAppModules {
+object AuthenticationModule {
 
     @Provides
     fun provideAuthenticationCoreManager(
@@ -43,19 +43,14 @@ object AuthenticationAppModules {
         sphinxEncryptionKeyHandler: SphinxEncryptionKeyHandler
     ): EncryptionKeyHandler =
         sphinxEncryptionKeyHandler
-}
-
-@Module
-@InstallIn(ActivityRetainedComponent::class)
-object AuthenticationActivityRetainedModule {
 
     @Provides
     fun provideBackgroundLoginHandler(
-        authenticationCoordinator: AuthenticationCoordinator,
+        authenticationCoreManager: AuthenticationCoreManager,
         authenticationStorage: AuthenticationStorage
     ): BackgroundLoginHandler =
         BackgroundLoginHandlerImpl(
-            authenticationCoordinator,
+            authenticationCoreManager,
             authenticationStorage
         )
 }
