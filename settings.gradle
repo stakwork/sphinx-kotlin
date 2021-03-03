@@ -8,6 +8,7 @@ include ':sphinx:application:common:resources'
 include ':sphinx:application:data:concepts:concept-background-login'
 include ':sphinx:application:data:features:feature-background-login'
 include ':sphinx:application:data:concepts:concept-relay'
+include ':sphinx:application:data:features:feature-relay'
 
 // Activities
 include ':sphinx:activity:main:activitymain'
