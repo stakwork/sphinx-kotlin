@@ -7,6 +7,7 @@ include ':sphinx:application:sphinx'
 include ':sphinx:application:common:resources'
 include ':sphinx:application:data:concepts:concept-background-login'
 include ':sphinx:application:data:features:feature-background-login'
+include ':sphinx:application:data:concepts:concept-relay'
 
 // Activities
 include ':sphinx:activity:main:activitymain'
@@ -15,6 +16,7 @@ include ':sphinx:activity:main:activitymain'
 include ':sphinx:screens:authentication:authentication'
 include ':sphinx:screens:onboard:onboard'
 include ':sphinx:screens:splash:splash'
+include ':sphinx:screens:splash:key-restore'
 
 ////////////////////////////////////////
 //////////// Kotlin Android ////////////
