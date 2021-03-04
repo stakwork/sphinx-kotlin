@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="PinPadButton" parent="BaseButton">
+        <item name="android:background">@drawable/background_button_pin_pad</item>
+        <item name="android:gravity">center</item>
+        <item name="android:padding">@dimen/pin_pad_padding</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textSize">@dimen/pin_pad_text_size</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:typeface">normal</item>
+    </style>
+
+</resources>

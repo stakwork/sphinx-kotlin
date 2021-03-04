@@ -11,4 +11,5 @@
     <color name="secondaryTextColor">#000000</color>
 
     <color name="lightPurple">#A986F9</color>
+    <color name="deepNight">#141d27</color>
 </resources>
