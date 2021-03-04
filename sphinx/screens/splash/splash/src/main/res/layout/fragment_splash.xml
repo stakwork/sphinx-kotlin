@@ -36,4 +36,8 @@
         android:layout_height="wrap_content"
         app:layout_constraintTop_toBottomOf="@+id/image_view_splash_logo" />
 
+    <include
+        android:id="@+id/layout_authentication"
+        layout="@layout/layout_authentication" />
+
 </androidx.constraintlayout.motion.widget.MotionLayout>

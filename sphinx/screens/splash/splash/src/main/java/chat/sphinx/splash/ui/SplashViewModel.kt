@@ -13,10 +13,10 @@ import io.matthewnelson.concept_authentication.coordinator.AuthenticationCoordin
 import io.matthewnelson.concept_authentication.coordinator.AuthenticationRequest
 import io.matthewnelson.concept_authentication.coordinator.AuthenticationResponse
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
-import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import io.matthewnelson.k_openssl_common.clazzes.Password
 import io.matthewnelson.k_openssl_common.extensions.decodeToString
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -38,7 +38,7 @@ internal class SplashViewModel @Inject constructor(
         Context,
         SplashSideEffect,
         SplashViewState
-        >(SplashViewState.Idle)
+        >(SplashViewState.Start_ShowIcon)
 {
     private var screenInit: Boolean = false
     fun screenInit() {
@@ -76,13 +76,14 @@ internal class SplashViewModel @Inject constructor(
                     }
                 } else {
                     // Display OnBoard
-                    updateViewState(SplashViewState.StartScene)
+                    delay(100L) // need a slight delay for window to fully hand over to splash
+                    updateViewState(SplashViewState.Transition_Set2_ShowWelcome)
                 }
             }
         }
     }
 
-    // TODO: Limit to not cause buffer overflow and crash.
+    // TODO: Use coordinator pattern and limit
     fun navigateToScanner() {
         viewModelScope.launch(dispatchers.mainImmediate) {
             submitSideEffect(SplashSideEffect.NotImplementedYet)
@@ -119,8 +120,8 @@ internal class SplashViewModel @Inject constructor(
 
                 if (decodedSplit.elementAt(0) == "keys") {
                     decodedSplit.elementAt(1).decodeBase64ToArray()?.let { toDecryptByteArray ->
-                        layoutViewStateContainer.updateViewState(
-                            OnBoardLayoutViewState.DecryptKeys(toDecryptByteArray)
+                        updateViewState(
+                            SplashViewState.Transition_Set3_DecryptKeys(toDecryptByteArray)
                         )
                         return
                     }
@@ -136,7 +137,7 @@ internal class SplashViewModel @Inject constructor(
 
     private var decryptionJob: Job? = null
     fun decryptInput(
-        decryptKeysViewState: OnBoardLayoutViewState.DecryptKeys,
+        decryptKeysViewState: SplashViewState.Set3_DecryptKeys,
         password: String?
     ) {
         if (password == null || password.isEmpty()) {
@@ -198,11 +199,6 @@ internal class SplashViewModel @Inject constructor(
                 submitSideEffect(SplashSideEffect.DecryptionFailure)
             }
         }
-    }
-
-    @Suppress("RemoveExplicitTypeArguments")
-    val layoutViewStateContainer: ViewStateContainer<OnBoardLayoutViewState> by lazy {
-        ViewStateContainer<OnBoardLayoutViewState>(OnBoardLayoutViewState.Hidden)
     }
 
     // Unused

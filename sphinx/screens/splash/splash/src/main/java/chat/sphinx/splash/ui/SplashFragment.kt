@@ -3,6 +3,8 @@ package chat.sphinx.splash.ui
 import android.content.Context
 import android.os.Bundle
 import android.view.View
+import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
 import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -14,8 +16,7 @@ import io.matthewnelson.android_feature_screens.navigation.CloseAppOnBackPress
 import io.matthewnelson.android_feature_screens.ui.motionlayout.MotionLayoutFragment
 import io.matthewnelson.android_feature_viewmodel.currentViewState
 import io.matthewnelson.android_feature_viewmodel.updateViewState
-import io.matthewnelson.concept_views.viewstate.collect
-import io.matthewnelson.concept_views.viewstate.value
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.annotation.meta.Exhaustive
 
@@ -33,6 +34,11 @@ internal class SplashFragment: MotionLayoutFragment<
     override val binding: FragmentSplashBinding by viewBinding(FragmentSplashBinding::bind)
     override val viewModel: SplashViewModel by viewModels()
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        viewModel.screenInit()
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         OnBackPress(binding.root.context).addCallback(viewLifecycleOwner, requireActivity())
@@ -41,9 +47,9 @@ internal class SplashFragment: MotionLayoutFragment<
 
     private inner class OnBackPress(context: Context): CloseAppOnBackPress(context) {
         override fun handleOnBackPressed() {
-            if (viewModel.layoutViewStateContainer.value is OnBoardLayoutViewState.DecryptKeys) {
-                binding.layoutOnBoard.editTextCodeInput.setText("")
-                viewModel.layoutViewStateContainer.updateViewState(OnBoardLayoutViewState.InputCode)
+            if (viewModel.currentViewState is SplashViewState.Set3_DecryptKeys) {
+                setTransitionListener(binding.layoutMotionSplash)
+                viewModel.currentViewState.transitionToEndSet(binding.layoutMotionSplash)
             } else {
                 super.handleOnBackPressed()
             }
@@ -57,65 +63,101 @@ internal class SplashFragment: MotionLayoutFragment<
         sideEffect.execute(binding.root.context)
     }
 
-    //////////////////
-    /// View State ///
-    //////////////////
-    override fun subscribeToViewStateFlow() {
-        super.subscribeToViewStateFlow()
-        lifecycleScope.launchWhenStarted {
-            viewModel.layoutViewStateContainer.collect { viewState ->
-                onOnBoardLayoutViewStateCollect(viewState)
-            }
-        }
-    }
-
-    private suspend fun onOnBoardLayoutViewStateCollect(viewState: OnBoardLayoutViewState) {
-        viewState.setInfoText(binding.layoutOnBoard.textViewWelcomeInfo)
-        viewState.setScannerButton(viewModel, binding.layoutOnBoard.imageButtonScanner)
-        viewState.setEditTextInput(viewModel, binding.layoutOnBoard.editTextCodeInput)
-    }
-
     /////////////////////
     /// Motion Layout ///
     /////////////////////
     override suspend fun onViewStateFlowCollect(viewState: SplashViewState) {
         @Exhaustive
         when (viewState) {
-            is SplashViewState.Idle -> {}
-            is SplashViewState.StartScene -> {
+            is SplashViewState.Start_ShowIcon -> {
+                binding.layoutOnBoard.imageButtonScanner.let { imageButton ->
+                    imageButton.isEnabled = false
+                    imageButton.setOnClickListener(null)
+                }
+                binding.layoutOnBoard.editTextCodeInput.let { editText ->
+                    editText.isEnabled = false
+                }
+            }
+
+            is SplashViewState.Transition_Set2_ShowWelcome -> {
                 setTransitionListener(binding.layoutMotionSplash)
                 viewState.transitionToEndSet(binding.layoutMotionSplash)
             }
-            is SplashViewState.SceneFinished -> {
-                viewModel.layoutViewStateContainer.value.let { layoutViewState ->
-                    @Exhaustive
-                    when (layoutViewState) {
-                        is OnBoardLayoutViewState.DecryptKeys -> {
-                            onOnBoardLayoutViewStateCollect(layoutViewState)
-                        }
-                        is OnBoardLayoutViewState.Hidden -> {
-                            viewModel.layoutViewStateContainer.updateViewState(
-                                OnBoardLayoutViewState.InputCode
+
+            is SplashViewState.Set2_ShowWelcome -> {
+                binding.layoutOnBoard.editTextCodeInput.let { editText ->
+                    editText.isEnabled = true
+
+                    (binding.root.context
+                        .getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
+                    )?.let { imm ->
+                        editText.requestFocus()
+                        imm.showSoftInput(editText, InputMethodManager.SHOW_IMPLICIT)
+                    }
+
+                    editText.setOnEditorActionListener { _, actionId, _ ->
+                        if (actionId == EditorInfo.IME_ACTION_DONE) {
+                            viewModel.processUserInput(
+                                editText.text?.toString()
                             )
-                        }
-                        is OnBoardLayoutViewState.InputCode -> {
-                            onOnBoardLayoutViewStateCollect(layoutViewState)
+                            true
+                        } else {
+                            false
                         }
                     }
                 }
+                binding.layoutOnBoard.imageButtonScanner.let { imageButton ->
+                    imageButton.isEnabled = true
+                    imageButton.setOnClickListener {
+                        viewModel.navigateToScanner()
+                    }
+                }
+            }
+
+            is SplashViewState.Transition_Set3_DecryptKeys -> {
+                binding.layoutOnBoard.editTextCodeInput.let { editText ->
+                    editText.isEnabled = false
+                    editText.setOnEditorActionListener(null)
+                }
+                binding.layoutOnBoard.imageButtonScanner.let { imageButton ->
+                    imageButton.isEnabled = false
+                    imageButton.setOnClickListener(null)
+                }
+                delay(500L) // keyboard close
+                setTransitionListener(binding.layoutMotionSplash)
+                viewState.transitionToEndSet(binding.layoutMotionSplash)
+            }
+
+            is SplashViewState.Set3_DecryptKeys -> {
+                // TODO: Setup authentication view
             }
         }
     }
 
     override fun onTransitionCompleted(motionLayout: MotionLayout?, currentId: Int) {
-        if (currentId == SplashViewState.StartScene.endSetId) {
-            removeTransitionListener(binding.layoutMotionSplash)
-            viewModel.updateViewState(SplashViewState.SceneFinished)
+        when (currentId) {
+            SplashViewState.Transition_Set2_ShowWelcome.endSetId -> {
+                removeTransitionListener(binding.layoutMotionSplash)
+                viewModel.updateViewState(SplashViewState.Set2_ShowWelcome)
+            }
+            SplashViewState.Transition_Set3_DecryptKeys.END_SET_ID -> {
+                removeTransitionListener(binding.layoutMotionSplash)
+                viewModel.updateViewState(
+                    SplashViewState.Set3_DecryptKeys(
+                        try {
+                            (viewModel.currentViewState as SplashViewState.Transition_Set3_DecryptKeys).toDecrypt
+                        } catch (e: ClassCastException) {
+                            // "Should" never happen, but if it does, this is the only other
+                            // view state that contains set3's resource ID.
+                            (viewModel.currentViewState as SplashViewState.Set3_DecryptKeys).toDecrypt
+                        }
+                    )
+                )
+            }
         }
     }
 
     override fun onViewCreatedRestoreMotionScene(viewState: SplashViewState, binding: FragmentSplashBinding) {
-        viewModel.screenInit()
         viewState.restoreMotionScene(binding.layoutMotionSplash)
     }
 

@@ -42,11 +42,18 @@
             <PropertySet android:visibility="invisible" />
         </Constraint>
 
+        <Constraint android:id="@+id/layout_authentication">
+            <Layout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+            <PropertySet android:visibility="invisible" />
+        </Constraint>
+
     </ConstraintSet>
 
 
     <!--
-           Set 2
+           Set 2: Show Welcome Information
     -->
     <ConstraintSet
         android:id="@+id/motion_scene_splash_set2"
@@ -73,6 +80,28 @@
     </ConstraintSet>
 
 
+    <!--
+           Set 3: Enter PIN to Decrypt Existing Keys
+    -->
+    <ConstraintSet
+        android:id="@+id/motion_scene_splash_set3"
+        app:deriveConstraintsFrom="@+id/motion_scene_splash_set2">
+
+        <Constraint android:id="@+id/image_view_splash_logo">
+            <PropertySet android:visibility="invisible" />
+        </Constraint>
+
+        <Constraint android:id="@+id/layout_on_board">
+            <PropertySet android:visibility="invisible" />
+        </Constraint>
+
+        <Constraint android:id="@+id/layout_authentication">
+            <PropertySet android:visibility="visible" />
+        </Constraint>
+
+    </ConstraintSet>
+
+
     <!-- ////////////////////////////////////////////////////////////////////////////////-->
     <!-- ////////////////////////////////////////////////////////////////////////////////-->
     <!-- ////////////////////////////// Transitions /////////////////////////////////////-->
@@ -88,5 +117,14 @@
         app:constraintSetEnd="@+id/motion_scene_splash_set2"
         app:constraintSetStart="@+id/motion_scene_splash_set1"
         app:motionInterpolator="easeIn" />
+
+    <!--
+           Set 2 >> Set 3
+    -->
+    <Transition
+        android:id="@+id/transition_splash_set2_to_set3"
+        app:constraintSetEnd="@+id/motion_scene_splash_set3"
+        app:constraintSetStart="@+id/motion_scene_splash_set2"
+        app:motionInterpolator="linear" />
 
 </MotionScene>
