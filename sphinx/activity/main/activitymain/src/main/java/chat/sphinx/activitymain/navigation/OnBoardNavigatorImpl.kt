@@ -6,7 +6,7 @@ import javax.inject.Inject
 class OnBoardNavigatorImpl @Inject constructor(
     navigationDriver: MainNavigationDriver
 ): OnBoardNavigator(navigationDriver) {
-    override suspend fun toHomeScreen() {
+    override suspend fun toDashboardScreen() {
         // TODO("Not yet implemented")
     }
 }
