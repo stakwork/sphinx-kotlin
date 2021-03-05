@@ -7,11 +7,9 @@ import androidx.test.core.app.ApplicationProvider
 import chat.sphinx.feature_relay.RelayDataHandlerImpl
 import chat.sphinx.key_restore.KeyRestoreResponse
 import io.matthewnelson.k_openssl_common.clazzes.Password
-import io.matthewnelson.k_openssl_common.extensions.decodeToString
 import io.matthewnelson.test_concept_coroutines.CoroutineTestHelper
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.test.runBlockingTest
-import okio.base64.decodeBase64ToArray
 import org.junit.After
 import org.junit.Assert
 import org.junit.Before
