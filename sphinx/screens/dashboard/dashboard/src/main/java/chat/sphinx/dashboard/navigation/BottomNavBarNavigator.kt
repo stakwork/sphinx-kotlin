@@ -4,10 +4,11 @@ import androidx.navigation.NavController
 import io.matthewnelson.concept_navigation.BaseNavigationDriver
 import io.matthewnelson.concept_navigation.Navigator
 
-abstract class DashboardNavigator(
+abstract class BottomNavBarNavigator(
     navigationDriver: BaseNavigationDriver<NavController>
 ): Navigator<NavController>(navigationDriver) {
-    abstract suspend fun toChatContact(chatId: String)
-    abstract suspend fun toChatGroup(chatId: String)
-    abstract suspend fun toChatTribe(chatId: String)
+    abstract suspend fun toReceivePaymentDetail()
+    abstract suspend fun toTransactionHistoryDetail()
+    abstract suspend fun toScannerDetail()
+    abstract suspend fun toSendPaymentDetail()
 }

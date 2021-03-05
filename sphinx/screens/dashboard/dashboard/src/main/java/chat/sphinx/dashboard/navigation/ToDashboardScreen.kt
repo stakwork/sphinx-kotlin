@@ -16,7 +16,7 @@ class ToDashboardScreen(@IdRes private val popUpToId: Int?): NavigationRequest<N
         } ?: DefaultNavOptions.defaultAnimsBuilt
 
         controller.navigate(
-            R.id.home_nav_graph,
+            R.id.dashboard_nav_graph,
             null,
             options
         )
