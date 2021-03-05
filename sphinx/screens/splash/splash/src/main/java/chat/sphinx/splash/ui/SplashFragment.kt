@@ -10,7 +10,7 @@ import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import by.kirich1409.viewbindingdelegate.viewBinding
-import chat.sphinx.authentication_layout.databinding.LayoutAuthenticationBinding
+import chat.sphinx.authentication_resources.databinding.LayoutAuthenticationBinding
 import chat.sphinx.resources.SphinxToastUtils
 import chat.sphinx.splash.R
 import chat.sphinx.splash.databinding.FragmentSplashBinding
