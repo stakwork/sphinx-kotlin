@@ -6,7 +6,7 @@
     app:startDestination="@+id/navigation_splash_fragment">
 
     <include app:graph="@navigation/authentication_nav_graph" />
-    <include app:graph="@navigation/home_nav_graph" />
+    <include app:graph="@navigation/dashboard_nav_graph" />
     <include app:graph="@navigation/on_board_nav_graph" />
 
     <fragment

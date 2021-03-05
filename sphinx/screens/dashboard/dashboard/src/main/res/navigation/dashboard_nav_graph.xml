@@ -3,11 +3,11 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/home_nav_graph"
-    app:startDestination="@+id/navigation_home_fragment">
+    app:startDestination="@+id/navigation_dashboard_fragment">
 
     <fragment
-        android:id="@+id/navigation_home_fragment"
-        android:name="chat.sphinx.home.ui.HomeFragment"
-        tools:layout="@layout/fragment_home" />
+        android:id="@+id/navigation_dashboard_fragment"
+        android:name="chat.sphinx.dashboard.ui.DashboardFragment"
+        tools:layout="@layout/fragment_dashboard" />
 
 </navigation>
