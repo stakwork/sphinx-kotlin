@@ -8,7 +8,6 @@ import chat.sphinx.key_restore.KeyRestoreResponse
 import chat.sphinx.splash.navigation.SplashNavigator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.MotionLayoutViewModel
-import io.matthewnelson.android_feature_viewmodel.currentViewState
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_authentication.coordinator.AuthenticationCoordinator
@@ -20,7 +19,7 @@ import io.matthewnelson.k_openssl_common.extensions.decodeToString
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import okio.base64.decodeBase64ToArray
 import org.cryptonode.jncryptor.AES256JNCryptor
@@ -59,9 +58,10 @@ internal class SplashViewModel @Inject constructor(
                 if (authenticationCoordinator.isAnEncryptionKeySet()) {
                     authenticationCoordinator.submitAuthenticationRequest(
                         AuthenticationRequest.LogIn()
-                    ).first().let { response ->
+                    ).firstOrNull().let { response ->
                         @Exhaustive
                         when (response) {
+                            null,
                             is AuthenticationResponse.Failure -> {
                                 // will not be returned as back press for handling
                                 // a LogIn request minimizes the application until
@@ -69,6 +69,8 @@ internal class SplashViewModel @Inject constructor(
                             }
                             is AuthenticationResponse.Success.Authenticated -> {
                                 // Prime relay cache data before navigating (takes an extra ~ .3s)
+                                // TODO: Enable once SplashFragment backpress handling is cleaned up
+//                                backgroundLoginHandler.updateLoginTime()
                                 navigator.toHomeScreen()
                             }
                             is AuthenticationResponse.Success.Key -> {
@@ -188,6 +190,8 @@ internal class SplashViewModel @Inject constructor(
                         viewState.pinWriter.append('0')
                     }
 
+                    // TODO: Enable once SplashFragment backpress handling is cleaned up
+//                    backgroundLoginHandler.updateLoginTime()
                     navigator.toHomeScreen()
 
                 } ?: updateViewState(
