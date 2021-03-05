@@ -1,0 +1,11 @@
+plugins {
+    id 'java-library'
+    id 'kotlin'
+}
+
+dependencies {
+    api project(path: ':sphinx:application:data:concepts:concept-background-login')
+    implementation project(path: ':kotlin:features:authentication:feature-authentication-core')
+
+    testImplementation project(path: ':kotlin:test:test-feature-authentication-core')
+}

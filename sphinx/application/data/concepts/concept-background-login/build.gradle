@@ -1,0 +1,8 @@
+plugins {
+    id 'java-library'
+    id 'kotlin'
+}
+
+dependencies {
+    api project(path: ':kotlin:concepts:authentication:concept-encryption-key')
+}

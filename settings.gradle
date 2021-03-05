@@ -3,15 +3,23 @@ rootProject.name = "Sphinx"
 ////////////////////////////////
 //////////// Sphinx ////////////
 ////////////////////////////////
-include ':sphinx:sphinx'
-include ':sphinx:android:common:annotation-hilt'
-include ':sphinx:android:common:resources'
+include ':sphinx:application:sphinx'
+include ':sphinx:application:common:resources'
+include ':sphinx:application:data:concepts:concept-background-login'
+include ':sphinx:application:data:features:feature-background-login'
+include ':sphinx:application:data:concepts:concept-relay'
+include ':sphinx:application:data:features:feature-relay'
 
 // Activities
-include ':sphinx:android:activitymain'
+include ':sphinx:activity:main:activitymain'
 
 // Screens
-include ':sphinx:android:screens:splash'
+include ':sphinx:screens:authentication:authentication'
+include ':sphinx:screens:authentication:authentication-resources'
+include ':sphinx:screens:home:home'
+include ':sphinx:screens:onboard:onboard'
+include ':sphinx:screens:splash:splash'
+include ':sphinx:screens:splash:key-restore'
 
 ////////////////////////////////////////
 //////////// Kotlin Android ////////////
@@ -123,6 +131,9 @@ project(':kotlin:features:feature-navigation').projectDir =
 include ':kotlin:test:test-concept-coroutines'
 project(':kotlin:test:test-concept-coroutines').projectDir =
         file(new File(rootDir, 'kotlin-android/kotlin/test/test-concept-coroutines'))
+include ':kotlin:test:test-feature-authentication-core'
+project(':kotlin:test:test-feature-authentication-core').projectDir =
+        file(new File(rootDir, 'kotlin-android/kotlin/test/test-feature-authentication-core'))
 include ':kotlin:test:test-k-openssl'
 project(':kotlin:test:test-k-openssl').projectDir =
         file(new File(rootDir, 'kotlin-android/kotlin/test/test-k-openssl'))
