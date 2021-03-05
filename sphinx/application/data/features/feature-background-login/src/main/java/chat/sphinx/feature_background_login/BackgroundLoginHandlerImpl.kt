@@ -9,6 +9,7 @@ import io.matthewnelson.feature_authentication_core.AuthenticationCoreManager
 import io.matthewnelson.k_openssl_common.annotations.RawPasswordAccess
 import io.matthewnelson.k_openssl_common.clazzes.Password
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 
 class BackgroundLoginHandlerImpl(
     private val authenticationManager: AuthenticationCoreManager,
@@ -72,7 +73,7 @@ class BackgroundLoginHandlerImpl(
                                     authenticationManager.authenticate(
                                         privateKey,
                                         request
-                                    ).first().let { response ->
+                                    ).firstOrNull().let { response ->
                                         if (response is AuthenticationResponse.Success.Key) {
                                             // Update our persisted string value with new
                                             // login time.
