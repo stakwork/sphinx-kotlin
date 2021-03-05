@@ -35,7 +35,7 @@ dependencies {
     api project(path: ':kotlin:features:authentication:feature-authentication-view')
 
     // Sphinx
-    implementation project(path: ':sphinx:application:common:resources')
+    implementation project(path: ':sphinx:screens:authentication:authentication-resources')
 
     implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt
