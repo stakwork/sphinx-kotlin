@@ -37,7 +37,7 @@ dependencies {
 
     // Sphinx
     implementation project(path: ':sphinx:application:data:concepts:concept-background-login')
-    implementation project(path: ':sphinx:screens:authentication:authentication-resources')
+    api project(path: ':sphinx:screens:authentication:authentication-resources')
     implementation project(path: ':sphinx:screens:splash:key-restore')
     implementation deps.jncryptor
 

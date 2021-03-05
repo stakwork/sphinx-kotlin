@@ -4,9 +4,11 @@ import android.content.Context
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_background_login.BackgroundLoginHandler
 import chat.sphinx.key_restore.KeyRestore
+import chat.sphinx.key_restore.KeyRestoreResponse
 import chat.sphinx.splash.navigation.SplashNavigator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.MotionLayoutViewModel
+import io.matthewnelson.android_feature_viewmodel.currentViewState
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_authentication.coordinator.AuthenticationCoordinator
@@ -136,20 +138,10 @@ internal class SplashViewModel @Inject constructor(
     }
 
     private var decryptionJob: Job? = null
-    fun decryptInput(
-        decryptKeysViewState: SplashViewState.Set3_DecryptKeys,
-        password: String?
-    ) {
-        if (password == null || password.isEmpty()) {
-            viewModelScope.launch(dispatchers.mainImmediate) {
-                submitSideEffect(SplashSideEffect.InputNullOrEmpty)
-            }
-            return
-        }
-
+    fun decryptInput(viewState: SplashViewState.Set3_DecryptKeys) {
         // TODO: Replace with automatic launching upon entering the 6th PIN character
         //  when Authentication View's Layout gets incorporated
-        if (password.length != 6 /*TODO: https://github.com/stakwork/sphinx-kotlin/issues/9*/) {
+        if (viewState.pinWriter.size() != 6 /*TODO: https://github.com/stakwork/sphinx-kotlin/issues/9*/) {
             viewModelScope.launch(dispatchers.mainImmediate) {
                 submitSideEffect(SplashSideEffect.InvalidPinLength)
             }
@@ -162,8 +154,9 @@ internal class SplashViewModel @Inject constructor(
         var decryptionJobException: Exception? = null
         decryptionJob = viewModelScope.launch(dispatchers.default) {
             try {
+                val pin = viewState.pinWriter.toCharArray()
                 val decryptedSplit = AES256JNCryptor()
-                    .decryptData(decryptKeysViewState.toDecrypt, password.toCharArray())
+                    .decryptData(viewState.toDecrypt, pin)
                     .decodeToString()
                     .split("::")
 
@@ -174,14 +167,33 @@ internal class SplashViewModel @Inject constructor(
                 // TODO: Ask to use Tor before any network calls go out.
                 // TODO: Hit relayUrl to verify creds work
 
+                var success: KeyRestoreResponse.Success? = null
                 keyRestore.restoreKeys(
                     privateKey = Password(decryptedSplit[0].toCharArray()),
                     publicKey = Password(decryptedSplit[1].toCharArray()),
-                    userPin = password.toCharArray(),
+                    userPin = pin,
                     relayUrl = decryptedSplit[2],
                     jwt = decryptedSplit[3],
                 ).collect { flowResponse ->
                     // TODO: Implement in Authentication View when it get's built/refactored
+                    if (flowResponse is KeyRestoreResponse.Success) {
+                        success = flowResponse
+                    }
+                }
+
+                success?.let { successResponse ->
+                    // Overwrite PIN
+                    viewState.pinWriter.reset()
+                    repeat(6) {
+                        viewState.pinWriter.append('0')
+                    }
+
+                    navigator.toHomeScreen()
+
+                } ?: updateViewState(
+                    SplashViewState.Set3_DecryptKeys(viewState.toDecrypt)
+                ).also {
+                    submitSideEffect(SplashSideEffect.InvalidPin)
                 }
 
                 // TODO: on success, show snackbar to clear clipboard
@@ -195,6 +207,10 @@ internal class SplashViewModel @Inject constructor(
         viewModelScope.launch(dispatchers.mainImmediate) {
             decryptionJob?.join()
             decryptionJobException?.let { exception ->
+                updateViewState(
+                    // reset view state
+                    SplashViewState.Set3_DecryptKeys(viewState.toDecrypt)
+                )
                 exception.printStackTrace()
                 submitSideEffect(SplashSideEffect.DecryptionFailure)
             }

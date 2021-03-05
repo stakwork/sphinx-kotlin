@@ -31,6 +31,10 @@ internal sealed class SplashSideEffect: SideEffect<Context>() {
         override suspend fun execute(value: Context) {
             SphinxToastUtils().show(value, R.string.side_effect_decryption_failure)
         }
-
+    }
+    object InvalidPin: SplashSideEffect() {
+        override suspend fun execute(value: Context) {
+            SphinxToastUtils().show(value, R.string.side_effect_invalid_pin)
+        }
     }
 }
