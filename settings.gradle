@@ -16,6 +16,7 @@ include ':sphinx:activity:main:activitymain'
 // Screens
 include ':sphinx:screens:authentication:authentication'
 include ':sphinx:screens:authentication:authentication-resources'
+include ':sphinx:screens:home:home'
 include ':sphinx:screens:onboard:onboard'
 include ':sphinx:screens:splash:splash'
 include ':sphinx:screens:splash:key-restore'
