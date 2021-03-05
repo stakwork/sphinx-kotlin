@@ -36,6 +36,7 @@ dependencies {
     // Sphinx
     api project(path: ':sphinx:application:common:resources')
     api project(path: ':sphinx:screens:authentication:authentication')
+    api project(path: ':sphinx:screens:home:home')
     api project(path: ':sphinx:screens:onboard:onboard')
     api project(path: ':sphinx:screens:splash:splash')
     implementation deps.chrisbanes.insetter
