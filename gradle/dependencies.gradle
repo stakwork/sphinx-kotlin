@@ -8,12 +8,12 @@ ext.versions = [
 
     'androidGradle': '4.1.2',
     'arch': '2.1.0',
-    'coroutines': '1.4.2',
+    'coroutines': '1.4.3',
     'insetter': '0.5.0',
     'lifecycle': '2.3.0',
-    'hilt': '2.32-alpha',
+    'hilt': '2.33-beta',
     'hiltJetpack': '1.0.0-alpha03',
-    'kotlin': '1.4.30',
+    'kotlin': '1.4.31',
     'moshi': '1.11.0',
     'navigation': '2.3.3',
     'sqlDelight': '1.4.4',
@@ -83,7 +83,7 @@ ext.deps = [
         sqlDelightJvm: "com.squareup.sqldelight:sqlite-driver:${versions.sqlDelight}",
         sqlDelightNative: "com.squareup.sqldelight:native-driver:${versions.sqlDelight}",
     ],
-    viewBindingDelegateNoReflect: "com.kirich1409.viewbindingpropertydelegate:vbpd-noreflection:1.4.1",
+    viewBindingDelegateNoReflect: "com.kirich1409.viewbindingpropertydelegate:vbpd-noreflection:1.4.2",
 ]
 
 /**
@@ -103,7 +103,7 @@ ext.plugin = [
     google: [
         hilt: "com.google.dagger:hilt-android-gradle-plugin:${versions.hilt}",
     ],
-    gradleVersions: "com.github.ben-manes:gradle-versions-plugin:0.36.0",
+    gradleVersions: "com.github.ben-manes:gradle-versions-plugin:0.38.0",
     kotlin: [
         dokka: "org.jetbrains.dokka:dokka-gradle-plugin:0.10.1",
         gradle: "org.jetbrains.kotlin:kotlin-gradle-plugin:${versions.kotlin}",
