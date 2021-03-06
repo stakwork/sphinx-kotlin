@@ -2,9 +2,15 @@ package chat.sphinx.activitymain.di
 
 import androidx.navigation.NavController
 import chat.sphinx.activitymain.navigation.*
+import chat.sphinx.activitymain.navigation.drivers.AuthenticationNavigationDriver
+import chat.sphinx.activitymain.navigation.drivers.DetailNavigationDriver
+import chat.sphinx.activitymain.navigation.drivers.PrimaryNavigationDriver
 import chat.sphinx.dashboard.navigation.DashboardBottomNavBarNavigator
 import chat.sphinx.dashboard.navigation.DashboardNavDrawerNavigator
 import chat.sphinx.dashboard.navigation.DashboardNavigator
+import chat.sphinx.hilt_qualifiers.AuthenticationDriver
+import chat.sphinx.hilt_qualifiers.DetailDriver
+import chat.sphinx.hilt_qualifiers.PrimaryDriver
 import chat.sphinx.onboard.navigation.OnBoardNavigator
 import chat.sphinx.splash.navigation.SplashNavigator
 import dagger.Module
@@ -17,12 +23,33 @@ import io.matthewnelson.concept_navigation.BaseNavigationDriver
 @InstallIn(ActivityRetainedComponent::class)
 object NavigationModule {
 
+    ///////////////
+    /// Drivers ///
+    ///////////////
     @Provides
-    fun provideBaseNavigationDriver(
-        mainNavigationDriver: MainNavigationDriver
+    @AuthenticationDriver
+    fun provideAuthenticationBaseNavigationDriver(
+        authenticationNavigationDriver: AuthenticationNavigationDriver
     ): BaseNavigationDriver<NavController> =
-        mainNavigationDriver
+        authenticationNavigationDriver
 
+    @Provides
+    @DetailDriver
+    fun provideDetailBaseNavigationDriver(
+        detailNavigationDriver: DetailNavigationDriver
+    ): BaseNavigationDriver<NavController> =
+        detailNavigationDriver
+
+    @Provides
+    @PrimaryDriver
+    fun providePrimaryBaseNavigationDriver(
+        primaryNavigationDriver: PrimaryNavigationDriver
+    ): BaseNavigationDriver<NavController> =
+        primaryNavigationDriver
+
+    //////////////////
+    /// Navigators ///
+    //////////////////
     @Provides
     fun provideDashboardBottomNavBarNavigator(
         dashboardBottomNavBarNavigatorImpl: DashboardBottomNavBarNavigatorImpl
