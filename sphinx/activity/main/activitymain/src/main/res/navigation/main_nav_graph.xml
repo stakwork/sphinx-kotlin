@@ -5,9 +5,25 @@
     android:id="@+id/main_nav_graph"
     app:startDestination="@+id/navigation_splash_fragment">
 
+    <!-- Screens -->
+    <include app:graph="@navigation/add_sats_nav_graph" />
+    <include app:graph="@navigation/address_book_nav_graph" />
     <include app:graph="@navigation/authentication_nav_graph" />
+    <include app:graph="@navigation/chat_contact_nav_graph" />
+    <include app:graph="@navigation/chat_group_nav_graph" />
+    <include app:graph="@navigation/chat_tribe_nav_graph" />
     <include app:graph="@navigation/dashboard_nav_graph" />
     <include app:graph="@navigation/on_board_nav_graph" />
+    <include app:graph="@navigation/profile_nav_graph" />
+
+    <!-- Detail Screens TODO: Move to separate nav controller -->
+    <include app:graph="@navigation/add_friend_nav_graph" />
+    <include app:graph="@navigation/create_tribe_nav_graph" />
+    <include app:graph="@navigation/payment_receive_nav_graph" />
+    <include app:graph="@navigation/payment_send_nav_graph" />
+    <include app:graph="@navigation/scanner_nav_graph" />
+    <include app:graph="@navigation/support_ticket_nav_graph" />
+    <include app:graph="@navigation/transactions_nav_graph" />
 
     <fragment
         android:id="@+id/navigation_splash_fragment"
