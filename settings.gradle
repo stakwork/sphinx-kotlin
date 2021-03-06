@@ -10,7 +10,8 @@ include ':sphinx:application:data:features:feature-background-login'
 include ':sphinx:application:data:concepts:concept-relay'
 include ':sphinx:application:data:features:feature-relay'
 
-// Activities
+// Activity
+include ':sphinx:activity:hilt-qualifiers'
 include ':sphinx:activity:main:activitymain'
 
 // Screens
@@ -29,6 +30,7 @@ include ':sphinx:screens:splash:key-restore'
 
 // Screens-Detail
 include ':sphinx:screens-detail:add-friend:add-friend'
+include ':sphinx:screens-detail:common:detail-resources'
 include ':sphinx:screens-detail:create-tribe:create-tribe'
 include ':sphinx:screens-detail:payments:payment-receive:payment-receive'
 include ':sphinx:screens-detail:payments:payment-send:payment-send'

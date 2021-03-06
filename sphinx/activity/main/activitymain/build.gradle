@@ -36,6 +36,8 @@ dependencies {
     // Sphinx
     api project(path: ':sphinx:application:common:resources')
 
+    api project(path: ':sphinx:activity:hilt-qualifiers')
+
     api project(path: ':sphinx:screens:add-sats:add-sats')
     api project(path: ':sphinx:screens:address-book:address-book')
     api project(path: ':sphinx:screens:authentication:authentication')
