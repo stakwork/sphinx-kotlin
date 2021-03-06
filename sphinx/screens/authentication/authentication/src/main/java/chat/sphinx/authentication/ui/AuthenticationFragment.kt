@@ -120,7 +120,11 @@ internal class AuthenticationFragment: SideEffectFragment<
             binding.textViewHeader.text = resources.getString(headerTextId)
         }
 
-        if (viewState.confirmButtonShow) {
+        // Check current view state, not viewState that is being collected here
+        if (
+            viewModel.currentViewState.confirmButtonShow &&
+            !viewModel.currentViewState.inputLockState.show
+        ) {
             viewModelContainer.confirmPress(produceHapticFeedback = false)
         }
     }
