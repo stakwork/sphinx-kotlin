@@ -1,4 +1,4 @@
-package chat.sphinx.activitymain.navigation
+package chat.sphinx.activitymain.navigation.drivers
 
 import androidx.navigation.NavController
 import dagger.hilt.android.scopes.ActivityRetainedScoped
@@ -7,9 +7,9 @@ import io.matthewnelson.feature_navigation.NavigationDriver
 import javax.inject.Inject
 
 @ActivityRetainedScoped
-class MainNavigationDriver @Inject constructor(
+class DetailNavigationDriver @Inject constructor(
 
-): NavigationDriver<NavController>(replayCacheSize = 5)
+): NavigationDriver<NavController>(replayCacheSize = 2)
 {
     override suspend fun whenTrueExecuteRequest(request: NavigationRequest<NavController>): Boolean {
         return true
