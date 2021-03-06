@@ -10,8 +10,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 internal class DashboardViewModel @Inject constructor(
-    val bottomNavBarNavigator: DashboardBottomNavBarNavigator,
     val dashboardNavigator: DashboardNavigator,
+    val navBarNavigator: DashboardBottomNavBarNavigator,
     val navDrawerNavigator: DashboardNavDrawerNavigator,
 ): BaseViewModel<DashboardChatViewState>(DashboardChatViewState.Idle)
 {

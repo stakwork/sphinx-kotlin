@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="240dp"
+    android:layout_height="match_parent"
+    android:background="@android:color/black">
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/nav_drawer_button_add_sats"
+        style="@style/BaseButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:background="@color/deepNight"
+        android:text="ADD SATS"
+        android:textColor="@android:color/white"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/nav_drawer_button_address_book"
+        style="@style/BaseButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:background="@color/deepNight"
+        android:text="ADDRESS BOOK"
+        android:textColor="@android:color/white"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/nav_drawer_button_add_sats" />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/nav_drawer_button_profile"
+        style="@style/BaseButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:background="@color/deepNight"
+        android:text="PROFILE"
+        android:textColor="@android:color/white"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/nav_drawer_button_address_book" />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/nav_drawer_button_add_friend"
+        style="@style/BaseButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:background="@color/deepNight"
+        android:text="ADD FRIEND"
+        android:textColor="@android:color/white"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/nav_drawer_button_profile" />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/nav_drawer_button_create_tribe"
+        style="@style/BaseButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:background="@color/deepNight"
+        android:text="CREATE TRIBE"
+        android:textColor="@android:color/white"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/nav_drawer_button_add_friend" />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/nav_drawer_button_support_ticket"
+        style="@style/BaseButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:background="@color/deepNight"
+        android:text="SUPPORT"
+        android:textColor="@android:color/white"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/nav_drawer_button_create_tribe" />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/nav_drawer_button_logout"
+        style="@style/BaseButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:background="@color/deepNight"
+        android:text="LOGOUT"
+        android:textColor="@android:color/white"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/nav_drawer_button_support_ticket" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

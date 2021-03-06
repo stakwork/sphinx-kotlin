@@ -7,10 +7,45 @@
     android:background="@color/deepNight"
     tools:context=".ui.DashboardFragment">
 
-    <TextView
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/dashboard_button_chat_contact"
+        style="@style/BaseButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@color/secondaryColor"
+        android:text="CONTACT"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/dashboard_button_chat_group"
+        style="@style/BaseButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@color/secondaryColor"
+        android:text="GROUP"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/dashboard_button_chat_contact" />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/dashboard_button_chat_tribe"
+        style="@style/BaseButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@color/secondaryColor"
+        android:text="TRIBE"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/dashboard_button_chat_group" />
+
+    <include
+        android:id="@+id/layout_nav_drawer"
+        layout="@layout/layout_nav_drawer" />
+
+    <include
+        android:id="@+id/layout_nav_bar"
+        layout="@layout/layout_nav_bar"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center"
-        android:text="DASHBOARD" />
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

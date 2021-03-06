@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingBottom="48dp"
+    android:background="@color/deepNight">
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/nav_bar_button_payment_receive"
+        style="@style/BaseButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@color/deepNight"
+        android:text="RECEIVE"
+        android:textColor="@android:color/white"
+        app:layout_constraintEnd_toStartOf="@+id/nav_bar_button_transactions"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/nav_bar_button_transactions"
+        style="@style/BaseButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@color/deepNight"
+        android:text="TX"
+        android:textColor="@android:color/white"
+        app:layout_constraintEnd_toStartOf="@+id/nav_bar_button_scanner"
+        app:layout_constraintStart_toEndOf="@+id/nav_bar_button_payment_receive"
+        app:layout_constraintBottom_toBottomOf="@+id/nav_bar_button_payment_receive" />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/nav_bar_button_scanner"
+        style="@style/BaseButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@color/deepNight"
+        android:text="SCAN"
+        android:textColor="@android:color/white"
+        app:layout_constraintStart_toEndOf="@+id/nav_bar_button_transactions"
+        app:layout_constraintEnd_toStartOf="@+id/nav_bar_button_payment_send"
+        app:layout_constraintBottom_toBottomOf="@+id/nav_bar_button_payment_receive" />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/nav_bar_button_payment_send"
+        style="@style/BaseButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@color/deepNight"
+        android:text="SEND"
+        android:textColor="@android:color/white"
+        app:layout_constraintStart_toEndOf="@+id/nav_bar_button_scanner"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="@+id/nav_bar_button_payment_receive" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
