@@ -1,5 +1,7 @@
 package chat.sphinx.activitymain.navigation
 
+import chat.sphinx.activitymain.navigation.drivers.DetailNavigationDriver
+import chat.sphinx.activitymain.navigation.drivers.PrimaryNavigationDriver
 import chat.sphinx.add_friend.navigation.ToAddFriendDetail
 import chat.sphinx.add_sats.navigation.ToAddSatsScreen
 import chat.sphinx.address_book.navigation.ToAddressBookScreen
@@ -10,9 +12,9 @@ import chat.sphinx.support_ticket.navigation.ToSupportTicketDetail
 import javax.inject.Inject
 
 class DashboardNavDrawerNavigatorImpl @Inject constructor(
-    // TODO: add detail navigation driver when it gets implemented
-    navigationDriver: MainNavigationDriver
-): DashboardNavDrawerNavigator(navigationDriver)
+    private val detailDriver: DetailNavigationDriver,
+    primaryDriver: PrimaryNavigationDriver
+): DashboardNavDrawerNavigator(primaryDriver)
 {
     override suspend fun toAddSatsScreen() {
         // TODO: Should this be loaded as a detail screen as to not disrupt the dashboard?
@@ -28,18 +30,15 @@ class DashboardNavDrawerNavigatorImpl @Inject constructor(
     }
 
     override suspend fun toAddFriendDetail() {
-        // TODO: Use MainDetailNavigationDriver when it gets implemented
-        navigationDriver.submitNavigationRequest(ToAddFriendDetail())
+        detailDriver.submitNavigationRequest(ToAddFriendDetail())
     }
 
     override suspend fun toCreateTribeDetail() {
-        // TODO: Use MainDetailNavigationDriver when it gets implemented
-        navigationDriver.submitNavigationRequest(ToCreateTribeDetail())
+        detailDriver.submitNavigationRequest(ToCreateTribeDetail())
     }
 
     override suspend fun toSupportTicketDetail() {
-        // TODO: Use MainDetailNavigationDriver when it gets implemented
-        navigationDriver.submitNavigationRequest(ToSupportTicketDetail())
+        detailDriver.submitNavigationRequest(ToSupportTicketDetail())
     }
 
     override suspend fun logout() {

@@ -1,5 +1,6 @@
 package chat.sphinx.activitymain.navigation
 
+import chat.sphinx.activitymain.navigation.drivers.DetailNavigationDriver
 import chat.sphinx.dashboard.navigation.DashboardBottomNavBarNavigator
 import chat.sphinx.payment_receive.navigation.ToPaymentReceiveDetail
 import chat.sphinx.payment_send.navigation.ToPaymentSendDetail
@@ -9,7 +10,7 @@ import javax.inject.Inject
 
 class DashboardBottomNavBarNavigatorImpl @Inject constructor(
     // TODO: update to detail navigation driver when it gets implemented
-    navigationDriver: MainNavigationDriver
+    navigationDriver: DetailNavigationDriver
 ): DashboardBottomNavBarNavigator(navigationDriver)
 {
     override suspend fun toScannerDetail() {
