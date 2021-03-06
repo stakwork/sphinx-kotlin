@@ -1,12 +1,12 @@
-package chat.sphinx.address_book.ui
+package chat.sphinx.profile.ui
 
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.BaseViewModel
 import javax.inject.Inject
 
 @HiltViewModel
-internal class AddressBookViewModel @Inject constructor(
+internal class ProfileViewModel @Inject constructor(
 
-): BaseViewModel<AddressBookViewState>(AddressBookViewState.Idle)
+): BaseViewModel<ProfileViewState>(ProfileViewState.Idle)
 {
 }

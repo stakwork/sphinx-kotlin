@@ -5,12 +5,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/deepNight"
-    tools:context=".ui.AddressBookFragment">
+    tools:context=".ui.ProfileFragment">
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center"
-        android:text="ADDRESS BOOK" />
+        android:text="PROFILE" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
