@@ -14,12 +14,27 @@ include ':sphinx:application:data:features:feature-relay'
 include ':sphinx:activity:main:activitymain'
 
 // Screens
+include ':sphinx:screens:add-sats:add-sats'
 include ':sphinx:screens:authentication:authentication'
 include ':sphinx:screens:authentication:authentication-resources'
+include ':sphinx:screens:chats:chat-contact:chat-contact'
+include ':sphinx:screens:chats:chat-group:chat-group'
+include ':sphinx:screens:chats:chat-tribe:chat-tribe'
+include ':sphinx:screens:contacts:contacts'
 include ':sphinx:screens:dashboard:dashboard'
 include ':sphinx:screens:onboard:onboard'
+include ':sphinx:screens:profile:profile'
 include ':sphinx:screens:splash:splash'
 include ':sphinx:screens:splash:key-restore'
+
+// Screens-Detail
+include ':sphinx:screens-detail:add-friend:add-friend'
+include ':sphinx:screens-detail:create-tribe:create-tribe'
+include ':sphinx:screens-detail:payment-receive:payment-receive'
+include ':sphinx:screens-detail:payment-send:payment-send'
+include ':sphinx:screens-detail:scanner:scanner'
+include ':sphinx:screens-detail:support-ticket:support-ticket'
+include ':sphinx:screens-detail:transactions:transactions'
 
 ////////////////////////////////////////
 //////////// Kotlin Android ////////////
