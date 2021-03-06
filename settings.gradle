@@ -15,12 +15,12 @@ include ':sphinx:activity:main:activitymain'
 
 // Screens
 include ':sphinx:screens:add-sats:add-sats'
+include ':sphinx:screens:address-book:address-book'
 include ':sphinx:screens:authentication:authentication'
 include ':sphinx:screens:authentication:authentication-resources'
 include ':sphinx:screens:chats:chat-contact:chat-contact'
 include ':sphinx:screens:chats:chat-group:chat-group'
 include ':sphinx:screens:chats:chat-tribe:chat-tribe'
-include ':sphinx:screens:contacts:contacts'
 include ':sphinx:screens:dashboard:dashboard'
 include ':sphinx:screens:onboard:onboard'
 include ':sphinx:screens:profile:profile'

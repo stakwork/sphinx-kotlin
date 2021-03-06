@@ -37,11 +37,11 @@ dependencies {
     api project(path: ':sphinx:application:common:resources')
 
     api project(path: ':sphinx:screens:add-sats:add-sats')
+    api project(path: ':sphinx:screens:address-book:address-book')
     api project(path: ':sphinx:screens:authentication:authentication')
     api project(path: ':sphinx:screens:chats:chat-contact:chat-contact')
     api project(path: ':sphinx:screens:chats:chat-group:chat-group')
     api project(path: ':sphinx:screens:chats:chat-tribe:chat-tribe')
-    api project(path: ':sphinx:screens:contacts:contacts')
     api project(path: ':sphinx:screens:dashboard:dashboard')
     api project(path: ':sphinx:screens:onboard:onboard')
     api project(path: ':sphinx:screens:profile:profile')

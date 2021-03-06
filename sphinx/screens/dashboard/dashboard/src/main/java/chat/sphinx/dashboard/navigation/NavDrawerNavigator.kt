@@ -8,7 +8,7 @@ abstract class NavDrawerNavigator(
     navigationDriver: BaseNavigationDriver<NavController>
 ): Navigator<NavController>(navigationDriver) {
     abstract suspend fun toAddSatsScreen()
-    abstract suspend fun toContactsScreen()
+    abstract suspend fun toAddressBookScreen()
     abstract suspend fun toProfileScreen()
     abstract suspend fun toAddFriendDetail()
     abstract suspend fun toCreateTribeDetail()
