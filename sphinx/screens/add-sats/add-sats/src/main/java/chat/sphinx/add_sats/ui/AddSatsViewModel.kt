@@ -5,7 +5,7 @@ import io.matthewnelson.android_feature_viewmodel.BaseViewModel
 import javax.inject.Inject
 
 @HiltViewModel
-class AddSatsViewModel @Inject constructor(
+internal class AddSatsViewModel @Inject constructor(
 
 ): BaseViewModel<AddSatsViewState>(AddSatsViewState.Idle)
 {
