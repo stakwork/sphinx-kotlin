@@ -1,12 +1,13 @@
 package chat.sphinx.activitymain
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.activitymain.navigation.drivers.AuthenticationNavigationDriver
 import chat.sphinx.activitymain.navigation.drivers.DetailNavigationDriver
 import chat.sphinx.activitymain.navigation.drivers.PrimaryNavigationDriver
+import chat.sphinx.activitymain.ui.MainViewState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_activity.NavigationViewModel
+import io.matthewnelson.android_feature_viewmodel.BaseViewModel
 import io.matthewnelson.concept_authentication.coordinator.AuthenticationCoordinator
 import io.matthewnelson.concept_authentication.coordinator.AuthenticationRequest
 import io.matthewnelson.concept_authentication.state.AuthenticationState
@@ -17,14 +18,14 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class MainViewModel @Inject constructor(
+internal class MainViewModel @Inject constructor(
     private val authenticationCoordinator: AuthenticationCoordinator,
     private val authenticationStateManager: AuthenticationStateManager,
     val authenticationDriver: AuthenticationNavigationDriver,
     val detailDriver: DetailNavigationDriver,
     private val dispatchers: CoroutineDispatchers,
     override val navigationDriver: PrimaryNavigationDriver
-): ViewModel(), NavigationViewModel<PrimaryNavigationDriver>
+): BaseViewModel<MainViewState>(MainViewState.DetailScreenInactive), NavigationViewModel<PrimaryNavigationDriver>
 {
     init {
         viewModelScope.launch(dispatchers.mainImmediate) {
