@@ -33,6 +33,13 @@
         app:defaultNavHost="true"
         app:navGraph="@navigation/main_primary_nav_graph" />
 
+    <Space
+        android:id="@+id/space_detail_host"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintHeight_percent="@dimen/space_detail_host_height"
+        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_status_bar" />
+
     <View
         android:id="@+id/view_main_input_lock"
         android:layout_width="0dp"
@@ -48,12 +55,11 @@
         android:name="androidx.navigation.fragment.NavHostFragment"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginTop="20dp"
         app:defaultNavHost="true"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_status_bar"
+        app:layout_constraintTop_toBottomOf="@+id/space_detail_host"
         app:navGraph="@navigation/main_detail_nav_graph" />
 
     <androidx.fragment.app.FragmentContainerView

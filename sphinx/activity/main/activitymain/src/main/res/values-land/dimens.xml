@@ -2,4 +2,5 @@
 <resources>
     <item name="primary_host_scale_x" format="float" type="dimen">.975</item>
     <item name="primary_host_scale_y" format="float" type="dimen">.95</item>
+    <item name="space_detail_host_height" format="float" type="dimen">.05</item>
 </resources>
