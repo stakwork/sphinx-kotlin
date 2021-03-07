@@ -60,6 +60,8 @@ internal class MainActivity: MotionLayoutNavigationActivity<
             }
         }
 
+        binding.viewMainInputLock.setOnClickListener { viewModel }
+
         // Authentication Screen
         lifecycleScope.launchWhenStarted {
             viewModel

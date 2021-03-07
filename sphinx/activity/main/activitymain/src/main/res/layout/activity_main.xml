@@ -33,6 +33,16 @@
         app:defaultNavHost="true"
         app:navGraph="@navigation/main_primary_nav_graph" />
 
+    <View
+        android:id="@+id/view_main_input_lock"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@color/deepNight"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_status_bar" />
+
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/nav_host_fragment_detail"
         android:name="androidx.navigation.fragment.NavHostFragment"
