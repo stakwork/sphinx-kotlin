@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="primary_host_scale_x" format="float" type="dimen">.95</item>
+    <item name="primary_host_scale_y" format="float" type="dimen">.975</item>
+</resources>
