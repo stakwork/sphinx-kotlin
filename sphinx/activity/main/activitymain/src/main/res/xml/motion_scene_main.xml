@@ -61,10 +61,10 @@
             <Layout
                 android:layout_width="0dp"
                 android:layout_height="0dp"
-                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHeight_percent=".95"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/space_detail_host" />
+                app:layout_constraintTop_toBottomOf="parent" />
         </Constraint>
 
         <Constraint android:id="@+id/nav_host_fragment_authentication">
@@ -108,7 +108,19 @@
         </Constraint>
 
         <Constraint android:id="@+id/view_main_input_lock">
-            <PropertySet android:visibility="visible" android:alpha=".6"/>
+            <PropertySet
+                android:alpha=".6"
+                android:visibility="visible" />
+        </Constraint>
+
+        <Constraint android:id="@+id/nav_host_fragment_detail">
+            <Layout
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/space_detail_host" />
         </Constraint>
 
     </ConstraintSet>
