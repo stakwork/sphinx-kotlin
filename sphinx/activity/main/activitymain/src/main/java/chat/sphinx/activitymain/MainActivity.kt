@@ -86,7 +86,6 @@ internal class MainActivity: MotionLayoutNavigationActivity<
                         if (detailNavController.previousBackStackEntry == null) {
                             viewModel.updateViewState(MainViewState.Transition_DetailScreenInactive)
                         } else if (viewModel.viewStateContainer.value is MainViewState.DetailScreenInactive) {
-                            delay(75L)
                             viewModel.updateViewState(MainViewState.Transition_DetailScreenActive)
                         }
                     }
