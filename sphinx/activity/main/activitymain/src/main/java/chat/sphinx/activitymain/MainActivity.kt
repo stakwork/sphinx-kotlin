@@ -2,6 +2,7 @@ package chat.sphinx.activitymain
 
 import android.os.Bundle
 import androidx.activity.viewModels
+import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
@@ -9,16 +10,22 @@ import androidx.navigation.findNavController
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.activitymain.databinding.ActivityMainBinding
 import chat.sphinx.activitymain.navigation.drivers.PrimaryNavigationDriver
+import chat.sphinx.activitymain.ui.MainViewState
+import chat.sphinx.activitymain.ui.MotionLayoutNavigationActivity
 import chat.sphinx.resources.R as R_common
 import dagger.hilt.android.AndroidEntryPoint
-import io.matthewnelson.android_feature_activity.NavigationActivity
+import dev.chrisbanes.insetter.applyInsetter
 import io.matthewnelson.android_feature_navigation.requests.PopBackStack
+import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_navigation.NavigationRequest
+import io.matthewnelson.concept_views.viewstate.value
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class MainActivity: NavigationActivity<
+internal class MainActivity: MotionLayoutNavigationActivity<
+        MainViewState,
         MainViewModel,
         PrimaryNavigationDriver,
         MainViewModel,
@@ -45,7 +52,15 @@ class MainActivity: NavigationActivity<
         setTheme(R_common.style.AppPostLaunchTheme)
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
+        setTransitionListener(binding.layoutMotionMain)
 
+        binding.layoutConstraintStatusBar.applyInsetter {
+            type(statusBars = true) {
+                padding()
+            }
+        }
+
+        // Authentication Screen
         lifecycleScope.launchWhenStarted {
             viewModel
                 .authenticationDriver
@@ -57,14 +72,24 @@ class MainActivity: NavigationActivity<
                 }
         }
 
+        // Detail Screens
         lifecycleScope.launchWhenStarted {
             viewModel
                 .detailDriver
                 .navigationRequestSharedFlow
                 .collect { request ->
-                    viewModel
-                        .detailDriver
-                        .executeNavigationRequest(detailNavController, request)
+                    if (
+                        viewModel
+                            .detailDriver
+                            .executeNavigationRequest(detailNavController, request)
+                    ) {
+                        if (detailNavController.previousBackStackEntry == null) {
+                            viewModel.updateViewState(MainViewState.Transition_DetailScreenInactive)
+                        } else if (viewModel.viewStateContainer.value is MainViewState.DetailScreenInactive) {
+                            delay(75L)
+                            viewModel.updateViewState(MainViewState.Transition_DetailScreenActive)
+                        }
+                    }
                 }
         }
     }
@@ -108,5 +133,33 @@ class MainActivity: NavigationActivity<
                 }
             }
         }
+    }
+
+    override suspend fun onViewStateFlowCollect(viewState: MainViewState) {
+        viewState.transitionToEndSet(binding.layoutMotionMain)
+    }
+
+    override fun onTransitionCompleted(motionLayout: MotionLayout?, currentId: Int) {
+        when (currentId) {
+            MainViewState.Transition_DetailScreenActive.endSetId -> {
+                MainViewState.DetailScreenActive
+            }
+            MainViewState.Transition_DetailScreenInactive.endSetId -> {
+                MainViewState.DetailScreenInactive
+            }
+            else -> {
+                null
+            }
+        }?.let { viewState ->
+            viewModel.updateViewState(viewState)
+        }
+    }
+
+    override fun onCreatedRestoreMotionScene(viewState: MainViewState, binding: ActivityMainBinding) {
+        viewState.restoreMotionScene(binding.layoutMotionMain)
+    }
+
+    override fun getMotionLayouts(): Array<MotionLayout> {
+        return arrayOf(binding.layoutMotionMain)
     }
 }

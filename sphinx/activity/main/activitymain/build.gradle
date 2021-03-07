@@ -59,7 +59,6 @@ dependencies {
 //    api project(path: )
 
     implementation deps.chrisbanes.insetter
-    implementation deps.chrisbanes.insetterWidgets
 
     implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt
