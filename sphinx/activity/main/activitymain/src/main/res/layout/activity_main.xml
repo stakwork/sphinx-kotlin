@@ -16,7 +16,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.appcompat.widget.AppCompatImageView
-        android:id="@+id/image_view_main"
+        android:id="@+id/image_view_primary_host_backer"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:background="@color/primaryColor"

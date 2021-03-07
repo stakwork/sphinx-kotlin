@@ -22,7 +22,7 @@
                 app:layout_constraintTop_toTopOf="parent" />
         </Constraint>
 
-        <Constraint android:id="@+id/image_view_main">
+        <Constraint android:id="@+id/image_view_primary_host_backer">
             <Layout
                 android:layout_width="0dp"
                 android:layout_height="0dp"
@@ -76,7 +76,7 @@
         android:id="@+id/motion_scene_main_set2"
         app:deriveConstraintsFrom="@+id/motion_scene_main_set1">
 
-        <Constraint android:id="@+id/image_view_main">
+        <Constraint android:id="@+id/image_view_primary_host_backer">
             <Layout
                 android:layout_width="0dp"
                 android:layout_height="0dp"
