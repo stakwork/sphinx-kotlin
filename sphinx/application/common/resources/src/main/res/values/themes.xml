@@ -14,7 +14,7 @@
     </style>
 
     <style name="AppPostLaunchTheme" parent="AppTheme.Fullscreen">
-        <item name="android:colorBackground">@android:color/holo_red_dark</item>
+        <item name="android:colorBackground">@android:color/black</item>
     </style>
 
 
