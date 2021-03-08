@@ -5,6 +5,7 @@ import chat.sphinx.activitymain.navigation.*
 import chat.sphinx.activitymain.navigation.drivers.AuthenticationNavigationDriver
 import chat.sphinx.activitymain.navigation.drivers.DetailNavigationDriver
 import chat.sphinx.activitymain.navigation.drivers.PrimaryNavigationDriver
+import chat.sphinx.add_friend.navigation.AddFriendNavigator
 import chat.sphinx.dashboard.navigation.DashboardBottomNavBarNavigator
 import chat.sphinx.dashboard.navigation.DashboardNavDrawerNavigator
 import chat.sphinx.dashboard.navigation.DashboardNavigator
@@ -79,4 +80,10 @@ object NavigationModule {
         splashNavigatorImpl: SplashNavigatorImpl
     ): SplashNavigator =
         splashNavigatorImpl
+
+    @Provides
+    fun provideAddFriendNavigator(
+        addFriendNavigatorImpl: AddFriendNavigatorImpl
+    ): AddFriendNavigator =
+        addFriendNavigatorImpl
 }
