@@ -14,7 +14,9 @@ class AddFriendNavigatorImpl @Inject constructor(
         // TODO: Replace with actual
         navigationDriver.submitNavigationRequest(
             ToSupportTicketDetail(
-                DefaultNavOptions.defaultAnimsBuilt
+                DefaultNavOptions.defaultAnims
+                    .setLaunchSingleTop(true)
+                    .build()
             )
         )
     }
@@ -23,7 +25,9 @@ class AddFriendNavigatorImpl @Inject constructor(
         // TODO: Replace with actual
         navigationDriver.submitNavigationRequest(
             ToTransactionsDetail(
-                DefaultNavOptions.defaultAnimsBuilt
+                DefaultNavOptions.defaultAnims
+                    .setLaunchSingleTop(true)
+                    .build()
             )
         )
     }
