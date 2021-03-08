@@ -28,7 +28,7 @@ android {
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
     // KotlinAndroid
-    api project(path: ':android:features:android-feature-screens')
+    implementation project(path: ':android:features:android-feature-screens')
 
     // Sphinx
     api project(path: ':sphinx:application:common:resources')

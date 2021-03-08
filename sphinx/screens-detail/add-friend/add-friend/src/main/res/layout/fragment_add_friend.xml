@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/deepNight"
+    android:background="@drawable/background_detail_screen"
     tools:context=".ui.AddFriendFragment">
 
     <TextView
