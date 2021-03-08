@@ -154,8 +154,8 @@
         android:id="@+id/transition_main_set1_to_set2"
         app:constraintSetEnd="@+id/motion_scene_main_set2"
         app:constraintSetStart="@+id/motion_scene_main_set1"
-        app:duration="250"
-        app:motionInterpolator="easeInOut">
+        app:duration="400"
+        app:motionInterpolator="cubic(0.41,0.39,0,1)">
 
         <OnSwipe
             app:dragDirection="dragUp"
