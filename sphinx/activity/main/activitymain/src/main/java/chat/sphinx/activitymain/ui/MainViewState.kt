@@ -7,6 +7,9 @@ import io.matthewnelson.android_concept_views.MotionLayoutViewState
 @Suppress("ClassName")
 internal sealed class MainViewState: MotionLayoutViewState<MainViewState>() {
 
+    open val swipeTargetEnabled: Boolean
+        get() = false
+
     object Idle: MainViewState() {
         override val startSetId: Int
             get() = R.id.motion_scene_main_set1
@@ -22,6 +25,9 @@ internal sealed class MainViewState: MotionLayoutViewState<MainViewState>() {
             get() = R.id.motion_scene_main_set1
         override val endSetId: Int
             get() = R.id.motion_scene_main_set2
+
+        override val swipeTargetEnabled: Boolean
+            get() = true
 
         override fun restoreMotionScene(motionLayout: MotionLayout) {
             motionLayout.setTransition(R.id.transition_main_set1_to_set2)

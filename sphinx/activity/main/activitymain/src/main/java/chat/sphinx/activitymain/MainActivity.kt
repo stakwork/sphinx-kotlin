@@ -18,8 +18,6 @@ import dev.chrisbanes.insetter.applyInsetter
 import io.matthewnelson.android_feature_navigation.requests.PopBackStack
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_navigation.NavigationRequest
-import io.matthewnelson.concept_views.viewstate.value
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
@@ -52,6 +50,7 @@ internal class MainActivity: MotionLayoutNavigationActivity<
         setTheme(R_common.style.AppPostLaunchTheme)
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
+        setTransitionListener(binding.layoutMotionMain)
 
         binding.layoutConstraintStatusBar.applyInsetter {
             type(statusBars = true) {
@@ -104,6 +103,20 @@ internal class MainActivity: MotionLayoutNavigationActivity<
 
     override fun getMotionLayouts(): Array<MotionLayout> {
         return arrayOf(binding.layoutMotionMain)
+    }
+
+    // To Handle swipe behaviour
+    override fun onTransitionCompleted(motionLayout: MotionLayout?, currentId: Int) {
+            if (
+                currentId == MainViewState.DetailScreenInactive.endSetId &&
+                detailNavController.previousBackStackEntry != null
+            ) {
+                lifecycleScope.launch {
+                    viewModel.detailDriver.submitNavigationRequest(
+                        PopBackStack(R.id.navigation_detail_blank_fragment)
+                    )
+                }
+            }
     }
 
     override suspend fun onPostNavigationRequestExecution(request: NavigationRequest<NavController>) {
