@@ -1,4 +1,4 @@
-package chat.sphinx.activitymain.navigation
+package chat.sphinx.activitymain.navigation.navigators.primary
 
 import chat.sphinx.activitymain.navigation.drivers.DetailNavigationDriver
 import chat.sphinx.dashboard.navigation.DashboardBottomNavBarNavigator

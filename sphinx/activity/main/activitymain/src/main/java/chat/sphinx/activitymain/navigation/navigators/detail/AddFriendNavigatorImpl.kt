@@ -1,4 +1,4 @@
-package chat.sphinx.activitymain.navigation
+package chat.sphinx.activitymain.navigation.navigators.detail
 
 import chat.sphinx.activitymain.navigation.drivers.DetailNavigationDriver
 import chat.sphinx.add_friend.navigation.AddFriendNavigator
