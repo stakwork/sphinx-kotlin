@@ -105,8 +105,14 @@ internal class MainActivity: MotionLayoutNavigationActivity<
         return arrayOf(binding.layoutMotionMain)
     }
 
+    private var transitionInProgress = false
+    override fun onTransitionStarted(motionLayout: MotionLayout?, startId: Int, endId: Int) {
+        transitionInProgress = true
+    }
+
     // To Handle swipe behaviour
     override fun onTransitionCompleted(motionLayout: MotionLayout?, currentId: Int) {
+        transitionInProgress = false
             if (
                 currentId == MainViewState.DetailScreenInactive.endSetId &&
                 detailNavController.previousBackStackEntry != null
@@ -136,8 +142,10 @@ internal class MainActivity: MotionLayoutNavigationActivity<
             detailNavController.previousBackStackEntry != null -> {
                 // Downside to this is that DetailScreens cannot add
                 // back press callbacks, but that's why they're detail screens
-                lifecycleScope.launch {
-                    viewModel.detailDriver.submitNavigationRequest(PopBackStack())
+                if (!transitionInProgress) {
+                    lifecycleScope.launch {
+                        viewModel.detailDriver.submitNavigationRequest(PopBackStack())
+                    }
                 }
             }
 
