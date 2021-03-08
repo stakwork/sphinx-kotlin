@@ -7,28 +7,21 @@ import io.matthewnelson.android_concept_views.MotionLayoutViewState
 @Suppress("ClassName")
 internal sealed class MainViewState: MotionLayoutViewState<MainViewState>() {
 
-    object DetailScreenInactive: MainViewState() {
-        override val startSetId: Int
-            get() = R.id.motion_scene_main_set1
-        override val endSetId: Int?
-            get() = null
-
-        override fun transitionToEndSet(motionLayout: MotionLayout) {}
-        override fun restoreMotionScene(motionLayout: MotionLayout) {}
-    }
-
-    object Transition_DetailScreenActive: MainViewState() {
+    object Idle: MainViewState() {
         override val startSetId: Int
             get() = R.id.motion_scene_main_set1
         override val endSetId: Int
             get() = R.id.motion_scene_main_set2
+
+        override fun restoreMotionScene(motionLayout: MotionLayout) {}
+        override fun transitionToEndSet(motionLayout: MotionLayout) {}
     }
 
     object DetailScreenActive: MainViewState() {
         override val startSetId: Int
+            get() = R.id.motion_scene_main_set1
+        override val endSetId: Int
             get() = R.id.motion_scene_main_set2
-        override val endSetId: Int?
-            get() = null
 
         override fun restoreMotionScene(motionLayout: MotionLayout) {
             motionLayout.setTransition(R.id.transition_main_set1_to_set2)
@@ -36,10 +29,12 @@ internal sealed class MainViewState: MotionLayoutViewState<MainViewState>() {
         }
     }
 
-    object Transition_DetailScreenInactive: MainViewState() {
+    object DetailScreenInactive: MainViewState() {
         override val startSetId: Int
             get() = R.id.motion_scene_main_set2
         override val endSetId: Int
             get() = R.id.motion_scene_main_set1
+
+        override fun restoreMotionScene(motionLayout: MotionLayout) {}
     }
 }

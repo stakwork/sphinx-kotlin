@@ -25,7 +25,7 @@ internal class MainViewModel @Inject constructor(
     val detailDriver: DetailNavigationDriver,
     private val dispatchers: CoroutineDispatchers,
     override val navigationDriver: PrimaryNavigationDriver
-): BaseViewModel<MainViewState>(MainViewState.DetailScreenInactive), NavigationViewModel<PrimaryNavigationDriver>
+): BaseViewModel<MainViewState>(MainViewState.Idle), NavigationViewModel<PrimaryNavigationDriver>
 {
     init {
         viewModelScope.launch(dispatchers.mainImmediate) {

@@ -52,7 +52,6 @@ internal class MainActivity: MotionLayoutNavigationActivity<
         setTheme(R_common.style.AppPostLaunchTheme)
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
-        setTransitionListener(binding.layoutMotionMain)
 
         binding.layoutConstraintStatusBar.applyInsetter {
             type(statusBars = true) {
@@ -86,13 +85,25 @@ internal class MainActivity: MotionLayoutNavigationActivity<
                             .executeNavigationRequest(detailNavController, request)
                     ) {
                         if (detailNavController.previousBackStackEntry == null) {
-                            viewModel.updateViewState(MainViewState.Transition_DetailScreenInactive)
-                        } else if (viewModel.viewStateContainer.value is MainViewState.DetailScreenInactive) {
-                            viewModel.updateViewState(MainViewState.Transition_DetailScreenActive)
+                            viewModel.updateViewState(MainViewState.DetailScreenInactive)
+                        } else {
+                            viewModel.updateViewState(MainViewState.DetailScreenActive)
                         }
                     }
                 }
         }
+    }
+
+    override suspend fun onViewStateFlowCollect(viewState: MainViewState) {
+        viewState.transitionToEndSet(binding.layoutMotionMain)
+    }
+
+    override fun onCreatedRestoreMotionScene(viewState: MainViewState, binding: ActivityMainBinding) {
+        viewState.restoreMotionScene(binding.layoutMotionMain)
+    }
+
+    override fun getMotionLayouts(): Array<MotionLayout> {
+        return arrayOf(binding.layoutMotionMain)
     }
 
     override suspend fun onPostNavigationRequestExecution(request: NavigationRequest<NavController>) {
@@ -104,14 +115,14 @@ internal class MainActivity: MotionLayoutNavigationActivity<
 
             // AuthenticationNavController
             authenticationNavController.previousBackStackEntry != null -> {
-                // AuthenticationView has a callback to handle it automatically
+                // Authentication Screen has a callback to handle it automatically
                 super.onBackPressed()
             }
 
             // DetailNavController
             detailNavController.previousBackStackEntry != null -> {
                 // Downside to this is that DetailScreens cannot add
-                // a backpress callbacks, but that's why they're detail screens
+                // back press callbacks, but that's why they're detail screens
                 lifecycleScope.launch {
                     viewModel.detailDriver.submitNavigationRequest(PopBackStack())
                 }
@@ -134,33 +145,5 @@ internal class MainActivity: MotionLayoutNavigationActivity<
                 }
             }
         }
-    }
-
-    override suspend fun onViewStateFlowCollect(viewState: MainViewState) {
-        viewState.transitionToEndSet(binding.layoutMotionMain)
-    }
-
-    override fun onTransitionCompleted(motionLayout: MotionLayout?, currentId: Int) {
-        when (currentId) {
-            MainViewState.Transition_DetailScreenActive.endSetId -> {
-                MainViewState.DetailScreenActive
-            }
-            MainViewState.Transition_DetailScreenInactive.endSetId -> {
-                MainViewState.DetailScreenInactive
-            }
-            else -> {
-                null
-            }
-        }?.let { viewState ->
-            viewModel.updateViewState(viewState)
-        }
-    }
-
-    override fun onCreatedRestoreMotionScene(viewState: MainViewState, binding: ActivityMainBinding) {
-        viewState.restoreMotionScene(binding.layoutMotionMain)
-    }
-
-    override fun getMotionLayouts(): Array<MotionLayout> {
-        return arrayOf(binding.layoutMotionMain)
     }
 }
