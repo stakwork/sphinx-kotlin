@@ -18,6 +18,7 @@ import dev.chrisbanes.insetter.applyInsetter
 import io.matthewnelson.android_feature_navigation.requests.PopBackStack
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_navigation.NavigationRequest
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
@@ -94,7 +95,21 @@ internal class MainActivity: MotionLayoutNavigationActivity<
     }
 
     override suspend fun onViewStateFlowCollect(viewState: MainViewState) {
-        viewState.transitionToEndSet(binding.layoutMotionMain)
+        when (viewState) {
+            is MainViewState.DetailScreenActive -> {
+                binding.layoutMotionMain.let { motionLayout ->
+                    motionLayout.setTransitionDuration(400)
+                    viewState.transitionToEndSet(motionLayout)
+                }
+            }
+            is MainViewState.DetailScreenInactive -> {
+                binding.layoutMotionMain.let { motionLayout ->
+                    motionLayout.setTransitionDuration(250)
+                    viewState.transitionToEndSet(motionLayout)
+                }
+            }
+            is MainViewState.Idle -> {}
+        }
     }
 
     override fun onCreatedRestoreMotionScene(viewState: MainViewState, binding: ActivityMainBinding) {

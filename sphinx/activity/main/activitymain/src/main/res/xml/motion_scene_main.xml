@@ -165,6 +165,8 @@
         app:duration="400"
         app:motionInterpolator="cubic(0.41,0.39,0,1)">
 
+        <!-- Duration is set programmatically from MainActivity depending on view state -->
+
         <OnSwipe
             app:dragDirection="dragUp"
             app:touchAnchorId="@id/space_detail_swipe_target"
