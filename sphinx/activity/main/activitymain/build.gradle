@@ -34,7 +34,7 @@ dependencies {
     api project(path: ':android:features:android-feature-activity')
 
     // Sphinx
-    api project(path: ':sphinx:application:common:resources')
+    implementation project(path: ':sphinx:screens-detail:common:detail-resources')
 
     api project(path: ':sphinx:activity:hilt-qualifiers')
 
