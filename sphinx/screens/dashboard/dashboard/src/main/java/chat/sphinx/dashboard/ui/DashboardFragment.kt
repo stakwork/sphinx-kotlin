@@ -6,6 +6,9 @@ import android.view.View
 import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.NavController
+import androidx.navigation.NavDestination
+import androidx.navigation.fragment.findNavController
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.dashboard.R
 import chat.sphinx.dashboard.databinding.FragmentDashboardBinding
@@ -47,6 +50,10 @@ internal class DashboardFragment : MotionLayoutFragment<
                 viewLifecycleOwner,
                 requireActivity()
             )
+
+        findNavController().addOnDestinationChangedListener(
+            CloseDrawerOnDestinationChange()
+        )
 
         binding.layoutHeader.let { header ->
 
@@ -133,6 +140,18 @@ internal class DashboardFragment : MotionLayoutFragment<
                 super.handleOnBackPressed()
             }
         }
+    }
+
+    private inner class CloseDrawerOnDestinationChange: NavController.OnDestinationChangedListener {
+        override fun onDestinationChanged(
+            controller: NavController,
+            destination: NavDestination,
+            arguments: Bundle?
+        ) {
+            controller.removeOnDestinationChangedListener(this)
+            viewModel.updateViewState(NavDrawerViewState.Closed)
+        }
+
     }
 
     override suspend fun onViewStateFlowCollect(viewState: NavDrawerViewState) {
