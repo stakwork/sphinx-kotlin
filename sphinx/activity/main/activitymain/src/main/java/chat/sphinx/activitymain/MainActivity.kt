@@ -12,13 +12,14 @@ import chat.sphinx.activitymain.databinding.ActivityMainBinding
 import chat.sphinx.activitymain.navigation.drivers.PrimaryNavigationDriver
 import chat.sphinx.activitymain.ui.MainViewState
 import chat.sphinx.activitymain.ui.MotionLayoutNavigationActivity
+import chat.sphinx.insetter_activity.InsetPadding
+import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.resources.R as R_common
 import dagger.hilt.android.AndroidEntryPoint
 import dev.chrisbanes.insetter.applyInsetter
 import io.matthewnelson.android_feature_navigation.requests.PopBackStack
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_navigation.NavigationRequest
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
@@ -29,7 +30,7 @@ internal class MainActivity: MotionLayoutNavigationActivity<
         PrimaryNavigationDriver,
         MainViewModel,
         ActivityMainBinding,
-        >(R.layout.activity_main)
+        >(R.layout.activity_main), InsetterActivity
 {
     override val binding: ActivityMainBinding by viewBinding(ActivityMainBinding::bind)
 
@@ -47,14 +48,42 @@ internal class MainActivity: MotionLayoutNavigationActivity<
     override val navigationViewModel: MainViewModel
         get() = viewModel
 
+
+    override val statusBarInsetHeight: InsetPadding by lazy(LazyThreadSafetyMode.NONE) {
+        binding.layoutConstraintMainStatusBar.let {
+            InsetPadding(
+                it.paddingLeft,
+                it.paddingRight,
+                it.paddingTop,
+                it.paddingBottom
+            )
+        }
+    }
+
+    override val navigationBarInsetHeight: InsetPadding by lazy(LazyThreadSafetyMode.NONE) {
+        binding.layoutConstraintMainNavigationBar.let {
+            InsetPadding(
+                it.paddingLeft,
+                it.paddingRight,
+                it.paddingTop,
+                it.paddingBottom
+            )
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         setTheme(R_common.style.AppPostLaunchTheme)
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
         setTransitionListener(binding.layoutMotionMain)
 
-        binding.layoutConstraintStatusBar.applyInsetter {
+        binding.layoutConstraintMainStatusBar.applyInsetter {
             type(statusBars = true) {
+                padding()
+            }
+        }
+        binding.layoutConstraintMainNavigationBar.applyInsetter {
+            type(navigationBars = true) {
                 padding()
             }
         }

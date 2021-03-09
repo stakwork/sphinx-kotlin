@@ -35,6 +35,7 @@ dependencies {
 
     // Sphinx
     implementation project(path: ':sphinx:screens-detail:common:detail-resources')
+    implementation project(path: ':sphinx:activity:insetter-activity')
 
     api project(path: ':sphinx:activity:hilt-qualifiers')
 

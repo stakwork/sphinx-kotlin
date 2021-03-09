@@ -15,11 +15,18 @@
     -->
     <ConstraintSet android:id="@+id/motion_scene_main_set1">
 
-        <Constraint android:id="@+id/layout_constraint_status_bar">
+        <Constraint android:id="@+id/layout_constraint_main_status_bar">
             <Layout
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 app:layout_constraintTop_toTopOf="parent" />
+        </Constraint>
+
+        <Constraint android:id="@+id/layout_constraint_main_navigation_bar">
+            <Layout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                app:layout_constraintBottom_toBottomOf="parent" />
         </Constraint>
 
         <Constraint android:id="@+id/image_view_primary_host_backer">
@@ -43,7 +50,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 app:layout_constraintHeight_percent="@dimen/space_detail_host_height"
-                app:layout_constraintTop_toBottomOf="@+id/layout_constraint_status_bar" />
+                app:layout_constraintTop_toBottomOf="@+id/layout_constraint_main_status_bar" />
         </Constraint>
 
         <Constraint android:id="@+id/view_main_input_lock">
@@ -112,7 +119,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 app:layout_constraintHeight_percent=".99999"
-                app:layout_constraintTop_toBottomOf="@+id/layout_constraint_status_bar" />
+                app:layout_constraintTop_toBottomOf="@+id/layout_constraint_main_status_bar" />
             <Transform
                 android:scaleX="@dimen/primary_host_scale_x"
                 android:scaleY="@dimen/primary_host_scale_y" />
