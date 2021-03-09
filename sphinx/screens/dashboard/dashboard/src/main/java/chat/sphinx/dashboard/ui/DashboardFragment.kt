@@ -94,11 +94,12 @@ internal class DashboardFragment : MotionLayoutFragment<
         }
 
         binding.layoutNavDrawer.let { navDrawer ->
-
             (requireActivity() as InsetterActivity)
                 .addStatusBarPadding(navDrawer.layoutConstraintNavDrawer)
             (requireActivity() as InsetterActivity)
                 .addNavigationBarPadding(navDrawer.layoutConstraintNavDrawer)
+
+            navDrawer.layoutConstraintNavDrawer.setOnClickListener { viewModel }
 
             navDrawer.navDrawerButtonAddSats.setOnClickListener {
                 lifecycleScope.launch { viewModel.navDrawerNavigator.toAddSatsScreen() }
