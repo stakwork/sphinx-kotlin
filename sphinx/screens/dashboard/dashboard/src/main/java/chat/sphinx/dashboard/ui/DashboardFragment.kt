@@ -1,22 +1,34 @@
 package chat.sphinx.dashboard.ui
 
+import android.content.Context
 import android.os.Bundle
 import android.view.View
+import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.dashboard.R
 import chat.sphinx.dashboard.databinding.FragmentDashboardBinding
-import chat.sphinx.dashboard.ui.viewstates.DashboardChatViewState
+import chat.sphinx.dashboard.ui.viewstates.NavDrawerViewState
+import chat.sphinx.insetter_activity.InsetterActivity
+import chat.sphinx.insetter_activity.addNavigationBarPadding
+import chat.sphinx.insetter_activity.addStatusBarPadding
 import chat.sphinx.resources.SphinxToastUtils
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.navigation.CloseAppOnBackPress
-import io.matthewnelson.android_feature_screens.ui.base.BaseFragment
+import io.matthewnelson.android_feature_screens.ui.motionlayout.MotionLayoutFragment
+import io.matthewnelson.android_feature_viewmodel.currentViewState
+import io.matthewnelson.android_feature_viewmodel.updateViewState
+import io.matthewnelson.concept_views.sideeffect.SideEffect
 import kotlinx.coroutines.launch
+import javax.annotation.meta.Exhaustive
 
 @AndroidEntryPoint
-internal class DashboardFragment: BaseFragment<
-        DashboardChatViewState,
+internal class DashboardFragment : MotionLayoutFragment<
+        Any,
+        Nothing,
+        SideEffect<Nothing>,
+        NavDrawerViewState,
         DashboardViewModel,
         FragmentDashboardBinding
         >(R.layout.fragment_dashboard)
@@ -26,7 +38,7 @@ internal class DashboardFragment: BaseFragment<
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        CloseAppOnBackPress(view.context)
+        BackPressHandler(view.context)
             .enableDoubleTapToClose(
                 viewLifecycleOwner,
                 SphinxToastUtils()
@@ -35,16 +47,38 @@ internal class DashboardFragment: BaseFragment<
                 viewLifecycleOwner,
                 requireActivity()
             )
-        binding.dashboardButtonChatContact.setOnClickListener {
-            lifecycleScope.launch { viewModel.dashboardNavigator.toChatContact("") }
+
+        binding.layoutHeader.let { header ->
+
+            (requireActivity() as InsetterActivity)
+                .addStatusBarPadding(header.layoutConstraintHeader)
+
+            header.imageViewNavDrawerHamburger.setOnClickListener {
+                viewModel.updateViewState(NavDrawerViewState.Open)
+            }
         }
-        binding.dashboardButtonChatGroup.setOnClickListener {
-            lifecycleScope.launch { viewModel.dashboardNavigator.toChatGroup("") }
+
+        binding.navDrawerInputLock.setOnClickListener {
+            viewModel.updateViewState(NavDrawerViewState.Closed)
         }
-        binding.dashboardButtonChatTribe.setOnClickListener {
-            lifecycleScope.launch { viewModel.dashboardNavigator.toChatTribe("") }
+
+        binding.layoutChats.let { chats ->
+            chats.dashboardButtonChatContact.setOnClickListener {
+                lifecycleScope.launch { viewModel.dashboardNavigator.toChatContact("") }
+            }
+            chats.dashboardButtonChatGroup.setOnClickListener {
+                lifecycleScope.launch { viewModel.dashboardNavigator.toChatGroup("") }
+            }
+            chats.dashboardButtonChatTribe.setOnClickListener {
+                lifecycleScope.launch { viewModel.dashboardNavigator.toChatTribe("") }
+            }
         }
+
         binding.layoutNavBar.let { navBar ->
+
+            (requireActivity() as InsetterActivity)
+                .addNavigationBarPadding(navBar.layoutConstraintNavBar)
+
             navBar.navBarButtonPaymentReceive.setOnClickListener {
                 lifecycleScope.launch { viewModel.navBarNavigator.toPaymentReceiveDetail() }
             }
@@ -58,7 +92,14 @@ internal class DashboardFragment: BaseFragment<
                 lifecycleScope.launch { viewModel.navBarNavigator.toPaymentSendDetail() }
             }
         }
+
         binding.layoutNavDrawer.let { navDrawer ->
+
+            (requireActivity() as InsetterActivity)
+                .addStatusBarPadding(navDrawer.layoutConstraintNavDrawer)
+            (requireActivity() as InsetterActivity)
+                .addNavigationBarPadding(navDrawer.layoutConstraintNavDrawer)
+
             navDrawer.navDrawerButtonAddSats.setOnClickListener {
                 lifecycleScope.launch { viewModel.navDrawerNavigator.toAddSatsScreen() }
             }
@@ -83,7 +124,41 @@ internal class DashboardFragment: BaseFragment<
         }
     }
 
-    override suspend fun onViewStateFlowCollect(viewState: DashboardChatViewState) {
-//        TODO("Not yet implemented")
+    private inner class BackPressHandler(context: Context): CloseAppOnBackPress(context) {
+        override fun handleOnBackPressed() {
+            if (viewModel.currentViewState is NavDrawerViewState.Open) {
+                viewModel.updateViewState(NavDrawerViewState.Closed)
+            } else {
+                super.handleOnBackPressed()
+            }
+        }
     }
+
+    override suspend fun onViewStateFlowCollect(viewState: NavDrawerViewState) {
+        @Exhaustive
+        when (viewState) {
+            NavDrawerViewState.Closed -> {
+                binding.layoutMotionDashboard.setTransitionDuration(150)
+            }
+            NavDrawerViewState.Idle -> {}
+            NavDrawerViewState.Open -> {
+                binding.layoutMotionDashboard.setTransitionDuration(300)
+            }
+        }
+        viewState.transitionToEndSet(binding.layoutMotionDashboard)
+    }
+
+    override fun onViewCreatedRestoreMotionScene(
+        viewState: NavDrawerViewState,
+        binding: FragmentDashboardBinding
+    ) {
+        viewState.restoreMotionScene(binding.layoutMotionDashboard)
+    }
+
+    override fun getMotionLayouts(): Array<MotionLayout> {
+        return arrayOf(binding.layoutMotionDashboard)
+    }
+
+    override suspend fun onSideEffectCollect(sideEffect: SideEffect<Nothing>) {}
+    override fun subscribeToSideEffectSharedFlow() {}
 }

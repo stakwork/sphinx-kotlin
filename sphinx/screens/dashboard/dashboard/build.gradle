@@ -35,6 +35,7 @@ dependencies {
 
     // Sphinx
     implementation project(path: ':sphinx:application:common:resources')
+    implementation project(path: ':sphinx:activity:insetter-activity')
 
     implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt
