@@ -12,6 +12,7 @@ include ':sphinx:application:data:features:feature-relay'
 
 // Activity
 include ':sphinx:activity:hilt-qualifiers'
+include ':sphinx:activity:insetter-activity'
 include ':sphinx:activity:main:activitymain'
 
 // Screens
