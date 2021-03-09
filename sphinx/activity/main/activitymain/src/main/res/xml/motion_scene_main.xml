@@ -127,7 +127,7 @@
 
         <Constraint android:id="@+id/view_main_input_lock">
             <PropertySet
-                android:alpha=".6"
+                android:alpha="@dimen/view_main_input_lock_alpha"
                 android:visibility="visible" />
         </Constraint>
 
