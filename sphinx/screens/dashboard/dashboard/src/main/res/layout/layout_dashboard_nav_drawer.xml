@@ -5,7 +5,8 @@
     android:id="@+id/layout_constraint_dashboard_nav_drawer"
     android:layout_width="@dimen/nav_drawer_width"
     android:layout_height="match_parent"
-    android:background="@color/headerBackground">
+    android:background="@color/headerBackground"
+    android:elevation="@dimen/default_elevation">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/nav_drawer_header"
@@ -41,7 +42,7 @@
             tools:text="Matthew long name to see 2 line text wrap" />
 
         <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/nav_drawer_text_view_sats_amount"
+            android:id="@+id/nav_drawer_text_view_sats_balance"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:alpha=".7"
@@ -55,38 +56,38 @@
             tools:text="100,000,000" />
 
         <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/nav_drawer_text_view_sats_amount_denomination"
+            android:id="@+id/nav_drawer_text_view_balance_denomination"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="4dp"
             android:alpha=".5"
             android:text="@string/sats"
             android:textColor="@android:color/white"
-            app:layout_constraintBottom_toBottomOf="@+id/nav_drawer_text_view_sats_amount"
-            app:layout_constraintStart_toEndOf="@+id/nav_drawer_text_view_sats_amount" />
+            app:layout_constraintBottom_toBottomOf="@+id/nav_drawer_text_view_sats_balance"
+            app:layout_constraintStart_toEndOf="@+id/nav_drawer_text_view_sats_balance" />
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/nav_drawer_button_add_sats"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="@dimen/default_layout_margin"
             android:background="@drawable/button_background_white_rad_48"
             android:backgroundTint="@color/primaryColor"
             android:paddingStart="10dp"
-            android:paddingTop="3dp"
+            android:paddingTop="4dp"
             android:paddingEnd="10dp"
-            android:paddingBottom="3dp"
+            android:paddingBottom="4dp"
             android:text="@string/add_sats"
             android:textAllCaps="true"
             android:textColor="@android:color/white"
             android:textSize="12sp"
-            app:layout_constraintStart_toStartOf="@+id/nav_drawer_text_view_sats_amount"
-            app:layout_constraintTop_toBottomOf="@+id/nav_drawer_text_view_sats_amount" />
+            app:layout_constraintStart_toStartOf="@+id/nav_drawer_text_view_sats_balance"
+            app:layout_constraintTop_toBottomOf="@+id/nav_drawer_text_view_sats_balance" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.appcompat.widget.AppCompatImageView
-        android:id="@+id/nav_drawer_header_deliminator"
+        android:id="@+id/nav_drawer_header_divider"
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:layout_marginTop="@dimen/nav_drawer_button_margin_top"
@@ -100,7 +101,7 @@
         android:layout_marginStart="@dimen/default_layout_margin"
         android:layout_marginTop="@dimen/nav_drawer_button_margin_top"
         android:layout_marginEnd="@dimen/default_layout_margin"
-        app:layout_constraintTop_toBottomOf="@+id/nav_drawer_header_deliminator">
+        app:layout_constraintTop_toBottomOf="@+id/nav_drawer_header_divider">
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/nav_drawer_image_view_contacts"

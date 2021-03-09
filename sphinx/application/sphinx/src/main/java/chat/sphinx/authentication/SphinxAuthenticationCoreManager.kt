@@ -26,7 +26,8 @@ class SphinxAuthenticationCoreManager @Inject constructor(
     AuthenticationManagerInitializerAndroid(
         application,
         minimumUserInputLength = 6,
-        maximumUserInputLength = 6
+        maximumUserInputLength = 6,
+        backgroundLogOutTime = 1L
     )
 ) {
     override val logOutWhenApplicationIsClearedFromRecentsTray: Boolean = false

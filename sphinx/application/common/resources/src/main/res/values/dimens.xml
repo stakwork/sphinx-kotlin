@@ -3,4 +3,6 @@
     <dimen name="default_layout_margin">16dp</dimen>
     <dimen name="default_header_height">72dp</dimen>
     <dimen name="default_header_margin_horizontal">24dp</dimen>
+    <dimen name="default_bottom_bar_height">56dp</dimen>
+    <dimen name="default_elevation">8dp</dimen>
 </resources>
