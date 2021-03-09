@@ -19,7 +19,7 @@ internal class DashboardViewModel @Inject constructor(
         Nothing,
         SideEffect<Nothing>,
         NavDrawerViewState
-        >(NavDrawerViewState.Idle)
+        >(NavDrawerViewState.Closed)
 {
     override suspend fun onMotionSceneCompletion(value: Any) {
         // Unused

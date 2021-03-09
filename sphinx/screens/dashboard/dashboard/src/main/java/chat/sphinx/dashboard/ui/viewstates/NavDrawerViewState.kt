@@ -6,16 +6,6 @@ import io.matthewnelson.android_concept_views.MotionLayoutViewState
 
 internal sealed class NavDrawerViewState: MotionLayoutViewState<NavDrawerViewState>() {
 
-    object Idle: NavDrawerViewState() {
-        override val startSetId: Int
-            get() = R.id.motion_scene_dashboard_drawer_closed
-        override val endSetId: Int
-            get() = R.id.motion_scene_dashboard_drawer_open
-
-        override fun restoreMotionScene(motionLayout: MotionLayout) {}
-        override fun transitionToEndSet(motionLayout: MotionLayout) {}
-    }
-
     object Closed: NavDrawerViewState() {
         override val startSetId: Int
             get() = R.id.motion_scene_dashboard_drawer_open

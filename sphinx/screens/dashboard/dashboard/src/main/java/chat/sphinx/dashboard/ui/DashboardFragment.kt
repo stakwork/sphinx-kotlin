@@ -164,7 +164,6 @@ internal class DashboardFragment : MotionLayoutFragment<
             NavDrawerViewState.Closed -> {
                 binding.layoutMotionDashboard.setTransitionDuration(150)
             }
-            NavDrawerViewState.Idle -> {}
             NavDrawerViewState.Open -> {
                 binding.layoutMotionDashboard.setTransitionDuration(300)
             }
