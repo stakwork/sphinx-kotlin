@@ -3,5 +3,4 @@
     <dimen name="pin_pad_text_size">24sp</dimen>
     <dimen name="pin_pad_padding">16dp</dimen>
     <dimen name="pin_pad_backspace_padding">20dp</dimen>
-    <dimen name="pin_pad_layout_padding">0dp</dimen>
 </resources>

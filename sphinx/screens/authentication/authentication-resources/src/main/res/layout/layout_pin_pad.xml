@@ -2,10 +2,10 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_constraint_pin_pad"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/deepNight"
-    android:paddingBottom="@dimen/pin_pad_layout_padding">
+    android:background="@color/deepNight">
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guide_v33"
