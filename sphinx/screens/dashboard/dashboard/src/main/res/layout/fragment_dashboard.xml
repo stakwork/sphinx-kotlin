@@ -1,45 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.motion.widget.MotionLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_motion_dashboard"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/deepNight"
+    app:layoutDescription="@xml/motion_scene_dashboard"
     tools:context=".ui.DashboardFragment">
 
-    <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/dashboard_button_chat_contact"
-        style="@style/BaseButton"
-        android:layout_width="wrap_content"
+    <include
+        android:id="@+id/layout_header"
+        layout="@layout/layout_header"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/secondaryColor"
-        android:text="CONTACT"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/dashboard_button_chat_group"
-        style="@style/BaseButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@color/secondaryColor"
-        android:text="GROUP"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/dashboard_button_chat_contact" />
-
-    <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/dashboard_button_chat_tribe"
-        style="@style/BaseButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@color/secondaryColor"
-        android:text="TRIBE"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/dashboard_button_chat_group" />
-
     <include
-        android:id="@+id/layout_nav_drawer"
-        layout="@layout/layout_nav_drawer" />
+        android:id="@+id/layout_chats"
+        layout="@layout/layout_chats"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@+id/layout_nav_bar"
+        app:layout_constraintTop_toBottomOf="@+id/layout_header" />
 
     <include
         android:id="@+id/layout_nav_bar"
@@ -48,4 +31,18 @@
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+
+    <View
+        android:id="@+id/nav_drawer_input_lock"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/black" />
+
+    <include
+        android:id="@+id/layout_nav_drawer"
+        layout="@layout/layout_nav_drawer"
+        android:layout_width="@dimen/nav_drawer_width"
+        android:layout_height="match_parent"
+        app:layout_constraintEnd_toStartOf="parent" />
+
+</androidx.constraintlayout.motion.widget.MotionLayout>

@@ -2,7 +2,8 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="240dp"
+    android:layout_width="@dimen/nav_drawer_width"
+    android:id="@+id/layout_constraint_nav_drawer"
     android:layout_height="match_parent"
     android:background="@android:color/black">
 
@@ -82,7 +83,7 @@
         android:textColor="@android:color/white"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/nav_drawer_button_create_tribe" />
+        app:layout_constraintBottom_toTopOf="@+id/nav_drawer_button_logout" />
 
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/nav_drawer_button_logout"
@@ -95,6 +96,6 @@
         android:textColor="@android:color/white"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/nav_drawer_button_support_ticket" />
+        app:layout_constraintBottom_toBottomOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
