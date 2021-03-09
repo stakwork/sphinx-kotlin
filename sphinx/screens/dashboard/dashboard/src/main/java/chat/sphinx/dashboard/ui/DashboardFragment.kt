@@ -92,7 +92,7 @@ internal class DashboardFragment : MotionLayoutFragment<
         binding.layoutHeader.let { header ->
 
             (requireActivity() as InsetterActivity)
-                .addStatusBarPadding(header.layoutConstraintHeader)
+                .addStatusBarPadding(header.layoutConstraintDashboardHeader)
 
             header.imageViewNavDrawerHamburger.setOnClickListener {
                 viewModel.updateViewState(NavDrawerViewState.Open)
@@ -104,7 +104,7 @@ internal class DashboardFragment : MotionLayoutFragment<
         binding.layoutNavBar.let { navBar ->
 
             (requireActivity() as InsetterActivity)
-                .addNavigationBarPadding(navBar.layoutConstraintNavBar)
+                .addNavigationBarPadding(navBar.layoutConstraintDashboardNavBar)
 
             navBar.navBarButtonPaymentReceive.setOnClickListener {
                 lifecycleScope.launch { viewModel.navBarNavigator.toPaymentReceiveDetail() }
@@ -128,33 +128,34 @@ internal class DashboardFragment : MotionLayoutFragment<
 
         binding.layoutNavDrawer.let { navDrawer ->
             (requireActivity() as InsetterActivity)
-                .addStatusBarPadding(navDrawer.layoutConstraintNavDrawer)
+                .addStatusBarPadding(navDrawer.layoutConstraintDashboardNavDrawer)
             (requireActivity() as InsetterActivity)
-                .addNavigationBarPadding(navDrawer.layoutConstraintNavDrawer)
+                .addNavigationBarPadding(navDrawer.layoutConstraintDashboardNavDrawer)
 
-            navDrawer.layoutConstraintNavDrawer.setOnClickListener { viewModel }
+            navDrawer.layoutConstraintDashboardNavDrawer.setOnClickListener { viewModel }
 
             navDrawer.navDrawerButtonAddSats.setOnClickListener {
                 lifecycleScope.launch { viewModel.navDrawerNavigator.toAddSatsScreen() }
             }
-            navDrawer.navDrawerButtonAddressBook.setOnClickListener {
+            navDrawer.navDrawerButtonContacts.setOnClickListener {
                 lifecycleScope.launch { viewModel.navDrawerNavigator.toAddressBookScreen() }
             }
             navDrawer.navDrawerButtonProfile.setOnClickListener {
                 lifecycleScope.launch { viewModel.navDrawerNavigator.toProfileScreen() }
             }
-            navDrawer.navDrawerButtonAddFriend.setOnClickListener {
+            navDrawer.layoutButtonAddFriend.layoutConstraintButtonAddFriend.setOnClickListener {
                 lifecycleScope.launch { viewModel.navDrawerNavigator.toAddFriendDetail() }
             }
-            navDrawer.navDrawerButtonCreateTribe.setOnClickListener {
+            navDrawer.layoutButtonCreateTribe.layoutConstraintButtonCreateTribe.setOnClickListener {
                 lifecycleScope.launch { viewModel.navDrawerNavigator.toCreateTribeDetail() }
             }
             navDrawer.navDrawerButtonSupportTicket.setOnClickListener {
                 lifecycleScope.launch { viewModel.navDrawerNavigator.toSupportTicketDetail() }
             }
-            navDrawer.navDrawerButtonLogout.setOnClickListener {
-                lifecycleScope.launch { viewModel.navDrawerNavigator.logout() }
-            }
+            // TODO: Implement Private chat mode
+//            navDrawer.navDrawerButtonLogout.setOnClickListener {
+//                lifecycleScope.launch { viewModel.navDrawerNavigator.logout() }
+//            }
         }
     }
 

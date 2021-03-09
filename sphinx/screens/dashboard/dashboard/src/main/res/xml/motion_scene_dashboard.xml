@@ -18,7 +18,7 @@
         <Constraint android:id="@+id/layout_header">
             <Layout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="@dimen/default_header_height"
                 app:layout_constraintTop_toTopOf="parent" />
         </Constraint>
 
@@ -63,7 +63,7 @@
 
         <Constraint android:id="@+id/nav_drawer_input_lock">
             <PropertySet
-                android:alpha=".6"
+                android:alpha="@dimen/nav_drawer_input_lock_alpha"
                 android:visibility="visible" />
         </Constraint>
 

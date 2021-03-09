@@ -11,14 +11,14 @@
 
     <include
         android:id="@+id/layout_header"
-        layout="@layout/layout_header"
+        layout="@layout/layout_dashboard_header"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="@dimen/default_header_height"
         app:layout_constraintTop_toTopOf="parent" />
 
     <include
         android:id="@+id/layout_chats"
-        layout="@layout/layout_chats"
+        layout="@layout/layout_dashboard_chats"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintBottom_toTopOf="@+id/layout_nav_bar"
@@ -26,7 +26,7 @@
 
     <include
         android:id="@+id/layout_nav_bar"
-        layout="@layout/layout_nav_bar"
+        layout="@layout/layout_dashboard_nav_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent" />
@@ -40,7 +40,7 @@
 
     <include
         android:id="@+id/layout_nav_drawer"
-        layout="@layout/layout_nav_drawer"
+        layout="@layout/layout_dashboard_nav_drawer"
         android:layout_width="@dimen/nav_drawer_width"
         android:layout_height="match_parent"
         app:layout_constraintEnd_toStartOf="parent" />
