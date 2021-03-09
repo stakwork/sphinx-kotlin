@@ -8,5 +8,4 @@
     <item
         android:drawable="@drawable/sphinx_white_logo"
         android:gravity="center" />
-
 </layer-list>
