@@ -41,34 +41,40 @@ internal class DashboardFragment : MotionLayoutFragment<
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        BackPressHandler(view.context)
-            .enableDoubleTapToClose(
-                viewLifecycleOwner,
-                SphinxToastUtils()
-            )
-            .addCallback(
-                viewLifecycleOwner,
-                requireActivity()
-            )
+        BackPressHandler(binding.root.context)
+            .enableDoubleTapToClose(viewLifecycleOwner, SphinxToastUtils())
+            .addCallback(viewLifecycleOwner, requireActivity())
 
-        findNavController().addOnDestinationChangedListener(
-            CloseDrawerOnDestinationChange()
-        )
+        findNavController().addOnDestinationChangedListener(CloseDrawerOnDestinationChange())
 
-        binding.layoutHeader.let { header ->
+        setupChats()
+        setupDashboardHeader()
+        setupNavBar()
+        setupNavDrawer()
+    }
 
-            (requireActivity() as InsetterActivity)
-                .addStatusBarPadding(header.layoutConstraintHeader)
-
-            header.imageViewNavDrawerHamburger.setOnClickListener {
-                viewModel.updateViewState(NavDrawerViewState.Open)
+    private inner class BackPressHandler(context: Context): CloseAppOnBackPress(context) {
+        override fun handleOnBackPressed() {
+            if (viewModel.currentViewState is NavDrawerViewState.Open) {
+                viewModel.updateViewState(NavDrawerViewState.Closed)
+            } else {
+                super.handleOnBackPressed()
             }
         }
+    }
 
-        binding.navDrawerInputLock.setOnClickListener {
+    private inner class CloseDrawerOnDestinationChange: NavController.OnDestinationChangedListener {
+        override fun onDestinationChanged(
+            controller: NavController,
+            destination: NavDestination,
+            arguments: Bundle?
+        ) {
+            controller.removeOnDestinationChangedListener(this)
             viewModel.updateViewState(NavDrawerViewState.Closed)
         }
+    }
 
+    private fun setupChats() {
         binding.layoutChats.let { chats ->
             chats.dashboardButtonChatContact.setOnClickListener {
                 lifecycleScope.launch { viewModel.dashboardNavigator.toChatContact("") }
@@ -80,7 +86,21 @@ internal class DashboardFragment : MotionLayoutFragment<
                 lifecycleScope.launch { viewModel.dashboardNavigator.toChatTribe("") }
             }
         }
+    }
 
+    private fun setupDashboardHeader() {
+        binding.layoutHeader.let { header ->
+
+            (requireActivity() as InsetterActivity)
+                .addStatusBarPadding(header.layoutConstraintHeader)
+
+            header.imageViewNavDrawerHamburger.setOnClickListener {
+                viewModel.updateViewState(NavDrawerViewState.Open)
+            }
+        }
+    }
+
+    private fun setupNavBar() {
         binding.layoutNavBar.let { navBar ->
 
             (requireActivity() as InsetterActivity)
@@ -98,6 +118,12 @@ internal class DashboardFragment : MotionLayoutFragment<
             navBar.navBarButtonPaymentSend.setOnClickListener {
                 lifecycleScope.launch { viewModel.navBarNavigator.toPaymentSendDetail() }
             }
+        }
+    }
+
+    private fun setupNavDrawer() {
+        binding.navDrawerInputLock.setOnClickListener {
+            viewModel.updateViewState(NavDrawerViewState.Closed)
         }
 
         binding.layoutNavDrawer.let { navDrawer ->
@@ -130,28 +156,6 @@ internal class DashboardFragment : MotionLayoutFragment<
                 lifecycleScope.launch { viewModel.navDrawerNavigator.logout() }
             }
         }
-    }
-
-    private inner class BackPressHandler(context: Context): CloseAppOnBackPress(context) {
-        override fun handleOnBackPressed() {
-            if (viewModel.currentViewState is NavDrawerViewState.Open) {
-                viewModel.updateViewState(NavDrawerViewState.Closed)
-            } else {
-                super.handleOnBackPressed()
-            }
-        }
-    }
-
-    private inner class CloseDrawerOnDestinationChange: NavController.OnDestinationChangedListener {
-        override fun onDestinationChanged(
-            controller: NavController,
-            destination: NavDestination,
-            arguments: Bundle?
-        ) {
-            controller.removeOnDestinationChangedListener(this)
-            viewModel.updateViewState(NavDrawerViewState.Closed)
-        }
-
     }
 
     override suspend fun onViewStateFlowCollect(viewState: NavDrawerViewState) {
