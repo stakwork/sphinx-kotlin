@@ -75,7 +75,7 @@ internal class DashboardFragment : MotionLayoutFragment<
     }
 
     private fun setupChats() {
-        binding.layoutChats.let { chats ->
+        binding.layoutDashboardChats.let { chats ->
             chats.dashboardButtonChatContact.setOnClickListener {
                 lifecycleScope.launch { viewModel.dashboardNavigator.toChatContact("") }
             }
@@ -89,7 +89,7 @@ internal class DashboardFragment : MotionLayoutFragment<
     }
 
     private fun setupDashboardHeader() {
-        binding.layoutHeader.let { header ->
+        binding.layoutDashboardHeader.let { header ->
 
             (requireActivity() as InsetterActivity)
                 .addStatusBarPadding(header.layoutConstraintDashboardHeader)
@@ -101,7 +101,7 @@ internal class DashboardFragment : MotionLayoutFragment<
     }
 
     private fun setupNavBar() {
-        binding.layoutNavBar.let { navBar ->
+        binding.layoutDashboardNavBar.let { navBar ->
 
             (requireActivity() as InsetterActivity)
                 .addNavigationBarPadding(navBar.layoutConstraintDashboardNavBar)
@@ -122,11 +122,11 @@ internal class DashboardFragment : MotionLayoutFragment<
     }
 
     private fun setupNavDrawer() {
-        binding.navDrawerInputLock.setOnClickListener {
+        binding.dashboardNavDrawerInputLock.setOnClickListener {
             viewModel.updateViewState(NavDrawerViewState.Closed)
         }
 
-        binding.layoutNavDrawer.let { navDrawer ->
+        binding.layoutDashboardNavDrawer.let { navDrawer ->
             (requireActivity() as InsetterActivity)
                 .addStatusBarPadding(navDrawer.layoutConstraintDashboardNavDrawer)
             (requireActivity() as InsetterActivity)
