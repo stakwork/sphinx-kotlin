@@ -45,7 +45,7 @@ internal class DashboardFragment : MotionLayoutFragment<
             .enableDoubleTapToClose(viewLifecycleOwner, SphinxToastUtils())
             .addCallback(viewLifecycleOwner, requireActivity())
 
-        findNavController().addOnDestinationChangedListener(CloseDrawerOnDestinationChange())
+//        findNavController().addOnDestinationChangedListener(CloseDrawerOnDestinationChange())
 
         setupChats()
         setupDashboardHeader()
