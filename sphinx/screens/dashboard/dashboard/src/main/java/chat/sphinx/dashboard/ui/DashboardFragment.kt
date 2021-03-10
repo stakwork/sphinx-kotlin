@@ -94,7 +94,7 @@ internal class DashboardFragment : MotionLayoutFragment<
             (requireActivity() as InsetterActivity)
                 .addStatusBarPadding(header.layoutConstraintDashboardHeader)
 
-            header.imageViewNavDrawerHamburger.setOnClickListener {
+            header.imageViewNavDrawerMenu.setOnClickListener {
                 viewModel.updateViewState(NavDrawerViewState.Open)
             }
         }

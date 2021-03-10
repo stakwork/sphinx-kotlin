@@ -19,4 +19,6 @@
     <dimen name="nav_drawer_button_margin_top">32dp</dimen>
 
     <dimen name="nav_bar_button_padding">20dp</dimen>
+
+    <dimen name="search_bar_height">48dp</dimen>
 </resources>
