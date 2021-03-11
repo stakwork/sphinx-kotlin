@@ -2,7 +2,8 @@ package chat.sphinx.insetter_activity
 
 import android.view.View
 
-fun InsetterActivity.addStatusBarPadding(view: View): InsetterActivity {
+@Suppress("NOTHING_TO_INLINE")
+inline fun InsetterActivity.addStatusBarPadding(view: View): InsetterActivity {
     view.setPadding(
         view.paddingLeft + statusBarInsetHeight.left,
         view.paddingTop + statusBarInsetHeight.top,
@@ -12,7 +13,8 @@ fun InsetterActivity.addStatusBarPadding(view: View): InsetterActivity {
     return this
 }
 
-fun InsetterActivity.addNavigationBarPadding(view: View): InsetterActivity {
+@Suppress("NOTHING_TO_INLINE")
+inline fun InsetterActivity.addNavigationBarPadding(view: View): InsetterActivity {
     view.setPadding(
         view.paddingLeft + navigationBarInsetHeight.left,
         view.paddingTop + navigationBarInsetHeight.top,
