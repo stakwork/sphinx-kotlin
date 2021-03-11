@@ -137,7 +137,6 @@ internal class MainActivity: MotionLayoutNavigationActivity<
                     viewState.transitionToEndSet(motionLayout)
                 }
             }
-            is MainViewState.Idle -> {}
         }
     }
 

@@ -7,16 +7,6 @@ import io.matthewnelson.android_concept_views.MotionLayoutViewState
 @Suppress("ClassName")
 internal sealed class MainViewState: MotionLayoutViewState<MainViewState>() {
 
-    object Idle: MainViewState() {
-        override val startSetId: Int
-            get() = R.id.motion_scene_main_set1
-        override val endSetId: Int
-            get() = R.id.motion_scene_main_set2
-
-        override fun restoreMotionScene(motionLayout: MotionLayout) {}
-        override fun transitionToEndSet(motionLayout: MotionLayout) {}
-    }
-
     object DetailScreenActive: MainViewState() {
         override val startSetId: Int
             get() = R.id.motion_scene_main_set1
