@@ -129,7 +129,6 @@ internal class DashboardFragment : MotionLayoutFragment<
         binding.layoutDashboardNavDrawer.let { navDrawer ->
             (requireActivity() as InsetterActivity)
                 .addStatusBarPadding(navDrawer.layoutConstraintDashboardNavDrawer)
-            (requireActivity() as InsetterActivity)
                 .addNavigationBarPadding(navDrawer.layoutConstraintDashboardNavDrawer)
 
             navDrawer.layoutConstraintDashboardNavDrawer.setOnClickListener { viewModel }
