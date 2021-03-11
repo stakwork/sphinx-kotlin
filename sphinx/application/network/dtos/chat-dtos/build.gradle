@@ -5,6 +5,7 @@ plugins {
 }
 
 dependencies {
+    api project(path: ':sphinx:application:network:concepts:concept-queries')
     api project(path: ':sphinx:application:network:dtos:common')
     implementation deps.square.moshi
     kapt kaptDeps.square.moshiCodegen
