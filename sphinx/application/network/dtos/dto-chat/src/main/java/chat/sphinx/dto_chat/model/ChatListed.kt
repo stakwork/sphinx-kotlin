@@ -1,5 +1,9 @@
 package chat.sphinx.dto_chat.model
 
+@Suppress("NOTHING_TO_INLINE")
+inline fun ChatListed.isTrue(): Boolean =
+    this is ChatListed.True
+
 /**
  * Comes off the wire as:
  *  - 0 (Listed)

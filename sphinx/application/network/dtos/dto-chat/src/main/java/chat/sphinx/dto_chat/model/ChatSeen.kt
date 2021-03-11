@@ -1,5 +1,9 @@
 package chat.sphinx.dto_chat.model
 
+@Suppress("NOTHING_TO_INLINE")
+inline fun ChatSeen.isTrue(): Boolean =
+    this is ChatSeen.True
+
 /**
  * Comes off the wier as:
  *  - 0 (Unseen)

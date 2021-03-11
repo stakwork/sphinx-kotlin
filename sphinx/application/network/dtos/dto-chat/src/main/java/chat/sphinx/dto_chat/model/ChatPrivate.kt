@@ -1,5 +1,9 @@
 package chat.sphinx.dto_chat.model
 
+@Suppress("NOTHING_TO_INLINE")
+inline fun ChatPrivate.isTrue(): Boolean =
+    this is ChatPrivate.True
+
 /**
  * Comes off the wire as:
  *  - null (Not Private)

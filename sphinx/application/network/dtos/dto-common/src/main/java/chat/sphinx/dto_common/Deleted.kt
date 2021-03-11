@@ -1,5 +1,9 @@
 package chat.sphinx.dto_common
 
+@Suppress("NOTHING_TO_INLINE")
+inline fun Deleted.isTrue(): Boolean =
+    this is Deleted.True
+
 /**
  * Comes off the wire as:
  *  - 0 (Not Deleted)
