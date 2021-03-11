@@ -34,13 +34,32 @@ dependencies {
     api project(path: ':android:features:android-feature-activity')
 
     // Sphinx
-    api project(path: ':sphinx:application:common:resources')
+    implementation project(path: ':sphinx:screens-detail:common:detail-resources')
+    implementation project(path: ':sphinx:activity:insetter-activity')
+
+    api project(path: ':sphinx:activity:hilt-qualifiers')
+
+    api project(path: ':sphinx:screens:add-sats:add-sats')
+    api project(path: ':sphinx:screens:address-book:address-book')
     api project(path: ':sphinx:screens:authentication:authentication')
-    api project(path: ':sphinx:screens:home:home')
+    api project(path: ':sphinx:screens:chats:chat-contact:chat-contact')
+    api project(path: ':sphinx:screens:chats:chat-group:chat-group')
+    api project(path: ':sphinx:screens:chats:chat-tribe:chat-tribe')
+    api project(path: ':sphinx:screens:dashboard:dashboard')
     api project(path: ':sphinx:screens:onboard:onboard')
+    api project(path: ':sphinx:screens:profile:profile')
     api project(path: ':sphinx:screens:splash:splash')
+    
+    api project(path: ':sphinx:screens-detail:add-friend:add-friend')
+    api project(path: ':sphinx:screens-detail:create-tribe:create-tribe')
+    api project(path: ':sphinx:screens-detail:payments:payment-receive:payment-receive')
+    api project(path: ':sphinx:screens-detail:payments:payment-send:payment-send')
+    api project(path: ':sphinx:screens-detail:scanner:scanner')
+    api project(path: ':sphinx:screens-detail:support-ticket:support-ticket')
+    api project(path: ':sphinx:screens-detail:transactions:transactions')
+//    api project(path: )
+
     implementation deps.chrisbanes.insetter
-    implementation deps.chrisbanes.insetterWidgets
 
     implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt

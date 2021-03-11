@@ -10,6 +10,8 @@ import androidx.navigation.NavController
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.authentication.R
 import chat.sphinx.authentication_resources.databinding.LayoutAuthenticationBinding
+import chat.sphinx.insetter_activity.InsetterActivity
+import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.resources.SphinxToastUtils
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.navigation.CloseAppOnBackPress
@@ -47,6 +49,9 @@ internal class AuthenticationFragment: SideEffectFragment<
 
         viewModel.currentViewState.pinPadChars.let { chars ->
             binding.layoutPinPad.let { pinPad ->
+                (requireActivity() as InsetterActivity)
+                    .addNavigationBarPadding(pinPad.layoutConstraintPinPad)
+
                 pinPad.button0.setOnClickListener { viewModelContainer.numPadPress(chars[0]) }
                 pinPad.button1.setOnClickListener { viewModelContainer.numPadPress(chars[1]) }
                 pinPad.button2.setOnClickListener { viewModelContainer.numPadPress(chars[2]) }
@@ -120,7 +125,11 @@ internal class AuthenticationFragment: SideEffectFragment<
             binding.textViewHeader.text = resources.getString(headerTextId)
         }
 
-        if (viewState.confirmButtonShow) {
+        // Check current view state, not viewState that is being collected here
+        if (
+            viewModel.currentViewState.confirmButtonShow &&
+            !viewModel.currentViewState.inputLockState.show
+        ) {
             viewModelContainer.confirmPress(produceHapticFeedback = false)
         }
     }

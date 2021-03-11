@@ -36,6 +36,7 @@ dependencies {
     implementation project(path: ':kotlin:encoders:base64')
 
     // Sphinx
+    implementation project(path: ':sphinx:activity:insetter-activity')
     implementation project(path: ':sphinx:application:data:concepts:concept-background-login')
     implementation project(path: ':sphinx:screens:authentication:authentication-resources')
     implementation project(path: ':sphinx:screens:splash:key-restore')

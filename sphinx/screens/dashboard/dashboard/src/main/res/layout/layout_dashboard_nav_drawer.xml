@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_constraint_dashboard_nav_drawer"
+    android:layout_width="@dimen/nav_drawer_width"
+    android:layout_height="match_parent"
+    android:background="@color/headerBackground"
+    android:elevation="@dimen/default_elevation">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/nav_drawer_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/default_layout_margin"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/nav_drawer_image_view_user_profile_picture"
+            android:layout_width="@dimen/nav_drawer_header_profile_picture_xy"
+            android:layout_height="@dimen/nav_drawer_header_profile_picture_xy"
+            android:src="@drawable/ic_baseline_account_circle_48"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/nav_drawer_text_view_profile_name"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginStart="8dp"
+            android:ellipsize="end"
+            android:gravity="center_vertical"
+            android:lines="2"
+            android:textAllCaps="true"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/nav_drawer_default_text_size"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="@+id/nav_drawer_image_view_user_profile_picture"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/nav_drawer_image_view_user_profile_picture"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Matthew long name to see 2 line text wrap" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/nav_drawer_text_view_sats_balance"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:alpha=".7"
+            android:ellipsize="end"
+            android:singleLine="true"
+            android:text="@string/default_sats_amount"
+            android:textColor="@android:color/white"
+            android:textSize="16sp"
+            app:layout_constraintStart_toStartOf="@+id/nav_drawer_text_view_profile_name"
+            app:layout_constraintTop_toBottomOf="@+id/nav_drawer_text_view_profile_name"
+            tools:text="100,000,000" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/nav_drawer_text_view_balance_denomination"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:alpha=".5"
+            android:text="@string/sats"
+            android:textColor="@android:color/white"
+            app:layout_constraintBottom_toBottomOf="@+id/nav_drawer_text_view_sats_balance"
+            app:layout_constraintStart_toEndOf="@+id/nav_drawer_text_view_sats_balance" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/nav_drawer_button_add_sats"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/default_layout_margin"
+            android:background="@drawable/button_background_white_rad_48"
+            android:backgroundTint="@color/primaryColor"
+            android:paddingStart="10dp"
+            android:paddingTop="4dp"
+            android:paddingEnd="10dp"
+            android:paddingBottom="4dp"
+            android:text="@string/add_sats"
+            android:textAllCaps="true"
+            android:textColor="@android:color/white"
+            android:textSize="12sp"
+            app:layout_constraintStart_toStartOf="@+id/nav_drawer_text_view_sats_balance"
+            app:layout_constraintTop_toBottomOf="@+id/nav_drawer_text_view_sats_balance" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/nav_drawer_header_divider"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="@dimen/nav_drawer_button_margin_top"
+        android:background="@color/divider"
+        app:layout_constraintTop_toBottomOf="@+id/nav_drawer_header" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/nav_drawer_button_contacts"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/default_layout_margin"
+        android:layout_marginTop="@dimen/nav_drawer_button_margin_top"
+        android:layout_marginEnd="@dimen/default_layout_margin"
+        app:layout_constraintTop_toBottomOf="@+id/nav_drawer_header_divider">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/nav_drawer_image_view_contacts"
+            android:layout_width="@dimen/nav_drawer_button_image_xy"
+            android:layout_height="@dimen/nav_drawer_button_image_xy"
+            android:layout_marginStart="@dimen/nav_drawer_button_image_margin_start"
+            android:src="@drawable/ic_baseline_people_32"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/nav_drawer_button_text_margin_start"
+            android:text="@string/contacts"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/nav_drawer_default_text_size"
+            app:layout_constraintBottom_toBottomOf="@+id/nav_drawer_image_view_contacts"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/nav_drawer_button_contacts" />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/nav_drawer_button_profile"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/default_layout_margin"
+        android:layout_marginTop="@dimen/nav_drawer_button_margin_top"
+        android:layout_marginEnd="@dimen/default_layout_margin"
+        app:layout_constraintTop_toBottomOf="@+id/nav_drawer_button_contacts">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/nav_drawer_image_view_profile"
+            android:layout_width="@dimen/nav_drawer_button_image_xy"
+            android:layout_height="@dimen/nav_drawer_button_image_xy"
+            android:layout_marginStart="@dimen/nav_drawer_button_image_margin_start"
+            android:src="@drawable/ic_baseline_person_32"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/nav_drawer_button_text_margin_start"
+            android:text="@string/profile"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/nav_drawer_default_text_size"
+            app:layout_constraintBottom_toBottomOf="@+id/nav_drawer_image_view_profile"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/nav_drawer_image_view_profile" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <include
+        android:id="@+id/layout_button_add_friend"
+        layout="@layout/layout_button_add_friend"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/default_layout_margin"
+        android:layout_marginTop="@dimen/nav_drawer_button_margin_top"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/nav_drawer_button_profile" />
+
+    <include
+        android:id="@+id/layout_button_create_tribe"
+        layout="@layout/layout_button_create_tribe"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/default_layout_margin"
+        android:layout_marginTop="@dimen/nav_drawer_button_margin_top"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/layout_button_add_friend" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/nav_drawer_button_support_ticket"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/default_layout_margin"
+        android:layout_marginEnd="@dimen/default_layout_margin"
+        android:layout_marginBottom="@dimen/default_layout_margin"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/nav_drawer_image_view_support_ticket"
+            android:layout_width="@dimen/nav_drawer_button_image_xy"
+            android:layout_height="@dimen/nav_drawer_button_image_xy"
+            android:layout_marginStart="@dimen/nav_drawer_button_image_margin_start"
+            android:src="@drawable/ic_baseline_mail_outline_24"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/nav_drawer_button_text_margin_start"
+            android:text="@string/support"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/nav_drawer_default_text_size"
+            app:layout_constraintBottom_toBottomOf="@+id/nav_drawer_image_view_support_ticket"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/nav_drawer_image_view_support_ticket" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- TODO: Build out private login support -->
+    <!--    <androidx.appcompat.widget.AppCompatButton-->
+    <!--        android:id="@+id/nav_drawer_button_logout"-->
+    <!--        style="@style/BaseButton"-->
+    <!--        android:layout_width="match_parent"-->
+    <!--        android:layout_height="wrap_content"-->
+    <!--        android:layout_margin="16dp"-->
+    <!--        android:background="@color/deepNight"-->
+    <!--        android:text="LOGOUT"-->
+    <!--        android:textColor="@android:color/white"-->
+    <!--        app:layout_constraintBottom_toBottomOf="parent"-->
+    <!--        app:layout_constraintEnd_toEndOf="parent"-->
+    <!--        app:layout_constraintStart_toStartOf="parent" />-->
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="utf-8"?>
+<MotionScene xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+
+    <!-- ////////////////////////////////////////////////////////////////////////////////-->
+    <!-- ////////////////////////////////////////////////////////////////////////////////-->
+    <!-- ////////////////////////// Constraint Sets /////////////////////////////////////-->
+    <!-- ////////////////////////////////////////////////////////////////////////////////-->
+    <!-- ////////////////////////////////////////////////////////////////////////////////-->
+
+
+    <!--
+           Set 1: No Detail Screen
+    -->
+    <ConstraintSet android:id="@+id/motion_scene_main_set1">
+
+        <Constraint android:id="@+id/layout_constraint_main_status_bar">
+            <Layout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                app:layout_constraintTop_toTopOf="parent" />
+        </Constraint>
+
+        <Constraint android:id="@+id/layout_constraint_main_navigation_bar">
+            <Layout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                app:layout_constraintBottom_toBottomOf="parent" />
+        </Constraint>
+
+        <Constraint android:id="@+id/image_view_primary_host_backer">
+            <Layout
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                app:layout_constraintBottom_toBottomOf="@id/nav_host_fragment_primary"
+                app:layout_constraintEnd_toEndOf="@+id/nav_host_fragment_primary"
+                app:layout_constraintStart_toStartOf="@+id/nav_host_fragment_primary"
+                app:layout_constraintTop_toTopOf="@+id/nav_host_fragment_primary" />
+        </Constraint>
+
+        <Constraint android:id="@+id/nav_host_fragment_primary">
+            <Layout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+        </Constraint>
+
+        <Constraint android:id="@+id/space_detail_host">
+            <Layout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                app:layout_constraintHeight_percent="@dimen/space_detail_host_height"
+                app:layout_constraintTop_toBottomOf="@+id/layout_constraint_main_status_bar" />
+        </Constraint>
+
+        <Constraint android:id="@+id/view_main_input_lock">
+            <Layout
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+            <PropertySet android:visibility="invisible" />
+        </Constraint>
+
+        <Constraint android:id="@+id/nav_host_fragment_detail">
+            <Layout
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHeight_percent=".95"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="parent" />
+        </Constraint>
+
+        <Constraint android:id="@+id/space_detail_swipe_target">
+            <Layout
+                android:layout_width="0dp"
+                android:layout_height="@dimen/detail_header_height"
+                android:layout_marginStart="@dimen/detail_header_nav_button_width"
+                android:layout_marginEnd="@dimen/detail_header_exit_button_width"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="parent" />
+        </Constraint>
+
+        <Constraint android:id="@+id/nav_host_fragment_authentication">
+            <Layout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+        </Constraint>
+
+    </ConstraintSet>
+
+
+    <!--
+           Set 1: Detail Screen
+    -->
+    <ConstraintSet
+        android:id="@+id/motion_scene_main_set2"
+        app:deriveConstraintsFrom="@+id/motion_scene_main_set1">
+
+        <Constraint android:id="@+id/image_view_primary_host_backer">
+            <Layout
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                app:layout_constraintBottom_toBottomOf="@id/nav_host_fragment_primary"
+                app:layout_constraintEnd_toEndOf="@+id/nav_host_fragment_primary"
+                app:layout_constraintStart_toStartOf="@+id/nav_host_fragment_primary"
+                app:layout_constraintTop_toTopOf="@+id/nav_host_fragment_primary" />
+            <Transform
+                android:scaleX="@dimen/primary_host_scale_x"
+                android:scaleY="@dimen/primary_host_scale_y" />
+        </Constraint>
+
+        <Constraint android:id="@+id/nav_host_fragment_primary">
+            <Layout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                app:layout_constraintHeight_percent=".99999"
+                app:layout_constraintTop_toBottomOf="@+id/layout_constraint_main_status_bar" />
+            <Transform
+                android:scaleX="@dimen/primary_host_scale_x"
+                android:scaleY="@dimen/primary_host_scale_y" />
+        </Constraint>
+
+        <Constraint android:id="@+id/view_main_input_lock">
+            <PropertySet
+                android:alpha="@dimen/view_main_input_lock_alpha"
+                android:visibility="visible" />
+        </Constraint>
+
+        <Constraint android:id="@+id/nav_host_fragment_detail">
+            <Layout
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/space_detail_host" />
+        </Constraint>
+
+        <Constraint android:id="@+id/space_detail_swipe_target">
+            <Layout
+                android:layout_width="0dp"
+                android:layout_height="@dimen/detail_header_height"
+                android:layout_marginStart="@dimen/detail_header_nav_button_width"
+                android:layout_marginEnd="@dimen/detail_header_exit_button_width"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/nav_host_fragment_detail" />
+        </Constraint>
+
+    </ConstraintSet>
+
+
+    <!-- ////////////////////////////////////////////////////////////////////////////////-->
+    <!-- ////////////////////////////////////////////////////////////////////////////////-->
+    <!-- ////////////////////////////// Transitions /////////////////////////////////////-->
+    <!-- ////////////////////////////////////////////////////////////////////////////////-->
+    <!-- ////////////////////////////////////////////////////////////////////////////////-->
+
+
+    <!--
+           Set 1 >> Set 2
+    -->
+    <Transition
+        android:id="@+id/transition_main_set1_to_set2"
+        app:constraintSetEnd="@+id/motion_scene_main_set2"
+        app:constraintSetStart="@+id/motion_scene_main_set1"
+        app:duration="400"
+        app:motionInterpolator="cubic(0.41,0.39,0,1)">
+
+        <!-- Duration is set programmatically from MainActivity depending on view state -->
+
+        <OnSwipe
+            app:dragDirection="dragUp"
+            app:touchAnchorId="@id/space_detail_swipe_target"
+            app:touchAnchorSide="bottom"
+            app:touchRegionId="@id/space_detail_swipe_target" />
+    </Transition>
+
+</MotionScene>

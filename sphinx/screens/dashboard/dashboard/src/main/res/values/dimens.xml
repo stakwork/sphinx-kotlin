@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="nav_drawer_width">240dp</dimen>
+    <item name="nav_drawer_input_lock_alpha" type="dimen" format="float">.5</item>
+    <dimen name="nav_drawer_default_text_size">18sp</dimen>
+
+
+    <dimen name="nav_drawer_header_profile_picture_xy">60dp</dimen>
+    <dimen name="nav_drawer_header_profile_text_margin">8dp</dimen>
+
+    <dimen name="nav_drawer_button_image_xy">32dp</dimen>
+
+    <!-- This is the profile_picture_xy + profile_text_margin -->
+    <dimen name="nav_drawer_button_text_margin_start">68dp</dimen>
+
+    <!-- This is the profile_picture_xy - nav_drawer_button_image_xy / 2-->
+    <dimen name="nav_drawer_button_image_margin_start">14dp</dimen>
+
+    <dimen name="nav_drawer_button_margin_top">32dp</dimen>
+
+    <dimen name="nav_bar_button_padding">20dp</dimen>
+
+    <dimen name="search_bar_height">48dp</dimen>
+</resources>

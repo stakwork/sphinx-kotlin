@@ -1,15 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="primaryColor">#6089ff</color>
+    <color name="primaryColor">#618AFF</color>
     <color name="primaryLightColor">#99b8ff</color>
     <color name="primaryDarkColor">#115dcb</color>
     <color name="primaryTextColor">#000000</color>
 
-    <color name="secondaryColor">#48c998</color>
+    <color name="secondaryColor">#49C998</color>
     <color name="secondaryLightColor">#7ffdc9</color>
     <color name="secondaryDarkColor">#00976a</color>
     <color name="secondaryTextColor">#000000</color>
 
     <color name="lightPurple">#A986F9</color>
-    <color name="deepNight">#141d27</color>
+    <color name="deepNight">#1E2934</color>
+
+    <color name="textHint">#556171</color>
+    <color name="divider">#101317</color>
+    <color name="background">#151E27</color>
+    <color name="headerBackground">#1A242E</color>
+    <color name="mainBottomIcons">#909BAA</color>
 </resources>

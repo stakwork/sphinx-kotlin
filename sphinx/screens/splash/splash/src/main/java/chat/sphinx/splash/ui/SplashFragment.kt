@@ -11,6 +11,8 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.authentication_resources.databinding.LayoutAuthenticationBinding
+import chat.sphinx.insetter_activity.InsetterActivity
+import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.resources.SphinxToastUtils
 import chat.sphinx.splash.R
 import chat.sphinx.splash.databinding.FragmentSplashBinding
@@ -105,11 +107,19 @@ internal class SplashFragment: MotionLayoutFragment<
             }
 
             is SplashViewState.Transition_Set2_ShowWelcome -> {
+
+                // TODO: temporary until InsetterActivity gets properly built out.
+                (requireActivity() as InsetterActivity)
+                    .addNavigationBarPadding(
+                        bindingAuthentication.layoutPinPad.layoutConstraintPinPad
+                    )
+
                 setTransitionListener(binding.layoutMotionSplash)
                 viewState.transitionToEndSet(binding.layoutMotionSplash)
             }
 
             is SplashViewState.Set2_ShowWelcome -> {
+
                 binding.layoutOnBoard.editTextCodeInput.let { editText ->
                     editText.isEnabled = true
 

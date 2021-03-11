@@ -34,15 +34,19 @@ internal class ToAuthenticationView private constructor(
             null,
             navOptions {
                 anim {
-                    popExit = R_navigation.anim.slide_out_bottom
                     @Exhaustive
                     when (authenticationStateManager.authenticationStateFlow.value) {
-                        is AuthenticationState.NotRequired,
+                        is AuthenticationState.NotRequired -> {
+                            enter = R_navigation.anim.slide_in_bottom
+                            popExit = R_navigation.anim.slide_out_bottom
+                        }
                         is AuthenticationState.Required.InitialLogIn -> {
                             enter = R_navigation.anim.slide_in_bottom
+                            popExit = R_navigation.anim.slide_out_left
                         }
                         is AuthenticationState.Required.LoggedOut -> {
                             // Enter immediately
+                            popExit = R_navigation.anim.slide_out_bottom
                         }
                     }
                 }
