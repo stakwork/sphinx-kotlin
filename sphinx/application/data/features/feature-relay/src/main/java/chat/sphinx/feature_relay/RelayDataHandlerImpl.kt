@@ -16,13 +16,15 @@ import io.matthewnelson.k_openssl_common.clazzes.Password
 import io.matthewnelson.k_openssl_common.clazzes.UnencryptedString
 import io.matthewnelson.k_openssl_common.exceptions.DecryptionException
 import io.matthewnelson.k_openssl_common.exceptions.EncryptionException
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 class RelayDataHandlerImpl(
     private val authenticationStorage: AuthenticationStorage,
     private val authenticationCoreManager: AuthenticationCoreManager,
     private val dispatchers: CoroutineDispatchers,
     private val encryptionKeyHandler: EncryptionKeyHandler
-): RelayDataHandler() {
+) : RelayDataHandler() {
 
     companion object {
         @Volatile
@@ -41,7 +43,10 @@ class RelayDataHandlerImpl(
 
     @OptIn(UnencryptedDataAccess::class, RawPasswordAccess::class)
     @Throws(EncryptionException::class, IllegalArgumentException::class)
-    private suspend fun encryptData(privateKey: Password, data: UnencryptedString): EncryptedString {
+    private suspend fun encryptData(
+        privateKey: Password,
+        data: UnencryptedString
+    ): EncryptedString {
         if (privateKey.value.isEmpty()) {
             throw IllegalArgumentException("Private Key cannot be empty")
         }
@@ -64,7 +69,10 @@ class RelayDataHandlerImpl(
     @Suppress("BlockingMethodInNonBlockingContext")
     @OptIn(UnencryptedDataAccess::class, RawPasswordAccess::class)
     @Throws(DecryptionException::class, IllegalArgumentException::class)
-    private suspend fun decryptData(privateKey: Password, data: EncryptedString): UnencryptedString {
+    private suspend fun decryptData(
+        privateKey: Password,
+        data: EncryptedString
+    ): UnencryptedString {
         if (privateKey.value.isEmpty()) {
             throw IllegalArgumentException("Private Key cannot be empty")
         }
@@ -84,48 +92,50 @@ class RelayDataHandlerImpl(
         }
     }
 
-    @Synchronized
+    private val lock = Mutex()
+
     override suspend fun persistRelayUrl(url: RelayUrl): Boolean {
         return authenticationCoreManager.getEncryptionKey()?.privateKey?.let { privateKey ->
             persistRelayUrlImpl(url, privateKey)
         } ?: false
     }
 
-    @Synchronized
     suspend fun persistRelayUrlImpl(url: RelayUrl, privateKey: Password): Boolean {
-        val encryptedRelayUrl = try {
-            encryptData(privateKey, UnencryptedString(url.value))
-        } catch (e: Exception) {
-            return false
-        }
+        lock.withLock {
+            val encryptedRelayUrl = try {
+                encryptData(privateKey, UnencryptedString(url.value))
+            } catch (e: Exception) {
+                return false
+            }
 
-        authenticationStorage.putString(RELAY_URL_KEY, encryptedRelayUrl.value)
-        relayUrlCache = url
-        return true
+            authenticationStorage.putString(RELAY_URL_KEY, encryptedRelayUrl.value)
+            relayUrlCache = url
+            return true
+        }
     }
 
-    @Synchronized
     @OptIn(UnencryptedDataAccess::class)
     override suspend fun retrieveRelayUrl(): RelayUrl? {
         return authenticationCoreManager.getEncryptionKey()?.privateKey?.let { privateKey ->
-            relayUrlCache ?: authenticationStorage.getString(RELAY_URL_KEY, null)
-                ?.let { encryptedUrlString ->
-                try {
-                    decryptData(privateKey, EncryptedString(encryptedUrlString))
-                        .value
-                        .let { decryptedUrlString ->
-                            val url = RelayUrl(decryptedUrlString)
-                            relayUrlCache = url
-                            url
+            lock.withLock {
+                relayUrlCache ?: authenticationStorage.getString(RELAY_URL_KEY, null)
+                    ?.let { encryptedUrlString ->
+                        try {
+                            decryptData(privateKey, EncryptedString(encryptedUrlString))
+                                .value
+                                .let { decryptedUrlString ->
+                                    val url = RelayUrl(decryptedUrlString)
+                                    relayUrlCache = url
+                                    url
+                                }
+                        } catch (e: Exception) {
+                            null
                         }
-                } catch (e: Exception) {
-                    null
-                }
+                    }
             }
         }
     }
 
-    @Synchronized
     override suspend fun persistJavaWebToken(token: JavaWebToken?): Boolean {
         return authenticationCoreManager.getEncryptionKey()?.privateKey?.let { privateKey ->
             persistJavaWebTokenImpl(token, privateKey)
@@ -136,43 +146,45 @@ class RelayDataHandlerImpl(
      * If sending `null` argument for [token], an empty [Password] is safe to send as this
      * will only clear the token from storage and not encrypt anything.
      * */
-    @Synchronized
     suspend fun persistJavaWebTokenImpl(token: JavaWebToken?, privateKey: Password): Boolean {
-        if (token == null) {
-            authenticationStorage.putString(RELAY_JWT_KEY, null)
-            tokenCache = null
-            return true
-        } else {
-            val encryptedJWT = try {
-                encryptData(privateKey, UnencryptedString(token.value))
-            } catch (e: Exception) {
-                return false
-            }
+        lock.withLock {
+            if (token == null) {
+                authenticationStorage.putString(RELAY_JWT_KEY, null)
+                tokenCache = null
+                return true
+            } else {
+                val encryptedJWT = try {
+                    encryptData(privateKey, UnencryptedString(token.value))
+                } catch (e: Exception) {
+                    return false
+                }
 
-            authenticationStorage.putString(RELAY_JWT_KEY, encryptedJWT.value)
-            tokenCache = token
-            return true
+                authenticationStorage.putString(RELAY_JWT_KEY, encryptedJWT.value)
+                tokenCache = token
+                return true
+            }
         }
     }
 
-    @Synchronized
     @OptIn(UnencryptedDataAccess::class)
     override suspend fun retrieveJavaWebToken(): JavaWebToken? {
         return authenticationCoreManager.getEncryptionKey()?.privateKey?.let { privateKey ->
-            tokenCache ?: authenticationStorage.getString(RELAY_JWT_KEY, null)
-                ?.let { encryptedJwtString ->
-                    try {
-                        decryptData(privateKey, EncryptedString(encryptedJwtString))
-                            .value
-                            .let { decryptedJwtString ->
-                                val token = JavaWebToken(decryptedJwtString)
-                                tokenCache = token
-                                token
-                            }
-                    } catch (e: Exception) {
-                        null
+            lock.withLock {
+                tokenCache ?: authenticationStorage.getString(RELAY_JWT_KEY, null)
+                    ?.let { encryptedJwtString ->
+                        try {
+                            decryptData(privateKey, EncryptedString(encryptedJwtString))
+                                .value
+                                .let { decryptedJwtString ->
+                                    val token = JavaWebToken(decryptedJwtString)
+                                    tokenCache = token
+                                    token
+                                }
+                        } catch (e: Exception) {
+                            null
+                        }
                     }
-                }
+            }
         }
     }
 }
