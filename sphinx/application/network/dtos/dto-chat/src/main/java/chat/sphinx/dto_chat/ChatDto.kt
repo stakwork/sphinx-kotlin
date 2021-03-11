@@ -36,5 +36,6 @@ class ChatDto(
     val feedUrl: FeedUrl?,
     val meta: ChatMetaData?,
     val myPhotoUrl: PhotoUrl?,
-    val myAlias: ChatAlias?
+    val myAlias: ChatAlias?,
+    val pendingContactIds: List<ContactId>,
 )
