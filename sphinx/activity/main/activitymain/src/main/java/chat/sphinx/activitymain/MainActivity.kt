@@ -49,26 +49,34 @@ internal class MainActivity: MotionLayoutNavigationActivity<
         get() = viewModel
 
 
+    companion object {
+        // Setting these here at initial load time will negate the need to query the view
+        // parameters again. This is ok as we're locked to portrait mode, and allows activity
+        // re-creation after the first call is made to InsetterActivity.
+        private var statusBarInsets: InsetPadding? = null
+        private var navigationBarInsets: InsetPadding? = null
+    }
+
     override val statusBarInsetHeight: InsetPadding by lazy(LazyThreadSafetyMode.NONE) {
-        binding.layoutConstraintMainStatusBar.let {
+        statusBarInsets ?: binding.layoutConstraintMainStatusBar.let {
             InsetPadding(
                 it.paddingLeft,
                 it.paddingRight,
                 it.paddingTop,
                 it.paddingBottom
             )
-        }
+        }.also { statusBarInsets = it }
     }
 
     override val navigationBarInsetHeight: InsetPadding by lazy(LazyThreadSafetyMode.NONE) {
-        binding.layoutConstraintMainNavigationBar.let {
+        navigationBarInsets ?: binding.layoutConstraintMainNavigationBar.let {
             InsetPadding(
                 it.paddingLeft,
                 it.paddingRight,
                 it.paddingTop,
                 it.paddingBottom
             )
-        }
+        }.also { navigationBarInsets = it }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
