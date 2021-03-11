@@ -15,7 +15,7 @@ sealed class ChatMuted {
         /**
          * Converts the integer value returned over the wire to an object.
          *
-         * @throws [IllegalArgumentException] if the muted integer is not supported
+         * @throws [IllegalArgumentException] if the [muted] integer is not supported
          * */
         fun fromInt(muted: Int?): ChatMuted =
             when (muted) {

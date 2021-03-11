@@ -11,6 +11,11 @@ sealed class ChatSeen {
         private const val SEEN = 1
         private const val UNSEEN = 0
 
+        /**
+         * Converts the integer value returned over the wire to an object.
+         *
+         * @throws [IllegalArgumentException] if the [seen] integer is not supported
+         * */
         fun fromInt(seen: Int): ChatSeen =
             when (seen) {
                 SEEN -> {

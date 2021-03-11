@@ -16,7 +16,7 @@ sealed class ChatType {
         /**
          * Converts the integer value returned over the wire to an object.
          *
-         * @throws [IllegalArgumentException] if the chat type is not supported
+         * @throws [IllegalArgumentException] if the [type] integer is not supported
          * */
         @Throws(IllegalArgumentException::class)
         fun fromInt(type: Int): ChatType =

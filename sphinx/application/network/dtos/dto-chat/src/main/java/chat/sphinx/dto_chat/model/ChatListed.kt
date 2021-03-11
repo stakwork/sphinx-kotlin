@@ -14,7 +14,7 @@ sealed class ChatListed {
         /**
          * Converts the integer value returned over the wire to an object.
          *
-         * @throws [IllegalArgumentException] if the unlisted type is not supported
+         * @throws [IllegalArgumentException] if the [unlisted] integer is not supported
          * */
         fun fromInt(unlisted: Int): ChatListed =
             when (unlisted) {

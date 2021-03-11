@@ -12,6 +12,11 @@ sealed class ChatPrivate {
         private const val PRIVATE = 1
         private const val NOT_PRIVATE = 0
 
+        /**
+         * Converts the integer value returned over the wire to an object.
+         *
+         * @throws [IllegalArgumentException] if the [private] integer is not supported
+         * */
         fun fromInt(private: Int?): ChatPrivate =
             when (private) {
                 null,

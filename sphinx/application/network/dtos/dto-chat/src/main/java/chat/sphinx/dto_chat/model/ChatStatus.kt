@@ -20,7 +20,7 @@ sealed class ChatStatus {
         /**
          * Converts the integer value returned over the wire to an object.
          *
-         * @throws [IllegalArgumentException] if the chat status is not supported
+         * @throws [IllegalArgumentException] if the [status] integer is not supported
          * */
         fun fromInt(status: Int?): ChatStatus =
             when (status) {
