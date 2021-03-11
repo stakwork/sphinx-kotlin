@@ -1,17 +1,22 @@
-package chat.sphinx.dto_chat.model
+package chat.sphinx.dto_common
 
 /**
  * Comes off the wire as:
  *  - 0 (Not Deleted)
  *  - 1 (Deleted)
  * */
-sealed class ChatDeleted {
+sealed class Deleted {
 
     companion object {
         private const val DELETED = 1
         private const val NOT_DELETED = 0
 
-        fun fromInt(deleted: Int): ChatDeleted =
+        /**
+         * Converts the integer value returned over the wire to an object.
+         *
+         * @throws [IllegalArgumentException] if the [deleted] integer is not supported
+         * */
+        fun fromInt(deleted: Int): Deleted =
             when (deleted) {
                 DELETED -> {
                     True
@@ -21,7 +26,7 @@ sealed class ChatDeleted {
                 }
                 else -> {
                     throw IllegalArgumentException(
-                        "ChatDeleted for integer '$deleted' not supported"
+                        "Deleted for integer '$deleted' not supported"
                     )
                 }
             }
@@ -29,12 +34,12 @@ sealed class ChatDeleted {
 
     abstract val value: Int
 
-    object True: ChatDeleted() {
+    object True: Deleted() {
         override val value: Int
             get() = DELETED
     }
 
-    object False: ChatDeleted(){
+    object False: Deleted(){
         override val value: Int
             get() = NOT_DELETED
     }

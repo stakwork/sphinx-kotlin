@@ -3,6 +3,7 @@ package chat.sphinx.dto_chat
 import chat.sphinx.dto_chat.model.*
 import chat.sphinx.dto_common.DateTime
 import chat.sphinx.dto_chat.model.ChatGroupKey
+import chat.sphinx.dto_common.Deleted
 import chat.sphinx.dto_common.PhotoUrl
 import chat.sphinx.dto_common.Sats
 import chat.sphinx.dto_common.chat.ChatId
@@ -20,7 +21,7 @@ class ChatDto(
     val isMuted: ChatMuted,
     val createdAt: DateTime,
     val updatedAt: DateTime,
-    val deleted: ChatDeleted,
+    val deleted: Deleted,
     val groupKey: ChatGroupKey?,
     val host: ChatHost?,
     val priceToJoin: Sats,
