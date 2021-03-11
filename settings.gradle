@@ -13,8 +13,8 @@ include ':sphinx:application:data:concepts:concept-relay'
 include ':sphinx:application:data:features:feature-relay'
 
 include ':sphinx:application:network:concepts:concept-queries'
-include ':sphinx:application:network:dtos:common'
-include ':sphinx:application:network:dtos:chat-dtos'
+include ':sphinx:application:network:dtos:dto-common'
+include ':sphinx:application:network:dtos:dto-chat'
 
 // Activity
 include ':sphinx:activity:hilt-qualifiers'
