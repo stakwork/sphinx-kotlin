@@ -10,6 +10,8 @@ import io.matthewnelson.k_openssl_common.annotations.RawPasswordAccess
 import io.matthewnelson.k_openssl_common.clazzes.Password
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 class BackgroundLoginHandlerImpl(
     private val authenticationManager: AuthenticationCoreManager,
@@ -26,7 +28,8 @@ class BackgroundLoginHandlerImpl(
         private var timeoutSettingsCache: Int? = null
     }
 
-    @Synchronized
+    private val lock = Mutex()
+
     override suspend fun attemptBackgroundLogin(
         updateLastLoginTimeOnSuccess: Boolean
     ): EncryptionKey? {
@@ -36,115 +39,127 @@ class BackgroundLoginHandlerImpl(
             if (updateLastLoginTimeOnSuccess) {
                 timeoutSettingsCache?.let { timeout ->
                     // if our cache isn't null, update our string with the new login time
-                    updateSettingsImpl(timeout, encryptionKey)
+                    lock.withLock {
+                        updateSettingsImpl(timeout, encryptionKey)
+                    }
                 } ?: updateLoginTime()
             }
             return encryptionKey
         }
 
-        // Try to pull key from AuthenticationStorage and login with it
-        return authenticationStorage.getString(BACKGROUND_LOGIN_KEY, null)?.let { bgLoginString ->
 
-            bgLoginString.split(DELIMINATOR).let { splits ->
+        lock.withLock {
+            // Try to pull key from AuthenticationStorage and login with it
+            return authenticationStorage.getString(BACKGROUND_LOGIN_KEY, null)?.let { bgLoginString ->
 
-                splits.elementAtOrNull(0)?.let { timeoutSettingHours ->
+                bgLoginString.split(DELIMINATOR).let { splits ->
 
-                    // update cache while we're here
-                    timeoutSettingsCache = timeoutSettingHours.toInt()
+                    splits.elementAtOrNull(0)?.let { timeoutSettingHours ->
 
-                    splits.elementAtOrNull(1)?.let { lastLoginTimeMillis ->
+                        // update cache while we're here
+                        timeoutSettingsCache = timeoutSettingHours.toInt()
 
-                        splits.elementAtOrNull(2)?.let { privateKeyString ->
+                        splits.elementAtOrNull(1)?.let { lastLoginTimeMillis ->
 
-                            when {
-                                privateKeyString == NULL -> {
-                                    null
-                                }
-                                timeoutSettingHours.toInt() == 0 -> {
-                                    // private key string is not NULL, so clear it.
-                                    updateSettingsImpl(0, null)
-                                    null
-                                }
-                                (System.currentTimeMillis() - lastLoginTimeMillis.toLong()) <
-                                        (timeoutSettingHours.toLong() * 3_600_000) -> {
+                            splits.elementAtOrNull(2)?.let { privateKeyString ->
 
-                                    val privateKey = Password(privateKeyString.toCharArray())
-                                    val request = AuthenticationRequest.LogIn(privateKey)
-                                    authenticationManager.authenticate(
-                                        privateKey,
-                                        request
-                                    ).firstOrNull().let { response ->
-                                        if (response is AuthenticationResponse.Success.Key) {
-                                            // Update our persisted string value with new
-                                            // login time.
-                                            if (updateLastLoginTimeOnSuccess) {
+                                when {
+                                    privateKeyString == NULL -> {
+                                        null
+                                    }
+                                    timeoutSettingHours.toInt() == 0 -> {
+                                        // private key string is not NULL, so clear it.
+                                        updateSettingsImpl(0, null)
+                                        null
+                                    }
+                                    (System.currentTimeMillis() - lastLoginTimeMillis.toLong()) <
+                                            (timeoutSettingHours.toLong() * 3_600_000) -> {
+
+                                        val privateKey = Password(privateKeyString.toCharArray())
+                                        val request = AuthenticationRequest.LogIn(privateKey)
+                                        authenticationManager.authenticate(
+                                            privateKey,
+                                            request
+                                        ).firstOrNull().let { response ->
+                                            if (response is AuthenticationResponse.Success.Key) {
+                                                // Update our persisted string value with new
+                                                // login time.
+                                                if (updateLastLoginTimeOnSuccess) {
+                                                    updateSettingsImpl(
+                                                        timeoutSettingHours.toInt(),
+                                                        response.encryptionKey
+                                                    )
+                                                }
+                                                response.encryptionKey
+                                            } else {
+                                                // Error validating the private key stored here
+                                                // to login with, so clear it to require user
+                                                // authentication
                                                 updateSettingsImpl(
                                                     timeoutSettingHours.toInt(),
-                                                    response.encryptionKey
+                                                    null
                                                 )
+                                                null
                                             }
-                                            response.encryptionKey
-                                        } else {
-                                            // Error validating the private key stored here
-                                            // to login with, so clear it to require user
-                                            // authentication
-                                            updateSettingsImpl(timeoutSettingHours.toInt(), null)
-                                            null
                                         }
+
                                     }
-
+                                    else -> {
+                                        // private key string is not null, so clear it.
+                                        updateSettingsImpl(timeoutSettingHours.toInt(), null)
+                                        null
+                                    }
                                 }
-                                else -> {
-                                    // private key string is not null, so clear it.
-                                    updateSettingsImpl(timeoutSettingHours.toInt(), null)
-                                    null
-                                }
-                            }
 
-                        } // private key string was null
+                            } // private key string was null
 
-                    } // last login time was null
+                        } // last login time was null
 
-                } // timeout settings was null
+                    } // timeout settings was null
+
+                }
 
             }
         }
     }
 
-    @Synchronized
     override suspend fun updateLoginTime(): Boolean {
         return authenticationManager.getEncryptionKey()?.let { encryptionKey ->
             // We're logged in and can update the setting, otherwise, don't
-            val timeoutSetting = timeoutSettingsCache
-                ?: authenticationStorage.getString(BACKGROUND_LOGIN_KEY, null)
-                    ?.split(DELIMINATOR)
-                    ?.elementAtOrNull(0)
-                    ?.toInt()
-                ?: DEFAULT_TIMEOUT
+            lock.withLock {
+                val timeoutSetting = timeoutSettingsCache
+                    ?: authenticationStorage.getString(BACKGROUND_LOGIN_KEY, null)
+                        ?.split(DELIMINATOR)
+                        ?.elementAtOrNull(0)
+                        ?.toInt()
+                    ?: DEFAULT_TIMEOUT
 
-            updateSettingsImpl(timeoutSetting, encryptionKey)
-            true
+                updateSettingsImpl(timeoutSetting, encryptionKey)
+                true
+            }
         } ?: false
     }
 
-    @Synchronized
     override suspend fun getTimeOutSetting(): Int {
-        return timeoutSettingsCache ?: let {
-            authenticationStorage.getString(BACKGROUND_LOGIN_KEY, null)
-                ?.split(DELIMINATOR)
-                ?.elementAtOrNull(0)
-                ?.toInt()
-                ?: DEFAULT_TIMEOUT
-                    .also { timeoutSettingsCache = it }
+        return lock.withLock {
+            timeoutSettingsCache ?: let {
+                authenticationStorage.getString(BACKGROUND_LOGIN_KEY, null)
+                    ?.split(DELIMINATOR)
+                    ?.elementAtOrNull(0)
+                    ?.toInt()
+                    ?: DEFAULT_TIMEOUT
+                        .also { timeoutSettingsCache = it }
+            }
         }
     }
 
-    @Synchronized
     override suspend fun updateSetting(pinTimeOutHours: Int): Boolean {
         return authenticationManager.getEncryptionKey()?.let { encryptionKey ->
-            // We're logged in and can update the setting, otherwise, don't
-            updateSettingsImpl(pinTimeOutHours, encryptionKey)
-            true
+            lock.withLock {
+                // We're logged in and can update the setting, otherwise, don't
+                updateSettingsImpl(pinTimeOutHours, encryptionKey)
+                true
+            }
         } ?: false
     }
 
