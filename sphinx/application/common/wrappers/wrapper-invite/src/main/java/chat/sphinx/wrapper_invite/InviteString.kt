@@ -1,4 +1,4 @@
-package chat.sphinx.dto_invite.model
+package chat.sphinx.wrapper_invite
 
 inline class InviteString(val value: String) {
     init {

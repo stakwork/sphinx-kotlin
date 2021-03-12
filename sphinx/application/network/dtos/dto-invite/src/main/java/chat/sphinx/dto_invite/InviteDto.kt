@@ -4,9 +4,9 @@ import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_common.lightning.Sats
 import chat.sphinx.wrapper_common.contact.ContactId
 import chat.sphinx.wrapper_common.invite.InviteId
-import chat.sphinx.dto_invite.model.InviteStatus
-import chat.sphinx.dto_invite.model.InviteString
-import chat.sphinx.dto_invite.model.LNInvoice
+import chat.sphinx.wrapper_invite.InviteStatus
+import chat.sphinx.wrapper_invite.InviteString
+import chat.sphinx.wrapper_common.lightning.LNInvoice
 
 class InviteDto(
     val id: InviteId,
