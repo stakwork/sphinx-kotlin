@@ -1,4 +1,4 @@
-package chat.sphinx.dto_common.contact
+package chat.sphinx.dto_contact.model
 
 inline class ContactAlias(val value: String) {
     init {
