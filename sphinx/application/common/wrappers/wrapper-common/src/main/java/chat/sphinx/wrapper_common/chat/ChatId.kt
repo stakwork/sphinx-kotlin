@@ -1,4 +1,4 @@
-package chat.sphinx.dto_common.chat
+package chat.sphinx.wrapper_common.chat
 
 inline class ChatId(val value: Long) {
     init {

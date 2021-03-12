@@ -1,4 +1,4 @@
-package chat.sphinx.dto_common.contact
+package chat.sphinx.wrapper_common.contact
 
 inline class ContactId(val value: Long) {
     init {

@@ -6,7 +6,7 @@ plugins {
 
 dependencies {
     api project(path: ':sphinx:application:network:concepts:concept-queries')
-    api project(path: ':sphinx:application:network:dtos:dto-common')
+    api project(path: ':sphinx:application:common:wrappers:wrapper-common')
     api project(path: ':sphinx:application:network:dtos:dto-invite')
     implementation deps.square.moshi
     kapt kaptDeps.square.moshiCodegen

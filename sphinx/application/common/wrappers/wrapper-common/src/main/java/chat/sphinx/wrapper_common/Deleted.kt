@@ -1,4 +1,4 @@
-package chat.sphinx.dto_common
+package chat.sphinx.wrapper_common
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun Deleted.isTrue(): Boolean =

@@ -1,4 +1,4 @@
-package chat.sphinx.dto_common
+package chat.sphinx.wrapper_common.lightning
 
 inline class Sats(val value: Long) {
     init {

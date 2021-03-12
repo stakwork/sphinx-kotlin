@@ -1,4 +1,4 @@
-package chat.sphinx.dto_common
+package chat.sphinx.wrapper_common
 
 inline class PhotoUrl(val value: String) {
     init {

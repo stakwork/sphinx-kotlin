@@ -1,4 +1,4 @@
-package chat.sphinx.dto_common
+package chat.sphinx.wrapper_common
 
 // TODO: Write extension functions.
 //  Contact and Chat Dto fields 'created_at' and 'updated_at'

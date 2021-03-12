@@ -1,4 +1,4 @@
-package chat.sphinx.dto_common.invite
+package chat.sphinx.wrapper_common.invite
 
 inline class InviteId(val value: Long) {
     init {

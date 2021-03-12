@@ -1,9 +1,9 @@
 package chat.sphinx.dto_invite
 
-import chat.sphinx.dto_common.DateTime
-import chat.sphinx.dto_common.Sats
-import chat.sphinx.dto_common.contact.ContactId
-import chat.sphinx.dto_common.invite.InviteId
+import chat.sphinx.wrapper_common.DateTime
+import chat.sphinx.wrapper_common.lightning.Sats
+import chat.sphinx.wrapper_common.contact.ContactId
+import chat.sphinx.wrapper_common.invite.InviteId
 import chat.sphinx.dto_invite.model.InviteStatus
 import chat.sphinx.dto_invite.model.InviteString
 import chat.sphinx.dto_invite.model.LNInvoice

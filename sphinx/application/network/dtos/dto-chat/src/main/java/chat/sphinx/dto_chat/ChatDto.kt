@@ -2,10 +2,13 @@ package chat.sphinx.dto_chat
 
 import chat.sphinx.dto_chat.model.*
 import chat.sphinx.dto_chat.model.ChatGroupKey
-import chat.sphinx.dto_common.*
-import chat.sphinx.dto_common.chat.ChatId
-import chat.sphinx.dto_common.contact.ContactId
-import chat.sphinx.dto_common.contact.NodePubKey
+import chat.sphinx.wrapper_common.DateTime
+import chat.sphinx.wrapper_common.Deleted
+import chat.sphinx.wrapper_common.PhotoUrl
+import chat.sphinx.wrapper_common.chat.ChatId
+import chat.sphinx.wrapper_common.contact.ContactId
+import chat.sphinx.wrapper_common.lightning.NodePubKey
+import chat.sphinx.wrapper_common.lightning.Sats
 
 // TODO: Move to Presenter Object
 //@Suppress("NOTHING_TO_INLINE")

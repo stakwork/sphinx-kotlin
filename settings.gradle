@@ -17,7 +17,6 @@ include ':sphinx:application:data:concepts:concept-relay'
 include ':sphinx:application:data:features:feature-relay'
 
 include ':sphinx:application:network:concepts:concept-queries'
-include ':sphinx:application:network:dtos:dto-common'
 include ':sphinx:application:network:dtos:dto-chat'
 include ':sphinx:application:network:dtos:dto-contact'
 include ':sphinx:application:network:dtos:dto-invite'
