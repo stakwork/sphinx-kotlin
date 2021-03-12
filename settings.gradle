@@ -10,6 +10,7 @@ include ':sphinx:application:common:wrappers:wrapper-chat'
 include ':sphinx:application:common:wrappers:wrapper-common'
 include ':sphinx:application:common:wrappers:wrapper-contact'
 include ':sphinx:application:common:wrappers:wrapper-invite'
+include ':sphinx:application:common:wrappers:wrapper-message'
 
 include ':sphinx:application:data:concepts:concept-background-login'
 include ':sphinx:application:data:features:feature-background-login'
@@ -20,6 +21,7 @@ include ':sphinx:application:network:concepts:concept-queries'
 include ':sphinx:application:network:dtos:dto-chat'
 include ':sphinx:application:network:dtos:dto-contact'
 include ':sphinx:application:network:dtos:dto-invite'
+include ':sphinx:application:network:dtos:dto-message'
 
 // Activity
 include ':sphinx:activity:hilt-qualifiers'
