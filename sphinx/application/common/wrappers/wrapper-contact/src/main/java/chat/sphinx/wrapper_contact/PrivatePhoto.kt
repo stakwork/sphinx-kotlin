@@ -16,7 +16,8 @@ inline fun Int?.toPrivatePhoto(): PrivatePhoto =
         PrivatePhoto.PRIVATE -> {
             PrivatePhoto.True
         }
-        null, PrivatePhoto.NOT_PRIVATE -> {
+        null,
+        PrivatePhoto.NOT_PRIVATE -> {
             PrivatePhoto.False
         }
         else -> {

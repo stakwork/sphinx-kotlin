@@ -27,7 +27,7 @@ inline fun Int.toChatSeen(): ChatSeen =
     }
 
 /**
- * Comes off the wier as:
+ * Comes off the wire as:
  *  - 0 (Unseen)
  *  - 1 (Seen)
  * */

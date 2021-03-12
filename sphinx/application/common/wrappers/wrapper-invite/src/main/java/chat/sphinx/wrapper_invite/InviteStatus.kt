@@ -74,6 +74,8 @@ inline fun Int.toInviteStatus(): InviteStatus =
  *  - 4 (Complete)
  *  - 5 (Expired)
  *  - 6 (PaymentPending)
+ *
+ *  https://github.com/stakwork/sphinx-relay/blob/7f8fd308101b5c279f6aac070533519160aa4a9f/src/constants.ts#L3
  * */
 sealed class InviteStatus {
 

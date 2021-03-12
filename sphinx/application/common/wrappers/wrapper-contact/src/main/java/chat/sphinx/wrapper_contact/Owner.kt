@@ -28,7 +28,7 @@ inline fun Int.toOwner(): Owner =
 
 /**
  * Comes off the wire as:
- *  - 0 (NotOwner)
+ *  - 0 (Not Owner)
  *  - 1 (Owner)
  * */
 sealed class Owner {

@@ -33,9 +33,11 @@ inline fun Int?.toContactStatus(): ContactStatus =
  *  - 0 (Pending)
  *  - 1 (Confirmed)
  *
- * Pending is used when inviting a new user. When the user signs up using the
- * invite code provided, status changes to 1 (Confirmed) and the contact info is
+ * [Pending] is used when inviting a new user. When the user signs up using the
+ * invite code provided, status changes to 1 ([Confirmed]) and the contact info is
  * updated.
+ *
+ * https://github.com/stakwork/sphinx-relay/blob/7f8fd308101b5c279f6aac070533519160aa4a9f/src/constants.ts#L12
  * */
 sealed class ContactStatus {
 
