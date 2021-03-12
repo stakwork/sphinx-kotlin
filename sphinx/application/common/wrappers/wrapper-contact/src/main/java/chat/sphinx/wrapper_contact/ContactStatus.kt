@@ -1,4 +1,4 @@
-package chat.sphinx.dto_contact.model
+package chat.sphinx.wrapper_contact
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun ContactStatus.isPending(): Boolean =

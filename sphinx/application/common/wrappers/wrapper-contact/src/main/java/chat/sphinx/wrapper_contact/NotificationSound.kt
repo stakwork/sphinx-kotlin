@@ -1,4 +1,4 @@
-package chat.sphinx.dto_contact.model
+package chat.sphinx.wrapper_contact
 
 inline class NotificationSound(val value: String) {
     init {
