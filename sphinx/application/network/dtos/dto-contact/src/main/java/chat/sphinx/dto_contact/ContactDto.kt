@@ -5,8 +5,9 @@ import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_common.Deleted
 import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.contact.ContactId
-import chat.sphinx.wrapper_common.lightning.NodePubKey
-import chat.sphinx.wrapper_common.lightning.Sats
+import chat.sphinx.wrapper_common.lightning.LightningNodeAlias
+import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
+import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_contact.*
 
 // TODO: Move to Presenter Object
@@ -28,8 +29,9 @@ import chat.sphinx.wrapper_contact.*
 
 class ContactDto(
     val id: ContactId,
-    val pubKey: NodePubKey,
-    val nodeAlias: NodeAlias?,
+//    val routHint: String?,
+    val pubKey: LightningNodePubKey,
+    val nodeAlias: LightningNodeAlias?,
     val alias: ContactAlias,
     val photoUrl: PhotoUrl?,
     val privatePhoto: PrivatePhoto,
@@ -45,6 +47,6 @@ class ContactDto(
     val fromGroup: ContactFromGroup,
     val notificationSound: NotificationSound?,
     val lastActive: DateTime?,
-    val tipAmount: Sats?,
+    val tipAmount: Sat?,
     val invite: InviteDto?,
 )

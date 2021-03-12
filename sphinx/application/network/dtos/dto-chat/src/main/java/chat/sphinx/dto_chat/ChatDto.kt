@@ -7,8 +7,8 @@ import chat.sphinx.wrapper_common.Deleted
 import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.chat.ChatId
 import chat.sphinx.wrapper_common.contact.ContactId
-import chat.sphinx.wrapper_common.lightning.NodePubKey
-import chat.sphinx.wrapper_common.lightning.Sats
+import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
+import chat.sphinx.wrapper_common.lightning.Sat
 
 // TODO: Move to Presenter Object
 //@Suppress("NOTHING_TO_INLINE")
@@ -49,18 +49,19 @@ class ChatDto(
     val deleted: Deleted,
     val groupKey: ChatGroupKey?,
     val host: ChatHost?,
-    val priceToJoin: Sats,
-    val pricePerMessage: Sats,
-    val escrowAmount: Sats,
-    val escrowMillis: Long,
+    val priceToJoin: Sat,
+    val pricePerMessage: Sat,
+    val escrowAmount: Sat,
+    val escrowMillis: Long, // milliseconds
     val unlisted: ChatListed,
     val private: ChatPrivate,
-    val ownerPubKey: NodePubKey?,
+    val ownerPubKey: LightningNodePubKey?,
     val seen: ChatSeen,
     val appUrl: AppUrl?,
     val feedUrl: FeedUrl?,
     val meta: ChatMetaData?,
     val myPhotoUrl: PhotoUrl?,
     val myAlias: ChatAlias?,
-    val pendingContactIds: List<ContactId>,
+//    val skipBroadcastJoins: Boolean,
+    val pendingContactIds: List<ContactId>?,
 )
