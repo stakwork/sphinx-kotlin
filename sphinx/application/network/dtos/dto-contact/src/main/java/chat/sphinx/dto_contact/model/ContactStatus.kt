@@ -25,6 +25,7 @@ sealed class ContactStatus {
          *
          * @throws [IllegalArgumentException] if the [status] integer is not supported
          * */
+        @Throws(IllegalArgumentException::class)
         fun fromInt(status: Int?): ContactStatus =
             when (status) {
                 null, // the only time null is sent, is for the owner account

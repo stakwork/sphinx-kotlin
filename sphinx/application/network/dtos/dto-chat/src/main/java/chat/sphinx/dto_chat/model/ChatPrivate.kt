@@ -21,6 +21,7 @@ sealed class ChatPrivate {
          *
          * @throws [IllegalArgumentException] if the [private] integer is not supported
          * */
+        @Throws(IllegalArgumentException::class)
         fun fromInt(private: Int?): ChatPrivate =
             when (private) {
                 null,

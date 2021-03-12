@@ -22,6 +22,7 @@ sealed class ChatStatus {
          *
          * @throws [IllegalArgumentException] if the [status] integer is not supported
          * */
+        @Throws(IllegalArgumentException::class)
         fun fromInt(status: Int?): ChatStatus =
             when (status) {
                 null,

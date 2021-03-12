@@ -25,6 +25,7 @@ sealed class ContactFromGroup {
          *
          * @throws [IllegalArgumentException] if the [fromGroup] integer is not supported
          * */
+        @Throws(IllegalArgumentException::class)
         fun fromInt(fromGroup: Int): ContactFromGroup =
             when (fromGroup) {
                 FROM_GROUP -> {

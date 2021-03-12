@@ -20,6 +20,7 @@ sealed class ChatSeen {
          *
          * @throws [IllegalArgumentException] if the [seen] integer is not supported
          * */
+        @Throws(IllegalArgumentException::class)
         fun fromInt(seen: Int): ChatSeen =
             when (seen) {
                 SEEN -> {

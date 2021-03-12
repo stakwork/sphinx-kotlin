@@ -4,21 +4,22 @@ import chat.sphinx.dto_common.*
 import chat.sphinx.dto_common.contact.*
 import chat.sphinx.dto_contact.model.*
 
-@Suppress("NOTHING_TO_INLINE")
-inline fun ContactDto.isOwner(): Boolean =
-    isOwner.isTrue()
-
-@Suppress("NOTHING_TO_INLINE")
-inline fun ContactDto.photoIsPrivate(): Boolean =
-    privatePhoto.isTrue()
-
-@Suppress("NOTHING_TO_INLINE")
-inline fun ContactDto.isDeleted(): Boolean =
-    deleted.isTrue()
-
-@Suppress("NOTHING_TO_INLINE")
-inline fun ContactDto.isFromGroup(): Boolean =
-    fromGroup.isTrue()
+// TODO: Move to Presenter Object
+//@Suppress("NOTHING_TO_INLINE")
+//inline fun ContactDto.isOwner(): Boolean =
+//    isOwner.isTrue()
+//
+//@Suppress("NOTHING_TO_INLINE")
+//inline fun ContactDto.photoIsPrivate(): Boolean =
+//    privatePhoto.isTrue()
+//
+//@Suppress("NOTHING_TO_INLINE")
+//inline fun ContactDto.isDeleted(): Boolean =
+//    deleted.isTrue()
+//
+//@Suppress("NOTHING_TO_INLINE")
+//inline fun ContactDto.isFromGroup(): Boolean =
+//    fromGroup.isTrue()
 
 class ContactDto(
     val id: ContactId,

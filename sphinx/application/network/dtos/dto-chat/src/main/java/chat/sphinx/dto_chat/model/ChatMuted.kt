@@ -21,6 +21,7 @@ sealed class ChatMuted {
          *
          * @throws [IllegalArgumentException] if the [muted] integer is not supported
          * */
+        @Throws(IllegalArgumentException::class)
         fun fromInt(muted: Int?): ChatMuted =
             when (muted) {
                 MUTED -> {

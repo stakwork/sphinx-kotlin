@@ -20,6 +20,7 @@ sealed class ChatListed {
          *
          * @throws [IllegalArgumentException] if the [unlisted] integer is not supported
          * */
+        @Throws(IllegalArgumentException::class)
         fun fromInt(unlisted: Int): ChatListed =
             when (unlisted) {
                 LISTED -> {

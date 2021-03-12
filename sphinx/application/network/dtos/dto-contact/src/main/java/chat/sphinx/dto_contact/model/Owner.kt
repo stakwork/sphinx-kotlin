@@ -1,7 +1,5 @@
 package chat.sphinx.dto_contact.model
 
-import java.lang.IllegalArgumentException
-
 @Suppress("NOTHING_TO_INLINE")
 inline fun Owner.isTrue(): Boolean =
     this is Owner.True
@@ -17,6 +15,7 @@ sealed class Owner {
          *
          * @throws [IllegalArgumentException] if the [owner] integer is not supported
          * */
+        @Throws(IllegalArgumentException::class)
         fun fromInt(owner: Int): Owner =
             when (owner) {
                 OWNER -> {

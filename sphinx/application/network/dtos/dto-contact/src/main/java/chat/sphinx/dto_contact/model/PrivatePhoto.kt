@@ -21,6 +21,7 @@ sealed class PrivatePhoto {
          *
          * @throws [IllegalArgumentException] if the [privatePhoto] integer is not supported
          * */
+        @Throws(IllegalArgumentException::class)
         fun fromInt(privatePhoto: Int?): PrivatePhoto =
             when (privatePhoto) {
                 PRIVATE -> {

@@ -7,29 +7,30 @@ import chat.sphinx.dto_common.chat.ChatId
 import chat.sphinx.dto_common.contact.ContactId
 import chat.sphinx.dto_common.contact.NodePubKey
 
-@Suppress("NOTHING_TO_INLINE")
-inline fun ChatDto.isMuted(): Boolean =
-    isMuted.isTrue()
-
-@Suppress("NOTHING_TO_INLINE")
-inline fun ChatDto.isDeleted(): Boolean =
-    deleted.isTrue()
-
-@Suppress("NOTHING_TO_INLINE")
-inline fun ChatDto.isListed(): Boolean =
-    unlisted.isTrue()
-
-@Suppress("NOTHING_TO_INLINE")
-inline fun ChatDto.isPrivate(): Boolean =
-    private.isTrue()
-
-@Suppress("NOTHING_TO_INLINE")
-inline fun ChatDto.hasBeenSeen(): Boolean =
-    seen.isTrue()
-
-@Suppress("NOTHING_TO_INLINE")
-inline fun ChatDto.hasPendingContacts(): Boolean =
-    pendingContactIds.isNotEmpty()
+// TODO: Move to Presenter Object
+//@Suppress("NOTHING_TO_INLINE")
+//inline fun ChatDto.isMuted(): Boolean =
+//    isMuted.isTrue()
+//
+//@Suppress("NOTHING_TO_INLINE")
+//inline fun ChatDto.isDeleted(): Boolean =
+//    deleted.isTrue()
+//
+//@Suppress("NOTHING_TO_INLINE")
+//inline fun ChatDto.isListed(): Boolean =
+//    unlisted.isTrue()
+//
+//@Suppress("NOTHING_TO_INLINE")
+//inline fun ChatDto.isPrivate(): Boolean =
+//    private.isTrue()
+//
+//@Suppress("NOTHING_TO_INLINE")
+//inline fun ChatDto.hasBeenSeen(): Boolean =
+//    seen.isTrue()
+//
+//@Suppress("NOTHING_TO_INLINE")
+//inline fun ChatDto.hasPendingContacts(): Boolean =
+//    pendingContactIds.isNotEmpty()
 
 class ChatDto(
     val id: ChatId,
