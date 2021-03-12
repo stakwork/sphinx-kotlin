@@ -3,6 +3,7 @@ package chat.sphinx.dto_contact
 import chat.sphinx.dto_common.*
 import chat.sphinx.dto_common.contact.*
 import chat.sphinx.dto_contact.model.*
+import chat.sphinx.dto_invite.InviteDto
 
 // TODO: Move to Presenter Object
 //@Suppress("NOTHING_TO_INLINE")
@@ -41,5 +42,5 @@ class ContactDto(
     val notificationSound: NotificationSound?,
     val lastActive: DateTime?,
     val tipAmount: Sats?,
-//    val invite: InviteDto?, // TODO: Create InviteDto
+    val invite: InviteDto?,
 )
