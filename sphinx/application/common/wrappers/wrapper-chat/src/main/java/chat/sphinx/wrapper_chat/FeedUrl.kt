@@ -1,4 +1,4 @@
-package chat.sphinx.dto_chat.model
+package chat.sphinx.wrapper_chat
 
 inline class FeedUrl(val value: String) {
     init {

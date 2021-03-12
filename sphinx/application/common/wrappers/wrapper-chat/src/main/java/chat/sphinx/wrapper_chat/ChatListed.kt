@@ -1,4 +1,4 @@
-package chat.sphinx.dto_chat.model
+package chat.sphinx.wrapper_chat
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun ChatListed.isTrue(): Boolean =

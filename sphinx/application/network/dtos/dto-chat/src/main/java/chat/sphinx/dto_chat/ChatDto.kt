@@ -1,7 +1,7 @@
 package chat.sphinx.dto_chat
 
-import chat.sphinx.dto_chat.model.*
-import chat.sphinx.dto_chat.model.ChatGroupKey
+import chat.sphinx.wrapper_chat.ChatGroupKey
+import chat.sphinx.wrapper_chat.*
 import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_common.Deleted
 import chat.sphinx.wrapper_common.PhotoUrl

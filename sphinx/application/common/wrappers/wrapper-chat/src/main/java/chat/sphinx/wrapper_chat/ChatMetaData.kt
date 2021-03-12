@@ -1,4 +1,4 @@
-package chat.sphinx.dto_chat.model
+package chat.sphinx.wrapper_chat
 
 // TODO: build out
 class ChatMetaData
