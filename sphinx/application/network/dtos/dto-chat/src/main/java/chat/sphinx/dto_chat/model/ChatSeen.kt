@@ -5,6 +5,28 @@ inline fun ChatSeen.isTrue(): Boolean =
     this is ChatSeen.True
 
 /**
+ * Converts the integer value returned over the wire to an object.
+ *
+ * @throws [IllegalArgumentException] if the integer is not supported
+ * */
+@Suppress("NOTHING_TO_INLINE")
+@Throws(IllegalArgumentException::class)
+inline fun Int.toChatSeen(): ChatSeen =
+    when (this) {
+        ChatSeen.SEEN -> {
+            ChatSeen.True
+        }
+        ChatSeen.UNSEEN -> {
+            ChatSeen.False
+        }
+        else -> {
+            throw IllegalArgumentException(
+                "ChatSeen for integer '$this' not supported"
+            )
+        }
+    }
+
+/**
  * Comes off the wier as:
  *  - 0 (Unseen)
  *  - 1 (Seen)
@@ -12,29 +34,8 @@ inline fun ChatSeen.isTrue(): Boolean =
 sealed class ChatSeen {
 
     companion object {
-        private const val SEEN = 1
-        private const val UNSEEN = 0
-
-        /**
-         * Converts the integer value returned over the wire to an object.
-         *
-         * @throws [IllegalArgumentException] if the [seen] integer is not supported
-         * */
-        @Throws(IllegalArgumentException::class)
-        fun fromInt(seen: Int): ChatSeen =
-            when (seen) {
-                SEEN -> {
-                    True
-                }
-                UNSEEN -> {
-                    False
-                }
-                else -> {
-                    throw IllegalArgumentException(
-                        "ChatSeen for integer '$seen' not supported"
-                    )
-                }
-            }
+        const val SEEN = 1
+        const val UNSEEN = 0
     }
 
     abstract val value: Int

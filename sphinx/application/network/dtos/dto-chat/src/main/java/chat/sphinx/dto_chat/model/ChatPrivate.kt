@@ -5,6 +5,29 @@ inline fun ChatPrivate.isTrue(): Boolean =
     this is ChatPrivate.True
 
 /**
+ * Converts the integer value returned over the wire to an object.
+ *
+ * @throws [IllegalArgumentException] if the integer is not supported
+ * */
+@Suppress("NOTHING_TO_INLINE")
+@Throws(IllegalArgumentException::class)
+inline fun Int?.toChatPrivate(): ChatPrivate =
+    when (this) {
+        null,
+        ChatPrivate.NOT_PRIVATE -> {
+            ChatPrivate.False
+        }
+        ChatPrivate.PRIVATE -> {
+            ChatPrivate.True
+        }
+        else -> {
+            throw IllegalArgumentException(
+                "ChatPrivate for integer '$this' not supported"
+            )
+        }
+    }
+
+/**
  * Comes off the wire as:
  *  - null (Not Private)
  *  - 0 (Not Private)
@@ -13,30 +36,8 @@ inline fun ChatPrivate.isTrue(): Boolean =
 sealed class ChatPrivate {
 
     companion object {
-        private const val PRIVATE = 1
-        private const val NOT_PRIVATE = 0
-
-        /**
-         * Converts the integer value returned over the wire to an object.
-         *
-         * @throws [IllegalArgumentException] if the [private] integer is not supported
-         * */
-        @Throws(IllegalArgumentException::class)
-        fun fromInt(private: Int?): ChatPrivate =
-            when (private) {
-                null,
-                NOT_PRIVATE -> {
-                    False
-                }
-                PRIVATE -> {
-                    True
-                }
-                else -> {
-                    throw IllegalArgumentException(
-                        "ChatPrivate for integer '$private' not supported"
-                    )
-                }
-            }
+        const val PRIVATE = 1
+        const val NOT_PRIVATE = 0
     }
 
     abstract val value: Int

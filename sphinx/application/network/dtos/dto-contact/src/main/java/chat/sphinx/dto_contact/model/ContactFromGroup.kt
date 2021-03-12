@@ -5,6 +5,28 @@ inline fun ContactFromGroup.isTrue(): Boolean =
     this is ContactFromGroup.True
 
 /**
+ * Converts the integer value returned over the wire to an object.
+ *
+ * @throws [IllegalArgumentException] if the integer is not supported
+ * */
+@Suppress("NOTHING_TO_INLINE")
+@Throws(IllegalArgumentException::class)
+inline fun Int.toContactFromGroup(): ContactFromGroup =
+    when (this) {
+        ContactFromGroup.FROM_GROUP -> {
+            ContactFromGroup.True
+        }
+        ContactFromGroup.NOT_FROM_GROUP -> {
+            ContactFromGroup.False
+        }
+        else -> {
+            throw IllegalArgumentException(
+                "ContactFromGroup for integer '$this' not supported"
+            )
+        }
+    }
+
+/**
  * Comes off the wire as:
  *  - 0 (Not From Group)
  *  - 1 (From Group)
@@ -17,29 +39,8 @@ inline fun ContactFromGroup.isTrue(): Boolean =
 sealed class ContactFromGroup {
 
     companion object {
-        private const val FROM_GROUP = 1
-        private const val NOT_FROM_GROUP = 0
-
-        /**
-         * Converts the integer value returned over the wire to an object.
-         *
-         * @throws [IllegalArgumentException] if the [fromGroup] integer is not supported
-         * */
-        @Throws(IllegalArgumentException::class)
-        fun fromInt(fromGroup: Int): ContactFromGroup =
-            when (fromGroup) {
-                FROM_GROUP -> {
-                    True
-                }
-                NOT_FROM_GROUP -> {
-                    False
-                }
-                else -> {
-                    throw IllegalArgumentException(
-                        "ContactFromGroup for integer '$fromGroup' not supported"
-                    )
-                }
-            }
+        const val FROM_GROUP = 1
+        const val NOT_FROM_GROUP = 0
     }
 
     abstract val value: Int

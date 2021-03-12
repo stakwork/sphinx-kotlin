@@ -5,6 +5,28 @@ inline fun Deleted.isTrue(): Boolean =
     this is Deleted.True
 
 /**
+ * Converts the integer value returned over the wire to an object.
+ *
+ * @throws [IllegalArgumentException] if the integer is not supported
+ * */
+@Suppress("NOTHING_TO_INLINE")
+@Throws(IllegalArgumentException::class)
+inline fun Int.toDeleted(): Deleted =
+    when (this) {
+        Deleted.DELETED -> {
+            Deleted.True
+        }
+        Deleted.NOT_DELETED -> {
+            Deleted.False
+        }
+        else -> {
+            throw IllegalArgumentException(
+                "Deleted for integer '$this' not supported"
+            )
+        }
+    }
+
+/**
  * Comes off the wire as:
  *  - 0 (Not Deleted)
  *  - 1 (Deleted)
@@ -12,28 +34,8 @@ inline fun Deleted.isTrue(): Boolean =
 sealed class Deleted {
 
     companion object {
-        private const val DELETED = 1
-        private const val NOT_DELETED = 0
-
-        /**
-         * Converts the integer value returned over the wire to an object.
-         *
-         * @throws [IllegalArgumentException] if the [deleted] integer is not supported
-         * */
-        fun fromInt(deleted: Int): Deleted =
-            when (deleted) {
-                DELETED -> {
-                    True
-                }
-                NOT_DELETED -> {
-                    False
-                }
-                else -> {
-                    throw IllegalArgumentException(
-                        "Deleted for integer '$deleted' not supported"
-                    )
-                }
-            }
+        const val DELETED = 1
+        const val NOT_DELETED = 0
     }
 
     abstract val value: Int

@@ -5,6 +5,28 @@ inline fun PrivatePhoto.isTrue(): Boolean =
     this is PrivatePhoto.True
 
 /**
+ * Converts the integer value returned over the wire to an object.
+ *
+ * @throws [IllegalArgumentException] if the integer is not supported
+ * */
+@Suppress("NOTHING_TO_INLINE")
+@Throws(IllegalArgumentException::class)
+inline fun Int?.toPrivatePhoto(): PrivatePhoto =
+    when (this) {
+        PrivatePhoto.PRIVATE -> {
+            PrivatePhoto.True
+        }
+        null, PrivatePhoto.NOT_PRIVATE -> {
+            PrivatePhoto.False
+        }
+        else -> {
+            throw IllegalArgumentException(
+                "PrivatePhoto for integer '$this' not supported"
+            )
+        }
+    }
+
+/**
  * Comes off the wire as:
  *  - null (Not Private)
  *  - 0 (Not Private)
@@ -13,29 +35,8 @@ inline fun PrivatePhoto.isTrue(): Boolean =
 sealed class PrivatePhoto {
 
     companion object {
-        private const val PRIVATE = 1
-        private const val NOT_PRIVATE = 0
-
-        /**
-         * Converts the integer value returned over the wire to an object.
-         *
-         * @throws [IllegalArgumentException] if the [privatePhoto] integer is not supported
-         * */
-        @Throws(IllegalArgumentException::class)
-        fun fromInt(privatePhoto: Int?): PrivatePhoto =
-            when (privatePhoto) {
-                PRIVATE -> {
-                    True
-                }
-                null, NOT_PRIVATE -> {
-                    False
-                }
-                else -> {
-                    throw IllegalArgumentException(
-                        "PrivatePhoto for integer '$privatePhoto' not supported"
-                    )
-                }
-            }
+        const val PRIVATE = 1
+        const val NOT_PRIVATE = 0
     }
 
     abstract val value: Int

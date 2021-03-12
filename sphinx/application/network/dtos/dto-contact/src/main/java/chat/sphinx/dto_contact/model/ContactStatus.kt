@@ -5,6 +5,29 @@ inline fun ContactStatus.isPending(): Boolean =
     this is ContactStatus.Pending
 
 /**
+ * Converts the integer value returned over the wire to an object.
+ *
+ * @throws [IllegalArgumentException] if the integer is not supported
+ * */
+@Suppress("NOTHING_TO_INLINE")
+@Throws(IllegalArgumentException::class)
+inline fun Int?.toContactStatus(): ContactStatus =
+    when (this) {
+        null, // the only time null is sent, is for the owner account
+        ContactStatus.CONFIRMED -> {
+            ContactStatus.Confirmed
+        }
+        ContactStatus.PENDING -> {
+            ContactStatus.Pending
+        }
+        else -> {
+            throw IllegalArgumentException(
+                "ContactStatus for integer '$this' is not supported"
+            )
+        }
+    }
+
+/**
  * Comes off the wire as:
  *  - null (account owner, confirmed)
  *  - 0 (Pending)
@@ -17,30 +40,8 @@ inline fun ContactStatus.isPending(): Boolean =
 sealed class ContactStatus {
 
     companion object {
-        private const val PENDING = 0
-        private const val CONFIRMED = 1
-
-        /**
-         * Converts the integer value returned over the wire to an object.
-         *
-         * @throws [IllegalArgumentException] if the [status] integer is not supported
-         * */
-        @Throws(IllegalArgumentException::class)
-        fun fromInt(status: Int?): ContactStatus =
-            when (status) {
-                null, // the only time null is sent, is for the owner account
-                CONFIRMED -> {
-                    Confirmed
-                }
-                PENDING -> {
-                    Pending
-                }
-                else -> {
-                    throw IllegalArgumentException(
-                        "ContactStatus for integer '$status' is not supported"
-                    )
-                }
-            }
+        const val PENDING = 0
+        const val CONFIRMED = 1
     }
 
     abstract val value: Int

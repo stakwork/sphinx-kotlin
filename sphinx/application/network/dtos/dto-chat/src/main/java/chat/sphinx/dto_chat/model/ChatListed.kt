@@ -5,6 +5,28 @@ inline fun ChatListed.isTrue(): Boolean =
     this is ChatListed.True
 
 /**
+ * Converts the integer value returned over the wire to an object.
+ *
+ * @throws [IllegalArgumentException] if the integer is not supported
+ * */
+@Suppress("NOTHING_TO_INLINE")
+@Throws(IllegalArgumentException::class)
+inline fun Int.toChatListed(): ChatListed =
+    when (this) {
+        ChatListed.LISTED -> {
+            ChatListed.True
+        }
+        ChatListed.UNLISTED -> {
+            ChatListed.False
+        }
+        else -> {
+            throw IllegalArgumentException(
+                "ChatListed for integer '$this' not supported"
+            )
+        }
+    }
+
+/**
  * Comes off the wire as:
  *  - 0 (Listed)
  *  - 1 (Unlisted)
@@ -12,29 +34,8 @@ inline fun ChatListed.isTrue(): Boolean =
 sealed class ChatListed {
 
     companion object {
-        private const val UNLISTED = 1
-        private const val LISTED = 0
-
-        /**
-         * Converts the integer value returned over the wire to an object.
-         *
-         * @throws [IllegalArgumentException] if the [unlisted] integer is not supported
-         * */
-        @Throws(IllegalArgumentException::class)
-        fun fromInt(unlisted: Int): ChatListed =
-            when (unlisted) {
-                LISTED -> {
-                    True
-                }
-                UNLISTED -> {
-                    False
-                }
-                else -> {
-                    throw IllegalArgumentException(
-                        "ChatListed for integer '$unlisted' not supported"
-                    )
-                }
-            }
+        const val UNLISTED = 1
+        const val LISTED = 0
     }
 
     abstract val value: Int
