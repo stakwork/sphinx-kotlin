@@ -6,6 +6,8 @@ rootProject.name = "Sphinx"
 include ':sphinx:application:sphinx'
 
 include ':sphinx:application:common:resources'
+include ':sphinx:application:common:kotlin-response'
+
 include ':sphinx:application:common:wrappers:wrapper-chat'
 include ':sphinx:application:common:wrappers:wrapper-common'
 include ':sphinx:application:common:wrappers:wrapper-contact'
@@ -20,6 +22,7 @@ include ':sphinx:application:data:features:feature-relay'
 
 include ':sphinx:application:network:concepts:concept-network-client'
 include ':sphinx:application:network:features:feature-network-client'
+include ':sphinx:application:network:concepts:queries:concept-network-query-chat'
 include ':sphinx:application:network:dtos:dto-chat'
 include ':sphinx:application:network:dtos:dto-contact'
 include ':sphinx:application:network:dtos:dto-invite'
