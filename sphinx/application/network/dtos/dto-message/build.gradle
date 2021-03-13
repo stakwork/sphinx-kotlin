@@ -5,7 +5,6 @@ plugins {
 }
 
 dependencies {
-    api project(path: ':sphinx:application:network:concepts:concept-queries')
     api project(path: ':sphinx:application:common:wrappers:wrapper-message')
     api project(path: ':sphinx:application:network:dtos:dto-chat')
     api project(path: ':sphinx:application:network:dtos:dto-contact')
