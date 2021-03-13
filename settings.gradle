@@ -11,6 +11,7 @@ include ':sphinx:application:common:wrappers:wrapper-common'
 include ':sphinx:application:common:wrappers:wrapper-contact'
 include ':sphinx:application:common:wrappers:wrapper-invite'
 include ':sphinx:application:common:wrappers:wrapper-message'
+include ':sphinx:application:common:wrappers:wrapper-relay'
 
 include ':sphinx:application:data:concepts:concept-background-login'
 include ':sphinx:application:data:features:feature-background-login'

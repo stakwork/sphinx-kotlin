@@ -1,8 +1,8 @@
 package chat.sphinx.feature_relay
 
-import chat.sphinx.concept_relay.JavaWebToken
+import chat.sphinx.wrapper_relay.JavaWebToken
 import chat.sphinx.concept_relay.RelayDataHandler
-import chat.sphinx.concept_relay.RelayUrl
+import chat.sphinx.wrapper_relay.RelayUrl
 import io.matthewnelson.concept_authentication.data.AuthenticationStorage
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_encryption_key.EncryptionKeyHandler

@@ -1,4 +1,4 @@
-package chat.sphinx.concept_relay
+package chat.sphinx.wrapper_relay
 
 inline class RelayUrl(val value: String){
     init {

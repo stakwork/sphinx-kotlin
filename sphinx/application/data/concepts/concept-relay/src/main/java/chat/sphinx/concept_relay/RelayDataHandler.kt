@@ -1,5 +1,8 @@
 package chat.sphinx.concept_relay
 
+import chat.sphinx.wrapper_relay.JavaWebToken
+import chat.sphinx.wrapper_relay.RelayUrl
+
 /**
  * Persists and retrieves Sphinx Relay data to device storage. Implementation
  * requires User to be logged in to work, otherwise `null` and `false` are always

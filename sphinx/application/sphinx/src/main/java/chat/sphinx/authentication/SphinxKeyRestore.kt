@@ -1,7 +1,7 @@
 package chat.sphinx.authentication
 
-import chat.sphinx.concept_relay.JavaWebToken
-import chat.sphinx.concept_relay.RelayUrl
+import chat.sphinx.wrapper_relay.JavaWebToken
+import chat.sphinx.wrapper_relay.RelayUrl
 import chat.sphinx.feature_relay.RelayDataHandlerImpl
 import chat.sphinx.key_restore.KeyRestore
 import chat.sphinx.key_restore.KeyRestoreResponse
