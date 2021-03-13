@@ -1,0 +1,15 @@
+plugins {
+    id 'java-library'
+    id 'kotlin'
+}
+
+dependencies {
+    // KotlinAndroid
+    api project(path: ':kotlin:common:build-config')
+
+    // Sphinx
+    api project(path: ':sphinx:application:network:concepts:concept-network-client')
+
+    implementation deps.kotlin.coroutinesCore
+    implementation deps.square.okhttpLogging
+}
