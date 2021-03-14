@@ -1,0 +1,14 @@
+plugins {
+    id 'java-library'
+    id 'kotlin'
+    id 'kotlin-kapt'
+}
+
+dependencies {
+    api project(path: ':sphinx:application:common:kotlin-response')
+    api project(path: ':sphinx:application:common:wrappers:wrapper-relay')
+    implementation deps.kotlin.coroutinesCore
+
+    implementation deps.square.moshi
+    kapt kaptDeps.square.moshiCodegen
+}
