@@ -30,6 +30,8 @@ include ':sphinx:application:network:concepts:queries:concept-network-query-invi
 include ':sphinx:application:network:features:queries:feature-network-query-invite'
 include ':sphinx:application:network:features:queries:feature-network-query-message'
 include ':sphinx:application:network:concepts:queries:concept-network-query-message'
+include ':sphinx:application:network:features:queries:feature-network-query-subscription'
+include ':sphinx:application:network:concepts:queries:concept-network-query-subscription'
 include ':sphinx:application:network:dtos:dto-chat'
 include ':sphinx:application:network:dtos:dto-contact'
 include ':sphinx:application:network:dtos:dto-invite'
