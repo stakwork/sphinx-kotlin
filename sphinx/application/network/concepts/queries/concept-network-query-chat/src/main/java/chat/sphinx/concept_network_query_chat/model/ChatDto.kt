@@ -32,4 +32,4 @@ data class ChatDto(
     override val tenant: Int,
     override val skip_broadcast_joins: Int?,
     override val pending_contact_ids: List<Long>?
-): BaseChatDto<Int?, Int>()
+): BaseChatDto<Int?, Int, Int?, Int>()

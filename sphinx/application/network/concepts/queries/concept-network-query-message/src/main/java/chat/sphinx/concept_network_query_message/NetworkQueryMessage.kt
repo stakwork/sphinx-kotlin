@@ -1,11 +1,22 @@
 package chat.sphinx.concept_network_query_message
 
+import chat.sphinx.concept_network_query_contact.model.GetContactsResponse
+import chat.sphinx.kotlin_response.KotlinResponse
+import chat.sphinx.wrapper_relay.JavaWebToken
+import chat.sphinx.wrapper_relay.RelayUrl
+import kotlinx.coroutines.flow.Flow
+
 abstract class NetworkQueryMessage {
 
     ///////////
     /// GET ///
     ///////////
 //    app.get('/msgs', messages.getMsgs)
+    abstract fun getContacts(): Flow<KotlinResponse<GetContactsResponse>>
+    abstract fun getContacts(
+        javaWebToken: JavaWebToken,
+        relayUrl: RelayUrl
+    ): Flow<KotlinResponse<GetContactsResponse>>
 
     ///////////
     /// PUT ///

@@ -25,11 +25,17 @@ inline fun Int?.toChatMuted(): ChatMuted =
         }
     }
 
+@Suppress("NOTHING_TO_INLINE")
+inline fun Boolean?.toChatMuted(): ChatMuted =
+    if (this != true) ChatMuted.False else ChatMuted.True
+
 /**
  * Comes off the wire as:
  *  - null (Not Muted)
  *  - 0 (Not Muted)
  *  - 1 (Muted)
+ *  - true (Muted)
+ *  - false (Not Muted)
  * */
 sealed class ChatMuted {
 

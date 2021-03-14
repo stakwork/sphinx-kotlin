@@ -14,11 +14,11 @@ inline fun ChatPrivate.isTrue(): Boolean =
 inline fun Int?.toChatPrivate(): ChatPrivate =
     when (this) {
         null,
-        ChatPrivate.NOT_PRIVATE -> {
-            ChatPrivate.False
-        }
         ChatPrivate.PRIVATE -> {
             ChatPrivate.True
+        }
+        ChatPrivate.NOT_PRIVATE -> {
+            ChatPrivate.False
         }
         else -> {
             throw IllegalArgumentException(
@@ -27,11 +27,17 @@ inline fun Int?.toChatPrivate(): ChatPrivate =
         }
     }
 
+@Suppress("NOTHING_TO_INLINE")
+inline fun Boolean?.toChatPrivate(): ChatPrivate =
+    if (this == false) ChatPrivate.False else ChatPrivate.True
+
 /**
  * Comes off the wire as:
- *  - null (Not Private)
+ *  - null (Private)
  *  - 0 (Not Private)
  *  - 1 (Private)
+ *  - false (Not Private)
+ *  - true (Private)
  * */
 sealed class ChatPrivate {
 

@@ -53,7 +53,7 @@ class ChatDto(
     val pricePerMessage: Sat,
     val escrowAmount: Sat?,
     val escrowMillis: Long?, // milliseconds
-    val unlisted: ChatListed,
+    val unlisted: ChatUnlisted,
     val private: ChatPrivate,
     val ownerPubKey: LightningNodePubKey?,
     val seen: ChatSeen,

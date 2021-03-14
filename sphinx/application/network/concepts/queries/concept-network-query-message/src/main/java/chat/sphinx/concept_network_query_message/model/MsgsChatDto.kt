@@ -12,7 +12,7 @@ data class MsgsChatDto(
     override val type: Int,
     override val status: Int?,
     override val contact_ids: List<Long>,
-    override val is_muted: Boolean,
+    override val is_muted: Boolean?,
     override val created_at: String,
     override val updated_at: String,
     override val deleted: Int,
@@ -21,8 +21,8 @@ data class MsgsChatDto(
     override val price_to_join: Long?,
     override val price_per_message: Long?,
     override val escrow_millis: Long?,
-    override val unlisted: Int,
-    override val private: Int?,
+    override val unlisted: Boolean,
+    override val private: Boolean?,
     override val owner_pub_key: String?,
     override val seen: Boolean,
     override val app_url: String?,
@@ -33,4 +33,4 @@ data class MsgsChatDto(
     override val tenant: Int,
     override val skip_broadcast_joins: Int?,
     override val pending_contact_ids: List<Long>?
-): BaseChatDto<Boolean, Boolean>()
+): BaseChatDto<Boolean?, Boolean, Boolean?, Boolean>()

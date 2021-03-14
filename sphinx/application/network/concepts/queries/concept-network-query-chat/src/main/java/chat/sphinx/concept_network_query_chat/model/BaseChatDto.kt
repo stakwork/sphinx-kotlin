@@ -1,7 +1,7 @@
 package chat.sphinx.concept_network_query_chat.model
 
 @Suppress("PropertyName")
-abstract class BaseChatDto<IsMuted, Seen> {
+abstract class BaseChatDto<IsMuted, Unlisted, Private, Seen> {
     abstract val id: Long
     abstract val uuid: String
     abstract val name: String?
@@ -9,7 +9,11 @@ abstract class BaseChatDto<IsMuted, Seen> {
     abstract val type: Int
     abstract val status: Int?
     abstract val contact_ids: List<Long>
-    abstract val is_muted: IsMuted // from '/msgs' endpoint, this comes in as a boolean while the '/chats' is an Int
+
+    // from '/msgs' endpoint this comes in as a nullable boolean
+    // while the '/chats' and '/contacts' endpoints it is a nullable Int
+    abstract val is_muted: IsMuted
+
     abstract val created_at: String
     abstract val updated_at: String
     abstract val deleted: Int
@@ -18,10 +22,21 @@ abstract class BaseChatDto<IsMuted, Seen> {
     abstract val price_to_join: Long?
     abstract val price_per_message: Long?
     abstract val escrow_millis: Long?
-    abstract val unlisted: Int
-    abstract val private: Int?
+
+    // from '/msgs' endpoint, this comes in as a boolean while the
+    // '/chats' and '/contacts' endpoints it is an Int
+    abstract val unlisted: Unlisted
+
+    // from '/msgs' endpoint this comes in as a nullable boolean
+    // while the '/chats' and '/contacts' endpoints it is a nullable Int
+    abstract val private: Private
+
     abstract val owner_pub_key: String?
-    abstract val seen: Seen // from '/msgs' endpoint, this comes in as a boolean while the '/chats' is an Int
+
+    // from '/msgs' endpoint, this comes in as a boolean while the
+    // '/chats' and '/contacts' endpoints it is an Int
+    abstract val seen: Seen
+
     abstract val app_url: String?
     abstract val feed_url: String?
     abstract val meta: String?
