@@ -1,9 +1,10 @@
-package chat.sphinx.concept_network_query_chat.model
+package chat.sphinx.concept_network_query_message.model
 
+import chat.sphinx.concept_network_query_chat.model.BaseChatDto
 import com.squareup.moshi.JsonClass
 
 @JsonClass(generateAdapter = true)
-data class ChatDto(
+data class MsgsChatDto(
     override val id: Long,
     override val uuid: String,
     override val name: String?,
@@ -11,7 +12,7 @@ data class ChatDto(
     override val type: Int,
     override val status: Int?,
     override val contact_ids: List<Long>,
-    override val is_muted: Int?,
+    override val is_muted: Boolean,
     override val created_at: String,
     override val updated_at: String,
     override val deleted: Int,
@@ -23,7 +24,7 @@ data class ChatDto(
     override val unlisted: Int,
     override val private: Int?,
     override val owner_pub_key: String?,
-    override val seen: Int,
+    override val seen: Boolean,
     override val app_url: String?,
     override val feed_url: String?,
     override val meta: String?,
@@ -32,4 +33,4 @@ data class ChatDto(
     override val tenant: Int,
     override val skip_broadcast_joins: Int?,
     override val pending_contact_ids: List<Long>?
-): BaseChatDto<Int?, Int>()
+): BaseChatDto<Boolean, Boolean>()
