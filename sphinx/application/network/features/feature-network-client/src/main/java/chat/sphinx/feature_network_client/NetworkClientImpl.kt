@@ -35,9 +35,10 @@ class NetworkClientImpl(private val debug: BuildConfigDebug): NetworkClient() {
     private suspend fun createClientImpl(): OkHttpClient =
         OkHttpClient.Builder().let { builder ->
 
+            builder.callTimeout(TIME_OUT * 3, TimeUnit.SECONDS)
             builder.connectTimeout(TIME_OUT, TimeUnit.SECONDS)
-            builder.writeTimeout(TIME_OUT, TimeUnit.SECONDS)
             builder.readTimeout(TIME_OUT, TimeUnit.SECONDS)
+            builder.writeTimeout(TIME_OUT, TimeUnit.SECONDS)
 
             if (debug.value) {
                 HttpLoggingInterceptor().let { interceptor ->
