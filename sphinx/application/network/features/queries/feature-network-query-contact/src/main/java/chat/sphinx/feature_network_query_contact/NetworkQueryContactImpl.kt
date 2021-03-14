@@ -46,7 +46,7 @@ class NetworkQueryContactImpl(
             dispatchers = dispatchers,
             jwt = javaWebToken,
             moshi = moshi,
-            adapterClass = ContactsRelayResponse::class.java,
+            adapterClass = GetContactsRelayResponse::class.java,
             networkClient = networkClient,
             url = relayUrl.value + ENDPOINT_CONTACTS
         )

@@ -44,7 +44,7 @@ class NetworkQueryChatImpl(
             dispatchers = dispatchers,
             jwt = javaWebToken,
             moshi = moshi,
-            adapterClass = ChatsRelayResponse::class.java,
+            adapterClass = GetChatsRelayResponse::class.java,
             networkClient = networkClient,
             url = relayUrl.value + ENDPOINT_CHATS
         )
