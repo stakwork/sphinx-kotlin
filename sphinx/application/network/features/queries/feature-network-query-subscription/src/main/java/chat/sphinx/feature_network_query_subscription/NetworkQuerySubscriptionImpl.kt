@@ -105,7 +105,7 @@ class NetworkQuerySubscriptionImpl(
             moshi = moshi,
             adapterClass = GetSubscriptionsRelayResponse::class.java,
             networkClient = networkClient,
-            url = relayUrl.value + ENDPOINT_SUBSCRIPTIONS + "/contact/${contactId.value}"
+            url = relayUrl.value + ENDPOINT_SUBSCRIPTIONS + "/contact/${contactId.value}",
         )
 
     ///////////

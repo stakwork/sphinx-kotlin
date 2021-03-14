@@ -4,6 +4,7 @@ import chat.sphinx.concept_network_client.NetworkClient
 import chat.sphinx.concept_network_query_chat.model.ChatDto
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
 import chat.sphinx.concept_relay.RelayDataHandler
+import chat.sphinx.feature_network_query_chat.model.GetChatsRelayResponse
 import chat.sphinx.kotlin_response.KotlinResponse
 import chat.sphinx.network_relay_call.RelayCall
 import chat.sphinx.wrapper_relay.JavaWebToken

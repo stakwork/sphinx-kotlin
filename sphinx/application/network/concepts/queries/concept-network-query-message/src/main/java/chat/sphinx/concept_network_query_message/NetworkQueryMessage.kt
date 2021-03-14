@@ -1,7 +1,8 @@
 package chat.sphinx.concept_network_query_message
 
-import chat.sphinx.concept_network_query_contact.model.GetContactsResponse
+import chat.sphinx.concept_network_query_message.model.GetMessagesResponse
 import chat.sphinx.kotlin_response.KotlinResponse
+import chat.sphinx.wrapper_common.message.MessagePagination
 import chat.sphinx.wrapper_relay.JavaWebToken
 import chat.sphinx.wrapper_relay.RelayUrl
 import kotlinx.coroutines.flow.Flow
@@ -11,12 +12,15 @@ abstract class NetworkQueryMessage {
     ///////////
     /// GET ///
     ///////////
-    abstract fun getContacts(): Flow<KotlinResponse<GetContactsResponse>>
+    abstract fun getMessages(
+        messagePagination: MessagePagination?
+    ): Flow<KotlinResponse<GetMessagesResponse>>
 
-    abstract fun getContacts(
+    abstract fun getMessages(
         javaWebToken: JavaWebToken,
-        relayUrl: RelayUrl
-    ): Flow<KotlinResponse<GetContactsResponse>>
+        relayUrl: RelayUrl,
+        messagePagination: MessagePagination?,
+    ): Flow<KotlinResponse<GetMessagesResponse>>
 
     ///////////
     /// PUT ///
