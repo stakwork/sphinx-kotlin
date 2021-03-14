@@ -12,6 +12,7 @@ abstract class NetworkQueryChat {
     /// GET ///
     ///////////
     abstract fun getChats(): Flow<KotlinResponse<List<ChatDto>>>
+
     abstract fun getChats(
         javaWebToken: JavaWebToken,
         relayUrl: RelayUrl

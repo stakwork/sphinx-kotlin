@@ -11,8 +11,8 @@ abstract class NetworkQueryMessage {
     ///////////
     /// GET ///
     ///////////
-//    app.get('/msgs', messages.getMsgs)
     abstract fun getContacts(): Flow<KotlinResponse<GetContactsResponse>>
+
     abstract fun getContacts(
         javaWebToken: JavaWebToken,
         relayUrl: RelayUrl

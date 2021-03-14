@@ -12,6 +12,7 @@ abstract class NetworkQueryContact {
     /// GET ///
     ///////////
     abstract fun getContacts(): Flow<KotlinResponse<GetContactsResponse>>
+
     abstract fun getContacts(
         javaWebToken: JavaWebToken,
         relayUrl: RelayUrl
