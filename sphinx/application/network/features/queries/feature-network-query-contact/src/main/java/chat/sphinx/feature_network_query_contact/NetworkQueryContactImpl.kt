@@ -3,6 +3,7 @@ package chat.sphinx.feature_network_query_contact
 import chat.sphinx.concept_network_client.NetworkClient
 import chat.sphinx.concept_network_query_contact.NetworkQueryContact
 import chat.sphinx.concept_network_query_contact.model.ContactDto
+import chat.sphinx.concept_network_query_contact.model.GetContactsResponse
 import chat.sphinx.concept_relay.RelayDataHandler
 import chat.sphinx.kotlin_response.KotlinResponse
 import chat.sphinx.network_relay_call.RelayCall
@@ -28,7 +29,7 @@ class NetworkQueryContactImpl(
     ///////////
     /// GET ///
     ///////////
-    override fun getContacts(): Flow<KotlinResponse<List<ContactDto>>> = flow {
+    override fun getContacts(): Flow<KotlinResponse<GetContactsResponse>> = flow {
         relayDataHandler.retrieveRelayUrl()?.let { relayUrl ->
             relayDataHandler.retrieveJavaWebToken()?.let { jwt ->
                 emitAll(
@@ -41,7 +42,7 @@ class NetworkQueryContactImpl(
     override fun getContacts(
         javaWebToken: JavaWebToken,
         relayUrl: RelayUrl
-    ): Flow<KotlinResponse<List<ContactDto>>> =
+    ): Flow<KotlinResponse<GetContactsResponse>> =
         RelayCall.Get.execute(
             dispatchers = dispatchers,
             jwt = javaWebToken,

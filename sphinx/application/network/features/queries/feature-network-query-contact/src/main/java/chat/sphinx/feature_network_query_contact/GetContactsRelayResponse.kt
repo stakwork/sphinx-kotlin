@@ -1,12 +1,12 @@
 package chat.sphinx.feature_network_query_contact
 
-import chat.sphinx.concept_network_query_contact.model.ContactDto
+import chat.sphinx.concept_network_query_contact.model.GetContactsResponse
 import chat.sphinx.network_relay_call.RelayResponse
 import com.squareup.moshi.JsonClass
 
 @JsonClass(generateAdapter = true)
 internal data class GetContactsRelayResponse(
     override val success: Boolean,
-    override val response: List<ContactDto>?,
+    override val response: GetContactsResponse?,
     override val error: String?
-) : RelayResponse<List<ContactDto>>()
+) : RelayResponse<GetContactsResponse>()

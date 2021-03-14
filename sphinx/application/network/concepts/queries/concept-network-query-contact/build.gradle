@@ -6,6 +6,7 @@ plugins {
 
 dependencies {
     api project(path: ':sphinx:application:network:concepts:queries:concept-network-query-invite')
+    api project(path: ':sphinx:application:network:concepts:queries:concept-network-query-subscription')
     implementation deps.kotlin.coroutinesCore
 
     implementation deps.square.moshi
