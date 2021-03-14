@@ -10,9 +10,9 @@ abstract class BaseSubscriptionDto<Ended, Paused> {
     abstract val cron: String
     abstract val amount: Long
     abstract val total_paid: Long
-    abstract val end_number: Long?
+    abstract val end_number: Int?
     abstract val end_date: String?
-    abstract val count: Int?
+    abstract val count: Int
 
     // from '/contacts' endpoint, this comes in as an Int while the
     // '/subscriptions' endpoint it is a boolean
