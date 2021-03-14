@@ -3,7 +3,7 @@ package chat.sphinx.concept_network_query_invite.model
 import com.squareup.moshi.JsonClass
 
 @JsonClass(generateAdapter = true)
-class InviteDto(
+data class InviteDto(
     val id: Long,
     val invite_string: String,
     val invoice: String,

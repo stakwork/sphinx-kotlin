@@ -4,7 +4,7 @@ import chat.sphinx.concept_network_query_invite.model.InviteDto
 import com.squareup.moshi.JsonClass
 
 @JsonClass(generateAdapter = true)
-class ContactDto(
+data class ContactDto(
     val id: Long,
     val route_hint: String?,
     val pub_key: String,

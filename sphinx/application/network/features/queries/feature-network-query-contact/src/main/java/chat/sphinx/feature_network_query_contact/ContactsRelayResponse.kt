@@ -5,7 +5,7 @@ import chat.sphinx.network_relay_call.RelayResponse
 import com.squareup.moshi.JsonClass
 
 @JsonClass(generateAdapter = true)
-class ContactsRelayResponse(
+internal data class ContactsRelayResponse(
     override val success: Boolean,
     override val response: List<ContactDto>?,
     override val error: String?
