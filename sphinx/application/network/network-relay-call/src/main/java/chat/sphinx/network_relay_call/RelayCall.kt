@@ -28,20 +28,20 @@ sealed class RelayCall {
 
             emit(KotlinResponse.Loading)
 
-            val request: Request = Request.Builder().let { builder ->
-                builder.addHeader("X-User-Token", jwt.value)
+            try {
+                val request: Request = Request.Builder().let { builder ->
+                    builder.addHeader("X-User-Token", jwt.value)
 
-                additionalHeaders?.let { headers ->
-                    for (header in headers) {
-                        builder.addHeader(header.key, header.value)
+                    additionalHeaders?.let { headers ->
+                        for (header in headers) {
+                            builder.addHeader(header.key, header.value)
+                        }
                     }
+
+                    builder.url(url)
+                    builder.build()
                 }
 
-                builder.url(url)
-                builder.build()
-            }
-
-            try {
                 val networkResponse = networkClient
                     .getClient()
                     .newCall(request)
