@@ -2,9 +2,13 @@ package chat.sphinx.di
 
 import chat.sphinx.concept_network_client.NetworkClient
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
+import chat.sphinx.concept_network_query_contact.NetworkQueryContact
+import chat.sphinx.concept_network_query_invite.NetworkQueryInvite
 import chat.sphinx.concept_relay.RelayDataHandler
 import chat.sphinx.feature_network_client.NetworkClientImpl
 import chat.sphinx.feature_network_query_chat.NetworkQueryChatImpl
+import chat.sphinx.feature_network_query_contact.NetworkQueryContactImpl
+import chat.sphinx.feature_network_query_invite.NetworkQueryInviteImpl
 import chat.sphinx.feature_relay.RelayDataHandlerImpl
 import com.squareup.moshi.Moshi
 import dagger.Module
@@ -81,4 +85,46 @@ object NetworkModule {
         networkQueryChatImpl: NetworkQueryChatImpl
     ): NetworkQueryChat =
         networkQueryChatImpl
+
+    @Provides
+    @Singleton
+    fun provideNetworkQueryContactImpl(
+        dispatchers: CoroutineDispatchers,
+        moshi: Moshi,
+        networkClient: NetworkClient,
+        relayDataHandler: RelayDataHandler
+    ): NetworkQueryContactImpl =
+        NetworkQueryContactImpl(
+            dispatchers,
+            moshi,
+            networkClient,
+            relayDataHandler
+        )
+
+    @Provides
+    fun provideNetworkQueryContact(
+        networkQueryContactImpl: NetworkQueryContactImpl
+    ): NetworkQueryContact =
+        networkQueryContactImpl
+
+    @Provides
+    @Singleton
+    fun provideNetworkQueryInviteImpl(
+        dispatchers: CoroutineDispatchers,
+        moshi: Moshi,
+        networkClient: NetworkClient,
+        relayDataHandler: RelayDataHandler
+    ): NetworkQueryInviteImpl =
+        NetworkQueryInviteImpl(
+            dispatchers,
+            moshi,
+            networkClient,
+            relayDataHandler
+        )
+
+    @Provides
+    fun provideNetworkQueryInvite(
+        networkQueryInviteImpl: NetworkQueryInviteImpl
+    ): NetworkQueryInvite =
+        networkQueryInviteImpl
 }
