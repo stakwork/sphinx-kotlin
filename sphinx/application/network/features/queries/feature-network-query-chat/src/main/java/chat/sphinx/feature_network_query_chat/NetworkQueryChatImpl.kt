@@ -23,6 +23,9 @@ class NetworkQueryChatImpl(
         private const val ENDPOINT_CHATS = "/chats"
     }
 
+    ///////////
+    /// GET ///
+    ///////////
     override fun getChats(): Flow<KotlinResponse<List<ChatDto>>> = flow {
         relayDataHandler.retrieveRelayUrl()?.let { relayUrl ->
             relayDataHandler.retrieveJavaWebToken()?.let { jwt ->
@@ -45,4 +48,25 @@ class NetworkQueryChatImpl(
             networkClient = networkClient,
             url = relayUrl.value + ENDPOINT_CHATS
         )
+
+    ///////////
+    /// PUT ///
+    ///////////
+//    app.put('/chats/:id', chats.updateChat)
+//    app.put('/chat/:id', chats.addGroupMembers)
+//    app.put('/kick/:chat_id/:contact_id', chats.kickChatMember)
+//    app.put('/member/:contactId/:status/:messageId', chatTribes.approveOrRejectMember)
+//    app.put('/group/:id', chatTribes.editTribe)
+
+    ////////////
+    /// POST ///
+    ////////////
+//    app.post('/group', chats.createGroupChat)
+//    app.post('/chats/:chat_id/:mute_unmute', chats.mute)
+//    app.post('/tribe', chatTribes.joinTribe)
+
+    //////////////
+    /// DELETE ///
+    //////////////
+//    app.delete('/chat/:id', chats.deleteChat)
 }
