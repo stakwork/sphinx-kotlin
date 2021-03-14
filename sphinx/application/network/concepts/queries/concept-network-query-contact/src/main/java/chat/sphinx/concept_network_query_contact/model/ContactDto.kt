@@ -25,5 +25,6 @@ data class ContactDto(
     val notification_sound: String?,
     val last_active: String?,
     val tip_amount: Long?,
-    val invite: InviteDto?
+    val tenant: Int,
+    val invite: InviteDto?,
 )
