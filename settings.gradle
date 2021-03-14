@@ -26,6 +26,8 @@ include ':sphinx:application:network:concepts:queries:concept-network-query-chat
 include ':sphinx:application:network:features:queries:feature-network-query-chat'
 include ':sphinx:application:network:concepts:queries:concept-network-query-contact'
 include ':sphinx:application:network:features:queries:feature-network-query-contact'
+include ':sphinx:application:network:concepts:queries:concept-network-query-invite'
+include ':sphinx:application:network:features:queries:feature-network-query-invite'
 include ':sphinx:application:network:dtos:dto-chat'
 include ':sphinx:application:network:dtos:dto-contact'
 include ':sphinx:application:network:dtos:dto-invite'
