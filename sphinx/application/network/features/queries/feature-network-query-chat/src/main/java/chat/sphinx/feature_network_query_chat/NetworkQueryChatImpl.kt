@@ -17,10 +17,10 @@ class NetworkQueryChatImpl(
     private val moshi: Moshi,
     private val networkClient: NetworkClient,
     private val relayDataHandler: RelayDataHandler
-): NetworkQueryChat {
+): NetworkQueryChat() {
 
     companion object {
-        private const val ENDPOINT_GET_CHATS = "/chats"
+        private const val ENDPOINT_CHATS = "/chats"
     }
 
     override fun getChats(): Flow<KotlinResponse<List<ChatDto>>> = flow {
@@ -43,6 +43,6 @@ class NetworkQueryChatImpl(
             moshi = moshi,
             adapterClass = ChatsRelayResponse::class.java,
             networkClient = networkClient,
-            url = relayUrl.value + ENDPOINT_GET_CHATS
+            url = relayUrl.value + ENDPOINT_CHATS
         )
 }
