@@ -16,7 +16,7 @@ inline fun Int.toChatSeen(): ChatSeen =
         ChatSeen.SEEN -> {
             ChatSeen.True
         }
-        ChatSeen.UNSEEN -> {
+        ChatSeen.NOT_SEEN -> {
             ChatSeen.False
         }
         else -> {
@@ -25,6 +25,10 @@ inline fun Int.toChatSeen(): ChatSeen =
             )
         }
     }
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun Boolean.toChatSeen(): ChatSeen =
+    if (this) ChatSeen.True else ChatSeen.False
 
 /**
  * Comes off the wire as:
@@ -35,7 +39,7 @@ sealed class ChatSeen {
 
     companion object {
         const val SEEN = 1
-        const val UNSEEN = 0
+        const val NOT_SEEN = 0
     }
 
     abstract val value: Int
@@ -47,6 +51,6 @@ sealed class ChatSeen {
 
     object False: ChatSeen() {
         override val value: Int
-            get() = UNSEEN
+            get() = NOT_SEEN
     }
 }
