@@ -15,6 +15,7 @@ sealed class RelayCall {
 
     object Get: RelayCall() {
 
+        @Suppress("BlockingMethodInNonBlockingContext")
         fun<T: Any, V: RelayResponse<T>> execute(
             dispatchers: CoroutineDispatchers,
             jwt: JavaWebToken,
@@ -41,7 +42,10 @@ sealed class RelayCall {
             }
 
             try {
-                val networkResponse = networkClient.getClient().newCall(request).execute()
+                val networkResponse = networkClient
+                    .getClient()
+                    .newCall(request)
+                    .execute()
 
                 if (!networkResponse.isSuccessful) {
                     throw IOException(networkResponse.toString())
