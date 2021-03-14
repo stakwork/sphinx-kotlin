@@ -51,8 +51,8 @@ class ChatDto(
     val host: ChatHost?,
     val priceToJoin: Sat,
     val pricePerMessage: Sat,
-    val escrowAmount: Sat,
-    val escrowMillis: Long, // milliseconds
+    val escrowAmount: Sat?,
+    val escrowMillis: Long?, // milliseconds
     val unlisted: ChatListed,
     val private: ChatPrivate,
     val ownerPubKey: LightningNodePubKey?,

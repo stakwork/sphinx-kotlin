@@ -1,4 +1,4 @@
-package chat.sphinx.concept_network_query_chat
+package chat.sphinx.concept_network_query_chat.model
 
 import com.squareup.moshi.JsonClass
 

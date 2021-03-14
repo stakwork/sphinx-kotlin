@@ -1,5 +1,6 @@
 package chat.sphinx.concept_network_query_chat
 
+import chat.sphinx.concept_network_query_chat.model.ChatDto
 import chat.sphinx.kotlin_response.KotlinResponse
 import chat.sphinx.wrapper_relay.JavaWebToken
 import chat.sphinx.wrapper_relay.RelayUrl
