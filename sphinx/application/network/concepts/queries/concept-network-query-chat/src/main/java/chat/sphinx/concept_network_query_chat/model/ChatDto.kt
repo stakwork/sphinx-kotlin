@@ -29,7 +29,7 @@ data class ChatDto(
     val meta: String?,
     val my_photo_url: String?,
     val my_alias: String?,
-    val pending_contact_ids: List<String>?,
     val tenant: Int,
     val skip_broadcast_joins: Int?,
+    val pending_contact_ids: List<Long>?
 )
