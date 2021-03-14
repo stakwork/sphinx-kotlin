@@ -20,7 +20,12 @@ class NetworkQueryChatImpl(
 ): NetworkQueryChat() {
 
     companion object {
+        private const val ENDPOINT_CHAT = "/chat"
         private const val ENDPOINT_CHATS = "/chats"
+        private const val ENDPOINT_GROUP = "/group"
+        private const val ENDPOINT_KICK = "/kick"
+        private const val ENDPOINT_MEMBER = "/member"
+        private const val ENDPOINT_TRIBE = "/tribe"
     }
 
     ///////////
