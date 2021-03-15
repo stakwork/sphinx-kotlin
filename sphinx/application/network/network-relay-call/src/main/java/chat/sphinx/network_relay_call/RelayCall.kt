@@ -67,7 +67,7 @@ sealed class RelayCall {
                     emit(
                         KotlinResponse.Success(
                             relayResponse.response ?: throw NullPointerException(
-                                "RelayResponse.response was null"
+                                "RelayResponse.response returned null for ${adapterClass.simpleName}"
                             )
                         )
                     )
