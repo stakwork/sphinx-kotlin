@@ -2,6 +2,7 @@ package chat.sphinx.splash.ui
 
 import android.content.Context
 import androidx.lifecycle.viewModelScope
+import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_background_login.BackgroundLoginHandler
 import chat.sphinx.key_restore.KeyRestore
 import chat.sphinx.key_restore.KeyRestoreResponse
@@ -24,7 +25,6 @@ import kotlinx.coroutines.launch
 import okio.base64.decodeBase64ToArray
 import org.cryptonode.jncryptor.AES256JNCryptor
 import org.cryptonode.jncryptor.CryptorException
-import javax.annotation.meta.Exhaustive
 import javax.inject.Inject
 
 @HiltViewModel
