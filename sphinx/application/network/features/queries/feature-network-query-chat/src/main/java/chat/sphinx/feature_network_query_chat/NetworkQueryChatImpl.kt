@@ -5,7 +5,9 @@ import chat.sphinx.concept_network_query_chat.model.ChatDto
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
 import chat.sphinx.concept_relay.RelayDataHandler
 import chat.sphinx.feature_network_query_chat.model.GetChatsRelayResponse
+import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.kotlin_response.KotlinResponse
+import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.network_relay_call.RelayCall
 import chat.sphinx.wrapper_relay.JavaWebToken
 import chat.sphinx.wrapper_relay.RelayUrl
@@ -32,20 +34,28 @@ class NetworkQueryChatImpl(
     ///////////
     /// GET ///
     ///////////
-    override fun getChats(): Flow<KotlinResponse<List<ChatDto>>> = flow {
+    override fun getChats(): Flow<LoadResponse<List<ChatDto>, ResponseError>> = flow {
         relayDataHandler.retrieveRelayUrl()?.let { relayUrl ->
             relayDataHandler.retrieveJavaWebToken()?.let { jwt ->
                 emitAll(
                     getChats(jwt, relayUrl)
                 )
-            } ?: emit(KotlinResponse.Error("Was unable to retrieve the JavaWebToken from storage"))
-        } ?: emit(KotlinResponse.Error("Was unable to retrieve the RelayURL from storage"))
+            } ?: emit(
+                KotlinResponse.Error(
+                    ResponseError("Was unable to retrieve the JavaWebToken from storage")
+                )
+            )
+        } ?: emit(
+            KotlinResponse.Error(
+                ResponseError("Was unable to retrieve the RelayURL from storage")
+            )
+        )
     }
 
     override fun getChats(
         javaWebToken: JavaWebToken,
         relayUrl: RelayUrl
-    ): Flow<KotlinResponse<List<ChatDto>>> =
+    ): Flow<LoadResponse<List<ChatDto>, ResponseError>> =
         RelayCall.Get.execute(
             dispatchers = dispatchers,
             jwt = javaWebToken,

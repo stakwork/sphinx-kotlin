@@ -7,6 +7,8 @@ import chat.sphinx.concept_relay.RelayDataHandler
 import chat.sphinx.feature_network_query_subscription.model.GetSubscriptionRelayResponse
 import chat.sphinx.feature_network_query_subscription.model.GetSubscriptionsRelayResponse
 import chat.sphinx.kotlin_response.KotlinResponse
+import chat.sphinx.kotlin_response.LoadResponse
+import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.network_relay_call.RelayCall
 import chat.sphinx.wrapper_common.contact.ContactId
 import chat.sphinx.wrapper_common.subscription.SubscriptionId
@@ -33,20 +35,28 @@ class NetworkQuerySubscriptionImpl(
     ///////////
     /// GET ///
     ///////////
-    override fun getSubscriptions(): Flow<KotlinResponse<List<SubscriptionDto>>> = flow {
+    override fun getSubscriptions(): Flow<LoadResponse<List<SubscriptionDto>, ResponseError>> = flow {
         relayDataHandler.retrieveRelayUrl()?.let { relayUrl ->
             relayDataHandler.retrieveJavaWebToken()?.let { jwt ->
                 emitAll(
                     getSubscriptions(jwt, relayUrl)
                 )
-            } ?: emit(KotlinResponse.Error("Was unable to retrieve the JavaWebToken from storage"))
-        } ?: emit(KotlinResponse.Error("Was unable to retrieve the RelayURL from storage"))
+            } ?: emit(
+                KotlinResponse.Error(
+                    ResponseError("Was unable to retrieve the JavaWebToken from storage")
+                )
+            )
+        } ?: emit(
+            KotlinResponse.Error(
+                ResponseError("Was unable to retrieve the RelayURL from storage")
+            )
+        )
     }
 
     override fun getSubscriptions(
         javaWebToken: JavaWebToken,
         relayUrl: RelayUrl
-    ): Flow<KotlinResponse<List<SubscriptionDto>>> =
+    ): Flow<LoadResponse<List<SubscriptionDto>, ResponseError>> =
         RelayCall.Get.execute(
             dispatchers = dispatchers,
             jwt = javaWebToken,
@@ -58,21 +68,29 @@ class NetworkQuerySubscriptionImpl(
 
     override fun getSubscriptionById(
         subscriptionId: SubscriptionId
-    ): Flow<KotlinResponse<SubscriptionDto>> = flow {
+    ): Flow<LoadResponse<SubscriptionDto, ResponseError>> = flow {
         relayDataHandler.retrieveRelayUrl()?.let { relayUrl ->
             relayDataHandler.retrieveJavaWebToken()?.let { jwt ->
                 emitAll(
                     getSubscriptionById(jwt, relayUrl, subscriptionId)
                 )
-            } ?: emit(KotlinResponse.Error("Was unable to retrieve the JavaWebToken from storage"))
-        } ?: emit(KotlinResponse.Error("Was unable to retrieve the RelayURL from storage"))
+            } ?: emit(
+                KotlinResponse.Error(
+                    ResponseError("Was unable to retrieve the JavaWebToken from storage")
+                )
+            )
+        } ?: emit(
+            KotlinResponse.Error(
+                ResponseError("Was unable to retrieve the RelayURL from storage")
+            )
+        )
     }
 
     override fun getSubscriptionById(
         javaWebToken: JavaWebToken,
         relayUrl: RelayUrl,
         subscriptionId: SubscriptionId
-    ): Flow<KotlinResponse<SubscriptionDto>> =
+    ): Flow<LoadResponse<SubscriptionDto, ResponseError>> =
         RelayCall.Get.execute(
             dispatchers = dispatchers,
             jwt = javaWebToken,
@@ -84,21 +102,29 @@ class NetworkQuerySubscriptionImpl(
 
     override fun getSubscriptionsByContactId(
         contactId: ContactId
-    ): Flow<KotlinResponse<List<SubscriptionDto>>> = flow {
+    ): Flow<LoadResponse<List<SubscriptionDto>, ResponseError>> = flow {
         relayDataHandler.retrieveRelayUrl()?.let { relayUrl ->
             relayDataHandler.retrieveJavaWebToken()?.let { jwt ->
                 emitAll(
                     getSubscriptionsByContactId(jwt, relayUrl, contactId)
                 )
-            } ?: emit(KotlinResponse.Error("Was unable to retrieve the JavaWebToken from storage"))
-        } ?: emit(KotlinResponse.Error("Was unable to retrieve the RelayURL from storage"))
+            } ?: emit(
+                KotlinResponse.Error(
+                    ResponseError("Was unable to retrieve the JavaWebToken from storage")
+                )
+            )
+        } ?: emit(
+            KotlinResponse.Error(
+                ResponseError("Was unable to retrieve the RelayURL from storage")
+            )
+        )
     }
 
     override fun getSubscriptionsByContactId(
         javaWebToken: JavaWebToken,
         relayUrl: RelayUrl,
         contactId: ContactId
-    ): Flow<KotlinResponse<List<SubscriptionDto>>> =
+    ): Flow<LoadResponse<List<SubscriptionDto>, ResponseError>> =
         RelayCall.Get.execute(
             dispatchers = dispatchers,
             jwt = javaWebToken,

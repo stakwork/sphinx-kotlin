@@ -1,7 +1,8 @@
 package chat.sphinx.concept_network_query_subscription
 
 import chat.sphinx.concept_network_query_subscription.model.SubscriptionDto
-import chat.sphinx.kotlin_response.KotlinResponse
+import chat.sphinx.kotlin_response.ResponseError
+import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.wrapper_common.contact.ContactId
 import chat.sphinx.wrapper_common.subscription.SubscriptionId
 import chat.sphinx.wrapper_relay.JavaWebToken
@@ -13,32 +14,32 @@ abstract class NetworkQuerySubscription {
     ///////////
     /// GET ///
     ///////////
-    abstract fun getSubscriptions(): Flow<KotlinResponse<List<SubscriptionDto>>>
+    abstract fun getSubscriptions(): Flow<LoadResponse<List<SubscriptionDto>, ResponseError>>
 
     abstract fun getSubscriptions(
         javaWebToken: JavaWebToken,
         relayUrl: RelayUrl,
-    ): Flow<KotlinResponse<List<SubscriptionDto>>>
+    ): Flow<LoadResponse<List<SubscriptionDto>, ResponseError>>
 
     abstract fun getSubscriptionById(
         subscriptionId: SubscriptionId
-    ): Flow<KotlinResponse<SubscriptionDto>>
+    ): Flow<LoadResponse<SubscriptionDto, ResponseError>>
 
     abstract fun getSubscriptionById(
         javaWebToken: JavaWebToken,
         relayUrl: RelayUrl,
         subscriptionId: SubscriptionId,
-    ): Flow<KotlinResponse<SubscriptionDto>>
+    ): Flow<LoadResponse<SubscriptionDto, ResponseError>>
 
     abstract fun getSubscriptionsByContactId(
         contactId: ContactId
-    ): Flow<KotlinResponse<List<SubscriptionDto>>>
+    ): Flow<LoadResponse<List<SubscriptionDto>, ResponseError>>
 
     abstract fun getSubscriptionsByContactId(
         javaWebToken: JavaWebToken,
         relayUrl: RelayUrl,
         contactId: ContactId,
-    ): Flow<KotlinResponse<List<SubscriptionDto>>>
+    ): Flow<LoadResponse<List<SubscriptionDto>, ResponseError>>
 
     ///////////
     /// PUT ///

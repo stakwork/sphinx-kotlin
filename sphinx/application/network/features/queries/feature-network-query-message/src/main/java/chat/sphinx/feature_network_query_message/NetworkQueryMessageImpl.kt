@@ -7,6 +7,8 @@ import chat.sphinx.concept_network_query_message.model.GetMessagesResponse
 import chat.sphinx.concept_relay.RelayDataHandler
 import chat.sphinx.feature_network_query_message.model.GetMessagesRelayResponse
 import chat.sphinx.kotlin_response.KotlinResponse
+import chat.sphinx.kotlin_response.LoadResponse
+import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.network_relay_call.RelayCall
 import chat.sphinx.wrapper_relay.JavaWebToken
 import chat.sphinx.wrapper_relay.RelayUrl
@@ -34,21 +36,29 @@ class NetworkQueryMessageImpl(
     ///////////
     override fun getMessages(
         messagePagination: MessagePagination?
-    ): Flow<KotlinResponse<GetMessagesResponse>> = flow {
+    ): Flow<LoadResponse<GetMessagesResponse, ResponseError>> = flow {
         relayDataHandler.retrieveRelayUrl()?.let { relayUrl ->
             relayDataHandler.retrieveJavaWebToken()?.let { jwt ->
                 emitAll(
                     getMessages(jwt, relayUrl, messagePagination)
                 )
-            } ?: emit(KotlinResponse.Error("Was unable to retrieve the JavaWebToken from storage"))
-        } ?: emit(KotlinResponse.Error("Was unable to retrieve the RelayURL from storage"))
+            } ?: emit(
+                KotlinResponse.Error(
+                    ResponseError("Was unable to retrieve the JavaWebToken from storage")
+                )
+            )
+        } ?: emit(
+            KotlinResponse.Error(
+                ResponseError("Was unable to retrieve the RelayURL from storage")
+            )
+        )
     }
 
     override fun getMessages(
         javaWebToken: JavaWebToken,
         relayUrl: RelayUrl,
         messagePagination: MessagePagination?,
-    ): Flow<KotlinResponse<GetMessagesResponse>> =
+    ): Flow<LoadResponse<GetMessagesResponse, ResponseError>> =
         RelayCall.Get.execute(
             dispatchers = dispatchers,
             jwt = javaWebToken,

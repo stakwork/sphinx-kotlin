@@ -2,6 +2,8 @@ package chat.sphinx.network_relay_call
 
 import chat.sphinx.concept_network_client.NetworkClient
 import chat.sphinx.kotlin_response.KotlinResponse
+import chat.sphinx.kotlin_response.LoadResponse
+import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.wrapper_relay.JavaWebToken
 import com.squareup.moshi.Moshi
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
@@ -24,9 +26,9 @@ sealed class RelayCall {
             networkClient: NetworkClient,
             url: String,
             additionalHeaders: Map<String, String>? = null
-        ): Flow<KotlinResponse<T>> = flow {
+        ): Flow<LoadResponse<T, ResponseError>> = flow {
 
-            emit(KotlinResponse.Loading)
+            emit(LoadResponse.Loading)
 
             try {
                 val request: Request = Request.Builder().let { builder ->
@@ -76,7 +78,9 @@ sealed class RelayCall {
 
                     emit(
                         KotlinResponse.Error(
-                            relayResponse.error ?: "Query failed for ${adapterClass.simpleName}"
+                            ResponseError(
+                                relayResponse.error ?: "Query failed for ${adapterClass.simpleName}"
+                            )
                         )
                     )
 
@@ -84,7 +88,7 @@ sealed class RelayCall {
 
             } catch (e: Exception) {
 
-                emit(KotlinResponse.Error("", e))
+                emit(KotlinResponse.Error(ResponseError("", e)))
 
             }
 
