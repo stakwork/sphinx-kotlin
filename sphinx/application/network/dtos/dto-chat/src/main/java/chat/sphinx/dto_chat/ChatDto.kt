@@ -5,6 +5,7 @@ import chat.sphinx.wrapper_chat.*
 import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_common.Deleted
 import chat.sphinx.wrapper_common.PhotoUrl
+import chat.sphinx.wrapper_common.Seen
 import chat.sphinx.wrapper_common.chat.ChatId
 import chat.sphinx.wrapper_common.contact.ContactId
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
@@ -56,7 +57,7 @@ class ChatDto(
     val unlisted: ChatUnlisted,
     val private: ChatPrivate,
     val ownerPubKey: LightningNodePubKey?,
-    val seen: ChatSeen,
+    val seen: Seen,
     val appUrl: AppUrl?,
     val feedUrl: FeedUrl?,
     val meta: ChatMetaData?,

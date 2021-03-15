@@ -16,4 +16,6 @@ dependencies {
 
     api deps.square.moshi
     kapt kaptDeps.square.moshiCodegen
+
+    testImplementation project(path: ':sphinx:test:test-network-query')
 }
