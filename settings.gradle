@@ -68,6 +68,9 @@ include ':sphinx:screens-detail:scanner:scanner'
 include ':sphinx:screens-detail:support-ticket:support-ticket'
 include ':sphinx:screens-detail:transactions:transactions'
 
+// Testing
+include ':sphinx:test:test-network-query'
+
 ////////////////////////////////////////
 //////////// Kotlin Android ////////////
 ////////////////////////////////////////
