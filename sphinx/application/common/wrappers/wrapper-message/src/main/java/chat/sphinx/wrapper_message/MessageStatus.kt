@@ -1,6 +1,10 @@
 package chat.sphinx.wrapper_message
 
 @Suppress("NOTHING_TO_INLINE")
+inline fun MessageStatus.isNoStatus(): Boolean =
+    this is MessageStatus.NoStatus
+
+@Suppress("NOTHING_TO_INLINE")
 inline fun MessageStatus.isPending(): Boolean =
     this is MessageStatus.Pending
 
@@ -31,8 +35,11 @@ inline fun MessageStatus.isDeleted(): Boolean =
  * */
 @Suppress("NOTHING_TO_INLINE")
 @Throws(IllegalArgumentException::class)
-inline fun Int.toMessageStatus(): MessageStatus =
+inline fun Int?.toMessageStatus(): MessageStatus =
     when (this) {
+        null -> {
+            MessageStatus.NoStatus
+        }
         MessageStatus.PENDING -> {
             MessageStatus.Pending
         }
@@ -60,6 +67,7 @@ inline fun Int.toMessageStatus(): MessageStatus =
 
 /**
  * Comes off the wire as:
+ *  - null (No Status) // returned for message types 5 (Direct Payment) & 6 (Attachment)
  *  - 0 (Pending)
  *  - 1 (Confirmed)
  *  - 2 (Cancelled)
@@ -72,6 +80,7 @@ inline fun Int.toMessageStatus(): MessageStatus =
 sealed class MessageStatus {
 
     companion object {
+        // NO_STATUS = null
         const val PENDING = 0
         const val CONFIRMED = 1
         const val CANCELLED = 2
@@ -80,7 +89,12 @@ sealed class MessageStatus {
         const val DELETED = 5
     }
 
-    abstract val value: Int
+    abstract val value: Int?
+
+    object NoStatus: MessageStatus() {
+        override val value: Int?
+            get() = null
+    }
 
     object Pending: MessageStatus() {
         override val value: Int

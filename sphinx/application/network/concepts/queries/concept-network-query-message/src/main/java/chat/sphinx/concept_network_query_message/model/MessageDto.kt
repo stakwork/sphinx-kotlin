@@ -19,7 +19,7 @@ data class MessageDto(
     val expiration_date: String?,
     val message_content: String?,
     val remote_message_content: String?,
-    val status: Int,
+    val status: Int?,
     val status_map: Map<Long, Long>?, // contact_id : their message's 'status'
     val parent_id: Long?,
     val subscription_id: Long?,
