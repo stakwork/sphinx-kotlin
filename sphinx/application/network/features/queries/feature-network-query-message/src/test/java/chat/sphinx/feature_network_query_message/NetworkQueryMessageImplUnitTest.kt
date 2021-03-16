@@ -105,4 +105,24 @@ class NetworkQueryMessageImplUnitTest: NetworkQueryTestHelper() {
         }
 
     // TODO: Test Datetime params. Need to build out compatible DateTime formatter.
+
+    @Test
+    fun `getPayments returns success`() =
+        testDispatcher.runBlockingTest {
+            getCredentials()?.let {
+                nqMessage.getPayments().collect { loadResponse ->
+
+                    @Exhaustive
+                    when (loadResponse) {
+                        is KotlinResponse.Error -> {
+                            loadResponse.exception?.printStackTrace()
+                            Assert.fail(loadResponse.message)
+                        }
+                        is KotlinResponse.Success -> {}
+                        is LoadResponse.Loading -> {}
+                    }
+
+                }
+            }
+        }
 }

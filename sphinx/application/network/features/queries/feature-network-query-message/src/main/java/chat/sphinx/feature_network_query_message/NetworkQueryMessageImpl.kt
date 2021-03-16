@@ -4,8 +4,10 @@ import chat.sphinx.concept_network_client.NetworkClient
 import chat.sphinx.wrapper_common.message.MessagePagination
 import chat.sphinx.concept_network_query_message.NetworkQueryMessage
 import chat.sphinx.concept_network_query_message.model.GetMessagesResponse
+import chat.sphinx.concept_network_query_message.model.MessageDto
 import chat.sphinx.concept_relay.RelayDataHandler
 import chat.sphinx.feature_network_query_message.model.GetMessagesRelayResponse
+import chat.sphinx.feature_network_query_message.model.GetPaymentsRelayResponse
 import chat.sphinx.kotlin_response.KotlinResponse
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.ResponseError
@@ -28,7 +30,8 @@ class NetworkQueryMessageImpl(
     companion object {
         private const val ENDPOINT_MSGS = "/msgs"
         private const val ENDPOINT_MESSAGE = "/message"
-        private const val ENDPOINT_MESSAGES = "/messages"
+        private const val ENDPOINT_MESSAGES = "${ENDPOINT_MESSAGE}s"
+        private const val ENDPOINT_PAYMENTS = "/payments"
     }
 
     ///////////
@@ -66,6 +69,37 @@ class NetworkQueryMessageImpl(
             adapterClass = GetMessagesRelayResponse::class.java,
             networkClient = networkClient,
             url = relayUrl.value + ENDPOINT_MSGS + (messagePagination?.value ?: "")
+        )
+
+    override fun getPayments(): Flow<LoadResponse<List<MessageDto>, ResponseError>> = flow {
+        relayDataHandler.retrieveRelayUrl()?.let { relayUrl ->
+            relayDataHandler.retrieveJavaWebToken()?.let { jwt ->
+                emitAll(
+                    getPayments(jwt, relayUrl)
+                )
+            } ?: emit(
+                KotlinResponse.Error(
+                    ResponseError("Was unable to retrieve the JavaWebToken from storage")
+                )
+            )
+        } ?: emit(
+            KotlinResponse.Error(
+                ResponseError("Was unable to retrieve the RelayURL from storage")
+            )
+        )
+    }
+
+    override fun getPayments(
+        javaWebToken: JavaWebToken,
+        relayUrl: RelayUrl
+    ): Flow<LoadResponse<List<MessageDto>, ResponseError>> =
+        RelayCall.Get.execute(
+            dispatchers = dispatchers,
+            jwt = javaWebToken,
+            moshi = moshi,
+            adapterClass = GetPaymentsRelayResponse::class.java,
+            networkClient = networkClient,
+            url = relayUrl.value + ENDPOINT_PAYMENTS
         )
 
     ///////////
