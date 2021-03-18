@@ -1,11 +1,13 @@
 package chat.sphinx.feature_network_query_message
 
+import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_network_client.NetworkClient
 import chat.sphinx.wrapper_common.message.MessagePagination
 import chat.sphinx.concept_network_query_message.NetworkQueryMessage
 import chat.sphinx.concept_network_query_message.model.GetMessagesResponse
 import chat.sphinx.concept_network_query_message.model.MessageDto
 import chat.sphinx.concept_relay.RelayDataHandler
+import chat.sphinx.concept_relay.retrieveRelayUrlAndJavaWebToken
 import chat.sphinx.feature_network_query_message.model.GetMessagesRelayResponse
 import chat.sphinx.feature_network_query_message.model.GetPaymentsRelayResponse
 import chat.sphinx.kotlin_response.KotlinResponse
@@ -40,21 +42,19 @@ class NetworkQueryMessageImpl(
     override fun getMessages(
         messagePagination: MessagePagination?
     ): Flow<LoadResponse<GetMessagesResponse, ResponseError>> = flow {
-        relayDataHandler.retrieveRelayUrl()?.let { relayUrl ->
-            relayDataHandler.retrieveJavaWebToken()?.let { jwt ->
-                emitAll(
-                    getMessages(jwt, relayUrl, messagePagination)
-                )
-            } ?: emit(
-                KotlinResponse.Error(
-                    ResponseError("Was unable to retrieve the JavaWebToken from storage")
-                )
-            )
-        } ?: emit(
-            KotlinResponse.Error(
-                ResponseError("Was unable to retrieve the RelayURL from storage")
-            )
-        )
+        relayDataHandler.retrieveRelayUrlAndJavaWebToken().let { response ->
+            @Exhaustive
+            when (response) {
+                is KotlinResponse.Error -> {
+                    emit(response)
+                }
+                is KotlinResponse.Success -> {
+                    emitAll(
+                        getMessages(response.value.first, response.value.second, messagePagination)
+                    )
+                }
+            }
+        }
     }
 
     override fun getMessages(
@@ -72,21 +72,19 @@ class NetworkQueryMessageImpl(
         )
 
     override fun getPayments(): Flow<LoadResponse<List<MessageDto>, ResponseError>> = flow {
-        relayDataHandler.retrieveRelayUrl()?.let { relayUrl ->
-            relayDataHandler.retrieveJavaWebToken()?.let { jwt ->
-                emitAll(
-                    getPayments(jwt, relayUrl)
-                )
-            } ?: emit(
-                KotlinResponse.Error(
-                    ResponseError("Was unable to retrieve the JavaWebToken from storage")
-                )
-            )
-        } ?: emit(
-            KotlinResponse.Error(
-                ResponseError("Was unable to retrieve the RelayURL from storage")
-            )
-        )
+        relayDataHandler.retrieveRelayUrlAndJavaWebToken().let { response ->
+            @Exhaustive
+            when (response) {
+                is KotlinResponse.Error -> {
+                    emit(response)
+                }
+                is KotlinResponse.Success -> {
+                    emitAll(
+                        getPayments(response.value.first, response.value.second)
+                    )
+                }
+            }
+        }
     }
 
     override fun getPayments(

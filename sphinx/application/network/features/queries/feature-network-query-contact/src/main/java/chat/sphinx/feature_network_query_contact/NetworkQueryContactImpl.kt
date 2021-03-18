@@ -1,9 +1,11 @@
 package chat.sphinx.feature_network_query_contact
 
+import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_network_client.NetworkClient
 import chat.sphinx.concept_network_query_contact.NetworkQueryContact
 import chat.sphinx.concept_network_query_contact.model.GetContactsResponse
 import chat.sphinx.concept_relay.RelayDataHandler
+import chat.sphinx.concept_relay.retrieveRelayUrlAndJavaWebToken
 import chat.sphinx.feature_network_query_contact.model.GetContactsRelayResponse
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.kotlin_response.KotlinResponse
@@ -32,21 +34,19 @@ class NetworkQueryContactImpl(
     /// GET ///
     ///////////
     override fun getContacts(): Flow<LoadResponse<GetContactsResponse, ResponseError>> = flow {
-        relayDataHandler.retrieveRelayUrl()?.let { relayUrl ->
-            relayDataHandler.retrieveJavaWebToken()?.let { jwt ->
-                emitAll(
-                    getContacts(jwt, relayUrl)
-                )
-            } ?: emit(
-                KotlinResponse.Error(
-                    ResponseError("Was unable to retrieve the JavaWebToken from storage")
-                )
-            )
-        } ?: emit(
-            KotlinResponse.Error(
-                ResponseError("Was unable to retrieve the RelayURL from storage")
-            )
-        )
+        relayDataHandler.retrieveRelayUrlAndJavaWebToken().let { response ->
+            @Exhaustive
+            when (response) {
+                is KotlinResponse.Error -> {
+                    emit(response)
+                }
+                is KotlinResponse.Success -> {
+                    emitAll(
+                        getContacts(response.value.first, response.value.second)
+                    )
+                }
+            }
+        }
     }
 
     override fun getContacts(

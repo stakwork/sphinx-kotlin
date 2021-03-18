@@ -1,9 +1,11 @@
 package chat.sphinx.feature_network_query_chat
 
+import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_network_client.NetworkClient
 import chat.sphinx.concept_network_query_chat.model.ChatDto
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
 import chat.sphinx.concept_relay.RelayDataHandler
+import chat.sphinx.concept_relay.retrieveRelayUrlAndJavaWebToken
 import chat.sphinx.feature_network_query_chat.model.GetChatsRelayResponse
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.kotlin_response.KotlinResponse
@@ -35,21 +37,19 @@ class NetworkQueryChatImpl(
     /// GET ///
     ///////////
     override fun getChats(): Flow<LoadResponse<List<ChatDto>, ResponseError>> = flow {
-        relayDataHandler.retrieveRelayUrl()?.let { relayUrl ->
-            relayDataHandler.retrieveJavaWebToken()?.let { jwt ->
-                emitAll(
-                    getChats(jwt, relayUrl)
-                )
-            } ?: emit(
-                KotlinResponse.Error(
-                    ResponseError("Was unable to retrieve the JavaWebToken from storage")
-                )
-            )
-        } ?: emit(
-            KotlinResponse.Error(
-                ResponseError("Was unable to retrieve the RelayURL from storage")
-            )
-        )
+        relayDataHandler.retrieveRelayUrlAndJavaWebToken().let { response ->
+            @Exhaustive
+            when (response) {
+                is KotlinResponse.Error -> {
+                    emit(response)
+                }
+                is KotlinResponse.Success -> {
+                    emitAll(
+                        getChats(response.value.first, response.value.second)
+                    )
+                }
+            }
+        }
     }
 
     override fun getChats(

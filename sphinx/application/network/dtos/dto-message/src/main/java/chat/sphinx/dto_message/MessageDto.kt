@@ -32,7 +32,7 @@ class MessageDto(
     val messageContent: MessageContent?,
     val remoteMessageContent: RemoteMessageContent?,
     val status: MessageStatus,
-    val statusMap: MessageStatusMap?,
+    val statusMap: Map<ContactId, MessageStatus>,
     val parentId: ParentId?,
     val subscriptionId: SubscriptionId?,
 //    val mediaKey: String?,
