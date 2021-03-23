@@ -12,6 +12,7 @@ class NetworkClientImpl(private val debug: BuildConfigDebug): NetworkClient() {
 
     companion object {
         const val TIME_OUT = 30L
+        const val PING_INTERVAL = 30L
     }
 
     @Volatile
@@ -39,6 +40,8 @@ class NetworkClientImpl(private val debug: BuildConfigDebug): NetworkClient() {
             builder.connectTimeout(TIME_OUT, TimeUnit.SECONDS)
             builder.readTimeout(TIME_OUT, TimeUnit.SECONDS)
             builder.writeTimeout(TIME_OUT, TimeUnit.SECONDS)
+
+            builder.pingInterval(PING_INTERVAL, TimeUnit.SECONDS)
 
             if (debug.value) {
                 HttpLoggingInterceptor().let { interceptor ->
