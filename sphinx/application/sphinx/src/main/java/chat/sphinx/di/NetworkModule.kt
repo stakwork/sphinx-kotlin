@@ -4,11 +4,17 @@ import chat.sphinx.concept_network_client.NetworkClient
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
 import chat.sphinx.concept_network_query_contact.NetworkQueryContact
 import chat.sphinx.concept_network_query_invite.NetworkQueryInvite
+import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
+import chat.sphinx.concept_network_query_message.NetworkQueryMessage
+import chat.sphinx.concept_network_query_subscription.NetworkQuerySubscription
 import chat.sphinx.concept_relay.RelayDataHandler
 import chat.sphinx.feature_network_client.NetworkClientImpl
 import chat.sphinx.feature_network_query_chat.NetworkQueryChatImpl
 import chat.sphinx.feature_network_query_contact.NetworkQueryContactImpl
 import chat.sphinx.feature_network_query_invite.NetworkQueryInviteImpl
+import chat.sphinx.feature_network_query_lightning.NetworkQueryLightningImpl
+import chat.sphinx.feature_network_query_message.NetworkQueryMessageImpl
+import chat.sphinx.feature_network_query_subscription.NetworkQuerySubscriptionImpl
 import chat.sphinx.feature_relay.RelayDataHandlerImpl
 import com.squareup.moshi.Moshi
 import dagger.Module
@@ -32,13 +38,13 @@ object NetworkModule {
         authenticationStorage: AuthenticationStorage,
         authenticationCoreManager: AuthenticationCoreManager,
         dispatchers: CoroutineDispatchers,
-        encryptionKeyHandler: EncryptionKeyHandler
+        encryptionKeyHandler: EncryptionKeyHandler,
     ): RelayDataHandlerImpl =
         RelayDataHandlerImpl(
             authenticationStorage,
             authenticationCoreManager,
             dispatchers,
-            encryptionKeyHandler
+            encryptionKeyHandler,
         )
 
     @Provides
@@ -71,13 +77,13 @@ object NetworkModule {
         dispatchers: CoroutineDispatchers,
         moshi: Moshi,
         networkClient: NetworkClient,
-        relayDataHandler: RelayDataHandler
+        relayDataHandler: RelayDataHandler,
     ): NetworkQueryChatImpl =
         NetworkQueryChatImpl(
             dispatchers,
             moshi,
             networkClient,
-            relayDataHandler
+            relayDataHandler,
         )
 
     @Provides
@@ -92,13 +98,13 @@ object NetworkModule {
         dispatchers: CoroutineDispatchers,
         moshi: Moshi,
         networkClient: NetworkClient,
-        relayDataHandler: RelayDataHandler
+        relayDataHandler: RelayDataHandler,
     ): NetworkQueryContactImpl =
         NetworkQueryContactImpl(
             dispatchers,
             moshi,
             networkClient,
-            relayDataHandler
+            relayDataHandler,
         )
 
     @Provides
@@ -119,7 +125,7 @@ object NetworkModule {
             dispatchers,
             moshi,
             networkClient,
-            relayDataHandler
+            relayDataHandler,
         )
 
     @Provides
@@ -127,4 +133,67 @@ object NetworkModule {
         networkQueryInviteImpl: NetworkQueryInviteImpl
     ): NetworkQueryInvite =
         networkQueryInviteImpl
+
+    @Provides
+    @Singleton
+    fun provideNetworkQueryLightningImpl(
+        dispatchers: CoroutineDispatchers,
+        moshi: Moshi,
+        networkClient: NetworkClient,
+        relayDataHandler: RelayDataHandler,
+    ): NetworkQueryLightningImpl =
+        NetworkQueryLightningImpl(
+            dispatchers,
+            moshi,
+            networkClient,
+            relayDataHandler,
+        )
+
+    @Provides
+    fun provideNetworkQueryLightning(
+        networkQueryLightningImpl: NetworkQueryLightningImpl
+    ): NetworkQueryLightning =
+        networkQueryLightningImpl
+
+    @Provides
+    @Singleton
+    fun provideNetworkQueryMessageImpl(
+        dispatchers: CoroutineDispatchers,
+        moshi: Moshi,
+        networkClient: NetworkClient,
+        relayDataHandler: RelayDataHandler,
+    ): NetworkQueryMessageImpl =
+        NetworkQueryMessageImpl(
+            dispatchers,
+            moshi,
+            networkClient,
+            relayDataHandler,
+        )
+
+    @Provides
+    fun provideNetworkQueryMessage(
+        networkQueryMessageImpl: NetworkQueryMessageImpl
+    ): NetworkQueryMessage =
+        networkQueryMessageImpl
+
+    @Provides
+    @Singleton
+    fun provideNetworkQuerySubscriptionImpl(
+        dispatchers: CoroutineDispatchers,
+        moshi: Moshi,
+        networkClient: NetworkClient,
+        relayDataHandler: RelayDataHandler,
+    ): NetworkQuerySubscriptionImpl =
+        NetworkQuerySubscriptionImpl(
+            dispatchers,
+            moshi,
+            networkClient,
+            relayDataHandler,
+        )
+
+    @Provides
+    fun provideNetworkQuerySubscription(
+        networkQuerySubscriptionImpl: NetworkQuerySubscriptionImpl
+    ): NetworkQuerySubscription =
+        networkQuerySubscriptionImpl
 }
