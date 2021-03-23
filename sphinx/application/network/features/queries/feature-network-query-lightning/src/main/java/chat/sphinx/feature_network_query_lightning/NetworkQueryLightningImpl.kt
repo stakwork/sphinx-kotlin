@@ -3,7 +3,7 @@ package chat.sphinx.feature_network_query_lightning
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_network_client.NetworkClient
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
-import chat.sphinx.concept_network_query_lightning.model.InvoicesDto
+import chat.sphinx.concept_network_query_lightning.model.invoice.InvoicesDto
 import chat.sphinx.concept_relay.RelayDataHandler
 import chat.sphinx.concept_relay.retrieveRelayUrlAndJavaWebToken
 import chat.sphinx.feature_network_query_lightning.model.GetInvoicesRelayResponse

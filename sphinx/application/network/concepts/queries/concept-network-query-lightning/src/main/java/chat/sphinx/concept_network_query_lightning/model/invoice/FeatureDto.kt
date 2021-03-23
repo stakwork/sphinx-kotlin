@@ -1,4 +1,4 @@
-package chat.sphinx.concept_network_query_lightning.model
+package chat.sphinx.concept_network_query_lightning.model.invoice
 
 import com.squareup.moshi.JsonClass
 

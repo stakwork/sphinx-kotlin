@@ -1,6 +1,6 @@
 package chat.sphinx.concept_network_query_lightning
 
-import chat.sphinx.concept_network_query_lightning.model.InvoicesDto
+import chat.sphinx.concept_network_query_lightning.model.invoice.InvoicesDto
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.wrapper_relay.JavaWebToken
