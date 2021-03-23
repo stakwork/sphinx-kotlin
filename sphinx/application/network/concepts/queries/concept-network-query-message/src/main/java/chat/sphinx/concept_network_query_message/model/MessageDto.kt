@@ -34,7 +34,6 @@ data class MessageDto(
     val original_muid: String?,
     val reply_uuid: String?,
     val network_type: Int?,
-    val tenant: Int,
     val chat: MsgsChatDto?,
     val contact: ContactDto?,
 )

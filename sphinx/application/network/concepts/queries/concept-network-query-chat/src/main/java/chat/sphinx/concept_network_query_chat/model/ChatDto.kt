@@ -29,7 +29,6 @@ data class ChatDto(
     override val meta: String?,
     override val my_photo_url: String?,
     override val my_alias: String?,
-    override val tenant: Int,
     override val skip_broadcast_joins: Int?,
     override val pending_contact_ids: List<Long>?
 ): BaseChatDto<Int?, Int, Int?, Int>()

@@ -19,7 +19,6 @@ data class ContactsSubscriptionDto(
     override val paused: Int,
     override val created_at: String,
     override val updated_at: String,
-    override val tenant: Int,
     override val interval: String,
     override val next: String,
     override val chat: ChatDto?,

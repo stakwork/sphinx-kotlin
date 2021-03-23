@@ -42,7 +42,6 @@ abstract class BaseChatDto<IsMuted, Unlisted, Private, Seen> {
     abstract val meta: String?
     abstract val my_photo_url: String?
     abstract val my_alias: String?
-    abstract val tenant: Int
     abstract val skip_broadcast_joins: Int?
     abstract val pending_contact_ids: List<Long>?
 }

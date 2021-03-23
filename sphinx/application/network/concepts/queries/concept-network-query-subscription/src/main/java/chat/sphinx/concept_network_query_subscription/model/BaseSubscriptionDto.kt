@@ -24,7 +24,6 @@ abstract class BaseSubscriptionDto<Ended, Paused> {
 
     abstract val created_at: String
     abstract val updated_at: String
-    abstract val tenant: Int
     abstract val interval: String
     abstract val next: String
     abstract val chat: ChatDto?
