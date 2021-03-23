@@ -1,11 +1,11 @@
 package chat.sphinx.kotlin_response
 
-sealed class KotlinResponse<out Success: Any, out Error: Any>: LoadResponse<Success, Error>() {
-    data class Success<out Success: Any>(val value: Success): KotlinResponse<Success, Nothing>()
+sealed class KotlinResponse<out Success: Any?, out Error: Any>: LoadResponse<Success, Error>() {
+    data class Success<out Success: Any?>(val value: Success): KotlinResponse<Success, Nothing>()
     data class Error<out Error: Any>(val cause: Error): KotlinResponse<Nothing, Error>()
 }
 
-sealed class LoadResponse<out Success: Any, out Error: Any> {
+sealed class LoadResponse<out Success: Any?, out Error: Any> {
     object Loading: LoadResponse<Nothing, Nothing>()
 }
 
