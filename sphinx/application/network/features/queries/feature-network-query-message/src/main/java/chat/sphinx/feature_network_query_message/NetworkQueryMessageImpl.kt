@@ -33,7 +33,8 @@ class NetworkQueryMessageImpl(
         private const val ENDPOINT_MSGS = "/msgs"
         private const val ENDPOINT_MESSAGE = "/message"
         private const val ENDPOINT_MESSAGES = "${ENDPOINT_MESSAGE}s"
-        private const val ENDPOINT_PAYMENTS = "/payments"
+        private const val ENDPOINT_PAYMENT = "/payment"
+        private const val ENDPOINT_PAYMENTS = "${ENDPOINT_PAYMENT}s"
     }
 
     ///////////
@@ -110,6 +111,7 @@ class NetworkQueryMessageImpl(
 //    app.post('/messages', messages.sendMessage)
 //    app.post('/messages/:chat_id/read', messages.readMessages)
 //    app.post('/messages/clear', messages.clearMessages)
+//    app.post('/payment', payments.sendPayment)
 
     //////////////
     /// DELETE ///

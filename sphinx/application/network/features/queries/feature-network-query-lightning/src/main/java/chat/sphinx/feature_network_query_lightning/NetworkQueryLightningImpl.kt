@@ -36,8 +36,6 @@ class NetworkQueryLightningImpl(
     companion object {
         private const val ENDPOINT_INVOICES = "/invoices"
         private const val ENDPOINT_INVOICES_CANCEL = "$ENDPOINT_INVOICES/cancel"
-        private const val ENDPOINT_PAYMENT = "/payment"
-        private const val ENDPOINT_PAYMENTS = "${ENDPOINT_PAYMENT}s"
         private const val ENDPOINT_CHANNELS = "/channels"
         private const val ENDPOINT_BALANCE = "/balance"
         private const val ENDPOINT_BALANCE_ALL = "$ENDPOINT_BALANCE/all"

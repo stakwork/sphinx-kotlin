@@ -28,14 +28,12 @@ abstract class NetworkQueryLightning {
         relayUrl: RelayUrl,
     ): Flow<LoadResponse<ChannelsDto, ResponseError>>
 
-//    app.get('/balance', details.getBalance)
     abstract fun getBalance(): Flow<LoadResponse<BalanceDto, ResponseError>>
     abstract fun getBalance(
         javaWebToken: JavaWebToken,
         relayUrl: RelayUrl,
     ): Flow<LoadResponse<BalanceDto, ResponseError>>
 
-//    app.get('/balance/all', details.getLocalRemoteBalance)
 abstract fun getBalanceAll(): Flow<LoadResponse<BalanceAllDto, ResponseError>>
     abstract fun getBalanceAll(
         javaWebToken: JavaWebToken,
@@ -59,7 +57,6 @@ abstract fun getBalanceAll(): Flow<LoadResponse<BalanceAllDto, ResponseError>>
     ////////////
 //    app.post('/invoices', invoices.createInvoice)
 //    app.post('/invoices/cancel', invoices.cancelInvoice)
-//    app.post('/payment', payments.sendPayment)
 
     //////////////
     /// DELETE ///

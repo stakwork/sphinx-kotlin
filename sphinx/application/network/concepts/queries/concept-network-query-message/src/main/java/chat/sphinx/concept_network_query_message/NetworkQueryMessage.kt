@@ -42,6 +42,7 @@ abstract class NetworkQueryMessage {
 //    app.post('/messages', messages.sendMessage)
 //    app.post('/messages/:chat_id/read', messages.readMessages)
 //    app.post('/messages/clear', messages.clearMessages)
+//    app.post('/payment', payments.sendPayment)
 
     //////////////
     /// DELETE ///
