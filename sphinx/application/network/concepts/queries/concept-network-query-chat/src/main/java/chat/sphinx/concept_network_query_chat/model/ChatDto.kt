@@ -19,6 +19,7 @@ data class ChatDto(
     override val host: String?,
     override val price_to_join: Long?,
     override val price_per_message: Long?,
+    override val escrow_amount: Long?,
     override val escrow_millis: Long?,
     override val unlisted: Int,
     override val private: Int?,

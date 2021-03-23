@@ -21,6 +21,7 @@ abstract class BaseChatDto<IsMuted, Unlisted, Private, Seen> {
     abstract val host: String?
     abstract val price_to_join: Long?
     abstract val price_per_message: Long?
+    abstract val escrow_amount: Long?
     abstract val escrow_millis: Long?
 
     // from '/msgs' endpoint, this comes in as a boolean while the
