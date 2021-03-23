@@ -3,11 +3,15 @@ package chat.sphinx.feature_network_query_lightning
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_network_client.NetworkClient
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
+import chat.sphinx.concept_network_query_lightning.model.balance.BalanceAllDto
+import chat.sphinx.concept_network_query_lightning.model.balance.BalanceDto
 import chat.sphinx.concept_network_query_lightning.model.channel.ChannelDto
 import chat.sphinx.concept_network_query_lightning.model.channel.ChannelsDto
 import chat.sphinx.concept_network_query_lightning.model.invoice.InvoicesDto
 import chat.sphinx.concept_relay.RelayDataHandler
 import chat.sphinx.concept_relay.retrieveRelayUrlAndJavaWebToken
+import chat.sphinx.feature_network_query_lightning.model.GetBalanceAllRelayResponse
+import chat.sphinx.feature_network_query_lightning.model.GetBalanceRelayResponse
 import chat.sphinx.feature_network_query_lightning.model.GetChannelsRelayResponse
 import chat.sphinx.feature_network_query_lightning.model.GetInvoicesRelayResponse
 import chat.sphinx.kotlin_response.KotlinResponse
@@ -48,7 +52,6 @@ class NetworkQueryLightningImpl(
     ///////////
     /// GET ///
     ///////////
-//    app.get('/invoices', invoices.listInvoices)
     override fun getInvoices(): Flow<LoadResponse<InvoicesDto, ResponseError>> = flow {
         relayDataHandler.retrieveRelayUrlAndJavaWebToken().let { response ->
             @Exhaustive
@@ -107,8 +110,64 @@ class NetworkQueryLightningImpl(
             url = relayUrl.value + ENDPOINT_CHANNELS
         )
 
-//    app.get('/balance', details.getBalance)
-//    app.get('/balance/all', details.getLocalRemoteBalance)
+    override fun getBalance(): Flow<LoadResponse<BalanceDto, ResponseError>> = flow {
+        relayDataHandler.retrieveRelayUrlAndJavaWebToken().let { response ->
+            @Exhaustive
+            when (response) {
+                is KotlinResponse.Error -> {
+                    emit(response)
+                }
+                is KotlinResponse.Success -> {
+                    emitAll(
+                        getBalance(response.value.first, response.value.second)
+                    )
+                }
+            }
+        }
+    }
+
+    override fun getBalance(
+        javaWebToken: JavaWebToken,
+        relayUrl: RelayUrl
+    ): Flow<LoadResponse<BalanceDto, ResponseError>> =
+        RelayCall.Get.execute(
+            dispatchers = dispatchers,
+            jwt = javaWebToken,
+            moshi = moshi,
+            adapterClass = GetBalanceRelayResponse::class.java,
+            networkClient = networkClient,
+            url = relayUrl.value + ENDPOINT_BALANCE
+        )
+
+    override fun getBalanceAll(): Flow<LoadResponse<BalanceAllDto, ResponseError>> = flow {
+        relayDataHandler.retrieveRelayUrlAndJavaWebToken().let { response ->
+            @Exhaustive
+            when (response) {
+                is KotlinResponse.Error -> {
+                    emit(response)
+                }
+                is KotlinResponse.Success -> {
+                    emitAll(
+                        getBalanceAll(response.value.first, response.value.second)
+                    )
+                }
+            }
+        }
+    }
+
+    override fun getBalanceAll(
+        javaWebToken: JavaWebToken,
+        relayUrl: RelayUrl
+    ): Flow<LoadResponse<BalanceAllDto, ResponseError>> =
+        RelayCall.Get.execute(
+            dispatchers = dispatchers,
+            jwt = javaWebToken,
+            moshi = moshi,
+            adapterClass = GetBalanceAllRelayResponse::class.java,
+            networkClient = networkClient,
+            url = relayUrl.value + ENDPOINT_BALANCE_ALL
+        )
+
 //    app.get('/getinfo', details.getInfo)
 //    app.get('/logs', details.getLogsSince)
 //    app.get('/info', details.getNodeInfo)

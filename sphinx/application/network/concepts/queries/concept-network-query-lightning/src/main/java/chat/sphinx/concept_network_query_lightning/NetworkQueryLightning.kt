@@ -1,5 +1,7 @@
 package chat.sphinx.concept_network_query_lightning
 
+import chat.sphinx.concept_network_query_lightning.model.balance.BalanceAllDto
+import chat.sphinx.concept_network_query_lightning.model.balance.BalanceDto
 import chat.sphinx.concept_network_query_lightning.model.channel.ChannelDto
 import chat.sphinx.concept_network_query_lightning.model.channel.ChannelsDto
 import chat.sphinx.concept_network_query_lightning.model.invoice.InvoicesDto
@@ -27,7 +29,19 @@ abstract class NetworkQueryLightning {
     ): Flow<LoadResponse<ChannelsDto, ResponseError>>
 
 //    app.get('/balance', details.getBalance)
+    abstract fun getBalance(): Flow<LoadResponse<BalanceDto, ResponseError>>
+    abstract fun getBalance(
+        javaWebToken: JavaWebToken,
+        relayUrl: RelayUrl,
+    ): Flow<LoadResponse<BalanceDto, ResponseError>>
+
 //    app.get('/balance/all', details.getLocalRemoteBalance)
+abstract fun getBalanceAll(): Flow<LoadResponse<BalanceAllDto, ResponseError>>
+    abstract fun getBalanceAll(
+        javaWebToken: JavaWebToken,
+        relayUrl: RelayUrl,
+    ): Flow<LoadResponse<BalanceAllDto, ResponseError>>
+
 //    app.get('/getinfo', details.getInfo)
 //    app.get('/logs', details.getLogsSince)
 //    app.get('/info', details.getNodeInfo)

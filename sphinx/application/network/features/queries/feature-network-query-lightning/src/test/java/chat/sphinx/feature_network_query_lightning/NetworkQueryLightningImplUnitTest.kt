@@ -52,4 +52,44 @@ class NetworkQueryLightningImplUnitTest: NetworkQueryTestHelper() {
                 }
             }
         }
+
+    @Test
+    fun `getBalance returns success`() =
+        testDispatcher.runBlockingTest {
+            getCredentials()?.let {
+                nqLightning.getBalance().collect { loadResponse ->
+
+                    @Exhaustive
+                    when (loadResponse) {
+                        is KotlinResponse.Error -> {
+                            loadResponse.exception?.printStackTrace()
+                            Assert.fail(loadResponse.message)
+                        }
+                        is KotlinResponse.Success -> {}
+                        is LoadResponse.Loading -> {}
+                    }
+
+                }
+            }
+        }
+
+    @Test
+    fun `getBalanceAll returns success`() =
+        testDispatcher.runBlockingTest {
+            getCredentials()?.let {
+                nqLightning.getBalanceAll().collect { loadResponse ->
+
+                    @Exhaustive
+                    when (loadResponse) {
+                        is KotlinResponse.Error -> {
+                            loadResponse.exception?.printStackTrace()
+                            Assert.fail(loadResponse.message)
+                        }
+                        is KotlinResponse.Success -> {}
+                        is LoadResponse.Loading -> {}
+                    }
+
+                }
+            }
+        }
 }
