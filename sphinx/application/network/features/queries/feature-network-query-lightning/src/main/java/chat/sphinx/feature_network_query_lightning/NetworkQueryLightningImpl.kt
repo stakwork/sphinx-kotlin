@@ -3,9 +3,12 @@ package chat.sphinx.feature_network_query_lightning
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_network_client.NetworkClient
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
+import chat.sphinx.concept_network_query_lightning.model.channel.ChannelDto
+import chat.sphinx.concept_network_query_lightning.model.channel.ChannelsDto
 import chat.sphinx.concept_network_query_lightning.model.invoice.InvoicesDto
 import chat.sphinx.concept_relay.RelayDataHandler
 import chat.sphinx.concept_relay.retrieveRelayUrlAndJavaWebToken
+import chat.sphinx.feature_network_query_lightning.model.GetChannelsRelayResponse
 import chat.sphinx.feature_network_query_lightning.model.GetInvoicesRelayResponse
 import chat.sphinx.kotlin_response.KotlinResponse
 import chat.sphinx.kotlin_response.LoadResponse
@@ -75,7 +78,35 @@ class NetworkQueryLightningImpl(
             url = relayUrl.value + ENDPOINT_INVOICES
         )
 
-//    app.get('/channels', details.getChannels)
+    override fun getChannels(): Flow<LoadResponse<ChannelsDto, ResponseError>> = flow {
+        relayDataHandler.retrieveRelayUrlAndJavaWebToken().let { response ->
+            @Exhaustive
+            when (response) {
+                is KotlinResponse.Error -> {
+                    emit(response)
+                }
+                is KotlinResponse.Success -> {
+                    emitAll(
+                        getChannels(response.value.first, response.value.second)
+                    )
+                }
+            }
+        }
+    }
+
+    override fun getChannels(
+        javaWebToken: JavaWebToken,
+        relayUrl: RelayUrl
+    ): Flow<LoadResponse<ChannelsDto, ResponseError>> =
+        RelayCall.Get.execute(
+            dispatchers = dispatchers,
+            jwt = javaWebToken,
+            moshi = moshi,
+            adapterClass = GetChannelsRelayResponse::class.java,
+            networkClient = networkClient,
+            url = relayUrl.value + ENDPOINT_CHANNELS
+        )
+
 //    app.get('/balance', details.getBalance)
 //    app.get('/balance/all', details.getLocalRemoteBalance)
 //    app.get('/getinfo', details.getInfo)

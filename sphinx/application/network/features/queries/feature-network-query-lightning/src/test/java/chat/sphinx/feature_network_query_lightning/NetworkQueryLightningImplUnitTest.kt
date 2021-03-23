@@ -32,4 +32,24 @@ class NetworkQueryLightningImplUnitTest: NetworkQueryTestHelper() {
                 }
             }
         }
+
+    @Test
+    fun `getChannels returns success`() =
+        testDispatcher.runBlockingTest {
+            getCredentials()?.let {
+                nqLightning.getChannels().collect { loadResponse ->
+
+                    @Exhaustive
+                    when (loadResponse) {
+                        is KotlinResponse.Error -> {
+                            loadResponse.exception?.printStackTrace()
+                            Assert.fail(loadResponse.message)
+                        }
+                        is KotlinResponse.Success -> {}
+                        is LoadResponse.Loading -> {}
+                    }
+
+                }
+            }
+        }
 }

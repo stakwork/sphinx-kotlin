@@ -10,7 +10,7 @@ import com.squareup.moshi.JsonClass
  * is simply a work around for Moshi and the call adapter.
  * */
 @JsonClass(generateAdapter = true)
-class GetInvoicesRelayResponse(
+data class GetInvoicesRelayResponse(
     val invoices: List<InvoiceDto>,
     val last_index_offset: Long,
     val first_index_offset: Long,

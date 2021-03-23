@@ -1,5 +1,7 @@
 package chat.sphinx.concept_network_query_lightning
 
+import chat.sphinx.concept_network_query_lightning.model.channel.ChannelDto
+import chat.sphinx.concept_network_query_lightning.model.channel.ChannelsDto
 import chat.sphinx.concept_network_query_lightning.model.invoice.InvoicesDto
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.ResponseError
@@ -12,14 +14,18 @@ abstract class NetworkQueryLightning {
     ///////////
     /// GET ///
     ///////////
-    // TODO: Is there pagination??
     abstract fun getInvoices(): Flow<LoadResponse<InvoicesDto, ResponseError>>
     abstract fun getInvoices(
         javaWebToken: JavaWebToken,
-        relayUrl: RelayUrl
+        relayUrl: RelayUrl,
     ): Flow<LoadResponse<InvoicesDto, ResponseError>>
 
-//    app.get('/channels', details.getChannels)
+    abstract fun getChannels(): Flow<LoadResponse<ChannelsDto, ResponseError>>
+    abstract fun getChannels(
+        javaWebToken: JavaWebToken,
+        relayUrl: RelayUrl,
+    ): Flow<LoadResponse<ChannelsDto, ResponseError>>
+
 //    app.get('/balance', details.getBalance)
 //    app.get('/balance/all', details.getLocalRemoteBalance)
 //    app.get('/getinfo', details.getInfo)
