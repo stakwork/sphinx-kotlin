@@ -1,10 +1,21 @@
 package chat.sphinx.feature_network_query_lightning
 
+import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_network_client.NetworkClient
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
+import chat.sphinx.concept_network_query_lightning.model.InvoicesDto
 import chat.sphinx.concept_relay.RelayDataHandler
+import chat.sphinx.concept_relay.retrieveRelayUrlAndJavaWebToken
+import chat.sphinx.kotlin_response.KotlinResponse
+import chat.sphinx.kotlin_response.LoadResponse
+import chat.sphinx.kotlin_response.ResponseError
+import chat.sphinx.wrapper_relay.JavaWebToken
+import chat.sphinx.wrapper_relay.RelayUrl
 import com.squareup.moshi.Moshi
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.flow
 
 class NetworkQueryLightningImpl(
     private val dispatchers: CoroutineDispatchers,
@@ -33,7 +44,30 @@ class NetworkQueryLightningImpl(
     /// GET ///
     ///////////
 //    app.get('/invoices', invoices.listInvoices)
-//    app.get('/payments', payments.listPayments)
+    override fun getInvoices(): Flow<LoadResponse<InvoicesDto, ResponseError>> = flow {
+        relayDataHandler.retrieveRelayUrlAndJavaWebToken().let { response ->
+            @Exhaustive
+            when (response) {
+                is KotlinResponse.Error -> {
+                    emit(response)
+                }
+                is KotlinResponse.Success -> {
+                    emitAll(
+                        getInvoices(response.value.first, response.value.second)
+                    )
+                }
+            }
+        }
+    }
+
+    override fun getInvoices(
+        javaWebToken: JavaWebToken,
+        relayUrl: RelayUrl
+    ): Flow<LoadResponse<InvoicesDto, ResponseError>> = flow {
+        emit(LoadResponse.Loading)
+        emit(KotlinResponse.Error(ResponseError("Needs implementation")))
+    }
+
 //    app.get('/channels', details.getChannels)
 //    app.get('/balance', details.getBalance)
 //    app.get('/balance/all', details.getLocalRemoteBalance)
