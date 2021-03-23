@@ -10,7 +10,7 @@ data class MessageDto(
     val chat_id: Long?,
     val type: Int,
     val sender: Long,
-    val receiver: Int?,
+    val receiver: Long?,
     val amount: Long,
     val amount_msat: Long,
     val payment_hash: String?,
