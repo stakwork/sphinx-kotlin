@@ -9,6 +9,7 @@ import android.view.inputmethod.InputMethodManager
 import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import app.cash.exhaustive.Exhaustive
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.authentication_resources.databinding.LayoutAuthenticationBinding
 import chat.sphinx.insetter_activity.InsetterActivity
@@ -27,7 +28,6 @@ import io.matthewnelson.android_feature_viewmodel.updateViewState
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import javax.annotation.meta.Exhaustive
 
 @AndroidEntryPoint
 internal class SplashFragment: MotionLayoutFragment<

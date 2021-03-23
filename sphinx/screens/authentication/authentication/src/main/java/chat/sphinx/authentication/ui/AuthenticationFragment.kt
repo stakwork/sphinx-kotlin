@@ -7,6 +7,7 @@ import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
+import app.cash.exhaustive.Exhaustive
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.authentication.R
 import chat.sphinx.authentication_resources.databinding.LayoutAuthenticationBinding
@@ -23,7 +24,6 @@ import io.matthewnelson.feature_authentication_view.ui.AuthenticationViewState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
-import javax.annotation.meta.Exhaustive
 
 @AndroidEntryPoint
 internal class AuthenticationFragment: SideEffectFragment<

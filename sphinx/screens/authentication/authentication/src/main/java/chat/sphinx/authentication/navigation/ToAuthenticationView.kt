@@ -2,12 +2,12 @@ package chat.sphinx.authentication.navigation
 
 import androidx.navigation.NavController
 import androidx.navigation.navOptions
+import app.cash.exhaustive.Exhaustive
 import chat.sphinx.authentication.R
 import io.matthewnelson.concept_authentication.state.AuthenticationState
 import io.matthewnelson.android_feature_navigation.R as R_navigation
 import io.matthewnelson.concept_authentication.state.AuthenticationStateManager
 import io.matthewnelson.concept_navigation.NavigationRequest
-import javax.annotation.meta.Exhaustive
 
 internal class ToAuthenticationView private constructor(
     private val authenticationStateManager: AuthenticationStateManager

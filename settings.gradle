@@ -4,11 +4,43 @@ rootProject.name = "Sphinx"
 //////////// Sphinx ////////////
 ////////////////////////////////
 include ':sphinx:application:sphinx'
+
 include ':sphinx:application:common:resources'
+include ':sphinx:application:common:kotlin-response'
+
+include ':sphinx:application:common:wrappers:wrapper-chat'
+include ':sphinx:application:common:wrappers:wrapper-common'
+include ':sphinx:application:common:wrappers:wrapper-contact'
+include ':sphinx:application:common:wrappers:wrapper-invite'
+include ':sphinx:application:common:wrappers:wrapper-lightning'
+include ':sphinx:application:common:wrappers:wrapper-message'
+include ':sphinx:application:common:wrappers:wrapper-relay'
+include ':sphinx:application:common:wrappers:wrapper-subscription'
+
 include ':sphinx:application:data:concepts:concept-background-login'
 include ':sphinx:application:data:features:feature-background-login'
 include ':sphinx:application:data:concepts:concept-relay'
 include ':sphinx:application:data:features:feature-relay'
+
+include ':sphinx:application:network:concepts:concept-network-client'
+include ':sphinx:application:network:features:feature-network-client'
+include ':sphinx:application:network:concepts:queries:concept-network-query-chat'
+include ':sphinx:application:network:features:queries:feature-network-query-chat'
+include ':sphinx:application:network:concepts:queries:concept-network-query-contact'
+include ':sphinx:application:network:features:queries:feature-network-query-contact'
+include ':sphinx:application:network:concepts:queries:concept-network-query-invite'
+include ':sphinx:application:network:features:queries:feature-network-query-invite'
+include ':sphinx:application:network:concepts:queries:concept-network-query-lightning'
+include ':sphinx:application:network:features:queries:feature-network-query-lightning'
+include ':sphinx:application:network:features:queries:feature-network-query-message'
+include ':sphinx:application:network:concepts:queries:concept-network-query-message'
+include ':sphinx:application:network:features:queries:feature-network-query-subscription'
+include ':sphinx:application:network:concepts:queries:concept-network-query-subscription'
+include ':sphinx:application:network:dtos:dto-chat'
+include ':sphinx:application:network:dtos:dto-contact'
+include ':sphinx:application:network:dtos:dto-invite'
+include ':sphinx:application:network:dtos:dto-message'
+include ':sphinx:application:network:network-relay-call'
 
 // Activity
 include ':sphinx:activity:hilt-qualifiers'
@@ -38,6 +70,9 @@ include ':sphinx:screens-detail:payments:payment-send:payment-send'
 include ':sphinx:screens-detail:scanner:scanner'
 include ':sphinx:screens-detail:support-ticket:support-ticket'
 include ':sphinx:screens-detail:transactions:transactions'
+
+// Testing
+include ':sphinx:test:test-network-query'
 
 ////////////////////////////////////////
 //////////// Kotlin Android ////////////

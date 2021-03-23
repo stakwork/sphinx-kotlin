@@ -1,0 +1,22 @@
+plugins {
+    id 'app.cash.exhaustive'
+    id 'java-library'
+    id 'kotlin'
+    id 'kotlin-kapt'
+}
+
+dependencies {
+    // KotlinAndroid
+    api project(path: ':kotlin:concepts:concept-coroutines')
+
+    // Sphinx
+    api project(path: ':sphinx:application:data:concepts:concept-relay')
+    api project(path: ':sphinx:application:network:concepts:queries:concept-network-query-message')
+    api project(path: ':sphinx:application:network:concepts:concept-network-client')
+    implementation project(path: ':sphinx:application:network:network-relay-call')
+
+    api deps.square.moshi
+    kapt kaptDeps.square.moshiCodegen
+
+    testImplementation project(path: ':sphinx:test:test-network-query')
+}
