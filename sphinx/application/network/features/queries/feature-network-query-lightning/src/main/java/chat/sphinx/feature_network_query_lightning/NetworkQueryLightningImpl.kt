@@ -6,9 +6,11 @@ import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_lightning.model.InvoicesDto
 import chat.sphinx.concept_relay.RelayDataHandler
 import chat.sphinx.concept_relay.retrieveRelayUrlAndJavaWebToken
+import chat.sphinx.feature_network_query_lightning.model.GetInvoicesRelayResponse
 import chat.sphinx.kotlin_response.KotlinResponse
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.ResponseError
+import chat.sphinx.network_relay_call.RelayCall
 import chat.sphinx.wrapper_relay.JavaWebToken
 import chat.sphinx.wrapper_relay.RelayUrl
 import com.squareup.moshi.Moshi
@@ -63,10 +65,15 @@ class NetworkQueryLightningImpl(
     override fun getInvoices(
         javaWebToken: JavaWebToken,
         relayUrl: RelayUrl
-    ): Flow<LoadResponse<InvoicesDto, ResponseError>> = flow {
-        emit(LoadResponse.Loading)
-        emit(KotlinResponse.Error(ResponseError("Needs implementation")))
-    }
+    ): Flow<LoadResponse<InvoicesDto, ResponseError>> =
+        RelayCall.Get.execute(
+            dispatchers = dispatchers,
+            jwt = javaWebToken,
+            moshi = moshi,
+            adapterClass = GetInvoicesRelayResponse::class.java,
+            networkClient = networkClient,
+            url = relayUrl.value + ENDPOINT_INVOICES
+        )
 
 //    app.get('/channels', details.getChannels)
 //    app.get('/balance', details.getBalance)
