@@ -100,7 +100,7 @@ class NetworkQuerySubscriptionImplUnitTest: NetworkQueryTestHelper() {
                             Assert.fail(loadResponse.message)
                         }
                         is KotlinResponse.Success -> {
-                            lastSubIdPlus1 = loadResponse.value.lastOrNull()?.id ?: 0 + 1L
+                            lastSubIdPlus1 = (loadResponse.value.lastOrNull()?.id ?: 0L) + 1L
                         }
                         is LoadResponse.Loading -> {}
                     }
