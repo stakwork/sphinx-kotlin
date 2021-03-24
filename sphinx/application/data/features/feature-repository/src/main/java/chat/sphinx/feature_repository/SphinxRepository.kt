@@ -17,6 +17,8 @@ import com.squareup.sqldelight.runtime.coroutines.mapToList
 import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
 class SphinxRepository(
@@ -32,6 +34,7 @@ class SphinxRepository(
     /////////////
     /// Chats ///
     /////////////
+    private val chatLock = Mutex()
     private val chatMapper: ChatMapper by lazy {
         ChatMapper()
     }
@@ -74,44 +77,47 @@ class SphinxRepository(
                 is KotlinResponse.Success -> {
                     withContext(dispatchers.io) {
 
-                        val chatIdsToRemove = sphinxDatabaseQueries.getAllChatIds()
-                            .executeAsList()
-                            .toMutableSet()
+                        chatLock.withLock {
 
-                        chatMapper.fromDTOsToDBOs(loadResponse.value).let { dbos ->
+                            val chatIdsToRemove = sphinxDatabaseQueries.getAllChatIds()
+                                .executeAsList()
+                                .toMutableSet()
 
-                            sphinxDatabaseQueries.transaction {
-                                dbos.forEach { dbo ->
-                                    sphinxDatabaseQueries.upsertChat(
-                                        dbo.uuid,
-                                        dbo.name,
-                                        dbo.photo_url,
-                                        dbo.type,
-                                        dbo.status,
-                                        dbo.contact_ids,
-                                        dbo.is_muted,
-                                        dbo.created_at,
-                                        dbo.group_key,
-                                        dbo.host,
-                                        dbo.price_per_message,
-                                        dbo.escrow_amount,
-                                        dbo.unlisted,
-                                        dbo.private_tribe,
-                                        dbo.owner_pub_key,
-                                        dbo.seen,
-                                        dbo.meta_data,
-                                        dbo.my_photo_url,
-                                        dbo.my_alias,
-                                        dbo.pending_contact_ids,
-                                        dbo.id
-                                    )
+                            chatMapper.fromDTOsToDBOs(loadResponse.value).let { dbos ->
 
-                                    chatIdsToRemove.remove(dbo.id)
-                                }
+                                sphinxDatabaseQueries.transaction {
+                                    dbos.forEach { dbo ->
+                                        sphinxDatabaseQueries.upsertChat(
+                                            dbo.uuid,
+                                            dbo.name,
+                                            dbo.photo_url,
+                                            dbo.type,
+                                            dbo.status,
+                                            dbo.contact_ids,
+                                            dbo.is_muted,
+                                            dbo.created_at,
+                                            dbo.group_key,
+                                            dbo.host,
+                                            dbo.price_per_message,
+                                            dbo.escrow_amount,
+                                            dbo.unlisted,
+                                            dbo.private_tribe,
+                                            dbo.owner_pub_key,
+                                            dbo.seen,
+                                            dbo.meta_data,
+                                            dbo.my_photo_url,
+                                            dbo.my_alias,
+                                            dbo.pending_contact_ids,
+                                            dbo.id
+                                        )
 
-                                // remove remaining chat's from DB
-                                chatIdsToRemove.forEach { chatId ->
-                                    sphinxDatabaseQueries.deleteChatById(chatId)
+                                        chatIdsToRemove.remove(dbo.id)
+                                    }
+
+                                    // remove remaining chat's from DB
+                                    chatIdsToRemove.forEach { chatId ->
+                                        sphinxDatabaseQueries.deleteChatById(chatId)
+                                    }
                                 }
                             }
                         }
