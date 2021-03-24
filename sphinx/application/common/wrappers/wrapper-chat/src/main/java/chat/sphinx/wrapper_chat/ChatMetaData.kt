@@ -11,12 +11,12 @@ inline fun String.toChatMetaDataOrNull(): ChatMetaData? =
         null
     }
 
-/**
- *
- * */
-@Suppress("NOTHING_TO_INLINE")
-@Throws(NumberFormatException::class, IndexOutOfBoundsException::class)
-inline fun String.toChatMetaData(): ChatMetaData {
+@Throws(
+    NumberFormatException::class,
+    IndexOutOfBoundsException::class,
+    IllegalArgumentException::class
+)
+fun String.toChatMetaData(): ChatMetaData {
 //    Off the wire:
 //    "{\"itemID\":1922435539,\"sats_per_minute\":3,\"ts\":4, \"speed\":1.5}"
     val splits = this
@@ -24,19 +24,42 @@ inline fun String.toChatMetaData(): ChatMetaData {
         .replace('\\', ' ')
         .replace('{', ' ')
         .replace('}', ' ')
-
-        // ChatMetaData.toString
-        .replace('=', ':')
-
         .replace("\\s".toRegex(), "")
         .split(',')
 
-    return ChatMetaData(
-        MetaDataId(splits[0].split(':')[1].toLong()),
-        Sat(splits[1].split(':')[1].toLong()),
-        splits[2].split(':')[1].toInt(),
-        splits[3].split(':')[1].toDouble()
-    )
+    val id: MetaDataId = splits[0].split(':').let { idSplit ->
+        if (idSplit[0] != "itemID") {
+            throw IllegalArgumentException("MetaData string did not contain 'itemID' field")
+        }
+
+        MetaDataId(idSplit[1].toLong())
+    }
+
+    val sats: Sat = splits[1].split(':').let { satSplit ->
+        if (satSplit[0] != "sats_per_minute") {
+            throw IllegalArgumentException("MetaData string did not contain 'sats_per_minute' field")
+        }
+
+        Sat(satSplit[1].toLong())
+    }
+
+    val timeSeconds: Int = splits[2].split(':').let { timeSplit ->
+        if (timeSplit[0] != "ts") {
+            throw IllegalArgumentException("MetaData string did not contain 'ts' field")
+        }
+
+        timeSplit[1].toInt()
+    }
+
+    val speed: Double = splits[3].split(':').let { speedSplit ->
+        if (speedSplit[0] != "speed") {
+            throw IllegalArgumentException("MetaData string did not contain 'speed' field")
+        }
+
+        speedSplit[1].toDouble()
+    }
+
+    return ChatMetaData(id, sats, timeSeconds, speed)
 }
 
 @Suppress("NOTHING_TO_INLINE")
