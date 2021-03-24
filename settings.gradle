@@ -22,6 +22,9 @@ include ':sphinx:application:data:features:feature-background-login'
 include ':sphinx:application:data:concepts:concept-relay'
 include ':sphinx:application:data:features:feature-relay'
 
+include ':sphinx:application:data:concepts:coredb:concept-coredb-message'
+include ':sphinx:application:data:concepts:coredb:concept-coredb-chat'
+
 include ':sphinx:application:network:concepts:concept-network-client'
 include ':sphinx:application:network:features:feature-network-client'
 include ':sphinx:application:network:concepts:queries:concept-network-query-chat'
