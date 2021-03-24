@@ -1,0 +1,137 @@
+import chat.sphinx.wrapper_chat.ChatAlias;
+import chat.sphinx.wrapper_chat.ChatGroupKey;
+import chat.sphinx.wrapper_chat.ChatHost;
+import chat.sphinx.wrapper_chat.ChatMetaData;
+import chat.sphinx.wrapper_chat.ChatMuted;
+import chat.sphinx.wrapper_chat.ChatName;
+import chat.sphinx.wrapper_chat.ChatPrivate;
+import chat.sphinx.wrapper_chat.ChatStatus;
+import chat.sphinx.wrapper_chat.ChatType;
+import chat.sphinx.wrapper_chat.ChatUUID;
+import chat.sphinx.wrapper_chat.ChatUnlisted;
+import chat.sphinx.wrapper_common.DateTime;
+import chat.sphinx.wrapper_common.PhotoUrl;
+import chat.sphinx.wrapper_common.Seen;
+import chat.sphinx.wrapper_common.chat.ChatId;
+import chat.sphinx.wrapper_common.contact.ContactId;
+import chat.sphinx.wrapper_common.lightning.LightningNodePubKey;
+import chat.sphinx.wrapper_common.lightning.Sat;
+import kotlin.collections.List;
+
+CREATE TABLE chatDbo(
+    id                      INTEGER         AS ChatId NOT NULL PRIMARY KEY,
+    uuid                    TEXT            AS ChatUUID NOT NULL,
+    name                    TEXT            AS ChatName,
+    photo_url               TEXT            AS PhotoUrl,
+    type                    INTEGER         AS ChatType NOT NULL,
+    status                  INTEGER         AS ChatStatus NOT NULL,
+    contact_ids             TEXT            AS List<ContactId> NOT NULL,
+    is_muted                INTEGER         AS ChatMuted NOT NULL,
+    created_at              TEXT            AS DateTime NOT NULL,
+    group_key               TEXT            AS ChatGroupKey,
+    host                    TEXT            AS ChatHost,
+    price_per_message       INTEGER         AS Sat,
+    escrow_amount           INTEGER         AS Sat,
+    unlisted                INTEGER         AS ChatUnlisted NOT NULL,
+    private_tribe           INTEGER         AS ChatPrivate NOT NULL,
+    owner_pub_key           TEXT            AS LightningNodePubKey,
+    seen                    INTEGER         AS Seen NOT NULL,
+    meta_data               TEXT            AS ChatMetaData,
+    my_photo_url            TEXT            AS PhotoUrl,
+    my_alias                TEXT            AS ChatAlias,
+    pending_contact_ids     TEXT            AS List<ContactId>
+);
+
+getAllChats:
+SELECT *
+FROM chatDbo;
+
+getAllChatIds:
+SELECT id
+FROM chatDbo;
+
+getChatById:
+SELECT *
+FROM chatDbo
+WHERE id = ?;
+
+getChatByUUID:
+SELECT *
+FROM chatDbo
+WHERE uuid = ?;
+
+upsertChat {
+    UPDATE chatDbo
+    SET uuid = :uuid,
+        name = :name,
+        photo_url = :photo_url,
+        type = :type,
+        status = :status,
+        contact_ids = :contact_ids,
+        is_muted = :is_muted,
+        created_at = :created_at,
+        group_key = :group_key,
+        host = :host,
+        price_per_message = :price_per_message,
+        escrow_amount = :escrow_amount,
+        unlisted = :unlisted,
+        private_tribe = :private_tribe,
+        owner_pub_key = :owner_pub_key,
+        seen = :seen,
+        meta_data = :meta_data,
+        my_photo_url = :my_photo_url,
+        my_alias = :my_alias,
+        pending_contact_ids = :pending_contact_ids
+    WHERE id = :id;
+
+    INSERT OR IGNORE INTO chatDbo(
+        id,
+        uuid,
+        name,
+        photo_url,
+        type,
+        status,
+        contact_ids,
+        is_muted,
+        created_at,
+        group_key,
+        host,
+        price_per_message,
+        escrow_amount,
+        unlisted,
+        private_tribe,
+        owner_pub_key,
+        seen,
+        meta_data,
+        my_photo_url,
+        my_alias,
+        pending_contact_ids
+    )
+    VALUES (
+        :id,
+        :uuid,
+        :name,
+        :photo_url,
+        :type,
+        :status,
+        :contact_ids,
+        :is_muted,
+        :created_at,
+        :group_key,
+        :host,
+        :price_per_message,
+        :escrow_amount,
+        :unlisted,
+        :private_tribe,
+        :owner_pub_key,
+        :seen,
+        :meta_data,
+        :my_photo_url,
+        :my_alias,
+        :pending_contact_ids
+    );
+}
+
+deleteChatById:
+DELETE FROM chatDbo
+WHERE id = ?;

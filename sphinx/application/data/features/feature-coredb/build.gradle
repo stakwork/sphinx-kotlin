@@ -1,0 +1,34 @@
+plugins {
+    id 'app.cash.exhaustive'
+    id 'com.squareup.sqldelight'
+    id 'java-library'
+    id 'kotlin'
+}
+
+sqldelight {
+    SphinxDatabase {
+        packageName = "chat.sphinx.feature_coredb"
+        schemaOutputDirectory = file("src/main/sqldelight/chat/sphinx/feature_coredb")
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: "libs", include: ["*.jar"])
+    // Kotlin Android
+    implementation project(path: ':kotlin:concepts:concept-coroutines')
+
+    // Sphinx
+    api project(path: ':sphinx:application:data:concepts:coredb:concept-coredb-chat')
+    api project(path: ':sphinx:application:data:concepts:coredb:concept-coredb-message')
+
+    implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-chat')
+    implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-contact')
+    implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-invite')
+    implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-lightning')
+    implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-message')
+
+    implementation deps.square.sqlDelightCoroutines
+
+    testImplementation deps.square.sqlDelightJvm
+    testImplementation project(path: ':sphinx:test:test-network-query')
+}
