@@ -1,4 +1,4 @@
-package chat.sphinx.feature_coredb.mappers
+package chat.sphinx.feature_repository.mappers
 
 internal abstract class ClassMapper<DTO, DBO, Presenter> {
 

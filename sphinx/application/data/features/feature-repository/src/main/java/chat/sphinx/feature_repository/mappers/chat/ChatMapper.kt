@@ -1,7 +1,7 @@
-package chat.sphinx.feature_coredb.mappers.chat
+package chat.sphinx.feature_repository.mappers.chat
 
 import chat.sphinx.concept_network_query_chat.model.ChatDto
-import chat.sphinx.feature_coredb.mappers.ClassMapper
+import chat.sphinx.feature_repository.mappers.ClassMapper
 import chat.sphinx.featurecoredb.ChatDbo
 import chat.sphinx.wrapper_chat.*
 import chat.sphinx.wrapper_common.DateTime

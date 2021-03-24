@@ -18,8 +18,8 @@ dependencies {
     implementation project(path: ':kotlin:concepts:concept-coroutines')
 
     // Sphinx
-    api project(path: ':sphinx:application:data:concepts:coredb:concept-coredb-chat')
-    api project(path: ':sphinx:application:data:concepts:coredb:concept-coredb-message')
+    api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-chat')
+    api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-message')
 
     implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-chat')
     implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-contact')
