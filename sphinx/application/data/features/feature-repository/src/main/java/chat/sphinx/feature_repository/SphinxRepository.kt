@@ -5,7 +5,7 @@ import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
 import chat.sphinx.feature_repository.mappers.chat.ChatMapper
-import chat.sphinx.featurecoredb.SphinxDatabaseQueries
+import chat.sphinx.featurerepository.SphinxDatabaseQueries
 import chat.sphinx.kotlin_response.KotlinResponse
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.ResponseError

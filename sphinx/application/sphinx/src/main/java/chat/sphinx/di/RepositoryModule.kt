@@ -9,7 +9,7 @@ import chat.sphinx.feature_repository.SphinxDatabase
 import chat.sphinx.feature_repository.adapters.chat.*
 import chat.sphinx.feature_repository.adapters.common.*
 import chat.sphinx.feature_repository.adapters.contact.ContactIdsAdapter
-import chat.sphinx.featurecoredb.ChatDbo
+import chat.sphinx.featurerepository.ChatDbo
 import com.squareup.sqldelight.android.AndroidSqliteDriver
 import com.squareup.sqldelight.db.SqlDriver
 import dagger.Module
