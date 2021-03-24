@@ -66,6 +66,7 @@ dependencies {
     implementation project(path: ':sphinx:activity:main:activitymain')
     implementation project(path: ':sphinx:application:data:features:feature-background-login')
     implementation project(path: ':sphinx:application:data:features:feature-relay')
+    implementation project(path: ':sphinx:application:data:features:feature-repository')
     implementation project(path: ':sphinx:application:network:features:feature-network-client')
     implementation project(path: ':sphinx:application:network:features:queries:feature-network-query-chat')
     implementation project(path: ':sphinx:application:network:features:queries:feature-network-query-contact')
@@ -77,6 +78,8 @@ dependencies {
 
     implementation deps.google.hilt
     kapt kaptDeps.google.hilt
+
+    implementation deps.square.sqlDelightAndroid
 
     testImplementation project(path: ':kotlin:test:test-concept-coroutines')
     testImplementation testDeps.robolectric
