@@ -17,7 +17,7 @@ data class ContactDto(
     val auth_token: String?,
     val remote_id: Int?,
     val status: Int?,
-    val contact_key: String,
+    val contact_key: String?,
     val device_id: String?,
     val created_at: String,
     val updated_at: String,
