@@ -76,10 +76,10 @@ ext.deps = [
         torBinary: "io.matthewnelson.topl-android:tor-binary:0.4.5.4",
     ],
     square: [
-//        okio: "com.squareup.okio:okio:2.9.0",
+        okio: "com.squareup.okio:okio:2.9.0",
         okhttp: "com.squareup.okhttp3:okhttp:${versions.okhttp}",
         okhttpLogging: "com.squareup.okhttp3:logging-interceptor:${versions.okhttp}",
-        moshi: "com.squareup.moshi:moshi:${versions.moshi}",
+        moshi: "com.squareup.moshi:moshi-kotlin:${versions.moshi}",
         sqlDelightAndroid: "com.squareup.sqldelight:android-driver:${versions.sqlDelight}",
         sqlDelightCoroutines: "com.squareup.sqldelight:coroutines-extensions:${versions.sqlDelight}",
         sqlDelightJvm: "com.squareup.sqldelight:sqlite-driver:${versions.sqlDelight}",
