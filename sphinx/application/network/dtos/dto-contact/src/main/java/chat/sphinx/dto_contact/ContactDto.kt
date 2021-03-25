@@ -46,7 +46,7 @@ class ContactDto(
     val updatedAt: DateTime,
     val fromGroup: ContactFromGroup,
     val notificationSound: NotificationSound?,
-    val lastActive: DateTime?,
+//    val lastActive: DateTime?,
     val tipAmount: Sat?,
     val invite: InviteDto?,
 )

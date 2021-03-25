@@ -23,7 +23,7 @@ data class ContactDto(
     val updated_at: String,
     val from_group: Int,
     val notification_sound: String?,
-    val last_active: String?,
+//    val last_active: String?,
     val tip_amount: Long?,
     val invite: InviteDto?,
 )
