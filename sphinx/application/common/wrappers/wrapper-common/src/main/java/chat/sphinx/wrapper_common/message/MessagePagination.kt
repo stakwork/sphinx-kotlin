@@ -2,6 +2,18 @@ package chat.sphinx.wrapper_common.message
 
 import chat.sphinx.wrapper_common.DateTime
 
+@Suppress("NOTHING_TO_INLINE")
+inline fun MessagePagination.instantiateOrNull(
+    limit: Int,
+    offset: Int,
+    date: DateTime?
+): MessagePagination? =
+    try {
+        MessagePagination.instantiate(limit, offset, date)
+    } catch (e: IllegalArgumentException) {
+        null
+    }
+
 inline class MessagePagination private constructor(val value: String) {
 
     companion object {
@@ -20,7 +32,7 @@ inline class MessagePagination private constructor(val value: String) {
             }
 
             val dateString = date?.let {
-                "&date=${it.value}"
+                "&date=$it"
             } ?: ""
 
             return MessagePagination("?limit=$limit&offset=${offset}$dateString")

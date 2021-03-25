@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import java.text.ParseException
 
 class SphinxRepository(
     private val dispatchers: CoroutineDispatchers,
@@ -75,55 +76,72 @@ class SphinxRepository(
                     emit(loadResponse)
                 }
                 is KotlinResponse.Success -> {
-                    withContext(dispatchers.io) {
 
-                        chatLock.withLock {
+                    try {
 
-                            val chatIdsToRemove = sphinxDatabaseQueries.getAllChatIds()
-                                .executeAsList()
-                                .toMutableSet()
+                        withContext(dispatchers.io) {
 
-                            chatMapper.fromDTOsToDBOs(loadResponse.value).let { dbos ->
+                            chatLock.withLock {
 
-                                sphinxDatabaseQueries.transaction {
-                                    dbos.forEach { dbo ->
-                                        sphinxDatabaseQueries.upsertChat(
-                                            dbo.uuid,
-                                            dbo.name,
-                                            dbo.photo_url,
-                                            dbo.type,
-                                            dbo.status,
-                                            dbo.contact_ids,
-                                            dbo.is_muted,
-                                            dbo.created_at,
-                                            dbo.group_key,
-                                            dbo.host,
-                                            dbo.price_per_message,
-                                            dbo.escrow_amount,
-                                            dbo.unlisted,
-                                            dbo.private_tribe,
-                                            dbo.owner_pub_key,
-                                            dbo.seen,
-                                            dbo.meta_data,
-                                            dbo.my_photo_url,
-                                            dbo.my_alias,
-                                            dbo.pending_contact_ids,
-                                            dbo.id
-                                        )
+                                val chatIdsToRemove = sphinxDatabaseQueries.getAllChatIds()
+                                    .executeAsList()
+                                    .toMutableSet()
 
-                                        chatIdsToRemove.remove(dbo.id)
-                                    }
+                                chatMapper.fromDTOsToDBOs(loadResponse.value).let { dbos ->
 
-                                    // remove remaining chat's from DB
-                                    chatIdsToRemove.forEach { chatId ->
-                                        sphinxDatabaseQueries.deleteChatById(chatId)
+                                    sphinxDatabaseQueries.transaction {
+                                        dbos.forEach { dbo ->
+                                            sphinxDatabaseQueries.upsertChat(
+                                                dbo.uuid,
+                                                dbo.name,
+                                                dbo.photo_url,
+                                                dbo.type,
+                                                dbo.status,
+                                                dbo.contact_ids,
+                                                dbo.is_muted,
+                                                dbo.created_at,
+                                                dbo.group_key,
+                                                dbo.host,
+                                                dbo.price_per_message,
+                                                dbo.escrow_amount,
+                                                dbo.unlisted,
+                                                dbo.private_tribe,
+                                                dbo.owner_pub_key,
+                                                dbo.seen,
+                                                dbo.meta_data,
+                                                dbo.my_photo_url,
+                                                dbo.my_alias,
+                                                dbo.pending_contact_ids,
+                                                dbo.id
+                                            )
+
+                                            chatIdsToRemove.remove(dbo.id)
+                                        }
+
+                                        // remove remaining chat's from DB
+                                        chatIdsToRemove.forEach { chatId ->
+                                            sphinxDatabaseQueries.deleteChatById(chatId)
+                                        }
                                     }
                                 }
                             }
                         }
-                    }
 
-                    emit(KotlinResponse.Success(true))
+                        emit(KotlinResponse.Success(true))
+
+                    } catch (e: IllegalArgumentException) {
+                        emit(
+                            KotlinResponse.Error(
+                                ResponseError("Failed to convert Json from Relay", e)
+                            )
+                        )
+                    } catch (e: ParseException) {
+                        emit(
+                            KotlinResponse.Error(
+                                ResponseError("Failed to convert date/time from SphinxRelay", e)
+                            )
+                        )
+                    }
                 }
                 is LoadResponse.Loading -> {
                     emit(loadResponse)

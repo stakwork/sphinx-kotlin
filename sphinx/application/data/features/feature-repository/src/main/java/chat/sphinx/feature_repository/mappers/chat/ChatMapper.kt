@@ -9,11 +9,17 @@ import chat.sphinx.wrapper_common.chat.ChatId
 import chat.sphinx.wrapper_common.contact.ContactId
 import chat.sphinx.wrapper_common.lightning.toLightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.toSat
+import chat.sphinx.wrapper_common.toDateTime
 import chat.sphinx.wrapper_common.toPhotoUrl
 import chat.sphinx.wrapper_common.toSeen
+import java.text.ParseException
 
 internal class ChatMapper: ClassMapper<ChatDto, ChatDbo, Chat>() {
 
+    @Throws(
+        IllegalArgumentException::class,
+        ParseException::class
+    )
     override fun fromDTOtoDBO(dto: ChatDto): ChatDbo {
         return ChatDbo(
             ChatId(dto.id),
@@ -24,7 +30,7 @@ internal class ChatMapper: ClassMapper<ChatDto, ChatDbo, Chat>() {
             dto.status.toChatStatus(),
             dto.contact_ids.map { ContactId(it) },
             dto.is_muted.toChatMuted(),
-            DateTime(dto.created_at),
+            dto.created_at.toDateTime(),
             dto.group_key?.toChatGroupKey(),
             dto.host?.toChatHost(),
             dto.price_per_message?.toSat(),
@@ -40,6 +46,10 @@ internal class ChatMapper: ClassMapper<ChatDto, ChatDbo, Chat>() {
         )
     }
 
+    @Throws(
+        IllegalArgumentException::class,
+        ParseException::class
+    )
     override fun fromDTOtoPresenter(dto: ChatDto): Chat {
         return Chat(
             ChatId(dto.id),
@@ -50,7 +60,7 @@ internal class ChatMapper: ClassMapper<ChatDto, ChatDbo, Chat>() {
             dto.status.toChatStatus(),
             dto.contact_ids.map { ContactId(it) },
             dto.is_muted.toChatMuted(),
-            DateTime(dto.created_at),
+            dto.created_at.toDateTime(),
             dto.group_key?.toChatGroupKey(),
             dto.host?.toChatHost(),
             dto.price_per_message?.toSat(),
@@ -66,10 +76,18 @@ internal class ChatMapper: ClassMapper<ChatDto, ChatDbo, Chat>() {
         )
     }
 
+    @Throws(
+        IllegalArgumentException::class,
+        ParseException::class
+    )
     override fun fromDTOsToDBOs(dtos: List<ChatDto>): List<ChatDbo> {
         return dtos.map { fromDTOtoDBO(it) }
     }
 
+    @Throws(
+        IllegalArgumentException::class,
+        ParseException::class
+    )
     override fun fromDTOsToPresenters(dtos: List<ChatDto>): List<Chat> {
         return dtos.map { fromDTOtoPresenter(it) }
     }

@@ -1,15 +1,45 @@
 package chat.sphinx.wrapper_common
 
-// TODO: Write extension functions.
-//  Contact and Chat Dto fields 'created_at' and 'updated_at'
-//  are formatted like: 2021-02-26T10:48:20.025Z
-//  whereas the Contact's 'last_active' field's format
-//  is: 2021-03-12 14:26:18.000 +00:00
+import java.text.ParseException
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
-inline class DateTime(val value: String) {
-    init {
-        require(value.isNotEmpty()) {
-            "DateTime cannot be empty"
-        }
+@Suppress("NOTHING_TO_INLINE")
+@Throws(ParseException::class)
+inline fun String.toDateTime(): DateTime =
+    DateTime(DateTime.getFormat().parse(this))
+
+inline val DateTime.time: Long
+    get() = value.time
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun DateTime.after(dateTime: DateTime): Boolean =
+    value.after(dateTime.value)
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun DateTime.before(dateTime: DateTime): Boolean =
+    value.before(dateTime.value)
+
+// TODO: Write function for creating a DateTime after discussing
+//  with Evan how Relay handles time zones, or if Relay handles all
+//  date creation such that it isn't needed.
+
+/**
+ * DateTime format from Relay: 2021-02-26T10:48:20.025Z
+ * */
+inline class DateTime(val value: Date) {
+
+    companion object {
+        private var format: SimpleDateFormat? = null
+        fun getFormat(): SimpleDateFormat =
+            format ?: synchronized(this) {
+                format ?: SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault())
+                    .also { format = it }
+            }
+    }
+
+    override fun toString(): String {
+        return getFormat().format(value)
     }
 }

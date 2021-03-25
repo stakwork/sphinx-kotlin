@@ -1,13 +1,9 @@
 package chat.sphinx.feature_repository.adapters.common
 
-import chat.sphinx.wrapper_common.DateTime
-import chat.sphinx.wrapper_common.PhotoUrl
-import chat.sphinx.wrapper_common.Seen
+import chat.sphinx.wrapper_common.*
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.Sat
-import chat.sphinx.wrapper_common.toSeen
 import com.squareup.sqldelight.ColumnAdapter
-
 
 class PhotoUrlAdapter private constructor(): ColumnAdapter<PhotoUrl, String> {
 
@@ -43,11 +39,11 @@ class DateTimeAdapter private constructor(): ColumnAdapter<DateTime, String> {
     }
 
     override fun decode(databaseValue: String): DateTime {
-        return DateTime(databaseValue)
+        return databaseValue.toDateTime()
     }
 
     override fun encode(value: DateTime): String {
-        return value.value
+        return value.toString()
     }
 }
 
