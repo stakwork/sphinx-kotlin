@@ -19,6 +19,8 @@ include ':sphinx:application:common:wrappers:wrapper-subscription'
 
 include ':sphinx:application:data:concepts:concept-background-login'
 include ':sphinx:application:data:features:feature-background-login'
+include ':sphinx:application:data:concepts:concept-coredb'
+include ':sphinx:application:data:features:feature-coredb'
 include ':sphinx:application:data:concepts:concept-relay'
 include ':sphinx:application:data:features:feature-relay'
 
@@ -194,7 +196,6 @@ project(':kotlin:test:test-feature-authentication-core').projectDir =
 include ':kotlin:test:test-k-openssl'
 project(':kotlin:test:test-k-openssl').projectDir =
         file(new File(rootDir, 'kotlin-android/kotlin/test/test-k-openssl'))
-
 
 //include ':sample'
 //project(':sample').projectDir = file(new File(rootDir, 'kotlin-android/sample'))

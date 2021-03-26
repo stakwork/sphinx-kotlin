@@ -1,0 +1,11 @@
+plugins {
+    id 'java-library'
+    id 'kotlin'
+}
+
+dependencies {
+    implementation fileTree(dir: "libs", include: ["*.jar"])
+    api project(path: ':kotlin:concepts:authentication:concept-encryption-key')
+    api project(path: ':sphinx:application:data:concepts:concept-coredb')
+    implementation deps.kotlin.coroutinesCore
+}
