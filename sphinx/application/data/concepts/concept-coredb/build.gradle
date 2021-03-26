@@ -10,6 +10,7 @@ sqldelight {
         packageName = "chat.sphinx.concept_coredb"
         schemaOutputDirectory = file("src/main/sqldelight/chat/sphinx/concept_coredb")
     }
+    linkSqlite = false
 }
 
 dependencies {
