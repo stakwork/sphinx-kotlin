@@ -3,10 +3,11 @@ package chat.sphinx.feature_coredb
 import chat.sphinx.concept_coredb.CoreDB
 import chat.sphinx.concept_coredb.SphinxDatabase
 import chat.sphinx.conceptcoredb.ChatDbo
+import chat.sphinx.conceptcoredb.MessageDbo
 import chat.sphinx.conceptcoredb.SphinxDatabaseQueries
 import chat.sphinx.feature_coredb.adapters.chat.*
 import chat.sphinx.feature_coredb.adapters.common.*
-import chat.sphinx.feature_coredb.adapters.contact.ContactIdsAdapter
+import chat.sphinx.feature_coredb.adapters.message.*
 import com.squareup.sqldelight.db.SqlDriver
 import io.matthewnelson.concept_encryption_key.EncryptionKey
 import kotlinx.coroutines.*
@@ -39,7 +40,7 @@ abstract class CoreDBImpl: CoreDB() {
             sphinxDatabaseQueriesStateFlow.value = SphinxDatabase(
                 driver = getSqlDriver(encryptionKey),
                 chatDboAdapter = ChatDbo.Adapter(
-                    idAdapter = ChatIdAdapter(),
+                    idAdapter = ChatIdAdapter.getInstance(),
                     uuidAdapter = ChatUUIDAdapter(),
                     nameAdapter = ChatNameAdapter(),
                     photo_urlAdapter = PhotoUrlAdapter.getInstance(),
@@ -60,6 +61,27 @@ abstract class CoreDBImpl: CoreDB() {
                     my_photo_urlAdapter = PhotoUrlAdapter.getInstance(),
                     my_aliasAdapter = ChatAliasAdapter(),
                     pending_contact_idsAdapter = ContactIdsAdapter.getInstance(),
+                ),
+                messageDboAdapter = MessageDbo.Adapter(
+                    idAdapter = MessageIdAdapter.getInstance(),
+                    uuidAdapter = MessageUUIDAdapter(),
+                    chat_idAdapter = ChatIdAdapter.getInstance(),
+                    typeAdapter = MessageTypeAdapter(),
+                    senderAdapter = ContactIdAdapter.getInstance(),
+                    receiverAdapter = ContactIdAdapter.getInstance(),
+                    amountAdapter = SatAdapter.getInstance(),
+                    payment_hashAdapter = LightningPaymentHashAdapter.getInstance(),
+                    payment_requestAdapter = LightningPaymentRequestAdapter.getInstance(),
+                    dateAdapter = DateTimeAdapter.getInstance(),
+                    expiration_dateAdapter = DateTimeAdapter.getInstance(),
+                    message_contentAdapter = MessageContentAdapter(),
+                    statusAdapter = MessageStatusAdapter(),
+                    status_mapAdapter = MessageStatusMapAdapter(),
+                    seenAdapter = SeenAdapter.getInstance(),
+                    sender_aliasAdapter = SenderAliasAdapter(),
+                    sender_picAdapter = PhotoUrlAdapter.getInstance(),
+                    original_muidAdapter = MessageMUIDAdapter(),
+                    reply_uuidAdapter = ReplyUUIDAdapter()
                 )
             ).sphinxDatabaseQueries
         }
