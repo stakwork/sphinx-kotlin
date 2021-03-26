@@ -104,4 +104,11 @@ class SphinxCoreDBImplUnitTest: CoroutineTestHelper() {
             Assert.assertNull(queries)
             Assert.assertNotNull(testCoreDB.getSphinxDatabaseQueries())
         }
+
+    @Test
+    fun `getSphinxDatabaseQueries returns immediately if initialization is already had`() =
+        testDispatcher.runBlockingTest {
+            testCoreDB.initializeDatabase(testHandler.generateEncryptionKey())
+            Assert.assertNotNull(testCoreDB.getSphinxDatabaseQueries())
+        }
 }
