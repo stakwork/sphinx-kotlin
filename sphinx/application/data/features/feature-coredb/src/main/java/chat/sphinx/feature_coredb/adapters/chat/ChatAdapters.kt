@@ -1,18 +1,7 @@
 package chat.sphinx.feature_coredb.adapters.chat
 
 import chat.sphinx.wrapper_chat.*
-import chat.sphinx.wrapper_common.chat.ChatId
 import com.squareup.sqldelight.ColumnAdapter
-
-internal class ChatIdAdapter: ColumnAdapter<ChatId, Long> {
-    override fun decode(databaseValue: Long): ChatId {
-        return ChatId(databaseValue)
-    }
-
-    override fun encode(value: ChatId): Long {
-        return value.value
-    }
-}
 
 internal class ChatUUIDAdapter: ColumnAdapter<ChatUUID, String> {
     override fun decode(databaseValue: String): ChatUUID {
