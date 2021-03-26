@@ -15,8 +15,19 @@ import chat.sphinx.wrapper_common.Seen;
 import chat.sphinx.wrapper_common.chat.ChatId;
 import chat.sphinx.wrapper_common.contact.ContactId;
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey;
+import chat.sphinx.wrapper_common.lightning.LightningPaymentHash;
+import chat.sphinx.wrapper_common.lightning.LightningPaymentRequest;
 import chat.sphinx.wrapper_common.lightning.Sat;
+import chat.sphinx.wrapper_common.message.MessageId;
+import chat.sphinx.wrapper_message.MessageContent;
+import chat.sphinx.wrapper_message.MessageMUID;
+import chat.sphinx.wrapper_message.MessageStatus;
+import chat.sphinx.wrapper_message.MessageType;
+import chat.sphinx.wrapper_message.MessageUUID;
+import chat.sphinx.wrapper_message.ReplyUUID;
+import chat.sphinx.wrapper_message.SenderAlias;
 import kotlin.collections.List;
+import kotlin.Pair;
 
 CREATE TABLE chatDbo(
     id                      INTEGER         AS ChatId NOT NULL PRIMARY KEY,
@@ -135,3 +146,29 @@ upsertChat {
 deleteChatById:
 DELETE FROM chatDbo
 WHERE id = ?;
+
+CREATE TABLE messageDbo(
+    id                  INTEGER         AS MessageId NOT NULL PRIMARY KEY,
+    uuid                TEXT            AS MessageUUID,
+    chat_id             INTEGER         AS ChatId,
+    type                INTEGER         AS MessageType NOT NULL,
+    sender              INTEGER         AS ContactId NOT NULL,
+    receiver            INTEGER         AS ContactId,
+    amount              INTEGER         AS Sat NOT NULL,
+    payment_hash        TEXT            AS LightningPaymentHash,
+    payment_request     TEXT            AS LightningPaymentRequest,
+    date                TEXT            AS DateTime NOT NULL,
+    expiration_date     TEXT            AS DateTime,
+    message_content     TEXT            AS MessageContent,
+    status              INTEGER         AS MessageStatus,
+    status_map          TEXT            AS List<Pair<ContactId, MessageStatus>>,
+    media_key           TEXT,
+    media_type          TEXT,
+    media_token         TEXT,
+    seen                INTEGER         AS Seen NOT NULL,
+    sender_alias        TEXT            AS SenderAlias,
+    sender_pic          TEXT            AS PhotoUrl,
+    original_muid       TEXT            AS MessageMUID,
+    reply_uuid          TEXT            AS ReplyUUID
+);
+
