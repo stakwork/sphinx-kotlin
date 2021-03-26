@@ -3,8 +3,7 @@ package chat.sphinx.di
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
-import chat.sphinx.database.SphinxCoreDBImplAndroid
-import chat.sphinx.feature_coredb.SphinxCoreDBImpl
+import chat.sphinx.database.SphinxCoreDBImpl
 import chat.sphinx.feature_repository.SphinxRepository
 import dagger.Module
 import dagger.Provides
@@ -19,21 +18,21 @@ object RepositoryModule {
 
     @Provides
     fun provideSphinxCoreDBImpl(
-        sphinxCoreDBImplAndroid: SphinxCoreDBImplAndroid
+        sphinxCoreDBImpl: SphinxCoreDBImpl
     ): SphinxCoreDBImpl =
-        sphinxCoreDBImplAndroid
+        sphinxCoreDBImpl
 
     @Provides
     @Singleton
     fun provideSphinxRepository(
         dispatchers: CoroutineDispatchers,
         networkQueryChat: NetworkQueryChat,
-        sphinxCoreDBImplAndroid: SphinxCoreDBImplAndroid,
+        sphinxCoreDBImpl: SphinxCoreDBImpl,
     ): SphinxRepository =
         SphinxRepository(
+            sphinxCoreDBImpl,
             dispatchers,
             networkQueryChat,
-            sphinxCoreDBImplAndroid,
         )
 
     @Provides

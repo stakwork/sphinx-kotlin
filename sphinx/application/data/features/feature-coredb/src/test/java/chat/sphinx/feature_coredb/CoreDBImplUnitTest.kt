@@ -18,7 +18,7 @@ import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 
-class SphinxCoreDBImplUnitTest: CoroutineTestHelper() {
+class CoreDBImplUnitTest: CoroutineTestHelper() {
 
     private companion object {
         const val TEST_PRIV_KEY = "TEST_PRIV_KEY"
@@ -42,7 +42,7 @@ class SphinxCoreDBImplUnitTest: CoroutineTestHelper() {
         }
     }
 
-    private inner class TestSphinxCoreDBImpl: SphinxCoreDBImpl() {
+    private inner class TestCoreDBImpl: CoreDBImpl() {
         override fun getSqlDriver(encryptionKey: EncryptionKey): SqlDriver {
             return driver
         }
@@ -56,8 +56,8 @@ class SphinxCoreDBImplUnitTest: CoroutineTestHelper() {
         JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY)
     }
 
-    private val testCoreDB: SphinxCoreDBImpl by lazy {
-        TestSphinxCoreDBImpl()
+    private val testCoreDB: CoreDBImpl by lazy {
+        TestCoreDBImpl()
     }
 
     @Before

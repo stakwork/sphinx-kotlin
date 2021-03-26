@@ -2,7 +2,7 @@ package chat.sphinx.concept_coredb
 
 import chat.sphinx.conceptcoredb.SphinxDatabaseQueries
 
-abstract class SphinxCoreDB {
+abstract class CoreDB {
 
     /**
      * Suspends until [SphinxDatabaseQueries] is initialized. Initialization occurs

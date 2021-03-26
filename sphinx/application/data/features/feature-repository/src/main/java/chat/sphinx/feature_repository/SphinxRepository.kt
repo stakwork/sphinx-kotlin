@@ -1,7 +1,7 @@
 package chat.sphinx.feature_repository
 
 import app.cash.exhaustive.Exhaustive
-import chat.sphinx.concept_coredb.SphinxCoreDB
+import chat.sphinx.concept_coredb.CoreDB
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
@@ -23,9 +23,9 @@ import kotlinx.coroutines.withContext
 import java.text.ParseException
 
 class SphinxRepository(
+    private val coreDB: CoreDB,
     private val dispatchers: CoroutineDispatchers,
     private val networkQueryChat: NetworkQueryChat,
-    private val sphinxCoreDB: SphinxCoreDB,
 ): ChatRepository, MessageRepository {
 
     /////////////
@@ -37,7 +37,7 @@ class SphinxRepository(
     }
 
     override suspend fun getChats(): Flow<List<Chat>> {
-        return sphinxCoreDB.getSphinxDatabaseQueries().getAllChats()
+        return coreDB.getSphinxDatabaseQueries().getAllChats()
             .asFlow()
             .flowOn(dispatchers.io)
             .mapToList(dispatchers.default)
@@ -46,7 +46,7 @@ class SphinxRepository(
     }
 
     override suspend fun getChatById(chatId: ChatId): Flow<Chat?> {
-        return sphinxCoreDB.getSphinxDatabaseQueries().getChatById(chatId)
+        return coreDB.getSphinxDatabaseQueries().getChatById(chatId)
             .asFlow()
             .flowOn(dispatchers.io)
             .mapToOneOrNull(dispatchers.default)
@@ -55,7 +55,7 @@ class SphinxRepository(
     }
 
     override suspend fun getChatByUUID(chatUUID: ChatUUID): Flow<Chat?> {
-        return sphinxCoreDB.getSphinxDatabaseQueries().getChatByUUID(chatUUID)
+        return coreDB.getSphinxDatabaseQueries().getChatByUUID(chatUUID)
             .asFlow()
             .flowOn(dispatchers.io)
             .mapToOneOrNull(dispatchers.default)
@@ -79,7 +79,7 @@ class SphinxRepository(
 
                             chatLock.withLock {
 
-                                val queries = sphinxCoreDB.getSphinxDatabaseQueries()
+                                val queries = coreDB.getSphinxDatabaseQueries()
                                 val chatIdsToRemove = queries.getAllChatIds()
                                     .executeAsList()
                                     .toMutableSet()

@@ -5,8 +5,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.test.core.app.ApplicationProvider
 import chat.sphinx.concept_coredb.SphinxDatabase
-import chat.sphinx.database.SphinxCoreDBImplAndroid
-import chat.sphinx.feature_coredb.SphinxCoreDBImpl
+import chat.sphinx.feature_coredb.CoreDBImpl
 import chat.sphinx.feature_relay.RelayDataHandlerImpl
 import chat.sphinx.key_restore.KeyRestoreResponse
 import com.squareup.sqldelight.android.AndroidSqliteDriver
@@ -48,7 +47,7 @@ class SphinxKeyRestoreUnitTest: CoroutineTestHelper() {
         SphinxEncryptionKeyHandler()
     }
 
-    private inner class TestSphinxCoreDBImpl: SphinxCoreDBImpl() {
+    private inner class TestCoreDBImpl: CoreDBImpl() {
 
         private var driver: AndroidSqliteDriver? = null
 
@@ -63,8 +62,8 @@ class SphinxKeyRestoreUnitTest: CoroutineTestHelper() {
         }
     }
 
-    private val testSphinxCoreDBImpl: TestSphinxCoreDBImpl by lazy {
-        TestSphinxCoreDBImpl()
+    private val testSphinxCoreDBImpl: TestCoreDBImpl by lazy {
+        TestCoreDBImpl()
     }
 
     private val sphinxManager: SphinxAuthenticationCoreManager by lazy {

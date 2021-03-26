@@ -1,6 +1,6 @@
 package chat.sphinx.feature_coredb
 
-import chat.sphinx.concept_coredb.SphinxCoreDB
+import chat.sphinx.concept_coredb.CoreDB
 import chat.sphinx.concept_coredb.SphinxDatabase
 import chat.sphinx.conceptcoredb.ChatDbo
 import chat.sphinx.conceptcoredb.SphinxDatabaseQueries
@@ -12,7 +12,7 @@ import io.matthewnelson.concept_encryption_key.EncryptionKey
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 
-abstract class SphinxCoreDBImpl: SphinxCoreDB() {
+abstract class CoreDBImpl: CoreDB() {
 
     companion object {
         const val DB_NAME = "sphinx.db"

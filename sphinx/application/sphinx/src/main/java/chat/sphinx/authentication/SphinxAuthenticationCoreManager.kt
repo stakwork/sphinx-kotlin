@@ -4,7 +4,7 @@ import android.app.Activity
 import android.app.Application
 import android.content.pm.ActivityInfo
 import android.os.Bundle
-import chat.sphinx.feature_coredb.SphinxCoreDBImpl
+import chat.sphinx.feature_coredb.CoreDBImpl
 import io.matthewnelson.android_feature_authentication_core.components.AuthenticationCoreManagerAndroid
 import io.matthewnelson.android_feature_authentication_core.components.AuthenticationManagerInitializerAndroid
 import io.matthewnelson.concept_authentication.state.AuthenticationState
@@ -20,7 +20,7 @@ class SphinxAuthenticationCoreManager @Inject constructor(
     dispatchers: CoroutineDispatchers,
     encryptionKeyHandler: SphinxEncryptionKeyHandler,
     sphinxAuthenticationCoreStorage: SphinxAuthenticationCoreStorage,
-    private val sphinxCoreDBImpl: SphinxCoreDBImpl,
+    private val sphinxCoreDBImpl: CoreDBImpl,
 ): AuthenticationCoreManagerAndroid(
     dispatchers,
     HashIterations(250_000),
