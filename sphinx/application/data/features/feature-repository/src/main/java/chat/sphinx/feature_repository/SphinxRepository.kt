@@ -16,7 +16,6 @@ import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
 import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -37,7 +36,6 @@ class SphinxRepository(
         ChatMapper()
     }
 
-    @Throws(CancellationException::class)
     override suspend fun getChats(): Flow<List<Chat>> {
         return sphinxCoreDB.getSphinxDatabaseQueries().getAllChats()
             .asFlow()
@@ -47,7 +45,6 @@ class SphinxRepository(
             .flowOn(dispatchers.default)
     }
 
-    @Throws(CancellationException::class)
     override suspend fun getChatById(chatId: ChatId): Flow<Chat?> {
         return sphinxCoreDB.getSphinxDatabaseQueries().getChatById(chatId)
             .asFlow()
@@ -57,7 +54,6 @@ class SphinxRepository(
             .distinctUntilChanged()
     }
 
-    @Throws(CancellationException::class)
     override suspend fun getChatByUUID(chatUUID: ChatUUID): Flow<Chat?> {
         return sphinxCoreDB.getSphinxDatabaseQueries().getChatByUUID(chatUUID)
             .asFlow()
@@ -67,7 +63,6 @@ class SphinxRepository(
             .distinctUntilChanged()
     }
 
-    @Throws(CancellationException::class)
     override fun networkRefreshChats(): Flow<LoadResponse<Boolean, ResponseError>> = flow {
         networkQueryChat.getChats().collect { loadResponse ->
 

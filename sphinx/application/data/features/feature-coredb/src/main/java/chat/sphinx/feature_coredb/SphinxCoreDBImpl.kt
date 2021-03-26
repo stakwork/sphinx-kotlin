@@ -9,10 +9,8 @@ import chat.sphinx.feature_coredb.adapters.common.*
 import chat.sphinx.feature_coredb.adapters.contact.ContactIdsAdapter
 import com.squareup.sqldelight.db.SqlDriver
 import io.matthewnelson.concept_encryption_key.EncryptionKey
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.currentCoroutineContext
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.*
 
 abstract class SphinxCoreDBImpl: SphinxCoreDB() {
 
@@ -20,25 +18,25 @@ abstract class SphinxCoreDBImpl: SphinxCoreDB() {
         const val DB_NAME = "sphinx.db"
     }
 
-    @Volatile
-    private var sphinxDatabaseQueries: SphinxDatabaseQueries? = null
+    private val sphinxDatabaseQueriesStateFlow: MutableStateFlow<SphinxDatabaseQueries?> =
+        MutableStateFlow(null)
 
     protected abstract fun getSqlDriver(encryptionKey: EncryptionKey): SqlDriver
 
     private val initializationLock = Object()
 
     fun initializeDatabase(encryptionKey: EncryptionKey) {
-        if (sphinxDatabaseQueries != null) {
+        if (sphinxDatabaseQueriesStateFlow.value != null) {
             return
         }
 
         synchronized(initializationLock) {
 
-            if (sphinxDatabaseQueries != null) {
+            if (sphinxDatabaseQueriesStateFlow.value != null) {
                 return
             }
 
-            sphinxDatabaseQueries = SphinxDatabase(
+            sphinxDatabaseQueriesStateFlow.value = SphinxDatabase(
                 driver = getSqlDriver(encryptionKey),
                 chatDboAdapter = ChatDbo.Adapter(
                     idAdapter = ChatIdAdapter(),
@@ -67,16 +65,28 @@ abstract class SphinxCoreDBImpl: SphinxCoreDB() {
         }
     }
 
-    @Throws(CancellationException::class)
+    private class Hackery(val hack: SphinxDatabaseQueries): Exception()
+
     override suspend fun getSphinxDatabaseQueries(): SphinxDatabaseQueries {
-        var queries = sphinxDatabaseQueries
-        while (queries == null) {
-            // This _never_ fires b/c by the time the dashboard is navigated
-            // to, initialization is already complete.
-            currentCoroutineContext().ensureActive()
-            delay(15L)
-            queries = sphinxDatabaseQueries
+        sphinxDatabaseQueriesStateFlow.value?.let { queries ->
+            return queries
         }
-        return queries
+
+        var queries: SphinxDatabaseQueries? = null
+
+        try {
+            sphinxDatabaseQueriesStateFlow.collect { queriesState ->
+                if (queriesState != null) {
+                    queries = queriesState
+                    throw Hackery(queriesState)
+                }
+            }
+        } catch (e: Hackery) {
+            return e.hack
+        }
+
+        // Will never make it here, but to please the IDE just in case...
+        delay(25L)
+        return queries!!
     }
 }
