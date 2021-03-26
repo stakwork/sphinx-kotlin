@@ -4,6 +4,7 @@ import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
 import chat.sphinx.database.SphinxCoreDBImpl
+import chat.sphinx.feature_coredb.CoreDBImpl
 import chat.sphinx.feature_repository.SphinxRepository
 import dagger.Module
 import dagger.Provides
@@ -17,9 +18,9 @@ import javax.inject.Singleton
 object RepositoryModule {
 
     @Provides
-    fun provideSphinxCoreDBImpl(
+    fun provideCoreDBImpl(
         sphinxCoreDBImpl: SphinxCoreDBImpl
-    ): SphinxCoreDBImpl =
+    ): CoreDBImpl =
         sphinxCoreDBImpl
 
     @Provides
@@ -27,10 +28,10 @@ object RepositoryModule {
     fun provideSphinxRepository(
         dispatchers: CoroutineDispatchers,
         networkQueryChat: NetworkQueryChat,
-        sphinxCoreDBImpl: SphinxCoreDBImpl,
+        coreDBImpl: CoreDBImpl,
     ): SphinxRepository =
         SphinxRepository(
-            sphinxCoreDBImpl,
+            coreDBImpl,
             dispatchers,
             networkQueryChat,
         )
