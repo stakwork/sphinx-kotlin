@@ -20,7 +20,7 @@ class SphinxCoreDBImplAndroid @Inject constructor(
     @OptIn(RawPasswordAccess::class)
     override fun initializeDatabase(encryptionKey: EncryptionKey) {
         val passphrase: ByteArray = SQLiteDatabase.getBytes(encryptionKey.privateKey.value)
-        val factory = SupportFactory(passphrase)
+        val factory = SupportFactory(passphrase, null, true)
         val driver = AndroidSqliteDriver(
             SphinxDatabase.Schema,
             appContext,
