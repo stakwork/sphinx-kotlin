@@ -1,10 +1,10 @@
-package chat.sphinx.feature_repository.adapters.contact
+package chat.sphinx.feature_coredb.adapters.contact
 
 import chat.sphinx.wrapper_common.contact.ContactId
 import com.squareup.sqldelight.ColumnAdapter
 
 
-class ContactIdsAdapter: ColumnAdapter<List<ContactId>, String> {
+internal class ContactIdsAdapter: ColumnAdapter<List<ContactId>, String> {
     override fun decode(databaseValue: String): List<ContactId> {
         if (databaseValue.isEmpty()) {
             return listOf()

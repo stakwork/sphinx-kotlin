@@ -1,10 +1,10 @@
-package chat.sphinx.feature_repository.adapters.chat
+package chat.sphinx.feature_coredb.adapters.chat
 
 import chat.sphinx.wrapper_chat.*
 import chat.sphinx.wrapper_common.chat.ChatId
 import com.squareup.sqldelight.ColumnAdapter
 
-class ChatIdAdapter: ColumnAdapter<ChatId, Long> {
+internal class ChatIdAdapter: ColumnAdapter<ChatId, Long> {
     override fun decode(databaseValue: Long): ChatId {
         return ChatId(databaseValue)
     }
@@ -14,7 +14,7 @@ class ChatIdAdapter: ColumnAdapter<ChatId, Long> {
     }
 }
 
-class ChatUUIDAdapter: ColumnAdapter<ChatUUID, String> {
+internal class ChatUUIDAdapter: ColumnAdapter<ChatUUID, String> {
     override fun decode(databaseValue: String): ChatUUID {
         return ChatUUID(databaseValue)
     }
@@ -24,7 +24,7 @@ class ChatUUIDAdapter: ColumnAdapter<ChatUUID, String> {
     }
 }
 
-class ChatNameAdapter: ColumnAdapter<ChatName, String> {
+internal class ChatNameAdapter: ColumnAdapter<ChatName, String> {
     override fun decode(databaseValue: String): ChatName {
         return ChatName(databaseValue)
     }
@@ -34,7 +34,7 @@ class ChatNameAdapter: ColumnAdapter<ChatName, String> {
     }
 }
 
-class ChatTypeAdapter: ColumnAdapter<ChatType, Long> {
+internal class ChatTypeAdapter: ColumnAdapter<ChatType, Long> {
     override fun decode(databaseValue: Long): ChatType {
         return databaseValue.toInt().toChatType()
     }
@@ -44,7 +44,7 @@ class ChatTypeAdapter: ColumnAdapter<ChatType, Long> {
     }
 }
 
-class ChatStatusAdapter: ColumnAdapter<ChatStatus, Long> {
+internal class ChatStatusAdapter: ColumnAdapter<ChatStatus, Long> {
     override fun decode(databaseValue: Long): ChatStatus {
         return databaseValue.toInt().toChatStatus()
     }
@@ -54,7 +54,7 @@ class ChatStatusAdapter: ColumnAdapter<ChatStatus, Long> {
     }
 }
 
-class ChatMutedAdapter: ColumnAdapter<ChatMuted, Long> {
+internal class ChatMutedAdapter: ColumnAdapter<ChatMuted, Long> {
     override fun decode(databaseValue: Long): ChatMuted {
         return databaseValue.toInt().toChatMuted()
     }
@@ -64,7 +64,7 @@ class ChatMutedAdapter: ColumnAdapter<ChatMuted, Long> {
     }
 }
 
-class ChatGroupKeyAdapter: ColumnAdapter<ChatGroupKey, String> {
+internal class ChatGroupKeyAdapter: ColumnAdapter<ChatGroupKey, String> {
     override fun decode(databaseValue: String): ChatGroupKey {
         return ChatGroupKey(databaseValue)
     }
@@ -74,7 +74,7 @@ class ChatGroupKeyAdapter: ColumnAdapter<ChatGroupKey, String> {
     }
 }
 
-class ChatHostAdapter: ColumnAdapter<ChatHost, String> {
+internal class ChatHostAdapter: ColumnAdapter<ChatHost, String> {
     override fun decode(databaseValue: String): ChatHost {
         return ChatHost(databaseValue)
     }
@@ -84,7 +84,7 @@ class ChatHostAdapter: ColumnAdapter<ChatHost, String> {
     }
 }
 
-class ChatUnlistedAdapter: ColumnAdapter<ChatUnlisted, Long> {
+internal class ChatUnlistedAdapter: ColumnAdapter<ChatUnlisted, Long> {
     override fun decode(databaseValue: Long): ChatUnlisted {
         return databaseValue.toInt().toChatUnlisted()
     }
@@ -94,7 +94,7 @@ class ChatUnlistedAdapter: ColumnAdapter<ChatUnlisted, Long> {
     }
 }
 
-class ChatPrivateAdapter: ColumnAdapter<ChatPrivate, Long> {
+internal class ChatPrivateAdapter: ColumnAdapter<ChatPrivate, Long> {
     override fun decode(databaseValue: Long): ChatPrivate {
         return databaseValue.toInt().toChatPrivate()
     }
@@ -104,7 +104,7 @@ class ChatPrivateAdapter: ColumnAdapter<ChatPrivate, Long> {
     }
 }
 
-class ChatMetaDataAdapter: ColumnAdapter<ChatMetaData, String> {
+internal class ChatMetaDataAdapter: ColumnAdapter<ChatMetaData, String> {
     override fun decode(databaseValue: String): ChatMetaData {
         return databaseValue.toChatMetaData()
     }
@@ -114,7 +114,7 @@ class ChatMetaDataAdapter: ColumnAdapter<ChatMetaData, String> {
     }
 }
 
-class ChatAliasAdapter: ColumnAdapter<ChatAlias, String> {
+internal class ChatAliasAdapter: ColumnAdapter<ChatAlias, String> {
     override fun decode(databaseValue: String): ChatAlias {
         return ChatAlias(databaseValue)
     }

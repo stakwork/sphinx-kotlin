@@ -1,11 +1,11 @@
-package chat.sphinx.feature_repository.adapters.common
+package chat.sphinx.feature_coredb.adapters.common
 
 import chat.sphinx.wrapper_common.*
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.Sat
 import com.squareup.sqldelight.ColumnAdapter
 
-class PhotoUrlAdapter private constructor(): ColumnAdapter<PhotoUrl, String> {
+internal class PhotoUrlAdapter private constructor(): ColumnAdapter<PhotoUrl, String> {
 
     companion object {
         @Volatile
@@ -26,7 +26,7 @@ class PhotoUrlAdapter private constructor(): ColumnAdapter<PhotoUrl, String> {
     }
 }
 
-class DateTimeAdapter private constructor(): ColumnAdapter<DateTime, String> {
+internal class DateTimeAdapter private constructor(): ColumnAdapter<DateTime, String> {
 
     companion object {
         @Volatile
@@ -47,7 +47,7 @@ class DateTimeAdapter private constructor(): ColumnAdapter<DateTime, String> {
     }
 }
 
-class SatAdapter private constructor(): ColumnAdapter<Sat, Long> {
+internal class SatAdapter private constructor(): ColumnAdapter<Sat, Long> {
 
     companion object {
         @Volatile
@@ -68,7 +68,7 @@ class SatAdapter private constructor(): ColumnAdapter<Sat, Long> {
     }
 }
 
-class LightningNodePubKeyAdapter private constructor(): ColumnAdapter<LightningNodePubKey, String> {
+internal class LightningNodePubKeyAdapter private constructor(): ColumnAdapter<LightningNodePubKey, String> {
 
     companion object {
         @Volatile
@@ -89,7 +89,7 @@ class LightningNodePubKeyAdapter private constructor(): ColumnAdapter<LightningN
     }
 }
 
-class SeenAdapter private constructor(): ColumnAdapter<Seen, Long> {
+internal class SeenAdapter private constructor(): ColumnAdapter<Seen, Long> {
 
     companion object {
         @Volatile
