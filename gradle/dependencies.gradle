@@ -49,6 +49,7 @@ ext.deps = [
         ],
         recyclerView: "androidx.recyclerview:recyclerview:1.1.0",
         securityCrypto: "androidx.security:security-crypto:1.1.0-alpha03",
+        sqlite: "androidx.sqlite:sqlite:2.1.0",
         viewBinding: "androidx.databinding:viewbinding:${versions.androidGradle}",
     ],
     bouncyCastle: "org.bouncycastle:bcprov-jdk15on:1.65",
@@ -75,6 +76,7 @@ ext.deps = [
         toplServiceBase: "io.matthewnelson.topl-android:topl-service-base:${versions.toplAndroid}",
         torBinary: "io.matthewnelson.topl-android:tor-binary:0.4.5.4",
     ],
+    sqlCipher: "net.zetetic:android-database-sqlcipher:4.4.3",
     square: [
         okio: "com.squareup.okio:okio:2.9.0",
         okhttp: "com.squareup.okhttp3:okhttp:${versions.okhttp}",
