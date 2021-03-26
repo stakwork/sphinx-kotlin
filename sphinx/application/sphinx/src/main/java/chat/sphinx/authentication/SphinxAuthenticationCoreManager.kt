@@ -4,10 +4,12 @@ import android.app.Activity
 import android.app.Application
 import android.content.pm.ActivityInfo
 import android.os.Bundle
+import chat.sphinx.feature_coredb.SphinxCoreDBImpl
 import io.matthewnelson.android_feature_authentication_core.components.AuthenticationCoreManagerAndroid
 import io.matthewnelson.android_feature_authentication_core.components.AuthenticationManagerInitializerAndroid
 import io.matthewnelson.concept_authentication.state.AuthenticationState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
+import io.matthewnelson.concept_encryption_key.EncryptionKey
 import io.matthewnelson.k_openssl_common.clazzes.HashIterations
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -18,6 +20,7 @@ class SphinxAuthenticationCoreManager @Inject constructor(
     dispatchers: CoroutineDispatchers,
     encryptionKeyHandler: SphinxEncryptionKeyHandler,
     sphinxAuthenticationCoreStorage: SphinxAuthenticationCoreStorage,
+    private val sphinxCoreDBImpl: SphinxCoreDBImpl,
 ): AuthenticationCoreManagerAndroid(
     dispatchers,
     HashIterations(250_000),
@@ -31,8 +34,13 @@ class SphinxAuthenticationCoreManager @Inject constructor(
 ) {
     override val logOutWhenApplicationIsClearedFromRecentsTray: Boolean = false
 
+    override fun onInitialLoginSuccess(encryptionKey: EncryptionKey) {
+        super.onInitialLoginSuccess(encryptionKey)
+        sphinxCoreDBImpl.initializeDatabase(encryptionKey)
+    }
+
     fun logOut() {
-        updateAuthenticationState(AuthenticationState.Required.InitialLogIn)
+        setAuthenticationStateRequired(AuthenticationState.Required.InitialLogIn)
     }
 
     override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {

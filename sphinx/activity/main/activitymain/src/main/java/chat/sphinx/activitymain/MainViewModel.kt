@@ -6,19 +6,16 @@ import chat.sphinx.activitymain.navigation.drivers.AuthenticationNavigationDrive
 import chat.sphinx.activitymain.navigation.drivers.DetailNavigationDriver
 import chat.sphinx.activitymain.navigation.drivers.PrimaryNavigationDriver
 import chat.sphinx.activitymain.ui.MainViewState
-import chat.sphinx.feature_coredb.SphinxCoreDBImpl
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_activity.NavigationViewModel
 import io.matthewnelson.android_feature_viewmodel.BaseViewModel
 import io.matthewnelson.concept_authentication.coordinator.AuthenticationCoordinator
 import io.matthewnelson.concept_authentication.coordinator.AuthenticationRequest
-import io.matthewnelson.concept_authentication.coordinator.AuthenticationResponse
 import io.matthewnelson.concept_authentication.state.AuthenticationState
 import io.matthewnelson.concept_authentication.state.AuthenticationStateManager
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.firstOrNull
 import javax.inject.Inject
 
 @HiltViewModel
@@ -29,7 +26,6 @@ internal class MainViewModel @Inject constructor(
     val detailDriver: DetailNavigationDriver,
     private val dispatchers: CoroutineDispatchers,
     override val navigationDriver: PrimaryNavigationDriver,
-    private val sphinxCoreDB: SphinxCoreDBImpl,
 ): BaseViewModel<MainViewState>(MainViewState.DetailScreenInactive), NavigationViewModel<PrimaryNavigationDriver>
 {
     init {
@@ -38,38 +34,18 @@ internal class MainViewModel @Inject constructor(
                 @Exhaustive
                 when (state) {
                     is AuthenticationState.NotRequired -> {
-                        initializeCoreDB()
+                        // Do nothing
                     }
-                    is AuthenticationState.Required.InitialLogIn -> {}
+                    is AuthenticationState.Required.InitialLogIn -> {
+                        // Handled by the Splash Screen
+                    }
                     is AuthenticationState.Required.LoggedOut -> {
+                        // Blow it up
                         authenticationCoordinator.submitAuthenticationRequest(
                             AuthenticationRequest.LogIn(privateKey = null)
                         )
                     }
                 }
-            }
-        }
-    }
-
-    private var initializeCoreDBJob: Job? = null
-    private fun initializeCoreDB() {
-        if (sphinxCoreDB.isInitialized || initializeCoreDBJob?.isActive == true) {
-            return
-        }
-
-        initializeCoreDBJob = viewModelScope.launch(dispatchers.mainImmediate) {
-            val request = AuthenticationRequest.GetEncryptionKey()
-            while (
-                !sphinxCoreDB.isInitialized &&
-                currentCoroutineContext().isActive
-            ) {
-                authenticationCoordinator.submitAuthenticationRequest(request)
-                    .firstOrNull().let { response ->
-                        if (response is AuthenticationResponse.Success.Key) {
-                            sphinxCoreDB.initializeDatabase(response.encryptionKey)
-                            delay(15L)
-                        }
-                    }
             }
         }
     }

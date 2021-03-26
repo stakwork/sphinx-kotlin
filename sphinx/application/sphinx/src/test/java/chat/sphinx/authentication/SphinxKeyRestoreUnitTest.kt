@@ -4,8 +4,14 @@ import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.test.core.app.ApplicationProvider
+import chat.sphinx.concept_coredb.SphinxDatabase
+import chat.sphinx.database.SphinxCoreDBImplAndroid
+import chat.sphinx.feature_coredb.SphinxCoreDBImpl
 import chat.sphinx.feature_relay.RelayDataHandlerImpl
 import chat.sphinx.key_restore.KeyRestoreResponse
+import com.squareup.sqldelight.android.AndroidSqliteDriver
+import com.squareup.sqldelight.db.SqlDriver
+import io.matthewnelson.concept_encryption_key.EncryptionKey
 import io.matthewnelson.k_openssl_common.clazzes.Password
 import io.matthewnelson.test_concept_coroutines.CoroutineTestHelper
 import kotlinx.coroutines.flow.collect
@@ -42,12 +48,32 @@ class SphinxKeyRestoreUnitTest: CoroutineTestHelper() {
         SphinxEncryptionKeyHandler()
     }
 
+    private inner class TestSphinxCoreDBImpl: SphinxCoreDBImpl() {
+
+        private var driver: AndroidSqliteDriver? = null
+
+        override fun getSqlDriver(encryptionKey: EncryptionKey): SqlDriver {
+            return driver ?: synchronized(this) {
+                AndroidSqliteDriver(
+                    SphinxDatabase.Schema,
+                    app,
+                    DB_NAME,
+                ).also { driver = it }
+            }
+        }
+    }
+
+    private val testSphinxCoreDBImpl: TestSphinxCoreDBImpl by lazy {
+        TestSphinxCoreDBImpl()
+    }
+
     private val sphinxManager: SphinxAuthenticationCoreManager by lazy {
         SphinxAuthenticationCoreManager(
             app,
             dispatchers,
             sphinxKeyHandler,
-            sphinxStorage
+            sphinxStorage,
+            testSphinxCoreDBImpl,
         )
     }
 
@@ -56,7 +82,7 @@ class SphinxKeyRestoreUnitTest: CoroutineTestHelper() {
             sphinxStorage,
             sphinxManager,
             dispatchers,
-            sphinxKeyHandler
+            sphinxKeyHandler,
         )
     }
 

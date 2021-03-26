@@ -23,13 +23,23 @@ abstract class SphinxCoreDBImpl: SphinxCoreDB() {
     @Volatile
     private var sphinxDatabaseQueries: SphinxDatabaseQueries? = null
 
-    val isInitialized: Boolean
-        get() = sphinxDatabaseQueries != null
+    protected abstract fun getSqlDriver(encryptionKey: EncryptionKey): SqlDriver
 
-    protected fun setDatabaseQueries(sqlDriver: SqlDriver) {
-        if (!isInitialized) {
+    private val initializationLock = Object()
+
+    fun initializeDatabase(encryptionKey: EncryptionKey) {
+        if (sphinxDatabaseQueries != null) {
+            return
+        }
+
+        synchronized(initializationLock) {
+
+            if (sphinxDatabaseQueries != null) {
+                return
+            }
+
             sphinxDatabaseQueries = SphinxDatabase(
-                driver = sqlDriver,
+                driver = getSqlDriver(encryptionKey),
                 chatDboAdapter = ChatDbo.Adapter(
                     idAdapter = ChatIdAdapter(),
                     uuidAdapter = ChatUUIDAdapter(),
@@ -69,6 +79,4 @@ abstract class SphinxCoreDBImpl: SphinxCoreDB() {
         }
         return queries
     }
-
-    abstract fun initializeDatabase(encryptionKey: EncryptionKey)
 }

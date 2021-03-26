@@ -35,7 +35,6 @@ dependencies {
     api project(path: ':android:features:android-feature-activity')
 
     // Sphinx
-    api project(path: ':sphinx:application:data:features:feature-coredb')
     implementation project(path: ':sphinx:screens-detail:common:detail-resources')
     implementation project(path: ':sphinx:activity:insetter-activity')
 

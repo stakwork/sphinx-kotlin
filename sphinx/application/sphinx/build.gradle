@@ -73,9 +73,12 @@ dependencies {
 
     // Sphinx
     implementation project(path: ':sphinx:activity:main:activitymain')
+
     implementation project(path: ':sphinx:application:data:features:feature-background-login')
+    implementation project(path: ':sphinx:application:data:features:feature-coredb')
     implementation project(path: ':sphinx:application:data:features:feature-relay')
     implementation project(path: ':sphinx:application:data:features:feature-repository')
+
     implementation project(path: ':sphinx:application:network:features:feature-network-client')
     implementation project(path: ':sphinx:application:network:features:queries:feature-network-query-chat')
     implementation project(path: ':sphinx:application:network:features:queries:feature-network-query-contact')
@@ -83,6 +86,7 @@ dependencies {
     implementation project(path: ':sphinx:application:network:features:queries:feature-network-query-lightning')
     implementation project(path: ':sphinx:application:network:features:queries:feature-network-query-message')
     implementation project(path: ':sphinx:application:network:features:queries:feature-network-query-subscription')
+
     implementation project(path: ':sphinx:screens:splash:key-restore')
 
     implementation deps.google.hilt
