@@ -8,4 +8,7 @@ dependencies {
     api project(path: ':kotlin:concepts:authentication:concept-encryption-key')
     api project(path: ':sphinx:application:data:concepts:concept-coredb')
     implementation deps.kotlin.coroutinesCore
+
+    testImplementation deps.square.sqlDelightJvm
+    testImplementation project(path: ':kotlin:test:test-concept-coroutines')
 }
