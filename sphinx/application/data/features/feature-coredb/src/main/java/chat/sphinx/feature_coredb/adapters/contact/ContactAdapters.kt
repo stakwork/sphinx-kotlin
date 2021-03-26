@@ -3,8 +3,18 @@ package chat.sphinx.feature_coredb.adapters.contact
 import chat.sphinx.wrapper_common.contact.ContactId
 import com.squareup.sqldelight.ColumnAdapter
 
+internal class ContactIdsAdapter private constructor(): ColumnAdapter<List<ContactId>, String> {
 
-internal class ContactIdsAdapter: ColumnAdapter<List<ContactId>, String> {
+    companion object {
+        @Volatile
+        private var instance: ContactIdsAdapter? = null
+        fun getInstance(): ContactIdsAdapter =
+            instance ?: synchronized(this) {
+                instance ?: ContactIdsAdapter()
+                    .also { instance = it }
+            }
+    }
+
     override fun decode(databaseValue: String): List<ContactId> {
         if (databaseValue.isEmpty()) {
             return listOf()

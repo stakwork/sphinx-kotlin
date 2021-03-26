@@ -37,7 +37,7 @@ abstract class SphinxCoreDBImpl: SphinxCoreDB() {
                     photo_urlAdapter = PhotoUrlAdapter.getInstance(),
                     typeAdapter = ChatTypeAdapter(),
                     statusAdapter = ChatStatusAdapter(),
-                    contact_idsAdapter = ContactIdsAdapter(),
+                    contact_idsAdapter = ContactIdsAdapter.getInstance(),
                     is_mutedAdapter = ChatMutedAdapter(),
                     created_atAdapter = DateTimeAdapter.getInstance(),
                     group_keyAdapter = ChatGroupKeyAdapter(),
@@ -51,7 +51,7 @@ abstract class SphinxCoreDBImpl: SphinxCoreDB() {
                     meta_dataAdapter = ChatMetaDataAdapter(),
                     my_photo_urlAdapter = PhotoUrlAdapter.getInstance(),
                     my_aliasAdapter = ChatAliasAdapter(),
-                    pending_contact_idsAdapter = ContactIdsAdapter(),
+                    pending_contact_idsAdapter = ContactIdsAdapter.getInstance(),
                 )
             ).sphinxDatabaseQueries
         }
