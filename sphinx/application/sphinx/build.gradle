@@ -54,6 +54,15 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+
+    splits {
+        abi {
+            enable true
+            reset()
+            include "x86", "armeabi-v7a", "arm64-v8a", "x86_64"
+            universalApk true
+        }
+    }
 }
 
 dependencies {
@@ -79,6 +88,8 @@ dependencies {
     implementation deps.google.hilt
     kapt kaptDeps.google.hilt
 
+    implementation deps.androidx.sqlite
+    implementation deps.sqlCipher
     implementation deps.square.sqlDelightAndroid
 
     testImplementation project(path: ':kotlin:test:test-concept-coroutines')
