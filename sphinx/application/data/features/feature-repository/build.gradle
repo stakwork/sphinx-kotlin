@@ -1,15 +1,7 @@
 plugins {
     id 'app.cash.exhaustive'
-    id 'com.squareup.sqldelight'
     id 'java-library'
     id 'kotlin'
-}
-
-sqldelight {
-    SphinxDatabase {
-        packageName = "chat.sphinx.feature_repository"
-        schemaOutputDirectory = file("src/main/sqldelight/chat/sphinx/feature_repository")
-    }
 }
 
 dependencies {
@@ -18,6 +10,7 @@ dependencies {
     implementation project(path: ':kotlin:concepts:concept-coroutines')
 
     // Sphinx
+    implementation project(path: ':sphinx:application:data:concepts:concept-coredb')
     api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-chat')
     api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-message')
 

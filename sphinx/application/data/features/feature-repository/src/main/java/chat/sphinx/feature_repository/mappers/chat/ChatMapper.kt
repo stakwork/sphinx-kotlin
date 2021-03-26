@@ -1,8 +1,8 @@
 package chat.sphinx.feature_repository.mappers.chat
 
 import chat.sphinx.concept_network_query_chat.model.ChatDto
+import chat.sphinx.conceptcoredb.ChatDbo
 import chat.sphinx.feature_repository.mappers.ClassMapper
-import chat.sphinx.featurerepository.ChatDbo
 import chat.sphinx.wrapper_chat.*
 import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_common.chat.ChatId
