@@ -11,9 +11,12 @@ import chat.sphinx.wrapper_common.lightning.toSat
 import chat.sphinx.wrapper_common.toDateTime
 import chat.sphinx.wrapper_common.toPhotoUrl
 import chat.sphinx.wrapper_common.toSeen
+import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import java.text.ParseException
 
-internal class ChatDtoDboMapper: ClassMapper<ChatDto, ChatDbo>() {
+internal class ChatDtoDboMapper(
+    dispatchers: CoroutineDispatchers
+): ClassMapper<ChatDto, ChatDbo>(dispatchers) {
 
     @Throws(
         IllegalArgumentException::class,

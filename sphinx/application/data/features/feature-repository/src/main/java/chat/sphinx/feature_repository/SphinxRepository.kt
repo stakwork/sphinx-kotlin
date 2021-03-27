@@ -2,6 +2,7 @@ package chat.sphinx.feature_repository
 
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_coredb.CoreDB
+import chat.sphinx.concept_coredb.util.upsertChat
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
@@ -35,10 +36,10 @@ class SphinxRepository(
     /////////////
     private val chatLock = Mutex()
     private val chatDtoDboMapper: ChatDtoDboMapper by lazy {
-        ChatDtoDboMapper()
+        ChatDtoDboMapper(dispatchers)
     }
     private val chatDboPresenterMapper: ChatDboPresenterMapper by lazy {
-        ChatDboPresenterMapper()
+        ChatDboPresenterMapper(dispatchers)
     }
 
     override suspend fun getChats(): Flow<List<Chat>> {
@@ -80,42 +81,21 @@ class SphinxRepository(
 
                     try {
 
-                        withContext(dispatchers.io) {
+                        chatLock.withLock {
 
-                            chatLock.withLock {
+                            chatDtoDboMapper.mapListFrom(loadResponse.value).let { dbos ->
 
                                 val queries = coreDB.getSphinxDatabaseQueries()
-                                val chatIdsToRemove = queries.getAllChatIds()
-                                    .executeAsList()
-                                    .toMutableSet()
 
-                                chatDtoDboMapper.mapListFrom(loadResponse.value).let { dbos ->
+                                withContext(dispatchers.io) {
+
+                                    val chatIdsToRemove = queries.getAllChatIds()
+                                        .executeAsList()
+                                        .toMutableSet()
 
                                     queries.transaction {
                                         dbos.forEach { dbo ->
-                                            queries.upsertChat(
-                                                dbo.uuid,
-                                                dbo.name,
-                                                dbo.photo_url,
-                                                dbo.type,
-                                                dbo.status,
-                                                dbo.contact_ids,
-                                                dbo.is_muted,
-                                                dbo.created_at,
-                                                dbo.group_key,
-                                                dbo.host,
-                                                dbo.price_per_message,
-                                                dbo.escrow_amount,
-                                                dbo.unlisted,
-                                                dbo.private_tribe,
-                                                dbo.owner_pub_key,
-                                                dbo.seen,
-                                                dbo.meta_data,
-                                                dbo.my_photo_url,
-                                                dbo.my_alias,
-                                                dbo.pending_contact_ids,
-                                                dbo.id
-                                            )
+                                            queries.upsertChat(dbo)
 
                                             chatIdsToRemove.remove(dbo.id)
                                         }
@@ -123,8 +103,11 @@ class SphinxRepository(
                                         // remove remaining chat's from DB
                                         chatIdsToRemove.forEach { chatId ->
                                             queries.deleteChatById(chatId)
+                                            // TODO: delete messages for chatid
                                         }
+
                                     }
+
                                 }
                             }
                         }

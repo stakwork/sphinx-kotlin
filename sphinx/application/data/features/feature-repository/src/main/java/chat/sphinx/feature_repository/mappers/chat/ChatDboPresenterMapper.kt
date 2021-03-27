@@ -3,10 +3,13 @@ package chat.sphinx.feature_repository.mappers.chat
 import chat.sphinx.conceptcoredb.ChatDbo
 import chat.sphinx.feature_repository.mappers.ClassMapper
 import chat.sphinx.wrapper_chat.*
+import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 
 import java.text.ParseException
 
-internal class ChatDboPresenterMapper: ClassMapper<ChatDbo, Chat>() {
+internal class ChatDboPresenterMapper(
+    dispatchers: CoroutineDispatchers
+): ClassMapper<ChatDbo, Chat>(dispatchers) {
 
     @Throws(
         IllegalArgumentException::class,
