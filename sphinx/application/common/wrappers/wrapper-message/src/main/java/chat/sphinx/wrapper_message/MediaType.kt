@@ -1,4 +1,4 @@
-package chat.sphinx.wrapper_media
+package chat.sphinx.wrapper_message
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun String.toMediaType(): MediaType? =

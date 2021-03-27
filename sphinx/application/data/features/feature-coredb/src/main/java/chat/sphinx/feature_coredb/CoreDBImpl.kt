@@ -7,9 +7,6 @@ import chat.sphinx.conceptcoredb.MessageDbo
 import chat.sphinx.conceptcoredb.SphinxDatabaseQueries
 import chat.sphinx.feature_coredb.adapters.chat.*
 import chat.sphinx.feature_coredb.adapters.common.*
-import chat.sphinx.feature_coredb.adapters.media.MediaKeyAdapter
-import chat.sphinx.feature_coredb.adapters.media.MediaTokenAdapter
-import chat.sphinx.feature_coredb.adapters.media.MediaTypeAdapter
 import chat.sphinx.feature_coredb.adapters.message.*
 import com.squareup.sqldelight.db.SqlDriver
 import io.matthewnelson.concept_encryption_key.EncryptionKey

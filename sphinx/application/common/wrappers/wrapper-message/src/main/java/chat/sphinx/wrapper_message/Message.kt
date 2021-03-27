@@ -9,9 +9,6 @@ import chat.sphinx.wrapper_common.lightning.LightningPaymentHash
 import chat.sphinx.wrapper_common.lightning.LightningPaymentRequest
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.MessageId
-import chat.sphinx.wrapper_media.MediaKey
-import chat.sphinx.wrapper_media.MediaToken
-import chat.sphinx.wrapper_media.MediaType
 
 data class Message(
     val id: MessageId,
