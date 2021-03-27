@@ -5,7 +5,9 @@ import chat.sphinx.concept_coredb.CoreDB
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
-import chat.sphinx.feature_repository.mappers.chat.ChatMapper
+import chat.sphinx.feature_repository.mappers.chat.ChatDboPresenterMapper
+import chat.sphinx.feature_repository.mappers.chat.ChatDtoDboMapper
+import chat.sphinx.feature_repository.mappers.mapListFrom
 import chat.sphinx.kotlin_response.KotlinResponse
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.ResponseError
@@ -32,8 +34,11 @@ class SphinxRepository(
     /// Chats ///
     /////////////
     private val chatLock = Mutex()
-    private val chatMapper: ChatMapper by lazy {
-        ChatMapper()
+    private val chatDtoDboMapper: ChatDtoDboMapper by lazy {
+        ChatDtoDboMapper()
+    }
+    private val chatDboPresenterMapper: ChatDboPresenterMapper by lazy {
+        ChatDboPresenterMapper()
     }
 
     override suspend fun getChats(): Flow<List<Chat>> {
@@ -41,7 +46,7 @@ class SphinxRepository(
             .asFlow()
             .flowOn(dispatchers.io)
             .mapToList(dispatchers.default)
-            .map { chatMapper.fromDBOsToPresenters(it) }
+            .map { chatDboPresenterMapper.mapListFrom(it) }
             .flowOn(dispatchers.default)
     }
 
@@ -50,7 +55,7 @@ class SphinxRepository(
             .asFlow()
             .flowOn(dispatchers.io)
             .mapToOneOrNull(dispatchers.default)
-            .map { it?.let { chatMapper.fromDBOtoPresenter(it) } }
+            .map { it?.let { chatDboPresenterMapper.mapFrom(it) } }
             .distinctUntilChanged()
     }
 
@@ -59,7 +64,7 @@ class SphinxRepository(
             .asFlow()
             .flowOn(dispatchers.io)
             .mapToOneOrNull(dispatchers.default)
-            .map { it?.let { chatMapper.fromDBOtoPresenter(it) } }
+            .map { it?.let { chatDboPresenterMapper.mapFrom(it) } }
             .distinctUntilChanged()
     }
 
@@ -84,7 +89,7 @@ class SphinxRepository(
                                     .executeAsList()
                                     .toMutableSet()
 
-                                chatMapper.fromDTOsToDBOs(loadResponse.value).let { dbos ->
+                                chatDtoDboMapper.mapListFrom(loadResponse.value).let { dbos ->
 
                                     queries.transaction {
                                         dbos.forEach { dbo ->

@@ -1,15 +1,14 @@
 package chat.sphinx.feature_repository.mappers
 
-internal abstract class ClassMapper<DTO, DBO, Presenter> {
+@Suppress("NOTHING_TO_INLINE")
+internal inline fun<From, To> ClassMapper<From, To>.mapListFrom(value: List<From>): List<To> =
+    value.map { mapFrom(it) }
 
-    abstract fun fromDTOtoDBO(dto: DTO): DBO
-    abstract fun fromDTOtoPresenter(dto: DTO): Presenter
-    abstract fun fromDTOsToDBOs(dtos: List<DTO>): List<DBO>
-    abstract fun fromDTOsToPresenters(dtos: List<DTO>): List<Presenter>
+@Suppress("NOTHING_TO_INLINE")
+internal inline fun<From, To> ClassMapper<From, To>.mapListTo(value: List<To>): List<From> =
+    value.map { mapTo(it) }
 
-    abstract fun fromDBOtoPresenter(dbo: DBO): Presenter
-    abstract fun fromDBOsToPresenters(dbos: List<DBO>): List<Presenter>
-
-    abstract fun fromPresenterToDBO(presenter: Presenter): DBO
-    abstract fun fromPresentersToDBOs(presenters: List<Presenter>): List<DBO>
+internal abstract class ClassMapper<From, To> {
+    abstract fun mapFrom(value: From): To
+    abstract fun mapTo(value: To): From
 }
