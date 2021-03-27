@@ -9,30 +9,33 @@ import chat.sphinx.wrapper_common.lightning.LightningPaymentHash
 import chat.sphinx.wrapper_common.lightning.LightningPaymentRequest
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.MessageId
+import chat.sphinx.wrapper_media.MediaKey
+import chat.sphinx.wrapper_media.MediaToken
+import chat.sphinx.wrapper_media.MediaType
 
 data class Message(
     val id: MessageId,
-    val uuid: MessageUUID,
-    val replyUUID: MessageUUID?,
+    val uuid: MessageUUID?,
+    val chatId: ChatId?,
     val type: MessageType,
     val sender: ContactId,
-    val senderAlias: SenderAlias?,
-    val senderPic: PhotoUrl?,
     val receiver: ContactId?,
     val amount: Sat,
     val paymentHash: LightningPaymentHash?,
     val paymentRequest: LightningPaymentRequest?,
-    val messageContent: MessageContent?,
-    val remoteMessageContent: RemoteMessageContent?,
-    val status: MessageStatus,
     val date: DateTime,
     val expirationDate: DateTime?,
+    val messageContent: MessageContent?,
+    val status: MessageStatus,
+    val statusMap: Map<ContactId, MessageStatus>?,
+    val mediaKey: MediaKey?,
+    val mediaType: MediaType?,
+    val mediaToken: MediaToken?,
+    val seen: Seen,
+    val senderAlias: SenderAlias?,
+    val senderPic: PhotoUrl?,
 //    val mediaTerms: String?, // TODO: Ask Tomas what this field is for
 //    val receipt: String?, // TODO: Ask Tomas what this field is for
-    val mediaToken: String?,
-    val mediaKey: String?,
-    val mediaType: String?,
-    val originalMUID: String?,
-    val seen: Seen,
-    val chatId: ChatId?
+    val originalMUID: MessageMUID?,
+    val replyUUID: ReplyUUID?,
 )
