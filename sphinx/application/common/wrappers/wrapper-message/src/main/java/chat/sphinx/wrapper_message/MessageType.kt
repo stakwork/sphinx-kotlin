@@ -130,11 +130,8 @@ inline fun MessageType.isQueryResponse(): Boolean =
 
 /**
  * Converts the integer value returned over the wire to an object.
- *
- * @throws [IllegalArgumentException] if the integer is not supported
  * */
 @Suppress("NOTHING_TO_INLINE")
-@Throws(IllegalArgumentException::class)
 inline fun Int.toMessageType(): MessageType =
     when (this) {
         MessageType.MESSAGE -> {
@@ -234,9 +231,7 @@ inline fun Int.toMessageType(): MessageType =
             MessageType.QueryResponse
         }
         else -> {
-            throw IllegalArgumentException(
-                "MessageType for integer $this not supported"
-            )
+            MessageType.Unknown(this)
         }
     }
 
@@ -574,5 +569,10 @@ sealed class MessageType {
 
         override val value: Int
             get() = QUERY_RESPONSE
+    }
+
+    class Unknown(override val value: Int) : MessageType() {
+        override val show: Boolean
+            get() = DO_NOT_SHOW
     }
 }

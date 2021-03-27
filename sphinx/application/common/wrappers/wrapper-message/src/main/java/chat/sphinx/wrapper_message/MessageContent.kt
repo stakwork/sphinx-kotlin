@@ -1,5 +1,14 @@
 package chat.sphinx.wrapper_message
 
+@Suppress("NOTHING_TO_INLINE")
+inline fun String.toMessageContent(): MessageContent? =
+    try {
+        MessageContent(this)
+    } catch (e: IllegalArgumentException) {
+        null
+    }
+
+// TODO: add encrypted/decrypted flag???
 inline class MessageContent(val value: String) {
     init {
         require(value.isNotEmpty()) {

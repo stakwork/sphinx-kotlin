@@ -4,6 +4,14 @@ package chat.sphinx.wrapper_common.lightning
 inline fun MilliSat.toSat(): Sat =
     Sat(value / 1_000L)
 
+@Suppress("NOTHING_TO_INLINE")
+inline fun Long.toMilliSat(): MilliSat? =
+    try {
+        MilliSat(this)
+    } catch (e: IllegalArgumentException) {
+        null
+    }
+
 inline class MilliSat(val value: Long) {
     init {
         require(value >= 0L) {

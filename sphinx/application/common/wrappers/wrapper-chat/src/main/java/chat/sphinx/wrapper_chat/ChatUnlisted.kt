@@ -34,6 +34,8 @@ inline fun Boolean.toChatUnlisted(): ChatUnlisted =
  * Comes off the wire as:
  *  - 0 (Not Unlisted)
  *  - 1 (Unlisted)
+ *  - true (Unlisted)
+ *  - false (Not Unlisted)
  * */
 sealed class ChatUnlisted {
 

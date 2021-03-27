@@ -10,10 +10,12 @@ inline fun NetworkType.isLightning(): Boolean =
 inline fun NetworkType.isMqtt(): Boolean =
     this is NetworkType.Mqtt
 
+@Suppress("NOTHING_TO_INLINE")
+inline fun NetworkType.isUnknown(): Boolean =
+    this is NetworkType.Unknown
+
 /**
  * Converts the integer value returned over the wire to an object.
- *
- * @throws [IllegalArgumentException] if the integer is not supported
  * */
 @Suppress("NOTHING_TO_INLINE")
 @Throws(IllegalArgumentException::class)
@@ -26,9 +28,7 @@ inline fun Int.toNetworkType(): NetworkType =
             NetworkType.Mqtt
         }
         else -> {
-            throw IllegalArgumentException(
-                "NetworkType for integer $this not supported"
-            )
+            NetworkType.Unknown(this)
         }
     }
 
@@ -57,4 +57,6 @@ sealed class NetworkType {
         override val value: Int
             get() = MQTT
     }
+
+    class Unknown(override val value: Int) : NetworkType()
 }

@@ -28,13 +28,14 @@ inline fun MessageStatus.isFailed(): Boolean =
 inline fun MessageStatus.isDeleted(): Boolean =
     this is MessageStatus.Deleted
 
+@Suppress("NOTHING_TO_INLINE")
+inline fun MessageStatus.isUnknown(): Boolean =
+    this is MessageStatus.Unknown
+
 /**
  * Converts the integer value returned over the wire to an object.
- *
- * @throws [IllegalArgumentException] if the integer is not supported
  * */
 @Suppress("NOTHING_TO_INLINE")
-@Throws(IllegalArgumentException::class)
 inline fun Int?.toMessageStatus(): MessageStatus =
     when (this) {
         null -> {
@@ -59,9 +60,7 @@ inline fun Int?.toMessageStatus(): MessageStatus =
             MessageStatus.Deleted
         }
         else -> {
-            throw IllegalArgumentException(
-                "MessageStatus for integer $this not supported"
-            )
+            MessageStatus.Unknown(this)
         }
     }
 
@@ -125,4 +124,6 @@ sealed class MessageStatus {
         override val value: Int
             get() = DELETED
     }
+
+    class Unknown(override val value: Int) : MessageStatus()
 }

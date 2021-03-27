@@ -28,13 +28,14 @@ inline fun InviteStatus.isExpired(): Boolean =
 inline fun InviteStatus.isPaymentPending(): Boolean =
     this is InviteStatus.PaymentPending
 
+@Suppress("NOTHING_TO_INLINE")
+inline fun InviteStatus.isUnknown(): Boolean =
+    this is InviteStatus.Unknown
+
 /**
  * Converts the integer value returned over the wire to an object.
- *
- * @throws [IllegalArgumentException] if the integer is not supported
  * */
 @Suppress("NOTHING_TO_INLINE")
-@Throws(IllegalArgumentException::class)
 inline fun Int.toInviteStatus(): InviteStatus =
     when (this) {
         InviteStatus.PENDING -> {
@@ -59,9 +60,7 @@ inline fun Int.toInviteStatus(): InviteStatus =
             InviteStatus.PaymentPending
         }
         else -> {
-            throw IllegalArgumentException(
-                "InviteStatus for integer '$this' not supported"
-            )
+            InviteStatus.Unknown(this)
         }
     }
 
@@ -125,4 +124,6 @@ sealed class InviteStatus {
         override val value: Int
             get() = PAYMENT_PENDING
     }
+
+    class Unknown(override val value: Int): InviteStatus()
 }

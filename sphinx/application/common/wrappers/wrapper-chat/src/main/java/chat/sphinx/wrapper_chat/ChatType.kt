@@ -13,15 +13,14 @@ inline fun ChatType.isGroup(): Boolean =
 inline fun ChatType.isTribe(): Boolean =
     this is ChatType.Tribe
 
-
+@Suppress("NOTHING_TO_INLINE")
+inline fun ChatType.isUnknown(): Boolean =
+    this is ChatType.Unknown
 
 /**
  * Converts the integer value returned over the wire to an object.
- *
- * @throws [IllegalArgumentException] if the integer is not supported
  * */
 @Suppress("NOTHING_TO_INLINE")
-@Throws(IllegalArgumentException::class)
 inline fun Int.toChatType(): ChatType =
     when (this) {
         ChatType.CONVERSATION -> {
@@ -34,9 +33,7 @@ inline fun Int.toChatType(): ChatType =
             ChatType.Tribe
         }
         else -> {
-            throw IllegalArgumentException(
-                "ChatType for integer '$this' not supported"
-            )
+            ChatType.Unknown(this)
         }
     }
 
@@ -73,4 +70,6 @@ sealed class ChatType {
         override val value: Int
             get() = TRIBE
     }
+
+    class Unknown(override val value: Int) : ChatType()
 }

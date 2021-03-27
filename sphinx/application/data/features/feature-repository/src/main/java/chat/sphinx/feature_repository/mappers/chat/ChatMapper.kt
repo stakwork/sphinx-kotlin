@@ -4,7 +4,6 @@ import chat.sphinx.concept_network_query_chat.model.ChatDto
 import chat.sphinx.conceptcoredb.ChatDbo
 import chat.sphinx.feature_repository.mappers.ClassMapper
 import chat.sphinx.wrapper_chat.*
-import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_common.chat.ChatId
 import chat.sphinx.wrapper_common.contact.ContactId
 import chat.sphinx.wrapper_common.lightning.toLightningNodePubKey

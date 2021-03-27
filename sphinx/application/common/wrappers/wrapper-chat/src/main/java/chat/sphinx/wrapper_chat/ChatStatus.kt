@@ -12,13 +12,14 @@ inline fun ChatStatus.isPending(): Boolean =
 inline fun ChatStatus.isRejected(): Boolean =
     this is ChatStatus.Rejected
 
+@Suppress("NOTHING_TO_INLINE")
+inline fun ChatStatus.isUnknown(): Boolean =
+    this is ChatStatus.Unknown
+
 /**
  * Converts the integer value returned over the wire to an object.
- *
- * @throws [IllegalArgumentException] if the integer is not supported
  * */
 @Suppress("NOTHING_TO_INLINE")
-@Throws(IllegalArgumentException::class)
 inline fun Int?.toChatStatus(): ChatStatus =
     when (this) {
         null,
@@ -32,9 +33,7 @@ inline fun Int?.toChatStatus(): ChatStatus =
             ChatStatus.Rejected
         }
         else -> {
-            throw IllegalArgumentException(
-                "ChatStatus for integer '$this' not supported"
-            )
+            ChatStatus.Unknown(this)
         }
     }
 
@@ -75,4 +74,6 @@ sealed class ChatStatus {
         override val value: Int
             get() = REJECTED
     }
+
+    class Unknown(override val value: Int) : ChatStatus()
 }
