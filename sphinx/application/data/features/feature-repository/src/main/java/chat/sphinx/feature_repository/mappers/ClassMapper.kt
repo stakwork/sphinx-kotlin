@@ -16,6 +16,6 @@ internal suspend inline fun<From, To> ClassMapper<From, To>.mapListTo(value: Lis
     }
 
 internal abstract class ClassMapper<From, To>(val dispatchers: CoroutineDispatchers) {
-    abstract fun mapFrom(value: From): To
-    abstract fun mapTo(value: To): From
+    abstract suspend fun mapFrom(value: From): To
+    abstract suspend fun mapTo(value: To): From
 }

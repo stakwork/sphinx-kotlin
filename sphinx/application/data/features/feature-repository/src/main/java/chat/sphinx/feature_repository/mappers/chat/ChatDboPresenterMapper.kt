@@ -15,7 +15,7 @@ internal class ChatDboPresenterMapper(
         IllegalArgumentException::class,
         ParseException::class
     )
-    override fun mapFrom(value: ChatDbo): Chat {
+    override suspend fun mapFrom(value: ChatDbo): Chat {
         return Chat(
             value.id,
             value.uuid,
@@ -41,7 +41,7 @@ internal class ChatDboPresenterMapper(
         )
     }
 
-    override fun mapTo(value: Chat): ChatDbo {
+    override suspend fun mapTo(value: Chat): ChatDbo {
         return ChatDbo(
             value.id,
             value.uuid,

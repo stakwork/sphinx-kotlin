@@ -22,7 +22,7 @@ internal class ChatDtoDboMapper(
         IllegalArgumentException::class,
         ParseException::class
     )
-    override fun mapFrom(value: ChatDto): ChatDbo {
+    override suspend fun mapFrom(value: ChatDto): ChatDbo {
         return ChatDbo(
             ChatId(value.id),
             ChatUUID(value.uuid),
@@ -49,7 +49,7 @@ internal class ChatDtoDboMapper(
     }
 
     @Throws(IllegalArgumentException::class)
-    override fun mapTo(value: ChatDbo): ChatDto {
+    override suspend fun mapTo(value: ChatDbo): ChatDto {
         throw IllegalArgumentException("Going from a ChatDbo to ChatDto is not allowed")
     }
 }
