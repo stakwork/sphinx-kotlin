@@ -64,6 +64,16 @@ internal class MessageContentAdapter: ColumnAdapter<MessageContent, String> {
     }
 }
 
+internal class MessageContentDecryptedAdapter: ColumnAdapter<MessageContentDecrypted, String> {
+    override fun decode(databaseValue: String): MessageContentDecrypted {
+        return MessageContentDecrypted(databaseValue)
+    }
+
+    override fun encode(value: MessageContentDecrypted): String {
+        return value.value
+    }
+}
+
 internal class MessageStatusAdapter: ColumnAdapter<MessageStatus, Long> {
 
     companion object {

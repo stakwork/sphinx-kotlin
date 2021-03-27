@@ -75,6 +75,7 @@ abstract class CoreDBImpl: CoreDB() {
                     dateAdapter = DateTimeAdapter.getInstance(),
                     expiration_dateAdapter = DateTimeAdapter.getInstance(),
                     message_contentAdapter = MessageContentAdapter(),
+                    message_content_decryptedAdapter = MessageContentDecryptedAdapter(),
                     statusAdapter = MessageStatusAdapter(),
                     status_mapAdapter = MessageStatusMapAdapter(),
                     media_keyAdapter = MediaKeyAdapter(),

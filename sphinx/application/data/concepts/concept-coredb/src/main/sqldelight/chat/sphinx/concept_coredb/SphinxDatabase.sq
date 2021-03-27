@@ -23,6 +23,7 @@ import chat.sphinx.wrapper_message.MediaKey;
 import chat.sphinx.wrapper_message.MediaToken;
 import chat.sphinx.wrapper_message.MediaType;
 import chat.sphinx.wrapper_message.MessageContent;
+import chat.sphinx.wrapper_message.MessageContentDecrypted;
 import chat.sphinx.wrapper_message.MessageMUID;
 import chat.sphinx.wrapper_message.MessageStatus;
 import chat.sphinx.wrapper_message.MessageType;
@@ -33,27 +34,27 @@ import kotlin.Pair;
 import kotlin.collections.List;
 
 CREATE TABLE chatDbo(
-    id                      INTEGER         AS ChatId NOT NULL PRIMARY KEY,
-    uuid                    TEXT            AS ChatUUID NOT NULL,
-    name                    TEXT            AS ChatName,
-    photo_url               TEXT            AS PhotoUrl,
-    type                    INTEGER         AS ChatType NOT NULL,
-    status                  INTEGER         AS ChatStatus NOT NULL,
-    contact_ids             TEXT            AS List<ContactId> NOT NULL,
-    is_muted                INTEGER         AS ChatMuted NOT NULL,
-    created_at              TEXT            AS DateTime NOT NULL,
-    group_key               TEXT            AS ChatGroupKey,
-    host                    TEXT            AS ChatHost,
-    price_per_message       INTEGER         AS Sat,
-    escrow_amount           INTEGER         AS Sat,
-    unlisted                INTEGER         AS ChatUnlisted NOT NULL,
-    private_tribe           INTEGER         AS ChatPrivate NOT NULL,
-    owner_pub_key           TEXT            AS LightningNodePubKey,
-    seen                    INTEGER         AS Seen NOT NULL,
-    meta_data               TEXT            AS ChatMetaData,
-    my_photo_url            TEXT            AS PhotoUrl,
-    my_alias                TEXT            AS ChatAlias,
-    pending_contact_ids     TEXT            AS List<ContactId>
+    id                          INTEGER         AS ChatId NOT NULL PRIMARY KEY,
+    uuid                        TEXT            AS ChatUUID NOT NULL,
+    name                        TEXT            AS ChatName,
+    photo_url                   TEXT            AS PhotoUrl,
+    type                        INTEGER         AS ChatType NOT NULL,
+    status                      INTEGER         AS ChatStatus NOT NULL,
+    contact_ids                 TEXT            AS List<ContactId> NOT NULL,
+    is_muted                    INTEGER         AS ChatMuted NOT NULL,
+    created_at                  TEXT            AS DateTime NOT NULL,
+    group_key                   TEXT            AS ChatGroupKey,
+    host                        TEXT            AS ChatHost,
+    price_per_message           INTEGER         AS Sat,
+    escrow_amount               INTEGER         AS Sat,
+    unlisted                    INTEGER         AS ChatUnlisted NOT NULL,
+    private_tribe               INTEGER         AS ChatPrivate NOT NULL,
+    owner_pub_key               TEXT            AS LightningNodePubKey,
+    seen                        INTEGER         AS Seen NOT NULL,
+    meta_data                   TEXT            AS ChatMetaData,
+    my_photo_url                TEXT            AS PhotoUrl,
+    my_alias                    TEXT            AS ChatAlias,
+    pending_contact_ids         TEXT            AS List<ContactId>
 );
 
 getAllChats:
@@ -151,27 +152,28 @@ DELETE FROM chatDbo
 WHERE id = ?;
 
 CREATE TABLE messageDbo(
-    id                  INTEGER         AS MessageId NOT NULL PRIMARY KEY,
-    uuid                TEXT            AS MessageUUID,
-    chat_id             INTEGER         AS ChatId,
-    type                INTEGER         AS MessageType NOT NULL,
-    sender              INTEGER         AS ContactId NOT NULL,
-    receiver            INTEGER         AS ContactId,
-    amount              INTEGER         AS Sat NOT NULL,
-    payment_hash        TEXT            AS LightningPaymentHash,
-    payment_request     TEXT            AS LightningPaymentRequest,
-    date                TEXT            AS DateTime NOT NULL,
-    expiration_date     TEXT            AS DateTime,
-    message_content     TEXT            AS MessageContent,
-    status              INTEGER         AS MessageStatus NOT NULL,
-    status_map          TEXT            AS List<Pair<ContactId, MessageStatus>>,
-    media_key           TEXT            AS MediaKey,
-    media_type          TEXT            AS MediaType,
-    media_token         TEXT            AS MediaToken,
-    seen                INTEGER         AS Seen NOT NULL,
-    sender_alias        TEXT            AS SenderAlias,
-    sender_pic          TEXT            AS PhotoUrl,
-    original_muid       TEXT            AS MessageMUID,
-    reply_uuid          TEXT            AS ReplyUUID
+    id                          INTEGER         AS MessageId NOT NULL PRIMARY KEY,
+    uuid                        TEXT            AS MessageUUID,
+    chat_id                     INTEGER         AS ChatId,
+    type                        INTEGER         AS MessageType NOT NULL,
+    sender                      INTEGER         AS ContactId NOT NULL,
+    receiver                    INTEGER         AS ContactId,
+    amount                      INTEGER         AS Sat NOT NULL,
+    payment_hash                TEXT            AS LightningPaymentHash,
+    payment_request             TEXT            AS LightningPaymentRequest,
+    date                        TEXT            AS DateTime NOT NULL,
+    expiration_date             TEXT            AS DateTime,
+    message_content             TEXT            AS MessageContent,
+    message_content_decrypted   TEXT            AS MessageContentDecrypted,
+    status                      INTEGER         AS MessageStatus NOT NULL,
+    status_map                  TEXT            AS List<Pair<ContactId, MessageStatus>>,
+    media_key                   TEXT            AS MediaKey,
+    media_type                  TEXT            AS MediaType,
+    media_token                 TEXT            AS MediaToken,
+    seen                        INTEGER         AS Seen NOT NULL,
+    sender_alias                TEXT            AS SenderAlias,
+    sender_pic                  TEXT            AS PhotoUrl,
+    original_muid               TEXT            AS MessageMUID,
+    reply_uuid                  TEXT            AS ReplyUUID
 );
 

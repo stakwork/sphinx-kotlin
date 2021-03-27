@@ -23,6 +23,7 @@ data class Message(
     val date: DateTime,
     val expirationDate: DateTime?,
     val messageContent: MessageContent?,
+    val messageContentDecrypted: MessageContentDecrypted?,
     val status: MessageStatus,
     val statusMap: Map<ContactId, MessageStatus>?,
     val mediaKey: MediaKey?,
