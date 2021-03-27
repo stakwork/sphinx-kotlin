@@ -99,7 +99,7 @@ internal class ChatMetaDataAdapter: ColumnAdapter<ChatMetaData, String> {
     }
 
     override fun encode(value: ChatMetaData): String {
-        return value.toRelayString()
+        return value.toString()
     }
 }
 

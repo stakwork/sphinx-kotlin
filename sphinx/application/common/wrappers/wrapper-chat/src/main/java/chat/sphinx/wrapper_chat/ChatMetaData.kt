@@ -62,26 +62,25 @@ fun String.toChatMetaData(): ChatMetaData {
     return ChatMetaData(id, sats, timeSeconds, speed)
 }
 
-@Suppress("NOTHING_TO_INLINE")
-inline fun ChatMetaData.toRelayString(): String {
-//    "{\"itemID\":1922435539,\"sats_per_minute\":3,\"ts\":4, \"speed\":1.5}"
-    val sb = StringBuilder()
-    sb.append("\"{")
-    sb.append("\\\"itemID\\\":")
-    sb.append("${itemId.value},")
-    sb.append("\\\"sats_per_minute\\\":")
-    sb.append("${satsPerMinute.value},")
-    sb.append("\\\"ts\\\":")
-    sb.append("$timeSeconds, ")
-    sb.append("\\\"speed\\\":")
-    sb.append("$speed")
-    sb.append("}\"")
-    return sb.toString()
-}
-
 data class ChatMetaData(
     val itemId: MetaDataId,
     val satsPerMinute: Sat,
     val timeSeconds: Int,
     val speed: Double,
-)
+) {
+    override fun toString(): String {
+//    "{\"itemID\":1922435539,\"sats_per_minute\":3,\"ts\":4, \"speed\":1.5}"
+        val sb = StringBuilder()
+        sb.append("\"{")
+        sb.append("\\\"itemID\\\":")
+        sb.append("${itemId.value},")
+        sb.append("\\\"sats_per_minute\\\":")
+        sb.append("${satsPerMinute.value},")
+        sb.append("\\\"ts\\\":")
+        sb.append("$timeSeconds, ")
+        sb.append("\\\"speed\\\":")
+        sb.append("$speed")
+        sb.append("}\"")
+        return sb.toString()
+    }
+}
