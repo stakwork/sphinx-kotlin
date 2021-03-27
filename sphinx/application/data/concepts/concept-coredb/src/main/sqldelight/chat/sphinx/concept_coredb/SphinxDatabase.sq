@@ -19,6 +19,9 @@ import chat.sphinx.wrapper_common.lightning.LightningPaymentHash;
 import chat.sphinx.wrapper_common.lightning.LightningPaymentRequest;
 import chat.sphinx.wrapper_common.lightning.Sat;
 import chat.sphinx.wrapper_common.message.MessageId;
+import chat.sphinx.wrapper_media.MediaKey;
+import chat.sphinx.wrapper_media.MediaToken;
+import chat.sphinx.wrapper_media.MediaType;
 import chat.sphinx.wrapper_message.MessageContent;
 import chat.sphinx.wrapper_message.MessageMUID;
 import chat.sphinx.wrapper_message.MessageStatus;
@@ -26,8 +29,8 @@ import chat.sphinx.wrapper_message.MessageType;
 import chat.sphinx.wrapper_message.MessageUUID;
 import chat.sphinx.wrapper_message.ReplyUUID;
 import chat.sphinx.wrapper_message.SenderAlias;
-import kotlin.collections.List;
 import kotlin.Pair;
+import kotlin.collections.List;
 
 CREATE TABLE chatDbo(
     id                      INTEGER         AS ChatId NOT NULL PRIMARY KEY,
@@ -160,11 +163,11 @@ CREATE TABLE messageDbo(
     date                TEXT            AS DateTime NOT NULL,
     expiration_date     TEXT            AS DateTime,
     message_content     TEXT            AS MessageContent,
-    status              INTEGER         AS MessageStatus,
+    status              INTEGER         AS MessageStatus NOT NULL,
     status_map          TEXT            AS List<Pair<ContactId, MessageStatus>>,
-    media_key           TEXT,
-    media_type          TEXT,
-    media_token         TEXT,
+    media_key           TEXT            AS MediaKey,
+    media_type          TEXT            AS MediaType,
+    media_token         TEXT            AS MediaToken,
     seen                INTEGER         AS Seen NOT NULL,
     sender_alias        TEXT            AS SenderAlias,
     sender_pic          TEXT            AS PhotoUrl,

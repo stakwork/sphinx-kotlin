@@ -7,6 +7,9 @@ import chat.sphinx.conceptcoredb.MessageDbo
 import chat.sphinx.conceptcoredb.SphinxDatabaseQueries
 import chat.sphinx.feature_coredb.adapters.chat.*
 import chat.sphinx.feature_coredb.adapters.common.*
+import chat.sphinx.feature_coredb.adapters.media.MediaKeyAdapter
+import chat.sphinx.feature_coredb.adapters.media.MediaTokenAdapter
+import chat.sphinx.feature_coredb.adapters.media.MediaTypeAdapter
 import chat.sphinx.feature_coredb.adapters.message.*
 import com.squareup.sqldelight.db.SqlDriver
 import io.matthewnelson.concept_encryption_key.EncryptionKey
@@ -77,6 +80,9 @@ abstract class CoreDBImpl: CoreDB() {
                     message_contentAdapter = MessageContentAdapter(),
                     statusAdapter = MessageStatusAdapter(),
                     status_mapAdapter = MessageStatusMapAdapter(),
+                    media_keyAdapter = MediaKeyAdapter(),
+                    media_typeAdapter = MediaTypeAdapter(),
+                    media_tokenAdapter = MediaTokenAdapter(),
                     seenAdapter = SeenAdapter.getInstance(),
                     sender_aliasAdapter = SenderAliasAdapter(),
                     sender_picAdapter = PhotoUrlAdapter.getInstance(),
