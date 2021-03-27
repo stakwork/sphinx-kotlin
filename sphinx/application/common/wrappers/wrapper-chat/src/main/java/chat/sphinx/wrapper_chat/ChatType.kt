@@ -2,8 +2,8 @@ package chat.sphinx.wrapper_chat
 
 
 @Suppress("NOTHING_TO_INLINE")
-inline fun ChatType.isContact(): Boolean =
-    this is ChatType.Contact
+inline fun ChatType.isConversation(): Boolean =
+    this is ChatType.Conversation
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun ChatType.isGroup(): Boolean =
@@ -24,8 +24,8 @@ inline fun ChatType.isTribe(): Boolean =
 @Throws(IllegalArgumentException::class)
 inline fun Int.toChatType(): ChatType =
     when (this) {
-        ChatType.CONTACT -> {
-            ChatType.Contact
+        ChatType.CONVERSATION -> {
+            ChatType.Conversation
         }
         ChatType.GROUP -> {
             ChatType.Group
@@ -43,7 +43,7 @@ inline fun Int.toChatType(): ChatType =
 
 /**
  * Comes off the wire as:
- *  - 0 (Contact)
+ *  - 0 (Conversation)
  *  - 1 (Group)
  *  - 2 (Tribe)
  *
@@ -52,16 +52,16 @@ inline fun Int.toChatType(): ChatType =
 sealed class ChatType {
 
     companion object {
-        const val CONTACT = 0
+        const val CONVERSATION = 0
         const val GROUP = 1
         const val TRIBE = 2
     }
 
     abstract val value: Int
 
-    object Contact: ChatType() {
+    object Conversation: ChatType() {
         override val value: Int
-            get() = CONTACT
+            get() = CONVERSATION
     }
 
     object Group: ChatType() {
