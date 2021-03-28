@@ -1,12 +1,12 @@
 package chat.sphinx.feature_crypto.rsa
 
-import chat.sphinx.concept_crypto.rsa.RSA
-import chat.sphinx.concept_crypto.rsa.RsaKeySize
+import chat.sphinx.concept_crypto.rsa.*
 import chat.sphinx.kotlin_response.KotlinResponse
 import chat.sphinx.kotlin_response.ResponseError
+import io.matthewnelson.k_openssl_common.extensions.toCharArray
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
-import java.security.KeyPair
+import okio.base64.encodeBase64ToByteArray
 import java.security.KeyPairGenerator
 
 class RSAImpl: RSA() {
@@ -18,7 +18,7 @@ class RSAImpl: RSA() {
     override suspend fun generateKeyPair(
         rsaKeySize: RsaKeySize,
         dispatcher: CoroutineDispatcher
-    ): KotlinResponse<KeyPair, ResponseError> {
+    ): KotlinResponse<RSAKeyPair, ResponseError> {
         return try {
             val generator = KeyPairGenerator.getInstance(RSA)
             generator.initialize(rsaKeySize.value)
@@ -26,8 +26,14 @@ class RSAImpl: RSA() {
             val keys = withContext(dispatcher) {
                 generator.genKeyPair()
             }
-
-            KotlinResponse.Success(keys)
+            KotlinResponse.Success(
+                RSAKeyPair(
+                    RsaPrivateKey(keys.private.encoded.encodeBase64ToByteArray().toCharArray()),
+                    RsaPublicKey(keys.public.encoded.encodeBase64ToByteArray().toCharArray())
+                )
+            ).also {
+                keys.private.encoded.fill('0'.toByte())
+            }
         } catch (e: Exception) {
             KotlinResponse.Error(ResponseError("RSA Key generation failure", e))
         }
