@@ -17,15 +17,18 @@ class RSAImpl: RSA() {
 
     override suspend fun generateKeyPair(
         rsaKeySize: RsaKeySize,
-        dispatcher: CoroutineDispatcher
+        dispatcher: CoroutineDispatcher?
     ): KotlinResponse<RSAKeyPair, ResponseError> {
         return try {
             val generator = KeyPairGenerator.getInstance(RSA)
             generator.initialize(rsaKeySize.value)
 
-            val keys = withContext(dispatcher) {
-                generator.genKeyPair()
-            }
+            val keys = dispatcher?.let {
+                withContext(it) {
+                    generator.genKeyPair()
+                }
+            } ?: generator.genKeyPair()
+
             KotlinResponse.Success(
                 RSAKeyPair(
                     RsaPrivateKey(keys.private.encoded.encodeBase64ToByteArray().toCharArray()),
