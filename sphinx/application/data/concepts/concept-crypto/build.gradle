@@ -6,4 +6,6 @@ plugins {
 dependencies {
     api project(path: ':sphinx:application:common:kotlin-response')
     implementation deps.kotlin.coroutinesCore
+
+    testImplementation testDeps.junit
 }
