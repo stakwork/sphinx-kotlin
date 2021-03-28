@@ -6,9 +6,11 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.SecureRandom;
 import java.security.Signature;
-import java.util.Base64;
 
 import javax.crypto.Cipher;
+
+import okio.base64.Base64;
+import okio.base64.Base64Kt;
 
 public class RSA_PEMUnitTest {
 
@@ -21,7 +23,7 @@ public class RSA_PEMUnitTest {
 
             String pemRawTxt = ""
                     + "-----BEGIN PRIVATE KEY-----"
-                    + Base64.getEncoder().encodeToString(keyPair.getPrivate().getEncoded())
+                    + Base64Kt.encodeBase64(keyPair.getPrivate().getEncoded(), Base64.Default.INSTANCE)
                     + "-----END PRIVATE KEY-----";
             //使用PEM PKCS#8文件的文本构造出pem对象
             RSA_PEM pem = RSA_PEM.FromPEM(pemRawTxt);
@@ -45,7 +47,7 @@ public class RSA_PEMUnitTest {
             enc.init(Cipher.ENCRYPT_MODE, pem.getRSAPublicKey());
             byte[] en = enc.doFinal(str.getBytes("utf-8"));
             System.out.println("【加密】：");
-            System.out.println(Base64.getEncoder().encodeToString(en));
+            System.out.println(Base64Kt.encodeBase64(en, Base64.Default.INSTANCE));
 
             //解密内容
             Cipher dec = Cipher.getInstance("RSA");
@@ -61,7 +63,7 @@ public class RSA_PEMUnitTest {
             signature.update(str.getBytes("utf-8"));
             byte[] sign = signature.sign();
             System.out.println("【SHA1签名】：");
-            System.out.println("签名：" + Base64.getEncoder().encodeToString(sign));
+            System.out.println("签名：" + Base64Kt.encodeBase64(sign, Base64.Default.INSTANCE));
 
             //公钥校验
             Signature signVerify = Signature.getInstance("SHA1WithRSA");

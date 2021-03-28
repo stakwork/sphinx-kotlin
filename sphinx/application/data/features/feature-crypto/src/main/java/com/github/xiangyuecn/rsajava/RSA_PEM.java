@@ -30,9 +30,11 @@ import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.RSAPrivateKeySpec;
 import java.security.spec.RSAPublicKeySpec;
-import java.util.Base64;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import okio.base64.Base64;
+import okio.base64.Base64Kt;
 
 /**
  * RSA PEM格式秘钥对的解析和导出
@@ -231,7 +233,7 @@ public class RSA_PEM {
         RSA_PEM param=new RSA_PEM();
 
         String base64 = _PEMCode.matcher(pem).replaceAll("");
-        byte[] dataX = Base64.getDecoder().decode(base64);//java byte是正负数
+        byte[] dataX = Base64Kt.decodeBase64ToArray(base64);
         if (dataX == null) {
             throw new Exception("PEM内容无效");
         }
@@ -472,7 +474,7 @@ public class RSA_PEM {
             if (!publicUsePKCS8) {
                 flag = " RSA" + flag;
             }
-            return "-----BEGIN" + flag + "-----\n" + TextBreak(Base64.getEncoder().encodeToString(byts), 64) + "\n-----END" + flag + "-----";
+            return "-----BEGIN" + flag + "-----\n" + TextBreak(Base64Kt.encodeBase64(byts, Base64.Default.INSTANCE), 64) + "\n-----END" + flag + "-----";
         } else {
             /****生成私钥****/
 
@@ -526,7 +528,7 @@ public class RSA_PEM {
             if (!privateUsePKCS8) {
                 flag = " RSA" + flag;
             }
-            return "-----BEGIN" + flag + "-----\n" + TextBreak(Base64.getEncoder().encodeToString(byts), 64) + "\n-----END" + flag + "-----";
+            return "-----BEGIN" + flag + "-----\n" + TextBreak(Base64Kt.encodeBase64(byts, Base64.Default.INSTANCE), 64) + "\n-----END" + flag + "-----";
         }
     }
     /**写入一个长度字节码**/
@@ -616,11 +618,11 @@ public class RSA_PEM {
         }
 
         Matcher tagM=xmlTagExp.matcher(xmlM.group(1));
-        Base64.Decoder dec=Base64.getDecoder();
+//        Base64.Decoder dec=Base64.getDecoder();
         while(tagM.find()) {
             String tag=tagM.group(1);
             String b64=tagM.group(2);
-            byte[] val=dec.decode(b64);
+            byte[] val=Base64Kt.decodeBase64ToArray(b64);
             switch(tag) {
                 case "Modulus":rtv.Key_Modulus=val;break;
                 case "Exponent":rtv.Key_Exponent=val;break;
@@ -658,22 +660,21 @@ public class RSA_PEM {
      * ，如果convertToPublic含私钥的RSA将只返回公钥，仅含公钥的RSA不受影响
      */
     public String ToXML(boolean convertToPublic) {
-        Base64.Encoder enc=Base64.getEncoder();
         StringBuilder str=new StringBuilder();
         str.append("<RSAKeyValue>");
-        str.append("<Modulus>"+enc.encodeToString(Key_Modulus)+"</Modulus>");
-        str.append("<Exponent>"+enc.encodeToString(Key_Exponent)+"</Exponent>");
+        str.append("<Modulus>"+Base64Kt.encodeBase64(Key_Modulus, Base64.Default.INSTANCE)+"</Modulus>");
+        str.append("<Exponent>"+Base64Kt.encodeBase64(Key_Exponent, Base64.Default.INSTANCE)+"</Exponent>");
         if (this.Key_D==null || convertToPublic) {
             /****生成公钥****/
             //NOOP
         } else {
             /****生成私钥****/
-            str.append("<P>"+enc.encodeToString(Val_P)+"</P>");
-            str.append("<Q>"+enc.encodeToString(Val_Q)+"</Q>");
-            str.append("<DP>"+enc.encodeToString(Val_DP)+"</DP>");
-            str.append("<DQ>"+enc.encodeToString(Val_DQ)+"</DQ>");
-            str.append("<InverseQ>"+enc.encodeToString(Val_InverseQ)+"</InverseQ>");
-            str.append("<D>"+enc.encodeToString(Key_D)+"</D>");
+            str.append("<P>"+Base64Kt.encodeBase64(Val_P, Base64.Default.INSTANCE)+"</P>");
+            str.append("<Q>"+Base64Kt.encodeBase64(Val_Q, Base64.Default.INSTANCE)+"</Q>");
+            str.append("<DP>"+Base64Kt.encodeBase64(Val_DP, Base64.Default.INSTANCE)+"</DP>");
+            str.append("<DQ>"+Base64Kt.encodeBase64(Val_DQ, Base64.Default.INSTANCE)+"</DQ>");
+            str.append("<InverseQ>"+Base64Kt.encodeBase64(Val_InverseQ, Base64.Default.INSTANCE)+"</InverseQ>");
+            str.append("<D>"+Base64Kt.encodeBase64(Key_D, Base64.Default.INSTANCE)+"</D>");
         }
         str.append("</RSAKeyValue>");
         return str.toString();
