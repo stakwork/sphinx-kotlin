@@ -21,6 +21,8 @@ include ':sphinx:application:data:concepts:concept-background-login'
 include ':sphinx:application:data:features:feature-background-login'
 include ':sphinx:application:data:concepts:concept-coredb'
 include ':sphinx:application:data:features:feature-coredb'
+include ':sphinx:application:data:concepts:concept-crypto'
+include ':sphinx:application:data:features:feature-crypto'
 include ':sphinx:application:data:concepts:concept-relay'
 include ':sphinx:application:data:features:feature-relay'
 

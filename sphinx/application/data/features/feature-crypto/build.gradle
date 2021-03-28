@@ -1,0 +1,18 @@
+plugins {
+    id 'app.cash.exhaustive'
+    id 'java-library'
+    id 'kotlin'
+}
+
+dependencies {
+    // KotlinAndroid
+    implementation project(path: ':kotlin:encoders:base64')
+    implementation project(path: ':kotlin:crypto:k-openssl-common')
+
+    // Sphinx
+    api project(path: ':sphinx:application:data:concepts:concept-crypto')
+
+    implementation deps.kotlin.coroutinesCore
+
+    testImplementation project(path: ':kotlin:test:test-concept-coroutines')
+}
