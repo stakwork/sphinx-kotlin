@@ -86,6 +86,12 @@ class RSAImpl: RSA() {
         text: EncryptedString,
         dispatcher: CoroutineDispatcher,
     ): KotlinResponse<UnencryptedByteArray, ResponseError> {
+        if (text.value.isEmpty()) {
+            return KotlinResponse.Error(
+                ResponseError("EncryptedString was empty")
+            )
+        }
+
         val cipherText: ByteArray = text.value.decodeBase64ToArray()
             ?: return KotlinResponse.Error(
                 ResponseError("EncryptedString was not base64 encoded")
