@@ -4,6 +4,7 @@ import chat.sphinx.kotlin_response.KotlinResponse
 import chat.sphinx.kotlin_response.ResponseError
 import io.matthewnelson.k_openssl_common.clazzes.EncryptedString
 import io.matthewnelson.k_openssl_common.clazzes.UnencryptedByteArray
+import io.matthewnelson.k_openssl_common.clazzes.UnencryptedString
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 
@@ -36,4 +37,19 @@ abstract class RSA {
         text: EncryptedString,
         dispatcher: CoroutineDispatcher = Dispatchers.Default,
     ): KotlinResponse<UnencryptedByteArray, ResponseError>
+
+    /**
+     * Encrypts an [UnencryptedString] value and returns a base64 encoded [EncryptedString]
+     *
+     * @param [rsaPublicKey] The public key to encrypt with
+     * @param [text] The raw, unencrypted string value to encrypt
+     * @param [formatOutput] `true`: format output to 64 chars per line, `false`: single line
+     * @param [dispatcher] The dispathcer to use when encrypting
+     * */
+    abstract suspend fun encrypt(
+        rsaPublicKey: RsaPublicKey,
+        text: UnencryptedString,
+        formatOutput: Boolean = false,
+        dispatcher: CoroutineDispatcher = Dispatchers.Default
+    ): KotlinResponse<EncryptedString, ResponseError>
 }

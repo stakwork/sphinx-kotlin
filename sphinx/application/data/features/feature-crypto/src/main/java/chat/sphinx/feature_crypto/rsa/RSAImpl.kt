@@ -5,19 +5,22 @@ import chat.sphinx.kotlin_response.KotlinResponse
 import chat.sphinx.kotlin_response.ResponseError
 import com.github.xiangyuecn.rsajava.RSA_PEM
 import io.matthewnelson.k_openssl_common.annotations.RawPasswordAccess
+import io.matthewnelson.k_openssl_common.annotations.UnencryptedDataAccess
 import io.matthewnelson.k_openssl_common.clazzes.EncryptedString
 import io.matthewnelson.k_openssl_common.clazzes.UnencryptedByteArray
+import io.matthewnelson.k_openssl_common.clazzes.UnencryptedString
+import io.matthewnelson.k_openssl_common.extensions.encodeToByteArray
 import io.matthewnelson.k_openssl_common.extensions.toCharArray
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import okio.base64.decodeBase64ToArray
+import okio.base64.encodeBase64
 import okio.base64.encodeBase64ToByteArray
 import java.security.*
 import java.security.interfaces.RSAPrivateKey
 import java.security.interfaces.RSAPublicKey
 import javax.crypto.Cipher
 
-// TODO: Move to RSA_PEM once converted to Kotlin
 @Suppress("NOTHING_TO_INLINE")
 inline fun RSA_PEM.clear(byte: Byte = '0'.toByte()) {
     Key_Modulus?.fill(byte)
@@ -109,11 +112,53 @@ class RSAImpl: RSA() {
                 } finally {
                     rsaPem.clear()
                 }
+
             }
 
             KotlinResponse.Success(UnencryptedByteArray(decrypted))
         } catch (e: Exception) {
             KotlinResponse.Error(ResponseError("Decryption failed", e))
+        }
+    }
+
+    // TODO: Chunking!!!
+    @OptIn(UnencryptedDataAccess::class)
+    override suspend fun encrypt(
+        rsaPublicKey: RsaPublicKey,
+        text: UnencryptedString,
+        formatOutput: Boolean,
+        dispatcher: CoroutineDispatcher
+    ): KotlinResponse<EncryptedString, ResponseError> {
+        if (text.value.isEmpty()) {
+            return KotlinResponse.Error(
+                ResponseError("UnencryptedString was empty")
+            )
+        }
+
+        return try {
+            val encrypted: ByteArray = withContext(dispatcher) {
+
+                val rsaPem: RSA_PEM = RSA_PEM.FromPEM(rsaPublicKey.value, false)
+
+                try {
+                    val cipher: Cipher = Cipher.getInstance(RSA)
+                    cipher.init(Cipher.ENCRYPT_MODE, rsaPem.rsaPublicKey)
+                    cipher.doFinal(text.value.encodeToByteArray())
+                } finally {
+                    rsaPem.clear()
+                }
+
+            }
+
+            val string: String = if (formatOutput) {
+                encrypted.encodeBase64().replace("(.{64})".toRegex(), "$1\n")
+            } else {
+                encrypted.encodeBase64()
+            }
+
+            KotlinResponse.Success(EncryptedString(string))
+        } catch (e: Exception) {
+            KotlinResponse.Error(ResponseError("Encryption failed", e))
         }
     }
 }

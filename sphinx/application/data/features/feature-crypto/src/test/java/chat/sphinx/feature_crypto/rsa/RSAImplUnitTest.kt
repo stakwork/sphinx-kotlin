@@ -11,8 +11,8 @@ import chat.sphinx.wrapper_common.message.MessagePagination
 import io.matthewnelson.k_openssl_common.annotations.RawPasswordAccess
 import io.matthewnelson.k_openssl_common.annotations.UnencryptedDataAccess
 import io.matthewnelson.k_openssl_common.clazzes.EncryptedString
+import io.matthewnelson.k_openssl_common.clazzes.UnencryptedString
 import io.matthewnelson.k_openssl_common.clazzes.toUnencryptedString
-import io.matthewnelson.k_openssl_common.extensions.decodeToString
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Assert
@@ -20,6 +20,10 @@ import org.junit.Test
 
 @OptIn(RawPasswordAccess::class, UnencryptedDataAccess::class)
 class RSAImplUnitTest: NetworkQueryTestHelper() {
+
+    companion object {
+        const val TEST_MESSAGE_SMALL = "TEST MESSAGE_SMALL"
+    }
 
     private val rsa: RSA by lazy {
         RSAImpl()
@@ -153,6 +157,71 @@ class RSAImplUnitTest: NetworkQueryTestHelper() {
                             }
                         }
                         is LoadResponse.Loading -> {}
+                    }
+                }
+            }
+        }
+
+    @Test
+    fun `public private key encryption success`() =
+        testDispatcher.runBlockingTest {
+            var privateKey: RsaPrivateKey? = null
+            var publicKey: RsaPublicKey? = null
+
+            // Generate new Public/Private key pair
+            rsa.generateKeyPair(dispatcher = dispatchers.default).let { response ->
+                @Exhaustive
+                when (response) {
+                    is KotlinResponse.Error -> {
+                        println(response.message)
+                        response.exception?.printStackTrace()
+                        Assert.fail()
+                    }
+                    is KotlinResponse.Success -> {
+                        privateKey = response.value.privateKey
+                        publicKey = response.value.publicKey
+                    }
+                }
+            }
+
+            val rsaPriv: RsaPrivateKey = privateKey ?: throw AssertionError()
+            val rsaPub: RsaPublicKey = publicKey ?: throw AssertionError()
+
+            var encrypted: EncryptedString? = null
+
+            // Encrypt a message using the public key
+            rsa.encrypt(
+                rsaPublicKey = rsaPub,
+                text = UnencryptedString(TEST_MESSAGE_SMALL),
+                formatOutput = true,
+                dispatcher = dispatchers.default
+            ).let { response ->
+                @Exhaustive
+                when (response) {
+                    is KotlinResponse.Error -> {
+                        println(response.message)
+                        response.exception?.printStackTrace()
+                        Assert.fail()
+                    }
+                    is KotlinResponse.Success -> {
+                        encrypted = response.value
+                    }
+                }
+            }
+
+            val enc: EncryptedString = encrypted ?: throw AssertionError()
+
+            // Decrypt the encrypted message using the private key
+            rsa.decrypt(rsaPriv, enc, dispatchers.default).let { response ->
+                @Exhaustive
+                when (response) {
+                    is KotlinResponse.Error -> {
+                        println(response.message)
+                        response.exception?.printStackTrace()
+                        Assert.fail()
+                    }
+                    is KotlinResponse.Success -> {
+                        Assert.assertEquals(TEST_MESSAGE_SMALL, response.value.toUnencryptedString().value)
                     }
                 }
             }
