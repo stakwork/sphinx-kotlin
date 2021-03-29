@@ -25,6 +25,7 @@ package com.github.xiangyuecn.rsajava;
 
 import java.io.ByteArrayOutputStream;
 import java.math.BigInteger;
+import java.nio.charset.Charset;
 import java.security.KeyFactory;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
@@ -395,31 +396,15 @@ public class RSA_PEM {
 
 
 
+    public byte[] ToPEM_PKCS1_Bytes(boolean convertToPublic) throws Exception {
+        return ToPEM_Bytes(convertToPublic, false, false);
+    }
 
-    /***
-     * 将RSA中的密钥对转换成PEM PKCS#8格式
-     * 。convertToPublic：等于true时含私钥的RSA将只返回公钥，仅含公钥的RSA不受影响
-     * 。公钥如：-----BEGIN RSA PUBLIC KEY-----，私钥如：-----BEGIN RSA PRIVATE KEY-----
-     * 。似乎导出PKCS#1公钥用的比较少，PKCS#8的公钥用的多些，私钥#1#8都差不多
-     */
-    public String ToPEM_PKCS1(boolean convertToPublic) throws Exception {
-        return ToPEM(convertToPublic, false, false);
+    public byte[] ToPEM_PKCS8_Bytes(boolean convertToPublic) throws Exception {
+        return ToPEM_Bytes(convertToPublic, true, true);
     }
-    /***
-     * 将RSA中的密钥对转换成PEM PKCS#8格式
-     * 。convertToPublic：等于true时含私钥的RSA将只返回公钥，仅含公钥的RSA不受影响
-     * 。公钥如：-----BEGIN PUBLIC KEY-----，私钥如：-----BEGIN PRIVATE KEY-----
-     */
-    public String ToPEM_PKCS8(boolean convertToPublic) throws Exception {
-        return ToPEM(convertToPublic, true, true);
-    }
-    /***
-     * 将RSA中的密钥对转换成PEM格式
-     * 。convertToPublic：等于true时含私钥的RSA将只返回公钥，仅含公钥的RSA不受影响
-     * 。privateUsePKCS8：私钥的返回格式，等于true时返回PKCS#8格式（-----BEGIN PRIVATE KEY-----），否则返回PKCS#1格式（-----BEGIN RSA PRIVATE KEY-----），返回公钥时此参数无效；两种格式使用都比较常见
-     * 。publicUsePKCS8：公钥的返回格式，等于true时返回PKCS#8格式（-----BEGIN PUBLIC KEY-----），否则返回PKCS#1格式（-----BEGIN RSA PUBLIC KEY-----），返回私钥时此参数无效；一般用的多的是true PKCS#8格式公钥，PKCS#1格式公钥似乎比较少见
-     */
-    public String ToPEM(boolean convertToPublic, boolean privateUsePKCS8, boolean publicUsePKCS8) throws Exception {
+
+    public byte[] ToPEM_Bytes(boolean convertToPublic, boolean privateUsePKCS8, boolean publicUsePKCS8) throws Exception {
         //https://www.jianshu.com/p/25803dd9527d
         //https://www.cnblogs.com/ylz8401/p/8443819.html
         //https://blog.csdn.net/jiayanhui2877/article/details/47187077
@@ -469,12 +454,7 @@ public class RSA_PEM {
             }
             byts = writeLen(index1, byts, ms);
 
-
-            String flag = " PUBLIC KEY";
-            if (!publicUsePKCS8) {
-                flag = " RSA" + flag;
-            }
-            return "-----BEGIN" + flag + "-----\n" + TextBreak(Base64Kt.encodeBase64(byts, Base64.Default.INSTANCE), 64) + "\n-----END" + flag + "-----";
+            return Base64Kt.encodeBase64ToByteArray(byts, Base64.Default.INSTANCE);
         } else {
             /****生成私钥****/
 
@@ -523,13 +503,51 @@ public class RSA_PEM {
             }
             byts = writeLen(index1, byts, ms);
 
+            return Base64Kt.encodeBase64ToByteArray(byts, Base64.Default.INSTANCE);
+        }
+    }
 
-            String flag = " PRIVATE KEY";
+    /***
+     * 将RSA中的密钥对转换成PEM PKCS#8格式
+     * 。convertToPublic：等于true时含私钥的RSA将只返回公钥，仅含公钥的RSA不受影响
+     * 。公钥如：-----BEGIN RSA PUBLIC KEY-----，私钥如：-----BEGIN RSA PRIVATE KEY-----
+     * 。似乎导出PKCS#1公钥用的比较少，PKCS#8的公钥用的多些，私钥#1#8都差不多
+     */
+    public String ToPEM_PKCS1(boolean convertToPublic) throws Exception {
+        return ToPEM(convertToPublic, false, false);
+    }
+    /***
+     * 将RSA中的密钥对转换成PEM PKCS#8格式
+     * 。convertToPublic：等于true时含私钥的RSA将只返回公钥，仅含公钥的RSA不受影响
+     * 。公钥如：-----BEGIN PUBLIC KEY-----，私钥如：-----BEGIN PRIVATE KEY-----
+     */
+    public String ToPEM_PKCS8(boolean convertToPublic) throws Exception {
+        return ToPEM(convertToPublic, true, true);
+    }
+    /***
+     * 将RSA中的密钥对转换成PEM格式
+     * 。convertToPublic：等于true时含私钥的RSA将只返回公钥，仅含公钥的RSA不受影响
+     * 。privateUsePKCS8：私钥的返回格式，等于true时返回PKCS#8格式（-----BEGIN PRIVATE KEY-----），否则返回PKCS#1格式（-----BEGIN RSA PRIVATE KEY-----），返回公钥时此参数无效；两种格式使用都比较常见
+     * 。publicUsePKCS8：公钥的返回格式，等于true时返回PKCS#8格式（-----BEGIN PUBLIC KEY-----），否则返回PKCS#1格式（-----BEGIN RSA PUBLIC KEY-----），返回私钥时此参数无效；一般用的多的是true PKCS#8格式公钥，PKCS#1格式公钥似乎比较少见
+     */
+    public String ToPEM(boolean convertToPublic, boolean privateUsePKCS8, boolean publicUsePKCS8) throws Exception {
+        byte[] byts = ToPEM_Bytes(convertToPublic, privateUsePKCS8, publicUsePKCS8);
+
+        String flag;
+        if (this.Key_D==null || convertToPublic) {
+            flag = " PUBLIC KEY";
+            if (!publicUsePKCS8) {
+                flag = " RSA" + flag;
+            }
+        } else {
+            flag = " PRIVATE KEY";
             if (!privateUsePKCS8) {
                 flag = " RSA" + flag;
             }
-            return "-----BEGIN" + flag + "-----\n" + TextBreak(Base64Kt.encodeBase64(byts, Base64.Default.INSTANCE), 64) + "\n-----END" + flag + "-----";
         }
+
+        //noinspection CharsetObjectCanBeUsed
+        return "-----BEGIN" + flag + "-----\n" + TextBreak(new String(byts, Charset.forName("UTF-8")), 64) + "\n-----END" + flag + "-----";
     }
     /**写入一个长度字节码**/
     static private void writeLenByte(int len, ByteArrayOutputStream ms) {

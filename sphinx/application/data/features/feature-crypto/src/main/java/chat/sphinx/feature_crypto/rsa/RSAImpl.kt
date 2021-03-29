@@ -61,8 +61,8 @@ class RSAImpl: RSA() {
 
             return KotlinResponse.Success(
                 RSAKeyPair(
-                    rsaPem.ToPEM_PKCS1(false).toRsaPrivateKey(),
-                    rsaPem.ToPEM_PKCS1(true).toRsaPublicKey(),
+                    RsaPrivateKey(rsaPem.ToPEM_PKCS1_Bytes(false).toCharArray()),
+                    RsaPublicKey(rsaPem.ToPEM_PKCS1_Bytes(true).toCharArray()),
                 )
             ).also {
                 keys.private.encoded?.fill('0'.toByte())
