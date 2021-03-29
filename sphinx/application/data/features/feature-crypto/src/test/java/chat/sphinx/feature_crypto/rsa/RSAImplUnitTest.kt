@@ -23,6 +23,40 @@ class RSAImplUnitTest: NetworkQueryTestHelper() {
 
     companion object {
         const val TEST_MESSAGE_SMALL = "TEST MESSAGE_SMALL"
+        val TEST_MESSAGE_LARGE = "" +
+                """
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                    Maecenas eleifend dignissim tellus at auctor. Suspendisse
+                    eget diam sit amet arcu scelerisque vehicula quis sed enim.
+                    Vivamus molestie ligula vel dapibus gravida. In hac habitasse
+                    platea dictumst. Nulla feugiat condimentum viverra. Duis a
+                    fringilla ipsum. Nulla fringilla sodales tellus in dictum.
+                    Proin nisi felis, auctor ac erat nec, molestie lobortis nulla.
+                    Praesent ut dignissim libero, in mattis odio. In viverra eu
+                    ligula in pretium.
+
+                    Phasellus in sem malesuada, malesuada arcu in, tincidunt odio.
+                    Aenean massa erat, lobortis ut finibus in, consequat vel nulla.
+                    Phasellus lobortis, ipsum et maximus porttitor, purus tellus
+                    sollicitudin purus, id hendrerit enim ante ac lorem. Vivamus
+                    rutrum ex at dui mollis, vitae consequat turpis efficitur.
+                    Donec molestie volutpat ligula, ac sollicitudin erat mollis in.
+                    Duis vitae congue elit. Duis luctus ex justo, et bibendum
+                    ligula aliquet at. Nullam ipsum eros, fermentum a tempus id,
+                    molestie vel nibh. Sed tincidunt massa sit amet mattis vehicula.
+                    Duis ac mauris eu turpis mollis ultricies ut vitae velit. Sed
+                    sed metus eu ante pellentesque pellentesque non ac urna. Nam
+                    nisl ex, pretium sit amet erat et, condimentum molestie lorem.
+                    Vestibulum at nisl vestibulum, tempor augue eu, tristique diam.
+                    Vivamus condimentum ex a sem ultrices mollis.
+
+                    Cras et malesuada lorem, nec eleifend est. Nulla at orci a mi
+                    ullamcorper pretium. Duis a ante ac odio congue ultricies a a
+                    nisl. Nulla facilisi. Nam feugiat dolor nulla, et venenatis arcu
+                    consectetur sed. Vivamus luctus urna ut massa euismod, in
+                    dignissim nulla pellentesque. Integer velit odio, tincidunt a
+                    imperdiet non, egestas at ligula.
+                """.trimIndent()
     }
 
     private val rsa: RSA by lazy {
@@ -30,9 +64,9 @@ class RSAImplUnitTest: NetworkQueryTestHelper() {
     }
 
     @Test
-    fun `2048 size key generation success`() =
+    fun `key generation success`() =
         testDispatcher.runBlockingTest {
-            rsa.generateKeyPair(KeySize._2048, dispatchers.default, PKCSType.PKCS1).let { response ->
+            rsa.generateKeyPair(KeySize._1024, dispatchers.default, PKCSType.PKCS1).let { response ->
                 @Exhaustive
                 when (response) {
                     is KotlinResponse.Error -> {
@@ -42,7 +76,7 @@ class RSAImplUnitTest: NetworkQueryTestHelper() {
                     is KotlinResponse.Success -> {}
                 }
             }
-            rsa.generateKeyPair(KeySize._2048, dispatchers.default, PKCSType.PKCS8).let { response ->
+            rsa.generateKeyPair(KeySize._1024, dispatchers.default, PKCSType.PKCS8).let { response ->
                 @Exhaustive
                 when (response) {
                     is KotlinResponse.Error -> {
@@ -52,56 +86,6 @@ class RSAImplUnitTest: NetworkQueryTestHelper() {
                     is KotlinResponse.Success -> {}
                 }
             }
-        }
-
-    @Test
-    fun `4096 size key generation success`() =
-        testDispatcher.runBlockingTest {
-            rsa.generateKeyPair(KeySize._4096, dispatchers.default, PKCSType.PKCS1).let { response ->
-                @Exhaustive
-                when (response) {
-                    is KotlinResponse.Error -> {
-                        response.exception?.printStackTrace()
-                        Assert.fail()
-                    }
-                    is KotlinResponse.Success -> {}
-                }
-            }
-            rsa.generateKeyPair(KeySize._4096, dispatchers.default, PKCSType.PKCS8).let { response ->
-                @Exhaustive
-                when (response) {
-                    is KotlinResponse.Error -> {
-                        response.exception?.printStackTrace()
-                        Assert.fail()
-                    }
-                    is KotlinResponse.Success -> {}
-                }
-            }
-        }
-
-    @Test
-    fun `8192 size key generation success`() =
-        testDispatcher.runBlockingTest {
-            rsa.generateKeyPair(KeySize._8192, dispatchers.default, PKCSType.PKCS1).let { response ->
-                @Exhaustive
-                when (response) {
-                    is KotlinResponse.Error -> {
-                        response.exception?.printStackTrace()
-                        Assert.fail()
-                    }
-                    is KotlinResponse.Success -> {}
-                }
-            }
-//            rsa.generateKeyPair(KeySize._8192, dispatchers.default, PKCSType.PKCS8).let { response ->
-//                @Exhaustive
-//                when (response) {
-//                    is KotlinResponse.Error -> {
-//                        response.exception?.printStackTrace()
-//                        Assert.fail()
-//                    }
-//                    is KotlinResponse.Success -> {}
-//                }
-//            }
         }
 
     @Test
@@ -170,7 +154,9 @@ class RSAImplUnitTest: NetworkQueryTestHelper() {
 
             // Generate new Public/Private key pair
             rsa.generateKeyPair(
-                dispatcher = dispatchers.default
+                keySize = KeySize._4096,
+                dispatcher = dispatchers.default,
+                pkcsType = PKCSType.PKCS8
             ).let { response ->
                 @Exhaustive
                 when (response) {
@@ -194,7 +180,8 @@ class RSAImplUnitTest: NetworkQueryTestHelper() {
             // Encrypt a message using the public key
             rsa.encrypt(
                 rsaPublicKey = rsaPub,
-                text = UnencryptedString(TEST_MESSAGE_SMALL),
+                text = UnencryptedString(TEST_MESSAGE_LARGE),
+//                text = UnencryptedString(TEST_MESSAGE_SMALL),
                 formatOutput = true,
                 dispatcher = dispatchers.default
             ).let { response ->
@@ -207,7 +194,7 @@ class RSAImplUnitTest: NetworkQueryTestHelper() {
                     }
                     is KotlinResponse.Success -> {
                         encrypted = response.value
-//                        println(response.value.value)
+                        println(response.value.value)
                     }
                 }
             }
@@ -228,7 +215,8 @@ class RSAImplUnitTest: NetworkQueryTestHelper() {
                         Assert.fail()
                     }
                     is KotlinResponse.Success -> {
-                        Assert.assertEquals(TEST_MESSAGE_SMALL, response.value.toUnencryptedString().value)
+                        Assert.assertEquals(TEST_MESSAGE_LARGE, response.value.toUnencryptedString().value)
+//                        Assert.assertEquals(TEST_MESSAGE_SMALL, response.value.toUnencryptedString().value)
                     }
                 }
             }
