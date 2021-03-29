@@ -37,6 +37,7 @@ class RSAImpl: RSA() {
 
     companion object {
         private const val RSA = "RSA"
+        private const val SIGNATURE_ALGORITHM = "SHA1WithRSA"
     }
 
     override suspend fun generateKeyPair(
@@ -159,6 +160,82 @@ class RSAImpl: RSA() {
             KotlinResponse.Success(EncryptedString(string))
         } catch (e: Exception) {
             KotlinResponse.Error(ResponseError("Encryption failed", e))
+        }
+    }
+
+    @OptIn(RawPasswordAccess::class)
+    override suspend fun sign(
+        rsaPrivateKey: RsaPrivateKey,
+        text: String,
+        dispatcher: CoroutineDispatcher
+    ): KotlinResponse<RsaSignedString, ResponseError> {
+        if (text.isEmpty()) {
+            return KotlinResponse.Error(
+                ResponseError("String value to sign was empty")
+            )
+        }
+
+        return try {
+            val signed: ByteArray = withContext(dispatcher) {
+
+                val rsaPem: RSA_PEM = RSA_PEM.FromPEM(rsaPrivateKey.value, true)
+
+                try {
+                    val signature: Signature = Signature.getInstance(SIGNATURE_ALGORITHM)
+                    signature.initSign(rsaPem.rsaPrivateKey)
+                    signature.update(text.encodeToByteArray())
+                    signature.sign()
+                } finally {
+                    rsaPem.clear()
+                }
+            }
+
+            KotlinResponse.Success(
+                RsaSignedString(
+                    text,
+                    RsaSignature(signed),
+                )
+            )
+        } catch (e: Exception) {
+            KotlinResponse.Error(ResponseError("Signing failed", e))
+        }
+    }
+
+    override suspend fun verifySignature(
+        rsaPublicKey: RsaPublicKey,
+        signedString: RsaSignedString,
+        dispatcher: CoroutineDispatcher
+    ): KotlinResponse<Boolean, ResponseError> {
+        if (signedString.signature.value.isEmpty()) {
+            return KotlinResponse.Error(
+                ResponseError("RsaSignature was empty")
+            )
+        }
+
+        if (signedString.text.isEmpty()) {
+            return KotlinResponse.Error(
+                ResponseError("String value to verify was empty")
+            )
+        }
+
+        return try {
+            val verification: Boolean = withContext(dispatcher) {
+
+                val rsaPem: RSA_PEM = RSA_PEM.FromPEM(rsaPublicKey.value, false)
+
+                try {
+                    val signVerify: Signature = Signature.getInstance(SIGNATURE_ALGORITHM)
+                    signVerify.initVerify(rsaPem.rsaPublicKey)
+                    signVerify.update(signedString.text.encodeToByteArray())
+                    signVerify.verify(signedString.signature.value)
+                } finally {
+                    rsaPem.clear()
+                }
+            }
+
+            KotlinResponse.Success(verification)
+        } catch (e: Exception) {
+            KotlinResponse.Error(ResponseError("Signature Verification failed", e))
         }
     }
 }

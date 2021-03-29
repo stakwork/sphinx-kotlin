@@ -52,4 +52,16 @@ abstract class RSA {
         formatOutput: Boolean = false,
         dispatcher: CoroutineDispatcher = Dispatchers.Default
     ): KotlinResponse<EncryptedString, ResponseError>
+
+    abstract suspend fun sign(
+        rsaPrivateKey: RsaPrivateKey,
+        text: String,
+        dispatcher: CoroutineDispatcher = Dispatchers.Default
+    ): KotlinResponse<RsaSignedString, ResponseError>
+
+    abstract suspend fun verifySignature(
+        rsaPublicKey: RsaPublicKey,
+        signedString: RsaSignedString,
+        dispatcher: CoroutineDispatcher = Dispatchers.Default
+    ): KotlinResponse<Boolean, ResponseError>
 }

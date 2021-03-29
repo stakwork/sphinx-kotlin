@@ -124,9 +124,9 @@ class RSAImplUnitTest: NetworkQueryTestHelper() {
                             for (message in response.value.new_messages) {
                                 if (!message.message_content.isNullOrEmpty()) {
                                     rsa.decrypt(
-                                        privateKey,
-                                        EncryptedString(message.message_content!!),
-                                        dispatchers.default
+                                        rsaPrivateKey = privateKey,
+                                        text = EncryptedString(message.message_content!!),
+                                        dispatcher = dispatchers.default
                                     ).let { decrypted ->
                                         @Exhaustive
                                         when (decrypted) {
@@ -136,7 +136,7 @@ class RSAImplUnitTest: NetworkQueryTestHelper() {
                                                 Assert.fail()
                                             }
                                             is KotlinResponse.Success -> {
-                                                println(decrypted.value.toUnencryptedString().value)
+//                                                println(decrypted.value.toUnencryptedString().value)
                                                 breakPlease = true
                                             }
                                         }
@@ -169,7 +169,9 @@ class RSAImplUnitTest: NetworkQueryTestHelper() {
             var publicKey: RsaPublicKey? = null
 
             // Generate new Public/Private key pair
-            rsa.generateKeyPair(dispatcher = dispatchers.default).let { response ->
+            rsa.generateKeyPair(
+                dispatcher = dispatchers.default
+            ).let { response ->
                 @Exhaustive
                 when (response) {
                     is KotlinResponse.Error -> {
@@ -205,6 +207,7 @@ class RSAImplUnitTest: NetworkQueryTestHelper() {
                     }
                     is KotlinResponse.Success -> {
                         encrypted = response.value
+//                        println(response.value.value)
                     }
                 }
             }
@@ -212,7 +215,11 @@ class RSAImplUnitTest: NetworkQueryTestHelper() {
             val enc: EncryptedString = encrypted ?: throw AssertionError()
 
             // Decrypt the encrypted message using the private key
-            rsa.decrypt(rsaPriv, enc, dispatchers.default).let { response ->
+            rsa.decrypt(
+                rsaPrivateKey = rsaPriv,
+                text = enc,
+                dispatcher = dispatchers.default
+            ).let { response ->
                 @Exhaustive
                 when (response) {
                     is KotlinResponse.Error -> {
@@ -222,6 +229,99 @@ class RSAImplUnitTest: NetworkQueryTestHelper() {
                     }
                     is KotlinResponse.Success -> {
                         Assert.assertEquals(TEST_MESSAGE_SMALL, response.value.toUnencryptedString().value)
+                    }
+                }
+            }
+        }
+
+    @Test
+    fun `signature verification success`() =
+        testDispatcher.runBlockingTest {
+            var privateKey: RsaPrivateKey? = null
+            var publicKey: RsaPublicKey? = null
+
+            // Generate new Public/Private key pair
+            rsa.generateKeyPair(
+                dispatcher = dispatchers.default
+            ).let { response ->
+                @Exhaustive
+                when (response) {
+                    is KotlinResponse.Error -> {
+                        println(response.message)
+                        response.exception?.printStackTrace()
+                        Assert.fail()
+                    }
+                    is KotlinResponse.Success -> {
+                        privateKey = response.value.privateKey
+                        publicKey = response.value.publicKey
+                    }
+                }
+            }
+
+            val rsaPriv: RsaPrivateKey = privateKey ?: throw AssertionError()
+            val rsaPub: RsaPublicKey = publicKey ?: throw AssertionError()
+
+            var signature: RsaSignedString? = null
+
+            // Sign string value
+            rsa.sign(
+                rsaPrivateKey = rsaPriv,
+                text = TEST_MESSAGE_SMALL,
+                dispatcher = dispatchers.default
+            ).let { response ->
+                @Exhaustive
+                when (response) {
+                    is KotlinResponse.Error -> {
+                        println(response.message)
+                        response.exception?.printStackTrace()
+                        Assert.fail()
+                    }
+                    is KotlinResponse.Success -> {
+                        signature = response.value
+//                        println(response.value)
+                    }
+                }
+            }
+
+            val sig: RsaSignedString = signature ?: throw AssertionError()
+
+            // Verify Success
+            rsa.verifySignature(
+                rsaPublicKey = rsaPub,
+                signedString = sig,
+                dispatcher = dispatchers.default
+            ).let { response ->
+                @Exhaustive
+                when (response) {
+                    is KotlinResponse.Error -> {
+                        println(response.message)
+                        response.exception?.printStackTrace()
+                        Assert.fail()
+                    }
+                    is KotlinResponse.Success -> {
+                        Assert.assertTrue(response.value)
+                    }
+                }
+            }
+
+            // Verify Failure
+            rsa.verifySignature(
+                rsaPublicKey = rsaPub,
+                signedString = RsaSignedString(
+                    TEST_MESSAGE_SMALL.dropLast(1),
+                    sig.signature
+                ),
+                dispatcher = dispatchers.default
+            ).let { response ->
+                @Exhaustive
+                when (response) {
+                    is KotlinResponse.Error -> {
+                        println(response.message)
+                        response.exception?.printStackTrace()
+                        Assert.fail()
+                    }
+                    is KotlinResponse.Success -> {
+                        Assert.assertFalse(response.value)
                     }
                 }
             }
