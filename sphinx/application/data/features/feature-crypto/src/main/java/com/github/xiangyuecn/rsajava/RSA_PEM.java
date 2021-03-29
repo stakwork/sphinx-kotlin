@@ -226,14 +226,9 @@ public class RSA_PEM {
 
 
 
-
-    /**
-     * 用PEM格式密钥对创建RSA，支持PKCS#1、PKCS#8格式的PEM
-     */
-    static public RSA_PEM FromPEM(String pem) throws Exception {
+    static public RSA_PEM FromPEM(char[] base64, boolean privateKey) throws Exception {
         RSA_PEM param=new RSA_PEM();
 
-        String base64 = _PEMCode.matcher(pem).replaceAll("");
         byte[] dataX = Base64Kt.decodeBase64ToArray(base64);
         if (dataX == null) {
             throw new Exception("PEM内容无效");
@@ -245,8 +240,7 @@ public class RSA_PEM {
 
         int[] idx = new int[] {0};
 
-
-        if (pem.contains("PUBLIC KEY")) {
+        if (!privateKey) {
             /****使用公钥****/
             //读取数据总长度
             readLen(0x30, data, idx);
@@ -268,7 +262,7 @@ public class RSA_PEM {
 
             //Exponent
             param.Key_Exponent = readBlock(data, idx);
-        } else if (pem.contains("PRIVATE KEY")) {
+        } else {
             /****使用私钥****/
             //读取数据总长度
             readLen(0x30, data, idx);
@@ -305,11 +299,24 @@ public class RSA_PEM {
             param.Val_DP = BigL(readBlock(data, idx), keyLen);
             param.Val_DQ = BigL(readBlock(data, idx), keyLen);
             param.Val_InverseQ = BigL(readBlock(data, idx), keyLen);
-        } else {
-            throw new Exception("pem需要BEGIN END标头");
         }
 
         return param;
+    }
+
+    /**
+     * 用PEM格式密钥对创建RSA，支持PKCS#1、PKCS#8格式的PEM
+     */
+    static public RSA_PEM FromPEM(String pem) throws Exception {
+        String base64 = _PEMCode.matcher(pem).replaceAll("");
+
+        if (pem.contains("PUBLIC KEY")) {
+            return FromPEM(base64.toCharArray(), false);
+        } else if (pem.contains("PRIVATE KEY")) {
+            return FromPEM(base64.toCharArray(), true);
+        } else {
+            throw new Exception("pem需要BEGIN END标头");
+        }
     }
     static private Pattern _PEMCode = Pattern.compile("--+.+?--+|[\\s\\r\\n]+");
     static private byte[] _SeqOID = new byte[] { 0x30, 0x0D, 0x06, 0x09, 0x2A, (byte)0x86, 0x48, (byte)0x86, (byte)0xF7, 0x0D, 0x01, 0x01, 0x01, 0x05, 0x00 };
@@ -533,7 +540,7 @@ public class RSA_PEM {
     public String ToPEM(boolean convertToPublic, boolean privateUsePKCS8, boolean publicUsePKCS8) throws Exception {
         byte[] byts = ToPEM_Bytes(convertToPublic, privateUsePKCS8, publicUsePKCS8);
 
-        String flag;
+        String flag = "";
         if (this.Key_D==null || convertToPublic) {
             flag = " PUBLIC KEY";
             if (!publicUsePKCS8) {
