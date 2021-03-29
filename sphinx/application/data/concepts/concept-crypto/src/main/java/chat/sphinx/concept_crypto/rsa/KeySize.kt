@@ -1,7 +1,7 @@
 package chat.sphinx.concept_crypto.rsa
 
 @Suppress("ClassName")
-sealed class RsaKeySize {
+sealed class KeySize {
 
     companion object {
         private const val KS_2048 = 2048
@@ -11,17 +11,17 @@ sealed class RsaKeySize {
 
     abstract val value: Int
 
-    object _2048: RsaKeySize() {
+    object _2048: KeySize() {
         override val value: Int
             get() = KS_2048
     }
 
-    object _4096: RsaKeySize() {
+    object _4096: KeySize() {
         override val value: Int
             get() = KS_4096
     }
 
-    object _8192: RsaKeySize() {
+    object _8192: KeySize() {
         override val value: Int
             get() = KS_8192
     }

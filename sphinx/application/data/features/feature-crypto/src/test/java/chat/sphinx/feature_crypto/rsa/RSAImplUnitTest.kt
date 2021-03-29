@@ -1,8 +1,7 @@
 package chat.sphinx.feature_crypto.rsa
 
 import app.cash.exhaustive.Exhaustive
-import chat.sphinx.concept_crypto.rsa.RSA
-import chat.sphinx.concept_crypto.rsa.RsaKeySize
+import chat.sphinx.concept_crypto.rsa.*
 import chat.sphinx.kotlin_response.KotlinResponse
 import chat.sphinx.kotlin_response.exception
 import io.matthewnelson.test_concept_coroutines.CoroutineTestHelper
@@ -31,7 +30,17 @@ class RSAImplUnitTest: CoroutineTestHelper() {
     @Test
     fun `2048 size key generation success`() =
         testDispatcher.runBlockingTest {
-            rsa.generateKeyPair(RsaKeySize._2048, dispatchers.default).let { response ->
+            rsa.generateKeyPair(KeySize._2048, dispatchers.default, PKCSType.PKCS1).let { response ->
+                @Exhaustive
+                when (response) {
+                    is KotlinResponse.Error -> {
+                        response.exception?.printStackTrace()
+                        Assert.fail()
+                    }
+                    is KotlinResponse.Success -> {}
+                }
+            }
+            rsa.generateKeyPair(KeySize._2048, dispatchers.default, PKCSType.PKCS8).let { response ->
                 @Exhaustive
                 when (response) {
                     is KotlinResponse.Error -> {
@@ -46,7 +55,17 @@ class RSAImplUnitTest: CoroutineTestHelper() {
     @Test
     fun `4096 size key generation success`() =
         testDispatcher.runBlockingTest {
-            rsa.generateKeyPair(RsaKeySize._4096, dispatchers.default).let { response ->
+            rsa.generateKeyPair(KeySize._4096, dispatchers.default, PKCSType.PKCS1).let { response ->
+                @Exhaustive
+                when (response) {
+                    is KotlinResponse.Error -> {
+                        response.exception?.printStackTrace()
+                        Assert.fail()
+                    }
+                    is KotlinResponse.Success -> {}
+                }
+            }
+            rsa.generateKeyPair(KeySize._4096, dispatchers.default, PKCSType.PKCS8).let { response ->
                 @Exhaustive
                 when (response) {
                     is KotlinResponse.Error -> {
@@ -61,7 +80,7 @@ class RSAImplUnitTest: CoroutineTestHelper() {
     @Test
     fun `8192 size key generation success`() =
         testDispatcher.runBlockingTest {
-            rsa.generateKeyPair(RsaKeySize._8192, dispatchers.default).let { response ->
+            rsa.generateKeyPair(KeySize._8192, dispatchers.default, PKCSType.PKCS1).let { response ->
                 @Exhaustive
                 when (response) {
                     is KotlinResponse.Error -> {
@@ -71,5 +90,15 @@ class RSAImplUnitTest: CoroutineTestHelper() {
                     is KotlinResponse.Success -> {}
                 }
             }
+//            rsa.generateKeyPair(KeySize._8192, dispatchers.default, PKCSType.PKCS8).let { response ->
+//                @Exhaustive
+//                when (response) {
+//                    is KotlinResponse.Error -> {
+//                        response.exception?.printStackTrace()
+//                        Assert.fail()
+//                    }
+//                    is KotlinResponse.Success -> {}
+//                }
+//            }
         }
 }
