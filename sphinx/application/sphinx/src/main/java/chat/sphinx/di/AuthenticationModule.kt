@@ -6,21 +6,27 @@ import chat.sphinx.feature_background_login.BackgroundLoginHandlerImpl
 import chat.sphinx.authentication.SphinxEncryptionKeyHandler
 import chat.sphinx.authentication.SphinxKeyRestore
 import chat.sphinx.concept_background_login.BackgroundLoginHandler
+import chat.sphinx.concept_crypto.rsa.RSA
+import chat.sphinx.feature_crypto.rsa.RSAImpl
 import chat.sphinx.key_restore.KeyRestore
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
-import dagger.hilt.android.components.ActivityRetainedComponent
 import dagger.hilt.components.SingletonComponent
-import io.matthewnelson.concept_authentication.coordinator.AuthenticationCoordinator
 import io.matthewnelson.concept_authentication.data.AuthenticationStorage
 import io.matthewnelson.concept_authentication.state.AuthenticationStateManager
 import io.matthewnelson.concept_encryption_key.EncryptionKeyHandler
 import io.matthewnelson.feature_authentication_core.AuthenticationCoreManager
+import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
 object AuthenticationModule {
+
+    @Provides
+    @Singleton
+    fun provideRSA(): RSA =
+        RSAImpl()
 
     @Provides
     fun provideAuthenticationCoreManager(
