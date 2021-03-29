@@ -14,8 +14,9 @@ abstract class RSA {
     /**
      * Returns a base64 encoded private and public key pair.
      *
-     * @param [keySize] The size keys to generate (2048, 4096, 8192)
-     * @param [pkcsType] Either PKCS#1 or PKCS#8
+     * @param [keySize] The size keys to generate (1024, 2048, 3072, 4096,
+     *   8192). Defaults to 2048
+     * @param [pkcsType] Either PKCS#1 or PKCS#8. Defaults to PKCS#1
      * @param [dispatcher] The dispatcher to generate keys on. If `null`, will
      *   run generation on whatever dispatcher [generateKeyPair] is called on.
      * */
