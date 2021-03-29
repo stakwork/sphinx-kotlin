@@ -7,6 +7,8 @@ import chat.sphinx.concept_background_login.BackgroundLoginHandler
 import chat.sphinx.key_restore.KeyRestore
 import chat.sphinx.key_restore.KeyRestoreResponse
 import chat.sphinx.splash.navigation.SplashNavigator
+import chat.sphinx.wrapper_relay.JavaWebToken
+import chat.sphinx.wrapper_relay.RelayUrl
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.MotionLayoutViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
@@ -174,8 +176,8 @@ internal class SplashViewModel @Inject constructor(
                     privateKey = Password(decryptedSplit[0].toCharArray()),
                     publicKey = Password(decryptedSplit[1].toCharArray()),
                     userPin = pin,
-                    relayUrl = decryptedSplit[2],
-                    jwt = decryptedSplit[3],
+                    relayUrl = RelayUrl(decryptedSplit[2]),
+                    jwt = JavaWebToken(decryptedSplit[3]),
                 ).collect { flowResponse ->
                     // TODO: Implement in Authentication View when it get's built/refactored
                     if (flowResponse is KeyRestoreResponse.Success) {

@@ -26,8 +26,8 @@ class SphinxKeyRestore @Inject constructor(
         privateKey: Password,
         publicKey: Password,
         userPin: CharArray,
-        relayUrl: String,
-        jwt: String
+        relayUrl: RelayUrl,
+        jwt: JavaWebToken,
     ): Flow<KeyRestoreResponse> = flow {
         when {
             authenticationManager.isAnEncryptionKeySet() -> {
@@ -39,20 +39,14 @@ class SphinxKeyRestore @Inject constructor(
             publicKey.value.isEmpty() -> {
                 emit(KeyRestoreResponse.Error.PublicKeyWasEmpty)
             }
-            relayUrl.isEmpty() -> {
-                emit(KeyRestoreResponse.Error.RelayUrlWasEmpty)
-            }
-            jwt.isEmpty() -> {
-                emit(KeyRestoreResponse.Error.JavaWebTokenWasEmpty)
-            }
             else -> {
                 emitAll(
                     restoreKeysImpl(
                         privateKey,
                         publicKey,
                         userPin,
-                        RelayUrl(relayUrl),
-                        JavaWebToken(jwt)
+                        relayUrl,
+                        jwt,
                     )
                 )
             }
