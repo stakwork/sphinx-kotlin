@@ -1,8 +1,10 @@
 package chat.sphinx.concept_crypto.rsa
 
+import io.matthewnelson.k_openssl_common.annotations.RawPasswordAccess
 import org.junit.Assert
 import org.junit.Test
 
+@OptIn(RawPasswordAccess::class)
 class RSAKeyPairUnitTest {
 
     companion object {
@@ -10,7 +12,7 @@ class RSAKeyPairUnitTest {
         // that the extension functions are properly formatted on output
 
         const val RSA_PRIVATE_KEY = """
-            -----BEGIN RSA PRIVATE KEY-----
+            -----BEGIN PRIVATE KEY-----
             MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQC9QjbU+Ae2Ihlj
             P8wnreUMNBHtxFrVSpCSKRnrAUm0T6XgsSYMvlu73nClI/6TgTxhYoc4buGkrLQu
             +lvaJLt8O3x/Q+po1nWjNQPZGDpIuJf6qQWJAn/Mnc3zkV8k76WhYsihkofhDEaj
@@ -37,11 +39,11 @@ class RSAKeyPairUnitTest {
             CUBkYaz8SnKmcEhEEnwBO9c07VkglV7mR4Q4afz7x8N3Zot05dXDNorntMZoxxqv
             MoK4v4NfwpYnk8Y2nTMRRmAE+MRu6Z+FvF9JK1GEWXzT12orA7O0eAoUaJ+ul7Cb
             HprGSrMI6uawk/RN/hm1VlLK
-            -----END RSA PRIVATE KEY-----
+            -----END PRIVATE KEY-----
         """
 
         const val RSA_PUB_KEY = """
-            -----BEGIN RSA PUBLIC KEY-----
+            -----BEGIN PUBLIC KEY-----
             MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAvUI21PgHtiIZYz/MJ63l
             DDQR7cRa1UqQkikZ6wFJtE+l4LEmDL5bu95wpSP+k4E8YWKHOG7hpKy0Lvpb2iS7
             fDt8f0PqaNZ1ozUD2Rg6SLiX+qkFiQJ/zJ3N85FfJO+loWLIoZKH4QxGo3F5ytyD
@@ -49,7 +51,7 @@ class RSAKeyPairUnitTest {
             LbFF3kpyzEVCc0+OD9ClWOa3K9oa9dvnY69qJX7R7+EmwaSWZHVedSkfLgRtPa+T
             tLXVjaZh2YXD5tVaK06OMpySdG5f9qkMauzDHMaUW7uNu+jJFEhvdorjZTgnGUrU
             /wIDAQAB
-            -----END RSA PUBLIC KEY-----
+            -----END PUBLIC KEY-----
         """
     }
 
@@ -68,7 +70,7 @@ class RSAKeyPairUnitTest {
     @Test
     fun `PrivateKey's formatToCert (multi-line) returns the same Cert`() {
         val privKey = RSA_PRIVATE_KEY.toRsaPrivateKey()
-        val privKeyBackToCert = privKey.formatToCert(singleLine = false)
+        val privKeyBackToCert = privKey.formatToCert(singleLine = false, pkcsType = PKCSType.PKCS8)
 
         // the test data constants are untrimmed
         Assert.assertNotEquals(RSA_PRIVATE_KEY, privKeyBackToCert)
@@ -79,7 +81,7 @@ class RSAKeyPairUnitTest {
     @Test
     fun `PublicKey's formatToCert (multi-line) returns the same Cert`() {
         val pubKey = RSA_PUB_KEY.toRsaPublicKey()
-        val pubKeyBackToCert = pubKey.formatToCert(singleLine = false)
+        val pubKeyBackToCert = pubKey.formatToCert(singleLine = false, pkcsType = PKCSType.PKCS8)
 
         // the test data constants are untrimmed
         Assert.assertNotEquals(RSA_PUB_KEY, pubKeyBackToCert)

@@ -2,6 +2,8 @@ package chat.sphinx.concept_crypto.rsa
 
 import chat.sphinx.kotlin_response.KotlinResponse
 import chat.sphinx.kotlin_response.ResponseError
+import io.matthewnelson.k_openssl_common.clazzes.EncryptedString
+import io.matthewnelson.k_openssl_common.clazzes.UnencryptedByteArray
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 
@@ -21,4 +23,17 @@ abstract class RSA {
         dispatcher: CoroutineDispatcher? = Dispatchers.Default,
         pkcsType: PKCSType = PKCSType.PKCS1,
     ): KotlinResponse<RSAKeyPair, ResponseError>
+
+    /**
+     * Decrypts a base64 encoded [EncryptedString] value
+     *
+     * @param [rsaPrivateKey] The private key to decrypt with
+     * @param [text] The base64 encoded string value to decrypt
+     * @param [dispatcher] The dispatcher to use when decrypting
+     * */
+    abstract suspend fun decrypt(
+        rsaPrivateKey: RsaPrivateKey,
+        text: EncryptedString,
+        dispatcher: CoroutineDispatcher = Dispatchers.Default,
+    ): KotlinResponse<UnencryptedByteArray, ResponseError>
 }

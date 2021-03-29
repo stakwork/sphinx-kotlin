@@ -4,13 +4,18 @@ import chat.sphinx.concept_crypto.rsa.*
 import chat.sphinx.kotlin_response.KotlinResponse
 import chat.sphinx.kotlin_response.ResponseError
 import com.github.xiangyuecn.rsajava.RSA_PEM
+import io.matthewnelson.k_openssl_common.annotations.RawPasswordAccess
+import io.matthewnelson.k_openssl_common.clazzes.EncryptedString
+import io.matthewnelson.k_openssl_common.clazzes.UnencryptedByteArray
 import io.matthewnelson.k_openssl_common.extensions.toCharArray
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
+import okio.base64.decodeBase64ToArray
 import okio.base64.encodeBase64ToByteArray
 import java.security.*
 import java.security.interfaces.RSAPrivateKey
 import java.security.interfaces.RSAPublicKey
+import javax.crypto.Cipher
 
 // TODO: Move to RSA_PEM once converted to Kotlin
 @Suppress("NOTHING_TO_INLINE")
@@ -71,6 +76,38 @@ class RSAImpl: RSA() {
 
         } catch (e: Exception) {
             return KotlinResponse.Error(ResponseError("RSA Key generation failure", e))
+        }
+    }
+
+    // TODO: Chunking!!!
+    @OptIn(RawPasswordAccess::class)
+    override suspend fun decrypt(
+        rsaPrivateKey: RsaPrivateKey,
+        text: EncryptedString,
+        dispatcher: CoroutineDispatcher,
+    ): KotlinResponse<UnencryptedByteArray, ResponseError> {
+        val cipherText: ByteArray = text.value.decodeBase64ToArray()
+            ?: return KotlinResponse.Error(
+                ResponseError("EncryptedString was not base64 encoded")
+            )
+
+        return try {
+            val decrypted: ByteArray = withContext(dispatcher) {
+
+                val rsaPem: RSA_PEM = RSA_PEM.FromPEM(rsaPrivateKey.value, true)
+
+                try {
+                    val cipher: Cipher = Cipher.getInstance(RSA)
+                    cipher.init(Cipher.DECRYPT_MODE, rsaPem.rsaPrivateKey)
+                    cipher.doFinal(cipherText)
+                } finally {
+                    rsaPem.clear()
+                }
+            }
+
+            KotlinResponse.Success(UnencryptedByteArray(decrypted))
+        } catch (e: Exception) {
+            KotlinResponse.Error(ResponseError("Decryption failed", e))
         }
     }
 }

@@ -4,7 +4,12 @@ plugins {
 }
 
 dependencies {
+    // KotlinAndroid
+    api project(path: ':kotlin:crypto:k-openssl-common')
+
+    // Sphinx
     api project(path: ':sphinx:application:common:kotlin-response')
+    
     implementation deps.kotlin.coroutinesCore
 
     testImplementation testDeps.junit
