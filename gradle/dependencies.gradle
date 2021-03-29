@@ -52,7 +52,7 @@ ext.deps = [
         sqlite: "androidx.sqlite:sqlite:2.1.0",
         viewBinding: "androidx.databinding:viewbinding:${versions.androidGradle}",
     ],
-    bouncyCastle: "org.bouncycastle:bcprov-jdk15on:1.65",
+//    bouncyCastle: "org.bouncycastle:bcprov-jdk15on:1.65",
     google: [
         hilt: "com.google.dagger:hilt-android:${versions.hilt}",
     ],
