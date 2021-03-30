@@ -4,11 +4,11 @@ package chat.sphinx.concept_crypto.rsa
 sealed class KeySize {
 
     companion object {
-        private const val KS_1024 = 1024
-        private const val KS_2048 = 2048
-        private const val KS_3072 = 3072
-        private const val KS_4096 = 4096
-        private const val KS_8192 = 8192
+        const val KS_1024 = 1024
+        const val KS_2048 = KS_1024 * 2
+        const val KS_3072 = KS_1024 * 3
+        const val KS_4096 = KS_1024 * 4
+        const val KS_8192 = KS_1024 * 8
     }
 
     abstract val value: Int
@@ -36,5 +36,18 @@ sealed class KeySize {
     object _8192: KeySize() {
         override val value: Int
             get() = KS_8192
+    }
+
+    class Custom(override val value: Int) : KeySize() {
+        init {
+            require(value in KS_1024..KS_8192 && value % KS_1024 == 0) {
+                "\n" + """
+                    KeySize must be:
+                     - greater than or equal to $KS_1024
+                     - less than or equal to $KS_8192
+                     - divisible by $KS_1024
+                """.trimIndent() + "\n"
+            }
+        }
     }
 }
