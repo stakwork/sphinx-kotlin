@@ -3,7 +3,7 @@ package chat.sphinx.concept_repository_chat
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.wrapper_chat.Chat
-import chat.sphinx.wrapper_chat.ChatUUID
+import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.chat.ChatId
 import kotlinx.coroutines.flow.Flow
 

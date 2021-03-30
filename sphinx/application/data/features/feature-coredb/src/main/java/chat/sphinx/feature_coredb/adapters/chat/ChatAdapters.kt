@@ -1,6 +1,7 @@
 package chat.sphinx.feature_coredb.adapters.chat
 
 import chat.sphinx.wrapper_chat.*
+import chat.sphinx.wrapper_common.chat.ChatUUID
 import com.squareup.sqldelight.ColumnAdapter
 
 internal class ChatUUIDAdapter: ColumnAdapter<ChatUUID, String> {

@@ -1,4 +1,4 @@
-package chat.sphinx.wrapper_chat
+package chat.sphinx.wrapper_common.chat
 
 inline class ChatUUID(val value: String) {
     init {

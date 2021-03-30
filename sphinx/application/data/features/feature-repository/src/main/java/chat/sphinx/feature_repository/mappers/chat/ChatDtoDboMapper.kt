@@ -5,6 +5,7 @@ import chat.sphinx.conceptcoredb.ChatDbo
 import chat.sphinx.feature_repository.mappers.ClassMapper
 import chat.sphinx.wrapper_chat.*
 import chat.sphinx.wrapper_common.chat.ChatId
+import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.contact.ContactId
 import chat.sphinx.wrapper_common.lightning.toLightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.toSat

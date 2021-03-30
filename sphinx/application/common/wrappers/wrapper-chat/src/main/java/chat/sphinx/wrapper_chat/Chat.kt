@@ -4,6 +4,7 @@ import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.Seen
 import chat.sphinx.wrapper_common.chat.ChatId
+import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.contact.ContactId
 import chat.sphinx.wrapper_common.isTrue
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
