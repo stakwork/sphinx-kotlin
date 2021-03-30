@@ -93,23 +93,29 @@ class SphinxRepository(
                                         .executeAsList()
                                         .toMutableSet()
 
-                                    queries.transaction {
-                                        dbos.forEach { dbo ->
-                                            queries.upsertChat(dbo)
+                                    messageLock.withLock {
 
-                                            chatIdsToRemove.remove(dbo.id)
-                                        }
+                                        queries.transaction {
+                                            dbos.forEach { dbo ->
+                                                queries.upsertChat(dbo)
 
-                                        // remove remaining chat's from DB
-                                        chatIdsToRemove.forEach { chatId ->
-                                            queries.deleteChatById(chatId)
-                                            // TODO: delete messages for chatid
+                                                chatIdsToRemove.remove(dbo.id)
+                                            }
+
+                                            // remove remaining chat's from DB
+                                            chatIdsToRemove.forEach { chatId ->
+                                                queries.deleteChatById(chatId)
+                                                queries.deleteMessagesByChatId(chatId)
+                                            }
+
                                         }
 
                                     }
 
                                 }
+
                             }
+
                         }
 
                         emit(Response.Success(true))
@@ -139,4 +145,5 @@ class SphinxRepository(
     ////////////////
     /// Messages ///
     ////////////////
+    private val messageLock = Mutex()
 }

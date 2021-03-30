@@ -177,3 +177,7 @@ CREATE TABLE messageDbo(
     reply_uuid                  TEXT            AS ReplyUUID
 );
 
+deleteMessagesByChatId:
+DELETE FROM messageDbo
+WHERE chat_id = ?;
+
