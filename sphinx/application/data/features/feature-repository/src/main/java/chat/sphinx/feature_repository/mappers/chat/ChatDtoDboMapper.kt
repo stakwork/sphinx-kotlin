@@ -25,27 +25,27 @@ internal class ChatDtoDboMapper(
     )
     override suspend fun mapFrom(value: ChatDto): ChatDbo {
         return ChatDbo(
-            ChatId(value.id),
-            ChatUUID(value.uuid),
-            value.name?.toChatName(),
-            value.photo_url?.toPhotoUrl(),
-            value.type.toChatType(),
-            value.status.toChatStatus(),
-            value.contact_ids.map { ContactId(it) },
-            value.is_muted.toChatMuted(),
-            value.created_at.toDateTime(),
-            value.group_key?.toChatGroupKey(),
-            value.host?.toChatHost(),
-            value.price_per_message?.toSat(),
-            value.escrow_amount?.toSat(),
-            value.unlisted.toChatUnlisted(),
-            value.private.toChatPrivate(),
-            value.owner_pub_key?.toLightningNodePubKey(),
-            value.seen.toSeen(),
-            value.meta?.toChatMetaDataOrNull(),
-            value.my_photo_url?.toPhotoUrl(),
-            value.my_alias?.toChatAlias(),
-            value.pending_contact_ids?.map { ContactId(it) }
+            id = ChatId(value.id),
+            uuid = ChatUUID(value.uuid),
+            name = value.name?.toChatName(),
+            photo_url = value.photo_url?.toPhotoUrl(),
+            type = value.type.toChatType(),
+            status = value.status.toChatStatus(),
+            contact_ids = value.contact_ids.map { ContactId(it) },
+            is_muted = value.is_muted.toChatMuted(),
+            created_at = value.created_at.toDateTime(),
+            group_key = value.group_key?.toChatGroupKey(),
+            host = value.host?.toChatHost(),
+            price_per_message = value.price_per_message?.toSat(),
+            escrow_amount = value.escrow_amount?.toSat(),
+            unlisted = value.unlisted.toChatUnlisted(),
+            private_tribe = value.private.toChatPrivate(),
+            owner_pub_key = value.owner_pub_key?.toLightningNodePubKey(),
+            seen = value.seen.toSeen(),
+            meta_data = value.meta?.toChatMetaDataOrNull(),
+            my_photo_url = value.my_photo_url?.toPhotoUrl(),
+            my_alias = value.my_alias?.toChatAlias(),
+            pending_contact_ids = value.pending_contact_ids?.map { ContactId(it) }
         )
     }
 
