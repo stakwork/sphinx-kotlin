@@ -5,9 +5,9 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.test.core.app.ApplicationProvider
 import chat.sphinx.concept_coredb.SphinxDatabase
-import chat.sphinx.concept_crypto.rsa.RSA
+import chat.sphinx.concept_crypto_rsa.RSA
 import chat.sphinx.feature_coredb.CoreDBImpl
-import chat.sphinx.feature_crypto.rsa.RSAImpl
+import chat.sphinx.feature_crypto_rsa.rsa.RSAImpl
 import chat.sphinx.feature_relay.RelayDataHandlerImpl
 import chat.sphinx.key_restore.KeyRestoreResponse
 import chat.sphinx.wrapper_relay.JavaWebToken

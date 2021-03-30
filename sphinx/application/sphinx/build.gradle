@@ -77,7 +77,7 @@ dependencies {
 
     implementation project(path: ':sphinx:application:data:features:feature-background-login')
     implementation project(path: ':sphinx:application:data:features:feature-coredb')
-    implementation project(path: ':sphinx:application:data:features:feature-crypto')
+    implementation project(path: ':sphinx:application:data:features:crypto:feature-crypto-rsa')
     implementation project(path: ':sphinx:application:data:features:feature-relay')
     implementation project(path: ':sphinx:application:data:features:feature-repository')
 

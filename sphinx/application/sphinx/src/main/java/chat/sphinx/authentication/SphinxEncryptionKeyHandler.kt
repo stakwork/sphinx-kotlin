@@ -1,8 +1,8 @@
 package chat.sphinx.authentication
 
-import chat.sphinx.concept_crypto.rsa.KeySize
-import chat.sphinx.concept_crypto.rsa.PKCSType
-import chat.sphinx.concept_crypto.rsa.RSA
+import chat.sphinx.concept_crypto_rsa.KeySize
+import chat.sphinx.concept_crypto_rsa.PKCSType
+import chat.sphinx.concept_crypto_rsa.RSA
 import chat.sphinx.kotlin_response.KotlinResponse
 import chat.sphinx.kotlin_response.exception
 import chat.sphinx.kotlin_response.message

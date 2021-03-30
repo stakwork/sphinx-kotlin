@@ -6,8 +6,8 @@ import chat.sphinx.feature_background_login.BackgroundLoginHandlerImpl
 import chat.sphinx.authentication.SphinxEncryptionKeyHandler
 import chat.sphinx.authentication.SphinxKeyRestore
 import chat.sphinx.concept_background_login.BackgroundLoginHandler
-import chat.sphinx.concept_crypto.rsa.RSA
-import chat.sphinx.feature_crypto.rsa.RSAImpl
+import chat.sphinx.concept_crypto_rsa.RSA
+import chat.sphinx.feature_crypto_rsa.rsa.RSAImpl
 import chat.sphinx.key_restore.KeyRestore
 import dagger.Module
 import dagger.Provides
