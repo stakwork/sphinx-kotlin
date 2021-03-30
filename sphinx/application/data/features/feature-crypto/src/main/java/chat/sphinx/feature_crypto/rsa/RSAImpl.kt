@@ -40,7 +40,8 @@ inline val RSA_PEM.blockSize: Int
 inline val RSA_PEM.maxBytes: Int
     get() = blockSize - 11
 
-open class RSAImpl: RSA() {
+@Suppress("SpellCheckingInspection")
+open class RSAImpl(): RSA() {
 
     companion object {
         private const val RSA = "RSA"
@@ -102,7 +103,7 @@ open class RSAImpl: RSA() {
             )
         }
 
-        val cipherText: ByteArray = text.value.decodeBase64ToArray()
+        val dataBytes: ByteArray = text.value.decodeBase64ToArray()
             ?: return KotlinResponse.Error(
                 ResponseError("EncryptedString was not base64 encoded")
             )
@@ -111,33 +112,32 @@ open class RSAImpl: RSA() {
             val decrypted: ByteArray = withContext(dispatcher) {
 
                 val rsaPem: RSA_PEM = RSA_PEM.FromPEM(rsaPrivateKey.value, true)
-                val blockSize = rsaPem.blockSize
+                val blockSize: Int = rsaPem.blockSize
 
-                if (cipherText.size > blockSize) {
+                if (dataBytes.size > blockSize) {
                     val privKey: RSAPrivateKey = rsaPem.rsaPrivateKey
 
-                    val arrSize = (cipherText.size / blockSize)
+                    val arrSize: Int = (dataBytes.size / blockSize)
 
                     @Suppress("RemoveExplicitTypeArguments")
                     val arr = Array<ByteArray>(arrSize) { index ->
                         val fromIndex: Int = (index * blockSize)
-                        val toIndex: Int = if ( (fromIndex + blockSize) <= cipherText.size ) {
+                        val toIndex: Int = if ( (fromIndex + blockSize) <= dataBytes.size ) {
                             fromIndex + blockSize
                         } else {
-                            cipherText.size
+                            dataBytes.size
                         }
 
-                        cipherText.copyOfRange(fromIndex, toIndex)
+                        dataBytes.copyOfRange(fromIndex, toIndex)
                     }
 
-                    val buffer = ByteBuffer.wrap(
-
-                        // The maximum size possible
-                        ByteArray(rsaPem.maxBytes * arrSize)
+                    val buffer: ByteBuffer = ByteBuffer.wrap(
+                        ByteArray(blockSize * arrSize)
                     )
 
                     var finalSize = 0
                     try {
+
                         for (ba in arr) {
                             val cipher: Cipher = Cipher.getInstance(RSA)
                             cipher.init(Cipher.DECRYPT_MODE, privKey)
@@ -149,11 +149,14 @@ open class RSAImpl: RSA() {
                                 )
                             }
                         }
+
                     } finally {
+
                         for (ba in arr) {
                             ba.fill('0'.toByte())
                         }
                         rsaPem.clear()
+
                     }
 
                     buffer.array().let { decrypted ->
@@ -161,12 +164,13 @@ open class RSAImpl: RSA() {
                             decrypted.fill('0'.toByte())
                         }
                     }
+
                 } else {
 
                     try {
                         val cipher: Cipher = Cipher.getInstance(RSA)
                         cipher.init(Cipher.DECRYPT_MODE, rsaPem.rsaPrivateKey)
-                        cipher.doFinal(cipherText)
+                        cipher.doFinal(dataBytes)
                     } finally {
                         rsaPem.clear()
                     }
@@ -201,9 +205,6 @@ open class RSAImpl: RSA() {
                 val dataBytes: ByteArray = text.value.encodeToByteArray()
                 val maxBytes: Int = rsaPem.maxBytes
 
-                println("Data Size: ${dataBytes.size}")
-                println("Data LastIndex: ${dataBytes.lastIndex}")
-
                 if (dataBytes.size > maxBytes) {
                     val pubKey: RSAPublicKey = rsaPem.rsaPublicKey
 
@@ -218,32 +219,26 @@ open class RSAImpl: RSA() {
                             dataBytes.size
                         }
 
-                        println("FromIndex: $fromIndex")
-                        println("ToIndex: $toIndex")
-
-                        dataBytes.copyOfRange(fromIndex, toIndex).also {
-                            println("Index: $index, ByteArray Size: ${it.size}\n")
-                        }
+                        dataBytes.copyOfRange(fromIndex, toIndex)
                     }
 
-                    val blockSize = rsaPem.blockSize
-                    val finalBytes = ByteArray(blockSize * arrSize)
+                    val buffer = ByteBuffer.wrap(ByteArray(rsaPem.blockSize * arrSize))
 
                     try {
-                        for ((index, ba) in arr.withIndex()) {
+                        for (ba in arr) {
                             val cipher: Cipher = Cipher.getInstance(RSA)
                             cipher.init(Cipher.ENCRYPT_MODE, pubKey)
-                            cipher.doFinal(ba)
-                                .copyInto(
-                                    destination = finalBytes,
-                                    destinationOffset = index * (blockSize)
+                            cipher.doFinal(ba).let { bytes ->
+                                buffer.put(
+                                    ByteBuffer.wrap(bytes).array()
                                 )
+                            }
                         }
                     } finally {
                         rsaPem.clear()
                     }
 
-                    finalBytes
+                    buffer.array()
                 } else {
                     try {
                         val cipher: Cipher = Cipher.getInstance(RSA)
@@ -255,8 +250,6 @@ open class RSAImpl: RSA() {
                 }
 
             }
-
-            println("EncryptedSize: ${encrypted.size}")
 
             val string: String = if (formatOutput) {
                 encrypted.encodeBase64().replace("(.{64})".toRegex(), "$1\n")
