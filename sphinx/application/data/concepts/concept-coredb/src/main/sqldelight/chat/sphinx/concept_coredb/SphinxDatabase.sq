@@ -7,12 +7,12 @@ import chat.sphinx.wrapper_chat.ChatName;
 import chat.sphinx.wrapper_chat.ChatPrivate;
 import chat.sphinx.wrapper_chat.ChatStatus;
 import chat.sphinx.wrapper_chat.ChatType;
-import chat.sphinx.wrapper_chat.ChatUUID;
 import chat.sphinx.wrapper_chat.ChatUnlisted;
 import chat.sphinx.wrapper_common.DateTime;
 import chat.sphinx.wrapper_common.PhotoUrl;
 import chat.sphinx.wrapper_common.Seen;
 import chat.sphinx.wrapper_common.chat.ChatId;
+import chat.sphinx.wrapper_common.chat.ChatUUID;
 import chat.sphinx.wrapper_common.contact.ContactId;
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey;
 import chat.sphinx.wrapper_common.lightning.LightningPaymentHash;
@@ -154,7 +154,7 @@ WHERE id = ?;
 CREATE TABLE messageDbo(
     id                          INTEGER         AS MessageId NOT NULL PRIMARY KEY,
     uuid                        TEXT            AS MessageUUID,
-    chat_id                     INTEGER         AS ChatId,
+    chat_id                     INTEGER         AS ChatId NOT NULL,
     type                        INTEGER         AS MessageType NOT NULL,
     sender                      INTEGER         AS ContactId NOT NULL,
     receiver                    INTEGER         AS ContactId,
