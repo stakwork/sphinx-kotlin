@@ -22,18 +22,21 @@ abstract class CoreDBImpl: CoreDB() {
     private val sphinxDatabaseQueriesStateFlow: MutableStateFlow<SphinxDatabaseQueries?> =
         MutableStateFlow(null)
 
+    override val isInitialized: Boolean
+        get() = sphinxDatabaseQueriesStateFlow.value != null
+
     protected abstract fun getSqlDriver(encryptionKey: EncryptionKey): SqlDriver
 
     private val initializationLock = Object()
 
     fun initializeDatabase(encryptionKey: EncryptionKey) {
-        if (sphinxDatabaseQueriesStateFlow.value != null) {
+        if (isInitialized) {
             return
         }
 
         synchronized(initializationLock) {
 
-            if (sphinxDatabaseQueriesStateFlow.value != null) {
+            if (isInitialized) {
                 return
             }
 
