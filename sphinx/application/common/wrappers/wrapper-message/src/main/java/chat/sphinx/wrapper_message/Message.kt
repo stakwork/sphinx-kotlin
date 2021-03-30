@@ -13,7 +13,7 @@ import chat.sphinx.wrapper_common.message.MessageId
 data class Message(
     val id: MessageId,
     val uuid: MessageUUID?,
-    val chatId: ChatId?,
+    val chatId: ChatId,
     val type: MessageType,
     val sender: ContactId,
     val receiver: ContactId?,
