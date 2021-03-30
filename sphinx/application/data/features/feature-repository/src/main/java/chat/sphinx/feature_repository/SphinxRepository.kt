@@ -6,15 +6,19 @@ import chat.sphinx.concept_coredb.util.upsertChat
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
+import chat.sphinx.concept_network_query_message.NetworkQueryMessage
 import chat.sphinx.feature_repository.mappers.chat.ChatDboPresenterMapper
 import chat.sphinx.feature_repository.mappers.chat.ChatDtoDboMapper
 import chat.sphinx.feature_repository.mappers.mapListFrom
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.ResponseError
+import chat.sphinx.feature_repository.mappers.message.MessageDboPresenterMapper
+import chat.sphinx.feature_repository.mappers.message.MessageDtoDboMapper
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.chat.ChatId
+import chat.sphinx.wrapper_message.Message
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
 import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
@@ -29,6 +33,7 @@ class SphinxRepository(
     private val coreDB: CoreDB,
     private val dispatchers: CoroutineDispatchers,
     private val networkQueryChat: NetworkQueryChat,
+    private val networkQueryMessage: NetworkQueryMessage,
 ): ChatRepository, MessageRepository {
 
     /////////////
@@ -106,6 +111,7 @@ class SphinxRepository(
                                             chatIdsToRemove.forEach { chatId ->
                                                 queries.deleteChatById(chatId)
                                                 queries.deleteMessagesByChatId(chatId)
+                                                // TODO: delete messages for chatid
                                             }
 
                                         }
@@ -146,4 +152,46 @@ class SphinxRepository(
     /// Messages ///
     ////////////////
     private val messageLock = Mutex()
+    private val messageDtoDboMapper: MessageDtoDboMapper by lazy {
+        MessageDtoDboMapper(dispatchers)
+    }
+    private val messageDboPresenterMapper: MessageDboPresenterMapper by lazy {
+        MessageDboPresenterMapper(dispatchers)
+    }
+
+    override suspend fun getLatestMessageForChatById(chatId: ChatId): Flow<Message?> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getLatestMessageForChatByUUID(chatUUID: ChatUUID): Flow<Message?> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getNumberUnseenMessagesForChatById(chatId: ChatId): Flow<Int> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getNumberUnseenMessagesForChatByUUID(chatUUID: ChatUUID): Flow<Int> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getMessagesForChatById(
+        chatId: ChatId,
+        limit: Int,
+        offset: Int
+    ): Flow<List<Message>> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getMessagesForChatByUUID(
+        chatUUID: ChatUUID,
+        limit: Int,
+        offset: Int
+    ): Flow<List<Message>> {
+        TODO("Not yet implemented")
+    }
+
+    override fun networkRefreshMessages(): Flow<LoadResponse<Boolean, ResponseError>> {
+        TODO("Not yet implemented")
+    }
 }
