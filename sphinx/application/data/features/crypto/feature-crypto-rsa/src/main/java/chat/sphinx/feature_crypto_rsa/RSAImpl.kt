@@ -1,7 +1,7 @@
 package chat.sphinx.feature_crypto_rsa
 
 import chat.sphinx.concept_crypto_rsa.*
-import chat.sphinx.kotlin_response.KotlinResponse
+import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
 import com.github.xiangyuecn.rsajava.RSA_PEM
 import io.matthewnelson.k_openssl_common.annotations.RawPasswordAccess
@@ -52,7 +52,7 @@ open class RSAImpl(): RSA() {
         keySize: KeySize,
         dispatcher: CoroutineDispatcher?,
         pkcsType: PKCSType,
-    ): KotlinResponse<RSAKeyPair, ResponseError> {
+    ): Response<RSAKeyPair, ResponseError> {
         try {
             val generator: KeyPairGenerator = KeyPairGenerator.getInstance(RSA)
             generator.initialize(keySize.value, SecureRandom())
@@ -64,7 +64,7 @@ open class RSAImpl(): RSA() {
             } ?: generator.genKeyPair()
 
             if (pkcsType is PKCSType.PKCS8) {
-                return KotlinResponse.Success(
+                return Response.Success(
                     RSAKeyPair(
                         RsaPrivateKey(keys.private.encoded.encodeBase64ToByteArray().toCharArray()),
                         RsaPublicKey(keys.public.encoded.encodeBase64ToByteArray().toCharArray())
@@ -76,7 +76,7 @@ open class RSAImpl(): RSA() {
 
             val rsaPem = RSA_PEM(keys.public as RSAPublicKey, keys.private as RSAPrivateKey)
 
-            return KotlinResponse.Success(
+            return Response.Success(
                 RSAKeyPair(
                     RsaPrivateKey(rsaPem.ToPEM_PKCS1_Bytes(false).toCharArray()),
                     RsaPublicKey(rsaPem.ToPEM_PKCS1_Bytes(true).toCharArray()),
@@ -87,7 +87,7 @@ open class RSAImpl(): RSA() {
             }
 
         } catch (e: Exception) {
-            return KotlinResponse.Error(ResponseError("RSA Key generation failure", e))
+            return Response.Error(ResponseError("RSA Key generation failure", e))
         }
     }
 
@@ -96,15 +96,15 @@ open class RSAImpl(): RSA() {
         rsaPrivateKey: RsaPrivateKey,
         text: EncryptedString,
         dispatcher: CoroutineDispatcher,
-    ): KotlinResponse<UnencryptedByteArray, ResponseError> {
+    ): Response<UnencryptedByteArray, ResponseError> {
         if (text.value.isEmpty()) {
-            return KotlinResponse.Error(
+            return Response.Error(
                 ResponseError("EncryptedString was empty")
             )
         }
 
         val dataBytes: ByteArray = text.value.decodeBase64ToArray()
-            ?: return KotlinResponse.Error(
+            ?: return Response.Error(
                 ResponseError("EncryptedString was not base64 encoded")
             )
 
@@ -179,9 +179,9 @@ open class RSAImpl(): RSA() {
 
             }
 
-            KotlinResponse.Success(UnencryptedByteArray(decrypted))
+            Response.Success(UnencryptedByteArray(decrypted))
         } catch (e: Exception) {
-            KotlinResponse.Error(ResponseError("Decryption failed", e))
+            Response.Error(ResponseError("Decryption failed", e))
         }
     }
 
@@ -191,9 +191,9 @@ open class RSAImpl(): RSA() {
         text: UnencryptedString,
         formatOutput: Boolean,
         dispatcher: CoroutineDispatcher
-    ): KotlinResponse<EncryptedString, ResponseError> {
+    ): Response<EncryptedString, ResponseError> {
         if (text.value.isEmpty()) {
-            return KotlinResponse.Error(
+            return Response.Error(
                 ResponseError("UnencryptedString was empty")
             )
         }
@@ -257,9 +257,9 @@ open class RSAImpl(): RSA() {
                 encrypted.encodeBase64()
             }
 
-            KotlinResponse.Success(EncryptedString(string))
+            Response.Success(EncryptedString(string))
         } catch (e: Exception) {
-            KotlinResponse.Error(ResponseError("Encryption failed", e))
+            Response.Error(ResponseError("Encryption failed", e))
         }
     }
 
@@ -268,9 +268,9 @@ open class RSAImpl(): RSA() {
         rsaPrivateKey: RsaPrivateKey,
         text: String,
         dispatcher: CoroutineDispatcher
-    ): KotlinResponse<RsaSignedString, ResponseError> {
+    ): Response<RsaSignedString, ResponseError> {
         if (text.isEmpty()) {
-            return KotlinResponse.Error(
+            return Response.Error(
                 ResponseError("String value to sign was empty")
             )
         }
@@ -290,14 +290,14 @@ open class RSAImpl(): RSA() {
                 }
             }
 
-            KotlinResponse.Success(
+            Response.Success(
                 RsaSignedString(
                     text,
                     RsaSignature(signed),
                 )
             )
         } catch (e: Exception) {
-            KotlinResponse.Error(ResponseError("Signing failed", e))
+            Response.Error(ResponseError("Signing failed", e))
         }
     }
 
@@ -305,15 +305,15 @@ open class RSAImpl(): RSA() {
         rsaPublicKey: RsaPublicKey,
         signedString: RsaSignedString,
         dispatcher: CoroutineDispatcher
-    ): KotlinResponse<Boolean, ResponseError> {
+    ): Response<Boolean, ResponseError> {
         if (signedString.signature.value.isEmpty()) {
-            return KotlinResponse.Error(
+            return Response.Error(
                 ResponseError("RsaSignature was empty")
             )
         }
 
         if (signedString.text.isEmpty()) {
-            return KotlinResponse.Error(
+            return Response.Error(
                 ResponseError("String value to verify was empty")
             )
         }
@@ -333,9 +333,9 @@ open class RSAImpl(): RSA() {
                 }
             }
 
-            KotlinResponse.Success(verification)
+            Response.Success(verification)
         } catch (e: Exception) {
-            KotlinResponse.Error(ResponseError("Signature Verification failed", e))
+            Response.Error(ResponseError("Signature Verification failed", e))
         }
     }
 }

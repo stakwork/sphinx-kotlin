@@ -1,7 +1,7 @@
 package chat.sphinx.feature_network_query_contact
 
 import app.cash.exhaustive.Exhaustive
-import chat.sphinx.kotlin_response.KotlinResponse
+import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.exception
 import chat.sphinx.kotlin_response.message
@@ -21,11 +21,11 @@ class NetworkQueryContactImplUnitTest: NetworkQueryTestHelper() {
 
                     @Exhaustive
                     when (loadResponse) {
-                        is KotlinResponse.Error -> {
+                        is Response.Error -> {
                             loadResponse.exception?.printStackTrace()
                             Assert.fail(loadResponse.message)
                         }
-                        is KotlinResponse.Success -> {}
+                        is Response.Success -> {}
                         is LoadResponse.Loading -> {}
                     }
 

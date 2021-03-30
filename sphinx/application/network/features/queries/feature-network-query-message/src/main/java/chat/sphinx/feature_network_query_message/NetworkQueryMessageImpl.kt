@@ -10,7 +10,7 @@ import chat.sphinx.concept_relay.RelayDataHandler
 import chat.sphinx.concept_relay.retrieveRelayUrlAndJavaWebToken
 import chat.sphinx.feature_network_query_message.model.GetMessagesRelayResponse
 import chat.sphinx.feature_network_query_message.model.GetPaymentsRelayResponse
-import chat.sphinx.kotlin_response.KotlinResponse
+import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.network_relay_call.RelayCall
@@ -46,10 +46,10 @@ class NetworkQueryMessageImpl(
         relayDataHandler.retrieveRelayUrlAndJavaWebToken().let { response ->
             @Exhaustive
             when (response) {
-                is KotlinResponse.Error -> {
+                is Response.Error -> {
                     emit(response)
                 }
-                is KotlinResponse.Success -> {
+                is Response.Success -> {
                     emitAll(
                         getMessages(response.value.first, response.value.second, messagePagination)
                     )
@@ -76,10 +76,10 @@ class NetworkQueryMessageImpl(
         relayDataHandler.retrieveRelayUrlAndJavaWebToken().let { response ->
             @Exhaustive
             when (response) {
-                is KotlinResponse.Error -> {
+                is Response.Error -> {
                     emit(response)
                 }
-                is KotlinResponse.Success -> {
+                is Response.Success -> {
                     emitAll(
                         getPayments(response.value.first, response.value.second)
                     )

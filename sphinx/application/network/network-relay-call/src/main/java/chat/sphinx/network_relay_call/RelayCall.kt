@@ -1,7 +1,7 @@
 package chat.sphinx.network_relay_call
 
 import chat.sphinx.concept_network_client.NetworkClient
-import chat.sphinx.kotlin_response.KotlinResponse
+import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.wrapper_relay.JavaWebToken
@@ -67,7 +67,7 @@ sealed class RelayCall {
                 if (relayResponse.success) {
 
                     emit(
-                        KotlinResponse.Success(
+                        Response.Success(
                             relayResponse.response ?: throw NullPointerException(
                                 "RelayResponse.response returned null for ${adapterClass.simpleName}"
                             )
@@ -77,7 +77,7 @@ sealed class RelayCall {
                 } else {
 
                     emit(
-                        KotlinResponse.Error(
+                        Response.Error(
                             ResponseError(
                                 relayResponse.error ?: "Query failed for ${adapterClass.simpleName}"
                             )
@@ -88,7 +88,7 @@ sealed class RelayCall {
 
             } catch (e: Exception) {
 
-                emit(KotlinResponse.Error(ResponseError("", e)))
+                emit(Response.Error(ResponseError("", e)))
 
             }
 

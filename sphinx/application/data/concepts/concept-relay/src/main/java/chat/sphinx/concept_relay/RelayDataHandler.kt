@@ -1,23 +1,23 @@
 package chat.sphinx.concept_relay
 
-import chat.sphinx.kotlin_response.KotlinResponse
+import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.wrapper_relay.JavaWebToken
 import chat.sphinx.wrapper_relay.RelayUrl
 
 @Suppress("NOTHING_TO_INLINE")
-suspend inline fun RelayDataHandler.retrieveRelayUrlAndJavaWebToken(): KotlinResponse<
+suspend inline fun RelayDataHandler.retrieveRelayUrlAndJavaWebToken(): Response<
         Pair<JavaWebToken, RelayUrl>,
         ResponseError
         > =
 
     retrieveRelayUrl()?.let { relayUrl ->
         retrieveJavaWebToken()?.let { jwt ->
-            KotlinResponse.Success(Pair(jwt, relayUrl))
-        } ?: KotlinResponse.Error(
+            Response.Success(Pair(jwt, relayUrl))
+        } ?: Response.Error(
                 ResponseError("Was unable to retrieve the JavaWebToken from storage")
         )
-    } ?: KotlinResponse.Error(
+    } ?: Response.Error(
             ResponseError("Was unable to retrieve the RelayURL from storage")
     )
 

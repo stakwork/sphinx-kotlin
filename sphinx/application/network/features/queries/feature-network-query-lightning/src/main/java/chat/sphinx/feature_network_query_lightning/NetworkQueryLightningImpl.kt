@@ -5,7 +5,6 @@ import chat.sphinx.concept_network_client.NetworkClient
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_lightning.model.balance.BalanceAllDto
 import chat.sphinx.concept_network_query_lightning.model.balance.BalanceDto
-import chat.sphinx.concept_network_query_lightning.model.channel.ChannelDto
 import chat.sphinx.concept_network_query_lightning.model.channel.ChannelsDto
 import chat.sphinx.concept_network_query_lightning.model.invoice.InvoicesDto
 import chat.sphinx.concept_relay.RelayDataHandler
@@ -14,7 +13,7 @@ import chat.sphinx.feature_network_query_lightning.model.GetBalanceAllRelayRespo
 import chat.sphinx.feature_network_query_lightning.model.GetBalanceRelayResponse
 import chat.sphinx.feature_network_query_lightning.model.GetChannelsRelayResponse
 import chat.sphinx.feature_network_query_lightning.model.GetInvoicesRelayResponse
-import chat.sphinx.kotlin_response.KotlinResponse
+import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.network_relay_call.RelayCall
@@ -54,10 +53,10 @@ class NetworkQueryLightningImpl(
         relayDataHandler.retrieveRelayUrlAndJavaWebToken().let { response ->
             @Exhaustive
             when (response) {
-                is KotlinResponse.Error -> {
+                is Response.Error -> {
                     emit(response)
                 }
-                is KotlinResponse.Success -> {
+                is Response.Success -> {
                     emitAll(
                         getInvoices(response.value.first, response.value.second)
                     )
@@ -83,10 +82,10 @@ class NetworkQueryLightningImpl(
         relayDataHandler.retrieveRelayUrlAndJavaWebToken().let { response ->
             @Exhaustive
             when (response) {
-                is KotlinResponse.Error -> {
+                is Response.Error -> {
                     emit(response)
                 }
-                is KotlinResponse.Success -> {
+                is Response.Success -> {
                     emitAll(
                         getChannels(response.value.first, response.value.second)
                     )
@@ -112,10 +111,10 @@ class NetworkQueryLightningImpl(
         relayDataHandler.retrieveRelayUrlAndJavaWebToken().let { response ->
             @Exhaustive
             when (response) {
-                is KotlinResponse.Error -> {
+                is Response.Error -> {
                     emit(response)
                 }
-                is KotlinResponse.Success -> {
+                is Response.Success -> {
                     emitAll(
                         getBalance(response.value.first, response.value.second)
                     )
@@ -141,10 +140,10 @@ class NetworkQueryLightningImpl(
         relayDataHandler.retrieveRelayUrlAndJavaWebToken().let { response ->
             @Exhaustive
             when (response) {
-                is KotlinResponse.Error -> {
+                is Response.Error -> {
                     emit(response)
                 }
-                is KotlinResponse.Success -> {
+                is Response.Success -> {
                     emitAll(
                         getBalanceAll(response.value.first, response.value.second)
                     )

@@ -3,7 +3,7 @@ package chat.sphinx.authentication
 import chat.sphinx.concept_crypto_rsa.KeySize
 import chat.sphinx.concept_crypto_rsa.PKCSType
 import chat.sphinx.concept_crypto_rsa.RSA
-import chat.sphinx.kotlin_response.KotlinResponse
+import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.exception
 import chat.sphinx.kotlin_response.message
 import io.matthewnelson.concept_encryption_key.EncryptionKey
@@ -56,7 +56,7 @@ class SphinxEncryptionKeyHandler @Inject constructor(
              pkcsType = PKCSType.PKCS1,
          )
 
-        if (response is KotlinResponse.Success) {
+        if (response is Response.Success) {
             return copyAndStoreKey(
                 response.value.privateKey.value,
                 response.value.publicKey.value,
@@ -64,7 +64,7 @@ class SphinxEncryptionKeyHandler @Inject constructor(
                 response.value.privateKey.value.fill('0')
             }
         } else {
-            throw (response as KotlinResponse.Error).exception
+            throw (response as Response.Error).exception
                 ?: EncryptionKeyException(response.message)
         }
     }

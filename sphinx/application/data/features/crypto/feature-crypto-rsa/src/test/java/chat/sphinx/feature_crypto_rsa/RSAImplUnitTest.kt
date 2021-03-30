@@ -2,7 +2,7 @@ package chat.sphinx.feature_crypto_rsa
 
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_crypto_rsa.*
-import chat.sphinx.kotlin_response.KotlinResponse
+import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.exception
 import chat.sphinx.kotlin_response.message
@@ -65,7 +65,7 @@ class RSAImplUnitTest: NetworkQueryTestHelper() {
         rsa.generateKeyPair(keySize, dispatchers.default, pkcsType).let { response ->
             @Exhaustive
             when (response) {
-                is KotlinResponse.Error -> {
+                is Response.Error -> {
                     println(response.message)
                     response.exception?.printStackTrace()
                     throw AssertionError(
@@ -77,7 +77,7 @@ class RSAImplUnitTest: NetworkQueryTestHelper() {
                         response.exception
                     )
                 }
-                is KotlinResponse.Success -> {
+                is Response.Success -> {
                     return response.value
                 }
             }
@@ -96,7 +96,7 @@ class RSAImplUnitTest: NetworkQueryTestHelper() {
         ).let { response ->
             @Exhaustive
             when (response) {
-                is KotlinResponse.Error -> {
+                is Response.Error -> {
                     println(response.message)
                     response.exception?.printStackTrace()
                     throw AssertionError(
@@ -107,7 +107,7 @@ class RSAImplUnitTest: NetworkQueryTestHelper() {
                         response.exception
                     )
                 }
-                is KotlinResponse.Success -> {
+                is Response.Success -> {
                     return response.value
                 }
             }
@@ -128,7 +128,7 @@ class RSAImplUnitTest: NetworkQueryTestHelper() {
         ).let { response ->
             @Exhaustive
             when (response) {
-                is KotlinResponse.Error -> {
+                is Response.Error -> {
                     println(response.message)
                     response.exception?.printStackTrace()
                     throw AssertionError(
@@ -139,7 +139,7 @@ class RSAImplUnitTest: NetworkQueryTestHelper() {
                         response.exception
                     )
                 }
-                is KotlinResponse.Success -> {
+                is Response.Success -> {
                     return response.value
                 }
             }
@@ -158,7 +158,7 @@ class RSAImplUnitTest: NetworkQueryTestHelper() {
         ).let { response ->
             @Exhaustive
             when (response) {
-                is KotlinResponse.Error -> {
+                is Response.Error -> {
                     println(response.message)
                     response.exception?.printStackTrace()
                     throw AssertionError(
@@ -169,7 +169,7 @@ class RSAImplUnitTest: NetworkQueryTestHelper() {
                         response.exception
                     )
                 }
-                is KotlinResponse.Success -> {
+                is Response.Success -> {
                     return response.value
                 }
             }
@@ -186,7 +186,7 @@ class RSAImplUnitTest: NetworkQueryTestHelper() {
             dispatcher = dispatchers.default
         ).let { response ->
             when (response) {
-                is KotlinResponse.Error -> {
+                is Response.Error -> {
                     println(response.message)
                     response.exception?.printStackTrace()
                     throw AssertionError(
@@ -197,7 +197,7 @@ class RSAImplUnitTest: NetworkQueryTestHelper() {
                         response.exception
                     )
                 }
-                is KotlinResponse.Success -> {
+                is Response.Success -> {
                     return response.value
                 }
             }
@@ -220,12 +220,12 @@ class RSAImplUnitTest: NetworkQueryTestHelper() {
                 nqMessage.getMessages(MessagePagination.instantiate(100, 500, null)).collect { response ->
                     @Exhaustive
                     when (response) {
-                        is KotlinResponse.Error -> {
+                        is Response.Error -> {
                             println(response.message)
                             response.exception?.printStackTrace()
                             Assert.fail()
                         }
-                        is KotlinResponse.Success -> {
+                        is Response.Success -> {
                             var breakPlease = 0
 
                             for (message in response.value.new_messages) {

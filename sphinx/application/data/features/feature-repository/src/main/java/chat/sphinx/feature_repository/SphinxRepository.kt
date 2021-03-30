@@ -9,7 +9,7 @@ import chat.sphinx.concept_network_query_chat.NetworkQueryChat
 import chat.sphinx.feature_repository.mappers.chat.ChatDboPresenterMapper
 import chat.sphinx.feature_repository.mappers.chat.ChatDtoDboMapper
 import chat.sphinx.feature_repository.mappers.mapListFrom
-import chat.sphinx.kotlin_response.KotlinResponse
+import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.wrapper_chat.Chat
@@ -74,10 +74,10 @@ class SphinxRepository(
 
             @Exhaustive
             when (loadResponse) {
-                is KotlinResponse.Error -> {
+                is Response.Error -> {
                     emit(loadResponse)
                 }
-                is KotlinResponse.Success -> {
+                is Response.Success -> {
 
                     try {
 
@@ -112,17 +112,17 @@ class SphinxRepository(
                             }
                         }
 
-                        emit(KotlinResponse.Success(true))
+                        emit(Response.Success(true))
 
                     } catch (e: IllegalArgumentException) {
                         emit(
-                            KotlinResponse.Error(
+                            Response.Error(
                                 ResponseError("Failed to convert Json from Relay", e)
                             )
                         )
                     } catch (e: ParseException) {
                         emit(
-                            KotlinResponse.Error(
+                            Response.Error(
                                 ResponseError("Failed to convert date/time from SphinxRelay", e)
                             )
                         )

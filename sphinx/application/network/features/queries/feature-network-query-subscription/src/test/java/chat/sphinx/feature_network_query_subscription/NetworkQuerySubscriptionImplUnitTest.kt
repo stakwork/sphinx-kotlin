@@ -2,7 +2,7 @@ package chat.sphinx.feature_network_query_subscription
 
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_network_query_subscription.model.SubscriptionDto
-import chat.sphinx.kotlin_response.KotlinResponse
+import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.exception
 import chat.sphinx.kotlin_response.message
@@ -23,12 +23,12 @@ class NetworkQuerySubscriptionImplUnitTest: NetworkQueryTestHelper() {
 
                     @Exhaustive
                     when (loadResponse) {
-                        is KotlinResponse.Error -> {
+                        is Response.Error -> {
                             // will fail on error
                             loadResponse.exception?.printStackTrace()
                             Assert.fail(loadResponse.message)
                         }
-                        is KotlinResponse.Success -> {}
+                        is Response.Success -> {}
                         is LoadResponse.Loading -> {}
                     }
 
@@ -46,12 +46,12 @@ class NetworkQuerySubscriptionImplUnitTest: NetworkQueryTestHelper() {
 
                     @Exhaustive
                     when (loadResponse) {
-                        is KotlinResponse.Error -> {
+                        is Response.Error -> {
                             // will fail on error
                             loadResponse.exception?.printStackTrace()
                             Assert.fail(loadResponse.message)
                         }
-                        is KotlinResponse.Success -> {
+                        is Response.Success -> {
                             subscription = loadResponse.value.lastOrNull()
                         }
                         is LoadResponse.Loading -> {}
@@ -64,12 +64,12 @@ class NetworkQuerySubscriptionImplUnitTest: NetworkQueryTestHelper() {
 
                         @Exhaustive
                         when (loadResponse) {
-                            is KotlinResponse.Error -> {
+                            is Response.Error -> {
                                 // will fail on error
                                 loadResponse.exception?.printStackTrace()
                                 Assert.fail(loadResponse.message)
                             }
-                            is KotlinResponse.Success -> {
+                            is Response.Success -> {
                                 // should return the same object
                                 Assert.assertEquals(
                                     nnSub.toString(),
@@ -94,12 +94,12 @@ class NetworkQuerySubscriptionImplUnitTest: NetworkQueryTestHelper() {
 
                     @Exhaustive
                     when (loadResponse) {
-                        is KotlinResponse.Error -> {
+                        is Response.Error -> {
                             // will fail on error
                             loadResponse.exception?.printStackTrace()
                             Assert.fail(loadResponse.message)
                         }
-                        is KotlinResponse.Success -> {
+                        is Response.Success -> {
                             lastSubIdPlus1 = (loadResponse.value.lastOrNull()?.id ?: 0L) + 1L
                         }
                         is LoadResponse.Loading -> {}
@@ -111,7 +111,7 @@ class NetworkQuerySubscriptionImplUnitTest: NetworkQueryTestHelper() {
 
                     @Exhaustive
                     when (loadResponse) {
-                        is KotlinResponse.Error -> {
+                        is Response.Error -> {
                             // an error should be returned as that Id does not exist
                             Assert.assertTrue(
 //                                Print statement:
@@ -119,7 +119,7 @@ class NetworkQuerySubscriptionImplUnitTest: NetworkQueryTestHelper() {
                                 loadResponse.cause.exception?.message?.contains("code=400") == true
                             )
                         }
-                        is KotlinResponse.Success -> {
+                        is Response.Success -> {
                             Assert.fail()
                         }
                         LoadResponse.Loading -> {}

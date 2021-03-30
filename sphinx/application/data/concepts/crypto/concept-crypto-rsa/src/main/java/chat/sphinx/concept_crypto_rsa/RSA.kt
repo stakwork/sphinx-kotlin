@@ -1,6 +1,6 @@
 package chat.sphinx.concept_crypto_rsa
 
-import chat.sphinx.kotlin_response.KotlinResponse
+import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
 import io.matthewnelson.k_openssl_common.clazzes.EncryptedString
 import io.matthewnelson.k_openssl_common.clazzes.UnencryptedByteArray
@@ -24,7 +24,7 @@ abstract class RSA {
         keySize: KeySize = KeySize._2048,
         dispatcher: CoroutineDispatcher? = Dispatchers.Default,
         pkcsType: PKCSType = PKCSType.PKCS1,
-    ): KotlinResponse<RSAKeyPair, ResponseError>
+    ): Response<RSAKeyPair, ResponseError>
 
     /**
      * Decrypts a base64 encoded [EncryptedString] value
@@ -37,7 +37,7 @@ abstract class RSA {
         rsaPrivateKey: RsaPrivateKey,
         text: EncryptedString,
         dispatcher: CoroutineDispatcher = Dispatchers.Default,
-    ): KotlinResponse<UnencryptedByteArray, ResponseError>
+    ): Response<UnencryptedByteArray, ResponseError>
 
     /**
      * Encrypts an [UnencryptedString] value and returns a base64 encoded [EncryptedString]
@@ -52,17 +52,17 @@ abstract class RSA {
         text: UnencryptedString,
         formatOutput: Boolean = false,
         dispatcher: CoroutineDispatcher = Dispatchers.Default
-    ): KotlinResponse<EncryptedString, ResponseError>
+    ): Response<EncryptedString, ResponseError>
 
     abstract suspend fun sign(
         rsaPrivateKey: RsaPrivateKey,
         text: String,
         dispatcher: CoroutineDispatcher = Dispatchers.Default
-    ): KotlinResponse<RsaSignedString, ResponseError>
+    ): Response<RsaSignedString, ResponseError>
 
     abstract suspend fun verifySignature(
         rsaPublicKey: RsaPublicKey,
         signedString: RsaSignedString,
         dispatcher: CoroutineDispatcher = Dispatchers.Default
-    ): KotlinResponse<Boolean, ResponseError>
+    ): Response<Boolean, ResponseError>
 }

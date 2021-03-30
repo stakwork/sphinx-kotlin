@@ -8,7 +8,7 @@ import chat.sphinx.concept_relay.RelayDataHandler
 import chat.sphinx.concept_relay.retrieveRelayUrlAndJavaWebToken
 import chat.sphinx.feature_network_query_chat.model.GetChatsRelayResponse
 import chat.sphinx.kotlin_response.ResponseError
-import chat.sphinx.kotlin_response.KotlinResponse
+import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.network_relay_call.RelayCall
 import chat.sphinx.wrapper_relay.JavaWebToken
@@ -40,10 +40,10 @@ class NetworkQueryChatImpl(
         relayDataHandler.retrieveRelayUrlAndJavaWebToken().let { response ->
             @Exhaustive
             when (response) {
-                is KotlinResponse.Error -> {
+                is Response.Error -> {
                     emit(response)
                 }
-                is KotlinResponse.Success -> {
+                is Response.Success -> {
                     emitAll(
                         getChats(response.value.first, response.value.second)
                     )
