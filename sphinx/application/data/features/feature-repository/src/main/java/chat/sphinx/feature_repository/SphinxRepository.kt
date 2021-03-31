@@ -159,23 +159,23 @@ class SphinxRepository(
         MessageDboPresenterMapper(dispatchers)
     }
 
-    override suspend fun getLatestMessageForChatById(chatId: ChatId): Flow<Message?> {
+    override suspend fun getLatestMessageForChat(chatId: ChatId): Flow<Message?> {
         TODO("Not yet implemented")
     }
 
-    override suspend fun getLatestMessageForChatByUUID(chatUUID: ChatUUID): Flow<Message?> {
+    override suspend fun getLatestMessageForChat(chatUUID: ChatUUID): Flow<Message?> {
         TODO("Not yet implemented")
     }
 
-    override suspend fun getNumberUnseenMessagesForChatById(chatId: ChatId): Flow<Int> {
+    override suspend fun getNumberUnseenMessagesForChat(chatId: ChatId): Flow<Int> {
         TODO("Not yet implemented")
     }
 
-    override suspend fun getNumberUnseenMessagesForChatByUUID(chatUUID: ChatUUID): Flow<Int> {
+    override suspend fun getNumberUnseenMessagesForChat(chatUUID: ChatUUID): Flow<Int> {
         TODO("Not yet implemented")
     }
 
-    override suspend fun getMessagesForChatById(
+    override suspend fun getMessagesForChat(
         chatId: ChatId,
         limit: Int,
         offset: Int
@@ -183,7 +183,7 @@ class SphinxRepository(
         TODO("Not yet implemented")
     }
 
-    override suspend fun getMessagesForChatByUUID(
+    override suspend fun getMessagesForChat(
         chatUUID: ChatUUID,
         limit: Int,
         offset: Int
