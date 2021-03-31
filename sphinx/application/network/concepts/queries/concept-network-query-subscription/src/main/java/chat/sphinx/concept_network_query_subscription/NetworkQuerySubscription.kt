@@ -5,7 +5,7 @@ import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.wrapper_common.contact.ContactId
 import chat.sphinx.wrapper_common.subscription.SubscriptionId
-import chat.sphinx.wrapper_relay.JavaWebToken
+import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
 import kotlinx.coroutines.flow.Flow
 
@@ -17,7 +17,7 @@ abstract class NetworkQuerySubscription {
     abstract fun getSubscriptions(): Flow<LoadResponse<List<SubscriptionDto>, ResponseError>>
 
     abstract fun getSubscriptions(
-        javaWebToken: JavaWebToken,
+        authorizationToken: AuthorizationToken,
         relayUrl: RelayUrl,
     ): Flow<LoadResponse<List<SubscriptionDto>, ResponseError>>
 
@@ -26,7 +26,7 @@ abstract class NetworkQuerySubscription {
     ): Flow<LoadResponse<SubscriptionDto, ResponseError>>
 
     abstract fun getSubscriptionById(
-        javaWebToken: JavaWebToken,
+        authorizationToken: AuthorizationToken,
         relayUrl: RelayUrl,
         subscriptionId: SubscriptionId,
     ): Flow<LoadResponse<SubscriptionDto, ResponseError>>
@@ -36,7 +36,7 @@ abstract class NetworkQuerySubscription {
     ): Flow<LoadResponse<List<SubscriptionDto>, ResponseError>>
 
     abstract fun getSubscriptionsByContactId(
-        javaWebToken: JavaWebToken,
+        authorizationToken: AuthorizationToken,
         relayUrl: RelayUrl,
         contactId: ContactId,
     ): Flow<LoadResponse<List<SubscriptionDto>, ResponseError>>

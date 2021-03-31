@@ -10,7 +10,7 @@ import chat.sphinx.feature_coredb.CoreDBImpl
 import chat.sphinx.feature_crypto_rsa.rsa.RSAImpl
 import chat.sphinx.feature_relay.RelayDataHandlerImpl
 import chat.sphinx.key_restore.KeyRestoreResponse
-import chat.sphinx.wrapper_relay.JavaWebToken
+import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
 import com.squareup.sqldelight.android.AndroidSqliteDriver
 import com.squareup.sqldelight.db.SqlDriver
@@ -107,7 +107,7 @@ class SphinxKeyRestoreUnitTest: CoroutineTestHelper() {
         val TEST_PUBLIC_KEY = Password("asdfoinavanlgknlgnlkanslgigjo23weojpasjd".toCharArray())
         val TEST_PIN = "012345".toCharArray()
         val RAW_RELAY_URL = RelayUrl("https://chat.sphinx.something-relay:3001")
-        val RAW_RELAY_JWT = JavaWebToken("ginoi3n4k5podb4")
+        val RAW_RELAY_JWT = AuthorizationToken("ginoi3n4k5podb4")
     }
 
     @Before

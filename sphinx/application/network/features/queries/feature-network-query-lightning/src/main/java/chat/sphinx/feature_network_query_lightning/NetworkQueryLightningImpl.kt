@@ -8,7 +8,7 @@ import chat.sphinx.concept_network_query_lightning.model.balance.BalanceDto
 import chat.sphinx.concept_network_query_lightning.model.channel.ChannelsDto
 import chat.sphinx.concept_network_query_lightning.model.invoice.InvoicesDto
 import chat.sphinx.concept_relay.RelayDataHandler
-import chat.sphinx.concept_relay.retrieveRelayUrlAndJavaWebToken
+import chat.sphinx.concept_relay.retrieveRelayUrlAndAuthorizationToken
 import chat.sphinx.feature_network_query_lightning.model.GetBalanceAllRelayResponse
 import chat.sphinx.feature_network_query_lightning.model.GetBalanceRelayResponse
 import chat.sphinx.feature_network_query_lightning.model.GetChannelsRelayResponse
@@ -17,7 +17,7 @@ import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.network_relay_call.RelayCall
-import chat.sphinx.wrapper_relay.JavaWebToken
+import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
 import com.squareup.moshi.Moshi
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
@@ -50,7 +50,7 @@ class NetworkQueryLightningImpl(
     /// GET ///
     ///////////
     override fun getInvoices(): Flow<LoadResponse<InvoicesDto, ResponseError>> = flow {
-        relayDataHandler.retrieveRelayUrlAndJavaWebToken().let { response ->
+        relayDataHandler.retrieveRelayUrlAndAuthorizationToken().let { response ->
             @Exhaustive
             when (response) {
                 is Response.Error -> {
@@ -66,12 +66,12 @@ class NetworkQueryLightningImpl(
     }
 
     override fun getInvoices(
-        javaWebToken: JavaWebToken,
+        authorizationToken: AuthorizationToken,
         relayUrl: RelayUrl
     ): Flow<LoadResponse<InvoicesDto, ResponseError>> =
         RelayCall.Get.execute(
             dispatchers = dispatchers,
-            jwt = javaWebToken,
+            jwt = authorizationToken,
             moshi = moshi,
             adapterClass = GetInvoicesRelayResponse::class.java,
             networkClient = networkClient,
@@ -79,7 +79,7 @@ class NetworkQueryLightningImpl(
         )
 
     override fun getChannels(): Flow<LoadResponse<ChannelsDto, ResponseError>> = flow {
-        relayDataHandler.retrieveRelayUrlAndJavaWebToken().let { response ->
+        relayDataHandler.retrieveRelayUrlAndAuthorizationToken().let { response ->
             @Exhaustive
             when (response) {
                 is Response.Error -> {
@@ -95,12 +95,12 @@ class NetworkQueryLightningImpl(
     }
 
     override fun getChannels(
-        javaWebToken: JavaWebToken,
+        authorizationToken: AuthorizationToken,
         relayUrl: RelayUrl
     ): Flow<LoadResponse<ChannelsDto, ResponseError>> =
         RelayCall.Get.execute(
             dispatchers = dispatchers,
-            jwt = javaWebToken,
+            jwt = authorizationToken,
             moshi = moshi,
             adapterClass = GetChannelsRelayResponse::class.java,
             networkClient = networkClient,
@@ -108,7 +108,7 @@ class NetworkQueryLightningImpl(
         )
 
     override fun getBalance(): Flow<LoadResponse<BalanceDto, ResponseError>> = flow {
-        relayDataHandler.retrieveRelayUrlAndJavaWebToken().let { response ->
+        relayDataHandler.retrieveRelayUrlAndAuthorizationToken().let { response ->
             @Exhaustive
             when (response) {
                 is Response.Error -> {
@@ -124,12 +124,12 @@ class NetworkQueryLightningImpl(
     }
 
     override fun getBalance(
-        javaWebToken: JavaWebToken,
+        authorizationToken: AuthorizationToken,
         relayUrl: RelayUrl
     ): Flow<LoadResponse<BalanceDto, ResponseError>> =
         RelayCall.Get.execute(
             dispatchers = dispatchers,
-            jwt = javaWebToken,
+            jwt = authorizationToken,
             moshi = moshi,
             adapterClass = GetBalanceRelayResponse::class.java,
             networkClient = networkClient,
@@ -137,7 +137,7 @@ class NetworkQueryLightningImpl(
         )
 
     override fun getBalanceAll(): Flow<LoadResponse<BalanceAllDto, ResponseError>> = flow {
-        relayDataHandler.retrieveRelayUrlAndJavaWebToken().let { response ->
+        relayDataHandler.retrieveRelayUrlAndAuthorizationToken().let { response ->
             @Exhaustive
             when (response) {
                 is Response.Error -> {
@@ -153,12 +153,12 @@ class NetworkQueryLightningImpl(
     }
 
     override fun getBalanceAll(
-        javaWebToken: JavaWebToken,
+        authorizationToken: AuthorizationToken,
         relayUrl: RelayUrl
     ): Flow<LoadResponse<BalanceAllDto, ResponseError>> =
         RelayCall.Get.execute(
             dispatchers = dispatchers,
-            jwt = javaWebToken,
+            jwt = authorizationToken,
             moshi = moshi,
             adapterClass = GetBalanceAllRelayResponse::class.java,
             networkClient = networkClient,

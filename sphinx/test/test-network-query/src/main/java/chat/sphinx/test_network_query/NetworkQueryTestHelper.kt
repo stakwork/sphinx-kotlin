@@ -16,7 +16,7 @@ import chat.sphinx.feature_network_query_lightning.NetworkQueryLightningImpl
 import chat.sphinx.feature_network_query_message.NetworkQueryMessageImpl
 import chat.sphinx.feature_network_query_subscription.NetworkQuerySubscriptionImpl
 import chat.sphinx.feature_relay.RelayDataHandlerImpl
-import chat.sphinx.wrapper_relay.JavaWebToken
+import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
 import com.squareup.moshi.Moshi
 import io.matthewnelson.build_config.BuildConfigDebug
@@ -45,7 +45,7 @@ abstract class NetworkQueryTestHelper: AuthenticationCoreDefaultsTestHelper() {
         protected var privKey: String? = null
         protected var pubKey: String? = null
         protected var relayUrl: RelayUrl? = null
-        protected var javaWebToken: JavaWebToken? = null
+        protected var authorizationToken: AuthorizationToken? = null
 
         @BeforeClass
         @JvmStatic
@@ -89,7 +89,7 @@ abstract class NetworkQueryTestHelper: AuthenticationCoreDefaultsTestHelper() {
                         privKey = decryptedSplit[0]
                         pubKey = decryptedSplit[1]
                         relayUrl = RelayUrl(decryptedSplit[2])
-                        javaWebToken = JavaWebToken(decryptedSplit[3])
+                        authorizationToken = AuthorizationToken(decryptedSplit[3])
                     }
                 }
         }
@@ -99,7 +99,7 @@ abstract class NetworkQueryTestHelper: AuthenticationCoreDefaultsTestHelper() {
         val privKey: String,
         val pubKey: String,
         val relayUrl: RelayUrl,
-        val jwt: JavaWebToken,
+        val jwt: AuthorizationToken,
     )
 
     /**
@@ -113,7 +113,7 @@ abstract class NetworkQueryTestHelper: AuthenticationCoreDefaultsTestHelper() {
         privKey?.let { nnPrivKey ->
             pubKey?.let { nnPubKey ->
                 relayUrl?.let { nnRelayUrl ->
-                    javaWebToken?.let { nnJwt ->
+                    authorizationToken?.let { nnJwt ->
                         Credentials(
                             nnPrivKey,
                             nnPubKey,
@@ -219,7 +219,7 @@ abstract class NetworkQueryTestHelper: AuthenticationCoreDefaultsTestHelper() {
             login()
 
             // persist our relay url and java web token to test storage
-            relayDataHandler.persistJavaWebToken(creds.jwt)
+            relayDataHandler.persistAuthorizationToken(creds.jwt)
             relayDataHandler.persistRelayUrl(creds.relayUrl)
         }
 

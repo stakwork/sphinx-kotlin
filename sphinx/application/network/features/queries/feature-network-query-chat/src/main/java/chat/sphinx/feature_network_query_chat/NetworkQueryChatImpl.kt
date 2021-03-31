@@ -5,13 +5,13 @@ import chat.sphinx.concept_network_client.NetworkClient
 import chat.sphinx.concept_network_query_chat.model.ChatDto
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
 import chat.sphinx.concept_relay.RelayDataHandler
-import chat.sphinx.concept_relay.retrieveRelayUrlAndJavaWebToken
+import chat.sphinx.concept_relay.retrieveRelayUrlAndAuthorizationToken
 import chat.sphinx.feature_network_query_chat.model.GetChatsRelayResponse
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.network_relay_call.RelayCall
-import chat.sphinx.wrapper_relay.JavaWebToken
+import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
 import com.squareup.moshi.Moshi
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
@@ -37,7 +37,7 @@ class NetworkQueryChatImpl(
     /// GET ///
     ///////////
     override fun getChats(): Flow<LoadResponse<List<ChatDto>, ResponseError>> = flow {
-        relayDataHandler.retrieveRelayUrlAndJavaWebToken().let { response ->
+        relayDataHandler.retrieveRelayUrlAndAuthorizationToken().let { response ->
             @Exhaustive
             when (response) {
                 is Response.Error -> {
@@ -53,12 +53,12 @@ class NetworkQueryChatImpl(
     }
 
     override fun getChats(
-        javaWebToken: JavaWebToken,
+        authorizationToken: AuthorizationToken,
         relayUrl: RelayUrl
     ): Flow<LoadResponse<List<ChatDto>, ResponseError>> =
         RelayCall.Get.execute(
             dispatchers = dispatchers,
-            jwt = javaWebToken,
+            jwt = authorizationToken,
             moshi = moshi,
             adapterClass = GetChatsRelayResponse::class.java,
             networkClient = networkClient,

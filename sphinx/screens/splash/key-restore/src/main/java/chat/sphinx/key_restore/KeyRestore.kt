@@ -1,6 +1,6 @@
 package chat.sphinx.key_restore
 
-import chat.sphinx.wrapper_relay.JavaWebToken
+import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
 import io.matthewnelson.k_openssl_common.clazzes.Password
 import kotlinx.coroutines.flow.Flow
@@ -16,6 +16,6 @@ abstract class KeyRestore {
         publicKey: Password,
         userPin: CharArray,
         relayUrl: RelayUrl,
-        jwt: JavaWebToken
+        authorizationToken: AuthorizationToken
     ): Flow<KeyRestoreResponse>
 }

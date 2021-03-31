@@ -1,6 +1,6 @@
 package chat.sphinx.authentication
 
-import chat.sphinx.wrapper_relay.JavaWebToken
+import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
 import chat.sphinx.feature_relay.RelayDataHandlerImpl
 import chat.sphinx.key_restore.KeyRestore
@@ -27,7 +27,7 @@ class SphinxKeyRestore @Inject constructor(
         publicKey: Password,
         userPin: CharArray,
         relayUrl: RelayUrl,
-        jwt: JavaWebToken,
+        authorizationToken: AuthorizationToken,
     ): Flow<KeyRestoreResponse> = flow {
         when {
             authenticationManager.isAnEncryptionKeySet() -> {
@@ -46,7 +46,7 @@ class SphinxKeyRestore @Inject constructor(
                         publicKey,
                         userPin,
                         relayUrl,
-                        jwt,
+                        authorizationToken,
                     )
                 )
             }
@@ -58,7 +58,7 @@ class SphinxKeyRestore @Inject constructor(
         publicKey: Password,
         userPin: CharArray,
         relayUrl: RelayUrl,
-        jwt: JavaWebToken
+        jwt: AuthorizationToken
     ): Flow<KeyRestoreResponse> = flow {
         // authenticating the first time will return a SetKeyFirstTime response
         val request = AuthenticationRequest.LogIn(privateKey = null)

@@ -38,7 +38,7 @@ import chat.sphinx.wrapper_common.lightning.Sat
 
 class ChatDto(
     val id: ChatId,
-    val uuid: ChatUUID,
+//    val uuid: ChatUUID,
     val name: ChatName?,
     val photoUrl: PhotoUrl?,
     val type: ChatType,

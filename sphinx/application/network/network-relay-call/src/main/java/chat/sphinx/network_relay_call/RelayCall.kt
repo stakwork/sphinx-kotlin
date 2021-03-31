@@ -4,7 +4,7 @@ import chat.sphinx.concept_network_client.NetworkClient
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.ResponseError
-import chat.sphinx.wrapper_relay.JavaWebToken
+import chat.sphinx.wrapper_relay.AuthorizationToken
 import com.squareup.moshi.Moshi
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.flow.Flow
@@ -20,7 +20,7 @@ sealed class RelayCall {
         @Suppress("BlockingMethodInNonBlockingContext")
         fun<T: Any, V: RelayResponse<T>> execute(
             dispatchers: CoroutineDispatchers,
-            jwt: JavaWebToken,
+            jwt: AuthorizationToken,
             moshi: Moshi,
             adapterClass: Class<V>,
             networkClient: NetworkClient,

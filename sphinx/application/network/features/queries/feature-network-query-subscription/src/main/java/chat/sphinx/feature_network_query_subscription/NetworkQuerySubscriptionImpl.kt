@@ -5,7 +5,7 @@ import chat.sphinx.concept_network_client.NetworkClient
 import chat.sphinx.concept_network_query_subscription.NetworkQuerySubscription
 import chat.sphinx.concept_network_query_subscription.model.SubscriptionDto
 import chat.sphinx.concept_relay.RelayDataHandler
-import chat.sphinx.concept_relay.retrieveRelayUrlAndJavaWebToken
+import chat.sphinx.concept_relay.retrieveRelayUrlAndAuthorizationToken
 import chat.sphinx.feature_network_query_subscription.model.GetSubscriptionRelayResponse
 import chat.sphinx.feature_network_query_subscription.model.GetSubscriptionsRelayResponse
 import chat.sphinx.kotlin_response.Response
@@ -14,7 +14,7 @@ import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.network_relay_call.RelayCall
 import chat.sphinx.wrapper_common.contact.ContactId
 import chat.sphinx.wrapper_common.subscription.SubscriptionId
-import chat.sphinx.wrapper_relay.JavaWebToken
+import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
 import com.squareup.moshi.Moshi
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
@@ -38,7 +38,7 @@ class NetworkQuerySubscriptionImpl(
     /// GET ///
     ///////////
     override fun getSubscriptions(): Flow<LoadResponse<List<SubscriptionDto>, ResponseError>> = flow {
-        relayDataHandler.retrieveRelayUrlAndJavaWebToken().let { response ->
+        relayDataHandler.retrieveRelayUrlAndAuthorizationToken().let { response ->
             @Exhaustive
             when (response) {
                 is Response.Error -> {
@@ -54,12 +54,12 @@ class NetworkQuerySubscriptionImpl(
     }
 
     override fun getSubscriptions(
-        javaWebToken: JavaWebToken,
+        authorizationToken: AuthorizationToken,
         relayUrl: RelayUrl
     ): Flow<LoadResponse<List<SubscriptionDto>, ResponseError>> =
         RelayCall.Get.execute(
             dispatchers = dispatchers,
-            jwt = javaWebToken,
+            jwt = authorizationToken,
             moshi = moshi,
             adapterClass = GetSubscriptionsRelayResponse::class.java,
             networkClient = networkClient,
@@ -69,7 +69,7 @@ class NetworkQuerySubscriptionImpl(
     override fun getSubscriptionById(
         subscriptionId: SubscriptionId
     ): Flow<LoadResponse<SubscriptionDto, ResponseError>> = flow {
-        relayDataHandler.retrieveRelayUrlAndJavaWebToken().let { response ->
+        relayDataHandler.retrieveRelayUrlAndAuthorizationToken().let { response ->
             @Exhaustive
             when (response) {
                 is Response.Error -> {
@@ -85,13 +85,13 @@ class NetworkQuerySubscriptionImpl(
     }
 
     override fun getSubscriptionById(
-        javaWebToken: JavaWebToken,
+        authorizationToken: AuthorizationToken,
         relayUrl: RelayUrl,
         subscriptionId: SubscriptionId
     ): Flow<LoadResponse<SubscriptionDto, ResponseError>> =
         RelayCall.Get.execute(
             dispatchers = dispatchers,
-            jwt = javaWebToken,
+            jwt = authorizationToken,
             moshi = moshi,
             adapterClass = GetSubscriptionRelayResponse::class.java,
             networkClient = networkClient,
@@ -101,7 +101,7 @@ class NetworkQuerySubscriptionImpl(
     override fun getSubscriptionsByContactId(
         contactId: ContactId
     ): Flow<LoadResponse<List<SubscriptionDto>, ResponseError>> = flow {
-        relayDataHandler.retrieveRelayUrlAndJavaWebToken().let { response ->
+        relayDataHandler.retrieveRelayUrlAndAuthorizationToken().let { response ->
             @Exhaustive
             when (response) {
                 is Response.Error -> {
@@ -117,13 +117,13 @@ class NetworkQuerySubscriptionImpl(
     }
 
     override fun getSubscriptionsByContactId(
-        javaWebToken: JavaWebToken,
+        authorizationToken: AuthorizationToken,
         relayUrl: RelayUrl,
         contactId: ContactId
     ): Flow<LoadResponse<List<SubscriptionDto>, ResponseError>> =
         RelayCall.Get.execute(
             dispatchers = dispatchers,
-            jwt = javaWebToken,
+            jwt = authorizationToken,
             moshi = moshi,
             adapterClass = GetSubscriptionsRelayResponse::class.java,
             networkClient = networkClient,

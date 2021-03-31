@@ -1,6 +1,6 @@
 package chat.sphinx.feature_relay
 
-import chat.sphinx.wrapper_relay.JavaWebToken
+import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.concept_relay.RelayDataHandler
 import chat.sphinx.wrapper_relay.RelayUrl
 import io.matthewnelson.k_openssl.KOpenSSL
@@ -30,8 +30,8 @@ class RelayDataHandlerImplUnitTest: AuthenticationCoreDefaultsTestHelper() {
         testDispatcher.runBlockingTest {
             Assert.assertFalse(relayHandler.persistRelayUrl(RelayUrl(RAW_URL)))
             Assert.assertNull(relayHandler.retrieveRelayUrl())
-            Assert.assertFalse(relayHandler.persistJavaWebToken(JavaWebToken(RAW_JWT)))
-            Assert.assertNull(relayHandler.retrieveJavaWebToken())
+            Assert.assertFalse(relayHandler.persistAuthorizationToken(AuthorizationToken(RAW_JWT)))
+            Assert.assertNull(relayHandler.retrieveAuthorizationToken())
         }
 
     @Test
@@ -44,8 +44,8 @@ class RelayDataHandlerImplUnitTest: AuthenticationCoreDefaultsTestHelper() {
                 Assert.assertTrue(KOpenSSL.isSalted(encryptedUrl))
             } ?: Assert.fail("Failed to persist relay url to storage")
 
-            Assert.assertTrue(relayHandler.persistJavaWebToken(JavaWebToken(RAW_JWT)))
-            testStorage.getString(RelayDataHandlerImpl.RELAY_JWT_KEY, null)?.let { encryptedJwt ->
+            Assert.assertTrue(relayHandler.persistAuthorizationToken(AuthorizationToken(RAW_JWT)))
+            testStorage.getString(RelayDataHandlerImpl.RELAY_AUTHORIZATION_KEY, null)?.let { encryptedJwt ->
                 Assert.assertTrue(KOpenSSL.isSalted(encryptedJwt))
             } ?: Assert.fail("Failed to persist relay jwt to storage")
         }
@@ -55,14 +55,14 @@ class RelayDataHandlerImplUnitTest: AuthenticationCoreDefaultsTestHelper() {
         testDispatcher.runBlockingTest {
             login()
 
-            relayHandler.persistJavaWebToken(JavaWebToken(RAW_JWT))
-            testStorage.getString(RelayDataHandlerImpl.RELAY_JWT_KEY, null)?.let { encryptedJwt ->
+            relayHandler.persistAuthorizationToken(AuthorizationToken(RAW_JWT))
+            testStorage.getString(RelayDataHandlerImpl.RELAY_AUTHORIZATION_KEY, null)?.let { encryptedJwt ->
                 Assert.assertTrue(KOpenSSL.isSalted(encryptedJwt))
             } ?: Assert.fail("Failed to persist relay jwt to storage")
 
-            relayHandler.persistJavaWebToken(null)
+            relayHandler.persistAuthorizationToken(null)
             val notInStorage = "NOT_IN_STORAGE"
-            testStorage.getString(RelayDataHandlerImpl.RELAY_JWT_KEY, notInStorage).let { jwt ->
+            testStorage.getString(RelayDataHandlerImpl.RELAY_AUTHORIZATION_KEY, notInStorage).let { jwt ->
                 // default value is returned if persisted value is null
                 if (jwt != notInStorage) {
                     Assert.fail("Java Web Token was not cleared from storage")
