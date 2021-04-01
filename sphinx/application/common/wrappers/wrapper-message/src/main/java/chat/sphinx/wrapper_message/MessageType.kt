@@ -275,13 +275,13 @@ inline fun Int.toMessageType(): MessageType =
 sealed class MessageType {
 
     companion object {
-        const val MESSAGE = 0
+        const val MESSAGE = 0 // SHOW
         const val CONFIRMATION = 1
-        const val INVOICE = 2
-        const val PAYMENT = 3
+        const val INVOICE = 2 // SHOW
+        const val PAYMENT = 3 // SHOW
         const val CANCELLATION = 4
-        const val DIRECT_PAYMENT = 5
-        const val ATTACHMENT = 6
+        const val DIRECT_PAYMENT = 5 // SHOW
+        const val ATTACHMENT = 6 // SHOW
         const val PURCHASE = 7
         const val PURCHASE_ACCEPT = 8
         const val PURCHASE_DENY = 9
@@ -289,8 +289,8 @@ sealed class MessageType {
         const val CONTACT_KEY_CONFIRMATION = 11
         const val GROUP_CREATE = 12
         const val GROUP_INVITE = 13
-        const val GROUP_JOIN = 14
-        const val GROUP_LEAVE = 15
+        const val GROUP_JOIN = 14 // SHOW
+        const val GROUP_LEAVE = 15 // SHOW
         const val GROUP_KICK = 16
         const val DELETE = 17
         const val REPAYMENT = 18
@@ -300,11 +300,11 @@ sealed class MessageType {
         const val TRIBE_DELETE = 22
         const val BOT_INSTALL = 23
         const val BOT_CMD = 24
-        const val BOT_RES = 25
+        const val BOT_RES = 25 // SHOW
         const val HEARTBEAT = 26
         const val HEARTBEAT_CONFIRMATION = 27
         const val KEY_SEND = 28
-        const val BOOST = 29
+        const val BOOST = 29 // SHOW
         const val QUERY = 30
         const val QUERY_RESPONSE = 31
 
