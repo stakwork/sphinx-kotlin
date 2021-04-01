@@ -56,6 +56,10 @@ class SphinxRepository(
     private val sphinxLogger: SphinxLogger,
 ): ChatRepository, MessageRepository {
 
+    companion object {
+        const val TAG: String = "SphinxRepository"
+    }
+
     /////////////
     /// Chats ///
     /////////////
@@ -125,6 +129,10 @@ class SphinxRepository(
 
                                         // remove remaining chat's from DB
                                         chatIdsToRemove.forEach { chatId ->
+                                            sphinxLogger.debug(
+                                                TAG,
+                                                "Removing Chats/Messages - chatId"
+                                            )
                                             queries.deleteChatById(chatId)
                                             queries.deleteMessagesByChatId(chatId)
                                         }
@@ -361,8 +369,9 @@ class SphinxRepository(
                                             val chatIds = queries.getAllChatIds().executeAsList()
 
                                             sphinxLogger.debug(
-                                                this@SphinxRepository.javaClass.simpleName,
-                                                "Inserting Message - ${dbos.firstOrNull()?.id?.value}" +
+                                                TAG,
+                                                "Inserting Messages -" +
+                                                        " ${dbos.firstOrNull()?.id?.value}" +
                                                         " - ${dbos.lastOrNull()?.id?.value}"
                                             )
 
