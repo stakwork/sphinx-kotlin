@@ -177,6 +177,12 @@ CREATE TABLE messageDbo(
     reply_uuid                  TEXT            AS ReplyUUID
 );
 
+getLatestMessageId:
+SELECT id
+FROM messageDbo
+ORDER BY id DESC
+LIMIT 1;
+
 -- If the message exists in the DB, it will update all fields _except_
 -- for message_content_decrypted as to not overwrite it.
 upsertMessage {
