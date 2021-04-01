@@ -8,9 +8,11 @@ dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
     // Kotlin Android
     implementation project(path: ':kotlin:concepts:concept-coroutines')
+    implementation project(path: ':kotlin:features:authentication:feature-authentication-core')
 
     // Sphinx
     implementation project(path: ':sphinx:application:data:concepts:concept-coredb')
+    implementation project(path: ':sphinx:application:data:concepts:crypto:concept-crypto-rsa')
     api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-chat')
     api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-message')
 

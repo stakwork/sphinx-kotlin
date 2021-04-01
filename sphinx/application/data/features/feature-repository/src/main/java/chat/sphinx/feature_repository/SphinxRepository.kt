@@ -3,6 +3,7 @@ package chat.sphinx.feature_repository
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_coredb.CoreDB
 import chat.sphinx.concept_coredb.util.upsertChat
+import chat.sphinx.concept_crypto_rsa.RSA
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
@@ -23,17 +24,20 @@ import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
 import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
+import io.matthewnelson.feature_authentication_core.AuthenticationCoreManager
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.withContext
 import java.text.ParseException
 
 class SphinxRepository(
+    private val authenticationCoreManager: AuthenticationCoreManager,
     private val coreDB: CoreDB,
     private val dispatchers: CoroutineDispatchers,
     private val networkQueryChat: NetworkQueryChat,
     private val networkQueryMessage: NetworkQueryMessage,
+    private val rsa: RSA,
 ): ChatRepository, MessageRepository {
 
     /////////////

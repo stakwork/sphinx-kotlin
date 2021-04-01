@@ -1,5 +1,6 @@
 package chat.sphinx.di
 
+import chat.sphinx.concept_crypto_rsa.RSA
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
@@ -12,6 +13,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
+import io.matthewnelson.feature_authentication_core.AuthenticationCoreManager
 import javax.inject.Singleton
 
 @Module
@@ -27,16 +29,20 @@ object RepositoryModule {
     @Provides
     @Singleton
     fun provideSphinxRepository(
+        authenticationCoreManager: AuthenticationCoreManager,
         coreDBImpl: CoreDBImpl,
         dispatchers: CoroutineDispatchers,
         networkQueryChat: NetworkQueryChat,
         networkQueryMessage: NetworkQueryMessage,
+        rsa: RSA,
     ): SphinxRepository =
         SphinxRepository(
+            authenticationCoreManager,
             coreDBImpl,
             dispatchers,
             networkQueryChat,
             networkQueryMessage,
+            rsa
         )
 
     @Provides
