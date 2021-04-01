@@ -23,7 +23,6 @@ internal class MessageDboPresenterMapper(
             date = value.date,
             expirationDate = value.expiration_date,
             messageContent = value.message_content,
-            messageContentDecrypted = value.message_content_decrypted,
             status = value.status,
             statusMap = value.status_map?.toMap(),
             mediaKey = value.media_key,
@@ -34,7 +33,11 @@ internal class MessageDboPresenterMapper(
             senderPic = value.sender_pic,
             originalMUID = value.original_muid,
             replyUUID = value.reply_uuid
-        )
+        ).also { message ->
+            value.message_content_decrypted?.let { decrypted ->
+                message.setMessageContentDecrypted(decrypted)
+            }
+        }
     }
 
     override suspend fun mapTo(value: Message): MessageDbo {

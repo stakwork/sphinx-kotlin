@@ -17,12 +17,16 @@ import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 
 internal class MessageDtoDboMapper(
     dispatchers: CoroutineDispatchers,
-): ClassMapper<Pair<MessageDto, MessageContentDecrypted?>, MessageDbo>(dispatchers) {
+): ClassMapper<MessageDto, MessageDbo>(dispatchers) {
 
-    override suspend fun mapFrom(value: Pair<MessageDto, MessageContentDecrypted?>): MessageDbo {
+    companion object {
+        const val NULL_CHAT_ID: Int = Int.MAX_VALUE
+    }
+
+    override suspend fun mapFrom(value: MessageDto): MessageDbo {
         return MessageDbo(
-            id = MessageId(value.first.id),
-            uuid = value.first.uuid?.toMessageUUID(),
+            id = MessageId(value.id),
+            uuid = value.uuid?.toMessageUUID(),
 
             // Messages off the wire with MessageType.Repayment (code 18) have a bug where
             // the ChatID is null. Repayment types are never shown to the user from the
@@ -35,42 +39,42 @@ internal class MessageDtoDboMapper(
             // It is highly doubtful that a user will reach 2147483647 chats; even if it is the
             // case (where it will be associated with an actual chat) MessageType.Repayment is
             // not displayed on the Chat screen.
-            chat_id = value.first.chat_id?.let {
+            chat_id = value.chat_id?.let {
                 ChatId(it)
-            } ?: value.first.chat?.id?.let {
+            } ?: value.chat?.id?.let {
                 ChatId(it)
-            } ?: ChatId(Int.MAX_VALUE.toLong()),
+            } ?: ChatId(NULL_CHAT_ID.toLong()),
 
-            type = value.first.type.toMessageType(),
-            sender = ContactId(value.first.sender),
-            receiver = value.first.receiver?.let { ContactId(it) },
-            amount = Sat(value.first.amount),
-            payment_hash = value.first.payment_hash?.toLightningPaymentHash(),
-            payment_request = value.first.payment_request?.toLightningPaymentRequest(),
-            date = value.first.date.toDateTime(),
-            expiration_date = value.first.expiration_date?.toDateTime(),
-            message_content = value.first.message_content?.toMessageContent(),
+            type = value.type.toMessageType(),
+            sender = ContactId(value.sender),
+            receiver = value.receiver?.let { ContactId(it) },
+            amount = Sat(value.amount),
+            payment_hash = value.payment_hash?.toLightningPaymentHash(),
+            payment_request = value.payment_request?.toLightningPaymentRequest(),
+            date = value.date.toDateTime(),
+            expiration_date = value.expiration_date?.toDateTime(),
+            message_content = value.message_content?.toMessageContent(),
 
             // Messages coming off the wire are decrypted if the Key is available (User
             // is logged in). If that is not the case (Key is not available), the message
             // is decrypted will be decrypted when going from a MessageDbo to a Message
-            message_content_decrypted = value.second,
+            message_content_decrypted = value.messageContentDecrypted?.toMessageContentDecrypted(),
 
-            status = value.first.status.toMessageStatus(),
-            status_map = value.first.status_map?.toMessageStatusMap()?.toList(),
-            media_key = value.first.mediaKey?.toMediaKey(),
-            media_type = value.first.mediaType?.toMediaType(),
-            media_token = value.first.mediaToken?.toMediaToken(),
-            seen = value.first.seen.toSeen(),
-            sender_alias = value.first.sender_alias?.toSenderAlias(),
-            sender_pic = value.first.sender_pic?.toPhotoUrl(),
-            original_muid = value.first.original_muid?.toMessageMUID(),
-            reply_uuid = value.first.reply_uuid?.toReplyUUID()
+            status = value.status.toMessageStatus(),
+            status_map = value.status_map?.toMessageStatusMap()?.toList(),
+            media_key = value.mediaKey?.toMediaKey(),
+            media_type = value.mediaType?.toMediaType(),
+            media_token = value.mediaToken?.toMediaToken(),
+            seen = value.seen.toSeen(),
+            sender_alias = value.sender_alias?.toSenderAlias(),
+            sender_pic = value.sender_pic?.toPhotoUrl(),
+            original_muid = value.original_muid?.toMessageMUID(),
+            reply_uuid = value.reply_uuid?.toReplyUUID()
         )
     }
 
     @Throws(IllegalArgumentException::class)
-    override suspend fun mapTo(value: MessageDbo): Pair<MessageDto, MessageContentDecrypted?> {
+    override suspend fun mapTo(value: MessageDbo): MessageDto {
         throw IllegalArgumentException("Going from a ChatDbo to ChatDto is not allowed")
     }
 }
