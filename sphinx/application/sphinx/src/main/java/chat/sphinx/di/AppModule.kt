@@ -1,7 +1,9 @@
 package chat.sphinx.di
 
 import chat.sphinx.BuildConfig
+import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.util.SphinxDispatchers
+import chat.sphinx.util.SphinxLoggerImpl
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -20,6 +22,12 @@ object AppModule {
         sphinxDispatchers: SphinxDispatchers
     ): CoroutineDispatchers =
         sphinxDispatchers
+
+    @Provides
+    fun provideSphinxLogger(
+        sphinxLoggerImpl: SphinxLoggerImpl
+    ): SphinxLogger =
+        sphinxLoggerImpl
 
     @Provides
     @Singleton

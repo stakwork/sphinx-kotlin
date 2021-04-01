@@ -4,8 +4,11 @@ import android.util.Log
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.logger.LogType
 import chat.sphinx.logger.SphinxLogger
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class SphinxLoggerImpl: SphinxLogger() {
+@Singleton
+class SphinxLoggerImpl @Inject constructor(): SphinxLogger() {
     override fun log(tag: String, message: String, type: LogType) {
 
         @Exhaustive
