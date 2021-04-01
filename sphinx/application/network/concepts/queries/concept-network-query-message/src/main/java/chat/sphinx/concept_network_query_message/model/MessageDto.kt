@@ -36,4 +36,13 @@ data class MessageDto(
     val network_type: Int?,
     val chat: MsgsChatDto?,
     val contact: ContactDto?,
-)
+) {
+    @Transient
+    var messageContentDecrypted: String? = null
+        private set
+
+    fun setMessageContentDecrypted(value: String) {
+        if (value.isEmpty()) return
+        messageContentDecrypted = value
+    }
+}
