@@ -177,6 +177,85 @@ CREATE TABLE messageDbo(
     reply_uuid                  TEXT            AS ReplyUUID
 );
 
+-- If the message exists in the DB, it will update all fields _except_
+-- for message_content_decrypted as to not overwrite it.
+upsertMessage {
+    UPDATE messageDbo
+    SET uuid = :uuid,
+        chat_id = :chat_id,
+        type = :type,
+        sender = :sender,
+        receiver = :receiver,
+        amount = :amount,
+        payment_hash = :payment_hash,
+        payment_request = :payment_request,
+        date = :date,
+        expiration_date = :expiration_date,
+        message_content = :message_content,
+        status = :status,
+        status_map = :status_map,
+        media_key = :media_key,
+        media_type = :media_type,
+        media_token = :media_token,
+        seen = :seen,
+        sender_alias = :sender_alias,
+        sender_pic = :sender_pic,
+        original_muid = :original_muid,
+        reply_uuid = :reply_uuid
+    WHERE id = :id;
+
+    INSERT OR IGNORE INTO messageDbo(
+        id,
+        uuid,
+        chat_id,
+        type,
+        sender,
+        receiver,
+        amount,
+        payment_hash,
+        payment_request,
+        date,
+        expiration_date,
+        message_content,
+        message_content_decrypted,
+        status,
+        status_map,
+        media_key,
+        media_type,
+        media_token,
+        seen,
+        sender_alias,
+        sender_pic,
+        original_muid,
+        reply_uuid
+    )
+    VALUES (
+        :id,
+        :uuid,
+        :chat_id,
+        :type,
+        :sender,
+        :receiver,
+        :amount,
+        :payment_hash,
+        :payment_request,
+        :date,
+        :expiration_date,
+        :message_content,
+        :message_content_decrypted,
+        :status,
+        :status_map,
+        :media_key,
+        :media_type,
+        :media_token,
+        :seen,
+        :sender_alias,
+        :sender_pic,
+        :original_muid,
+        :reply_uuid
+    );
+}
+
 deleteMessagesByChatId:
 DELETE FROM messageDbo
 WHERE chat_id = ?;
