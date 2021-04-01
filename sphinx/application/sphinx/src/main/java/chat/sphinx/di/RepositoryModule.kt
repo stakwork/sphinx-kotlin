@@ -8,6 +8,7 @@ import chat.sphinx.concept_network_query_message.NetworkQueryMessage
 import chat.sphinx.database.SphinxCoreDBImpl
 import chat.sphinx.feature_coredb.CoreDBImpl
 import chat.sphinx.feature_repository.SphinxRepository
+import chat.sphinx.logger.SphinxLogger
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -35,6 +36,7 @@ object RepositoryModule {
         networkQueryChat: NetworkQueryChat,
         networkQueryMessage: NetworkQueryMessage,
         rsa: RSA,
+        sphinxLogger: SphinxLogger
     ): SphinxRepository =
         SphinxRepository(
             authenticationCoreManager,
@@ -42,7 +44,8 @@ object RepositoryModule {
             dispatchers,
             networkQueryChat,
             networkQueryMessage,
-            rsa
+            rsa,
+            sphinxLogger
         )
 
     @Provides

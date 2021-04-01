@@ -19,6 +19,8 @@ import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.feature_repository.mappers.message.MessageDboPresenterMapper
 import chat.sphinx.feature_repository.mappers.message.MessageDtoDboMapper
 import chat.sphinx.kotlin_response.exception
+import chat.sphinx.logger.SphinxLogger
+import chat.sphinx.logger.debug
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.chat.ChatId
@@ -51,7 +53,12 @@ class SphinxRepository(
     private val networkQueryChat: NetworkQueryChat,
     private val networkQueryMessage: NetworkQueryMessage,
     private val rsa: RSA,
+    private val sphinxLogger: SphinxLogger,
 ): ChatRepository, MessageRepository {
+
+    companion object {
+        const val TAG: String = "SphinxRepository"
+    }
 
     /////////////
     /// Chats ///
@@ -122,6 +129,10 @@ class SphinxRepository(
 
                                         // remove remaining chat's from DB
                                         chatIdsToRemove.forEach { chatId ->
+                                            sphinxLogger.debug(
+                                                TAG,
+                                                "Removing Chats/Messages - chatId"
+                                            )
                                             queries.deleteChatById(chatId)
                                             queries.deleteMessagesByChatId(chatId)
                                         }
@@ -356,6 +367,14 @@ class SphinxRepository(
 
                                         queries.transaction {
                                             val chatIds = queries.getAllChatIds().executeAsList()
+
+                                            sphinxLogger.debug(
+                                                TAG,
+                                                "Inserting Messages -" +
+                                                        " ${dbos.firstOrNull()?.id?.value}" +
+                                                        " - ${dbos.lastOrNull()?.id?.value}"
+                                            )
+
                                             for (dbo in dbos) {
                                                 if (dbo.chat_id.value == MessageDtoDboMapper.NULL_CHAT_ID.toLong()) {
                                                     queries.upsertMessage(dbo)
