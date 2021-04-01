@@ -6,6 +6,11 @@ inline fun SphinxLogger.debug(tag: String, message: String) {
 }
 
 @Suppress("NOTHING_TO_INLINE")
+inline fun SphinxLogger.exception(tag: String, message: String, e: Exception?) {
+    log(tag, message, LogType.Exception, e)
+}
+
+@Suppress("NOTHING_TO_INLINE")
 inline fun SphinxLogger.info(tag: String, message: String) {
     log(tag, message, LogType.Info)
 }
@@ -21,5 +26,5 @@ inline fun SphinxLogger.verbose(tag: String, message: String) {
 }
 
 abstract class SphinxLogger {
-    abstract fun log(tag: String, message: String, type: LogType)
+    abstract fun log(tag: String, message: String, type: LogType, throwable: Throwable? = null)
 }

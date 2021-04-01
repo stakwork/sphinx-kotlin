@@ -13,13 +13,16 @@ class SphinxLoggerImpl @Inject constructor(
     private val buildConfigDebug: BuildConfigDebug,
 ): SphinxLogger() {
 
-    override fun log(tag: String, message: String, type: LogType) {
+    override fun log(tag: String, message: String, type: LogType, throwable: Throwable?) {
         @Exhaustive
         when (type) {
             LogType.Debug -> {
                 if (buildConfigDebug.value) {
                     Log.d(tag, message)
                 }
+            }
+            LogType.Exception -> {
+                Log.e(tag, message, throwable)
             }
             LogType.Info -> {
                 if (buildConfigDebug.value) {
