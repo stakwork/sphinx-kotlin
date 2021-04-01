@@ -10,10 +10,10 @@ import javax.inject.Singleton
 
 @Singleton
 class SphinxLoggerImpl @Inject constructor(
-    val buildConfigDebug: BuildConfigDebug,
+    private val buildConfigDebug: BuildConfigDebug,
 ): SphinxLogger() {
-    override fun log(tag: String, message: String, type: LogType) {
 
+    override fun log(tag: String, message: String, type: LogType) {
         @Exhaustive
         when (type) {
             LogType.Debug -> {
@@ -28,6 +28,11 @@ class SphinxLoggerImpl @Inject constructor(
             }
             LogType.Warning -> {
                 Log.w(tag, message)
+            }
+            LogType.Verbose -> {
+                if (buildConfigDebug.value) {
+                    Log.v(tag, message)
+                }
             }
         }
     }

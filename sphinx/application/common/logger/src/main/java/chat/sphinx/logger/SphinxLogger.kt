@@ -15,6 +15,11 @@ inline fun SphinxLogger.warn(tag: String, message: String) {
     log(tag, message, LogType.Warning)
 }
 
+@Suppress("NOTHING_TO_INLINE")
+inline fun SphinxLogger.verbose(tag: String, message: String) {
+    log(tag, message, LogType.Verbose)
+}
+
 abstract class SphinxLogger {
     abstract fun log(tag: String, message: String, type: LogType)
 }

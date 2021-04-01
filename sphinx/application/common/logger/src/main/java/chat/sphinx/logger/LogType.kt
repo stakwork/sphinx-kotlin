@@ -4,4 +4,5 @@ sealed class LogType {
     object Debug: LogType()
     object Info: LogType()
     object Warning: LogType()
+    object Verbose: LogType()
 }
