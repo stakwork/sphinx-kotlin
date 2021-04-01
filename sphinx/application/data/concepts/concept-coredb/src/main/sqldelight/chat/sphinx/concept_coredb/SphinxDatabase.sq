@@ -183,6 +183,20 @@ FROM messageDbo
 ORDER BY id DESC
 LIMIT 1;
 
+-- Retrieves the latest message for the given ChatID that will be shown
+-- to the User. See [MessageType] for more detail
+getLatestMessageToShowByChatId:
+SELECT *
+FROM messageDbo
+WHERE chat_id = ? AND type = (0 OR 2 OR 3 OR 5 OR 6 OR 14 OR 15 OR 25 OR 29)
+ORDER BY id DESC
+LIMIT 1;
+
+updateMessageContentDecrypted:
+UPDATE messageDbo
+SET message_content_decrypted = :message_content_decrypted
+WHERE id = :id;
+
 -- If the message exists in the DB, it will update all fields _except_
 -- for message_content_decrypted as to not overwrite it.
 upsertMessage {

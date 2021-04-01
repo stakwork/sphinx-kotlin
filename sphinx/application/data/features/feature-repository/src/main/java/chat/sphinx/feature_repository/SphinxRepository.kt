@@ -18,6 +18,7 @@ import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.feature_repository.mappers.message.MessageDboPresenterMapper
 import chat.sphinx.feature_repository.mappers.message.MessageDtoDboMapper
+import chat.sphinx.kotlin_response.exception
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.chat.ChatId
@@ -25,6 +26,7 @@ import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessagePagination
 import chat.sphinx.wrapper_message.Message
 import chat.sphinx.wrapper_message.MessageContent
+import chat.sphinx.wrapper_message.MessageContentDecrypted
 import chat.sphinx.wrapper_message.MessageType
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
@@ -179,8 +181,59 @@ class SphinxRepository(
             )
         } ?: Response.Error(ResponseError("EncryptionKey retrieval failed"))
 
+    @OptIn(UnencryptedDataAccess::class)
     override suspend fun getLatestMessageForChat(chatId: ChatId): Flow<Message?> {
-        TODO("Not yet implemented")
+        val queries = coreDB.getSphinxDatabaseQueries()
+        return queries.getLatestMessageToShowByChatId(chatId)
+            .asFlow()
+            .mapToOneOrNull(dispatchers.io)
+            .map { it?.let { messageDbo ->
+
+                messageDbo.message_content?.let { messageContent ->
+
+                    if (
+                        messageDbo.type !is MessageType.KeySend &&
+                        messageDbo.message_content_decrypted == null
+                    ) {
+
+                        val response = decryptMessageContent(messageContent)
+                        val message = messageDboPresenterMapper.mapFrom(messageDbo)
+
+                        @Exhaustive
+                        when (response) {
+                            is Response.Error -> {
+                                message.setDecryptionError(response.exception)
+                                message
+                            }
+                            is Response.Success -> {
+
+                                val decrypted = MessageContentDecrypted(
+                                    response.value.toUnencryptedString().value
+                                )
+
+                                messageLock.withLock {
+                                    withContext(dispatchers.io) {
+                                        queries.updateMessageContentDecrypted(
+                                            decrypted,
+                                            messageDbo.id
+                                        )
+                                    }
+                                }
+
+                                message.setMessageContentDecrypted(decrypted)
+                                message
+                            }
+                        }
+
+                    } else {
+
+                        messageDboPresenterMapper.mapFrom(messageDbo)
+
+                    }
+
+                } ?: messageDboPresenterMapper.mapFrom(messageDbo)
+            }}
+            .distinctUntilChanged()
     }
 
     override suspend fun getLatestMessageForChat(chatUUID: ChatUUID): Flow<Message?> {
