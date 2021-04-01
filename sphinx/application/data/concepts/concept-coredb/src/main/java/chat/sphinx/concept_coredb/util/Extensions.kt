@@ -1,8 +1,7 @@
-@file:Suppress("unused")
-
 package chat.sphinx.concept_coredb.util
 
 import chat.sphinx.conceptcoredb.ChatDbo
+import chat.sphinx.conceptcoredb.MessageDbo
 import chat.sphinx.conceptcoredb.SphinxDatabaseQueries
 
 @Suppress("NOTHING_TO_INLINE", "SpellCheckingInspection")
@@ -29,4 +28,32 @@ inline fun SphinxDatabaseQueries.upsertChat(dbo: ChatDbo): Unit =
         dbo.my_alias,
         dbo.pending_contact_ids,
         dbo.id
+    )
+
+@Suppress("NOTHING_TO_INLINE", "SpellCheckingInspection")
+inline fun SphinxDatabaseQueries.upsertMessage(dbo: MessageDbo): Unit =
+    upsertMessage(
+        dbo.uuid,
+        dbo.chat_id,
+        dbo.type,
+        dbo.sender,
+        dbo.receiver,
+        dbo.amount,
+        dbo.payment_hash,
+        dbo.payment_request,
+        dbo.date,
+        dbo.expiration_date,
+        dbo.message_content,
+        dbo.status,
+        dbo.status_map,
+        dbo.media_key,
+        dbo.media_type,
+        dbo.media_token,
+        dbo.seen,
+        dbo.sender_alias,
+        dbo.sender_pic,
+        dbo.original_muid,
+        dbo.reply_uuid,
+        dbo.id,
+        dbo.message_content_decrypted,
     )
