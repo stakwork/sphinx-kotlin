@@ -23,7 +23,6 @@ data class Message(
     val date: DateTime,
     val expirationDate: DateTime?,
     val messageContent: MessageContent?,
-    val messageContentDecrypted: MessageContentDecrypted?,
     val status: MessageStatus,
     val statusMap: Map<ContactId, MessageStatus>?,
     val mediaKey: MediaKey?,
@@ -36,4 +35,21 @@ data class Message(
 //    val receipt: String?, // TODO: Ask Tomas what this field is for
     val originalMUID: MessageMUID?,
     val replyUUID: ReplyUUID?,
-)
+) {
+    var messageContentDecrypted: MessageContentDecrypted? = null
+        private set
+
+    fun setMessageContentDecrypted(messageContentDecrypted: MessageContentDecrypted) {
+        this.messageContentDecrypted = messageContentDecrypted
+    }
+
+    var decryptionError: Boolean = false
+        private set
+    var decryptionException: Exception? = null
+        private set
+
+    fun setDecryptionError(e: Exception?) {
+        decryptionError = true
+        decryptionException = e
+    }
+}
