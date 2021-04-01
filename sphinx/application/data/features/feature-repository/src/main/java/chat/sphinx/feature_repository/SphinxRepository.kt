@@ -65,17 +65,14 @@ class SphinxRepository(
     override suspend fun getChats(): Flow<List<Chat>> {
         return coreDB.getSphinxDatabaseQueries().getAllChats()
             .asFlow()
-            .flowOn(dispatchers.io)
-            .mapToList(dispatchers.default)
+            .mapToList(dispatchers.io)
             .map { chatDboPresenterMapper.mapListFrom(it) }
-            .flowOn(dispatchers.default)
     }
 
     override suspend fun getChatById(chatId: ChatId): Flow<Chat?> {
         return coreDB.getSphinxDatabaseQueries().getChatById(chatId)
             .asFlow()
-            .flowOn(dispatchers.io)
-            .mapToOneOrNull(dispatchers.default)
+            .mapToOneOrNull(dispatchers.io)
             .map { it?.let { chatDboPresenterMapper.mapFrom(it) } }
             .distinctUntilChanged()
     }
@@ -83,8 +80,7 @@ class SphinxRepository(
     override suspend fun getChatByUUID(chatUUID: ChatUUID): Flow<Chat?> {
         return coreDB.getSphinxDatabaseQueries().getChatByUUID(chatUUID)
             .asFlow()
-            .flowOn(dispatchers.io)
-            .mapToOneOrNull(dispatchers.default)
+            .mapToOneOrNull(dispatchers.io)
             .map { it?.let { chatDboPresenterMapper.mapFrom(it) } }
             .distinctUntilChanged()
     }
