@@ -88,32 +88,29 @@ class SphinxRepository(
 
                         chatLock.withLock {
 
-                            chatDtoDboMapper.mapListFrom(loadResponse.value).let { dbos ->
+                            val dbos = chatDtoDboMapper.mapListFrom(loadResponse.value)
 
-                                val queries = coreDB.getSphinxDatabaseQueries()
+                            val queries = coreDB.getSphinxDatabaseQueries()
 
-                                withContext(dispatchers.io) {
+                            withContext(dispatchers.io) {
 
-                                    val chatIdsToRemove = queries.getAllChatIds()
-                                        .executeAsList()
-                                        .toMutableSet()
+                                val chatIdsToRemove = queries.getAllChatIds()
+                                    .executeAsList()
+                                    .toMutableSet()
 
-                                    messageLock.withLock {
+                                messageLock.withLock {
 
-                                        queries.transaction {
-                                            dbos.forEach { dbo ->
-                                                queries.upsertChat(dbo)
+                                    queries.transaction {
+                                        dbos.forEach { dbo ->
+                                            queries.upsertChat(dbo)
 
-                                                chatIdsToRemove.remove(dbo.id)
-                                            }
+                                            chatIdsToRemove.remove(dbo.id)
+                                        }
 
-                                            // remove remaining chat's from DB
-                                            chatIdsToRemove.forEach { chatId ->
-                                                queries.deleteChatById(chatId)
-                                                queries.deleteMessagesByChatId(chatId)
-                                                // TODO: delete messages for chatid
-                                            }
-
+                                        // remove remaining chat's from DB
+                                        chatIdsToRemove.forEach { chatId ->
+                                            queries.deleteChatById(chatId)
+                                            queries.deleteMessagesByChatId(chatId)
                                         }
 
                                     }
