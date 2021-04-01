@@ -20,7 +20,7 @@ import chat.sphinx.feature_repository.mappers.message.MessageDboPresenterMapper
 import chat.sphinx.feature_repository.mappers.message.MessageDtoDboMapper
 import chat.sphinx.kotlin_response.exception
 import chat.sphinx.logger.SphinxLogger
-import chat.sphinx.logger.debug
+import chat.sphinx.logger.d
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.chat.ChatId
@@ -53,7 +53,7 @@ class SphinxRepository(
     private val networkQueryChat: NetworkQueryChat,
     private val networkQueryMessage: NetworkQueryMessage,
     private val rsa: RSA,
-    private val sphinxLogger: SphinxLogger,
+    private val LOG: SphinxLogger,
 ): ChatRepository, MessageRepository {
 
     companion object {
@@ -129,10 +129,7 @@ class SphinxRepository(
 
                                         // remove remaining chat's from DB
                                         chatIdsToRemove.forEach { chatId ->
-                                            sphinxLogger.debug(
-                                                TAG,
-                                                "Removing Chats/Messages - chatId"
-                                            )
+                                            LOG.d(TAG, "Removing Chats/Messages - chatId")
                                             queries.deleteChatById(chatId)
                                             queries.deleteMessagesByChatId(chatId)
                                         }
@@ -367,8 +364,7 @@ class SphinxRepository(
 
                                         queries.transaction {
                                             val chatIds = queries.getAllChatIds().executeAsList()
-
-                                            sphinxLogger.debug(
+                                            LOG.d(
                                                 TAG,
                                                 "Inserting Messages -" +
                                                         " ${dbos.firstOrNull()?.id?.value}" +
