@@ -9,10 +9,12 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.LinearLayoutManager
 import app.cash.exhaustive.Exhaustive
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.dashboard.R
 import chat.sphinx.dashboard.databinding.FragmentDashboardBinding
+import chat.sphinx.dashboard.ui.adapter.ChatListAdapter
 import chat.sphinx.dashboard.ui.viewstates.NavDrawerViewState
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
@@ -45,6 +47,8 @@ internal class DashboardFragment : MotionLayoutFragment<
             .enableDoubleTapToClose(viewLifecycleOwner, SphinxToastUtils())
             .addCallback(viewLifecycleOwner, requireActivity())
 
+        viewModel.networkRefresh()
+
 //        findNavController().addOnDestinationChangedListener(CloseDrawerOnDestinationChange())
 
         setupChats()
@@ -75,16 +79,10 @@ internal class DashboardFragment : MotionLayoutFragment<
     }
 
     private fun setupChats() {
-        binding.layoutDashboardChats.let { chats ->
-            chats.dashboardButtonChatContact.setOnClickListener {
-                lifecycleScope.launch { viewModel.dashboardNavigator.toChatContact("") }
-            }
-            chats.dashboardButtonChatGroup.setOnClickListener {
-                lifecycleScope.launch { viewModel.dashboardNavigator.toChatGroup("") }
-            }
-            chats.dashboardButtonChatTribe.setOnClickListener {
-                lifecycleScope.launch { viewModel.dashboardNavigator.toChatTribe("") }
-            }
+        binding.layoutDashboardChats.recyclerViewChats.apply {
+            this.setHasFixedSize(true)
+            layoutManager = LinearLayoutManager(binding.root.context)
+            adapter = ChatListAdapter(viewModel, viewLifecycleOwner)
         }
     }
 
