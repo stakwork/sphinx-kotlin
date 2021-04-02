@@ -13,5 +13,6 @@ import kotlinx.coroutines.flow.Flow
 interface ContactRepository {
     suspend fun getContacts(): Flow<List<Contact>>
     suspend fun getContactById(contactId: ContactId): Flow<Contact?>
+    suspend fun getOwner(): Flow<Contact?>
     fun networkRefreshContacts(): Flow<LoadResponse<Boolean, ResponseError>>
 }
