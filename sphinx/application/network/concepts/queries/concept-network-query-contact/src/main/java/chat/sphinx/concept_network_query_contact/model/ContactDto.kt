@@ -7,7 +7,7 @@ import com.squareup.moshi.JsonClass
 data class ContactDto(
     val id: Long,
     val route_hint: String?,
-    val public_key: String,
+    val public_key: String?,
     val node_alias: String?,
     val alias: String,
     val photo_url: String?,

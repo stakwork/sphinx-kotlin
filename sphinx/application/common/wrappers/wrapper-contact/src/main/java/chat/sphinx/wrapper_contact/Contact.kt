@@ -13,7 +13,7 @@ import chat.sphinx.wrapper_common.lightning.Sat
 data class Contact(
     val id: ContactId,
     val routeHint: LightningRouteHint?,
-    val pubKey: LightningNodePubKey,
+    val nodePubKey: LightningNodePubKey?,
     val nodeAlias: LightningNodeAlias?,
     val alias: ContactAlias,
     val photoUrl: PhotoUrl?,
@@ -22,7 +22,7 @@ data class Contact(
     val deleted: Deleted,
     val status: ContactStatus,
     val contactKey: ContactKey,
-    val deviceId: DeviceId,
+    val deviceId: DeviceId?,
     val createdAt: DateTime,
     val updatedAt: DateTime,
     val notificationSound: NotificationSound?,
