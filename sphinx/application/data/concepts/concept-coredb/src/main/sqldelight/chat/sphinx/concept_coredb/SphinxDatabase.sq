@@ -313,6 +313,11 @@ getContacts:
 SELECT *
 FROM contactDbo;
 
+getContactById:
+SELECT *
+FROM contactDbo
+WHERE id = :id;
+
 getContactOwner:
 SELECT *
 FROM contactDbo
