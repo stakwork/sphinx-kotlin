@@ -3,6 +3,7 @@ package chat.sphinx.dashboard.ui
 import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_repository_chat.ChatRepository
+import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.dashboard.navigation.DashboardBottomNavBarNavigator
 import chat.sphinx.dashboard.navigation.DashboardNavDrawerNavigator
@@ -31,6 +32,7 @@ internal class DashboardViewModel @Inject constructor(
 
     private val dispatchers: CoroutineDispatchers,
     private val chatRepository: ChatRepository,
+    private val contactRepository: ContactRepository,
     private val messageRepository: MessageRepository,
 ): MotionLayoutViewModel<
         Any,
@@ -88,6 +90,21 @@ internal class DashboardViewModel @Inject constructor(
             }
 
             messageRepository.networkRefreshMessages().collect { response ->
+                @Exhaustive
+                when (response) {
+                    is Response.Error -> {
+                        _networkStateFlow.value = response
+                    }
+                    is LoadResponse.Loading,
+                    is Response.Success -> {}
+                }
+            }
+
+            if (_networkStateFlow.value is Response.Error) {
+                jobNetworkRefresh?.cancel()
+            }
+
+            contactRepository.networkRefreshContacts().collect { response ->
                 _networkStateFlow.value = response
             }
         }
