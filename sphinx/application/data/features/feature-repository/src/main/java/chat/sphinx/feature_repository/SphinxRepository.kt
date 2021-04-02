@@ -5,7 +5,7 @@ import chat.sphinx.concept_coredb.CoreDB
 import chat.sphinx.concept_coredb.util.upsertChat
 import chat.sphinx.concept_coredb.util.upsertMessage
 import chat.sphinx.concept_crypto_rsa.RSA
-import chat.sphinx.concept_crypto_rsa.RsaPrivateKey
+import chat.sphinx.wrapper_rsa.RsaPrivateKey
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat

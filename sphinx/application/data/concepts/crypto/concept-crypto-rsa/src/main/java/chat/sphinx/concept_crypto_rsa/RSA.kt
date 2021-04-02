@@ -2,6 +2,11 @@ package chat.sphinx.concept_crypto_rsa
 
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
+import chat.sphinx.wrapper_rsa.PKCSType
+import chat.sphinx.wrapper_rsa.RSAKeyPair
+import chat.sphinx.wrapper_rsa.RsaPrivateKey
+import chat.sphinx.wrapper_rsa.RsaPublicKey
+import chat.sphinx.wrapper_rsa.RsaSignedString
 import io.matthewnelson.k_openssl_common.clazzes.EncryptedString
 import io.matthewnelson.k_openssl_common.clazzes.UnencryptedByteArray
 import io.matthewnelson.k_openssl_common.clazzes.UnencryptedString

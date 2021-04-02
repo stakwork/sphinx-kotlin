@@ -1,5 +1,9 @@
 package chat.sphinx.concept_crypto_rsa
 
+import chat.sphinx.wrapper_rsa.PKCSType
+import chat.sphinx.wrapper_rsa.formatToCert
+import chat.sphinx.wrapper_rsa.toRsaPrivateKey
+import chat.sphinx.wrapper_rsa.toRsaPublicKey
 import io.matthewnelson.k_openssl_common.annotations.RawPasswordAccess
 import org.junit.Assert
 import org.junit.Test

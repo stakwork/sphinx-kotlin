@@ -1,9 +1,6 @@
-package chat.sphinx.concept_crypto_rsa
-
-import io.matthewnelson.k_openssl_common.annotations.RawPasswordAccess
+package chat.sphinx.wrapper_rsa
 
 @Suppress("NOTHING_TO_INLINE")
-@RawPasswordAccess
 inline fun RsaPrivateKey.formatToCert(pkcsType: PKCSType, singleLine: Boolean = false): String {
     val sb = StringBuilder()
 
@@ -141,7 +138,7 @@ inline fun String.toRsaPublicKey(): RsaPublicKey {
     return RsaPublicKey(sb.toString().toCharArray())
 }
 
-inline class RsaPrivateKey(@property: RawPasswordAccess val value: CharArray) {
+inline class RsaPrivateKey(val value: CharArray) {
     companion object {
         const val CERT_PKCS1_HEADER = "-----BEGIN RSA PRIVATE KEY-----"
         const val CERT_PKCS1_FOOTER = "-----END RSA PRIVATE KEY-----"

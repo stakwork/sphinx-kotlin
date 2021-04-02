@@ -8,7 +8,7 @@ import chat.sphinx.kotlin_response.exception
 import chat.sphinx.kotlin_response.message
 import chat.sphinx.test_network_query.NetworkQueryTestHelper
 import chat.sphinx.wrapper_common.message.MessagePagination
-import io.matthewnelson.k_openssl_common.annotations.RawPasswordAccess
+import chat.sphinx.wrapper_rsa.*
 import io.matthewnelson.k_openssl_common.annotations.UnencryptedDataAccess
 import io.matthewnelson.k_openssl_common.clazzes.EncryptedString
 import io.matthewnelson.k_openssl_common.clazzes.UnencryptedByteArray
@@ -19,7 +19,7 @@ import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Assert
 import org.junit.Test
 
-@OptIn(RawPasswordAccess::class, UnencryptedDataAccess::class)
+@OptIn(UnencryptedDataAccess::class)
 class RSAImplUnitTest: NetworkQueryTestHelper() {
 
     companion object {

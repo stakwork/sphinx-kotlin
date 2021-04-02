@@ -10,6 +10,7 @@ dependencies {
 
     // Sphinx
     api project(path: ':sphinx:application:common:kotlin-response')
+    api project(path: ':sphinx:application:common:wrappers:wrapper-rsa')
     
     implementation deps.kotlin.coroutinesCore
 

@@ -1,4 +1,4 @@
-package chat.sphinx.concept_crypto_rsa
+package chat.sphinx.wrapper_rsa
 
 @Suppress("SpellCheckingInspection")
 sealed class PKCSType {

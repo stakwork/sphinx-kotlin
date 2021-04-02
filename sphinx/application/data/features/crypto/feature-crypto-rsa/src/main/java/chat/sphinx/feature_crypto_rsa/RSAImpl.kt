@@ -3,8 +3,8 @@ package chat.sphinx.feature_crypto_rsa
 import chat.sphinx.concept_crypto_rsa.*
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
+import chat.sphinx.wrapper_rsa.*
 import com.github.xiangyuecn.rsajava.RSA_PEM
-import io.matthewnelson.k_openssl_common.annotations.RawPasswordAccess
 import io.matthewnelson.k_openssl_common.annotations.UnencryptedDataAccess
 import io.matthewnelson.k_openssl_common.clazzes.EncryptedString
 import io.matthewnelson.k_openssl_common.clazzes.UnencryptedByteArray
@@ -91,7 +91,6 @@ open class RSAImpl(): RSA() {
         }
     }
 
-    @OptIn(RawPasswordAccess::class)
     override suspend fun decrypt(
         rsaPrivateKey: RsaPrivateKey,
         text: EncryptedString,
@@ -263,7 +262,6 @@ open class RSAImpl(): RSA() {
         }
     }
 
-    @OptIn(RawPasswordAccess::class)
     override suspend fun sign(
         rsaPrivateKey: RsaPrivateKey,
         text: String,

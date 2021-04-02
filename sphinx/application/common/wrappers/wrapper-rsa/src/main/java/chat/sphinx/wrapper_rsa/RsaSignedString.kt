@@ -1,4 +1,4 @@
-package chat.sphinx.concept_crypto_rsa
+package chat.sphinx.wrapper_rsa
 
 import okio.base64.decodeBase64ToArray
 import okio.base64.encodeBase64
