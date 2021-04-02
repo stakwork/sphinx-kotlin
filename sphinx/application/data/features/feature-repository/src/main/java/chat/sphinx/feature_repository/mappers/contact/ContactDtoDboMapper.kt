@@ -18,7 +18,14 @@ import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 internal class ContactDtoDboMapper(
     dispatchers: CoroutineDispatchers
 ): ClassMapper<ContactDto, ContactDbo>(dispatchers) {
+
+    @Throws(IllegalArgumentException::class)
     override suspend fun mapFrom(value: ContactDto): ContactDbo {
+
+        if (value.from_group.toContactFromGroup().isTrue()) {
+            throw IllegalArgumentException("Contacts that are from a group _cannot_ be saved to the DB")
+        }
+
         return ContactDbo(
             ContactId(value.id),
             value.route_hint?.toLightningRouteHint(),
