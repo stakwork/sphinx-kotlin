@@ -9,6 +9,7 @@ import chat.sphinx.wrapper_common.lightning.LightningNodeAlias
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.LightningRouteHint
 import chat.sphinx.wrapper_common.lightning.Sat
+import chat.sphinx.wrapper_rsa.RsaPublicKey
 
 data class Contact(
     val id: ContactId,
@@ -21,10 +22,11 @@ data class Contact(
     val isOwner: Owner,
     val deleted: Deleted,
     val status: ContactStatus,
-    val contactKey: ContactKey,
+    val rsaPublicKey: RsaPublicKey?,
     val deviceId: DeviceId?,
     val createdAt: DateTime,
     val updatedAt: DateTime,
+    val fromGroup: ContactFromGroup,
     val notificationSound: NotificationSound?,
     val tipAmount: Sat?,
     val inviteId: InviteId?,
