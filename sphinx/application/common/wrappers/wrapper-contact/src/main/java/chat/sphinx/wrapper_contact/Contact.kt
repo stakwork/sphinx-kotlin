@@ -7,10 +7,12 @@ import chat.sphinx.wrapper_common.contact.ContactId
 import chat.sphinx.wrapper_common.invite.InviteId
 import chat.sphinx.wrapper_common.lightning.LightningNodeAlias
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
+import chat.sphinx.wrapper_common.lightning.LightningRouteHint
 import chat.sphinx.wrapper_common.lightning.Sat
 
 data class Contact(
     val id: ContactId,
+    val routeHint: LightningRouteHint?,
     val pubKey: LightningNodePubKey,
     val nodeAlias: LightningNodeAlias?,
     val alias: ContactAlias,
