@@ -74,13 +74,28 @@ internal class DashboardViewModel @Inject constructor(
         }
 
         jobNetworkRefresh = viewModelScope.launch(dispatchers.mainImmediate) {
-            chatRepository.networkRefreshChats().collect { response ->
+            contactRepository.networkRefreshContacts().collect { response ->
                 @Exhaustive
                 when (response) {
                     is LoadResponse.Loading,
                     is Response.Error -> {
                         _networkStateFlow.value = response
                     }
+                    is Response.Success -> {}
+                }
+            }
+
+            if (_networkStateFlow.value is Response.Error) {
+                jobNetworkRefresh?.cancel()
+            }
+
+            chatRepository.networkRefreshChats().collect { response ->
+                @Exhaustive
+                when (response) {
+                    is Response.Error -> {
+                        _networkStateFlow.value = response
+                    }
+                    is LoadResponse.Loading,
                     is Response.Success -> {}
                 }
             }
@@ -90,21 +105,6 @@ internal class DashboardViewModel @Inject constructor(
             }
 
             messageRepository.networkRefreshMessages().collect { response ->
-                @Exhaustive
-                when (response) {
-                    is Response.Error -> {
-                        _networkStateFlow.value = response
-                    }
-                    is LoadResponse.Loading,
-                    is Response.Success -> {}
-                }
-            }
-
-            if (_networkStateFlow.value is Response.Error) {
-                jobNetworkRefresh?.cancel()
-            }
-
-            contactRepository.networkRefreshContacts().collect { response ->
                 _networkStateFlow.value = response
             }
         }
