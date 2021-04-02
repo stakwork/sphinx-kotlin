@@ -10,8 +10,11 @@ import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
 import chat.sphinx.concept_network_query_message.NetworkQueryMessage
+import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.feature_repository.mappers.chat.ChatDboPresenterMapper
 import chat.sphinx.feature_repository.mappers.chat.ChatDtoDboMapper
+import chat.sphinx.feature_repository.mappers.contact.ContactDboPresenterMapper
+import chat.sphinx.feature_repository.mappers.contact.ContactDtoDboMapper
 import chat.sphinx.feature_repository.mappers.mapListFrom
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.LoadResponse
@@ -24,8 +27,10 @@ import chat.sphinx.logger.d
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.chat.ChatId
+import chat.sphinx.wrapper_common.contact.ContactId
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessagePagination
+import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_message.Message
 import chat.sphinx.wrapper_message.MessageContent
 import chat.sphinx.wrapper_message.MessageContentDecrypted
@@ -54,7 +59,7 @@ class SphinxRepository(
     private val networkQueryMessage: NetworkQueryMessage,
     private val rsa: RSA,
     private val LOG: SphinxLogger,
-): ChatRepository, MessageRepository {
+): ChatRepository, ContactRepository, MessageRepository {
 
     companion object {
         const val TAG: String = "SphinxRepository"
@@ -165,6 +170,34 @@ class SphinxRepository(
 
         }
     }
+
+
+    ////////////////
+    /// Contacts ///
+    ////////////////
+    private val contactDtoDboMapper: ContactDtoDboMapper by lazy {
+        ContactDtoDboMapper(dispatchers)
+    }
+    private val contactDboPresenterMapper: ContactDboPresenterMapper by lazy {
+        ContactDboPresenterMapper(dispatchers)
+    }
+
+    override suspend fun getContacts(): Flow<List<Contact>> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getContactById(contactId: ContactId): Flow<Contact?> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getOwner(): Flow<Contact?> {
+        TODO("Not yet implemented")
+    }
+
+    override fun networkRefreshContacts(): Flow<LoadResponse<Boolean, ResponseError>> {
+        TODO("Not yet implemented")
+    }
+
 
     ////////////////
     /// Messages ///
