@@ -1,4 +1,3 @@
-include ':sphinx:application:data:concepts:repositories:concept-repository-contact'
 rootProject.name = "Sphinx"
 
 ////////////////////////////////
@@ -17,6 +16,7 @@ include ':sphinx:application:common:wrappers:wrapper-invite'
 include ':sphinx:application:common:wrappers:wrapper-lightning'
 include ':sphinx:application:common:wrappers:wrapper-message'
 include ':sphinx:application:common:wrappers:wrapper-relay'
+include ':sphinx:application:common:wrappers:wrapper-rsa'
 include ':sphinx:application:common:wrappers:wrapper-subscription'
 
 include ':sphinx:application:data:concepts:crypto:concept-crypto-rsa'
@@ -28,8 +28,9 @@ include ':sphinx:application:data:features:feature-coredb'
 include ':sphinx:application:data:concepts:concept-relay'
 include ':sphinx:application:data:features:feature-relay'
 
-include ':sphinx:application:data:concepts:repositories:concept-repository-message'
 include ':sphinx:application:data:concepts:repositories:concept-repository-chat'
+include ':sphinx:application:data:concepts:repositories:concept-repository-contact'
+include ':sphinx:application:data:concepts:repositories:concept-repository-message'
 include ':sphinx:application:data:features:feature-repository'
 
 include ':sphinx:application:network:concepts:concept-network-client'
