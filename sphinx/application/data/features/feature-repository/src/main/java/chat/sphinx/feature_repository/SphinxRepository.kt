@@ -183,15 +183,25 @@ class SphinxRepository(
     }
 
     override suspend fun getContacts(): Flow<List<Contact>> {
-        TODO("Not yet implemented")
+        return coreDB.getSphinxDatabaseQueries().getContacts()
+            .asFlow()
+            .mapToList(dispatchers.io)
+            .map { contactDboPresenterMapper.mapListFrom(it) }
     }
 
     override suspend fun getContactById(contactId: ContactId): Flow<Contact?> {
-        TODO("Not yet implemented")
+        return coreDB.getSphinxDatabaseQueries().getContactById(contactId)
+            .asFlow()
+            .mapToOneOrNull(dispatchers.io)
+            .map { it?.let { contactDboPresenterMapper.mapFrom(it) } }
+            .distinctUntilChanged()
     }
 
     override suspend fun getOwner(): Flow<Contact?> {
-        TODO("Not yet implemented")
+        return coreDB.getSphinxDatabaseQueries().getContactOwner()
+            .asFlow()
+            .mapToOneOrNull(dispatchers.io)
+            .map { it?.let { contactDboPresenterMapper.mapFrom(it) } }
     }
 
     override fun networkRefreshContacts(): Flow<LoadResponse<Boolean, ResponseError>> {
