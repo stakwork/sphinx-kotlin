@@ -40,6 +40,8 @@ dependencies {
     implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-chat')
     implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-message')
 
+    implementation deps.androidx.recyclerView
+
     implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt
     kapt kaptDeps.google.hilt
