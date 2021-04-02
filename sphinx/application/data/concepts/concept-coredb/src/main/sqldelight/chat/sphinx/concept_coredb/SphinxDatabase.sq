@@ -286,6 +286,10 @@ upsertMessage {
     );
 }
 
+deleteMessageById:
+DELETE FROM messageDbo
+WHERE id = ?;
+
 deleteMessagesByChatId:
 DELETE FROM messageDbo
 WHERE chat_id = ?;
@@ -308,6 +312,10 @@ CREATE TABLE contactDbo(
     tip_amount                  INTEGER         AS Sat,
     invite_id                   INTEGER         AS InviteId
 );
+
+getAllContactIds:
+SELECT id
+FROM contactDbo;
 
 getContacts:
 SELECT *
