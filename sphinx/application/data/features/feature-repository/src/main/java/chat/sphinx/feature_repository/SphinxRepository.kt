@@ -10,6 +10,7 @@ import chat.sphinx.wrapper_rsa.RsaPrivateKey
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
+import chat.sphinx.concept_network_query_chat.model.ChatDto
 import chat.sphinx.concept_network_query_contact.NetworkQueryContact
 import chat.sphinx.concept_network_query_message.NetworkQueryMessage
 import chat.sphinx.concept_repository_contact.ContactRepository
@@ -113,66 +114,66 @@ class SphinxRepository(
                     emit(loadResponse)
                 }
                 is Response.Success -> {
-
-                    try {
-
-                        chatLock.withLock {
-
-                            val dbos = chatDtoDboMapper.mapListFrom(loadResponse.value)
-
-                            val queries = coreDB.getSphinxDatabaseQueries()
-
-                            withContext(dispatchers.io) {
-
-                                val chatIdsToRemove = queries.getAllChatIds()
-                                    .executeAsList()
-                                    .toMutableSet()
-
-                                messageLock.withLock {
-
-                                    queries.transaction {
-                                        dbos.forEach { dbo ->
-                                            queries.upsertChat(dbo)
-
-                                            chatIdsToRemove.remove(dbo.id)
-                                        }
-
-                                        // remove remaining chat's from DB
-                                        chatIdsToRemove.forEach { chatId ->
-                                            LOG.d(TAG, "Removing Chats/Messages - chatId")
-                                            queries.deleteChatById(chatId)
-                                            queries.deleteMessagesByChatId(chatId)
-                                        }
-
-                                    }
-
-                                }
-
-                            }
-
-                        }
-
-                        emit(Response.Success(true))
-
-                    } catch (e: IllegalArgumentException) {
-                        emit(
-                            Response.Error(
-                                ResponseError("Failed to convert Json from Relay", e)
-                            )
-                        )
-                    } catch (e: ParseException) {
-                        emit(
-                            Response.Error(
-                                ResponseError("Failed to convert date/time from SphinxRelay", e)
-                            )
-                        )
-                    }
+                    emit(
+                        saveChats(loadResponse.value)
+                    )
                 }
                 is LoadResponse.Loading -> {
                     emit(loadResponse)
                 }
             }
 
+        }
+    }
+
+    private suspend fun saveChats(chats: List<ChatDto>): Response<Boolean, ResponseError> {
+        try {
+            chatLock.withLock {
+
+                val dbos = chatDtoDboMapper.mapListFrom(chats)
+
+                val queries = coreDB.getSphinxDatabaseQueries()
+
+                withContext(dispatchers.io) {
+
+                    val chatIdsToRemove = queries.getAllChatIds()
+                        .executeAsList()
+                        .toMutableSet()
+
+                    messageLock.withLock {
+
+                        queries.transaction {
+                            dbos.forEach { dbo ->
+                                queries.upsertChat(dbo)
+
+                                chatIdsToRemove.remove(dbo.id)
+                            }
+
+                            // remove remaining chat's from DB
+                            chatIdsToRemove.forEach { chatId ->
+                                LOG.d(TAG, "Removing Chats/Messages - chatId")
+                                queries.deleteChatById(chatId)
+                                queries.deleteMessagesByChatId(chatId)
+                            }
+
+                        }
+
+                    }
+
+                }
+
+            }
+
+            return Response.Success(true)
+
+        } catch (e: IllegalArgumentException) {
+            return Response.Error(
+                ResponseError("Failed to convert Json from Relay", e)
+            )
+        } catch (e: ParseException) {
+            return Response.Error(
+                ResponseError("Failed to convert date/time from SphinxRelay", e)
+            )
         }
     }
 
@@ -250,7 +251,9 @@ class SphinxRepository(
                         }
                     }
 
-                    emit(Response.Success(true))
+                    emit(
+                        saveChats(loadResponse.value.chats)
+                    )
 
                 }
                 is LoadResponse.Loading -> {
