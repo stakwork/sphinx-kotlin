@@ -1,3 +1,4 @@
+include ':sphinx:application:data:concepts:repositories:concept-repository-contact'
 rootProject.name = "Sphinx"
 
 ////////////////////////////////
