@@ -3,12 +3,14 @@ package chat.sphinx.feature_repository
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_coredb.CoreDB
 import chat.sphinx.concept_coredb.util.upsertChat
+import chat.sphinx.concept_coredb.util.upsertContact
 import chat.sphinx.concept_coredb.util.upsertMessage
 import chat.sphinx.concept_crypto_rsa.RSA
 import chat.sphinx.wrapper_rsa.RsaPrivateKey
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
+import chat.sphinx.concept_network_query_contact.NetworkQueryContact
 import chat.sphinx.concept_network_query_message.NetworkQueryMessage
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.feature_repository.mappers.chat.ChatDboPresenterMapper
@@ -31,6 +33,8 @@ import chat.sphinx.wrapper_common.contact.ContactId
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessagePagination
 import chat.sphinx.wrapper_contact.Contact
+import chat.sphinx.wrapper_contact.isTrue
+import chat.sphinx.wrapper_contact.toContactFromGroup
 import chat.sphinx.wrapper_message.Message
 import chat.sphinx.wrapper_message.MessageContent
 import chat.sphinx.wrapper_message.MessageContentDecrypted
@@ -56,6 +60,7 @@ class SphinxRepository(
     private val coreDB: CoreDB,
     private val dispatchers: CoroutineDispatchers,
     private val networkQueryChat: NetworkQueryChat,
+    private val networkQueryContact: NetworkQueryContact,
     private val networkQueryMessage: NetworkQueryMessage,
     private val rsa: RSA,
     private val LOG: SphinxLogger,
@@ -175,6 +180,7 @@ class SphinxRepository(
     ////////////////
     /// Contacts ///
     ////////////////
+    private val contactLock = Mutex()
     private val contactDtoDboMapper: ContactDtoDboMapper by lazy {
         ContactDtoDboMapper(dispatchers)
     }
@@ -204,8 +210,55 @@ class SphinxRepository(
             .map { it?.let { contactDboPresenterMapper.mapFrom(it) } }
     }
 
-    override fun networkRefreshContacts(): Flow<LoadResponse<Boolean, ResponseError>> {
-        TODO("Not yet implemented")
+    override fun networkRefreshContacts(): Flow<LoadResponse<Boolean, ResponseError>> = flow {
+        networkQueryContact.getContacts().collect { loadResponse ->
+
+            @Exhaustive
+            when (loadResponse) {
+                is Response.Error -> {
+                    emit(loadResponse)
+                }
+                is Response.Success -> {
+
+                    val dbos = contactDtoDboMapper.mapListFrom(
+                        loadResponse.value.contacts.filterNot {
+                            it.from_group.toContactFromGroup().isTrue()
+                        }
+                    )
+
+                    val queries = coreDB.getSphinxDatabaseQueries()
+
+                    contactLock.withLock {
+                        withContext(dispatchers.io) {
+
+                            val contactIdsToRemove = queries.getAllContactIds()
+                                .executeAsList()
+                                .toMutableSet()
+
+                            queries.transaction {
+                                for (dbo in dbos) {
+                                    queries.upsertContact(dbo)
+
+                                    contactIdsToRemove.remove(dbo.id)
+                                }
+
+                                for (id in contactIdsToRemove) {
+                                    queries.deleteContact(id)
+                                }
+                            }
+
+                        }
+                    }
+
+                    emit(Response.Success(true))
+
+                }
+                is LoadResponse.Loading -> {
+                    emit(loadResponse)
+                }
+            }
+
+        }
     }
 
 
