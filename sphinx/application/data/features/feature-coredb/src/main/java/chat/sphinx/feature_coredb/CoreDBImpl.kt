@@ -3,10 +3,17 @@ package chat.sphinx.feature_coredb
 import chat.sphinx.concept_coredb.CoreDB
 import chat.sphinx.concept_coredb.SphinxDatabase
 import chat.sphinx.conceptcoredb.ChatDbo
+import chat.sphinx.conceptcoredb.ContactDbo
 import chat.sphinx.conceptcoredb.MessageDbo
 import chat.sphinx.conceptcoredb.SphinxDatabaseQueries
 import chat.sphinx.feature_coredb.adapters.chat.*
 import chat.sphinx.feature_coredb.adapters.common.*
+import chat.sphinx.feature_coredb.adapters.contact.*
+import chat.sphinx.feature_coredb.adapters.contact.ContactAliasAdapter
+import chat.sphinx.feature_coredb.adapters.contact.ContactOwnerAdapter
+import chat.sphinx.feature_coredb.adapters.contact.LightningNodeAliasAdapter
+import chat.sphinx.feature_coredb.adapters.contact.LightningRouteHintAdapter
+import chat.sphinx.feature_coredb.adapters.contact.PrivatePhotoAdapter
 import chat.sphinx.feature_coredb.adapters.message.*
 import com.squareup.sqldelight.db.SqlDriver
 import io.matthewnelson.concept_encryption_key.EncryptionKey
@@ -89,6 +96,24 @@ abstract class CoreDBImpl: CoreDB() {
                     sender_picAdapter = PhotoUrlAdapter.getInstance(),
                     original_muidAdapter = MessageMUIDAdapter(),
                     reply_uuidAdapter = ReplyUUIDAdapter()
+                ),
+                contactDboAdapter = ContactDbo.Adapter(
+                    idAdapter = ContactIdAdapter.getInstance(),
+                    route_hintAdapter = LightningRouteHintAdapter(),
+                    node_pub_keyAdapter = LightningNodePubKeyAdapter.getInstance(),
+                    node_aliasAdapter = LightningNodeAliasAdapter(),
+                    aliasAdapter = ContactAliasAdapter(),
+                    photo_urlAdapter = PhotoUrlAdapter.getInstance(),
+                    private_photoAdapter = PrivatePhotoAdapter(),
+                    ownerAdapter = ContactOwnerAdapter(),
+                    statusAdapter = ContactStatusAdapter(),
+                    public_keyAdapter = ContactPublicKeyAdapter(),
+                    device_idAdapter = DeviceIdAdapter(),
+                    created_atAdapter = DateTimeAdapter.getInstance(),
+                    updated_atAdapter = DateTimeAdapter.getInstance(),
+                    notification_soundAdapter = NotificationSoundAdapter(),
+                    tip_amountAdapter = SatAdapter.getInstance(),
+                    invite_idAdapter = InviteIdAdapter.getInstance()
                 )
             ).sphinxDatabaseQueries
         }

@@ -3,6 +3,7 @@ package chat.sphinx.feature_coredb.adapters.common
 import chat.sphinx.wrapper_common.*
 import chat.sphinx.wrapper_common.chat.ChatId
 import chat.sphinx.wrapper_common.contact.ContactId
+import chat.sphinx.wrapper_common.invite.InviteId
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.LightningPaymentHash
 import chat.sphinx.wrapper_common.lightning.LightningPaymentRequest
@@ -136,6 +137,27 @@ internal class PhotoUrlAdapter private constructor(): ColumnAdapter<PhotoUrl, St
     }
 
     override fun encode(value: PhotoUrl): String {
+        return value.value
+    }
+}
+
+internal class InviteIdAdapter private constructor(): ColumnAdapter<InviteId, Long> {
+
+    companion object {
+        @Volatile
+        private var instance: InviteIdAdapter? = null
+        fun getInstance(): InviteIdAdapter =
+            instance ?: synchronized(this) {
+                instance ?: InviteIdAdapter()
+                    .also { instance = it }
+            }
+    }
+
+    override fun decode(databaseValue: Long): InviteId {
+        return InviteId(databaseValue)
+    }
+
+    override fun encode(value: InviteId): Long {
         return value.value
     }
 }
