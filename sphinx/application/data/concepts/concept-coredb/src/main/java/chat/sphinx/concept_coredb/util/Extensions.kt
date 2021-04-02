@@ -1,6 +1,7 @@
 package chat.sphinx.concept_coredb.util
 
 import chat.sphinx.conceptcoredb.ChatDbo
+import chat.sphinx.conceptcoredb.ContactDbo
 import chat.sphinx.conceptcoredb.MessageDbo
 import chat.sphinx.conceptcoredb.SphinxDatabaseQueries
 
@@ -56,4 +57,25 @@ inline fun SphinxDatabaseQueries.upsertMessage(dbo: MessageDbo): Unit =
         dbo.reply_uuid,
         dbo.id,
         dbo.message_content_decrypted,
+    )
+
+@Suppress("NOTHING_TO_INLINE", "SpellCheckingInspection")
+inline fun SphinxDatabaseQueries.upsertContact(dbo: ContactDbo): Unit =
+    upsertContact(
+        dbo.route_hint,
+        dbo.node_pub_key,
+        dbo.node_alias,
+        dbo.alias,
+        dbo.photo_url,
+        dbo.private_photo,
+        dbo.status,
+        dbo.public_key,
+        dbo.device_id,
+        dbo.created_at,
+        dbo.updated_at,
+        dbo.notification_sound,
+        dbo.tip_amount,
+        dbo.invite_id,
+        dbo.id,
+        dbo.owner
     )
