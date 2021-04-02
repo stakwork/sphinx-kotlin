@@ -12,4 +12,10 @@
         android:layout_height="match_parent"
         tools:listitem="@layout/layout_chat_holder" />
 
+    <androidx.appcompat.widget.AppCompatImageView
+        android:layout_width="match_parent"
+        android:layout_height="8dp"
+        android:src="@drawable/bottom_nav_bar_elevation_gradient"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
