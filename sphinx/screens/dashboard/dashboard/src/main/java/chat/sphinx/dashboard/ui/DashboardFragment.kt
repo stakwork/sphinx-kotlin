@@ -8,7 +8,6 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import app.cash.exhaustive.Exhaustive
 import by.kirich1409.viewbindingdelegate.viewBinding
@@ -20,13 +19,20 @@ import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.insetter_activity.addStatusBarPadding
 import chat.sphinx.resources.SphinxToastUtils
+import chat.sphinx.resources.inputMethodManager
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.navigation.CloseAppOnBackPress
 import io.matthewnelson.android_feature_screens.ui.motionlayout.MotionLayoutFragment
 import io.matthewnelson.android_feature_viewmodel.currentViewState
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_views.sideeffect.SideEffect
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+
+@Suppress("NOTHING_TO_INLINE")
+private inline fun FragmentDashboardBinding.searchBarClearFocus() {
+    layoutDashboardSearchBar.editTextDashboardSearch.clearFocus()
+}
 
 @AndroidEntryPoint
 internal class DashboardFragment : MotionLayoutFragment<
@@ -62,6 +68,7 @@ internal class DashboardFragment : MotionLayoutFragment<
             if (viewModel.currentViewState is NavDrawerViewState.Open) {
                 viewModel.updateViewState(NavDrawerViewState.Closed)
             } else {
+                binding.searchBarClearFocus()
                 super.handleOnBackPressed()
             }
         }
@@ -105,15 +112,19 @@ internal class DashboardFragment : MotionLayoutFragment<
                 .addNavigationBarPadding(navBar.layoutConstraintDashboardNavBar)
 
             navBar.navBarButtonPaymentReceive.setOnClickListener {
+                binding.searchBarClearFocus()
                 lifecycleScope.launch { viewModel.navBarNavigator.toPaymentReceiveDetail() }
             }
             navBar.navBarButtonTransactions.setOnClickListener {
+                binding.searchBarClearFocus()
                 lifecycleScope.launch { viewModel.navBarNavigator.toTransactionsDetail() }
             }
             navBar.navBarButtonScanner.setOnClickListener {
+                binding.searchBarClearFocus()
                 lifecycleScope.launch { viewModel.navBarNavigator.toScannerDetail() }
             }
             navBar.navBarButtonPaymentSend.setOnClickListener {
+                binding.searchBarClearFocus()
                 lifecycleScope.launch { viewModel.navBarNavigator.toPaymentSendDetail() }
             }
         }
@@ -156,6 +167,11 @@ internal class DashboardFragment : MotionLayoutFragment<
         }
     }
 
+    override fun onPause() {
+        super.onPause()
+        binding.searchBarClearFocus()
+    }
+
     override suspend fun onViewStateFlowCollect(viewState: NavDrawerViewState) {
         @Exhaustive
         when (viewState) {
@@ -164,6 +180,15 @@ internal class DashboardFragment : MotionLayoutFragment<
             }
             NavDrawerViewState.Open -> {
                 binding.layoutMotionDashboard.setTransitionDuration(300)
+                binding.layoutDashboardSearchBar.editTextDashboardSearch.let { editText ->
+                    binding.root.context.inputMethodManager?.let { imm ->
+                        if (imm.isActive(editText)) {
+                            imm.hideSoftInputFromWindow(editText.windowToken, 0)
+                            delay(250L)
+                        }
+                    }
+                    binding.searchBarClearFocus()
+                }
             }
         }
         viewState.transitionToEndSet(binding.layoutMotionDashboard)
