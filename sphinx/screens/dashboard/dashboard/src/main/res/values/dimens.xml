@@ -21,4 +21,5 @@
     <dimen name="nav_bar_button_padding">20dp</dimen>
 
     <dimen name="search_bar_height">48dp</dimen>
+    <dimen name="dashboard_header_network_xy">24dp</dimen>
 </resources>

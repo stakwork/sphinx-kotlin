@@ -18,4 +18,5 @@
     <color name="background">#151E27</color>
     <color name="headerBackground">#1A242E</color>
     <color name="mainBottomIcons">#909BAA</color>
+    <color name="primaryRed">#ED7474</color>
 </resources>
