@@ -30,7 +30,7 @@ internal class DashboardViewModel @Inject constructor(
     val navBarNavigator: DashboardBottomNavBarNavigator,
     val navDrawerNavigator: DashboardNavDrawerNavigator,
 
-    private val dispatchers: CoroutineDispatchers,
+    val dispatchers: CoroutineDispatchers,
     private val chatRepository: ChatRepository,
     private val contactRepository: ContactRepository,
     private val messageRepository: MessageRepository,

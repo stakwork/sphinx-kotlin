@@ -7,6 +7,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.lifecycle.*
+import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import app.cash.exhaustive.Exhaustive
@@ -18,10 +19,11 @@ import chat.sphinx.wrapper_chat.isMuted
 import io.matthewnelson.android_feature_screens.util.invisibleIfFalse
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 internal class ChatListAdapter(
-    private val viewModel: DashboardViewModel,
     private val lifecycleOwner: LifecycleOwner,
+    private val viewModel: DashboardViewModel,
 ): RecyclerView.Adapter<ChatListAdapter.ChatViewHolder>(), DefaultLifecycleObserver {
 
     inner class ChatViewHolder(view: View): RecyclerView.ViewHolder(view)
@@ -68,15 +70,22 @@ internal class ChatListAdapter(
 
     override fun onStart(owner: LifecycleOwner) {
         super.onStart(owner)
-        supervisor.scope().launch {
+        supervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
             viewModel.chatsStateFlow.collect { newChats ->
 
-                DiffUtil.calculateDiff(
-                    Diff(chatsList, newChats)
-                ).let { result ->
-                    chatsList.clear()
+                if (chatsList.isEmpty() && newChats.isNotEmpty()) {
                     chatsList.addAll(newChats)
-                    result.dispatchUpdatesTo(this@ChatListAdapter)
+                    this@ChatListAdapter.notifyDataSetChanged()
+                } else {
+                    withContext(viewModel.dispatchers.default) {
+                        DiffUtil.calculateDiff(
+                            Diff(chatsList, newChats)
+                        ).let { result ->
+                            chatsList.clear()
+                            chatsList.addAll(newChats)
+                            result.dispatchUpdatesTo(this@ChatListAdapter)
+                        }
+                    }
                 }
             }
         }

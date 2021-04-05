@@ -94,7 +94,7 @@ internal class DashboardFragment : MotionLayoutFragment<
         binding.layoutDashboardChats.recyclerViewChats.apply {
             this.setHasFixedSize(true)
             layoutManager = LinearLayoutManager(binding.root.context)
-            adapter = ChatListAdapter(viewModel, viewLifecycleOwner)
+            adapter = ChatListAdapter(viewLifecycleOwner, viewModel)
         }
     }
 
