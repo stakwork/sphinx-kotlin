@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Bundle
 import android.view.View
 import androidx.constraintlayout.motion.widget.MotionLayout
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
@@ -18,15 +19,19 @@ import chat.sphinx.dashboard.ui.viewstates.NavDrawerViewState
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.insetter_activity.addStatusBarPadding
+import chat.sphinx.kotlin_response.LoadResponse
+import chat.sphinx.kotlin_response.Response
 import chat.sphinx.resources.SphinxToastUtils
 import chat.sphinx.resources.inputMethodManager
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.navigation.CloseAppOnBackPress
 import io.matthewnelson.android_feature_screens.ui.motionlayout.MotionLayoutFragment
+import io.matthewnelson.android_feature_screens.util.invisibleIfFalse
 import io.matthewnelson.android_feature_viewmodel.currentViewState
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_views.sideeffect.SideEffect
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 @Suppress("NOTHING_TO_INLINE")
@@ -170,6 +175,57 @@ internal class DashboardFragment : MotionLayoutFragment<
     override fun onPause() {
         super.onPause()
         binding.searchBarClearFocus()
+    }
+
+    override fun subscribeToViewStateFlow() {
+        super.subscribeToViewStateFlow()
+        lifecycleScope.launchWhenStarted {
+            viewModel.networkStateFlow.collect { loadResponse ->
+                binding.layoutDashboardHeader.let { dashboardHeader ->
+                    @Exhaustive
+                    when (loadResponse) {
+                        is LoadResponse.Loading -> {
+                            dashboardHeader.progressBarDashboardHeaderNetwork.invisibleIfFalse(true)
+                            dashboardHeader.imageViewDashboardHeaderNetwork.invisibleIfFalse(false)
+                        }
+                        is Response.Error -> {
+                            dashboardHeader.progressBarDashboardHeaderNetwork.invisibleIfFalse(false)
+                            dashboardHeader.imageViewDashboardHeaderNetwork.invisibleIfFalse(true)
+                            dashboardHeader.imageViewDashboardHeaderNetwork.setImageDrawable(
+                                ContextCompat.getDrawable(
+                                    binding.root.context,
+                                    R.drawable.ic_network_state_white
+                                ).also { drawable ->
+                                    drawable?.setTint(
+                                        ContextCompat.getColor(
+                                            binding.root.context,
+                                            R.color.primaryRed
+                                        )
+                                    )
+                                }
+                            )
+                        }
+                        is Response.Success -> {
+                            dashboardHeader.progressBarDashboardHeaderNetwork.invisibleIfFalse(false)
+                            dashboardHeader.imageViewDashboardHeaderNetwork.invisibleIfFalse(true)
+                            dashboardHeader.imageViewDashboardHeaderNetwork.setImageDrawable(
+                                ContextCompat.getDrawable(
+                                    binding.root.context,
+                                    R.drawable.ic_network_state_white
+                                ).also { drawable ->
+                                    drawable?.setTint(
+                                        ContextCompat.getColor(
+                                            binding.root.context,
+                                            R.color.secondaryColor
+                                        )
+                                    )
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+        }
     }
 
     override suspend fun onViewStateFlowCollect(viewState: NavDrawerViewState) {

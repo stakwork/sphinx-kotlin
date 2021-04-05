@@ -64,7 +64,7 @@ internal class DashboardViewModel @Inject constructor(
         MutableStateFlow(LoadResponse.Loading)
     }
 
-    val networkStateLive: StateFlow<LoadResponse<Boolean, ResponseError>>
+    val networkStateFlow: StateFlow<LoadResponse<Boolean, ResponseError>>
         get() = _networkStateFlow.asStateFlow()
 
     private var jobNetworkRefresh: Job? = null
