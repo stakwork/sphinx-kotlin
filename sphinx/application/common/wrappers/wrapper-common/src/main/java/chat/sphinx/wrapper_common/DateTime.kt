@@ -10,6 +10,10 @@ import java.util.Locale
 inline fun String.toDateTime(): DateTime =
     DateTime(DateTime.getFormat().parse(this))
 
+@Suppress("NOTHING_TO_INLINE")
+inline fun Long.toDateTime(): DateTime =
+    DateTime(Date(this))
+
 inline val DateTime.time: Long
     get() = value.time
 
@@ -20,10 +24,6 @@ inline fun DateTime.after(dateTime: DateTime): Boolean =
 @Suppress("NOTHING_TO_INLINE")
 inline fun DateTime.before(dateTime: DateTime): Boolean =
     value.before(dateTime.value)
-
-// TODO: Write function for creating a DateTime after discussing
-//  with Evan how Relay handles time zones, or if Relay handles all
-//  date creation such that it isn't needed.
 
 /**
  * DateTime format from Relay: 2021-02-26T10:48:20.025Z
