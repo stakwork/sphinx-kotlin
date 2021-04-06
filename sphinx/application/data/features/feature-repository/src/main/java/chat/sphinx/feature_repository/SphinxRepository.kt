@@ -14,6 +14,8 @@ import chat.sphinx.concept_network_query_chat.model.ChatDto
 import chat.sphinx.concept_network_query_contact.NetworkQueryContact
 import chat.sphinx.concept_network_query_message.NetworkQueryMessage
 import chat.sphinx.concept_repository_contact.ContactRepository
+import chat.sphinx.conceptcoredb.MessageDbo
+import chat.sphinx.conceptcoredb.SphinxDatabaseQueries
 import chat.sphinx.feature_repository.mappers.chat.ChatDboPresenterMapper
 import chat.sphinx.feature_repository.mappers.chat.ChatDtoDboMapper
 import chat.sphinx.feature_repository.mappers.contact.ContactDboPresenterMapper
@@ -27,6 +29,7 @@ import chat.sphinx.feature_repository.mappers.message.MessageDtoDboMapper
 import chat.sphinx.kotlin_response.exception
 import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.logger.d
+import chat.sphinx.logger.e
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.chat.ChatId
@@ -115,7 +118,7 @@ class SphinxRepository(
                 }
                 is Response.Success -> {
                     emit(
-                        saveChats(loadResponse.value)
+                        processChatDtos(loadResponse.value)
                     )
                 }
                 is LoadResponse.Loading -> {
@@ -126,14 +129,13 @@ class SphinxRepository(
         }
     }
 
-    private suspend fun saveChats(chats: List<ChatDto>): Response<Boolean, ResponseError> {
+    private suspend fun processChatDtos(chats: List<ChatDto>): Response<Boolean, ResponseError> {
         try {
+            val dbos = chatDtoDboMapper.mapListFrom(chats)
+
+            val queries = coreDB.getSphinxDatabaseQueries()
+
             chatLock.withLock {
-
-                val dbos = chatDtoDboMapper.mapListFrom(chats)
-
-                val queries = coreDB.getSphinxDatabaseQueries()
-
                 withContext(dispatchers.io) {
 
                     val chatIdsToRemove = queries.getAllChatIds()
@@ -167,13 +169,13 @@ class SphinxRepository(
             return Response.Success(true)
 
         } catch (e: IllegalArgumentException) {
-            return Response.Error(
-                ResponseError("Failed to convert Json from Relay", e)
-            )
+            val msg = "Failed to convert Json from Relay while processing Chats"
+            LOG.e(TAG, msg, e)
+            return Response.Error(ResponseError(msg, e))
         } catch (e: ParseException) {
-            return Response.Error(
-                ResponseError("Failed to convert date/time from SphinxRelay", e)
-            )
+            val msg = "Failed to convert date/time from Relay while processing Chats"
+            LOG.e(TAG, msg, e)
+            return Response.Error(ResponseError(msg, e))
         }
     }
 
@@ -221,39 +223,46 @@ class SphinxRepository(
                 }
                 is Response.Success -> {
 
-                    val dbos = contactDtoDboMapper.mapListFrom(
-                        loadResponse.value.contacts.filterNot {
-                            it.from_group.toContactFromGroup().isTrue()
-                        }
-                    )
-
-                    val queries = coreDB.getSphinxDatabaseQueries()
-
-                    contactLock.withLock {
-                        withContext(dispatchers.io) {
-
-                            val contactIdsToRemove = queries.getAllContactIds()
-                                .executeAsList()
-                                .toMutableSet()
-
-                            queries.transaction {
-                                for (dbo in dbos) {
-                                    queries.upsertContact(dbo)
-
-                                    contactIdsToRemove.remove(dbo.id)
-                                }
-
-                                for (id in contactIdsToRemove) {
-                                    queries.deleteContact(id)
-                                }
+                    try {
+                        val dbos = contactDtoDboMapper.mapListFrom(
+                            loadResponse.value.contacts.filterNot {
+                                it.from_group.toContactFromGroup().isTrue()
                             }
+                        )
 
+                        val queries = coreDB.getSphinxDatabaseQueries()
+
+                        contactLock.withLock {
+                            withContext(dispatchers.io) {
+
+                                val contactIdsToRemove = queries.getAllContactIds()
+                                    .executeAsList()
+                                    .toMutableSet()
+
+                                queries.transaction {
+                                    for (dbo in dbos) {
+                                        queries.upsertContact(dbo)
+
+                                        contactIdsToRemove.remove(dbo.id)
+                                    }
+
+                                    for (id in contactIdsToRemove) {
+                                        queries.deleteContact(id)
+                                    }
+                                }
+
+                            }
                         }
-                    }
 
-                    emit(
-                        saveChats(loadResponse.value.chats)
-                    )
+                        emit(
+                            processChatDtos(loadResponse.value.chats)
+                        )
+
+                    } catch (e: ParseException) {
+                        val msg = "Failed to convert date/time from Relay while processing Contacts"
+                        LOG.e(TAG, msg, e)
+                        emit(Response.Error(ResponseError(msg, e)))
+                    }
 
                 }
                 is LoadResponse.Loading -> {
@@ -279,66 +288,79 @@ class SphinxRepository(
     @OptIn(RawPasswordAccess::class)
     private suspend fun decryptMessageContent(
         messageContent: MessageContent
-    ): Response<UnencryptedByteArray, ResponseError> =
-        authenticationCoreManager.getEncryptionKey()?.let { keys ->
-            rsa.decrypt(
-                rsaPrivateKey = RsaPrivateKey(keys.privateKey.value),
-                text = EncryptedString(messageContent.value),
-                dispatcher = dispatchers.default
+    ): Response<UnencryptedByteArray, ResponseError> {
+        val privateKey: CharArray = authenticationCoreManager.getEncryptionKey()
+            ?.privateKey
+            ?.value
+            ?: return Response.Error(
+                ResponseError("EncryptionKey retrieval failed")
             )
-        } ?: Response.Error(ResponseError("EncryptionKey retrieval failed"))
+
+        return rsa.decrypt(
+            rsaPrivateKey = RsaPrivateKey(privateKey),
+            text = EncryptedString(messageContent.value),
+            dispatcher = dispatchers.default
+        )
+    }
 
     @OptIn(UnencryptedDataAccess::class)
+    private suspend fun mapMessageDboAndDecryptContentIfNeeded(
+        queries: SphinxDatabaseQueries,
+        messageDbo: MessageDbo
+    ): Message {
+
+        return messageDbo.message_content?.let { messageContent ->
+
+            if (
+                messageDbo.type !is MessageType.KeySend &&
+                messageDbo.message_content_decrypted == null
+            ) {
+
+                val response = decryptMessageContent(messageContent)
+                val message = messageDboPresenterMapper.mapFrom(messageDbo)
+
+                @Exhaustive
+                when (response) {
+                    is Response.Error -> {
+                        message.setDecryptionError(response.exception)
+                        message
+                    }
+                    is Response.Success -> {
+
+                        val decrypted = MessageContentDecrypted(
+                            response.value.toUnencryptedString().value
+                        )
+
+                        messageLock.withLock {
+                            withContext(dispatchers.io) {
+                                queries.updateMessageContentDecrypted(
+                                    decrypted,
+                                    messageDbo.id
+                                )
+                            }
+                        }
+
+                        message.setMessageContentDecrypted(decrypted)
+                        message
+                    }
+                }
+
+            } else {
+
+                messageDboPresenterMapper.mapFrom(messageDbo)
+
+            }
+
+        } ?: messageDboPresenterMapper.mapFrom(messageDbo)
+    }
+
     override suspend fun getLatestMessageForChat(chatId: ChatId): Flow<Message?> {
         val queries = coreDB.getSphinxDatabaseQueries()
         return queries.getLatestMessageToShowByChatId(chatId)
             .asFlow()
             .mapToOneOrNull(dispatchers.io)
             .map { it?.let { messageDbo ->
-
-                messageDbo.message_content?.let { messageContent ->
-
-                    if (
-                        messageDbo.type !is MessageType.KeySend &&
-                        messageDbo.message_content_decrypted == null
-                    ) {
-
-                        val response = decryptMessageContent(messageContent)
-                        val message = messageDboPresenterMapper.mapFrom(messageDbo)
-
-                        @Exhaustive
-                        when (response) {
-                            is Response.Error -> {
-                                message.setDecryptionError(response.exception)
-                                message
-                            }
-                            is Response.Success -> {
-
-                                val decrypted = MessageContentDecrypted(
-                                    response.value.toUnencryptedString().value
-                                )
-
-                                messageLock.withLock {
-                                    withContext(dispatchers.io) {
-                                        queries.updateMessageContentDecrypted(
-                                            decrypted,
-                                            messageDbo.id
-                                        )
-                                    }
-                                }
-
-                                message.setMessageContentDecrypted(decrypted)
-                                message
-                            }
-                        }
-
-                    } else {
-
-                        messageDboPresenterMapper.mapFrom(messageDbo)
-
-                    }
-
-                } ?: messageDboPresenterMapper.mapFrom(messageDbo)
+                mapMessageDboAndDecryptContentIfNeeded(queries, messageDbo)
             }}
             .distinctUntilChanged()
     }
