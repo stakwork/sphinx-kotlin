@@ -27,6 +27,7 @@ import chat.sphinx.feature_repository.mappers.message.MessageDtoDboMapper
 import chat.sphinx.kotlin_response.exception
 import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.logger.d
+import chat.sphinx.logger.e
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.chat.ChatId
@@ -115,7 +116,7 @@ class SphinxRepository(
                 }
                 is Response.Success -> {
                     emit(
-                        saveChats(loadResponse.value)
+                        processChatDtos(loadResponse.value)
                     )
                 }
                 is LoadResponse.Loading -> {
@@ -126,14 +127,13 @@ class SphinxRepository(
         }
     }
 
-    private suspend fun saveChats(chats: List<ChatDto>): Response<Boolean, ResponseError> {
+    private suspend fun processChatDtos(chats: List<ChatDto>): Response<Boolean, ResponseError> {
         try {
+            val dbos = chatDtoDboMapper.mapListFrom(chats)
+
+            val queries = coreDB.getSphinxDatabaseQueries()
+
             chatLock.withLock {
-
-                val dbos = chatDtoDboMapper.mapListFrom(chats)
-
-                val queries = coreDB.getSphinxDatabaseQueries()
-
                 withContext(dispatchers.io) {
 
                     val chatIdsToRemove = queries.getAllChatIds()
@@ -167,13 +167,13 @@ class SphinxRepository(
             return Response.Success(true)
 
         } catch (e: IllegalArgumentException) {
-            return Response.Error(
-                ResponseError("Failed to convert Json from Relay", e)
-            )
+            val msg = "Failed to convert Json from Relay while processing Chats"
+            LOG.e(TAG, msg, e)
+            return Response.Error(ResponseError(msg, e))
         } catch (e: ParseException) {
-            return Response.Error(
-                ResponseError("Failed to convert date/time from SphinxRelay", e)
-            )
+            val msg = "Failed to convert date/time from Relay while processing Chats"
+            LOG.e(TAG, msg, e)
+            return Response.Error(ResponseError(msg, e))
         }
     }
 
@@ -252,7 +252,7 @@ class SphinxRepository(
                     }
 
                     emit(
-                        saveChats(loadResponse.value.chats)
+                        processChatDtos(loadResponse.value.chats)
                     )
 
                 }
