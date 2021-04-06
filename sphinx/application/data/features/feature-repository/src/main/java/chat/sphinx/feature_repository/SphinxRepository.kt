@@ -221,39 +221,46 @@ class SphinxRepository(
                 }
                 is Response.Success -> {
 
-                    val dbos = contactDtoDboMapper.mapListFrom(
-                        loadResponse.value.contacts.filterNot {
-                            it.from_group.toContactFromGroup().isTrue()
-                        }
-                    )
-
-                    val queries = coreDB.getSphinxDatabaseQueries()
-
-                    contactLock.withLock {
-                        withContext(dispatchers.io) {
-
-                            val contactIdsToRemove = queries.getAllContactIds()
-                                .executeAsList()
-                                .toMutableSet()
-
-                            queries.transaction {
-                                for (dbo in dbos) {
-                                    queries.upsertContact(dbo)
-
-                                    contactIdsToRemove.remove(dbo.id)
-                                }
-
-                                for (id in contactIdsToRemove) {
-                                    queries.deleteContact(id)
-                                }
+                    try {
+                        val dbos = contactDtoDboMapper.mapListFrom(
+                            loadResponse.value.contacts.filterNot {
+                                it.from_group.toContactFromGroup().isTrue()
                             }
+                        )
 
+                        val queries = coreDB.getSphinxDatabaseQueries()
+
+                        contactLock.withLock {
+                            withContext(dispatchers.io) {
+
+                                val contactIdsToRemove = queries.getAllContactIds()
+                                    .executeAsList()
+                                    .toMutableSet()
+
+                                queries.transaction {
+                                    for (dbo in dbos) {
+                                        queries.upsertContact(dbo)
+
+                                        contactIdsToRemove.remove(dbo.id)
+                                    }
+
+                                    for (id in contactIdsToRemove) {
+                                        queries.deleteContact(id)
+                                    }
+                                }
+
+                            }
                         }
-                    }
 
-                    emit(
-                        processChatDtos(loadResponse.value.chats)
-                    )
+                        emit(
+                            processChatDtos(loadResponse.value.chats)
+                        )
+
+                    } catch (e: ParseException) {
+                        val msg = "Failed to convert date/time from Relay while processing Contacts"
+                        LOG.e(TAG, msg, e)
+                        emit(Response.Error(ResponseError(msg, e)))
+                    }
 
                 }
                 is LoadResponse.Loading -> {
