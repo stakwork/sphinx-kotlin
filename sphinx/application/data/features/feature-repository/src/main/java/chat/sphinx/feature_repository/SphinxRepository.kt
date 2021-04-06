@@ -14,6 +14,8 @@ import chat.sphinx.concept_network_query_chat.model.ChatDto
 import chat.sphinx.concept_network_query_contact.NetworkQueryContact
 import chat.sphinx.concept_network_query_message.NetworkQueryMessage
 import chat.sphinx.concept_repository_contact.ContactRepository
+import chat.sphinx.conceptcoredb.MessageDbo
+import chat.sphinx.conceptcoredb.SphinxDatabaseQueries
 import chat.sphinx.feature_repository.mappers.chat.ChatDboPresenterMapper
 import chat.sphinx.feature_repository.mappers.chat.ChatDtoDboMapper
 import chat.sphinx.feature_repository.mappers.contact.ContactDboPresenterMapper
@@ -296,56 +298,63 @@ class SphinxRepository(
         } ?: Response.Error(ResponseError("EncryptionKey retrieval failed"))
 
     @OptIn(UnencryptedDataAccess::class)
+    private suspend fun mapMessageDboAndDecryptContentIfNeeded(
+        queries: SphinxDatabaseQueries,
+        messageDbo: MessageDbo
+    ): Message {
+
+        return messageDbo.message_content?.let { messageContent ->
+
+            if (
+                messageDbo.type !is MessageType.KeySend &&
+                messageDbo.message_content_decrypted == null
+            ) {
+
+                val response = decryptMessageContent(messageContent)
+                val message = messageDboPresenterMapper.mapFrom(messageDbo)
+
+                @Exhaustive
+                when (response) {
+                    is Response.Error -> {
+                        message.setDecryptionError(response.exception)
+                        message
+                    }
+                    is Response.Success -> {
+
+                        val decrypted = MessageContentDecrypted(
+                            response.value.toUnencryptedString().value
+                        )
+
+                        messageLock.withLock {
+                            withContext(dispatchers.io) {
+                                queries.updateMessageContentDecrypted(
+                                    decrypted,
+                                    messageDbo.id
+                                )
+                            }
+                        }
+
+                        message.setMessageContentDecrypted(decrypted)
+                        message
+                    }
+                }
+
+            } else {
+
+                messageDboPresenterMapper.mapFrom(messageDbo)
+
+            }
+
+        } ?: messageDboPresenterMapper.mapFrom(messageDbo)
+    }
+
     override suspend fun getLatestMessageForChat(chatId: ChatId): Flow<Message?> {
         val queries = coreDB.getSphinxDatabaseQueries()
         return queries.getLatestMessageToShowByChatId(chatId)
             .asFlow()
             .mapToOneOrNull(dispatchers.io)
             .map { it?.let { messageDbo ->
-
-                messageDbo.message_content?.let { messageContent ->
-
-                    if (
-                        messageDbo.type !is MessageType.KeySend &&
-                        messageDbo.message_content_decrypted == null
-                    ) {
-
-                        val response = decryptMessageContent(messageContent)
-                        val message = messageDboPresenterMapper.mapFrom(messageDbo)
-
-                        @Exhaustive
-                        when (response) {
-                            is Response.Error -> {
-                                message.setDecryptionError(response.exception)
-                                message
-                            }
-                            is Response.Success -> {
-
-                                val decrypted = MessageContentDecrypted(
-                                    response.value.toUnencryptedString().value
-                                )
-
-                                messageLock.withLock {
-                                    withContext(dispatchers.io) {
-                                        queries.updateMessageContentDecrypted(
-                                            decrypted,
-                                            messageDbo.id
-                                        )
-                                    }
-                                }
-
-                                message.setMessageContentDecrypted(decrypted)
-                                message
-                            }
-                        }
-
-                    } else {
-
-                        messageDboPresenterMapper.mapFrom(messageDbo)
-
-                    }
-
-                } ?: messageDboPresenterMapper.mapFrom(messageDbo)
+                mapMessageDboAndDecryptContentIfNeeded(queries, messageDbo)
             }}
             .distinctUntilChanged()
     }
