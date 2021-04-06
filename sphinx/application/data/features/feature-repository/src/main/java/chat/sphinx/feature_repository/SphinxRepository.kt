@@ -288,14 +288,20 @@ class SphinxRepository(
     @OptIn(RawPasswordAccess::class)
     private suspend fun decryptMessageContent(
         messageContent: MessageContent
-    ): Response<UnencryptedByteArray, ResponseError> =
-        authenticationCoreManager.getEncryptionKey()?.let { keys ->
-            rsa.decrypt(
-                rsaPrivateKey = RsaPrivateKey(keys.privateKey.value),
-                text = EncryptedString(messageContent.value),
-                dispatcher = dispatchers.default
+    ): Response<UnencryptedByteArray, ResponseError> {
+        val privateKey: CharArray = authenticationCoreManager.getEncryptionKey()
+            ?.privateKey
+            ?.value
+            ?: return Response.Error(
+                ResponseError("EncryptionKey retrieval failed")
             )
-        } ?: Response.Error(ResponseError("EncryptionKey retrieval failed"))
+
+        return rsa.decrypt(
+            rsaPrivateKey = RsaPrivateKey(privateKey),
+            text = EncryptedString(messageContent.value),
+            dispatcher = dispatchers.default
+        )
+    }
 
     @OptIn(UnencryptedDataAccess::class)
     private suspend fun mapMessageDboAndDecryptContentIfNeeded(
