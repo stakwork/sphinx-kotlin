@@ -39,4 +39,11 @@ internal class DateTimeUnitTest {
         Assert.assertTrue(date1.before(date2))
         Assert.assertTrue(date2.after(date1))
     }
+
+    @Test
+    fun `DateTime to and from Long compatible with string format`() {
+        val date: Long = testData[4].toDateTime().time
+
+        Assert.assertEquals(testData[4], date.toDateTime().toString())
+    }
 }

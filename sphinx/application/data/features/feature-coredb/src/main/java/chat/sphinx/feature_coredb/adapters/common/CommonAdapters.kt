@@ -78,7 +78,7 @@ internal class ContactIdsAdapter private constructor(): ColumnAdapter<List<Conta
     }
 }
 
-internal class DateTimeAdapter private constructor(): ColumnAdapter<DateTime, String> {
+internal class DateTimeAdapter private constructor(): ColumnAdapter<DateTime, Long> {
 
     companion object {
         @Volatile
@@ -90,12 +90,12 @@ internal class DateTimeAdapter private constructor(): ColumnAdapter<DateTime, St
             }
     }
 
-    override fun decode(databaseValue: String): DateTime {
+    override fun decode(databaseValue: Long): DateTime {
         return databaseValue.toDateTime()
     }
 
-    override fun encode(value: DateTime): String {
-        return value.toString()
+    override fun encode(value: DateTime): Long {
+        return value.time
     }
 }
 
