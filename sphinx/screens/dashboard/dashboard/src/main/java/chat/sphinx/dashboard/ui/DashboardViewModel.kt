@@ -16,6 +16,8 @@ import chat.sphinx.dashboard.ui.viewstates.NavDrawerViewState
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
+import chat.sphinx.wrapper_chat.isConversation
+import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_message.Message
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.MotionLayoutViewModel
@@ -76,7 +78,18 @@ internal class DashboardViewModel @Inject constructor(
                             null
                         }
 
-                        newList.add(DashboardChat(chat, message))
+                        if (chat.type.isConversation()) {
+                            // TODO: Replace direct calls with local contactStateFlow
+                            val contact: Contact = contactRepository.getContactById(
+                                chat.contactIds.lastOrNull() ?: continue
+                            ).firstOrNull() ?: continue
+
+                            newList.add(DashboardChat.Conversation(
+                                chat, message, contact
+                            ))
+                        } else {
+                            newList.add(DashboardChat.GroupOrTribe(chat, message))
+                        }
                     }
                 }
 

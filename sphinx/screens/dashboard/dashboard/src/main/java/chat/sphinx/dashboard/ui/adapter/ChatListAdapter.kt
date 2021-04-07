@@ -15,8 +15,7 @@ import chat.sphinx.dashboard.R
 import chat.sphinx.dashboard.ui.DashboardViewModel
 import chat.sphinx.dashboard.ui.collectChatViewState
 import chat.sphinx.dashboard.ui.currentChatViewState
-import chat.sphinx.wrapper_chat.ChatType
-import chat.sphinx.wrapper_chat.isMuted
+import chat.sphinx.wrapper_chat.*
 import io.matthewnelson.android_feature_screens.util.invisibleIfFalse
 import kotlinx.coroutines.launch
 
@@ -43,8 +42,24 @@ internal class ChatListAdapter(
             return try {
                 oldList[oldItemPosition].let { old ->
                     newList[newItemPosition].let { new ->
-                        old.chat.id == new.chat.id                              &&
-                        old.chat.latestMessageId == new.chat.latestMessageId
+                        // TODO: Clean up...
+                        when {
+                            old is DashboardChat.GroupOrTribe &&
+                            new is DashboardChat.GroupOrTribe -> {
+                                old.chat.id == new.chat.id &&
+                                old.chat.latestMessageId == new.chat.latestMessageId
+                            }
+                            old is DashboardChat.Conversation &&
+                            new is DashboardChat.Conversation -> {
+                                old.contact.id == new.contact.id &&
+                                old.chat?.id == new.chat?.id &&
+                                old.chat?.latestMessageId == new.chat?.latestMessageId
+
+                            }
+                            else -> {
+                                false
+                            }
+                        }
                     }
                 }
             } catch (e: IndexOutOfBoundsException) {
@@ -56,10 +71,26 @@ internal class ChatListAdapter(
             return try {
                 oldList[oldItemPosition].let { old ->
                     newList[newItemPosition].let { new ->
-                        old.chat.isMuted == new.chat.isMuted                    &&
-                        old.chat.seen == new.chat.seen                          &&
-                        old.chat.name == new.chat.name                          &&
-                        old.chat.photoUrl == new.chat.photoUrl
+                        // TODO: Clean up...
+                        when {
+                            old is DashboardChat.GroupOrTribe &&
+                            new is DashboardChat.GroupOrTribe -> {
+                                old.chatName == new.chatName                            &&
+                                old.chat.isMuted == new.chat.isMuted                    &&
+                                old.chat.seen == new.chat.seen                          &&
+                                old.chat.photoUrl == new.chat.photoUrl
+                            }
+                            old is DashboardChat.Conversation &&
+                            new is DashboardChat.Conversation -> {
+                                old.chatName == new.chatName                            &&
+                                old.chat?.isMuted == new.chat?.isMuted                  &&
+                                old.chat?.seen == new.chat?.seen                        &&
+                                old.chat?.photoUrl == new.chat?.photoUrl
+                            }
+                            else -> {
+                                false
+                            }
+                        }
                     }
                 }
             } catch (e: IndexOutOfBoundsException) {
@@ -123,63 +154,45 @@ internal class ChatListAdapter(
             val textViewTime: TextView =
                 holder.itemView.findViewById(R.id.text_view_chat_holder_time)
 
-            @Exhaustive
-            when (dashboardChat.chat.type) {
-                is ChatType.Conversation -> {
-                    // use contact's name
-                    textViewName.text = "Contact"
-                    textViewName.setTextColor(
-                        ContextCompat.getColor(textViewName.context, android.R.color.white)
-                    )
-                }
-                is ChatType.Group,
-                is ChatType.Tribe -> {
-                    val name = dashboardChat.chat.name
-
-                    textViewName.text = if (name != null) {
-                        textViewName.setTextColor(
-                            ContextCompat.getColor(textViewName.context, android.R.color.white)
-                        )
-                        name.value
-                    } else {
-                        textViewName.setTextColor(
-                            ContextCompat.getColor(textViewName.context, R.color.primaryRed)
-                        )
-                        "ERROR: NULL NAME"
-                    }
-                }
-                is ChatType.Unknown -> {
-                    textViewName.text = "ERROR: UNKNOWN CHAT TYPE"
-                    textViewName.setTextColor(
-                        ContextCompat.getColor(textViewName.context, R.color.primaryRed)
-                    )
-                }
+            textViewName.text = if (dashboardChat.chatName != null) {
+                textViewName.setTextColor(
+                    ContextCompat.getColor(textViewName.context, android.R.color.white)
+                )
+                dashboardChat.chatName
+            } else {
+                // Should never make it here, but just in case...
+                textViewName.setTextColor(
+                    ContextCompat.getColor(textViewName.context, R.color.primaryRed)
+                )
+                "ERROR: NULL NAME"
             }
 
-            textViewMessage.text = dashboardChat.chat.latestMessageId.toString()
+            // TODO: Re-work once pulling of messages gets fleshed out
+            textViewMessage.text = dashboardChat.chat?.latestMessageId?.toString() ?: ""
 
-            imageViewNotification.invisibleIfFalse(dashboardChat.chat.isMuted())
+            imageViewNotification.invisibleIfFalse(dashboardChat.chat?.isMuted() != false)
 
             layoutChatHolder.setOnClickListener {
                 @Exhaustive
-                when (dashboardChat.chat.type) {
-                    is ChatType.Conversation -> {
-                        supervisor.scope().launch {
-                            viewModel.dashboardNavigator.toChatContact(dashboardChat.chat.id)
+                when (dashboardChat) {
+                    is DashboardChat.Conversation -> {
+                        // TODO: Use ContactId
+                        dashboardChat.chat?.id?.let {
+                            supervisor.scope().launch {
+                                viewModel.dashboardNavigator.toChatContact(it)
+                            }
                         }
                     }
-                    is ChatType.Group -> {
-                        supervisor.scope().launch {
-                            viewModel.dashboardNavigator.toChatGroup(dashboardChat.chat.id)
+                    is DashboardChat.GroupOrTribe -> {
+                        if (dashboardChat.chat.type.isGroup()) {
+                            supervisor.scope().launch {
+                                viewModel.dashboardNavigator.toChatGroup(dashboardChat.chat.id)
+                            }
+                        } else if (dashboardChat.chat.type.isTribe()) {
+                            supervisor.scope().launch {
+                                viewModel.dashboardNavigator.toChatTribe(dashboardChat.chat.id)
+                            }
                         }
-                    }
-                    is ChatType.Tribe -> {
-                        supervisor.scope().launch {
-                            viewModel.dashboardNavigator.toChatTribe(dashboardChat.chat.id)
-                        }
-                    }
-                    is ChatType.Unknown -> {
-                        // TODO: Warning message???
                     }
                 }
             }

@@ -52,7 +52,7 @@ private inline fun List<DashboardChat>.filterDashboardChats(
     filter: CharSequence
 ): List<DashboardChat> =
     filter {
-        it.chat.name?.value?.contains(filter, ignoreCase = true) == true
+        it.chatName?.contains(filter, ignoreCase = true) == true
     }
 
 internal class ChatViewStateContainer(
@@ -79,7 +79,7 @@ internal class ChatViewStateContainer(
             val sortedDashboardChats = if (dashboardChats != null) {
                 withContext(dispatchers.default) {
                     dashboardChats.sortedByDescending {
-                        it.chat.latestMessageId?.value
+                        it.chat?.latestMessageId?.value
                     }
                 }
             } else {
