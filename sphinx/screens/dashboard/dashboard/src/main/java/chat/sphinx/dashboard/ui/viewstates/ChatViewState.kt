@@ -101,7 +101,10 @@ internal class ChatViewStateContainer(
                             super.updateViewState(
                                 ChatViewState.SearchMode(
                                     viewState.filter,
-                                    sortedDashboardChats.filterDashboardChats(viewState.filter.value)
+                                    withContext(dispatchers.default) {
+                                        sortedDashboardChats
+                                            .filterDashboardChats(viewState.filter.value)
+                                    }
                                 )
                             )
                         }
@@ -117,7 +120,10 @@ internal class ChatViewStateContainer(
                     super.updateViewState(
                         ChatViewState.SearchMode(
                             filter,
-                            sortedDashboardChats.filterDashboardChats(filter.value)
+                            withContext(dispatchers.default) {
+                                sortedDashboardChats
+                                    .filterDashboardChats(filter.value)
+                            }
                         )
                     )
                 }
