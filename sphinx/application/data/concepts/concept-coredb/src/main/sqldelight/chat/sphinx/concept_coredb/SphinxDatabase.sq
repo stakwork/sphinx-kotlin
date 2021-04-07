@@ -68,30 +68,30 @@ CREATE TABLE chatDbo(
     latest_message_id           INTEGER         AS MessageId DEFAULT NULL
 );
 
-updateLatestMessage:
+chatUpdateLatestMessage:
 UPDATE chatDbo
 SET latest_message_id = :latest_message_id
 WHERE id = ?;
 
-getAllChats:
+chatGetAll:
 SELECT *
 FROM chatDbo;
 
-getAllChatIds:
+chatGetAllIds:
 SELECT id
 FROM chatDbo;
 
-getChatById:
+chatGetById:
 SELECT *
 FROM chatDbo
 WHERE id = ?;
 
-getChatByUUID:
+chatGetByUUID:
 SELECT *
 FROM chatDbo
 WHERE uuid = ?;
 
-upsertChat {
+chatUpsert {
     UPDATE chatDbo
     SET uuid = :uuid,
         name = :name,
@@ -163,7 +163,7 @@ upsertChat {
     );
 }
 
-deleteChatById:
+chatDeleteById:
 DELETE FROM chatDbo
 WHERE id = ?;
 
@@ -193,7 +193,7 @@ CREATE TABLE messageDbo(
     reply_uuid                  TEXT            AS ReplyUUID
 );
 
-getLatestMessageId:
+messageGetLatestId:
 SELECT id
 FROM messageDbo
 ORDER BY id DESC
@@ -201,7 +201,7 @@ LIMIT 1;
 
 -- Retrieves the latest message for the given ChatID that will be shown
 -- to the User. See [MessageType] for more detail
-getLatestMessageToShowByChatId:
+messageGetLatestToShowByChatId:
 SELECT *
 FROM messageDbo
 WHERE chat_id = ?
@@ -217,14 +217,14 @@ AND type = 0
 ORDER BY id DESC
 LIMIT 1;
 
-updateMessageContentDecrypted:
+messageUpdateContentDecrypted:
 UPDATE messageDbo
 SET message_content_decrypted = :message_content_decrypted
 WHERE id = :id;
 
 -- If the message exists in the DB, it will update all fields _except_
 -- for message_content_decrypted as to not overwrite it.
-upsertMessage {
+messageUpsert {
     UPDATE messageDbo
     SET uuid = :uuid,
         chat_id = :chat_id,
@@ -301,11 +301,11 @@ upsertMessage {
     );
 }
 
-deleteMessageById:
+messageDeleteById:
 DELETE FROM messageDbo
 WHERE id = ?;
 
-deleteMessagesByChatId:
+messageDeleteByChatId:
 DELETE FROM messageDbo
 WHERE chat_id = ?;
 
@@ -328,27 +328,27 @@ CREATE TABLE contactDbo(
     invite_id                   INTEGER         AS InviteId
 );
 
-getAllContactIds:
+contactGetAllIds:
 SELECT id
 FROM contactDbo;
 
-getContacts:
+contactGetAll:
 SELECT *
 FROM contactDbo;
 
-getContactById:
+contactGetById:
 SELECT *
 FROM contactDbo
-WHERE id = :id;
+WHERE id = ?;
 
-getContactOwner:
+contactGetOwner:
 SELECT *
 FROM contactDbo
 WHERE owner = 1
 ORDER BY id
 LIMIT 1;
 
-upsertContact {
+contactUpsert {
     UPDATE contactDbo
     SET route_hint = :route_hint,
         node_pub_key = :node_pub_key,
@@ -404,6 +404,6 @@ upsertContact {
     );
 }
 
-deleteContact:
+contactDeleteById:
 DELETE FROM contactDbo
 WHERE id = ?;

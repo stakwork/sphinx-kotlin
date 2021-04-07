@@ -86,14 +86,14 @@ class SphinxRepository(
     }
 
     override suspend fun getChats(): Flow<List<Chat>> {
-        return coreDB.getSphinxDatabaseQueries().getAllChats()
+        return coreDB.getSphinxDatabaseQueries().chatGetAll()
             .asFlow()
             .mapToList(dispatchers.io)
             .map { chatDboPresenterMapper.mapListFrom(it) }
     }
 
     override suspend fun getChatById(chatId: ChatId): Flow<Chat?> {
-        return coreDB.getSphinxDatabaseQueries().getChatById(chatId)
+        return coreDB.getSphinxDatabaseQueries().chatGetById(chatId)
             .asFlow()
             .mapToOneOrNull(dispatchers.io)
             .map { it?.let { chatDboPresenterMapper.mapFrom(it) } }
@@ -101,7 +101,7 @@ class SphinxRepository(
     }
 
     override suspend fun getChatByUUID(chatUUID: ChatUUID): Flow<Chat?> {
-        return coreDB.getSphinxDatabaseQueries().getChatByUUID(chatUUID)
+        return coreDB.getSphinxDatabaseQueries().chatGetByUUID(chatUUID)
             .asFlow()
             .mapToOneOrNull(dispatchers.io)
             .map { it?.let { chatDboPresenterMapper.mapFrom(it) } }
@@ -138,7 +138,7 @@ class SphinxRepository(
             chatLock.withLock {
                 withContext(dispatchers.io) {
 
-                    val chatIdsToRemove = queries.getAllChatIds()
+                    val chatIdsToRemove = queries.chatGetAllIds()
                         .executeAsList()
                         .toMutableSet()
 
@@ -154,8 +154,8 @@ class SphinxRepository(
                             // remove remaining chat's from DB
                             chatIdsToRemove.forEach { chatId ->
                                 LOG.d(TAG, "Removing Chats/Messages - chatId")
-                                queries.deleteChatById(chatId)
-                                queries.deleteMessagesByChatId(chatId)
+                                queries.chatDeleteById(chatId)
+                                queries.messageDeleteByChatId(chatId)
                             }
 
                         }
@@ -192,14 +192,14 @@ class SphinxRepository(
     }
 
     override suspend fun getContacts(): Flow<List<Contact>> {
-        return coreDB.getSphinxDatabaseQueries().getContacts()
+        return coreDB.getSphinxDatabaseQueries().contactGetAll()
             .asFlow()
             .mapToList(dispatchers.io)
             .map { contactDboPresenterMapper.mapListFrom(it) }
     }
 
     override suspend fun getContactById(contactId: ContactId): Flow<Contact?> {
-        return coreDB.getSphinxDatabaseQueries().getContactById(contactId)
+        return coreDB.getSphinxDatabaseQueries().contactGetById(contactId)
             .asFlow()
             .mapToOneOrNull(dispatchers.io)
             .map { it?.let { contactDboPresenterMapper.mapFrom(it) } }
@@ -207,7 +207,7 @@ class SphinxRepository(
     }
 
     override suspend fun getOwner(): Flow<Contact?> {
-        return coreDB.getSphinxDatabaseQueries().getContactOwner()
+        return coreDB.getSphinxDatabaseQueries().contactGetOwner()
             .asFlow()
             .mapToOneOrNull(dispatchers.io)
             .map { it?.let { contactDboPresenterMapper.mapFrom(it) } }
@@ -235,7 +235,7 @@ class SphinxRepository(
                         contactLock.withLock {
                             withContext(dispatchers.io) {
 
-                                val contactIdsToRemove = queries.getAllContactIds()
+                                val contactIdsToRemove = queries.contactGetAllIds()
                                     .executeAsList()
                                     .toMutableSet()
 
@@ -247,7 +247,7 @@ class SphinxRepository(
                                     }
 
                                     for (id in contactIdsToRemove) {
-                                        queries.deleteContact(id)
+                                        queries.contactDeleteById(id)
                                     }
                                 }
 
@@ -333,7 +333,7 @@ class SphinxRepository(
 
                         messageLock.withLock {
                             withContext(dispatchers.io) {
-                                queries.updateMessageContentDecrypted(
+                                queries.messageUpdateContentDecrypted(
                                     decrypted,
                                     messageDbo.id
                                 )
@@ -356,7 +356,7 @@ class SphinxRepository(
 
     override suspend fun getLatestMessageForChat(chatId: ChatId): Flow<Message?> {
         val queries = coreDB.getSphinxDatabaseQueries()
-        return queries.getLatestMessageToShowByChatId(chatId)
+        return queries.messageGetLatestToShowByChatId(chatId)
             .asFlow()
             .mapToOneOrNull(dispatchers.io)
             .map { it?.let { messageDbo ->
@@ -398,7 +398,7 @@ class SphinxRepository(
         emit(LoadResponse.Loading)
         val queries = coreDB.getSphinxDatabaseQueries()
         var lastMessageId: Long = withContext(dispatchers.io) {
-            queries.getLatestMessageId().executeAsOneOrNull()?.value?.let {
+            queries.messageGetLatestId().executeAsOneOrNull()?.value?.let {
                 if (it >= 1) {
                     it - 1
                 } else {
@@ -490,7 +490,7 @@ class SphinxRepository(
                                     withContext(dispatchers.io) {
 
                                         queries.transaction {
-                                            val chatIds = queries.getAllChatIds().executeAsList()
+                                            val chatIds = queries.chatGetAllIds().executeAsList()
                                             LOG.d(
                                                 TAG,
                                                 "Inserting Messages -" +
@@ -513,7 +513,7 @@ class SphinxRepository(
                                             }
 
                                             for (entry in latestMessageMap.entries) {
-                                                queries.updateLatestMessage(entry.value, entry.key)
+                                                queries.chatUpdateLatestMessage(entry.value, entry.key)
                                             }
                                         }
 

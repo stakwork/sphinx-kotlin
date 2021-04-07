@@ -7,7 +7,7 @@ import chat.sphinx.conceptcoredb.SphinxDatabaseQueries
 
 @Suppress("NOTHING_TO_INLINE", "SpellCheckingInspection")
 inline fun SphinxDatabaseQueries.upsertChat(dbo: ChatDbo): Unit =
-    upsertChat(
+    chatUpsert(
         dbo.uuid,
         dbo.name,
         dbo.photo_url,
@@ -33,7 +33,7 @@ inline fun SphinxDatabaseQueries.upsertChat(dbo: ChatDbo): Unit =
 
 @Suppress("NOTHING_TO_INLINE", "SpellCheckingInspection")
 inline fun SphinxDatabaseQueries.upsertMessage(dbo: MessageDbo): Unit =
-    upsertMessage(
+    messageUpsert(
         dbo.uuid,
         dbo.chat_id,
         dbo.type,
@@ -61,7 +61,7 @@ inline fun SphinxDatabaseQueries.upsertMessage(dbo: MessageDbo): Unit =
 
 @Suppress("NOTHING_TO_INLINE", "SpellCheckingInspection")
 inline fun SphinxDatabaseQueries.upsertContact(dbo: ContactDbo): Unit =
-    upsertContact(
+    contactUpsert(
         dbo.route_hint,
         dbo.node_pub_key,
         dbo.node_alias,
