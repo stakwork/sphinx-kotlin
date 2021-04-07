@@ -24,8 +24,26 @@ internal sealed class ChatViewState: ViewState<ChatViewState>() {
 }
 
 internal sealed class ChatFilter {
+
+    /**
+     * Will use the current filter (if any) applied to the list of [DashboardChat]s.
+     * */
     object UseCurrent: ChatFilter()
-    class FilterBy(val value: CharSequence): ChatFilter()
+
+    /**
+     * Will filter the list of [DashboardChat]s based on the provided [value]
+     * */
+    class FilterBy(val value: CharSequence): ChatFilter() {
+        init {
+            require(value.isNotEmpty()) {
+                "ChatFilter.FilterBy cannot be empty. Use ClearFilter."
+            }
+        }
+    }
+
+    /**
+     * Clears any applied filters.
+     * */
     object ClearFilter: ChatFilter()
 }
 
@@ -47,15 +65,21 @@ internal class ChatViewStateContainer(
 
     private val lock = Mutex()
 
+    /**
+     * Sorts and filters the provided list.
+     *
+     * @param [dashboardChats] if `null` uses the current, already sorted list.
+     * @param [filter] the type of filtering to apply to the list. See [ChatFilter].
+     * */
     suspend fun updateDashboardChats(
-        dashboardChats: List<DashboardChat>,
+        dashboardChats: List<DashboardChat>?,
         filter: ChatFilter = ChatFilter.UseCurrent
     ) {
         lock.withLock {
             val sortedDashboardChats = withContext(dispatchers.default) {
-                dashboardChats.sortedByDescending {
+                dashboardChats?.sortedByDescending {
                     it.chat.latestMessageId?.value
-                }
+                } ?: viewStateFlow.value.list
             }
 
             @Exhaustive

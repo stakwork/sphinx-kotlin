@@ -38,7 +38,7 @@ internal val DashboardViewModel.currentChatViewState: ChatViewState
     get() = chatViewStateContainer.value
 
 internal suspend inline fun DashboardViewModel.updateChatListFilter(filter: ChatFilter) {
-    chatViewStateContainer.updateDashboardChats(currentChatViewState.list, filter)
+    chatViewStateContainer.updateDashboardChats(null, filter)
 }
 
 @HiltViewModel
