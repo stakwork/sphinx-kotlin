@@ -74,7 +74,7 @@ internal class DashboardViewModel @Inject constructor(
                     for (chat in chats) {
                         val message: Message? = chat.latestMessageId?.let {
                             // TODO: Fix DB's messages table
-//                        messageRepository.getLatestMessageForChat(chat.id).firstOrNull()
+//                            messageRepository.getLatestMessageForChat(chat.id).firstOrNull()
                             null
                         }
 
