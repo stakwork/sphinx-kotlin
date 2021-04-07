@@ -13,12 +13,12 @@ import androidx.recyclerview.widget.RecyclerView
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.dashboard.R
 import chat.sphinx.dashboard.ui.DashboardViewModel
+import chat.sphinx.dashboard.ui.collectChatViewState
+import chat.sphinx.dashboard.ui.currentChatViewState
 import chat.sphinx.wrapper_chat.ChatType
 import chat.sphinx.wrapper_chat.isMuted
 import io.matthewnelson.android_feature_screens.util.invisibleIfFalse
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 internal class ChatListAdapter(
     private val lifecycleOwner: LifecycleOwner,
@@ -69,25 +69,27 @@ internal class ChatListAdapter(
 
     }
 
-    private val dashboardChats = ArrayList<DashboardChat>(viewModel.chatsStateFlow.value)
+    private val dashboardChats = ArrayList<DashboardChat>(viewModel.currentChatViewState.list)
     private val supervisor = OnStartStopSupervisor(lifecycleOwner)
 
     override fun onStart(owner: LifecycleOwner) {
         super.onStart(owner)
         supervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
-            viewModel.chatsStateFlow.collect { newDashboardChats ->
-                if (dashboardChats.isEmpty() && newDashboardChats.isNotEmpty()) {
-                    dashboardChats.addAll(newDashboardChats)
+            viewModel.collectChatViewState { viewState ->
+
+                if (dashboardChats.isEmpty() && viewState.list.isNotEmpty()) {
+                    dashboardChats.addAll(viewState.list)
                     this@ChatListAdapter.notifyDataSetChanged()
                 } else {
                     DiffUtil.calculateDiff(
-                        Diff(dashboardChats, newDashboardChats)
+                        Diff(dashboardChats, viewState.list)
                     ).let { result ->
                         dashboardChats.clear()
-                        dashboardChats.addAll(newDashboardChats)
+                        dashboardChats.addAll(viewState.list)
                         result.dispatchUpdatesTo(this@ChatListAdapter)
                     }
                 }
+
             }
         }
     }
