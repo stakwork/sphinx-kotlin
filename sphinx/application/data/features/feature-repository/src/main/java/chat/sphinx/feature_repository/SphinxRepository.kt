@@ -398,7 +398,13 @@ class SphinxRepository(
         emit(LoadResponse.Loading)
         val queries = coreDB.getSphinxDatabaseQueries()
         var lastMessageId: Long = withContext(dispatchers.io) {
-            queries.getLatestMessageId().executeAsOneOrNull()?.value ?: 0
+            queries.getLatestMessageId().executeAsOneOrNull()?.value?.let {
+                if (it >= 1) {
+                    it - 1
+                } else {
+                    0
+                }
+            } ?: 0
         }
 
         val supervisor = SupervisorJob(currentCoroutineContext().job)
