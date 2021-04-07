@@ -68,6 +68,11 @@ CREATE TABLE chatDbo(
     latest_message_id           INTEGER         AS MessageId DEFAULT NULL
 );
 
+updateLatestMessage:
+UPDATE chatDbo
+SET latest_message_id = :latest_message_id
+WHERE id = ?;
+
 getAllChats:
 SELECT *
 FROM chatDbo;

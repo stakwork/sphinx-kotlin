@@ -492,12 +492,22 @@ class SphinxRepository(
                                                         " - ${dbos.lastOrNull()?.id?.value}"
                                             )
 
+                                            val latestMessageMap = mutableMapOf<ChatId, MessageId>()
+
                                             for (dbo in dbos) {
                                                 if (dbo.chat_id.value == MessageDtoDboMapper.NULL_CHAT_ID.toLong()) {
                                                     queries.upsertMessage(dbo)
                                                 } else if (chatIds.contains(dbo.chat_id)) {
                                                     queries.upsertMessage(dbo)
+
+                                                    if (dbo.type.show) {
+                                                        latestMessageMap[dbo.chat_id] = dbo.id
+                                                    }
                                                 }
+                                            }
+
+                                            for (entry in latestMessageMap.entries) {
+                                                queries.updateLatestMessage(entry.value, entry.key)
                                             }
                                         }
 
@@ -510,7 +520,7 @@ class SphinxRepository(
                         when {
                             lastMessageId == -1 -> {}
                             newMessages.size >= 199 -> {
-                                lastMessageId += 200
+                                lastMessageId += 199
                             }
                             else -> {
                                 lastMessageId = -1
