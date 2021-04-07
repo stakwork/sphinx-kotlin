@@ -71,6 +71,7 @@ abstract class CoreDBImpl: CoreDB() {
                     my_photo_urlAdapter = PhotoUrlAdapter.getInstance(),
                     my_aliasAdapter = ChatAliasAdapter(),
                     pending_contact_idsAdapter = ContactIdsAdapter.getInstance(),
+                    latest_message_idAdapter = MessageIdAdapter.getInstance(),
                 ),
                 messageDboAdapter = MessageDbo.Adapter(
                     idAdapter = MessageIdAdapter.getInstance(),
@@ -95,7 +96,7 @@ abstract class CoreDBImpl: CoreDB() {
                     sender_aliasAdapter = SenderAliasAdapter(),
                     sender_picAdapter = PhotoUrlAdapter.getInstance(),
                     original_muidAdapter = MessageMUIDAdapter(),
-                    reply_uuidAdapter = ReplyUUIDAdapter()
+                    reply_uuidAdapter = ReplyUUIDAdapter(),
                 ),
                 contactDboAdapter = ContactDbo.Adapter(
                     idAdapter = ContactIdAdapter.getInstance(),
@@ -113,7 +114,7 @@ abstract class CoreDBImpl: CoreDB() {
                     updated_atAdapter = DateTimeAdapter.getInstance(),
                     notification_soundAdapter = NotificationSoundAdapter(),
                     tip_amountAdapter = SatAdapter.getInstance(),
-                    invite_idAdapter = InviteIdAdapter.getInstance()
+                    invite_idAdapter = InviteIdAdapter.getInstance(),
                 )
             ).sphinxDatabaseQueries
         }

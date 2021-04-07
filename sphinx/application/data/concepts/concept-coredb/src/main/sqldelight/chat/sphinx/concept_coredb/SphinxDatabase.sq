@@ -64,7 +64,8 @@ CREATE TABLE chatDbo(
     meta_data                   TEXT            AS ChatMetaData,
     my_photo_url                TEXT            AS PhotoUrl,
     my_alias                    TEXT            AS ChatAlias,
-    pending_contact_ids         TEXT            AS List<ContactId>
+    pending_contact_ids         TEXT            AS List<ContactId>,
+    latest_message_id           INTEGER         AS MessageId DEFAULT NULL
 );
 
 getAllChats:

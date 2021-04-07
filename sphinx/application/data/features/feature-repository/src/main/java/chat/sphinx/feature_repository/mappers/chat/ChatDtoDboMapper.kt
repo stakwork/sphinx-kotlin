@@ -45,7 +45,8 @@ internal class ChatDtoDboMapper(
             meta_data = value.meta?.toChatMetaDataOrNull(),
             my_photo_url = value.my_photo_url?.toPhotoUrl(),
             my_alias = value.my_alias?.toChatAlias(),
-            pending_contact_ids = value.pending_contact_ids?.map { ContactId(it) }
+            pending_contact_ids = value.pending_contact_ids?.map { ContactId(it) },
+            latest_message_id = null
         )
     }
 
