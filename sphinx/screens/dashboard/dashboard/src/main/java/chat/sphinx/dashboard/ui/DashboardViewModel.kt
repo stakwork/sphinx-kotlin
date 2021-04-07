@@ -9,6 +9,7 @@ import chat.sphinx.dashboard.navigation.DashboardBottomNavBarNavigator
 import chat.sphinx.dashboard.navigation.DashboardNavDrawerNavigator
 import chat.sphinx.dashboard.navigation.DashboardNavigator
 import chat.sphinx.dashboard.ui.adapter.DashboardChat
+import chat.sphinx.dashboard.ui.viewstates.ChatFilter
 import chat.sphinx.dashboard.ui.viewstates.ChatViewState
 import chat.sphinx.dashboard.ui.viewstates.ChatViewStateContainer
 import chat.sphinx.dashboard.ui.viewstates.NavDrawerViewState
@@ -36,7 +37,7 @@ internal suspend inline fun DashboardViewModel.collectChatViewState(
 internal val DashboardViewModel.currentChatViewState: ChatViewState
     get() = chatViewStateContainer.value
 
-internal suspend inline fun DashboardViewModel.updateSearchParams(filter: String) {
+internal suspend inline fun DashboardViewModel.updateChatListFilter(filter: ChatFilter) {
     chatViewStateContainer.updateDashboardChats(currentChatViewState.list, filter)
 }
 
