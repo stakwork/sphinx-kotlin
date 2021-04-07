@@ -76,10 +76,14 @@ internal class ChatViewStateContainer(
         filter: ChatFilter = ChatFilter.UseCurrent
     ) {
         lock.withLock {
-            val sortedDashboardChats = withContext(dispatchers.default) {
-                dashboardChats?.sortedByDescending {
-                    it.chat.latestMessageId?.value
-                } ?: viewStateFlow.value.list
+            val sortedDashboardChats = if (dashboardChats != null) {
+                withContext(dispatchers.default) {
+                    dashboardChats.sortedByDescending {
+                        it.chat.latestMessageId?.value
+                    }
+                }
+            } else {
+                viewStateFlow.value.list
             }
 
             @Exhaustive
