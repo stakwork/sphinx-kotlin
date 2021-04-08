@@ -4,6 +4,7 @@ import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.concept_relay.RelayDataHandler
 import chat.sphinx.wrapper_relay.RelayUrl
 import io.matthewnelson.k_openssl.KOpenSSL
+import io.matthewnelson.k_openssl.isSalted
 import io.matthewnelson.test_feature_authentication_core.AuthenticationCoreDefaultsTestHelper
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Assert
@@ -41,12 +42,12 @@ class RelayDataHandlerImplUnitTest: AuthenticationCoreDefaultsTestHelper() {
 
             Assert.assertTrue(relayHandler.persistRelayUrl(RelayUrl(RAW_URL)))
             testStorage.getString(RelayDataHandlerImpl.RELAY_URL_KEY, null)?.let { encryptedUrl ->
-                Assert.assertTrue(KOpenSSL.isSalted(encryptedUrl))
+                Assert.assertTrue(encryptedUrl.isSalted)
             } ?: Assert.fail("Failed to persist relay url to storage")
 
             Assert.assertTrue(relayHandler.persistAuthorizationToken(AuthorizationToken(RAW_JWT)))
             testStorage.getString(RelayDataHandlerImpl.RELAY_AUTHORIZATION_KEY, null)?.let { encryptedJwt ->
-                Assert.assertTrue(KOpenSSL.isSalted(encryptedJwt))
+                Assert.assertTrue(encryptedJwt.isSalted)
             } ?: Assert.fail("Failed to persist relay jwt to storage")
         }
 
@@ -57,7 +58,7 @@ class RelayDataHandlerImplUnitTest: AuthenticationCoreDefaultsTestHelper() {
 
             relayHandler.persistAuthorizationToken(AuthorizationToken(RAW_JWT))
             testStorage.getString(RelayDataHandlerImpl.RELAY_AUTHORIZATION_KEY, null)?.let { encryptedJwt ->
-                Assert.assertTrue(KOpenSSL.isSalted(encryptedJwt))
+                Assert.assertTrue(encryptedJwt.isSalted)
             } ?: Assert.fail("Failed to persist relay jwt to storage")
 
             relayHandler.persistAuthorizationToken(null)

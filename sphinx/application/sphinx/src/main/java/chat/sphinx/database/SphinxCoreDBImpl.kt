@@ -8,7 +8,7 @@ import com.squareup.sqldelight.db.SqlDriver
 import dagger.hilt.android.qualifiers.ApplicationContext
 import io.matthewnelson.build_config.BuildConfigDebug
 import io.matthewnelson.concept_encryption_key.EncryptionKey
-import io.matthewnelson.k_openssl_common.annotations.RawPasswordAccess
+import io.matthewnelson.crypto_common.annotations.RawPasswordAccess
 import net.sqlcipher.database.SQLiteDatabase
 import net.sqlcipher.database.SupportFactory
 import javax.inject.Inject

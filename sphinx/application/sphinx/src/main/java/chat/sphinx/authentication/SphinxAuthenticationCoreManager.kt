@@ -10,7 +10,7 @@ import io.matthewnelson.android_feature_authentication_core.components.Authentic
 import io.matthewnelson.concept_authentication.state.AuthenticationState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_encryption_key.EncryptionKey
-import io.matthewnelson.k_openssl_common.clazzes.HashIterations
+import io.matthewnelson.crypto_common.clazzes.HashIterations
 import javax.inject.Inject
 import javax.inject.Singleton
 

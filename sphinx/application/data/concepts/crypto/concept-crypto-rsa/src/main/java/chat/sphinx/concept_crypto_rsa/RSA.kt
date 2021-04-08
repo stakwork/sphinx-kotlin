@@ -7,9 +7,9 @@ import chat.sphinx.wrapper_rsa.RSAKeyPair
 import chat.sphinx.wrapper_rsa.RsaPrivateKey
 import chat.sphinx.wrapper_rsa.RsaPublicKey
 import chat.sphinx.wrapper_rsa.RsaSignedString
-import io.matthewnelson.k_openssl_common.clazzes.EncryptedString
-import io.matthewnelson.k_openssl_common.clazzes.UnencryptedByteArray
-import io.matthewnelson.k_openssl_common.clazzes.UnencryptedString
+import io.matthewnelson.crypto_common.clazzes.EncryptedString
+import io.matthewnelson.crypto_common.clazzes.UnencryptedByteArray
+import io.matthewnelson.crypto_common.clazzes.UnencryptedString
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 

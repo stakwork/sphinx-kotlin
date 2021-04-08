@@ -20,7 +20,7 @@ import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
 import com.squareup.moshi.Moshi
 import io.matthewnelson.build_config.BuildConfigDebug
-import io.matthewnelson.k_openssl_common.clazzes.Password
+import io.matthewnelson.crypto_common.clazzes.Password
 import io.matthewnelson.test_feature_authentication_core.AuthenticationCoreDefaultsTestHelper
 import io.matthewnelson.test_feature_authentication_core.TestEncryptionKeyHandler
 import kotlinx.coroutines.test.runBlockingTest

@@ -9,13 +9,13 @@ import io.matthewnelson.concept_encryption_key.EncryptionKeyHandler
 import io.matthewnelson.feature_authentication_core.AuthenticationCoreManager
 import io.matthewnelson.k_openssl.KOpenSSL
 import io.matthewnelson.k_openssl.algos.AES256CBC_PBKDF2_HMAC_SHA256
-import io.matthewnelson.k_openssl_common.annotations.RawPasswordAccess
-import io.matthewnelson.k_openssl_common.annotations.UnencryptedDataAccess
-import io.matthewnelson.k_openssl_common.clazzes.EncryptedString
-import io.matthewnelson.k_openssl_common.clazzes.Password
-import io.matthewnelson.k_openssl_common.clazzes.UnencryptedString
-import io.matthewnelson.k_openssl_common.exceptions.DecryptionException
-import io.matthewnelson.k_openssl_common.exceptions.EncryptionException
+import io.matthewnelson.crypto_common.annotations.RawPasswordAccess
+import io.matthewnelson.crypto_common.annotations.UnencryptedDataAccess
+import io.matthewnelson.crypto_common.clazzes.EncryptedString
+import io.matthewnelson.crypto_common.clazzes.Password
+import io.matthewnelson.crypto_common.clazzes.UnencryptedString
+import io.matthewnelson.crypto_common.exceptions.DecryptionException
+import io.matthewnelson.crypto_common.exceptions.EncryptionException
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 

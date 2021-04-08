@@ -5,7 +5,7 @@ plugins {
 
 dependencies {
     // KotlinAndroid
-    api project(path: ':kotlin:crypto:k-openssl-common')
+    api project(path: ':kotlin:crypto:crypto-common')
     api project(path: ':kotlin:encoders:base64')
 
     // Sphinx
