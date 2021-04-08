@@ -16,6 +16,7 @@ import chat.sphinx.dashboard.ui.DashboardViewModel
 import chat.sphinx.dashboard.ui.collectChatViewState
 import chat.sphinx.dashboard.ui.currentChatViewState
 import chat.sphinx.wrapper_chat.*
+import chat.sphinx.wrapper_message.isMessage
 import io.matthewnelson.android_feature_screens.util.invisibleIfFalse
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -171,7 +172,27 @@ internal class ChatListAdapter(
             }
 
             // TODO: Re-work once pulling of messages gets fleshed out
-            textViewMessage.text = dashboardChat.chat?.latestMessageId?.toString() ?: ""
+            val message = dashboardChat.message
+            textViewMessage.text = when {
+                message == null -> {
+                    ""
+                }
+                message.decryptionError -> {
+                    "DECRYPTION ERROR..."
+                }
+                message.type.isMessage() -> {
+                    val sender: String = message.senderAlias?.value?.let { alias ->
+                        "$alias: "
+                    } ?: ""
+
+                    message.messageContentDecrypted?.value?.let { decrypted ->
+                        "$sender$decrypted"
+                    } ?: "$sender..."
+                }
+                else -> {
+                    ""
+                }
+            }
 
             imageViewNotification.invisibleIfFalse(dashboardChat.chat?.isMuted() != false)
 
