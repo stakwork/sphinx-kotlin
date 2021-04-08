@@ -18,6 +18,7 @@ import chat.sphinx.dashboard.ui.currentChatViewState
 import chat.sphinx.wrapper_chat.*
 import io.matthewnelson.android_feature_screens.util.invisibleIfFalse
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 internal class ChatListAdapter(
     private val lifecycleOwner: LifecycleOwner,
@@ -108,13 +109,15 @@ internal class ChatListAdapter(
         supervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
             viewModel.collectChatViewState { viewState ->
 
-                if (dashboardChats.isEmpty() && viewState.list.isNotEmpty()) {
+                if (dashboardChats.isEmpty()) {
                     dashboardChats.addAll(viewState.list)
                     this@ChatListAdapter.notifyDataSetChanged()
                 } else {
-                    DiffUtil.calculateDiff(
-                        Diff(dashboardChats, viewState.list)
-                    ).let { result ->
+                    withContext(viewModel.dispatchers.default) {
+                        DiffUtil.calculateDiff(
+                            Diff(dashboardChats, viewState.list)
+                        )
+                    }.let { result ->
                         dashboardChats.clear()
                         dashboardChats.addAll(viewState.list)
                         result.dispatchUpdatesTo(this@ChatListAdapter)
