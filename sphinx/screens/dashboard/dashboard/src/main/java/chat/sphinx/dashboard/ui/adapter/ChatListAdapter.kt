@@ -16,10 +16,14 @@ import chat.sphinx.dashboard.ui.DashboardViewModel
 import chat.sphinx.dashboard.ui.collectChatViewState
 import chat.sphinx.dashboard.ui.currentChatViewState
 import chat.sphinx.wrapper_chat.*
+import chat.sphinx.wrapper_common.DateTime
+import chat.sphinx.wrapper_common.hhmmElseDate
 import chat.sphinx.wrapper_message.isMessage
 import io.matthewnelson.android_feature_screens.util.invisibleIfFalse
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.*
+import kotlin.collections.ArrayList
 
 internal class ChatListAdapter(
     private val lifecycleOwner: LifecycleOwner,
@@ -141,6 +145,10 @@ internal class ChatListAdapter(
         )
     }
 
+    private val today00: DateTime by lazy {
+        DateTime.getToday00()
+    }
+
     override fun onBindViewHolder(holder: ChatListAdapter.ChatViewHolder, position: Int) {
         dashboardChats.getOrNull(position)?.let { dashboardChat ->
             val layoutChatHolder: ConstraintLayout =
@@ -170,6 +178,8 @@ internal class ChatListAdapter(
                 )
                 "ERROR: NULL NAME"
             }
+
+            textViewTime.text = dashboardChat.message?.date?.hhmmElseDate(today00) ?: ""
 
             // TODO: Re-work once pulling of messages gets fleshed out
             val message = dashboardChat.message
