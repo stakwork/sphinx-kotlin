@@ -88,7 +88,6 @@ abstract class CoreDBImpl: CoreDB() {
                     message_contentAdapter = MessageContentAdapter(),
                     message_content_decryptedAdapter = MessageContentDecryptedAdapter(),
                     statusAdapter = MessageStatusAdapter(),
-                    status_mapAdapter = MessageStatusMapAdapter(),
                     media_keyAdapter = MediaKeyAdapter(),
                     media_typeAdapter = MediaTypeAdapter(),
                     media_tokenAdapter = MediaTokenAdapter(),

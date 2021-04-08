@@ -1,6 +1,5 @@
 package chat.sphinx.feature_coredb.adapters.message
 
-import chat.sphinx.wrapper_common.contact.ContactId
 import chat.sphinx.wrapper_message.*
 import com.squareup.sqldelight.ColumnAdapter
 
@@ -90,69 +89,6 @@ internal class MessageStatusAdapter: ColumnAdapter<MessageStatus, Long> {
 
     override fun encode(value: MessageStatus): Long {
         return value.value?.toLong() ?: NULL
-    }
-}
-
-/**
- * Stores the map as a string value that looks like:
- *
- * 22||8|--|15||NULL|--|18||12
- *
- * SqlDelight does not like Maps, so we use a List of Pairs for the DBO
- * and use the
- * */
-internal class MessageStatusMapAdapter: ColumnAdapter<List<Pair<ContactId, MessageStatus>>, String> {
-
-    companion object {
-        private const val DELIMINATOR_MAJOR = "|--|"
-        private const val DELIMINATOR_MINOR = "||"
-        private const val NULL = "NULL"
-        private const val EMPTY = "EMPTY"
-    }
-
-    override fun decode(databaseValue: String): List<Pair<ContactId, MessageStatus>> {
-        if (databaseValue == EMPTY) {
-            return emptyList()
-        }
-
-        databaseValue.split(DELIMINATOR_MAJOR).let { kvps ->
-            val list: ArrayList<Pair<ContactId, MessageStatus>> = ArrayList(kvps.size)
-            kvps.forEach { kvp ->
-                kvp.split(DELIMINATOR_MINOR).let { split ->
-                    list.add(
-                        Pair(
-                            ContactId(split[0].toLong()),
-                            if (split[1] == NULL) {
-                                MessageStatus.NoStatus
-                            } else {
-                                split[1].toInt().toMessageStatus()
-                            }
-                        )
-                    )
-                }
-            }
-            return list.toList()
-        }
-    }
-
-    override fun encode(value: List<Pair<ContactId, MessageStatus>>): String {
-        if (value.isEmpty()) {
-            return EMPTY
-        }
-
-        val sb = StringBuilder()
-        var count = 1
-        for (item in value) {
-            sb.append(item.first.value)
-            sb.append(DELIMINATOR_MINOR)
-            sb.append(item.second.value ?: NULL)
-            if (count < value.size) {
-                sb.append(DELIMINATOR_MAJOR)
-            }
-            count++
-        }
-
-        return sb.toString()
     }
 }
 

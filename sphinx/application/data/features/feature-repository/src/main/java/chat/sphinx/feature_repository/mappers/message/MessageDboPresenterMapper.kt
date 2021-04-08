@@ -1,7 +1,6 @@
 package chat.sphinx.feature_repository.mappers.message
 
 import chat.sphinx.conceptcoredb.MessageDbo
-import chat.sphinx.feature_repository.SphinxRepository
 import chat.sphinx.feature_repository.mappers.ClassMapper
 import chat.sphinx.wrapper_message.Message
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
@@ -24,7 +23,6 @@ internal class MessageDboPresenterMapper(
             expirationDate = value.expiration_date,
             messageContent = value.message_content,
             status = value.status,
-            statusMap = value.status_map?.toMap(),
             mediaKey = value.media_key,
             mediaType = value.media_type,
             mediaToken = value.media_token,
@@ -56,7 +54,6 @@ internal class MessageDboPresenterMapper(
             message_content = value.messageContent,
             message_content_decrypted = value.messageContentDecrypted,
             status = value.status,
-            status_map = value.statusMap?.toList(),
             media_key = value.mediaKey,
             media_type = value.mediaType,
             media_token = value.mediaToken,

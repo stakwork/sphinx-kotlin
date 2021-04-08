@@ -46,7 +46,6 @@ inline fun SphinxDatabaseQueries.upsertMessage(dbo: MessageDbo): Unit =
         dbo.expiration_date,
         dbo.message_content,
         dbo.status,
-        dbo.status_map,
         dbo.media_key,
         dbo.media_type,
         dbo.media_token,
