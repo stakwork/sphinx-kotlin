@@ -21,12 +21,9 @@ import chat.sphinx.feature_repository.mappers.chat.ChatDtoDboMapper
 import chat.sphinx.feature_repository.mappers.contact.ContactDboPresenterMapper
 import chat.sphinx.feature_repository.mappers.contact.ContactDtoDboMapper
 import chat.sphinx.feature_repository.mappers.mapListFrom
-import chat.sphinx.kotlin_response.Response
-import chat.sphinx.kotlin_response.LoadResponse
-import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.feature_repository.mappers.message.MessageDboPresenterMapper
 import chat.sphinx.feature_repository.mappers.message.MessageDtoDboMapper
-import chat.sphinx.kotlin_response.exception
+import chat.sphinx.kotlin_response.*
 import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.logger.d
 import chat.sphinx.logger.e
@@ -455,7 +452,16 @@ class SphinxRepository(
 
                                             @Exhaustive
                                             when (decrypted) {
-                                                is Response.Error -> {}
+                                                is Response.Error -> {
+                                                    // Only log it if there is an exception
+                                                    decrypted.exception?.let { nnE ->
+                                                        LOG.e(
+                                                            TAG,
+                                                            decrypted.message + " MessageId: ${message.id}",
+                                                            nnE
+                                                        )
+                                                    }
+                                                }
                                                 is Response.Success -> {
                                                     message.setMessageContentDecrypted(
                                                         decrypted.value.toUnencryptedString().value
