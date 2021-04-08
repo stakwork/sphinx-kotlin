@@ -24,7 +24,6 @@ data class Message(
     val expirationDate: DateTime?,
     val messageContent: MessageContent?,
     val status: MessageStatus,
-    val statusMap: Map<ContactId, MessageStatus>?,
     val mediaKey: MediaKey?,
     val mediaType: MediaType?,
     val mediaToken: MediaToken?,
