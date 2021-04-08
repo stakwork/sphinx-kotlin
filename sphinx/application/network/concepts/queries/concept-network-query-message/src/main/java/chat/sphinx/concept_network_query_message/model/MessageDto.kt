@@ -38,6 +38,7 @@ data class MessageDto(
     val contact: ContactDto?,
 ) {
     @Transient
+    @Volatile
     var messageContentDecrypted: String? = null
         private set
 

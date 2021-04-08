@@ -428,59 +428,40 @@ class SphinxRepository(
                         val newMessages = response.value.new_messages
 
                         if (newMessages.isNotEmpty()) {
-                            val decryptMap: MutableMap<MessageId, String> = mutableMapOf()
+
+                            val jobList = ArrayList<Job>(newMessages.size)
 
                             for (message in newMessages) {
+
                                 message.message_content?.let { content ->
+
                                     if (content.isNotEmpty() && message.type != MessageType.KEY_SEND) {
-                                        decryptMap[MessageId(message.id)] = content
-                                    }
-                                }
-                            }
 
-                            // TODO: Move out to separate class to encapsulate
-                            val decryptMapCounterLock = Mutex()
-                            var counter = decryptMap.size
+                                        scope.launch(dispatchers.mainImmediate) {
+                                            val decrypted = decryptMessageContent(
+                                                MessageContent(content)
+                                            )
 
-                            for (key in decryptMap.keys) {
-                                scope.launch decrypt@ {
-                                    val content: String = decryptMapCounterLock.withLock {
-                                        decryptMap[key] ?: let {
-                                            counter--
-                                            return@decrypt
-                                        }
-                                    }
-
-                                    val decrypted = decryptMessageContent(MessageContent(content))
-
-                                    decryptMapCounterLock.withLock {
-                                        @Exhaustive
-                                        when (decrypted) {
-                                            is Response.Error -> {
-                                                decryptMap.remove(key)
-                                                counter--
+                                            @Exhaustive
+                                            when (decrypted) {
+                                                is Response.Error -> {}
+                                                is Response.Success -> {
+                                                    message.setMessageContentDecrypted(
+                                                        decrypted.value.toUnencryptedString().value
+                                                    )
+                                                }
                                             }
-                                            is Response.Success -> {
-                                                decryptMap[key] =
-                                                    decrypted.value.toUnencryptedString().value
-                                                counter--
-                                            }
+                                        }.let { job ->
+                                            jobList.add(job)
                                         }
+
                                     }
+
                                 }
                             }
 
-                            while (currentCoroutineContext().isActive) {
-                                delay(100L)
-                                if (decryptMapCounterLock.withLock { counter } <= 1) {
-                                    break
-                                }
-                            }
-
-                            for (message in newMessages) {
-                                decryptMap[MessageId(message.id)]?.let { decrypted ->
-                                    message.setMessageContentDecrypted(decrypted)
-                                }
+                            for (job in jobList) {
+                                job.join()
                             }
 
                             val dbos = messageDtoDboMapper.mapListFrom(newMessages)
