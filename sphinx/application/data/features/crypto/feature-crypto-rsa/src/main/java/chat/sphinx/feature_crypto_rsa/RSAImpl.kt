@@ -10,6 +10,7 @@ import io.matthewnelson.crypto_common.clazzes.EncryptedString
 import io.matthewnelson.crypto_common.clazzes.UnencryptedByteArray
 import io.matthewnelson.crypto_common.clazzes.UnencryptedString
 import io.matthewnelson.crypto_common.extensions.encodeToByteArray
+import io.matthewnelson.crypto_common.extensions.isValidUTF8
 import io.matthewnelson.crypto_common.extensions.toCharArray
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
@@ -116,7 +117,7 @@ open class RSAImpl(val algorithm: RSAAlgorithm): RSA() {
                     @Suppress("RemoveExplicitTypeArguments")
                     val arr = Array<ByteArray>(arrSize) { index ->
                         val fromIndex: Int = (index * blockSize)
-                        val toIndex: Int = if ( (fromIndex + blockSize) <= dataBytes.size ) {
+                        val toIndex: Int = if ((fromIndex + blockSize) <= dataBytes.size) {
                             fromIndex + blockSize
                         } else {
                             dataBytes.size
@@ -173,7 +174,22 @@ open class RSAImpl(val algorithm: RSAAlgorithm): RSA() {
 
             }
 
+            if (!decrypted.isValidUTF8) {
+                throw CharacterCodingException()
+            }
+
             Response.Success(UnencryptedByteArray(decrypted))
+        } catch (e: CharacterCodingException) {
+            Response.Error(
+                ResponseError(
+                    """
+                        Decryption failed.
+                        Decrypted value produced invalid UTF-8 encoded bytes.
+                        Current Algorithm: ${algorithm.value}
+                    """.trimIndent(),
+                    e
+                )
+            )
         } catch (e: Exception) {
             Response.Error(ResponseError("Decryption failed", e))
         }
