@@ -7,6 +7,7 @@ import androidx.test.core.app.ApplicationProvider
 import chat.sphinx.concept_coredb.SphinxDatabase
 import chat.sphinx.concept_crypto_rsa.RSA
 import chat.sphinx.feature_coredb.CoreDBImpl
+import chat.sphinx.feature_crypto_rsa.RSAAlgorithm
 import chat.sphinx.feature_crypto_rsa.RSAImpl
 import chat.sphinx.feature_relay.RelayDataHandlerImpl
 import chat.sphinx.key_restore.KeyRestoreResponse
@@ -48,7 +49,7 @@ class SphinxKeyRestoreUnitTest: CoroutineTestHelper() {
     }
 
     private val rsa: RSA by lazy {
-        RSAImpl()
+        RSAImpl(RSAAlgorithm.RSA_ECB_PKCS1Padding)
     }
 
     private val sphinxKeyHandler: SphinxEncryptionKeyHandler by lazy {

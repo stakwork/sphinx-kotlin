@@ -53,7 +53,7 @@ open class RSAImpl(val algorithm: RSAAlgorithm): RSA() {
         pkcsType: PKCSType,
     ): Response<RSAKeyPair, ResponseError> {
         try {
-            val generator: KeyPairGenerator = KeyPairGenerator.getInstance(algorithm.value)
+            val generator: KeyPairGenerator = KeyPairGenerator.getInstance(RSAAlgorithm.ALGORITHM_RSA)
             generator.initialize(keySize.value, SecureRandom())
 
             val keys: KeyPair = dispatcher?.let {
