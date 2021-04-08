@@ -15,6 +15,7 @@ import chat.sphinx.dashboard.R
 import chat.sphinx.dashboard.ui.DashboardViewModel
 import chat.sphinx.dashboard.ui.collectChatViewState
 import chat.sphinx.dashboard.ui.currentChatViewState
+import chat.sphinx.resources.setTextColorExt
 import chat.sphinx.wrapper_chat.*
 import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_common.hhmmElseDate
@@ -24,6 +25,38 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.*
 import kotlin.collections.ArrayList
+
+private typealias ChatViewHolder = ChatListAdapter.ChatViewHolder
+
+@Suppress("NOTHING_TO_INLINE")
+private inline fun ChatViewHolder.getChatHolderLayout(): ConstraintLayout =
+    itemView.findViewById(R.id.layout_constraint_chat_holder)
+
+@Suppress("NOTHING_TO_INLINE")
+private inline fun ChatViewHolder.getImageViewChatHolder(): ImageView =
+    itemView.findViewById(R.id.image_view_chat_holder)
+
+@Suppress("NOTHING_TO_INLINE")
+private inline fun ChatViewHolder.getTextViewName(): TextView =
+    itemView.findViewById<TextView>(R.id.text_view_chat_holder_name)
+        .also { it.setTextColorExt(android.R.color.white) }
+
+@Suppress("NOTHING_TO_INLINE")
+private inline fun ChatViewHolder.getImageViewLock(): ImageView =
+    itemView.findViewById(R.id.image_view_chat_holder_lock)
+
+@Suppress("NOTHING_TO_INLINE")
+private inline fun ChatViewHolder.getTextViewMessage(): TextView =
+    itemView.findViewById<TextView>(R.id.text_view_chat_holder_message)
+        .also { it.setTextColorExt(R.color.textHint) }
+
+@Suppress("NOTHING_TO_INLINE")
+private inline fun ChatViewHolder.getImageViewNotification(): ImageView =
+    itemView.findViewById(R.id.image_view_chat_holder_notification)
+
+@Suppress("NOTHING_TO_INLINE")
+private inline fun ChatViewHolder.getTextViewTime(): TextView =
+    itemView.findViewById(R.id.text_view_chat_holder_time)
 
 internal class ChatListAdapter(
     private val lifecycleOwner: LifecycleOwner,
@@ -151,31 +184,19 @@ internal class ChatListAdapter(
 
     override fun onBindViewHolder(holder: ChatListAdapter.ChatViewHolder, position: Int) {
         dashboardChats.getOrNull(position)?.let { dashboardChat ->
-            val layoutChatHolder: ConstraintLayout =
-                holder.itemView.findViewById(R.id.layout_constraint_chat_holder)
-            val imageViewChatHolder: ImageView =
-                holder.itemView.findViewById(R.id.image_view_chat_holder)
-            val textViewName: TextView =
-                holder.itemView.findViewById(R.id.text_view_chat_holder_name)
-            val imageViewLock: ImageView =
-                holder.itemView.findViewById(R.id.image_view_chat_holder_lock)
-            val textViewMessage: TextView =
-                holder.itemView.findViewById(R.id.text_view_chat_holder_message)
-            val imageViewNotification: ImageView =
-                holder.itemView.findViewById(R.id.image_view_chat_holder_notification)
-            val textViewTime: TextView =
-                holder.itemView.findViewById(R.id.text_view_chat_holder_time)
+            val layoutChatHolder = holder.getChatHolderLayout()
+            val imageViewChatHolder = holder.getImageViewChatHolder()
+            val textViewName = holder.getTextViewName()
+            val imageViewLock = holder.getImageViewLock()
+            val textViewMessage = holder.getTextViewMessage()
+            val imageViewNotification = holder.getImageViewNotification()
+            val textViewTime = holder.getTextViewTime()
 
             textViewName.text = if (dashboardChat.chatName != null) {
-                textViewName.setTextColor(
-                    ContextCompat.getColor(textViewName.context, android.R.color.white)
-                )
                 dashboardChat.chatName
             } else {
                 // Should never make it here, but just in case...
-                textViewName.setTextColor(
-                    ContextCompat.getColor(textViewName.context, R.color.primaryRed)
-                )
+                textViewName.setTextColorExt(R.color.primaryRed)
                 "ERROR: NULL NAME"
             }
 
@@ -188,9 +209,11 @@ internal class ChatListAdapter(
                     ""
                 }
                 message.decryptionError -> {
+                    textViewMessage.setTextColorExt(R.color.primaryRed)
                     "DECRYPTION ERROR..."
                 }
                 message.type.isMessage() -> {
+                    // TODO: if from owner use "you: "
                     val sender: String = message.senderAlias?.value?.let { alias ->
                         "$alias: "
                     } ?: ""
