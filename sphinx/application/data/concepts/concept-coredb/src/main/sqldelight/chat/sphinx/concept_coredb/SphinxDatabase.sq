@@ -193,6 +193,11 @@ CREATE TABLE messageDbo(
     reply_uuid                  TEXT            AS ReplyUUID
 );
 
+messageGetById:
+SELECT *
+FROM messageDbo
+WHERE id = ?;
+
 messageGetLatestId:
 SELECT id
 FROM messageDbo

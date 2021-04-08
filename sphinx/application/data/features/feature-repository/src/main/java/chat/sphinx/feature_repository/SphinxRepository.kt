@@ -45,6 +45,7 @@ import chat.sphinx.wrapper_message.MessageContentDecrypted
 import chat.sphinx.wrapper_message.MessageType
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
+import com.squareup.sqldelight.runtime.coroutines.mapToOne
 import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.feature_authentication_core.AuthenticationCoreManager
@@ -352,6 +353,17 @@ class SphinxRepository(
             }
 
         } ?: messageDboPresenterMapper.mapFrom(messageDbo)
+    }
+
+    override suspend fun getMessageById(messageId: MessageId): Flow<Message?> {
+        val queries = coreDB.getSphinxDatabaseQueries()
+        return queries.messageGetById(messageId)
+            .asFlow()
+            .mapToOneOrNull(dispatchers.io)
+            .map { it?.let { messageDbo ->
+                mapMessageDboAndDecryptContentIfNeeded(queries, messageDbo)
+            }}
+            .distinctUntilChanged()
     }
 
     override suspend fun getLatestMessageForChat(chatId: ChatId): Flow<Message?> {
