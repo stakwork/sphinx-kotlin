@@ -43,10 +43,6 @@ inline val RSA_PEM.maxBytes: Int
 @Suppress("SpellCheckingInspection")
 open class RSAImpl(val algorithm: RSAAlgorithm): RSA() {
 
-    companion object {
-        private const val SIGNATURE_ALGORITHM = "SHA1WithRSA"
-    }
-
     override suspend fun generateKeyPair(
         keySize: KeySize,
         dispatcher: CoroutineDispatcher?,
@@ -264,6 +260,7 @@ open class RSAImpl(val algorithm: RSAAlgorithm): RSA() {
     override suspend fun sign(
         rsaPrivateKey: RsaPrivateKey,
         text: String,
+        algorithm: SignatureAlgorithm,
         dispatcher: CoroutineDispatcher
     ): Response<RsaSignedString, ResponseError> {
         if (text.isEmpty()) {
@@ -278,7 +275,7 @@ open class RSAImpl(val algorithm: RSAAlgorithm): RSA() {
                 val rsaPem: RSA_PEM = RSA_PEM.FromPEM(rsaPrivateKey.value, true)
 
                 try {
-                    val signature: Signature = Signature.getInstance(SIGNATURE_ALGORITHM)
+                    val signature: Signature = Signature.getInstance(algorithm.value)
                     signature.initSign(rsaPem.rsaPrivateKey)
                     signature.update(text.encodeToByteArray())
                     signature.sign()
@@ -301,6 +298,7 @@ open class RSAImpl(val algorithm: RSAAlgorithm): RSA() {
     override suspend fun verifySignature(
         rsaPublicKey: RsaPublicKey,
         signedString: RsaSignedString,
+        algorithm: SignatureAlgorithm,
         dispatcher: CoroutineDispatcher
     ): Response<Boolean, ResponseError> {
         if (signedString.signature.value.isEmpty()) {
@@ -321,7 +319,7 @@ open class RSAImpl(val algorithm: RSAAlgorithm): RSA() {
                 val rsaPem: RSA_PEM = RSA_PEM.FromPEM(rsaPublicKey.value, false)
 
                 try {
-                    val signVerify: Signature = Signature.getInstance(SIGNATURE_ALGORITHM)
+                    val signVerify: Signature = Signature.getInstance(algorithm.value)
                     signVerify.initVerify(rsaPem.rsaPublicKey)
                     signVerify.update(signedString.text.encodeToByteArray())
                     signVerify.verify(signedString.signature.value)

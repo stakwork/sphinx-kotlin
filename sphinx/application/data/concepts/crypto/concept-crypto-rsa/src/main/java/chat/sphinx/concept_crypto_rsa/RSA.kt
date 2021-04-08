@@ -62,12 +62,14 @@ abstract class RSA {
     abstract suspend fun sign(
         rsaPrivateKey: RsaPrivateKey,
         text: String,
+        algorithm: SignatureAlgorithm = SignatureAlgorithm.SHA256_with_RSA,
         dispatcher: CoroutineDispatcher = Dispatchers.Default
     ): Response<RsaSignedString, ResponseError>
 
     abstract suspend fun verifySignature(
         rsaPublicKey: RsaPublicKey,
         signedString: RsaSignedString,
+        algorithm: SignatureAlgorithm = SignatureAlgorithm.SHA256_with_RSA,
         dispatcher: CoroutineDispatcher = Dispatchers.Default
     ): Response<Boolean, ResponseError>
 }
