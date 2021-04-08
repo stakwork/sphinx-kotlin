@@ -55,6 +55,7 @@ private inline fun List<DashboardChat>.filterDashboardChats(
         it.chatName?.contains(filter, ignoreCase = true) == true
     }
 
+// TODO: Need to preserve the original list when going between list and search modes.
 internal class ChatViewStateContainer(
     private val dispatchers: CoroutineDispatchers,
 ): ViewStateContainer<ChatViewState>(ChatViewState.ListMode(emptyList())) {
