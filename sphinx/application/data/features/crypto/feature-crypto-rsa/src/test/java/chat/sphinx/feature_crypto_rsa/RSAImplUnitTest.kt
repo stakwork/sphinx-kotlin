@@ -56,7 +56,7 @@ class RSAImplUnitTest: NetworkQueryTestHelper() {
     }
 
     private val rsa: RSA by lazy {
-        RSAImpl()
+        RSAImpl(RSAAlgorithm.RSA)
     }
 
     @Throws(AssertionError::class)

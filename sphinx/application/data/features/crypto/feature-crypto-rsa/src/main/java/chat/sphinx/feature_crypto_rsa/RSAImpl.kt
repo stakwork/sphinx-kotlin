@@ -41,10 +41,9 @@ inline val RSA_PEM.maxBytes: Int
     get() = blockSize - 11
 
 @Suppress("SpellCheckingInspection")
-open class RSAImpl(): RSA() {
+open class RSAImpl(val algorithm: RSAAlgorithm): RSA() {
 
     companion object {
-        private const val RSA = "RSA"
         private const val SIGNATURE_ALGORITHM = "SHA1WithRSA"
     }
 
@@ -54,7 +53,7 @@ open class RSAImpl(): RSA() {
         pkcsType: PKCSType,
     ): Response<RSAKeyPair, ResponseError> {
         try {
-            val generator: KeyPairGenerator = KeyPairGenerator.getInstance(RSA)
+            val generator: KeyPairGenerator = KeyPairGenerator.getInstance(algorithm.value)
             generator.initialize(keySize.value, SecureRandom())
 
             val keys: KeyPair = dispatcher?.let {
@@ -138,7 +137,7 @@ open class RSAImpl(): RSA() {
                     try {
 
                         for (ba in arr) {
-                            val cipher: Cipher = Cipher.getInstance(RSA)
+                            val cipher: Cipher = Cipher.getInstance(algorithm.value)
                             cipher.init(Cipher.DECRYPT_MODE, privKey)
                             cipher.doFinal(ba).let { bytes ->
                                 buffer.put(
@@ -167,7 +166,7 @@ open class RSAImpl(): RSA() {
                 } else {
 
                     try {
-                        val cipher: Cipher = Cipher.getInstance(RSA)
+                        val cipher: Cipher = Cipher.getInstance(algorithm.value)
                         cipher.init(Cipher.DECRYPT_MODE, rsaPem.rsaPrivateKey)
                         cipher.doFinal(dataBytes)
                     } finally {
@@ -225,7 +224,7 @@ open class RSAImpl(): RSA() {
 
                     try {
                         for (ba in arr) {
-                            val cipher: Cipher = Cipher.getInstance(RSA)
+                            val cipher: Cipher = Cipher.getInstance(algorithm.value)
                             cipher.init(Cipher.ENCRYPT_MODE, pubKey)
                             cipher.doFinal(ba).let { bytes ->
                                 buffer.put(
@@ -240,7 +239,7 @@ open class RSAImpl(): RSA() {
                     buffer.array()
                 } else {
                     try {
-                        val cipher: Cipher = Cipher.getInstance(RSA)
+                        val cipher: Cipher = Cipher.getInstance(algorithm.value)
                         cipher.init(Cipher.ENCRYPT_MODE, rsaPem.rsaPublicKey)
                         cipher.doFinal(dataBytes)
                     } finally {
