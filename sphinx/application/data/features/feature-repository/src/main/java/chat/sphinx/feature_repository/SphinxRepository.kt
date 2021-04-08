@@ -472,8 +472,10 @@ class SphinxRepository(
                                 }
                             }
 
-                            for (job in jobList) {
-                                job.join()
+                            var count = 0
+                            while (currentCoroutineContext().isActive) {
+                                jobList.elementAtOrNull(count)?.join() ?: break
+                                count++
                             }
 
                             val dbos = messageDtoDboMapper.mapListFrom(newMessages)
