@@ -314,31 +314,75 @@ class SphinxRepository(
             ) {
 
                 val response = decryptMessageContent(messageContent)
-                val message = messageDboPresenterMapper.mapFrom(messageDbo)
 
                 @Exhaustive
                 when (response) {
                     is Response.Error -> {
-                        message.setDecryptionError(response.exception)
-                        message
+                        messageDboPresenterMapper.mapFrom(messageDbo).let { message ->
+                            message.setDecryptionError(response.exception)
+                            message
+                        }
                     }
                     is Response.Success -> {
 
-                        val decrypted = MessageContentDecrypted(
-                            response.value.toUnencryptedString().value
+                        var type: MessageType? = null
+                        val decryptedContent = MessageContentDecrypted(
+                            response.value.toUnencryptedString().value.let { decrypted ->
+                                if (decrypted.contains("boost::{\"feedID\":")) {
+                                    type = MessageType.Boost
+                                    decrypted.split("::")[1]
+                                } else {
+                                    decrypted
+                                }
+                            }
                         )
+
+                        val dboUpdate: MessageDbo? = type?.let { nnType ->
+                            MessageDbo(
+                                messageDbo.id,
+                                messageDbo.uuid,
+                                messageDbo.chat_id,
+                                nnType,
+                                messageDbo.sender,
+                                messageDbo.receiver,
+                                messageDbo.amount,
+                                messageDbo.payment_hash,
+                                messageDbo.payment_request,
+                                messageDbo.date,
+                                messageDbo.expiration_date,
+                                messageDbo.message_content,
+                                decryptedContent,
+                                messageDbo.status,
+                                messageDbo.media_key,
+                                messageDbo.media_type,
+                                messageDbo.media_token,
+                                messageDbo.seen,
+                                messageDbo.sender_alias,
+                                messageDbo.sender_pic,
+                                messageDbo.original_muid,
+                                messageDbo.reply_uuid,
+                            )
+                        }
 
                         messageLock.withLock {
                             withContext(dispatchers.io) {
-                                queries.messageUpdateContentDecrypted(
-                                    decrypted,
-                                    messageDbo.id
-                                )
+                                queries.transaction {
+                                    queries.messageUpdateContentDecrypted(
+                                        decryptedContent,
+                                        messageDbo.id
+                                    )
+
+                                    dboUpdate?.let {
+                                        queries.upsertMessage(it)
+                                    }
+                                }
                             }
                         }
 
-                        message.setMessageContentDecrypted(decrypted)
-                        message
+                        dboUpdate?.let {
+                            messageDboPresenterMapper.mapFrom(it)
+                        } ?: messageDboPresenterMapper.mapFrom(messageDbo)
+                            .setMessageContentDecrypted(decryptedContent)
                     }
                 }
 
