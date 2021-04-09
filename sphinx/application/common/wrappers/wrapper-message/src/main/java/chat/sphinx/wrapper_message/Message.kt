@@ -35,20 +35,25 @@ data class Message(
     val originalMUID: MessageMUID?,
     val replyUUID: ReplyUUID?,
 ) {
+    @Volatile
     var messageContentDecrypted: MessageContentDecrypted? = null
         private set
 
-    fun setMessageContentDecrypted(messageContentDecrypted: MessageContentDecrypted) {
+    fun setMessageContentDecrypted(messageContentDecrypted: MessageContentDecrypted): Message {
         this.messageContentDecrypted = messageContentDecrypted
+        return this
     }
 
+    @Volatile
     var decryptionError: Boolean = false
         private set
+    @Volatile
     var decryptionException: Exception? = null
         private set
 
-    fun setDecryptionError(e: Exception?) {
+    fun setDecryptionError(e: Exception?): Message {
         decryptionError = true
         decryptionException = e
+        return this
     }
 }
