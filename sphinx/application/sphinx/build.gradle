@@ -108,3 +108,12 @@ dependencies {
     androidTestImplementation testDeps.androidx.espresso
     androidTestImplementation testDeps.androidx.junit
 }
+
+/**
+ * Requires graphviz to be installed:
+ *  - sudo apt-get install graphviz
+ *
+ * Run:
+ *  - ./gradlew :sphinx:application:sphinx:projectDependencyGraph
+ * */
+apply from: rootProject.file('gradle/projectDependencyGraph.gradle')
