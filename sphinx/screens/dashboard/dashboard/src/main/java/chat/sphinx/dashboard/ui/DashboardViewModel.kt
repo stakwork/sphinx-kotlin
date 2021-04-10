@@ -82,11 +82,11 @@ internal class DashboardViewModel @Inject constructor(
                                 chat.contactIds.lastOrNull() ?: continue
                             ).firstOrNull() ?: continue
 
-                            newList.add(DashboardChat.Conversation(
+                            newList.add(DashboardChat.Active.Conversation(
                                 chat, message, contact
                             ))
                         } else {
-                            newList.add(DashboardChat.GroupOrTribe(chat, message))
+                            newList.add(DashboardChat.Active.GroupOrTribe(chat, message))
                         }
                     }
                 }

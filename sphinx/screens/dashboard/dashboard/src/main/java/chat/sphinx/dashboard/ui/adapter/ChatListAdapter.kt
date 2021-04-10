@@ -83,17 +83,12 @@ internal class ChatListAdapter(
                     newList[newItemPosition].let { new ->
                         // TODO: Clean up...
                         when {
-                            old is DashboardChat.GroupOrTribe &&
-                            new is DashboardChat.GroupOrTribe -> {
-                                old.chat.id == new.chat.id &&
-                                old.chat.latestMessageId == new.chat.latestMessageId
+                            old is DashboardChat.Active && new is DashboardChat.Active -> {
+                                old.chat.id                 == new.chat.id                  &&
+                                old.chat.latestMessageId    == new.chat.latestMessageId
                             }
-                            old is DashboardChat.Conversation &&
-                            new is DashboardChat.Conversation -> {
-                                old.contact.id == new.contact.id &&
-                                old.chat?.id == new.chat?.id &&
-                                old.chat?.latestMessageId == new.chat?.latestMessageId
-
+                            old is DashboardChat.Inactive && new is DashboardChat.Inactive -> {
+                                old.chatName                == new.chatName
                             }
                             else -> {
                                 false
@@ -110,21 +105,16 @@ internal class ChatListAdapter(
             return try {
                 oldList[oldItemPosition].let { old ->
                     newList[newItemPosition].let { new ->
-                        // TODO: Clean up...
                         when {
-                            old is DashboardChat.GroupOrTribe &&
-                            new is DashboardChat.GroupOrTribe -> {
-                                old.chatName == new.chatName                            &&
-                                old.chat.isMuted == new.chat.isMuted                    &&
-                                old.chat.seen == new.chat.seen                          &&
-                                old.chat.photoUrl == new.chat.photoUrl
+                            old is DashboardChat.Active && new is DashboardChat.Active -> {
+                                old.chat.type               == new.chat.type                &&
+                                old.chatName                == new.chatName                 &&
+                                old.chat.isMuted            == new.chat.isMuted             &&
+                                old.chat.seen               == new.chat.seen                &&
+                                old.chat.photoUrl           == new.chat.photoUrl
                             }
-                            old is DashboardChat.Conversation &&
-                            new is DashboardChat.Conversation -> {
-                                old.chatName == new.chatName                            &&
-                                old.chat?.isMuted == new.chat?.isMuted                  &&
-                                old.chat?.seen == new.chat?.seen                        &&
-                                old.chat?.photoUrl == new.chat?.photoUrl
+                            old is DashboardChat.Inactive && new is DashboardChat.Inactive -> {
+                                old.chatName == new.chatName
                             }
                             else -> {
                                 false
@@ -192,6 +182,16 @@ internal class ChatListAdapter(
             val imageViewNotification = holder.getImageViewNotification()
             val textViewTime = holder.getTextViewTime()
 
+            // Image
+            // TODO: Setup COIL
+            @Exhaustive
+            when (dashboardChat) {
+                is DashboardChat.Active.Conversation -> {}
+                is DashboardChat.Active.GroupOrTribe -> {}
+                is DashboardChat.Inactive.Conversation -> {}
+            }
+
+            // Name
             textViewName.text = if (dashboardChat.chatName != null) {
                 dashboardChat.chatName
             } else {
@@ -200,9 +200,13 @@ internal class ChatListAdapter(
                 "ERROR: NULL NAME"
             }
 
+            // Lock
+            imageViewLock.invisibleIfFalse(dashboardChat is DashboardChat.Active)
+
+            // Time
             textViewTime.text = dashboardChat.message?.date?.hhmmElseDate(today00) ?: ""
 
-            // TODO: Re-work once pulling of messages gets fleshed out
+            // Message
             val message = dashboardChat.message
             textViewMessage.text = when {
                 message == null -> {
@@ -227,20 +231,24 @@ internal class ChatListAdapter(
                 }
             }
 
-            imageViewNotification.invisibleIfFalse(dashboardChat.chat?.isMuted() != false)
+            // Notification
+            if (dashboardChat is DashboardChat.Active) {
+                imageViewNotification.invisibleIfFalse(dashboardChat.chat.isMuted())
+            } else {
+                imageViewNotification.invisibleIfFalse(false)
+            }
 
+            // ClickListener
             layoutChatHolder.setOnClickListener {
                 @Exhaustive
                 when (dashboardChat) {
-                    is DashboardChat.Conversation -> {
+                    is DashboardChat.Active.Conversation -> {
                         // TODO: Use ContactId
-                        dashboardChat.chat?.id?.let {
-                            supervisor.scope().launch {
-                                viewModel.dashboardNavigator.toChatContact(it)
-                            }
+                        supervisor.scope().launch {
+                            viewModel.dashboardNavigator.toChatContact(dashboardChat.chat.id)
                         }
                     }
-                    is DashboardChat.GroupOrTribe -> {
+                    is DashboardChat.Active.GroupOrTribe -> {
                         if (dashboardChat.chat.type.isGroup()) {
                             supervisor.scope().launch {
                                 viewModel.dashboardNavigator.toChatGroup(dashboardChat.chat.id)
@@ -250,6 +258,9 @@ internal class ChatListAdapter(
                                 viewModel.dashboardNavigator.toChatTribe(dashboardChat.chat.id)
                             }
                         }
+                    }
+                    is DashboardChat.Inactive.Conversation -> {
+                        // TODO: Implement contactID usage with `dashboardNavigator.toChatContact`
                     }
                 }
             }

@@ -168,7 +168,7 @@ WHERE id = ?;
 
 CREATE TABLE messageDbo(
     id                          INTEGER         AS MessageId NOT NULL PRIMARY KEY,
-    uuid                        TEXT            AS MessageUUID UNIQUE,
+    uuid                        TEXT            AS MessageUUID,
     chat_id                     INTEGER         AS ChatId NOT NULL,
     type                        INTEGER         AS MessageType NOT NULL,
     sender                      INTEGER         AS ContactId NOT NULL,
