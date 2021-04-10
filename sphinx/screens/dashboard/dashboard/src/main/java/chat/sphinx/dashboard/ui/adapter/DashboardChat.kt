@@ -1,7 +1,9 @@
 package chat.sphinx.dashboard.ui.adapter
 
 import chat.sphinx.wrapper_chat.Chat
+import chat.sphinx.wrapper_chat.ChatType
 import chat.sphinx.wrapper_chat.isConversation
+import chat.sphinx.wrapper_chat.isTribe
 import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_common.hhmmElseDate
 import chat.sphinx.wrapper_common.time
@@ -24,7 +26,7 @@ sealed class DashboardChat {
     sealed class Active: DashboardChat() {
 
         companion object {
-            const val YOU = "You: "
+            const val YOU = "You"
             const val DECRYPTION_ERROR = "DECRYPTION ERROR..."
         }
 
@@ -41,7 +43,7 @@ sealed class DashboardChat {
         fun isMessageSenderSelf(message: Message): Boolean =
             message.sender == chat.contactIds.firstOrNull()
 
-        abstract fun getMessageSender(message: Message): String
+        abstract fun getMessageSender(message: Message, withColon: Boolean = true): String
 
         override fun getMessageText(): String {
             val message: Message? = message
@@ -84,6 +86,12 @@ sealed class DashboardChat {
                         "Payment Received: $amount"
                     }
                 }
+                message.type.isGroupJoin() -> {
+                    "${getMessageSender(message, false)} has joined the ${chat.type.javaClass.simpleName}"
+                }
+                message.type.isGroupLeave() -> {
+                    "${getMessageSender(message, false)} has left the ${chat.type.javaClass.simpleName}"
+                }
                 message.type.isBoost() -> {
                     "${getMessageSender(message)}Boost"
                 }
@@ -111,13 +119,13 @@ sealed class DashboardChat {
             override val chatName: String?
                 get() = contact.alias?.value
 
-            override fun getMessageSender(message: Message): String {
+            override fun getMessageSender(message: Message, withColon: Boolean): String {
                 if (isMessageSenderSelf(message)) {
-                    return YOU
+                    return YOU + if (withColon) ": " else ""
                 }
 
                 return contact.alias?.let { alias ->
-                    "${alias.value}: "
+                    alias.value + if (withColon) ": " else ""
                 } ?: ""
             }
         }
@@ -129,13 +137,13 @@ sealed class DashboardChat {
             override val chatName: String?
                 get() = chat.name?.value
 
-            override fun getMessageSender(message: Message): String {
+            override fun getMessageSender(message: Message, withColon: Boolean): String {
                 if (isMessageSenderSelf(message)) {
-                    return YOU
+                    return YOU + if (withColon) ": " else ""
                 }
 
                 return message.senderAlias?.let { alias ->
-                    "${alias.value}: "
+                    alias.value + if (withColon) ": " else ""
                 } ?: ""
             }
         }
