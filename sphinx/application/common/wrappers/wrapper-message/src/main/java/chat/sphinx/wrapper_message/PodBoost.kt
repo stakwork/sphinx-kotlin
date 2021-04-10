@@ -1,15 +1,16 @@
-package chat.sphinx.wrapper_chat
+package chat.sphinx.wrapper_message
 
 import chat.sphinx.wrapper_common.ItemId
 import chat.sphinx.wrapper_common.lightning.Sat
+import chat.sphinx.wrapper_common.message.FeedId
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.Moshi
 
 @Suppress("NOTHING_TO_INLINE")
-inline fun String.toChatMetaDataOrNull(moshi: Moshi): ChatMetaData? =
+inline fun String.toPodBoostOrNull(moshi: Moshi): PodBoost? =
     try {
-        this.toChatMetaData(moshi)
+        this.toPodBoost(moshi)
     } catch (e: Exception) {
         null
     }
@@ -18,43 +19,43 @@ inline fun String.toChatMetaDataOrNull(moshi: Moshi): ChatMetaData? =
     IllegalArgumentException::class,
     JsonDataException::class
 )
-fun String.toChatMetaData(moshi: Moshi): ChatMetaData =
-    moshi.adapter(ChatMetaDataMoshi::class.java)
+fun String.toPodBoost(moshi: Moshi): PodBoost =
+    moshi.adapter(PodBoostMoshi::class.java)
         .fromJson(this)
         ?.let {
-            ChatMetaData(
+            PodBoost(
+                FeedId(it.feedID),
                 ItemId(it.itemID),
-                Sat(it.sats_per_minute),
                 it.ts,
-                it.speed
+                Sat(it.amount)
             )
         }
         ?: throw IllegalArgumentException("Provided Json was invalid")
 
 @Throws(AssertionError::class)
-fun ChatMetaData.toJson(moshi: Moshi): String =
-    moshi.adapter(ChatMetaDataMoshi::class.java)
+fun PodBoost.toJson(moshi: Moshi): String =
+    moshi.adapter(PodBoostMoshi::class.java)
         .toJson(
-            ChatMetaDataMoshi(
+            PodBoostMoshi(
+                feedId.value,
                 itemId.value,
-                satsPerMinute.value,
                 timeSeconds,
-                speed
+                amount.value
             )
         )
 
-data class ChatMetaData(
+data class PodBoost(
+    val feedId: FeedId,
     val itemId: ItemId,
-    val satsPerMinute: Sat,
     val timeSeconds: Int,
-    val speed: Double,
+    val amount: Sat
 )
 
-// "{\"itemID\":1922435539,\"sats_per_minute\":3,\"ts\":4, \"speed\":1.5}"
+// "{\"feedID\":226249,\"itemID\":1997782557,\"ts\":1396,\"amount\":100}"
 @JsonClass(generateAdapter = true)
-internal data class ChatMetaDataMoshi(
+internal data class PodBoostMoshi(
+    val feedID: Long,
     val itemID: Long,
-    val sats_per_minute: Long,
     val ts: Int,
-    val speed: Double,
+    val amount: Long
 )

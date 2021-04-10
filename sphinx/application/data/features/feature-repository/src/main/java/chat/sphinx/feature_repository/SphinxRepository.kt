@@ -36,10 +36,7 @@ import chat.sphinx.wrapper_common.message.MessagePagination
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_contact.isTrue
 import chat.sphinx.wrapper_contact.toContactFromGroup
-import chat.sphinx.wrapper_message.Message
-import chat.sphinx.wrapper_message.MessageContent
-import chat.sphinx.wrapper_message.MessageContentDecrypted
-import chat.sphinx.wrapper_message.MessageType
+import chat.sphinx.wrapper_message.*
 import com.squareup.moshi.Moshi
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
@@ -281,7 +278,7 @@ class SphinxRepository(
         MessageDtoDboMapper(dispatchers)
     }
     private val messageDboPresenterMapper: MessageDboPresenterMapper by lazy {
-        MessageDboPresenterMapper(dispatchers)
+        MessageDboPresenterMapper(dispatchers, moshi)
     }
 
     @OptIn(RawPasswordAccess::class)

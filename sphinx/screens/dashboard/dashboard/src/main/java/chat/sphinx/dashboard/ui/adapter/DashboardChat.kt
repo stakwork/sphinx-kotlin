@@ -99,17 +99,7 @@ sealed class DashboardChat {
                     ""
                 }
                 message.type.isBoost() -> {
-                    // {"feedID":226249,"itemID":1997782557,"ts":1396,"amount":100}
-                    val amount: Long = message.messageContentDecrypted?.let { decrypted ->
-                        decrypted.value.split("\"amount\":").elementAtOrNull(1)?.let {
-                            try {
-                                it.dropLast(1).toLong()
-                            } catch (e: NumberFormatException) {
-                                null
-                            }
-                        }
-                    } ?: message.amount.value
-
+                    val amount: Long = message.podBoost?.amount?.value ?: message.amount.value
                     "${getMessageSender(message)}Boost $amount " + if (amount > 1) "sats" else "sat"
                 }
                 else -> {

@@ -1,6 +1,6 @@
-package chat.sphinx.wrapper_common.chat
+package chat.sphinx.wrapper_common
 
-inline class MetaDataId(val value: Long) {
+inline class ItemId(val value: Long) {
     init {
         require(value >= 0) {
             "MetaDataId must be greater than or equal to 0"

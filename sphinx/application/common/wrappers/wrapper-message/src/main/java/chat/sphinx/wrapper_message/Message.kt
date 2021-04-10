@@ -45,6 +45,15 @@ data class Message(
     }
 
     @Volatile
+    var podBoost: PodBoost? = null
+        private set
+
+    fun setPodBoost(podBoost: PodBoost): Message {
+        this.podBoost = podBoost
+        return this
+    }
+
+    @Volatile
     var decryptionError: Boolean = false
         private set
     @Volatile

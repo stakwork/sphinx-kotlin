@@ -3,10 +3,15 @@ package chat.sphinx.feature_repository.mappers.message
 import chat.sphinx.conceptcoredb.MessageDbo
 import chat.sphinx.feature_repository.mappers.ClassMapper
 import chat.sphinx.wrapper_message.Message
+import chat.sphinx.wrapper_message.isBoost
+import chat.sphinx.wrapper_message.toPodBoost
+import chat.sphinx.wrapper_message.toPodBoostOrNull
+import com.squareup.moshi.Moshi
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 
 internal class MessageDboPresenterMapper(
-    dispatchers: CoroutineDispatchers
+    dispatchers: CoroutineDispatchers,
+    private val moshi: Moshi,
 ): ClassMapper<MessageDbo, Message>(dispatchers) {
     override suspend fun mapFrom(value: MessageDbo): Message {
         return Message(
@@ -33,6 +38,11 @@ internal class MessageDboPresenterMapper(
             replyUUID = value.reply_uuid
         ).also { message ->
             value.message_content_decrypted?.let { decrypted ->
+                if (message.type.isBoost()) {
+                    decrypted.value.toPodBoostOrNull(moshi)?.let { boost ->
+                        message.setPodBoost(boost)
+                    }
+                }
                 message.setMessageContentDecrypted(decrypted)
             }
         }
