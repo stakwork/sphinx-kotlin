@@ -19,6 +19,7 @@ import chat.sphinx.resources.setTextColorExt
 import chat.sphinx.wrapper_chat.*
 import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_common.hhmmElseDate
+import chat.sphinx.wrapper_message.Message
 import chat.sphinx.wrapper_message.isMessage
 import io.matthewnelson.android_feature_screens.util.invisibleIfFalse
 import kotlinx.coroutines.launch
@@ -204,29 +205,39 @@ internal class ChatListAdapter(
             imageViewLock.invisibleIfFalse(dashboardChat is DashboardChat.Active)
 
             // Time
-            textViewTime.text = dashboardChat.message?.date?.hhmmElseDate(today00) ?: ""
-
-            // Message
-            val message = dashboardChat.message
-            textViewMessage.text = when {
-                message == null -> {
+            textViewTime.text = when (dashboardChat) {
+                is DashboardChat.Active -> {
+                    dashboardChat.message?.date?.hhmmElseDate(today00) ?: ""
+                }
+                is DashboardChat.Inactive.Conversation -> {
                     ""
                 }
-                message.decryptionError -> {
-                    textViewMessage.setTextColorExt(R.color.primaryRed)
-                    "DECRYPTION ERROR..."
-                }
-                message.type.isMessage() -> {
-                    // TODO: if from owner use "you: "
-                    val sender: String = message.senderAlias?.value?.let { alias ->
-                        "$alias: "
-                    } ?: ""
+            }
 
-                    message.messageContentDecrypted?.value?.let { decrypted ->
-                        "$sender$decrypted"
-                    } ?: "$sender..."
+            // Message
+            textViewMessage.text = when (dashboardChat) {
+                is DashboardChat.Active -> {
+                    val message: Message? = dashboardChat.message
+                    when {
+                        message == null -> {
+                            ""
+                        }
+                        message.decryptionError -> {
+                            textViewMessage.setTextColorExt(R.color.primaryRed)
+                            "DECRYPTION ERROR..."
+                        }
+                        message.type.isMessage() -> {
+                            val sender = dashboardChat.getMessageSender(message)
+                            message.messageContentDecrypted?.value?.let { decrypted ->
+                                "$sender$decrypted"
+                            } ?: "$sender..."
+                        }
+                        else -> {
+                            ""
+                        }
+                    }
                 }
-                else -> {
+                is DashboardChat.Inactive.Conversation -> {
                     ""
                 }
             }

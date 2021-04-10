@@ -14,11 +14,13 @@ import chat.sphinx.wrapper_message.Message
 sealed class DashboardChat {
 
     abstract val chatName: String?
-    abstract val message: Message?
     abstract val sortBy: Long
 
     sealed class Active: DashboardChat() {
         abstract val chat: Chat
+        abstract val message: Message?
+
+        abstract fun getMessageSender(message: Message): String
 
         override val sortBy: Long
             get() = message?.date?.time ?: chat.createdAt.time
@@ -40,6 +42,16 @@ sealed class DashboardChat {
 
             override val chatName: String?
                 get() = contact.alias?.value
+
+            override fun getMessageSender(message: Message): String {
+                if (message.sender == chat.contactIds.firstOrNull()) {
+                    return "you: "
+                }
+
+                return contact.alias?.let { alias ->
+                    "${alias.value}: "
+                } ?: ""
+            }
         }
 
         class GroupOrTribe(
@@ -48,6 +60,16 @@ sealed class DashboardChat {
         ): Active() {
             override val chatName: String?
                 get() = chat.name?.value
+
+            override fun getMessageSender(message: Message): String {
+                if (message.sender == chat.contactIds.firstOrNull()) {
+                    return "you: "
+                }
+
+                return message.senderAlias?.let { alias ->
+                    "${alias.value}: "
+                } ?: ""
+            }
         }
     }
 
@@ -60,9 +82,6 @@ sealed class DashboardChat {
         class Conversation(
             val contact: Contact
         ): Inactive() {
-            override val message: Message?
-                get() = null
-
             override val chatName: String?
                 get() = contact.alias?.value
 
