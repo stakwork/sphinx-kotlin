@@ -3,6 +3,7 @@ package chat.sphinx.database
 import android.content.Context
 import chat.sphinx.concept_coredb.SphinxDatabase
 import chat.sphinx.feature_coredb.CoreDBImpl
+import com.squareup.moshi.Moshi
 import com.squareup.sqldelight.android.AndroidSqliteDriver
 import com.squareup.sqldelight.db.SqlDriver
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -18,7 +19,8 @@ import javax.inject.Singleton
 class SphinxCoreDBImpl @Inject constructor(
     @ApplicationContext private val appContext: Context,
     private val buildConfigDebug: BuildConfigDebug,
-): CoreDBImpl() {
+    moshi: Moshi,
+): CoreDBImpl(moshi) {
 
     @Volatile
     private var driver: AndroidSqliteDriver? = null

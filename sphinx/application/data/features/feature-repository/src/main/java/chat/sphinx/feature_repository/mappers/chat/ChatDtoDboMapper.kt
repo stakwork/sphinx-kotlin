@@ -12,11 +12,13 @@ import chat.sphinx.wrapper_common.lightning.toSat
 import chat.sphinx.wrapper_common.toDateTime
 import chat.sphinx.wrapper_common.toPhotoUrl
 import chat.sphinx.wrapper_common.toSeen
+import com.squareup.moshi.Moshi
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import java.text.ParseException
 
 internal class ChatDtoDboMapper(
-    dispatchers: CoroutineDispatchers
+    dispatchers: CoroutineDispatchers,
+    private val moshi: Moshi
 ): ClassMapper<ChatDto, ChatDbo>(dispatchers) {
 
     @Throws(
@@ -42,7 +44,7 @@ internal class ChatDtoDboMapper(
             private_tribe = value.private.toChatPrivate(),
             owner_pub_key = value.owner_pub_key?.toLightningNodePubKey(),
             seen = value.seen.toSeen(),
-            meta_data = value.meta?.toChatMetaDataOrNull(),
+            meta_data = value.meta?.toChatMetaDataOrNull(moshi),
             my_photo_url = value.my_photo_url?.toPhotoUrl(),
             my_alias = value.my_alias?.toChatAlias(),
             pending_contact_ids = value.pending_contact_ids?.map { ContactId(it) },

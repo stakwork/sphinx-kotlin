@@ -40,6 +40,7 @@ import chat.sphinx.wrapper_message.Message
 import chat.sphinx.wrapper_message.MessageContent
 import chat.sphinx.wrapper_message.MessageContentDecrypted
 import chat.sphinx.wrapper_message.MessageType
+import com.squareup.moshi.Moshi
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
 import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
@@ -60,6 +61,7 @@ class SphinxRepository(
     private val authenticationCoreManager: AuthenticationCoreManager,
     private val coreDB: CoreDB,
     private val dispatchers: CoroutineDispatchers,
+    private val moshi: Moshi,
     private val networkQueryChat: NetworkQueryChat,
     private val networkQueryContact: NetworkQueryContact,
     private val networkQueryMessage: NetworkQueryMessage,
@@ -76,7 +78,7 @@ class SphinxRepository(
     /////////////
     private val chatLock = Mutex()
     private val chatDtoDboMapper: ChatDtoDboMapper by lazy {
-        ChatDtoDboMapper(dispatchers)
+        ChatDtoDboMapper(dispatchers, moshi)
     }
     private val chatDboPresenterMapper: ChatDboPresenterMapper by lazy {
         ChatDboPresenterMapper(dispatchers)

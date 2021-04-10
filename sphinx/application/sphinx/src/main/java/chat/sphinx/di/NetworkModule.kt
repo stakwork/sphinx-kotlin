@@ -68,11 +68,6 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideMoshi(): Moshi =
-        Moshi.Builder().build()
-
-    @Provides
-    @Singleton
     fun provideNetworkQueryChatImpl(
         dispatchers: CoroutineDispatchers,
         moshi: Moshi,

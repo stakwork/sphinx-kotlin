@@ -15,12 +15,13 @@ import chat.sphinx.feature_coredb.adapters.contact.LightningNodeAliasAdapter
 import chat.sphinx.feature_coredb.adapters.contact.LightningRouteHintAdapter
 import chat.sphinx.feature_coredb.adapters.contact.PrivatePhotoAdapter
 import chat.sphinx.feature_coredb.adapters.message.*
+import com.squareup.moshi.Moshi
 import com.squareup.sqldelight.db.SqlDriver
 import io.matthewnelson.concept_encryption_key.EncryptionKey
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 
-abstract class CoreDBImpl: CoreDB() {
+abstract class CoreDBImpl(private val moshi: Moshi): CoreDB() {
 
     companion object {
         const val DB_NAME = "sphinx.db"
@@ -67,7 +68,7 @@ abstract class CoreDBImpl: CoreDB() {
                     private_tribeAdapter = ChatPrivateAdapter(),
                     owner_pub_keyAdapter = LightningNodePubKeyAdapter.getInstance(),
                     seenAdapter = SeenAdapter.getInstance(),
-                    meta_dataAdapter = ChatMetaDataAdapter(),
+                    meta_dataAdapter = ChatMetaDataAdapter(moshi),
                     my_photo_urlAdapter = PhotoUrlAdapter.getInstance(),
                     my_aliasAdapter = ChatAliasAdapter(),
                     pending_contact_idsAdapter = ContactIdsAdapter.getInstance(),

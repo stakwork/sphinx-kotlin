@@ -2,6 +2,7 @@ package chat.sphinx.feature_coredb.adapters.chat
 
 import chat.sphinx.wrapper_chat.*
 import chat.sphinx.wrapper_common.chat.ChatUUID
+import com.squareup.moshi.Moshi
 import com.squareup.sqldelight.ColumnAdapter
 
 internal class ChatUUIDAdapter: ColumnAdapter<ChatUUID, String> {
@@ -94,13 +95,13 @@ internal class ChatPrivateAdapter: ColumnAdapter<ChatPrivate, Long> {
     }
 }
 
-internal class ChatMetaDataAdapter: ColumnAdapter<ChatMetaData, String> {
+internal class ChatMetaDataAdapter(val moshi: Moshi): ColumnAdapter<ChatMetaData, String> {
     override fun decode(databaseValue: String): ChatMetaData {
-        return databaseValue.toChatMetaData()
+        return databaseValue.toChatMetaData(moshi)
     }
 
     override fun encode(value: ChatMetaData): String {
-        return value.toString()
+        return value.toJson(moshi)
     }
 }
 
