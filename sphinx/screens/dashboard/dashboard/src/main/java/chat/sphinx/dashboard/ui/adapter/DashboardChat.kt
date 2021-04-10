@@ -1,9 +1,7 @@
 package chat.sphinx.dashboard.ui.adapter
 
 import chat.sphinx.wrapper_chat.Chat
-import chat.sphinx.wrapper_chat.ChatType
 import chat.sphinx.wrapper_chat.isConversation
-import chat.sphinx.wrapper_chat.isTribe
 import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_common.hhmmElseDate
 import chat.sphinx.wrapper_common.time
@@ -86,14 +84,33 @@ sealed class DashboardChat {
                         "Payment Received: $amount"
                     }
                 }
+                message.type.isAttachment() -> {
+                    // TODO: Implement
+                    ""
+                }
                 message.type.isGroupJoin() -> {
                     "${getMessageSender(message, false)} has joined the ${chat.type.javaClass.simpleName}"
                 }
                 message.type.isGroupLeave() -> {
                     "${getMessageSender(message, false)} has left the ${chat.type.javaClass.simpleName}"
                 }
+                message.type.isBotRes() -> {
+                    // TODO: Implement
+                    ""
+                }
                 message.type.isBoost() -> {
-                    "${getMessageSender(message)}Boost"
+                    // {"feedID":226249,"itemID":1997782557,"ts":1396,"amount":100}
+                    val amount: Long = message.messageContentDecrypted?.let { decrypted ->
+                        decrypted.value.split("\"amount\":").elementAtOrNull(1)?.let {
+                            try {
+                                it.dropLast(1).toLong()
+                            } catch (e: NumberFormatException) {
+                                null
+                            }
+                        }
+                    } ?: message.amount.value
+
+                    "${getMessageSender(message)}Boost $amount " + if (amount > 1) "sats" else "sat"
                 }
                 else -> {
                     ""

@@ -214,6 +214,7 @@ internal class ChatListAdapter(
             }
 
             // TODO: check for `clip::` to load pod clip
+            // TODO: check for `giphy::` to load gif
 
             textViewMessage.text = messageText
 
