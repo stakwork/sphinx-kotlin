@@ -44,7 +44,7 @@ import chat.sphinx.wrapper_rsa.RsaPublicKey;
 import kotlin.collections.List;
 
 CREATE TABLE chatDbo(
-    id                          INTEGER         AS ChatId PRIMARY KEY,
+    id                          INTEGER         AS ChatId NOT NULL PRIMARY KEY,
     uuid                        TEXT            AS ChatUUID NOT NULL UNIQUE,
     name                        TEXT            AS ChatName,
     photo_url                   TEXT            AS PhotoUrl,
@@ -167,8 +167,11 @@ chatDeleteById:
 DELETE FROM chatDbo
 WHERE id = ?;
 
+-- Cannot use inline classes if there are 23 or more columns
+-- https://youtrack.jetbrains.com/issue/KT-45084
+-- https://github.com/cashapp/sqldelight/issues/2266
 CREATE TABLE messageDbo(
-    id                          INTEGER         AS MessageId PRIMARY KEY,
+    id                          INTEGER         AS MessageId NOT NULL PRIMARY KEY,
     uuid                        TEXT            AS MessageUUID,
     chat_id                     INTEGER         AS ChatId NOT NULL,
     type                        INTEGER         AS MessageType NOT NULL,
@@ -319,7 +322,7 @@ DELETE FROM messageDbo
 WHERE chat_id = ?;
 
 CREATE TABLE contactDbo(
-    id                          INTEGER         AS ContactId PRIMARY KEY,
+    id                          INTEGER         AS ContactId NOT NULL PRIMARY KEY,
     route_hint                  TEXT            AS LightningRouteHint,
     node_pub_key                TEXT            AS LightningNodePubKey,
     node_alias                  TEXT            AS LightningNodeAlias,
