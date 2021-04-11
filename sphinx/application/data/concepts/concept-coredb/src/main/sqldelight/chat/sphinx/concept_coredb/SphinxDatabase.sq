@@ -167,6 +167,105 @@ chatDeleteById:
 DELETE FROM chatDbo
 WHERE id = ?;
 
+CREATE TABLE contactDbo(
+    id                          INTEGER         AS ContactId NOT NULL PRIMARY KEY,
+    route_hint                  TEXT            AS LightningRouteHint,
+    node_pub_key                TEXT            AS LightningNodePubKey,
+    node_alias                  TEXT            AS LightningNodeAlias,
+    alias                       TEXT            AS ContactAlias,
+    photo_url                   TEXT            AS PhotoUrl,
+    private_photo               INTEGER         AS PrivatePhoto NOT NULL,
+    owner                       INTEGER         AS Owner NOT NULL,
+    status                      INTEGER         AS ContactStatus NOT NULL,
+    public_key                  TEXT            AS RsaPublicKey,
+    device_id                   TEXT            AS DeviceId,
+    created_at                  INTEGER         AS DateTime NOT NULL,
+    updated_at                  INTEGER         AS DateTime NOT NULL,
+    notification_sound          TEXT            AS NotificationSound,
+    tip_amount                  INTEGER         AS Sat,
+    invite_id                   INTEGER         AS InviteId
+);
+
+contactGetAllIds:
+SELECT id
+FROM contactDbo;
+
+contactGetAll:
+SELECT *
+FROM contactDbo;
+
+contactGetById:
+SELECT *
+FROM contactDbo
+WHERE id = ?;
+
+contactGetOwner:
+SELECT *
+FROM contactDbo
+WHERE owner = 1
+ORDER BY id
+LIMIT 1;
+
+contactUpsert {
+    UPDATE contactDbo
+    SET route_hint = :route_hint,
+        node_pub_key = :node_pub_key,
+        node_alias = :node_alias,
+        alias = :alias,
+        photo_url = :photo_url,
+        private_photo = :private_photo,
+        status = :status,
+        public_key = :public_key,
+        device_id = :device_id,
+        created_at = :created_at,
+        updated_at = :updated_at,
+        notification_sound = :notification_sound,
+        tip_amount = :tip_amount,
+        invite_id = :invite_id
+    WHERE id = :id;
+
+    INSERT OR IGNORE INTO contactDbo(
+        id,
+        route_hint,
+        node_pub_key,
+        node_alias,
+        alias,
+        photo_url,
+        private_photo,
+        owner,
+        status,
+        public_key,
+        device_id,
+        created_at,
+        updated_at,
+        notification_sound,
+        tip_amount,
+        invite_id
+    )
+    VALUES (
+        :id,
+        :route_hint,
+        :node_pub_key,
+        :node_alias,
+        :alias,
+        :photo_url,
+        :private_photo,
+        :owner,
+        :status,
+        :public_key,
+        :device_id,
+        :created_at,
+        :updated_at,
+        :notification_sound,
+        :tip_amount,
+        :invite_id
+    );
+}
+
+contactDeleteById:
+DELETE FROM contactDbo
+WHERE id = ?;
+
 -- Cannot use inline classes if there are 23 or more columns
 -- https://youtrack.jetbrains.com/issue/KT-45084
 -- https://github.com/cashapp/sqldelight/issues/2266
@@ -320,102 +419,3 @@ WHERE id = ?;
 messageDeleteByChatId:
 DELETE FROM messageDbo
 WHERE chat_id = ?;
-
-CREATE TABLE contactDbo(
-    id                          INTEGER         AS ContactId NOT NULL PRIMARY KEY,
-    route_hint                  TEXT            AS LightningRouteHint,
-    node_pub_key                TEXT            AS LightningNodePubKey,
-    node_alias                  TEXT            AS LightningNodeAlias,
-    alias                       TEXT            AS ContactAlias,
-    photo_url                   TEXT            AS PhotoUrl,
-    private_photo               INTEGER         AS PrivatePhoto NOT NULL,
-    owner                       INTEGER         AS Owner NOT NULL,
-    status                      INTEGER         AS ContactStatus NOT NULL,
-    public_key                  TEXT            AS RsaPublicKey,
-    device_id                   TEXT            AS DeviceId,
-    created_at                  INTEGER         AS DateTime NOT NULL,
-    updated_at                  INTEGER         AS DateTime NOT NULL,
-    notification_sound          TEXT            AS NotificationSound,
-    tip_amount                  INTEGER         AS Sat,
-    invite_id                   INTEGER         AS InviteId
-);
-
-contactGetAllIds:
-SELECT id
-FROM contactDbo;
-
-contactGetAll:
-SELECT *
-FROM contactDbo;
-
-contactGetById:
-SELECT *
-FROM contactDbo
-WHERE id = ?;
-
-contactGetOwner:
-SELECT *
-FROM contactDbo
-WHERE owner = 1
-ORDER BY id
-LIMIT 1;
-
-contactUpsert {
-    UPDATE contactDbo
-    SET route_hint = :route_hint,
-        node_pub_key = :node_pub_key,
-        node_alias = :node_alias,
-        alias = :alias,
-        photo_url = :photo_url,
-        private_photo = :private_photo,
-        status = :status,
-        public_key = :public_key,
-        device_id = :device_id,
-        created_at = :created_at,
-        updated_at = :updated_at,
-        notification_sound = :notification_sound,
-        tip_amount = :tip_amount,
-        invite_id = :invite_id
-    WHERE id = :id;
-
-    INSERT OR IGNORE INTO contactDbo(
-        id,
-        route_hint,
-        node_pub_key,
-        node_alias,
-        alias,
-        photo_url,
-        private_photo,
-        owner,
-        status,
-        public_key,
-        device_id,
-        created_at,
-        updated_at,
-        notification_sound,
-        tip_amount,
-        invite_id
-    )
-    VALUES (
-        :id,
-        :route_hint,
-        :node_pub_key,
-        :node_alias,
-        :alias,
-        :photo_url,
-        :private_photo,
-        :owner,
-        :status,
-        :public_key,
-        :device_id,
-        :created_at,
-        :updated_at,
-        :notification_sound,
-        :tip_amount,
-        :invite_id
-    );
-}
-
-contactDeleteById:
-DELETE FROM contactDbo
-WHERE id = ?;
