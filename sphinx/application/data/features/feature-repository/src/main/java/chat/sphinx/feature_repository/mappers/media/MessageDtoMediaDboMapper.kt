@@ -22,7 +22,7 @@ internal class MessageDtoMediaDboMapper(
                     ChatId(value.chat_id ?: MessageDtoDboMapper.NULL_CHAT_ID.toLong()),
                     value.media_key?.toMediaKey(),
                     value.mediaKeyDecrypted?.toMediaKeyDecrypted(),
-                    MediaType(type),
+                    type.toMediaType(),
                     MediaToken(token)
                 )
             }

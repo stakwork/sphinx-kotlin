@@ -1,9 +1,6 @@
 package chat.sphinx.feature_coredb.adapters.media
 
-import chat.sphinx.wrapper_message.media.MediaKey
-import chat.sphinx.wrapper_message.media.MediaKeyDecrypted
-import chat.sphinx.wrapper_message.media.MediaToken
-import chat.sphinx.wrapper_message.media.MediaType
+import chat.sphinx.wrapper_message.media.*
 import com.squareup.sqldelight.ColumnAdapter
 
 internal class MediaKeyAdapter: ColumnAdapter<MediaKey, String> {
@@ -28,7 +25,7 @@ internal class MediaKeyDecryptedAdapter: ColumnAdapter<MediaKeyDecrypted, String
 
 internal class MediaTypeAdapter: ColumnAdapter<MediaType, String> {
     override fun decode(databaseValue: String): MediaType {
-        return MediaType(databaseValue)
+        return databaseValue.toMediaType()
     }
 
     override fun encode(value: MediaType): String {
