@@ -45,6 +45,15 @@ data class Message(
     }
 
     @Volatile
+    var mediaKeyDecrypted: MediaKeyDecrypted? = null
+        private set
+
+    fun setMediaKeyDecrypted(mediaKeyDecrypted: MediaKeyDecrypted): Message {
+        this.mediaKeyDecrypted = mediaKeyDecrypted
+        return this
+    }
+
+    @Volatile
     var podBoost: PodBoost? = null
         private set
 

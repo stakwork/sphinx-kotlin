@@ -56,6 +56,7 @@ inline fun SphinxDatabaseQueries.upsertMessage(dbo: MessageDbo): Unit =
         dbo.reply_uuid,
         dbo.id,
         dbo.message_content_decrypted,
+        dbo.media_key_decrypted,
     )
 
 @Suppress("NOTHING_TO_INLINE", "SpellCheckingInspection")

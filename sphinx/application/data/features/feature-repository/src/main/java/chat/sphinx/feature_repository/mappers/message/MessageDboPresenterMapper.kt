@@ -56,6 +56,10 @@ internal class MessageDboPresenterMapper(
 
                 message.setMessageContentDecrypted(decrypted)
             }
+
+            value.media_key_decrypted?.let { decrypted ->
+                message.setMediaKeyDecrypted(decrypted)
+            }
         }
     }
 
@@ -76,6 +80,7 @@ internal class MessageDboPresenterMapper(
             message_content_decrypted = value.messageContentDecrypted,
             status = value.status,
             media_key = value.mediaKey,
+            media_key_decrypted = value.mediaKeyDecrypted,
             media_type = value.mediaType,
             media_token = value.mediaToken,
             seen = value.seen,

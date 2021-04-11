@@ -13,6 +13,16 @@ internal class MediaKeyAdapter: ColumnAdapter<MediaKey, String> {
     }
 }
 
+internal class MediaKeyDecryptedAdapter: ColumnAdapter<MediaKeyDecrypted, String> {
+    override fun decode(databaseValue: String): MediaKeyDecrypted {
+        return MediaKeyDecrypted(databaseValue)
+    }
+
+    override fun encode(value: MediaKeyDecrypted): String {
+        return value.value
+    }
+}
+
 internal class MediaTypeAdapter: ColumnAdapter<MediaType, String> {
     override fun decode(databaseValue: String): MediaType {
         return MediaType(databaseValue)

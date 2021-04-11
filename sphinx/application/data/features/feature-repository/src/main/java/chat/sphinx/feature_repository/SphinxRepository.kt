@@ -305,6 +305,7 @@ class SphinxRepository(
         messageDbo: MessageDbo
     ): Message {
 
+        // TODO: add checking for mediaKey/mediaKeyDecrypted
         return messageDbo.message_content?.let { messageContent ->
 
             if (
@@ -353,6 +354,7 @@ class SphinxRepository(
                                 decryptedContent,
                                 messageDbo.status,
                                 messageDbo.media_key,
+                                messageDbo.media_key_decrypted,
                                 messageDbo.media_type,
                                 messageDbo.media_token,
                                 messageDbo.seen,
@@ -480,7 +482,7 @@ class SphinxRepository(
 
                         if (newMessages.isNotEmpty()) {
 
-                            val jobList = ArrayList<Job>(newMessages.size)
+                            val jobList = ArrayList<Job>(newMessages.size * 2)
 
                             for (message in newMessages) {
 
@@ -500,7 +502,11 @@ class SphinxRepository(
                                                     decrypted.exception?.let { nnE ->
                                                         LOG.e(
                                                             TAG,
-                                                            decrypted.message + " MessageId: ${message.id}",
+                                                            """
+                                                                ${decrypted.message}
+                                                                MessageId: ${message.id}
+                                                                MessageContent: ${message.message_content}
+                                                            """.trimIndent(),
                                                             nnE
                                                         )
                                                     }
@@ -517,6 +523,46 @@ class SphinxRepository(
 
                                     }
 
+                                }
+
+                                message.media_key?.let { mediaKey ->
+
+                                    if (mediaKey.isNotEmpty()) {
+
+                                        scope.launch(dispatchers.mainImmediate) {
+
+                                            val decrypted = decryptMessageContent(
+                                                MessageContent(mediaKey)
+                                            )
+
+                                            @Exhaustive
+                                            when (decrypted) {
+                                                is Response.Error -> {
+                                                    // Only log it if there is an exception
+                                                    decrypted.exception?.let { nnE ->
+                                                        LOG.e(
+                                                            TAG,
+                                                            """
+                                                                ${decrypted.message}
+                                                                MessageId: ${message.id}
+                                                                MediaKey: ${message.media_key}
+                                                            """.trimIndent(),
+                                                            nnE
+                                                        )
+                                                    }
+                                                }
+                                                is Response.Success -> {
+                                                    message.setMediaKeyDecrypted(
+                                                        decrypted.value.toUnencryptedString().value
+                                                    )
+                                                }
+                                            }
+
+                                        }.let { job ->
+                                            jobList.add(job)
+                                        }
+
+                                    }
                                 }
                             }
 

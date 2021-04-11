@@ -46,4 +46,14 @@ data class MessageDto(
         if (value.isEmpty()) return
         messageContentDecrypted = value
     }
+
+    @Transient
+    @Volatile
+    var mediaKeyDecrypted: String? = null
+        private set
+
+    fun setMediaKeyDecrypted(value: String) {
+        if (value.isEmpty()) return
+        mediaKeyDecrypted = value
+    }
 }

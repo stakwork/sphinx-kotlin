@@ -90,6 +90,7 @@ abstract class CoreDBImpl(private val moshi: Moshi): CoreDB() {
                     message_content_decryptedAdapter = MessageContentDecryptedAdapter(),
                     statusAdapter = MessageStatusAdapter(),
                     media_keyAdapter = MediaKeyAdapter(),
+                    media_key_decryptedAdapter = MediaKeyDecryptedAdapter(),
                     media_typeAdapter = MediaTypeAdapter(),
                     media_tokenAdapter = MediaTokenAdapter(),
                     seenAdapter = SeenAdapter.getInstance(),
