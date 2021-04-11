@@ -308,14 +308,21 @@ sealed class MessageType {
         const val QUERY = 30
         const val QUERY_RESPONSE = 31
 
+        const val CAN_CONTAIN_MEDIA = true
+        const val CAN_NOT_CONTAIN_MEDIA = false
+
         const val SHOW = true
         const val DO_NOT_SHOW = false
     }
 
+    abstract val canContainMedia: Boolean
     abstract val show: Boolean
     abstract val value: Int
 
     object Message: MessageType() {
+        override val canContainMedia: Boolean
+            get() = CAN_NOT_CONTAIN_MEDIA
+
         override val show: Boolean
             get() = SHOW
 
@@ -324,6 +331,9 @@ sealed class MessageType {
     }
 
     object Confirmation: MessageType() {
+        override val canContainMedia: Boolean
+            get() = CAN_NOT_CONTAIN_MEDIA
+
         override val show: Boolean
             get() = DO_NOT_SHOW
 
@@ -332,6 +342,9 @@ sealed class MessageType {
     }
 
     object Invoice: MessageType() {
+        override val canContainMedia: Boolean
+            get() = CAN_NOT_CONTAIN_MEDIA
+
         override val show: Boolean
             get() = SHOW
 
@@ -340,6 +353,9 @@ sealed class MessageType {
     }
 
     object Payment: MessageType() {
+        override val canContainMedia: Boolean
+            get() = CAN_NOT_CONTAIN_MEDIA
+
         override val show: Boolean
             get() = SHOW
 
@@ -348,6 +364,9 @@ sealed class MessageType {
     }
 
     object Cancellation: MessageType() {
+        override val canContainMedia: Boolean
+            get() = CAN_NOT_CONTAIN_MEDIA
+
         override val show: Boolean
             get() = DO_NOT_SHOW
 
@@ -356,6 +375,9 @@ sealed class MessageType {
     }
 
     object DirectPayment: MessageType() {
+        override val canContainMedia: Boolean
+            get() = CAN_CONTAIN_MEDIA
+
         override val show: Boolean
             get() = SHOW
 
@@ -364,6 +386,9 @@ sealed class MessageType {
     }
 
     object Attachment: MessageType() {
+        override val canContainMedia: Boolean
+            get() = CAN_CONTAIN_MEDIA
+
         override val show: Boolean
             get() = SHOW
 
@@ -372,6 +397,9 @@ sealed class MessageType {
     }
 
     object Purchase: MessageType() {
+        override val canContainMedia: Boolean
+            get() = CAN_CONTAIN_MEDIA
+
         override val show: Boolean
             get() = DO_NOT_SHOW
 
@@ -380,6 +408,9 @@ sealed class MessageType {
     }
 
     object PurchaseAccept: MessageType() {
+        override val canContainMedia: Boolean
+            get() = CAN_CONTAIN_MEDIA
+
         override val show: Boolean
             get() = DO_NOT_SHOW
 
@@ -388,6 +419,9 @@ sealed class MessageType {
     }
 
     object PurchaseDeny: MessageType() {
+        override val canContainMedia: Boolean
+            get() = CAN_CONTAIN_MEDIA
+
         override val show: Boolean
             get() = DO_NOT_SHOW
 
@@ -396,6 +430,9 @@ sealed class MessageType {
     }
 
     object ContactKey: MessageType() {
+        override val canContainMedia: Boolean
+            get() = CAN_NOT_CONTAIN_MEDIA
+
         override val show: Boolean
             get() = DO_NOT_SHOW
 
@@ -404,6 +441,9 @@ sealed class MessageType {
     }
 
     object ContactKeyConfirmation: MessageType() {
+        override val canContainMedia: Boolean
+            get() = CAN_NOT_CONTAIN_MEDIA
+
         override val show: Boolean
             get() = DO_NOT_SHOW
 
@@ -412,6 +452,9 @@ sealed class MessageType {
     }
 
     object GroupCreate: MessageType() {
+        override val canContainMedia: Boolean
+            get() = CAN_NOT_CONTAIN_MEDIA
+
         override val show: Boolean
             get() = DO_NOT_SHOW
 
@@ -420,6 +463,9 @@ sealed class MessageType {
     }
 
     object GroupInvite: MessageType() {
+        override val canContainMedia: Boolean
+            get() = CAN_NOT_CONTAIN_MEDIA
+
         override val show: Boolean
             get() = DO_NOT_SHOW
 
@@ -428,6 +474,9 @@ sealed class MessageType {
     }
 
     object GroupJoin: MessageType() {
+        override val canContainMedia: Boolean
+            get() = CAN_NOT_CONTAIN_MEDIA
+
         override val show: Boolean
             get() = SHOW
 
@@ -436,6 +485,9 @@ sealed class MessageType {
     }
 
     object GroupLeave: MessageType() {
+        override val canContainMedia: Boolean
+            get() = CAN_NOT_CONTAIN_MEDIA
+
         override val show: Boolean
             get() = SHOW
 
@@ -444,6 +496,9 @@ sealed class MessageType {
     }
 
     object GroupKick: MessageType() {
+        override val canContainMedia: Boolean
+            get() = CAN_NOT_CONTAIN_MEDIA
+
         override val show: Boolean
             get() = DO_NOT_SHOW
 
@@ -452,6 +507,9 @@ sealed class MessageType {
     }
 
     object Delete: MessageType() {
+        override val canContainMedia: Boolean
+            get() = CAN_NOT_CONTAIN_MEDIA
+
         override val show: Boolean
             get() = DO_NOT_SHOW
 
@@ -460,6 +518,9 @@ sealed class MessageType {
     }
 
     object Repayment: MessageType() {
+        override val canContainMedia: Boolean
+            get() = CAN_NOT_CONTAIN_MEDIA
+
         override val show: Boolean
             get() = DO_NOT_SHOW
 
@@ -468,6 +529,9 @@ sealed class MessageType {
     }
 
     object MemberRequest: MessageType() {
+        override val canContainMedia: Boolean
+            get() = CAN_NOT_CONTAIN_MEDIA
+
         override val show: Boolean
             get() = DO_NOT_SHOW
 
@@ -476,6 +540,9 @@ sealed class MessageType {
     }
 
     object MemberApprove: MessageType() {
+        override val canContainMedia: Boolean
+            get() = CAN_NOT_CONTAIN_MEDIA
+
         override val show: Boolean
             get() = DO_NOT_SHOW
 
@@ -484,6 +551,9 @@ sealed class MessageType {
     }
 
     object MemberReject: MessageType() {
+        override val canContainMedia: Boolean
+            get() = CAN_NOT_CONTAIN_MEDIA
+
         override val show: Boolean
             get() = DO_NOT_SHOW
 
@@ -492,6 +562,9 @@ sealed class MessageType {
     }
 
     object TribeDelete: MessageType() {
+        override val canContainMedia: Boolean
+            get() = CAN_NOT_CONTAIN_MEDIA
+
         override val show: Boolean
             get() = DO_NOT_SHOW
 
@@ -500,6 +573,9 @@ sealed class MessageType {
     }
 
     object BotInstall: MessageType() {
+        override val canContainMedia: Boolean
+            get() = CAN_NOT_CONTAIN_MEDIA
+
         override val show: Boolean
             get() = DO_NOT_SHOW
 
@@ -508,6 +584,9 @@ sealed class MessageType {
     }
 
     object BotCmd: MessageType() {
+        override val canContainMedia: Boolean
+            get() = CAN_NOT_CONTAIN_MEDIA
+
         override val show: Boolean
             get() = DO_NOT_SHOW
 
@@ -516,6 +595,9 @@ sealed class MessageType {
     }
 
     object BotRes: MessageType() {
+        override val canContainMedia: Boolean
+            get() = CAN_NOT_CONTAIN_MEDIA
+
         override val show: Boolean
             get() = SHOW
 
@@ -524,6 +606,9 @@ sealed class MessageType {
     }
 
     object Heartbeat: MessageType() {
+        override val canContainMedia: Boolean
+            get() = CAN_NOT_CONTAIN_MEDIA
+
         override val show: Boolean
             get() = DO_NOT_SHOW
 
@@ -532,6 +617,9 @@ sealed class MessageType {
     }
 
     object HeartbeatConfirmation: MessageType() {
+        override val canContainMedia: Boolean
+            get() = CAN_NOT_CONTAIN_MEDIA
+
         override val show: Boolean
             get() = DO_NOT_SHOW
 
@@ -540,6 +628,9 @@ sealed class MessageType {
     }
 
     object KeySend: MessageType() {
+        override val canContainMedia: Boolean
+            get() = CAN_NOT_CONTAIN_MEDIA
+
         override val show: Boolean
             get() = DO_NOT_SHOW
 
@@ -548,6 +639,9 @@ sealed class MessageType {
     }
 
     object Boost: MessageType() {
+        override val canContainMedia: Boolean
+            get() = CAN_NOT_CONTAIN_MEDIA
+
         override val show: Boolean
             get() = SHOW
 
@@ -556,6 +650,9 @@ sealed class MessageType {
     }
 
     object Query: MessageType() {
+        override val canContainMedia: Boolean
+            get() = CAN_NOT_CONTAIN_MEDIA
+
         override val show: Boolean
             get() = DO_NOT_SHOW
 
@@ -564,6 +661,9 @@ sealed class MessageType {
     }
 
     object QueryResponse: MessageType() {
+        override val canContainMedia: Boolean
+            get() = CAN_NOT_CONTAIN_MEDIA
+
         override val show: Boolean
             get() = DO_NOT_SHOW
 
@@ -572,6 +672,9 @@ sealed class MessageType {
     }
 
     class Unknown(override val value: Int) : MessageType() {
+        override val canContainMedia: Boolean
+            get() = CAN_NOT_CONTAIN_MEDIA
+
         override val show: Boolean
             get() = DO_NOT_SHOW
     }

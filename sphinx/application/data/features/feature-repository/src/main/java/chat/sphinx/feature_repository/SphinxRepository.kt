@@ -400,7 +400,7 @@ class SphinxRepository(
 
         } ?: messageDboPresenterMapper.mapFrom(messageDbo)
 
-        if (message.type.isDirectPayment() || message.type.isAttachment()) {
+        if (message.type.canContainMedia) {
             withContext(dispatchers.io) {
                 queries.messageMediaGetById(message.id).executeAsOneOrNull()
             }?.let { mediaDbo ->
