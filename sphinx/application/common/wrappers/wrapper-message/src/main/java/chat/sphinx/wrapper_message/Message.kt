@@ -9,6 +9,7 @@ import chat.sphinx.wrapper_common.lightning.LightningPaymentHash
 import chat.sphinx.wrapper_common.lightning.LightningPaymentRequest
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.MessageId
+import chat.sphinx.wrapper_message.media.MessageMedia
 
 data class Message(
     val id: MessageId,
@@ -24,9 +25,6 @@ data class Message(
     val expirationDate: DateTime?,
     val messageContent: MessageContent?,
     val status: MessageStatus,
-    val mediaKey: MediaKey?,
-    val mediaType: MediaType?,
-    val mediaToken: MediaToken?,
     val seen: Seen,
     val senderAlias: SenderAlias?,
     val senderPic: PhotoUrl?,
@@ -45,6 +43,27 @@ data class Message(
     }
 
     @Volatile
+    var messageDecryptionError: Boolean = false
+        private set
+    @Volatile
+    var messageDecryptionException: Exception? = null
+        private set
+
+    fun setDecryptionError(e: Exception?): Message {
+        messageDecryptionError = true
+        messageDecryptionException = e
+        return this
+    }
+
+    @Volatile
+    var messageMedia: MessageMedia? = null
+
+    fun setMessageMedia(messageMedia: MessageMedia): Message {
+        this.messageMedia = messageMedia
+        return this
+    }
+
+    @Volatile
     var podBoost: PodBoost? = null
         private set
 
@@ -59,19 +78,6 @@ data class Message(
 
     fun setGiphyData(giphyData: GiphyData): Message {
         this.giphyData = giphyData
-        return this
-    }
-
-    @Volatile
-    var decryptionError: Boolean = false
-        private set
-    @Volatile
-    var decryptionException: Exception? = null
-        private set
-
-    fun setDecryptionError(e: Exception?): Message {
-        decryptionError = true
-        decryptionException = e
         return this
     }
 }

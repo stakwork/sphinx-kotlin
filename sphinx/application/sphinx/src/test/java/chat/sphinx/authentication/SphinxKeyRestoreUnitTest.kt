@@ -13,6 +13,7 @@ import chat.sphinx.feature_relay.RelayDataHandlerImpl
 import chat.sphinx.key_restore.KeyRestoreResponse
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
+import com.squareup.moshi.Moshi
 import com.squareup.sqldelight.android.AndroidSqliteDriver
 import com.squareup.sqldelight.db.SqlDriver
 import io.matthewnelson.concept_encryption_key.EncryptionKey
@@ -56,7 +57,7 @@ class SphinxKeyRestoreUnitTest: CoroutineTestHelper() {
         SphinxEncryptionKeyHandler(rsa)
     }
 
-    private inner class TestCoreDBImpl: CoreDBImpl() {
+    private inner class TestCoreDBImpl(moshi: Moshi): CoreDBImpl(moshi) {
 
         private var driver: AndroidSqliteDriver? = null
 
@@ -71,8 +72,12 @@ class SphinxKeyRestoreUnitTest: CoroutineTestHelper() {
         }
     }
 
+    private val moshi: Moshi by lazy {
+        Moshi.Builder().build()
+    }
+
     private val testSphinxCoreDBImpl: TestCoreDBImpl by lazy {
-        TestCoreDBImpl()
+        TestCoreDBImpl(moshi)
     }
 
     private val sphinxManager: SphinxAuthenticationCoreManager by lazy {

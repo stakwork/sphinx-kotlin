@@ -49,7 +49,7 @@ ext.deps = [
         ],
         recyclerView: "androidx.recyclerview:recyclerview:1.1.0",
         securityCrypto: "androidx.security:security-crypto:1.1.0-alpha03",
-        sqlite: "androidx.sqlite:sqlite:2.1.0",
+        sqlite: "androidx.sqlite:sqlite-ktx:2.1.0",
         viewBinding: "androidx.databinding:viewbinding:${versions.androidGradle}",
     ],
 //    bouncyCastle: "org.bouncycastle:bcprov-jdk15on:1.65",
