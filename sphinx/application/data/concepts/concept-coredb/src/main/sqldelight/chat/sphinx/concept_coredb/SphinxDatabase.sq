@@ -28,10 +28,10 @@ import chat.sphinx.wrapper_contact.DeviceId;
 import chat.sphinx.wrapper_contact.NotificationSound;
 import chat.sphinx.wrapper_contact.Owner;
 import chat.sphinx.wrapper_contact.PrivatePhoto;
-import chat.sphinx.wrapper_message.MediaKey;
-import chat.sphinx.wrapper_message.MediaKeyDecrypted;
-import chat.sphinx.wrapper_message.MediaToken;
-import chat.sphinx.wrapper_message.MediaType;
+import chat.sphinx.wrapper_message.media.MediaKey;
+import chat.sphinx.wrapper_message.media.MediaKeyDecrypted;
+import chat.sphinx.wrapper_message.media.MediaToken;
+import chat.sphinx.wrapper_message.media.MediaType;
 import chat.sphinx.wrapper_message.MessageContent;
 import chat.sphinx.wrapper_message.MessageContentDecrypted;
 import chat.sphinx.wrapper_message.MessageMUID;
@@ -269,6 +269,9 @@ WHERE id = ?;
 -- Cannot use inline classes if there are 23 or more columns
 -- https://youtrack.jetbrains.com/issue/KT-45084
 -- https://github.com/cashapp/sqldelight/issues/2266
+--
+-- Because of this, the messageMediaDbo table exists as an extension
+-- where the messageID is utilized as the primary key.
 CREATE TABLE messageDbo(
     id                          INTEGER         AS MessageId NOT NULL PRIMARY KEY,
     uuid                        TEXT            AS MessageUUID,
@@ -284,10 +287,6 @@ CREATE TABLE messageDbo(
     message_content             TEXT            AS MessageContent,
     message_content_decrypted   TEXT            AS MessageContentDecrypted,
     status                      INTEGER         AS MessageStatus NOT NULL,
-    media_key                   TEXT            AS MediaKey,
-    media_key_decrypted         TEXT            AS MediaKeyDecrypted,
-    media_type                  TEXT            AS MediaType,
-    media_token                 TEXT            AS MediaToken,
     seen                        INTEGER         AS Seen NOT NULL,
     sender_alias                TEXT            AS SenderAlias,
     sender_pic                  TEXT            AS PhotoUrl,
@@ -329,11 +328,6 @@ UPDATE messageDbo
 SET message_content_decrypted = :message_content_decrypted
 WHERE id = ?;
 
-messageUpdateMediaKeyDecrypted:
-UPDATE messageDbo
-SET media_key_decrypted = :media_key_decrypted
-WHERE id = ?;
-
 -- If the message exists in the DB, it will update all fields _except_
 -- for message_content_decrypted as to not overwrite it.
 messageUpsert {
@@ -350,9 +344,6 @@ messageUpsert {
         expiration_date = :expiration_date,
         message_content = :message_content,
         status = :status,
-        media_key = :media_key,
-        media_type = :media_type,
-        media_token = :media_token,
         seen = :seen,
         sender_alias = :sender_alias,
         sender_pic = :sender_pic,
@@ -375,10 +366,6 @@ messageUpsert {
         message_content,
         message_content_decrypted,
         status,
-        media_key,
-        media_key_decrypted,
-        media_type,
-        media_token,
         seen,
         sender_alias,
         sender_pic,
@@ -400,10 +387,6 @@ messageUpsert {
         :message_content,
         :message_content_decrypted,
         :status,
-        :media_key,
-        :media_key_decrypted,
-        :media_type,
-        :media_token,
         :seen,
         :sender_alias,
         :sender_pic,
@@ -418,4 +401,56 @@ WHERE id = ?;
 
 messageDeleteByChatId:
 DELETE FROM messageDbo
+WHERE chat_id = ?;
+
+CREATE TABLE messageMediaDbo(
+    id                          INTEGER         AS MessageId NOT NULL PRIMARY KEY,
+    chat_id                     INTEGER         AS ChatId NOT NULL,
+    media_key                   TEXT            AS MediaKey,
+    media_key_decrypted         TEXT            AS MediaKeyDecrypted,
+    media_type                  TEXT            AS MediaType NOT NULL,
+    media_token                 TEXT            AS MediaToken NOT NULL
+);
+
+messageMediaGetById:
+SELECT *
+FROM messageMediaDbo
+WHERE id = ?;
+
+messageMediaUpdateMediaKeyDecrypted:
+UPDATE messageMediaDbo
+SET media_key_decrypted = :media_key_decrypted
+WHERE id = ?;
+
+messageMediaUpsert {
+    UPDATE messageMediaDbo
+    SET media_key = :media_key,
+        media_type = :media_type,
+        media_token = :media_token
+    WHERE id = :id;
+
+    INSERT OR IGNORE INTO messageMediaDbo(
+        id,
+        chat_id,
+        media_key,
+        media_key_decrypted,
+        media_type,
+        media_token
+    )
+    VALUES(
+        :id,
+        :chat_id,
+        :media_key,
+        :media_key_decrypted,
+        :media_type,
+        :media_token
+    );
+}
+
+messageMediaDeleteById:
+DELETE FROM messageMediaDbo
+WHERE id = ?;
+
+messageMediaDeleteByChatId:
+DELETE FROM messageMediaDbo
 WHERE chat_id = ?;

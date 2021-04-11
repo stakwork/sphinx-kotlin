@@ -75,10 +75,6 @@ internal class MessageDtoDboMapper(
             message_content_decrypted = decryptedContent?.toMessageContentDecrypted(),
 
             status = value.status.toMessageStatus(),
-            media_key = value.media_key?.toMediaKey(),
-            media_key_decrypted = value.mediaKeyDecrypted?.toMediaKeyDecrypted(),
-            media_type = value.media_type?.toMediaType(),
-            media_token = value.media_token?.toMediaToken(),
             seen = value.seen.toSeen(),
             sender_alias = value.sender_alias?.toSenderAlias(),
             sender_pic = value.sender_pic?.toPhotoUrl(),

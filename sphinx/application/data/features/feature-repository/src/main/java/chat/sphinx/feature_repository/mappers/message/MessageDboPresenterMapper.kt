@@ -27,9 +27,6 @@ internal class MessageDboPresenterMapper(
             expirationDate = value.expiration_date,
             messageContent = value.message_content,
             status = value.status,
-            mediaKey = value.media_key,
-            mediaType = value.media_type,
-            mediaToken = value.media_token,
             seen = value.seen,
             senderAlias = value.sender_alias,
             senderPic = value.sender_pic,
@@ -56,10 +53,6 @@ internal class MessageDboPresenterMapper(
 
                 message.setMessageContentDecrypted(decrypted)
             }
-
-            value.media_key_decrypted?.let { decrypted ->
-                message.setMediaKeyDecrypted(decrypted)
-            }
         }
     }
 
@@ -79,10 +72,6 @@ internal class MessageDboPresenterMapper(
             message_content = value.messageContent,
             message_content_decrypted = value.messageContentDecrypted,
             status = value.status,
-            media_key = value.mediaKey,
-            media_key_decrypted = value.mediaKeyDecrypted,
-            media_type = value.mediaType,
-            media_token = value.mediaToken,
             seen = value.seen,
             sender_alias = value.senderAlias,
             sender_pic = value.senderPic,

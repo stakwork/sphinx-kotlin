@@ -49,7 +49,7 @@ sealed class DashboardChat {
                 message == null -> {
                     ""
                 }
-                message.decryptionError -> {
+                message.messageDecryptionError -> {
                     DECRYPTION_ERROR
                 }
                 message.type.isMessage() -> {

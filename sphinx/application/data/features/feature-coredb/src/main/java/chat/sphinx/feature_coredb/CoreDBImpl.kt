@@ -5,6 +5,7 @@ import chat.sphinx.concept_coredb.SphinxDatabase
 import chat.sphinx.conceptcoredb.ChatDbo
 import chat.sphinx.conceptcoredb.ContactDbo
 import chat.sphinx.conceptcoredb.MessageDbo
+import chat.sphinx.conceptcoredb.MessageMediaDbo
 import chat.sphinx.conceptcoredb.SphinxDatabaseQueries
 import chat.sphinx.feature_coredb.adapters.chat.*
 import chat.sphinx.feature_coredb.adapters.common.*
@@ -14,6 +15,7 @@ import chat.sphinx.feature_coredb.adapters.contact.ContactOwnerAdapter
 import chat.sphinx.feature_coredb.adapters.contact.LightningNodeAliasAdapter
 import chat.sphinx.feature_coredb.adapters.contact.LightningRouteHintAdapter
 import chat.sphinx.feature_coredb.adapters.contact.PrivatePhotoAdapter
+import chat.sphinx.feature_coredb.adapters.media.*
 import chat.sphinx.feature_coredb.adapters.message.*
 import com.squareup.moshi.Moshi
 import com.squareup.sqldelight.db.SqlDriver
@@ -74,31 +76,6 @@ abstract class CoreDBImpl(private val moshi: Moshi): CoreDB() {
                     pending_contact_idsAdapter = ContactIdsAdapter.getInstance(),
                     latest_message_idAdapter = MessageIdAdapter.getInstance(),
                 ),
-                messageDboAdapter = MessageDbo.Adapter(
-                    idAdapter = MessageIdAdapter.getInstance(),
-                    uuidAdapter = MessageUUIDAdapter(),
-                    chat_idAdapter = ChatIdAdapter.getInstance(),
-                    typeAdapter = MessageTypeAdapter(),
-                    senderAdapter = ContactIdAdapter.getInstance(),
-                    receiverAdapter = ContactIdAdapter.getInstance(),
-                    amountAdapter = SatAdapter.getInstance(),
-                    payment_hashAdapter = LightningPaymentHashAdapter.getInstance(),
-                    payment_requestAdapter = LightningPaymentRequestAdapter.getInstance(),
-                    dateAdapter = DateTimeAdapter.getInstance(),
-                    expiration_dateAdapter = DateTimeAdapter.getInstance(),
-                    message_contentAdapter = MessageContentAdapter(),
-                    message_content_decryptedAdapter = MessageContentDecryptedAdapter(),
-                    statusAdapter = MessageStatusAdapter(),
-                    media_keyAdapter = MediaKeyAdapter(),
-                    media_key_decryptedAdapter = MediaKeyDecryptedAdapter(),
-                    media_typeAdapter = MediaTypeAdapter(),
-                    media_tokenAdapter = MediaTokenAdapter(),
-                    seenAdapter = SeenAdapter.getInstance(),
-                    sender_aliasAdapter = SenderAliasAdapter(),
-                    sender_picAdapter = PhotoUrlAdapter.getInstance(),
-                    original_muidAdapter = MessageMUIDAdapter(),
-                    reply_uuidAdapter = ReplyUUIDAdapter(),
-                ),
                 contactDboAdapter = ContactDbo.Adapter(
                     idAdapter = ContactIdAdapter.getInstance(),
                     route_hintAdapter = LightningRouteHintAdapter(),
@@ -116,6 +93,35 @@ abstract class CoreDBImpl(private val moshi: Moshi): CoreDB() {
                     notification_soundAdapter = NotificationSoundAdapter(),
                     tip_amountAdapter = SatAdapter.getInstance(),
                     invite_idAdapter = InviteIdAdapter.getInstance(),
+                ),
+                messageDboAdapter = MessageDbo.Adapter(
+                    idAdapter = MessageIdAdapter.getInstance(),
+                    uuidAdapter = MessageUUIDAdapter(),
+                    chat_idAdapter = ChatIdAdapter.getInstance(),
+                    typeAdapter = MessageTypeAdapter(),
+                    senderAdapter = ContactIdAdapter.getInstance(),
+                    receiverAdapter = ContactIdAdapter.getInstance(),
+                    amountAdapter = SatAdapter.getInstance(),
+                    payment_hashAdapter = LightningPaymentHashAdapter.getInstance(),
+                    payment_requestAdapter = LightningPaymentRequestAdapter.getInstance(),
+                    dateAdapter = DateTimeAdapter.getInstance(),
+                    expiration_dateAdapter = DateTimeAdapter.getInstance(),
+                    message_contentAdapter = MessageContentAdapter(),
+                    message_content_decryptedAdapter = MessageContentDecryptedAdapter(),
+                    statusAdapter = MessageStatusAdapter(),
+                    seenAdapter = SeenAdapter.getInstance(),
+                    sender_aliasAdapter = SenderAliasAdapter(),
+                    sender_picAdapter = PhotoUrlAdapter.getInstance(),
+                    original_muidAdapter = MessageMUIDAdapter(),
+                    reply_uuidAdapter = ReplyUUIDAdapter(),
+                ),
+                messageMediaDboAdapter = MessageMediaDbo.Adapter(
+                    idAdapter = MessageIdAdapter.getInstance(),
+                    chat_idAdapter = ChatIdAdapter.getInstance(),
+                    media_keyAdapter = MediaKeyAdapter(),
+                    media_key_decryptedAdapter = MediaKeyDecryptedAdapter(),
+                    media_typeAdapter = MediaTypeAdapter(),
+                    media_tokenAdapter = MediaTokenAdapter(),
                 )
             ).sphinxDatabaseQueries
         }
