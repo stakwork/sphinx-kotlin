@@ -8,21 +8,40 @@ import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.dashboard.navigation.DashboardBottomNavBarNavigator
 import chat.sphinx.dashboard.navigation.DashboardNavDrawerNavigator
 import chat.sphinx.dashboard.navigation.DashboardNavigator
+import chat.sphinx.dashboard.ui.adapter.DashboardChat
+import chat.sphinx.dashboard.ui.viewstates.ChatFilter
+import chat.sphinx.dashboard.ui.viewstates.ChatViewState
+import chat.sphinx.dashboard.ui.viewstates.ChatViewStateContainer
 import chat.sphinx.dashboard.ui.viewstates.NavDrawerViewState
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
-import chat.sphinx.wrapper_chat.Chat
-import chat.sphinx.wrapper_common.chat.ChatId
+import chat.sphinx.wrapper_chat.isConversation
+import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_message.Message
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.MotionLayoutViewModel
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.sideeffect.SideEffect
+import io.matthewnelson.concept_views.viewstate.collect
+import io.matthewnelson.concept_views.viewstate.value
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
+
+internal suspend inline fun DashboardViewModel.collectChatViewState(
+    crossinline action: suspend (value: ChatViewState) -> Unit
+): Unit =
+    chatViewStateContainer.collect { action(it) }
+
+internal val DashboardViewModel.currentChatViewState: ChatViewState
+    get() = chatViewStateContainer.value
+
+internal suspend inline fun DashboardViewModel.updateChatListFilter(filter: ChatFilter) {
+    chatViewStateContainer.updateDashboardChats(null, filter)
+}
 
 @HiltViewModel
 internal class DashboardViewModel @Inject constructor(
@@ -41,24 +60,41 @@ internal class DashboardViewModel @Inject constructor(
         NavDrawerViewState
         >(NavDrawerViewState.Closed)
 {
-    private val _chatsStateFlow: MutableStateFlow<List<Chat>> by lazy {
-        MutableStateFlow(emptyList())
-    }
 
-    val chatsStateFlow: StateFlow<List<Chat>>
-        get() = _chatsStateFlow.asStateFlow()
+    val chatViewStateContainer: ChatViewStateContainer by lazy {
+        ChatViewStateContainer(dispatchers)
+    }
 
     init {
         viewModelScope.launch(dispatchers.mainImmediate) {
             chatRepository.getChats().distinctUntilChanged().collect { chats ->
-                // TODO: Sort chats by latest message
-                _chatsStateFlow.value = chats
+                val newList = ArrayList<DashboardChat>(chats.size)
+
+                withContext(dispatchers.default) {
+                    for (chat in chats) {
+                        val message: Message? = chat.latestMessageId?.let {
+                            messageRepository.getMessageById(it).firstOrNull()
+                        }
+
+                        if (chat.type.isConversation()) {
+                            // TODO: Replace direct calls with local contactStateFlow
+                            val contact: Contact = contactRepository.getContactById(
+                                chat.contactIds.lastOrNull() ?: continue
+                            ).firstOrNull() ?: continue
+
+                            newList.add(DashboardChat.Active.Conversation(
+                                chat, message, contact
+                            ))
+                        } else {
+                            newList.add(DashboardChat.Active.GroupOrTribe(chat, message))
+                        }
+                    }
+                }
+
+                chatViewStateContainer.updateDashboardChats(newList)
             }
         }
     }
-
-    suspend fun getLatestMessageForChat(chatId: ChatId): Flow<Message?> =
-        messageRepository.getLatestMessageForChat(chatId)
 
     private val _networkStateFlow: MutableStateFlow<LoadResponse<Boolean, ResponseError>> by lazy {
         MutableStateFlow(LoadResponse.Loading)

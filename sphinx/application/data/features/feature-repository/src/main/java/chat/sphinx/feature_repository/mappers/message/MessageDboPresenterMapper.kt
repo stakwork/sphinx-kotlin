@@ -1,13 +1,16 @@
 package chat.sphinx.feature_repository.mappers.message
 
 import chat.sphinx.conceptcoredb.MessageDbo
-import chat.sphinx.feature_repository.SphinxRepository
 import chat.sphinx.feature_repository.mappers.ClassMapper
-import chat.sphinx.wrapper_message.Message
+import chat.sphinx.wrapper_message.*
+import com.squareup.moshi.Moshi
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
+import io.matthewnelson.crypto_common.extensions.decodeToString
+import okio.base64.decodeBase64ToArray
 
 internal class MessageDboPresenterMapper(
-    dispatchers: CoroutineDispatchers
+    dispatchers: CoroutineDispatchers,
+    private val moshi: Moshi,
 ): ClassMapper<MessageDbo, Message>(dispatchers) {
     override suspend fun mapFrom(value: MessageDbo): Message {
         return Message(
@@ -24,10 +27,6 @@ internal class MessageDboPresenterMapper(
             expirationDate = value.expiration_date,
             messageContent = value.message_content,
             status = value.status,
-            statusMap = value.status_map?.toMap(),
-            mediaKey = value.media_key,
-            mediaType = value.media_type,
-            mediaToken = value.media_token,
             seen = value.seen,
             senderAlias = value.sender_alias,
             senderPic = value.sender_pic,
@@ -35,6 +34,23 @@ internal class MessageDboPresenterMapper(
             replyUUID = value.reply_uuid
         ).also { message ->
             value.message_content_decrypted?.let { decrypted ->
+                if (message.type.isBoost()) {
+                    decrypted.value.toPodBoostOrNull(moshi)?.let { boost ->
+                        message.setPodBoost(boost)
+                    }
+                }
+
+                if (message.type.isMessage() && decrypted.value.contains("giphy::")) {
+                    decrypted.value.split("::")
+                        .elementAtOrNull(1)
+                        ?.decodeBase64ToArray()
+                        ?.decodeToString()
+                        ?.toGiphyDataOrNull(moshi)
+                        ?.let { giphy ->
+                            message.setGiphyData(giphy)
+                        }
+                }
+
                 message.setMessageContentDecrypted(decrypted)
             }
         }
@@ -56,10 +72,6 @@ internal class MessageDboPresenterMapper(
             message_content = value.messageContent,
             message_content_decrypted = value.messageContentDecrypted,
             status = value.status,
-            status_map = value.statusMap?.toList(),
-            media_key = value.mediaKey,
-            media_type = value.mediaType,
-            media_token = value.mediaToken,
             seen = value.seen,
             sender_alias = value.senderAlias,
             sender_pic = value.senderPic,

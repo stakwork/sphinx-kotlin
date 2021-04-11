@@ -9,16 +9,18 @@ import chat.sphinx.kotlin_response.message
 import chat.sphinx.test_network_query.NetworkQueryTestHelper
 import chat.sphinx.wrapper_common.message.MessagePagination
 import chat.sphinx.wrapper_rsa.*
-import io.matthewnelson.k_openssl_common.annotations.UnencryptedDataAccess
-import io.matthewnelson.k_openssl_common.clazzes.EncryptedString
-import io.matthewnelson.k_openssl_common.clazzes.UnencryptedByteArray
-import io.matthewnelson.k_openssl_common.clazzes.UnencryptedString
-import io.matthewnelson.k_openssl_common.clazzes.toUnencryptedString
+import io.matthewnelson.crypto_common.annotations.RawPasswordAccess
+import io.matthewnelson.crypto_common.annotations.UnencryptedDataAccess
+import io.matthewnelson.crypto_common.clazzes.EncryptedString
+import io.matthewnelson.crypto_common.clazzes.UnencryptedByteArray
+import io.matthewnelson.crypto_common.clazzes.UnencryptedString
+import io.matthewnelson.crypto_common.clazzes.toUnencryptedString
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Assert
 import org.junit.Test
 
+@RawPasswordAccess
 @OptIn(UnencryptedDataAccess::class)
 class RSAImplUnitTest: NetworkQueryTestHelper() {
 
@@ -54,7 +56,7 @@ class RSAImplUnitTest: NetworkQueryTestHelper() {
     }
 
     private val rsa: RSA by lazy {
-        RSAImpl()
+        RSAImpl(RSAAlgorithm.RSA)
     }
 
     @Throws(AssertionError::class)
@@ -209,6 +211,36 @@ class RSAImplUnitTest: NetworkQueryTestHelper() {
         testDispatcher.runBlockingTest {
             generateKeys(KeySize._1024, PKCSType.PKCS1)
             generateKeys(KeySize._1024, PKCSType.PKCS8)
+        }
+
+    @Test
+    fun `message decryption from linux client success`() =
+        testDispatcher.runBlockingTest {
+            getCredentials()?.let {
+
+                fun printError() {
+                    println("\n\n***********************************************")
+                    println("      SPHINX_CHAT_LINUX_CLIENT_ENCRYPTED")
+                    println("                  and/or")
+                    println("      SPHINX_CHAT_LINUX_CLIENT_DECRYPTED\n")
+                    println("    System environment variables are not set\n")
+                    println("             Tests were run!!!")
+                    println("***********************************************\n\n")
+                }
+
+                System.getenv("SPHINX_CHAT_LINUX_CLIENT_ENCRYPTED")?.let { encryptedMessage ->
+                    System.getenv("SPHINX_CHAT_LINUX_CLIENT_DECRYPTED")?.let { expected ->
+                        decrypt(
+                            RsaPrivateKey(testCoreManager.getEncryptionKey()!!.privateKey.value),
+                            EncryptedString(encryptedMessage)
+                        ).let { unencryptedByteArray ->
+                            val decryptedString = unencryptedByteArray.toUnencryptedString().value
+//                            println(decryptedString)
+                            Assert.assertEquals(expected, decryptedString)
+                        }
+                    } ?: printError()
+                } ?: printError()
+            }
         }
 
     @Test

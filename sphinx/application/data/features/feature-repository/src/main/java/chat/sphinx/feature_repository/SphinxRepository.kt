@@ -5,6 +5,7 @@ import chat.sphinx.concept_coredb.CoreDB
 import chat.sphinx.concept_coredb.util.upsertChat
 import chat.sphinx.concept_coredb.util.upsertContact
 import chat.sphinx.concept_coredb.util.upsertMessage
+import chat.sphinx.concept_coredb.util.upsertMessageMedia
 import chat.sphinx.concept_crypto_rsa.RSA
 import chat.sphinx.wrapper_rsa.RsaPrivateKey
 import chat.sphinx.concept_repository_chat.ChatRepository
@@ -15,18 +16,17 @@ import chat.sphinx.concept_network_query_contact.NetworkQueryContact
 import chat.sphinx.concept_network_query_message.NetworkQueryMessage
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.conceptcoredb.MessageDbo
+import chat.sphinx.conceptcoredb.MessageMediaDbo
 import chat.sphinx.conceptcoredb.SphinxDatabaseQueries
 import chat.sphinx.feature_repository.mappers.chat.ChatDboPresenterMapper
 import chat.sphinx.feature_repository.mappers.chat.ChatDtoDboMapper
 import chat.sphinx.feature_repository.mappers.contact.ContactDboPresenterMapper
 import chat.sphinx.feature_repository.mappers.contact.ContactDtoDboMapper
 import chat.sphinx.feature_repository.mappers.mapListFrom
-import chat.sphinx.kotlin_response.Response
-import chat.sphinx.kotlin_response.LoadResponse
-import chat.sphinx.kotlin_response.ResponseError
+import chat.sphinx.feature_repository.mappers.media.MessageDtoMediaDboMapper
 import chat.sphinx.feature_repository.mappers.message.MessageDboPresenterMapper
 import chat.sphinx.feature_repository.mappers.message.MessageDtoDboMapper
-import chat.sphinx.kotlin_response.exception
+import chat.sphinx.kotlin_response.*
 import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.logger.d
 import chat.sphinx.logger.e
@@ -39,20 +39,20 @@ import chat.sphinx.wrapper_common.message.MessagePagination
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_contact.isTrue
 import chat.sphinx.wrapper_contact.toContactFromGroup
-import chat.sphinx.wrapper_message.Message
-import chat.sphinx.wrapper_message.MessageContent
-import chat.sphinx.wrapper_message.MessageContentDecrypted
-import chat.sphinx.wrapper_message.MessageType
+import chat.sphinx.wrapper_message.*
+import chat.sphinx.wrapper_message.media.MediaKeyDecrypted
+import chat.sphinx.wrapper_message.media.MessageMedia
+import com.squareup.moshi.Moshi
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
 import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.feature_authentication_core.AuthenticationCoreManager
-import io.matthewnelson.k_openssl_common.annotations.RawPasswordAccess
-import io.matthewnelson.k_openssl_common.annotations.UnencryptedDataAccess
-import io.matthewnelson.k_openssl_common.clazzes.EncryptedString
-import io.matthewnelson.k_openssl_common.clazzes.UnencryptedByteArray
-import io.matthewnelson.k_openssl_common.clazzes.toUnencryptedString
+import io.matthewnelson.crypto_common.annotations.RawPasswordAccess
+import io.matthewnelson.crypto_common.annotations.UnencryptedDataAccess
+import io.matthewnelson.crypto_common.clazzes.EncryptedString
+import io.matthewnelson.crypto_common.clazzes.UnencryptedByteArray
+import io.matthewnelson.crypto_common.clazzes.toUnencryptedString
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.sync.Mutex
@@ -63,6 +63,7 @@ class SphinxRepository(
     private val authenticationCoreManager: AuthenticationCoreManager,
     private val coreDB: CoreDB,
     private val dispatchers: CoroutineDispatchers,
+    private val moshi: Moshi,
     private val networkQueryChat: NetworkQueryChat,
     private val networkQueryContact: NetworkQueryContact,
     private val networkQueryMessage: NetworkQueryMessage,
@@ -79,21 +80,21 @@ class SphinxRepository(
     /////////////
     private val chatLock = Mutex()
     private val chatDtoDboMapper: ChatDtoDboMapper by lazy {
-        ChatDtoDboMapper(dispatchers)
+        ChatDtoDboMapper(dispatchers, moshi)
     }
     private val chatDboPresenterMapper: ChatDboPresenterMapper by lazy {
         ChatDboPresenterMapper(dispatchers)
     }
 
     override suspend fun getChats(): Flow<List<Chat>> {
-        return coreDB.getSphinxDatabaseQueries().getAllChats()
+        return coreDB.getSphinxDatabaseQueries().chatGetAll()
             .asFlow()
             .mapToList(dispatchers.io)
             .map { chatDboPresenterMapper.mapListFrom(it) }
     }
 
     override suspend fun getChatById(chatId: ChatId): Flow<Chat?> {
-        return coreDB.getSphinxDatabaseQueries().getChatById(chatId)
+        return coreDB.getSphinxDatabaseQueries().chatGetById(chatId)
             .asFlow()
             .mapToOneOrNull(dispatchers.io)
             .map { it?.let { chatDboPresenterMapper.mapFrom(it) } }
@@ -101,7 +102,7 @@ class SphinxRepository(
     }
 
     override suspend fun getChatByUUID(chatUUID: ChatUUID): Flow<Chat?> {
-        return coreDB.getSphinxDatabaseQueries().getChatByUUID(chatUUID)
+        return coreDB.getSphinxDatabaseQueries().chatGetByUUID(chatUUID)
             .asFlow()
             .mapToOneOrNull(dispatchers.io)
             .map { it?.let { chatDboPresenterMapper.mapFrom(it) } }
@@ -138,7 +139,7 @@ class SphinxRepository(
             chatLock.withLock {
                 withContext(dispatchers.io) {
 
-                    val chatIdsToRemove = queries.getAllChatIds()
+                    val chatIdsToRemove = queries.chatGetAllIds()
                         .executeAsList()
                         .toMutableSet()
 
@@ -154,8 +155,9 @@ class SphinxRepository(
                             // remove remaining chat's from DB
                             chatIdsToRemove.forEach { chatId ->
                                 LOG.d(TAG, "Removing Chats/Messages - chatId")
-                                queries.deleteChatById(chatId)
-                                queries.deleteMessagesByChatId(chatId)
+                                queries.chatDeleteById(chatId)
+                                queries.messageDeleteByChatId(chatId)
+                                queries.messageMediaDeleteByChatId(chatId)
                             }
 
                         }
@@ -192,14 +194,14 @@ class SphinxRepository(
     }
 
     override suspend fun getContacts(): Flow<List<Contact>> {
-        return coreDB.getSphinxDatabaseQueries().getContacts()
+        return coreDB.getSphinxDatabaseQueries().contactGetAll()
             .asFlow()
             .mapToList(dispatchers.io)
             .map { contactDboPresenterMapper.mapListFrom(it) }
     }
 
     override suspend fun getContactById(contactId: ContactId): Flow<Contact?> {
-        return coreDB.getSphinxDatabaseQueries().getContactById(contactId)
+        return coreDB.getSphinxDatabaseQueries().contactGetById(contactId)
             .asFlow()
             .mapToOneOrNull(dispatchers.io)
             .map { it?.let { contactDboPresenterMapper.mapFrom(it) } }
@@ -207,7 +209,7 @@ class SphinxRepository(
     }
 
     override suspend fun getOwner(): Flow<Contact?> {
-        return coreDB.getSphinxDatabaseQueries().getContactOwner()
+        return coreDB.getSphinxDatabaseQueries().contactGetOwner()
             .asFlow()
             .mapToOneOrNull(dispatchers.io)
             .map { it?.let { contactDboPresenterMapper.mapFrom(it) } }
@@ -235,7 +237,7 @@ class SphinxRepository(
                         contactLock.withLock {
                             withContext(dispatchers.io) {
 
-                                val contactIdsToRemove = queries.getAllContactIds()
+                                val contactIdsToRemove = queries.contactGetAllIds()
                                     .executeAsList()
                                     .toMutableSet()
 
@@ -247,7 +249,7 @@ class SphinxRepository(
                                     }
 
                                     for (id in contactIdsToRemove) {
-                                        queries.deleteContact(id)
+                                        queries.contactDeleteById(id)
                                     }
                                 }
 
@@ -282,7 +284,10 @@ class SphinxRepository(
         MessageDtoDboMapper(dispatchers)
     }
     private val messageDboPresenterMapper: MessageDboPresenterMapper by lazy {
-        MessageDboPresenterMapper(dispatchers)
+        MessageDboPresenterMapper(dispatchers, moshi)
+    }
+    private val messageDtoMediaDboMapper: MessageDtoMediaDboMapper by lazy {
+        MessageDtoMediaDboMapper(dispatchers)
     }
 
     @OptIn(RawPasswordAccess::class)
@@ -309,7 +314,8 @@ class SphinxRepository(
         messageDbo: MessageDbo
     ): Message {
 
-        return messageDbo.message_content?.let { messageContent ->
+        // TODO: add checking for mediaKey/mediaKeyDecrypted
+        val message: Message = messageDbo.message_content?.let { messageContent ->
 
             if (
                 messageDbo.type !is MessageType.KeySend &&
@@ -317,31 +323,72 @@ class SphinxRepository(
             ) {
 
                 val response = decryptMessageContent(messageContent)
-                val message = messageDboPresenterMapper.mapFrom(messageDbo)
 
                 @Exhaustive
                 when (response) {
                     is Response.Error -> {
-                        message.setDecryptionError(response.exception)
-                        message
+                        messageDboPresenterMapper.mapFrom(messageDbo).let { message ->
+                            message.setDecryptionError(response.exception)
+                            message
+                        }
                     }
                     is Response.Success -> {
 
-                        val decrypted = MessageContentDecrypted(
-                            response.value.toUnencryptedString().value
+                        var type: MessageType? = null
+                        val decryptedContent = MessageContentDecrypted(
+                            response.value.toUnencryptedString().value.let { decrypted ->
+                                if (decrypted.contains("boost::{\"feedID\":")) {
+                                    type = MessageType.Boost
+                                    decrypted.split("::")[1]
+                                } else {
+                                    decrypted
+                                }
+                            }
                         )
+
+                        val dboUpdate: MessageDbo? = type?.let { nnType ->
+                            MessageDbo(
+                                messageDbo.id,
+                                messageDbo.uuid,
+                                messageDbo.chat_id,
+                                nnType,
+                                messageDbo.sender,
+                                messageDbo.receiver,
+                                messageDbo.amount,
+                                messageDbo.payment_hash,
+                                messageDbo.payment_request,
+                                messageDbo.date,
+                                messageDbo.expiration_date,
+                                messageDbo.message_content,
+                                decryptedContent,
+                                messageDbo.status,
+                                messageDbo.seen,
+                                messageDbo.sender_alias,
+                                messageDbo.sender_pic,
+                                messageDbo.original_muid,
+                                messageDbo.reply_uuid,
+                            )
+                        }
 
                         messageLock.withLock {
                             withContext(dispatchers.io) {
-                                queries.updateMessageContentDecrypted(
-                                    decrypted,
-                                    messageDbo.id
-                                )
+                                queries.transaction {
+                                    queries.messageUpdateContentDecrypted(
+                                        decryptedContent,
+                                        messageDbo.id
+                                    )
+
+                                    dboUpdate?.let {
+                                        queries.upsertMessage(it)
+                                    }
+                                }
                             }
                         }
 
-                        message.setMessageContentDecrypted(decrypted)
-                        message
+                        dboUpdate?.let {
+                            messageDboPresenterMapper.mapFrom(it)
+                        } ?: messageDboPresenterMapper.mapFrom(messageDbo)
+                            .setMessageContentDecrypted(decryptedContent)
                     }
                 }
 
@@ -352,11 +399,98 @@ class SphinxRepository(
             }
 
         } ?: messageDboPresenterMapper.mapFrom(messageDbo)
+
+        if (message.type.canContainMedia) {
+            withContext(dispatchers.io) {
+                queries.messageMediaGetById(message.id).executeAsOneOrNull()
+            }?.let { mediaDbo ->
+
+                mediaDbo.media_key?.let { key ->
+
+                    mediaDbo.media_key_decrypted.let { decrypted ->
+
+                        if (decrypted == null) {
+                            val response = decryptMessageContent(MessageContent(key.value))
+
+                            @Exhaustive
+                            when (response) {
+                                is Response.Error -> {
+                                    MessageMedia(
+                                        mediaDbo.media_key,
+                                        null,
+                                        mediaDbo.media_type,
+                                        mediaDbo.media_token
+                                    ).also {
+                                        it.setDecryptionError(response.exception)
+                                        message.setMessageMedia(it)
+                                    }
+                                }
+                                is Response.Success -> {
+                                    val decryptedKey = MediaKeyDecrypted(
+                                        response.value.toUnencryptedString().value
+                                    )
+
+                                    messageLock.withLock {
+                                        withContext(dispatchers.io) {
+                                            queries.messageMediaUpdateMediaKeyDecrypted(
+                                                decrypted,
+                                                mediaDbo.id
+                                            )
+                                        }
+                                    }
+
+                                    message.setMessageMedia(
+                                        MessageMedia(
+                                            mediaDbo.media_key,
+                                            decryptedKey,
+                                            mediaDbo.media_type,
+                                            mediaDbo.media_token
+                                        )
+                                    )
+                                }
+                            }
+                        } else {
+                            message.setMessageMedia(
+                                MessageMedia(
+                                    mediaDbo.media_key,
+                                    decrypted,
+                                    mediaDbo.media_type,
+                                    mediaDbo.media_token
+                                )
+                            )
+                        }
+
+                    }
+
+                } ?: message.setMessageMedia(
+                    MessageMedia(
+                        mediaDbo.media_key,
+                        mediaDbo.media_key_decrypted,
+                        mediaDbo.media_type,
+                        mediaDbo.media_token
+                    )
+                )
+
+            } // else do nothing
+        }
+
+        return message
+    }
+
+    override suspend fun getMessageById(messageId: MessageId): Flow<Message?> {
+        val queries = coreDB.getSphinxDatabaseQueries()
+        return queries.messageGetById(messageId)
+            .asFlow()
+            .mapToOneOrNull(dispatchers.io)
+            .map { it?.let { messageDbo ->
+                mapMessageDboAndDecryptContentIfNeeded(queries, messageDbo)
+            }}
+            .distinctUntilChanged()
     }
 
     override suspend fun getLatestMessageForChat(chatId: ChatId): Flow<Message?> {
         val queries = coreDB.getSphinxDatabaseQueries()
-        return queries.getLatestMessageToShowByChatId(chatId)
+        return queries.messageGetLatestToShowByChatId(chatId)
             .asFlow()
             .mapToOneOrNull(dispatchers.io)
             .map { it?.let { messageDbo ->
@@ -398,7 +532,13 @@ class SphinxRepository(
         emit(LoadResponse.Loading)
         val queries = coreDB.getSphinxDatabaseQueries()
         var lastMessageId: Long = withContext(dispatchers.io) {
-            queries.getLatestMessageId().executeAsOneOrNull()?.value ?: 0
+            queries.messageGetLatestId().executeAsOneOrNull()?.value?.let {
+                if (it >= 1) {
+                    it - 1
+                } else {
+                    0
+                }
+            } ?: 0
         }
 
         val supervisor = SupervisorJob(currentCoroutineContext().job)
@@ -422,82 +562,137 @@ class SphinxRepository(
                         val newMessages = response.value.new_messages
 
                         if (newMessages.isNotEmpty()) {
-                            val decryptMap: MutableMap<MessageId, String> = mutableMapOf()
+
+                            val jobList = ArrayList<Job>(newMessages.size * 2)
 
                             for (message in newMessages) {
+
                                 message.message_content?.let { content ->
+
                                     if (content.isNotEmpty() && message.type != MessageType.KEY_SEND) {
-                                        decryptMap[MessageId(message.id)] = content
+
+                                        scope.launch(dispatchers.mainImmediate) {
+                                            val decrypted = decryptMessageContent(
+                                                MessageContent(content)
+                                            )
+
+                                            @Exhaustive
+                                            when (decrypted) {
+                                                is Response.Error -> {
+                                                    // Only log it if there is an exception
+                                                    decrypted.exception?.let { nnE ->
+                                                        LOG.e(
+                                                            TAG,
+                                                            """
+                                                                ${decrypted.message}
+                                                                MessageId: ${message.id}
+                                                                MessageContent: ${message.message_content}
+                                                            """.trimIndent(),
+                                                            nnE
+                                                        )
+                                                    }
+                                                }
+                                                is Response.Success -> {
+                                                    message.setMessageContentDecrypted(
+                                                        decrypted.value.toUnencryptedString().value
+                                                    )
+                                                }
+                                            }
+                                        }.let { job ->
+                                            jobList.add(job)
+                                        }
+
+                                    }
+
+                                }
+
+                                message.media_key?.let { mediaKey ->
+
+                                    if (mediaKey.isNotEmpty()) {
+
+                                        scope.launch(dispatchers.mainImmediate) {
+
+                                            val decrypted = decryptMessageContent(
+                                                MessageContent(mediaKey)
+                                            )
+
+                                            @Exhaustive
+                                            when (decrypted) {
+                                                is Response.Error -> {
+                                                    // Only log it if there is an exception
+                                                    decrypted.exception?.let { nnE ->
+                                                        LOG.e(
+                                                            TAG,
+                                                            """
+                                                                ${decrypted.message}
+                                                                MessageId: ${message.id}
+                                                                MediaKey: ${message.media_key}
+                                                            """.trimIndent(),
+                                                            nnE
+                                                        )
+                                                    }
+                                                }
+                                                is Response.Success -> {
+                                                    message.setMediaKeyDecrypted(
+                                                        decrypted.value.toUnencryptedString().value
+                                                    )
+                                                }
+                                            }
+
+                                        }.let { job ->
+                                            jobList.add(job)
+                                        }
+
                                     }
                                 }
                             }
 
-                            // TODO: Move out to separate class to encapsulate
-                            val decryptMapCounterLock = Mutex()
-                            var counter = decryptMap.size
-
-                            for (key in decryptMap.keys) {
-                                scope.launch decrypt@ {
-                                    val content: String = decryptMapCounterLock.withLock {
-                                        decryptMap[key] ?: let {
-                                            counter--
-                                            return@decrypt
-                                        }
-                                    }
-
-                                    val decrypted = decryptMessageContent(MessageContent(content))
-
-                                    decryptMapCounterLock.withLock {
-                                        @Exhaustive
-                                        when (decrypted) {
-                                            is Response.Error -> {
-                                                decryptMap.remove(key)
-                                                counter--
-                                            }
-                                            is Response.Success -> {
-                                                decryptMap[key] =
-                                                    decrypted.value.toUnencryptedString().value
-                                                counter--
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-
+                            var count = 0
                             while (currentCoroutineContext().isActive) {
-                                delay(100L)
-                                if (decryptMapCounterLock.withLock { counter } <= 1) {
-                                    break
-                                }
+                                jobList.elementAtOrNull(count)?.join() ?: break
+                                count++
                             }
 
-                            for (message in newMessages) {
-                                decryptMap[MessageId(message.id)]?.let { decrypted ->
-                                    message.setMessageContentDecrypted(decrypted)
-                                }
-                            }
-
-                            val dbos = messageDtoDboMapper.mapListFrom(newMessages)
+                            val messageDbos: List<MessageDbo> =
+                                messageDtoDboMapper.mapListFrom(newMessages)
+                            val mediaDbos: List<MessageMediaDbo?> =
+                                messageDtoMediaDboMapper.mapListFrom(newMessages)
 
                             chatLock.withLock {
                                 messageLock.withLock {
                                     withContext(dispatchers.io) {
 
                                         queries.transaction {
-                                            val chatIds = queries.getAllChatIds().executeAsList()
+                                            val chatIds = queries.chatGetAllIds().executeAsList()
                                             LOG.d(
                                                 TAG,
                                                 "Inserting Messages -" +
-                                                        " ${dbos.firstOrNull()?.id?.value}" +
-                                                        " - ${dbos.lastOrNull()?.id?.value}"
+                                                        " ${messageDbos.firstOrNull()?.id?.value}" +
+                                                        " - ${messageDbos.lastOrNull()?.id?.value}"
                                             )
 
-                                            for (dbo in dbos) {
+                                            val latestMessageMap = mutableMapOf<ChatId, MessageId>()
+
+                                            for (dbo in messageDbos) {
                                                 if (dbo.chat_id.value == MessageDtoDboMapper.NULL_CHAT_ID.toLong()) {
                                                     queries.upsertMessage(dbo)
                                                 } else if (chatIds.contains(dbo.chat_id)) {
                                                     queries.upsertMessage(dbo)
+
+                                                    if (dbo.type.show && !dbo.type.isBotRes()) {
+                                                        latestMessageMap[dbo.chat_id] = dbo.id
+                                                    }
                                                 }
+                                            }
+
+                                            for (dbo in mediaDbos) {
+                                                if (dbo != null) {
+                                                    queries.upsertMessageMedia(dbo)
+                                                }
+                                            }
+
+                                            for (entry in latestMessageMap.entries) {
+                                                queries.chatUpdateLatestMessage(entry.value, entry.key)
                                             }
                                         }
 
@@ -510,7 +705,7 @@ class SphinxRepository(
                         when {
                             lastMessageId == -1 -> {}
                             newMessages.size >= 199 -> {
-                                lastMessageId += 200
+                                lastMessageId += 199
                             }
                             else -> {
                                 lastMessageId = -1

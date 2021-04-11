@@ -7,9 +7,9 @@ import chat.sphinx.wrapper_rsa.RSAKeyPair
 import chat.sphinx.wrapper_rsa.RsaPrivateKey
 import chat.sphinx.wrapper_rsa.RsaPublicKey
 import chat.sphinx.wrapper_rsa.RsaSignedString
-import io.matthewnelson.k_openssl_common.clazzes.EncryptedString
-import io.matthewnelson.k_openssl_common.clazzes.UnencryptedByteArray
-import io.matthewnelson.k_openssl_common.clazzes.UnencryptedString
+import io.matthewnelson.crypto_common.clazzes.EncryptedString
+import io.matthewnelson.crypto_common.clazzes.UnencryptedByteArray
+import io.matthewnelson.crypto_common.clazzes.UnencryptedString
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 
@@ -62,12 +62,14 @@ abstract class RSA {
     abstract suspend fun sign(
         rsaPrivateKey: RsaPrivateKey,
         text: String,
+        algorithm: SignatureAlgorithm = SignatureAlgorithm.SHA256_with_RSA,
         dispatcher: CoroutineDispatcher = Dispatchers.Default
     ): Response<RsaSignedString, ResponseError>
 
     abstract suspend fun verifySignature(
         rsaPublicKey: RsaPublicKey,
         signedString: RsaSignedString,
+        algorithm: SignatureAlgorithm = SignatureAlgorithm.SHA256_with_RSA,
         dispatcher: CoroutineDispatcher = Dispatchers.Default
     ): Response<Boolean, ResponseError>
 }

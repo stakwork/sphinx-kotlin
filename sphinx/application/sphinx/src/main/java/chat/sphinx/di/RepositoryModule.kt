@@ -11,6 +11,7 @@ import chat.sphinx.database.SphinxCoreDBImpl
 import chat.sphinx.feature_coredb.CoreDBImpl
 import chat.sphinx.feature_repository.SphinxRepository
 import chat.sphinx.logger.SphinxLogger
+import com.squareup.moshi.Moshi
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -35,6 +36,7 @@ object RepositoryModule {
         authenticationCoreManager: AuthenticationCoreManager,
         coreDBImpl: CoreDBImpl,
         dispatchers: CoroutineDispatchers,
+        moshi: Moshi,
         networkQueryChat: NetworkQueryChat,
         networkQueryContact: NetworkQueryContact,
         networkQueryMessage: NetworkQueryMessage,
@@ -45,6 +47,7 @@ object RepositoryModule {
             authenticationCoreManager,
             coreDBImpl,
             dispatchers,
+            moshi,
             networkQueryChat,
             networkQueryContact,
             networkQueryMessage,

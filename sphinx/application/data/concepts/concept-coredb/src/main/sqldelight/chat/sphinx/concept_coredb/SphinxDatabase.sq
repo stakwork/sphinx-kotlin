@@ -28,9 +28,10 @@ import chat.sphinx.wrapper_contact.DeviceId;
 import chat.sphinx.wrapper_contact.NotificationSound;
 import chat.sphinx.wrapper_contact.Owner;
 import chat.sphinx.wrapper_contact.PrivatePhoto;
-import chat.sphinx.wrapper_message.MediaKey;
-import chat.sphinx.wrapper_message.MediaToken;
-import chat.sphinx.wrapper_message.MediaType;
+import chat.sphinx.wrapper_message.media.MediaKey;
+import chat.sphinx.wrapper_message.media.MediaKeyDecrypted;
+import chat.sphinx.wrapper_message.media.MediaToken;
+import chat.sphinx.wrapper_message.media.MediaType;
 import chat.sphinx.wrapper_message.MessageContent;
 import chat.sphinx.wrapper_message.MessageContentDecrypted;
 import chat.sphinx.wrapper_message.MessageMUID;
@@ -40,12 +41,11 @@ import chat.sphinx.wrapper_message.MessageUUID;
 import chat.sphinx.wrapper_message.ReplyUUID;
 import chat.sphinx.wrapper_message.SenderAlias;
 import chat.sphinx.wrapper_rsa.RsaPublicKey;
-import kotlin.Pair;
 import kotlin.collections.List;
 
 CREATE TABLE chatDbo(
     id                          INTEGER         AS ChatId NOT NULL PRIMARY KEY,
-    uuid                        TEXT            AS ChatUUID NOT NULL,
+    uuid                        TEXT            AS ChatUUID NOT NULL UNIQUE,
     name                        TEXT            AS ChatName,
     photo_url                   TEXT            AS PhotoUrl,
     type                        INTEGER         AS ChatType NOT NULL,
@@ -64,28 +64,34 @@ CREATE TABLE chatDbo(
     meta_data                   TEXT            AS ChatMetaData,
     my_photo_url                TEXT            AS PhotoUrl,
     my_alias                    TEXT            AS ChatAlias,
-    pending_contact_ids         TEXT            AS List<ContactId>
+    pending_contact_ids         TEXT            AS List<ContactId>,
+    latest_message_id           INTEGER         AS MessageId DEFAULT NULL
 );
 
-getAllChats:
+chatUpdateLatestMessage:
+UPDATE chatDbo
+SET latest_message_id = :latest_message_id
+WHERE id = ?;
+
+chatGetAll:
 SELECT *
 FROM chatDbo;
 
-getAllChatIds:
+chatGetAllIds:
 SELECT id
 FROM chatDbo;
 
-getChatById:
+chatGetById:
 SELECT *
 FROM chatDbo
 WHERE id = ?;
 
-getChatByUUID:
+chatGetByUUID:
 SELECT *
 FROM chatDbo
 WHERE uuid = ?;
 
-upsertChat {
+chatUpsert {
     UPDATE chatDbo
     SET uuid = :uuid,
         name = :name,
@@ -157,151 +163,9 @@ upsertChat {
     );
 }
 
-deleteChatById:
+chatDeleteById:
 DELETE FROM chatDbo
 WHERE id = ?;
-
-CREATE TABLE messageDbo(
-    id                          INTEGER         AS MessageId NOT NULL PRIMARY KEY,
-    uuid                        TEXT            AS MessageUUID,
-    chat_id                     INTEGER         AS ChatId NOT NULL,
-    type                        INTEGER         AS MessageType NOT NULL,
-    sender                      INTEGER         AS ContactId NOT NULL,
-    receiver                    INTEGER         AS ContactId,
-    amount                      INTEGER         AS Sat NOT NULL,
-    payment_hash                TEXT            AS LightningPaymentHash,
-    payment_request             TEXT            AS LightningPaymentRequest,
-    date                        INTEGER         AS DateTime NOT NULL,
-    expiration_date             INTEGER         AS DateTime,
-    message_content             TEXT            AS MessageContent,
-    message_content_decrypted   TEXT            AS MessageContentDecrypted,
-    status                      INTEGER         AS MessageStatus NOT NULL,
-    status_map                  TEXT            AS List<Pair<ContactId, MessageStatus>>,
-    media_key                   TEXT            AS MediaKey,
-    media_type                  TEXT            AS MediaType,
-    media_token                 TEXT            AS MediaToken,
-    seen                        INTEGER         AS Seen NOT NULL,
-    sender_alias                TEXT            AS SenderAlias,
-    sender_pic                  TEXT            AS PhotoUrl,
-    original_muid               TEXT            AS MessageMUID,
-    reply_uuid                  TEXT            AS ReplyUUID
-);
-
-getLatestMessageId:
-SELECT id
-FROM messageDbo
-ORDER BY id DESC
-LIMIT 1;
-
--- Retrieves the latest message for the given ChatID that will be shown
--- to the User. See [MessageType] for more detail
-getLatestMessageToShowByChatId:
-SELECT *
-FROM messageDbo
-WHERE chat_id = ?
-AND type = 0
-    OR type = 2
-    OR type = 3
-    OR type = 5
-    OR type = 6
-    OR type = 14
-    OR type = 15
-    OR type = 25
-    OR type = 29
-ORDER BY id DESC
-LIMIT 1;
-
-updateMessageContentDecrypted:
-UPDATE messageDbo
-SET message_content_decrypted = :message_content_decrypted
-WHERE id = :id;
-
--- If the message exists in the DB, it will update all fields _except_
--- for message_content_decrypted as to not overwrite it.
-upsertMessage {
-    UPDATE messageDbo
-    SET uuid = :uuid,
-        chat_id = :chat_id,
-        type = :type,
-        sender = :sender,
-        receiver = :receiver,
-        amount = :amount,
-        payment_hash = :payment_hash,
-        payment_request = :payment_request,
-        date = :date,
-        expiration_date = :expiration_date,
-        message_content = :message_content,
-        status = :status,
-        status_map = :status_map,
-        media_key = :media_key,
-        media_type = :media_type,
-        media_token = :media_token,
-        seen = :seen,
-        sender_alias = :sender_alias,
-        sender_pic = :sender_pic,
-        original_muid = :original_muid,
-        reply_uuid = :reply_uuid
-    WHERE id = :id;
-
-    INSERT OR IGNORE INTO messageDbo(
-        id,
-        uuid,
-        chat_id,
-        type,
-        sender,
-        receiver,
-        amount,
-        payment_hash,
-        payment_request,
-        date,
-        expiration_date,
-        message_content,
-        message_content_decrypted,
-        status,
-        status_map,
-        media_key,
-        media_type,
-        media_token,
-        seen,
-        sender_alias,
-        sender_pic,
-        original_muid,
-        reply_uuid
-    )
-    VALUES (
-        :id,
-        :uuid,
-        :chat_id,
-        :type,
-        :sender,
-        :receiver,
-        :amount,
-        :payment_hash,
-        :payment_request,
-        :date,
-        :expiration_date,
-        :message_content,
-        :message_content_decrypted,
-        :status,
-        :status_map,
-        :media_key,
-        :media_type,
-        :media_token,
-        :seen,
-        :sender_alias,
-        :sender_pic,
-        :original_muid,
-        :reply_uuid
-    );
-}
-
-deleteMessageById:
-DELETE FROM messageDbo
-WHERE id = ?;
-
-deleteMessagesByChatId:
-DELETE FROM messageDbo
-WHERE chat_id = ?;
 
 CREATE TABLE contactDbo(
     id                          INTEGER         AS ContactId NOT NULL PRIMARY KEY,
@@ -322,27 +186,27 @@ CREATE TABLE contactDbo(
     invite_id                   INTEGER         AS InviteId
 );
 
-getAllContactIds:
+contactGetAllIds:
 SELECT id
 FROM contactDbo;
 
-getContacts:
+contactGetAll:
 SELECT *
 FROM contactDbo;
 
-getContactById:
+contactGetById:
 SELECT *
 FROM contactDbo
-WHERE id = :id;
+WHERE id = ?;
 
-getContactOwner:
+contactGetOwner:
 SELECT *
 FROM contactDbo
 WHERE owner = 1
 ORDER BY id
 LIMIT 1;
 
-upsertContact {
+contactUpsert {
     UPDATE contactDbo
     SET route_hint = :route_hint,
         node_pub_key = :node_pub_key,
@@ -398,6 +262,195 @@ upsertContact {
     );
 }
 
-deleteContact:
+contactDeleteById:
 DELETE FROM contactDbo
 WHERE id = ?;
+
+-- Cannot use inline classes if there are 23 or more columns
+-- https://youtrack.jetbrains.com/issue/KT-45084
+-- https://github.com/cashapp/sqldelight/issues/2266
+--
+-- Because of this, the messageMediaDbo table exists as an extension
+-- where the messageID is utilized as the primary key.
+CREATE TABLE messageDbo(
+    id                          INTEGER         AS MessageId NOT NULL PRIMARY KEY,
+    uuid                        TEXT            AS MessageUUID,
+    chat_id                     INTEGER         AS ChatId NOT NULL,
+    type                        INTEGER         AS MessageType NOT NULL,
+    sender                      INTEGER         AS ContactId NOT NULL,
+    receiver                    INTEGER         AS ContactId,
+    amount                      INTEGER         AS Sat NOT NULL,
+    payment_hash                TEXT            AS LightningPaymentHash,
+    payment_request             TEXT            AS LightningPaymentRequest,
+    date                        INTEGER         AS DateTime NOT NULL,
+    expiration_date             INTEGER         AS DateTime,
+    message_content             TEXT            AS MessageContent,
+    message_content_decrypted   TEXT            AS MessageContentDecrypted,
+    status                      INTEGER         AS MessageStatus NOT NULL,
+    seen                        INTEGER         AS Seen NOT NULL,
+    sender_alias                TEXT            AS SenderAlias,
+    sender_pic                  TEXT            AS PhotoUrl,
+    original_muid               TEXT            AS MessageMUID,
+    reply_uuid                  TEXT            AS ReplyUUID
+);
+
+messageGetById:
+SELECT *
+FROM messageDbo
+WHERE id = ?;
+
+messageGetLatestId:
+SELECT id
+FROM messageDbo
+ORDER BY id DESC
+LIMIT 1;
+
+-- Retrieves the latest message for the given ChatID that will be shown
+-- to the User. See [MessageType] for more detail
+messageGetLatestToShowByChatId:
+SELECT *
+FROM messageDbo
+WHERE chat_id = ?
+AND type = 0
+    OR type = 2
+    OR type = 3
+    OR type = 5
+    OR type = 6
+    OR type = 14
+    OR type = 15
+    OR type = 25
+    OR type = 29
+ORDER BY id DESC
+LIMIT 1;
+
+messageUpdateContentDecrypted:
+UPDATE messageDbo
+SET message_content_decrypted = :message_content_decrypted
+WHERE id = ?;
+
+-- If the message exists in the DB, it will update all fields _except_
+-- for message_content_decrypted as to not overwrite it.
+messageUpsert {
+    UPDATE messageDbo
+    SET uuid = :uuid,
+        chat_id = :chat_id,
+        type = :type,
+        sender = :sender,
+        receiver = :receiver,
+        amount = :amount,
+        payment_hash = :payment_hash,
+        payment_request = :payment_request,
+        date = :date,
+        expiration_date = :expiration_date,
+        message_content = :message_content,
+        status = :status,
+        seen = :seen,
+        sender_alias = :sender_alias,
+        sender_pic = :sender_pic,
+        original_muid = :original_muid,
+        reply_uuid = :reply_uuid
+    WHERE id = :id;
+
+    INSERT OR IGNORE INTO messageDbo(
+        id,
+        uuid,
+        chat_id,
+        type,
+        sender,
+        receiver,
+        amount,
+        payment_hash,
+        payment_request,
+        date,
+        expiration_date,
+        message_content,
+        message_content_decrypted,
+        status,
+        seen,
+        sender_alias,
+        sender_pic,
+        original_muid,
+        reply_uuid
+    )
+    VALUES (
+        :id,
+        :uuid,
+        :chat_id,
+        :type,
+        :sender,
+        :receiver,
+        :amount,
+        :payment_hash,
+        :payment_request,
+        :date,
+        :expiration_date,
+        :message_content,
+        :message_content_decrypted,
+        :status,
+        :seen,
+        :sender_alias,
+        :sender_pic,
+        :original_muid,
+        :reply_uuid
+    );
+}
+
+messageDeleteById:
+DELETE FROM messageDbo
+WHERE id = ?;
+
+messageDeleteByChatId:
+DELETE FROM messageDbo
+WHERE chat_id = ?;
+
+CREATE TABLE messageMediaDbo(
+    id                          INTEGER         AS MessageId NOT NULL PRIMARY KEY,
+    chat_id                     INTEGER         AS ChatId NOT NULL,
+    media_key                   TEXT            AS MediaKey,
+    media_key_decrypted         TEXT            AS MediaKeyDecrypted,
+    media_type                  TEXT            AS MediaType NOT NULL,
+    media_token                 TEXT            AS MediaToken NOT NULL
+);
+
+messageMediaGetById:
+SELECT *
+FROM messageMediaDbo
+WHERE id = ?;
+
+messageMediaUpdateMediaKeyDecrypted:
+UPDATE messageMediaDbo
+SET media_key_decrypted = :media_key_decrypted
+WHERE id = ?;
+
+messageMediaUpsert {
+    UPDATE messageMediaDbo
+    SET media_key = :media_key,
+        media_type = :media_type,
+        media_token = :media_token
+    WHERE id = :id;
+
+    INSERT OR IGNORE INTO messageMediaDbo(
+        id,
+        chat_id,
+        media_key,
+        media_key_decrypted,
+        media_type,
+        media_token
+    )
+    VALUES(
+        :id,
+        :chat_id,
+        :media_key,
+        :media_key_decrypted,
+        :media_type,
+        :media_token
+    );
+}
+
+messageMediaDeleteById:
+DELETE FROM messageMediaDbo
+WHERE id = ?;
+
+messageMediaDeleteByChatId:
+DELETE FROM messageMediaDbo
+WHERE chat_id = ?;

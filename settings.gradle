@@ -152,12 +152,12 @@ project(':kotlin:concepts:concept-views').projectDir =
 include ':kotlin:crypto:bouncycastle-ktx'
 project(':kotlin:crypto:bouncycastle-ktx').projectDir =
         file(new File(rootDir, 'kotlin-android/kotlin/crypto/bouncycastle-ktx'))
+include ':kotlin:crypto:crypto-common'
+project(':kotlin:crypto:crypto-common').projectDir =
+        file(new File(rootDir, 'kotlin-android/kotlin/crypto/crypto-common'))
 include ':kotlin:crypto:k-openssl'
 project(':kotlin:crypto:k-openssl').projectDir =
         file(new File(rootDir, 'kotlin-android/kotlin/crypto/k-openssl'))
-include ':kotlin:crypto:k-openssl-common'
-project(':kotlin:crypto:k-openssl-common').projectDir =
-        file(new File(rootDir, 'kotlin-android/kotlin/crypto/k-openssl-common'))
 
 ////////////////////////
 /// :kotlin:encoders ///

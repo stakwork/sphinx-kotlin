@@ -24,6 +24,20 @@ internal class MessageDtoDboMapper(
     }
 
     override suspend fun mapFrom(value: MessageDto): MessageDbo {
+
+        // This handles the old method for sending boost payments (they were sent as
+        // type 0 [MESSAGE]). Will update the MessageType to the correct value and
+        // store the feed data properly for display.
+        var type: MessageType = value.type.toMessageType()
+        val decryptedContent: String? = value.messageContentDecrypted?.let { decrypted ->
+            if (decrypted.contains("boost::{\"feedID\":")) {
+                type = MessageType.Boost
+                decrypted.split("::")[1]
+            } else {
+                decrypted
+            }
+        }
+
         return MessageDbo(
             id = MessageId(value.id),
             uuid = value.uuid?.toMessageUUID(),
@@ -45,7 +59,7 @@ internal class MessageDtoDboMapper(
                 ChatId(it)
             } ?: ChatId(NULL_CHAT_ID.toLong()),
 
-            type = value.type.toMessageType(),
+            type = type,
             sender = ContactId(value.sender),
             receiver = value.receiver?.let { ContactId(it) },
             amount = Sat(value.amount),
@@ -58,13 +72,9 @@ internal class MessageDtoDboMapper(
             // Messages coming off the wire are decrypted if the Key is available (User
             // is logged in). If that is not the case (Key is not available), the message
             // is decrypted will be decrypted when going from a MessageDbo to a Message
-            message_content_decrypted = value.messageContentDecrypted?.toMessageContentDecrypted(),
+            message_content_decrypted = decryptedContent?.toMessageContentDecrypted(),
 
             status = value.status.toMessageStatus(),
-            status_map = value.status_map?.toMessageStatusMap()?.toList(),
-            media_key = value.mediaKey?.toMediaKey(),
-            media_type = value.mediaType?.toMediaType(),
-            media_token = value.mediaToken?.toMediaToken(),
             seen = value.seen.toSeen(),
             sender_alias = value.sender_alias?.toSenderAlias(),
             sender_pic = value.sender_pic?.toPhotoUrl(),

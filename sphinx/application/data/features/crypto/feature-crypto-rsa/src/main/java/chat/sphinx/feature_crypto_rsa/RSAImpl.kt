@@ -5,12 +5,13 @@ import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.wrapper_rsa.*
 import com.github.xiangyuecn.rsajava.RSA_PEM
-import io.matthewnelson.k_openssl_common.annotations.UnencryptedDataAccess
-import io.matthewnelson.k_openssl_common.clazzes.EncryptedString
-import io.matthewnelson.k_openssl_common.clazzes.UnencryptedByteArray
-import io.matthewnelson.k_openssl_common.clazzes.UnencryptedString
-import io.matthewnelson.k_openssl_common.extensions.encodeToByteArray
-import io.matthewnelson.k_openssl_common.extensions.toCharArray
+import io.matthewnelson.crypto_common.annotations.UnencryptedDataAccess
+import io.matthewnelson.crypto_common.clazzes.EncryptedString
+import io.matthewnelson.crypto_common.clazzes.UnencryptedByteArray
+import io.matthewnelson.crypto_common.clazzes.UnencryptedString
+import io.matthewnelson.crypto_common.extensions.encodeToByteArray
+import io.matthewnelson.crypto_common.extensions.isValidUTF8
+import io.matthewnelson.crypto_common.extensions.toCharArray
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import okio.base64.decodeBase64ToArray
@@ -41,12 +42,7 @@ inline val RSA_PEM.maxBytes: Int
     get() = blockSize - 11
 
 @Suppress("SpellCheckingInspection")
-open class RSAImpl(): RSA() {
-
-    companion object {
-        private const val RSA = "RSA"
-        private const val SIGNATURE_ALGORITHM = "SHA1WithRSA"
-    }
+open class RSAImpl(val algorithm: RSAAlgorithm): RSA() {
 
     override suspend fun generateKeyPair(
         keySize: KeySize,
@@ -54,7 +50,7 @@ open class RSAImpl(): RSA() {
         pkcsType: PKCSType,
     ): Response<RSAKeyPair, ResponseError> {
         try {
-            val generator: KeyPairGenerator = KeyPairGenerator.getInstance(RSA)
+            val generator: KeyPairGenerator = KeyPairGenerator.getInstance(RSAAlgorithm.ALGORITHM_RSA)
             generator.initialize(keySize.value, SecureRandom())
 
             val keys: KeyPair = dispatcher?.let {
@@ -121,7 +117,7 @@ open class RSAImpl(): RSA() {
                     @Suppress("RemoveExplicitTypeArguments")
                     val arr = Array<ByteArray>(arrSize) { index ->
                         val fromIndex: Int = (index * blockSize)
-                        val toIndex: Int = if ( (fromIndex + blockSize) <= dataBytes.size ) {
+                        val toIndex: Int = if ((fromIndex + blockSize) <= dataBytes.size) {
                             fromIndex + blockSize
                         } else {
                             dataBytes.size
@@ -138,7 +134,7 @@ open class RSAImpl(): RSA() {
                     try {
 
                         for (ba in arr) {
-                            val cipher: Cipher = Cipher.getInstance(RSA)
+                            val cipher: Cipher = Cipher.getInstance(algorithm.value)
                             cipher.init(Cipher.DECRYPT_MODE, privKey)
                             cipher.doFinal(ba).let { bytes ->
                                 buffer.put(
@@ -167,7 +163,7 @@ open class RSAImpl(): RSA() {
                 } else {
 
                     try {
-                        val cipher: Cipher = Cipher.getInstance(RSA)
+                        val cipher: Cipher = Cipher.getInstance(algorithm.value)
                         cipher.init(Cipher.DECRYPT_MODE, rsaPem.rsaPrivateKey)
                         cipher.doFinal(dataBytes)
                     } finally {
@@ -178,7 +174,22 @@ open class RSAImpl(): RSA() {
 
             }
 
+            if (!decrypted.isValidUTF8) {
+                throw CharacterCodingException()
+            }
+
             Response.Success(UnencryptedByteArray(decrypted))
+        } catch (e: CharacterCodingException) {
+            Response.Error(
+                ResponseError(
+                    """
+                        Decryption failed.
+                        Decrypted value produced invalid UTF-8 encoded bytes.
+                        Current Algorithm: ${algorithm.value}
+                    """.trimIndent(),
+                    e
+                )
+            )
         } catch (e: Exception) {
             Response.Error(ResponseError("Decryption failed", e))
         }
@@ -225,7 +236,7 @@ open class RSAImpl(): RSA() {
 
                     try {
                         for (ba in arr) {
-                            val cipher: Cipher = Cipher.getInstance(RSA)
+                            val cipher: Cipher = Cipher.getInstance(algorithm.value)
                             cipher.init(Cipher.ENCRYPT_MODE, pubKey)
                             cipher.doFinal(ba).let { bytes ->
                                 buffer.put(
@@ -240,7 +251,7 @@ open class RSAImpl(): RSA() {
                     buffer.array()
                 } else {
                     try {
-                        val cipher: Cipher = Cipher.getInstance(RSA)
+                        val cipher: Cipher = Cipher.getInstance(algorithm.value)
                         cipher.init(Cipher.ENCRYPT_MODE, rsaPem.rsaPublicKey)
                         cipher.doFinal(dataBytes)
                     } finally {
@@ -265,6 +276,7 @@ open class RSAImpl(): RSA() {
     override suspend fun sign(
         rsaPrivateKey: RsaPrivateKey,
         text: String,
+        algorithm: SignatureAlgorithm,
         dispatcher: CoroutineDispatcher
     ): Response<RsaSignedString, ResponseError> {
         if (text.isEmpty()) {
@@ -279,7 +291,7 @@ open class RSAImpl(): RSA() {
                 val rsaPem: RSA_PEM = RSA_PEM.FromPEM(rsaPrivateKey.value, true)
 
                 try {
-                    val signature: Signature = Signature.getInstance(SIGNATURE_ALGORITHM)
+                    val signature: Signature = Signature.getInstance(algorithm.value)
                     signature.initSign(rsaPem.rsaPrivateKey)
                     signature.update(text.encodeToByteArray())
                     signature.sign()
@@ -302,6 +314,7 @@ open class RSAImpl(): RSA() {
     override suspend fun verifySignature(
         rsaPublicKey: RsaPublicKey,
         signedString: RsaSignedString,
+        algorithm: SignatureAlgorithm,
         dispatcher: CoroutineDispatcher
     ): Response<Boolean, ResponseError> {
         if (signedString.signature.value.isEmpty()) {
@@ -322,7 +335,7 @@ open class RSAImpl(): RSA() {
                 val rsaPem: RSA_PEM = RSA_PEM.FromPEM(rsaPublicKey.value, false)
 
                 try {
-                    val signVerify: Signature = Signature.getInstance(SIGNATURE_ALGORITHM)
+                    val signVerify: Signature = Signature.getInstance(algorithm.value)
                     signVerify.initVerify(rsaPem.rsaPublicKey)
                     signVerify.update(signedString.text.encodeToByteArray())
                     signVerify.verify(signedString.signature.value)

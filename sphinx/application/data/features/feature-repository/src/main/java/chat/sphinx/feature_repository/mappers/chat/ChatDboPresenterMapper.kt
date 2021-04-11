@@ -37,7 +37,8 @@ internal class ChatDboPresenterMapper(
             metaData = value.meta_data,
             myPhotoUrl = value.my_photo_url,
             myAlias = value.my_alias,
-            pendingContactIds = value.pending_contact_ids
+            pendingContactIds = value.pending_contact_ids,
+            latestMessageId = value.latest_message_id,
         )
     }
 
@@ -64,6 +65,7 @@ internal class ChatDboPresenterMapper(
             my_photo_url = value.myPhotoUrl,
             my_alias = value.myAlias,
             pending_contact_ids = value.pendingContactIds,
+            latest_message_id = value.latestMessageId,
         )
     }
 }

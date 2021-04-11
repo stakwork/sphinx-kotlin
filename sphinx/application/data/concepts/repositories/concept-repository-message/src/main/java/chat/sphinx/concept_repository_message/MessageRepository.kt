@@ -4,10 +4,13 @@ import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.wrapper_common.chat.ChatId
 import chat.sphinx.wrapper_common.chat.ChatUUID
+import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_message.Message
 import kotlinx.coroutines.flow.Flow
 
 interface MessageRepository {
+    suspend fun getMessageById(messageId: MessageId): Flow<Message?>
+
     suspend fun getLatestMessageForChat(chatId: ChatId): Flow<Message?>
     suspend fun getLatestMessageForChat(chatUUID: ChatUUID): Flow<Message?>
 

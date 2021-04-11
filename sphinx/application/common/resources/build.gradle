@@ -27,6 +27,9 @@ android {
 
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
-    implementation deps.androidx.appCompat
+    // KotlinAndroid
     api project(':android:features:android-feature-toast-utils')
+
+    implementation deps.androidx.annotation
+    implementation deps.androidx.appCompat
 }

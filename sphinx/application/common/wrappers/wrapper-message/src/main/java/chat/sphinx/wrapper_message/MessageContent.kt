@@ -8,7 +8,6 @@ inline fun String.toMessageContent(): MessageContent? =
         null
     }
 
-// TODO: add encrypted/decrypted flag???
 inline class MessageContent(val value: String) {
     init {
         require(value.isNotEmpty()) {

@@ -9,6 +9,7 @@ import chat.sphinx.wrapper_common.lightning.LightningPaymentHash
 import chat.sphinx.wrapper_common.lightning.LightningPaymentRequest
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.MessageId
+import chat.sphinx.wrapper_message.media.MessageMedia
 
 data class Message(
     val id: MessageId,
@@ -24,10 +25,6 @@ data class Message(
     val expirationDate: DateTime?,
     val messageContent: MessageContent?,
     val status: MessageStatus,
-    val statusMap: Map<ContactId, MessageStatus>?,
-    val mediaKey: MediaKey?,
-    val mediaType: MediaType?,
-    val mediaToken: MediaToken?,
     val seen: Seen,
     val senderAlias: SenderAlias?,
     val senderPic: PhotoUrl?,
@@ -36,20 +33,51 @@ data class Message(
     val originalMUID: MessageMUID?,
     val replyUUID: ReplyUUID?,
 ) {
+    @Volatile
     var messageContentDecrypted: MessageContentDecrypted? = null
         private set
 
-    fun setMessageContentDecrypted(messageContentDecrypted: MessageContentDecrypted) {
+    fun setMessageContentDecrypted(messageContentDecrypted: MessageContentDecrypted): Message {
         this.messageContentDecrypted = messageContentDecrypted
+        return this
     }
 
-    var decryptionError: Boolean = false
+    @Volatile
+    var messageDecryptionError: Boolean = false
         private set
-    var decryptionException: Exception? = null
+    @Volatile
+    var messageDecryptionException: Exception? = null
         private set
 
-    fun setDecryptionError(e: Exception?) {
-        decryptionError = true
-        decryptionException = e
+    fun setDecryptionError(e: Exception?): Message {
+        messageDecryptionError = true
+        messageDecryptionException = e
+        return this
+    }
+
+    @Volatile
+    var messageMedia: MessageMedia? = null
+
+    fun setMessageMedia(messageMedia: MessageMedia): Message {
+        this.messageMedia = messageMedia
+        return this
+    }
+
+    @Volatile
+    var podBoost: PodBoost? = null
+        private set
+
+    fun setPodBoost(podBoost: PodBoost): Message {
+        this.podBoost = podBoost
+        return this
+    }
+
+    @Volatile
+    var giphyData: GiphyData? = null
+        private set
+
+    fun setGiphyData(giphyData: GiphyData): Message {
+        this.giphyData = giphyData
+        return this
     }
 }

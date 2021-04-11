@@ -7,15 +7,17 @@ import androidx.test.core.app.ApplicationProvider
 import chat.sphinx.concept_coredb.SphinxDatabase
 import chat.sphinx.concept_crypto_rsa.RSA
 import chat.sphinx.feature_coredb.CoreDBImpl
+import chat.sphinx.feature_crypto_rsa.RSAAlgorithm
 import chat.sphinx.feature_crypto_rsa.RSAImpl
 import chat.sphinx.feature_relay.RelayDataHandlerImpl
 import chat.sphinx.key_restore.KeyRestoreResponse
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
+import com.squareup.moshi.Moshi
 import com.squareup.sqldelight.android.AndroidSqliteDriver
 import com.squareup.sqldelight.db.SqlDriver
 import io.matthewnelson.concept_encryption_key.EncryptionKey
-import io.matthewnelson.k_openssl_common.clazzes.Password
+import io.matthewnelson.crypto_common.clazzes.Password
 import io.matthewnelson.test_concept_coroutines.CoroutineTestHelper
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.test.runBlockingTest
@@ -48,14 +50,14 @@ class SphinxKeyRestoreUnitTest: CoroutineTestHelper() {
     }
 
     private val rsa: RSA by lazy {
-        RSAImpl()
+        RSAImpl(RSAAlgorithm.RSA_ECB_PKCS1Padding)
     }
 
     private val sphinxKeyHandler: SphinxEncryptionKeyHandler by lazy {
         SphinxEncryptionKeyHandler(rsa)
     }
 
-    private inner class TestCoreDBImpl: CoreDBImpl() {
+    private inner class TestCoreDBImpl(moshi: Moshi): CoreDBImpl(moshi) {
 
         private var driver: AndroidSqliteDriver? = null
 
@@ -70,8 +72,12 @@ class SphinxKeyRestoreUnitTest: CoroutineTestHelper() {
         }
     }
 
+    private val moshi: Moshi by lazy {
+        Moshi.Builder().build()
+    }
+
     private val testSphinxCoreDBImpl: TestCoreDBImpl by lazy {
-        TestCoreDBImpl()
+        TestCoreDBImpl(moshi)
     }
 
     private val sphinxManager: SphinxAuthenticationCoreManager by lazy {

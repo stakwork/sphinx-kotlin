@@ -1,12 +1,13 @@
 package chat.sphinx.feature_coredb
 
 import chat.sphinx.conceptcoredb.SphinxDatabaseQueries
+import com.squareup.moshi.Moshi
 import com.squareup.sqldelight.db.SqlDriver
 import com.squareup.sqldelight.sqlite.driver.JdbcSqliteDriver
 import io.matthewnelson.concept_encryption_key.EncryptionKey
 import io.matthewnelson.concept_encryption_key.EncryptionKeyHandler
-import io.matthewnelson.k_openssl_common.clazzes.HashIterations
-import io.matthewnelson.k_openssl_common.clazzes.Password
+import io.matthewnelson.crypto_common.clazzes.HashIterations
+import io.matthewnelson.crypto_common.clazzes.Password
 import io.matthewnelson.test_concept_coroutines.CoroutineTestHelper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
@@ -42,7 +43,7 @@ class CoreDBImplUnitTest: CoroutineTestHelper() {
         }
     }
 
-    private inner class TestCoreDBImpl: CoreDBImpl() {
+    private inner class TestCoreDBImpl(moshi: Moshi): CoreDBImpl(moshi) {
         override fun getSqlDriver(encryptionKey: EncryptionKey): SqlDriver {
             return driver
         }
@@ -56,8 +57,12 @@ class CoreDBImplUnitTest: CoroutineTestHelper() {
         JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY)
     }
 
+    private val moshi: Moshi by lazy {
+        Moshi.Builder().build()
+    }
+
     private val testCoreDB: CoreDBImpl by lazy {
-        TestCoreDBImpl()
+        TestCoreDBImpl(moshi)
     }
 
     @Before

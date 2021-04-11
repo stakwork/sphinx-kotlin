@@ -4,6 +4,7 @@ import chat.sphinx.BuildConfig
 import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.util.SphinxDispatchers
 import chat.sphinx.util.SphinxLoggerImpl
+import com.squareup.moshi.Moshi
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -38,4 +39,9 @@ object AppModule {
     @Singleton
     fun provideBuildConfigVersionCode(): BuildConfigVersionCode =
         BuildConfigVersionCode(BuildConfig.VERSION_CODE)
+
+    @Provides
+    @Singleton
+    fun provideMoshi(): Moshi =
+        Moshi.Builder().build()
 }

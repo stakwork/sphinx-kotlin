@@ -23,9 +23,9 @@ data class MessageDto(
     val status_map: Map<Long, Int?>?, // contact_id : their message's 'status'
     val parent_id: Long?,
     val subscription_id: Long?,
-    val mediaKey: String?,
-    val mediaType: String?,
-    val mediaToken: String?,
+    val media_key: String?,
+    val media_type: String?,
+    val media_token: String?,
     val seen: Boolean,
     val created_at: String,
     val updated_at: String,
@@ -38,11 +38,22 @@ data class MessageDto(
     val contact: ContactDto?,
 ) {
     @Transient
+    @Volatile
     var messageContentDecrypted: String? = null
         private set
 
     fun setMessageContentDecrypted(value: String) {
         if (value.isEmpty()) return
         messageContentDecrypted = value
+    }
+
+    @Transient
+    @Volatile
+    var mediaKeyDecrypted: String? = null
+        private set
+
+    fun setMediaKeyDecrypted(value: String) {
+        if (value.isEmpty()) return
+        mediaKeyDecrypted = value
     }
 }
