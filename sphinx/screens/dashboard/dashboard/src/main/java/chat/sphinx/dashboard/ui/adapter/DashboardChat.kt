@@ -54,7 +54,13 @@ sealed class DashboardChat {
                 }
                 message.type.isMessage() -> {
                     message.messageContentDecrypted?.value?.let { decrypted ->
-                        "${getMessageSender(message)}$decrypted"
+
+                        if (message.giphyData != null) {
+                            "${getMessageSender(message)}GIF shared"
+                        } else {
+                            "${getMessageSender(message)}$decrypted"
+                        }
+
                     } ?: "${getMessageSender(message)}..."
                 }
                 message.type.isInvoice() -> {

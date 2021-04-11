@@ -2,12 +2,11 @@ package chat.sphinx.feature_repository.mappers.message
 
 import chat.sphinx.conceptcoredb.MessageDbo
 import chat.sphinx.feature_repository.mappers.ClassMapper
-import chat.sphinx.wrapper_message.Message
-import chat.sphinx.wrapper_message.isBoost
-import chat.sphinx.wrapper_message.toPodBoost
-import chat.sphinx.wrapper_message.toPodBoostOrNull
+import chat.sphinx.wrapper_message.*
 import com.squareup.moshi.Moshi
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
+import io.matthewnelson.crypto_common.extensions.decodeToString
+import okio.base64.decodeBase64ToArray
 
 internal class MessageDboPresenterMapper(
     dispatchers: CoroutineDispatchers,
@@ -43,6 +42,18 @@ internal class MessageDboPresenterMapper(
                         message.setPodBoost(boost)
                     }
                 }
+
+                if (message.type.isMessage() && decrypted.value.contains("giphy::")) {
+                    decrypted.value.split("::")
+                        .elementAtOrNull(1)
+                        ?.decodeBase64ToArray()
+                        ?.decodeToString()
+                        ?.toGiphyDataOrNull(moshi)
+                        ?.let { giphy ->
+                            message.setGiphyData(giphy)
+                        }
+                }
+
                 message.setMessageContentDecrypted(decrypted)
             }
         }

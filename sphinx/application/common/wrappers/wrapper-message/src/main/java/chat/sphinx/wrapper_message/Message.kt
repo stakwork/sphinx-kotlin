@@ -54,6 +54,15 @@ data class Message(
     }
 
     @Volatile
+    var giphyData: GiphyData? = null
+        private set
+
+    fun setGiphyData(giphyData: GiphyData): Message {
+        this.giphyData = giphyData
+        return this
+    }
+
+    @Volatile
     var decryptionError: Boolean = false
         private set
     @Volatile
