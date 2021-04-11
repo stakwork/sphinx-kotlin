@@ -679,7 +679,7 @@ class SphinxRepository(
                                                 } else if (chatIds.contains(dbo.chat_id)) {
                                                     queries.upsertMessage(dbo)
 
-                                                    if (dbo.type.show) {
+                                                    if (dbo.type.show && !dbo.type.isBotRes()) {
                                                         latestMessageMap[dbo.chat_id] = dbo.id
                                                     }
                                                 }

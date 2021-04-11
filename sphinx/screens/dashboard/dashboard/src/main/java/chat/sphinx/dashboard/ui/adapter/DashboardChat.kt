@@ -100,10 +100,6 @@ sealed class DashboardChat {
                 message.type.isGroupLeave() -> {
                     "${getMessageSender(message, false)} has left the ${chat.type.javaClass.simpleName}"
                 }
-                message.type.isBotRes() -> {
-                    // TODO: Implement
-                    ""
-                }
                 message.type.isBoost() -> {
                     val amount: Long = message.podBoost?.amount?.value ?: message.amount.value
                     "${getMessageSender(message)}Boost $amount " + if (amount > 1) "sats" else "sat"
