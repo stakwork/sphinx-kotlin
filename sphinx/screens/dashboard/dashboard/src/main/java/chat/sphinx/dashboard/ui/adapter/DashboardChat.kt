@@ -7,6 +7,7 @@ import chat.sphinx.wrapper_common.hhmmElseDate
 import chat.sphinx.wrapper_common.time
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_message.*
+import chat.sphinx.wrapper_message.media.MediaType
 
 /**
  * [DashboardChat]s are separated into 2 categories:
@@ -91,8 +92,36 @@ sealed class DashboardChat {
                     }
                 }
                 message.type.isAttachment() -> {
-                    // TODO: Implement
-                    ""
+                    message.messageMedia?.let { media ->
+                        when (media.mediaType) {
+                            is MediaType.Audio -> {
+                                "an Audio clip"
+                            }
+                            is MediaType.Gif -> {
+                                "a GIF"
+                            }
+                            is MediaType.Image -> {
+                                "an Image"
+                            }
+                            is MediaType.Pdf -> {
+                                "a PDF"
+                            }
+                            is MediaType.SphinxText -> {
+                                "a Paid Message"
+                            }
+                            is MediaType.Unknown -> {
+                                "an Attachment"
+                            }
+                            is MediaType.Video -> {
+                                "a Video"
+                            }
+                            else -> {
+                                null
+                            }
+                        }?.let { text ->
+                            "${getMessageSender(message, false)} sent $text"
+                        }
+                    } ?: ""
                 }
                 message.type.isGroupJoin() -> {
                     "${getMessageSender(message, false)} has joined the ${chat.type.javaClass.simpleName}"
