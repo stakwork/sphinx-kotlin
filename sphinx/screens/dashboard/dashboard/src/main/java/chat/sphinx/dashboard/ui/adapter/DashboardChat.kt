@@ -59,6 +59,9 @@ sealed class DashboardChat {
                         if (message.giphyData != null) {
                             "${getMessageSender(message)}GIF shared"
                         } else {
+
+                            // TODO: check for `clip::` to load pod clip
+
                             "${getMessageSender(message)}$decrypted"
                         }
 
