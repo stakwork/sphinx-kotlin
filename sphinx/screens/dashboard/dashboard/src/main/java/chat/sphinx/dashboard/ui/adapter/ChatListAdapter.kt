@@ -37,6 +37,7 @@ internal class ChatListAdapter(
         private val oldList: List<DashboardChat>,
         private val newList: List<DashboardChat>,
     ): DiffUtil.Callback() {
+
         override fun getOldListSize(): Int {
             return oldList.size
         }
@@ -45,12 +46,15 @@ internal class ChatListAdapter(
             return newList.size
         }
 
+        @Volatile
+        var sameList: Boolean = oldListSize == newListSize
+
         override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
             return try {
                 val old = oldList[oldItemPosition]
                 val new = newList[newItemPosition]
 
-                when {
+                val same: Boolean = when {
                     old is DashboardChat.Active && new is DashboardChat.Active -> {
                         old.chat.id                 == new.chat.id                  &&
                         old.chat.latestMessageId    == new.chat.latestMessageId
@@ -62,7 +66,14 @@ internal class ChatListAdapter(
                         false
                     }
                 }
+
+                if (sameList) {
+                    sameList = same
+                }
+
+                same
             } catch (e: IndexOutOfBoundsException) {
+                sameList = false
                 false
             }
         }
@@ -72,7 +83,7 @@ internal class ChatListAdapter(
                 val old = oldList[oldItemPosition]
                 val new = newList[newItemPosition]
 
-                when {
+                val same: Boolean = when {
                     old is DashboardChat.Active && new is DashboardChat.Active -> {
                         old.chat.type               == new.chat.type                &&
                         old.chatName                == new.chatName                 &&
@@ -87,7 +98,14 @@ internal class ChatListAdapter(
                         false
                     }
                 }
+
+                if (sameList) {
+                    sameList = same
+                }
+
+                same
             } catch (e: IndexOutOfBoundsException) {
+                sameList = false
                 false
             }
         }
@@ -106,14 +124,19 @@ internal class ChatListAdapter(
                     dashboardChats.addAll(viewState.list)
                     this@ChatListAdapter.notifyDataSetChanged()
                 } else {
+
+                    val diff = Diff(dashboardChats, viewState.list)
+
                     withContext(viewModel.dispatchers.default) {
-                        DiffUtil.calculateDiff(
-                            Diff(dashboardChats, viewState.list)
-                        )
+                        DiffUtil.calculateDiff(diff)
                     }.let { result ->
-                        dashboardChats.clear()
-                        dashboardChats.addAll(viewState.list)
-                        result.dispatchUpdatesTo(this@ChatListAdapter)
+
+                        if (!diff.sameList) {
+                            dashboardChats.clear()
+                            dashboardChats.addAll(viewState.list)
+                            result.dispatchUpdatesTo(this@ChatListAdapter)
+                        }
+
                     }
                 }
 
@@ -227,14 +250,14 @@ internal class ChatListAdapter(
                             }
                         }
                         is DashboardChat.Active.GroupOrTribe -> {
-                            if (dashboardChat.chat.type.isGroup()) {
-                                supervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
+                            supervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
+
+                                if (dashboardChat.chat.type.isGroup()) {
                                     viewModel.dashboardNavigator.toChatGroup(dashboardChat.chat.id)
-                                }
-                            } else if (dashboardChat.chat.type.isTribe()) {
-                                supervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
+                                } else if (dashboardChat.chat.type.isTribe()) {
                                     viewModel.dashboardNavigator.toChatTribe(dashboardChat.chat.id)
                                 }
+
                             }
                         }
                         is DashboardChat.Inactive.Conversation -> {

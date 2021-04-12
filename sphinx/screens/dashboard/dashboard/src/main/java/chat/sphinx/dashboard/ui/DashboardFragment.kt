@@ -103,7 +103,7 @@ internal class DashboardFragment : MotionLayoutFragment<
         val chatListAdapter = ChatListAdapter(imageLoader, viewLifecycleOwner, viewModel)
         val chatListFooterAdapter = ChatListFooterAdapter(viewLifecycleOwner, viewModel)
         binding.layoutDashboardChats.recyclerViewChats.apply {
-            this.setHasFixedSize(true)
+            this.setHasFixedSize(false)
             layoutManager = LinearLayoutManager(binding.root.context)
             adapter = ConcatAdapter(chatListAdapter, chatListFooterAdapter)
         }
