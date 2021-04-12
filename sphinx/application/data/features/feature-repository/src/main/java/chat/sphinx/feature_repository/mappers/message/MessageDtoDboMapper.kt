@@ -75,7 +75,7 @@ internal class MessageDtoDboMapper(
             message_content_decrypted = decryptedContent?.toMessageContentDecrypted(),
 
             status = value.status.toMessageStatus(),
-            seen = value.seen.toSeen(),
+            seen = value.seenActual.toSeen(),
             sender_alias = value.sender_alias?.toSenderAlias(),
             sender_pic = value.sender_pic?.toPhotoUrl(),
             original_muid = value.original_muid?.toMessageMUID(),
