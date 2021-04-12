@@ -1,5 +1,6 @@
 package chat.sphinx.concept_network_query_message.model
 
+import chat.sphinx.concept_network_query_chat.model.ChatDto
 import chat.sphinx.concept_network_query_contact.model.ContactDto
 import com.squareup.moshi.JsonClass
 
@@ -26,7 +27,7 @@ data class MessageDto(
     val media_key: String?,
     val media_type: String?,
     val media_token: String?,
-    val seen: Boolean,
+    val seen: Any,
     val created_at: String,
     val updated_at: String,
     val sender_alias: String?,
@@ -34,9 +35,23 @@ data class MessageDto(
     val original_muid: String?,
     val reply_uuid: String?,
     val network_type: Int?,
-    val chat: MsgsChatDto?,
+    val chat: ChatDto?,
     val contact: ContactDto?,
 ) {
+    @Transient
+    val seenActual: Boolean =
+        when (seen) {
+            is Boolean -> {
+                seen
+            }
+            is Double -> {
+                seen.toInt() == 1
+            }
+            else -> {
+                false
+            }
+        }
+
     @Transient
     @Volatile
     var messageContentDecrypted: String? = null

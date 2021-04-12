@@ -22,7 +22,7 @@ internal class ContactDtoDboMapper(
     @Throws(IllegalArgumentException::class)
     override suspend fun mapFrom(value: ContactDto): ContactDbo {
 
-        if (value.from_group.toContactFromGroup().isTrue()) {
+        if (value.fromGroupActual) {
             throw IllegalArgumentException("Contacts that are from a group _cannot_ be saved to the DB")
         }
 
@@ -33,8 +33,8 @@ internal class ContactDtoDboMapper(
             value.node_alias?.toLightningNodeAlias(),
             value.alias.toContactAlias(),
             value.photo_url?.toPhotoUrl(),
-            value.private_photo.toPrivatePhoto(),
-            value.is_owner.toOwner(),
+            value.privatePhotoActual.toPrivatePhoto(),
+            value.isOwnerActual.toOwner(),
             value.status.toContactStatus(),
             value.contact_key?.let { RsaPublicKey(it.toCharArray()) },
             value.device_id?.toDeviceId(),

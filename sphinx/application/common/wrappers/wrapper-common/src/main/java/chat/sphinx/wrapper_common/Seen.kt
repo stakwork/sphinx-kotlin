@@ -4,25 +4,14 @@ package chat.sphinx.wrapper_common
 inline fun Seen.isTrue(): Boolean =
     this is Seen.True
 
-/**
- * Converts the integer value returned over the wire to an object.
- *
- * @throws [IllegalArgumentException] if the integer is not supported
- * */
 @Suppress("NOTHING_TO_INLINE")
-@Throws(IllegalArgumentException::class)
 inline fun Int.toSeen(): Seen =
     when (this) {
         Seen.SEEN -> {
             Seen.True
         }
-        Seen.NOT_SEEN -> {
-            Seen.False
-        }
         else -> {
-            throw IllegalArgumentException(
-                "Seen for integer '$this' not supported"
-            )
+            Seen.False
         }
     }
 

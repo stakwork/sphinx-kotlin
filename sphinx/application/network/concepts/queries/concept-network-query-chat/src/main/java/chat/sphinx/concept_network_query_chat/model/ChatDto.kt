@@ -4,31 +4,101 @@ import com.squareup.moshi.JsonClass
 
 @JsonClass(generateAdapter = true)
 data class ChatDto(
-    override val id: Long,
-    override val uuid: String,
-    override val name: String?,
-    override val photo_url: String?,
-    override val type: Int,
-    override val status: Int?,
-    override val contact_ids: List<Long>,
-    override val is_muted: Int?,
-    override val created_at: String,
-    override val updated_at: String,
-    override val deleted: Int,
-    override val group_key: String?,
-    override val host: String?,
-    override val price_to_join: Long?,
-    override val price_per_message: Long?,
-    override val escrow_amount: Long?,
-    override val escrow_millis: Long?,
-    override val unlisted: Int,
-    override val private: Int?,
-    override val owner_pub_key: String?,
-    override val seen: Int,
-    override val app_url: String?,
-    override val feed_url: String?,
-    override val meta: String?,
-    override val my_photo_url: String?,
-    override val my_alias: String?,
-    override val pending_contact_ids: List<Long>?
-): BaseChatDto<Int?, Int, Int?, Int>()
+    val id: Long,
+    val uuid: String,
+    val name: String?,
+    val photo_url: String?,
+    val type: Int,
+    val status: Int?,
+    val contact_ids: List<Long>,
+    val is_muted: Any?,
+    val created_at: String,
+    val updated_at: String,
+    val deleted: Any?,
+    val group_key: String?,
+    val host: String?,
+    val price_to_join: Long?,
+    val price_per_message: Long?,
+    val escrow_amount: Long?,
+    val escrow_millis: Long?,
+    val unlisted: Any?,
+    val private: Any?,
+    val owner_pub_key: String?,
+    val seen: Any,
+    val app_url: String?,
+    val feed_url: String?,
+    val meta: String?,
+    val my_photo_url: String?,
+    val my_alias: String?,
+    val pending_contact_ids: List<Long>?
+) {
+    @Transient
+    val isMutedActual: Boolean =
+        when (is_muted) {
+            is Boolean -> {
+                is_muted
+            }
+            is Double -> {
+                is_muted.toInt() == 1
+            }
+            else -> {
+                false
+            }
+        }
+
+    @Transient
+    val deletedActual: Boolean =
+        when (deleted) {
+            is Boolean -> {
+                deleted
+            }
+            is Double -> {
+                deleted.toInt() == 1
+            }
+            else -> {
+                false
+            }
+        }
+
+    @Transient
+    val unlistedActual: Boolean =
+        when (unlisted) {
+            is Boolean -> {
+                unlisted
+            }
+            is Double -> {
+                unlisted.toInt() == 1
+            }
+            else -> {
+                false
+            }
+        }
+
+    @Transient
+    val privateActual: Boolean =
+        when (private) {
+            is Boolean -> {
+                private
+            }
+            is Double -> {
+                private.toInt() == 1
+            }
+            else -> {
+                true
+            }
+        }
+
+    @Transient
+    val seenActual: Boolean =
+        when (seen) {
+            is Boolean -> {
+                seen
+            }
+            is Double -> {
+                seen.toInt() == 1
+            }
+            else -> {
+                false
+            }
+        }
+}

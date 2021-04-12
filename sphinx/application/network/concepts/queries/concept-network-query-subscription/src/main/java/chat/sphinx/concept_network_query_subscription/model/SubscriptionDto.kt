@@ -5,20 +5,48 @@ import com.squareup.moshi.JsonClass
 
 @JsonClass(generateAdapter = true)
 data class SubscriptionDto(
-    override val id: Long,
-    override val chat_id: Long,
-    override val contact_id: Long,
-    override val cron: String,
-    override val amount: Long,
-    override val total_paid: Long,
-    override val end_number: Int?,
-    override val end_date: String?,
-    override val count: Int,
-    override val ended: Boolean,
-    override val paused: Boolean,
-    override val created_at: String,
-    override val updated_at: String,
-    override val interval: String,
-    override val next: String,
-    override val chat: ChatDto?,
-): BaseSubscriptionDto<Boolean, Boolean>()
+    val id: Long,
+    val chat_id: Long,
+    val contact_id: Long,
+    val cron: String,
+    val amount: Long,
+    val total_paid: Long,
+    val end_number: Int?,
+    val end_date: String?,
+    val count: Int,
+    val ended: Any?,
+    val paused: Any?,
+    val created_at: String,
+    val updated_at: String,
+    val interval: String,
+    val next: String,
+    val chat: ChatDto?,
+) {
+    @Transient
+    val endedActual: Boolean =
+        when (ended) {
+            is Boolean -> {
+                ended
+            }
+            is Double -> {
+                ended.toInt() == 1
+            }
+            else -> {
+                true
+            }
+        }
+
+    @Transient
+    val pausedActual: Boolean =
+        when (paused) {
+            is Boolean -> {
+                paused
+            }
+            is Double -> {
+                paused.toInt() == 1
+            }
+            else -> {
+                true
+            }
+        }
+}

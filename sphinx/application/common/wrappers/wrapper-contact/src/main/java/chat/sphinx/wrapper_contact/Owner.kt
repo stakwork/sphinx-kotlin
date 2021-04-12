@@ -4,27 +4,20 @@ package chat.sphinx.wrapper_contact
 inline fun Owner.isTrue(): Boolean =
     this is Owner.True
 
-/**
- * Converts the integer value returned over the wire to an object.
- *
- * @throws [IllegalArgumentException] if the integer is not supported
- * */
 @Suppress("NOTHING_TO_INLINE")
-@Throws(IllegalArgumentException::class)
 inline fun Int.toOwner(): Owner =
     when (this) {
         Owner.OWNER -> {
             Owner.True
         }
-        Owner.NOT_OWNER -> {
+        else -> {
             Owner.False
         }
-        else -> {
-            throw IllegalArgumentException(
-                "Owner for integer '$this' not supported"
-            )
-        }
     }
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun Boolean.toOwner(): Owner =
+    if (this) Owner.True else Owner.False
 
 /**
  * Comes off the wire as:

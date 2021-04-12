@@ -4,24 +4,14 @@ package chat.sphinx.wrapper_chat
 inline fun ChatMuted.isTrue(): Boolean =
     this is ChatMuted.True
 
-/**
- * Converts the integer value returned over the wire to an object.
- *
- * @throws [IllegalArgumentException] if the integer is not supported
- * */
 @Suppress("NOTHING_TO_INLINE")
-@Throws(IllegalArgumentException::class)
 inline fun Int?.toChatMuted(): ChatMuted =
     when (this) {
         ChatMuted.MUTED -> {
             ChatMuted.True
         }
-        null,
-        ChatMuted.NOT_MUTED -> {
-            ChatMuted.False
-        }
         else -> {
-            throw IllegalArgumentException("ChatMuted for integer '$this' not supported")
+            ChatMuted.False
         }
     }
 
