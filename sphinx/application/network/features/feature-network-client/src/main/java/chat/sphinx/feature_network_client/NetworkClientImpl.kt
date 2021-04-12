@@ -1,6 +1,6 @@
 package chat.sphinx.feature_network_client
 
-import chat.sphinx.concept_network_client.NetworkClient
+import chat.sphinx.concept_network_client_cache.NetworkClientCache
 import io.matthewnelson.build_config.BuildConfigDebug
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -8,7 +8,7 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import java.util.concurrent.TimeUnit
 
-class NetworkClientImpl(private val debug: BuildConfigDebug): NetworkClient() {
+class NetworkClientImpl(private val debug: BuildConfigDebug): NetworkClientCache() {
 
     companion object {
         const val TIME_OUT = 30L
