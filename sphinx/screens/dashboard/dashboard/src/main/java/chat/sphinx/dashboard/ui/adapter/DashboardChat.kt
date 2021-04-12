@@ -3,6 +3,7 @@ package chat.sphinx.dashboard.ui.adapter
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.isConversation
 import chat.sphinx.wrapper_common.DateTime
+import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.hhmmElseDate
 import chat.sphinx.wrapper_common.time
 import chat.sphinx.wrapper_contact.Contact
@@ -17,7 +18,9 @@ import chat.sphinx.wrapper_message.media.MediaType
 sealed class DashboardChat {
 
     abstract val chatName: String?
+    abstract val photoUrl: PhotoUrl?
     abstract val sortBy: Long
+
     abstract fun getDisplayTime(today00: DateTime): String
 
     abstract fun getMessageText(): String
@@ -160,6 +163,9 @@ sealed class DashboardChat {
             override val chatName: String?
                 get() = contact.alias?.value
 
+            override val photoUrl: PhotoUrl?
+                get() = chat.photoUrl ?: contact.photoUrl
+
             override fun getMessageSender(message: Message, withColon: Boolean): String {
                 if (isMessageSenderSelf(message)) {
                     return YOU + if (withColon) ": " else ""
@@ -169,14 +175,19 @@ sealed class DashboardChat {
                     alias.value + if (withColon) ": " else ""
                 } ?: ""
             }
+
         }
 
         class GroupOrTribe(
             override val chat: Chat,
             override val message: Message?,
         ): Active() {
+
             override val chatName: String?
                 get() = chat.name?.value
+
+            override val photoUrl: PhotoUrl?
+                get() = chat.photoUrl
 
             override fun getMessageSender(message: Message, withColon: Boolean): String {
                 if (isMessageSenderSelf(message)) {
@@ -187,6 +198,7 @@ sealed class DashboardChat {
                     alias.value + if (withColon) ": " else ""
                 } ?: ""
             }
+
         }
     }
 
@@ -203,8 +215,12 @@ sealed class DashboardChat {
         class Conversation(
             val contact: Contact
         ): Inactive() {
+
             override val chatName: String?
                 get() = contact.alias?.value
+
+            override val photoUrl: PhotoUrl?
+                get() = contact.photoUrl
 
             override val sortBy: Long
                 get() = contact.createdAt.time
@@ -212,6 +228,7 @@ sealed class DashboardChat {
             override fun getMessageText(): String {
                 return ""
             }
+
         }
     }
 }
