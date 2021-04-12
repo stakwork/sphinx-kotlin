@@ -26,10 +26,17 @@ android {
 }
 
 dependencies {
+    // KotlinAndroid
+    api project(path: ':kotlin:concepts:concept-coroutines')
+
+    // Sphinx
     api project(path: ':sphinx:application:data:concepts:concept-image-loader')
     implementation project(path: ':sphinx:application:network:concepts:clients:concept-network-client-cache')
 
     api deps.instacart.coilBase
+    implementation deps.instacart.coilGif
+    implementation deps.instacart.coilSvg
+    implementation deps.instacart.coilVideo
 
     testImplementation project(path: ':kotlin:test:test-concept-coroutines')
 }

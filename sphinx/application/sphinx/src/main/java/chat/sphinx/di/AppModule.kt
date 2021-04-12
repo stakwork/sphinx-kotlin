@@ -1,5 +1,6 @@
 package chat.sphinx.di
 
+import android.content.Context
 import android.widget.ImageView
 import chat.sphinx.BuildConfig
 import chat.sphinx.concept_image_loader.ImageLoader
@@ -12,6 +13,7 @@ import com.squareup.moshi.Moshi
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import io.matthewnelson.build_config.BuildConfigDebug
 import io.matthewnelson.build_config.BuildConfigVersionCode
@@ -52,12 +54,14 @@ object AppModule {
     @Provides
     @Singleton
     fun provideImageLoaderAndroid(
+        @ApplicationContext appContext: Context,
+        dispatchers: CoroutineDispatchers,
         networkClientCache: NetworkClientCache
     ): ImageLoaderAndroid =
-        ImageLoaderAndroid(networkClientCache)
+        ImageLoaderAndroid(appContext, dispatchers, networkClientCache)
 
     @Provides
-    fun provideImageLoaderImageView(
+    fun provideImageLoader(
         imageLoaderAndroid: ImageLoaderAndroid
     ): ImageLoader<ImageView> =
         imageLoaderAndroid
