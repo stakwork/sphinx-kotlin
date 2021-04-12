@@ -1,6 +1,7 @@
 package chat.sphinx.di
 
 import chat.sphinx.concept_network_client.NetworkClient
+import chat.sphinx.concept_network_client_cache.NetworkClientCache
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
 import chat.sphinx.concept_network_query_contact.NetworkQueryContact
 import chat.sphinx.concept_network_query_invite.NetworkQueryInvite
@@ -64,6 +65,12 @@ object NetworkModule {
     fun provideNetworkClient(
         networkClientImpl: NetworkClientImpl
     ): NetworkClient =
+        networkClientImpl
+
+    @Provides
+    fun provideNetworkClientCache(
+        networkClientImpl: NetworkClientImpl
+    ): NetworkClientCache =
         networkClientImpl
 
     @Provides

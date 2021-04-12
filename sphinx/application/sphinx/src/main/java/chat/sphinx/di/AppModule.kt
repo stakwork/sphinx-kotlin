@@ -1,6 +1,9 @@
 package chat.sphinx.di
 
+import android.widget.ImageView
 import chat.sphinx.BuildConfig
+import chat.sphinx.concept_image_loader.ImageLoader
+import chat.sphinx.feature_image_loader_android.ImageLoaderAndroid
 import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.util.SphinxDispatchers
 import chat.sphinx.util.SphinxLoggerImpl
@@ -44,4 +47,15 @@ object AppModule {
     @Singleton
     fun provideMoshi(): Moshi =
         Moshi.Builder().build()
+
+    @Provides
+    @Singleton
+    fun provideImageLoaderAndroid(): ImageLoaderAndroid =
+        ImageLoaderAndroid()
+
+    @Provides
+    fun provideImageLoaderImageView(
+        imageLoaderAndroid: ImageLoaderAndroid
+    ): ImageLoader<ImageView> =
+        imageLoaderAndroid
 }
