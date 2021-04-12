@@ -3,6 +3,7 @@ package chat.sphinx.di
 import android.widget.ImageView
 import chat.sphinx.BuildConfig
 import chat.sphinx.concept_image_loader.ImageLoader
+import chat.sphinx.concept_network_client_cache.NetworkClientCache
 import chat.sphinx.feature_image_loader_android.ImageLoaderAndroid
 import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.util.SphinxDispatchers
@@ -50,8 +51,10 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideImageLoaderAndroid(): ImageLoaderAndroid =
-        ImageLoaderAndroid()
+    fun provideImageLoaderAndroid(
+        networkClientCache: NetworkClientCache
+    ): ImageLoaderAndroid =
+        ImageLoaderAndroid(networkClientCache)
 
     @Provides
     fun provideImageLoaderImageView(

@@ -1,5 +1,6 @@
 package chat.sphinx.di
 
+import android.content.Context
 import chat.sphinx.concept_network_client.NetworkClient
 import chat.sphinx.concept_network_client_cache.NetworkClientCache
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
@@ -17,10 +18,12 @@ import chat.sphinx.feature_network_query_lightning.NetworkQueryLightningImpl
 import chat.sphinx.feature_network_query_message.NetworkQueryMessageImpl
 import chat.sphinx.feature_network_query_subscription.NetworkQuerySubscriptionImpl
 import chat.sphinx.feature_relay.RelayDataHandlerImpl
+import coil.util.CoilUtils
 import com.squareup.moshi.Moshi
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import io.matthewnelson.build_config.BuildConfigDebug
 import io.matthewnelson.concept_authentication.data.AuthenticationStorage
@@ -57,9 +60,13 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideNetworkClientImpl(
+        @ApplicationContext appContext: Context,
         buildConfigDebug: BuildConfigDebug
     ): NetworkClientImpl =
-        NetworkClientImpl(buildConfigDebug)
+        NetworkClientImpl(
+            buildConfigDebug,
+            CoilUtils.createDefaultCache(appContext)
+        )
 
     @Provides
     fun provideNetworkClient(

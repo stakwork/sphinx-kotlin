@@ -2,15 +2,12 @@ package chat.sphinx.feature_image_loader_android
 
 import android.widget.ImageView
 import chat.sphinx.concept_image_loader.ImageLoader
-import chat.sphinx.wrapper_common.chat.ChatId
-import chat.sphinx.wrapper_common.contact.ContactId
+import chat.sphinx.concept_network_client_cache.NetworkClientCache
 
-class ImageLoaderAndroid: ImageLoader<ImageView>() {
-    override suspend fun load(imageView: ImageView, id: ChatId, url: String) {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun load(imageView: ImageView, id: ContactId, url: String) {
+class ImageLoaderAndroid(
+    private var networkClientCache: NetworkClientCache
+): ImageLoader<ImageView>() {
+    override suspend fun load(imageView: ImageView, url: String) {
         TODO("Not yet implemented")
     }
 }

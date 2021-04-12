@@ -29,7 +29,7 @@ dependencies {
     api project(path: ':sphinx:application:data:concepts:concept-image-loader')
     implementation project(path: ':sphinx:application:network:concepts:clients:concept-network-client-cache')
 
-    implementation deps.instacart.coilBase
+    api deps.instacart.coilBase
 
     testImplementation project(path: ':kotlin:test:test-concept-coroutines')
 }

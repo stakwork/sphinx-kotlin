@@ -4,11 +4,15 @@ import chat.sphinx.concept_network_client_cache.NetworkClientCache
 import io.matthewnelson.build_config.BuildConfigDebug
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import okhttp3.Cache
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import java.util.concurrent.TimeUnit
 
-class NetworkClientImpl(private val debug: BuildConfigDebug): NetworkClientCache() {
+class NetworkClientImpl(
+    private val debug: BuildConfigDebug,
+    private val cache: Cache,
+): NetworkClientCache() {
 
     companion object {
         const val TIME_OUT = 30L
@@ -17,23 +21,35 @@ class NetworkClientImpl(private val debug: BuildConfigDebug): NetworkClientCache
 
     @Volatile
     private var client: OkHttpClient? = null
-    private val lock = Mutex()
+    private val clientLock = Mutex()
+
+    @Volatile
+    private var cachingClient: OkHttpClient? = null
+    private val cachingClientLock = Mutex()
 
     override suspend fun getClient(): OkHttpClient =
-        lock.withLock {
-            client ?: createClientImpl()
+        clientLock.withLock {
+            client ?: createClientImpl().build()
                 .also { client = it }
         }
 
-    // TODO: For future Tor implementation where variability in the
-    //  SOCKS Proxy can change depending on network state and if the
-    //  SOCKS Port is set to auto.
-    suspend fun createClient(): OkHttpClient =
-        lock.withLock {
-            createClientImpl()
+    override suspend fun getCachingClient(): OkHttpClient =
+        cachingClientLock.withLock {
+            cachingClient ?: createClientImpl()
+                .cache(cache)
+                .build()
+                .also { cachingClient = it }
         }
 
-    private suspend fun createClientImpl(): OkHttpClient =
+//    // TODO: For future Tor implementation where variability in the
+//    //  SOCKS Proxy can change depending on network state and if the
+//    //  SOCKS Port is set to auto.
+//    suspend fun createClient(): OkHttpClient =
+//        lock.withLock {
+//            createClientImpl()
+//        }
+
+    private suspend fun createClientImpl(): OkHttpClient.Builder =
         OkHttpClient.Builder().let { builder ->
 
             builder.callTimeout(TIME_OUT * 3, TimeUnit.SECONDS)
@@ -50,7 +66,6 @@ class NetworkClientImpl(private val debug: BuildConfigDebug): NetworkClientCache
                 }
             }
 
-            return builder.build()
-                .also { client = it }
+            return builder
         }
 }

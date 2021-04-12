@@ -24,10 +24,15 @@ import io.matthewnelson.crypto_common.clazzes.Password
 import io.matthewnelson.test_feature_authentication_core.AuthenticationCoreDefaultsTestHelper
 import io.matthewnelson.test_feature_authentication_core.TestEncryptionKeyHandler
 import kotlinx.coroutines.test.runBlockingTest
+import okhttp3.Cache
 import okio.base64.decodeBase64ToArray
 import org.cryptonode.jncryptor.AES256JNCryptor
+import org.junit.After
 import org.junit.Before
 import org.junit.BeforeClass
+import org.junit.Rule
+import org.junit.rules.TemporaryFolder
+import java.io.File
 
 /**
  * This class uses a test account setup on SphinxRelay to help ensure API compatibility.
@@ -134,10 +139,18 @@ abstract class NetworkQueryTestHelper: AuthenticationCoreDefaultsTestHelper() {
      * */
     open val useLoggingInterceptors: Boolean = false
 
+    @get:Rule
+    val testDirectory = TemporaryFolder()
+
+    open val okHttpCache: Cache by lazy {
+        Cache(testDirectory.newFile("okhttp_test_cache"), 2000000L /*2MB*/)
+    }
+
     protected open val networkClient: NetworkClient by lazy {
         NetworkClientImpl(
             // true will add interceptors to the OkHttpClient
-            BuildConfigDebug(useLoggingInterceptors)
+            BuildConfigDebug(useLoggingInterceptors),
+            okHttpCache,
         )
     }
 
@@ -206,6 +219,7 @@ abstract class NetworkQueryTestHelper: AuthenticationCoreDefaultsTestHelper() {
 
     @Before
     fun setupNetworkQueryTestHelper() = testDispatcher.runBlockingTest {
+        testDirectory.create()
         getCredentials()?.let { creds ->
             // Set our raw private/public keys in the test handler so when we login
             // for the first time the generated keys will be these
@@ -224,5 +238,10 @@ abstract class NetworkQueryTestHelper: AuthenticationCoreDefaultsTestHelper() {
         }
 
         // if null, do nothing.
+    }
+
+    @After
+    fun tearDownNetworkQueryTestHelper() {
+        testDirectory.delete()
     }
 }
