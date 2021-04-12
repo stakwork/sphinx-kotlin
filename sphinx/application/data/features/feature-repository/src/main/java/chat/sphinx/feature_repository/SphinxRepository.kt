@@ -228,7 +228,7 @@ class SphinxRepository(
                     try {
                         val dbos = contactDtoDboMapper.mapListFrom(
                             loadResponse.value.contacts.filterNot {
-                                it.from_group.toContactFromGroup().isTrue()
+                                it.fromGroupActual
                             }
                         )
 
