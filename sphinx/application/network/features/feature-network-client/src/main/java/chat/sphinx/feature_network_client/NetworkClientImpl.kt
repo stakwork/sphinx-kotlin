@@ -33,9 +33,6 @@ class NetworkClientImpl(
     private var cachingClient: OkHttpClient? = null
     private val cachingClientLock = Mutex()
 
-    override val isCachingClientCleared: Boolean
-        get() = cachingClient == null
-
     override suspend fun getCachingClient(): OkHttpClient =
         cachingClientLock.withLock {
             cachingClient ?: createClientImpl()
@@ -44,13 +41,14 @@ class NetworkClientImpl(
                 .also { cachingClient = it }
         }
 
-//    // TODO: For future Tor implementation where variability in the
-//    //  SOCKS Proxy can change depending on network state and if the
-//    //  SOCKS Port is set to auto.
-//    suspend fun createClient(): OkHttpClient =
-//        lock.withLock {
-//            createClientImpl()
-//        }
+    private var callback: () -> Unit? = {}
+    override fun addOnClientClearedCallback(onClear: () -> Unit) {
+        callback = onClear
+    }
+
+    override fun removeOnClientClearedCallback() {
+        callback = {}
+    }
 
     private suspend fun createClientImpl(): OkHttpClient.Builder =
         OkHttpClient.Builder().let { builder ->

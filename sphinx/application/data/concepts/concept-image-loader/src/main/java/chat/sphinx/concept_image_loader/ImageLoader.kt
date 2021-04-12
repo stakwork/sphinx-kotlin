@@ -1,8 +1,19 @@
 package chat.sphinx.concept_image_loader
 
 abstract class ImageLoader<ImageView> {
-    abstract suspend fun load(imageView: ImageView, url: String): Disposable
-    abstract suspend fun load(imageView: ImageView, drawableResId: Int): Disposable
+
+    abstract suspend fun load(
+        imageView: ImageView,
+        url: String,
+        options: ImageLoaderOptions? = null
+    ): Disposable
+
+    abstract suspend fun load(
+        imageView: ImageView,
+        drawableResId: Int,
+        options: ImageLoaderOptions? = null
+    ): Disposable
+
 }
 
 /**

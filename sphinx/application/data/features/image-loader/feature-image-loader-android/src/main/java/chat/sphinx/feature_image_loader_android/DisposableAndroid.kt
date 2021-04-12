@@ -11,7 +11,7 @@ class DisposableAndroid(private val disposable: coil.request.Disposable): Dispos
         disposable.dispose()
     }
 
-    @ExperimentalCoilApi
+    @OptIn(ExperimentalCoilApi::class)
     override suspend fun await() {
         disposable.await()
     }
