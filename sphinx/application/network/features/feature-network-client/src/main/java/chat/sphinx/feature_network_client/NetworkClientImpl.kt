@@ -23,15 +23,18 @@ class NetworkClientImpl(
     private var client: OkHttpClient? = null
     private val clientLock = Mutex()
 
-    @Volatile
-    private var cachingClient: OkHttpClient? = null
-    private val cachingClientLock = Mutex()
-
     override suspend fun getClient(): OkHttpClient =
         clientLock.withLock {
             client ?: createClientImpl().build()
                 .also { client = it }
         }
+
+    @Volatile
+    private var cachingClient: OkHttpClient? = null
+    private val cachingClientLock = Mutex()
+
+    override val isCachingClientCleared: Boolean
+        get() = cachingClient == null
 
     override suspend fun getCachingClient(): OkHttpClient =
         cachingClientLock.withLock {
