@@ -15,6 +15,7 @@ import chat.sphinx.resources.setTextColorExt
 import chat.sphinx.wrapper_chat.*
 import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_message.*
+import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.invisibleIfFalse
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -145,6 +146,7 @@ internal class ChatListAdapter(
                 val dashboardChat = dashboardChats.getOrNull(position) ?: return
 
                 // Set Defaults
+                layoutConstraintChatHolderBorder.goneIfFalse(position != dashboardChats.lastIndex)
                 textViewChatHolderName.setTextColorExt(android.R.color.white)
                 textViewChatHolderMessage.setTextColorExt(R.color.textHint)
 
