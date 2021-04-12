@@ -9,12 +9,14 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
+import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import app.cash.exhaustive.Exhaustive
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.dashboard.R
 import chat.sphinx.dashboard.databinding.FragmentDashboardBinding
 import chat.sphinx.dashboard.ui.adapter.ChatListAdapter
+import chat.sphinx.dashboard.ui.adapter.ChatListFooterAdapter
 import chat.sphinx.dashboard.ui.viewstates.NavDrawerViewState
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
@@ -91,10 +93,12 @@ internal class DashboardFragment : MotionLayoutFragment<
     }
 
     private fun setupChats() {
+        val chatListAdapter = ChatListAdapter(viewLifecycleOwner, viewModel)
+        val chatListFooterAdapter = ChatListFooterAdapter(viewLifecycleOwner, viewModel)
         binding.layoutDashboardChats.recyclerViewChats.apply {
             this.setHasFixedSize(true)
             layoutManager = LinearLayoutManager(binding.root.context)
-            adapter = ChatListAdapter(viewLifecycleOwner, viewModel)
+            adapter = ConcatAdapter(chatListAdapter, chatListFooterAdapter)
         }
     }
 
