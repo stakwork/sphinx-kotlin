@@ -20,7 +20,7 @@ data class MessageDto(
     val message_content: String?,
     val remote_message_content: String?,
     val status: Int?,
-    val status_map: Map<Long, Int?>?, // contact_id : their message's 'status'
+//    val status_map: Map<Long, Int?>?, // contact_id : their message's 'status'
     val parent_id: Long?,
     val subscription_id: Long?,
     val media_key: String?,
