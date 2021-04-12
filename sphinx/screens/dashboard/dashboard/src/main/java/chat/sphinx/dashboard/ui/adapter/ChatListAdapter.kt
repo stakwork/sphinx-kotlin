@@ -2,10 +2,15 @@ package chat.sphinx.dashboard.ui.adapter
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.widget.ImageView
 import androidx.lifecycle.*
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import app.cash.exhaustive.Exhaustive
+import chat.sphinx.concept_image_loader.Disposable
+import chat.sphinx.concept_image_loader.ImageLoader
+import chat.sphinx.concept_image_loader.ImageLoaderOptions
+import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.dashboard.R
 import chat.sphinx.dashboard.databinding.LayoutChatHolderBinding
 import chat.sphinx.dashboard.ui.DashboardViewModel
@@ -23,6 +28,7 @@ import java.util.*
 import kotlin.collections.ArrayList
 
 internal class ChatListAdapter(
+    private val imageLoader: ImageLoader<ImageView>,
     private val lifecycleOwner: LifecycleOwner,
     private val viewModel: DashboardViewModel,
 ): RecyclerView.Adapter<ChatListAdapter.ChatViewHolder>(), DefaultLifecycleObserver {
@@ -137,13 +143,23 @@ internal class ChatListAdapter(
         DateTime.getToday00()
     }
 
+    private val imageLoaderOptions: ImageLoaderOptions by lazy {
+        ImageLoaderOptions.Builder()
+            .placeholderResId(R.drawable.sphinx_white_logo)
+            .transformation(Transformation.CircleCrop)
+            .build()
+    }
+
     inner class ChatViewHolder(
         private val binding: LayoutChatHolderBinding
     ): RecyclerView.ViewHolder(binding.root) {
 
+        private var disposable: Disposable? = null
+
         fun bind(position: Int) {
             binding.apply {
                 val dashboardChat = dashboardChats.getOrNull(position) ?: return
+                disposable?.dispose()
 
                 // Set Defaults
                 layoutConstraintChatHolderBorder.goneIfFalse(position != dashboardChats.lastIndex)
@@ -151,12 +167,22 @@ internal class ChatListAdapter(
                 textViewChatHolderMessage.setTextColorExt(R.color.textHint)
 
                 // Image
-                // TODO: Setup COIL
-                @Exhaustive
-                when (dashboardChat) {
-                    is DashboardChat.Active.Conversation -> {}
-                    is DashboardChat.Active.GroupOrTribe -> {}
-                    is DashboardChat.Inactive.Conversation -> {}
+                dashboardChat.photoUrl.let { url ->
+                    supervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
+                        disposable = if (url != null) {
+                            imageLoader.load(
+                                imageViewChatHolder,
+                                url.value,
+                                imageLoaderOptions
+                            )
+                        } else {
+                            imageLoader.load(
+                                imageViewChatHolder,
+                                R.drawable.sphinx_white_logo,
+                                imageLoaderOptions
+                            )
+                        }
+                    }
                 }
 
                 // Name
@@ -196,17 +222,17 @@ internal class ChatListAdapter(
                     when (dashboardChat) {
                         is DashboardChat.Active.Conversation -> {
                             // TODO: Use ContactId
-                            supervisor.scope().launch {
+                            supervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
                                 viewModel.dashboardNavigator.toChatContact(dashboardChat.chat.id)
                             }
                         }
                         is DashboardChat.Active.GroupOrTribe -> {
                             if (dashboardChat.chat.type.isGroup()) {
-                                supervisor.scope().launch {
+                                supervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
                                     viewModel.dashboardNavigator.toChatGroup(dashboardChat.chat.id)
                                 }
                             } else if (dashboardChat.chat.type.isTribe()) {
-                                supervisor.scope().launch {
+                                supervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
                                     viewModel.dashboardNavigator.toChatTribe(dashboardChat.chat.id)
                                 }
                             }
