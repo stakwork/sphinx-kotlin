@@ -1,0 +1,15 @@
+plugins {
+    id 'java-library'
+    id 'kotlin'
+}
+
+dependencies {
+    // KotlinAndroid
+    api project(path: ':kotlin:concepts:concept-coroutines')
+
+    // Sphinx
+    api project(path: ':sphinx:application:network:concepts:concept-network-relay-call')
+    api project(path: ':sphinx:application:network:concepts:clients:concept-network-client')
+
+    api deps.square.moshi
+}
