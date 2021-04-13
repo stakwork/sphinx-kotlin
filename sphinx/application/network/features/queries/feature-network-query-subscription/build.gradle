@@ -6,16 +6,12 @@ plugins {
 }
 
 dependencies {
-    // KotlinAndroid
-    api project(path: ':kotlin:concepts:concept-coroutines')
-
-    // Sphinx
-    api project(path: ':sphinx:application:data:concepts:concept-relay')
     api project(path: ':sphinx:application:network:concepts:queries:concept-network-query-subscription')
-    api project(path: ':sphinx:application:network:concepts:clients:concept-network-client')
-    implementation project(path: ':sphinx:application:network:network-relay-call')
+    api project(path: ':sphinx:application:network:concepts:concept-network-relay-call')
 
-    api deps.square.moshi
+    implementation deps.kotlin.coroutinesCore
+
+    implementation deps.square.moshi
     kapt kaptDeps.square.moshiCodegen
 
     testImplementation project(path: ':sphinx:test:test-network-query')

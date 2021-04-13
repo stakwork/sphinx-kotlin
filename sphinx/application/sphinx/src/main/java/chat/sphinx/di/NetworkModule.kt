@@ -9,6 +9,7 @@ import chat.sphinx.concept_network_query_invite.NetworkQueryInvite
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_message.NetworkQueryMessage
 import chat.sphinx.concept_network_query_subscription.NetworkQuerySubscription
+import chat.sphinx.concept_network_relay_call.NetworkRelayCall
 import chat.sphinx.concept_relay.RelayDataHandler
 import chat.sphinx.feature_network_client.NetworkClientImpl
 import chat.sphinx.feature_network_query_chat.NetworkQueryChatImpl
@@ -17,7 +18,9 @@ import chat.sphinx.feature_network_query_invite.NetworkQueryInviteImpl
 import chat.sphinx.feature_network_query_lightning.NetworkQueryLightningImpl
 import chat.sphinx.feature_network_query_message.NetworkQueryMessageImpl
 import chat.sphinx.feature_network_query_subscription.NetworkQuerySubscriptionImpl
+import chat.sphinx.feature_network_relay_call.NetworkRelayCallImpl
 import chat.sphinx.feature_relay.RelayDataHandlerImpl
+import chat.sphinx.logger.SphinxLogger
 import coil.util.CoilUtils
 import com.squareup.moshi.Moshi
 import dagger.Module
@@ -82,18 +85,33 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideNetworkQueryChatImpl(
+    fun provideNetworkRelayCallImpl(
         dispatchers: CoroutineDispatchers,
         moshi: Moshi,
         networkClient: NetworkClient,
         relayDataHandler: RelayDataHandler,
-    ): NetworkQueryChatImpl =
-        NetworkQueryChatImpl(
+        sphinxLogger: SphinxLogger,
+    ): NetworkRelayCallImpl =
+        NetworkRelayCallImpl(
             dispatchers,
             moshi,
             networkClient,
             relayDataHandler,
+            sphinxLogger
         )
+
+    @Provides
+    fun provideNetworkRelayCall(
+        networkRelayCallImpl: NetworkRelayCallImpl
+    ): NetworkRelayCall =
+        networkRelayCallImpl
+
+    @Provides
+    @Singleton
+    fun provideNetworkQueryChatImpl(
+        networkRelayCall: NetworkRelayCall
+    ): NetworkQueryChatImpl =
+        NetworkQueryChatImpl(networkRelayCall)
 
     @Provides
     fun provideNetworkQueryChat(
@@ -104,17 +122,9 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideNetworkQueryContactImpl(
-        dispatchers: CoroutineDispatchers,
-        moshi: Moshi,
-        networkClient: NetworkClient,
-        relayDataHandler: RelayDataHandler,
+        networkRelayCall: NetworkRelayCall
     ): NetworkQueryContactImpl =
-        NetworkQueryContactImpl(
-            dispatchers,
-            moshi,
-            networkClient,
-            relayDataHandler,
-        )
+        NetworkQueryContactImpl(networkRelayCall)
 
     @Provides
     fun provideNetworkQueryContact(
@@ -125,17 +135,9 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideNetworkQueryInviteImpl(
-        dispatchers: CoroutineDispatchers,
-        moshi: Moshi,
-        networkClient: NetworkClient,
-        relayDataHandler: RelayDataHandler
+        networkRelayCall: NetworkRelayCall
     ): NetworkQueryInviteImpl =
-        NetworkQueryInviteImpl(
-            dispatchers,
-            moshi,
-            networkClient,
-            relayDataHandler,
-        )
+        NetworkQueryInviteImpl(networkRelayCall)
 
     @Provides
     fun provideNetworkQueryInvite(
@@ -146,17 +148,9 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideNetworkQueryLightningImpl(
-        dispatchers: CoroutineDispatchers,
-        moshi: Moshi,
-        networkClient: NetworkClient,
-        relayDataHandler: RelayDataHandler,
+        networkRelayCall: NetworkRelayCall
     ): NetworkQueryLightningImpl =
-        NetworkQueryLightningImpl(
-            dispatchers,
-            moshi,
-            networkClient,
-            relayDataHandler,
-        )
+        NetworkQueryLightningImpl(networkRelayCall)
 
     @Provides
     fun provideNetworkQueryLightning(
@@ -167,17 +161,9 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideNetworkQueryMessageImpl(
-        dispatchers: CoroutineDispatchers,
-        moshi: Moshi,
-        networkClient: NetworkClient,
-        relayDataHandler: RelayDataHandler,
+        networkRelayCall: NetworkRelayCall
     ): NetworkQueryMessageImpl =
-        NetworkQueryMessageImpl(
-            dispatchers,
-            moshi,
-            networkClient,
-            relayDataHandler,
-        )
+        NetworkQueryMessageImpl(networkRelayCall)
 
     @Provides
     fun provideNetworkQueryMessage(
@@ -188,17 +174,9 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideNetworkQuerySubscriptionImpl(
-        dispatchers: CoroutineDispatchers,
-        moshi: Moshi,
-        networkClient: NetworkClient,
-        relayDataHandler: RelayDataHandler,
+        networkRelayCall: NetworkRelayCall
     ): NetworkQuerySubscriptionImpl =
-        NetworkQuerySubscriptionImpl(
-            dispatchers,
-            moshi,
-            networkClient,
-            relayDataHandler,
-        )
+        NetworkQuerySubscriptionImpl(networkRelayCall)
 
     @Provides
     fun provideNetworkQuerySubscription(

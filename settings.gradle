@@ -50,7 +50,8 @@ include ':sphinx:application:network:features:queries:feature-network-query-mess
 include ':sphinx:application:network:concepts:queries:concept-network-query-message'
 include ':sphinx:application:network:features:queries:feature-network-query-subscription'
 include ':sphinx:application:network:concepts:queries:concept-network-query-subscription'
-include ':sphinx:application:network:network-relay-call'
+include ':sphinx:application:network:features:feature-network-relay-call'
+include ':sphinx:application:network:concepts:concept-network-relay-call'
 
 // Activity
 include ':sphinx:activity:hilt-qualifiers'
