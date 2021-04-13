@@ -12,12 +12,15 @@ abstract class NetworkQueryContact {
     ///////////
     /// GET ///
     ///////////
-    abstract fun getContacts(): Flow<LoadResponse<GetContactsResponse, ResponseError>>
-
     abstract fun getContacts(
-        authorizationToken: AuthorizationToken,
-        relayUrl: RelayUrl
+        relayData: Pair<AuthorizationToken, RelayUrl>? = null
     ): Flow<LoadResponse<GetContactsResponse, ResponseError>>
+//    abstract fun getContacts(): Flow<LoadResponse<GetContactsResponse, ResponseError>>
+//
+//    abstract fun getContacts(
+//        authorizationToken: AuthorizationToken,
+//        relayUrl: RelayUrl
+//    ): Flow<LoadResponse<GetContactsResponse, ResponseError>>
 
     ///////////
     /// PUT ///
