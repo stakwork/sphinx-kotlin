@@ -69,32 +69,65 @@ class ImageLoaderAndroid(
                 .dispatcher(dispatchers.io)
                 .target(imageView)
 
-            request.apply {
-                options?.errorResId?.let {
-                    error(it)
+            options?.let {
+                it.errorResId?.let { errorRes ->
+                    request.error(errorRes)
                 }
-                options?.placeholderResId?.let {
-                    placeholder(it)
+                it.placeholderResId?.let { placeholderRes ->
+                    request.placeholder(placeholderRes)
                 }
-                options?.transformation?.let {
+                it.transformation?.let { transform ->
                     @Exhaustive
-                    when (it) {
-                        Transformation.Blur -> {
-                            transformations(BlurTransformation(appContext))
+                    when (transform) {
+                        is Transformation.Blur -> {
+                            request.transformations(
+                                BlurTransformation(
+                                    appContext,
+                                    transform.radius,
+                                    transform.sampling
+                                )
+                            )
                         }
-                        Transformation.CircleCrop -> {
-                            transformations(CircleCropTransformation())
+                        is Transformation.CircleCrop -> {
+                            request.transformations(
+                                CircleCropTransformation()
+                            )
                         }
-                        Transformation.GrayScale -> {
-                            transformations(GrayscaleTransformation())
+                        is Transformation.GrayScale -> {
+                            request.transformations(
+                                GrayscaleTransformation()
+                            )
                         }
-                        Transformation.RoundedCorners -> {
-                            transformations(RoundedCornersTransformation())
+                        is Transformation.RoundedCorners -> {
+                            request.transformations(
+                                RoundedCornersTransformation(
+                                    transform.topLeft,
+                                    transform.topRight,
+                                    transform.bottomLeft,
+                                    transform.bottomRight
+                                )
+                            )
                         }
                     }
                 }
-                if (options?.transition is Transition.CrossFade) {
-                    request.transition(CrossfadeTransition())
+
+                it.transition.let { transition ->
+                    @Exhaustive
+                    when (transition) {
+                        is Transition.CrossFade -> {
+                            request.transition(
+                                CrossfadeTransition(
+                                    transition.durationMillis,
+                                    transition.preferExactIntrinsicSize
+                                )
+                            )
+                        }
+                        is Transition.None -> {
+                            request.transition(
+                                coil.transition.Transition.NONE
+                            )
+                        }
+                    }
                 }
             }
 

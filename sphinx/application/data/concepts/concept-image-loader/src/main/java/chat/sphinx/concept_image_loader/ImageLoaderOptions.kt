@@ -1,6 +1,6 @@
 package chat.sphinx.concept_image_loader
 
-class ImageLoaderOptions(
+class ImageLoaderOptions private constructor(
     val transformation: Transformation?,
     val transition: Transition,
     val errorResId: Int?,
@@ -41,28 +41,37 @@ class ImageLoaderOptions(
 
 sealed class Transformation {
 
-    // TODO: Add support for:
-    //  private val radius: Float = DEFAULT_RADIUS,
-    //  private val sampling: Float = DEFAULT_SAMPLING
-    object Blur: Transformation()
+    class Blur(
+        val radius: Float = DEFAULT_RADIUS,
+        val sampling: Float = DEFAULT_SAMPLING,
+    ): Transformation() {
+        companion object {
+            const val DEFAULT_RADIUS = 10f
+            const val DEFAULT_SAMPLING = 1f
+        }
+    }
 
     object CircleCrop: Transformation()
     object GrayScale: Transformation()
 
-    // TODO: Add support for:
-    //  @Px private val topLeft: Float = 0f,
-    //  @Px private val topRight: Float = 0f,
-    //  @Px private val bottomLeft: Float = 0f,
-    //  @Px private val bottomRight: Float = 0f
-    object RoundedCorners: Transformation()
+    class RoundedCorners(
+        val topLeft: Float = 0f,
+        val topRight: Float = 0f,
+        val bottomLeft: Float = 0f,
+        val bottomRight: Float = 0f,
+    ): Transformation()
 }
 
 sealed class Transition {
 
-    // TODO: Add support for:
-    //  val durationMillis: Int = CrossfadeDrawable.DEFAULT_DURATION,
-    //  val preferExactIntrinsicSize: Boolean = false
-    object CrossFade: Transition()
+    class CrossFade(
+        val durationMillis: Int = DEFAULT_DURATION,
+        val preferExactIntrinsicSize: Boolean = false
+    ): Transition() {
+        companion object {
+            const val DEFAULT_DURATION = 100
+        }
+    }
 
     object None: Transition()
 }
