@@ -15,8 +15,11 @@ class NetworkClientImpl(
 ): NetworkClientCache() {
 
     companion object {
-        const val TIME_OUT = 30L
+        const val TIME_OUT = 20L
         const val PING_INTERVAL = 30L
+
+        const val CACHE_CONTROL = "Cache-Control"
+        const val MAX_STALE = "public, max-stale=$MAX_STALE_VALUE"
     }
 
     @Volatile
@@ -37,6 +40,12 @@ class NetworkClientImpl(
         cachingClientLock.withLock {
             cachingClient ?: createClientImpl()
                 .cache(cache)
+                .addInterceptor { chain ->
+                    val request = chain.request().newBuilder()
+                        .header(CACHE_CONTROL, MAX_STALE)
+                        .build()
+                    chain.proceed(request)
+                }
                 .build()
                 .also { cachingClient = it }
         }
