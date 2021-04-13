@@ -52,7 +52,6 @@ include ':sphinx:application:network:features:queries:feature-network-query-subs
 include ':sphinx:application:network:concepts:queries:concept-network-query-subscription'
 include ':sphinx:application:network:features:feature-network-relay-call'
 include ':sphinx:application:network:concepts:concept-network-relay-call'
-include ':sphinx:application:network:network-relay-call'
 
 // Activity
 include ':sphinx:activity:hilt-qualifiers'
