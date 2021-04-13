@@ -12,11 +12,8 @@ abstract class NetworkQueryChat {
     ///////////
     /// GET ///
     ///////////
-    abstract fun getChats(): Flow<LoadResponse<List<ChatDto>, ResponseError>>
-
     abstract fun getChats(
-        authorizationToken: AuthorizationToken,
-        relayUrl: RelayUrl
+        relayData: Pair<AuthorizationToken, RelayUrl>? = null
     ): Flow<LoadResponse<List<ChatDto>, ResponseError>>
 
     ///////////
