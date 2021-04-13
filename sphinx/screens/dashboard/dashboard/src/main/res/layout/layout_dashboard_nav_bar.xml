@@ -5,7 +5,7 @@
     android:id="@+id/layout_constraint_dashboard_nav_bar"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/headerBackground"
+    android:background="@color/headerBG"
     android:elevation="@dimen/default_elevation">
 
     <androidx.appcompat.widget.AppCompatImageView
@@ -22,9 +22,7 @@
         android:id="@+id/nav_bar_button_transactions"
         android:layout_width="0dp"
         android:layout_height="@dimen/default_bottom_bar_height"
-        android:layout_marginStart="@dimen/default_layout_margin"
-        android:layout_marginEnd="8dp"
-        android:padding="@dimen/nav_bar_button_padding"
+        android:padding="19dp"
         android:src="@drawable/ic_transaction"
         app:layout_constraintEnd_toStartOf="@+id/nav_bar_button_scanner"
         app:layout_constraintStart_toEndOf="@+id/nav_bar_button_payment_receive"
@@ -34,9 +32,7 @@
         android:id="@+id/nav_bar_button_scanner"
         android:layout_width="0dp"
         android:layout_height="@dimen/default_bottom_bar_height"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="@dimen/default_layout_margin"
-        android:padding="@dimen/nav_bar_button_padding"
+        android:padding="18dp"
         android:src="@drawable/ic_scan"
         app:layout_constraintEnd_toStartOf="@+id/nav_bar_button_payment_send"
         app:layout_constraintStart_toEndOf="@+id/nav_bar_button_transactions"

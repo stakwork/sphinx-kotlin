@@ -168,7 +168,7 @@ internal class ChatListAdapter(
 
     private val imageLoaderOptions: ImageLoaderOptions by lazy {
         ImageLoaderOptions.Builder()
-            .placeholderResId(R.drawable.sphinx_white_logo)
+            .placeholderResId(R.drawable.ic_profile_avatar_circle)
             .transformation(Transformation.CircleCrop)
             .build()
     }
@@ -187,7 +187,7 @@ internal class ChatListAdapter(
                 // Set Defaults
                 layoutConstraintChatHolderBorder.goneIfFalse(position != dashboardChats.lastIndex)
                 textViewChatHolderName.setTextColorExt(android.R.color.white)
-                textViewChatHolderMessage.setTextColorExt(R.color.textHint)
+                textViewChatHolderMessage.setTextColorExt(R.color.placeholderText)
 
                 // Image
                 dashboardChat.photoUrl.let { url ->
@@ -201,7 +201,7 @@ internal class ChatListAdapter(
                         } else {
                             imageLoader.load(
                                 imageViewChatHolder,
-                                R.drawable.sphinx_white_logo,
+                                R.drawable.ic_profile_avatar_circle,
                                 imageLoaderOptions
                             )
                         }

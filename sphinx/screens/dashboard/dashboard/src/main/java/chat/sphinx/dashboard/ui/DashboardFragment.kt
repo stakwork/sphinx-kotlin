@@ -227,7 +227,7 @@ internal class DashboardFragment : MotionLayoutFragment<
                                     drawable?.setTint(
                                         ContextCompat.getColor(
                                             binding.root.context,
-                                            R.color.secondaryColor
+                                            R.color.primaryGreen
                                         )
                                     )
                                 }

@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    tools:background="@color/primaryColor">
+    tools:background="@color/primaryBlue">
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/text_view_welcome"
@@ -55,7 +55,7 @@
             android:hint="@string/on_board_edit_text_hint_code"
             android:inputType="text"
             android:singleLine="true"
-            android:textColor="@color/secondaryTextColor"
+            android:textColor="@color/secondaryText"
             android:textColorHint="@color/lightPurple"
             android:textSize="24sp"
             app:layout_constraintEnd_toStartOf="@+id/image_button_scanner"

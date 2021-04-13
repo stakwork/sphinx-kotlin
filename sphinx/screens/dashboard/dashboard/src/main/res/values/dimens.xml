@@ -2,19 +2,26 @@
 <resources>
     <dimen name="nav_drawer_width">240dp</dimen>
     <item name="nav_drawer_input_lock_alpha" type="dimen" format="float">.5</item>
-    <dimen name="nav_drawer_default_text_size">18sp</dimen>
 
+    <!-- Text size -->
+    <dimen name="nav_drawer_default_text_size">16sp</dimen>
+    <dimen name="dashboard_search_text_size">14sp</dimen>
 
-    <dimen name="nav_drawer_header_profile_picture_xy">60dp</dimen>
+    <dimen name="add_buttons_height">50dp</dimen>
+    <dimen name="add_buttons_text_size">15sp</dimen>
+    <dimen name="add_buttons_icon_size">25sp</dimen>
+
+    <dimen name="nav_drawer_header_margin">32dp</dimen>
+    <dimen name="nav_drawer_header_profile_picture_size">45dp</dimen>
     <dimen name="nav_drawer_header_profile_text_margin">8dp</dimen>
 
-    <dimen name="nav_drawer_button_image_xy">32dp</dimen>
+    <dimen name="nav_drawer_button_image_xy">29dp</dimen>
 
     <!-- This is the profile_picture_xy + profile_text_margin -->
-    <dimen name="nav_drawer_button_text_margin_start">68dp</dimen>
+    <dimen name="nav_drawer_button_text_margin_start">53dp</dimen>
 
     <!-- This is the profile_picture_xy - nav_drawer_button_image_xy / 2-->
-    <dimen name="nav_drawer_button_image_margin_start">14dp</dimen>
+    <dimen name="nav_drawer_button_image_margin_start">8dp</dimen>
 
     <dimen name="nav_drawer_button_margin_top">32dp</dimen>
 
@@ -23,5 +30,5 @@
     <dimen name="search_bar_height">48dp</dimen>
     <dimen name="dashboard_header_network_xy">24dp</dimen>
 
-    <dimen name="recycler_view_holder_height">80dp</dimen>
+    <dimen name="recycler_view_holder_height">90dp</dimen>
 </resources>
