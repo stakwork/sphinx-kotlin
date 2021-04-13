@@ -15,28 +15,20 @@ abstract class NetworkQueryLightning {
     ///////////
     /// GET ///
     ///////////
-    abstract fun getInvoices(): Flow<LoadResponse<InvoicesDto, ResponseError>>
     abstract fun getInvoices(
-        authorizationToken: AuthorizationToken,
-        relayUrl: RelayUrl,
+        relayData: Pair<AuthorizationToken, RelayUrl>? = null
     ): Flow<LoadResponse<InvoicesDto, ResponseError>>
 
-    abstract fun getChannels(): Flow<LoadResponse<ChannelsDto, ResponseError>>
     abstract fun getChannels(
-        authorizationToken: AuthorizationToken,
-        relayUrl: RelayUrl,
+        relayData: Pair<AuthorizationToken, RelayUrl>? = null
     ): Flow<LoadResponse<ChannelsDto, ResponseError>>
 
-    abstract fun getBalance(): Flow<LoadResponse<BalanceDto, ResponseError>>
     abstract fun getBalance(
-        authorizationToken: AuthorizationToken,
-        relayUrl: RelayUrl,
+        relayData: Pair<AuthorizationToken, RelayUrl>? = null
     ): Flow<LoadResponse<BalanceDto, ResponseError>>
 
-abstract fun getBalanceAll(): Flow<LoadResponse<BalanceAllDto, ResponseError>>
     abstract fun getBalanceAll(
-        authorizationToken: AuthorizationToken,
-        relayUrl: RelayUrl,
+        relayData: Pair<AuthorizationToken, RelayUrl>? = null
     ): Flow<LoadResponse<BalanceAllDto, ResponseError>>
 
 //    app.get('/getinfo', details.getInfo)
