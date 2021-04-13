@@ -11,6 +11,7 @@ dependencies {
     api project(path: ':sphinx:application:common:kotlin-response')
     api project(path: ':sphinx:application:common:wrappers:wrapper-relay')
     api project(path: ':sphinx:application:network:concepts:clients:concept-network-client')
+    api project(path: ':sphinx:application:network:concepts:concept-network-relay-call')
 
     api deps.square.moshi
 }
