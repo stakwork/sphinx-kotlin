@@ -7,6 +7,7 @@ import chat.sphinx.concept_network_query_invite.NetworkQueryInvite
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_message.NetworkQueryMessage
 import chat.sphinx.concept_network_query_subscription.NetworkQuerySubscription
+import chat.sphinx.concept_network_relay_call.NetworkRelayCall
 import chat.sphinx.concept_relay.RelayDataHandler
 import chat.sphinx.feature_network_client.NetworkClientImpl
 import chat.sphinx.feature_network_query_chat.NetworkQueryChatImpl
@@ -15,7 +16,10 @@ import chat.sphinx.feature_network_query_invite.NetworkQueryInviteImpl
 import chat.sphinx.feature_network_query_lightning.NetworkQueryLightningImpl
 import chat.sphinx.feature_network_query_message.NetworkQueryMessageImpl
 import chat.sphinx.feature_network_query_subscription.NetworkQuerySubscriptionImpl
+import chat.sphinx.feature_network_relay_call.NetworkRelayCallImpl
 import chat.sphinx.feature_relay.RelayDataHandlerImpl
+import chat.sphinx.logger.LogType
+import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
 import com.squareup.moshi.Moshi
@@ -32,7 +36,6 @@ import org.junit.Before
 import org.junit.BeforeClass
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
-import java.io.File
 
 /**
  * This class uses a test account setup on SphinxRelay to help ensure API compatibility.
@@ -44,6 +47,7 @@ import java.io.File
  * that test will simply notify that environment variables should be set with
  * their own test account credentials.
  * */
+@Suppress("BlockingMethodInNonBlockingContext")
 abstract class NetworkQueryTestHelper: AuthenticationCoreDefaultsTestHelper() {
 
     companion object {
@@ -163,58 +167,42 @@ abstract class NetworkQueryTestHelper: AuthenticationCoreDefaultsTestHelper() {
         )
     }
 
-    protected open val nqChat: NetworkQueryChat by lazy {
-        NetworkQueryChatImpl(
+    private class TestSphinxLogger: SphinxLogger() {
+        override fun log(tag: String, message: String, type: LogType, throwable: Throwable?) {}
+    }
+
+    protected open val networkRelayCall: NetworkRelayCall by lazy {
+        NetworkRelayCallImpl(
             dispatchers,
             moshi,
             networkClient,
-            relayDataHandler
+            relayDataHandler,
+            TestSphinxLogger()
         )
+    }
+
+    protected open val nqChat: NetworkQueryChat by lazy {
+        NetworkQueryChatImpl(networkRelayCall)
     }
 
     protected open val nqContact: NetworkQueryContact by lazy {
-        NetworkQueryContactImpl(
-            dispatchers,
-            moshi,
-            networkClient,
-            relayDataHandler
-        )
+        NetworkQueryContactImpl(networkRelayCall)
     }
 
     protected open val nqInvite: NetworkQueryInvite by lazy {
-        NetworkQueryInviteImpl(
-            dispatchers,
-            moshi,
-            networkClient,
-            relayDataHandler
-        )
+        NetworkQueryInviteImpl(networkRelayCall)
     }
 
     protected open val nqMessage: NetworkQueryMessage by lazy {
-        NetworkQueryMessageImpl(
-            dispatchers,
-            moshi,
-            networkClient,
-            relayDataHandler
-        )
+        NetworkQueryMessageImpl(networkRelayCall)
     }
 
     protected open val nqSubscription: NetworkQuerySubscription by lazy {
-        NetworkQuerySubscriptionImpl(
-            dispatchers,
-            moshi,
-            networkClient,
-            relayDataHandler
-        )
+        NetworkQuerySubscriptionImpl(networkRelayCall)
     }
 
     protected open val nqLightning: NetworkQueryLightning by lazy {
-        NetworkQueryLightningImpl(
-            dispatchers,
-            moshi,
-            networkClient,
-            relayDataHandler
-        )
+        NetworkQueryLightningImpl(networkRelayCall)
     }
 
     @Before
