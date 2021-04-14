@@ -2,7 +2,6 @@ package chat.sphinx.feature_repository
 
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_coredb.CoreDB
-import chat.sphinx.concept_coredb.util.upsertChat
 import chat.sphinx.concept_coredb.util.upsertMessage
 import chat.sphinx.concept_coredb.util.upsertMessageMedia
 import chat.sphinx.concept_crypto_rsa.RSA
@@ -18,13 +17,13 @@ import chat.sphinx.conceptcoredb.MessageDbo
 import chat.sphinx.conceptcoredb.MessageMediaDbo
 import chat.sphinx.conceptcoredb.SphinxDatabaseQueries
 import chat.sphinx.feature_repository.mappers.chat.ChatDboPresenterMapper
-import chat.sphinx.feature_repository.mappers.chat.ChatDtoDboMapper
 import chat.sphinx.feature_repository.mappers.contact.ContactDboPresenterMapper
 import chat.sphinx.feature_repository.mappers.invite.InviteDboPresenterMapper
 import chat.sphinx.feature_repository.mappers.mapListFrom
 import chat.sphinx.feature_repository.mappers.media.MessageDtoMediaDboMapper
 import chat.sphinx.feature_repository.mappers.message.MessageDboPresenterMapper
 import chat.sphinx.feature_repository.mappers.message.MessageDtoDboMapper
+import chat.sphinx.feature_repository.util.upsertChat
 import chat.sphinx.feature_repository.util.upsertContact
 import chat.sphinx.kotlin_response.*
 import chat.sphinx.logger.SphinxLogger
@@ -79,9 +78,6 @@ class SphinxRepository(
     /// Chats ///
     /////////////
     private val chatLock = Mutex()
-    private val chatDtoDboMapper: ChatDtoDboMapper by lazy {
-        ChatDtoDboMapper(dispatchers, moshi)
-    }
     private val chatDboPresenterMapper: ChatDboPresenterMapper by lazy {
         ChatDboPresenterMapper(dispatchers)
     }
@@ -132,8 +128,6 @@ class SphinxRepository(
 
     private suspend fun processChatDtos(chats: List<ChatDto>): Response<Boolean, ResponseError> {
         try {
-            val dbos = chatDtoDboMapper.mapListFrom(chats)
-
             val queries = coreDB.getSphinxDatabaseQueries()
 
             chatLock.withLock {
@@ -146,14 +140,14 @@ class SphinxRepository(
                     messageLock.withLock {
 
                         queries.transaction {
-                            dbos.forEach { dbo ->
-                                queries.upsertChat(dbo)
+                            for (dto in chats) {
+                                queries.upsertChat(dto, moshi)
 
-                                chatIdsToRemove.remove(dbo.id)
+                                chatIdsToRemove.remove(ChatId(dto.id))
                             }
 
                             // remove remaining chat's from DB
-                            chatIdsToRemove.forEach { chatId ->
+                            for (chatId in chatIdsToRemove) {
                                 LOG.d(TAG, "Removing Chats/Messages - chatId")
                                 queries.chatDeleteById(chatId)
                                 queries.messageDeleteByChatId(chatId)

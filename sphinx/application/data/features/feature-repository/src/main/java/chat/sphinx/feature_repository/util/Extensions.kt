@@ -1,16 +1,49 @@
 package chat.sphinx.feature_repository.util
 
+import chat.sphinx.concept_network_query_chat.model.ChatDto
 import chat.sphinx.concept_network_query_contact.model.ContactDto
 import chat.sphinx.conceptcoredb.SphinxDatabaseQueries
+import chat.sphinx.wrapper_chat.*
+import chat.sphinx.wrapper_common.chat.ChatId
+import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.contact.ContactId
 import chat.sphinx.wrapper_common.invite.InviteId
 import chat.sphinx.wrapper_common.invite.toInviteStatus
 import chat.sphinx.wrapper_common.lightning.*
 import chat.sphinx.wrapper_common.toDateTime
 import chat.sphinx.wrapper_common.toPhotoUrl
+import chat.sphinx.wrapper_common.toSeen
 import chat.sphinx.wrapper_contact.*
 import chat.sphinx.wrapper_invite.InviteString
 import chat.sphinx.wrapper_rsa.RsaPublicKey
+import com.squareup.moshi.Moshi
+
+@Suppress("NOTHING_TO_INLINE", "SpellCheckingInspection")
+inline fun SphinxDatabaseQueries.upsertChat(dto: ChatDto, moshi: Moshi) {
+    chatUpsert(
+        dto.name?.toChatName(),
+        dto.photo_url?.toPhotoUrl(),
+        dto.status.toChatStatus(),
+        dto.contact_ids.map { ContactId(it) },
+        dto.isMutedActual.toChatMuted(),
+        dto.group_key?.toChatGroupKey(),
+        dto.host?.toChatHost(),
+        dto.price_per_message?.toSat(),
+        dto.escrow_amount?.toSat(),
+        dto.unlistedActual.toChatUnlisted(),
+        dto.privateActual.toChatPrivate(),
+        dto.owner_pub_key?.toLightningNodePubKey(),
+        dto.seenActual.toSeen(),
+        dto.meta?.toChatMetaDataOrNull(moshi),
+        dto.my_photo_url?.toPhotoUrl(),
+        dto.my_alias?.toChatAlias(),
+        dto.pending_contact_ids?.map { ContactId(it) },
+        ChatId(dto.id),
+        ChatUUID(dto.uuid),
+        dto.type.toChatType(),
+        dto.created_at.toDateTime()
+    )
+}
 
 /**
  * Always use [SphinxDatabaseQueries.transaction] with this extension function.
