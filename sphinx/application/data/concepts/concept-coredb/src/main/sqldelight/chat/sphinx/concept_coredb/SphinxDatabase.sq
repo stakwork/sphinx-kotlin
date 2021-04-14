@@ -93,14 +93,11 @@ WHERE uuid = ?;
 
 chatUpsert {
     UPDATE chatDbo
-    SET uuid = :uuid,
-        name = :name,
+    SET name = :name,
         photo_url = :photo_url,
-        type = :type,
         status = :status,
         contact_ids = :contact_ids,
         is_muted = :is_muted,
-        created_at = :created_at,
         group_key = :group_key,
         host = :host,
         price_per_message = :price_per_message,
@@ -217,7 +214,6 @@ contactUpsert {
         status = :status,
         public_key = :public_key,
         device_id = :device_id,
-        created_at = :created_at,
         updated_at = :updated_at,
         notification_sound = :notification_sound,
         tip_amount = :tip_amount,
@@ -332,18 +328,7 @@ WHERE id = ?;
 -- for message_content_decrypted as to not overwrite it.
 messageUpsert {
     UPDATE messageDbo
-    SET uuid = :uuid,
-        chat_id = :chat_id,
-        type = :type,
-        sender = :sender,
-        receiver = :receiver,
-        amount = :amount,
-        payment_hash = :payment_hash,
-        payment_request = :payment_request,
-        date = :date,
-        expiration_date = :expiration_date,
-        message_content = :message_content,
-        status = :status,
+    SET status = :status,
         seen = :seen,
         sender_alias = :sender_alias,
         sender_pic = :sender_pic,
