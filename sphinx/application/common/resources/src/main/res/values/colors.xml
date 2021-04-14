@@ -21,6 +21,7 @@
     <color name="text">#FFFFFF</color>
     <color name="textInverted">#3C3F41</color>
     <color name="secondaryText">#6B7A8D</color>
+    <color name="placeholderTextInverted">#8C6B7A8D</color>
     <color name="secondaryTextInverted">#8E969C</color>
     <color name="secondaryTextSent">#A1BACB</color>
     <color name="textMessages">#FFFFFF</color>

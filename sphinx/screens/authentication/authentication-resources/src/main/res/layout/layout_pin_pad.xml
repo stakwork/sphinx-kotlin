@@ -140,13 +140,14 @@
         app:layout_constraintStart_toStartOf="@+id/guide_v33"
         app:layout_constraintTop_toTopOf="@+id/button_null" />
 
-    <androidx.appcompat.widget.AppCompatImageButton
+    <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/button_backspace"
-        style="@style/PinPadButton"
         android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:padding="@dimen/pin_pad_backspace_padding"
-        android:src="@drawable/ic_backspace_white_32dp"
+        android:layout_height="wrap_content"
+        android:text="@string/backspace"
+        style="@style/PinPadButton"
+        android:fontFamily="@font/material_icons_regular"
+        android:textSize="@dimen/pin_pad_backspace_text_size"
         app:layout_constraintBottom_toBottomOf="@+id/button_null"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="@+id/guide_v66"
