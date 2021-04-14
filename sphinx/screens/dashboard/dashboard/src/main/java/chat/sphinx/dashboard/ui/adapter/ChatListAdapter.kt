@@ -262,9 +262,11 @@ internal class ChatListAdapter(
                     @Exhaustive
                     when (dashboardChat) {
                         is DashboardChat.Active.Conversation -> {
-                            // TODO: Use ContactId
                             supervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
-                                viewModel.dashboardNavigator.toChatContact(dashboardChat.chat.id)
+                                viewModel.dashboardNavigator.toChatContact(
+                                    dashboardChat.chat.id,
+                                    dashboardChat.contact.id
+                                )
                             }
                         }
                         is DashboardChat.Active.GroupOrTribe -> {
@@ -279,7 +281,12 @@ internal class ChatListAdapter(
                             }
                         }
                         is DashboardChat.Inactive.Conversation -> {
-                            // TODO: Implement contactID usage with `dashboardNavigator.toChatContact`
+                            supervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
+                                viewModel.dashboardNavigator.toChatContact(
+                                    null,
+                                    dashboardChat.contact.id
+                                )
+                            }
                         }
                     }
                 }
