@@ -3,7 +3,6 @@ package chat.sphinx.feature_repository
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_coredb.CoreDB
 import chat.sphinx.concept_coredb.util.upsertChat
-import chat.sphinx.concept_coredb.util.upsertContact
 import chat.sphinx.concept_coredb.util.upsertMessage
 import chat.sphinx.concept_coredb.util.upsertMessageMedia
 import chat.sphinx.concept_crypto_rsa.RSA
@@ -21,11 +20,12 @@ import chat.sphinx.conceptcoredb.SphinxDatabaseQueries
 import chat.sphinx.feature_repository.mappers.chat.ChatDboPresenterMapper
 import chat.sphinx.feature_repository.mappers.chat.ChatDtoDboMapper
 import chat.sphinx.feature_repository.mappers.contact.ContactDboPresenterMapper
-import chat.sphinx.feature_repository.mappers.contact.ContactDtoDboMapper
+import chat.sphinx.feature_repository.mappers.invite.InviteDboPresenterMapper
 import chat.sphinx.feature_repository.mappers.mapListFrom
 import chat.sphinx.feature_repository.mappers.media.MessageDtoMediaDboMapper
 import chat.sphinx.feature_repository.mappers.message.MessageDboPresenterMapper
 import chat.sphinx.feature_repository.mappers.message.MessageDtoDboMapper
+import chat.sphinx.feature_repository.util.upsertContact
 import chat.sphinx.kotlin_response.*
 import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.logger.d
@@ -34,11 +34,11 @@ import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.chat.ChatId
 import chat.sphinx.wrapper_common.contact.ContactId
+import chat.sphinx.wrapper_common.invite.InviteId
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessagePagination
 import chat.sphinx.wrapper_contact.Contact
-import chat.sphinx.wrapper_contact.isTrue
-import chat.sphinx.wrapper_contact.toContactFromGroup
+import chat.sphinx.wrapper_invite.Invite
 import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message.media.MediaKeyDecrypted
 import chat.sphinx.wrapper_message.media.MessageMedia
@@ -186,11 +186,11 @@ class SphinxRepository(
     /// Contacts ///
     ////////////////
     private val contactLock = Mutex()
-    private val contactDtoDboMapper: ContactDtoDboMapper by lazy {
-        ContactDtoDboMapper(dispatchers)
-    }
     private val contactDboPresenterMapper: ContactDboPresenterMapper by lazy {
         ContactDboPresenterMapper(dispatchers)
+    }
+    private val inviteDboPresenterMapper: InviteDboPresenterMapper by lazy {
+        InviteDboPresenterMapper(dispatchers)
     }
 
     override suspend fun getContacts(): Flow<List<Contact>> {
@@ -225,15 +225,9 @@ class SphinxRepository(
                 }
                 is Response.Success -> {
 
+                    val queries = coreDB.getSphinxDatabaseQueries()
+
                     try {
-                        val dbos = contactDtoDboMapper.mapListFrom(
-                            loadResponse.value.contacts.filterNot {
-                                it.fromGroupActual
-                            }
-                        )
-
-                        val queries = coreDB.getSphinxDatabaseQueries()
-
                         contactLock.withLock {
                             withContext(dispatchers.io) {
 
@@ -242,14 +236,15 @@ class SphinxRepository(
                                     .toMutableSet()
 
                                 queries.transaction {
-                                    for (dbo in dbos) {
-                                        queries.upsertContact(dbo)
+                                    for (dto in loadResponse.value.contacts) {
+                                        queries.upsertContact(dto)
 
-                                        contactIdsToRemove.remove(dbo.id)
+                                        contactIdsToRemove.remove(ContactId(dto.id))
                                     }
 
                                     for (id in contactIdsToRemove) {
                                         queries.contactDeleteById(id)
+                                        queries.inviteDeleteByContactId(id)
                                     }
                                 }
 
