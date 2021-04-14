@@ -4,28 +4,20 @@ package chat.sphinx.wrapper_contact
 inline fun PrivatePhoto.isTrue(): Boolean =
     this is PrivatePhoto.True
 
-/**
- * Converts the integer value returned over the wire to an object.
- *
- * @throws [IllegalArgumentException] if the integer is not supported
- * */
 @Suppress("NOTHING_TO_INLINE")
-@Throws(IllegalArgumentException::class)
 inline fun Int?.toPrivatePhoto(): PrivatePhoto =
     when (this) {
         PrivatePhoto.PRIVATE -> {
             PrivatePhoto.True
         }
-        null,
-        PrivatePhoto.NOT_PRIVATE -> {
+        else -> {
             PrivatePhoto.False
         }
-        else -> {
-            throw IllegalArgumentException(
-                "PrivatePhoto for integer '$this' not supported"
-            )
-        }
     }
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun Boolean.toPrivatePhoto(): PrivatePhoto =
+    if (this) PrivatePhoto.True else PrivatePhoto.False
 
 /**
  * Comes off the wire as:

@@ -4,27 +4,20 @@ package chat.sphinx.wrapper_common
 inline fun Deleted.isTrue(): Boolean =
     this is Deleted.True
 
-/**
- * Converts the integer value returned over the wire to an object.
- *
- * @throws [IllegalArgumentException] if the integer is not supported
- * */
 @Suppress("NOTHING_TO_INLINE")
-@Throws(IllegalArgumentException::class)
 inline fun Int.toDeleted(): Deleted =
     when (this) {
         Deleted.DELETED -> {
             Deleted.True
         }
-        Deleted.NOT_DELETED -> {
+        else -> {
             Deleted.False
         }
-        else -> {
-            throw IllegalArgumentException(
-                "Deleted for integer '$this' not supported"
-            )
-        }
     }
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun Boolean.toDeleted(): Deleted =
+    if (this) Deleted.True else Deleted.False
 
 /**
  * Comes off the wire as:

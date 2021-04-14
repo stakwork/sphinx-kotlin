@@ -4,26 +4,15 @@ package chat.sphinx.wrapper_chat
 inline fun ChatPrivate.isTrue(): Boolean =
     this is ChatPrivate.True
 
-/**
- * Converts the integer value returned over the wire to an object.
- *
- * @throws [IllegalArgumentException] if the integer is not supported
- * */
 @Suppress("NOTHING_TO_INLINE")
-@Throws(IllegalArgumentException::class)
 inline fun Int?.toChatPrivate(): ChatPrivate =
     when (this) {
         null,
         ChatPrivate.PRIVATE -> {
             ChatPrivate.True
         }
-        ChatPrivate.NOT_PRIVATE -> {
-            ChatPrivate.False
-        }
         else -> {
-            throw IllegalArgumentException(
-                "ChatPrivate for integer '$this' not supported"
-            )
+            ChatPrivate.False
         }
     }
 

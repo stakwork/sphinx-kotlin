@@ -5,7 +5,7 @@
     android:id="@+id/layout_motion_dashboard"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background"
+    android:background="@color/body"
     app:layoutDescription="@xml/motion_scene_dashboard"
     tools:context=".ui.DashboardFragment">
 

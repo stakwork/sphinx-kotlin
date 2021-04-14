@@ -5,7 +5,7 @@
     android:id="@+id/layout_constraint_dashboard_search_bar"
     android:layout_width="match_parent"
     android:layout_height="@dimen/search_bar_height"
-    android:background="@color/headerBackground"
+    android:background="@color/headerBG"
     android:descendantFocusability="beforeDescendants"
     android:elevation="@dimen/default_elevation"
     android:focusableInTouchMode="true">
@@ -13,9 +13,9 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_margin="6dp"
+        android:layout_margin="5dp"
         android:background="@drawable/button_background_white_rad_48"
-        android:backgroundTint="@color/background">
+        android:backgroundTint="@color/body">
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/image_view_dashboard_search"
@@ -38,9 +38,11 @@
             android:importantForAutofill="no"
             android:inputType="text"
             android:singleLine="true"
-            android:textColor="@android:color/white"
-            android:textColorHighlight="@color/primaryColor"
-            android:textColorHint="@color/textHint"
+            android:textColor="@color/text"
+            android:fontFamily="@font/roboto_regular"
+            android:textSize="@dimen/dashboard_search_text_size"
+            android:textColorHighlight="@color/primaryBlue"
+            android:textColorHint="@color/placeholderText"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/image_view_dashboard_search" />
 

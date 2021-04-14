@@ -3,6 +3,7 @@ package chat.sphinx.dashboard.ui
 import android.content.Context
 import android.os.Bundle
 import android.view.View
+import android.widget.ImageView
 import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
@@ -13,6 +14,7 @@ import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import app.cash.exhaustive.Exhaustive
 import by.kirich1409.viewbindingdelegate.viewBinding
+import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.dashboard.R
 import chat.sphinx.dashboard.databinding.FragmentDashboardBinding
 import chat.sphinx.dashboard.ui.adapter.ChatListAdapter
@@ -35,6 +37,7 @@ import io.matthewnelson.concept_views.sideeffect.SideEffect
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @Suppress("NOTHING_TO_INLINE")
 private inline fun FragmentDashboardBinding.searchBarClearFocus() {
@@ -51,6 +54,10 @@ internal class DashboardFragment : MotionLayoutFragment<
         FragmentDashboardBinding
         >(R.layout.fragment_dashboard)
 {
+    @Inject
+    @Suppress("ProtectedInFinal")
+    protected lateinit var imageLoader: ImageLoader<ImageView>
+
     override val viewModel: DashboardViewModel by viewModels()
     override val binding: FragmentDashboardBinding by viewBinding(FragmentDashboardBinding::bind)
 
@@ -93,10 +100,10 @@ internal class DashboardFragment : MotionLayoutFragment<
     }
 
     private fun setupChats() {
-        val chatListAdapter = ChatListAdapter(viewLifecycleOwner, viewModel)
+        val chatListAdapter = ChatListAdapter(imageLoader, viewLifecycleOwner, viewModel)
         val chatListFooterAdapter = ChatListFooterAdapter(viewLifecycleOwner, viewModel)
         binding.layoutDashboardChats.recyclerViewChats.apply {
-            this.setHasFixedSize(true)
+            this.setHasFixedSize(false)
             layoutManager = LinearLayoutManager(binding.root.context)
             adapter = ConcatAdapter(chatListAdapter, chatListFooterAdapter)
         }
@@ -220,7 +227,7 @@ internal class DashboardFragment : MotionLayoutFragment<
                                     drawable?.setTint(
                                         ContextCompat.getColor(
                                             binding.root.context,
-                                            R.color.secondaryColor
+                                            R.color.primaryGreen
                                         )
                                     )
                                 }

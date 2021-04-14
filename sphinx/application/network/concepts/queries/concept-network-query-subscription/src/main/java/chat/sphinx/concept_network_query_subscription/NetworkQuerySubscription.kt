@@ -14,31 +14,18 @@ abstract class NetworkQuerySubscription {
     ///////////
     /// GET ///
     ///////////
-    abstract fun getSubscriptions(): Flow<LoadResponse<List<SubscriptionDto>, ResponseError>>
-
     abstract fun getSubscriptions(
-        authorizationToken: AuthorizationToken,
-        relayUrl: RelayUrl,
+        relayData: Pair<AuthorizationToken, RelayUrl>? = null
     ): Flow<LoadResponse<List<SubscriptionDto>, ResponseError>>
 
     abstract fun getSubscriptionById(
-        subscriptionId: SubscriptionId
-    ): Flow<LoadResponse<SubscriptionDto, ResponseError>>
-
-    abstract fun getSubscriptionById(
-        authorizationToken: AuthorizationToken,
-        relayUrl: RelayUrl,
         subscriptionId: SubscriptionId,
+        relayData: Pair<AuthorizationToken, RelayUrl>? = null
     ): Flow<LoadResponse<SubscriptionDto, ResponseError>>
 
     abstract fun getSubscriptionsByContactId(
-        contactId: ContactId
-    ): Flow<LoadResponse<List<SubscriptionDto>, ResponseError>>
-
-    abstract fun getSubscriptionsByContactId(
-        authorizationToken: AuthorizationToken,
-        relayUrl: RelayUrl,
         contactId: ContactId,
+        relayData: Pair<AuthorizationToken, RelayUrl>? = null
     ): Flow<LoadResponse<List<SubscriptionDto>, ResponseError>>
 
     ///////////

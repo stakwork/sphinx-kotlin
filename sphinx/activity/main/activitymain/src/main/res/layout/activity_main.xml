@@ -24,7 +24,7 @@
         android:id="@+id/image_view_primary_host_backer"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:background="@color/primaryColor"
+        android:background="@color/primaryBlue"
         app:layout_constraintBottom_toBottomOf="@id/nav_host_fragment_primary"
         app:layout_constraintEnd_toEndOf="@+id/nav_host_fragment_primary"
         app:layout_constraintStart_toStartOf="@+id/nav_host_fragment_primary"

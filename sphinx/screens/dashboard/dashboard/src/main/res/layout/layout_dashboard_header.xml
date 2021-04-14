@@ -5,7 +5,7 @@
     android:id="@+id/layout_constraint_dashboard_header"
     android:layout_width="match_parent"
     android:layout_height="@dimen/default_header_height"
-    android:background="@color/headerBackground"
+    android:background="@color/headerBG"
     android:elevation="@dimen/default_elevation">
 
     <androidx.appcompat.widget.AppCompatImageView
@@ -24,6 +24,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/default_sats_amount"
+        android:textSize="17sp"
+        android:fontFamily="@font/montserrat_regular"
         android:textColor="@android:color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -37,7 +39,9 @@
         android:layout_marginStart="8dp"
         android:alpha=".5"
         android:text="@string/sats"
-        android:textColor="@android:color/white"
+        android:textSize="17sp"
+        android:fontFamily="@font/roboto_regular"
+        android:textColor="@color/dashboardWashedOutText"
         app:layout_constraintBottom_toBottomOf="@+id/text_view_dashboard_header_balance"
         app:layout_constraintStart_toEndOf="@+id/text_view_dashboard_header_balance"
         app:layout_constraintTop_toTopOf="@+id/text_view_dashboard_header_balance" />

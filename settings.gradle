@@ -25,6 +25,8 @@ include ':sphinx:application:data:concepts:concept-background-login'
 include ':sphinx:application:data:features:feature-background-login'
 include ':sphinx:application:data:concepts:concept-coredb'
 include ':sphinx:application:data:features:feature-coredb'
+include ':sphinx:application:data:concepts:concept-image-loader'
+include ':sphinx:application:data:features:image-loader:feature-image-loader-android'
 include ':sphinx:application:data:concepts:concept-relay'
 include ':sphinx:application:data:features:feature-relay'
 
@@ -33,7 +35,8 @@ include ':sphinx:application:data:concepts:repositories:concept-repository-conta
 include ':sphinx:application:data:concepts:repositories:concept-repository-message'
 include ':sphinx:application:data:features:feature-repository'
 
-include ':sphinx:application:network:concepts:concept-network-client'
+include ':sphinx:application:network:concepts:clients:concept-network-client'
+include ':sphinx:application:network:concepts:clients:concept-network-client-cache'
 include ':sphinx:application:network:features:feature-network-client'
 include ':sphinx:application:network:concepts:queries:concept-network-query-chat'
 include ':sphinx:application:network:features:queries:feature-network-query-chat'
@@ -47,7 +50,8 @@ include ':sphinx:application:network:features:queries:feature-network-query-mess
 include ':sphinx:application:network:concepts:queries:concept-network-query-message'
 include ':sphinx:application:network:features:queries:feature-network-query-subscription'
 include ':sphinx:application:network:concepts:queries:concept-network-query-subscription'
-include ':sphinx:application:network:network-relay-call'
+include ':sphinx:application:network:features:feature-network-relay-call'
+include ':sphinx:application:network:concepts:concept-network-relay-call'
 
 // Activity
 include ':sphinx:activity:hilt-qualifiers'

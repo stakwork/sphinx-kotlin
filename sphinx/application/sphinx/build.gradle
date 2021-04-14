@@ -80,6 +80,7 @@ dependencies {
     implementation project(path: ':sphinx:application:data:features:feature-background-login')
     implementation project(path: ':sphinx:application:data:features:feature-coredb')
     implementation project(path: ':sphinx:application:data:features:crypto:feature-crypto-rsa')
+    implementation project(path: ':sphinx:application:data:features:image-loader:feature-image-loader-android')
     implementation project(path: ':sphinx:application:data:features:feature-relay')
     implementation project(path: ':sphinx:application:data:features:feature-repository')
 
@@ -90,6 +91,7 @@ dependencies {
     implementation project(path: ':sphinx:application:network:features:queries:feature-network-query-lightning')
     implementation project(path: ':sphinx:application:network:features:queries:feature-network-query-message')
     implementation project(path: ':sphinx:application:network:features:queries:feature-network-query-subscription')
+    implementation project(path: ':sphinx:application:network:features:feature-network-relay-call')
 
     implementation project(path: ':sphinx:screens:splash:key-restore')
 

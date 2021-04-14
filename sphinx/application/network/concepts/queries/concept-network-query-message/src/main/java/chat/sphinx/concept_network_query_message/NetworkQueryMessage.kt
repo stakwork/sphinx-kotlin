@@ -15,21 +15,12 @@ abstract class NetworkQueryMessage {
     /// GET ///
     ///////////
     abstract fun getMessages(
-        messagePagination: MessagePagination?
-    ): Flow<LoadResponse<GetMessagesResponse, ResponseError>>
-
-    abstract fun getMessages(
-        authorizationToken: AuthorizationToken,
-        relayUrl: RelayUrl,
         messagePagination: MessagePagination?,
+        relayData: Pair<AuthorizationToken, RelayUrl>? = null
     ): Flow<LoadResponse<GetMessagesResponse, ResponseError>>
-
-//    app.get('/payments', payments.listPayments)
-    abstract fun getPayments(): Flow<LoadResponse<List<MessageDto>, ResponseError>>
 
     abstract fun getPayments(
-        authorizationToken: AuthorizationToken,
-        relayUrl: RelayUrl,
+        relayData: Pair<AuthorizationToken, RelayUrl>? = null
     ): Flow<LoadResponse<List<MessageDto>, ResponseError>>
 
     ///////////
