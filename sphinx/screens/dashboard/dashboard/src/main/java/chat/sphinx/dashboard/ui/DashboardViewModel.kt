@@ -92,8 +92,13 @@ internal class DashboardViewModel @Inject constructor(
             contactRepository.getContacts().distinctUntilChanged().collect { contacts ->
                 collectionLock.withLock {
                     contactsCollectionInitialized = true
-                    val newList = ArrayList<Contact>(contacts.size - 1)
-                    val contactIds = ArrayList<ContactId>(contacts.size - 1)
+
+                    if (contacts.isEmpty()) {
+                        return@withLock
+                    }
+
+                    val newList = ArrayList<Contact>(contacts.size)
+                    val contactIds = ArrayList<ContactId>(contacts.size)
 
                     withContext(dispatchers.default) {
                         for (contact in contacts) {
