@@ -29,27 +29,6 @@ inline fun SphinxDatabaseQueries.upsertChat(dbo: ChatDbo): Unit =
     )
 
 @Suppress("NOTHING_TO_INLINE", "SpellCheckingInspection")
-inline fun SphinxDatabaseQueries.upsertContact(dbo: ContactDbo): Unit =
-    contactUpsert(
-        dbo.route_hint,
-        dbo.node_pub_key,
-        dbo.node_alias,
-        dbo.alias,
-        dbo.photo_url,
-        dbo.private_photo,
-        dbo.status,
-        dbo.public_key,
-        dbo.device_id,
-        dbo.updated_at,
-        dbo.notification_sound,
-        dbo.tip_amount,
-        dbo.invite_id,
-        dbo.id,
-        dbo.owner,
-        dbo.created_at,
-    )
-
-@Suppress("NOTHING_TO_INLINE", "SpellCheckingInspection")
 inline fun SphinxDatabaseQueries.upsertMessage(dbo: MessageDbo): Unit =
     messageUpsert(
         dbo.status,
