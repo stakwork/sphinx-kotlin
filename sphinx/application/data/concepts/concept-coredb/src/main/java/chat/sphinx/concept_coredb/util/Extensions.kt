@@ -25,14 +25,3 @@ inline fun SphinxDatabaseQueries.upsertMessage(dbo: MessageDbo): Unit =
         dbo.message_content,
         dbo.message_content_decrypted,
     )
-
-@Suppress("NOTHING_TO_INLINE", "SpellCheckingInspection")
-inline fun SphinxDatabaseQueries.upsertMessageMedia(dbo: MessageMediaDbo): Unit =
-    messageMediaUpsert(
-        dbo.media_key,
-        dbo.media_type,
-        dbo.media_token,
-        dbo.id,
-        dbo.chat_id,
-        dbo.media_key_decrypted,
-    )

@@ -3,7 +3,6 @@ package chat.sphinx.feature_repository
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_coredb.CoreDB
 import chat.sphinx.concept_coredb.util.upsertMessage
-import chat.sphinx.concept_coredb.util.upsertMessageMedia
 import chat.sphinx.concept_crypto_rsa.RSA
 import chat.sphinx.wrapper_rsa.RsaPrivateKey
 import chat.sphinx.concept_repository_chat.ChatRepository
@@ -14,17 +13,15 @@ import chat.sphinx.concept_network_query_contact.NetworkQueryContact
 import chat.sphinx.concept_network_query_message.NetworkQueryMessage
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.conceptcoredb.MessageDbo
-import chat.sphinx.conceptcoredb.MessageMediaDbo
 import chat.sphinx.conceptcoredb.SphinxDatabaseQueries
 import chat.sphinx.feature_repository.mappers.chat.ChatDboPresenterMapper
 import chat.sphinx.feature_repository.mappers.contact.ContactDboPresenterMapper
 import chat.sphinx.feature_repository.mappers.invite.InviteDboPresenterMapper
 import chat.sphinx.feature_repository.mappers.mapListFrom
-import chat.sphinx.feature_repository.mappers.media.MessageDtoMediaDboMapper
 import chat.sphinx.feature_repository.mappers.message.MessageDboPresenterMapper
-import chat.sphinx.feature_repository.mappers.message.MessageDtoDboMapper
 import chat.sphinx.feature_repository.util.upsertChat
 import chat.sphinx.feature_repository.util.upsertContact
+import chat.sphinx.feature_repository.util.upsertMessage
 import chat.sphinx.kotlin_response.*
 import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.logger.d
@@ -286,14 +283,8 @@ class SphinxRepository(
     /// Messages ///
     ////////////////
     private val messageLock = Mutex()
-    private val messageDtoDboMapper: MessageDtoDboMapper by lazy {
-        MessageDtoDboMapper(dispatchers)
-    }
     private val messageDboPresenterMapper: MessageDboPresenterMapper by lazy {
         MessageDboPresenterMapper(dispatchers, moshi)
-    }
-    private val messageDtoMediaDboMapper: MessageDtoMediaDboMapper by lazy {
-        MessageDtoMediaDboMapper(dispatchers)
     }
 
     @OptIn(RawPasswordAccess::class)
@@ -320,7 +311,6 @@ class SphinxRepository(
         messageDbo: MessageDbo
     ): Message {
 
-        // TODO: add checking for mediaKey/mediaKeyDecrypted
         val message: Message = messageDbo.message_content?.let { messageContent ->
 
             if (
@@ -439,7 +429,7 @@ class SphinxRepository(
                                     messageLock.withLock {
                                         withContext(dispatchers.io) {
                                             queries.messageMediaUpdateMediaKeyDecrypted(
-                                                decrypted,
+                                                decryptedKey,
                                                 mediaDbo.id
                                             )
                                         }
@@ -659,11 +649,6 @@ class SphinxRepository(
                                 count++
                             }
 
-                            val messageDbos: List<MessageDbo> =
-                                messageDtoDboMapper.mapListFrom(newMessages)
-                            val mediaDbos: List<MessageMediaDbo?> =
-                                messageDtoMediaDboMapper.mapListFrom(newMessages)
-
                             chatLock.withLock {
                                 messageLock.withLock {
                                     withContext(dispatchers.io) {
@@ -673,27 +658,27 @@ class SphinxRepository(
                                             LOG.d(
                                                 TAG,
                                                 "Inserting Messages -" +
-                                                        " ${messageDbos.firstOrNull()?.id?.value}" +
-                                                        " - ${messageDbos.lastOrNull()?.id?.value}"
+                                                        " ${newMessages.firstOrNull()?.id}" +
+                                                        " - ${newMessages.lastOrNull()?.id}"
                                             )
 
                                             val latestMessageMap = mutableMapOf<ChatId, MessageId>()
 
-                                            for (dbo in messageDbos) {
-                                                if (dbo.chat_id.value == MessageDtoDboMapper.NULL_CHAT_ID.toLong()) {
-                                                    queries.upsertMessage(dbo)
-                                                } else if (chatIds.contains(dbo.chat_id)) {
-                                                    queries.upsertMessage(dbo)
+                                            for (dto in newMessages) {
 
-                                                    if (dbo.type.show && !dbo.type.isBotRes()) {
-                                                        latestMessageMap[dbo.chat_id] = dbo.id
+                                                val id: Long? = dto.chat_id
+
+                                                if (id == null) {
+                                                    queries.upsertMessage(dto)
+                                                } else if (chatIds.contains(ChatId(id))) {
+                                                    queries.upsertMessage(dto)
+
+                                                    if (
+                                                        dto.type.toMessageType().show &&
+                                                        dto.type != MessageType.BOT_RES
+                                                    ) {
+                                                        latestMessageMap[ChatId(id)] = MessageId(dto.id)
                                                     }
-                                                }
-                                            }
-
-                                            for (dbo in mediaDbos) {
-                                                if (dbo != null) {
-                                                    queries.upsertMessageMedia(dbo)
                                                 }
                                             }
 
