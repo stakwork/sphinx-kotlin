@@ -4,6 +4,8 @@ import chat.sphinx.wrapper_common.*
 import chat.sphinx.wrapper_common.chat.ChatId
 import chat.sphinx.wrapper_common.contact.ContactId
 import chat.sphinx.wrapper_common.invite.InviteId
+import chat.sphinx.wrapper_common.invite.InviteStatus
+import chat.sphinx.wrapper_common.invite.toInviteStatus
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.LightningPaymentHash
 import chat.sphinx.wrapper_common.lightning.LightningPaymentRequest
@@ -99,48 +101,6 @@ internal class DateTimeAdapter private constructor(): ColumnAdapter<DateTime, Lo
     }
 }
 
-internal class MessageIdAdapter private constructor(): ColumnAdapter<MessageId, Long> {
-
-    companion object {
-        @Volatile
-        private var instance: MessageIdAdapter? = null
-        fun getInstance(): MessageIdAdapter =
-            instance ?: synchronized(this) {
-                instance ?: MessageIdAdapter()
-                    .also { instance = it }
-            }
-    }
-
-    override fun decode(databaseValue: Long): MessageId {
-        return MessageId(databaseValue)
-    }
-
-    override fun encode(value: MessageId): Long {
-        return value.value
-    }
-}
-
-internal class PhotoUrlAdapter private constructor(): ColumnAdapter<PhotoUrl, String> {
-
-    companion object {
-        @Volatile
-        private var instance: PhotoUrlAdapter? = null
-        fun getInstance(): PhotoUrlAdapter =
-            instance ?: synchronized(this) {
-                instance ?: PhotoUrlAdapter()
-                    .also { instance = it }
-            }
-    }
-
-    override fun decode(databaseValue: String): PhotoUrl {
-        return PhotoUrl(databaseValue)
-    }
-
-    override fun encode(value: PhotoUrl): String {
-        return value.value
-    }
-}
-
 internal class InviteIdAdapter private constructor(): ColumnAdapter<InviteId, Long> {
 
     companion object {
@@ -159,6 +119,27 @@ internal class InviteIdAdapter private constructor(): ColumnAdapter<InviteId, Lo
 
     override fun encode(value: InviteId): Long {
         return value.value
+    }
+}
+
+internal class InviteStatusAdapter private constructor(): ColumnAdapter<InviteStatus, Long> {
+
+    companion object {
+        @Volatile
+        private var instance: InviteStatusAdapter? = null
+        fun getInstance(): InviteStatusAdapter =
+            instance ?: synchronized(this) {
+                instance ?: InviteStatusAdapter()
+                    .also { instance = it }
+            }
+    }
+
+    override fun decode(databaseValue: Long): InviteStatus {
+        return databaseValue.toInt().toInviteStatus()
+    }
+
+    override fun encode(value: InviteStatus): Long {
+        return value.value.toLong()
     }
 }
 
@@ -221,6 +202,46 @@ internal class LightningPaymentRequestAdapter private constructor(): ColumnAdapt
     }
 
     override fun encode(value: LightningPaymentRequest): String {
+        return value.value
+    }
+}internal class MessageIdAdapter private constructor(): ColumnAdapter<MessageId, Long> {
+
+    companion object {
+        @Volatile
+        private var instance: MessageIdAdapter? = null
+        fun getInstance(): MessageIdAdapter =
+            instance ?: synchronized(this) {
+                instance ?: MessageIdAdapter()
+                    .also { instance = it }
+            }
+    }
+
+    override fun decode(databaseValue: Long): MessageId {
+        return MessageId(databaseValue)
+    }
+
+    override fun encode(value: MessageId): Long {
+        return value.value
+    }
+}
+
+internal class PhotoUrlAdapter private constructor(): ColumnAdapter<PhotoUrl, String> {
+
+    companion object {
+        @Volatile
+        private var instance: PhotoUrlAdapter? = null
+        fun getInstance(): PhotoUrlAdapter =
+            instance ?: synchronized(this) {
+                instance ?: PhotoUrlAdapter()
+                    .also { instance = it }
+            }
+    }
+
+    override fun decode(databaseValue: String): PhotoUrl {
+        return PhotoUrl(databaseValue)
+    }
+
+    override fun encode(value: PhotoUrl): String {
         return value.value
     }
 }

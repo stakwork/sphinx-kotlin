@@ -3,53 +3,6 @@ package chat.sphinx.concept_coredb.util
 import chat.sphinx.conceptcoredb.*
 
 @Suppress("NOTHING_TO_INLINE", "SpellCheckingInspection")
-inline fun SphinxDatabaseQueries.upsertChat(dbo: ChatDbo): Unit =
-    chatUpsert(
-        dbo.name,
-        dbo.photo_url,
-        dbo.status,
-        dbo.contact_ids,
-        dbo.is_muted,
-        dbo.group_key,
-        dbo.host,
-        dbo.price_per_message,
-        dbo.escrow_amount,
-        dbo.unlisted,
-        dbo.private_tribe,
-        dbo.owner_pub_key,
-        dbo.seen,
-        dbo.meta_data,
-        dbo.my_photo_url,
-        dbo.my_alias,
-        dbo.pending_contact_ids,
-        dbo.id,
-        dbo.uuid,
-        dbo.type,
-        dbo.created_at,
-    )
-
-@Suppress("NOTHING_TO_INLINE", "SpellCheckingInspection")
-inline fun SphinxDatabaseQueries.upsertContact(dbo: ContactDbo): Unit =
-    contactUpsert(
-        dbo.route_hint,
-        dbo.node_pub_key,
-        dbo.node_alias,
-        dbo.alias,
-        dbo.photo_url,
-        dbo.private_photo,
-        dbo.status,
-        dbo.public_key,
-        dbo.device_id,
-        dbo.updated_at,
-        dbo.notification_sound,
-        dbo.tip_amount,
-        dbo.invite_id,
-        dbo.id,
-        dbo.owner,
-        dbo.created_at,
-    )
-
-@Suppress("NOTHING_TO_INLINE", "SpellCheckingInspection")
 inline fun SphinxDatabaseQueries.upsertMessage(dbo: MessageDbo): Unit =
     messageUpsert(
         dbo.status,
@@ -71,15 +24,4 @@ inline fun SphinxDatabaseQueries.upsertMessage(dbo: MessageDbo): Unit =
         dbo.expiration_date,
         dbo.message_content,
         dbo.message_content_decrypted,
-    )
-
-@Suppress("NOTHING_TO_INLINE", "SpellCheckingInspection")
-inline fun SphinxDatabaseQueries.upsertMessageMedia(dbo: MessageMediaDbo): Unit =
-    messageMediaUpsert(
-        dbo.media_key,
-        dbo.media_type,
-        dbo.media_token,
-        dbo.id,
-        dbo.chat_id,
-        dbo.media_key_decrypted,
     )

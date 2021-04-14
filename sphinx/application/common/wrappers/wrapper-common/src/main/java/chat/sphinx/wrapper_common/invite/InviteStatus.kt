@@ -1,4 +1,4 @@
-package chat.sphinx.wrapper_invite
+package chat.sphinx.wrapper_common.invite
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun InviteStatus.isPending(): Boolean =

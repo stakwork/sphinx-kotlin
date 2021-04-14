@@ -2,10 +2,7 @@ package chat.sphinx.feature_repository
 
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_coredb.CoreDB
-import chat.sphinx.concept_coredb.util.upsertChat
-import chat.sphinx.concept_coredb.util.upsertContact
 import chat.sphinx.concept_coredb.util.upsertMessage
-import chat.sphinx.concept_coredb.util.upsertMessageMedia
 import chat.sphinx.concept_crypto_rsa.RSA
 import chat.sphinx.wrapper_rsa.RsaPrivateKey
 import chat.sphinx.concept_repository_chat.ChatRepository
@@ -16,16 +13,15 @@ import chat.sphinx.concept_network_query_contact.NetworkQueryContact
 import chat.sphinx.concept_network_query_message.NetworkQueryMessage
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.conceptcoredb.MessageDbo
-import chat.sphinx.conceptcoredb.MessageMediaDbo
 import chat.sphinx.conceptcoredb.SphinxDatabaseQueries
 import chat.sphinx.feature_repository.mappers.chat.ChatDboPresenterMapper
-import chat.sphinx.feature_repository.mappers.chat.ChatDtoDboMapper
 import chat.sphinx.feature_repository.mappers.contact.ContactDboPresenterMapper
-import chat.sphinx.feature_repository.mappers.contact.ContactDtoDboMapper
+import chat.sphinx.feature_repository.mappers.invite.InviteDboPresenterMapper
 import chat.sphinx.feature_repository.mappers.mapListFrom
-import chat.sphinx.feature_repository.mappers.media.MessageDtoMediaDboMapper
 import chat.sphinx.feature_repository.mappers.message.MessageDboPresenterMapper
-import chat.sphinx.feature_repository.mappers.message.MessageDtoDboMapper
+import chat.sphinx.feature_repository.util.upsertChat
+import chat.sphinx.feature_repository.util.upsertContact
+import chat.sphinx.feature_repository.util.upsertMessage
 import chat.sphinx.kotlin_response.*
 import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.logger.d
@@ -34,11 +30,11 @@ import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.chat.ChatId
 import chat.sphinx.wrapper_common.contact.ContactId
+import chat.sphinx.wrapper_common.invite.InviteId
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessagePagination
 import chat.sphinx.wrapper_contact.Contact
-import chat.sphinx.wrapper_contact.isTrue
-import chat.sphinx.wrapper_contact.toContactFromGroup
+import chat.sphinx.wrapper_invite.Invite
 import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message.media.MediaKeyDecrypted
 import chat.sphinx.wrapper_message.media.MessageMedia
@@ -79,9 +75,6 @@ class SphinxRepository(
     /// Chats ///
     /////////////
     private val chatLock = Mutex()
-    private val chatDtoDboMapper: ChatDtoDboMapper by lazy {
-        ChatDtoDboMapper(dispatchers, moshi)
-    }
     private val chatDboPresenterMapper: ChatDboPresenterMapper by lazy {
         ChatDboPresenterMapper(dispatchers)
     }
@@ -132,8 +125,6 @@ class SphinxRepository(
 
     private suspend fun processChatDtos(chats: List<ChatDto>): Response<Boolean, ResponseError> {
         try {
-            val dbos = chatDtoDboMapper.mapListFrom(chats)
-
             val queries = coreDB.getSphinxDatabaseQueries()
 
             chatLock.withLock {
@@ -146,14 +137,14 @@ class SphinxRepository(
                     messageLock.withLock {
 
                         queries.transaction {
-                            dbos.forEach { dbo ->
-                                queries.upsertChat(dbo)
+                            for (dto in chats) {
+                                queries.upsertChat(dto, moshi)
 
-                                chatIdsToRemove.remove(dbo.id)
+                                chatIdsToRemove.remove(ChatId(dto.id))
                             }
 
                             // remove remaining chat's from DB
-                            chatIdsToRemove.forEach { chatId ->
+                            for (chatId in chatIdsToRemove) {
                                 LOG.d(TAG, "Removing Chats/Messages - chatId")
                                 queries.chatDeleteById(chatId)
                                 queries.messageDeleteByChatId(chatId)
@@ -186,11 +177,11 @@ class SphinxRepository(
     /// Contacts ///
     ////////////////
     private val contactLock = Mutex()
-    private val contactDtoDboMapper: ContactDtoDboMapper by lazy {
-        ContactDtoDboMapper(dispatchers)
-    }
     private val contactDboPresenterMapper: ContactDboPresenterMapper by lazy {
         ContactDboPresenterMapper(dispatchers)
+    }
+    private val inviteDboPresenterMapper: InviteDboPresenterMapper by lazy {
+        InviteDboPresenterMapper(dispatchers)
     }
 
     override suspend fun getContacts(): Flow<List<Contact>> {
@@ -208,11 +199,28 @@ class SphinxRepository(
             .distinctUntilChanged()
     }
 
+    override suspend fun getInviteById(inviteId: InviteId): Flow<Invite?> {
+        return coreDB.getSphinxDatabaseQueries().inviteGetById(inviteId)
+            .asFlow()
+            .mapToOneOrNull(dispatchers.io)
+            .map { it?.let { inviteDboPresenterMapper.mapFrom(it) } }
+            .distinctUntilChanged()
+    }
+
+    override suspend fun getInviteByContactId(contactId: ContactId): Flow<Invite?> {
+        return coreDB.getSphinxDatabaseQueries().inviteGetByContactId(contactId)
+            .asFlow()
+            .mapToOneOrNull(dispatchers.io)
+            .map { it?.let { inviteDboPresenterMapper.mapFrom(it) } }
+            .distinctUntilChanged()
+    }
+
     override suspend fun getOwner(): Flow<Contact?> {
         return coreDB.getSphinxDatabaseQueries().contactGetOwner()
             .asFlow()
             .mapToOneOrNull(dispatchers.io)
             .map { it?.let { contactDboPresenterMapper.mapFrom(it) } }
+            .distinctUntilChanged()
     }
 
     override fun networkRefreshContacts(): Flow<LoadResponse<Boolean, ResponseError>> = flow {
@@ -225,15 +233,9 @@ class SphinxRepository(
                 }
                 is Response.Success -> {
 
+                    val queries = coreDB.getSphinxDatabaseQueries()
+
                     try {
-                        val dbos = contactDtoDboMapper.mapListFrom(
-                            loadResponse.value.contacts.filterNot {
-                                it.fromGroupActual
-                            }
-                        )
-
-                        val queries = coreDB.getSphinxDatabaseQueries()
-
                         contactLock.withLock {
                             withContext(dispatchers.io) {
 
@@ -242,14 +244,15 @@ class SphinxRepository(
                                     .toMutableSet()
 
                                 queries.transaction {
-                                    for (dbo in dbos) {
-                                        queries.upsertContact(dbo)
+                                    for (dto in loadResponse.value.contacts) {
+                                        queries.upsertContact(dto)
 
-                                        contactIdsToRemove.remove(dbo.id)
+                                        contactIdsToRemove.remove(ContactId(dto.id))
                                     }
 
                                     for (id in contactIdsToRemove) {
                                         queries.contactDeleteById(id)
+                                        queries.inviteDeleteByContactId(id)
                                     }
                                 }
 
@@ -280,14 +283,8 @@ class SphinxRepository(
     /// Messages ///
     ////////////////
     private val messageLock = Mutex()
-    private val messageDtoDboMapper: MessageDtoDboMapper by lazy {
-        MessageDtoDboMapper(dispatchers)
-    }
     private val messageDboPresenterMapper: MessageDboPresenterMapper by lazy {
         MessageDboPresenterMapper(dispatchers, moshi)
-    }
-    private val messageDtoMediaDboMapper: MessageDtoMediaDboMapper by lazy {
-        MessageDtoMediaDboMapper(dispatchers)
     }
 
     @OptIn(RawPasswordAccess::class)
@@ -314,7 +311,6 @@ class SphinxRepository(
         messageDbo: MessageDbo
     ): Message {
 
-        // TODO: add checking for mediaKey/mediaKeyDecrypted
         val message: Message = messageDbo.message_content?.let { messageContent ->
 
             if (
@@ -433,7 +429,7 @@ class SphinxRepository(
                                     messageLock.withLock {
                                         withContext(dispatchers.io) {
                                             queries.messageMediaUpdateMediaKeyDecrypted(
-                                                decrypted,
+                                                decryptedKey,
                                                 mediaDbo.id
                                             )
                                         }
@@ -653,11 +649,6 @@ class SphinxRepository(
                                 count++
                             }
 
-                            val messageDbos: List<MessageDbo> =
-                                messageDtoDboMapper.mapListFrom(newMessages)
-                            val mediaDbos: List<MessageMediaDbo?> =
-                                messageDtoMediaDboMapper.mapListFrom(newMessages)
-
                             chatLock.withLock {
                                 messageLock.withLock {
                                     withContext(dispatchers.io) {
@@ -667,27 +658,27 @@ class SphinxRepository(
                                             LOG.d(
                                                 TAG,
                                                 "Inserting Messages -" +
-                                                        " ${messageDbos.firstOrNull()?.id?.value}" +
-                                                        " - ${messageDbos.lastOrNull()?.id?.value}"
+                                                        " ${newMessages.firstOrNull()?.id}" +
+                                                        " - ${newMessages.lastOrNull()?.id}"
                                             )
 
                                             val latestMessageMap = mutableMapOf<ChatId, MessageId>()
 
-                                            for (dbo in messageDbos) {
-                                                if (dbo.chat_id.value == MessageDtoDboMapper.NULL_CHAT_ID.toLong()) {
-                                                    queries.upsertMessage(dbo)
-                                                } else if (chatIds.contains(dbo.chat_id)) {
-                                                    queries.upsertMessage(dbo)
+                                            for (dto in newMessages) {
 
-                                                    if (dbo.type.show && !dbo.type.isBotRes()) {
-                                                        latestMessageMap[dbo.chat_id] = dbo.id
+                                                val id: Long? = dto.chat_id
+
+                                                if (id == null) {
+                                                    queries.upsertMessage(dto)
+                                                } else if (chatIds.contains(ChatId(id))) {
+                                                    queries.upsertMessage(dto)
+
+                                                    if (
+                                                        dto.type.toMessageType().show &&
+                                                        dto.type != MessageType.BOT_RES
+                                                    ) {
+                                                        latestMessageMap[ChatId(id)] = MessageId(dto.id)
                                                     }
-                                                }
-                                            }
-
-                                            for (dbo in mediaDbos) {
-                                                if (dbo != null) {
-                                                    queries.upsertMessageMedia(dbo)
                                                 }
                                             }
 
