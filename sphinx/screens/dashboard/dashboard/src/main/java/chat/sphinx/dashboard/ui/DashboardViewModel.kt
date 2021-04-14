@@ -17,7 +17,10 @@ import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.wrapper_chat.isConversation
+import chat.sphinx.wrapper_common.contact.ContactId
 import chat.sphinx.wrapper_contact.Contact
+import chat.sphinx.wrapper_contact.isConfirmed
+import chat.sphinx.wrapper_contact.isTrue
 import chat.sphinx.wrapper_message.Message
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.MotionLayoutViewModel
@@ -26,8 +29,11 @@ import io.matthewnelson.concept_views.sideeffect.SideEffect
 import io.matthewnelson.concept_views.viewstate.collect
 import io.matthewnelson.concept_views.viewstate.value
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
@@ -65,33 +71,150 @@ internal class DashboardViewModel @Inject constructor(
         ChatViewStateContainer(dispatchers)
     }
 
+    private val _accountOwnerStateFlow: MutableStateFlow<Contact?> by lazy {
+        MutableStateFlow(null)
+    }
+
+    val accountOwnerStateFlow: StateFlow<Contact?>
+        get() = _accountOwnerStateFlow.asStateFlow()
+
+    private val _contactsStateFlow: MutableStateFlow<List<Contact>> by lazy {
+        MutableStateFlow(emptyList())
+    }
+
+    private val collectionLock = Mutex()
+
+    private var contactsCollectionInitialized: Boolean = false
+    private var chatsCollectionInitialized: Boolean = false
+
     init {
         viewModelScope.launch(dispatchers.mainImmediate) {
-            chatRepository.getChats().distinctUntilChanged().collect { chats ->
-                val newList = ArrayList<DashboardChat>(chats.size)
+            contactRepository.getContacts().distinctUntilChanged().collect { contacts ->
+                collectionLock.withLock {
+                    contactsCollectionInitialized = true
+                    val newList = ArrayList<Contact>(contacts.size - 1)
+                    val contactIds = ArrayList<ContactId>(contacts.size - 1)
 
-                withContext(dispatchers.default) {
-                    for (chat in chats) {
-                        val message: Message? = chat.latestMessageId?.let {
-                            messageRepository.getMessageById(it).firstOrNull()
+                    withContext(dispatchers.default) {
+                        for (contact in contacts) {
+                            if (contact.isOwner.isTrue()) {
+                                _accountOwnerStateFlow.value = contact
+                                continue
+                            }
+
+                            contactIds.add(contact.id)
+                            newList.add(contact)
+                        }
+                    }
+
+                    _contactsStateFlow.value = newList.toList()
+
+                    // Don't push update to chat view state, let it's collection do it.
+                    if (!chatsCollectionInitialized) {
+                        return@withLock
+                    }
+
+                    withContext(dispatchers.default) {
+                        val currentChats = currentChatViewState.list.toMutableList()
+
+                        var updateChatViewState = false
+                        for (chat in currentChatViewState.list) {
+
+                            val contact: Contact? = when (chat) {
+                                is DashboardChat.Active.Conversation -> {
+                                    chat.contact
+                                }
+                                is DashboardChat.Active.GroupOrTribe -> {
+                                    null
+                                }
+                                is DashboardChat.Inactive.Conversation -> {
+                                    chat.contact
+                                }
+                            }
+
+                            contact?.let {
+                                // if the id of the currently displayed chat is not contained
+                                // in the list collected here, it's a new contact w/o a chat.
+                                if (!contactIds.contains(it.id)) {
+                                    updateChatViewState = true
+                                    currentChats.add(DashboardChat.Inactive.Conversation(contact))
+                                }
+                            }
                         }
 
-                        if (chat.type.isConversation()) {
-                            // TODO: Replace direct calls with local contactStateFlow
-                            val contact: Contact = contactRepository.getContactById(
-                                chat.contactIds.lastOrNull() ?: continue
-                            ).firstOrNull() ?: continue
-
-                            newList.add(DashboardChat.Active.Conversation(
-                                chat, message, contact
-                            ))
-                        } else {
-                            newList.add(DashboardChat.Active.GroupOrTribe(chat, message))
+                        if (updateChatViewState) {
+                            chatViewStateContainer.updateDashboardChats(currentChats.toList())
                         }
                     }
                 }
+            }
+        }
 
-                chatViewStateContainer.updateDashboardChats(newList)
+        viewModelScope.launch(dispatchers.mainImmediate) {
+            delay(25L)
+            chatRepository.getChats().distinctUntilChanged().collect { chats ->
+                collectionLock.withLock {
+                    chatsCollectionInitialized = true
+                    val newList = ArrayList<DashboardChat>(chats.size)
+                    val contactsAdded = mutableListOf<ContactId>()
+
+                    withContext(dispatchers.default) {
+                        for (chat in chats) {
+                            val message: Message? = chat.latestMessageId?.let {
+                                messageRepository.getMessageById(it).firstOrNull()
+                            }
+
+                            if (chat.type.isConversation()) {
+                                val contactId: ContactId = chat.contactIds.lastOrNull() ?: continue
+
+                                val contact: Contact = if (contactsCollectionInitialized) {
+
+                                    var temp: Contact? = null
+                                    for (contact in _contactsStateFlow.value) {
+                                        if (contact.id == contactId) {
+                                            temp = contact
+                                            break
+                                        }
+                                    }
+                                    temp ?: continue
+
+                                } else {
+
+                                    contactRepository.getContactById(
+                                        chat.contactIds.lastOrNull() ?: continue
+                                    ).firstOrNull() ?: continue
+
+                                }
+
+                                contactsAdded.add(contactId)
+
+                                newList.add(
+                                    DashboardChat.Active.Conversation(
+                                        chat, message, contact
+                                    )
+                                )
+                            } else {
+                                newList.add(DashboardChat.Active.GroupOrTribe(chat, message))
+                            }
+                        }
+                    }
+
+                    if (contactsCollectionInitialized) {
+                        withContext(dispatchers.default) {
+                            for (contact in _contactsStateFlow.value) {
+
+                                if (contact.status.isConfirmed() && !contactsAdded.contains(contact.id)) {
+                                    newList.add(
+                                        DashboardChat.Inactive.Conversation(contact)
+                                    )
+                                }
+
+                            }
+                        }
+                    }
+
+                    chatViewStateContainer.updateDashboardChats(newList)
+                }
             }
         }
     }
