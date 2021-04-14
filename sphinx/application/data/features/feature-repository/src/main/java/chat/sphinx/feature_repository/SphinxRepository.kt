@@ -208,11 +208,28 @@ class SphinxRepository(
             .distinctUntilChanged()
     }
 
+    override suspend fun getInviteById(inviteId: InviteId): Flow<Invite?> {
+        return coreDB.getSphinxDatabaseQueries().inviteGetById(inviteId)
+            .asFlow()
+            .mapToOneOrNull(dispatchers.io)
+            .map { it?.let { inviteDboPresenterMapper.mapFrom(it) } }
+            .distinctUntilChanged()
+    }
+
+    override suspend fun getInviteByContactId(contactId: ContactId): Flow<Invite?> {
+        return coreDB.getSphinxDatabaseQueries().inviteGetByContactId(contactId)
+            .asFlow()
+            .mapToOneOrNull(dispatchers.io)
+            .map { it?.let { inviteDboPresenterMapper.mapFrom(it) } }
+            .distinctUntilChanged()
+    }
+
     override suspend fun getOwner(): Flow<Contact?> {
         return coreDB.getSphinxDatabaseQueries().contactGetOwner()
             .asFlow()
             .mapToOneOrNull(dispatchers.io)
             .map { it?.let { contactDboPresenterMapper.mapFrom(it) } }
+            .distinctUntilChanged()
     }
 
     override fun networkRefreshContacts(): Flow<LoadResponse<Boolean, ResponseError>> = flow {
