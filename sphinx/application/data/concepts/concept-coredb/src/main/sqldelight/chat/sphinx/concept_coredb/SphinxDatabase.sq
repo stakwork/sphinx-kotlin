@@ -15,6 +15,7 @@ import chat.sphinx.wrapper_common.chat.ChatId;
 import chat.sphinx.wrapper_common.chat.ChatUUID;
 import chat.sphinx.wrapper_common.contact.ContactId;
 import chat.sphinx.wrapper_common.invite.InviteId;
+import chat.sphinx.wrapper_common.invite.InviteStatus;
 import chat.sphinx.wrapper_common.lightning.LightningNodeAlias;
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey;
 import chat.sphinx.wrapper_common.lightning.LightningPaymentHash;
@@ -28,10 +29,7 @@ import chat.sphinx.wrapper_contact.DeviceId;
 import chat.sphinx.wrapper_contact.NotificationSound;
 import chat.sphinx.wrapper_contact.Owner;
 import chat.sphinx.wrapper_contact.PrivatePhoto;
-import chat.sphinx.wrapper_message.media.MediaKey;
-import chat.sphinx.wrapper_message.media.MediaKeyDecrypted;
-import chat.sphinx.wrapper_message.media.MediaToken;
-import chat.sphinx.wrapper_message.media.MediaType;
+import chat.sphinx.wrapper_invite.InviteString;
 import chat.sphinx.wrapper_message.MessageContent;
 import chat.sphinx.wrapper_message.MessageContentDecrypted;
 import chat.sphinx.wrapper_message.MessageMUID;
@@ -40,6 +38,10 @@ import chat.sphinx.wrapper_message.MessageType;
 import chat.sphinx.wrapper_message.MessageUUID;
 import chat.sphinx.wrapper_message.ReplyUUID;
 import chat.sphinx.wrapper_message.SenderAlias;
+import chat.sphinx.wrapper_message.media.MediaKey;
+import chat.sphinx.wrapper_message.media.MediaKeyDecrypted;
+import chat.sphinx.wrapper_message.media.MediaToken;
+import chat.sphinx.wrapper_message.media.MediaType;
 import chat.sphinx.wrapper_rsa.RsaPublicKey;
 import kotlin.collections.List;
 
@@ -180,7 +182,8 @@ CREATE TABLE contactDbo(
     updated_at                  INTEGER         AS DateTime NOT NULL,
     notification_sound          TEXT            AS NotificationSound,
     tip_amount                  INTEGER         AS Sat,
-    invite_id                   INTEGER         AS InviteId
+    invite_id                   INTEGER         AS InviteId,
+    invite_status               INTEGER         AS InviteStatus
 );
 
 contactGetAllIds:
@@ -217,7 +220,8 @@ contactUpsert {
         updated_at = :updated_at,
         notification_sound = :notification_sound,
         tip_amount = :tip_amount,
-        invite_id = :invite_id
+        invite_id = :invite_id,
+        invite_status = :invite_status
     WHERE id = :id;
 
     INSERT OR IGNORE INTO contactDbo(
@@ -236,7 +240,8 @@ contactUpsert {
         updated_at,
         notification_sound,
         tip_amount,
-        invite_id
+        invite_id,
+        invite_status
     )
     VALUES (
         :id,
@@ -254,13 +259,76 @@ contactUpsert {
         :updated_at,
         :notification_sound,
         :tip_amount,
-        :invite_id
+        :invite_id,
+        :invite_status
     );
 }
+
+contactUpdateInviteStatus:
+UPDATE contactDbo
+SET invite_status = :invite_status
+WHERE invite_id = ?;
 
 contactDeleteById:
 DELETE FROM contactDbo
 WHERE id = ?;
+
+CREATE TABLE inviteDbo(
+    id                          INTEGER         AS InviteId NOT NULL PRIMARY KEY,
+    invite_string               TEXT            AS InviteString NOT NULL,
+    invoice                     TEXT            AS LightningPaymentRequest,
+--     welcome_message             TEXT,
+    contact_id                  INTEGER         AS ContactId NOT NULL,
+    status                      INTEGER         AS InviteStatus NOT NULL,
+    price                       INTEGER         AS Sat,
+    created_at                  INTEGER         AS DateTime NOT NULL
+);
+
+inviteGetById:
+SELECT *
+FROM inviteDbo
+WHERE id = ?;
+
+inviteGetByContactId:
+SELECT *
+FROM inviteDbo
+WHERE contact_id = ?;
+
+inviteUpsert {
+    UPDATE inviteDbo
+    SET invite_string = :invite_string,
+        invoice = :invoice,
+        status = :status,
+        price = :price
+    WHERE id = :id;
+
+    INSERT OR IGNORE INTO inviteDbo(
+        id,
+        invite_string,
+        invoice,
+        contact_id,
+        status,
+        price,
+        created_at
+    )
+    VALUES (
+        :id,
+        :invite_string,
+        :invoice,
+        :contact_id,
+        :status,
+        :price,
+        :created_at
+    );
+}
+
+inviteDeleteById:
+DELETE FROM inviteDbo
+WHERE id = ?;
+
+inviteDeleteByContactId:
+DELETE FROM inviteDbo
+WHERE contact_id = ?;
 
 -- Cannot use inline classes if there are 23 or more columns
 -- https://youtrack.jetbrains.com/issue/KT-45084
