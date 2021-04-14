@@ -132,6 +132,6 @@
         android:background="@color/body"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/image_view_chat_holder" />
+        app:layout_constraintStart_toEndOf="@+id/image_initials_holder" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

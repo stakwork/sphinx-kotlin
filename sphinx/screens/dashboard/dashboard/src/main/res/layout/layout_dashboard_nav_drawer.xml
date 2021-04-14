@@ -12,13 +12,15 @@
         android:id="@+id/nav_drawer_header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/nav_drawer_header_margin"
+        android:layout_marginTop="@dimen/nav_drawer_header_margin"
+        android:layout_marginBottom="@dimen/nav_drawer_header_margin"
+        android:layout_marginStart="@dimen/default_layout_margin"
         app:layout_constraintTop_toTopOf="parent">
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/nav_drawer_image_view_user_profile_picture"
-            android:layout_width="@dimen/nav_drawer_header_profile_picture_size"
-            android:layout_height="@dimen/nav_drawer_header_profile_picture_size"
+            android:layout_width="@dimen/nav_drawer_header_profile_picture_xy"
+            android:layout_height="@dimen/nav_drawer_header_profile_picture_xy"
             android:src="@drawable/ic_profile_avatar_circle"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />

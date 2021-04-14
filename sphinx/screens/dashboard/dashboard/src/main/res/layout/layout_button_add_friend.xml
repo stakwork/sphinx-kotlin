@@ -14,7 +14,7 @@
         android:layout_height="wrap_content"
         android:text="@string/add_icon"
         android:textColor="@color/primaryText"
-        android:textSize="@dimen/add_buttons_icon_size"
+        android:textSize="@dimen/add_buttons_icon_xy"
         android:fontFamily="@font/material_icons_regular"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
