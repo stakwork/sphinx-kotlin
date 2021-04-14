@@ -4,6 +4,7 @@ import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.contact.ContactId
 import chat.sphinx.wrapper_common.invite.InviteId
+import chat.sphinx.wrapper_common.invite.InviteStatus
 import chat.sphinx.wrapper_common.lightning.LightningNodeAlias
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.LightningRouteHint
@@ -28,4 +29,5 @@ data class Contact(
     val notificationSound: NotificationSound?,
     val tipAmount: Sat?,
     val inviteId: InviteId?,
+    val inviteStatus: InviteStatus?,
 )
