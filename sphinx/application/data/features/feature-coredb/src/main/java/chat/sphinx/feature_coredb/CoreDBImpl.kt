@@ -2,11 +2,7 @@ package chat.sphinx.feature_coredb
 
 import chat.sphinx.concept_coredb.CoreDB
 import chat.sphinx.concept_coredb.SphinxDatabase
-import chat.sphinx.conceptcoredb.ChatDbo
-import chat.sphinx.conceptcoredb.ContactDbo
-import chat.sphinx.conceptcoredb.MessageDbo
-import chat.sphinx.conceptcoredb.MessageMediaDbo
-import chat.sphinx.conceptcoredb.SphinxDatabaseQueries
+import chat.sphinx.conceptcoredb.*
 import chat.sphinx.feature_coredb.adapters.chat.*
 import chat.sphinx.feature_coredb.adapters.common.*
 import chat.sphinx.feature_coredb.adapters.contact.*
@@ -15,6 +11,7 @@ import chat.sphinx.feature_coredb.adapters.contact.ContactOwnerAdapter
 import chat.sphinx.feature_coredb.adapters.contact.LightningNodeAliasAdapter
 import chat.sphinx.feature_coredb.adapters.contact.LightningRouteHintAdapter
 import chat.sphinx.feature_coredb.adapters.contact.PrivatePhotoAdapter
+import chat.sphinx.feature_coredb.adapters.invite.InviteStringAdapter
 import chat.sphinx.feature_coredb.adapters.media.*
 import chat.sphinx.feature_coredb.adapters.message.*
 import com.squareup.moshi.Moshi
@@ -93,6 +90,7 @@ abstract class CoreDBImpl(private val moshi: Moshi): CoreDB() {
                     notification_soundAdapter = NotificationSoundAdapter(),
                     tip_amountAdapter = SatAdapter.getInstance(),
                     invite_idAdapter = InviteIdAdapter.getInstance(),
+                    invite_statusAdapter = InviteStatusAdapter.getInstance(),
                 ),
                 messageDboAdapter = MessageDbo.Adapter(
                     idAdapter = MessageIdAdapter.getInstance(),
@@ -122,6 +120,15 @@ abstract class CoreDBImpl(private val moshi: Moshi): CoreDB() {
                     media_key_decryptedAdapter = MediaKeyDecryptedAdapter(),
                     media_typeAdapter = MediaTypeAdapter(),
                     media_tokenAdapter = MediaTokenAdapter(),
+                ),
+                inviteDboAdapter = InviteDbo.Adapter(
+                    idAdapter = InviteIdAdapter.getInstance(),
+                    invite_stringAdapter = InviteStringAdapter(),
+                    invoiceAdapter = LightningPaymentRequestAdapter.getInstance(),
+                    contact_idAdapter = ContactIdAdapter.getInstance(),
+                    statusAdapter = InviteStatusAdapter.getInstance(),
+                    priceAdapter = SatAdapter.getInstance(),
+                    created_atAdapter = DateTimeAdapter.getInstance(),
                 )
             ).sphinxDatabaseQueries
         }
