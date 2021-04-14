@@ -6,13 +6,14 @@ import chat.sphinx.chat_group.navigation.ToChatGroupScreen
 import chat.sphinx.chat_tribe.navigation.ToChatTribeScreen
 import chat.sphinx.dashboard.navigation.DashboardNavigator
 import chat.sphinx.wrapper_common.chat.ChatId
+import chat.sphinx.wrapper_common.contact.ContactId
 import javax.inject.Inject
 
 class DashboardNavigatorImpl @Inject constructor(
     navigationDriver: PrimaryNavigationDriver
 ): DashboardNavigator(navigationDriver)
 {
-    override suspend fun toChatContact(chatId: ChatId) {
+    override suspend fun toChatContact(chatId: ChatId?, contactId: ContactId) {
         navigationDriver.submitNavigationRequest(ToChatContactScreen(/*chatId*/))
     }
 

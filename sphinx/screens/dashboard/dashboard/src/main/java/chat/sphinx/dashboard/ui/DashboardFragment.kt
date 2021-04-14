@@ -15,10 +15,13 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import app.cash.exhaustive.Exhaustive
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.concept_image_loader.ImageLoader
+import chat.sphinx.concept_image_loader.ImageLoaderOptions
+import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.dashboard.R
 import chat.sphinx.dashboard.databinding.FragmentDashboardBinding
 import chat.sphinx.dashboard.ui.adapter.ChatListAdapter
 import chat.sphinx.dashboard.ui.adapter.ChatListFooterAdapter
+import chat.sphinx.dashboard.ui.adapter.OnStartStopSupervisor
 import chat.sphinx.dashboard.ui.viewstates.NavDrawerViewState
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
@@ -183,14 +186,13 @@ internal class DashboardFragment : MotionLayoutFragment<
         }
     }
 
-    override fun onPause() {
-        super.onPause()
-        binding.searchBarClearFocus()
+    private val supervisor: OnStartStopSupervisor by lazy(LazyThreadSafetyMode.NONE) {
+        OnStartStopSupervisor(viewLifecycleOwner)
     }
 
-    override fun subscribeToViewStateFlow() {
-        super.subscribeToViewStateFlow()
-        lifecycleScope.launchWhenStarted {
+    override fun onStart() {
+        super.onStart()
+        supervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
             viewModel.networkStateFlow.collect { loadResponse ->
                 binding.layoutDashboardHeader.let { dashboardHeader ->
                     @Exhaustive
@@ -237,6 +239,33 @@ internal class DashboardFragment : MotionLayoutFragment<
                 }
             }
         }
+
+        supervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
+            viewModel.accountOwnerStateFlow.collect { contactOwner ->
+                contactOwner?.photoUrl?.value?.let { url ->
+                    imageLoader.load(
+                        binding.layoutDashboardNavDrawer.navDrawerImageViewUserProfilePicture,
+                        url,
+                        ImageLoaderOptions.Builder()
+                            .placeholderResId(R.drawable.ic_profile_avatar_circle)
+                            .transformation(Transformation.CircleCrop)
+                            .build()
+                    )
+                } ?: binding.layoutDashboardNavDrawer
+                    .navDrawerImageViewUserProfilePicture
+                    .setImageDrawable(
+                        ContextCompat.getDrawable(
+                            binding.root.context,
+                            R.drawable.ic_profile_avatar_circle
+                        )
+                    )
+            }
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        binding.searchBarClearFocus()
     }
 
     override suspend fun onViewStateFlowCollect(viewState: NavDrawerViewState) {
