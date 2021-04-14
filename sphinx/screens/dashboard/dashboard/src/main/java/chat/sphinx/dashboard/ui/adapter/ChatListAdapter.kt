@@ -16,6 +16,7 @@ import chat.sphinx.dashboard.databinding.LayoutChatHolderBinding
 import chat.sphinx.dashboard.ui.DashboardViewModel
 import chat.sphinx.dashboard.ui.collectChatViewState
 import chat.sphinx.dashboard.ui.currentChatViewState
+import chat.sphinx.resources.setBackgroundRandomColor
 import chat.sphinx.resources.setTextColorExt
 import chat.sphinx.wrapper_chat.*
 import chat.sphinx.wrapper_common.DateTime
@@ -26,6 +27,21 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.*
 import kotlin.collections.ArrayList
+
+@Suppress("NOTHING_TO_INLINE")
+private inline fun String.getInitials(charLimit: Int = 2): String {
+    val sb = StringBuilder()
+    this.split(' ').let { splits ->
+        for ((index, split) in splits.withIndex()) {
+            if (index < charLimit) {
+                sb.append(split.firstOrNull() ?: "")
+            } else {
+                break
+            }
+        }
+    }
+    return sb.toString()
+}
 
 internal class ChatListAdapter(
     private val imageLoader: ImageLoader<ImageView>,
@@ -191,21 +207,23 @@ internal class ChatListAdapter(
 
                 // Image
                 dashboardChat.photoUrl.let { url ->
-                    supervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
-                        disposable = if (url != null) {
+
+                    imageViewChatHolder.goneIfFalse(url != null)
+                    textViewInitials.goneIfFalse(url == null)
+
+                    if (url != null) {
+                        supervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
                             imageLoader.load(
                                 imageViewChatHolder,
                                 url.value,
                                 imageLoaderOptions
                             )
-                        } else {
-                            imageLoader.load(
-                                imageViewChatHolder,
-                                R.drawable.ic_profile_avatar_circle,
-                                imageLoaderOptions
-                            )
                         }
+                    } else {
+                        textViewInitials.text = dashboardChat.chatName?.getInitials() ?: ""
+                        textViewInitials.setBackgroundRandomColor(R.drawable.chat_initials_circle)
                     }
+
                 }
 
                 // Name
