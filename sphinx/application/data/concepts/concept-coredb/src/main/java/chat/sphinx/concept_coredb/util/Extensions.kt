@@ -5,14 +5,11 @@ import chat.sphinx.conceptcoredb.*
 @Suppress("NOTHING_TO_INLINE", "SpellCheckingInspection")
 inline fun SphinxDatabaseQueries.upsertChat(dbo: ChatDbo): Unit =
     chatUpsert(
-        dbo.uuid,
         dbo.name,
         dbo.photo_url,
-        dbo.type,
         dbo.status,
         dbo.contact_ids,
         dbo.is_muted,
-        dbo.created_at,
         dbo.group_key,
         dbo.host,
         dbo.price_per_message,
@@ -25,7 +22,10 @@ inline fun SphinxDatabaseQueries.upsertChat(dbo: ChatDbo): Unit =
         dbo.my_photo_url,
         dbo.my_alias,
         dbo.pending_contact_ids,
-        dbo.id
+        dbo.id,
+        dbo.uuid,
+        dbo.type,
+        dbo.created_at,
     )
 
 @Suppress("NOTHING_TO_INLINE", "SpellCheckingInspection")
@@ -40,18 +40,25 @@ inline fun SphinxDatabaseQueries.upsertContact(dbo: ContactDbo): Unit =
         dbo.status,
         dbo.public_key,
         dbo.device_id,
-        dbo.created_at,
         dbo.updated_at,
         dbo.notification_sound,
         dbo.tip_amount,
         dbo.invite_id,
         dbo.id,
-        dbo.owner
+        dbo.owner,
+        dbo.created_at,
     )
 
 @Suppress("NOTHING_TO_INLINE", "SpellCheckingInspection")
 inline fun SphinxDatabaseQueries.upsertMessage(dbo: MessageDbo): Unit =
     messageUpsert(
+        dbo.status,
+        dbo.seen,
+        dbo.sender_alias,
+        dbo.sender_pic,
+        dbo.original_muid,
+        dbo.reply_uuid,
+        dbo.id,
         dbo.uuid,
         dbo.chat_id,
         dbo.type,
@@ -63,14 +70,7 @@ inline fun SphinxDatabaseQueries.upsertMessage(dbo: MessageDbo): Unit =
         dbo.date,
         dbo.expiration_date,
         dbo.message_content,
-        dbo.status,
-        dbo.seen,
-        dbo.sender_alias,
-        dbo.sender_pic,
-        dbo.original_muid,
-        dbo.reply_uuid,
-        dbo.id,
-        dbo.message_content_decrypted
+        dbo.message_content_decrypted,
     )
 
 @Suppress("NOTHING_TO_INLINE", "SpellCheckingInspection")
@@ -81,5 +81,5 @@ inline fun SphinxDatabaseQueries.upsertMessageMedia(dbo: MessageMediaDbo): Unit 
         dbo.media_token,
         dbo.id,
         dbo.chat_id,
-        dbo.media_key_decrypted
+        dbo.media_key_decrypted,
     )
