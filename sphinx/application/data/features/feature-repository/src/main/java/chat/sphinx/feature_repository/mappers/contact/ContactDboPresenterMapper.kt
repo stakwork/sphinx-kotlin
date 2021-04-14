@@ -30,7 +30,8 @@ internal class ContactDboPresenterMapper(
 
             value.notification_sound,
             value.tip_amount,
-            value.invite_id
+            value.invite_id,
+            value.invite_status
         )
     }
 
@@ -51,7 +52,8 @@ internal class ContactDboPresenterMapper(
             value.updatedAt,
             value.notificationSound,
             value.tipAmount,
-            value.inviteId
+            value.inviteId,
+            value.inviteStatus
         )
     }
 }
