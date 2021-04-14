@@ -65,11 +65,17 @@ inline class DateTime(val value: Date) {
     companion object {
         private const val UTC = "UTC"
 
+        private const val FORMAT_RELAY = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
+        private const val FORMAT_TODAY_00 = "yyyy-MM-dd'T00:00:00.000Z'"
+        private const val FORMAT_H_MM_A = "h:mm a"
+        private const val FORMAT_MMM = "MMM"
+        private const val FORMAT_EEE_DD = "EEE dd"
+
         @Volatile
         private var formatRelay: SimpleDateFormat? = null
         fun getFormatRelay(): SimpleDateFormat =
             formatRelay ?: synchronized(this) {
-                formatRelay ?: SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.ENGLISH)
+                formatRelay ?: SimpleDateFormat(FORMAT_RELAY, Locale.ENGLISH)
                     .also {
                         it.timeZone = TimeZone.getTimeZone(UTC)
                         formatRelay = it
@@ -79,8 +85,12 @@ inline class DateTime(val value: Date) {
         @Volatile
         private var formatToday00: SimpleDateFormat? = null
         fun getFormatToday00(): SimpleDateFormat =
-            formatToday00 ?: synchronized(this) {
-                formatToday00 ?: SimpleDateFormat("yyyy-MM-dd'T00:00:00.000Z'", Locale.getDefault())
+            formatToday00?.also {
+                it.timeZone = TimeZone.getDefault()
+            } ?: synchronized(this) {
+                formatToday00?.also {
+                    it.timeZone = TimeZone.getDefault()
+                } ?: SimpleDateFormat(FORMAT_TODAY_00, Locale.getDefault())
                     .also {
                         it.timeZone = TimeZone.getDefault()
                         formatToday00 = it
@@ -103,8 +113,12 @@ inline class DateTime(val value: Date) {
         private var formathmma: SimpleDateFormat? = null
         @Suppress("SpellCheckingInspection")
         fun getFormathmma(): SimpleDateFormat =
-            formathmma ?: synchronized(this) {
-                formathmma ?: SimpleDateFormat("h:mm a", Locale.getDefault())
+            formathmma?.also {
+                it.timeZone = TimeZone.getDefault()
+            } ?: synchronized(this) {
+                formathmma?.also {
+                    it.timeZone = TimeZone.getDefault()
+                } ?: SimpleDateFormat(FORMAT_H_MM_A, Locale.getDefault())
                     .also {
                         it.timeZone = TimeZone.getDefault()
                         formathmma = it
@@ -114,8 +128,12 @@ inline class DateTime(val value: Date) {
         @Volatile
         private var formatMMM: SimpleDateFormat? = null
         fun getFormatMMM(): SimpleDateFormat =
-            formatMMM ?: synchronized(this) {
-                formatMMM ?: SimpleDateFormat("MMM", Locale.getDefault())
+            formatMMM?.also {
+                it.timeZone = TimeZone.getDefault()
+            } ?: synchronized(this) {
+                formatMMM?.also {
+                    it.timeZone = TimeZone.getDefault()
+                } ?: SimpleDateFormat(FORMAT_MMM, Locale.getDefault())
                     .also {
                         it.timeZone = TimeZone.getDefault()
                         formatMMM = it
@@ -125,8 +143,12 @@ inline class DateTime(val value: Date) {
         @Volatile
         private var formatEEEdd: SimpleDateFormat? = null
         fun getFormatEEEdd(): SimpleDateFormat =
-            formatEEEdd ?: synchronized(this) {
-                formatEEEdd ?: SimpleDateFormat("EEE dd", Locale.getDefault())
+            formatEEEdd?.also {
+                it.timeZone = TimeZone.getDefault()
+            } ?: synchronized(this) {
+                formatEEEdd?.also {
+                    it.timeZone = TimeZone.getDefault()
+                } ?: SimpleDateFormat(FORMAT_EEE_DD, Locale.getDefault())
                     .also {
                         it.timeZone = TimeZone.getDefault()
                         formatEEEdd = it
