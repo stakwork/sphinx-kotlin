@@ -10,8 +10,11 @@ import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
 import chat.sphinx.concept_network_query_chat.model.ChatDto
 import chat.sphinx.concept_network_query_contact.NetworkQueryContact
+import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
+import chat.sphinx.concept_network_query_lightning.model.balance.BalanceDto
 import chat.sphinx.concept_network_query_message.NetworkQueryMessage
 import chat.sphinx.concept_repository_contact.ContactRepository
+import chat.sphinx.concept_repository_lightning.LightningRepository
 import chat.sphinx.conceptcoredb.MessageDbo
 import chat.sphinx.conceptcoredb.SphinxDatabaseQueries
 import chat.sphinx.feature_repository.mappers.chat.ChatDboPresenterMapper
@@ -19,9 +22,7 @@ import chat.sphinx.feature_repository.mappers.contact.ContactDboPresenterMapper
 import chat.sphinx.feature_repository.mappers.invite.InviteDboPresenterMapper
 import chat.sphinx.feature_repository.mappers.mapListFrom
 import chat.sphinx.feature_repository.mappers.message.MessageDboPresenterMapper
-import chat.sphinx.feature_repository.util.upsertChat
-import chat.sphinx.feature_repository.util.upsertContact
-import chat.sphinx.feature_repository.util.upsertMessage
+import chat.sphinx.feature_repository.util.*
 import chat.sphinx.kotlin_response.*
 import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.logger.d
@@ -35,6 +36,7 @@ import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessagePagination
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_invite.Invite
+import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message.media.MediaKeyDecrypted
 import chat.sphinx.wrapper_message.media.MessageMedia
@@ -42,6 +44,7 @@ import com.squareup.moshi.Moshi
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
 import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
+import io.matthewnelson.concept_authentication.data.AuthenticationStorage
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.feature_authentication_core.AuthenticationCoreManager
 import io.matthewnelson.crypto_common.annotations.RawPasswordAccess
@@ -57,18 +60,22 @@ import java.text.ParseException
 
 class SphinxRepository(
     private val authenticationCoreManager: AuthenticationCoreManager,
+    private val authenticationStorage: AuthenticationStorage,
     private val coreDB: CoreDB,
     private val dispatchers: CoroutineDispatchers,
     private val moshi: Moshi,
     private val networkQueryChat: NetworkQueryChat,
     private val networkQueryContact: NetworkQueryContact,
+    private val networkQueryLightning: NetworkQueryLightning,
     private val networkQueryMessage: NetworkQueryMessage,
     private val rsa: RSA,
     private val LOG: SphinxLogger,
-): ChatRepository, ContactRepository, MessageRepository {
+): ChatRepository, ContactRepository, LightningRepository, MessageRepository {
 
     companion object {
         const val TAG: String = "SphinxRepository"
+
+        const val REPOSITORY_LIGHTNING_BALANCE = "REPOSITORY_LIGHTNING_BALANCE"
     }
 
     /////////////
@@ -275,6 +282,96 @@ class SphinxRepository(
                 }
             }
 
+        }
+    }
+
+    /////////////////
+    /// Lightning ///
+    /////////////////
+    @Suppress("RemoveExplicitTypeArguments")
+    private val accountBalanceStateFlow: MutableStateFlow<NodeBalance?> by lazy {
+        MutableStateFlow<NodeBalance?>(null)
+    }
+    private val balanceLock = Mutex()
+
+    @Suppress("BlockingMethodInNonBlockingContext")
+    override suspend fun getAccountBalance(): StateFlow<NodeBalance?> {
+        balanceLock.withLock {
+
+            if (accountBalanceStateFlow.value == null) {
+                authenticationStorage
+                    .getString(REPOSITORY_LIGHTNING_BALANCE, null)
+                    ?.let { balanceJsonString ->
+
+                        val balanceDto: BalanceDto? = try {
+                            withContext(dispatchers.default) {
+                                moshi.adapter(BalanceDto::class.java)
+                                    .fromJson(balanceJsonString)
+                            }
+                        } catch (e: Exception) {
+                            null
+                        }
+
+                        balanceDto?.toNodeBalanceOrNull()?.let { nodeBalance ->
+                            accountBalanceStateFlow.value = nodeBalance
+                        }
+                    }
+            }
+
+        }
+
+        return accountBalanceStateFlow.asStateFlow()
+    }
+
+    override fun networkRefreshBalance(): Flow<LoadResponse<Boolean, ResponseError>> = flow {
+        networkQueryLightning.getBalance().collect { loadResponse ->
+            @Exhaustive
+            when (loadResponse) {
+                is LoadResponse.Loading -> {
+                    emit(loadResponse)
+                }
+                is Response.Error -> {
+                    emit(loadResponse)
+                }
+                is Response.Success -> {
+
+                    try {
+                        val jsonString: String = withContext(dispatchers.default) {
+                            moshi.adapter(BalanceDto::class.java)
+                                .toJson(loadResponse.value)
+                        } ?: throw NullPointerException("Converting BalanceDto to Json failed")
+
+                        balanceLock.withLock {
+                            accountBalanceStateFlow.value = loadResponse.value.toNodeBalance()
+
+                            authenticationStorage.putString(
+                                REPOSITORY_LIGHTNING_BALANCE,
+                                jsonString
+                            )
+                        }
+
+                        emit(Response.Success(true))
+                    } catch (e: Exception) {
+
+                        // this should _never_ happen, as if the network call was
+                        // successful, it went from json -> dto, and we're just going
+                        // back from dto -> json to persist it...
+                        emit(
+                            Response.Error(
+                                ResponseError(
+                                    """
+                                        Network Fetching of balance was successful, but
+                                        conversion to a string for persisting failed.
+                                        ${loadResponse.value}
+                                    """.trimIndent(),
+                                    e
+                                )
+                            )
+                        )
+                    }
+
+                }
+            }
         }
     }
 

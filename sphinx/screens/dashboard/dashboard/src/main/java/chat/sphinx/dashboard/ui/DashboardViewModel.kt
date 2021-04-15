@@ -4,6 +4,7 @@ import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
+import chat.sphinx.concept_repository_lightning.LightningRepository
 import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.dashboard.navigation.DashboardBottomNavBarNavigator
 import chat.sphinx.dashboard.navigation.DashboardNavDrawerNavigator
@@ -18,9 +19,11 @@ import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.wrapper_chat.isConversation
 import chat.sphinx.wrapper_common.contact.ContactId
+import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_contact.isConfirmed
 import chat.sphinx.wrapper_contact.isTrue
+import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_message.Message
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.MotionLayoutViewModel
@@ -58,6 +61,7 @@ internal class DashboardViewModel @Inject constructor(
     val dispatchers: CoroutineDispatchers,
     private val chatRepository: ChatRepository,
     private val contactRepository: ContactRepository,
+    private val lightningRepository: LightningRepository,
     private val messageRepository: MessageRepository,
 ): MotionLayoutViewModel<
         Any,
@@ -77,6 +81,9 @@ internal class DashboardViewModel @Inject constructor(
 
     val accountOwnerStateFlow: StateFlow<Contact?>
         get() = _accountOwnerStateFlow.asStateFlow()
+
+    suspend fun getAccountBalance(): StateFlow<NodeBalance?> =
+        lightningRepository.getAccountBalance()
 
     private val _contactsStateFlow: MutableStateFlow<List<Contact>> by lazy {
         MutableStateFlow(emptyList())
@@ -238,10 +245,25 @@ internal class DashboardViewModel @Inject constructor(
         }
 
         jobNetworkRefresh = viewModelScope.launch(dispatchers.mainImmediate) {
-            contactRepository.networkRefreshContacts().collect { response ->
+            lightningRepository.networkRefreshBalance().collect { response ->
                 @Exhaustive
                 when (response) {
                     is LoadResponse.Loading,
+                    is Response.Error -> {
+                        _networkStateFlow.value = response
+                    }
+                    is Response.Success -> {}
+                }
+            }
+
+            if (_networkStateFlow.value is Response.Error) {
+                jobNetworkRefresh?.cancel()
+            }
+
+            contactRepository.networkRefreshContacts().collect { response ->
+                @Exhaustive
+                when (response) {
+                    is LoadResponse.Loading -> {}
                     is Response.Error -> {
                         _networkStateFlow.value = response
                     }

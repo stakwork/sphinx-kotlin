@@ -30,6 +30,7 @@ import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.resources.SphinxToastUtils
 import chat.sphinx.resources.inputMethodManager
+import chat.sphinx.wrapper_common.lightning.asFormattedString
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.navigation.CloseAppOnBackPress
 import io.matthewnelson.android_feature_screens.ui.motionlayout.MotionLayoutFragment
@@ -193,6 +194,17 @@ internal class DashboardFragment : MotionLayoutFragment<
     override fun onStart() {
         super.onStart()
         supervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
+            viewModel.getAccountBalance().collect { nodeBalance ->
+                if (nodeBalance == null) return@collect
+
+                nodeBalance.balance.asFormattedString().let { balance ->
+                    binding.layoutDashboardHeader.textViewDashboardHeaderBalance.text = balance
+                    binding.layoutDashboardNavDrawer.navDrawerTextViewSatsBalance.text = balance
+                }
+            }
+        }
+
+        supervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
             viewModel.networkStateFlow.collect { loadResponse ->
                 binding.layoutDashboardHeader.let { dashboardHeader ->
                     @Exhaustive
@@ -265,6 +277,10 @@ internal class DashboardFragment : MotionLayoutFragment<
                 }
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
     }
 
     override fun onPause() {

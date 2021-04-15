@@ -32,6 +32,7 @@ include ':sphinx:application:data:features:feature-relay'
 
 include ':sphinx:application:data:concepts:repositories:concept-repository-chat'
 include ':sphinx:application:data:concepts:repositories:concept-repository-contact'
+include ':sphinx:application:data:concepts:repositories:concept-repository-lightning'
 include ':sphinx:application:data:concepts:repositories:concept-repository-message'
 include ':sphinx:application:data:features:feature-repository'
 
