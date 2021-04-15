@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_background_login.BackgroundLoginHandler
+import chat.sphinx.concept_repository_lightning.LightningRepository
 import chat.sphinx.key_restore.KeyRestore
 import chat.sphinx.key_restore.KeyRestoreResponse
 import chat.sphinx.splash.navigation.SplashNavigator
@@ -35,6 +36,7 @@ internal class SplashViewModel @Inject constructor(
     private val backgroundLoginHandler: BackgroundLoginHandler,
     private val dispatchers: CoroutineDispatchers,
     private val keyRestore: KeyRestore,
+    private val lightningRepository: LightningRepository,
     private val navigator: SplashNavigator,
 ): MotionLayoutViewModel<
         Any,
@@ -49,6 +51,12 @@ internal class SplashViewModel @Inject constructor(
             return
         } else {
             screenInit = true
+        }
+
+
+        // prime the account balance retrieval from SharePrefs
+        viewModelScope.launch(dispatchers.mainImmediate) {
+            lightningRepository.getAccountBalance().firstOrNull()
         }
 
         viewModelScope.launch(dispatchers.mainImmediate) {
