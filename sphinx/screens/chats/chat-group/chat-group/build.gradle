@@ -30,11 +30,7 @@ android {
 
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
-    // KotlinAndroid
-    implementation project(path: ':android:features:android-feature-screens')
-
-    // Sphinx
-    implementation project(path: ':sphinx:application:common:resources')
+    api project(path: ':sphinx:screens:chats:chat-common:chat-common')
 
     implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt
