@@ -2,6 +2,7 @@ package chat.sphinx.feature_repository.util
 
 import chat.sphinx.concept_network_query_chat.model.ChatDto
 import chat.sphinx.concept_network_query_contact.model.ContactDto
+import chat.sphinx.concept_network_query_lightning.model.balance.BalanceDto
 import chat.sphinx.concept_network_query_message.model.MessageDto
 import chat.sphinx.conceptcoredb.SphinxDatabaseQueries
 import chat.sphinx.wrapper_chat.*
@@ -17,6 +18,7 @@ import chat.sphinx.wrapper_common.toPhotoUrl
 import chat.sphinx.wrapper_common.toSeen
 import chat.sphinx.wrapper_contact.*
 import chat.sphinx.wrapper_invite.InviteString
+import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message.media.MediaToken
 import chat.sphinx.wrapper_message.media.toMediaKey
@@ -24,6 +26,23 @@ import chat.sphinx.wrapper_message.media.toMediaKeyDecrypted
 import chat.sphinx.wrapper_message.media.toMediaType
 import chat.sphinx.wrapper_rsa.RsaPublicKey
 import com.squareup.moshi.Moshi
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun BalanceDto.toNodeBalanceOrNull(): NodeBalance? =
+    try {
+        toNodeBalance()
+    } catch (e: IllegalArgumentException) {
+        null
+    }
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun BalanceDto.toNodeBalance(): NodeBalance =
+    NodeBalance(
+        Sat(reserve),
+        Sat(full_balance),
+        Sat(balance),
+        Sat(pending_open_balance),
+    )
 
 @Suppress("NOTHING_TO_INLINE", "SpellCheckingInspection")
 inline fun SphinxDatabaseQueries.upsertChat(dto: ChatDto, moshi: Moshi) {

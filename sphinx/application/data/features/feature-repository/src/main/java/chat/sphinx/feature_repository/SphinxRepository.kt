@@ -10,6 +10,7 @@ import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
 import chat.sphinx.concept_network_query_chat.model.ChatDto
 import chat.sphinx.concept_network_query_contact.NetworkQueryContact
+import chat.sphinx.concept_network_query_lightning.model.balance.BalanceDto
 import chat.sphinx.concept_network_query_message.NetworkQueryMessage
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_lightning.LightningRepository
@@ -42,6 +43,7 @@ import com.squareup.moshi.Moshi
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
 import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
+import io.matthewnelson.concept_authentication.data.AuthenticationStorage
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.feature_authentication_core.AuthenticationCoreManager
 import io.matthewnelson.crypto_common.annotations.RawPasswordAccess
@@ -57,6 +59,7 @@ import java.text.ParseException
 
 class SphinxRepository(
     private val authenticationCoreManager: AuthenticationCoreManager,
+    private val authenticationStorage: AuthenticationStorage,
     private val coreDB: CoreDB,
     private val dispatchers: CoroutineDispatchers,
     private val moshi: Moshi,
@@ -69,6 +72,8 @@ class SphinxRepository(
 
     companion object {
         const val TAG: String = "SphinxRepository"
+
+        const val REPOSITORY_LIGHTNING_BALANCE = "REPOSITORY_LIGHTNING_BALANCE"
     }
 
     /////////////
@@ -281,8 +286,39 @@ class SphinxRepository(
     /////////////////
     /// Lightning ///
     /////////////////
+    @Suppress("RemoveExplicitTypeArguments")
+    private val accountBalanceStateFlow: MutableStateFlow<NodeBalance?> by lazy {
+        MutableStateFlow<NodeBalance?>(null)
+    }
+    private val balanceLock = Mutex()
+
+    @Suppress("BlockingMethodInNonBlockingContext")
     override suspend fun getAccountBalance(): StateFlow<NodeBalance?> {
-        TODO("Not yet implemented")
+        balanceLock.withLock {
+
+            if (accountBalanceStateFlow.value == null) {
+                authenticationStorage
+                    .getString(REPOSITORY_LIGHTNING_BALANCE, null)
+                    ?.let { balanceJsonString ->
+
+                        val balanceDto: BalanceDto? = try {
+                            withContext(dispatchers.default) {
+                                moshi.adapter(BalanceDto::class.java)
+                                    .fromJson(balanceJsonString)
+                            }
+                        } catch (e: Exception) {
+                            null
+                        }
+
+                        balanceDto?.toNodeBalanceOrNull()?.let { nodeBalance ->
+                            accountBalanceStateFlow.value = nodeBalance
+                        }
+                    }
+            }
+
+        }
+
+        return accountBalanceStateFlow.asStateFlow()
     }
 
     override fun networkRefreshBalance(): Flow<LoadResponse<Boolean, ResponseError>> = flow {
