@@ -1,39 +1,65 @@
 package chat.sphinx.feature_network_client
 
-import chat.sphinx.concept_network_client.NetworkClient
+import chat.sphinx.concept_network_client_cache.NetworkClientCache
 import io.matthewnelson.build_config.BuildConfigDebug
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import okhttp3.Cache
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import java.util.concurrent.TimeUnit
 
-class NetworkClientImpl(private val debug: BuildConfigDebug): NetworkClient() {
+class NetworkClientImpl(
+    private val debug: BuildConfigDebug,
+    private val cache: Cache,
+): NetworkClientCache() {
 
     companion object {
-        const val TIME_OUT = 30L
+        const val TIME_OUT = 20L
         const val PING_INTERVAL = 30L
+
+        const val CACHE_CONTROL = "Cache-Control"
+        const val MAX_STALE = "public, max-stale=$MAX_STALE_VALUE"
     }
 
     @Volatile
     private var client: OkHttpClient? = null
-    private val lock = Mutex()
+    private val clientLock = Mutex()
 
     override suspend fun getClient(): OkHttpClient =
-        lock.withLock {
-            client ?: createClientImpl()
+        clientLock.withLock {
+            client ?: createClientImpl().build()
                 .also { client = it }
         }
 
-    // TODO: For future Tor implementation where variability in the
-    //  SOCKS Proxy can change depending on network state and if the
-    //  SOCKS Port is set to auto.
-    suspend fun createClient(): OkHttpClient =
-        lock.withLock {
-            createClientImpl()
+    @Volatile
+    private var cachingClient: OkHttpClient? = null
+    private val cachingClientLock = Mutex()
+
+    override suspend fun getCachingClient(): OkHttpClient =
+        cachingClientLock.withLock {
+            cachingClient ?: createClientImpl()
+                .cache(cache)
+                .addInterceptor { chain ->
+                    val request = chain.request().newBuilder()
+                        .header(CACHE_CONTROL, MAX_STALE)
+                        .build()
+                    chain.proceed(request)
+                }
+                .build()
+                .also { cachingClient = it }
         }
 
-    private suspend fun createClientImpl(): OkHttpClient =
+    private var callback: () -> Unit? = {}
+    override fun addOnClientClearedCallback(onClear: () -> Unit) {
+        callback = onClear
+    }
+
+    override fun removeOnClientClearedCallback() {
+        callback = {}
+    }
+
+    private suspend fun createClientImpl(): OkHttpClient.Builder =
         OkHttpClient.Builder().let { builder ->
 
             builder.callTimeout(TIME_OUT * 3, TimeUnit.SECONDS)
@@ -50,7 +76,6 @@ class NetworkClientImpl(private val debug: BuildConfigDebug): NetworkClient() {
                 }
             }
 
-            return builder.build()
-                .also { client = it }
+            return builder
         }
 }

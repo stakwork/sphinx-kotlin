@@ -134,18 +134,13 @@ internal class MainActivity: MotionLayoutNavigationActivity<
     override suspend fun onViewStateFlowCollect(viewState: MainViewState) {
         when (viewState) {
             is MainViewState.DetailScreenActive -> {
-                binding.layoutMotionMain.let { motionLayout ->
-                    motionLayout.setTransitionDuration(400)
-                    viewState.transitionToEndSet(motionLayout)
-                }
+                binding.layoutMotionMain.setTransitionDuration(400)
             }
             is MainViewState.DetailScreenInactive -> {
-                binding.layoutMotionMain.let { motionLayout ->
-                    motionLayout.setTransitionDuration(250)
-                    viewState.transitionToEndSet(motionLayout)
-                }
+                binding.layoutMotionMain.setTransitionDuration(250)
             }
         }
+        viewState.transitionToEndSet(binding.layoutMotionMain)
     }
 
     override fun onCreatedRestoreMotionScene(viewState: MainViewState, binding: ActivityMainBinding) {

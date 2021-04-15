@@ -1,32 +1,20 @@
 package chat.sphinx.feature_network_query_subscription
 
-import app.cash.exhaustive.Exhaustive
-import chat.sphinx.concept_network_client.NetworkClient
 import chat.sphinx.concept_network_query_subscription.NetworkQuerySubscription
 import chat.sphinx.concept_network_query_subscription.model.SubscriptionDto
-import chat.sphinx.concept_relay.RelayDataHandler
-import chat.sphinx.concept_relay.retrieveRelayUrlAndJavaWebToken
+import chat.sphinx.concept_network_relay_call.NetworkRelayCall
 import chat.sphinx.feature_network_query_subscription.model.GetSubscriptionRelayResponse
 import chat.sphinx.feature_network_query_subscription.model.GetSubscriptionsRelayResponse
-import chat.sphinx.kotlin_response.KotlinResponse
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.ResponseError
-import chat.sphinx.network_relay_call.RelayCall
 import chat.sphinx.wrapper_common.contact.ContactId
 import chat.sphinx.wrapper_common.subscription.SubscriptionId
-import chat.sphinx.wrapper_relay.JavaWebToken
+import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
-import com.squareup.moshi.Moshi
-import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.emitAll
-import kotlinx.coroutines.flow.flow
 
 class NetworkQuerySubscriptionImpl(
-    private val dispatchers: CoroutineDispatchers,
-    private val moshi: Moshi,
-    private val networkClient: NetworkClient,
-    private val relayDataHandler: RelayDataHandler
+    private val networkRelayCall: NetworkRelayCall,
 ): NetworkQuerySubscription() {
 
     companion object {
@@ -37,97 +25,33 @@ class NetworkQuerySubscriptionImpl(
     ///////////
     /// GET ///
     ///////////
-    override fun getSubscriptions(): Flow<LoadResponse<List<SubscriptionDto>, ResponseError>> = flow {
-        relayDataHandler.retrieveRelayUrlAndJavaWebToken().let { response ->
-            @Exhaustive
-            when (response) {
-                is KotlinResponse.Error -> {
-                    emit(response)
-                }
-                is KotlinResponse.Success -> {
-                    emitAll(
-                        getSubscriptions(response.value.first, response.value.second)
-                    )
-                }
-            }
-        }
-    }
-
     override fun getSubscriptions(
-        javaWebToken: JavaWebToken,
-        relayUrl: RelayUrl
+        relayData: Pair<AuthorizationToken, RelayUrl>?
     ): Flow<LoadResponse<List<SubscriptionDto>, ResponseError>> =
-        RelayCall.Get.execute(
-            dispatchers = dispatchers,
-            jwt = javaWebToken,
-            moshi = moshi,
-            adapterClass = GetSubscriptionsRelayResponse::class.java,
-            networkClient = networkClient,
-            url = relayUrl.value + ENDPOINT_SUBSCRIPTIONS
+        networkRelayCall.get(
+            jsonAdapter = GetSubscriptionsRelayResponse::class.java,
+            relayEndpoint = ENDPOINT_SUBSCRIPTIONS,
+            relayData = relayData
         )
 
     override fun getSubscriptionById(
-        subscriptionId: SubscriptionId
-    ): Flow<LoadResponse<SubscriptionDto, ResponseError>> = flow {
-        relayDataHandler.retrieveRelayUrlAndJavaWebToken().let { response ->
-            @Exhaustive
-            when (response) {
-                is KotlinResponse.Error -> {
-                    emit(response)
-                }
-                is KotlinResponse.Success -> {
-                    emitAll(
-                        getSubscriptionById(response.value.first, response.value.second, subscriptionId)
-                    )
-                }
-            }
-        }
-    }
-
-    override fun getSubscriptionById(
-        javaWebToken: JavaWebToken,
-        relayUrl: RelayUrl,
-        subscriptionId: SubscriptionId
+        subscriptionId: SubscriptionId,
+        relayData: Pair<AuthorizationToken, RelayUrl>?
     ): Flow<LoadResponse<SubscriptionDto, ResponseError>> =
-        RelayCall.Get.execute(
-            dispatchers = dispatchers,
-            jwt = javaWebToken,
-            moshi = moshi,
-            adapterClass = GetSubscriptionRelayResponse::class.java,
-            networkClient = networkClient,
-            url = relayUrl.value + ENDPOINT_SUBSCRIPTION + "/${subscriptionId.value}"
+        networkRelayCall.get(
+            jsonAdapter = GetSubscriptionRelayResponse::class.java,
+            relayEndpoint = "$ENDPOINT_SUBSCRIPTION/${subscriptionId.value}",
+            relayData = relayData
         )
 
     override fun getSubscriptionsByContactId(
-        contactId: ContactId
-    ): Flow<LoadResponse<List<SubscriptionDto>, ResponseError>> = flow {
-        relayDataHandler.retrieveRelayUrlAndJavaWebToken().let { response ->
-            @Exhaustive
-            when (response) {
-                is KotlinResponse.Error -> {
-                    emit(response)
-                }
-                is KotlinResponse.Success -> {
-                    emitAll(
-                        getSubscriptionsByContactId(response.value.first, response.value.second, contactId)
-                    )
-                }
-            }
-        }
-    }
-
-    override fun getSubscriptionsByContactId(
-        javaWebToken: JavaWebToken,
-        relayUrl: RelayUrl,
-        contactId: ContactId
+        contactId: ContactId,
+        relayData: Pair<AuthorizationToken, RelayUrl>?
     ): Flow<LoadResponse<List<SubscriptionDto>, ResponseError>> =
-        RelayCall.Get.execute(
-            dispatchers = dispatchers,
-            jwt = javaWebToken,
-            moshi = moshi,
-            adapterClass = GetSubscriptionsRelayResponse::class.java,
-            networkClient = networkClient,
-            url = relayUrl.value + ENDPOINT_SUBSCRIPTIONS + "/contact/${contactId.value}",
+        networkRelayCall.get(
+            jsonAdapter = GetSubscriptionsRelayResponse::class.java,
+            relayEndpoint = "$ENDPOINT_SUBSCRIPTIONS/contact/${contactId.value}",
+            relayData = relayData
         )
 
     ///////////

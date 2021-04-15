@@ -4,25 +4,14 @@ package chat.sphinx.wrapper_chat
 inline fun ChatUnlisted.isTrue(): Boolean =
     this is ChatUnlisted.True
 
-/**
- * Converts the integer value returned over the wire to an object.
- *
- * @throws [IllegalArgumentException] if the integer is not supported
- * */
 @Suppress("NOTHING_TO_INLINE")
-@Throws(IllegalArgumentException::class)
 inline fun Int.toChatUnlisted(): ChatUnlisted =
     when (this) {
-        ChatUnlisted.NOT_UNLISTED -> {
+        ChatUnlisted.UNLISTED -> {
             ChatUnlisted.True
         }
-        ChatUnlisted.UNLISTED -> {
-            ChatUnlisted.False
-        }
         else -> {
-            throw IllegalArgumentException(
-                "ChatUnlisted for integer '$this' not supported"
-            )
+            ChatUnlisted.False
         }
     }
 
@@ -34,6 +23,8 @@ inline fun Boolean.toChatUnlisted(): ChatUnlisted =
  * Comes off the wire as:
  *  - 0 (Not Unlisted)
  *  - 1 (Unlisted)
+ *  - true (Unlisted)
+ *  - false (Not Unlisted)
  * */
 sealed class ChatUnlisted {
 

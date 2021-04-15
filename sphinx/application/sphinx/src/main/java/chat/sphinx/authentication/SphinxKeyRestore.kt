@@ -1,6 +1,6 @@
 package chat.sphinx.authentication
 
-import chat.sphinx.wrapper_relay.JavaWebToken
+import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
 import chat.sphinx.feature_relay.RelayDataHandlerImpl
 import chat.sphinx.key_restore.KeyRestore
@@ -8,9 +8,9 @@ import chat.sphinx.key_restore.KeyRestoreResponse
 import io.matthewnelson.concept_authentication.coordinator.AuthenticationRequest
 import io.matthewnelson.concept_authentication.coordinator.AuthenticationResponse
 import io.matthewnelson.feature_authentication_core.model.AuthenticateFlowResponse
-import io.matthewnelson.k_openssl_common.annotations.RawPasswordAccess
-import io.matthewnelson.k_openssl_common.clazzes.Password
-import io.matthewnelson.k_openssl_common.clazzes.compare
+import io.matthewnelson.crypto_common.annotations.RawPasswordAccess
+import io.matthewnelson.crypto_common.clazzes.Password
+import io.matthewnelson.crypto_common.clazzes.compare
 import kotlinx.coroutines.flow.*
 import javax.inject.Inject
 
@@ -26,8 +26,8 @@ class SphinxKeyRestore @Inject constructor(
         privateKey: Password,
         publicKey: Password,
         userPin: CharArray,
-        relayUrl: String,
-        jwt: String
+        relayUrl: RelayUrl,
+        authorizationToken: AuthorizationToken,
     ): Flow<KeyRestoreResponse> = flow {
         when {
             authenticationManager.isAnEncryptionKeySet() -> {
@@ -39,20 +39,14 @@ class SphinxKeyRestore @Inject constructor(
             publicKey.value.isEmpty() -> {
                 emit(KeyRestoreResponse.Error.PublicKeyWasEmpty)
             }
-            relayUrl.isEmpty() -> {
-                emit(KeyRestoreResponse.Error.RelayUrlWasEmpty)
-            }
-            jwt.isEmpty() -> {
-                emit(KeyRestoreResponse.Error.JavaWebTokenWasEmpty)
-            }
             else -> {
                 emitAll(
                     restoreKeysImpl(
                         privateKey,
                         publicKey,
                         userPin,
-                        RelayUrl(relayUrl),
-                        JavaWebToken(jwt)
+                        relayUrl,
+                        authorizationToken,
                     )
                 )
             }
@@ -64,7 +58,7 @@ class SphinxKeyRestore @Inject constructor(
         publicKey: Password,
         userPin: CharArray,
         relayUrl: RelayUrl,
-        jwt: JavaWebToken
+        jwt: AuthorizationToken
     ): Flow<KeyRestoreResponse> = flow {
         // authenticating the first time will return a SetKeyFirstTime response
         val request = AuthenticationRequest.LogIn(privateKey = null)

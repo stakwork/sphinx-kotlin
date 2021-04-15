@@ -3,28 +3,50 @@ package chat.sphinx.dashboard.ui
 import android.content.Context
 import android.os.Bundle
 import android.view.View
+import android.widget.ImageView
 import androidx.constraintlayout.motion.widget.MotionLayout
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
-import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.ConcatAdapter
+import androidx.recyclerview.widget.LinearLayoutManager
 import app.cash.exhaustive.Exhaustive
 import by.kirich1409.viewbindingdelegate.viewBinding
+import chat.sphinx.concept_image_loader.ImageLoader
+import chat.sphinx.concept_image_loader.ImageLoaderOptions
+import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.dashboard.R
 import chat.sphinx.dashboard.databinding.FragmentDashboardBinding
+import chat.sphinx.dashboard.ui.adapter.ChatListAdapter
+import chat.sphinx.dashboard.ui.adapter.ChatListFooterAdapter
+import chat.sphinx.dashboard.ui.adapter.OnStartStopSupervisor
 import chat.sphinx.dashboard.ui.viewstates.NavDrawerViewState
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.insetter_activity.addStatusBarPadding
+import chat.sphinx.kotlin_response.LoadResponse
+import chat.sphinx.kotlin_response.Response
 import chat.sphinx.resources.SphinxToastUtils
+import chat.sphinx.resources.inputMethodManager
+import chat.sphinx.wrapper_common.lightning.asFormattedString
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.navigation.CloseAppOnBackPress
 import io.matthewnelson.android_feature_screens.ui.motionlayout.MotionLayoutFragment
+import io.matthewnelson.android_feature_screens.util.invisibleIfFalse
 import io.matthewnelson.android_feature_viewmodel.currentViewState
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_views.sideeffect.SideEffect
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import javax.inject.Inject
+
+@Suppress("NOTHING_TO_INLINE")
+private inline fun FragmentDashboardBinding.searchBarClearFocus() {
+    layoutDashboardSearchBar.editTextDashboardSearch.clearFocus()
+}
 
 @AndroidEntryPoint
 internal class DashboardFragment : MotionLayoutFragment<
@@ -36,6 +58,10 @@ internal class DashboardFragment : MotionLayoutFragment<
         FragmentDashboardBinding
         >(R.layout.fragment_dashboard)
 {
+    @Inject
+    @Suppress("ProtectedInFinal")
+    protected lateinit var imageLoader: ImageLoader<ImageView>
+
     override val viewModel: DashboardViewModel by viewModels()
     override val binding: FragmentDashboardBinding by viewBinding(FragmentDashboardBinding::bind)
 
@@ -44,6 +70,8 @@ internal class DashboardFragment : MotionLayoutFragment<
         BackPressHandler(binding.root.context)
             .enableDoubleTapToClose(viewLifecycleOwner, SphinxToastUtils())
             .addCallback(viewLifecycleOwner, requireActivity())
+
+        viewModel.networkRefresh()
 
 //        findNavController().addOnDestinationChangedListener(CloseDrawerOnDestinationChange())
 
@@ -58,6 +86,7 @@ internal class DashboardFragment : MotionLayoutFragment<
             if (viewModel.currentViewState is NavDrawerViewState.Open) {
                 viewModel.updateViewState(NavDrawerViewState.Closed)
             } else {
+                binding.searchBarClearFocus()
                 super.handleOnBackPressed()
             }
         }
@@ -75,16 +104,12 @@ internal class DashboardFragment : MotionLayoutFragment<
     }
 
     private fun setupChats() {
-        binding.layoutDashboardChats.let { chats ->
-            chats.dashboardButtonChatContact.setOnClickListener {
-                lifecycleScope.launch { viewModel.dashboardNavigator.toChatContact("") }
-            }
-            chats.dashboardButtonChatGroup.setOnClickListener {
-                lifecycleScope.launch { viewModel.dashboardNavigator.toChatGroup("") }
-            }
-            chats.dashboardButtonChatTribe.setOnClickListener {
-                lifecycleScope.launch { viewModel.dashboardNavigator.toChatTribe("") }
-            }
+        val chatListAdapter = ChatListAdapter(imageLoader, viewLifecycleOwner, viewModel)
+        val chatListFooterAdapter = ChatListFooterAdapter(viewLifecycleOwner, viewModel)
+        binding.layoutDashboardChats.recyclerViewChats.apply {
+            this.setHasFixedSize(false)
+            layoutManager = LinearLayoutManager(binding.root.context)
+            adapter = ConcatAdapter(chatListAdapter, chatListFooterAdapter)
         }
     }
 
@@ -107,15 +132,19 @@ internal class DashboardFragment : MotionLayoutFragment<
                 .addNavigationBarPadding(navBar.layoutConstraintDashboardNavBar)
 
             navBar.navBarButtonPaymentReceive.setOnClickListener {
+                binding.searchBarClearFocus()
                 lifecycleScope.launch { viewModel.navBarNavigator.toPaymentReceiveDetail() }
             }
             navBar.navBarButtonTransactions.setOnClickListener {
+                binding.searchBarClearFocus()
                 lifecycleScope.launch { viewModel.navBarNavigator.toTransactionsDetail() }
             }
             navBar.navBarButtonScanner.setOnClickListener {
+                binding.searchBarClearFocus()
                 lifecycleScope.launch { viewModel.navBarNavigator.toScannerDetail() }
             }
             navBar.navBarButtonPaymentSend.setOnClickListener {
+                binding.searchBarClearFocus()
                 lifecycleScope.launch { viewModel.navBarNavigator.toPaymentSendDetail() }
             }
         }
@@ -158,6 +187,107 @@ internal class DashboardFragment : MotionLayoutFragment<
         }
     }
 
+    private val supervisor: OnStartStopSupervisor by lazy(LazyThreadSafetyMode.NONE) {
+        OnStartStopSupervisor(viewLifecycleOwner)
+    }
+
+    override fun onStart() {
+        super.onStart()
+        supervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
+            viewModel.getAccountBalance().collect { nodeBalance ->
+                if (nodeBalance == null) return@collect
+
+                nodeBalance.balance.asFormattedString().let { balance ->
+                    binding.layoutDashboardHeader.textViewDashboardHeaderBalance.text = balance
+                    binding.layoutDashboardNavDrawer.navDrawerTextViewSatsBalance.text = balance
+                }
+            }
+        }
+
+        supervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
+            viewModel.networkStateFlow.collect { loadResponse ->
+                binding.layoutDashboardHeader.let { dashboardHeader ->
+                    @Exhaustive
+                    when (loadResponse) {
+                        is LoadResponse.Loading -> {
+                            dashboardHeader.progressBarDashboardHeaderNetwork.invisibleIfFalse(true)
+                            dashboardHeader.imageViewDashboardHeaderNetwork.invisibleIfFalse(false)
+                        }
+                        is Response.Error -> {
+                            dashboardHeader.progressBarDashboardHeaderNetwork.invisibleIfFalse(false)
+                            dashboardHeader.imageViewDashboardHeaderNetwork.invisibleIfFalse(true)
+                            dashboardHeader.imageViewDashboardHeaderNetwork.setImageDrawable(
+                                ContextCompat.getDrawable(
+                                    binding.root.context,
+                                    R.drawable.ic_network_state_white
+                                ).also { drawable ->
+                                    drawable?.setTint(
+                                        ContextCompat.getColor(
+                                            binding.root.context,
+                                            R.color.primaryRed
+                                        )
+                                    )
+                                }
+                            )
+                        }
+                        is Response.Success -> {
+                            dashboardHeader.progressBarDashboardHeaderNetwork.invisibleIfFalse(false)
+                            dashboardHeader.imageViewDashboardHeaderNetwork.invisibleIfFalse(true)
+                            dashboardHeader.imageViewDashboardHeaderNetwork.setImageDrawable(
+                                ContextCompat.getDrawable(
+                                    binding.root.context,
+                                    R.drawable.ic_network_state_white
+                                ).also { drawable ->
+                                    drawable?.setTint(
+                                        ContextCompat.getColor(
+                                            binding.root.context,
+                                            R.color.primaryGreen
+                                        )
+                                    )
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+        supervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
+            viewModel.accountOwnerStateFlow.collect { contactOwner ->
+                contactOwner?.let { owner ->
+                    owner.photoUrl?.value?.let { url ->
+                        imageLoader.load(
+                            binding.layoutDashboardNavDrawer.navDrawerImageViewUserProfilePicture,
+                            url,
+                            ImageLoaderOptions.Builder()
+                                .placeholderResId(R.drawable.ic_profile_avatar_circle)
+                                .transformation(Transformation.CircleCrop)
+                                .build()
+                        )
+                    } ?: binding.layoutDashboardNavDrawer
+                        .navDrawerImageViewUserProfilePicture
+                        .setImageDrawable(
+                            ContextCompat.getDrawable(
+                                binding.root.context,
+                                R.drawable.ic_profile_avatar_circle
+                            )
+                        )
+                    binding.layoutDashboardNavDrawer.navDrawerTextViewProfileName.text =
+                        owner.alias?.value ?: ""
+                }
+            }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        binding.searchBarClearFocus()
+    }
+
     override suspend fun onViewStateFlowCollect(viewState: NavDrawerViewState) {
         @Exhaustive
         when (viewState) {
@@ -166,6 +296,15 @@ internal class DashboardFragment : MotionLayoutFragment<
             }
             NavDrawerViewState.Open -> {
                 binding.layoutMotionDashboard.setTransitionDuration(300)
+                binding.layoutDashboardSearchBar.editTextDashboardSearch.let { editText ->
+                    binding.root.context.inputMethodManager?.let { imm ->
+                        if (imm.isActive(editText)) {
+                            imm.hideSoftInputFromWindow(editText.windowToken, 0)
+                            delay(250L)
+                        }
+                    }
+                    binding.searchBarClearFocus()
+                }
             }
         }
         viewState.transitionToEndSet(binding.layoutMotionDashboard)

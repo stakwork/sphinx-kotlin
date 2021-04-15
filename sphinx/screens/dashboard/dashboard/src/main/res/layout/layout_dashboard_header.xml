@@ -5,7 +5,7 @@
     android:id="@+id/layout_constraint_dashboard_header"
     android:layout_width="match_parent"
     android:layout_height="@dimen/default_header_height"
-    android:background="@color/headerBackground"
+    android:background="@color/headerBG"
     android:elevation="@dimen/default_elevation">
 
     <androidx.appcompat.widget.AppCompatImageView
@@ -17,6 +17,58 @@
         android:src="@drawable/ic_baseline_menu_24"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/text_view_dashboard_header_balance"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/default_sats_amount"
+        android:textSize="17sp"
+        android:fontFamily="@font/montserrat_regular"
+        android:textColor="@android:color/white"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="134 456" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:alpha=".5"
+        android:text="@string/sats"
+        android:textSize="17sp"
+        android:fontFamily="@font/roboto_regular"
+        android:textColor="@color/dashboardWashedOutText"
+        app:layout_constraintBottom_toBottomOf="@+id/text_view_dashboard_header_balance"
+        app:layout_constraintStart_toEndOf="@+id/text_view_dashboard_header_balance"
+        app:layout_constraintTop_toTopOf="@+id/text_view_dashboard_header_balance" />
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/image_view_dashboard_header_network"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:src="@drawable/ic_network_state_white"
+        android:visibility="invisible"
+        android:paddingTop="4dp"
+        app:layout_constraintBottom_toBottomOf="@+id/progress_bar_dashboard_header_network"
+        app:layout_constraintEnd_toEndOf="@+id/progress_bar_dashboard_header_network"
+        app:layout_constraintStart_toStartOf="@+id/progress_bar_dashboard_header_network"
+        app:layout_constraintTop_toTopOf="@+id/progress_bar_dashboard_header_network"
+        tools:visibility="visible" />
+
+    <ProgressBar
+        android:id="@+id/progress_bar_dashboard_header_network"
+        android:layout_width="@dimen/dashboard_header_network_xy"
+        android:layout_height="@dimen/dashboard_header_network_xy"
+        android:indeterminate="true"
+        android:layout_marginEnd="@dimen/default_layout_margin"
+        android:indeterminateTint="@android:color/white"
+        android:progressBackgroundTint="@android:color/white"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_constraint_chat_holder"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/recycler_view_holder_height"
+    android:background="@color/headerBG"
+    android:elevation="4dp">
+
+    <android.widget.RelativeLayout
+        android:id="@+id/image_initials_holder"
+        android:layout_width="75dp"
+        android:layout_height="match_parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <TextView
+            android:id="@+id/text_view_initials"
+            android:layout_width="46dp"
+            android:layout_height="46dp"
+            android:gravity="center"
+            android:singleLine="true"
+            android:textColor="@android:color/white"
+            android:textSize="17sp"
+            android:fontFamily="@font/montserrat_regular"
+            android:background="@drawable/chat_initials_circle"
+            android:layout_centerInParent="true"
+            tools:text="TT" />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/image_view_chat_holder"
+            android:layout_width="46dp"
+            android:layout_height="46dp"
+            android:layout_centerInParent="true"
+            android:src="@drawable/ic_profile_avatar_circle" />
+
+    </android.widget.RelativeLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        app:layout_constraintEnd_toStartOf="@+id/layout_constraint_chat_holder_details"
+        app:layout_constraintStart_toEndOf="@+id/image_initials_holder">
+
+        <TextView
+            android:id="@+id/text_view_chat_holder_name"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:ellipsize="end"
+            android:gravity="center_vertical|start"
+            android:paddingTop="22dp"
+            android:singleLine="true"
+            android:textColor="@color/primaryText"
+            android:textSize="17sp"
+            android:fontFamily="@font/roboto_regular"
+            app:layout_constraintBottom_toTopOf="@+id/text_view_chat_holder_message"
+            app:layout_constraintEnd_toStartOf="@+id/image_view_chat_holder_lock"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Planet Sphinx" />
+
+        <TextView
+            android:id="@+id/image_view_chat_holder_lock"
+            android:text="lock"
+            android:singleLine="true"
+            android:textSize="15sp"
+            android:textColor="@color/secondaryText"
+            android:fontFamily="@font/material_icons_regular"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginBottom="2dp"
+            app:layout_constraintBottom_toTopOf="@+id/text_view_chat_holder_message"
+            app:layout_constraintStart_toEndOf="@id/text_view_chat_holder_name" />
+
+        <TextView
+            android:id="@+id/text_view_chat_holder_message"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:ellipsize="end"
+            android:gravity="center_vertical"
+            android:paddingBottom="18dp"
+            android:singleLine="true"
+            android:textSize="14sp"
+            android:textColor="@color/secondaryText"
+            android:fontFamily="@font/roboto_regular"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/text_view_chat_holder_name"
+            tools:text="This is a test message" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_chat_holder_details"
+        android:layout_width="72dp"
+        android:layout_height="match_parent"
+        android:paddingEnd="16dp"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/image_view_chat_holder_notification"
+            android:layout_width="16dp"
+            android:layout_height="0dp"
+            android:paddingTop="28dp"
+            android:src="@drawable/ic_baseline_notifications_off_24"
+            android:visibility="invisible"
+            app:layout_constraintBottom_toTopOf="@+id/text_view_chat_holder_time"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:visibility="visible" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_chat_holder_time"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:gravity="center_vertical|end"
+            android:paddingBottom="18dp"
+            android:textColor="@color/placeholderText"
+            android:textSize="10sp"
+            android:fontFamily="@font/roboto_regular"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/image_view_chat_holder_notification"
+            tools:ignore="SmallSp"
+            tools:text="12:21 PM" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_chat_holder_border"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:background="@color/body"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/image_initials_holder" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

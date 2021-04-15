@@ -7,6 +7,7 @@ import chat.sphinx.concept_network_query_invite.NetworkQueryInvite
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_message.NetworkQueryMessage
 import chat.sphinx.concept_network_query_subscription.NetworkQuerySubscription
+import chat.sphinx.concept_network_relay_call.NetworkRelayCall
 import chat.sphinx.concept_relay.RelayDataHandler
 import chat.sphinx.feature_network_client.NetworkClientImpl
 import chat.sphinx.feature_network_query_chat.NetworkQueryChatImpl
@@ -15,19 +16,26 @@ import chat.sphinx.feature_network_query_invite.NetworkQueryInviteImpl
 import chat.sphinx.feature_network_query_lightning.NetworkQueryLightningImpl
 import chat.sphinx.feature_network_query_message.NetworkQueryMessageImpl
 import chat.sphinx.feature_network_query_subscription.NetworkQuerySubscriptionImpl
+import chat.sphinx.feature_network_relay_call.NetworkRelayCallImpl
 import chat.sphinx.feature_relay.RelayDataHandlerImpl
-import chat.sphinx.wrapper_relay.JavaWebToken
+import chat.sphinx.logger.LogType
+import chat.sphinx.logger.SphinxLogger
+import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
 import com.squareup.moshi.Moshi
 import io.matthewnelson.build_config.BuildConfigDebug
-import io.matthewnelson.k_openssl_common.clazzes.Password
+import io.matthewnelson.crypto_common.clazzes.Password
 import io.matthewnelson.test_feature_authentication_core.AuthenticationCoreDefaultsTestHelper
 import io.matthewnelson.test_feature_authentication_core.TestEncryptionKeyHandler
 import kotlinx.coroutines.test.runBlockingTest
+import okhttp3.Cache
 import okio.base64.decodeBase64ToArray
 import org.cryptonode.jncryptor.AES256JNCryptor
+import org.junit.After
 import org.junit.Before
 import org.junit.BeforeClass
+import org.junit.Rule
+import org.junit.rules.TemporaryFolder
 
 /**
  * This class uses a test account setup on SphinxRelay to help ensure API compatibility.
@@ -39,13 +47,14 @@ import org.junit.BeforeClass
  * that test will simply notify that environment variables should be set with
  * their own test account credentials.
  * */
+@Suppress("BlockingMethodInNonBlockingContext")
 abstract class NetworkQueryTestHelper: AuthenticationCoreDefaultsTestHelper() {
 
     companion object {
         protected var privKey: String? = null
         protected var pubKey: String? = null
         protected var relayUrl: RelayUrl? = null
-        protected var javaWebToken: JavaWebToken? = null
+        protected var authorizationToken: AuthorizationToken? = null
 
         @BeforeClass
         @JvmStatic
@@ -89,7 +98,7 @@ abstract class NetworkQueryTestHelper: AuthenticationCoreDefaultsTestHelper() {
                         privKey = decryptedSplit[0]
                         pubKey = decryptedSplit[1]
                         relayUrl = RelayUrl(decryptedSplit[2])
-                        javaWebToken = JavaWebToken(decryptedSplit[3])
+                        authorizationToken = AuthorizationToken(decryptedSplit[3])
                     }
                 }
         }
@@ -99,7 +108,7 @@ abstract class NetworkQueryTestHelper: AuthenticationCoreDefaultsTestHelper() {
         val privKey: String,
         val pubKey: String,
         val relayUrl: RelayUrl,
-        val jwt: JavaWebToken,
+        val jwt: AuthorizationToken,
     )
 
     /**
@@ -113,7 +122,7 @@ abstract class NetworkQueryTestHelper: AuthenticationCoreDefaultsTestHelper() {
         privKey?.let { nnPrivKey ->
             pubKey?.let { nnPubKey ->
                 relayUrl?.let { nnRelayUrl ->
-                    javaWebToken?.let { nnJwt ->
+                    authorizationToken?.let { nnJwt ->
                         Credentials(
                             nnPrivKey,
                             nnPubKey,
@@ -134,10 +143,18 @@ abstract class NetworkQueryTestHelper: AuthenticationCoreDefaultsTestHelper() {
      * */
     open val useLoggingInterceptors: Boolean = false
 
+    @get:Rule
+    val testDirectory = TemporaryFolder()
+
+    open val okHttpCache: Cache by lazy {
+        Cache(testDirectory.newFile("okhttp_test_cache"), 2000000L /*2MB*/)
+    }
+
     protected open val networkClient: NetworkClient by lazy {
         NetworkClientImpl(
             // true will add interceptors to the OkHttpClient
-            BuildConfigDebug(useLoggingInterceptors)
+            BuildConfigDebug(useLoggingInterceptors),
+            okHttpCache,
         )
     }
 
@@ -150,62 +167,47 @@ abstract class NetworkQueryTestHelper: AuthenticationCoreDefaultsTestHelper() {
         )
     }
 
-    protected open val nqChat: NetworkQueryChat by lazy {
-        NetworkQueryChatImpl(
+    private class TestSphinxLogger: SphinxLogger() {
+        override fun log(tag: String, message: String, type: LogType, throwable: Throwable?) {}
+    }
+
+    protected open val networkRelayCall: NetworkRelayCall by lazy {
+        NetworkRelayCallImpl(
             dispatchers,
             moshi,
             networkClient,
-            relayDataHandler
+            relayDataHandler,
+            TestSphinxLogger()
         )
+    }
+
+    protected open val nqChat: NetworkQueryChat by lazy {
+        NetworkQueryChatImpl(networkRelayCall)
     }
 
     protected open val nqContact: NetworkQueryContact by lazy {
-        NetworkQueryContactImpl(
-            dispatchers,
-            moshi,
-            networkClient,
-            relayDataHandler
-        )
+        NetworkQueryContactImpl(networkRelayCall)
     }
 
     protected open val nqInvite: NetworkQueryInvite by lazy {
-        NetworkQueryInviteImpl(
-            dispatchers,
-            moshi,
-            networkClient,
-            relayDataHandler
-        )
+        NetworkQueryInviteImpl(networkRelayCall)
     }
 
     protected open val nqMessage: NetworkQueryMessage by lazy {
-        NetworkQueryMessageImpl(
-            dispatchers,
-            moshi,
-            networkClient,
-            relayDataHandler
-        )
+        NetworkQueryMessageImpl(networkRelayCall)
     }
 
     protected open val nqSubscription: NetworkQuerySubscription by lazy {
-        NetworkQuerySubscriptionImpl(
-            dispatchers,
-            moshi,
-            networkClient,
-            relayDataHandler
-        )
+        NetworkQuerySubscriptionImpl(networkRelayCall)
     }
 
     protected open val nqLightning: NetworkQueryLightning by lazy {
-        NetworkQueryLightningImpl(
-            dispatchers,
-            moshi,
-            networkClient,
-            relayDataHandler
-        )
+        NetworkQueryLightningImpl(networkRelayCall)
     }
 
     @Before
     fun setupNetworkQueryTestHelper() = testDispatcher.runBlockingTest {
+        testDirectory.create()
         getCredentials()?.let { creds ->
             // Set our raw private/public keys in the test handler so when we login
             // for the first time the generated keys will be these
@@ -219,10 +221,15 @@ abstract class NetworkQueryTestHelper: AuthenticationCoreDefaultsTestHelper() {
             login()
 
             // persist our relay url and java web token to test storage
-            relayDataHandler.persistJavaWebToken(creds.jwt)
+            relayDataHandler.persistAuthorizationToken(creds.jwt)
             relayDataHandler.persistRelayUrl(creds.relayUrl)
         }
 
         // if null, do nothing.
+    }
+
+    @After
+    fun tearDownNetworkQueryTestHelper() {
+        testDirectory.delete()
     }
 }

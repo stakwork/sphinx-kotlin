@@ -1,0 +1,13 @@
+plugins {
+    id 'app.cash.exhaustive'
+    id 'java-library'
+    id 'kotlin'
+}
+
+dependencies {
+    api project(path: ':sphinx:application:data:concepts:crypto:concept-crypto-rsa')
+
+    implementation deps.kotlin.coroutinesCore
+
+    testImplementation project(path: ':sphinx:test:test-network-query')
+}

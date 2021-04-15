@@ -1,0 +1,19 @@
+plugins {
+    id 'java-library'
+    id 'kotlin'
+}
+
+dependencies {
+    implementation fileTree(dir: "libs", include: ["*.jar"])
+    // KotlinAndroid
+    api project(path: ':kotlin:concepts:authentication:concept-encryption-key')
+
+    // Sphinx
+    api project(path: ':sphinx:application:data:concepts:concept-coredb')
+    
+    implementation deps.kotlin.coroutinesCore
+    implementation deps.square.moshi
+
+    testImplementation deps.square.sqlDelightJvm
+    testImplementation project(path: ':kotlin:test:test-concept-coroutines')
+}

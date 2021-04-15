@@ -4,27 +4,16 @@ package chat.sphinx.wrapper_subscription
 inline fun SubscriptionEnded.isTrue(): Boolean =
     this is SubscriptionEnded.True
 
-
-/**
- * Converts the integer value returned over the wire to an object.
- *
- * @throws [IllegalArgumentException] if the integer is not supported
- * */
 @Suppress("NOTHING_TO_INLINE")
-@Throws(IllegalArgumentException::class)
 inline fun Int.toSubscriptionEnded(): SubscriptionEnded =
     when (this) {
         SubscriptionEnded.ENDED -> {
             SubscriptionEnded.True
         }
-        SubscriptionEnded.NOT_ENDED -> {
+        else -> {
             SubscriptionEnded.False
         }
-        else -> {
-            throw IllegalArgumentException("SubscriptionEnded for integer '$this' not supported")
-        }
     }
-
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun Boolean.toSubscriptionEnded(): SubscriptionEnded =

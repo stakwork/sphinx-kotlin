@@ -1,19 +1,30 @@
 package chat.sphinx.wrapper_contact
 
 @Suppress("NOTHING_TO_INLINE")
+inline fun ContactStatus.isOwner(): Boolean =
+    this is ContactStatus.AccountOwner
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun ContactStatus.isConfirmed(): Boolean =
+    this is ContactStatus.Confirmed
+
+@Suppress("NOTHING_TO_INLINE")
 inline fun ContactStatus.isPending(): Boolean =
     this is ContactStatus.Pending
 
+@Suppress("NOTHING_TO_INLINE")
+inline fun ContactStatus.isUnknown(): Boolean =
+    this is ContactStatus.Unknown
+
 /**
  * Converts the integer value returned over the wire to an object.
- *
- * @throws [IllegalArgumentException] if the integer is not supported
  * */
 @Suppress("NOTHING_TO_INLINE")
-@Throws(IllegalArgumentException::class)
 inline fun Int?.toContactStatus(): ContactStatus =
     when (this) {
-        null, // the only time null is sent, is for the owner account
+        null -> {
+            ContactStatus.AccountOwner
+        }
         ContactStatus.CONFIRMED -> {
             ContactStatus.Confirmed
         }
@@ -21,15 +32,13 @@ inline fun Int?.toContactStatus(): ContactStatus =
             ContactStatus.Pending
         }
         else -> {
-            throw IllegalArgumentException(
-                "ContactStatus for integer '$this' is not supported"
-            )
+            ContactStatus.Unknown(this)
         }
     }
 
 /**
  * Comes off the wire as:
- *  - null (account owner, confirmed)
+ *  - null (AccountOwner)
  *  - 0 (Pending)
  *  - 1 (Confirmed)
  *
@@ -46,7 +55,12 @@ sealed class ContactStatus {
         const val CONFIRMED = 1
     }
 
-    abstract val value: Int
+    abstract val value: Int?
+
+    object AccountOwner: ContactStatus() {
+        override val value: Int?
+            get() = null
+    }
 
     object Pending: ContactStatus() {
         override val value: Int
@@ -57,4 +71,6 @@ sealed class ContactStatus {
         override val value: Int
             get() = CONFIRMED
     }
+
+    class Unknown(override val value: Int) : ContactStatus()
 }

@@ -1,0 +1,8 @@
+plugins {
+    id 'java-library'
+    id 'kotlin'
+}
+
+dependencies {
+    api project(path: ':sphinx:application:network:concepts:clients:concept-network-client')
+}

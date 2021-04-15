@@ -4,6 +4,11 @@ plugins {
 }
 
 dependencies {
-    api project(path: ':kotlin:crypto:k-openssl-common')
+    // KotlinAndroid
+    api project(path: ':kotlin:crypto:crypto-common')
+
+    // Sphinx
+    api project(path: ':sphinx:application:common:wrappers:wrapper-relay')
+
     implementation deps.kotlin.coroutinesCore
 }

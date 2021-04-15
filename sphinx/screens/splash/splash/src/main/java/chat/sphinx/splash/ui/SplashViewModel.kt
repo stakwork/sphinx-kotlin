@@ -4,9 +4,12 @@ import android.content.Context
 import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_background_login.BackgroundLoginHandler
+import chat.sphinx.concept_repository_lightning.LightningRepository
 import chat.sphinx.key_restore.KeyRestore
 import chat.sphinx.key_restore.KeyRestoreResponse
 import chat.sphinx.splash.navigation.SplashNavigator
+import chat.sphinx.wrapper_relay.AuthorizationToken
+import chat.sphinx.wrapper_relay.RelayUrl
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.MotionLayoutViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
@@ -15,8 +18,8 @@ import io.matthewnelson.concept_authentication.coordinator.AuthenticationCoordin
 import io.matthewnelson.concept_authentication.coordinator.AuthenticationRequest
 import io.matthewnelson.concept_authentication.coordinator.AuthenticationResponse
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
-import io.matthewnelson.k_openssl_common.clazzes.Password
-import io.matthewnelson.k_openssl_common.extensions.decodeToString
+import io.matthewnelson.crypto_common.clazzes.Password
+import io.matthewnelson.crypto_common.extensions.decodeToString
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
@@ -33,6 +36,7 @@ internal class SplashViewModel @Inject constructor(
     private val backgroundLoginHandler: BackgroundLoginHandler,
     private val dispatchers: CoroutineDispatchers,
     private val keyRestore: KeyRestore,
+    private val lightningRepository: LightningRepository,
     private val navigator: SplashNavigator,
 ): MotionLayoutViewModel<
         Any,
@@ -47,6 +51,12 @@ internal class SplashViewModel @Inject constructor(
             return
         } else {
             screenInit = true
+        }
+
+
+        // prime the account balance retrieval from SharePrefs
+        viewModelScope.launch(dispatchers.mainImmediate) {
+            lightningRepository.getAccountBalance().firstOrNull()
         }
 
         viewModelScope.launch(dispatchers.mainImmediate) {
@@ -174,8 +184,8 @@ internal class SplashViewModel @Inject constructor(
                     privateKey = Password(decryptedSplit[0].toCharArray()),
                     publicKey = Password(decryptedSplit[1].toCharArray()),
                     userPin = pin,
-                    relayUrl = decryptedSplit[2],
-                    jwt = decryptedSplit[3],
+                    relayUrl = RelayUrl(decryptedSplit[2]),
+                    authorizationToken = AuthorizationToken(decryptedSplit[3]),
                 ).collect { flowResponse ->
                     // TODO: Implement in Authentication View when it get's built/refactored
                     if (flowResponse is KeyRestoreResponse.Success) {

@@ -12,6 +12,10 @@ inline fun SubscriptionInterval.isWeekly(): Boolean =
 inline fun SubscriptionInterval.isMonthly(): Boolean =
     this is SubscriptionInterval.Monthly
 
+@Suppress("NOTHING_TO_INLINE")
+inline fun SubscriptionInterval.isUnknown(): Boolean =
+    this is SubscriptionInterval.Unknown
+
 /**
  * Converts the integer value returned over the wire to an object.
  *
@@ -31,7 +35,7 @@ inline fun String.toSubscriptionInterval(): SubscriptionInterval =
             SubscriptionInterval.Monthly
         }
         else -> {
-            throw IllegalArgumentException("SubscriptionInterval for string $this not supported")
+            SubscriptionInterval.Unknown(this)
         }
     }
 
@@ -65,4 +69,6 @@ sealed class SubscriptionInterval {
         override val value: String
             get() = MONTHLY
     }
+
+    class Unknown(override val value: String): SubscriptionInterval()
 }

@@ -1,6 +1,6 @@
 package chat.sphinx.feature_relay
 
-import chat.sphinx.wrapper_relay.JavaWebToken
+import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.concept_relay.RelayDataHandler
 import chat.sphinx.wrapper_relay.RelayUrl
 import io.matthewnelson.concept_authentication.data.AuthenticationStorage
@@ -9,13 +9,13 @@ import io.matthewnelson.concept_encryption_key.EncryptionKeyHandler
 import io.matthewnelson.feature_authentication_core.AuthenticationCoreManager
 import io.matthewnelson.k_openssl.KOpenSSL
 import io.matthewnelson.k_openssl.algos.AES256CBC_PBKDF2_HMAC_SHA256
-import io.matthewnelson.k_openssl_common.annotations.RawPasswordAccess
-import io.matthewnelson.k_openssl_common.annotations.UnencryptedDataAccess
-import io.matthewnelson.k_openssl_common.clazzes.EncryptedString
-import io.matthewnelson.k_openssl_common.clazzes.Password
-import io.matthewnelson.k_openssl_common.clazzes.UnencryptedString
-import io.matthewnelson.k_openssl_common.exceptions.DecryptionException
-import io.matthewnelson.k_openssl_common.exceptions.EncryptionException
+import io.matthewnelson.crypto_common.annotations.RawPasswordAccess
+import io.matthewnelson.crypto_common.annotations.UnencryptedDataAccess
+import io.matthewnelson.crypto_common.clazzes.EncryptedString
+import io.matthewnelson.crypto_common.clazzes.Password
+import io.matthewnelson.crypto_common.clazzes.UnencryptedString
+import io.matthewnelson.crypto_common.exceptions.DecryptionException
+import io.matthewnelson.crypto_common.exceptions.EncryptionException
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
@@ -31,10 +31,10 @@ class RelayDataHandlerImpl(
         private var relayUrlCache: RelayUrl? = null
 
         @Volatile
-        private var tokenCache: JavaWebToken? = null
+        private var tokenCache: AuthorizationToken? = null
 
         const val RELAY_URL_KEY = "RELAY_URL_KEY"
-        const val RELAY_JWT_KEY = "RELAY_JWT_KEY"
+        const val RELAY_AUTHORIZATION_KEY = "RELAY_JWT_KEY"
     }
 
     private val kOpenSSL: KOpenSSL by lazy {
@@ -136,7 +136,7 @@ class RelayDataHandlerImpl(
         }
     }
 
-    override suspend fun persistJavaWebToken(token: JavaWebToken?): Boolean {
+    override suspend fun persistAuthorizationToken(token: AuthorizationToken?): Boolean {
         return authenticationCoreManager.getEncryptionKey()?.privateKey?.let { privateKey ->
             persistJavaWebTokenImpl(token, privateKey)
         } ?: false
@@ -146,10 +146,10 @@ class RelayDataHandlerImpl(
      * If sending `null` argument for [token], an empty [Password] is safe to send as this
      * will only clear the token from storage and not encrypt anything.
      * */
-    suspend fun persistJavaWebTokenImpl(token: JavaWebToken?, privateKey: Password): Boolean {
+    suspend fun persistJavaWebTokenImpl(token: AuthorizationToken?, privateKey: Password): Boolean {
         lock.withLock {
             if (token == null) {
-                authenticationStorage.putString(RELAY_JWT_KEY, null)
+                authenticationStorage.putString(RELAY_AUTHORIZATION_KEY, null)
                 tokenCache = null
                 return true
             } else {
@@ -159,7 +159,7 @@ class RelayDataHandlerImpl(
                     return false
                 }
 
-                authenticationStorage.putString(RELAY_JWT_KEY, encryptedJWT.value)
+                authenticationStorage.putString(RELAY_AUTHORIZATION_KEY, encryptedJWT.value)
                 tokenCache = token
                 return true
             }
@@ -167,16 +167,16 @@ class RelayDataHandlerImpl(
     }
 
     @OptIn(UnencryptedDataAccess::class)
-    override suspend fun retrieveJavaWebToken(): JavaWebToken? {
+    override suspend fun retrieveAuthorizationToken(): AuthorizationToken? {
         return authenticationCoreManager.getEncryptionKey()?.privateKey?.let { privateKey ->
             lock.withLock {
-                tokenCache ?: authenticationStorage.getString(RELAY_JWT_KEY, null)
+                tokenCache ?: authenticationStorage.getString(RELAY_AUTHORIZATION_KEY, null)
                     ?.let { encryptedJwtString ->
                         try {
                             decryptData(privateKey, EncryptedString(encryptedJwtString))
                                 .value
                                 .let { decryptedJwtString ->
-                                    val token = JavaWebToken(decryptedJwtString)
+                                    val token = AuthorizationToken(decryptedJwtString)
                                     tokenCache = token
                                     token
                                 }

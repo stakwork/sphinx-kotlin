@@ -4,9 +4,20 @@ import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.test.core.app.ApplicationProvider
+import chat.sphinx.concept_coredb.SphinxDatabase
+import chat.sphinx.concept_crypto_rsa.RSA
+import chat.sphinx.feature_coredb.CoreDBImpl
+import chat.sphinx.feature_crypto_rsa.RSAAlgorithm
+import chat.sphinx.feature_crypto_rsa.RSAImpl
 import chat.sphinx.feature_relay.RelayDataHandlerImpl
 import chat.sphinx.key_restore.KeyRestoreResponse
-import io.matthewnelson.k_openssl_common.clazzes.Password
+import chat.sphinx.wrapper_relay.AuthorizationToken
+import chat.sphinx.wrapper_relay.RelayUrl
+import com.squareup.moshi.Moshi
+import com.squareup.sqldelight.android.AndroidSqliteDriver
+import com.squareup.sqldelight.db.SqlDriver
+import io.matthewnelson.concept_encryption_key.EncryptionKey
+import io.matthewnelson.crypto_common.clazzes.Password
 import io.matthewnelson.test_concept_coroutines.CoroutineTestHelper
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.test.runBlockingTest
@@ -38,8 +49,35 @@ class SphinxKeyRestoreUnitTest: CoroutineTestHelper() {
         TestSphinxStorage()
     }
 
+    private val rsa: RSA by lazy {
+        RSAImpl(RSAAlgorithm.RSA_ECB_PKCS1Padding)
+    }
+
     private val sphinxKeyHandler: SphinxEncryptionKeyHandler by lazy {
-        SphinxEncryptionKeyHandler()
+        SphinxEncryptionKeyHandler(rsa)
+    }
+
+    private inner class TestCoreDBImpl(moshi: Moshi): CoreDBImpl(moshi) {
+
+        private var driver: AndroidSqliteDriver? = null
+
+        override fun getSqlDriver(encryptionKey: EncryptionKey): SqlDriver {
+            return driver ?: synchronized(this) {
+                AndroidSqliteDriver(
+                    SphinxDatabase.Schema,
+                    app,
+                    DB_NAME,
+                ).also { driver = it }
+            }
+        }
+    }
+
+    private val moshi: Moshi by lazy {
+        Moshi.Builder().build()
+    }
+
+    private val testSphinxCoreDBImpl: TestCoreDBImpl by lazy {
+        TestCoreDBImpl(moshi)
     }
 
     private val sphinxManager: SphinxAuthenticationCoreManager by lazy {
@@ -47,7 +85,8 @@ class SphinxKeyRestoreUnitTest: CoroutineTestHelper() {
             app,
             dispatchers,
             sphinxKeyHandler,
-            sphinxStorage
+            sphinxStorage,
+            testSphinxCoreDBImpl,
         )
     }
 
@@ -56,7 +95,7 @@ class SphinxKeyRestoreUnitTest: CoroutineTestHelper() {
             sphinxStorage,
             sphinxManager,
             dispatchers,
-            sphinxKeyHandler
+            sphinxKeyHandler,
         )
     }
 
@@ -73,8 +112,8 @@ class SphinxKeyRestoreUnitTest: CoroutineTestHelper() {
         val TEST_PRIVATE_KEY = Password("laksdf09j32ipijoiwoihgoiwh4ithip9gpsigagadfg".toCharArray())
         val TEST_PUBLIC_KEY = Password("asdfoinavanlgknlgnlkanslgigjo23weojpasjd".toCharArray())
         val TEST_PIN = "012345".toCharArray()
-        const val RAW_RELAY_URL = "https://chat.sphinx.something-relay:3001"
-        val RAW_RELAY_JWT = "ginoi3n4k5podb4"
+        val RAW_RELAY_URL = RelayUrl("https://chat.sphinx.something-relay:3001")
+        val RAW_RELAY_JWT = AuthorizationToken("ginoi3n4k5podb4")
     }
 
     @Before

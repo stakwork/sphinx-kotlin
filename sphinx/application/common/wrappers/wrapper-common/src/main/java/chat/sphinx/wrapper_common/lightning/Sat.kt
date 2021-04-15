@@ -1,8 +1,30 @@
 package chat.sphinx.wrapper_common.lightning
 
+import java.text.NumberFormat
+import java.util.*
+
 @Suppress("NOTHING_TO_INLINE")
 inline fun Sat.toMilliSat(): MilliSat =
     MilliSat(value * 1_000L)
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun Long.toSat(): Sat? =
+    try {
+        Sat(this)
+    } catch (e: IllegalArgumentException) {
+        null
+    }
+
+/**
+ * Will format the value using the [separator] passed.
+ *
+ * ex:
+ *  (separator = ',') 1000000 -> 1,000,000
+ *  (separator = ' ') 1000000 -> 1 000 000
+ * */
+@Suppress("NOTHING_TO_INLINE")
+inline fun Sat.asFormattedString(separator: Char = ' ') =
+    NumberFormat.getInstance(Locale.ENGLISH).format(value).replace(',', separator)
 
 inline class Sat(val value: Long) {
     init {

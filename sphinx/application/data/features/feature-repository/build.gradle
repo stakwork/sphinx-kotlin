@@ -1,0 +1,34 @@
+plugins {
+    id 'app.cash.exhaustive'
+    id 'java-library'
+    id 'kotlin'
+}
+
+dependencies {
+    implementation fileTree(dir: "libs", include: ["*.jar"])
+    // Kotlin Android
+    implementation project(path: ':kotlin:concepts:concept-coroutines')
+    implementation project(path: ':kotlin:features:authentication:feature-authentication-core')
+
+    // Sphinx
+    implementation project(path: ':sphinx:application:common:logger')
+
+    implementation project(path: ':sphinx:application:data:concepts:concept-coredb')
+    implementation project(path: ':sphinx:application:data:concepts:crypto:concept-crypto-rsa')
+    api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-chat')
+    api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-contact')
+    api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-lightning')
+    api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-message')
+
+    implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-chat')
+    implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-contact')
+    implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-invite')
+    implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-lightning')
+    implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-message')
+
+    implementation deps.square.moshi
+    implementation deps.square.sqlDelightCoroutines
+
+    testImplementation deps.square.sqlDelightJvm
+    testImplementation project(path: ':sphinx:test:test-network-query')
+}

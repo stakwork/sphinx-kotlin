@@ -3,7 +3,7 @@ package chat.sphinx.concept_network_query_chat
 import chat.sphinx.concept_network_query_chat.model.ChatDto
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.kotlin_response.LoadResponse
-import chat.sphinx.wrapper_relay.JavaWebToken
+import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
 import kotlinx.coroutines.flow.Flow
 
@@ -12,11 +12,8 @@ abstract class NetworkQueryChat {
     ///////////
     /// GET ///
     ///////////
-    abstract fun getChats(): Flow<LoadResponse<List<ChatDto>, ResponseError>>
-
     abstract fun getChats(
-        javaWebToken: JavaWebToken,
-        relayUrl: RelayUrl
+        relayData: Pair<AuthorizationToken, RelayUrl>? = null
     ): Flow<LoadResponse<List<ChatDto>, ResponseError>>
 
     ///////////

@@ -1,23 +1,23 @@
 package chat.sphinx.concept_relay
 
-import chat.sphinx.kotlin_response.KotlinResponse
+import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
-import chat.sphinx.wrapper_relay.JavaWebToken
+import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
 
 @Suppress("NOTHING_TO_INLINE")
-suspend inline fun RelayDataHandler.retrieveRelayUrlAndJavaWebToken(): KotlinResponse<
-        Pair<JavaWebToken, RelayUrl>,
+suspend inline fun RelayDataHandler.retrieveRelayUrlAndAuthorizationToken(): Response<
+        Pair<AuthorizationToken, RelayUrl>,
         ResponseError
         > =
 
     retrieveRelayUrl()?.let { relayUrl ->
-        retrieveJavaWebToken()?.let { jwt ->
-            KotlinResponse.Success(Pair(jwt, relayUrl))
-        } ?: KotlinResponse.Error(
-                ResponseError("Was unable to retrieve the JavaWebToken from storage")
+        retrieveAuthorizationToken()?.let { jwt ->
+            Response.Success(Pair(jwt, relayUrl))
+        } ?: Response.Error(
+                ResponseError("Was unable to retrieve the AuthorizationToken from storage")
         )
-    } ?: KotlinResponse.Error(
+    } ?: Response.Error(
             ResponseError("Was unable to retrieve the RelayURL from storage")
     )
 
@@ -33,6 +33,6 @@ abstract class RelayDataHandler {
     /**
      * Send `null` to clear the token from persistent storage
      * */
-    abstract suspend fun persistJavaWebToken(token: JavaWebToken?): Boolean
-    abstract suspend fun retrieveJavaWebToken(): JavaWebToken?
+    abstract suspend fun persistAuthorizationToken(token: AuthorizationToken?): Boolean
+    abstract suspend fun retrieveAuthorizationToken(): AuthorizationToken?
 }

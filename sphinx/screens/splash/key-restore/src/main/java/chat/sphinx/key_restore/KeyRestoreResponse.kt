@@ -15,8 +15,6 @@ sealed class KeyRestoreResponse {
         object KeysAlreadyPresent: Error()
         object PrivateKeyWasEmpty: Error()
         object PublicKeyWasEmpty: Error()
-        object JavaWebTokenWasEmpty: Error()
-        object RelayUrlWasEmpty: Error()
         object InvalidUserPin: Error()
     }
 }
