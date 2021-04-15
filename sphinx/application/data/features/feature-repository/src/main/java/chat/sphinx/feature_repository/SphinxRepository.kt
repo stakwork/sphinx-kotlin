@@ -10,6 +10,7 @@ import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
 import chat.sphinx.concept_network_query_chat.model.ChatDto
 import chat.sphinx.concept_network_query_contact.NetworkQueryContact
+import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_lightning.model.balance.BalanceDto
 import chat.sphinx.concept_network_query_message.NetworkQueryMessage
 import chat.sphinx.concept_repository_contact.ContactRepository
@@ -65,6 +66,7 @@ class SphinxRepository(
     private val moshi: Moshi,
     private val networkQueryChat: NetworkQueryChat,
     private val networkQueryContact: NetworkQueryContact,
+    private val networkQueryLightning: NetworkQueryLightning,
     private val networkQueryMessage: NetworkQueryMessage,
     private val rsa: RSA,
     private val LOG: SphinxLogger,
@@ -322,7 +324,55 @@ class SphinxRepository(
     }
 
     override fun networkRefreshBalance(): Flow<LoadResponse<Boolean, ResponseError>> = flow {
-        TODO("Not yet implemented")
+        networkQueryLightning.getBalance().collect { loadResponse ->
+            @Exhaustive
+            when (loadResponse) {
+                is LoadResponse.Loading -> {
+                    emit(loadResponse)
+                }
+                is Response.Error -> {
+                    emit(loadResponse)
+                }
+                is Response.Success -> {
+
+                    try {
+                        val jsonString: String = withContext(dispatchers.default) {
+                            moshi.adapter(BalanceDto::class.java)
+                                .toJson(loadResponse.value)
+                        } ?: throw NullPointerException("Converting BalanceDto to Json failed")
+
+                        balanceLock.withLock {
+                            accountBalanceStateFlow.value = loadResponse.value.toNodeBalance()
+
+                            authenticationStorage.putString(
+                                REPOSITORY_LIGHTNING_BALANCE,
+                                jsonString
+                            )
+                        }
+
+                        emit(Response.Success(true))
+                    } catch (e: Exception) {
+
+                        // this should _never_ happen, as if the network call was
+                        // successful, it went from json -> dto, and we're just going
+                        // back from dto -> json to persist it...
+                        emit(
+                            Response.Error(
+                                ResponseError(
+                                    """
+                                        Network Fetching of balance was successful, but
+                                        conversion to a string for persisting failed.
+                                        ${loadResponse.value}
+                                    """.trimIndent(),
+                                    e
+                                )
+                            )
+                        )
+                    }
+
+                }
+            }
+        }
     }
 
 
