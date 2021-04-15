@@ -242,23 +242,27 @@ internal class DashboardFragment : MotionLayoutFragment<
 
         supervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
             viewModel.accountOwnerStateFlow.collect { contactOwner ->
-                contactOwner?.photoUrl?.value?.let { url ->
-                    imageLoader.load(
-                        binding.layoutDashboardNavDrawer.navDrawerImageViewUserProfilePicture,
-                        url,
-                        ImageLoaderOptions.Builder()
-                            .placeholderResId(R.drawable.ic_profile_avatar_circle)
-                            .transformation(Transformation.CircleCrop)
-                            .build()
-                    )
-                } ?: binding.layoutDashboardNavDrawer
-                    .navDrawerImageViewUserProfilePicture
-                    .setImageDrawable(
-                        ContextCompat.getDrawable(
-                            binding.root.context,
-                            R.drawable.ic_profile_avatar_circle
+                contactOwner?.let { owner ->
+                    owner.photoUrl?.value?.let { url ->
+                        imageLoader.load(
+                            binding.layoutDashboardNavDrawer.navDrawerImageViewUserProfilePicture,
+                            url,
+                            ImageLoaderOptions.Builder()
+                                .placeholderResId(R.drawable.ic_profile_avatar_circle)
+                                .transformation(Transformation.CircleCrop)
+                                .build()
                         )
-                    )
+                    } ?: binding.layoutDashboardNavDrawer
+                        .navDrawerImageViewUserProfilePicture
+                        .setImageDrawable(
+                            ContextCompat.getDrawable(
+                                binding.root.context,
+                                R.drawable.ic_profile_avatar_circle
+                            )
+                        )
+                    binding.layoutDashboardNavDrawer.navDrawerTextViewProfileName.text =
+                        owner.alias?.value ?: ""
+                }
             }
         }
     }
