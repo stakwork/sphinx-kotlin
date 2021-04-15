@@ -12,6 +12,7 @@ import chat.sphinx.concept_network_query_chat.model.ChatDto
 import chat.sphinx.concept_network_query_contact.NetworkQueryContact
 import chat.sphinx.concept_network_query_message.NetworkQueryMessage
 import chat.sphinx.concept_repository_contact.ContactRepository
+import chat.sphinx.concept_repository_lightning.LightningRepository
 import chat.sphinx.conceptcoredb.MessageDbo
 import chat.sphinx.conceptcoredb.SphinxDatabaseQueries
 import chat.sphinx.feature_repository.mappers.chat.ChatDboPresenterMapper
@@ -19,9 +20,7 @@ import chat.sphinx.feature_repository.mappers.contact.ContactDboPresenterMapper
 import chat.sphinx.feature_repository.mappers.invite.InviteDboPresenterMapper
 import chat.sphinx.feature_repository.mappers.mapListFrom
 import chat.sphinx.feature_repository.mappers.message.MessageDboPresenterMapper
-import chat.sphinx.feature_repository.util.upsertChat
-import chat.sphinx.feature_repository.util.upsertContact
-import chat.sphinx.feature_repository.util.upsertMessage
+import chat.sphinx.feature_repository.util.*
 import chat.sphinx.kotlin_response.*
 import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.logger.d
@@ -35,6 +34,7 @@ import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessagePagination
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_invite.Invite
+import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message.media.MediaKeyDecrypted
 import chat.sphinx.wrapper_message.media.MessageMedia
@@ -65,7 +65,7 @@ class SphinxRepository(
     private val networkQueryMessage: NetworkQueryMessage,
     private val rsa: RSA,
     private val LOG: SphinxLogger,
-): ChatRepository, ContactRepository, MessageRepository {
+): ChatRepository, ContactRepository, LightningRepository, MessageRepository {
 
     companion object {
         const val TAG: String = "SphinxRepository"
@@ -276,6 +276,17 @@ class SphinxRepository(
             }
 
         }
+    }
+
+    /////////////////
+    /// Lightning ///
+    /////////////////
+    override suspend fun getAccountBalance(): StateFlow<NodeBalance?> {
+        TODO("Not yet implemented")
+    }
+
+    override fun networkRefreshBalance(): Flow<LoadResponse<Boolean, ResponseError>> = flow {
+        TODO("Not yet implemented")
     }
 
 
