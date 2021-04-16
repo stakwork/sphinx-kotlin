@@ -13,4 +13,24 @@
         android:gravity="center"
         android:text="CHAT CONTACT" />
 
+    <include
+        android:id="@+id/layout_chat_header"
+        layout="@layout/layout_chat_header"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/default_header_height" />
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/image_view_chat_footer_shadow"
+        android:layout_width="match_parent"
+        android:layout_height="8dp"
+        android:src="@drawable/bottom_bar_elevation_gradient"
+        app:layout_constraintBottom_toTopOf="@+id/layout_chat_footer" />
+
+    <include
+        android:id="@+id/layout_chat_footer"
+        layout="@layout/layout_chat_footer"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
