@@ -208,20 +208,22 @@ internal class ChatListAdapter(
                 // Image
                 dashboardChat.photoUrl.let { url ->
 
-                    imageViewChatHolder.goneIfFalse(url != null)
-                    textViewInitials.goneIfFalse(url == null)
+                    layoutDashboardChatInitialHolder.imageViewChatPicture.goneIfFalse(url != null)
+                    layoutDashboardChatInitialHolder.textViewInitials.goneIfFalse(url == null)
 
                     if (url != null) {
                         supervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
                             imageLoader.load(
-                                imageViewChatHolder,
+                                layoutDashboardChatInitialHolder.imageViewChatPicture,
                                 url.value,
                                 imageLoaderOptions
                             )
                         }
                     } else {
-                        textViewInitials.text = dashboardChat.chatName?.getInitials() ?: ""
-                        textViewInitials.setBackgroundRandomColor(R.drawable.chat_initials_circle)
+                        layoutDashboardChatInitialHolder.textViewInitials.text =
+                            dashboardChat.chatName?.getInitials() ?: ""
+                        layoutDashboardChatInitialHolder.textViewInitials
+                            .setBackgroundRandomColor(R.drawable.chat_initials_circle)
                     }
 
                 }

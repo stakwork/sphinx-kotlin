@@ -10,10 +10,10 @@
 
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/image_view_nav_drawer_menu"
-        android:layout_width="56dp"
-        android:layout_height="56dp"
-        android:layout_marginStart="8dp"
-        android:padding="16dp"
+        android:layout_width="@dimen/default_header_navigation_xy"
+        android:layout_height="@dimen/default_header_navigation_xy"
+        android:layout_marginStart="@dimen/default_header_navigation_margin_start"
+        android:padding="@dimen/default_header_navigation_padding"
         android:src="@drawable/ic_baseline_menu_24"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
