@@ -35,6 +35,9 @@ dependencies {
 
     // Sphinx
     api project(path: ':sphinx:application:common:resources')
+    api project(path: ':sphinx:activity:insetter-activity')
+
+    api deps.androidx.recyclerView
 
     implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt
