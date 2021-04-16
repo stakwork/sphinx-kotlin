@@ -12,6 +12,7 @@ import chat.sphinx.activitymain.databinding.ActivityMainBinding
 import chat.sphinx.activitymain.navigation.drivers.PrimaryNavigationDriver
 import chat.sphinx.activitymain.ui.MainViewState
 import chat.sphinx.activitymain.ui.MotionLayoutNavigationActivity
+import chat.sphinx.chat_common.ChatViewModel
 import chat.sphinx.insetter_activity.InsetPadding
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.resources.R as R_common
@@ -48,6 +49,7 @@ internal class MainActivity: MotionLayoutNavigationActivity<
     override val navigationViewModel: MainViewModel
         get() = viewModel
 
+    private val chatViewModel: ChatViewModel by viewModels()
 
     companion object {
         // Setting these here at initial load time will negate the need to query the view
@@ -84,6 +86,7 @@ internal class MainActivity: MotionLayoutNavigationActivity<
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
         setTransitionListener(binding.layoutMotionMain)
+        chatViewModel
 
         binding.layoutConstraintMainStatusBar.applyInsetter {
             type(statusBars = true) {
