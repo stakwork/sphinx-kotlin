@@ -13,6 +13,9 @@ import chat.sphinx.activitymain.navigation.drivers.PrimaryNavigationDriver
 import chat.sphinx.activitymain.ui.MainViewState
 import chat.sphinx.activitymain.ui.MotionLayoutNavigationActivity
 import chat.sphinx.chat_common.ChatViewModel
+import chat.sphinx.chat_contact.navigation.ToChatContactScreen
+import chat.sphinx.chat_group.navigation.ToChatGroupScreen
+import chat.sphinx.chat_tribe.navigation.ToChatTribeScreen
 import chat.sphinx.insetter_activity.InsetPadding
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.resources.R as R_common
@@ -176,6 +179,17 @@ internal class MainActivity: MotionLayoutNavigationActivity<
 
     override suspend fun onPostNavigationRequestExecution(request: NavigationRequest<NavController>) {
         super.onPostNavigationRequestExecution(request)
+        when (request) {
+            is ToChatContactScreen -> {
+                chatViewModel.initializeChatData(request.chat, request.contact)
+            }
+            is ToChatGroupScreen -> {
+                chatViewModel.initializeChatData(request.chat, null)
+            }
+            is ToChatTribeScreen -> {
+                chatViewModel.initializeChatData(request.chat, null)
+            }
+        }
     }
 
     override fun onBackPressed() {

@@ -266,8 +266,8 @@ internal class ChatListAdapter(
                         is DashboardChat.Active.Conversation -> {
                             supervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
                                 viewModel.dashboardNavigator.toChatContact(
-                                    dashboardChat.chat.id,
-                                    dashboardChat.contact.id
+                                    dashboardChat.chat,
+                                    dashboardChat.contact
                                 )
                             }
                         }
@@ -275,9 +275,9 @@ internal class ChatListAdapter(
                             supervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
 
                                 if (dashboardChat.chat.type.isGroup()) {
-                                    viewModel.dashboardNavigator.toChatGroup(dashboardChat.chat.id)
+                                    viewModel.dashboardNavigator.toChatGroup(dashboardChat.chat)
                                 } else if (dashboardChat.chat.type.isTribe()) {
-                                    viewModel.dashboardNavigator.toChatTribe(dashboardChat.chat.id)
+                                    viewModel.dashboardNavigator.toChatTribe(dashboardChat.chat)
                                 }
 
                             }
@@ -286,7 +286,7 @@ internal class ChatListAdapter(
                             supervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
                                 viewModel.dashboardNavigator.toChatContact(
                                     null,
-                                    dashboardChat.contact.id
+                                    dashboardChat.contact
                                 )
                             }
                         }
