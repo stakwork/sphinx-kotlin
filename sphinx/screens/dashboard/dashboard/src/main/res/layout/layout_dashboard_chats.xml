@@ -15,7 +15,7 @@
     <androidx.appcompat.widget.AppCompatImageView
         android:layout_width="match_parent"
         android:layout_height="8dp"
-        android:src="@drawable/bottom_nav_bar_elevation_gradient"
+        android:src="@drawable/bottom_bar_elevation_gradient"
         app:layout_constraintBottom_toBottomOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
