@@ -23,6 +23,7 @@ import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_message.*
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.invisibleIfFalse
+import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisorScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.*
@@ -129,7 +130,7 @@ internal class ChatListAdapter(
     }
 
     private val dashboardChats = ArrayList<DashboardChat>(viewModel.currentChatViewState.list)
-    private val supervisor = OnStartStopSupervisor(lifecycleOwner)
+    private val supervisor = OnStopSupervisorScope(lifecycleOwner)
 
     override fun onStart(owner: LifecycleOwner) {
         super.onStart(owner)

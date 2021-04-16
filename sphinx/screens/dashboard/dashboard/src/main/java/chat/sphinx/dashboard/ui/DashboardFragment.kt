@@ -21,7 +21,7 @@ import chat.sphinx.dashboard.R
 import chat.sphinx.dashboard.databinding.FragmentDashboardBinding
 import chat.sphinx.dashboard.ui.adapter.ChatListAdapter
 import chat.sphinx.dashboard.ui.adapter.ChatListFooterAdapter
-import chat.sphinx.dashboard.ui.adapter.OnStartStopSupervisor
+import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisorScope
 import chat.sphinx.dashboard.ui.viewstates.NavDrawerViewState
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
@@ -187,8 +187,8 @@ internal class DashboardFragment : MotionLayoutFragment<
         }
     }
 
-    private val supervisor: OnStartStopSupervisor by lazy(LazyThreadSafetyMode.NONE) {
-        OnStartStopSupervisor(viewLifecycleOwner)
+    private val supervisor: OnStopSupervisorScope by lazy(LazyThreadSafetyMode.NONE) {
+        OnStopSupervisorScope(viewLifecycleOwner)
     }
 
     override fun onStart() {
