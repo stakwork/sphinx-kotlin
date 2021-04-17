@@ -20,6 +20,7 @@ import chat.sphinx.resources.setBackgroundRandomColor
 import chat.sphinx.resources.setTextColorExt
 import chat.sphinx.wrapper_chat.*
 import chat.sphinx.wrapper_common.DateTime
+import chat.sphinx.wrapper_common.util.getInitials
 import chat.sphinx.wrapper_message.*
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.invisibleIfFalse
@@ -28,21 +29,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.*
 import kotlin.collections.ArrayList
-
-@Suppress("NOTHING_TO_INLINE")
-private inline fun String.getInitials(charLimit: Int = 2): String {
-    val sb = StringBuilder()
-    this.split(' ').let { splits ->
-        for ((index, split) in splits.withIndex()) {
-            if (index < charLimit) {
-                sb.append(split.firstOrNull() ?: "")
-            } else {
-                break
-            }
-        }
-    }
-    return sb.toString()
-}
 
 internal class ChatListAdapter(
     private val imageLoader: ImageLoader<ImageView>,
