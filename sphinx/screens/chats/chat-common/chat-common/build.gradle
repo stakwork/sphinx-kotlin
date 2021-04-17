@@ -1,4 +1,5 @@
 plugins {
+    id 'app.cash.exhaustive'
     id 'com.android.library'
     id 'dagger.hilt.android.plugin'
     id 'kotlin-android'
@@ -37,6 +38,7 @@ dependencies {
     api project(path: ':sphinx:application:common:resources')
     api project(path: ':sphinx:application:common:wrappers:wrapper-chat')
     api project(path: ':sphinx:application:common:wrappers:wrapper-contact')
+    api project(path: ':sphinx:application:data:concepts:concept-image-loader')
     api project(path: ':sphinx:activity:insetter-activity')
 
     api deps.androidx.recyclerView

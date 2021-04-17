@@ -12,7 +12,9 @@ import chat.sphinx.activitymain.databinding.ActivityMainBinding
 import chat.sphinx.activitymain.navigation.drivers.PrimaryNavigationDriver
 import chat.sphinx.activitymain.ui.MainViewState
 import chat.sphinx.activitymain.ui.MotionLayoutNavigationActivity
+import chat.sphinx.chat_common.ChatData
 import chat.sphinx.chat_common.ChatViewModel
+import chat.sphinx.chat_common.ChatViewState
 import chat.sphinx.chat_contact.navigation.ToChatContactScreen
 import chat.sphinx.chat_group.navigation.ToChatGroupScreen
 import chat.sphinx.chat_tribe.navigation.ToChatTribeScreen
@@ -181,13 +183,19 @@ internal class MainActivity: MotionLayoutNavigationActivity<
         super.onPostNavigationRequestExecution(request)
         when (request) {
             is ToChatContactScreen -> {
-                chatViewModel.initializeChatData(request.chat, request.contact)
+                chatViewModel.setChatData(
+                    ChatData.Conversation(request.chat, request.contact)
+                )
             }
             is ToChatGroupScreen -> {
-                chatViewModel.initializeChatData(request.chat, null)
+                chatViewModel.setChatData(
+                    ChatData.Group(request.chat)
+                )
             }
             is ToChatTribeScreen -> {
-                chatViewModel.initializeChatData(request.chat, null)
+                chatViewModel.setChatData(
+                    ChatData.Tribe(request.chat)
+                )
             }
         }
     }
