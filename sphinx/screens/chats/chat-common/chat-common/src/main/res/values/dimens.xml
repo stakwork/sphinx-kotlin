@@ -2,5 +2,7 @@
 <resources>
     <dimen name="chat_footer_button_xy">30dp</dimen>
     <dimen name="chat_message_rounded_corner_radius">9dp</dimen>
-
+    <dimen name="chat_message_container_padding_start">16dp</dimen>
+    <dimen name="chat_message_container_padding_end">20dp</dimen>
+    <dimen name="chat_message_container_padding_vertical">20dp</dimen>
 </resources>

@@ -5,6 +5,10 @@
   android:id="@+id/layout_constraint_message_type_message"
   android:layout_width="wrap_content"
   android:layout_height="wrap_content"
+  android:background="@color/lightDivider"
+  android:paddingStart="@dimen/chat_message_container_padding_start"
+  android:paddingEnd="@dimen/chat_message_container_padding_end"
+  android:paddingVertical="@dimen/chat_message_container_padding_vertical"
   android:elevation="@dimen/default_elevation">
 
 
@@ -14,7 +18,11 @@
     android:layout_height="wrap_content"
     android:gravity="start"
     android:textAlignment="textStart"
-    android:textColor="@color/textMessages" />
+    android:textColor="@color/primaryText"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent"
+    tools:text="@tools:sample/lorem/random" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 
