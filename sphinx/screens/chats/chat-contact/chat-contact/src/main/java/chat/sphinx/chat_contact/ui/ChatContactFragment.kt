@@ -5,8 +5,10 @@ import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.chat_common.BaseChatFragment
+import chat.sphinx.chat_common.navigation.ChatNavigator
 import chat.sphinx.chat_contact.R
 import chat.sphinx.chat_contact.databinding.FragmentChatContactBinding
+import chat.sphinx.chat_contact.navigation.ContactChatNavigator
 import chat.sphinx.concept_image_loader.ImageLoader
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -32,13 +34,19 @@ internal class ChatContactFragment: BaseChatFragment<
         get() = binding.layoutChatHeader.imageViewChatHeaderMuted
     override val headerName: TextView
         get() = binding.layoutChatHeader.textViewChatHeaderName
+    override val headerNavBack: ImageView
+        get() = binding.layoutChatHeader.imageViewChatHeaderNavBack
 
     override val footer: ConstraintLayout
         get() = binding.layoutChatFooter.layoutConstraintChatFooter
 
     @Inject
     protected lateinit var imageLoaderInj: ImageLoader<ImageView>
-
     override val imageLoader: ImageLoader<ImageView>
         get() = imageLoaderInj
+
+    @Inject
+    protected lateinit var chatNavigatorInj: ContactChatNavigator
+    override val chatNavigator: ChatNavigator
+        get() = chatNavigatorInj
 }

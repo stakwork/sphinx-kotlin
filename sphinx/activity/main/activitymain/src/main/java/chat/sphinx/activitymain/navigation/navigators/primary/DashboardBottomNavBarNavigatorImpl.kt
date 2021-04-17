@@ -9,7 +9,6 @@ import chat.sphinx.transactions.navigation.ToTransactionsDetail
 import javax.inject.Inject
 
 class DashboardBottomNavBarNavigatorImpl @Inject constructor(
-    // TODO: update to detail navigation driver when it gets implemented
     navigationDriver: DetailNavigationDriver
 ): DashboardBottomNavBarNavigator(navigationDriver)
 {
