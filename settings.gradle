@@ -18,6 +18,7 @@ include ':sphinx:application:common:wrappers:wrapper-message'
 include ':sphinx:application:common:wrappers:wrapper-relay'
 include ':sphinx:application:common:wrappers:wrapper-rsa'
 include ':sphinx:application:common:wrappers:wrapper-subscription'
+include ':sphinx:application:common:wrappers:wrapper-view'
 
 include ':sphinx:application:data:concepts:crypto:concept-crypto-rsa'
 include ':sphinx:application:data:features:crypto:feature-crypto-rsa'

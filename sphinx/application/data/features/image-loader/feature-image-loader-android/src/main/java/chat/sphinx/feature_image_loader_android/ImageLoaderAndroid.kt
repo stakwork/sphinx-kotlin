@@ -101,10 +101,10 @@ class ImageLoaderAndroid(
                         is Transformation.RoundedCorners -> {
                             request.transformations(
                                 RoundedCornersTransformation(
-                                    transform.topLeft,
-                                    transform.topRight,
-                                    transform.bottomLeft,
-                                    transform.bottomRight
+                                    transform.topLeft.value,
+                                    transform.topRight.value,
+                                    transform.bottomLeft.value,
+                                    transform.bottomRight.value
                                 )
                             )
                         }

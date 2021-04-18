@@ -29,7 +29,10 @@ android {
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
     // KotlinAndroid
-    api project(':android:features:android-feature-toast-utils')
+    api project(path: ':android:features:android-feature-toast-utils')
+
+    // Sphinx
+    api project(path: ':sphinx:application:common:wrappers:wrapper-view')
 
     implementation deps.androidx.annotation
     implementation deps.androidx.appCompat

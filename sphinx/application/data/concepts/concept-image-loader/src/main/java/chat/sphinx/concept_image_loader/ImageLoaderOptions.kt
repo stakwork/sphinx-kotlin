@@ -1,5 +1,7 @@
 package chat.sphinx.concept_image_loader
 
+import chat.sphinx.wrapper_view.Px
+
 class ImageLoaderOptions private constructor(
     val transformation: Transformation?,
     val transition: Transition,
@@ -55,10 +57,10 @@ sealed class Transformation {
     object GrayScale: Transformation()
 
     class RoundedCorners(
-        val topLeft: Float = 0f,
-        val topRight: Float = 0f,
-        val bottomLeft: Float = 0f,
-        val bottomRight: Float = 0f,
+        val topLeft: Px = Px(0f),
+        val topRight: Px = Px(0f),
+        val bottomLeft: Px = Px(0f),
+        val bottomRight: Px = Px(0f),
     ): Transformation()
 }
 
