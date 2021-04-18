@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="@color/primaryBlue" />
+
+    <!-- TODO: top right niche -->
+
+    <corners
+        android:bottomLeftRadius="@dimen/background_message_holder_default_corner_rad"
+        android:topLeftRadius="@dimen/background_message_holder_default_corner_rad" />
+    <padding
+        android:bottom="@dimen/background_message_holder_default_padding"
+        android:left="@dimen/background_message_holder_default_padding"
+        android:right="@dimen/background_message_holder_default_padding"
+        android:top="@dimen/background_message_holder_default_padding_top" />
+</shape>
