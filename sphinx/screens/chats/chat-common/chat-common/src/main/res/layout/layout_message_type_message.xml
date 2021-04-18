@@ -2,6 +2,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_constraint_message_type_message"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:visibility="gone"
@@ -16,6 +17,7 @@
         android:textColor="@color/textMessages"
         android:textSize="@dimen/chat_message_text_size"
         app:layout_constraintTop_toTopOf="parent"
-        tools:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean scelerisque nisi neque, dictum volutpat est rutrum vel. Nunc luctus velit vel odio fermentum blandit. Vivamus quis dictum mi, porta tincidunt lacus. Vestibulum nec lectus sed elit rhoncus vehicula. Vestibulum at purus ac tellus varius pellentesque ultricies sit amet massa. Praesent mollis orci vitae erat pellentesque, non lacinia ipsum rutrum. Nunc pulvinar mauris vitae tortor euismod semper. Donec eleifend accumsan viverra." />
+        tools:text="@tools:sample/cities" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

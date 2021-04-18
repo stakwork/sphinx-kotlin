@@ -8,6 +8,15 @@
 
     <include
         android:id="@+id/layout_message_type_message"
-        layout="@layout/layout_message_type_message" />
+        layout="@layout/layout_message_type_message"
+        android:visibility="gone"
+        tools:visibility="visible" />
+
+    <include
+        android:id="@+id/message_holder_message_type_boost"
+        layout="@layout/layout_message_type_boost"
+        android:visibility="gone"
+        tools:layout_constraintTop_toBottomOf="@+id/layout_message_type_message"
+        tools:visibility="visible" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
