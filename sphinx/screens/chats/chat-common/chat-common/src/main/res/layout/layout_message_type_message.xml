@@ -14,10 +14,8 @@
         android:fontFamily="@font/roboto_regular"
         android:textColor="@color/textMessages"
         android:textSize="18sp"
-        android:visibility="gone"
         app:layout_constraintTop_toTopOf="parent"
-        tools:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce sodales volutpat metus quis facilisis. Fusce sed facilisis augue. Nulla venenatis ante quam, in cursus magna placerat at. Praesent fringilla purus vitae elit posuere luctus. Aliquam erat volutpat. Sed arcu mauris, aliquam et leo sit amet, pulvinar porttitor arcu. Nullam mi neque, tristique eu enim eget, bibendum porttitor sem. Sed scelerisque ac nisl ut congue. Praesent luctus leo aliquam felis porttitor tempus. Integer lacinia lorem ac mi hendrerit gravida. Donec fermentum feugiat semper. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas."
-        tools:visibility="visible" />
+        tools:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce sodales volutpat metus quis facilisis. Fusce sed facilisis augue. Nulla venenatis ante quam, in cursus magna placerat at. Praesent fringilla purus vitae elit posuere luctus. Aliquam erat volutpat. Sed arcu mauris, aliquam et leo sit amet, pulvinar porttitor arcu. Nullam mi neque, tristique eu enim eget, bibendum porttitor sem. Sed scelerisque ac nisl ut congue. Praesent luctus leo aliquam felis porttitor tempus. Integer lacinia lorem ac mi hendrerit gravida. Donec fermentum feugiat semper. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas." />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 
