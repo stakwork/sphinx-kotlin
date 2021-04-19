@@ -49,14 +49,12 @@
         tools:layout_width="80dp" />
 
     <include
-        android:id="@+id/layout_message_type_message"
-        layout="@layout/layout_message_type_message"
+        android:id="@+id/layout_message_types"
+        layout="@layout/layout_message_types"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:visibility="gone"
         app:layout_constraintEnd_toStartOf="@+id/space_message_holder_right"
         app:layout_constraintStart_toEndOf="@+id/space_message_holder_left"
-        app:layout_constraintTop_toBottomOf="@+id/text_view_message_holder_time"
-        tools:visibility="visible" />
+        app:layout_constraintTop_toBottomOf="@+id/text_view_message_holder_time" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
