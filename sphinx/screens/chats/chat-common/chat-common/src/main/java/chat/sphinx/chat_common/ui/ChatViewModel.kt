@@ -1,4 +1,4 @@
-package chat.sphinx.chat_common
+package chat.sphinx.chat_common.ui
 
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.BaseViewModel

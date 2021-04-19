@@ -1,4 +1,4 @@
-package chat.sphinx.chat_common
+package chat.sphinx.chat_common.ui
 
 import android.content.Context
 import android.os.Bundle
@@ -10,6 +10,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.viewbinding.ViewBinding
+import chat.sphinx.chat_common.R
 import chat.sphinx.chat_common.navigation.ChatNavigator
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions

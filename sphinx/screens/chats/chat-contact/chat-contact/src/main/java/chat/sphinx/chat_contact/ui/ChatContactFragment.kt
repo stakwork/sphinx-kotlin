@@ -4,7 +4,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import by.kirich1409.viewbindingdelegate.viewBinding
-import chat.sphinx.chat_common.BaseChatFragment
+import chat.sphinx.chat_common.ui.BaseChatFragment
 import chat.sphinx.chat_common.navigation.ChatNavigator
 import chat.sphinx.chat_contact.R
 import chat.sphinx.chat_contact.databinding.FragmentChatContactBinding

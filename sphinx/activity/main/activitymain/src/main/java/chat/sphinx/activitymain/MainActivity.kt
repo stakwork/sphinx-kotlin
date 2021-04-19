@@ -12,9 +12,8 @@ import chat.sphinx.activitymain.databinding.ActivityMainBinding
 import chat.sphinx.activitymain.navigation.drivers.PrimaryNavigationDriver
 import chat.sphinx.activitymain.ui.MainViewState
 import chat.sphinx.activitymain.ui.MotionLayoutNavigationActivity
-import chat.sphinx.chat_common.ChatData
-import chat.sphinx.chat_common.ChatViewModel
-import chat.sphinx.chat_common.ChatViewState
+import chat.sphinx.chat_common.ui.ChatData
+import chat.sphinx.chat_common.ui.ChatViewModel
 import chat.sphinx.chat_contact.navigation.ToChatContactScreen
 import chat.sphinx.chat_group.navigation.ToChatGroupScreen
 import chat.sphinx.chat_tribe.navigation.ToChatTribeScreen
