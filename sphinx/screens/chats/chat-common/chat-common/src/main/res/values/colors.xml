@@ -2,4 +2,6 @@
 <resources>
   <color name="message_container_background_received">#222E3A</color>
   <color name="message_container_background_sent">#3E6189</color>
+
+  <color name="receivedIcon">#82B4FF</color>
 </resources>
