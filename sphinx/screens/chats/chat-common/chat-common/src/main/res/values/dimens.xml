@@ -15,4 +15,7 @@
 
   <dimen name="icon_container_boost_message_width">26dp</dimen>
   <dimen name="icon_container_boost_message_height">26dp</dimen>
+
+  <dimen name="message_type_boost_reaction_image_holder_width">26dp</dimen>
+  <dimen name="message_type_boost_reaction_image_holder_height">26dp</dimen>
 </resources>
