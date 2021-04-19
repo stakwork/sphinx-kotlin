@@ -4,25 +4,64 @@
   xmlns:tools="http://schemas.android.com/tools"
   android:id="@+id/layout_constraint_message_type_boost"
   android:layout_width="match_parent"
-  android:layout_height="wrap_content">
+  android:layout_height="wrap_content"
+  tools:background="@drawable/background_message_holder_in_first">
 
 
-  <!-- TODO: Boost Icon -->
+  <!-- Boost Icon -->
 
   <androidx.appcompat.widget.AppCompatImageView
     android:id="@+id/image_view_boost_message_icon"
-    android:layout_width="@dimen/icon_container_boost_message_width"
-    android:layout_height="@dimen/icon_container_boost_message_height"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
     android:layout_marginStart="@dimen/default_layout_margin"
-    android:background="@drawable/button_background_white_rad_48"
-    android:backgroundTint="@color/receivedIcon"
-    android:src="@drawable/ic_baseline_add_24" />
+    android:src="@drawable/ic_received"
+    app:layout_constraintEnd_toStartOf="@+id/text_view_boost_amount"
+    app:layout_constraintBottom_toBottomOf="@+id/text_view_boost_amount"
+    app:layout_constraintTop_toTopOf="@+id/text_view_boost_amount"
+    tools:backgroundTint="@color/receivedIcon"/>
 
 
-  <!--TODO: Amount Label -->
+  <!--Amount Label -->
+
+  <androidx.appcompat.widget.AppCompatTextView
+    android:id="@+id/text_view_boost_amount"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:fontFamily="@font/roboto_regular"
+    android:textAlignment="textStart"
+    android:textColor="@color/textMessages"
+    android:textSize="@dimen/chat_message_text_size"
+    app:layout_constraintStart_toEndOf="@+id/image_view_boost_message_icon"
+    app:layout_constraintEnd_toStartOf="@id/space_after_boost_amount_text_view"
+    app:layout_constraintTop_toTopOf="parent"
+    android:layout_marginHorizontal="@dimen/default_layout_margin"
+    tools:text="21,000 Sats" />
 
 
-  <!-- TODO: Overlapping circles with Initials of boosters -->
+  <Space
+    android:id="@+id/space_after_boost_amount_text_view"
+    android:layout_width="0dp"
+    android:layout_height="0dp"
+    app:layout_constraintEnd_toStartOf="@+id/include_boost_reaction_image_holder_1"
+    app:layout_constraintStart_toEndOf="@id/text_view_boost_amount"
+    app:layout_constraintTop_toTopOf="parent"
+    tools:layout_width="80dp" />
+
+
+  <!-- Overlapping circles with images for boosters (AKA "reactions") -->
+
+  <include
+    android:id="@+id/include_boost_reaction_image_holder_1"
+    layout="@layout/layout_message_type_boost_reaction_image_holder"
+    android:visibility="gone"
+    android:layout_width="24dp"
+    android:layout_height="24dp"
+    app:layout_constraintStart_toEndOf="@+id/space_after_boost_amount_text_view"
+    app:layout_constraintTop_toTopOf="parent"
+    app:layout_constraintBottom_toBottomOf="parent"
+    tools:visibility="visible" />
+
 
 
   <!-- TODO: Count Label if more than 3 boosters -->
