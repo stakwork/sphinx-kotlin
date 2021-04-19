@@ -12,41 +12,34 @@
 
   <androidx.appcompat.widget.AppCompatImageView
     android:id="@+id/image_view_boost_message_icon"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_marginStart="@dimen/default_layout_margin"
+    android:layout_width="@dimen/icon_container_boost_message_width"
+    android:layout_height="@dimen/icon_container_boost_message_height"
+    android:layout_marginStart="16dp"
     android:src="@drawable/ic_received"
+    app:layout_constraintBottom_toBottomOf="parent"
     app:layout_constraintEnd_toStartOf="@+id/text_view_boost_amount"
-    app:layout_constraintBottom_toBottomOf="@+id/text_view_boost_amount"
-    app:layout_constraintTop_toTopOf="@+id/text_view_boost_amount"
-    tools:backgroundTint="@color/receivedIcon"/>
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent"
+    tools:backgroundTint="@color/receivedIcon" />
 
 
   <!--Amount Label -->
 
   <androidx.appcompat.widget.AppCompatTextView
     android:id="@+id/text_view_boost_amount"
-    android:layout_width="match_parent"
+    android:layout_width="0dp"
     android:layout_height="wrap_content"
+    android:layout_marginHorizontal="@dimen/default_layout_margin"
     android:fontFamily="@font/roboto_regular"
     android:textAlignment="textStart"
     android:textColor="@color/textMessages"
     android:textSize="@dimen/chat_message_text_size"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintEnd_toStartOf="@id/include_boost_reaction_image_holder_1"
     app:layout_constraintStart_toEndOf="@+id/image_view_boost_message_icon"
-    app:layout_constraintEnd_toStartOf="@id/space_after_boost_amount_text_view"
     app:layout_constraintTop_toTopOf="parent"
-    android:layout_marginHorizontal="@dimen/default_layout_margin"
     tools:text="21,000 Sats" />
 
-
-  <Space
-    android:id="@+id/space_after_boost_amount_text_view"
-    android:layout_width="0dp"
-    android:layout_height="0dp"
-    app:layout_constraintEnd_toStartOf="@+id/include_boost_reaction_image_holder_1"
-    app:layout_constraintStart_toEndOf="@id/text_view_boost_amount"
-    app:layout_constraintTop_toTopOf="parent"
-    tools:layout_width="80dp" />
 
 
   <!-- Overlapping circles with images for boosters (AKA "reactions") -->
@@ -55,13 +48,37 @@
     android:id="@+id/include_boost_reaction_image_holder_1"
     layout="@layout/layout_message_type_boost_reaction_image_holder"
     android:visibility="gone"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    app:layout_constraintStart_toEndOf="@+id/space_after_boost_amount_text_view"
+    android:layout_width="26dp"
+    android:layout_height="26dp"
     app:layout_constraintTop_toTopOf="parent"
     app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintStart_toEndOf="@id/text_view_boost_amount"
+    app:layout_constraintEnd_toStartOf="@id/include_boost_reaction_image_holder_2"
     tools:visibility="visible" />
 
+  <include
+    android:id="@+id/include_boost_reaction_image_holder_2"
+    layout="@layout/layout_message_type_boost_reaction_image_holder"
+    android:layout_width="26dp"
+    android:layout_height="26dp"
+    android:visibility="gone"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintEnd_toStartOf="@id/include_boost_reaction_image_holder_3"
+    app:layout_constraintStart_toEndOf="@id/include_boost_reaction_image_holder_1"
+    app:layout_constraintTop_toTopOf="parent"
+    tools:visibility="visible" />
+
+  <include
+    android:id="@+id/include_boost_reaction_image_holder_3"
+    layout="@layout/layout_message_type_boost_reaction_image_holder"
+    android:layout_width="26dp"
+    android:layout_height="26dp"
+    android:visibility="gone"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toEndOf="@id/include_boost_reaction_image_holder_2"
+    app:layout_constraintTop_toTopOf="parent"
+    tools:visibility="visible" />
 
 
   <!-- TODO: Count Label if more than 3 boosters -->
