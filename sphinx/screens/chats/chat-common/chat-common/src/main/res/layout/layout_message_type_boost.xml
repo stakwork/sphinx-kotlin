@@ -14,32 +14,27 @@
     android:id="@+id/image_view_boost_message_icon"
     android:layout_width="@dimen/icon_container_boost_message_width"
     android:layout_height="@dimen/icon_container_boost_message_height"
-    android:layout_marginStart="16dp"
     android:src="@drawable/ic_received"
     app:layout_constraintBottom_toBottomOf="parent"
-    app:layout_constraintEnd_toStartOf="@+id/text_view_boost_amount"
+    app:layout_constraintEnd_toStartOf="@+id/include_boost_amount_text_group"
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toTopOf="parent"
     tools:backgroundTint="@color/receivedIcon" />
 
 
-  <!--Amount Label -->
+  <!--Amount Text -->
 
-  <androidx.appcompat.widget.AppCompatTextView
-    android:id="@+id/text_view_boost_amount"
+  <include
+    android:id="@+id/include_boost_amount_text_group"
+    layout="@layout/layout_message_type_boost_amount_text_group"
     android:layout_width="0dp"
     android:layout_height="wrap_content"
     android:layout_marginHorizontal="@dimen/default_layout_margin"
-    android:fontFamily="@font/roboto_regular"
-    android:textAlignment="textStart"
-    android:textColor="@color/textMessages"
-    android:textSize="@dimen/chat_message_text_size"
     app:layout_constraintBottom_toBottomOf="parent"
     app:layout_constraintEnd_toStartOf="@id/include_boost_reaction_image_holder_1"
     app:layout_constraintStart_toEndOf="@+id/image_view_boost_message_icon"
     app:layout_constraintTop_toTopOf="parent"
-    tools:text="21,000 Sats" />
-
+    tools:visibility="visible" />
 
 
   <!-- Overlapping circles with images for boosters (AKA "reactions") -->
@@ -52,7 +47,7 @@
     android:layout_height="26dp"
     app:layout_constraintTop_toTopOf="parent"
     app:layout_constraintBottom_toBottomOf="parent"
-    app:layout_constraintStart_toEndOf="@id/text_view_boost_amount"
+    app:layout_constraintStart_toEndOf="@id/include_boost_amount_text_group"
     app:layout_constraintEnd_toStartOf="@id/include_boost_reaction_image_holder_2"
     tools:visibility="visible" />
 
