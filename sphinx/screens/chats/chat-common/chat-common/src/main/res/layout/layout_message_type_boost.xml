@@ -5,7 +5,8 @@
   android:id="@+id/layout_constraint_message_type_boost"
   android:layout_width="match_parent"
   android:layout_height="wrap_content"
-  tools:background="@drawable/background_message_holder_in_first">
+  android:paddingHorizontal="@dimen/default_layout_margin"
+  tools:background="@color/sentMsgBG">
 
 
   <!-- Boost Icon -->
@@ -69,13 +70,28 @@
     android:layout_width="26dp"
     android:layout_height="26dp"
     android:visibility="gone"
+    android:layout_marginEnd="12sp"
     app:layout_constraintBottom_toBottomOf="parent"
-    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintEnd_toStartOf="@+id/text_view_boost_reaction_count"
     app:layout_constraintStart_toEndOf="@id/include_boost_reaction_image_holder_2"
     app:layout_constraintTop_toTopOf="parent"
     tools:visibility="visible" />
 
 
-  <!-- TODO: Count Label if more than 3 boosters -->
+  <!-- Count Label if more than 3 boosters -->
+
+  <androidx.appcompat.widget.AppCompatTextView
+    android:id="@+id/text_view_boost_reaction_count"
+    android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    android:textColor="@color/secondaryTextSent"
+    android:textSize="@dimen/message_type_boost_amount_unit_text_size"
+    android:visibility="gone"
+    android:layout_marginStart="16dp"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintTop_toTopOf="parent"
+    tools:text="21"
+    tools:visibility="visible" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
