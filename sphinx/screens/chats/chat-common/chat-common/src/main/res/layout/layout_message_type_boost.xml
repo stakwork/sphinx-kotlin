@@ -29,7 +29,7 @@
 
     <include
         android:id="@+id/include_boost_amount_text_group"
-        layout="@layout/layout_message_type_boost_amount_text_group"
+        layout="@layout/layout_text_sats_amount"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="@dimen/default_layout_margin"

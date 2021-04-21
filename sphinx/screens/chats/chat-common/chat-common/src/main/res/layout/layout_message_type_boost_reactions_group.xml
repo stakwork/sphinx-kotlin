@@ -58,7 +58,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:textColor="@color/secondaryTextSent"
-        android:textSize="@dimen/message_type_boost_amount_unit_text_size"
+        android:textSize="@dimen/default_text_size_subheadline"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toEndOf="@id/include_boost_reaction_image_holder_3"
