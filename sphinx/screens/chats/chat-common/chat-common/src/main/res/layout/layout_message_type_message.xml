@@ -17,7 +17,8 @@
         android:textColor="@color/textMessages"
         android:textSize="@dimen/chat_message_text_size"
         app:layout_constraintTop_toTopOf="parent"
-        tools:text="@tools:sample/cities" />
+        tools:text="Contrary to popular belief, Lorem Ipsum is not simply random text. Latin from 45 BC, making it over 2000 years old."
+        tools:layout_editor_absoluteX="0dp" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
