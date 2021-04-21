@@ -146,10 +146,10 @@ class MessageListAdapter(
 
                 // TODO: refactor into view state
                 viewState.message.messageContentDecrypted?.value?.let { content ->
-                    layoutMessageTypes.layoutMessageTypeMessage.root.goneIfFalse(true)
-                    layoutMessageTypes.layoutMessageTypeMessage.textViewMessageTypeMessage.text =
+                    layoutMessageTypes.includeMessageTypeMessage.root.goneIfFalse(true)
+                    layoutMessageTypes.includeMessageTypeMessage.textViewMessageTypeMessage.text =
                         content
-                } ?: layoutMessageTypes.layoutMessageTypeMessage.root.goneIfFalse(false)
+                } ?: layoutMessageTypes.includeMessageTypeMessage.root.goneIfFalse(false)
 
                 viewState.background.setBackground(recyclerViewWidth, binding)
             }
