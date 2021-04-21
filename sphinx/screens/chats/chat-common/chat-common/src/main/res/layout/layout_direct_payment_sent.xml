@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_constraint_direct_payment_sent"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:visibility="gone"
+    tools:background="@color/sentMsgBG"
+    tools:visibility="visible">
+
+
+    <!--Amount Text -->
+
+    <include
+        android:id="@+id/include_direct_payment_amount_text_group"
+        layout="@layout/layout_text_sats_amount"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+
+    <!-- Payment Direction Icon -->
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/image_view_direct_payment_direction_icon"
+        android:layout_width="@dimen/icon_container_message_payment_direction_xy"
+        android:layout_height="@dimen/icon_container_message_payment_direction_xy"
+        android:src="@drawable/ic_sent"
+        android:tint="@color/textMessages"
+        android:layout_marginStart="@dimen/default_layout_margin"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/include_direct_payment_amount_text_group"
+        app:layout_constraintTop_toTopOf="parent" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

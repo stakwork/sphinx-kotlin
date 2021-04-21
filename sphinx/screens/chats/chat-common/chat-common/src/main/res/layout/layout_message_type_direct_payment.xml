@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_constraint_message_type_direct_payment"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="@dimen/default_layout_margin"
+    android:visibility="gone"
+    tools:background="@color/receivedMsgBG"
+    tools:visibility="visible">
+
+
+    <!--  If inbound payment, include "Received" layout  -->
+
+    <include
+        android:id="@+id/include_direct_payment_received"
+        layout="@layout/layout_direct_payment_received"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+
+    <!--  If outbound payment, include "Sent" layout   -->
+
+    <include
+        android:id="@+id/include_direct_payment_sent"
+        layout="@layout/layout_direct_payment_sent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
