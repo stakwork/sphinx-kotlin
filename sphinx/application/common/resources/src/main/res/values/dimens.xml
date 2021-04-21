@@ -9,4 +9,7 @@
     <dimen name="default_header_margin_horizontal">24dp</dimen>
     <dimen name="default_bottom_bar_height">56dp</dimen>
     <dimen name="default_elevation">8dp</dimen>
+
+    <dimen name="default_text_size_headline">17sp</dimen>
+    <dimen name="default_text_size_subheadline">11sp</dimen>
 </resources>
