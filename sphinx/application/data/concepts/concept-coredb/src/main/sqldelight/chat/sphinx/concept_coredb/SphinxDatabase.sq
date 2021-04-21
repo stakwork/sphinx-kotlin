@@ -369,23 +369,20 @@ FROM messageDbo
 ORDER BY id DESC
 LIMIT 1;
 
--- Retrieves the latest message for the given ChatID that will be shown
--- to the User. See [MessageType] for more detail
-messageGetLatestToShowByChatId:
+messageGetAllToShowByChatId:
 SELECT *
 FROM messageDbo
 WHERE chat_id = ?
 AND type = 0
-    OR type = 2
-    OR type = 3
-    OR type = 5
-    OR type = 6
-    OR type = 14
-    OR type = 15
-    OR type = 25
-    OR type = 29
-ORDER BY id DESC
-LIMIT 1;
+--     OR type = 2
+--     OR type = 3
+--     OR type = 5
+--     OR type = 6
+--     OR type = 14
+--     OR type = 15
+--     OR type = 25
+--     OR type = 29
+ORDER BY id;
 
 messageUpdateContentDecrypted:
 UPDATE messageDbo

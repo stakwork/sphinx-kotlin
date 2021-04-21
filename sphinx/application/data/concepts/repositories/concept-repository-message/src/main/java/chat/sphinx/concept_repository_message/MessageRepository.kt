@@ -11,13 +11,7 @@ import kotlinx.coroutines.flow.Flow
 interface MessageRepository {
     suspend fun getMessageById(messageId: MessageId): Flow<Message?>
 
-    suspend fun getLatestMessageForChat(chatId: ChatId): Flow<Message?>
-    suspend fun getLatestMessageForChat(chatUUID: ChatUUID): Flow<Message?>
+    suspend fun getMessagesForChat(chatId: ChatId): Flow<List<Message>>
 
-    suspend fun getNumberUnseenMessagesForChat(chatId: ChatId): Flow<Int>
-    suspend fun getNumberUnseenMessagesForChat(chatUUID: ChatUUID): Flow<Int>
-
-    suspend fun getMessagesForChat(chatId: ChatId, limit: Int, offset: Int): Flow<List<Message>>
-    suspend fun getMessagesForChat(chatUUID: ChatUUID, limit: Int, offset: Int): Flow<List<Message>>
     fun networkRefreshMessages(): Flow<LoadResponse<Boolean, ResponseError>>
 }

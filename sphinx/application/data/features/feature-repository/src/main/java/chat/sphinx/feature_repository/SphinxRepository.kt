@@ -543,43 +543,16 @@ class SphinxRepository(
             .distinctUntilChanged()
     }
 
-    override suspend fun getLatestMessageForChat(chatId: ChatId): Flow<Message?> {
+    override suspend fun getMessagesForChat(chatId: ChatId): Flow<List<Message>> {
         val queries = coreDB.getSphinxDatabaseQueries()
-        return queries.messageGetLatestToShowByChatId(chatId)
+        return queries.messageGetAllToShowByChatId(chatId)
             .asFlow()
-            .mapToOneOrNull(dispatchers.io)
-            .map { it?.let { messageDbo ->
-                mapMessageDboAndDecryptContentIfNeeded(queries, messageDbo)
-            }}
-            .distinctUntilChanged()
-    }
-
-    override suspend fun getLatestMessageForChat(chatUUID: ChatUUID): Flow<Message?> {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun getNumberUnseenMessagesForChat(chatId: ChatId): Flow<Int> {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun getNumberUnseenMessagesForChat(chatUUID: ChatUUID): Flow<Int> {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun getMessagesForChat(
-        chatId: ChatId,
-        limit: Int,
-        offset: Int
-    ): Flow<List<Message>> {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun getMessagesForChat(
-        chatUUID: ChatUUID,
-        limit: Int,
-        offset: Int
-    ): Flow<List<Message>> {
-        TODO("Not yet implemented")
+            .mapToList(dispatchers.io)
+            .map { listMessageDbo ->
+                listMessageDbo.map {
+                    mapMessageDboAndDecryptContentIfNeeded(queries, it)
+                }
+            }
     }
 
     @OptIn(UnencryptedDataAccess::class)
