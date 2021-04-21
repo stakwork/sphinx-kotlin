@@ -12,11 +12,9 @@
         layout="@layout/layout_message_type_boost_reaction_image_holder"
         android:layout_width="@dimen/message_type_boost_reaction_image_holder_width"
         android:layout_height="@dimen/message_type_boost_reaction_image_holder_height"
-        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/guideline_reaction_images"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:visibility="visible" />
+        app:layout_constraintTop_toTopOf="parent" />
 
 
     <androidx.constraintlayout.widget.Guideline
@@ -36,10 +34,8 @@
         layout="@layout/layout_message_type_boost_reaction_image_holder"
         android:layout_width="@dimen/message_type_boost_reaction_image_holder_width"
         android:layout_height="@dimen/message_type_boost_reaction_image_holder_height"
-        android:visibility="gone"
         app:layout_constraintEnd_toEndOf="@id/guideline_reaction_images"
-        app:layout_constraintStart_toStartOf="@id/guideline_reaction_images"
-        tools:visibility="visible" />
+        app:layout_constraintStart_toStartOf="@id/guideline_reaction_images" />
 
 
     <include
@@ -47,13 +43,11 @@
         layout="@layout/layout_message_type_boost_reaction_image_holder"
         android:layout_width="@dimen/message_type_boost_reaction_image_holder_width"
         android:layout_height="@dimen/message_type_boost_reaction_image_holder_height"
-        android:layout_marginEnd="12sp"
-        android:visibility="gone"
+        android:layout_marginEnd="12dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/text_view_boost_reaction_count"
         app:layout_constraintStart_toEndOf="@id/guideline_reaction_images"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:visibility="visible" />
+        app:layout_constraintTop_toTopOf="parent" />
 
 
     <!-- Count Label if more than 3 boosters -->

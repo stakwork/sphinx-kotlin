@@ -4,8 +4,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:visibility="gone"
     tools:layout_height="@dimen/message_type_boost_reaction_image_holder_height"
-    tools:layout_width="@dimen/message_type_boost_reaction_image_holder_width">
+    tools:layout_width="@dimen/message_type_boost_reaction_image_holder_width"
+    tools:visibility="visible">
 
 
     <androidx.appcompat.widget.AppCompatTextView
