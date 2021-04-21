@@ -6,8 +6,7 @@
     android:layout_height="wrap_content"
     android:layout_marginHorizontal="@dimen/default_layout_margin"
     android:layout_marginVertical="4dp"
-    android:elevation="@dimen/default_elevation"
-    tools:background="@color/body">
+    android:elevation="@dimen/default_elevation">
 
     <include
         android:id="@+id/layout_message_holder_initial_holder"
