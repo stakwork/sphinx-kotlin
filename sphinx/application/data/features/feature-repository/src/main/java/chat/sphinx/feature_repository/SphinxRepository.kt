@@ -626,8 +626,8 @@ class SphinxRepository(
         val queries = coreDB.getSphinxDatabaseQueries()
         var lastMessageId: Long = withContext(dispatchers.io) {
             queries.messageGetLatestId().executeAsOneOrNull()?.value?.let {
-                if (it >= 1) {
-                    it - 1
+                if (it >= 10) {
+                    it - 10
                 } else {
                     0
                 }
@@ -792,8 +792,8 @@ class SphinxRepository(
 
                         when {
                             lastMessageId == -1 -> {}
-                            newMessages.size >= 199 -> {
-                                lastMessageId += 199
+                            newMessages.size >= 190 -> {
+                                lastMessageId += 190
                             }
                             else -> {
                                 lastMessageId = -1
