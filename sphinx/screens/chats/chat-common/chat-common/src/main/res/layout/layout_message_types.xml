@@ -7,11 +7,11 @@
     tools:background="@drawable/background_message_holder_in_first">
 
     <include
-        android:id="@+id/layout_message_type_message"
+        android:id="@+id/include_message_type_message"
         layout="@layout/layout_message_type_message" />
 
     <include
-        android:id="@+id/message_holder_message_type_boost"
+        android:id="@+id/include_message_type_boost"
         layout="@layout/layout_message_type_boost"
         tools:layout_constraintTop_toBottomOf="@+id/layout_message_type_message" />
 
