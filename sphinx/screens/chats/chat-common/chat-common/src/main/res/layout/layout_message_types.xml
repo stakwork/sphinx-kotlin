@@ -8,8 +8,6 @@
 
     <include
         android:id="@+id/layout_message_type_message"
-        layout="@layout/layout_message_type_message"
-        android:visibility="gone"
-        tools:visibility="visible" />
+        layout="@layout/layout_message_type_message" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

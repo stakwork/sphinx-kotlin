@@ -3,6 +3,7 @@ package chat.sphinx.chat_group.ui
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.recyclerview.widget.RecyclerView
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.chat_common.ui.BaseChatFragment
 import chat.sphinx.chat_common.navigation.ChatNavigator
@@ -39,6 +40,9 @@ internal class ChatGroupFragment: BaseChatFragment<
 
     override val footer: ConstraintLayout
         get() = binding.layoutChatFooter.layoutConstraintChatFooter
+
+    override val recyclerView: RecyclerView
+        get() = binding.recyclerViewMessages
 
     @Inject
     protected lateinit var imageLoaderInj: ImageLoader<ImageView>

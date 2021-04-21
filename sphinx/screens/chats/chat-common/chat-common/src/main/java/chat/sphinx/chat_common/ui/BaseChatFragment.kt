@@ -5,12 +5,16 @@ import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.annotation.CallSuper
 import androidx.annotation.LayoutRes
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
 import chat.sphinx.chat_common.R
+import chat.sphinx.chat_common.adapters.MessageListAdapter
 import chat.sphinx.chat_common.navigation.ChatNavigator
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
@@ -49,6 +53,8 @@ abstract class BaseChatFragment<
 
     protected abstract val footer: ConstraintLayout
 
+    protected abstract val recyclerView: RecyclerView
+
     protected abstract val imageLoader: ImageLoader<ImageView>
 
     protected abstract val chatNavigator: ChatNavigator
@@ -63,14 +69,23 @@ abstract class BaseChatFragment<
             .addCallback(viewLifecycleOwner, requireActivity())
 
         headerNavBack.setOnClickListener {
+            onNavigationBack()
             lifecycleScope.launch {
                 chatNavigator.popBackStack()
             }
+        }
+
+        val messageListAdapter = MessageListAdapter(recyclerView, viewLifecycleOwner, viewModel, imageLoader)
+        recyclerView.apply {
+            setHasFixedSize(false)
+            layoutManager = LinearLayoutManager(binding.root.context)
+            adapter = messageListAdapter
         }
     }
 
     private inner class ChatBackPressHandler(context: Context): CloseAppOnBackPress(context) {
         override fun handleOnBackPressed() {
+            onNavigationBack()
             lifecycleScope.launch {
                 chatNavigator.popBackStack()
             }
@@ -123,4 +138,9 @@ abstract class BaseChatFragment<
 
     override suspend fun onViewStateFlowCollect(viewState: ChatViewState) {}
     override fun subscribeToViewStateFlow() {}
+
+    @CallSuper
+    protected open fun onNavigationBack() {
+        viewModel.onNavigationBack()
+    }
 }

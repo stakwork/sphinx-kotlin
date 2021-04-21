@@ -14,9 +14,7 @@
         layout="@layout/layout_chat_image_initial_holder"
         android:layout_width="@dimen/message_holder_in_photo_holder_xy"
         android:layout_height="@dimen/message_holder_in_photo_holder_xy"
-        android:visibility="gone"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:visibility="visible" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/text_view_message_holder_time"
