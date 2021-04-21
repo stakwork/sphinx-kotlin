@@ -41,6 +41,7 @@
     <color name="messageOptionDivider">#FFFFFF</color>
     <color name="replyDividerReceived">#556171</color>
     <color name="replyDividerSent">#829CB9</color>
+    <color name="receivedIcon">#82B4FF</color>
     <color name="receivedMsgBG">#222E3A</color>
     <color name="sentMsgBG">#3E6189</color>
     <color name="oldReceivedMsgBG">#222E3A</color>
