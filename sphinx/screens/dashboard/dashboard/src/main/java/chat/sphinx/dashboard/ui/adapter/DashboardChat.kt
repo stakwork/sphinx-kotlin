@@ -59,13 +59,18 @@ sealed class DashboardChat {
                 message.type.isMessage() -> {
                     message.messageContentDecrypted?.value?.let { decrypted ->
 
-                        if (message.giphyData != null) {
-                            "${getMessageSender(message)}GIF shared"
-                        } else {
-
-                            // TODO: check for `clip::` to load pod clip
-
-                            "${getMessageSender(message)}$decrypted"
+                        when {
+                            message.giphyData != null -> {
+                                "${getMessageSender(message)}GIF shared"
+                            }
+                            message.podBoost != null -> {
+                                val amount: Long = message.podBoost?.amount?.value ?: message.amount.value
+                                "${getMessageSender(message)}Boost $amount " + if (amount > 1) "sats" else "sat"
+                            }
+                            // TODO: check for clip::
+                            else -> {
+                                "${getMessageSender(message)}$decrypted"
+                            }
                         }
 
                     } ?: "${getMessageSender(message)}..."
