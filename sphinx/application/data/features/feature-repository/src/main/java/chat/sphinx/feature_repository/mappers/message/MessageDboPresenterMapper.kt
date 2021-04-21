@@ -6,6 +6,7 @@ import chat.sphinx.wrapper_message.*
 import com.squareup.moshi.Moshi
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.crypto_common.extensions.decodeToString
+import kotlinx.coroutines.withContext
 import okio.base64.decodeBase64ToArray
 
 internal class MessageDboPresenterMapper(
@@ -34,21 +35,31 @@ internal class MessageDboPresenterMapper(
             replyUUID = value.reply_uuid
         ).also { message ->
             value.message_content_decrypted?.let { decrypted ->
-                if (message.type.isBoost()) {
-                    decrypted.value.toPodBoostOrNull(moshi)?.let { boost ->
-                        message.setPodBoost(boost)
-                    }
-                }
-
-                if (message.type.isMessage() && decrypted.value.contains("giphy::")) {
-                    decrypted.value.split("::")
-                        .elementAtOrNull(1)
-                        ?.decodeBase64ToArray()
-                        ?.decodeToString()
-                        ?.toGiphyDataOrNull(moshi)
-                        ?.let { giphy ->
-                            message.setGiphyData(giphy)
+                if (message.type.isMessage()) {
+                    when {
+                        decrypted.value.contains("boost::") -> {
+                            withContext(dispatchers.default) {
+                                decrypted.value.split("::")
+                                    .elementAtOrNull(1)
+                                    ?.toPodBoostOrNull(moshi)
+                                    ?.let { podBoost ->
+                                        message.setPodBoost(podBoost)
+                                    }
+                            }
                         }
+                        decrypted.value.contains("giphy::") -> {
+                            withContext(dispatchers.default) {
+                                decrypted.value.split("::")
+                                    .elementAtOrNull(1)
+                                    ?.decodeBase64ToArray()
+                                    ?.decodeToString()
+                                    ?.toGiphyDataOrNull(moshi)
+                                    ?.let { giphy ->
+                                        message.setGiphyData(giphy)
+                                    }
+                            }
+                        }
+                    }
                 }
 
                 message.setMessageContentDecrypted(decrypted)

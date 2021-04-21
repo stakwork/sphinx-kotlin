@@ -116,19 +116,6 @@ inline fun SphinxDatabaseQueries.upsertContact(dto: ContactDto) {
 @Suppress("SpellCheckingInspection")
 fun SphinxDatabaseQueries.upsertMessage(dto: MessageDto) {
 
-    // This handles the old method for sending boost payments (they were sent as
-    // type 0 [MESSAGE]). Will update the MessageType to the correct value and
-    // store the feed data properly for display.
-    var type: MessageType = dto.type.toMessageType()
-    val decryptedContent: String? = dto.messageContentDecrypted?.let { decrypted ->
-        if (decrypted.contains("boost::{\"feedID\":")) {
-            type = MessageType.Boost
-            decrypted.split("::")[1]
-        } else {
-            decrypted
-        }
-    }
-
     val chatId: ChatId = dto.chat_id?.let {
         ChatId(it)
     } ?: dto.chat?.id?.let {
@@ -145,7 +132,7 @@ fun SphinxDatabaseQueries.upsertMessage(dto: MessageDto) {
         MessageId(dto.id),
         dto.uuid?.toMessageUUID(),
         chatId,
-        type,
+        dto.type.toMessageType(),
         ContactId(dto.sender),
         dto.receiver?.let { ContactId(it) },
         Sat(dto.amount),
@@ -154,7 +141,7 @@ fun SphinxDatabaseQueries.upsertMessage(dto: MessageDto) {
         dto.date.toDateTime(),
         dto.expiration_date?.toDateTime(),
         dto.message_content?.toMessageContent(),
-        decryptedContent?.toMessageContentDecrypted(),
+        dto.messageContentDecrypted?.toMessageContentDecrypted(),
     )
 
     dto.media_token?.let { mediaToken ->
