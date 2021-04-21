@@ -1,25 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <dimen name="chat_footer_button_xy">30dp</dimen>
-  <dimen name="chat_message_rounded_corner_radius">9dp</dimen>
-  <dimen name="chat_message_text_size">17sp</dimen>
+    <dimen name="chat_footer_button_xy">30dp</dimen>
+    <dimen name="chat_message_rounded_corner_radius">9dp</dimen>
+    <dimen name="chat_message_text_size">17sp</dimen>
 
-  <item name="default_space_width_percent" type="dimen" format="float">.2</item>
-  <dimen name="background_message_holder_default_corner_rad">12dp</dimen>
-  <dimen name="background_message_holder_default_padding">16dp</dimen>
-  <dimen name="background_message_holder_default_padding_top">12dp</dimen>
-  <dimen name="message_holder_in_photo_holder_xy">32dp</dimen>
+    <item name="default_space_width_percent" format="float" type="dimen">.2</item>
+    <dimen name="background_message_holder_default_corner_rad">12dp</dimen>
+    <dimen name="background_message_holder_default_padding">16dp</dimen>
+    <dimen name="background_message_holder_default_padding_top">12dp</dimen>
+    <dimen name="message_holder_in_photo_holder_xy">32dp</dimen>
 
-  <!-- message_holder_in_photo_holder_xy + 8dp -->
-  <dimen name="message_holder_space_width_left">40dp</dimen>
+    <!-- message_holder_in_photo_holder_xy + 8dp -->
+    <dimen name="message_holder_space_width_left">40dp</dimen>
 
-  <dimen name="icon_container_boost_message_width">26dp</dimen>
-  <dimen name="icon_container_boost_message_height">26dp</dimen>
+    <dimen name="icon_container_boost_message_width">26dp</dimen>
+    <dimen name="icon_container_boost_message_height">26dp</dimen>
 
-  <dimen name="message_type_boost_reaction_image_holder_width">26dp</dimen>
-  <dimen name="message_type_boost_reaction_image_holder_height">26dp</dimen>
-  <dimen name="message_type_boost_amount_value_text_size">17sp</dimen>
-  <dimen name="message_type_boost_amount_unit_text_size">11sp</dimen>
-
+    <dimen name="message_type_boost_reaction_image_holder_width">26dp</dimen>
+    <dimen name="message_type_boost_reaction_image_holder_height">26dp</dimen>
+    <dimen name="message_type_boost_amount_value_text_size">17sp</dimen>
+    <dimen name="message_type_boost_amount_unit_text_size">11sp</dimen>
 
 </resources>
