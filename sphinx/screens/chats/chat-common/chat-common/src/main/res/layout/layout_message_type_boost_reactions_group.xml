@@ -30,7 +30,6 @@
         app:layout_constraintEnd_toEndOf="@id/guideline_reaction_images"
         app:layout_constraintStart_toStartOf="@id/guideline_reaction_images" />
 
-
     <include
         android:id="@+id/include_boost_reaction_image_holder_3"
         layout="@layout/layout_chat_image_initial_holder"
@@ -42,13 +41,13 @@
         app:layout_constraintStart_toEndOf="@id/guideline_reaction_images"
         app:layout_constraintTop_toTopOf="parent" />
 
-
     <!-- Count Label if more than 3 boosters -->
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/text_view_boost_reaction_count"
         android:layout_width="0dp"
-        android:layout_height="match_parent"
+        android:layout_height="@dimen/message_type_boost_height"
+        android:layout_marginStart="@dimen/message_type_boost_height"
         android:gravity="center_vertical"
         android:paddingStart="4dp"
         android:textColor="@color/secondaryTextSent"
