@@ -15,6 +15,7 @@
 
     <dimen name="icon_container_message_payment_direction_xy">26dp</dimen>
     <dimen name="message_type_boost_height">26dp</dimen>
+    <dimen name="message_type_image_attachment_height">208dp</dimen>
 
     <dimen name="image_holder_boost_reaction_xy">26dp</dimen>
 </resources>
