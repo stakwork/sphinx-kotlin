@@ -13,9 +13,19 @@
     <!-- message_holder_in_photo_holder_xy + 8dp -->
     <dimen name="message_holder_space_width_left">40dp</dimen>
 
-    <dimen name="icon_container_message_payment_direction_xy">26dp</dimen>
+    <!-- Message type heights  -->
     <dimen name="message_type_boost_height">26dp</dimen>
+    <dimen name="message_type_direct_payment_height">26dp</dimen>
     <dimen name="message_type_image_attachment_height">208dp</dimen>
+    <dimen name="message_type_file_attachment_height">60dp</dimen>
 
     <dimen name="image_holder_boost_reaction_xy">26dp</dimen>
+    <dimen name="icon_container_message_payment_direction_xy">26dp</dimen>
+
+
+    <!-- Icons -->
+    <dimen name="icon_file_attachment_xy">30dp</dimen>
+    <dimen name="icon_file_attachment_text_size">30sp</dimen>
+    <dimen name="icon_file_download_width">30dp</dimen>
+    <dimen name="icon_file_download_text_size">30sp</dimen>
 </resources>
