@@ -13,7 +13,8 @@
     <!-- message_holder_in_photo_holder_xy + 8dp -->
     <dimen name="message_holder_space_width_left">40dp</dimen>
 
+    <dimen name="icon_container_message_payment_direction_xy">26dp</dimen>
     <dimen name="message_type_boost_height">26dp</dimen>
 
-    <dimen name="message_type_boost_reaction_image_holder_xy">26dp</dimen>
+    <dimen name="image_holder_boost_reaction_xy">26dp</dimen>
 </resources>

@@ -16,8 +16,8 @@
     <include
         android:id="@+id/include_boost_reaction_image_holder_1"
         layout="@layout/layout_chat_image_initial_holder"
-        android:layout_width="@dimen/message_type_boost_height"
-        android:layout_height="@dimen/message_type_boost_height"
+        android:layout_width="@dimen/image_holder_boost_reaction_xy"
+        android:layout_height="@dimen/image_holder_boost_reaction_xy"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/guideline_reaction_images"
         app:layout_constraintTop_toTopOf="parent" />
@@ -25,19 +25,20 @@
     <include
         android:id="@+id/include_boost_reaction_image_holder_2"
         layout="@layout/layout_chat_image_initial_holder"
-        android:layout_width="@dimen/message_type_boost_height"
-        android:layout_height="@dimen/message_type_boost_height"
+        android:layout_width="@dimen/image_holder_boost_reaction_xy"
+        android:layout_height="@dimen/image_holder_boost_reaction_xy"
         app:layout_constraintEnd_toEndOf="@id/guideline_reaction_images"
         app:layout_constraintStart_toStartOf="@id/guideline_reaction_images" />
 
     <include
         android:id="@+id/include_boost_reaction_image_holder_3"
         layout="@layout/layout_chat_image_initial_holder"
-        android:layout_width="@dimen/message_type_boost_reaction_image_holder_xy"
-        android:layout_height="@dimen/message_type_boost_reaction_image_holder_xy"
+        android:layout_width="@dimen/image_holder_boost_reaction_xy"
+        android:layout_height="@dimen/image_holder_boost_reaction_xy"
         android:layout_marginEnd="12dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="@+id/guideline_reaction_images"
+        app:layout_constraintEnd_toStartOf="@+id/text_view_boost_reaction_count"
+        app:layout_constraintStart_toEndOf="@id/guideline_reaction_images"
         app:layout_constraintTop_toTopOf="parent" />
 
     <!-- Count Label if more than 3 boosters -->
