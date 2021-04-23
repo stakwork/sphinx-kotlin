@@ -211,40 +211,26 @@ internal class DashboardFragment : MotionLayoutFragment<
                     when (loadResponse) {
                         is LoadResponse.Loading -> {
                             dashboardHeader.progressBarDashboardHeaderNetwork.invisibleIfFalse(true)
-                            dashboardHeader.imageViewDashboardHeaderNetwork.invisibleIfFalse(false)
+                            dashboardHeader.textViewDashboardHeaderNetwork.invisibleIfFalse(false)
                         }
                         is Response.Error -> {
                             dashboardHeader.progressBarDashboardHeaderNetwork.invisibleIfFalse(false)
-                            dashboardHeader.imageViewDashboardHeaderNetwork.invisibleIfFalse(true)
-                            dashboardHeader.imageViewDashboardHeaderNetwork.setImageDrawable(
-                                ContextCompat.getDrawable(
+                            dashboardHeader.textViewDashboardHeaderNetwork.invisibleIfFalse(true)
+                            dashboardHeader.textViewDashboardHeaderNetwork.setTextColor(
+                                ContextCompat.getColor(
                                     binding.root.context,
-                                    R.drawable.ic_network_state_white
-                                ).also { drawable ->
-                                    drawable?.setTint(
-                                        ContextCompat.getColor(
-                                            binding.root.context,
-                                            R.color.primaryRed
-                                        )
-                                    )
-                                }
+                                    R.color.primaryRed
+                                )
                             )
                         }
                         is Response.Success -> {
                             dashboardHeader.progressBarDashboardHeaderNetwork.invisibleIfFalse(false)
-                            dashboardHeader.imageViewDashboardHeaderNetwork.invisibleIfFalse(true)
-                            dashboardHeader.imageViewDashboardHeaderNetwork.setImageDrawable(
-                                ContextCompat.getDrawable(
+                            dashboardHeader.textViewDashboardHeaderNetwork.invisibleIfFalse(true)
+                            dashboardHeader.textViewDashboardHeaderNetwork.setTextColor(
+                                ContextCompat.getColor(
                                     binding.root.context,
-                                    R.drawable.ic_network_state_white
-                                ).also { drawable ->
-                                    drawable?.setTint(
-                                        ContextCompat.getColor(
-                                            binding.root.context,
-                                            R.color.primaryGreen
-                                        )
-                                    )
-                                }
+                                    R.color.primaryGreen
+                                )
                             )
                         }
                     }

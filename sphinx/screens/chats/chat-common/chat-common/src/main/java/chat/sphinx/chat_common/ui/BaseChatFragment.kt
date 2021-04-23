@@ -44,12 +44,12 @@ abstract class BaseChatFragment<
 
     protected abstract val header: ConstraintLayout
     protected abstract val headerChatPicture: ImageView
-    protected abstract val headerConnectivityIcon: ImageView
+    protected abstract val headerConnectivityIcon: TextView
     protected abstract val headerInitials: TextView
-    protected abstract val headerLockIcon: ImageView
+    protected abstract val headerLockIcon: TextView
     protected abstract val headerMute: ImageView
     protected abstract val headerName: TextView
-    protected abstract val headerNavBack: ImageView
+    protected abstract val headerNavBack: TextView
 
     protected abstract val footer: ConstraintLayout
 

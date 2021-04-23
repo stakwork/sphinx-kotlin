@@ -116,7 +116,7 @@ class SphinxKeyRestore @Inject constructor(
                         }
                 }
 
-                completionResponse?.let { success ->
+                completionResponse?.let { _ ->
                     authenticationManager.getEncryptionKey()?.let { encryptionKey ->
                         // validate encryption key correctness
                         if (

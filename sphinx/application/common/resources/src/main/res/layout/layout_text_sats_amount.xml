@@ -28,7 +28,7 @@
         android:fontFamily="@font/roboto_regular"
         android:textAlignment="textStart"
         android:textColor="@color/secondaryTextSent"
-        android:textSize="@dimen/default_text_size_subheadline"
+        android:textSize="@dimen/default_text_size_sub_headline"
         app:layout_constraintBaseline_toBaselineOf="@+id/text_view_boost_amount"
         app:layout_constraintStart_toEndOf="@+id/text_view_boost_amount"
         tools:text="sat" />

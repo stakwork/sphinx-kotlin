@@ -7,9 +7,11 @@
     <dimen name="default_header_navigation_margin_start">8dp</dimen>
     <dimen name="default_chat_initial_image_xy">46dp</dimen>
     <dimen name="default_header_margin_horizontal">24dp</dimen>
+    <dimen name="default_header_headline_margin_horizontal">12dp</dimen>
     <dimen name="default_bottom_bar_height">56dp</dimen>
     <dimen name="default_elevation">8dp</dimen>
 
+    <dimen name="default_text_size_back_arrow">21sp</dimen>
     <dimen name="default_text_size_headline">17sp</dimen>
-    <dimen name="default_text_size_subheadline">11sp</dimen>
+    <dimen name="default_text_size_sub_headline">11sp</dimen>
 </resources>
