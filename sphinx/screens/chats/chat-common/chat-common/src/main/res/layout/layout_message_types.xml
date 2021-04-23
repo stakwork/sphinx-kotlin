@@ -21,6 +21,10 @@
             android:id="@+id/include_message_type_direct_payment"
             layout="@layout/layout_message_type_direct_payment" />
 
+        <include
+            android:id="@+id/include_message_type_image_attachment"
+            layout="@layout/layout_message_type_image_attachment" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <!-- Reactions -->
