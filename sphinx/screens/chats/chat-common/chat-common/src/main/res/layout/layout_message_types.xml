@@ -32,6 +32,11 @@
             android:id="@+id/include_message_type_file_attachment"
             layout="@layout/layout_message_type_file_attachment" />
 
+        <!--  Audio Attachment  -->
+        <include
+            android:id="@+id/include_message_type_audio_attachment"
+            layout="@layout/layout_message_type_audio_attachment" />
+
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

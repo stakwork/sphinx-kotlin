@@ -8,4 +8,7 @@
     <string name="material_icon_name_file_attachment">insert_drive_file</string>
     <string name="material_icon_name_file_download">file_download</string>
 
+    <string name="material_icon_name_play_button">play_arrow</string>
+    <string name="material_icon_name_pause_button">pause</string>
+
 </resources>
