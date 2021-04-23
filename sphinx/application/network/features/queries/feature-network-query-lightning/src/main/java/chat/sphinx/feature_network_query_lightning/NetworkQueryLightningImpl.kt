@@ -5,6 +5,8 @@ import chat.sphinx.concept_network_query_lightning.model.balance.BalanceAllDto
 import chat.sphinx.concept_network_query_lightning.model.balance.BalanceDto
 import chat.sphinx.concept_network_query_lightning.model.channel.ChannelsDto
 import chat.sphinx.concept_network_query_lightning.model.invoice.InvoicesDto
+import chat.sphinx.wrapper_common.contact.ContactPublicKey
+import chat.sphinx.wrapper_common.contact.ContactRouteHint
 import chat.sphinx.concept_network_relay_call.NetworkRelayCall
 import chat.sphinx.feature_network_query_lightning.model.GetBalanceAllRelayResponse
 import chat.sphinx.feature_network_query_lightning.model.GetBalanceRelayResponse
@@ -30,6 +32,7 @@ class NetworkQueryLightningImpl(
         private const val ENDPOINT_LOGS = "/logs"
         private const val ENDPOINT_INFO = "/info"
         private const val ENDPOINT_ROUTE = "/route"
+        private const val ENDPOINT_ROUTE_2 = "/route2"
         private const val ENDPOINT_QUERY_ONCHAIN_ADDRESS = "/query/onchain_address"
         private const val ENDPOINT_UTXOS = "/utxos"
     }
@@ -65,6 +68,17 @@ class NetworkQueryLightningImpl(
         )
 
     override fun getBalanceAll(
+        relayData: Pair<AuthorizationToken, RelayUrl>?
+    ): Flow<LoadResponse<BalanceAllDto, ResponseError>> =
+        networkRelayCall.get(
+            jsonAdapter = GetBalanceAllRelayResponse::class.java,
+            relayEndpoint = ENDPOINT_BALANCE_ALL,
+            relayData = relayData
+        )
+
+    override fun checkRoute(
+        contactPublicKey: ContactPublicKey,
+        contactRouteHint: ContactRouteHint,
         relayData: Pair<AuthorizationToken, RelayUrl>?
     ): Flow<LoadResponse<BalanceAllDto, ResponseError>> =
         networkRelayCall.get(

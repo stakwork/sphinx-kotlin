@@ -4,6 +4,8 @@ import chat.sphinx.concept_network_query_lightning.model.balance.BalanceAllDto
 import chat.sphinx.concept_network_query_lightning.model.balance.BalanceDto
 import chat.sphinx.concept_network_query_lightning.model.channel.ChannelsDto
 import chat.sphinx.concept_network_query_lightning.model.invoice.InvoicesDto
+import chat.sphinx.wrapper_common.contact.ContactPublicKey
+import chat.sphinx.wrapper_common.contact.ContactRouteHint
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.wrapper_relay.AuthorizationToken
@@ -28,6 +30,12 @@ abstract class NetworkQueryLightning {
     ): Flow<LoadResponse<BalanceDto, ResponseError>>
 
     abstract fun getBalanceAll(
+        relayData: Pair<AuthorizationToken, RelayUrl>? = null
+    ): Flow<LoadResponse<BalanceAllDto, ResponseError>>
+
+    abstract fun checkRoute(
+        contactPublicKey: ContactPublicKey,
+        contactRouteHint: ContactRouteHint,
         relayData: Pair<AuthorizationToken, RelayUrl>? = null
     ): Flow<LoadResponse<BalanceAllDto, ResponseError>>
 
