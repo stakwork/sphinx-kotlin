@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:background="@drawable/background_message_holder_in_last">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -12,18 +12,26 @@
         android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="parent">
 
+        <!--   Standard Text Message  -->
         <include
             android:id="@+id/include_message_type_message"
             layout="@layout/layout_message_type_message" />
 
-
+        <!--   Direct Payment Message  -->
         <include
             android:id="@+id/include_message_type_direct_payment"
             layout="@layout/layout_message_type_direct_payment" />
 
+        <!--  Image Attachment  -->
         <include
             android:id="@+id/include_message_type_image_attachment"
             layout="@layout/layout_message_type_image_attachment" />
+
+        <!--  File Attachment  -->
+        <include
+            android:id="@+id/include_message_type_file_attachment"
+            layout="@layout/layout_message_type_file_attachment" />
+
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

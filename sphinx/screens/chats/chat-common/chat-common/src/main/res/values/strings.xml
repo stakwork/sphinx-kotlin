@@ -4,4 +4,8 @@
     <string name="message_context_menu_label_copy">Copy</string>
     <string name="message_context_menu_label_boost">Boost</string>
     <string name="message_context_menu_label_delete">Delete</string>
+
+    <string name="material_icon_name_file_attachment">insert_drive_file</string>
+    <string name="material_icon_name_file_download">file_download</string>
+
 </resources>
