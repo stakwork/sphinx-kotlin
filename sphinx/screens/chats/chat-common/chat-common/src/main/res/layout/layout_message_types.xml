@@ -43,6 +43,13 @@
             tools:visibility="gone" />
 
 
+        <!--  Video Attachment  -->
+        <include
+            android:id="@+id/include_message_type_video_attachment"
+            layout="@layout/layout_message_type_video_attachment"
+            tools:visibility="gone" />
+
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <!-- Reactions -->

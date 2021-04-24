@@ -10,6 +10,7 @@
     <dimen name="background_message_holder_default_padding_top">12dp</dimen>
     <dimen name="message_holder_in_photo_holder_xy">32dp</dimen>
     <dimen name="audio_button_play_pause_width">60dp</dimen>
+    <dimen name="video_attachment_play_pause_button_xy">50dp</dimen>
     <dimen name="image_holder_boost_reaction_xy">26dp</dimen>
     <dimen name="icon_container_message_payment_direction_xy">26dp</dimen>
 
@@ -24,6 +25,7 @@
     <dimen name="message_type_image_attachment_height">208dp</dimen>
     <dimen name="message_type_file_attachment_height">60dp</dimen>
     <dimen name="message_type_audio_attachment_height">62dp</dimen>
+    <dimen name="message_type_video_attachment_height">210dp</dimen>
 
 
     <!-- Icons -->
