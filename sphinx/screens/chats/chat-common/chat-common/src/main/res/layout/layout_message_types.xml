@@ -15,27 +15,39 @@
         <!--   Standard Text Message  -->
         <include
             android:id="@+id/include_message_type_message"
-            layout="@layout/layout_message_type_message" />
+            layout="@layout/layout_message_type_message"
+            tools:visibility="visible" />
 
         <!--   Direct Payment Message  -->
         <include
             android:id="@+id/include_message_type_direct_payment"
-            layout="@layout/layout_message_type_direct_payment" />
+            layout="@layout/layout_message_type_direct_payment"
+            tools:visibility="gone" />
 
         <!--  Image Attachment  -->
         <include
             android:id="@+id/include_message_type_image_attachment"
-            layout="@layout/layout_message_type_image_attachment" />
+            layout="@layout/layout_message_type_image_attachment"
+            tools:visibility="gone" />
 
         <!--  File Attachment  -->
         <include
             android:id="@+id/include_message_type_file_attachment"
-            layout="@layout/layout_message_type_file_attachment" />
+            layout="@layout/layout_message_type_file_attachment"
+            tools:visibility="gone" />
 
         <!--  Audio Attachment  -->
         <include
             android:id="@+id/include_message_type_audio_attachment"
-            layout="@layout/layout_message_type_audio_attachment" />
+            layout="@layout/layout_message_type_audio_attachment"
+            tools:visibility="gone" />
+
+
+        <!--  Video Attachment  -->
+        <include
+            android:id="@+id/include_message_type_video_attachment"
+            layout="@layout/layout_message_type_video_attachment"
+            tools:visibility="gone" />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>
