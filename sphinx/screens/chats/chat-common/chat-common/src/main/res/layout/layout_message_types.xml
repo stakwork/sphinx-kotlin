@@ -52,14 +52,30 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!-- Reactions -->
 
-    <include
-        android:id="@+id/include_message_type_boost"
-        layout="@layout/layout_message_type_boost"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_message_footer_container"
         android:layout_width="match_parent"
         android:layout_height="@dimen/message_type_boost_height"
-        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_inner_message_types" />
+        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_inner_message_types">
+
+
+        <!-- Paid Message Information -->
+
+
+        <!-- Reactions -->
+        <include
+            android:id="@+id/include_message_type_boost"
+            layout="@layout/layout_message_type_boost"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/message_type_boost_height"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
