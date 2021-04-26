@@ -63,7 +63,7 @@ inline fun DateTime.before(dateTime: DateTime): Boolean =
 inline class DateTime(val value: Date) {
 
     companion object {
-        private const val UTC = "UTC"
+        const val UTC = "UTC"
 
         private const val FORMAT_RELAY = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
         private const val FORMAT_TODAY_00 = "yyyy-MM-dd'T00:00:00.000Z'"
