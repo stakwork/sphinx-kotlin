@@ -51,7 +51,7 @@
         android:gravity="center_vertical"
         android:paddingStart="4dp"
         android:textColor="@color/secondaryTextSent"
-        android:textSize="@dimen/default_text_size_subheadline"
+        android:textSize="@dimen/default_text_size_sub_headline"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toEndOf="@id/guideline_reaction_images"

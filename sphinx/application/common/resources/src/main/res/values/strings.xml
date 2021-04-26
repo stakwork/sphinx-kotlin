@@ -13,4 +13,9 @@
     <string name="backspace"></string>
 
     <string name="sats">sats</string>
+    <string name="lock_icon">lock</string>
+    <string name="bolt_icon">flash_on</string>
+    <string name="phone_icon"></string>
+
+    <string name="nav_back"></string>
 </resources>

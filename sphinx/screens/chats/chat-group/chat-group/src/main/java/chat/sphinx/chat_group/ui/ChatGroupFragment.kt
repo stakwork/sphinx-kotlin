@@ -25,18 +25,18 @@ internal class ChatGroupFragment: BaseChatFragment<
         get() = binding.layoutChatHeader.layoutConstraintChatHeader
     override val headerChatPicture: ImageView
         get() = binding.layoutChatHeader.layoutChatInitialHolder.imageViewChatPicture
-    override val headerConnectivityIcon: ImageView
-        get() = binding.layoutChatHeader.imageViewChatHeaderConnectivity
+    override val headerConnectivityIcon: TextView
+        get() = binding.layoutChatHeader.textViewChatHeaderConnectivity
     override val headerInitials: TextView
         get() = binding.layoutChatHeader.layoutChatInitialHolder.textViewInitials
-    override val headerLockIcon: ImageView
-        get() = binding.layoutChatHeader.imageViewChatHeaderLock
+    override val headerLockIcon: TextView
+        get() = binding.layoutChatHeader.textViewChatHeaderLock
     override val headerMute: ImageView
         get() = binding.layoutChatHeader.imageViewChatHeaderMuted
     override val headerName: TextView
         get() = binding.layoutChatHeader.textViewChatHeaderName
-    override val headerNavBack: ImageView
-        get() = binding.layoutChatHeader.imageViewChatHeaderNavBack
+    override val headerNavBack: TextView
+        get() = binding.layoutChatHeader.textViewChatHeaderNavBack
 
     override val footer: ConstraintLayout
         get() = binding.layoutChatFooter.layoutConstraintChatFooter

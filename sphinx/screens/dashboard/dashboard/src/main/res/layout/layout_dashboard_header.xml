@@ -46,13 +46,15 @@
         app:layout_constraintStart_toEndOf="@+id/text_view_dashboard_header_balance"
         app:layout_constraintTop_toTopOf="@+id/text_view_dashboard_header_balance" />
 
-    <androidx.appcompat.widget.AppCompatImageView
-        android:id="@+id/image_view_dashboard_header_network"
-        android:layout_width="wrap_content"
-        android:layout_height="0dp"
-        android:src="@drawable/ic_network_state_white"
-        android:visibility="invisible"
-        android:paddingTop="4dp"
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/text_view_dashboard_header_network"
+        android:layout_width="50dp"
+        android:layout_height="match_parent"
+        android:fontFamily="@font/material_icons_regular"
+        android:textSize="15sp"
+        android:textColor="@color/washedOutReceivedText"
+        android:text="@string/bolt_icon"
+        android:gravity="center"
         app:layout_constraintBottom_toBottomOf="@+id/progress_bar_dashboard_header_network"
         app:layout_constraintEnd_toEndOf="@+id/progress_bar_dashboard_header_network"
         app:layout_constraintStart_toStartOf="@+id/progress_bar_dashboard_header_network"

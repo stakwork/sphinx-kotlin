@@ -1,7 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <dimen name="chat_footer_initial_holder_xy">45dp</dimen>
     <dimen name="chat_footer_button_xy">30dp</dimen>
+    <dimen name="chat_footer_send_button_xy">37dp</dimen>
+    <dimen name="chat_footer_send_button_margin_horizontal">11dp</dimen>
+    <dimen name="chat_header_mute_padding_horizontal">4sp</dimen>
     <dimen name="chat_message_rounded_corner_radius">9dp</dimen>
+
+    <dimen name="chat_header_headline_text_size">16sp</dimen>
+    <dimen name="chat_header_phone_text_size">25sp</dimen>
     <dimen name="chat_message_text_size">17sp</dimen>
 
     <item name="default_space_width_percent" format="float" type="dimen">.2</item>

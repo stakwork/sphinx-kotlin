@@ -452,7 +452,6 @@ class SphinxRepository(
                 messageDboPresenterMapper.mapFrom(messageDbo)
 
             }
-
         } ?: messageDboPresenterMapper.mapFrom(messageDbo)
 
         if (message.type.canContainMedia) {

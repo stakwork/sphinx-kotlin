@@ -5,6 +5,10 @@
     <string name="message_context_menu_label_boost">Boost</string>
     <string name="message_context_menu_label_delete">Delete</string>
 
+
+    <string name="send_icon"></string>
+    <string name="attachment_icon"></string>
+
     <!-- Paid Message Details   -->
     <string name="paid_message_label_pay">Pay</string>
     <string name="paid_message_label_payment_accepted">Purchase Succeeded</string>
@@ -15,5 +19,4 @@
     <string name="material_icon_name_play_button">play_arrow</string>
     <string name="material_icon_name_pause_button">pause</string>
     <string name="material_icon_name_check">check</string>
-
 </resources>
