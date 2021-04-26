@@ -102,14 +102,11 @@ class ChatViewModel @Inject constructor(
         }
     }
 
-    private var routeJob: Job? = null
     fun checkRoute(): Flow<Boolean> = flow {
         chatDataStateFlow.value?.let { chatData ->
             val contact: Contact? = if (chatData is ChatData.Conversation) { chatData.contact } else { null }
-            routeJob = viewModelScope.launch(dispatchers.mainImmediate) {
-                lightningRepository.networkCheckRoute(chat = chatData.chat, contact = contact).collect { success ->
-                    emit(success)
-                }
+            lightningRepository.networkCheckRoute(chat = chatData.chat, contact = contact).collect { success ->
+                emit(success)
             }
         }
     }
