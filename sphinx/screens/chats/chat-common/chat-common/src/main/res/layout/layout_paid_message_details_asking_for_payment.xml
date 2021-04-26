@@ -24,7 +24,7 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/image_view_pay_sender"
+            android:id="@+id/text_view_payment_status_icon"
             android:layout_width="@dimen/icon_container_message_payment_direction_xy"
             android:layout_height="@dimen/icon_container_message_payment_direction_xy"
             android:tint="@color/textMessages"
@@ -65,7 +65,7 @@
         tools:text="2000 SAT" />
 
     <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/text_view_pay_label"
+        android:id="@+id/text_view_payment_status_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/default_inner_spacing_list_item_title"
