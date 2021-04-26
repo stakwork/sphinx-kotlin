@@ -2,11 +2,11 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/layout_constraint_paid_message_details_payment_accepted"
+    android:id="@+id/layout_constraint_paid_message_details_payment_denied"
     android:layout_width="match_parent"
     android:layout_height="@dimen/paid_message_details_holder_height"
     android:visibility="gone"
-    tools:background="@color/primaryGreen"
+    tools:background="@color/badgeRed"
     tools:visibility="visible">
 
 
@@ -16,7 +16,7 @@
         android:layout_height="@dimen/material_icon_text_size_message_payment_status"
         android:layout_marginEnd="@dimen/default_inner_spacing_list_item_title"
         android:fontFamily="@font/material_icons_regular"
-        android:text="@string/material_icon_name_payment_accepted"
+        android:text="@string/material_icon_name_payment_denied"
         android:textAlignment="center"
         android:textColor="@color/textMessages"
         android:textSize="@dimen/material_icon_text_size_message_payment_status"
@@ -30,7 +30,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:fontFamily="@font/roboto_medium"
-        android:text="@string/paid_message_label_payment_accepted"
+        android:text="@string/paid_message_label_payment_denied"
         android:textAllCaps="false"
         android:textColor="@color/textMessages"
         android:textSize="@dimen/default_text_size_sub_headline"
