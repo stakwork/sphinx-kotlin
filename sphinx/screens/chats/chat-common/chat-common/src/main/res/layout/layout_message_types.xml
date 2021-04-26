@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:background="@drawable/background_message_holder_in_last">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -12,29 +12,79 @@
         android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="parent">
 
+        <!--   Standard Text Message  -->
         <include
             android:id="@+id/include_message_type_message"
-            layout="@layout/layout_message_type_message" />
+            layout="@layout/layout_message_type_message"
+            tools:visibility="visible" />
 
-
+        <!--   Direct Payment Message  -->
         <include
             android:id="@+id/include_message_type_direct_payment"
-            layout="@layout/layout_message_type_direct_payment" />
+            layout="@layout/layout_message_type_direct_payment"
+            tools:visibility="gone" />
 
+        <!--  Image Attachment  -->
         <include
             android:id="@+id/include_message_type_image_attachment"
-            layout="@layout/layout_message_type_image_attachment" />
+            layout="@layout/layout_message_type_image_attachment"
+            tools:visibility="gone" />
+
+        <!--  File Attachment  -->
+        <include
+            android:id="@+id/include_message_type_file_attachment"
+            layout="@layout/layout_message_type_file_attachment"
+            tools:visibility="gone" />
+
+        <!--  Audio Attachment  -->
+        <include
+            android:id="@+id/include_message_type_audio_attachment"
+            layout="@layout/layout_message_type_audio_attachment"
+            tools:visibility="gone" />
+
+
+        <!--  Video Attachment  -->
+        <include
+            android:id="@+id/include_message_type_video_attachment"
+            layout="@layout/layout_message_type_video_attachment"
+            tools:visibility="gone" />
+
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!-- Reactions -->
 
-    <include
-        android:id="@+id/include_message_type_boost"
-        layout="@layout/layout_message_type_boost"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_message_footer_container"
         android:layout_width="match_parent"
         android:layout_height="@dimen/message_type_boost_height"
-        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_inner_message_types" />
+        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_inner_message_types">
+
+
+        <!-- Paid Message Information -->
+        <include
+            android:id="@+id/include_paid_message_details_holder"
+            layout="@layout/layout_paid_message_details_holder"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/paid_message_details_holder_height"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+
+        <!-- Reactions -->
+        <include
+            android:id="@+id/include_message_type_boost"
+            layout="@layout/layout_message_type_boost"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/message_type_boost_height"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

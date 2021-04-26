@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/layout_constraint_message_type_direct_payment"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/icon_container_message_payment_direction_xy"
+    android:layout_height="@dimen/message_type_direct_payment_height"
     android:visibility="gone"
     tools:visibility="visible">
 
