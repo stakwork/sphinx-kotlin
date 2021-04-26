@@ -13,6 +13,7 @@
     <string name="paid_message_label_pay">Pay</string>
     <string name="paid_message_label_payment_accepted">Purchase Succeeded</string>
     <string name="paid_message_label_payment_denied">Purchase Denied</string>
+    <string name="paid_message_label_processing_payment">Processing payment…</string>
 
     <!--  Material Icons   -->
     <string name="material_icon_name_file_attachment">insert_drive_file</string>
