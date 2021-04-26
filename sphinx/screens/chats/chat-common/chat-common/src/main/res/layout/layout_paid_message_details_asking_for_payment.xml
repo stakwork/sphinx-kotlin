@@ -17,8 +17,8 @@
         android:layout_width="@dimen/icon_container_message_payment_direction_xy"
         android:layout_height="@dimen/icon_container_message_payment_direction_xy"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/text_view_amount_to_pay"
-        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintEnd_toStartOf="@+id/text_view_payment_status_label"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintHorizontal_chainStyle="spread_inside"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -51,20 +51,6 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/text_view_amount_to_pay"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:fontFamily="@font/roboto_regular"
-        android:textColor="@color/textMessages"
-        android:textSize="@dimen/default_text_size_caption1"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/constraint_layout_payment_direction_icons"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:text="2000 SAT" />
-
-    <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/text_view_payment_status_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -74,9 +60,24 @@
         android:textAllCaps="true"
         android:textColor="@color/textMessages"
         android:textSize="13sp"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toEndOf="@+id/constraint_layout_payment_direction_icons"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/text_view_amount_to_pay"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/roboto_regular"
+        android:textColor="@color/textMessages"
+        android:textSize="@dimen/default_text_size_caption1"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toEndOf="@+id/text_view_payment_status_label"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="2000 SAT" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
