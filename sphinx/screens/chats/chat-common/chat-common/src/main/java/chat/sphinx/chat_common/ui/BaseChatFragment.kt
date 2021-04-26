@@ -8,6 +8,7 @@ import android.widget.TextView
 import androidx.annotation.CallSuper
 import androidx.annotation.LayoutRes
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -123,7 +124,12 @@ abstract class BaseChatFragment<
                 }
 
                 viewModel.checkRoute().collect { success ->
-
+                    headerConnectivityIcon.setTextColor(
+                        ContextCompat.getColor(
+                            binding.root.context,
+                            if (success) R.color.primaryGreen else R.color.sphinxOrange
+                        )
+                    )
                 }
             }
         }
