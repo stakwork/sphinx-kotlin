@@ -10,7 +10,6 @@
 
 
     <!-- Asking for Payment -->
-
     <include
         android:id="@+id/include_paid_message_details_asking_for_payment"
         layout="@layout/layout_paid_message_details_asking_for_payment"
@@ -21,6 +20,18 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:visibility="visible" />
+
+    <!-- Payment Accepted -->
+    <include
+        android:id="@+id/include_paid_message_details_payment_accepted"
+        layout="@layout/layout_paid_message_details_payment_accepted"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:visibility="gone" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
