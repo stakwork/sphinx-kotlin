@@ -15,6 +15,11 @@
     <string name="paid_message_label_payment_denied">Purchase Denied</string>
     <string name="paid_message_label_processing_payment">Processing payment…</string>
 
+
+    <!-- Paid Message Overlays   -->
+    <string name="paid_text_message_received_overlay_label">Pay to Unlock Message</string>
+
+
     <!--  Material Icons   -->
     <string name="material_icon_name_file_attachment">insert_drive_file</string>
     <string name="material_icon_name_file_download">file_download</string>
