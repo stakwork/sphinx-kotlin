@@ -2,19 +2,18 @@ package chat.sphinx.feature_repository
 
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_coredb.CoreDB
-import chat.sphinx.concept_coredb.util.upsertMessage
 import chat.sphinx.concept_crypto_rsa.RSA
-import chat.sphinx.wrapper_rsa.RsaPrivateKey
-import chat.sphinx.concept_repository_chat.ChatRepository
-import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
 import chat.sphinx.concept_network_query_chat.model.ChatDto
 import chat.sphinx.concept_network_query_contact.NetworkQueryContact
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_lightning.model.balance.BalanceDto
+import chat.sphinx.concept_network_query_lightning.model.route.RouteSuccessProbabilityDto
 import chat.sphinx.concept_network_query_message.NetworkQueryMessage
+import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_lightning.LightningRepository
+import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.conceptcoredb.MessageDbo
 import chat.sphinx.conceptcoredb.SphinxDatabaseQueries
 import chat.sphinx.feature_repository.mappers.chat.ChatDboPresenterMapper
@@ -23,13 +22,14 @@ import chat.sphinx.feature_repository.mappers.invite.InviteDboPresenterMapper
 import chat.sphinx.feature_repository.mappers.mapListFrom
 import chat.sphinx.feature_repository.mappers.message.MessageDboPresenterMapper
 import chat.sphinx.feature_repository.util.*
+
 import chat.sphinx.kotlin_response.*
 import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.logger.d
 import chat.sphinx.logger.e
 import chat.sphinx.wrapper_chat.Chat
-import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.chat.ChatId
+import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.contact.ContactId
 import chat.sphinx.wrapper_common.invite.InviteId
 import chat.sphinx.wrapper_common.message.MessageId
@@ -40,18 +40,19 @@ import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message.media.MediaKeyDecrypted
 import chat.sphinx.wrapper_message.media.MessageMedia
+import chat.sphinx.wrapper_rsa.RsaPrivateKey
 import com.squareup.moshi.Moshi
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
 import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
 import io.matthewnelson.concept_authentication.data.AuthenticationStorage
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
-import io.matthewnelson.feature_authentication_core.AuthenticationCoreManager
 import io.matthewnelson.crypto_common.annotations.RawPasswordAccess
 import io.matthewnelson.crypto_common.annotations.UnencryptedDataAccess
 import io.matthewnelson.crypto_common.clazzes.EncryptedString
 import io.matthewnelson.crypto_common.clazzes.UnencryptedByteArray
 import io.matthewnelson.crypto_common.clazzes.toUnencryptedString
+import io.matthewnelson.feature_authentication_core.AuthenticationCoreManager
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.sync.Mutex
@@ -743,5 +744,33 @@ class SphinxRepository(
         error?.let { responseError ->
             emit(responseError)
         } ?: emit(Response.Success(true))
+    }
+
+    override fun networkCheckRoute(chat: Chat?, contact: Contact?): Flow<Boolean> = flow {
+        fun checkRouteResponse(loadResponse: LoadResponse<RouteSuccessProbabilityDto, ResponseError>): Flow<Boolean> = flow {
+            @Exhaustive
+            when (loadResponse) {
+                is LoadResponse.Loading -> {
+                    LOG.d(TAG, "Checking route.")
+                }
+                is Response.Error -> {
+                    emit(Response.Success(false).value)
+                }
+                is Response.Success -> {
+                    val successProb = loadResponse.value.success_prob > 0
+                    emit(Response.Success(successProb).value)
+                }
+            }
+        }
+
+        contact?.let {
+            networkQueryLightning.checkRoute(publicKey = contact.nodePubKey, routeHint = contact.routeHint).collect { loadResponse ->
+                checkRouteResponse(loadResponse)
+            }
+        } ?: chat?.let {
+            networkQueryLightning.checkChatRoute(chatId = chat.id).collect { loadResponse ->
+                checkRouteResponse(loadResponse)
+            }
+        }
     }
 }

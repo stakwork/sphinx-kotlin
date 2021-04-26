@@ -101,7 +101,6 @@ abstract class BaseChatFragment<
         onStopSupervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
             viewModel.chatDataStateFlow.collect { chatData ->
                 if (chatData != null) {
-
                     if (chatData.muted.isTrue()) {
                         imageLoader.load(headerMute, R.drawable.ic_baseline_notifications_off_24)
                     } else {
@@ -121,6 +120,10 @@ abstract class BaseChatFragment<
                     headerName.text = chatData.chatName ?: ""
 
                     headerLockIcon.goneIfFalse(chatData.chat != null)
+                }
+
+                viewModel.checkRoute().collect { success ->
+
                 }
             }
         }

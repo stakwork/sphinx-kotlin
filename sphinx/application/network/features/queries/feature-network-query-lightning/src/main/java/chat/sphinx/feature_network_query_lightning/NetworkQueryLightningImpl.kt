@@ -5,15 +5,14 @@ import chat.sphinx.concept_network_query_lightning.model.balance.BalanceAllDto
 import chat.sphinx.concept_network_query_lightning.model.balance.BalanceDto
 import chat.sphinx.concept_network_query_lightning.model.channel.ChannelsDto
 import chat.sphinx.concept_network_query_lightning.model.invoice.InvoicesDto
-import chat.sphinx.wrapper_common.contact.ContactPublicKey
-import chat.sphinx.wrapper_common.contact.ContactRouteHint
+import chat.sphinx.concept_network_query_lightning.model.route.RouteSuccessProbabilityDto
 import chat.sphinx.concept_network_relay_call.NetworkRelayCall
-import chat.sphinx.feature_network_query_lightning.model.GetBalanceAllRelayResponse
-import chat.sphinx.feature_network_query_lightning.model.GetBalanceRelayResponse
-import chat.sphinx.feature_network_query_lightning.model.GetChannelsRelayResponse
-import chat.sphinx.feature_network_query_lightning.model.GetInvoicesRelayResponse
+import chat.sphinx.feature_network_query_lightning.model.*
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.ResponseError
+import chat.sphinx.wrapper_common.chat.ChatId
+import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
+import chat.sphinx.wrapper_common.lightning.LightningRouteHint
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
 import kotlinx.coroutines.flow.Flow
@@ -28,11 +27,11 @@ class NetworkQueryLightningImpl(
         private const val ENDPOINT_CHANNELS = "/channels"
         private const val ENDPOINT_BALANCE = "/balance"
         private const val ENDPOINT_BALANCE_ALL = "$ENDPOINT_BALANCE/all"
+        private const val ENDPOINT_ROUTE = "/route"
+        private const val ENDPOINT_ROUTE_2 = "/route2"
         private const val ENDPOINT_GET_INFO = "/getinfo"
         private const val ENDPOINT_LOGS = "/logs"
         private const val ENDPOINT_INFO = "/info"
-        private const val ENDPOINT_ROUTE = "/route"
-        private const val ENDPOINT_ROUTE_2 = "/route2"
         private const val ENDPOINT_QUERY_ONCHAIN_ADDRESS = "/query/onchain_address"
         private const val ENDPOINT_UTXOS = "/utxos"
     }
@@ -77,13 +76,23 @@ class NetworkQueryLightningImpl(
         )
 
     override fun checkRoute(
-        contactPublicKey: ContactPublicKey,
-        contactRouteHint: ContactRouteHint,
+        publicKey: LightningNodePubKey?,
+        routeHint: LightningRouteHint?,
         relayData: Pair<AuthorizationToken, RelayUrl>?
-    ): Flow<LoadResponse<BalanceAllDto, ResponseError>> =
+    ): Flow<LoadResponse<RouteSuccessProbabilityDto, ResponseError>> =
         networkRelayCall.get(
-            jsonAdapter = GetBalanceAllRelayResponse::class.java,
-            relayEndpoint = ENDPOINT_BALANCE_ALL,
+            jsonAdapter = CheckRouteRelayResponse::class.java,
+            relayEndpoint = ENDPOINT_ROUTE + "?pubkey=${publicKey?.value ?: ""}&route_hint=${routeHint?.value ?: ""}",
+            relayData = relayData
+        )
+
+    override fun checkChatRoute(
+        chatId: ChatId,
+        relayData: Pair<AuthorizationToken, RelayUrl>?
+    ): Flow<LoadResponse<RouteSuccessProbabilityDto, ResponseError>> =
+        networkRelayCall.get(
+            jsonAdapter = CheckRouteRelayResponse::class.java,
+            relayEndpoint = ENDPOINT_ROUTE_2 + "?chat_id=${chatId.value}",
             relayData = relayData
         )
 

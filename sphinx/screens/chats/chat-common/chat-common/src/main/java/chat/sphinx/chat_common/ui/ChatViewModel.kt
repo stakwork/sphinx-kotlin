@@ -6,18 +6,17 @@ import androidx.lifecycle.viewModelScope
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
 import chat.sphinx.chat_common.ui.viewstate.messageholder.HolderBackground
 import chat.sphinx.chat_common.ui.viewstate.messageholder.MessageHolderViewState
+import chat.sphinx.concept_repository_lightning.LightningRepository
 import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.resources.getRandomColor
 import chat.sphinx.wrapper_common.util.getInitials
+import chat.sphinx.wrapper_contact.Contact
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import io.matthewnelson.android_feature_viewmodel.BaseViewModel
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -28,6 +27,7 @@ class ChatViewModel @Inject constructor(
     @ApplicationContext private val appContext: Context,
     val dispatchers: CoroutineDispatchers,
     private val messageRepository: MessageRepository,
+    private val lightningRepository: LightningRepository,
 ): BaseViewModel<ChatViewState>(ChatViewState.Idle)
 {
     @Suppress("RemoveExplicitTypeArguments")
@@ -97,6 +97,18 @@ class ChatViewModel @Inject constructor(
                         }
                     }
                     _messageHolderViewStateFlow.value = newList
+                }
+            }
+        }
+    }
+
+    private var routeJob: Job? = null
+    fun checkRoute(): Flow<Boolean> = flow {
+        chatDataStateFlow.value?.let { chatData ->
+            val contact: Contact? = if (chatData is ChatData.Conversation) { chatData.contact } else { null }
+            routeJob = viewModelScope.launch(dispatchers.mainImmediate) {
+                lightningRepository.networkCheckRoute(chat = chatData.chat, contact = contact).collect { success ->
+                    emit(success)
                 }
             }
         }
