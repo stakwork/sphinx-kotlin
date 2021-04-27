@@ -14,6 +14,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
+import app.cash.exhaustive.Exhaustive
 import chat.sphinx.chat_common.R
 import chat.sphinx.chat_common.adapters.MessageListAdapter
 import chat.sphinx.chat_common.navigation.ChatNavigator
@@ -23,6 +24,9 @@ import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.insetter_activity.addStatusBarPadding
+import chat.sphinx.kotlin_response.LoadResponse
+import chat.sphinx.kotlin_response.Response
+import chat.sphinx.resources.setTextColorExt
 import chat.sphinx.wrapper_chat.isTrue
 import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.util.getInitials
@@ -30,6 +34,7 @@ import io.matthewnelson.android_feature_screens.navigation.CloseAppOnBackPress
 import io.matthewnelson.android_feature_screens.ui.base.BaseFragment
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisorScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
@@ -122,14 +127,26 @@ abstract class BaseChatFragment<
 
                     headerLockIcon.goneIfFalse(chatData.chat != null)
                 }
+            }
+        }
+        
+        onStopSupervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
+            viewModel.checkRoute().collect { response ->
+                @Exhaustive
+                when (response) {
+                    is LoadResponse.Loading -> {}
+                    is Response.Error -> {
+                        headerConnectivityIcon.setTextColorExt(R.color.sphinxOrange)
+                    }
+                    is Response.Success -> {
+                        val colorRes = if (response.value) {
+                            R.color.primaryGreen
+                        } else {
+                            R.color.sphinxOrange
+                        }
 
-                viewModel.checkRoute().collect { success ->
-                    headerConnectivityIcon.setTextColor(
-                        ContextCompat.getColor(
-                            binding.root.context,
-                            if (success) R.color.primaryGreen else R.color.sphinxOrange
-                        )
-                    )
+                        headerConnectivityIcon.setTextColorExt(colorRes)
+                    }
                 }
             }
         }
