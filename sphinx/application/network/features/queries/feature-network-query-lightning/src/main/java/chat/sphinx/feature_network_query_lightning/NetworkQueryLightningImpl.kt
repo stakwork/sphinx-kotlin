@@ -76,23 +76,49 @@ class NetworkQueryLightningImpl(
         )
 
     override fun checkRoute(
-        publicKey: LightningNodePubKey?,
-        routeHint: LightningRouteHint?,
+        publicKey: LightningNodePubKey,
         relayData: Pair<AuthorizationToken, RelayUrl>?
     ): Flow<LoadResponse<RouteSuccessProbabilityDto, ResponseError>> =
-        networkRelayCall.get(
-            jsonAdapter = CheckRouteRelayResponse::class.java,
-            relayEndpoint = ENDPOINT_ROUTE + "?pubkey=${publicKey?.value ?: ""}&route_hint=${routeHint?.value ?: ""}",
+        checkRouteImpl(
+            endpoint = ENDPOINT_ROUTE + "?pubkey=${publicKey.value}&route_hint=",
             relayData = relayData
         )
 
-    override fun checkChatRoute(
+    override fun checkRoute(
+        routeHint: LightningRouteHint,
+        relayData: Pair<AuthorizationToken, RelayUrl>?
+    ): Flow<LoadResponse<RouteSuccessProbabilityDto, ResponseError>> =
+        checkRouteImpl(
+            endpoint = ENDPOINT_ROUTE + "?pubkey=&route_hint=${routeHint.value}",
+            relayData = relayData
+        )
+
+    override fun checkRoute(
+        publicKey: LightningNodePubKey,
+        routeHint: LightningRouteHint,
+        relayData: Pair<AuthorizationToken, RelayUrl>?
+    ): Flow<LoadResponse<RouteSuccessProbabilityDto, ResponseError>> =
+        checkRouteImpl(
+            endpoint = ENDPOINT_ROUTE + "?pubkey=${publicKey.value}&route_hint=${routeHint.value}",
+            relayData = relayData
+        )
+
+    override fun checkRoute(
         chatId: ChatId,
+        relayData: Pair<AuthorizationToken, RelayUrl>?
+    ): Flow<LoadResponse<RouteSuccessProbabilityDto, ResponseError>> =
+        checkRouteImpl(
+            endpoint = ENDPOINT_ROUTE_2 + "?chat_id=${chatId.value}",
+            relayData = relayData
+        )
+
+    private fun checkRouteImpl(
+        endpoint: String,
         relayData: Pair<AuthorizationToken, RelayUrl>?
     ): Flow<LoadResponse<RouteSuccessProbabilityDto, ResponseError>> =
         networkRelayCall.get(
             jsonAdapter = CheckRouteRelayResponse::class.java,
-            relayEndpoint = ENDPOINT_ROUTE_2 + "?chat_id=${chatId.value}",
+            relayEndpoint = endpoint,
             relayData = relayData
         )
 

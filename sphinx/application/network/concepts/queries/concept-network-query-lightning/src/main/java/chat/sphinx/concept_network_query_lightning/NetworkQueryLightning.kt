@@ -36,12 +36,22 @@ abstract class NetworkQueryLightning {
     ): Flow<LoadResponse<BalanceAllDto, ResponseError>>
 
     abstract fun checkRoute(
-        publicKey: LightningNodePubKey?,
-        routeHint: LightningRouteHint?,
+        publicKey: LightningNodePubKey,
         relayData: Pair<AuthorizationToken, RelayUrl>? = null
     ): Flow<LoadResponse<RouteSuccessProbabilityDto, ResponseError>>
 
-    abstract fun checkChatRoute(
+    abstract fun checkRoute(
+        routeHint: LightningRouteHint,
+        relayData: Pair<AuthorizationToken, RelayUrl>? = null
+    ): Flow<LoadResponse<RouteSuccessProbabilityDto, ResponseError>>
+
+    abstract fun checkRoute(
+        publicKey: LightningNodePubKey,
+        routeHint: LightningRouteHint,
+        relayData: Pair<AuthorizationToken, RelayUrl>? = null
+    ): Flow<LoadResponse<RouteSuccessProbabilityDto, ResponseError>>
+
+    abstract fun checkRoute(
         chatId: ChatId,
         relayData: Pair<AuthorizationToken, RelayUrl>? = null
     ): Flow<LoadResponse<RouteSuccessProbabilityDto, ResponseError>>
