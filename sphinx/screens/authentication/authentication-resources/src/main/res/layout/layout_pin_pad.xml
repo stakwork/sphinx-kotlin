@@ -144,7 +144,7 @@
         android:id="@+id/button_backspace"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="@string/backspace"
+        android:text="@string/material_icon_name_backspace_button"
         style="@style/PinPadButton"
         android:fontFamily="@font/material_icons_regular"
         android:textSize="@dimen/pin_pad_backspace_text_size"
