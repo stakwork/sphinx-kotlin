@@ -26,12 +26,14 @@ import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.logger.d
 import chat.sphinx.logger.e
 import chat.sphinx.wrapper_chat.Chat
-import chat.sphinx.wrapper_common.chat.ChatId
+import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_common.chat.ChatUUID
+import chat.sphinx.wrapper_common.chat.ChatId
 import chat.sphinx.wrapper_common.contact.ContactId
 import chat.sphinx.wrapper_common.invite.InviteId
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessagePagination
+import chat.sphinx.wrapper_common.toDateTime
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_invite.Invite
 import chat.sphinx.wrapper_lightning.NodeBalance
@@ -56,6 +58,8 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.text.ParseException
+import java.util.*
+import kotlin.collections.ArrayList
 
 class SphinxRepository(
     private val authenticationCoreManager: AuthenticationCoreManager,
@@ -75,6 +79,7 @@ class SphinxRepository(
         const val TAG: String = "SphinxRepository"
 
         const val REPOSITORY_LIGHTNING_BALANCE = "REPOSITORY_LIGHTNING_BALANCE"
+        const val REPOSITORY_LAST_SEEN_MESSAGE_DATE = "REPOSITORY_LAST_SEEN_MESSAGE_DATE"
     }
 
     /////////////
@@ -557,33 +562,42 @@ class SphinxRepository(
     override fun networkRefreshMessages(): Flow<LoadResponse<Boolean, ResponseError>> = flow {
         emit(LoadResponse.Loading)
         val queries = coreDB.getSphinxDatabaseQueries()
-        var lastMessageId: Long = withContext(dispatchers.io) {
-            queries.messageGetLatestId().executeAsOneOrNull()?.value?.let {
-                if (it >= 10) {
-                    it - 10
-                } else {
-                    0
-                }
-            } ?: 0
-        }
+
+        val lastSeenMessagesDate: DateTime = authenticationStorage.getString(
+            REPOSITORY_LAST_SEEN_MESSAGE_DATE,
+            "1971-08-15T00:00:00.000Z"
+        )!!.toDateTime()
+
+        val now: String = DateTime.getFormatRelay().format(Date(System.currentTimeMillis()))
+
+        var offset: Int = 0
 
         val supervisor = SupervisorJob(currentCoroutineContext().job)
         val scope = CoroutineScope(supervisor)
 
         var error: Response.Error<ResponseError>? = null
 
-        while (currentCoroutineContext().isActive && lastMessageId >= 0) {
+        while (currentCoroutineContext().isActive && offset >= 0) {
 
             networkQueryMessage.getMessages(
-                MessagePagination.instantiate(200, lastMessageId.toInt(), null)
+                MessagePagination.instantiate(
+                    limit = 200,
+                    offset = offset,
+                    date = lastSeenMessagesDate
+                )
             ).collect { response ->
+
                 @Exhaustive
                 when (response) {
                     is LoadResponse.Loading -> {}
+
                     is Response.Error -> {
-                        lastMessageId = -1
+
+                        offset = -1
                         error = response
+
                     }
+
                     is Response.Success -> {
                         val newMessages = response.value.new_messages
 
@@ -704,8 +718,9 @@ class SphinxRepository(
                                                     queries.upsertMessage(dto)
 
                                                     if (
-                                                        dto.type.toMessageType().show &&
-                                                        dto.type != MessageType.BOT_RES
+                                                        dto.type.toMessageType().show           &&
+                                                        dto.type != MessageType.BOT_RES         &&
+                                                        dto.status != MessageStatus.DELETED
                                                     ) {
                                                         latestMessageMap[ChatId(id)] = MessageId(dto.id)
                                                     }
@@ -724,12 +739,12 @@ class SphinxRepository(
                         }
 
                         when {
-                            lastMessageId == -1 -> {}
-                            newMessages.size >= 190 -> {
-                                lastMessageId += 190
+                            offset == -1 -> {}
+                            newMessages.size >= 200 -> {
+                                offset += 200
                             }
                             else -> {
-                                lastMessageId = -1
+                                offset = -1
                             }
                         }
                     }
@@ -740,8 +755,18 @@ class SphinxRepository(
         supervisor.cancelAndJoin()
 
         error?.let { responseError ->
+
             emit(responseError)
-        } ?: emit(Response.Success(true))
+
+        } ?: let {
+
+            authenticationStorage.putString(
+                REPOSITORY_LAST_SEEN_MESSAGE_DATE,
+                now
+            )
+
+            emit(Response.Success(true))
+        }
     }
 
     override fun networkCheckRoute(chat: Chat?, contact: Contact?): Flow<Boolean> = flow {

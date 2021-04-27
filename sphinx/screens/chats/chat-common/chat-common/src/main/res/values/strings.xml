@@ -5,6 +5,25 @@
     <string name="message_context_menu_label_boost">Boost</string>
     <string name="message_context_menu_label_delete">Delete</string>
 
-    <string name="send_icon"></string>
-    <string name="attachment_icon"></string>
+
+    <!-- Paid Message Details   -->
+    <string name="paid_message_label_pay">Pay</string>
+    <string name="paid_message_label_payment_accepted">Purchase Succeeded</string>
+    <string name="paid_message_label_payment_denied">Purchase Denied</string>
+    <string name="paid_message_label_processing_payment">Processing payment…</string>
+
+
+    <!-- Paid Message Overlays   -->
+    <string name="paid_text_message_received_overlay_label">Pay to Unlock Message</string>
+
+
+    <!--  Material Icons   -->
+    <string name="material_icon_name_file_attachment">insert_drive_file</string>
+    <string name="material_icon_name_file_download">file_download</string>
+    <string name="material_icon_name_play_button">play_arrow</string>
+    <string name="material_icon_name_pause_button">pause</string>
+    <string name="material_icon_name_payment_accepted">check</string>
+    <string name="material_icon_name_payment_denied">error_outline</string>
+    <string name="material_icon_name_message_editor_send">send</string>
+    <string name="material_icon_name_message_editor_attachment">add</string>
 </resources>

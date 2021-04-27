@@ -14,4 +14,8 @@
     <dimen name="default_text_size_back_arrow">21sp</dimen>
     <dimen name="default_text_size_headline">17sp</dimen>
     <dimen name="default_text_size_sub_headline">11sp</dimen>
+    <dimen name="default_text_size_list_row_headline">13sp</dimen>
+    <dimen name="default_text_size_caption1">10sp</dimen>
+
+    <dimen name="default_inner_spacing_list_item_title">10dp</dimen>
 </resources>

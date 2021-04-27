@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_constraint_message_type_video_attachment"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/message_type_video_attachment_height"
+    android:visibility="gone"
+    tools:layout_height="@dimen/message_type_video_attachment_height"
+    tools:layout_width="300dp"
+    tools:visibility="visible">
+
+
+    <VideoView
+        android:id="@+id/video_view"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+
+    <!--  TODO: Create and apply drawable for Circular Play Button  -->
+    <androidx.appcompat.widget.AppCompatImageButton
+        android:id="@+id/button_play_video"
+        android:layout_width="@dimen/video_attachment_play_pause_button_xy"
+        android:layout_height="@dimen/video_attachment_play_pause_button_xy"
+        android:src="@drawable/sphinx_white_logo"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:visibility="gone" />
+
+
+    <!--  TODO: Create and apply drawable for Circular Pause Button  -->
+    <androidx.appcompat.widget.AppCompatImageButton
+        android:id="@+id/button_pause_video"
+        android:layout_width="@dimen/video_attachment_play_pause_button_xy"
+        android:layout_height="@dimen/video_attachment_play_pause_button_xy"
+        android:src="@drawable/sphinx_white_logo"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

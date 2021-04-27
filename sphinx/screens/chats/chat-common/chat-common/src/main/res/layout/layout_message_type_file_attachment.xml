@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_constraint_message_type_file_attachment"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/message_type_file_attachment_height"
+    android:visibility="gone"
+    tools:layout_height="@dimen/message_type_file_attachment_height"
+    tools:layout_width="300dp"
+    tools:visibility="visible">
+
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/text_view_file_attachment_icon"
+        android:layout_width="@dimen/icon_file_attachment_xy"
+        android:layout_height="@dimen/icon_file_attachment_xy"
+        android:fontFamily="@font/material_icons_regular"
+        android:text="@string/material_icon_name_file_attachment"
+        android:textColor="@color/primaryText"
+        android:textSize="@dimen/icon_file_attachment_text_size"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraint_layout_main_info_group"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:paddingHorizontal="@dimen/default_inner_spacing_list_item_title"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/constraint_layout_download_button_group"
+        app:layout_constraintStart_toEndOf="@+id/text_view_file_attachment_icon"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_file_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/roboto_medium"
+            android:textSize="@dimen/default_text_size_list_row_headline"
+            app:layout_constraintBottom_toTopOf="@+id/text_view_file_size"
+            app:layout_constraintStart_toStartOf="@id/constraint_layout_main_info_group"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_chainStyle="packed"
+            tools:text="sphinx-world-domination-plans.pdf" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_file_size"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/roboto_regular"
+            android:textSize="@dimen/default_text_size_sub_headline"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="@id/constraint_layout_main_info_group"
+            app:layout_constraintTop_toBottomOf="@+id/text_view_file_name"
+            tools:text="12kb" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraint_layout_download_button_group"
+        android:layout_width="50dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/button_download_file"
+            android:layout_width="@dimen/icon_file_download_width"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/material_icons_regular"
+            android:text="@string/material_icon_name_file_download"
+            android:textSize="@dimen/icon_file_download_text_size"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@id/constraint_layout_download_button_group"
+            app:layout_constraintEnd_toEndOf="@id/constraint_layout_download_button_group"
+            app:layout_constraintStart_toStartOf="@id/constraint_layout_download_button_group"
+            app:layout_constraintTop_toTopOf="@id/constraint_layout_download_button_group"
+            tools:visibility="visible" />
+
+
+        <ProgressBar
+            android:id="@+id/spinner_file_download_progress"
+            android:layout_width="@dimen/icon_file_download_width"
+            android:layout_height="@dimen/icon_file_download_width"
+            android:indeterminate="true"
+            android:indeterminateTint="@color/primaryText"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@id/button_download_file"
+            app:layout_constraintEnd_toEndOf="@id/button_download_file"
+            app:layout_constraintStart_toStartOf="@id/button_download_file"
+            app:layout_constraintTop_toTopOf="@id/button_download_file"
+            tools:visibility="visible" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

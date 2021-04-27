@@ -363,12 +363,6 @@ SELECT *
 FROM messageDbo
 WHERE id = ?;
 
-messageGetLatestId:
-SELECT id
-FROM messageDbo
-ORDER BY id DESC
-LIMIT 1;
-
 messageGetAllToShowByChatId:
 SELECT *
 FROM messageDbo
