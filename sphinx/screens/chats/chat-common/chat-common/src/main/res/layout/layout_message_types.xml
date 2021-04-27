@@ -50,6 +50,12 @@
             tools:visibility="gone" />
 
 
+        <!--  Paid Text Message Received Overlay  -->
+        <include
+            android:id="@+id/include_message_overlay_paid_text_message_received"
+            layout="@layout/layout_message_overlay_paid_text_message_received"
+            tools:visibility="gone" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 
@@ -81,7 +87,8 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            tools:visibility="gone" />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>
