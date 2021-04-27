@@ -9,12 +9,10 @@
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/text_view_message_type_message"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:fontFamily="@font/roboto_regular"
-        android:textAlignment="textStart"
-        android:textColor="@color/textMessages"
-        android:textSize="@dimen/chat_message_text_size"
+        style="@style/chat_message_body_text"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="Contrary to popular belief, Lorem Ipsum is not simply random text. Latin from 45 BC, making it over 2000 years old." />
 
