@@ -1,21 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="_1">1</string>
-    <string name="_2">2</string>
-    <string name="_3">3</string>
-    <string name="_4">4</string>
-    <string name="_5">5</string>
-    <string name="_6">6</string>
-    <string name="_7">7</string>
-    <string name="_8">8</string>
-    <string name="_9">9</string>
-    <string name="_0">0</string>
-    <string name="backspace"></string>
-
     <string name="sats">sats</string>
-    <string name="lock_icon">lock</string>
-    <string name="bolt_icon">flash_on</string>
-    <string name="phone_icon"></string>
 
-    <string name="nav_back"></string>
+    <!--  Material Icons   -->
+    <string name="material_icon_name_lock_outline">lock_outline</string>
+    <string name="material_icon_name_lock">lock</string>
+    <string name="material_icon_name_bolt">flash_on</string>
+    <string name="material_icon_name_backspace_button">backspace</string>
+    <string name="material_icon_name_call_button">phone</string>
+    <string name="material_icon_name_nav_back">arrow_back</string>
+    <string name="material_icon_name_file_attachment">insert_drive_file</string>
+    <string name="material_icon_name_file_download">file_download</string>
+    <string name="material_icon_name_play_button">play_arrow</string>
+    <string name="material_icon_name_pause_button">pause</string>
+    <string name="material_icon_name_payment_accepted">check</string>
+    <string name="material_icon_name_payment_denied">error_outline</string>
+    <string name="material_icon_name_message_editor_send">send</string>
+    <string name="material_icon_name_message_editor_attachment">add</string>
 </resources>

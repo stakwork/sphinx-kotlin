@@ -52,7 +52,7 @@
             android:layout_marginBottom="2dp"
             android:fontFamily="@font/material_icons_regular"
             android:singleLine="true"
-            android:text="@string/lock_icon"
+            android:text="@string/material_icon_name_lock"
             android:textColor="@color/secondaryText"
             android:textSize="15sp"
             app:layout_constraintBottom_toTopOf="@+id/text_view_chat_holder_message"
