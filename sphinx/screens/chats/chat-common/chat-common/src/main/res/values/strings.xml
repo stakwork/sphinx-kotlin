@@ -5,12 +5,15 @@
     <string name="message_context_menu_label_boost">Boost</string>
     <string name="message_context_menu_label_delete">Delete</string>
 
+
     <!-- Paid Message Details   -->
     <string name="paid_message_label_pay">Pay</string>
     <string name="paid_message_label_payment_accepted">Purchase Succeeded</string>
     <string name="paid_message_label_payment_denied">Purchase Denied</string>
     <string name="paid_message_label_processing_payment">Processing payment…</string>
 
+
     <!-- Paid Message Overlays   -->
     <string name="paid_text_message_received_overlay_label">Pay to Unlock Message</string>
+    <string name="paywall_overlay_content_description_image_message_received">Pay to Unlock This Image</string>
 </resources>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_constraint_paywall_overlay_image_message_received"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/paywall_overlay_image_message_received_height"
+    android:visibility="gone"
+    tools:visibility="visible">
+
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/image_view_paywall_overlay"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:contentDescription="@string/paywall_overlay_content_description_image_message_received"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/image_not_available" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
