@@ -14,6 +14,6 @@
 
 
     <!-- Paid Message Overlays   -->
-    <string name="paid_text_message_received_overlay_label">Pay to Unlock Message</string>
+    <string name="paywall_overlay_label_text_message_received">Pay to Unlock Message</string>
     <string name="paywall_overlay_content_description_image_message_received">Pay to Unlock This Image</string>
 </resources>
