@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="chat_message_body_text">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:fontFamily">@font/roboto_regular</item>
+        <item name="android:textAlignment">textStart</item>
+        <item name="android:textColor">@color/textMessages</item>
+        <item name="android:textSize">@dimen/chat_message_text_size</item>
+    </style>
+</resources>
