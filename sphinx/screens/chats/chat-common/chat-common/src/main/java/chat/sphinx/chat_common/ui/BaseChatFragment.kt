@@ -8,11 +8,13 @@ import android.widget.TextView
 import androidx.annotation.CallSuper
 import androidx.annotation.LayoutRes
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
+import app.cash.exhaustive.Exhaustive
 import chat.sphinx.chat_common.R
 import chat.sphinx.chat_common.adapters.MessageListAdapter
 import chat.sphinx.chat_common.navigation.ChatNavigator
@@ -22,6 +24,9 @@ import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.insetter_activity.addStatusBarPadding
+import chat.sphinx.kotlin_response.LoadResponse
+import chat.sphinx.kotlin_response.Response
+import chat.sphinx.resources.setTextColorExt
 import chat.sphinx.wrapper_chat.isTrue
 import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.util.getInitials
@@ -29,6 +34,7 @@ import io.matthewnelson.android_feature_screens.navigation.CloseAppOnBackPress
 import io.matthewnelson.android_feature_screens.ui.base.BaseFragment
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisorScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
@@ -101,7 +107,6 @@ abstract class BaseChatFragment<
         onStopSupervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
             viewModel.chatDataStateFlow.collect { chatData ->
                 if (chatData != null) {
-
                     if (chatData.muted.isTrue()) {
                         imageLoader.load(headerMute, R.drawable.ic_baseline_notifications_off_24)
                     } else {
@@ -121,6 +126,27 @@ abstract class BaseChatFragment<
                     headerName.text = chatData.chatName ?: ""
 
                     headerLockIcon.goneIfFalse(chatData.chat != null)
+                }
+            }
+        }
+        
+        onStopSupervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
+            viewModel.checkRoute().collect { response ->
+                @Exhaustive
+                when (response) {
+                    is LoadResponse.Loading -> {}
+                    is Response.Error -> {
+                        headerConnectivityIcon.setTextColorExt(R.color.sphinxOrange)
+                    }
+                    is Response.Success -> {
+                        val colorRes = if (response.value) {
+                            R.color.primaryGreen
+                        } else {
+                            R.color.sphinxOrange
+                        }
+
+                        headerConnectivityIcon.setTextColorExt(colorRes)
+                    }
                 }
             }
         }

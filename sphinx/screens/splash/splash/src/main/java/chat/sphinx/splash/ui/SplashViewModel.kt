@@ -193,7 +193,7 @@ internal class SplashViewModel @Inject constructor(
                     }
                 }
 
-                success?.let { successResponse ->
+                success?.let { _ ->
                     // Overwrite PIN
                     viewState.pinWriter.reset()
                     repeat(6) {
