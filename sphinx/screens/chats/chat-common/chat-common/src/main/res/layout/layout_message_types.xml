@@ -53,7 +53,14 @@
         <!--  Paid Text Message Received Overlay  -->
         <include
             android:id="@+id/include_message_overlay_paid_text_message_received"
-            layout="@layout/layout_message_overlay_paid_text_message_received"
+            layout="@layout/layout_paywall_overlay_text_message_received"
+            tools:visibility="gone" />
+
+
+        <!--  Paid Image Message Received Overlay  -->
+        <include
+            android:id="@+id/include_message_overlay_paid_image_message_received"
+            layout="@layout/layout_paywall_overlay_image_message_received"
             tools:visibility="gone" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
