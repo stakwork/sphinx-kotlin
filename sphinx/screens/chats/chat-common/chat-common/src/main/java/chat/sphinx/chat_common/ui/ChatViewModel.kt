@@ -3,14 +3,17 @@ package chat.sphinx.chat_common.ui
 import android.annotation.SuppressLint
 import android.content.Context
 import androidx.lifecycle.viewModelScope
+import app.cash.exhaustive.Exhaustive
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
 import chat.sphinx.chat_common.ui.viewstate.messageholder.HolderBackground
 import chat.sphinx.chat_common.ui.viewstate.messageholder.MessageHolderViewState
-import chat.sphinx.concept_repository_lightning.LightningRepository
+import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_repository_message.MessageRepository
+import chat.sphinx.kotlin_response.LoadResponse
+import chat.sphinx.kotlin_response.Response
+import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.resources.getRandomColor
 import chat.sphinx.wrapper_common.util.getInitials
-import chat.sphinx.wrapper_contact.Contact
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import io.matthewnelson.android_feature_viewmodel.BaseViewModel
@@ -27,7 +30,7 @@ class ChatViewModel @Inject constructor(
     @ApplicationContext private val appContext: Context,
     val dispatchers: CoroutineDispatchers,
     private val messageRepository: MessageRepository,
-    private val lightningRepository: LightningRepository,
+    private val networkQueryLightning: NetworkQueryLightning,
 ): BaseViewModel<ChatViewState>(ChatViewState.Idle)
 {
     @Suppress("RemoveExplicitTypeArguments")
@@ -102,11 +105,54 @@ class ChatViewModel @Inject constructor(
         }
     }
 
-    fun checkRoute(): Flow<Boolean> = flow {
+    fun checkRoute(): Flow<LoadResponse<Boolean, ResponseError>> = flow {
         chatDataStateFlow.value?.let { chatData ->
-            val contact: Contact? = if (chatData is ChatData.Conversation) { chatData.contact } else { null }
-            lightningRepository.networkCheckRoute(chat = chatData.chat, contact = contact).collect { success ->
-                emit(success)
+            when (chatData) {
+                is ChatData.Conversation -> {
+                    chatData.contact.nodePubKey?.let { pubKey ->
+
+                        chatData.contact.routeHint?.let { hint ->
+
+                            networkQueryLightning.checkRoute(pubKey, hint)
+
+                        } ?: networkQueryLightning.checkRoute(pubKey)
+
+                    } ?: chatData.chat?.let { chat ->
+
+                        networkQueryLightning.checkRoute(chat.id)
+
+                    }
+                }
+
+                is ChatData.Group ->  {
+                    null
+                }
+
+                is ChatData.Tribe -> {
+                    networkQueryLightning.checkRoute(chatData.chat.id)
+                }
+
+            }?.collect { response ->
+                @Exhaustive
+                when (response) {
+                    is LoadResponse.Loading -> {
+                        emit(response)
+                    }
+                    is Response.Error -> {
+                        emit(response)
+                    }
+                    is Response.Success -> {
+                        emit(Response.Success(response.value.success_prob > 0))
+                    }
+                }
+            } ?: if (chatData is ChatData.Group) {
+
+                emit(Response.Success(true))
+
+            } else {
+                emit(
+                    Response.Error(ResponseError("ChatData was null"))
+                )
             }
         }
     }
