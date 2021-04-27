@@ -768,36 +768,4 @@ class SphinxRepository(
             emit(Response.Success(true))
         }
     }
-
-    override fun networkCheckRoute(chat: Chat?, contact: Contact?): Flow<Boolean> = flow {
-        contact?.let {
-            networkQueryLightning.checkRoute(publicKey = contact.nodePubKey, routeHint = contact.routeHint).collect { loadResponse ->
-                @Exhaustive
-                when (loadResponse) {
-                    is LoadResponse.Loading -> {}
-                    is Response.Error -> {
-                        emit(Response.Success(false).value)
-                    }
-                    is Response.Success -> {
-                        val successProb = loadResponse.value.success_prob > 0
-                        emit(Response.Success(successProb).value)
-                    }
-                }
-            }
-        } ?: chat?.let {
-            networkQueryLightning.checkChatRoute(chatId = chat.id).collect { loadResponse ->
-                @Exhaustive
-                when (loadResponse) {
-                    is LoadResponse.Loading -> {}
-                    is Response.Error -> {
-                        emit(Response.Success(false).value)
-                    }
-                    is Response.Success -> {
-                        val successProb = loadResponse.value.success_prob > 0
-                        emit(Response.Success(successProb).value)
-                    }
-                }
-            }
-        }
-    }
 }
