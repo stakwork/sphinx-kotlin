@@ -6,16 +6,15 @@
     android:layout_width="match_parent"
     android:layout_height="@dimen/message_type_video_attachment_height"
     android:visibility="gone"
-    tools:layout_height="@dimen/message_type_video_attachment_height"
+    tools:layout_height="wrap_content"
     tools:layout_width="300dp"
     tools:visibility="visible">
-
 
     <VideoView
         android:id="@+id/video_view"
         android:layout_width="0dp"
-        android:layout_height="0dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_height="@dimen/message_type_video_attachment_height"
+        app:layout_constraintBottom_toTopOf="@id/text_view_optional_message_body"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -27,12 +26,10 @@
         android:layout_width="@dimen/video_attachment_play_pause_button_xy"
         android:layout_height="@dimen/video_attachment_play_pause_button_xy"
         android:src="@drawable/sphinx_white_logo"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:visibility="gone" />
+        app:layout_constraintBottom_toBottomOf="@id/video_view"
+        app:layout_constraintEnd_toEndOf="@id/video_view"
+        app:layout_constraintStart_toStartOf="@id/video_view"
+        app:layout_constraintTop_toTopOf="@id/video_view" />
 
 
     <!--  TODO: Create and apply drawable for Circular Pause Button  -->
@@ -41,10 +38,25 @@
         android:layout_width="@dimen/video_attachment_play_pause_button_xy"
         android:layout_height="@dimen/video_attachment_play_pause_button_xy"
         android:src="@drawable/sphinx_white_logo"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/video_view"
+        app:layout_constraintEnd_toEndOf="@id/video_view"
+        app:layout_constraintStart_toStartOf="@id/video_view"
+        app:layout_constraintTop_toTopOf="@id/video_view"
+        tools:visibility="gone" />
+
+
+    <!-- Optional Message   -->
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/text_view_optional_message_body"
+        style="@style/chat_message_body_text"
+        android:layout_width="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
+        app:layout_constraintTop_toBottomOf="@+id/video_view"
+        android:visibility="gone"
+        tools:text="Contrary to popular belief, Lorem Ipsum is not simply random text. Latin from 45 BC, making it over 2000 years old."
+        tools:visibility="visible" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
