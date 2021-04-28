@@ -23,6 +23,8 @@
     <dimen name="material_icon_text_size_message_payment_status">20sp</dimen>
     <dimen name="loading_wheel_message_payment_processing_xy">20dp</dimen>
 
+    <dimen name="status_badge_row_padding">10dp</dimen>
+
 
     <!-- message_holder_in_photo_holder_xy + 8dp -->
     <dimen name="message_holder_space_width_left">40dp</dimen>

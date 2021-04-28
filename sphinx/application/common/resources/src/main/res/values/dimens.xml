@@ -18,4 +18,5 @@
     <dimen name="default_text_size_caption1">10sp</dimen>
 
     <dimen name="default_inner_spacing_list_item_title">10dp</dimen>
+    <dimen name="default_status_badge_inner_padding">4dp</dimen>
 </resources>

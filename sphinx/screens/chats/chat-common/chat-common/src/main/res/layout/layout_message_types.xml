@@ -71,6 +71,12 @@
             tools:visibility="gone" />
 
 
+        <!--  Paid Text Message Sent  -->
+        <include
+            android:id="@+id/include_message_type_paid_text_message_sent"
+            layout="@layout/layout_message_type_paid_text_message_sent"
+            tools:visibility="gone" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 
@@ -93,7 +99,7 @@
             app:layout_constraintTop_toTopOf="parent" />
 
 
-        <!-- Reactions -->
+        <!-- Boost Details -->
         <include
             android:id="@+id/include_message_type_boost"
             layout="@layout/layout_message_type_boost"
