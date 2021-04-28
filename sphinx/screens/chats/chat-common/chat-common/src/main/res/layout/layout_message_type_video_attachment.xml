@@ -51,6 +51,7 @@
         android:id="@+id/text_view_optional_message_body"
         style="@style/chat_message_body_text"
         android:layout_width="0dp"
+        android:padding="@dimen/background_message_holder_default_padding"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

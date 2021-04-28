@@ -77,6 +77,13 @@
             layout="@layout/layout_message_type_paid_text_message_sent"
             tools:visibility="gone" />
 
+
+        <!--  Paid Image Message Sent  -->
+        <include
+            android:id="@+id/include_message_type_paid_image_message_sent"
+            layout="@layout/layout_message_type_paid_image_message_sent"
+            tools:visibility="gone" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 
