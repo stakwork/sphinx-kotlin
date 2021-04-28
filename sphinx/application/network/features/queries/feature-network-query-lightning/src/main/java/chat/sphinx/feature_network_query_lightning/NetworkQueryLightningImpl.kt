@@ -85,15 +85,6 @@ class NetworkQueryLightningImpl(
         )
 
     override fun checkRoute(
-        routeHint: LightningRouteHint,
-        relayData: Pair<AuthorizationToken, RelayUrl>?
-    ): Flow<LoadResponse<RouteSuccessProbabilityDto, ResponseError>> =
-        checkRouteImpl(
-            endpoint = ENDPOINT_ROUTE + "?pubkey=&route_hint=${routeHint.value}",
-            relayData = relayData
-        )
-
-    override fun checkRoute(
         publicKey: LightningNodePubKey,
         routeHint: LightningRouteHint,
         relayData: Pair<AuthorizationToken, RelayUrl>?

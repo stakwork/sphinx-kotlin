@@ -166,6 +166,16 @@ chatDeleteById:
 DELETE FROM chatDbo
 WHERE id = ?;
 
+chatUpdateAsSeen:
+UPDATE chatDbo
+SET seen = :seen
+WHERE id = ?;
+
+chatMessagesUpdateAsSeen:
+UPDATE messageDbo
+SET seen = :seen
+WHERE chat_id = ?;
+
 CREATE TABLE contactDbo(
     id                          INTEGER         AS ContactId NOT NULL PRIMARY KEY,
     route_hint                  TEXT            AS LightningRouteHint,

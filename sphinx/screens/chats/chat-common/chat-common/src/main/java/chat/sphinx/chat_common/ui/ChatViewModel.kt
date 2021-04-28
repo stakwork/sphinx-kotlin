@@ -156,4 +156,12 @@ class ChatViewModel @Inject constructor(
             }
         }
     }
+
+    suspend fun readMessages() {
+        chatDataStateFlow.value?.let { chatData ->
+            chatData.chat?.id?.let { chatId ->
+                messageRepository.readMessages(chatId)
+            }
+        }
+    }
 }

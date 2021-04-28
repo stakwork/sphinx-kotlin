@@ -8,6 +8,10 @@ import kotlinx.coroutines.flow.Flow
 
 abstract class NetworkRelayCall {
 
+    enum class RequestType {
+        GET, POST, PUT, DELETE
+    }
+
     /**
      * GET
      *
@@ -19,6 +23,8 @@ abstract class NetworkRelayCall {
     abstract fun<T: Any, V: RelayResponse<T>> get(
         jsonAdapter: Class<V>,
         relayEndpoint: String,
+        requestType: RequestType = RequestType.GET,
+        requestBody: Map<String, String>? = null,
         additionalHeaders: Map<String, String>? = null,
         relayData: Pair<AuthorizationToken, RelayUrl>? = null,
     ): Flow<LoadResponse<T, ResponseError>>

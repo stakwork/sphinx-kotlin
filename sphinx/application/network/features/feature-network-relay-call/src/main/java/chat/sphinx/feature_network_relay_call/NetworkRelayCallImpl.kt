@@ -20,7 +20,11 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import okhttp3.Request
+import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.MediaType.Companion.toMediaType
 import java.io.IOException
+
 
 @Suppress("NOTHING_TO_INLINE")
 private inline fun NetworkRelayCallImpl.buildRelayRequest(
@@ -59,6 +63,8 @@ class NetworkRelayCallImpl(
     override fun <T : Any, V : RelayResponse<T>> get(
         jsonAdapter: Class<V>,
         relayEndpoint: String,
+        requestType: RequestType,
+        requestBody: Map<String, String>?,
         additionalHeaders: Map<String, String>?,
         relayData: Pair<AuthorizationToken, RelayUrl>?
     ): Flow<LoadResponse<T, ResponseError>> = flow {
@@ -72,8 +78,19 @@ class NetworkRelayCallImpl(
                 additionalHeaders
             )
 
+            val mediaType = "application/json".toMediaType()
+            val payload = requestBody.toString()
+            val reqBody: RequestBody = "".toRequestBody(mediaType)
+
+            val request: Request = when (requestType) {
+                RequestType.GET -> requestBuilder.build()
+                RequestType.POST -> requestBuilder.post(reqBody).build()
+                RequestType.PUT -> requestBuilder.put(reqBody).build()
+                RequestType.DELETE -> requestBuilder.delete().build()
+            }
+
             val networkResponse = networkClient.getClient()
-                .newCall(requestBuilder.build())
+                .newCall(request)
                 .execute()
 
             if (!networkResponse.isSuccessful) {
@@ -98,7 +115,6 @@ class NetworkRelayCallImpl(
                 )
 
             if (relayResponse.success) {
-
                 emit(
                     Response.Success(
                         relayResponse.response ?: throw NullPointerException(
@@ -122,11 +138,13 @@ class NetworkRelayCallImpl(
             }
 
         } catch (e: Exception) {
-            val msg = "GET request failure for endpoint: $relayEndpoint"
+            val msg = "Request failure for endpoint: $relayEndpoint"
             LOG.e(TAG, msg, e)
-            emit(Response.Error(
-                ResponseError(msg, e)
-            ))
+            emit(
+                Response.Error(
+                    ResponseError(msg, e)
+                )
+            )
         }
 
     }.flowOn(dispatchers.io)

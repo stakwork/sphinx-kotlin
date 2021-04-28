@@ -8,7 +8,6 @@ import android.widget.TextView
 import androidx.annotation.CallSuper
 import androidx.annotation.LayoutRes
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -34,7 +33,6 @@ import io.matthewnelson.android_feature_screens.navigation.CloseAppOnBackPress
 import io.matthewnelson.android_feature_screens.ui.base.BaseFragment
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisorScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
@@ -134,7 +132,9 @@ abstract class BaseChatFragment<
             viewModel.checkRoute().collect { response ->
                 @Exhaustive
                 when (response) {
-                    is LoadResponse.Loading -> {}
+                    is LoadResponse.Loading -> {
+                        headerConnectivityIcon.setTextColorExt(R.color.washedOutReceivedText)
+                    }
                     is Response.Error -> {
                         headerConnectivityIcon.setTextColorExt(R.color.sphinxOrange)
                     }
@@ -150,6 +150,8 @@ abstract class BaseChatFragment<
                 }
             }
         }
+
+        readMessages()
     }
 
     private fun setChatImageFromUrl(photoUrl: PhotoUrl) {
@@ -162,11 +164,22 @@ abstract class BaseChatFragment<
         }
     }
 
+    private fun readMessages() {
+        onStopSupervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
+            viewModel.readMessages()
+        }
+    }
+
     override suspend fun onViewStateFlowCollect(viewState: ChatViewState) {}
     override fun subscribeToViewStateFlow() {}
 
     @CallSuper
     protected open fun onNavigationBack() {
         viewModel.onNavigationBack()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        readMessages()
     }
 }

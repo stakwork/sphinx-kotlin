@@ -45,6 +45,7 @@ data class Message(
     @Volatile
     var messageDecryptionError: Boolean = false
         private set
+
     @Volatile
     var messageDecryptionException: Exception? = null
         private set

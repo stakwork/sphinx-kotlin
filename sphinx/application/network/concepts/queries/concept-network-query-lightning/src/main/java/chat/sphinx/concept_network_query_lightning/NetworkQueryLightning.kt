@@ -41,11 +41,6 @@ abstract class NetworkQueryLightning {
     ): Flow<LoadResponse<RouteSuccessProbabilityDto, ResponseError>>
 
     abstract fun checkRoute(
-        routeHint: LightningRouteHint,
-        relayData: Pair<AuthorizationToken, RelayUrl>? = null
-    ): Flow<LoadResponse<RouteSuccessProbabilityDto, ResponseError>>
-
-    abstract fun checkRoute(
         publicKey: LightningNodePubKey,
         routeHint: LightningRouteHint,
         relayData: Pair<AuthorizationToken, RelayUrl>? = null
