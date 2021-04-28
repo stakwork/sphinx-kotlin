@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/layout_constraint_message_type_image_attachment"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/message_type_image_attachment_height"
+    android:layout_height="wrap_content"
     android:visibility="gone"
-    tools:layout_height="@dimen/message_type_image_attachment_height"
     tools:layout_width="300dp"
     tools:visibility="visible">
 
@@ -14,13 +14,31 @@
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/image_view_message_image_attachment"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="@dimen/message_type_image_attachment_height"
         android:clickable="true"
         android:focusable="true"
         android:foreground="?attr/selectableItemBackground"
         android:scaleType="center"
+        app:layout_constraintBottom_toTopOf="@id/text_view_optional_message_body"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
         tools:srcCompat="@tools:sample/backgrounds/scenic"
         tools:viewBindingIgnore="true" />
 
+
+    <!-- Optional Message   -->
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/text_view_optional_message_body"
+        style="@style/chat_message_body_text"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/image_view_message_image_attachment"
+        android:visibility="gone"
+        tools:text="Contrary to popular belief, Lorem Ipsum is not simply random text. Latin from 45 BC, making it over 2000 years old."
+        tools:visibility="visible" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
