@@ -27,26 +27,26 @@
         <!--  Image Attachment  -->
         <include
             android:id="@+id/include_message_type_image_attachment"
-            layout="@layout/layout_message_type_image_attachment"
+            layout="@layout/layout_message_type_attachment_image"
             tools:visibility="gone" />
 
         <!--  File Attachment  -->
         <include
             android:id="@+id/include_message_type_file_attachment"
-            layout="@layout/layout_message_type_file_attachment"
+            layout="@layout/layout_message_type_attachment_file"
             tools:visibility="gone" />
 
         <!--  Audio Attachment  -->
         <include
             android:id="@+id/include_message_type_audio_attachment"
-            layout="@layout/layout_message_type_audio_attachment"
+            layout="@layout/layout_message_type_attachment_audio"
             tools:visibility="gone" />
 
 
         <!--  Video Attachment  -->
         <include
             android:id="@+id/include_message_type_video_attachment"
-            layout="@layout/layout_message_type_video_attachment"
+            layout="@layout/layout_message_type_attachment_video"
             tools:visibility="gone" />
 
 
