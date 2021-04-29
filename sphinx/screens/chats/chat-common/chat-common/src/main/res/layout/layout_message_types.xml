@@ -7,7 +7,7 @@
     tools:background="@drawable/background_message_holder_in_last">
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/layout_constraint_inner_message_types"
+        android:id="@+id/layout_constraint_message_type_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="parent">
@@ -27,26 +27,26 @@
         <!--  Image Attachment  -->
         <include
             android:id="@+id/include_message_type_image_attachment"
-            layout="@layout/layout_message_type_image_attachment"
+            layout="@layout/layout_message_type_attachment_image"
             tools:visibility="gone" />
 
         <!--  File Attachment  -->
         <include
             android:id="@+id/include_message_type_file_attachment"
-            layout="@layout/layout_message_type_file_attachment"
+            layout="@layout/layout_message_type_attachment_file"
             tools:visibility="gone" />
 
         <!--  Audio Attachment  -->
         <include
             android:id="@+id/include_message_type_audio_attachment"
-            layout="@layout/layout_message_type_audio_attachment"
+            layout="@layout/layout_message_type_attachment_audio"
             tools:visibility="gone" />
 
 
         <!--  Video Attachment  -->
         <include
             android:id="@+id/include_message_type_video_attachment"
-            layout="@layout/layout_message_type_video_attachment"
+            layout="@layout/layout_message_type_attachment_video"
             tools:visibility="gone" />
 
 
@@ -95,10 +95,10 @@
 
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/layout_constraint_message_footer_container"
+        android:id="@+id/layout_constraint_message_reaction_container"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/message_type_boost_height"
-        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_inner_message_types">
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_message_type_container">
 
 
         <!-- Paid Message Information -->
@@ -106,6 +106,7 @@
             android:id="@+id/include_paid_message_details_holder"
             layout="@layout/layout_paid_message_details_holder"
             android:layout_width="match_parent"
+            android:layout_marginTop="8dp"
             android:layout_height="@dimen/paid_message_details_holder_height"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="parent"
@@ -118,6 +119,7 @@
             android:id="@+id/include_message_type_boost"
             layout="@layout/layout_message_type_boost"
             android:layout_width="match_parent"
+            android:layout_marginTop="8dp"
             android:layout_height="@dimen/message_type_boost_height"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="parent"
