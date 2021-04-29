@@ -15,5 +15,5 @@ interface MessageRepository {
 
     fun networkRefreshMessages(): Flow<LoadResponse<Boolean, ResponseError>>
 
-    fun readMessages(chatId: ChatId)
+    suspend fun readMessages(chatId: ChatId)
 }

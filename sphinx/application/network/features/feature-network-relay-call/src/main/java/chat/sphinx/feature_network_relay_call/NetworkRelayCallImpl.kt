@@ -79,8 +79,9 @@ class NetworkRelayCallImpl(
             )
 
             val mediaType = "application/json".toMediaType()
-            val payload = requestBody.toString()
-            val reqBody: RequestBody = "".toRequestBody(mediaType)
+            val payload = (requestBody ?: "{}").toString()
+            val reqBody: RequestBody = payload.toRequestBody(mediaType)
+
 
             val request: Request = when (requestType) {
                 RequestType.GET -> requestBuilder.build()

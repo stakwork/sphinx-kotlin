@@ -559,31 +559,27 @@ class SphinxRepository(
             }
     }
 
-    override fun readMessages(chatId: ChatId) {
-        val supervisor = SupervisorJob()
-        val scope = CoroutineScope(supervisor)
-        scope.launch(dispatchers.mainImmediate) {
-            val queries = coreDB.getSphinxDatabaseQueries()
+    override suspend fun readMessages(chatId: ChatId) {
+        val queries = coreDB.getSphinxDatabaseQueries()
 
-            val messages = queries.messageGetAllToShowByChatId(chatId)
-                .asFlow()
-                .mapToList(dispatchers.io)
-                .map { _ -> }
+//        LOG.d(TAG, "UNSEEN MESSAGES COUNT----")
+//
+//        val messages = queries.messageGetUnseenToShowByChatId(chatId)
+//            .executeAsList()
+//            .toMutableSet()
+//
+//        LOG.d(TAG, "UNSEEN MESSAGES COUNT ${messages.size}")
 
-            LOG.d(TAG, "UNSEEN MESSAGES COUNT ${messages.count()}")
+        queries.chatUpdateSeen(true.toSeen(), chatId)
+        queries.chatMessagesUpdateSeen(true.toSeen(), chatId)
 
-            queries.chatUpdateSeen(true.toSeen(), chatId)
-            queries.chatMessagesUpdateSeen(true.toSeen(), chatId)
+//        val messagesAfterUpdate = queries.messageGetUnseenToShowByChatId(chatId)
+//            .executeAsList()
+//            .toMutableSet()
+//
+//        LOG.d(TAG, "UNSEEN MESSAGES COUNT AFTER UPDATE ${messagesAfterUpdate.size}")
 
-            val messagesAfterUpdate = queries.messageGetAllToShowByChatId(chatId)
-                .asFlow()
-                .mapToList(dispatchers.io)
-                .map { _ -> }
-
-            LOG.d(TAG, "UNSEEN MESSAGES COUNT AFTER UPDATE ${messagesAfterUpdate.count()}")
-
-            networkQueryMessage.readMessages(chatId).collect { _ -> }
-        }
+        networkQueryMessage.readMessages(chatId).collect { _ -> }
     }
 
     @OptIn(UnencryptedDataAccess::class)
