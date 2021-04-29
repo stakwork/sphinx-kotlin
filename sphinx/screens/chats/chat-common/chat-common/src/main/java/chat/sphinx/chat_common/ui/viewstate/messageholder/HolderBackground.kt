@@ -16,14 +16,14 @@ sealed class HolderBackground {
 
     object None: HolderBackground() {
         override fun setBackground(holderWidth: Px, binding: LayoutMessageHolderBinding) {
-            binding.layoutMessageTypes.root.goneIfFalse(false)
+            binding.includeMessageHolderMessageTypes.root.goneIfFalse(false)
         }
     }
 
     sealed class In: HolderBackground() {
 
         override fun setBackground(holderWidth: Px, binding: LayoutMessageHolderBinding) {
-            binding.layoutMessageTypes.root.goneIfFalse(true)
+            binding.includeMessageHolderMessageTypes.root.goneIfFalse(true)
             binding.spaceMessageHolderLeft.updateLayoutParams {
                 width = binding.root.context.resources.getDimensionPixelSize(R.dimen.message_holder_space_width_left)
             }
@@ -35,7 +35,7 @@ sealed class HolderBackground {
         object First: In() {
 
             override fun setBackground(holderWidth: Px, binding: LayoutMessageHolderBinding) {
-                binding.layoutMessageTypes.root
+                binding.includeMessageHolderMessageTypes.root
                     .setBackgroundResource(R.drawable.background_message_holder_in_first)
 
                 super.setBackground(holderWidth, binding)
@@ -44,7 +44,7 @@ sealed class HolderBackground {
 
         object Middle: In() {
             override fun setBackground(holderWidth: Px, binding: LayoutMessageHolderBinding) {
-                binding.layoutMessageTypes.root
+                binding.includeMessageHolderMessageTypes.root
                     .setBackgroundResource(R.drawable.background_message_holder_in_middle)
 
                 super.setBackground(holderWidth, binding)
@@ -53,7 +53,7 @@ sealed class HolderBackground {
 
         object Last: In() {
             override fun setBackground(holderWidth: Px, binding: LayoutMessageHolderBinding) {
-                binding.layoutMessageTypes.root
+                binding.includeMessageHolderMessageTypes.root
                     .setBackgroundResource(R.drawable.background_message_holder_in_last)
 
                 super.setBackground(holderWidth, binding)
@@ -64,7 +64,7 @@ sealed class HolderBackground {
     sealed class Out: HolderBackground() {
 
         override fun setBackground(holderWidth: Px, binding: LayoutMessageHolderBinding) {
-            binding.layoutMessageTypes.root.goneIfFalse(true)
+            binding.includeMessageHolderMessageTypes.root.goneIfFalse(true)
             binding.spaceMessageHolderLeft.updateLayoutParams {
                 width = (holderWidth.value * SPACE_WIDTH_MULTIPLE).toInt()
             }
@@ -75,7 +75,7 @@ sealed class HolderBackground {
 
         object First: Out() {
             override fun setBackground(holderWidth: Px, binding: LayoutMessageHolderBinding) {
-                binding.layoutMessageTypes.root
+                binding.includeMessageHolderMessageTypes.root
                     .setBackgroundResource(R.drawable.background_message_holder_out_first)
 
                 super.setBackground(holderWidth, binding)
@@ -84,7 +84,7 @@ sealed class HolderBackground {
 
         object Middle: Out() {
             override fun setBackground(holderWidth: Px, binding: LayoutMessageHolderBinding) {
-                binding.layoutMessageTypes.root
+                binding.includeMessageHolderMessageTypes.root
                     .setBackgroundResource(R.drawable.background_message_holder_out_middle)
                 super.setBackground(holderWidth, binding)
             }
@@ -92,7 +92,7 @@ sealed class HolderBackground {
 
         object Last: Out() {
             override fun setBackground(holderWidth: Px, binding: LayoutMessageHolderBinding) {
-                binding.layoutMessageTypes.root
+                binding.includeMessageHolderMessageTypes.root
                     .setBackgroundResource(R.drawable.background_message_holder_out_last)
 
                 super.setBackground(holderWidth, binding)

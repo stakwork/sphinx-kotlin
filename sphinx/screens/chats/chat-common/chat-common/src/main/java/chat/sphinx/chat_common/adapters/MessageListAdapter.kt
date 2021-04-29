@@ -138,18 +138,18 @@ class MessageListAdapter(
 
                 supervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
                     disposable = viewState.initialHolder.setInitialHolder(
-                        binding.layoutMessageHolderInitialHolder.textViewInitials,
-                        binding.layoutMessageHolderInitialHolder.imageViewChatPicture,
+                        binding.includeMessageHolderChatImageInitialHolder.textViewInitials,
+                        binding.includeMessageHolderChatImageInitialHolder.imageViewChatPicture,
                         imageLoader
                     )
                 }
 
                 // TODO: refactor into view state
                 viewState.message.messageContentDecrypted?.value?.let { content ->
-                    layoutMessageTypes.includeMessageTypeMessage.root.goneIfFalse(true)
-                    layoutMessageTypes.includeMessageTypeMessage.textViewMessageTypeMessage.text =
+                    includeMessageHolderMessageTypes.includeMessageTypeMessage.root.goneIfFalse(true)
+                    includeMessageHolderMessageTypes.includeMessageTypeMessage.textViewMessageTypeMessage.text =
                         content
-                } ?: layoutMessageTypes.includeMessageTypeMessage.root.goneIfFalse(false)
+                } ?: includeMessageHolderMessageTypes.includeMessageTypeMessage.root.goneIfFalse(false)
 
                 viewState.background.setBackground(recyclerViewWidth, binding)
             }
