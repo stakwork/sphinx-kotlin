@@ -388,13 +388,6 @@ AND type = 0
 --     OR type = 29
 ORDER BY id;
 
-messageGetUnseenToShowByChatId:
-SELECT *
-FROM messageDbo
-WHERE chat_id = ?
-AND seen = 0
-ORDER BY id;
-
 messageUpdateContentDecrypted:
 UPDATE messageDbo
 SET message_content_decrypted = :message_content_decrypted

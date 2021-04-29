@@ -561,23 +561,8 @@ class SphinxRepository(
 
     override suspend fun readMessages(chatId: ChatId) {
         val queries = coreDB.getSphinxDatabaseQueries()
-
-//        LOG.d(TAG, "UNSEEN MESSAGES COUNT----")
-//
-//        val messages = queries.messageGetUnseenToShowByChatId(chatId)
-//            .executeAsList()
-//            .toMutableSet()
-//
-//        LOG.d(TAG, "UNSEEN MESSAGES COUNT ${messages.size}")
-
         queries.chatUpdateSeen(true.toSeen(), chatId)
         queries.chatMessagesUpdateSeen(true.toSeen(), chatId)
-
-//        val messagesAfterUpdate = queries.messageGetUnseenToShowByChatId(chatId)
-//            .executeAsList()
-//            .toMutableSet()
-//
-//        LOG.d(TAG, "UNSEEN MESSAGES COUNT AFTER UPDATE ${messagesAfterUpdate.size}")
 
         networkQueryMessage.readMessages(chatId).collect { _ -> }
     }

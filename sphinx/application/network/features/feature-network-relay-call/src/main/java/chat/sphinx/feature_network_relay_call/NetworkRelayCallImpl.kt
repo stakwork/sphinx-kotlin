@@ -23,6 +23,7 @@ import okhttp3.Request
 import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import java.io.IOException
 
 
@@ -64,7 +65,7 @@ class NetworkRelayCallImpl(
         jsonAdapter: Class<V>,
         relayEndpoint: String,
         requestType: RequestType,
-        requestBody: Map<String, String>?,
+        requestBody: Map<String, Any>,
         additionalHeaders: Map<String, String>?,
         relayData: Pair<AuthorizationToken, RelayUrl>?
     ): Flow<LoadResponse<T, ResponseError>> = flow {
@@ -78,10 +79,9 @@ class NetworkRelayCallImpl(
                 additionalHeaders
             )
 
+            val jsonString = moshi.adapter(Map::class.java).toJson(requestBody).toString()
             val mediaType = "application/json".toMediaType()
-            val payload = (requestBody ?: "{}").toString()
-            val reqBody: RequestBody = payload.toRequestBody(mediaType)
-
+            val reqBody: RequestBody = jsonString.toRequestBody(mediaType)
 
             val request: Request = when (requestType) {
                 RequestType.GET -> requestBuilder.build()

@@ -24,7 +24,7 @@ abstract class NetworkRelayCall {
         jsonAdapter: Class<V>,
         relayEndpoint: String,
         requestType: RequestType = RequestType.GET,
-        requestBody: Map<String, String>? = null,
+        requestBody: Map<String, Any> = mapOf(),
         additionalHeaders: Map<String, String>? = null,
         relayData: Pair<AuthorizationToken, RelayUrl>? = null,
     ): Flow<LoadResponse<T, ResponseError>>
