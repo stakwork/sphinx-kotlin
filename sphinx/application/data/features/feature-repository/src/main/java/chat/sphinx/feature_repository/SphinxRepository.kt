@@ -559,12 +559,31 @@ class SphinxRepository(
             }
     }
 
-    override suspend fun readMessages(chatId: ChatId) {
-        val queries = coreDB.getSphinxDatabaseQueries()
-        queries.chatUpdateAsSeen(true.toSeen(), chatId)
-        queries.chatMessagesUpdateAsSeen(true.toSeen(), chatId)
+    override fun readMessages(chatId: ChatId) {
+        val supervisor = SupervisorJob()
+        val scope = CoroutineScope(supervisor)
+        scope.launch(dispatchers.mainImmediate) {
+            val queries = coreDB.getSphinxDatabaseQueries()
 
-        networkQueryMessage.readMessages(chatId).collect { _ -> }
+            val messages = queries.messageGetAllToShowByChatId(chatId)
+                .asFlow()
+                .mapToList(dispatchers.io)
+                .map { _ -> }
+
+            LOG.d(TAG, "UNSEEN MESSAGES COUNT ${messages.count()}")
+
+            queries.chatUpdateSeen(true.toSeen(), chatId)
+            queries.chatMessagesUpdateSeen(true.toSeen(), chatId)
+
+            val messagesAfterUpdate = queries.messageGetAllToShowByChatId(chatId)
+                .asFlow()
+                .mapToList(dispatchers.io)
+                .map { _ -> }
+
+            LOG.d(TAG, "UNSEEN MESSAGES COUNT AFTER UPDATE ${messagesAfterUpdate.count()}")
+
+            networkQueryMessage.readMessages(chatId).collect { _ -> }
+        }
     }
 
     @OptIn(UnencryptedDataAccess::class)

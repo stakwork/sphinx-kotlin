@@ -166,12 +166,12 @@ chatDeleteById:
 DELETE FROM chatDbo
 WHERE id = ?;
 
-chatUpdateAsSeen:
+chatUpdateSeen:
 UPDATE chatDbo
 SET seen = :seen
 WHERE id = ?;
 
-chatMessagesUpdateAsSeen:
+chatMessagesUpdateSeen:
 UPDATE messageDbo
 SET seen = :seen
 WHERE chat_id = ?;
@@ -386,6 +386,13 @@ AND type = 0
 --     OR type = 15
 --     OR type = 25
 --     OR type = 29
+ORDER BY id;
+
+messageGetUnseenToShowByChatId:
+SELECT *
+FROM messageDbo
+WHERE chat_id = ?
+AND seen = 0
 ORDER BY id;
 
 messageUpdateContentDecrypted:
