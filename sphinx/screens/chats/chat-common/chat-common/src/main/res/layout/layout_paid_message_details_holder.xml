@@ -6,54 +6,106 @@
     android:layout_width="match_parent"
     android:layout_height="@dimen/paid_message_details_holder_height"
     android:visibility="gone"
-    tools:visibility="visible">
+    tools:visibility="visible"
+    tools:background="@color/primaryGreen">
 
 
-    <!-- Asking for Payment -->
-    <include
-        android:id="@+id/include_paid_message_details_asking_for_payment"
-        layout="@layout/layout_paid_message_details_asking_for_payment"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
+    <!-- Payment Direction Icon: Sent -->
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/image_view_payment_sent_icon"
+        android:layout_width="@dimen/icon_container_message_payment_direction_xy"
+        android:layout_height="@dimen/icon_container_message_payment_direction_xy"
+        android:tint="@color/textMessages"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/text_view_payment_status_label"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:visibility="gone" />
+        app:srcCompat="@drawable/ic_sent"
+        tools:visibility="visible" />
 
-    <!-- Payment Accepted -->
-    <include
-        android:id="@+id/include_paid_message_details_payment_accepted"
-        layout="@layout/layout_paid_message_details_payment_accepted"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
+
+    <!-- Payment Direction Icon: Received -->
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/image_view_payment_received_icon"
+        android:layout_width="@dimen/icon_container_message_payment_direction_xy"
+        android:layout_height="@dimen/icon_container_message_payment_direction_xy"
+        android:tint="@color/receivedIcon"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:visibility="gone" />
+        app:srcCompat="@drawable/ic_received"
+        tools:visibility="visible" />
 
-    <!-- Payment Denied -->
-    <include
-        android:id="@+id/include_paid_message_details_payment_denied"
-        layout="@layout/layout_paid_message_details_payment_denied"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
+
+    <!-- Payment Status Icon -->
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/text_view_payment_status_icon"
+        android:layout_width="@dimen/material_icon_text_size_message_payment_status"
+        android:layout_height="@dimen/material_icon_text_size_message_payment_status"
+        android:layout_marginEnd="@dimen/default_inner_spacing_list_item_title"
+        android:fontFamily="@font/material_icons_regular"
+        android:text="@string/material_icon_name_payment_accepted"
+        android:textAlignment="center"
+        android:textColor="@color/textMessages"
+        android:textSize="@dimen/material_icon_text_size_message_payment_status"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/text_view_payment_status_label"
+        app:layout_constraintStart_toEndOf="@id/image_view_payment_received_icon"
         app:layout_constraintTop_toTopOf="parent"
-        tools:visibility="gone" />
+        tools:visibility="visible" />
 
-    <!-- Processing Payment -->
-    <include
-        android:id="@+id/include_paid_message_details_processing_payment"
-        layout="@layout/layout_paid_message_details_processing_payment"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
+
+    <!--  Payment Status Label  -->
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/text_view_payment_status_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/default_inner_spacing_list_item_title"
+        android:fontFamily="@font/montserrat_semi_bold"
+        android:textAllCaps="true"
+        android:textColor="@color/textMessages"
+        android:textSize="13sp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toEndOf="@id/text_view_payment_status_icon"
+        tools:text="@string/paid_message_details_status_label_pay"
+        tools:visibility="visible" />
+
+
+    <!--  Amount to Pay Label  -->
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/text_view_amount_to_pay_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/roboto_regular"
+        android:textColor="@color/textMessages"
+        android:textSize="@dimen/default_text_size_caption1"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toEndOf="@+id/text_view_payment_status_label"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="2000 SAT"
+        tools:visibility="visible" />
+
+
+    <!-- Spinner for when payment is processing -->
+    <ProgressBar
+        android:id="@+id/progress_wheel_processing_payment"
+        android:layout_width="@dimen/loading_wheel_message_payment_processing_xy"
+        android:layout_height="@dimen/loading_wheel_message_payment_processing_xy"
+        android:indeterminate="true"
+        android:indeterminateTint="@color/primaryText"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toEndOf="@+id/text_view_payment_status_label"
         app:layout_constraintTop_toTopOf="parent"
         tools:visibility="visible" />
 
