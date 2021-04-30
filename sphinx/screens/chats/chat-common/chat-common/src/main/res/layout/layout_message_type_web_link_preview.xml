@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_constraint_message_type_web_link_preview"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/web_link_preview_holder_height"
+    android:paddingHorizontal="@dimen/chat_message_inner_padding"
+    android:visibility="gone"
+    app:layout_constraintTop_toBottomOf="@+id/boosted_message_details_holder"
+    tools:visibility="visible">
+
+    <!-- Website Favicon -->
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/image_view_web_link_preview_favicon"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_marginEnd="@dimen/default_status_badge_inner_padding"
+        android:scaleType="fitCenter"
+        app:layout_constraintBottom_toBottomOf="@+id/text_view_web_link_preview_title"
+        app:layout_constraintEnd_toStartOf="@+id/text_view_web_link_preview_title"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/text_view_web_link_preview_title"
+        tools:srcCompat="@drawable/sphinx_white_notification" />
+
+    <!-- Title -->
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/text_view_web_link_preview_title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/roboto_bold"
+        android:paddingVertical="@dimen/default_list_row_padding_vertical"
+        android:textColor="@color/text"
+        android:textSize="@dimen/default_text_size_caption1"
+        app:layout_constraintBottom_toTopOf="@+id/text_view_web_link_preview_description"
+        app:layout_constraintEnd_toStartOf="@id/image_view_web_link_preview_main_image"
+        app:layout_constraintStart_toEndOf="@id/image_view_web_link_preview_favicon"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="SpaceX" />
+
+    <!-- Description -->
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/text_view_web_link_preview_description"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:fontFamily="@font/roboto_regular"
+        android:textColor="@color/text"
+        android:textSize="@dimen/default_text_size_caption2"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/image_view_web_link_preview_main_image"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/text_view_web_link_preview_title"
+        tools:text="SpaceX - Launches\n\nhttps://www.spacex.com/launches/" />
+
+    <!-- Main Image -->
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/image_view_web_link_preview_main_image"
+        android:layout_width="@dimen/web_link_preview_image_xy"
+        android:layout_height="@dimen/web_link_preview_image_xy"
+        android:scaleType="fitCenter"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toEndOf="@id/text_view_web_link_preview_description"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:srcCompat="@tools:sample/backgrounds/scenic" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

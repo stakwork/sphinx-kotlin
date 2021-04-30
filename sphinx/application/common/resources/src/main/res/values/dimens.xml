@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <dimen name="default_layout_margin">16dp</dimen>
+    <dimen name="default_list_row_padding_vertical">10dp</dimen>
     <dimen name="default_header_height">80dp</dimen>
     <dimen name="default_header_navigation_xy">56dp</dimen>
     <dimen name="default_header_navigation_padding">16dp</dimen>
@@ -16,6 +17,7 @@
     <dimen name="default_text_size_sub_headline">11sp</dimen>
     <dimen name="default_text_size_list_row_headline">13sp</dimen>
     <dimen name="default_text_size_caption1">10sp</dimen>
+    <dimen name="default_text_size_caption2">9sp</dimen>
 
     <dimen name="default_inner_spacing_list_item_title">10dp</dimen>
     <dimen name="default_status_badge_inner_padding">4dp</dimen>
