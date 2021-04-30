@@ -1,8 +1,8 @@
 package chat.sphinx.address_book.ui
 
 import androidx.lifecycle.viewModelScope
-import chat.sphinx.address_book.ui.adapter.AddressBookContact
 import chat.sphinx.concept_repository_contact.ContactRepository
+import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_contact.isTrue
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.BaseViewModel
@@ -10,8 +10,6 @@ import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
@@ -39,15 +37,13 @@ internal class AddressBookViewModel @Inject constructor(
                     return@collect
                 }
 
-                val newList = ArrayList<AddressBookContact>(contacts.size)
+                val newList = ArrayList<Contact>(contacts.size)
 
                 withContext(dispatchers.default) {
                     for (contact in contacts) {
                         if (contact.isOwner.isTrue()) {
                             continue
                         }
-
-                        newList.add(AddressBookContact(contact))
                     }
                 }
 

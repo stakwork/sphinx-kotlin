@@ -19,7 +19,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
-internal class AddressBookFragment(): BaseFragment<
+internal class AddressBookFragment: BaseFragment<
         AddressBookViewState,
         AddressBookViewModel,
         FragmentAddressBookBinding

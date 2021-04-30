@@ -15,6 +15,7 @@ import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.resources.R
 import chat.sphinx.resources.setBackgroundRandomColor
 import chat.sphinx.resources.setTextColorExt
+import chat.sphinx.wrapper_contact.Contact
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_viewmodel.collectViewState
 import io.matthewnelson.android_feature_viewmodel.currentViewState
@@ -27,7 +28,7 @@ internal class AddressBookListAdapter(
     private val viewModel: AddressBookViewModel,
 ): RecyclerView.Adapter<AddressBookListAdapter.AddressBookViewHolder>(), DefaultLifecycleObserver {
 
-    private val addressBookContacts = ArrayList<AddressBookContact>(viewModel.currentViewState.list)
+    private val addressBookContacts = ArrayList<Contact>(viewModel.currentViewState.list)
     private val supervisor = OnStopSupervisorScope(lifecycleOwner)
 
     override fun onStart(owner: LifecycleOwner) {
@@ -70,9 +71,9 @@ internal class AddressBookListAdapter(
     ): RecyclerView.ViewHolder(binding.root) {
 
         private var disposable: Disposable? = null
-        private var dContact: AddressBookContact? = null
+        private var dContact: Contact? = null
 
-        init {
+//        init {
 //            binding.layoutConstraintChatHolder.setOnClickListener {
 //                dChat?.let { dashboardChat ->
 //                    @Exhaustive
@@ -107,11 +108,11 @@ internal class AddressBookListAdapter(
 //                    }
 //                }
 //            }
-        }
+//        }
 
         fun bind(position: Int) {
             binding.apply {
-                val addressBookContact: AddressBookContact = addressBookContacts.getOrNull(position) ?: let {
+                val addressBookContact: Contact = addressBookContacts.getOrNull(position) ?: let {
                     dContact = null
                     return
                 }
@@ -137,7 +138,7 @@ internal class AddressBookListAdapter(
                         }
                     } else {
                         layoutAddressBookInitialHolder.textViewInitials.text =
-                            addressBookContact.contactName ?: ""
+                            addressBookContact.alias?.value ?: ""
                         layoutAddressBookInitialHolder.textViewInitials
                             .setBackgroundRandomColor(R.drawable.chat_initials_circle)
                     }
@@ -145,8 +146,8 @@ internal class AddressBookListAdapter(
                 }
 
                 // Name
-                textViewAddressBookHolderName.text = if (addressBookContact.contactName != null) {
-                    addressBookContact.contactName
+                textViewAddressBookHolderName.text = if (addressBookContact.alias != null) {
+                    addressBookContact.alias?.value
                 } else {
                     // Should never make it here, but just in case...
                     textViewAddressBookHolderName.setTextColorExt(R.color.primaryRed)

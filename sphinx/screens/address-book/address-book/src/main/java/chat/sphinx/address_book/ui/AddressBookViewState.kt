@@ -1,6 +1,6 @@
 package chat.sphinx.address_book.ui
 
-import chat.sphinx.address_book.ui.adapter.AddressBookContact
+import chat.sphinx.wrapper_contact.Contact
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewState
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
@@ -10,27 +10,27 @@ import kotlinx.coroutines.withContext
 import javax.annotation.meta.Exhaustive
 
 internal sealed class AddressBookViewState: ViewState<AddressBookViewState>() {
-    abstract val list: List<AddressBookContact>
+    abstract val list: List<Contact>
 
     class ListMode(
-        override val list: List<AddressBookContact>
+        override val list: List<Contact>
     ): AddressBookViewState()
 
     class SearchMode(
         val filter: AddressBookFilter.FilterBy,
-        override val list: List<AddressBookContact>
+        override val list: List<Contact>
     ): AddressBookViewState()
 }
 
 internal sealed class AddressBookFilter {
 
     /**
-     * Will use the current filter (if any) applied to the list of [AddressBookContact]s.
+     * Will use the current filter (if any) applied to the list of [Contact]s.
      * */
     object UseCurrent: AddressBookFilter()
 
     /**
-     * Will filter the list of [AddressBookContact]s based on the provided [value]
+     * Will filter the list of [Contact]s based on the provided [value]
      * */
     class FilterBy(val value: CharSequence): AddressBookFilter() {
         init {
@@ -47,11 +47,11 @@ internal sealed class AddressBookFilter {
 }
 
 @Suppress("NOTHING_TO_INLINE")
-private inline fun List<AddressBookContact>.filterAddressBookContacts(
+private inline fun List<Contact>.filterAddressBookContacts(
     filter: CharSequence
-): List<AddressBookContact> =
+): List<Contact> =
     filter {
-        it.contactName?.contains(filter, ignoreCase = true) == true
+        it.alias?.value?.contains(filter, ignoreCase = true) == true
     }
 
 // TODO: Need to preserve the original list when going between list and search modes.
@@ -72,13 +72,13 @@ internal class AddressBookViewStateContainer(
      * @param [filter] the type of filtering to apply to the list. See [AddressBookFilter].
      * */
     suspend fun updateAddressBookContacts(
-        addressBookContacts: List<AddressBookContact>?,
+        addressBookContacts: List<Contact>?,
         filter: AddressBookFilter = AddressBookFilter.UseCurrent
     ) {
         lock.withLock {
             val sortedAddressBookContacts = if (addressBookContacts != null) {
                 withContext(dispatchers.default) {
-                    addressBookContacts.sortedByDescending { it.sortBy }
+                    addressBookContacts.sortedByDescending { it.alias?.value }
                 }
             } else {
                 viewStateFlow.value.list
