@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="sats">sats</string>
+    <string name="new_contact">New Contact</string>
 
     <!--  Material Icons   -->
     <string name="material_icon_name_lock_outline">lock_outline</string>

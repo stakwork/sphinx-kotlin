@@ -7,7 +7,6 @@
     android:layout_height="@dimen/web_link_preview_holder_height"
     android:paddingHorizontal="@dimen/chat_message_inner_padding"
     android:visibility="gone"
-    app:layout_constraintTop_toBottomOf="@+id/boosted_message_details_holder"
     tools:visibility="visible">
 
     <!-- Website Favicon -->
