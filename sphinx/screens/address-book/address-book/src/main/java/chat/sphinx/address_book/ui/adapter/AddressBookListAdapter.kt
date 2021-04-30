@@ -5,6 +5,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import chat.sphinx.address_book.databinding.LayoutAddressBookContactHolderBinding
 import chat.sphinx.address_book.ui.AddressBookViewModel
@@ -21,12 +22,65 @@ import io.matthewnelson.android_feature_viewmodel.collectViewState
 import io.matthewnelson.android_feature_viewmodel.currentViewState
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisorScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 internal class AddressBookListAdapter(
     private val imageLoader: ImageLoader<ImageView>,
     private val lifecycleOwner: LifecycleOwner,
     private val viewModel: AddressBookViewModel,
 ): RecyclerView.Adapter<AddressBookListAdapter.AddressBookViewHolder>(), DefaultLifecycleObserver {
+
+    private inner class Diff(
+        private val oldList: List<Contact>,
+        private val newList: List<Contact>,
+    ): DiffUtil.Callback() {
+        override fun getOldListSize(): Int {
+            return oldList.size
+        }
+
+        override fun getNewListSize(): Int {
+            return oldList.size
+        }
+
+        @Volatile
+        var sameList: Boolean = oldListSize == newListSize
+            private set
+
+        override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+            val same: Boolean =  try {
+                oldList[oldItemPosition].let { old ->
+                    newList[newItemPosition].let { new ->
+                        old.id == new.id
+                    }
+                }
+            } catch (e: IndexOutOfBoundsException) {
+                false
+            }
+
+            if (sameList) {
+                sameList = same
+            }
+
+            return same
+        }
+
+        override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+            val same: Boolean = try {
+                // the Contact is a data class so we can simply compare string
+                // values to see if any fields have changed.
+                oldList[oldItemPosition].toString() == newList[newItemPosition].toString()
+            } catch (e: IndexOutOfBoundsException) {
+                false
+            }
+
+            if (sameList) {
+                sameList = same
+            }
+
+            return same
+        }
+
+    }
 
     private val addressBookContacts = ArrayList<Contact>(viewModel.currentViewState.list)
     private val supervisor = OnStopSupervisorScope(lifecycleOwner)
@@ -35,8 +89,25 @@ internal class AddressBookListAdapter(
         super.onStart(owner)
         supervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
             viewModel.collectViewState { viewState ->
-                addressBookContacts.addAll(viewState.list)
-                this@AddressBookListAdapter.notifyDataSetChanged()
+
+                if (addressBookContacts.isEmpty()) {
+                    addressBookContacts.addAll(viewState.list)
+                    this@AddressBookListAdapter.notifyDataSetChanged()
+                } else {
+                    val diff = Diff(addressBookContacts, viewState.list)
+
+                    withContext(viewModel.dispatchers.default) {
+                        DiffUtil.calculateDiff(diff)
+                    }.let { result ->
+
+                        if (!diff.sameList) {
+                            addressBookContacts.clear()
+                            addressBookContacts.addAll(viewState.list)
+                            result.dispatchUpdatesTo(this@AddressBookListAdapter)
+                        }
+
+                    }
+                }
             }
         }
     }
