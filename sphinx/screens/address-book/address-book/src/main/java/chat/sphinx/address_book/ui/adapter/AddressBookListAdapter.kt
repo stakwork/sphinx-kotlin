@@ -5,12 +5,9 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
-import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import chat.sphinx.address_book.databinding.LayoutAddressBookContactHolderBinding
 import chat.sphinx.address_book.ui.AddressBookViewModel
-import chat.sphinx.address_book.ui.collectAddressBookViewState
-import chat.sphinx.address_book.ui.currentAddressBookViewState
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
@@ -19,22 +16,24 @@ import chat.sphinx.resources.R
 import chat.sphinx.resources.setBackgroundRandomColor
 import chat.sphinx.resources.setTextColorExt
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
+import io.matthewnelson.android_feature_viewmodel.collectViewState
+import io.matthewnelson.android_feature_viewmodel.currentViewState
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisorScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 internal class AddressBookListAdapter(
     private val imageLoader: ImageLoader<ImageView>,
     private val lifecycleOwner: LifecycleOwner,
     private val viewModel: AddressBookViewModel,
 ): RecyclerView.Adapter<AddressBookListAdapter.AddressBookViewHolder>(), DefaultLifecycleObserver {
-    private val addressBookContacts = ArrayList<AddressBookContact>(viewModel.currentAddressBookViewState.list)
+
+    private val addressBookContacts = ArrayList<AddressBookContact>(viewModel.currentViewState.list)
     private val supervisor = OnStopSupervisorScope(lifecycleOwner)
 
     override fun onStart(owner: LifecycleOwner) {
         super.onStart(owner)
         supervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
-            viewModel.collectAddressBookViewState { viewState ->
+            viewModel.collectViewState { viewState ->
                 addressBookContacts.addAll(viewState.list)
                 this@AddressBookListAdapter.notifyDataSetChanged()
             }
