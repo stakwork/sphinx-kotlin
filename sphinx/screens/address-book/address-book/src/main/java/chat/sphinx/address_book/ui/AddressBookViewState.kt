@@ -78,7 +78,7 @@ internal class AddressBookViewStateContainer(
         lock.withLock {
             val sortedAddressBookContacts = if (addressBookContacts != null) {
                 withContext(dispatchers.default) {
-                    addressBookContacts.sortedByDescending { it.alias?.value }
+                    addressBookContacts.sortedBy { it.alias?.value }
                 }
             } else {
                 viewStateFlow.value.list
