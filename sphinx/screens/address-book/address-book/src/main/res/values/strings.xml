@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="address_book_header_name">Address Book</string>
+    <string name="search">Search</string>
+    <string name="add_icon"></string>
+    <string name="add_friend">Add Friend</string>
+</resources>
