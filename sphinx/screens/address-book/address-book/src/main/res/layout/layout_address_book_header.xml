@@ -10,13 +10,13 @@
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/text_view_address_book_header_nav_back"
-        android:layout_width="@dimen/default_chat_initial_image_xy"
-        android:layout_height="@dimen/default_chat_initial_image_xy"
+        android:layout_width="@dimen/default_header_navigation_xy"
+        android:layout_height="@dimen/default_header_navigation_xy"
         android:fontFamily="@font/material_icons_regular"
+        android:gravity="center"
+        android:text="@string/material_icon_name_nav_back"
         android:textColor="@color/washedOutReceivedText"
         android:textSize="@dimen/default_text_size_back_arrow"
-        android:text="@string/material_icon_name_nav_back"
-        android:gravity="center"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -26,16 +26,16 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/default_header_headline_margin_horizontal"
+        android:fontFamily="@font/montserrat_bold"
         android:paddingEnd="4dp"
         android:singleLine="true"
+        android:text="@string/address_book_header_name"
         android:textAllCaps="true"
         android:textColor="@color/primaryText"
         android:textSize="@dimen/address_book_header_default_text_size"
-        android:fontFamily="@font/montserrat_bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:text="@string/address_book_header_name" />
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -7,17 +7,12 @@
     android:background="@color/deepNight"
     tools:context=".ui.AddressBookFragment">
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center"
-        android:text="ADDRESS BOOK" />
-
     <include
         android:id="@+id/layout_address_book_header"
         layout="@layout/layout_address_book_header"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/default_header_height" />
+        android:layout_height="@dimen/default_header_height"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <include
         android:id="@+id/layout_address_book_search_bar"
@@ -28,9 +23,9 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/add_button_row_container"
-        app:layout_constraintTop_toBottomOf="@+id/layout_address_book_search_bar"
         android:layout_width="match_parent"
-        android:layout_height="70dp">
+        android:layout_height="70dp"
+        app:layout_constraintTop_toBottomOf="@+id/layout_address_book_search_bar">
 
         <include
             android:id="@+id/layout_address_book_button_add_friend"
@@ -49,7 +44,7 @@
         layout="@layout/layout_address_book_contacts"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:layout_constraintTop_toBottomOf="@+id/add_button_row_container"
-        app:layout_constraintBottom_toBottomOf="parent" />
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/add_button_row_container" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
