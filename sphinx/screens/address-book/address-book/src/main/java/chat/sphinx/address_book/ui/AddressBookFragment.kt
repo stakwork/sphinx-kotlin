@@ -6,13 +6,17 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.address_book.R
 import chat.sphinx.address_book.ui.adapter.AddressBookListAdapter
 import chat.sphinx.address_book.databinding.FragmentAddressBookBinding
 import chat.sphinx.address_book.navigation.AddressBookNavigator
+import chat.sphinx.address_book.ui.adapter.AddressBookFooterAdapter
 import chat.sphinx.concept_image_loader.ImageLoader
+import chat.sphinx.insetter_activity.InsetterActivity
+import chat.sphinx.insetter_activity.addStatusBarPadding
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.base.BaseFragment
 import kotlinx.coroutines.launch
@@ -63,15 +67,19 @@ internal class AddressBookFragment: BaseFragment<
             }
         }
 
+        (requireActivity() as InsetterActivity)
+            .addStatusBarPadding(binding.layoutAddressBookHeader.layoutConstraintAddressBookHeader)
+
         setupContacts()
     }
 
     private fun setupContacts() {
         val addressBookListAdapter = AddressBookListAdapter(imageLoader, viewLifecycleOwner, viewModel)
+        val addressBookFooterAdapter = AddressBookFooterAdapter(requireActivity() as InsetterActivity)
         binding.layoutAddressBookContacts.recyclerViewContacts.apply {
             this.setHasFixedSize(false)
             layoutManager = LinearLayoutManager(binding.root.context)
-            adapter = addressBookListAdapter
+            adapter = ConcatAdapter(addressBookListAdapter, addressBookFooterAdapter)
         }
     }
 
