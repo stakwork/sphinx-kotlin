@@ -16,6 +16,7 @@ import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.resources.R
 import chat.sphinx.resources.setBackgroundRandomColor
 import chat.sphinx.resources.setTextColorExt
+import chat.sphinx.wrapper_common.util.getInitials
 import chat.sphinx.wrapper_contact.Contact
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_viewmodel.collectViewState
@@ -209,7 +210,7 @@ internal class AddressBookListAdapter(
                         }
                     } else {
                         layoutAddressBookInitialHolder.textViewInitials.text =
-                            addressBookContact.alias?.value ?: ""
+                            addressBookContact.alias?.value?.getInitials() ?: ""
                         layoutAddressBookInitialHolder.textViewInitials
                             .setBackgroundRandomColor(R.drawable.chat_initials_circle)
                     }
