@@ -32,30 +32,26 @@ internal class AddressBookViewModel @Inject constructor(
         addressBookViewStateContainer.updateAddressBookContacts(null, filter)
     }
 
-    private val collectionLock = Mutex()
-
     init {
         viewModelScope.launch(dispatchers.mainImmediate) {
             contactRepository.getContacts().distinctUntilChanged().collect { contacts ->
-                collectionLock.withLock {
-                    if (contacts.isEmpty()) {
-                        return@withLock
-                    }
-
-                    val newList = ArrayList<AddressBookContact>(contacts.size)
-
-                    withContext(dispatchers.default) {
-                        for (contact in contacts) {
-                            if (contact.isOwner.isTrue()) {
-                                continue
-                            }
-
-                            newList.add(AddressBookContact(contact))
-                        }
-                    }
-
-                    addressBookViewStateContainer.updateAddressBookContacts(newList.toList())
+                if (contacts.isEmpty()) {
+                    return@collect
                 }
+
+                val newList = ArrayList<AddressBookContact>(contacts.size)
+
+                withContext(dispatchers.default) {
+                    for (contact in contacts) {
+                        if (contact.isOwner.isTrue()) {
+                            continue
+                        }
+
+                        newList.add(AddressBookContact(contact))
+                    }
+                }
+
+                addressBookViewStateContainer.updateAddressBookContacts(newList.toList())
             }
         }
     }
