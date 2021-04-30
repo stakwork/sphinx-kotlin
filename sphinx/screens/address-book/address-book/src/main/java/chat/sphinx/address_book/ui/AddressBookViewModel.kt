@@ -2,7 +2,6 @@ package chat.sphinx.address_book.ui
 
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_repository_contact.ContactRepository
-import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_contact.isTrue
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.BaseViewModel
@@ -37,17 +36,18 @@ internal class AddressBookViewModel @Inject constructor(
                     return@collect
                 }
 
-                val newList = ArrayList<Contact>(contacts.size)
+                val mutableList = contacts.toMutableList()
 
                 withContext(dispatchers.default) {
-                    for (contact in contacts) {
+                    for ((index, contact) in contacts.withIndex()) {
                         if (contact.isOwner.isTrue()) {
-                            continue
+                            mutableList.removeAt(index)
+                            break
                         }
                     }
                 }
 
-                addressBookViewStateContainer.updateAddressBookContacts(newList.toList())
+                addressBookViewStateContainer.updateAddressBookContacts(mutableList.toList())
             }
         }
     }
