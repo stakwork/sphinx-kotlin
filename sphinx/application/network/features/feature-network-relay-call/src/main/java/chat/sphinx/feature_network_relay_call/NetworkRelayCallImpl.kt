@@ -35,7 +35,7 @@ private inline fun NetworkRelayCallImpl.buildRelayRequest(
 ): Request.Builder {
     val builder = Request.Builder()
 
-    builder.addHeader(NetworkRelayCallImpl.AUTHORIZATION_HEADER, relayData.first.value)
+    builder.addHeader(AuthorizationToken.AUTHORIZATION_HEADER, relayData.first.value)
     builder.url(relayData.second.value + relayEndpoint)
 
     additionalHeaders?.let { headers ->
@@ -85,7 +85,6 @@ class NetworkRelayCallImpl(
 
     companion object {
         const val TAG = "NetworkRelayCallImpl"
-        const val AUTHORIZATION_HEADER = "X-User-Token"
     }
 
     override fun <T: Any, V: RelayResponse<T>> get(
