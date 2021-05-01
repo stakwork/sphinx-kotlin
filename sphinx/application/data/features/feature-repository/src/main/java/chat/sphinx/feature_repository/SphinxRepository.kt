@@ -27,6 +27,7 @@ import chat.sphinx.logger.d
 import chat.sphinx.logger.e
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_common.DateTime
+import chat.sphinx.wrapper_common.Seen
 import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.chat.ChatId
 import chat.sphinx.wrapper_common.contact.ContactId
@@ -561,8 +562,15 @@ class SphinxRepository(
 
     override suspend fun readMessages(chatId: ChatId) {
         val queries = coreDB.getSphinxDatabaseQueries()
-        queries.chatUpdateSeen(true.toSeen(), chatId)
-        queries.chatMessagesUpdateSeen(true.toSeen(), chatId)
+
+        chatLock.withLock {
+            messageLock.withLock {
+                queries.transaction {
+                    queries.chatUpdateSeen(Seen.True, chatId)
+                    queries.chatMessagesUpdateSeen(Seen.True, chatId)
+                }
+            }
+        }
 
         networkQueryMessage.readMessages(chatId).collect { _ -> }
     }
