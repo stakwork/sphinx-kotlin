@@ -87,7 +87,7 @@ abstract class NetworkRelayCall {
      * */
     abstract fun<
             T: Any,
-            RequestBody: Any?,
+            RequestBody: Any,
             V: RelayResponse<T>
             > delete(
         jsonAdapter: Class<V>,

@@ -74,6 +74,18 @@ private suspend inline fun RelayDataHandler.retrieveRelayData(): Pair<Authorizat
     }
 }
 
+@Suppress("NOTHING_TO_INLINE")
+@Throws(AssertionError::class, NullPointerException::class)
+private inline fun<RequestBody: Any> Moshi.requestBodyToJson(
+    requestBodyJsonAdapter: Class<RequestBody>,
+    requestBody: RequestBody
+): String =
+    adapter(requestBodyJsonAdapter)
+        .toJson(requestBody)
+        ?: throw NullPointerException(
+            "Failed to convert RequestBody ${requestBodyJsonAdapter.simpleName} to Json"
+        )
+
 @Suppress("BlockingMethodInNonBlockingContext")
 class NetworkRelayCallImpl(
     private val dispatchers: CoroutineDispatchers,
@@ -132,11 +144,8 @@ class NetworkRelayCallImpl(
                 additionalHeaders
             )
 
-            val requestBodyJson: String = moshi.adapter(requestBodyJsonAdapter)
-                .toJson(requestBody)
-                ?: throw NullPointerException(
-                    "Failed to convert RequestBody ${requestBodyJsonAdapter.simpleName} to Json"
-                )
+            val requestBodyJson: String = moshi
+                .requestBodyToJson(requestBodyJsonAdapter, requestBody)
 
             val reqBody = requestBodyJson.toRequestBody(mediaType?.toMediaType())
 
@@ -169,11 +178,8 @@ class NetworkRelayCallImpl(
                 additionalHeaders
             )
 
-            val requestBodyJson: String = moshi.adapter(requestBodyJsonAdapter)
-                .toJson(requestBody)
-                ?: throw NullPointerException(
-                    "Failed to convert RequestBody ${requestBodyJsonAdapter.simpleName} to Json"
-                )
+            val requestBodyJson: String = moshi
+                .requestBodyToJson(requestBodyJsonAdapter, requestBody)
 
             val reqBody = requestBodyJson.toRequestBody(mediaType?.toMediaType())
 
@@ -187,7 +193,7 @@ class NetworkRelayCallImpl(
 
     }.flowOn(dispatchers.io)
 
-    override fun <T: Any, RequestBody: Any?, V: RelayResponse<T>> delete(
+    override fun <T: Any, RequestBody: Any, V: RelayResponse<T>> delete(
         jsonAdapter: Class<V>,
         relayEndpoint: String,
         requestBodyJsonAdapter: Class<RequestBody>?,
@@ -210,11 +216,7 @@ class NetworkRelayCallImpl(
                 if (requestBody == null || requestBodyJsonAdapter == null) {
                     null
                 } else {
-                    moshi.adapter(requestBodyJsonAdapter)
-                        .toJson(requestBody)
-                        ?: throw NullPointerException(
-                            "Failed to convert RequestBody ${requestBodyJsonAdapter.simpleName} to Json"
-                        )
+                    moshi.requestBodyToJson(requestBodyJsonAdapter, requestBody)
                 }
 
             val reqBody = requestBodyJson?.toRequestBody(mediaType?.toMediaType())
