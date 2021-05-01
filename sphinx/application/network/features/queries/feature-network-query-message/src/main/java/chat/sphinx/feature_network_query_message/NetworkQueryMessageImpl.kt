@@ -50,17 +50,6 @@ class NetworkQueryMessageImpl(
             relayData = relayData
         )
 
-    override fun readMessages(
-        chatId: ChatId,
-        relayData: Pair<AuthorizationToken, RelayUrl>?
-    ): Flow<LoadResponse<Any?, ResponseError>> =
-        networkRelayCall.get(
-            jsonAdapter = ReadMessagesRelayResponse::class.java,
-            relayEndpoint = String.format(ENDPOINT_MESSAGES_READ, chatId.value),
-            requestType = NetworkRelayCall.RequestType.POST,
-            relayData = relayData
-        )
-
     ///////////
     /// PUT ///
     ///////////
@@ -70,6 +59,18 @@ class NetworkQueryMessageImpl(
     ////////////
 //    app.post('/messages', messages.sendMessage)
 //    app.post('/messages/:chat_id/read', messages.readMessages)
+    override fun readMessages(
+        chatId: ChatId,
+        relayData: Pair<AuthorizationToken, RelayUrl>?
+    ): Flow<LoadResponse<Any?, ResponseError>> =
+        networkRelayCall.post(
+            jsonAdapter = ReadMessagesRelayResponse::class.java,
+            relayEndpoint = String.format(ENDPOINT_MESSAGES_READ, chatId.value),
+            requestBodyJsonAdapter = Map::class.java,
+            requestBody = mapOf(Pair("", "")),
+            relayData = relayData
+        )
+
 //    app.post('/messages/clear', messages.clearMessages)
 //    app.post('/payment', payments.sendPayment)
 

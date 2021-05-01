@@ -26,11 +26,6 @@ abstract class NetworkQueryMessage {
         relayData: Pair<AuthorizationToken, RelayUrl>? = null
     ): Flow<LoadResponse<List<MessageDto>, ResponseError>>
 
-    abstract fun readMessages(
-        chatId: ChatId,
-        relayData: Pair<AuthorizationToken, RelayUrl>? = null
-    ): Flow<LoadResponse<Any?, ResponseError>>
-
     ///////////
     /// PUT ///
     ///////////
@@ -40,6 +35,11 @@ abstract class NetworkQueryMessage {
     ////////////
 //    app.post('/messages', messages.sendMessage)
 //    app.post('/messages/:chat_id/read', messages.readMessages)
+    abstract fun readMessages(
+        chatId: ChatId,
+        relayData: Pair<AuthorizationToken, RelayUrl>? = null
+    ): Flow<LoadResponse<Any?, ResponseError>>
+
 //    app.post('/messages/clear', messages.clearMessages)
 //    app.post('/payment', payments.sendPayment)
 
