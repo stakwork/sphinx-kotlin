@@ -1,0 +1,11 @@
+plugins {
+    id 'java-library'
+    id 'kotlin'
+}
+
+dependencies {
+    api project(path: ':socket-io:engine')
+
+    testImplementation testDeps.junit
+    testImplementation testDeps.hamcrest
+}

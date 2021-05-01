@@ -88,6 +88,10 @@ include ':sphinx:screens-detail:transactions:transactions'
 // Testing
 include ':sphinx:test:test-network-query'
 
+// SocketIO
+include ':socket-io:client'
+include ':socket-io:engine'
+
 ////////////////////////////////////////
 //////////// Kotlin Android ////////////
 ////////////////////////////////////////
