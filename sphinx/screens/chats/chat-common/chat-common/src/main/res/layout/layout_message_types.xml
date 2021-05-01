@@ -57,6 +57,12 @@
             tools:visibility="gone" />
 
 
+        <!-- Web link preview  -->
+        <include
+            android:id="@+id/include_message_type_web_link_preview"
+            layout="@layout/layout_message_type_web_link_preview"
+            tools:visibility="gone" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 
@@ -93,6 +99,5 @@
             tools:visibility="gone" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>
