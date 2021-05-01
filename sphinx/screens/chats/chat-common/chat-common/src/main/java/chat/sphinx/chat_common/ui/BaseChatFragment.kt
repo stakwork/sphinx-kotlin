@@ -151,7 +151,7 @@ abstract class BaseChatFragment<
             }
         }
 
-        readMessages()
+        viewModel.readMessages()
     }
 
     private fun setChatImageFromUrl(photoUrl: PhotoUrl) {
@@ -161,12 +161,6 @@ abstract class BaseChatFragment<
 
         onStopSupervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
             imageLoader.load(headerChatPicture, photoUrl.value, options.build())
-        }
-    }
-
-    private fun readMessages() {
-        onStopSupervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
-            viewModel.readMessages()
         }
     }
 
@@ -180,6 +174,6 @@ abstract class BaseChatFragment<
 
     override fun onPause() {
         super.onPause()
-        readMessages()
+        viewModel.readMessages()
     }
 }
