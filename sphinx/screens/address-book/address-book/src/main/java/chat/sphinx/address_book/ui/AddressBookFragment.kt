@@ -76,7 +76,7 @@ internal class AddressBookFragment: BaseFragment<
     private fun setupContacts() {
         val addressBookListAdapter = AddressBookListAdapter(imageLoader, viewLifecycleOwner, viewModel)
         val addressBookFooterAdapter = AddressBookFooterAdapter(requireActivity() as InsetterActivity)
-        binding.layoutAddressBookContacts.recyclerViewContacts.apply {
+        binding.recyclerViewContacts.apply {
             this.setHasFixedSize(false)
             layoutManager = LinearLayoutManager(binding.root.context)
             adapter = ConcatAdapter(addressBookListAdapter, addressBookFooterAdapter)

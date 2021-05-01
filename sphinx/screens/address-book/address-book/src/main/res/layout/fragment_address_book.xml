@@ -39,12 +39,12 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <include
-        android:id="@+id/layout_address_book_contacts"
-        layout="@layout/layout_address_book_contacts"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_view_contacts"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/add_button_row_container" />
+        app:layout_constraintTop_toBottomOf="@+id/add_button_row_container"
+        tools:listitem="@layout/layout_address_book_contact_holder" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
