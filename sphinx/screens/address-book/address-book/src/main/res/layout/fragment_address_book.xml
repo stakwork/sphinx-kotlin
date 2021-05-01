@@ -25,6 +25,8 @@
         android:id="@+id/add_button_row_container"
         android:layout_width="match_parent"
         android:layout_height="70dp"
+        android:background="@color/headerBG"
+        android:elevation="@dimen/default_elevation"
         app:layout_constraintTop_toBottomOf="@+id/layout_address_book_search_bar">
 
         <include
