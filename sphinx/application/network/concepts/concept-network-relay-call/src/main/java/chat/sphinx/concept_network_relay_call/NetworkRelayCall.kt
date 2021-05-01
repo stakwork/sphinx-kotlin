@@ -15,7 +15,7 @@ abstract class NetworkRelayCall {
     /**
      * GET
      *
-     * @param [jsonAdapter] the class to serialize json into
+     * @param [jsonAdapter] the class to serialize the response json into
      * @param [relayEndpoint] the endpoint to append to the [RelayUrl], ex: /contacts
      * @param [additionalHeaders] any additional headers to add to the call
      * @param [relayData] if not `null`, will override the auto-fetching of persisted user data
@@ -23,8 +23,78 @@ abstract class NetworkRelayCall {
     abstract fun<T: Any, V: RelayResponse<T>> get(
         jsonAdapter: Class<V>,
         relayEndpoint: String,
-        requestType: RequestType = RequestType.GET,
-        requestBody: Map<String, Any> = mapOf(),
+        additionalHeaders: Map<String, String>? = null,
+        relayData: Pair<AuthorizationToken, RelayUrl>? = null,
+    ): Flow<LoadResponse<T, ResponseError>>
+
+    /**
+     * PUT
+     *
+     * @param [jsonAdapter] the class to serialize the response json into
+     * @param [relayEndpoint] the endpoint to append to the [RelayUrl], ex: /contacts
+     * @param [requestBodyJsonAdapter] the class to serialize the request body to json
+     * @param [requestBody] the request body to be converted to json
+     * @param [additionalHeaders] any additional headers to add to the call
+     * @param [relayData] if not `null`, will override the auto-fetching of persisted user data
+     * */
+    abstract fun<
+            T: Any,
+            RequestBody: Any,
+            V: RelayResponse<T>
+            > put(
+        jsonAdapter: Class<V>,
+        relayEndpoint: String,
+        requestBodyJsonAdapter: Class<RequestBody>,
+        requestBody: RequestBody,
+        mediaType: String? = "application/json",
+        additionalHeaders: Map<String, String>? = null,
+        relayData: Pair<AuthorizationToken, RelayUrl>? = null,
+    ): Flow<LoadResponse<T, ResponseError>>
+
+    /**
+     * POST
+     *
+     * @param [jsonAdapter] the class to serialize the response json into
+     * @param [relayEndpoint] the endpoint to append to the [RelayUrl], ex: /contacts
+     * @param [requestBodyJsonAdapter] the class to serialize the request body to json
+     * @param [requestBody] the request body to be converted to json
+     * @param [additionalHeaders] any additional headers to add to the call
+     * @param [relayData] if not `null`, will override the auto-fetching of persisted user data
+     * */
+    abstract fun<
+            T: Any,
+            RequestBody: Any,
+            V: RelayResponse<T>
+            > post(
+        jsonAdapter: Class<V>,
+        relayEndpoint: String,
+        requestBodyJsonAdapter: Class<RequestBody>,
+        requestBody: RequestBody,
+        mediaType: String? = "application/json",
+        additionalHeaders: Map<String, String>? = null,
+        relayData: Pair<AuthorizationToken, RelayUrl>? = null,
+    ): Flow<LoadResponse<T, ResponseError>>
+
+    /**
+     * DELETE
+     *
+     * @param [jsonAdapter] the class to serialize the response json into
+     * @param [relayEndpoint] the endpoint to append to the [RelayUrl], ex: /contacts
+     * @param [requestBodyJsonAdapter] OPTIONAL: the class to serialize the request body to json
+     * @param [requestBody] OPTIONAL: the request body to be converted to json
+     * @param [additionalHeaders] any additional headers to add to the call
+     * @param [relayData] if not `null`, will override the auto-fetching of persisted user data
+     * */
+    abstract fun<
+            T: Any,
+            RequestBody: Any?,
+            V: RelayResponse<T>
+            > delete(
+        jsonAdapter: Class<V>,
+        relayEndpoint: String,
+        requestBodyJsonAdapter: Class<RequestBody>? = null,
+        requestBody: RequestBody? = null,
+        mediaType: String? = null,
         additionalHeaders: Map<String, String>? = null,
         relayData: Pair<AuthorizationToken, RelayUrl>? = null,
     ): Flow<LoadResponse<T, ResponseError>>

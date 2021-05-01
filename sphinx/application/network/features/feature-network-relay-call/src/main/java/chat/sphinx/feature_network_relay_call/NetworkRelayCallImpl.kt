@@ -20,14 +20,14 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import okhttp3.Request
-import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.internal.EMPTY_REQUEST
 import java.io.IOException
 
 
 @Suppress("NOTHING_TO_INLINE")
+@Throws(IllegalArgumentException::class)
 private inline fun NetworkRelayCallImpl.buildRelayRequest(
     relayEndpoint: String,
     relayData: Pair<AuthorizationToken, RelayUrl>,
@@ -47,6 +47,33 @@ private inline fun NetworkRelayCallImpl.buildRelayRequest(
     return builder
 }
 
+@Suppress("NOTHING_TO_INLINE")
+private inline fun NetworkRelayCallImpl.handleException(
+    LOG: SphinxLogger,
+    callMethod: String,
+    relayEndpoint: String,
+    e: Exception
+): Response.Error<ResponseError> {
+    val msg = "$callMethod Request failure for endpoint: $relayEndpoint"
+    LOG.e(NetworkRelayCallImpl.TAG, msg, e)
+    return Response.Error(ResponseError(msg, e))
+}
+
+@Throws(Exception::class)
+private suspend inline fun RelayDataHandler.retrieveRelayData(): Pair<AuthorizationToken, RelayUrl> {
+    val response = retrieveRelayUrlAndAuthorizationToken()
+
+    @Exhaustive
+    when(response) {
+        is Response.Error -> {
+            throw Exception(response.message)
+        }
+        is Response.Success -> {
+            return response.value
+        }
+    }
+}
+
 @Suppress("BlockingMethodInNonBlockingContext")
 class NetworkRelayCallImpl(
     private val dispatchers: CoroutineDispatchers,
@@ -61,11 +88,9 @@ class NetworkRelayCallImpl(
         const val AUTHORIZATION_HEADER = "X-User-Token"
     }
 
-    override fun <T : Any, V : RelayResponse<T>> get(
+    override fun <T: Any, V: RelayResponse<T>> get(
         jsonAdapter: Class<V>,
         relayEndpoint: String,
-        requestType: RequestType,
-        requestBody: Map<String, Any>,
         additionalHeaders: Map<String, String>?,
         relayData: Pair<AuthorizationToken, RelayUrl>?
     ): Flow<LoadResponse<T, ResponseError>> = flow {
@@ -75,93 +100,180 @@ class NetworkRelayCallImpl(
         try {
             val requestBuilder = buildRelayRequest(
                 relayEndpoint,
-                relayData ?: retrieveRelayData(),
+                relayData ?: relayDataHandler.retrieveRelayData(),
                 additionalHeaders
             )
 
-            val jsonString = moshi.adapter(Map::class.java).toJson(requestBody).toString()
-            val mediaType = "application/json".toMediaType()
-            val reqBody: RequestBody = jsonString.toRequestBody(mediaType)
+            val response = call(jsonAdapter, requestBuilder.build())
 
-            val request: Request = when (requestType) {
-                RequestType.GET -> requestBuilder.build()
-                RequestType.POST -> requestBuilder.post(reqBody).build()
-                RequestType.PUT -> requestBuilder.put(reqBody).build()
-                RequestType.DELETE -> requestBuilder.delete().build()
-            }
-
-            val networkResponse = networkClient.getClient()
-                .newCall(request)
-                .execute()
-
-            if (!networkResponse.isSuccessful) {
-                throw IOException(networkResponse.toString())
-            }
-
-            val body = networkResponse.body ?: throw NullPointerException(
-                """
-                    NetworkResponse.body returned null
-                    NetworkResponse: $networkResponse
-                """.trimIndent()
-            )
-
-            val relayResponse: V = moshi
-                .adapter(jsonAdapter)
-                .fromJson(body.source())
-                ?: throw IOException(
-                    """
-                        Failed to convert Json to ${jsonAdapter.simpleName}
-                        NetworkResponse: $networkResponse
-                    """.trimIndent()
-                )
-
-            if (relayResponse.success) {
-                emit(
-                    Response.Success(
-                        relayResponse.response ?: throw NullPointerException(
-                            """
-                                RelayResponse.success: true
-                                RelayResponse.response: >>> null <<<
-                                RelayResponse.error: ${relayResponse.error}
-                                NetworkResponse: $networkResponse
-                            """.trimIndent()
-                        )
-                    )
-                )
-            } else {
-                throw Exception(
-                    """
-                        RelayResponse.success: false
-                        RelayResponse.error: ${relayResponse.error}
-                        NetworkResponse: $networkResponse
-                    """.trimIndent()
-                )
-            }
+            emit(Response.Success(response))
 
         } catch (e: Exception) {
-            val msg = "Request failure for endpoint: $relayEndpoint"
-            LOG.e(TAG, msg, e)
-            emit(
-                Response.Error(
-                    ResponseError(msg, e)
-                )
-            )
+            emit(handleException(LOG, "GET", relayEndpoint, e))
         }
 
     }.flowOn(dispatchers.io)
 
-    @Throws(Exception::class)
-    private suspend fun retrieveRelayData(): Pair<AuthorizationToken, RelayUrl> {
-        val response = relayDataHandler.retrieveRelayUrlAndAuthorizationToken()
+    override fun <T: Any, RequestBody: Any, V: RelayResponse<T>> put(
+        jsonAdapter: Class<V>,
+        relayEndpoint: String,
+        requestBodyJsonAdapter: Class<RequestBody>,
+        requestBody: RequestBody,
+        mediaType: String?,
+        additionalHeaders: Map<String, String>?,
+        relayData: Pair<AuthorizationToken, RelayUrl>?
+    ): Flow<LoadResponse<T, ResponseError>> = flow {
 
-        @Exhaustive
-        when(response) {
-            is Response.Error -> {
-                throw Exception(response.message)
-            }
-            is Response.Success -> {
-                return response.value
-            }
+        emit(LoadResponse.Loading)
+
+        try {
+            val requestBuilder = buildRelayRequest(
+                relayEndpoint,
+                relayData ?: relayDataHandler.retrieveRelayData(),
+                additionalHeaders
+            )
+
+            val requestBodyJson: String = moshi.adapter(requestBodyJsonAdapter)
+                .toJson(requestBody)
+                ?: throw NullPointerException(
+                    "Failed to convert RequestBody ${requestBodyJsonAdapter.simpleName} to Json"
+                )
+
+            val reqBody = requestBodyJson.toRequestBody(mediaType?.toMediaType())
+
+            val response = call(jsonAdapter, requestBuilder.put(reqBody).build())
+
+            emit(Response.Success(response))
+
+        } catch (e: Exception) {
+            emit(handleException(LOG, "PUT", relayEndpoint, e))
+        }
+
+    }.flowOn(dispatchers.io)
+
+    override fun <T: Any, RequestBody: Any, V: RelayResponse<T>> post(
+        jsonAdapter: Class<V>,
+        relayEndpoint: String,
+        requestBodyJsonAdapter: Class<RequestBody>,
+        requestBody: RequestBody,
+        mediaType: String?,
+        additionalHeaders: Map<String, String>?,
+        relayData: Pair<AuthorizationToken, RelayUrl>?
+    ): Flow<LoadResponse<T, ResponseError>> = flow {
+
+        emit(LoadResponse.Loading)
+
+        try {
+            val requestBuilder = buildRelayRequest(
+                relayEndpoint,
+                relayData ?: relayDataHandler.retrieveRelayData(),
+                additionalHeaders
+            )
+
+            val requestBodyJson: String = moshi.adapter(requestBodyJsonAdapter)
+                .toJson(requestBody)
+                ?: throw NullPointerException(
+                    "Failed to convert RequestBody ${requestBodyJsonAdapter.simpleName} to Json"
+                )
+
+            val reqBody = requestBodyJson.toRequestBody(mediaType?.toMediaType())
+
+            val response = call(jsonAdapter, requestBuilder.post(reqBody).build())
+
+            emit(Response.Success(response))
+
+        } catch (e: Exception) {
+            emit(handleException(LOG, "POST", relayEndpoint, e))
+        }
+
+    }.flowOn(dispatchers.io)
+
+    override fun <T: Any, RequestBody: Any?, V: RelayResponse<T>> delete(
+        jsonAdapter: Class<V>,
+        relayEndpoint: String,
+        requestBodyJsonAdapter: Class<RequestBody>?,
+        requestBody: RequestBody?,
+        mediaType: String?,
+        additionalHeaders: Map<String, String>?,
+        relayData: Pair<AuthorizationToken, RelayUrl>?
+    ): Flow<LoadResponse<T, ResponseError>> = flow {
+
+        emit(LoadResponse.Loading)
+
+        try {
+            val requestBuilder = buildRelayRequest(
+                relayEndpoint,
+                relayData ?: relayDataHandler.retrieveRelayData(),
+                additionalHeaders
+            )
+
+            val requestBodyJson: String? =
+                if (requestBody == null || requestBodyJsonAdapter == null) {
+                    null
+                } else {
+                    moshi.adapter(requestBodyJsonAdapter)
+                        .toJson(requestBody)
+                        ?: throw NullPointerException(
+                            "Failed to convert RequestBody ${requestBodyJsonAdapter.simpleName} to Json"
+                        )
+                }
+
+            val reqBody = requestBodyJson?.toRequestBody(mediaType?.toMediaType())
+
+            val response = call(jsonAdapter, requestBuilder.delete(reqBody ?: EMPTY_REQUEST).build())
+
+            emit(Response.Success(response))
+
+        } catch (e: Exception) {
+            emit(handleException(LOG, "DELETE", relayEndpoint, e))
+        }
+
+    }.flowOn(dispatchers.io)
+
+    @Throws(NullPointerException::class, IOException::class)
+    private suspend fun<T: Any, V: RelayResponse<T>> call(jsonAdapter: Class<V>, request: Request): T {
+        val networkResponse = networkClient.getClient()
+            .newCall(request)
+            .execute()
+
+        if (!networkResponse.isSuccessful) {
+            throw IOException(networkResponse.toString())
+        }
+
+        val body = networkResponse.body ?: throw NullPointerException(
+            """
+                NetworkResponse.body returned null
+                NetworkResponse: $networkResponse
+            """.trimIndent()
+        )
+
+        val relayResponse: V = moshi
+            .adapter(jsonAdapter)
+            .fromJson(body.source())
+            ?: throw IOException(
+                """
+                    Failed to convert Json to ${jsonAdapter.simpleName}
+                    NetworkResponse: $networkResponse
+                """.trimIndent()
+            )
+
+        if (relayResponse.success) {
+            return relayResponse.response ?: throw NullPointerException(
+                """
+                    RelayResponse.success: true
+                    RelayResponse.response: >>> null <<<
+                    RelayResponse.error: ${relayResponse.error}
+                    NetworkResponse: $networkResponse
+                """.trimIndent()
+            )
+        } else {
+            throw Exception(
+                """
+                    RelayResponse.success: false
+                    RelayResponse.error: ${relayResponse.error}
+                    NetworkResponse: $networkResponse
+                """.trimIndent()
+            )
         }
     }
 }
