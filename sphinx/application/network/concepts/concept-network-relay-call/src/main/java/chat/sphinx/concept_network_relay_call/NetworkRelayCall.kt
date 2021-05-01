@@ -8,10 +8,6 @@ import kotlinx.coroutines.flow.Flow
 
 abstract class NetworkRelayCall {
 
-    enum class RequestType {
-        GET, POST, PUT, DELETE
-    }
-
     /**
      * GET
      *
