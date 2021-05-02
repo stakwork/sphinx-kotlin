@@ -48,12 +48,14 @@ include ':sphinx:application:network:concepts:queries:concept-network-query-invi
 include ':sphinx:application:network:features:queries:feature-network-query-invite'
 include ':sphinx:application:network:concepts:queries:concept-network-query-lightning'
 include ':sphinx:application:network:features:queries:feature-network-query-lightning'
-include ':sphinx:application:network:features:queries:feature-network-query-message'
 include ':sphinx:application:network:concepts:queries:concept-network-query-message'
-include ':sphinx:application:network:features:queries:feature-network-query-subscription'
+include ':sphinx:application:network:features:queries:feature-network-query-message'
 include ':sphinx:application:network:concepts:queries:concept-network-query-subscription'
-include ':sphinx:application:network:features:feature-network-relay-call'
+include ':sphinx:application:network:features:queries:feature-network-query-subscription'
 include ':sphinx:application:network:concepts:concept-network-relay-call'
+include ':sphinx:application:network:features:feature-network-relay-call'
+include ':sphinx:application:network:concepts:concept-socket-io'
+include ':sphinx:application:network:features:feature-socket-io'
 
 // Activity
 include ':sphinx:activity:hilt-qualifiers'
