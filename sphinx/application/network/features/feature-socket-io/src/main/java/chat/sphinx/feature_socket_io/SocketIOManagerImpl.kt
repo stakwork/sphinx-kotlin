@@ -4,9 +4,7 @@ import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_network_client.NetworkClient
 import chat.sphinx.concept_relay.RelayDataHandler
 import chat.sphinx.concept_relay.retrieveRelayUrlAndAuthorizationToken
-import chat.sphinx.concept_socket_io.SocketIOError
-import chat.sphinx.concept_socket_io.SocketIOManager
-import chat.sphinx.concept_socket_io.SocketIOState
+import chat.sphinx.concept_socket_io.*
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.kotlin_response.exception
@@ -17,6 +15,7 @@ import chat.sphinx.logger.e
 import chat.sphinx.logger.w
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
+import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.socket.client.client.IO
 import io.socket.client.client.Manager
 import io.socket.client.client.Socket
@@ -24,13 +23,20 @@ import io.socket.engine.engineio.client.EngineIOException
 import io.socket.engine.engineio.client.Transport
 import io.socket.engine.engineio.client.transports.Polling
 import io.socket.engine.engineio.client.transports.WebSocket
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import okhttp3.OkHttpClient
+import org.json.JSONObject
 import java.util.concurrent.TimeUnit
+import kotlin.collections.LinkedHashSet
 
 class SocketIOManagerImpl(
+    private val dispatchers: CoroutineDispatchers,
     private val networkClient: NetworkClient,
     private val relayDataHandler: RelayDataHandler,
     private val LOG: SphinxLogger,
@@ -38,8 +44,19 @@ class SocketIOManagerImpl(
 
     companion object {
         const val TAG = "SocketIOManagerImpl"
+
+        private const val JSON_TYPE = "type"
+        private const val JSON_TYPE_BOOST = "boost"
+        private const val JSON_TYPE_CONTACT = "contact"
+        private const val JSON_TYPE_DELETE = "delete"
+        private const val JSON_TYPE_MESSAGE = "message"
+
+        private const val JSON_RESPONSE = "response"
     }
 
+    /////////////////////////
+    /// State/Error Flows ///
+    /////////////////////////
     @Suppress("RemoveExplicitTypeArguments")
     private val _socketIOStateFlow: MutableStateFlow<SocketIOState> by lazy {
         MutableStateFlow<SocketIOState>(SocketIOState.Uninitialized)
@@ -54,11 +71,95 @@ class SocketIOManagerImpl(
     override val socketIOErrorFlow: SharedFlow<SocketIOError>
         get() = _socketIOSharedFlow.asSharedFlow()
 
+    /////////////////
+    /// Listeners ///
+    /////////////////
+    private inner class SynchronizedListenerHolder {
+        private val listeners: LinkedHashSet<SphinxSocketIOMessageListener> = LinkedHashSet(0)
 
-    private class SocketClientHolder(val socket: Socket, val socketIOClient: OkHttpClient)
+        fun addListener(listener: SphinxSocketIOMessageListener): Boolean =
+            synchronized(this) {
+                val bool = listeners.add(listener)
+                if (bool) {
+                    LOG.d(TAG, "Listener ${listener.javaClass.simpleName} added")
+                }
+                return bool
+            }
+
+        fun removeListener(listener: SphinxSocketIOMessageListener): Boolean =
+            synchronized(this) {
+                val bool = listeners.remove(listener)
+                if (bool) {
+                    LOG.d(TAG, "Listener ${listener.javaClass.simpleName} removed")
+                }
+                return bool
+            }
+
+        fun clear() {
+            synchronized(this) {
+                listeners.clear()
+                LOG.d(TAG, "Listeners cleared")
+            }
+        }
+
+        fun dispatch(type: SphinxSocketIOMessageType) {
+            synchronized(this) {
+                for (listener in listeners) {
+                    instance?.socketIOScope?.launch(dispatchers.io) {
+                        try {
+                            listener.onSocketIOMessageReceived(type)
+                        } catch (e: Exception) {
+                            LOG.e(
+                                TAG,
+                                "Listener ${listener.javaClass.simpleName} threw exception " +
+                                "${e.javaClass.simpleName} for type ${type.javaClass.simpleName}",
+                                e
+                            )
+                        }
+                    } ?: LOG.w(
+                        TAG,
+                        """
+                            EVENT_MESSAGE: type ${type.javaClass.simpleName}
+                            SocketIOState: ${_socketIOStateFlow.value}
+                            Instance: >>> null <<<
+                        """.trimIndent()
+                    )
+                }
+            }
+        }
+
+        val hasListeners: Boolean
+            get() = synchronized(this) {
+                listeners.isNotEmpty()
+            }
+    }
+
+    private val synchronizedListeners = SynchronizedListenerHolder()
+
+    override fun addListener(listener: SphinxSocketIOMessageListener): Boolean {
+        return synchronizedListeners.addListener(listener)
+    }
+
+    override fun removeListener(listener: SphinxSocketIOMessageListener): Boolean {
+        return synchronizedListeners.removeListener(listener)
+    }
+
+    override fun clearListeners() {
+        synchronizedListeners.clear()
+    }
+
+    /////////////////////
+    /// Socket/Client ///
+    /////////////////////
+    private class SocketInstanceHolder(
+        val socket: Socket,
+        val socketIOClient: OkHttpClient,
+        val socketIOSupervisor: Job = SupervisorJob(),
+        val socketIOScope: CoroutineScope = CoroutineScope(socketIOSupervisor)
+    )
 
     @Volatile
-    private var instance: SocketClientHolder? = null
+    private var instance: SocketInstanceHolder? = null
     private val lock = Mutex()
 
     override suspend fun getSocket(
@@ -83,7 +184,7 @@ class SocketIOManagerImpl(
     @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN", "UNCHECKED_CAST")
     private suspend fun buildSocket(
         relayData: Pair<AuthorizationToken, RelayUrl>?
-    ): Response<SocketClientHolder, ResponseError> {
+    ): Response<SocketInstanceHolder, ResponseError> {
         val nnRelayData: Pair<AuthorizationToken, RelayUrl> = relayData
             ?: relayDataHandler.retrieveRelayUrlAndAuthorizationToken().let { response ->
                 @Exhaustive
@@ -177,7 +278,41 @@ class SocketIOManagerImpl(
             )
         }
         socket.on(Socket.EVENT_MESSAGE) { args ->
-            LOG.d(TAG, "MESSAGE" + args.joinToString(", ", ": "))
+            val argsString = args.joinToString("")
+            LOG.d(TAG, "MESSAGE: $argsString")
+
+            if (synchronizedListeners.hasListeners) {
+                try {
+                    val json: JSONObject = JSONObject(argsString)
+                    val type: String = json.getString(JSON_TYPE) ?: throw Exception()
+                    val response: String = json.getString(JSON_RESPONSE) ?: throw Exception()
+                    when (type) {
+                        JSON_TYPE_BOOST -> {
+                            synchronizedListeners.dispatch(
+                                SphinxSocketIOMessageType.Boost(response)
+                            )
+                        }
+                        JSON_TYPE_CONTACT -> {
+                            synchronizedListeners.dispatch(
+                                SphinxSocketIOMessageType.Contact(response)
+                            )
+                        }
+                        JSON_TYPE_DELETE -> {
+                            synchronizedListeners.dispatch(
+                                SphinxSocketIOMessageType.Delete(response)
+                            )
+                        }
+                        JSON_TYPE_MESSAGE -> {
+                            synchronizedListeners.dispatch(
+                                SphinxSocketIOMessageType.Message(response)
+                            )
+                        }
+                    }
+                } catch (e: Exception) {
+                    LOG.e(TAG, "SocketIO EventMessage JSON error", e)
+                }
+            }
+
         }
         socket.on(Socket.EVENT_CONNECT_ERROR) { args ->
             LOG.e(
@@ -279,6 +414,6 @@ class SocketIOManagerImpl(
 
         _socketIOStateFlow.value = SocketIOState.Initialized.Disconnected
 
-        return Response.Success(SocketClientHolder(socket, client))
+        return Response.Success(SocketInstanceHolder(socket, client))
     }
 }

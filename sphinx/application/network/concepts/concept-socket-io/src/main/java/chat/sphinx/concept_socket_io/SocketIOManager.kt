@@ -15,4 +15,8 @@ abstract class SocketIOManager {
 
     abstract val socketIOStateFlow: StateFlow<SocketIOState>
     abstract val socketIOErrorFlow: SharedFlow<SocketIOError>
+
+    abstract fun addListener(listener: SphinxSocketIOMessageListener): Boolean
+    abstract fun removeListener(listener: SphinxSocketIOMessageListener): Boolean
+    abstract fun clearListeners()
 }

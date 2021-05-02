@@ -10,5 +10,5 @@ dependencies {
     api project(path: ':sphinx:application:common:kotlin-response')
     api project(path: ':sphinx:application:data:concepts:concept-relay')
 
-    api deps.kotlin.coroutinesCore
+    implementation deps.kotlin.coroutinesCore
 }
