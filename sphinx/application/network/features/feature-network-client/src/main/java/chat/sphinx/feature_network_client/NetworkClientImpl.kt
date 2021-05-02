@@ -67,8 +67,6 @@ class NetworkClientImpl(
             builder.readTimeout(TIME_OUT, TimeUnit.SECONDS)
             builder.writeTimeout(TIME_OUT, TimeUnit.SECONDS)
 
-            builder.pingInterval(PING_INTERVAL, TimeUnit.SECONDS)
-
             if (debug.value) {
                 HttpLoggingInterceptor().let { interceptor ->
                     interceptor.level = HttpLoggingInterceptor.Level.BODY

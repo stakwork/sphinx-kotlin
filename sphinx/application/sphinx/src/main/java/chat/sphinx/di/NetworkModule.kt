@@ -11,6 +11,7 @@ import chat.sphinx.concept_network_query_message.NetworkQueryMessage
 import chat.sphinx.concept_network_query_subscription.NetworkQuerySubscription
 import chat.sphinx.concept_network_relay_call.NetworkRelayCall
 import chat.sphinx.concept_relay.RelayDataHandler
+import chat.sphinx.concept_socket_io.SocketIOManager
 import chat.sphinx.feature_network_client.NetworkClientImpl
 import chat.sphinx.feature_network_query_chat.NetworkQueryChatImpl
 import chat.sphinx.feature_network_query_contact.NetworkQueryContactImpl
@@ -20,6 +21,7 @@ import chat.sphinx.feature_network_query_message.NetworkQueryMessageImpl
 import chat.sphinx.feature_network_query_subscription.NetworkQuerySubscriptionImpl
 import chat.sphinx.feature_network_relay_call.NetworkRelayCallImpl
 import chat.sphinx.feature_relay.RelayDataHandlerImpl
+import chat.sphinx.feature_socket_io.SocketIOManagerImpl
 import chat.sphinx.logger.SphinxLogger
 import coil.util.CoilUtils
 import com.squareup.moshi.Moshi
@@ -82,6 +84,27 @@ object NetworkModule {
         networkClientImpl: NetworkClientImpl
     ): NetworkClientCache =
         networkClientImpl
+
+    @Provides
+    @Singleton
+    fun provideSocketIOManagerImpl(
+        buildConfigDebug: BuildConfigDebug,
+        networkClient: NetworkClient,
+        relayDataHandler: RelayDataHandler,
+        LOG: SphinxLogger,
+    ): SocketIOManagerImpl =
+        SocketIOManagerImpl(
+            buildConfigDebug,
+            networkClient,
+            relayDataHandler,
+            LOG
+        )
+
+    @Provides
+    fun provideSocketIOManager(
+        socketIOManagerImpl: SocketIOManagerImpl
+    ): SocketIOManager =
+        socketIOManagerImpl
 
     @Provides
     @Singleton

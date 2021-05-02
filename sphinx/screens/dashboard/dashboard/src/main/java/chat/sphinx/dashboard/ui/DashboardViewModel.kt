@@ -6,6 +6,7 @@ import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_lightning.LightningRepository
 import chat.sphinx.concept_repository_message.MessageRepository
+import chat.sphinx.concept_socket_io.SocketIOManager
 import chat.sphinx.dashboard.navigation.DashboardBottomNavBarNavigator
 import chat.sphinx.dashboard.navigation.DashboardNavDrawerNavigator
 import chat.sphinx.dashboard.navigation.DashboardNavigator
@@ -19,7 +20,6 @@ import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.wrapper_chat.isConversation
 import chat.sphinx.wrapper_common.contact.ContactId
-import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_contact.isConfirmed
 import chat.sphinx.wrapper_contact.isTrue
@@ -63,6 +63,8 @@ internal class DashboardViewModel @Inject constructor(
     private val contactRepository: ContactRepository,
     private val lightningRepository: LightningRepository,
     private val messageRepository: MessageRepository,
+
+    private val socketIOManager: SocketIOManager,
 ): MotionLayoutViewModel<
         Any,
         Nothing,
@@ -70,6 +72,21 @@ internal class DashboardViewModel @Inject constructor(
         NavDrawerViewState
         >(NavDrawerViewState.Closed)
 {
+
+    init {
+        viewModelScope.launch(dispatchers.mainImmediate) {
+            delay(4_000)
+            socketIOManager.getSocket().let { response ->
+                if (response is Response.Success) {
+                    response.value.connect()
+                    delay(45_000)
+                    response.value.disconnect()
+                    delay(5_000)
+                    response.value.connect()
+                }
+            }
+        }
+    }
 
     val chatViewStateContainer: ChatViewStateContainer by lazy {
         ChatViewStateContainer(dispatchers)

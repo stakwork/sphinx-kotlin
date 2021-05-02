@@ -1,8 +1,16 @@
 plugins {
+    id 'app.cash.exhaustive'
     id 'java-library'
     id 'kotlin'
 }
 
 dependencies {
+    // KotlinAndroid
+    api project(path: ':kotlin:common:build-config')
+
+    // Sphinx
+    api project(path: ':sphinx:application:common:logger')
+    api project(path: ':sphinx:application:data:concepts:concept-relay')
     api project(path: ':sphinx:application:network:concepts:concept-socket-io')
+    api project(path: ':sphinx:application:network:concepts:clients:concept-network-client')
 }
