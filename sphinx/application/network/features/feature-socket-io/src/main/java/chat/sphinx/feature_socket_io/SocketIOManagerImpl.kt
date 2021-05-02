@@ -4,7 +4,9 @@ import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_network_client.NetworkClient
 import chat.sphinx.concept_relay.RelayDataHandler
 import chat.sphinx.concept_relay.retrieveRelayUrlAndAuthorizationToken
+import chat.sphinx.concept_socket_io.SocketIOError
 import chat.sphinx.concept_socket_io.SocketIOManager
+import chat.sphinx.concept_socket_io.SocketIOState
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.kotlin_response.exception
@@ -22,6 +24,7 @@ import io.socket.engine.engineio.client.EngineIOException
 import io.socket.engine.engineio.client.Transport
 import io.socket.engine.engineio.client.transports.Polling
 import io.socket.engine.engineio.client.transports.WebSocket
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import okhttp3.OkHttpClient
@@ -36,6 +39,21 @@ class SocketIOManagerImpl(
     companion object {
         const val TAG = "SocketIOManagerImpl"
     }
+
+    @Suppress("RemoveExplicitTypeArguments")
+    private val _socketIOStateFlow: MutableStateFlow<SocketIOState> by lazy {
+        MutableStateFlow<SocketIOState>(SocketIOState.Uninitialized)
+    }
+    override val socketIOStateFlow: StateFlow<SocketIOState>
+        get() = _socketIOStateFlow.asStateFlow()
+
+    @Suppress("RemoveExplicitTypeArguments")
+    private val _socketIOSharedFlow: MutableSharedFlow<SocketIOError> by lazy {
+        MutableSharedFlow<SocketIOError>(0, 1)
+    }
+    override val socketIOErrorFlow: SharedFlow<SocketIOError>
+        get() = _socketIOSharedFlow.asSharedFlow()
+
 
     private class SocketClientHolder(val socket: Socket, val socketIOClient: OkHttpClient)
 
@@ -125,12 +143,23 @@ class SocketIOManagerImpl(
 
         // Client Socket Listeners
         socket.on(Socket.EVENT_CONNECT) { args ->
+            if (_socketIOStateFlow.value != SocketIOState.Uninitialized) {
+                _socketIOStateFlow.value = SocketIOState.Initialized.Connected(
+                    System.currentTimeMillis()
+                )
+            }
             LOG.d(TAG, "CONNECT" + args.joinToString(", ", ": "))
         }
         socket.on(Socket.EVENT_CONNECTING) { args ->
+            if (_socketIOStateFlow.value != SocketIOState.Uninitialized) {
+                _socketIOStateFlow.value = SocketIOState.Initialized.Connecting
+            }
             LOG.d(TAG, "CONNECTING" + args.joinToString(", ", ": "))
         }
         socket.on(Socket.EVENT_DISCONNECT) { args ->
+            if (_socketIOStateFlow.value != SocketIOState.Uninitialized) {
+                _socketIOStateFlow.value = SocketIOState.Initialized.Disconnected
+            }
             LOG.d(TAG, "DISCONNECT" + args.joinToString(", ", ": "))
         }
         socket.on(Socket.EVENT_ERROR) { args ->
@@ -138,9 +167,11 @@ class SocketIOManagerImpl(
                 TAG,
                 "ERROR: ",
                 try {
-                    args[0] as EngineIOException
+                    (args[0] as EngineIOException)
+                        .also { _socketIOSharedFlow.tryEmit(SocketIOError.Error(it)) }
                 } catch (e: Exception) {
                     // ClassCast or IndexOutOfBounds Exception
+                    _socketIOSharedFlow.tryEmit(SocketIOError.Error(null))
                     null
                 }
             )
@@ -153,8 +184,10 @@ class SocketIOManagerImpl(
                 TAG,
                 "CONNECT_ERROR: ",
                 try {
-                    args[0] as EngineIOException
+                    (args[0] as EngineIOException)
+                        .also { _socketIOSharedFlow.tryEmit(SocketIOError.ConnectError(it)) }
                 } catch (e: Exception) {
+                    _socketIOSharedFlow.tryEmit(SocketIOError.ConnectError(null))
                     // ClassCast or IndexOutOfBounds Exception
                     null
                 }
@@ -164,6 +197,9 @@ class SocketIOManagerImpl(
             LOG.d(TAG, "CONNECT_TIMEOUT" + args.joinToString(", ", ": "))
         }
         socket.on(Socket.EVENT_RECONNECT) { args ->
+            if (_socketIOStateFlow.value != SocketIOState.Uninitialized) {
+                _socketIOStateFlow.value = SocketIOState.Initialized.Reconnected
+            }
             LOG.d(TAG, "RECONNECT" + args.joinToString(", ", ": "))
         }
         socket.on(Socket.EVENT_RECONNECT_ERROR) { args ->
@@ -171,8 +207,10 @@ class SocketIOManagerImpl(
                 TAG,
                 "RECONNECT_ERROR: ",
                 try {
-                    args[0] as EngineIOException
+                    (args[0] as EngineIOException)
+                        .also { _socketIOSharedFlow.tryEmit(SocketIOError.ReconnectError(it)) }
                 } catch (e: Exception) {
+                    _socketIOSharedFlow.tryEmit(SocketIOError.ReconnectError(null))
                     // ClassCast or IndexOutOfBounds Exception
                     null
                 }
@@ -182,9 +220,17 @@ class SocketIOManagerImpl(
             LOG.d(TAG, "RECONNECT_FAILED" + args.joinToString(", ", ": "))
         }
         socket.on(Socket.EVENT_RECONNECTING) { args ->
+            if (_socketIOStateFlow.value != SocketIOState.Uninitialized) {
+                _socketIOStateFlow.value = SocketIOState.Initialized.Reconnecting
+            }
             LOG.d(TAG, "RECONNECTING" + args.joinToString(", ", ": "))
         }
         socket.on(Socket.EVENT_PING) { args ->
+            if (_socketIOStateFlow.value != SocketIOState.Uninitialized) {
+                _socketIOStateFlow.value = SocketIOState.Initialized.Connected(
+                    System.currentTimeMillis()
+                )
+            }
             LOG.d(TAG, "PING" + args.joinToString(", ", ": "))
         }
         socket.on(Socket.EVENT_PONG) { args ->
@@ -193,9 +239,15 @@ class SocketIOManagerImpl(
 
         // Engine Socket Listeners
         socket.io().on(io.socket.engine.engineio.client.Socket.EVENT_OPEN) { args ->
+            if (_socketIOStateFlow.value != SocketIOState.Uninitialized) {
+                _socketIOStateFlow.value = SocketIOState.Initialized.Opened
+            }
             LOG.d(TAG, "OPEN" + args.joinToString(", ", ": "))
         }
         socket.io().on(io.socket.engine.engineio.client.Socket.EVENT_CLOSE) { args ->
+            if (_socketIOStateFlow.value != SocketIOState.Uninitialized) {
+                _socketIOStateFlow.value = SocketIOState.Initialized.Closed
+            }
             LOG.d(TAG, "CLOSE" + args.joinToString(", ", ": "))
         }
         socket.io().on(io.socket.engine.engineio.client.Socket.EVENT_UPGRADE_ERROR) { args ->
@@ -203,25 +255,29 @@ class SocketIOManagerImpl(
                 TAG,
                 "UPGRADE_ERROR: ",
                 try {
-                    args[0] as EngineIOException
+                    (args[0] as EngineIOException)
+                        .also { _socketIOSharedFlow.tryEmit(SocketIOError.UpgradeError(it)) }
                 } catch (e: Exception) {
+                    _socketIOSharedFlow.tryEmit(SocketIOError.UpgradeError(null))
                     // ClassCast or IndexOutOfBounds Exception
                     null
                 }
             )
         }
-        socket.io().on(io.socket.engine.engineio.client.Socket.EVENT_FLUSH) { args ->
-            LOG.d(TAG, "FLUSH" + args.joinToString(", ", ": "))
-        }
-        socket.io().on(io.socket.engine.engineio.client.Socket.EVENT_HANDSHAKE) { args ->
-            LOG.d(TAG, "HANDSHAKE" + args.joinToString(", ", ": "))
-        }
-        socket.io().on(io.socket.engine.engineio.client.Socket.EVENT_UPGRADING) { args ->
-            LOG.d(TAG, "UPGRADING" + args.joinToString(", ", ": "))
-        }
-        socket.io().on(io.socket.engine.engineio.client.Socket.EVENT_UPGRADE) { args ->
-            LOG.d(TAG, "UPGRADE" + args.joinToString(", ", ": "))
-        }
+//        socket.io().on(io.socket.engine.engineio.client.Socket.EVENT_FLUSH) { args ->
+//            LOG.d(TAG, "FLUSH" + args.joinToString(", ", ": "))
+//        }
+//        socket.io().on(io.socket.engine.engineio.client.Socket.EVENT_HANDSHAKE) { args ->
+//            LOG.d(TAG, "HANDSHAKE" + args.joinToString(", ", ": "))
+//        }
+//        socket.io().on(io.socket.engine.engineio.client.Socket.EVENT_UPGRADING) { args ->
+//            LOG.d(TAG, "UPGRADING" + args.joinToString(", ", ": "))
+//        }
+//        socket.io().on(io.socket.engine.engineio.client.Socket.EVENT_UPGRADE) { args ->
+//            LOG.d(TAG, "UPGRADE" + args.joinToString(", ", ": "))
+//        }
+
+        _socketIOStateFlow.value = SocketIOState.Initialized.Disconnected
 
         return Response.Success(SocketClientHolder(socket, client))
     }

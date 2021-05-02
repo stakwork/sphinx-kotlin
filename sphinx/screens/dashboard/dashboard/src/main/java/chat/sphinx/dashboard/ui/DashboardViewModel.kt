@@ -7,6 +7,7 @@ import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_lightning.LightningRepository
 import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.concept_socket_io.SocketIOManager
+import chat.sphinx.concept_socket_io.SocketIOState
 import chat.sphinx.dashboard.navigation.DashboardBottomNavBarNavigator
 import chat.sphinx.dashboard.navigation.DashboardNavDrawerNavigator
 import chat.sphinx.dashboard.navigation.DashboardNavigator
@@ -31,13 +32,10 @@ import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.sideeffect.SideEffect
 import io.matthewnelson.concept_views.viewstate.collect
 import io.matthewnelson.concept_views.viewstate.value
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 internal suspend inline fun DashboardViewModel.collectChatViewState(
@@ -74,15 +72,31 @@ internal class DashboardViewModel @Inject constructor(
 {
 
     init {
-        viewModelScope.launch(dispatchers.mainImmediate) {
-            delay(4_000)
-            socketIOManager.getSocket().let { response ->
-                if (response is Response.Success) {
-                    response.value.connect()
-//                    delay(45_000)
-//                    response.value.disconnect()
-//                    delay(5_000)
-//                    response.value.connect()
+        if (socketIOManager.socketIOStateFlow.value is SocketIOState.Uninitialized) {
+            viewModelScope.launch(dispatchers.mainImmediate) {
+
+                var breakPlease = false
+
+                while (isActive && !breakPlease) {
+
+                    socketIOManager.getSocket().let { response ->
+
+                        if (response is Response.Success) {
+                            response.value.connect()
+                            try {
+                                socketIOManager.socketIOStateFlow.collect { state ->
+                                    if (state is SocketIOState.Initialized.Connected) {
+                                        breakPlease = true
+                                        throw Exception()
+                                    }
+                                    if (state is SocketIOState.Uninitialized) {
+                                        throw Exception()
+                                    }
+                                }
+                            } catch (e: Exception) {}
+                        }
+
+                    }
                 }
             }
         }
