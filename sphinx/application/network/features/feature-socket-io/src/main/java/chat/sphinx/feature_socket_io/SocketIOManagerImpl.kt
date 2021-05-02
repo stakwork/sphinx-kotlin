@@ -15,7 +15,6 @@ import chat.sphinx.logger.e
 import chat.sphinx.logger.w
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
-import io.matthewnelson.build_config.BuildConfigDebug
 import io.socket.client.client.IO
 import io.socket.client.client.Manager
 import io.socket.client.client.Socket
@@ -25,9 +24,10 @@ import io.socket.engine.engineio.client.transports.Polling
 import io.socket.engine.engineio.client.transports.WebSocket
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import okhttp3.OkHttpClient
+import java.util.concurrent.TimeUnit
 
 class SocketIOManagerImpl(
-    private val buildConfigDebug: BuildConfigDebug,
     private val networkClient: NetworkClient,
     private val relayDataHandler: RelayDataHandler,
     private val LOG: SphinxLogger,
@@ -37,18 +37,27 @@ class SocketIOManagerImpl(
         const val TAG = "SocketIOManagerImpl"
     }
 
+    private class SocketClientHolder(val socket: Socket, val socketIOClient: OkHttpClient)
+
     @Volatile
-    private var socket: Socket? = null
+    private var instance: SocketClientHolder? = null
     private val lock = Mutex()
 
     override suspend fun getSocket(
         relayData: Pair<AuthorizationToken, RelayUrl>?
     ): Response<Socket, ResponseError> =
-        socket?.let { Response.Success(it) } ?: lock.withLock {
-            socket?.let { Response.Success(it) } ?: buildSocket(relayData)
-                .also { response ->
-                    if (response is Response.Success) {
-                        socket = response.value
+        instance?.let { Response.Success(it.socket) } ?: lock.withLock {
+            instance?.let { Response.Success(it.socket) }
+                ?: buildSocket(relayData).let { response ->
+                    @Exhaustive
+                    when (response) {
+                        is Response.Error -> {
+                            return response
+                        }
+                        is Response.Success -> {
+                            instance = response.value
+                            return Response.Success(response.value.socket)
+                        }
                     }
                 }
         }
@@ -56,7 +65,7 @@ class SocketIOManagerImpl(
     @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN", "UNCHECKED_CAST")
     private suspend fun buildSocket(
         relayData: Pair<AuthorizationToken, RelayUrl>?
-    ): Response<Socket, ResponseError> {
+    ): Response<SocketClientHolder, ResponseError> {
         val nnRelayData: Pair<AuthorizationToken, RelayUrl> = relayData
             ?: relayDataHandler.retrieveRelayUrlAndAuthorizationToken().let { response ->
                 @Exhaustive
@@ -73,7 +82,13 @@ class SocketIOManagerImpl(
                 }
             }
 
-        val client = networkClient.getClient()
+        // Need to create a new network client with timeout set to 0
+        val client = networkClient.getClient().newBuilder()
+            .callTimeout(0L, TimeUnit.SECONDS)
+            .connectTimeout(0L, TimeUnit.SECONDS)
+            .readTimeout(0L, TimeUnit.SECONDS)
+            .writeTimeout(0L, TimeUnit.SECONDS)
+            .build()
 
         val options: IO.Options = IO.Options().apply {
             callFactory = client
@@ -108,108 +123,106 @@ class SocketIOManagerImpl(
             }
         }
 
-        if (buildConfigDebug.value) {
-            // Client Socket Listeners
-            socket.on(Socket.EVENT_CONNECT) { args ->
-                LOG.d(TAG, "CONNECT" + args.joinToString(", ", ": "))
-            }
-            socket.on(Socket.EVENT_CONNECTING) { args ->
-                LOG.d(TAG, "CONNECTING" + args.joinToString(", ", ": "))
-            }
-            socket.on(Socket.EVENT_DISCONNECT) { args ->
-                LOG.d(TAG, "DISCONNECT" + args.joinToString(", ", ": "))
-            }
-            socket.on(Socket.EVENT_ERROR) { args ->
-                LOG.e(
-                    TAG,
-                    "ERROR: ",
-                    try {
-                        args[0] as EngineIOException
-                    } catch (e: Exception) {
-                        // ClassCast or IndexOutOfBounds Exception
-                        null
-                    }
-                )
-            }
-            socket.on(Socket.EVENT_MESSAGE) { args ->
-                LOG.d(TAG, "MESSAGE" + args.joinToString(", ", ": "))
-            }
-            socket.on(Socket.EVENT_CONNECT_ERROR) { args ->
-                LOG.e(
-                    TAG,
-                    "CONNECT_ERROR: ",
-                    try {
-                        args[0] as EngineIOException
-                    } catch (e: Exception) {
-                        // ClassCast or IndexOutOfBounds Exception
-                        null
-                    }
-                )
-            }
-            socket.on(Socket.EVENT_CONNECT_TIMEOUT) { args ->
-                LOG.d(TAG, "CONNECT_TIMEOUT" + args.joinToString(", ", ": "))
-            }
-            socket.on(Socket.EVENT_RECONNECT) { args ->
-                LOG.d(TAG, "RECONNECT" + args.joinToString(", ", ": "))
-            }
-            socket.on(Socket.EVENT_RECONNECT_ERROR) { args ->
-                LOG.e(
-                    TAG,
-                    "RECONNECT_ERROR: ",
-                    try {
-                        args[0] as EngineIOException
-                    } catch (e: Exception) {
-                        // ClassCast or IndexOutOfBounds Exception
-                        null
-                    }
-                )
-            }
-            socket.on(Socket.EVENT_RECONNECT_FAILED) { args ->
-                LOG.d(TAG, "RECONNECT_FAILED" + args.joinToString(", ", ": "))
-            }
-            socket.on(Socket.EVENT_RECONNECTING) { args ->
-                LOG.d(TAG, "RECONNECTING" + args.joinToString(", ", ": "))
-            }
-            socket.on(Socket.EVENT_PING) { args ->
-                LOG.d(TAG, "PING" + args.joinToString(", ", ": "))
-            }
-            socket.on(Socket.EVENT_PONG) { args ->
-                LOG.d(TAG, "PONG" + args.joinToString(", ", ": "))
-            }
-
-            // Engine Socket Listeners
-            socket.io().on(io.socket.engine.engineio.client.Socket.EVENT_OPEN) { args ->
-                LOG.d(TAG, "OPEN" + args.joinToString(", ", ": "))
-            }
-            socket.io().on(io.socket.engine.engineio.client.Socket.EVENT_CLOSE) { args ->
-                LOG.d(TAG, "CLOSE" + args.joinToString(", ", ": "))
-            }
-            socket.io().on(io.socket.engine.engineio.client.Socket.EVENT_UPGRADE_ERROR) { args ->
-                LOG.e(
-                    TAG,
-                    "UPGRADE_ERROR: ",
-                    try {
-                        args[0] as EngineIOException
-                    } catch (e: Exception) {
-                        // ClassCast or IndexOutOfBounds Exception
-                        null
-                    }
-                )
-            }
-            socket.io().on(io.socket.engine.engineio.client.Socket.EVENT_FLUSH) { args ->
-                LOG.d(TAG, "FLUSH" + args.joinToString(", ", ": "))
-            }
-            socket.io().on(io.socket.engine.engineio.client.Socket.EVENT_HANDSHAKE) { args ->
-                LOG.d(TAG, "HANDSHAKE" + args.joinToString(", ", ": "))
-            }
-            socket.io().on(io.socket.engine.engineio.client.Socket.EVENT_UPGRADING) { args ->
-                LOG.d(TAG, "UPGRADING" + args.joinToString(", ", ": "))
-            }
-            socket.io().on(io.socket.engine.engineio.client.Socket.EVENT_UPGRADE) { args ->
-                LOG.d(TAG, "UPGRADE" + args.joinToString(", ", ": "))
-            }
+        // Client Socket Listeners
+        socket.on(Socket.EVENT_CONNECT) { args ->
+            LOG.d(TAG, "CONNECT" + args.joinToString(", ", ": "))
+        }
+        socket.on(Socket.EVENT_CONNECTING) { args ->
+            LOG.d(TAG, "CONNECTING" + args.joinToString(", ", ": "))
+        }
+        socket.on(Socket.EVENT_DISCONNECT) { args ->
+            LOG.d(TAG, "DISCONNECT" + args.joinToString(", ", ": "))
+        }
+        socket.on(Socket.EVENT_ERROR) { args ->
+            LOG.e(
+                TAG,
+                "ERROR: ",
+                try {
+                    args[0] as EngineIOException
+                } catch (e: Exception) {
+                    // ClassCast or IndexOutOfBounds Exception
+                    null
+                }
+            )
+        }
+        socket.on(Socket.EVENT_MESSAGE) { args ->
+            LOG.d(TAG, "MESSAGE" + args.joinToString(", ", ": "))
+        }
+        socket.on(Socket.EVENT_CONNECT_ERROR) { args ->
+            LOG.e(
+                TAG,
+                "CONNECT_ERROR: ",
+                try {
+                    args[0] as EngineIOException
+                } catch (e: Exception) {
+                    // ClassCast or IndexOutOfBounds Exception
+                    null
+                }
+            )
+        }
+        socket.on(Socket.EVENT_CONNECT_TIMEOUT) { args ->
+            LOG.d(TAG, "CONNECT_TIMEOUT" + args.joinToString(", ", ": "))
+        }
+        socket.on(Socket.EVENT_RECONNECT) { args ->
+            LOG.d(TAG, "RECONNECT" + args.joinToString(", ", ": "))
+        }
+        socket.on(Socket.EVENT_RECONNECT_ERROR) { args ->
+            LOG.e(
+                TAG,
+                "RECONNECT_ERROR: ",
+                try {
+                    args[0] as EngineIOException
+                } catch (e: Exception) {
+                    // ClassCast or IndexOutOfBounds Exception
+                    null
+                }
+            )
+        }
+        socket.on(Socket.EVENT_RECONNECT_FAILED) { args ->
+            LOG.d(TAG, "RECONNECT_FAILED" + args.joinToString(", ", ": "))
+        }
+        socket.on(Socket.EVENT_RECONNECTING) { args ->
+            LOG.d(TAG, "RECONNECTING" + args.joinToString(", ", ": "))
+        }
+        socket.on(Socket.EVENT_PING) { args ->
+            LOG.d(TAG, "PING" + args.joinToString(", ", ": "))
+        }
+        socket.on(Socket.EVENT_PONG) { args ->
+            LOG.d(TAG, "PONG" + args.joinToString(", ", ": "))
         }
 
-        return Response.Success(socket)
+        // Engine Socket Listeners
+        socket.io().on(io.socket.engine.engineio.client.Socket.EVENT_OPEN) { args ->
+            LOG.d(TAG, "OPEN" + args.joinToString(", ", ": "))
+        }
+        socket.io().on(io.socket.engine.engineio.client.Socket.EVENT_CLOSE) { args ->
+            LOG.d(TAG, "CLOSE" + args.joinToString(", ", ": "))
+        }
+        socket.io().on(io.socket.engine.engineio.client.Socket.EVENT_UPGRADE_ERROR) { args ->
+            LOG.e(
+                TAG,
+                "UPGRADE_ERROR: ",
+                try {
+                    args[0] as EngineIOException
+                } catch (e: Exception) {
+                    // ClassCast or IndexOutOfBounds Exception
+                    null
+                }
+            )
+        }
+        socket.io().on(io.socket.engine.engineio.client.Socket.EVENT_FLUSH) { args ->
+            LOG.d(TAG, "FLUSH" + args.joinToString(", ", ": "))
+        }
+        socket.io().on(io.socket.engine.engineio.client.Socket.EVENT_HANDSHAKE) { args ->
+            LOG.d(TAG, "HANDSHAKE" + args.joinToString(", ", ": "))
+        }
+        socket.io().on(io.socket.engine.engineio.client.Socket.EVENT_UPGRADING) { args ->
+            LOG.d(TAG, "UPGRADING" + args.joinToString(", ", ": "))
+        }
+        socket.io().on(io.socket.engine.engineio.client.Socket.EVENT_UPGRADE) { args ->
+            LOG.d(TAG, "UPGRADE" + args.joinToString(", ", ": "))
+        }
+
+        return Response.Success(SocketClientHolder(socket, client))
     }
 }

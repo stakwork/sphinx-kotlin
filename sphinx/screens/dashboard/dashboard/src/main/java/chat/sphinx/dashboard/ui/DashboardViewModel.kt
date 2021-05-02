@@ -79,10 +79,10 @@ internal class DashboardViewModel @Inject constructor(
             socketIOManager.getSocket().let { response ->
                 if (response is Response.Success) {
                     response.value.connect()
-                    delay(45_000)
-                    response.value.disconnect()
-                    delay(5_000)
-                    response.value.connect()
+//                    delay(45_000)
+//                    response.value.disconnect()
+//                    delay(5_000)
+//                    response.value.connect()
                 }
             }
         }

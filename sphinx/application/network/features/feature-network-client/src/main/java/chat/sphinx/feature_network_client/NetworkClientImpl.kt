@@ -15,8 +15,8 @@ class NetworkClientImpl(
 ): NetworkClientCache() {
 
     companion object {
-        const val TIME_OUT = 20L
-        const val PING_INTERVAL = 30L
+        const val TIME_OUT = 15L
+        const val PING_INTERVAL = 25L
 
         const val CACHE_CONTROL = "Cache-Control"
         const val MAX_STALE = "public, max-stale=$MAX_STALE_VALUE"

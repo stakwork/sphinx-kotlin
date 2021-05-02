@@ -88,13 +88,11 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideSocketIOManagerImpl(
-        buildConfigDebug: BuildConfigDebug,
         networkClient: NetworkClient,
         relayDataHandler: RelayDataHandler,
         LOG: SphinxLogger,
     ): SocketIOManagerImpl =
         SocketIOManagerImpl(
-            buildConfigDebug,
             networkClient,
             relayDataHandler,
             LOG
