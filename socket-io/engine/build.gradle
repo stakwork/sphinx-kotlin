@@ -16,7 +16,7 @@ compileTestJava.dependsOn(npmInstall)
 
 dependencies {
     api deps.square.okhttp
-    api "org.json:json:20180813"
+    api deps.json
 
     testImplementation testDeps.junit
     testImplementation testDeps.hamcrest

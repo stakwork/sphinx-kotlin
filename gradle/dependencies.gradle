@@ -75,6 +75,7 @@ ext.deps = [
         inject: "javax.inject:javax.inject:1",
     ],
     jncryptor: "org.cryptonode.jncryptor:jncryptor:1.2.0",
+    json: "org.json:json:20180813",
     kotlin: [
         coroutinesAndroid: "org.jetbrains.kotlinx:kotlinx-coroutines-android:${versions.coroutines}",
         coroutinesCore: "org.jetbrains.kotlinx:kotlinx-coroutines-core:${versions.coroutines}",
@@ -153,6 +154,7 @@ ext.testDeps = [
         coroutines: "org.jetbrains.kotlinx:kotlinx-coroutines-test:${versions.coroutines}",
     ],
     robolectric: "org.robolectric:robolectric:4.5.1",
+    jsonAssert: "org.skyscreamer:jsonassert:1.5.0",
     turbine: "app.cash.turbine:turbine:0.4.1",
 ]
 

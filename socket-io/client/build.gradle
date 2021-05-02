@@ -1,11 +1,23 @@
 plugins {
+    id 'com.github.node-gradle.node' version '3.0.1'
     id 'java-library'
     id 'kotlin'
 }
+
+node {
+    download = true
+    version = nodeVersion
+    npmVersion = ""
+    workDir = file(nodeWorkDir)
+    nodeProjectDir = file("$projectDir/src/test/resources")
+}
+
+compileTestJava.dependsOn(npmInstall)
 
 dependencies {
     api project(path: ':socket-io:engine')
 
     testImplementation testDeps.junit
     testImplementation testDeps.hamcrest
+    testImplementation testDeps.jsonAssert
 }
