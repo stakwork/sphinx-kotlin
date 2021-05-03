@@ -168,6 +168,7 @@ class SocketIOManagerImpl(
                 nnInstance.socketIOSupervisor.cancel()
                 nnInstance.socketIOClient.dispatcher.executorService.shutdown()
                 instance = null
+                _socketIOStateFlow.value = SocketIOState.Uninitialized
             }
         } finally {
             if (lockSuccess) {
