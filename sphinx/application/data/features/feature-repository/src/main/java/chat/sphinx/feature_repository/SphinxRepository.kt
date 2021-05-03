@@ -154,6 +154,7 @@ class SphinxRepository(
                 }
                 is SphinxSocketIOMessage.Type.Invite -> {
                     // TODO: Implement
+//                    queries.upsertInvite(msg.dto)
                 }
                 is SphinxSocketIOMessage.Type.InvoicePayment -> {
                     // TODO: Implement
