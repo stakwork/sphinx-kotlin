@@ -6,7 +6,6 @@ import chat.sphinx.concept_crypto_rsa.RSA
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
 import chat.sphinx.concept_network_query_chat.model.ChatDto
 import chat.sphinx.concept_network_query_contact.NetworkQueryContact
-import chat.sphinx.concept_network_query_contact.model.ContactDto
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_lightning.model.balance.BalanceDto
 import chat.sphinx.concept_network_query_message.NetworkQueryMessage
@@ -17,7 +16,7 @@ import chat.sphinx.concept_repository_lightning.LightningRepository
 import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.concept_socket_io.SocketIOManager
 import chat.sphinx.concept_socket_io.SphinxSocketIOMessageListener
-import chat.sphinx.concept_socket_io.SphinxSocketIOMessageType
+import chat.sphinx.concept_socket_io.SphinxSocketIOMessage
 import chat.sphinx.conceptcoredb.MessageDbo
 import chat.sphinx.conceptcoredb.SphinxDatabaseQueries
 import chat.sphinx.feature_repository.mappers.chat.ChatDboPresenterMapper
@@ -46,7 +45,6 @@ import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message.media.MediaKeyDecrypted
 import chat.sphinx.wrapper_message.media.MessageMedia
 import chat.sphinx.wrapper_rsa.RsaPrivateKey
-import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.Moshi
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
@@ -102,25 +100,21 @@ class SphinxRepository(
     }
 
     @Suppress("BlockingMethodInNonBlockingContext")
-    override suspend fun onSocketIOMessageReceived(type: SphinxSocketIOMessageType) {
+    override suspend fun onSocketIOMessageReceived(msg: SphinxSocketIOMessage) {
         coreDB.getSphinxDatabaseQueriesOrNull()?.let { queries ->
             @Exhaustive
-            when (type) {
-                is SphinxSocketIOMessageType.Boost,
-                is SphinxSocketIOMessageType.Delete,
-                is SphinxSocketIOMessageType.Message -> {
-                    val dto: MessageDto = moshi.adapter(MessageDto::class.java)
-                        .fromJson(type.json)
-                        ?: throw JsonDataException("Failed to convert Json to MessageDto")
-
+            when (msg) {
+                // TODO: Implement conditional arguments depending on
+                //  different MessageType
+                is SphinxSocketIOMessage.Type.MessageType -> {
                     decryptMessageDtoContentIfAvailable(
-                        dto,
+                        msg.dto,
                         coroutineScope { this },
                         dispatchers.io
                     )?.join()
 
                     decryptMessageDtoMediaKeyIfAvailable(
-                        dto,
+                        msg.dto,
                         coroutineScope { this },
                         dispatchers.io
                     )?.join()
@@ -129,13 +123,13 @@ class SphinxRepository(
                         chatLock.withLock {
                             queries.transaction {
 
-                                queries.upsertMessage(dto)
+                                queries.upsertMessage(msg.dto)
 
-                                dto.chat_id?.let { nnChatId ->
+                                msg.dto.chat_id?.let { nnChatId ->
 
-                                    if (dto.updateChatDboLatestMessage) {
+                                    if (msg.dto.updateChatDboLatestMessage) {
                                         queries.chatUpdateLatestMessage(
-                                            MessageId(dto.id),
+                                            MessageId(msg.dto.id),
                                             ChatId(nnChatId)
                                         )
                                     }
@@ -146,16 +140,21 @@ class SphinxRepository(
                     }
 
                 }
-                is SphinxSocketIOMessageType.Contact -> {
-                    val dto: ContactDto = moshi.adapter(ContactDto::class.java)
-                        .fromJson(type.json)
-                        ?: throw JsonDataException("Failed to convert Json to ContactDto")
-
+                is SphinxSocketIOMessage.Type.Contact -> {
                     contactLock.withLock {
                         queries.transaction {
-                            queries.upsertContact(dto)
+                            queries.upsertContact(msg.dto)
                         }
                     }
+                }
+                is SphinxSocketIOMessage.Type.ChatSeen -> {
+                    // TODO: Implement
+                }
+                is SphinxSocketIOMessage.Type.Invite -> {
+                    // TODO: Implement
+                }
+                is SphinxSocketIOMessage.Type.InvoicePayment -> {
+                    // TODO: Implement
                 }
             }
         }

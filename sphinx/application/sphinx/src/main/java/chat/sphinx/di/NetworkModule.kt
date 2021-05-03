@@ -89,12 +89,14 @@ object NetworkModule {
     @Singleton
     fun provideSocketIOManagerImpl(
         dispatchers: CoroutineDispatchers,
+        moshi: Moshi,
         networkClient: NetworkClient,
         relayDataHandler: RelayDataHandler,
         LOG: SphinxLogger,
     ): SocketIOManagerImpl =
         SocketIOManagerImpl(
             dispatchers,
+            moshi,
             networkClient,
             relayDataHandler,
             LOG,
