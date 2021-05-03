@@ -27,6 +27,7 @@ import chat.sphinx.logger.d
 import chat.sphinx.logger.e
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_common.DateTime
+import chat.sphinx.wrapper_common.Seen
 import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.chat.ChatId
 import chat.sphinx.wrapper_common.contact.ContactId
@@ -34,6 +35,7 @@ import chat.sphinx.wrapper_common.invite.InviteId
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessagePagination
 import chat.sphinx.wrapper_common.toDateTime
+import chat.sphinx.wrapper_common.toSeen
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_invite.Invite
 import chat.sphinx.wrapper_lightning.NodeBalance
@@ -556,6 +558,21 @@ class SphinxRepository(
                     mapMessageDboAndDecryptContentIfNeeded(queries, it)
                 }
             }
+    }
+
+    override suspend fun readMessages(chatId: ChatId) {
+        val queries = coreDB.getSphinxDatabaseQueries()
+
+        chatLock.withLock {
+            messageLock.withLock {
+                queries.transaction {
+                    queries.chatUpdateSeen(Seen.True, chatId)
+                    queries.chatMessagesUpdateSeen(Seen.True, chatId)
+                }
+            }
+        }
+
+        networkQueryMessage.readMessages(chatId).collect { _ -> }
     }
 
     @OptIn(UnencryptedDataAccess::class)
