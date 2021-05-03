@@ -32,6 +32,10 @@ abstract class CoreDBImpl(private val moshi: Moshi): CoreDB() {
     override val isInitialized: Boolean
         get() = sphinxDatabaseQueriesStateFlow.value != null
 
+    override fun getSphinxDatabaseQueriesOrNull(): SphinxDatabaseQueries? {
+        return sphinxDatabaseQueriesStateFlow.value
+    }
+
     protected abstract fun getSqlDriver(encryptionKey: EncryptionKey): SqlDriver
 
     private val initializationLock = Object()
