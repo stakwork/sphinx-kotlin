@@ -20,4 +20,5 @@
 
     <!--  Link Previews  -->
     <string name="link_preview_add_contact_banner_label">Add Contact</string>
+    <string name="link_preview_see_tribe_banner_label">See Tribe</string>
 </resources>
