@@ -2,6 +2,8 @@ package chat.sphinx.feature_network_client
 
 import chat.sphinx.concept_network_client.NetworkClientClearedListener
 import chat.sphinx.concept_network_client_cache.NetworkClientCache
+import chat.sphinx.logger.SphinxLogger
+import chat.sphinx.logger.d
 import io.matthewnelson.build_config.BuildConfigDebug
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -13,9 +15,12 @@ import java.util.concurrent.TimeUnit
 class NetworkClientImpl(
     private val debug: BuildConfigDebug,
     private val cache: Cache,
+    private val LOG: SphinxLogger,
 ): NetworkClientCache() {
 
     companion object {
+        const val TAG = "NetworkClientImpl"
+
         const val TIME_OUT = 15L
         const val PING_INTERVAL = 25L
 
@@ -31,19 +36,30 @@ class NetworkClientImpl(
 
         fun addListener(listener: NetworkClientClearedListener): Boolean {
             synchronized(this) {
-                return listeners.add(listener)
+                val bool = listeners.add(listener)
+                if (bool) {
+                    LOG.d(TAG, "Listener ${listener.javaClass.simpleName} registered")
+                }
+                return bool
             }
         }
 
         fun removeListener(listener: NetworkClientClearedListener): Boolean {
             synchronized(this) {
-                return listeners.remove(listener)
+                val bool = listeners.remove(listener)
+                if (bool) {
+                    LOG.d(TAG, "Listener ${listener.javaClass.simpleName} removed")
+                }
+                return bool
             }
         }
 
         fun clear() {
             synchronized(this) {
-                listeners.clear()
+                if (listeners.isNotEmpty()) {
+                    listeners.clear()
+                    LOG.d(TAG, "Listeners cleared")
+                }
             }
         }
 

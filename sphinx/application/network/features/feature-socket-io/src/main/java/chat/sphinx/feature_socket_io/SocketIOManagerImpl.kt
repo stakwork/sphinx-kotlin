@@ -79,7 +79,7 @@ class SocketIOManagerImpl(
             synchronized(this) {
                 val bool = listeners.add(listener)
                 if (bool) {
-                    LOG.d(TAG, "Listener ${listener.javaClass.simpleName} added")
+                    LOG.d(TAG, "Listener ${listener.javaClass.simpleName} registered")
                 }
                 return bool
             }
@@ -95,8 +95,10 @@ class SocketIOManagerImpl(
 
         fun clear() {
             synchronized(this) {
-                listeners.clear()
-                LOG.d(TAG, "Listeners cleared")
+                if (listeners.isNotEmpty()) {
+                    listeners.clear()
+                    LOG.d(TAG, "Listeners cleared")
+                }
             }
         }
 

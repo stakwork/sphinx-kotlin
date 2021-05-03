@@ -66,11 +66,13 @@ object NetworkModule {
     @Singleton
     fun provideNetworkClientImpl(
         @ApplicationContext appContext: Context,
-        buildConfigDebug: BuildConfigDebug
+        buildConfigDebug: BuildConfigDebug,
+        LOG: SphinxLogger,
     ): NetworkClientImpl =
         NetworkClientImpl(
             buildConfigDebug,
-            CoilUtils.createDefaultCache(appContext)
+            CoilUtils.createDefaultCache(appContext),
+            LOG,
         )
 
     @Provides
