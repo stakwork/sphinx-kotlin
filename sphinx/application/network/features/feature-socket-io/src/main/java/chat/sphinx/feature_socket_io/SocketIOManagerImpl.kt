@@ -390,66 +390,66 @@ class SocketIOManagerImpl(
                                 )
                             )
                         }
-                        SphinxSocketIOMessage.Type.MessageType.Group.Create.JSON_TYPE -> {
-                            SphinxSocketIOMessage.Type.MessageType.Group.Create(
+                        SphinxSocketIOMessage.Type.Group.Create.JSON_TYPE -> {
+                            SphinxSocketIOMessage.Type.Group.Create(
                                 moshi.getMessageResponse(
-                                    MessageResponse.ResponseMessage::class.java,
+                                    MessageResponse.ResponseGroup::class.java,
                                     argsString
                                 )
                             )
                         }
-                        SphinxSocketIOMessage.Type.MessageType.Group.Leave.JSON_TYPE -> {
-                            SphinxSocketIOMessage.Type.MessageType.Group.Leave(
+                        SphinxSocketIOMessage.Type.Group.Leave.JSON_TYPE -> {
+                            SphinxSocketIOMessage.Type.Group.Leave(
                                 moshi.getMessageResponse(
-                                    MessageResponse.ResponseMessage::class.java,
+                                    MessageResponse.ResponseGroup::class.java,
                                     argsString
                                 )
                             )
                         }
-                        SphinxSocketIOMessage.Type.MessageType.Group.Join.JSON_TYPE -> {
-                            SphinxSocketIOMessage.Type.MessageType.Group.Join(
+                        SphinxSocketIOMessage.Type.Group.Join.JSON_TYPE -> {
+                            SphinxSocketIOMessage.Type.Group.Join(
                                 moshi.getMessageResponse(
-                                    MessageResponse.ResponseMessage::class.java,
+                                    MessageResponse.ResponseGroup::class.java,
                                     argsString
                                 )
                             )
                         }
-                        SphinxSocketIOMessage.Type.MessageType.Group.Kick.JSON_TYPE -> {
-                            SphinxSocketIOMessage.Type.MessageType.Group.Kick(
+                        SphinxSocketIOMessage.Type.Group.Kick.JSON_TYPE -> {
+                            SphinxSocketIOMessage.Type.Group.Kick(
                                 moshi.getMessageResponse(
-                                    MessageResponse.ResponseMessage::class.java,
+                                    MessageResponse.ResponseGroup::class.java,
                                     argsString
                                 )
                             )
                         }
-                        SphinxSocketIOMessage.Type.MessageType.Group.TribeDelete.JSON_TYPE -> {
-                            SphinxSocketIOMessage.Type.MessageType.Group.TribeDelete(
+                        SphinxSocketIOMessage.Type.Group.TribeDelete.JSON_TYPE -> {
+                            SphinxSocketIOMessage.Type.Group.TribeDelete(
                                 moshi.getMessageResponse(
-                                    MessageResponse.ResponseMessage::class.java,
+                                    MessageResponse.ResponseGroup::class.java,
                                     argsString
                                 )
                             )
                         }
-                        SphinxSocketIOMessage.Type.MessageType.Group.Member.Request.JSON_TYPE -> {
-                            SphinxSocketIOMessage.Type.MessageType.Group.Member.Request(
+                        SphinxSocketIOMessage.Type.Group.Member.Request.JSON_TYPE -> {
+                            SphinxSocketIOMessage.Type.Group.Member.Request(
                                 moshi.getMessageResponse(
-                                    MessageResponse.ResponseMessage::class.java,
+                                    MessageResponse.ResponseGroup::class.java,
                                     argsString
                                 )
                             )
                         }
-                        SphinxSocketIOMessage.Type.MessageType.Group.Member.Approve.JSON_TYPE -> {
-                            SphinxSocketIOMessage.Type.MessageType.Group.Member.Approve(
+                        SphinxSocketIOMessage.Type.Group.Member.Approve.JSON_TYPE -> {
+                            SphinxSocketIOMessage.Type.Group.Member.Approve(
                                 moshi.getMessageResponse(
-                                    MessageResponse.ResponseMessage::class.java,
+                                    MessageResponse.ResponseGroup::class.java,
                                     argsString
                                 )
                             )
                         }
-                        SphinxSocketIOMessage.Type.MessageType.Group.Member.Reject.JSON_TYPE -> {
-                            SphinxSocketIOMessage.Type.MessageType.Group.Member.Reject(
+                        SphinxSocketIOMessage.Type.Group.Member.Reject.JSON_TYPE -> {
+                            SphinxSocketIOMessage.Type.Group.Member.Reject(
                                 moshi.getMessageResponse(
-                                    MessageResponse.ResponseMessage::class.java,
+                                    MessageResponse.ResponseGroup::class.java,
                                     argsString
                                 )
                             )

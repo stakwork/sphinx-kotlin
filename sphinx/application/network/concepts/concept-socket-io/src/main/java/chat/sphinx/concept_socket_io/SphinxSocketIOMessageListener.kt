@@ -6,6 +6,13 @@ import chat.sphinx.concept_network_query_invite.model.InviteDto
 import chat.sphinx.concept_network_query_lightning.model.invoice.InvoiceDto
 import chat.sphinx.concept_network_query_message.model.MessageDto
 
+// TODO: This will need to be moved to concept-network-query-xxx when it gets built
+//  out. For now implementing it here (and in feature-socket-io module) works...
+abstract class GroupDto {
+    abstract val contact: ContactDto
+    abstract val message: MessageDto
+}
+
 sealed class SphinxSocketIOMessage {
 
     sealed class Type<T>: SphinxSocketIOMessage() {
@@ -21,6 +28,61 @@ sealed class SphinxSocketIOMessage {
         class Contact(override val dto: ContactDto): Type<ContactDto>() {
             companion object {
                 const val JSON_TYPE = "contact"
+            }
+        }
+
+        sealed class Group: Type<GroupDto>() {
+
+            class Create(override val dto: GroupDto): Group() {
+                companion object {
+                    const val JSON_TYPE = "group_create"
+                }
+            }
+
+            class Leave(override val dto: GroupDto): Group() {
+                companion object {
+                    const val JSON_TYPE = "group_leave"
+                }
+            }
+
+            class Join(override val dto: GroupDto): Group() {
+                companion object {
+                    const val JSON_TYPE = "group_join"
+                }
+            }
+
+            class Kick(override val dto: GroupDto): Group() {
+                companion object {
+                    const val JSON_TYPE = "group_kick"
+                }
+            }
+
+            class TribeDelete(override val dto: GroupDto): Group() {
+                companion object {
+                    const val JSON_TYPE = "tribe_delete"
+                }
+            }
+
+            sealed class Member: Group() {
+
+                class Request(override val dto: GroupDto): Member() {
+                    companion object {
+                        const val JSON_TYPE = "member_request"
+                    }
+                }
+
+                class Approve(override val dto: GroupDto): Member() {
+                    companion object {
+                        const val JSON_TYPE = "member_approve"
+                    }
+                }
+
+                class Reject(override val dto: GroupDto): Member() {
+                    companion object {
+                        const val JSON_TYPE = "member_reject"
+                    }
+                }
+
             }
         }
 
@@ -59,61 +121,6 @@ sealed class SphinxSocketIOMessage {
             class Delete(override val dto: MessageDto): MessageType() {
                 companion object {
                     const val JSON_TYPE = "delete"
-                }
-            }
-
-            sealed class Group: MessageType() {
-
-                class Create(override val dto: MessageDto): Group() {
-                    companion object {
-                        const val JSON_TYPE = "group_create"
-                    }
-                }
-
-                class Leave(override val dto: MessageDto): Group() {
-                    companion object {
-                        const val JSON_TYPE = "group_leave"
-                    }
-                }
-
-                class Join(override val dto: MessageDto): Group() {
-                    companion object {
-                        const val JSON_TYPE = "group_join"
-                    }
-                }
-
-                class Kick(override val dto: MessageDto): Group() {
-                    companion object {
-                        const val JSON_TYPE = "group_kick"
-                    }
-                }
-
-                class TribeDelete(override val dto: MessageDto): Group() {
-                    companion object {
-                        const val JSON_TYPE = "tribe_delete"
-                    }
-                }
-
-                sealed class Member: Group() {
-
-                    class Request(override val dto: MessageDto): Member() {
-                        companion object {
-                            const val JSON_TYPE = "member_request"
-                        }
-                    }
-
-                    class Approve(override val dto: MessageDto): Member() {
-                        companion object {
-                            const val JSON_TYPE = "member_approve"
-                        }
-                    }
-
-                    class Reject(override val dto: MessageDto): Member() {
-                        companion object {
-                            const val JSON_TYPE = "member_reject"
-                        }
-                    }
-
                 }
             }
 

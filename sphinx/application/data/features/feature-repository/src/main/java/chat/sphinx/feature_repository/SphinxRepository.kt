@@ -106,9 +106,31 @@ class SphinxRepository(
         coreDB.getSphinxDatabaseQueriesOrNull()?.let { queries ->
             @Exhaustive
             when (msg) {
-                // TODO: Implement conditional arguments depending on
-                //  different MessageType
+                is SphinxSocketIOMessage.Type.Contact -> {
+                    contactLock.withLock {
+                        queries.transaction {
+                            queries.upsertContact(msg.dto)
+                        }
+                    }
+                }
+                is SphinxSocketIOMessage.Type.ChatSeen -> {
+                    // TODO: Implement
+                }
+                is SphinxSocketIOMessage.Type.Group -> {
+                    // TODO: Implement
+                }
+                is SphinxSocketIOMessage.Type.Invite -> {
+                    // TODO: Implement
+//                    queries.upsertInvite(msg.dto)
+                }
+                is SphinxSocketIOMessage.Type.InvoicePayment -> {
+                    // TODO: Implement
+                }
                 is SphinxSocketIOMessage.Type.MessageType -> {
+
+                    // TODO: Implement conditional arguments depending on
+                    //  different MessageType
+
                     decryptMessageDtoContentIfAvailable(
                         msg.dto,
                         coroutineScope { this },
@@ -141,23 +163,6 @@ class SphinxRepository(
                         }
                     }
 
-                }
-                is SphinxSocketIOMessage.Type.Contact -> {
-                    contactLock.withLock {
-                        queries.transaction {
-                            queries.upsertContact(msg.dto)
-                        }
-                    }
-                }
-                is SphinxSocketIOMessage.Type.ChatSeen -> {
-                    // TODO: Implement
-                }
-                is SphinxSocketIOMessage.Type.Invite -> {
-                    // TODO: Implement
-//                    queries.upsertInvite(msg.dto)
-                }
-                is SphinxSocketIOMessage.Type.InvoicePayment -> {
-                    // TODO: Implement
                 }
             }
         }

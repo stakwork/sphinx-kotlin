@@ -5,6 +5,7 @@ import chat.sphinx.concept_network_query_contact.model.ContactDto
 import chat.sphinx.concept_network_query_invite.model.InviteDto
 import chat.sphinx.concept_network_query_lightning.model.invoice.InvoiceDto
 import chat.sphinx.concept_network_query_message.model.MessageDto
+import chat.sphinx.concept_socket_io.GroupDto
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.Moshi
@@ -23,6 +24,12 @@ internal inline fun<T: Any, V: MessageResponse<T>> Moshi.getMessageResponse(
         ?: throw JsonDataException("Failed to convert SocketIO Message.response Json to ${adapter.simpleName}")
 }
 
+@JsonClass(generateAdapter = true)
+internal data class GroupDtoImpl(
+    override val contact: ContactDto,
+    override val message: MessageDto
+): GroupDto()
+
 internal sealed class MessageResponse<T> {
     abstract val response: T
 
@@ -31,6 +38,9 @@ internal sealed class MessageResponse<T> {
 
     @JsonClass(generateAdapter = true)
     internal class ResponseContact(override val response: ContactDto): MessageResponse<ContactDto>()
+
+    @JsonClass(generateAdapter = true)
+    internal class ResponseGroup(override val response: GroupDtoImpl): MessageResponse<GroupDtoImpl>()
 
     @JsonClass(generateAdapter = true)
     internal class ResponseInvite(override val response: InviteDto): MessageResponse<InviteDto>()
