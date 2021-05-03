@@ -10,6 +10,4 @@ abstract class NetworkClientCache: NetworkClient() {
     }
 
     abstract suspend fun getCachingClient(): OkHttpClient
-    abstract fun addOnClientClearedCallback(onClear: () -> Unit)
-    abstract fun removeOnClientClearedCallback()
 }

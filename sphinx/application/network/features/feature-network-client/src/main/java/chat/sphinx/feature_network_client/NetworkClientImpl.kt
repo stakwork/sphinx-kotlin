@@ -1,5 +1,6 @@
 package chat.sphinx.feature_network_client
 
+import chat.sphinx.concept_network_client.NetworkClientClearedListener
 import chat.sphinx.concept_network_client_cache.NetworkClientCache
 import io.matthewnelson.build_config.BuildConfigDebug
 import kotlinx.coroutines.sync.Mutex
@@ -22,6 +23,57 @@ class NetworkClientImpl(
         const val MAX_STALE = "public, max-stale=$MAX_STALE_VALUE"
     }
 
+    /////////////////
+    /// Listeners ///
+    /////////////////
+    private inner class SynchronizedListenerHolder {
+        private val listeners: LinkedHashSet<NetworkClientClearedListener> = LinkedHashSet(0)
+
+        fun addListener(listener: NetworkClientClearedListener): Boolean {
+            synchronized(this) {
+                return listeners.add(listener)
+            }
+        }
+
+        fun removeListener(listener: NetworkClientClearedListener): Boolean {
+            synchronized(this) {
+                return listeners.remove(listener)
+            }
+        }
+
+        fun clear() {
+            synchronized(this) {
+                listeners.clear()
+            }
+        }
+
+        fun dispatchClearedEvent() {
+            synchronized(this) {
+                for (listener in listeners) {
+                    listener.networkClientCleared()
+                }
+            }
+        }
+
+        val hasListeners: Boolean
+            get() = synchronized(this) {
+                listeners.isNotEmpty()
+            }
+    }
+
+    private val synchronizedListeners = SynchronizedListenerHolder()
+
+    override fun addListener(listener: NetworkClientClearedListener): Boolean {
+        return synchronizedListeners.addListener(listener)
+    }
+
+    override fun removeListener(listener: NetworkClientClearedListener): Boolean {
+        return synchronizedListeners.removeListener(listener)
+    }
+
+    ///////////////
+    /// Clients ///
+    ///////////////
     @Volatile
     private var client: OkHttpClient? = null
     private val clientLock = Mutex()
@@ -49,15 +101,6 @@ class NetworkClientImpl(
                 .build()
                 .also { cachingClient = it }
         }
-
-    private var callback: () -> Unit? = {}
-    override fun addOnClientClearedCallback(onClear: () -> Unit) {
-        callback = onClear
-    }
-
-    override fun removeOnClientClearedCallback() {
-        callback = {}
-    }
 
     private suspend fun createClientImpl(): OkHttpClient.Builder =
         OkHttpClient.Builder().let { builder ->

@@ -6,6 +6,7 @@ import android.widget.ImageView
 import androidx.annotation.DrawableRes
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_image_loader.*
+import chat.sphinx.concept_network_client.NetworkClientClearedListener
 import chat.sphinx.concept_network_client_cache.NetworkClientCache
 import coil.annotation.ExperimentalCoilApi
 import coil.decode.GifDecoder
@@ -27,7 +28,7 @@ class ImageLoaderAndroid(
     context: Context,
     private val dispatchers: CoroutineDispatchers,
     private val networkClientCache: NetworkClientCache
-): ImageLoader<ImageView>() {
+): ImageLoader<ImageView>(), NetworkClientClearedListener {
 
     private val appContext: Context = context.applicationContext
 
@@ -35,10 +36,12 @@ class ImageLoaderAndroid(
     private var loader: coil.ImageLoader? = null
     private val loaderLock = Mutex()
 
+    override fun networkClientCleared() {
+        loader = null
+    }
+
     init {
-        networkClientCache.addOnClientClearedCallback {
-            loader = null
-        }
+        networkClientCache.addListener(this)
     }
 
     override suspend fun load(

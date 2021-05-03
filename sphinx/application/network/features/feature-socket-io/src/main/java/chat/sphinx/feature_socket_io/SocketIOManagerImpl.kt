@@ -2,6 +2,7 @@ package chat.sphinx.feature_socket_io
 
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_network_client.NetworkClient
+import chat.sphinx.concept_network_client.NetworkClientClearedListener
 import chat.sphinx.concept_relay.RelayDataHandler
 import chat.sphinx.concept_relay.retrieveRelayUrlAndAuthorizationToken
 import chat.sphinx.concept_socket_io.*
@@ -40,7 +41,7 @@ class SocketIOManagerImpl(
     private val networkClient: NetworkClient,
     private val relayDataHandler: RelayDataHandler,
     private val LOG: SphinxLogger,
-): SocketIOManager() {
+): SocketIOManager(), NetworkClientClearedListener {
 
     companion object {
         const val TAG = "SocketIOManagerImpl"
@@ -162,23 +163,43 @@ class SocketIOManagerImpl(
     private var instance: SocketInstanceHolder? = null
     private val lock = Mutex()
 
+    override fun networkClientCleared() {
+        var lockSuccess = false
+        try {
+            instance?.let { nnInstance ->
+                lockSuccess = lock.tryLock()
+                nnInstance.socket.disconnect()
+                nnInstance.socketIOSupervisor.cancel()
+                nnInstance.socketIOClient.dispatcher.executorService.shutdown()
+                instance = null
+            }
+        } finally {
+            if (lockSuccess) {
+                lock.unlock()
+            }
+        }
+    }
+
+    init {
+        networkClient.addListener(this)
+    }
+
     override suspend fun getSocket(
         relayData: Pair<AuthorizationToken, RelayUrl>?
     ): Response<Socket, ResponseError> =
-        instance?.let { Response.Success(it.socket) } ?: lock.withLock {
-            instance?.let { Response.Success(it.socket) }
-                ?: buildSocket(relayData).let { response ->
-                    @Exhaustive
-                    when (response) {
-                        is Response.Error -> {
-                            return response
-                        }
-                        is Response.Success -> {
-                            instance = response.value
-                            return Response.Success(response.value.socket)
-                        }
+        lock.withLock { instance?.let { Response.Success(it.socket) }
+            ?: buildSocket(relayData).let { response ->
+                @Exhaustive
+                when (response) {
+                    is Response.Error -> {
+                        return response
+                    }
+                    is Response.Success -> {
+                        instance = response.value
+                        return Response.Success(response.value.socket)
                     }
                 }
+            }
         }
 
     @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN", "UNCHECKED_CAST")
@@ -220,6 +241,8 @@ class SocketIOManagerImpl(
         }
 
         val socket: Socket = try {
+            // TODO: Need to add listener to relayData in case it is changed
+            //  need to disconnect and open a new socket.
             IO.socket(nnRelayData.second.value, options)
         } catch (e: Exception) {
             val msg = "Failed to create socket-io instance"
