@@ -71,37 +71,6 @@ internal class DashboardViewModel @Inject constructor(
         >(NavDrawerViewState.Closed)
 {
 
-    init {
-        if (socketIOManager.socketIOStateFlow.value is SocketIOState.Uninitialized) {
-            viewModelScope.launch(dispatchers.mainImmediate) {
-
-                var breakPlease = false
-
-                while (isActive && !breakPlease) {
-
-                    socketIOManager.getSocket().let { response ->
-
-                        if (response is Response.Success) {
-                            response.value.connect()
-                            try {
-                                socketIOManager.socketIOStateFlow.collect { state ->
-                                    if (state is SocketIOState.Initialized.Connected) {
-                                        breakPlease = true
-                                        throw Exception()
-                                    }
-                                    if (state is SocketIOState.Uninitialized) {
-                                        throw Exception()
-                                    }
-                                }
-                            } catch (e: Exception) {}
-                        }
-
-                    }
-                }
-            }
-        }
-    }
-
     val chatViewStateContainer: ChatViewStateContainer by lazy {
         ChatViewStateContainer(dispatchers)
     }
@@ -264,6 +233,14 @@ internal class DashboardViewModel @Inject constructor(
 
     private val _networkStateFlow: MutableStateFlow<LoadResponse<Boolean, ResponseError>> by lazy {
         MutableStateFlow(LoadResponse.Loading)
+    }
+
+    init {
+        viewModelScope.launch(dispatchers.mainImmediate) {
+            // TODO: Move to Service and observe state instead
+            //  to reflect changes on UI
+            socketIOManager.connect()
+        }
     }
 
     val networkStateFlow: StateFlow<LoadResponse<Boolean, ResponseError>>

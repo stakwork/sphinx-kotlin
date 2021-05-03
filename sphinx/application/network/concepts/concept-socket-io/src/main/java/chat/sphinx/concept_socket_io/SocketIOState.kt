@@ -1,7 +1,5 @@
 package chat.sphinx.concept_socket_io
 
-import io.socket.engine.engineio.client.EngineIOException
-
 sealed class SocketIOState {
 
     object Uninitialized: SocketIOState()
@@ -21,10 +19,10 @@ sealed class SocketIOState {
 
 sealed class SocketIOError {
 
-    abstract val e: EngineIOException?
+    abstract val e: Exception?
 
-    data class Error(override val e: EngineIOException?): SocketIOError()
-    data class ConnectError(override val e: EngineIOException?) : SocketIOError()
-    data class ReconnectError(override val e: EngineIOException?) : SocketIOError()
-    data class UpgradeError(override val e: EngineIOException?) : SocketIOError()
+    data class Error(override val e: Exception?): SocketIOError()
+    data class ConnectError(override val e: Exception?): SocketIOError()
+    data class ReconnectError(override val e: Exception?): SocketIOError()
+    data class UpgradeError(override val e: Exception?): SocketIOError()
 }

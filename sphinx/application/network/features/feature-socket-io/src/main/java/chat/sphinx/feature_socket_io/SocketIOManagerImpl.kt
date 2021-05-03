@@ -155,6 +155,7 @@ class SocketIOManagerImpl(
     private class SocketInstanceHolder(
         val socket: Socket,
         val socketIOClient: OkHttpClient,
+        val relayData: Pair<AuthorizationToken, RelayUrl>,
         val socketIOSupervisor: Job = SupervisorJob(),
         val socketIOScope: CoroutineScope = CoroutineScope(socketIOSupervisor)
     )
@@ -184,11 +185,17 @@ class SocketIOManagerImpl(
         networkClient.addListener(this)
     }
 
-    override suspend fun getSocket(
+    override suspend fun connect(
         relayData: Pair<AuthorizationToken, RelayUrl>?
-    ): Response<Socket, ResponseError> =
-        lock.withLock { instance?.let { Response.Success(it.socket) }
-            ?: buildSocket(relayData).let { response ->
+    ): Response<Any, ResponseError> =
+        lock.withLock {
+            instance?.let { nnInstance ->
+
+                nnInstance.socket.connect()
+                Response.Success(true)
+
+            } ?: buildSocket(relayData).let { response ->
+
                 @Exhaustive
                 when (response) {
                     is Response.Error -> {
@@ -196,11 +203,20 @@ class SocketIOManagerImpl(
                     }
                     is Response.Success -> {
                         instance = response.value
-                        return Response.Success(response.value.socket)
+                        response.value.socket.connect()
+                        Response.Success(true)
                     }
                 }
+
             }
         }
+
+    override fun disconnect() {
+        instance?.socket?.disconnect()
+    }
+
+    override val isConnected: Boolean
+        get() = instance?.socket?.connected() ?: false
 
     @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN", "UNCHECKED_CAST")
     private suspend fun buildSocket(
@@ -437,6 +453,6 @@ class SocketIOManagerImpl(
 
         _socketIOStateFlow.value = SocketIOState.Initialized.Disconnected
 
-        return Response.Success(SocketInstanceHolder(socket, client))
+        return Response.Success(SocketInstanceHolder(socket, client, nnRelayData))
     }
 }

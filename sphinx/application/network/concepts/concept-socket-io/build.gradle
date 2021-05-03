@@ -4,9 +4,6 @@ plugins {
 }
 
 dependencies {
-    api project(path: ':socket-io:client')
-
-    // Sphinx
     api project(path: ':sphinx:application:common:kotlin-response')
     api project(path: ':sphinx:application:data:concepts:concept-relay')
 
