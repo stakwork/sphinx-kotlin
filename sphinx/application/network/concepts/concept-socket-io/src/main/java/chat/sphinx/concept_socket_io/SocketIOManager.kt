@@ -21,5 +21,4 @@ abstract class SocketIOManager {
 
     abstract fun addListener(listener: SphinxSocketIOMessageListener): Boolean
     abstract fun removeListener(listener: SphinxSocketIOMessageListener): Boolean
-    abstract fun clearListeners()
 }

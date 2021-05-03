@@ -145,10 +145,6 @@ class SocketIOManagerImpl(
         return synchronizedListeners.removeListener(listener)
     }
 
-    override fun clearListeners() {
-        synchronizedListeners.clear()
-    }
-
     /////////////////////
     /// Socket/Client ///
     /////////////////////
