@@ -6,6 +6,7 @@ import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.exception
 import chat.sphinx.kotlin_response.message
 import chat.sphinx.test_network_query.NetworkQueryTestHelper
+import chat.sphinx.wrapper_common.chat.ChatId
 import chat.sphinx.wrapper_common.message.MessagePagination
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.test.runBlockingTest
@@ -104,8 +105,6 @@ class NetworkQueryMessageImplUnitTest: NetworkQueryTestHelper() {
             }
         }
 
-    // TODO: Test Datetime params. Need to build out compatible DateTime formatter.
-
     @Test
     fun `getPayments returns success`() =
         testDispatcher.runBlockingTest {
@@ -120,6 +119,26 @@ class NetworkQueryMessageImplUnitTest: NetworkQueryTestHelper() {
                         }
                         is Response.Success -> {}
                         is LoadResponse.Loading -> {}
+                    }
+
+                }
+            }
+        }
+
+    @Test
+    fun `readMessages returns success`() =
+        testDispatcher.runBlockingTest {
+            getCredentials()?.let {
+                nqMessage.readMessages(ChatId(1)).collect { loadResponse ->
+
+                    @Exhaustive
+                    when (loadResponse) {
+                        is LoadResponse.Loading -> {}
+                        is Response.Error -> {
+                            loadResponse.exception?.printStackTrace()
+                            Assert.fail(loadResponse.message)
+                        }
+                        is Response.Success -> {}
                     }
 
                 }
