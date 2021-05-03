@@ -38,9 +38,21 @@ sealed class SphinxSocketIOMessage {
 
         sealed class MessageType: Type<MessageDto>() {
 
+            class Attachment(override val dto: MessageDto): MessageType() {
+                companion object {
+                    const val JSON_TYPE = "attachment"
+                }
+            }
+
             class Boost(override val dto: MessageDto): MessageType() {
                 companion object {
                     const val JSON_TYPE = "boost"
+                }
+            }
+
+            class Confirmation(override val dto: MessageDto): MessageType() {
+                companion object {
+                    const val JSON_TYPE = "confirmation"
                 }
             }
 

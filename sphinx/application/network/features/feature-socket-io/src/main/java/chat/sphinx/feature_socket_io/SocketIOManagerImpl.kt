@@ -3,6 +3,7 @@ package chat.sphinx.feature_socket_io
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_network_client.NetworkClient
 import chat.sphinx.concept_network_client.NetworkClientClearedListener
+import chat.sphinx.concept_network_query_message.model.MessageDto
 import chat.sphinx.concept_relay.RelayDataHandler
 import chat.sphinx.concept_relay.retrieveRelayUrlAndAuthorizationToken
 import chat.sphinx.concept_socket_io.*
@@ -242,6 +243,10 @@ class SocketIOManagerImpl(
             callFactory = client
             webSocketFactory = client
             reconnection = true
+
+            // TODO: work out a reconnection attempt strategy to set on initialization
+//            reconnectionAttempts
+
             timeout = 20_000L
             upgrade = true
             rememberUpgrade = false
@@ -350,8 +355,24 @@ class SocketIOManagerImpl(
                                 )
                             )
                         }
+                        SphinxSocketIOMessage.Type.MessageType.Attachment.JSON_TYPE -> {
+                            SphinxSocketIOMessage.Type.MessageType.Attachment(
+                                moshi.getMessageResponse(
+                                    MessageResponse.ResponseMessage::class.java,
+                                    argsString
+                                )
+                            )
+                        }
                         SphinxSocketIOMessage.Type.MessageType.Boost.JSON_TYPE -> {
                             SphinxSocketIOMessage.Type.MessageType.Boost(
+                                moshi.getMessageResponse(
+                                    MessageResponse.ResponseMessage::class.java,
+                                    argsString
+                                )
+                            )
+                        }
+                        SphinxSocketIOMessage.Type.MessageType.Confirmation.JSON_TYPE -> {
+                            SphinxSocketIOMessage.Type.MessageType.Confirmation(
                                 moshi.getMessageResponse(
                                     MessageResponse.ResponseMessage::class.java,
                                     argsString
@@ -471,7 +492,15 @@ class SocketIOManagerImpl(
                             )
                         }
                         else -> {
-                            throw RuntimeException("SocketIO EventMessage Type '$type' not handled")
+                            // Try to handle it as a message
+                            val messageDto: MessageDto = moshi.getMessageResponse(
+                                MessageResponse.ResponseMessage::class.java,
+                                argsString
+                            )
+
+                            LOG.w(TAG, "SocketIO EventMessage Type '$type' not handled")
+
+                            SphinxSocketIOMessage.Type.MessageType.Message(messageDto)
                         }
                     }.let { response ->
                         synchronizedListeners.dispatch(response)
