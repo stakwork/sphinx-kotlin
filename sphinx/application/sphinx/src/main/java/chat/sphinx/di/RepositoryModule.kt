@@ -9,6 +9,7 @@ import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_message.NetworkQueryMessage
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_lightning.LightningRepository
+import chat.sphinx.concept_socket_io.SocketIOManager
 import chat.sphinx.database.SphinxCoreDBImpl
 import chat.sphinx.feature_coredb.CoreDBImpl
 import chat.sphinx.feature_repository.SphinxRepository
@@ -45,8 +46,9 @@ object RepositoryModule {
         networkQueryContact: NetworkQueryContact,
         networkQueryLightning: NetworkQueryLightning,
         networkQueryMessage: NetworkQueryMessage,
+        socketIOManager: SocketIOManager,
         rsa: RSA,
-        sphinxLogger: SphinxLogger
+        sphinxLogger: SphinxLogger,
     ): SphinxRepository =
         SphinxRepository(
             authenticationCoreManager,
@@ -59,7 +61,8 @@ object RepositoryModule {
             networkQueryLightning,
             networkQueryMessage,
             rsa,
-            sphinxLogger
+            socketIOManager,
+            sphinxLogger,
         )
 
     @Provides

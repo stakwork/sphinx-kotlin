@@ -44,6 +44,11 @@ inline fun BalanceDto.toNodeBalance(): NodeBalance =
         Sat(pending_open_balance),
     )
 
+inline val MessageDto.updateChatDboLatestMessage: Boolean
+    get() = type.toMessageType().show           &&
+            type != MessageType.BOT_RES         &&
+            status != MessageStatus.DELETED
+
 @Suppress("NOTHING_TO_INLINE", "SpellCheckingInspection")
 inline fun SphinxDatabaseQueries.upsertChat(dto: ChatDto, moshi: Moshi) {
     chatUpsert(

@@ -25,6 +25,7 @@ dependencies {
     implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-invite')
     implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-lightning')
     implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-message')
+    implementation project(path: ':sphinx:application:network:concepts:concept-socket-io')
 
     implementation deps.square.moshi
     implementation deps.square.sqlDelightCoroutines
