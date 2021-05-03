@@ -18,15 +18,25 @@ internal inline fun<T: Any, V: MessageResponse<T>> Moshi.getMessageResponse(
     adapter: Class<V>,
     json: String
 ): T {
+    val jsonResolved: String = if (
+        adapter == MessageResponse.ResponseGroup::class.java &&
+        json.contains("\"contact\":{}")
+    ) {
+        json.replace("\"contact\":{}", "\"contact\":null")
+    } else {
+        json
+    }
+
     return adapter(adapter)
-        .fromJson(json)
+        .fromJson(jsonResolved)
         ?.response
         ?: throw JsonDataException("Failed to convert SocketIO Message.response Json to ${adapter.simpleName}")
 }
 
 @JsonClass(generateAdapter = true)
 internal data class GroupDtoImpl(
-    override val contact: ContactDto,
+    override val chat: ChatDto,
+    override val contact: ContactDto?,
     override val message: MessageDto
 ): GroupDto()
 

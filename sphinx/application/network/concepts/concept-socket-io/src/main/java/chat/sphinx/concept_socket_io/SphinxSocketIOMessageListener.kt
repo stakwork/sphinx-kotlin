@@ -9,7 +9,8 @@ import chat.sphinx.concept_network_query_message.model.MessageDto
 // TODO: This will need to be moved to concept-network-query-xxx when it gets built
 //  out. For now implementing it here (and in feature-socket-io module) works...
 abstract class GroupDto {
-    abstract val contact: ContactDto
+    abstract val chat: ChatDto
+    abstract val contact: ContactDto?
     abstract val message: MessageDto
 }
 
