@@ -3,12 +3,16 @@ package chat.sphinx.feature_network_query_contact
 import chat.sphinx.concept_network_query_contact.NetworkQueryContact
 import chat.sphinx.concept_network_query_contact.model.GetContactsResponse
 import chat.sphinx.concept_network_relay_call.NetworkRelayCall
+import chat.sphinx.feature_network_query_contact.model.DeleteContactRelayResponse
 import chat.sphinx.feature_network_query_contact.model.GetContactsRelayResponse
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.kotlin_response.LoadResponse
+import chat.sphinx.kotlin_response.Response
+import chat.sphinx.wrapper_common.contact.ContactId
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collect
 
 class NetworkQueryContactImpl(
     private val networkRelayCall: NetworkRelayCall,
@@ -16,6 +20,7 @@ class NetworkQueryContactImpl(
 
     companion object {
         private const val ENDPOINT_CONTACTS = "/contacts"
+        private const val ENDPOINT_DELETE_CONTACT = "/contacts/%d"
     }
 
     override fun getContacts(
@@ -43,4 +48,23 @@ class NetworkQueryContactImpl(
     /// DELETE ///
     //////////////
 //    app.delete('/contacts/:id', contacts.deleteContact)
+    override suspend fun deleteContact(
+        contactId: ContactId,
+        relayData: Pair<AuthorizationToken, RelayUrl>?
+    ): Response<Boolean, ResponseError> {
+
+        var response: Response<Boolean, ResponseError> = Response.Success(true)
+
+        networkRelayCall.delete(
+            DeleteContactRelayResponse::class.java,
+            String.format(ENDPOINT_DELETE_CONTACT, contactId.value),
+            requestBody = null
+        ).collect { loadResponse ->
+            if (loadResponse is Response.Error) {
+                response = loadResponse
+            }
+        }
+
+        return response
+    }
 }
