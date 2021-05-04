@@ -27,7 +27,7 @@ class NetworkQueryContactImpl(
         relayData: Pair<AuthorizationToken, RelayUrl>?
     ): Flow<LoadResponse<GetContactsResponse, ResponseError>> =
         networkRelayCall.relayGet(
-            jsonAdapter = GetContactsRelayResponse::class.java,
+            responseJsonClass = GetContactsRelayResponse::class.java,
             relayEndpoint = ENDPOINT_CONTACTS,
             relayData = relayData
         )

@@ -36,7 +36,7 @@ class NetworkQueryMessageImpl(
         relayData: Pair<AuthorizationToken, RelayUrl>?
     ): Flow<LoadResponse<GetMessagesResponse, ResponseError>> =
         networkRelayCall.relayGet(
-            jsonAdapter = GetMessagesRelayResponse::class.java,
+            responseJsonClass = GetMessagesRelayResponse::class.java,
             relayEndpoint = ENDPOINT_MSGS + (messagePagination?.value ?: ""),
             relayData = relayData
         )
@@ -45,7 +45,7 @@ class NetworkQueryMessageImpl(
         relayData: Pair<AuthorizationToken, RelayUrl>?
     ): Flow<LoadResponse<List<MessageDto>, ResponseError>> =
         networkRelayCall.relayGet(
-            jsonAdapter = GetPaymentsRelayResponse::class.java,
+            responseJsonClass = GetPaymentsRelayResponse::class.java,
             relayEndpoint = ENDPOINT_PAYMENTS,
             relayData = relayData
         )
@@ -64,9 +64,9 @@ class NetworkQueryMessageImpl(
         relayData: Pair<AuthorizationToken, RelayUrl>?
     ): Flow<LoadResponse<Any?, ResponseError>> =
         networkRelayCall.relayPost(
-            jsonAdapter = ReadMessagesRelayResponse::class.java,
+            responseJsonClass = ReadMessagesRelayResponse::class.java,
             relayEndpoint = String.format(ENDPOINT_MESSAGES_READ, chatId.value),
-            requestBodyJsonAdapter = Map::class.java,
+            requestBodyJsonClass = Map::class.java,
             requestBody = mapOf(Pair("", "")),
             relayData = relayData
         )

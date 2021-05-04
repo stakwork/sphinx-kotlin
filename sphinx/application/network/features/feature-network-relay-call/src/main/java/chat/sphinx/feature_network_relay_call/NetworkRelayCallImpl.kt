@@ -122,7 +122,7 @@ class NetworkRelayCallImpl(
     ///////////////////
     override fun <T: Any> get(
         url: String,
-        jsonAdapter: Class<T>,
+        responseJsonClass: Class<T>,
         headers: Map<String, String>?
     ): Flow<LoadResponse<T, ResponseError>> = flow {
 
@@ -131,7 +131,7 @@ class NetworkRelayCallImpl(
         try {
             val requestBuilder = buildRequest(url, headers)
 
-            val response = call(jsonAdapter, requestBuilder.build())
+            val response = call(responseJsonClass, requestBuilder.build())
 
             emit(Response.Success(response))
         } catch (e: Exception) {
@@ -142,8 +142,8 @@ class NetworkRelayCallImpl(
 
     override fun <T: Any, V: Any> put(
         url: String,
-        jsonAdapter: Class<T>,
-        requestBodyJsonAdapter: Class<V>,
+        responseJsonClass: Class<T>,
+        requestBodyJsonClass: Class<V>,
         requestBody: V,
         mediaType: String?,
         headers: Map<String, String>?
@@ -155,11 +155,11 @@ class NetworkRelayCallImpl(
             val requestBuilder = buildRequest(url, headers)
 
             val requestBodyJson: String = moshi
-                .requestBodyToJson(requestBodyJsonAdapter, requestBody)
+                .requestBodyToJson(requestBodyJsonClass, requestBody)
 
             val reqBody = requestBodyJson.toRequestBody(mediaType?.toMediaType())
 
-            val response = call(jsonAdapter, requestBuilder.put(reqBody).build())
+            val response = call(responseJsonClass, requestBuilder.put(reqBody).build())
 
             emit(Response.Success(response))
         } catch (e: Exception) {
@@ -170,8 +170,8 @@ class NetworkRelayCallImpl(
 
     override fun <T: Any, V: Any> post(
         url: String,
-        jsonAdapter: Class<T>,
-        requestBodyJsonAdapter: Class<V>,
+        responseJsonClass: Class<T>,
+        requestBodyJsonClass: Class<V>,
         requestBody: V,
         mediaType: String?,
         headers: Map<String, String>?
@@ -183,11 +183,11 @@ class NetworkRelayCallImpl(
             val requestBuilder = buildRequest(url, headers)
 
             val requestBodyJson: String = moshi
-                .requestBodyToJson(requestBodyJsonAdapter, requestBody)
+                .requestBodyToJson(requestBodyJsonClass, requestBody)
 
             val reqBody = requestBodyJson.toRequestBody(mediaType?.toMediaType())
 
-            val response = call(jsonAdapter, requestBuilder.post(reqBody).build())
+            val response = call(responseJsonClass, requestBuilder.post(reqBody).build())
 
             emit(Response.Success(response))
         } catch (e: Exception) {
@@ -198,8 +198,8 @@ class NetworkRelayCallImpl(
 
     override fun <T: Any, V: Any> delete(
         url: String,
-        jsonAdapter: Class<T>,
-        requestBodyJsonAdapter: Class<V>?,
+        responseJsonClass: Class<T>,
+        requestBodyJsonClass: Class<V>?,
         requestBody: V?,
         mediaType: String?,
         headers: Map<String, String>?
@@ -211,15 +211,15 @@ class NetworkRelayCallImpl(
             val requestBuilder = buildRequest(url, headers)
 
             val requestBodyJson: String? =
-                if (requestBody == null || requestBodyJsonAdapter == null) {
+                if (requestBody == null || requestBodyJsonClass == null) {
                     null
                 } else {
-                    moshi.requestBodyToJson(requestBodyJsonAdapter, requestBody)
+                    moshi.requestBodyToJson(requestBodyJsonClass, requestBody)
                 }
 
             val reqBody: RequestBody? = requestBodyJson?.toRequestBody(mediaType?.toMediaType())
 
-            val response = call(jsonAdapter, requestBuilder.delete(reqBody ?: EMPTY_REQUEST).build())
+            val response = call(responseJsonClass, requestBuilder.delete(reqBody ?: EMPTY_REQUEST).build())
 
             emit(Response.Success(response))
         } catch (e: Exception) {
@@ -260,7 +260,7 @@ class NetworkRelayCallImpl(
     /// NetworkRelayCall ///
     ////////////////////////
     override fun <T: Any, V: RelayResponse<T>> relayGet(
-        jsonAdapter: Class<V>,
+        responseJsonClass: Class<V>,
         relayEndpoint: String,
         additionalHeaders: Map<String, String>?,
         relayData: Pair<AuthorizationToken, RelayUrl>?
@@ -272,7 +272,7 @@ class NetworkRelayCallImpl(
 
             get(
                 nnRelayData.second.value + relayEndpoint,
-                jsonAdapter,
+                responseJsonClass,
                 mapRelayHeaders(nnRelayData, additionalHeaders)
             )
         } catch (e: Exception) {
@@ -287,9 +287,9 @@ class NetworkRelayCallImpl(
     }.flowOn(dispatchers.io)
 
     override fun <T: Any, RequestBody: Any, V: RelayResponse<T>> relayPut(
-        jsonAdapter: Class<V>,
+        responseJsonClass: Class<V>,
         relayEndpoint: String,
-        requestBodyJsonAdapter: Class<RequestBody>,
+        requestBodyJsonClass: Class<RequestBody>,
         requestBody: RequestBody,
         mediaType: String?,
         additionalHeaders: Map<String, String>?,
@@ -302,8 +302,8 @@ class NetworkRelayCallImpl(
 
             put(
                 nnRelayData.second.value + relayEndpoint,
-                jsonAdapter,
-                requestBodyJsonAdapter,
+                responseJsonClass,
+                requestBodyJsonClass,
                 requestBody,
                 mediaType,
                 mapRelayHeaders(nnRelayData, additionalHeaders)
@@ -320,9 +320,9 @@ class NetworkRelayCallImpl(
     }.flowOn(dispatchers.io)
 
     override fun <T: Any, RequestBody: Any, V: RelayResponse<T>> relayPost(
-        jsonAdapter: Class<V>,
+        responseJsonClass: Class<V>,
         relayEndpoint: String,
-        requestBodyJsonAdapter: Class<RequestBody>,
+        requestBodyJsonClass: Class<RequestBody>,
         requestBody: RequestBody,
         mediaType: String?,
         additionalHeaders: Map<String, String>?,
@@ -335,8 +335,8 @@ class NetworkRelayCallImpl(
 
             post(
                 nnRelayData.second.value + relayEndpoint,
-                jsonAdapter,
-                requestBodyJsonAdapter,
+                responseJsonClass,
+                requestBodyJsonClass,
                 requestBody,
                 mediaType,
                 mapRelayHeaders(nnRelayData, additionalHeaders)
@@ -353,9 +353,9 @@ class NetworkRelayCallImpl(
     }.flowOn(dispatchers.io)
 
     override fun <T: Any, RequestBody: Any, V: RelayResponse<T>> relayDelete(
-        jsonAdapter: Class<V>,
+        responseJsonClass: Class<V>,
         relayEndpoint: String,
-        requestBodyJsonAdapter: Class<RequestBody>?,
+        requestBodyJsonClass: Class<RequestBody>?,
         requestBody: RequestBody?,
         mediaType: String?,
         additionalHeaders: Map<String, String>?,
@@ -368,8 +368,8 @@ class NetworkRelayCallImpl(
 
             delete(
                 nnRelayData.second.value + relayEndpoint,
-                jsonAdapter,
-                requestBodyJsonAdapter,
+                responseJsonClass,
+                requestBodyJsonClass,
                 requestBody,
                 mediaType,
                 mapRelayHeaders(nnRelayData, additionalHeaders)

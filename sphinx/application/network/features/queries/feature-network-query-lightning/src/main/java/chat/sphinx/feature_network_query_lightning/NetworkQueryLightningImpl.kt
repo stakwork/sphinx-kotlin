@@ -43,7 +43,7 @@ class NetworkQueryLightningImpl(
         relayData: Pair<AuthorizationToken, RelayUrl>?
     ): Flow<LoadResponse<InvoicesDto, ResponseError>> =
         networkRelayCall.relayGet(
-            jsonAdapter = GetInvoicesRelayResponse::class.java,
+            responseJsonClass = GetInvoicesRelayResponse::class.java,
             relayEndpoint = ENDPOINT_INVOICES,
             relayData = relayData
         )
@@ -52,7 +52,7 @@ class NetworkQueryLightningImpl(
         relayData: Pair<AuthorizationToken, RelayUrl>?
     ): Flow<LoadResponse<ChannelsDto, ResponseError>> =
         networkRelayCall.relayGet(
-            jsonAdapter = GetChannelsRelayResponse::class.java,
+            responseJsonClass = GetChannelsRelayResponse::class.java,
             relayEndpoint = ENDPOINT_CHANNELS,
             relayData = relayData
         )
@@ -61,7 +61,7 @@ class NetworkQueryLightningImpl(
         relayData: Pair<AuthorizationToken, RelayUrl>?
     ): Flow<LoadResponse<BalanceDto, ResponseError>> =
         networkRelayCall.relayGet(
-            jsonAdapter = GetBalanceRelayResponse::class.java,
+            responseJsonClass = GetBalanceRelayResponse::class.java,
             relayEndpoint = ENDPOINT_BALANCE,
             relayData = relayData
         )
@@ -70,7 +70,7 @@ class NetworkQueryLightningImpl(
         relayData: Pair<AuthorizationToken, RelayUrl>?
     ): Flow<LoadResponse<BalanceAllDto, ResponseError>> =
         networkRelayCall.relayGet(
-            jsonAdapter = GetBalanceAllRelayResponse::class.java,
+            responseJsonClass = GetBalanceAllRelayResponse::class.java,
             relayEndpoint = ENDPOINT_BALANCE_ALL,
             relayData = relayData
         )
@@ -108,7 +108,7 @@ class NetworkQueryLightningImpl(
         relayData: Pair<AuthorizationToken, RelayUrl>?
     ): Flow<LoadResponse<RouteSuccessProbabilityDto, ResponseError>> =
         networkRelayCall.relayGet(
-            jsonAdapter = CheckRouteRelayResponse::class.java,
+            responseJsonClass = CheckRouteRelayResponse::class.java,
             relayEndpoint = endpoint,
             relayData = relayData
         )

@@ -30,7 +30,7 @@ class NetworkQueryChatImpl(
         relayData: Pair<AuthorizationToken, RelayUrl>?
     ): Flow<LoadResponse<List<ChatDto>, ResponseError>> =
         networkRelayCall.relayGet(
-            jsonAdapter = GetChatsRelayResponse::class.java,
+            responseJsonClass = GetChatsRelayResponse::class.java,
             relayEndpoint = ENDPOINT_CHATS,
             relayData = relayData
         )
