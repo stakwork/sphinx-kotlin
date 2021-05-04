@@ -13,6 +13,8 @@ import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_lightning.LightningRepository
 import chat.sphinx.concept_repository_message.MessageRepository
+import chat.sphinx.conceptcoredb.ChatDbo
+import chat.sphinx.conceptcoredb.ContactDbo
 import chat.sphinx.conceptcoredb.MessageDbo
 import chat.sphinx.conceptcoredb.SphinxDatabaseQueries
 import chat.sphinx.feature_repository.mappers.chat.ChatDboPresenterMapper
@@ -25,6 +27,7 @@ import chat.sphinx.kotlin_response.*
 import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.logger.d
 import chat.sphinx.logger.e
+import chat.sphinx.logger.w
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_common.Seen
@@ -289,6 +292,42 @@ class SphinxRepository(
             }
 
         }
+    }
+
+    override suspend fun deleteContactById(contactId: ContactId): Response<Boolean, ResponseError> {
+        val queries = coreDB.getSphinxDatabaseQueries()
+
+        val response = networkQueryContact.deleteContact(contactId)
+
+        if (response is Response.Success) {
+            val owner: ContactDbo = queries.contactGetOwner().executeAsOneOrNull()
+                ?: let {
+                    LOG.w(TAG, "Owner was not in the DB")
+                    return Response.Error(ResponseError("Owner was not in the DB"))
+                }
+
+            chatLock.withLock {
+                messageLock.withLock {
+                    contactLock.withLock {
+
+                        val chat: ChatDbo? =
+                            queries.chatGetConversationForContact(listOf(owner.id, contactId))
+                                .executeAsOneOrNull()
+
+                        queries.transaction {
+                            chat?.let {
+                                queries.messageDeleteByChatId(it.id)
+                                queries.chatDeleteById(it.id)
+                            }
+                            queries.contactDeleteById(contactId)
+                        }
+
+                    }
+                }
+            }
+        }
+
+        return response
     }
 
     /////////////////

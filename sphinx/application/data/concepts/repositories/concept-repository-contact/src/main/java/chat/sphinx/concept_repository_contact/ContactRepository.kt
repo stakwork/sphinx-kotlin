@@ -1,6 +1,7 @@
 package chat.sphinx.concept_repository_contact
 
 import chat.sphinx.kotlin_response.LoadResponse
+import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.wrapper_common.contact.ContactId
 import chat.sphinx.wrapper_common.invite.InviteId
@@ -21,4 +22,6 @@ interface ContactRepository {
 
     suspend fun getOwner(): Flow<Contact?>
     fun networkRefreshContacts(): Flow<LoadResponse<Boolean, ResponseError>>
+
+    suspend fun deleteContactById(contactId: ContactId): Response<Boolean, ResponseError>
 }
