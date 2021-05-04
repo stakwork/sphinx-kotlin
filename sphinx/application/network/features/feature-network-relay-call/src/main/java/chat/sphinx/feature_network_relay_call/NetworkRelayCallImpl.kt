@@ -16,9 +16,7 @@ import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
 import com.squareup.moshi.Moshi
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.*
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.MediaType.Companion.toMediaType
@@ -38,27 +36,6 @@ private inline fun NetworkRelayCallImpl.buildRequest(
 
     headers?.let {
         for (header in it) {
-            builder.addHeader(header.key, header.value)
-        }
-    }
-
-    return builder
-}
-
-@Suppress("NOTHING_TO_INLINE")
-@Throws(IllegalArgumentException::class)
-private inline fun NetworkRelayCallImpl.buildRelayRequest(
-    relayEndpoint: String,
-    relayData: Pair<AuthorizationToken, RelayUrl>,
-    additionalHeaders: Map<String, String>?
-): Request.Builder {
-    val builder = Request.Builder()
-
-    builder.addHeader(AuthorizationToken.AUTHORIZATION_HEADER, relayData.first.value)
-    builder.url(relayData.second.value + relayEndpoint)
-
-    additionalHeaders?.let { headers ->
-        for (header in headers) {
             builder.addHeader(header.key, header.value)
         }
     }
@@ -116,6 +93,11 @@ class NetworkRelayCallImpl(
 
     companion object {
         const val TAG = "NetworkRelayCallImpl"
+
+        private const val GET = "GET"
+        private const val PUT = "PUT"
+        private const val POST = "POST"
+        private const val DELETE = "DELETE"
     }
 
     ///////////////////
@@ -136,7 +118,7 @@ class NetworkRelayCallImpl(
 
             emit(Response.Success(response))
         } catch (e: Exception) {
-            emit(handleException(LOG, "GET", url, e))
+            emit(handleException(LOG, GET, url, e))
         }
 
     }.flowOn(dispatchers.io)
@@ -164,7 +146,7 @@ class NetworkRelayCallImpl(
 
             emit(Response.Success(response))
         } catch (e: Exception) {
-            emit(handleException(LOG, "PUT", url, e))
+            emit(handleException(LOG, PUT, url, e))
         }
 
     }.flowOn(dispatchers.io)
@@ -192,7 +174,7 @@ class NetworkRelayCallImpl(
 
             emit(Response.Success(response))
         } catch (e: Exception) {
-            emit(handleException(LOG, "POST", url, e))
+            emit(handleException(LOG, POST, url, e))
         }
 
     }.flowOn(dispatchers.io)
@@ -223,9 +205,8 @@ class NetworkRelayCallImpl(
             val response = call(jsonAdapter, requestBuilder.delete(reqBody ?: EMPTY_REQUEST).build())
 
             emit(Response.Success(response))
-
         } catch (e: Exception) {
-            emit(handleException(LOG, "DELETE", url, e))
+            emit(handleException(LOG, DELETE, url, e))
         }
 
     }.flowOn(dispatchers.io)
@@ -268,20 +249,27 @@ class NetworkRelayCallImpl(
         relayData: Pair<AuthorizationToken, RelayUrl>?
     ): Flow<LoadResponse<T, ResponseError>> = flow {
 
-        emit(LoadResponse.Loading)
-
         try {
-            val requestBuilder = buildRelayRequest(
-                relayEndpoint,
-                relayData ?: relayDataHandler.retrieveRelayData(),
-                additionalHeaders
+            val nnRelayData: Pair<AuthorizationToken, RelayUrl> = relayData
+                ?: relayDataHandler.retrieveRelayData()
+
+            val map: MutableMap<String, String> = mutableMapOf(
+                Pair(AuthorizationToken.AUTHORIZATION_HEADER, nnRelayData.first.value)
             )
 
-            val response = relayCall(jsonAdapter, requestBuilder.build())
+            additionalHeaders?.let {
+                map.putAll(it)
+            }
 
-            emit(Response.Success(response))
+            val responseFlow: Flow<LoadResponse<V, ResponseError>> = get(
+                nnRelayData.second.value + relayEndpoint,
+                jsonAdapter,
+                map
+            )
+
+            emitAll(validateRelayResponse(responseFlow, GET, relayEndpoint))
         } catch (e: Exception) {
-            emit(handleException(LOG, "GET", relayEndpoint, e))
+            emit(handleException(LOG, GET, relayEndpoint, e))
         }
 
     }.flowOn(dispatchers.io)
@@ -296,25 +284,30 @@ class NetworkRelayCallImpl(
         relayData: Pair<AuthorizationToken, RelayUrl>?
     ): Flow<LoadResponse<T, ResponseError>> = flow {
 
-        emit(LoadResponse.Loading)
-
         try {
-            val requestBuilder = buildRelayRequest(
-                relayEndpoint,
-                relayData ?: relayDataHandler.retrieveRelayData(),
-                additionalHeaders
+            val nnRelayData: Pair<AuthorizationToken, RelayUrl> = relayData
+                ?: relayDataHandler.retrieveRelayData()
+
+            val map: MutableMap<String, String> = mutableMapOf(
+                Pair(AuthorizationToken.AUTHORIZATION_HEADER, nnRelayData.first.value)
             )
 
-            val requestBodyJson: String = moshi
-                .requestBodyToJson(requestBodyJsonAdapter, requestBody)
+            additionalHeaders?.let {
+                map.putAll(it)
+            }
 
-            val reqBody = requestBodyJson.toRequestBody(mediaType?.toMediaType())
+            val responseFlow: Flow<LoadResponse<V, ResponseError>> = put(
+                nnRelayData.second.value + relayEndpoint,
+                jsonAdapter,
+                requestBodyJsonAdapter,
+                requestBody,
+                mediaType,
+                map
+            )
 
-            val response = relayCall(jsonAdapter, requestBuilder.put(reqBody).build())
-
-            emit(Response.Success(response))
+            emitAll(validateRelayResponse(responseFlow, PUT, relayEndpoint))
         } catch (e: Exception) {
-            emit(handleException(LOG, "PUT", relayEndpoint, e))
+            emit(handleException(LOG, PUT, relayEndpoint, e))
         }
 
     }.flowOn(dispatchers.io)
@@ -332,22 +325,29 @@ class NetworkRelayCallImpl(
         emit(LoadResponse.Loading)
 
         try {
-            val requestBuilder = buildRelayRequest(
-                relayEndpoint,
-                relayData ?: relayDataHandler.retrieveRelayData(),
-                additionalHeaders
+            val nnRelayData: Pair<AuthorizationToken, RelayUrl> = relayData
+                ?: relayDataHandler.retrieveRelayData()
+
+            val map: MutableMap<String, String> = mutableMapOf(
+                Pair(AuthorizationToken.AUTHORIZATION_HEADER, nnRelayData.first.value)
             )
 
-            val requestBodyJson: String = moshi
-                .requestBodyToJson(requestBodyJsonAdapter, requestBody)
+            additionalHeaders?.let {
+                map.putAll(it)
+            }
 
-            val reqBody = requestBodyJson.toRequestBody(mediaType?.toMediaType())
+            val responseFlow: Flow<LoadResponse<V, ResponseError>> = post(
+                nnRelayData.second.value + relayEndpoint,
+                jsonAdapter,
+                requestBodyJsonAdapter,
+                requestBody,
+                mediaType,
+                map
+            )
 
-            val response = relayCall(jsonAdapter, requestBuilder.post(reqBody).build())
-
-            emit(Response.Success(response))
+            emitAll(validateRelayResponse(responseFlow, POST, relayEndpoint))
         } catch (e: Exception) {
-            emit(handleException(LOG, "POST", relayEndpoint, e))
+            emit(handleException(LOG, POST, relayEndpoint, e))
         }
 
     }.flowOn(dispatchers.io)
@@ -362,77 +362,87 @@ class NetworkRelayCallImpl(
         relayData: Pair<AuthorizationToken, RelayUrl>?
     ): Flow<LoadResponse<T, ResponseError>> = flow {
 
-        emit(LoadResponse.Loading)
-
         try {
-            val requestBuilder = buildRelayRequest(
-                relayEndpoint,
-                relayData ?: relayDataHandler.retrieveRelayData(),
-                additionalHeaders
+            val nnRelayData: Pair<AuthorizationToken, RelayUrl> = relayData
+                ?: relayDataHandler.retrieveRelayData()
+
+            val map: MutableMap<String, String> = mutableMapOf(
+                Pair(AuthorizationToken.AUTHORIZATION_HEADER, nnRelayData.first.value)
             )
 
-            val requestBodyJson: String? =
-                if (requestBody == null || requestBodyJsonAdapter == null) {
-                    null
-                } else {
-                    moshi.requestBodyToJson(requestBodyJsonAdapter, requestBody)
-                }
+            additionalHeaders?.let {
+                map.putAll(it)
+            }
 
-            val reqBody = requestBodyJson?.toRequestBody(mediaType?.toMediaType())
+            val responseFlow: Flow<LoadResponse<V, ResponseError>> = delete(
+                nnRelayData.second.value + relayEndpoint,
+                jsonAdapter,
+                requestBodyJsonAdapter,
+                requestBody,
+                mediaType,
+                map
+            )
 
-            val response = relayCall(jsonAdapter, requestBuilder.delete(reqBody ?: EMPTY_REQUEST).build())
-
-            emit(Response.Success(response))
+            emitAll(validateRelayResponse(responseFlow, DELETE, relayEndpoint))
         } catch (e: Exception) {
-            emit(handleException(LOG, "DELETE", relayEndpoint, e))
+            emit(handleException(LOG, DELETE, relayEndpoint, e))
         }
 
     }.flowOn(dispatchers.io)
 
-    @Throws(NullPointerException::class, IOException::class)
-    private suspend fun<T: Any, V: RelayResponse<T>> relayCall(jsonAdapter: Class<V>, request: Request): T {
-        val networkResponse = networkClient.getClient()
-            .newCall(request)
-            .execute()
+    @Throws(NullPointerException::class, AssertionError::class)
+    private fun<T: Any, V: RelayResponse<T>> validateRelayResponse(
+        flow: Flow<LoadResponse<V, ResponseError>>,
+        callMethod: String,
+        endpoint: String,
+    ): Flow<LoadResponse<T, ResponseError>> = flow {
 
-        if (!networkResponse.isSuccessful) {
-            throw IOException(networkResponse.toString())
+        flow.collect { loadResponse ->
+
+            @Exhaustive
+            when (loadResponse) {
+                is LoadResponse.Loading -> {
+                    emit(loadResponse)
+                }
+                is Response.Error -> {
+                    emit(loadResponse)
+                }
+                is Response.Success -> {
+
+                    if (loadResponse.value.success) {
+
+                        loadResponse.value.response?.let { nnResponse ->
+
+                            emit(Response.Success(nnResponse))
+
+                        } ?: let {
+
+                            val msg = """
+                                RelayResponse.success: true
+                                RelayResponse.response: >>> null <<<
+                                RelayResponse.error: ${loadResponse.value.error}
+                            """.trimIndent()
+
+                            emit(handleException(LOG, callMethod, endpoint, NullPointerException(msg)))
+
+                        }
+
+                    } else {
+
+                        val msg = """
+                            RelayResponse.success: false
+                            RelayResponse.error: ${loadResponse.value.error}
+                        """.trimIndent()
+
+                        emit(handleException(LOG, callMethod, endpoint, Exception(msg)))
+
+                    }
+                }
+
+            }
+
         }
 
-        val body = networkResponse.body ?: throw NullPointerException(
-            """
-                NetworkResponse.body returned null
-                NetworkResponse: $networkResponse
-            """.trimIndent()
-        )
-
-        val relayResponse: V = moshi
-            .adapter(jsonAdapter)
-            .fromJson(body.source())
-            ?: throw IOException(
-                """
-                    Failed to convert Json to ${jsonAdapter.simpleName}
-                    NetworkResponse: $networkResponse
-                """.trimIndent()
-            )
-
-        if (relayResponse.success) {
-            return relayResponse.response ?: throw NullPointerException(
-                """
-                    RelayResponse.success: true
-                    RelayResponse.response: >>> null <<<
-                    RelayResponse.error: ${relayResponse.error}
-                    NetworkResponse: $networkResponse
-                """.trimIndent()
-            )
-        } else {
-            throw Exception(
-                """
-                    RelayResponse.success: false
-                    RelayResponse.error: ${relayResponse.error}
-                    NetworkResponse: $networkResponse
-                """.trimIndent()
-            )
-        }
     }
+
 }
