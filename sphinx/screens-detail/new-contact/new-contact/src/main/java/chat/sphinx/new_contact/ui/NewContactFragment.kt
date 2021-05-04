@@ -4,8 +4,10 @@ import androidx.fragment.app.viewModels
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.new_contact.R
 import chat.sphinx.new_contact.databinding.FragmentNewContactBinding
+import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.base.BaseFragment
 
+@AndroidEntryPoint
 internal class NewContactFragment: BaseFragment<
         NewContactViewState,
         NewContactViewModel,
