@@ -23,7 +23,7 @@ abstract class NetworkRelayCall: NetworkCall() {
      * @param [additionalHeaders] any additional headers to add to the call
      * @param [relayData] if not `null`, will override the auto-fetching of persisted user data
      * */
-    abstract fun<T: Any, V: RelayResponse<T>> get(
+    abstract fun<T: Any, V: RelayResponse<T>> relayGet(
         jsonAdapter: Class<V>,
         relayEndpoint: String,
         additionalHeaders: Map<String, String>? = null,
@@ -45,7 +45,7 @@ abstract class NetworkRelayCall: NetworkCall() {
             T: Any,
             RequestBody: Any,
             V: RelayResponse<T>
-            > put(
+            > relayPut(
         jsonAdapter: Class<V>,
         relayEndpoint: String,
         requestBodyJsonAdapter: Class<RequestBody>,
@@ -70,7 +70,7 @@ abstract class NetworkRelayCall: NetworkCall() {
             T: Any,
             RequestBody: Any,
             V: RelayResponse<T>
-            > post(
+            > relayPost(
         jsonAdapter: Class<V>,
         relayEndpoint: String,
         requestBodyJsonAdapter: Class<RequestBody>,
@@ -95,7 +95,7 @@ abstract class NetworkRelayCall: NetworkCall() {
             T: Any,
             RequestBody: Any,
             V: RelayResponse<T>
-            > delete(
+            > relayDelete(
         jsonAdapter: Class<V>,
         relayEndpoint: String,
         requestBodyJsonAdapter: Class<RequestBody>? = null,

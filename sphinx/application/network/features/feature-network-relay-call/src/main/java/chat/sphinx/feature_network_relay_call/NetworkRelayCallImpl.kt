@@ -242,7 +242,7 @@ class NetworkRelayCallImpl(
     ////////////////////////
     /// NetworkRelayCall ///
     ////////////////////////
-    override fun <T: Any, V: RelayResponse<T>> get(
+    override fun <T: Any, V: RelayResponse<T>> relayGet(
         jsonAdapter: Class<V>,
         relayEndpoint: String,
         additionalHeaders: Map<String, String>?,
@@ -274,7 +274,7 @@ class NetworkRelayCallImpl(
 
     }.flowOn(dispatchers.io)
 
-    override fun <T: Any, RequestBody: Any, V: RelayResponse<T>> put(
+    override fun <T: Any, RequestBody: Any, V: RelayResponse<T>> relayPut(
         jsonAdapter: Class<V>,
         relayEndpoint: String,
         requestBodyJsonAdapter: Class<RequestBody>,
@@ -312,7 +312,7 @@ class NetworkRelayCallImpl(
 
     }.flowOn(dispatchers.io)
 
-    override fun <T: Any, RequestBody: Any, V: RelayResponse<T>> post(
+    override fun <T: Any, RequestBody: Any, V: RelayResponse<T>> relayPost(
         jsonAdapter: Class<V>,
         relayEndpoint: String,
         requestBodyJsonAdapter: Class<RequestBody>,
@@ -352,7 +352,7 @@ class NetworkRelayCallImpl(
 
     }.flowOn(dispatchers.io)
 
-    override fun <T: Any, RequestBody: Any, V: RelayResponse<T>> delete(
+    override fun <T: Any, RequestBody: Any, V: RelayResponse<T>> relayDelete(
         jsonAdapter: Class<V>,
         relayEndpoint: String,
         requestBodyJsonAdapter: Class<RequestBody>?,

@@ -42,7 +42,7 @@ class NetworkQueryLightningImpl(
     override fun getInvoices(
         relayData: Pair<AuthorizationToken, RelayUrl>?
     ): Flow<LoadResponse<InvoicesDto, ResponseError>> =
-        networkRelayCall.get(
+        networkRelayCall.relayGet(
             jsonAdapter = GetInvoicesRelayResponse::class.java,
             relayEndpoint = ENDPOINT_INVOICES,
             relayData = relayData
@@ -51,7 +51,7 @@ class NetworkQueryLightningImpl(
     override fun getChannels(
         relayData: Pair<AuthorizationToken, RelayUrl>?
     ): Flow<LoadResponse<ChannelsDto, ResponseError>> =
-        networkRelayCall.get(
+        networkRelayCall.relayGet(
             jsonAdapter = GetChannelsRelayResponse::class.java,
             relayEndpoint = ENDPOINT_CHANNELS,
             relayData = relayData
@@ -60,7 +60,7 @@ class NetworkQueryLightningImpl(
     override fun getBalance(
         relayData: Pair<AuthorizationToken, RelayUrl>?
     ): Flow<LoadResponse<BalanceDto, ResponseError>> =
-        networkRelayCall.get(
+        networkRelayCall.relayGet(
             jsonAdapter = GetBalanceRelayResponse::class.java,
             relayEndpoint = ENDPOINT_BALANCE,
             relayData = relayData
@@ -69,7 +69,7 @@ class NetworkQueryLightningImpl(
     override fun getBalanceAll(
         relayData: Pair<AuthorizationToken, RelayUrl>?
     ): Flow<LoadResponse<BalanceAllDto, ResponseError>> =
-        networkRelayCall.get(
+        networkRelayCall.relayGet(
             jsonAdapter = GetBalanceAllRelayResponse::class.java,
             relayEndpoint = ENDPOINT_BALANCE_ALL,
             relayData = relayData
@@ -107,7 +107,7 @@ class NetworkQueryLightningImpl(
         endpoint: String,
         relayData: Pair<AuthorizationToken, RelayUrl>?
     ): Flow<LoadResponse<RouteSuccessProbabilityDto, ResponseError>> =
-        networkRelayCall.get(
+        networkRelayCall.relayGet(
             jsonAdapter = CheckRouteRelayResponse::class.java,
             relayEndpoint = endpoint,
             relayData = relayData
