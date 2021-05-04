@@ -22,6 +22,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ActivityRetainedComponent
+import dagger.hilt.android.scopes.ActivityRetainedScoped
 import io.matthewnelson.concept_navigation.BaseNavigationDriver
 
 @Module
@@ -32,6 +33,11 @@ object NavigationModule {
     /// Drivers ///
     ///////////////
     @Provides
+    @ActivityRetainedScoped
+    fun provideAuthenticationNavigationDriver(): AuthenticationNavigationDriver =
+        AuthenticationNavigationDriver()
+
+    @Provides
     @AuthenticationDriver
     fun provideAuthenticationBaseNavigationDriver(
         authenticationNavigationDriver: AuthenticationNavigationDriver
@@ -39,11 +45,21 @@ object NavigationModule {
         authenticationNavigationDriver
 
     @Provides
+    @ActivityRetainedScoped
+    fun provideDetailNavigationDriver(): DetailNavigationDriver =
+        DetailNavigationDriver()
+
+    @Provides
     @DetailDriver
     fun provideDetailBaseNavigationDriver(
         detailNavigationDriver: DetailNavigationDriver
     ): BaseNavigationDriver<NavController> =
         detailNavigationDriver
+
+    @Provides
+    @ActivityRetainedScoped
+    fun providePrimaryNavigationDriver(): PrimaryNavigationDriver =
+        PrimaryNavigationDriver()
 
     @Provides
     @PrimaryDriver
