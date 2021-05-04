@@ -1,6 +1,7 @@
 package chat.sphinx.di
 
 import android.app.Application
+import android.content.Context
 import chat.sphinx.authentication.SphinxAuthenticationCoreManager
 import chat.sphinx.authentication.SphinxAuthenticationCoreStorage
 import chat.sphinx.feature_background_login.BackgroundLoginHandlerImpl
@@ -15,6 +16,7 @@ import chat.sphinx.key_restore.KeyRestore
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import io.matthewnelson.concept_authentication.data.AuthenticationStorage
 import io.matthewnelson.concept_authentication.state.AuthenticationStateManager
@@ -71,6 +73,17 @@ object AuthenticationModule {
         sphinxKeyRestore: SphinxKeyRestore
     ): KeyRestore =
         sphinxKeyRestore
+
+    @Provides
+    @Singleton
+    fun provideSphinxAuthenticationCoreStorage(
+        @ApplicationContext appContext: Context,
+        dispatchers: CoroutineDispatchers,
+    ): SphinxAuthenticationCoreStorage =
+        SphinxAuthenticationCoreStorage(
+            appContext,
+            dispatchers,
+        )
 
     @Provides
     @Singleton
