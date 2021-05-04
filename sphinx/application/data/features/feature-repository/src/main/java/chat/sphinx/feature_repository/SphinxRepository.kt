@@ -294,7 +294,7 @@ class SphinxRepository(
         }
     }
 
-    override suspend fun deleteContactById(contactId: ContactId): Response<Boolean, ResponseError> {
+    override suspend fun deleteContactById(contactId: ContactId): Response<Any, ResponseError> {
         val queries = coreDB.getSphinxDatabaseQueries()
 
         val owner: ContactDbo = queries.contactGetOwner().executeAsOneOrNull()

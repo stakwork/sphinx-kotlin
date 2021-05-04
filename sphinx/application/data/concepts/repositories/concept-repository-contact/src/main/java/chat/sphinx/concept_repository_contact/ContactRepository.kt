@@ -23,5 +23,5 @@ interface ContactRepository {
     suspend fun getOwner(): Flow<Contact?>
     fun networkRefreshContacts(): Flow<LoadResponse<Boolean, ResponseError>>
 
-    suspend fun deleteContactById(contactId: ContactId): Response<Boolean, ResponseError>
+    suspend fun deleteContactById(contactId: ContactId): Response<Any, ResponseError>
 }

@@ -51,9 +51,9 @@ class NetworkQueryContactImpl(
     override suspend fun deleteContact(
         contactId: ContactId,
         relayData: Pair<AuthorizationToken, RelayUrl>?
-    ): Response<Boolean, ResponseError> {
+    ): Response<Any, ResponseError> {
 
-        var response: Response<Boolean, ResponseError> = Response.Success(true)
+        var response: Response<Any, ResponseError> = Response.Success(true)
 
         networkRelayCall.delete(
             DeleteContactRelayResponse::class.java,

@@ -43,5 +43,5 @@ abstract class NetworkQueryContact {
     abstract suspend fun deleteContact(
         contactId: ContactId,
         relayData: Pair<AuthorizationToken, RelayUrl>? = null,
-    ): Response<Boolean, ResponseError>
+    ): Response<Any, ResponseError>
 }
