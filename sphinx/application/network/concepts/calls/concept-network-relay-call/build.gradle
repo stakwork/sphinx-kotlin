@@ -4,8 +4,8 @@ plugins {
 }
 
 dependencies {
-    api project(path: ':sphinx:application:common:kotlin-response')
     api project(path: ':sphinx:application:common:wrappers:wrapper-relay')
+    api project(path: ':sphinx:application:network:concepts:calls:concept-network-call')
 
     implementation deps.kotlin.coroutinesCore
 }
