@@ -13,13 +13,8 @@ import io.matthewnelson.crypto_common.annotations.RawPasswordAccess
 import io.matthewnelson.crypto_common.clazzes.HashIterations
 import io.matthewnelson.crypto_common.clazzes.Password
 import io.matthewnelson.crypto_common.clazzes.clear
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class SphinxEncryptionKeyHandler @Inject constructor(
-    private val rsa: RSA,
-): EncryptionKeyHandler() {
+class SphinxEncryptionKeyHandler(private val rsa: RSA): EncryptionKeyHandler() {
 
     private var keysToRestore: RestoreKeyHolder? = null
 
