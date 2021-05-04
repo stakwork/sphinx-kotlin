@@ -12,6 +12,7 @@ import chat.sphinx.concept_crypto_rsa.RSA
 import chat.sphinx.feature_coredb.CoreDBImpl
 import chat.sphinx.feature_crypto_rsa.RSAAlgorithm
 import chat.sphinx.feature_crypto_rsa.RSAImpl
+import chat.sphinx.feature_relay.RelayDataHandlerImpl
 import chat.sphinx.key_restore.KeyRestore
 import dagger.Module
 import dagger.Provides
@@ -87,6 +88,13 @@ object AuthenticationModule {
 
     @Provides
     @Singleton
+    fun provideSphinxEncryptionKeyHandler(
+        rsa: RSA
+    ): SphinxEncryptionKeyHandler =
+        SphinxEncryptionKeyHandler(rsa)
+
+    @Provides
+    @Singleton
     fun provideSphinxAuthenticationCoreManager(
         application: Application,
         dispatchers: CoroutineDispatchers,
@@ -100,5 +108,20 @@ object AuthenticationModule {
             encryptionKeyHandler,
             sphinxAuthenticationCoreStorage,
             coreDBImpl,
+        )
+
+    // _Not_ singleton (only utilized by the Splash Screen)
+    @Provides
+    fun provideSphinxKeyRestore(
+        sphinxAuthenticationCoreManager: SphinxAuthenticationCoreManager,
+        sphinxAuthenticationCoreStorage: SphinxAuthenticationCoreStorage,
+        sphinxEncryptionKeyHandler: SphinxEncryptionKeyHandler,
+        relayDataHandlerImpl: RelayDataHandlerImpl,
+    ): SphinxKeyRestore =
+        SphinxKeyRestore(
+            sphinxAuthenticationCoreManager,
+            sphinxAuthenticationCoreStorage,
+            sphinxEncryptionKeyHandler,
+            relayDataHandlerImpl
         )
 }
