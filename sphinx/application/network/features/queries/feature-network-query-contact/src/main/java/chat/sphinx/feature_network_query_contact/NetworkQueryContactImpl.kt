@@ -26,8 +26,8 @@ class NetworkQueryContactImpl(
     override fun getContacts(
         relayData: Pair<AuthorizationToken, RelayUrl>?
     ): Flow<LoadResponse<GetContactsResponse, ResponseError>> =
-        networkRelayCall.get(
-            jsonAdapter = GetContactsRelayResponse::class.java,
+        networkRelayCall.relayGet(
+            responseJsonClass = GetContactsRelayResponse::class.java,
             relayEndpoint = ENDPOINT_CONTACTS,
             relayData = relayData
         )
@@ -55,7 +55,7 @@ class NetworkQueryContactImpl(
 
         var response: Response<Any, ResponseError> = Response.Success(true)
 
-        networkRelayCall.delete(
+        networkRelayCall.relayDelete(
             DeleteContactRelayResponse::class.java,
             String.format(ENDPOINT_DELETE_CONTACT, contactId.value),
             requestBody = null

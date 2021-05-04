@@ -11,7 +11,7 @@ dependencies {
     // Sphinx
     api project(path: ':sphinx:application:common:logger')
     api project(path: ':sphinx:application:data:concepts:concept-relay')
-    api project(path: ':sphinx:application:network:concepts:concept-network-relay-call')
+    api project(path: ':sphinx:application:network:concepts:calls:concept-network-relay-call')
     api project(path: ':sphinx:application:network:concepts:clients:concept-network-client')
 
     api deps.square.moshi
