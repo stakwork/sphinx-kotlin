@@ -99,6 +99,61 @@ class NetworkRelayCallImpl(
         const val TAG = "NetworkRelayCallImpl"
     }
 
+    ///////////////////
+    /// NetworkCall ///
+    ///////////////////
+    override fun <T: Any> get(
+        jsonAdapter: Class<T>,
+        url: String,
+        headers: Map<String, String>?
+    ): Flow<LoadResponse<T, ResponseError>> = flow {
+
+        emit(LoadResponse.Loading)
+
+    }.flowOn(dispatchers.io)
+
+    override fun <T: Any, V: Any> put(
+        jsonAdapter: Class<T>,
+        url: String,
+        requestBodyJsonAdapter: Class<V>,
+        requestBody: V,
+        mediaType: String?,
+        headers: Map<String, String>?
+    ): Flow<LoadResponse<T, ResponseError>> = flow {
+
+        emit(LoadResponse.Loading)
+
+    }.flowOn(dispatchers.io)
+
+    override fun <T: Any, V: Any> post(
+        jsonAdapter: Class<T>,
+        url: String,
+        requestBodyJsonAdapter: Class<V>,
+        requestBody: V,
+        mediaType: String?,
+        headers: Map<String, String>?
+    ): Flow<LoadResponse<T, ResponseError>> = flow {
+
+        emit(LoadResponse.Loading)
+
+    }.flowOn(dispatchers.io)
+
+    override fun <T: Any, V: Any> delete(
+        jsonAdapter: Class<T>,
+        url: String,
+        requestBodyJsonAdapter: Class<V>?,
+        requestBody: V?,
+        mediaType: String?,
+        headers: Map<String, String>?
+    ): Flow<LoadResponse<T, ResponseError>> = flow {
+
+        emit(LoadResponse.Loading)
+
+    }.flowOn(dispatchers.io)
+
+    ////////////////////////
+    /// NetworkRelayCall ///
+    ////////////////////////
     override fun <T: Any, V: RelayResponse<T>> get(
         jsonAdapter: Class<V>,
         relayEndpoint: String,

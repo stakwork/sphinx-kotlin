@@ -37,6 +37,7 @@ abstract class NetworkRelayCall: NetworkCall() {
      * @param [relayEndpoint] the endpoint to append to the [RelayUrl], ex: /contacts
      * @param [requestBodyJsonAdapter] the class to serialize the request body to json
      * @param [requestBody] the request body to be converted to json
+     * @param [mediaType] the media type for the request body, defaults to "application/json"
      * @param [additionalHeaders] any additional headers to add to the call
      * @param [relayData] if not `null`, will override the auto-fetching of persisted user data
      * */
@@ -61,6 +62,7 @@ abstract class NetworkRelayCall: NetworkCall() {
      * @param [relayEndpoint] the endpoint to append to the [RelayUrl], ex: /contacts
      * @param [requestBodyJsonAdapter] the class to serialize the request body to json
      * @param [requestBody] the request body to be converted to json
+     * @param [mediaType] the media type for the request body, defaults to "application/json"
      * @param [additionalHeaders] any additional headers to add to the call
      * @param [relayData] if not `null`, will override the auto-fetching of persisted user data
      * */
@@ -85,6 +87,7 @@ abstract class NetworkRelayCall: NetworkCall() {
      * @param [relayEndpoint] the endpoint to append to the [RelayUrl], ex: /contacts
      * @param [requestBodyJsonAdapter] OPTIONAL: the class to serialize the request body to json
      * @param [requestBody] OPTIONAL: the request body to be converted to json
+     * @param [mediaType] OPTIONAL: the media type for the request body
      * @param [additionalHeaders] any additional headers to add to the call
      * @param [relayData] if not `null`, will override the auto-fetching of persisted user data
      * */
