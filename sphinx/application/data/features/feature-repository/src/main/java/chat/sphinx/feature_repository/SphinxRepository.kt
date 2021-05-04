@@ -297,14 +297,22 @@ class SphinxRepository(
     override suspend fun deleteContactById(contactId: ContactId): Response<Boolean, ResponseError> {
         val queries = coreDB.getSphinxDatabaseQueries()
 
+        val owner: ContactDbo = queries.contactGetOwner().executeAsOneOrNull()
+            ?: let {
+                val msg = "Account Owner was not in the DB. Something is very wrong..."
+                LOG.w(TAG, msg)
+                return Response.Error(ResponseError(msg))
+            }
+
+        if (owner.id == contactId) {
+            val msg = "deleteContactById called for account owner. Deletion not permitted."
+            LOG.w(TAG, msg)
+            return Response.Error(ResponseError(msg))
+        }
+
         val response = networkQueryContact.deleteContact(contactId)
 
         if (response is Response.Success) {
-            val owner: ContactDbo = queries.contactGetOwner().executeAsOneOrNull()
-                ?: let {
-                    LOG.w(TAG, "Owner was not in the DB")
-                    return Response.Error(ResponseError("Owner was not in the DB"))
-                }
 
             chatLock.withLock {
                 messageLock.withLock {
