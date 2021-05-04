@@ -271,9 +271,10 @@ class SocketIOManagerImpl(
                 (args[0] as Transport).on(Transport.EVENT_REQUEST_HEADERS) { requestArgs ->
 
                     val headers = requestArgs[0] as java.util.Map<String, List<String>>
-                    // TODO: Update string value to use constant from AuthorizationToken class
-                    //  once PR#66 is merged.
-                    headers.put("X-User-Token", listOf(nnRelayData.first.value))
+                    headers.put(
+                        AuthorizationToken.AUTHORIZATION_HEADER,
+                        listOf(nnRelayData.first.value)
+                    )
 
                 }
             } catch (e: Exception) {
