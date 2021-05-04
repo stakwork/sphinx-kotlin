@@ -44,6 +44,23 @@ private inline fun NetworkRelayCallImpl.buildRequest(
 }
 
 @Suppress("NOTHING_TO_INLINE")
+private inline fun NetworkRelayCallImpl.mapRelayHeaders(
+    relayData: Pair<AuthorizationToken, RelayUrl>,
+    additionalHeaders: Map<String, String>?
+): Map<String, String> {
+    val map: MutableMap<String, String> = mutableMapOf(
+        Pair(AuthorizationToken.AUTHORIZATION_HEADER, relayData.first.value)
+    )
+
+    additionalHeaders?.let {
+        map.putAll(it)
+    }
+
+    return map
+}
+
+
+@Suppress("NOTHING_TO_INLINE")
 private inline fun NetworkRelayCallImpl.handleException(
     LOG: SphinxLogger,
     callMethod: String,
@@ -212,7 +229,7 @@ class NetworkRelayCallImpl(
     }.flowOn(dispatchers.io)
 
     @Throws(NullPointerException::class, IOException::class)
-    private suspend fun<T: Any> call(jsonAdapter: Class<T>, request: Request): T {
+    private suspend fun <T: Any> call(jsonAdapter: Class<T>, request: Request): T {
         val networkResponse = networkClient.getClient()
             .newCall(request)
             .execute()
@@ -253,18 +270,10 @@ class NetworkRelayCallImpl(
             val nnRelayData: Pair<AuthorizationToken, RelayUrl> = relayData
                 ?: relayDataHandler.retrieveRelayData()
 
-            val map: MutableMap<String, String> = mutableMapOf(
-                Pair(AuthorizationToken.AUTHORIZATION_HEADER, nnRelayData.first.value)
-            )
-
-            additionalHeaders?.let {
-                map.putAll(it)
-            }
-
             get(
                 nnRelayData.second.value + relayEndpoint,
                 jsonAdapter,
-                map
+                mapRelayHeaders(nnRelayData, additionalHeaders)
             )
         } catch (e: Exception) {
             emit(handleException(LOG, GET, relayEndpoint, e))
@@ -291,21 +300,13 @@ class NetworkRelayCallImpl(
             val nnRelayData: Pair<AuthorizationToken, RelayUrl> = relayData
                 ?: relayDataHandler.retrieveRelayData()
 
-            val map: MutableMap<String, String> = mutableMapOf(
-                Pair(AuthorizationToken.AUTHORIZATION_HEADER, nnRelayData.first.value)
-            )
-
-            additionalHeaders?.let {
-                map.putAll(it)
-            }
-
             put(
                 nnRelayData.second.value + relayEndpoint,
                 jsonAdapter,
                 requestBodyJsonAdapter,
                 requestBody,
                 mediaType,
-                map
+                mapRelayHeaders(nnRelayData, additionalHeaders)
             )
         } catch (e: Exception) {
             emit(handleException(LOG, PUT, relayEndpoint, e))
@@ -332,21 +333,13 @@ class NetworkRelayCallImpl(
             val nnRelayData: Pair<AuthorizationToken, RelayUrl> = relayData
                 ?: relayDataHandler.retrieveRelayData()
 
-            val map: MutableMap<String, String> = mutableMapOf(
-                Pair(AuthorizationToken.AUTHORIZATION_HEADER, nnRelayData.first.value)
-            )
-
-            additionalHeaders?.let {
-                map.putAll(it)
-            }
-
             post(
                 nnRelayData.second.value + relayEndpoint,
                 jsonAdapter,
                 requestBodyJsonAdapter,
                 requestBody,
                 mediaType,
-                map
+                mapRelayHeaders(nnRelayData, additionalHeaders)
             )
         } catch (e: Exception) {
             emit(handleException(LOG, POST, relayEndpoint, e))
@@ -373,21 +366,13 @@ class NetworkRelayCallImpl(
             val nnRelayData: Pair<AuthorizationToken, RelayUrl> = relayData
                 ?: relayDataHandler.retrieveRelayData()
 
-            val map: MutableMap<String, String> = mutableMapOf(
-                Pair(AuthorizationToken.AUTHORIZATION_HEADER, nnRelayData.first.value)
-            )
-
-            additionalHeaders?.let {
-                map.putAll(it)
-            }
-
             delete(
                 nnRelayData.second.value + relayEndpoint,
                 jsonAdapter,
                 requestBodyJsonAdapter,
                 requestBody,
                 mediaType,
-                map
+                mapRelayHeaders(nnRelayData, additionalHeaders)
             )
         } catch (e: Exception) {
             emit(handleException(LOG, DELETE, relayEndpoint, e))
@@ -401,7 +386,7 @@ class NetworkRelayCallImpl(
     }.flowOn(dispatchers.io)
 
     @Throws(NullPointerException::class, AssertionError::class)
-    private fun<T: Any, V: RelayResponse<T>> validateRelayResponse(
+    private fun <T: Any, V: RelayResponse<T>> validateRelayResponse(
         flow: Flow<LoadResponse<V, ResponseError>>,
         callMethod: String,
         endpoint: String,

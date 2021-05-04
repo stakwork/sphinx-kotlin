@@ -16,7 +16,7 @@ abstract class NetworkCall {
      * @param [url] the url
      * @param [headers] any headers that need to be added to the request
     * */
-    abstract fun<T: Any> get(
+    abstract fun <T: Any> get(
         url: String,
         jsonAdapter: Class<T>,
         headers: Map<String, String>? = null,
@@ -32,7 +32,7 @@ abstract class NetworkCall {
      * @param [mediaType] the media type for the request body, defaults to "application/json"
      * @param [headers] any headers that need to be added to the request
      * */
-    abstract fun<T: Any, RequestBody: Any> put(
+    abstract fun <T: Any, RequestBody: Any> put(
         url: String,
         jsonAdapter: Class<T>,
         requestBodyJsonAdapter: Class<RequestBody>,
@@ -51,7 +51,7 @@ abstract class NetworkCall {
      * @param [mediaType] the media type for the request body, defaults to "application/json"
      * @param [headers] any headers that need to be added to the request
      * */
-    abstract fun<T: Any, RequestBody: Any> post(
+    abstract fun <T: Any, RequestBody: Any> post(
         url: String,
         jsonAdapter: Class<T>,
         requestBodyJsonAdapter: Class<RequestBody>,
@@ -70,7 +70,7 @@ abstract class NetworkCall {
      * @param [mediaType] OPTIONAL: the media type for the request body
      * @param [headers] any headers that need to be added to the request
      * */
-    abstract fun<T: Any, RequestBody: Any> delete(
+    abstract fun <T: Any, RequestBody: Any> delete(
         url: String,
         jsonAdapter: Class<T>,
         requestBodyJsonAdapter: Class<RequestBody>? = null,
