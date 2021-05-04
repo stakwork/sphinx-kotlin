@@ -22,9 +22,28 @@ import kotlinx.coroutines.flow.flowOn
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.RequestBody
 import okhttp3.internal.EMPTY_REQUEST
 import java.io.IOException
 
+@Suppress("NOTHING_TO_INLINE")
+@Throws(IllegalArgumentException::class)
+private inline fun NetworkRelayCallImpl.buildRequest(
+    url: String,
+    headers: Map<String, String>?
+): Request.Builder {
+    val builder = Request.Builder()
+
+    builder.url(url)
+
+    headers?.let {
+        for (header in it) {
+            builder.addHeader(header.key, header.value)
+        }
+    }
+
+    return builder
+}
 
 @Suppress("NOTHING_TO_INLINE")
 @Throws(IllegalArgumentException::class)
@@ -51,10 +70,10 @@ private inline fun NetworkRelayCallImpl.buildRelayRequest(
 private inline fun NetworkRelayCallImpl.handleException(
     LOG: SphinxLogger,
     callMethod: String,
-    relayEndpoint: String,
+    url: String,
     e: Exception
 ): Response.Error<ResponseError> {
-    val msg = "$callMethod Request failure for endpoint: $relayEndpoint"
+    val msg = "$callMethod Request failure for: $url"
     LOG.e(NetworkRelayCallImpl.TAG, msg, e)
     return Response.Error(ResponseError(msg, e))
 }
@@ -103,18 +122,28 @@ class NetworkRelayCallImpl(
     /// NetworkCall ///
     ///////////////////
     override fun <T: Any> get(
-        jsonAdapter: Class<T>,
         url: String,
+        jsonAdapter: Class<T>,
         headers: Map<String, String>?
     ): Flow<LoadResponse<T, ResponseError>> = flow {
 
         emit(LoadResponse.Loading)
+
+        try {
+            val requestBuilder = buildRequest(url, headers)
+
+            val response = call(jsonAdapter, requestBuilder.build())
+
+            emit(Response.Success(response))
+        } catch (e: Exception) {
+            emit(handleException(LOG, "GET", url, e))
+        }
 
     }.flowOn(dispatchers.io)
 
     override fun <T: Any, V: Any> put(
-        jsonAdapter: Class<T>,
         url: String,
+        jsonAdapter: Class<T>,
         requestBodyJsonAdapter: Class<V>,
         requestBody: V,
         mediaType: String?,
@@ -122,12 +151,27 @@ class NetworkRelayCallImpl(
     ): Flow<LoadResponse<T, ResponseError>> = flow {
 
         emit(LoadResponse.Loading)
+
+        try {
+            val requestBuilder = buildRequest(url, headers)
+
+            val requestBodyJson: String = moshi
+                .requestBodyToJson(requestBodyJsonAdapter, requestBody)
+
+            val reqBody = requestBodyJson.toRequestBody(mediaType?.toMediaType())
+
+            val response = call(jsonAdapter, requestBuilder.put(reqBody).build())
+
+            emit(Response.Success(response))
+        } catch (e: Exception) {
+            emit(handleException(LOG, "PUT", url, e))
+        }
 
     }.flowOn(dispatchers.io)
 
     override fun <T: Any, V: Any> post(
-        jsonAdapter: Class<T>,
         url: String,
+        jsonAdapter: Class<T>,
         requestBodyJsonAdapter: Class<V>,
         requestBody: V,
         mediaType: String?,
@@ -136,11 +180,26 @@ class NetworkRelayCallImpl(
 
         emit(LoadResponse.Loading)
 
+        try {
+            val requestBuilder = buildRequest(url, headers)
+
+            val requestBodyJson: String = moshi
+                .requestBodyToJson(requestBodyJsonAdapter, requestBody)
+
+            val reqBody = requestBodyJson.toRequestBody(mediaType?.toMediaType())
+
+            val response = call(jsonAdapter, requestBuilder.post(reqBody).build())
+
+            emit(Response.Success(response))
+        } catch (e: Exception) {
+            emit(handleException(LOG, "POST", url, e))
+        }
+
     }.flowOn(dispatchers.io)
 
     override fun <T: Any, V: Any> delete(
-        jsonAdapter: Class<T>,
         url: String,
+        jsonAdapter: Class<T>,
         requestBodyJsonAdapter: Class<V>?,
         requestBody: V?,
         mediaType: String?,
@@ -149,7 +208,55 @@ class NetworkRelayCallImpl(
 
         emit(LoadResponse.Loading)
 
+        try {
+            val requestBuilder = buildRequest(url, headers)
+
+            val requestBodyJson: String? =
+                if (requestBody == null || requestBodyJsonAdapter == null) {
+                    null
+                } else {
+                    moshi.requestBodyToJson(requestBodyJsonAdapter, requestBody)
+                }
+
+            val reqBody: RequestBody? = requestBodyJson?.toRequestBody(mediaType?.toMediaType())
+
+            val response = call(jsonAdapter, requestBuilder.delete(reqBody ?: EMPTY_REQUEST).build())
+
+            emit(Response.Success(response))
+
+        } catch (e: Exception) {
+            emit(handleException(LOG, "DELETE", url, e))
+        }
+
     }.flowOn(dispatchers.io)
+
+    @Throws(NullPointerException::class, IOException::class)
+    private suspend fun<T: Any> call(jsonAdapter: Class<T>, request: Request): T {
+        val networkResponse = networkClient.getClient()
+            .newCall(request)
+            .execute()
+
+        if (!networkResponse.isSuccessful) {
+            throw IOException(networkResponse.toString())
+        }
+
+        val body = networkResponse.body ?: throw NullPointerException(
+            """
+                NetworkResponse.body returned null
+                NetworkResponse: $networkResponse
+            """.trimIndent()
+        )
+
+        return moshi
+            .adapter(jsonAdapter)
+            .fromJson(body.source())
+            ?: throw IOException(
+                """
+                    Failed to convert Json to ${jsonAdapter.simpleName}
+                    NetworkResponse: $networkResponse
+                """.trimIndent()
+            )
+    }
 
     ////////////////////////
     /// NetworkRelayCall ///
@@ -170,10 +277,9 @@ class NetworkRelayCallImpl(
                 additionalHeaders
             )
 
-            val response = call(jsonAdapter, requestBuilder.build())
+            val response = relayCall(jsonAdapter, requestBuilder.build())
 
             emit(Response.Success(response))
-
         } catch (e: Exception) {
             emit(handleException(LOG, "GET", relayEndpoint, e))
         }
@@ -204,10 +310,9 @@ class NetworkRelayCallImpl(
 
             val reqBody = requestBodyJson.toRequestBody(mediaType?.toMediaType())
 
-            val response = call(jsonAdapter, requestBuilder.put(reqBody).build())
+            val response = relayCall(jsonAdapter, requestBuilder.put(reqBody).build())
 
             emit(Response.Success(response))
-
         } catch (e: Exception) {
             emit(handleException(LOG, "PUT", relayEndpoint, e))
         }
@@ -238,10 +343,9 @@ class NetworkRelayCallImpl(
 
             val reqBody = requestBodyJson.toRequestBody(mediaType?.toMediaType())
 
-            val response = call(jsonAdapter, requestBuilder.post(reqBody).build())
+            val response = relayCall(jsonAdapter, requestBuilder.post(reqBody).build())
 
             emit(Response.Success(response))
-
         } catch (e: Exception) {
             emit(handleException(LOG, "POST", relayEndpoint, e))
         }
@@ -276,10 +380,9 @@ class NetworkRelayCallImpl(
 
             val reqBody = requestBodyJson?.toRequestBody(mediaType?.toMediaType())
 
-            val response = call(jsonAdapter, requestBuilder.delete(reqBody ?: EMPTY_REQUEST).build())
+            val response = relayCall(jsonAdapter, requestBuilder.delete(reqBody ?: EMPTY_REQUEST).build())
 
             emit(Response.Success(response))
-
         } catch (e: Exception) {
             emit(handleException(LOG, "DELETE", relayEndpoint, e))
         }
@@ -287,7 +390,7 @@ class NetworkRelayCallImpl(
     }.flowOn(dispatchers.io)
 
     @Throws(NullPointerException::class, IOException::class)
-    private suspend fun<T: Any, V: RelayResponse<T>> call(jsonAdapter: Class<V>, request: Request): T {
+    private suspend fun<T: Any, V: RelayResponse<T>> relayCall(jsonAdapter: Class<V>, request: Request): T {
         val networkResponse = networkClient.getClient()
             .newCall(request)
             .execute()

@@ -17,8 +17,8 @@ abstract class NetworkCall {
      * @param [headers] any headers that need to be added to the request
     * */
     abstract fun<T: Any> get(
-        jsonAdapter: Class<T>,
         url: String,
+        jsonAdapter: Class<T>,
         headers: Map<String, String>? = null,
     ): Flow<LoadResponse<T, ResponseError>>
 
@@ -33,8 +33,8 @@ abstract class NetworkCall {
      * @param [headers] any headers that need to be added to the request
      * */
     abstract fun<T: Any, RequestBody: Any> put(
-        jsonAdapter: Class<T>,
         url: String,
+        jsonAdapter: Class<T>,
         requestBodyJsonAdapter: Class<RequestBody>,
         requestBody: RequestBody,
         mediaType: String? = "application/json",
@@ -52,8 +52,8 @@ abstract class NetworkCall {
      * @param [headers] any headers that need to be added to the request
      * */
     abstract fun<T: Any, RequestBody: Any> post(
-        jsonAdapter: Class<T>,
         url: String,
+        jsonAdapter: Class<T>,
         requestBodyJsonAdapter: Class<RequestBody>,
         requestBody: RequestBody,
         mediaType: String? = "application/json",
@@ -71,8 +71,8 @@ abstract class NetworkCall {
      * @param [headers] any headers that need to be added to the request
      * */
     abstract fun<T: Any, RequestBody: Any> delete(
-        jsonAdapter: Class<T>,
         url: String,
+        jsonAdapter: Class<T>,
         requestBodyJsonAdapter: Class<RequestBody>? = null,
         requestBody: RequestBody? = null,
         mediaType: String? = null,
