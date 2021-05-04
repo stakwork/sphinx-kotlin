@@ -11,11 +11,8 @@ import io.matthewnelson.concept_authentication.state.AuthenticationState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_encryption_key.EncryptionKey
 import io.matthewnelson.crypto_common.clazzes.HashIterations
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class SphinxAuthenticationCoreManager @Inject constructor(
+class SphinxAuthenticationCoreManager(
     application: Application,
     dispatchers: CoroutineDispatchers,
     encryptionKeyHandler: SphinxEncryptionKeyHandler,
