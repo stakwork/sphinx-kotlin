@@ -7,7 +7,7 @@ plugins {
 
 dependencies {
     api project(path: ':sphinx:application:network:concepts:queries:concept-network-query-lightning')
-    api project(path: ':sphinx:application:network:concepts:concept-network-relay-call')
+    api project(path: ':sphinx:application:network:concepts:calls:concept-network-relay-call')
 
     implementation deps.kotlin.coroutinesCore
 
