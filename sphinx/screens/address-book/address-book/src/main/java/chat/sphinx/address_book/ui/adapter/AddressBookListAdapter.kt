@@ -1,13 +1,20 @@
 package chat.sphinx.address_book.ui.adapter
 
+import android.content.Context
+import android.content.res.Resources
+import android.graphics.Canvas
+import android.util.TypedValue
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import chat.sphinx.address_book.databinding.LayoutAddressBookContactHolderBinding
+import chat.sphinx.address_book.databinding.LayoutAddressBookHeaderContactHolderBinding
 import chat.sphinx.address_book.ui.AddressBookViewModel
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
@@ -113,11 +120,16 @@ internal class AddressBookListAdapter(
         }
     }
 
+    fun removeAt(position: Int) {
+        addressBookContacts[position]
+        notifyItemRemoved(position)
+    }
+
     override fun getItemCount(): Int {
         return addressBookContacts.size
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AddressBookListAdapter.AddressBookViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AddressBookViewHolder {
         val binding = LayoutAddressBookContactHolderBinding.inflate(
             LayoutInflater.from(parent.context),
             parent,
@@ -127,7 +139,7 @@ internal class AddressBookListAdapter(
         return AddressBookViewHolder(binding)
     }
 
-    override fun onBindViewHolder(holder: AddressBookListAdapter.AddressBookViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: AddressBookViewHolder, position: Int) {
         holder.bind(position)
     }
 
@@ -144,43 +156,6 @@ internal class AddressBookListAdapter(
 
         private var disposable: Disposable? = null
         private var dContact: Contact? = null
-
-//        init {
-//            binding.layoutConstraintChatHolder.setOnClickListener {
-//                dChat?.let { dashboardChat ->
-//                    @Exhaustive
-//                    when (dashboardChat) {
-//                        is DashboardChat.Active.Conversation -> {
-//                            supervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
-//                                viewModel.dashboardNavigator.toChatContact(
-//                                    dashboardChat.chat,
-//                                    dashboardChat.contact
-//                                )
-//                            }
-//                        }
-//                        is DashboardChat.Active.GroupOrTribe -> {
-//                            supervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
-//
-//                                if (dashboardChat.chat.type.isGroup()) {
-//                                    viewModel.dashboardNavigator.toChatGroup(dashboardChat.chat)
-//                                } else if (dashboardChat.chat.type.isTribe()) {
-//                                    viewModel.dashboardNavigator.toChatTribe(dashboardChat.chat)
-//                                }
-//
-//                            }
-//                        }
-//                        is DashboardChat.Inactive.Conversation -> {
-//                            supervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
-//                                viewModel.dashboardNavigator.toChatContact(
-//                                    null,
-//                                    dashboardChat.contact
-//                                )
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//        }
 
         fun bind(position: Int) {
             binding.apply {

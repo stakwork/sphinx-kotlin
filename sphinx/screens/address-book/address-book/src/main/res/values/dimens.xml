@@ -9,4 +9,5 @@
     <dimen name="add_buttons_icon_xy">25sp</dimen>
 
     <dimen name="recycler_view_holder_height">90dp</dimen>
+    <dimen name="recycler_view_header_holder_height">45dp</dimen>
 </resources>

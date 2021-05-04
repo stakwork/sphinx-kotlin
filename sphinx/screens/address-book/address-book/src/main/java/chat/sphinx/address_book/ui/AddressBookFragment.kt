@@ -7,13 +7,16 @@ import android.widget.TextView
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ConcatAdapter
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.address_book.R
 import chat.sphinx.address_book.ui.adapter.AddressBookListAdapter
 import chat.sphinx.address_book.databinding.FragmentAddressBookBinding
 import chat.sphinx.address_book.navigation.AddressBookNavigator
 import chat.sphinx.address_book.ui.adapter.AddressBookFooterAdapter
+import chat.sphinx.address_book.ui.adapter.SwipeToDeleteCallback
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addStatusBarPadding
@@ -29,13 +32,6 @@ internal class AddressBookFragment: BaseFragment<
         FragmentAddressBookBinding
         >(R.layout.fragment_address_book)
 {
-//    companion object {
-//        const val TAG = "AddressBookFragment"
-//    }
-//
-//    @Inject
-//    protected lateinit var LOG: SphinxLogger
-
     @Inject
     @Suppress("ProtectedInFinal")
     protected lateinit var imageLoader: ImageLoader<ImageView>
@@ -52,8 +48,6 @@ internal class AddressBookFragment: BaseFragment<
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-//        LOG.d(TAG, "ON VIEW CREATED -=-=-=-=-==--=-=-=")
 
         headerNavBack.setOnClickListener {
             lifecycleScope.launch {
@@ -80,6 +74,16 @@ internal class AddressBookFragment: BaseFragment<
             this.setHasFixedSize(false)
             layoutManager = LinearLayoutManager(binding.root.context)
             adapter = ConcatAdapter(addressBookListAdapter, addressBookFooterAdapter)
+        }
+
+        context?.let {
+            val swipeHandler = object : SwipeToDeleteCallback(it) {
+                override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                    addressBookListAdapter.removeAt(viewHolder.adapterPosition)
+                }
+            }
+            val itemTouchHelper = ItemTouchHelper(swipeHandler)
+            itemTouchHelper.attachToRecyclerView(binding.recyclerViewContacts)
         }
     }
 

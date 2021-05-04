@@ -1,6 +1,5 @@
 package chat.sphinx.address_book.ui
 
-import app.cash.exhaustive.Exhaustive
 import chat.sphinx.wrapper_contact.Contact
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewState
@@ -8,6 +7,7 @@ import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import javax.annotation.meta.Exhaustive
 
 internal sealed class AddressBookViewState: ViewState<AddressBookViewState>() {
     abstract val list: List<Contact>
