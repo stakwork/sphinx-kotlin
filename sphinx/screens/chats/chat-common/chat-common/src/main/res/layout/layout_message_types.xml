@@ -70,6 +70,12 @@
             layout="@layout/layout_message_type_contact_link_preview"
             tools:visibility="gone" />
 
+        <!-- Tribe link preview  -->
+        <include
+            android:id="@+id/include_message_type_tribe_link_preview"
+            layout="@layout/layout_message_type_tribe_link_preview"
+            tools:visibility="gone" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 
