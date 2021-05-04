@@ -249,7 +249,7 @@ class NetworkRelayCallImpl(
         relayData: Pair<AuthorizationToken, RelayUrl>?
     ): Flow<LoadResponse<T, ResponseError>> = flow {
 
-        try {
+        val responseFlow: Flow<LoadResponse<V, ResponseError>>? = try {
             val nnRelayData: Pair<AuthorizationToken, RelayUrl> = relayData
                 ?: relayDataHandler.retrieveRelayData()
 
@@ -261,15 +261,18 @@ class NetworkRelayCallImpl(
                 map.putAll(it)
             }
 
-            val responseFlow: Flow<LoadResponse<V, ResponseError>> = get(
+            get(
                 nnRelayData.second.value + relayEndpoint,
                 jsonAdapter,
                 map
             )
-
-            emitAll(validateRelayResponse(responseFlow, GET, relayEndpoint))
         } catch (e: Exception) {
             emit(handleException(LOG, GET, relayEndpoint, e))
+            null
+        }
+
+        responseFlow?.let {
+            emitAll(validateRelayResponse(it, GET, relayEndpoint))
         }
 
     }.flowOn(dispatchers.io)
@@ -284,7 +287,7 @@ class NetworkRelayCallImpl(
         relayData: Pair<AuthorizationToken, RelayUrl>?
     ): Flow<LoadResponse<T, ResponseError>> = flow {
 
-        try {
+        val responseFlow: Flow<LoadResponse<V, ResponseError>>? = try {
             val nnRelayData: Pair<AuthorizationToken, RelayUrl> = relayData
                 ?: relayDataHandler.retrieveRelayData()
 
@@ -296,7 +299,7 @@ class NetworkRelayCallImpl(
                 map.putAll(it)
             }
 
-            val responseFlow: Flow<LoadResponse<V, ResponseError>> = put(
+            put(
                 nnRelayData.second.value + relayEndpoint,
                 jsonAdapter,
                 requestBodyJsonAdapter,
@@ -304,10 +307,13 @@ class NetworkRelayCallImpl(
                 mediaType,
                 map
             )
-
-            emitAll(validateRelayResponse(responseFlow, PUT, relayEndpoint))
         } catch (e: Exception) {
             emit(handleException(LOG, PUT, relayEndpoint, e))
+            null
+        }
+
+        responseFlow?.let {
+            emitAll(validateRelayResponse(it, PUT, relayEndpoint))
         }
 
     }.flowOn(dispatchers.io)
@@ -322,9 +328,7 @@ class NetworkRelayCallImpl(
         relayData: Pair<AuthorizationToken, RelayUrl>?
     ): Flow<LoadResponse<T, ResponseError>> = flow {
 
-        emit(LoadResponse.Loading)
-
-        try {
+        val responseFlow: Flow<LoadResponse<V, ResponseError>>? = try {
             val nnRelayData: Pair<AuthorizationToken, RelayUrl> = relayData
                 ?: relayDataHandler.retrieveRelayData()
 
@@ -336,7 +340,7 @@ class NetworkRelayCallImpl(
                 map.putAll(it)
             }
 
-            val responseFlow: Flow<LoadResponse<V, ResponseError>> = post(
+            post(
                 nnRelayData.second.value + relayEndpoint,
                 jsonAdapter,
                 requestBodyJsonAdapter,
@@ -344,10 +348,13 @@ class NetworkRelayCallImpl(
                 mediaType,
                 map
             )
-
-            emitAll(validateRelayResponse(responseFlow, POST, relayEndpoint))
         } catch (e: Exception) {
             emit(handleException(LOG, POST, relayEndpoint, e))
+            null
+        }
+
+        responseFlow?.let {
+            emitAll(validateRelayResponse(it, POST, relayEndpoint))
         }
 
     }.flowOn(dispatchers.io)
@@ -362,7 +369,7 @@ class NetworkRelayCallImpl(
         relayData: Pair<AuthorizationToken, RelayUrl>?
     ): Flow<LoadResponse<T, ResponseError>> = flow {
 
-        try {
+        val responseFlow: Flow<LoadResponse<V, ResponseError>>? = try {
             val nnRelayData: Pair<AuthorizationToken, RelayUrl> = relayData
                 ?: relayDataHandler.retrieveRelayData()
 
@@ -374,7 +381,7 @@ class NetworkRelayCallImpl(
                 map.putAll(it)
             }
 
-            val responseFlow: Flow<LoadResponse<V, ResponseError>> = delete(
+            delete(
                 nnRelayData.second.value + relayEndpoint,
                 jsonAdapter,
                 requestBodyJsonAdapter,
@@ -382,10 +389,13 @@ class NetworkRelayCallImpl(
                 mediaType,
                 map
             )
-
-            emitAll(validateRelayResponse(responseFlow, DELETE, relayEndpoint))
         } catch (e: Exception) {
             emit(handleException(LOG, DELETE, relayEndpoint, e))
+            null
+        }
+
+        responseFlow?.let {
+            emitAll(validateRelayResponse(it, DELETE, relayEndpoint))
         }
 
     }.flowOn(dispatchers.io)
