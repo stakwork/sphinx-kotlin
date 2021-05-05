@@ -1,26 +1,18 @@
 package chat.sphinx.address_book.ui.adapter
 
-import android.content.Context
-import android.content.res.Resources
-import android.graphics.Canvas
-import android.util.TypedValue
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import chat.sphinx.address_book.databinding.LayoutAddressBookContactHolderBinding
-import chat.sphinx.address_book.databinding.LayoutAddressBookHeaderContactHolderBinding
 import chat.sphinx.address_book.ui.AddressBookViewModel
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
-import chat.sphinx.concept_network_query_contact.NetworkQueryContact
 import chat.sphinx.resources.R
 import chat.sphinx.resources.setBackgroundRandomColor
 import chat.sphinx.resources.setTextColorExt

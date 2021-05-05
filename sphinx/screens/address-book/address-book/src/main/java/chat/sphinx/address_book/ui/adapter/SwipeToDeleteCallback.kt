@@ -23,7 +23,7 @@ abstract class SwipeToDeleteCallback(
     private val backgroundColor = ContextCompat.getColor(context, R.color.primaryRed)
     private val clearPaint = Paint().apply { xfermode = PorterDuffXfermode(PorterDuff.Mode.CLEAR) }
 
-    override fun getMovementFlags(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder): Int {
+//    override fun getMovementFlags(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder): Int {
         /**
          * To disable "swipe" for specific item return 0 here.
          * For example:
@@ -31,8 +31,8 @@ abstract class SwipeToDeleteCallback(
          * if (viewHolder?.adapterPosition == 0) return 0
          */
 //        if (viewHolder?.adapterPosition == 10) return 0
-        return super.getMovementFlags(recyclerView, viewHolder)
-    }
+//        return super.getMovementFlags(recyclerView, viewHolder)
+//    }
 
     override fun onMove(
         recyclerView: RecyclerView,
