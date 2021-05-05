@@ -6,6 +6,8 @@ import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_lightning.LightningRepository
 import chat.sphinx.concept_repository_message.MessageRepository
+import chat.sphinx.concept_socket_io.SocketIOManager
+import chat.sphinx.concept_socket_io.SocketIOState
 import chat.sphinx.dashboard.navigation.DashboardBottomNavBarNavigator
 import chat.sphinx.dashboard.navigation.DashboardNavDrawerNavigator
 import chat.sphinx.dashboard.navigation.DashboardNavigator
@@ -19,7 +21,6 @@ import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.wrapper_chat.isConversation
 import chat.sphinx.wrapper_common.contact.ContactId
-import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_contact.isConfirmed
 import chat.sphinx.wrapper_contact.isTrue
@@ -31,13 +32,10 @@ import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.sideeffect.SideEffect
 import io.matthewnelson.concept_views.viewstate.collect
 import io.matthewnelson.concept_views.viewstate.value
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 internal suspend inline fun DashboardViewModel.collectChatViewState(
@@ -63,6 +61,8 @@ internal class DashboardViewModel @Inject constructor(
     private val contactRepository: ContactRepository,
     private val lightningRepository: LightningRepository,
     private val messageRepository: MessageRepository,
+
+    private val socketIOManager: SocketIOManager,
 ): MotionLayoutViewModel<
         Any,
         Nothing,
@@ -233,6 +233,14 @@ internal class DashboardViewModel @Inject constructor(
 
     private val _networkStateFlow: MutableStateFlow<LoadResponse<Boolean, ResponseError>> by lazy {
         MutableStateFlow(LoadResponse.Loading)
+    }
+
+    init {
+        viewModelScope.launch(dispatchers.mainImmediate) {
+            // TODO: Move to Service and observe state instead
+            //  to reflect changes on UI
+            socketIOManager.connect()
+        }
     }
 
     val networkStateFlow: StateFlow<LoadResponse<Boolean, ResponseError>>

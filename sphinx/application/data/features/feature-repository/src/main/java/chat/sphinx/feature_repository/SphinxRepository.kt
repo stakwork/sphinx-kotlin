@@ -9,10 +9,14 @@ import chat.sphinx.concept_network_query_contact.NetworkQueryContact
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_lightning.model.balance.BalanceDto
 import chat.sphinx.concept_network_query_message.NetworkQueryMessage
+import chat.sphinx.concept_network_query_message.model.MessageDto
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_lightning.LightningRepository
 import chat.sphinx.concept_repository_message.MessageRepository
+import chat.sphinx.concept_socket_io.SocketIOManager
+import chat.sphinx.concept_socket_io.SphinxSocketIOMessageListener
+import chat.sphinx.concept_socket_io.SphinxSocketIOMessage
 import chat.sphinx.conceptcoredb.ChatDbo
 import chat.sphinx.conceptcoredb.ContactDbo
 import chat.sphinx.conceptcoredb.MessageDbo
@@ -77,14 +81,94 @@ class SphinxRepository(
     private val networkQueryLightning: NetworkQueryLightning,
     private val networkQueryMessage: NetworkQueryMessage,
     private val rsa: RSA,
+    private val socketIOManager: SocketIOManager,
     private val LOG: SphinxLogger,
-): ChatRepository, ContactRepository, LightningRepository, MessageRepository {
+) : ChatRepository,
+    ContactRepository,
+    LightningRepository,
+    MessageRepository,
+    SphinxSocketIOMessageListener
+{
 
     companion object {
         const val TAG: String = "SphinxRepository"
 
         const val REPOSITORY_LIGHTNING_BALANCE = "REPOSITORY_LIGHTNING_BALANCE"
         const val REPOSITORY_LAST_SEEN_MESSAGE_DATE = "REPOSITORY_LAST_SEEN_MESSAGE_DATE"
+    }
+
+    ////////////////
+    /// SocketIO ///
+    ////////////////
+    init {
+        socketIOManager.addListener(this)
+    }
+
+    @Suppress("BlockingMethodInNonBlockingContext")
+    override suspend fun onSocketIOMessageReceived(msg: SphinxSocketIOMessage) {
+        coreDB.getSphinxDatabaseQueriesOrNull()?.let { queries ->
+            @Exhaustive
+            when (msg) {
+                is SphinxSocketIOMessage.Type.Contact -> {
+                    contactLock.withLock {
+                        queries.transaction {
+                            queries.upsertContact(msg.dto)
+                        }
+                    }
+                }
+                is SphinxSocketIOMessage.Type.ChatSeen -> {
+                    // TODO: Implement
+                }
+                is SphinxSocketIOMessage.Type.Group -> {
+                    // TODO: Implement
+                }
+                is SphinxSocketIOMessage.Type.Invite -> {
+                    // TODO: Implement
+//                    queries.upsertInvite(msg.dto)
+                }
+                is SphinxSocketIOMessage.Type.InvoicePayment -> {
+                    // TODO: Implement
+                }
+                is SphinxSocketIOMessage.Type.MessageType -> {
+
+                    // TODO: Implement conditional arguments depending on
+                    //  different MessageType
+
+                    decryptMessageDtoContentIfAvailable(
+                        msg.dto,
+                        coroutineScope { this },
+                        dispatchers.io
+                    )?.join()
+
+                    decryptMessageDtoMediaKeyIfAvailable(
+                        msg.dto,
+                        coroutineScope { this },
+                        dispatchers.io
+                    )?.join()
+
+                    messageLock.withLock {
+                        chatLock.withLock {
+                            queries.transaction {
+
+                                queries.upsertMessage(msg.dto)
+
+                                msg.dto.chat_id?.let { nnChatId ->
+
+                                    if (msg.dto.updateChatDboLatestMessage) {
+                                        queries.chatUpdateLatestMessage(
+                                            MessageId(msg.dto.id),
+                                            ChatId(nnChatId)
+                                        )
+                                    }
+
+                                }
+                            }
+                        }
+                    }
+
+                }
+            }
+        }
     }
 
     /////////////
@@ -671,84 +755,12 @@ class SphinxRepository(
 
                             for (message in newMessages) {
 
-                                message.message_content?.let { content ->
+                                decryptMessageDtoContentIfAvailable(message, scope)
+                                    ?.let { jobList.add(it) }
 
-                                    if (content.isNotEmpty() && message.type != MessageType.KEY_SEND) {
+                                decryptMessageDtoMediaKeyIfAvailable(message, scope)
+                                    ?.let { jobList.add(it) }
 
-                                        scope.launch(dispatchers.mainImmediate) {
-                                            val decrypted = decryptMessageContent(
-                                                MessageContent(content)
-                                            )
-
-                                            @Exhaustive
-                                            when (decrypted) {
-                                                is Response.Error -> {
-                                                    // Only log it if there is an exception
-                                                    decrypted.exception?.let { nnE ->
-                                                        LOG.e(
-                                                            TAG,
-                                                            """
-                                                                ${decrypted.message}
-                                                                MessageId: ${message.id}
-                                                                MessageContent: ${message.message_content}
-                                                            """.trimIndent(),
-                                                            nnE
-                                                        )
-                                                    }
-                                                }
-                                                is Response.Success -> {
-                                                    message.setMessageContentDecrypted(
-                                                        decrypted.value.toUnencryptedString().value
-                                                    )
-                                                }
-                                            }
-                                        }.let { job ->
-                                            jobList.add(job)
-                                        }
-
-                                    }
-
-                                }
-
-                                message.media_key?.let { mediaKey ->
-
-                                    if (mediaKey.isNotEmpty()) {
-
-                                        scope.launch(dispatchers.mainImmediate) {
-
-                                            val decrypted = decryptMessageContent(
-                                                MessageContent(mediaKey)
-                                            )
-
-                                            @Exhaustive
-                                            when (decrypted) {
-                                                is Response.Error -> {
-                                                    // Only log it if there is an exception
-                                                    decrypted.exception?.let { nnE ->
-                                                        LOG.e(
-                                                            TAG,
-                                                            """
-                                                                ${decrypted.message}
-                                                                MessageId: ${message.id}
-                                                                MediaKey: ${message.media_key}
-                                                            """.trimIndent(),
-                                                            nnE
-                                                        )
-                                                    }
-                                                }
-                                                is Response.Success -> {
-                                                    message.setMediaKeyDecrypted(
-                                                        decrypted.value.toUnencryptedString().value
-                                                    )
-                                                }
-                                            }
-
-                                        }.let { job ->
-                                            jobList.add(job)
-                                        }
-
-                                    }
-                                }
                             }
 
                             var count = 0
@@ -781,11 +793,7 @@ class SphinxRepository(
                                                 } else if (chatIds.contains(ChatId(id))) {
                                                     queries.upsertMessage(dto)
 
-                                                    if (
-                                                        dto.type.toMessageType().show           &&
-                                                        dto.type != MessageType.BOT_RES         &&
-                                                        dto.status != MessageStatus.DELETED
-                                                    ) {
+                                                    if (dto.updateChatDboLatestMessage) {
                                                         latestMessageMap[ChatId(id)] = MessageId(dto.id)
                                                     }
                                                 }
@@ -832,4 +840,94 @@ class SphinxRepository(
             emit(Response.Success(true))
         }
     }
+
+    @OptIn(UnencryptedDataAccess::class)
+    private suspend fun decryptMessageDtoContentIfAvailable(
+        message: MessageDto,
+        scope: CoroutineScope,
+        dispatcher: CoroutineDispatcher = dispatchers.mainImmediate
+    ): Job? =
+        message.message_content?.let { content ->
+
+            if (content.isNotEmpty() && message.type != MessageType.KEY_SEND) {
+
+                scope.launch(dispatcher) {
+                    val decrypted = decryptMessageContent(
+                        MessageContent(content)
+                    )
+
+                    @Exhaustive
+                    when (decrypted) {
+                        is Response.Error -> {
+                            // Only log it if there is an exception
+                            decrypted.exception?.let { nnE ->
+                                LOG.e(
+                                    TAG,
+                                    """
+                                ${decrypted.message}
+                                MessageId: ${message.id}
+                                MessageContent: ${message.message_content}
+                            """.trimIndent(),
+                                    nnE
+                                )
+                            }
+                        }
+                        is Response.Success -> {
+                            message.setMessageContentDecrypted(
+                                decrypted.value.toUnencryptedString().value
+                            )
+                        }
+                    }
+                }
+
+            } else {
+                null
+            }
+        }
+
+    @OptIn(UnencryptedDataAccess::class)
+    private suspend fun decryptMessageDtoMediaKeyIfAvailable(
+        message: MessageDto,
+        scope: CoroutineScope,
+        dispatcher: CoroutineDispatcher = dispatchers.mainImmediate,
+    ): Job? =
+        message.media_key?.let { mediaKey ->
+
+            if (mediaKey.isNotEmpty()) {
+
+                scope.launch(dispatcher) {
+
+                    val decrypted = decryptMessageContent(
+                        MessageContent(mediaKey)
+                    )
+
+                    @Exhaustive
+                    when (decrypted) {
+                        is Response.Error -> {
+                            // Only log it if there is an exception
+                            decrypted.exception?.let { nnE ->
+                                LOG.e(
+                                    TAG,
+                                    """
+                                        ${decrypted.message}
+                                        MessageId: ${message.id}
+                                        MediaKey: ${message.media_key}
+                                    """.trimIndent(),
+                                    nnE
+                                )
+                            }
+                        }
+                        is Response.Success -> {
+                            message.setMediaKeyDecrypted(
+                                decrypted.value.toUnencryptedString().value
+                            )
+                        }
+                    }
+
+                }
+
+            } else {
+                null
+            }
+        }
 }

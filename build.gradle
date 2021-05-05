@@ -63,6 +63,10 @@ allprojects {
     }
 }
 
+// EngineIO Modules (for tests)
+ext.nodeVersion = "14.15.4"
+ext.nodeWorkDir = "$rootDir/.gradle/nodejs"
+
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
