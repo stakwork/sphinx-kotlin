@@ -51,6 +51,7 @@ include ':sphinx:application:network:features:queries:feature-network-query-ligh
 include ':sphinx:application:network:concepts:queries:concept-network-query-message'
 include ':sphinx:application:network:features:queries:feature-network-query-message'
 include ':sphinx:application:network:concepts:queries:concept-network-query-subscription'
+include ':sphinx:application:network:features:queries:feature-network-query-subscription'
 include ':sphinx:application:network:concepts:calls:concept-network-call'
 include ':sphinx:application:network:concepts:calls:concept-network-relay-call'
 include ':sphinx:application:network:features:feature-network-relay-call'

@@ -138,6 +138,14 @@ abstract class NetworkQueryTestHelper: AuthenticationCoreDefaultsTestHelper() {
         Moshi.Builder().build()
     }
 
+    private class TestSphinxLogger: SphinxLogger() {
+        override fun log(tag: String, message: String, type: LogType, throwable: Throwable?) {}
+    }
+
+    protected open val testLogger: SphinxLogger by lazy {
+        TestSphinxLogger()
+    }
+
     /**
      * Override this and set to `true` to use Logging Interceptors during the test
      * */
@@ -155,6 +163,7 @@ abstract class NetworkQueryTestHelper: AuthenticationCoreDefaultsTestHelper() {
             // true will add interceptors to the OkHttpClient
             BuildConfigDebug(useLoggingInterceptors),
             okHttpCache,
+            testLogger,
         )
     }
 
@@ -167,17 +176,13 @@ abstract class NetworkQueryTestHelper: AuthenticationCoreDefaultsTestHelper() {
         )
     }
 
-    private class TestSphinxLogger: SphinxLogger() {
-        override fun log(tag: String, message: String, type: LogType, throwable: Throwable?) {}
-    }
-
     protected open val networkRelayCall: NetworkRelayCall by lazy {
         NetworkRelayCallImpl(
             dispatchers,
             moshi,
             networkClient,
             relayDataHandler,
-            TestSphinxLogger()
+            testLogger
         )
     }
 
