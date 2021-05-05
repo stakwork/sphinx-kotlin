@@ -1,6 +1,7 @@
 package chat.sphinx.di
 
 import android.content.Context
+import chat.sphinx.concept_network_call.NetworkCall
 import chat.sphinx.concept_network_client.NetworkClient
 import chat.sphinx.concept_network_client_cache.NetworkClientCache
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
@@ -131,6 +132,12 @@ object NetworkModule {
     fun provideNetworkRelayCall(
         networkRelayCallImpl: NetworkRelayCallImpl
     ): NetworkRelayCall =
+        networkRelayCallImpl
+
+    @Provides
+    fun provideNetworkCall(
+        networkRelayCallImpl: NetworkRelayCallImpl
+    ): NetworkCall =
         networkRelayCallImpl
 
     @Provides

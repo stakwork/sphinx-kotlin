@@ -28,8 +28,8 @@ class NetworkQuerySubscriptionImpl(
     override fun getSubscriptions(
         relayData: Pair<AuthorizationToken, RelayUrl>?
     ): Flow<LoadResponse<List<SubscriptionDto>, ResponseError>> =
-        networkRelayCall.get(
-            jsonAdapter = GetSubscriptionsRelayResponse::class.java,
+        networkRelayCall.relayGet(
+            responseJsonClass = GetSubscriptionsRelayResponse::class.java,
             relayEndpoint = ENDPOINT_SUBSCRIPTIONS,
             relayData = relayData
         )
@@ -38,8 +38,8 @@ class NetworkQuerySubscriptionImpl(
         subscriptionId: SubscriptionId,
         relayData: Pair<AuthorizationToken, RelayUrl>?
     ): Flow<LoadResponse<SubscriptionDto, ResponseError>> =
-        networkRelayCall.get(
-            jsonAdapter = GetSubscriptionRelayResponse::class.java,
+        networkRelayCall.relayGet(
+            responseJsonClass = GetSubscriptionRelayResponse::class.java,
             relayEndpoint = "$ENDPOINT_SUBSCRIPTION/${subscriptionId.value}",
             relayData = relayData
         )
@@ -48,8 +48,8 @@ class NetworkQuerySubscriptionImpl(
         contactId: ContactId,
         relayData: Pair<AuthorizationToken, RelayUrl>?
     ): Flow<LoadResponse<List<SubscriptionDto>, ResponseError>> =
-        networkRelayCall.get(
-            jsonAdapter = GetSubscriptionsRelayResponse::class.java,
+        networkRelayCall.relayGet(
+            responseJsonClass = GetSubscriptionsRelayResponse::class.java,
             relayEndpoint = "$ENDPOINT_SUBSCRIPTIONS/contact/${contactId.value}",
             relayData = relayData
         )

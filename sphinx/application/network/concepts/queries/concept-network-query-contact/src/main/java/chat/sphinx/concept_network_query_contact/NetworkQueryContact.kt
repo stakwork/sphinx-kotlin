@@ -3,6 +3,8 @@ package chat.sphinx.concept_network_query_contact
 import chat.sphinx.concept_network_query_contact.model.GetContactsResponse
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.kotlin_response.LoadResponse
+import chat.sphinx.kotlin_response.Response
+import chat.sphinx.wrapper_common.contact.ContactId
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
 import kotlinx.coroutines.flow.Flow
@@ -38,4 +40,8 @@ abstract class NetworkQueryContact {
     /// DELETE ///
     //////////////
 //    app.delete('/contacts/:id', contacts.deleteContact)
+    abstract suspend fun deleteContact(
+        contactId: ContactId,
+        relayData: Pair<AuthorizationToken, RelayUrl>? = null,
+    ): Response<Any, ResponseError>
 }

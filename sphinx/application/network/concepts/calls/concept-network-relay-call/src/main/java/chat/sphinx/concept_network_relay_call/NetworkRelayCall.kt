@@ -1,23 +1,38 @@
 package chat.sphinx.concept_network_relay_call
 
+import chat.sphinx.concept_network_call.NetworkCall
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
 import kotlinx.coroutines.flow.Flow
 
-abstract class NetworkRelayCall {
+/**
+ * Methods for GET/PUT/POST/DELETE that are specific to interacting with Relay.
+ *
+ * It automatically:
+ *  - Retrieves from persistent storage the [RelayUrl] and [AuthorizationToken]
+ *  for all queries if `null` is passed for that argument.
+ *  - Adds the Authorization RequestHeader.
+ *  - Handles [RelayResponse.success] when `false` by returning a [ResponseError]
+ *  instead.
+ *  - Json serialization/deserialization
+ * */
+abstract class NetworkRelayCall: NetworkCall() {
 
     /**
      * GET
      *
-     * @param [jsonAdapter] the class to serialize the response json into
+     * @param [responseJsonClass] the class to serialize the response json into
      * @param [relayEndpoint] the endpoint to append to the [RelayUrl], ex: /contacts
      * @param [additionalHeaders] any additional headers to add to the call
      * @param [relayData] if not `null`, will override the auto-fetching of persisted user data
      * */
-    abstract fun<T: Any, V: RelayResponse<T>> get(
-        jsonAdapter: Class<V>,
+    abstract fun <
+            T: Any,
+            V: RelayResponse<T>
+            > relayGet(
+        responseJsonClass: Class<V>,
         relayEndpoint: String,
         additionalHeaders: Map<String, String>? = null,
         relayData: Pair<AuthorizationToken, RelayUrl>? = null,
@@ -26,21 +41,22 @@ abstract class NetworkRelayCall {
     /**
      * PUT
      *
-     * @param [jsonAdapter] the class to serialize the response json into
+     * @param [responseJsonClass] the class to serialize the response json into
      * @param [relayEndpoint] the endpoint to append to the [RelayUrl], ex: /contacts
-     * @param [requestBodyJsonAdapter] the class to serialize the request body to json
+     * @param [requestBodyJsonClass] the class to serialize the request body to json
      * @param [requestBody] the request body to be converted to json
+     * @param [mediaType] the media type for the request body, defaults to "application/json"
      * @param [additionalHeaders] any additional headers to add to the call
      * @param [relayData] if not `null`, will override the auto-fetching of persisted user data
      * */
-    abstract fun<
+    abstract fun <
             T: Any,
             RequestBody: Any,
             V: RelayResponse<T>
-            > put(
-        jsonAdapter: Class<V>,
+            > relayPut(
+        responseJsonClass: Class<V>,
         relayEndpoint: String,
-        requestBodyJsonAdapter: Class<RequestBody>,
+        requestBodyJsonClass: Class<RequestBody>,
         requestBody: RequestBody,
         mediaType: String? = "application/json",
         additionalHeaders: Map<String, String>? = null,
@@ -50,21 +66,22 @@ abstract class NetworkRelayCall {
     /**
      * POST
      *
-     * @param [jsonAdapter] the class to serialize the response json into
+     * @param [responseJsonClass] the class to serialize the response json into
      * @param [relayEndpoint] the endpoint to append to the [RelayUrl], ex: /contacts
-     * @param [requestBodyJsonAdapter] the class to serialize the request body to json
+     * @param [requestBodyJsonClass] the class to serialize the request body to json
      * @param [requestBody] the request body to be converted to json
+     * @param [mediaType] the media type for the request body, defaults to "application/json"
      * @param [additionalHeaders] any additional headers to add to the call
      * @param [relayData] if not `null`, will override the auto-fetching of persisted user data
      * */
-    abstract fun<
+    abstract fun <
             T: Any,
             RequestBody: Any,
             V: RelayResponse<T>
-            > post(
-        jsonAdapter: Class<V>,
+            > relayPost(
+        responseJsonClass: Class<V>,
         relayEndpoint: String,
-        requestBodyJsonAdapter: Class<RequestBody>,
+        requestBodyJsonClass: Class<RequestBody>,
         requestBody: RequestBody,
         mediaType: String? = "application/json",
         additionalHeaders: Map<String, String>? = null,
@@ -74,21 +91,22 @@ abstract class NetworkRelayCall {
     /**
      * DELETE
      *
-     * @param [jsonAdapter] the class to serialize the response json into
+     * @param [responseJsonClass] the class to serialize the response json into
      * @param [relayEndpoint] the endpoint to append to the [RelayUrl], ex: /contacts
-     * @param [requestBodyJsonAdapter] OPTIONAL: the class to serialize the request body to json
+     * @param [requestBodyJsonClass] OPTIONAL: the class to serialize the request body to json
      * @param [requestBody] OPTIONAL: the request body to be converted to json
+     * @param [mediaType] OPTIONAL: the media type for the request body
      * @param [additionalHeaders] any additional headers to add to the call
      * @param [relayData] if not `null`, will override the auto-fetching of persisted user data
      * */
-    abstract fun<
+    abstract fun <
             T: Any,
             RequestBody: Any,
             V: RelayResponse<T>
-            > delete(
-        jsonAdapter: Class<V>,
+            > relayDelete(
+        responseJsonClass: Class<V>,
         relayEndpoint: String,
-        requestBodyJsonAdapter: Class<RequestBody>? = null,
+        requestBodyJsonClass: Class<RequestBody>? = null,
         requestBody: RequestBody? = null,
         mediaType: String? = null,
         additionalHeaders: Map<String, String>? = null,

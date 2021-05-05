@@ -93,6 +93,12 @@ SELECT *
 FROM chatDbo
 WHERE uuid = ?;
 
+chatGetConversationForContact:
+SELECT *
+FROM chatDbo
+WHERE type = 0 AND contact_ids = ?
+LIMIT 1;
+
 chatUpsert {
     UPDATE chatDbo
     SET name = :name,

@@ -1,11 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="message_context_menu_label_reply">Reply</string>
-    <string name="message_context_menu_label_copy">Copy</string>
-    <string name="message_context_menu_label_boost">Boost</string>
-    <string name="message_context_menu_label_delete">Delete</string>
-
-
     <!-- Paid Message Details: Status Labels   -->
     <string name="paid_message_details_status_label_pay">Pay</string>
     <string name="paid_message_details_status_label_payment_accepted">Purchase Succeeded</string>
@@ -20,4 +14,5 @@
 
     <!--  Link Previews  -->
     <string name="link_preview_add_contact_banner_label">Add Contact</string>
+    <string name="link_preview_see_tribe_banner_label">See Tribe</string>
 </resources>

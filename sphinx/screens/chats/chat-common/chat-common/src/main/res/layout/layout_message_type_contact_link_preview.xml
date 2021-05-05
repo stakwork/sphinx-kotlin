@@ -2,12 +2,12 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/layout_constraint_message_type_web_link_preview"
+    android:id="@+id/layout_constraint_message_type_contact_link_preview"
     android:layout_width="match_parent"
     android:layout_height="@dimen/contact_link_preview_holder_height"
-    android:backgroundTint="@color/blueTextAccent"
-    android:foregroundTint="@color/blueTextAccent"
-    android:paddingHorizontal="@dimen/chat_message_inner_padding">
+    android:paddingHorizontal="@dimen/chat_message_inner_padding"
+    android:visibility="gone"
+    tools:visibility="visible">
 
 
     <!-- Contact Avatar -->
@@ -29,9 +29,11 @@
         android:id="@+id/text_view_new_contact_label"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:lines="1"
+        android:fontFamily="@font/roboto_medium"
+        android:maxLines="2"
         android:text="@string/new_contact"
         android:textColor="@color/text"
+        android:textSize="@dimen/chat_header_headline_text_size"
         app:layout_constraintBottom_toTopOf="@id/text_view_contact_pubkey"
         app:layout_constraintStart_toEndOf="@id/image_view_contact_avatar"
         app:layout_constraintStart_toStartOf="@+id/text_view_contact_pubkey"

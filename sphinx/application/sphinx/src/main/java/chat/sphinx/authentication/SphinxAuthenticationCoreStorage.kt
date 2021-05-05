@@ -1,21 +1,17 @@
 package chat.sphinx.authentication
 
 import android.content.Context
-import dagger.hilt.android.qualifiers.ApplicationContext
 import io.matthewnelson.android_feature_authentication_core.data.AuthenticationCoreStorageAndroid
 import io.matthewnelson.android_feature_authentication_core.data.AuthenticationSharedPrefsName
 import io.matthewnelson.android_feature_authentication_core.data.MasterKeyAlias
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.delay
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-open class SphinxAuthenticationCoreStorage @Inject constructor(
-    @ApplicationContext appContext: Context,
+open class SphinxAuthenticationCoreStorage(
+    context: Context,
     dispatchers: CoroutineDispatchers
 ): AuthenticationCoreStorageAndroid(
-    appContext,
+    context.applicationContext,
     MasterKeyAlias(AUTHENTICATION_STORAGE_MASTER_KEY),
     AuthenticationSharedPrefsName(AUTHENTICATION_STORAGE_NAME),
     dispatchers
