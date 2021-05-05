@@ -32,6 +32,7 @@ import chat.sphinx.wrapper_common.util.getInitials
 import io.matthewnelson.android_feature_screens.navigation.CloseAppOnBackPress
 import io.matthewnelson.android_feature_screens.ui.base.BaseFragment
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
+import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisorScope
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -65,9 +66,7 @@ abstract class BaseChatFragment<
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        (requireActivity() as InsetterActivity)
-            .addNavigationBarPadding(footer)
-            .addStatusBarPadding(header)
+        setupChatHeader()
 
         ChatBackPressHandler(binding.root.context)
             .addCallback(viewLifecycleOwner, requireActivity())
@@ -98,6 +97,16 @@ abstract class BaseChatFragment<
 
     protected val onStopSupervisor: OnStopSupervisorScope by lazy {
         OnStopSupervisorScope(viewLifecycleOwner)
+    }
+
+    private fun setupChatHeader() {
+        val activity = (requireActivity() as InsetterActivity)
+
+        activity.addNavigationBarPadding(footer)
+                .addStatusBarPadding(header)
+
+        header.layoutParams.height = header.layoutParams.height + activity.statusBarInsetHeight.top
+        header.requestLayout()
     }
 
     override fun onStart() {

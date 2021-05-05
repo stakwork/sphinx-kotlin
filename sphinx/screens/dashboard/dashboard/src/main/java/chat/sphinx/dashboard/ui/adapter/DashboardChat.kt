@@ -47,6 +47,7 @@ sealed class DashboardChat {
 
         abstract fun getMessageSender(message: Message, withColon: Boolean = true): String
 
+        @ExperimentalStdlibApi
         override fun getMessageText(): String {
             val message: Message? = message
             return when {
@@ -135,10 +136,10 @@ sealed class DashboardChat {
                     } ?: ""
                 }
                 message.type.isGroupJoin() -> {
-                    "${getMessageSender(message, false)} has joined the ${chat.type.javaClass.simpleName}"
+                    "${getMessageSender(message, false)} just joined the ${chat.type.javaClass.simpleName.lowercase()}"
                 }
                 message.type.isGroupLeave() -> {
-                    "${getMessageSender(message, false)} has left the ${chat.type.javaClass.simpleName}"
+                    "${getMessageSender(message, false)} just left the ${chat.type.javaClass.simpleName.lowercase()}"
                 }
                 message.type.isBoost() -> {
                     val amount: Long = message.podBoost?.amount?.value ?: message.amount.value
