@@ -5,6 +5,7 @@
     <dimen name="chat_footer_send_button_xy">37dp</dimen>
     <dimen name="chat_footer_send_button_margin_horizontal">11dp</dimen>
     <dimen name="chat_header_mute_padding_horizontal">4sp</dimen>
+    <dimen name="chat_message_inner_padding">8sp</dimen>
     <dimen name="chat_message_rounded_corner_radius">9dp</dimen>
 
     <dimen name="chat_header_headline_text_size">16sp</dimen>
@@ -51,4 +52,11 @@
     <dimen name="icon_play_pause_button_text_size">25sp</dimen>
     <dimen name="paywall_overlay_video_icon_text_size">40sp</dimen>
 
+
+    <!-- Link Previews  -->
+    <dimen name="web_link_preview_holder_height">100dp</dimen>
+    <dimen name="contact_link_preview_holder_height">168dp</dimen>
+    <dimen name="web_link_preview_image_xy">80dp</dimen>
+    <dimen name="link_preview_action_button_height">40dp</dimen>
+    <dimen name="contact_link_preview_avatar_image_xy">80dp</dimen>
 </resources>

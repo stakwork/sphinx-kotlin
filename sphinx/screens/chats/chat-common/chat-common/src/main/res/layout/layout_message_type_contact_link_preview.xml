@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_constraint_message_type_contact_link_preview"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/contact_link_preview_holder_height"
+    android:paddingHorizontal="@dimen/chat_message_inner_padding"
+    android:visibility="gone"
+    tools:visibility="visible">
+
+
+    <!-- Contact Avatar -->
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/image_view_contact_avatar"
+        android:layout_width="@dimen/contact_link_preview_avatar_image_xy"
+        android:layout_height="@dimen/contact_link_preview_avatar_image_xy"
+        android:layout_marginEnd="@dimen/default_inner_spacing_list_item_title"
+        app:layout_constraintBottom_toTopOf="@id/text_view_add_contact_banner"
+        app:layout_constraintEnd_toStartOf="@id/text_view_new_contact_label"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ic_add_contact"
+        app:tint="@color/secondaryText" />
+
+    <!-- Title -->
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/text_view_new_contact_label"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/roboto_medium"
+        android:maxLines="2"
+        android:text="@string/new_contact"
+        android:textColor="@color/text"
+        android:textSize="@dimen/chat_header_headline_text_size"
+        app:layout_constraintBottom_toTopOf="@id/text_view_contact_pubkey"
+        app:layout_constraintStart_toEndOf="@id/image_view_contact_avatar"
+        app:layout_constraintStart_toStartOf="@+id/text_view_contact_pubkey"
+        app:layout_constraintTop_toTopOf="@id/image_view_contact_avatar"
+        app:layout_constraintVertical_chainStyle="packed" />
+
+    <!-- PubKey -->
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/text_view_contact_pubkey"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:lines="1"
+        android:textColor="@color/secondaryText"
+        app:layout_constraintBottom_toBottomOf="@id/image_view_contact_avatar"
+        app:layout_constraintEnd_toEndOf="@id/image_view_qr_invite_icon"
+        app:layout_constraintStart_toStartOf="@id/text_view_new_contact_label"
+        app:layout_constraintTop_toBottomOf="@id/text_view_new_contact_label"
+        tools:text="askdjh12387sdhkasd79123h1238asdhad19823791283h" />
+
+
+    <!-- QR Icon -->
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/image_view_qr_invite_icon"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginEnd="@dimen/chat_message_inner_padding"
+        android:tint="@color/secondaryText"
+        app:layout_constraintBottom_toBottomOf="@id/text_view_contact_pubkey"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toEndOf="@id/text_view_contact_pubkey"
+        app:srcCompat="@drawable/ic_qr_code" />
+
+
+    <!-- "Add Contact" Banner -->
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/text_view_add_contact_banner"
+        android:layout_width="0dp"
+        android:layout_height="@dimen/link_preview_action_button_height"
+        android:background="@color/primaryBlue"
+        android:fontFamily="@font/montserrat_regular"
+        android:gravity="center"
+        android:lines="1"
+        android:text="@string/link_preview_add_contact_banner_label"
+        android:textAlignment="center"
+        android:textAllCaps="true"
+        android:textColor="@android:color/white"
+        android:textSize="@dimen/default_text_size_caption1"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent" />
+
+
+    <androidx.constraintlayout.widget.Group
+        android:id="@+id/group_contact_label_text"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:constraint_referenced_ids="text_view_contact_pubkey,text_view_new_contact_label"
+        app:layout_constraintBottom_toBottomOf="@id/image_view_contact_avatar"
+        app:layout_constraintEnd_toStartOf="@id/image_view_qr_invite_icon"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toEndOf="@id/image_view_contact_avatar"
+        app:layout_constraintTop_toTopOf="@id/image_view_contact_avatar" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -29,8 +29,8 @@ class NetworkQueryChatImpl(
     override fun getChats(
         relayData: Pair<AuthorizationToken, RelayUrl>?
     ): Flow<LoadResponse<List<ChatDto>, ResponseError>> =
-        networkRelayCall.get(
-            jsonAdapter = GetChatsRelayResponse::class.java,
+        networkRelayCall.relayGet(
+            responseJsonClass = GetChatsRelayResponse::class.java,
             relayEndpoint = ENDPOINT_CHATS,
             relayData = relayData
         )

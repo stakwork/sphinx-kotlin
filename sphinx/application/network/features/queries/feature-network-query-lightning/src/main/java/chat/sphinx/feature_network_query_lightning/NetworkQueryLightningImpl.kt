@@ -42,8 +42,8 @@ class NetworkQueryLightningImpl(
     override fun getInvoices(
         relayData: Pair<AuthorizationToken, RelayUrl>?
     ): Flow<LoadResponse<InvoicesDto, ResponseError>> =
-        networkRelayCall.get(
-            jsonAdapter = GetInvoicesRelayResponse::class.java,
+        networkRelayCall.relayGet(
+            responseJsonClass = GetInvoicesRelayResponse::class.java,
             relayEndpoint = ENDPOINT_INVOICES,
             relayData = relayData
         )
@@ -51,8 +51,8 @@ class NetworkQueryLightningImpl(
     override fun getChannels(
         relayData: Pair<AuthorizationToken, RelayUrl>?
     ): Flow<LoadResponse<ChannelsDto, ResponseError>> =
-        networkRelayCall.get(
-            jsonAdapter = GetChannelsRelayResponse::class.java,
+        networkRelayCall.relayGet(
+            responseJsonClass = GetChannelsRelayResponse::class.java,
             relayEndpoint = ENDPOINT_CHANNELS,
             relayData = relayData
         )
@@ -60,8 +60,8 @@ class NetworkQueryLightningImpl(
     override fun getBalance(
         relayData: Pair<AuthorizationToken, RelayUrl>?
     ): Flow<LoadResponse<BalanceDto, ResponseError>> =
-        networkRelayCall.get(
-            jsonAdapter = GetBalanceRelayResponse::class.java,
+        networkRelayCall.relayGet(
+            responseJsonClass = GetBalanceRelayResponse::class.java,
             relayEndpoint = ENDPOINT_BALANCE,
             relayData = relayData
         )
@@ -69,8 +69,8 @@ class NetworkQueryLightningImpl(
     override fun getBalanceAll(
         relayData: Pair<AuthorizationToken, RelayUrl>?
     ): Flow<LoadResponse<BalanceAllDto, ResponseError>> =
-        networkRelayCall.get(
-            jsonAdapter = GetBalanceAllRelayResponse::class.java,
+        networkRelayCall.relayGet(
+            responseJsonClass = GetBalanceAllRelayResponse::class.java,
             relayEndpoint = ENDPOINT_BALANCE_ALL,
             relayData = relayData
         )
@@ -81,15 +81,6 @@ class NetworkQueryLightningImpl(
     ): Flow<LoadResponse<RouteSuccessProbabilityDto, ResponseError>> =
         checkRouteImpl(
             endpoint = ENDPOINT_ROUTE + "?pubkey=${publicKey.value}&route_hint=",
-            relayData = relayData
-        )
-
-    override fun checkRoute(
-        routeHint: LightningRouteHint,
-        relayData: Pair<AuthorizationToken, RelayUrl>?
-    ): Flow<LoadResponse<RouteSuccessProbabilityDto, ResponseError>> =
-        checkRouteImpl(
-            endpoint = ENDPOINT_ROUTE + "?pubkey=&route_hint=${routeHint.value}",
             relayData = relayData
         )
 
@@ -116,8 +107,8 @@ class NetworkQueryLightningImpl(
         endpoint: String,
         relayData: Pair<AuthorizationToken, RelayUrl>?
     ): Flow<LoadResponse<RouteSuccessProbabilityDto, ResponseError>> =
-        networkRelayCall.get(
-            jsonAdapter = CheckRouteRelayResponse::class.java,
+        networkRelayCall.relayGet(
+            responseJsonClass = CheckRouteRelayResponse::class.java,
             relayEndpoint = endpoint,
             relayData = relayData
         )

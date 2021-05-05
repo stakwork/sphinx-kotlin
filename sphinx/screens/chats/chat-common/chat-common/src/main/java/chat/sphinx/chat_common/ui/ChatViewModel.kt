@@ -156,4 +156,14 @@ class ChatViewModel @Inject constructor(
             }
         }
     }
+
+    fun readMessages() {
+        chatDataStateFlow.value?.let { chatData ->
+            chatData.chat?.id?.let { chatId ->
+                viewModelScope.launch(dispatchers.mainImmediate) {
+                    messageRepository.readMessages(chatId)
+                }
+            }
+        }
+    }
 }

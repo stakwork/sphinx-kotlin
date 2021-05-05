@@ -1,5 +1,6 @@
 package chat.sphinx.di
 
+import android.content.Context
 import chat.sphinx.concept_crypto_rsa.RSA
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_message.MessageRepository
@@ -17,7 +18,9 @@ import com.squareup.moshi.Moshi
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import io.matthewnelson.build_config.BuildConfigDebug
 import io.matthewnelson.concept_authentication.data.AuthenticationStorage
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.feature_authentication_core.AuthenticationCoreManager
@@ -26,6 +29,19 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object RepositoryModule {
+
+    @Provides
+    @Singleton
+    fun provideSphinxCoreDBImpl(
+        @ApplicationContext appContext: Context,
+        buildConfigDebug: BuildConfigDebug,
+        moshi: Moshi,
+    ): SphinxCoreDBImpl =
+        SphinxCoreDBImpl(
+            appContext,
+            buildConfigDebug,
+            moshi
+        )
 
     @Provides
     fun provideCoreDBImpl(

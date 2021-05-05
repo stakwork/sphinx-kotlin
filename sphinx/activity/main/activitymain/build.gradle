@@ -53,6 +53,7 @@ dependencies {
     
     api project(path: ':sphinx:screens-detail:add-friend:add-friend')
     api project(path: ':sphinx:screens-detail:create-tribe:create-tribe')
+    api project(path: ':sphinx:screens-detail:new-contact:new-contact')
     api project(path: ':sphinx:screens-detail:payments:payment-receive:payment-receive')
     api project(path: ':sphinx:screens-detail:payments:payment-send:payment-send')
     api project(path: ':sphinx:screens-detail:scanner:scanner')
