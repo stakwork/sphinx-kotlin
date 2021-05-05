@@ -20,6 +20,7 @@ import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
+import chat.sphinx.concept_network_query_contact.NetworkQueryContact
 import chat.sphinx.resources.R
 import chat.sphinx.resources.setBackgroundRandomColor
 import chat.sphinx.resources.setTextColorExt
@@ -35,7 +36,7 @@ import kotlinx.coroutines.withContext
 internal class AddressBookListAdapter(
     private val imageLoader: ImageLoader<ImageView>,
     private val lifecycleOwner: LifecycleOwner,
-    private val viewModel: AddressBookViewModel,
+    private val viewModel: AddressBookViewModel
 ): RecyclerView.Adapter<AddressBookListAdapter.AddressBookViewHolder>(), DefaultLifecycleObserver {
 
     private inner class Diff(
@@ -121,7 +122,10 @@ internal class AddressBookListAdapter(
     }
 
     fun removeAt(position: Int) {
-        addressBookContacts[position]
+        val contact = addressBookContacts[position]
+
+        viewModel.deleteContact(contact)
+
         notifyItemRemoved(position)
     }
 

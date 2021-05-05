@@ -2,6 +2,8 @@ package chat.sphinx.address_book.ui
 
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_repository_contact.ContactRepository
+import chat.sphinx.kotlin_response.Response
+import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_contact.isTrue
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -30,22 +32,9 @@ internal class AddressBookViewModel @Inject constructor(
         addressBookViewStateContainer.updateAddressBookContacts(null, filter)
     }
 
-    fun delete(deletedContact: Contact) {
+    fun deleteContact(deletedContact: Contact) {
         viewModelScope.launch(dispatchers.mainImmediate) {
-            contactRepository.getContacts().distinctUntilChanged().collect { contacts ->
-                val mutableList = contacts.toMutableList()
-
-                withContext(dispatchers.default) {
-                    for ((index, contact) in contacts.withIndex()) {
-                        if (contact.isOwner.isTrue() || contact.id == deletedContact.id) {
-                            mutableList.removeAt(index)
-                            break
-                        }
-                    }
-                }
-
-                addressBookViewStateContainer.updateAddressBookContacts(mutableList.toList())
-            }
+            contactRepository.deleteContactById(deletedContact.id)
         }
     }
 

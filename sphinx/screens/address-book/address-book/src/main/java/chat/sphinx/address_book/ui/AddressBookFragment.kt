@@ -79,7 +79,7 @@ internal class AddressBookFragment: BaseFragment<
         context?.let {
             val swipeHandler = object : SwipeToDeleteCallback(it) {
                 override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-                    addressBookListAdapter.removeAt(viewHolder.adapterPosition)
+                    addressBookListAdapter.removeAt(viewHolder.bindingAdapterPosition)
                 }
             }
             val itemTouchHelper = ItemTouchHelper(swipeHandler)
