@@ -38,7 +38,6 @@ import chat.sphinx.wrapper_common.invite.InviteId
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessagePagination
 import chat.sphinx.wrapper_common.toDateTime
-import chat.sphinx.wrapper_common.toSeen
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_invite.Invite
 import chat.sphinx.wrapper_lightning.NodeBalance
@@ -83,8 +82,14 @@ class SphinxRepository(
     companion object {
         const val TAG: String = "SphinxRepository"
 
+        // PersistentStorage Keys
         const val REPOSITORY_LIGHTNING_BALANCE = "REPOSITORY_LIGHTNING_BALANCE"
         const val REPOSITORY_LAST_SEEN_MESSAGE_DATE = "REPOSITORY_LAST_SEEN_MESSAGE_DATE"
+        const val REPOSITORY_LAST_SEEN_MESSAGE_RESTORE_PAGE = "REPOSITORY_LAST_SEEN_MESSAGE_RESTORE_PAGE"
+
+        // networkRefreshMessages
+        const val MESSAGE_PAGINATION_LIMIT = 200
+        const val DATE_NIXON_SHOCK = "1971-08-15T00:00:00.000Z"
     }
 
     /////////////
@@ -627,27 +632,40 @@ class SphinxRepository(
         emit(LoadResponse.Loading)
         val queries = coreDB.getSphinxDatabaseQueries()
 
-        val lastSeenMessagesDate: DateTime = authenticationStorage.getString(
+        val lastSeenMessagesDate: String? = authenticationStorage.getString(
             REPOSITORY_LAST_SEEN_MESSAGE_DATE,
-            "1971-08-15T00:00:00.000Z"
-        )!!.toDateTime()
+            null
+        )
+
+        val page: Int = if (lastSeenMessagesDate == null) {
+            authenticationStorage.getString(
+                REPOSITORY_LAST_SEEN_MESSAGE_RESTORE_PAGE,
+                "0"
+            )!!.toInt()
+        } else {
+            0
+        }
+
+        val lastSeenMessageDateResolved: DateTime = lastSeenMessagesDate?.toDateTime()
+            ?: DATE_NIXON_SHOCK.toDateTime()
 
         val now: String = DateTime.getFormatRelay().format(Date(System.currentTimeMillis()))
-
-        var offset: Int = 0
 
         val supervisor = SupervisorJob(currentCoroutineContext().job)
         val scope = CoroutineScope(supervisor)
 
-        var error: Response.Error<ResponseError>? = null
+        var networkResponseError: Response.Error<ResponseError>? = null
 
+        val jobList = ArrayList<Job>(MESSAGE_PAGINATION_LIMIT * 2 /* MessageDto fields to potentially decrypt */)
+
+        var offset: Int = page * MESSAGE_PAGINATION_LIMIT
         while (currentCoroutineContext().isActive && offset >= 0) {
 
             networkQueryMessage.getMessages(
                 MessagePagination.instantiate(
-                    limit = 200,
+                    limit = MESSAGE_PAGINATION_LIMIT,
                     offset = offset,
-                    date = lastSeenMessagesDate
+                    date = lastSeenMessageDateResolved
                 )
             ).collect { response ->
 
@@ -658,7 +676,7 @@ class SphinxRepository(
                     is Response.Error -> {
 
                         offset = -1
-                        error = response
+                        networkResponseError = response
 
                     }
 
@@ -666,8 +684,6 @@ class SphinxRepository(
                         val newMessages = response.value.new_messages
 
                         if (newMessages.isNotEmpty()) {
-
-                            val jobList = ArrayList<Job>(newMessages.size * 2)
 
                             for (message in newMessages) {
 
@@ -804,8 +820,23 @@ class SphinxRepository(
 
                         when {
                             offset == -1 -> {}
-                            newMessages.size >= 200 -> {
-                                offset += 200
+                            newMessages.size >= MESSAGE_PAGINATION_LIMIT -> {
+                                offset += MESSAGE_PAGINATION_LIMIT
+
+                                if (lastSeenMessagesDate == null) {
+                                    val resumePageNumber = (offset / MESSAGE_PAGINATION_LIMIT)
+                                    authenticationStorage.putString(
+                                        REPOSITORY_LAST_SEEN_MESSAGE_RESTORE_PAGE,
+                                        resumePageNumber.toString()
+                                    )
+                                    LOG.d(
+                                        TAG,
+                                        "Persisting message restore page number: $resumePageNumber"
+                                    )
+                                }
+
+                                jobList.clear()
+
                             }
                             else -> {
                                 offset = -1
@@ -818,16 +849,23 @@ class SphinxRepository(
 
         supervisor.cancelAndJoin()
 
-        error?.let { responseError ->
+        networkResponseError?.let { responseError ->
 
             emit(responseError)
 
         } ?: let {
 
-            authenticationStorage.putString(
-                REPOSITORY_LAST_SEEN_MESSAGE_DATE,
-                now
-            )
+            try {
+                authenticationStorage.putString(
+                    REPOSITORY_LAST_SEEN_MESSAGE_DATE,
+                    now
+                )
+            } finally {
+                if (lastSeenMessagesDate == null) {
+                    authenticationStorage.removeString(REPOSITORY_LAST_SEEN_MESSAGE_RESTORE_PAGE)
+                    LOG.d(TAG, "Removing message restore page number")
+                }
+            }
 
             emit(Response.Success(true))
         }
