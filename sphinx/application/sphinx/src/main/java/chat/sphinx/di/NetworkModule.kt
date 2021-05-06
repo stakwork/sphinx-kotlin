@@ -121,11 +121,13 @@ object NetworkModule {
         application: Application,
         buildConfigDebug: BuildConfigDebug,
         buildConfigVersionCode: BuildConfigVersionCode,
+        LOG: SphinxLogger,
     ): TorManagerAndroid =
         TorManagerAndroid(
             application,
             buildConfigDebug,
-            buildConfigVersionCode
+            buildConfigVersionCode,
+            LOG,
         )
 
     @Provides
