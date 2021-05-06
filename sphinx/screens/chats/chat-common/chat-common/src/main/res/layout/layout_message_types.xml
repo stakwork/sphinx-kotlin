@@ -95,6 +95,13 @@
             layout="@layout/layout_message_type_leave_or_join_group"
             tools:visibility="gone" />
 
+
+        <!-- Group Kick  -->
+        <include
+            android:id="@+id/include_message_type_group_kick"
+            layout="@layout/layout_message_type_group_kick"
+            tools:visibility="gone" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 
