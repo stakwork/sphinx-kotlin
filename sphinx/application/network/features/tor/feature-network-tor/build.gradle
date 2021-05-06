@@ -28,6 +28,9 @@ android {
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
 
+    // KotlinAndroid
+    api project(path: ':kotlin:common:build-config')
+
     // Sphinx
     api project(path: ':sphinx:application:network:concepts:tor:concept-network-tor')
 

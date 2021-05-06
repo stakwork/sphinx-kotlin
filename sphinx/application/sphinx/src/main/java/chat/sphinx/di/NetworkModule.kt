@@ -1,5 +1,6 @@
 package chat.sphinx.di
 
+import android.app.Application
 import android.content.Context
 import chat.sphinx.concept_network_call.NetworkCall
 import chat.sphinx.concept_network_client.NetworkClient
@@ -11,6 +12,7 @@ import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_message.NetworkQueryMessage
 import chat.sphinx.concept_network_query_subscription.NetworkQuerySubscription
 import chat.sphinx.concept_network_relay_call.NetworkRelayCall
+import chat.sphinx.concept_network_tor.TorManager
 import chat.sphinx.concept_relay.RelayDataHandler
 import chat.sphinx.concept_socket_io.SocketIOManager
 import chat.sphinx.feature_network_client.NetworkClientImpl
@@ -21,6 +23,7 @@ import chat.sphinx.feature_network_query_lightning.NetworkQueryLightningImpl
 import chat.sphinx.feature_network_query_message.NetworkQueryMessageImpl
 import chat.sphinx.feature_network_query_subscription.NetworkQuerySubscriptionImpl
 import chat.sphinx.feature_network_relay_call.NetworkRelayCallImpl
+import chat.sphinx.feature_network_tor.TorManagerAndroid
 import chat.sphinx.feature_relay.RelayDataHandlerImpl
 import chat.sphinx.feature_socket_io.SocketIOManagerImpl
 import chat.sphinx.logger.SphinxLogger
@@ -32,6 +35,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import io.matthewnelson.build_config.BuildConfigDebug
+import io.matthewnelson.build_config.BuildConfigVersionCode
 import io.matthewnelson.concept_authentication.data.AuthenticationStorage
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_encryption_key.EncryptionKeyHandler
@@ -110,6 +114,25 @@ object NetworkModule {
         socketIOManagerImpl: SocketIOManagerImpl
     ): SocketIOManager =
         socketIOManagerImpl
+
+    @Provides
+    @Singleton
+    fun provideTorManagerAndroid(
+        application: Application,
+        buildConfigDebug: BuildConfigDebug,
+        buildConfigVersionCode: BuildConfigVersionCode,
+    ): TorManagerAndroid =
+        TorManagerAndroid(
+            application,
+            buildConfigDebug,
+            buildConfigVersionCode
+        )
+
+    @Provides
+    fun provideTorManager(
+        torManagerAndroid: TorManagerAndroid
+    ): TorManager =
+        torManagerAndroid
 
     @Provides
     @Singleton
