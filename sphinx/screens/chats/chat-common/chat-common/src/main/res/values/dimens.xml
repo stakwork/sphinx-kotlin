@@ -43,6 +43,7 @@
     <dimen name="paywall_overlay_image_message_received_height">210dp</dimen>
     <dimen name="paywall_overlay_video_message_received_height">210dp</dimen>
     <dimen name="message_reply_holder_height">50dp</dimen>
+    <dimen name="message_type_deleted_message_height">50dp</dimen>
     <dimen name="new_day_separator_holder_height">40dp</dimen>
 
 
