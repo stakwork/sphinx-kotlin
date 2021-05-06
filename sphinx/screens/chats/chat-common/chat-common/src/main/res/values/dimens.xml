@@ -25,6 +25,8 @@
     <dimen name="loading_wheel_message_payment_processing_xy">20dp</dimen>
 
     <dimen name="status_badge_row_padding">10dp</dimen>
+    <dimen name="group_action_message_padding_horizontal">20dp</dimen>
+    <dimen name="group_action_message_padding_vertical">4dp</dimen>
 
 
     <!-- message_holder_in_photo_holder_xy + 8dp -->
@@ -43,6 +45,7 @@
     <dimen name="paywall_overlay_image_message_received_height">210dp</dimen>
     <dimen name="paywall_overlay_video_message_received_height">210dp</dimen>
     <dimen name="message_reply_holder_height">50dp</dimen>
+    <dimen name="message_type_leave_or_join_group_holder_height">40dp</dimen>
     <dimen name="message_type_deleted_message_height">50dp</dimen>
     <dimen name="new_day_separator_holder_height">40dp</dimen>
 
