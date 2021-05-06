@@ -260,6 +260,7 @@ class NetworkRelayCallImpl(
         val client = if (useExtendedNetworkCallClient) {
             extendedClientLock.withLock {
                 extendedNetworkCallClient ?: networkClient.getClient().newBuilder()
+                    .connectTimeout(45, TimeUnit.SECONDS)
                     .readTimeout(45, TimeUnit.SECONDS)
                     .writeTimeout(45, TimeUnit.SECONDS)
                     .build()
