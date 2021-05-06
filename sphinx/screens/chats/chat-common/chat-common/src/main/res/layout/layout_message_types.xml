@@ -76,12 +76,18 @@
             layout="@layout/layout_message_type_tribe_link_preview"
             tools:visibility="gone" />
 
-
-        <!-- Replies  -->
+        <!--  Replies  -->
         <include
             android:id="@+id/include_message_reply"
             layout="@layout/layout_message_reply"
             tools:visibility="gone" />
+
+        <!--  Deleted Message  -->
+        <include
+            android:id="@+id/include_message_type_deleted_message"
+            layout="@layout/layout_message_type_deleted_message"
+            tools:visibility="gone" />
+
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
