@@ -5,8 +5,7 @@
     android:id="@+id/layout_constraint_message_reply"
     android:layout_width="match_parent"
     android:layout_height="@dimen/message_reply_holder_height"
-    android:paddingHorizontal="@dimen/chat_message_inner_padding"
-    android:paddingVertical="@dimen/chat_message_inner_padding"
+    android:padding="@dimen/chat_message_inner_padding"
     android:visibility="gone"
     tools:visibility="visible">
 
