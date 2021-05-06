@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
 import androidx.constraintlayout.motion.widget.MotionLayout
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -115,9 +116,19 @@ internal class DashboardFragment : MotionLayoutFragment<
 
     private fun setupDashboardHeader() {
         binding.layoutDashboardHeader.let { header ->
+            val activity = (requireActivity() as InsetterActivity)
 
-            (requireActivity() as InsetterActivity)
-                .addStatusBarPadding(header.layoutConstraintDashboardHeader)
+            activity.addStatusBarPadding(header.layoutConstraintDashboardHeader)
+
+            val newHeaderHeight = header.layoutConstraintDashboardHeader.layoutParams.height + activity.statusBarInsetHeight.top
+
+            binding.layoutMotionDashboard.getConstraintSet(R.id.motion_scene_dashboard_drawer_closed)?.let { constraintSet ->
+                constraintSet.constrainHeight(R.id.layout_dashboard_header, newHeaderHeight)
+            }
+
+            binding.layoutMotionDashboard.getConstraintSet(R.id.motion_scene_dashboard_drawer_open)?.let { constraintSet ->
+                constraintSet.constrainHeight(R.id.layout_dashboard_header, newHeaderHeight)
+            }
 
             header.imageViewNavDrawerMenu.setOnClickListener {
                 viewModel.updateViewState(NavDrawerViewState.Open)
