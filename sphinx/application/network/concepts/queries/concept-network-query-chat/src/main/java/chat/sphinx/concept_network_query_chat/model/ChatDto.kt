@@ -24,7 +24,7 @@ data class ChatDto(
     val unlisted: Any?,
     val private: Any?,
     val owner_pub_key: String?,
-    val seen: Any,
+    val seen: Any?,
     val app_url: String?,
     val feed_url: String?,
     val meta: String?,

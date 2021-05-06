@@ -36,6 +36,7 @@ abstract class NetworkRelayCall: NetworkCall() {
         relayEndpoint: String,
         additionalHeaders: Map<String, String>? = null,
         relayData: Pair<AuthorizationToken, RelayUrl>? = null,
+        useExtendedNetworkCallClient: Boolean = false,
     ): Flow<LoadResponse<T, ResponseError>>
 
     /**

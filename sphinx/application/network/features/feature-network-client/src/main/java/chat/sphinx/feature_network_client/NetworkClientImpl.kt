@@ -96,7 +96,20 @@ class NetworkClientImpl(
 
     override suspend fun getClient(): OkHttpClient =
         clientLock.withLock {
-            client ?: createClientImpl().build()
+            client ?: OkHttpClient.Builder().apply {
+                connectTimeout(TIME_OUT, TimeUnit.SECONDS)
+                readTimeout(TIME_OUT, TimeUnit.SECONDS)
+                writeTimeout(TIME_OUT, TimeUnit.SECONDS)
+
+                if (debug.value) {
+                    HttpLoggingInterceptor().let { interceptor ->
+                        interceptor.level = HttpLoggingInterceptor.Level.BODY
+                        addNetworkInterceptor(interceptor)
+                    }
+                }
+
+            }
+                .build()
                 .also { client = it }
         }
 
@@ -106,7 +119,7 @@ class NetworkClientImpl(
 
     override suspend fun getCachingClient(): OkHttpClient =
         cachingClientLock.withLock {
-            cachingClient ?: createClientImpl()
+            cachingClient ?: getClient().newBuilder()
                 .cache(cache)
                 .addInterceptor { chain ->
                     val request = chain.request().newBuilder()
@@ -116,23 +129,5 @@ class NetworkClientImpl(
                 }
                 .build()
                 .also { cachingClient = it }
-        }
-
-    private suspend fun createClientImpl(): OkHttpClient.Builder =
-        OkHttpClient.Builder().let { builder ->
-
-            builder.callTimeout(TIME_OUT * 3, TimeUnit.SECONDS)
-            builder.connectTimeout(TIME_OUT, TimeUnit.SECONDS)
-            builder.readTimeout(TIME_OUT, TimeUnit.SECONDS)
-            builder.writeTimeout(TIME_OUT, TimeUnit.SECONDS)
-
-            if (debug.value) {
-                HttpLoggingInterceptor().let { interceptor ->
-                    interceptor.level = HttpLoggingInterceptor.Level.BODY
-                    builder.addNetworkInterceptor(interceptor)
-                }
-            }
-
-            return builder
         }
 }
