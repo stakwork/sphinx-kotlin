@@ -5,7 +5,7 @@
     android:id="@+id/layout_constraint_chat_holder"
     android:layout_width="match_parent"
     android:layout_height="@dimen/recycler_view_header_holder_height"
-    android:background="@color/headerBG"
+    android:background="@color/addressBookHeader"
     android:elevation="4dp"
     android:paddingStart="16dp"
     tools:ignore="RtlSymmetry">

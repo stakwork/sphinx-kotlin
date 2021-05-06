@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -19,6 +20,7 @@ import chat.sphinx.address_book.ui.adapter.AddressBookFooterAdapter
 import chat.sphinx.address_book.ui.adapter.SwipeHelper
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.insetter_activity.InsetterActivity
+import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.insetter_activity.addStatusBarPadding
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.base.BaseFragment
@@ -38,6 +40,9 @@ internal class AddressBookFragment: BaseFragment<
 
     override val viewModel: AddressBookViewModel by viewModels()
     override val binding: FragmentAddressBookBinding by viewBinding(FragmentAddressBookBinding::bind)
+
+    private val header: ConstraintLayout
+        get() = binding.layoutAddressBookHeader.layoutConstraintAddressBookHeader
     private val headerNavBack: TextView
         get() = binding.layoutAddressBookHeader.textViewAddressBookHeaderNavBack
 
@@ -61,10 +66,17 @@ internal class AddressBookFragment: BaseFragment<
             }
         }
 
-        (requireActivity() as InsetterActivity)
-            .addStatusBarPadding(binding.layoutAddressBookHeader.layoutConstraintAddressBookHeader)
+        setupAddressBookHeader()
 
         setupContacts()
+    }
+
+    private fun setupAddressBookHeader() {
+        val activity = (requireActivity() as InsetterActivity)
+        activity.addStatusBarPadding(binding.layoutAddressBookHeader.layoutConstraintAddressBookHeader)
+
+        header.layoutParams.height = header.layoutParams.height + activity.statusBarInsetHeight.top
+        header.requestLayout()
     }
 
     private fun setupContacts() {

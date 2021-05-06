@@ -5,9 +5,7 @@
     android:id="@+id/layout_constraint_chat_holder"
     android:layout_width="match_parent"
     android:layout_height="@dimen/recycler_view_holder_height"
-    android:background="@color/headerBG"
-    android:elevation="4dp"
-    android:paddingStart="16dp"
+    android:background="@color/body"
     tools:ignore="RtlSymmetry">
 
     <include
@@ -15,6 +13,7 @@
         layout="@layout/layout_chat_image_initial_holder"
         android:layout_width="@dimen/default_chat_initial_image_xy"
         android:layout_height="@dimen/default_chat_initial_image_xy"
+        android:layout_marginStart="@dimen/default_layout_margin"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -24,6 +23,8 @@
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_marginStart="@dimen/default_layout_margin"
+        android:layout_marginEnd="@dimen/recycler_view_holder_end_margin"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/layout_address_book_initial_holder">
 
         <TextView
@@ -34,13 +35,19 @@
             android:fontFamily="@font/roboto_regular"
             android:gravity="center_vertical|start"
             android:singleLine="true"
-            android:textColor="@color/primaryText"
-            android:textSize="17sp"
+            android:textColor="@color/text"
+            android:textSize="@dimen/address_book_contact_holder_text_size"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="Planet Sphinx" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layout_constraint_address_book_contact_holder_border"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/lightDivider"
+            app:layout_constraintBottom_toBottomOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

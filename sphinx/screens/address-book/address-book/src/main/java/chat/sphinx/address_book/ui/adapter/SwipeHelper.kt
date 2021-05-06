@@ -79,9 +79,12 @@ abstract class SwipeHelper(
         actionState: Int,
         isCurrentlyActive: Boolean
     ) {
+        
         val position = viewHolder.bindingAdapterPosition
         var maxDX = dX
         val itemView = viewHolder.itemView
+
+        if (viewHolder is AddressBookFooterAdapter.FooterViewHolder) return
 
         if (actionState == ItemTouchHelper.ACTION_STATE_SWIPE) {
             if (dX < 0) {

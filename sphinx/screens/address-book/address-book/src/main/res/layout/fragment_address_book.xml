@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/deepNight"
+    android:background="@color/body"
     tools:context=".ui.AddressBookFragment">
 
     <include
@@ -24,16 +24,17 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/add_button_row_container"
         android:layout_width="match_parent"
-        android:layout_height="70dp"
-        android:background="@color/headerBG"
+        android:layout_height="@dimen/address_book_add_buttons_holder_height"
+        android:background="@color/body"
         android:elevation="@dimen/default_elevation"
+        android:paddingBottom="5dp"
         app:layout_constraintTop_toBottomOf="@+id/layout_address_book_search_bar">
 
         <include
             android:id="@+id/layout_address_book_button_add_friend"
             layout="@layout/layout_address_book_button_add_friend"
             android:layout_width="0dp"
-            android:layout_height="50dp"
+            android:layout_height="@dimen/add_buttons_height"
             android:layout_marginStart="@dimen/default_layout_margin"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"

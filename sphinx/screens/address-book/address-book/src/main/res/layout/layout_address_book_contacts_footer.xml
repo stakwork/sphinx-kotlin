@@ -4,8 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:elevation="@dimen/default_elevation"
-    android:background="@color/headerBG">
+    android:background="@color/body">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/layout_constraint_address_book_contacts_footer"
