@@ -12,6 +12,7 @@ import chat.sphinx.concept_network_query_message.NetworkQueryMessage
 import chat.sphinx.concept_network_query_subscription.NetworkQuerySubscription
 import chat.sphinx.concept_network_relay_call.NetworkRelayCall
 import chat.sphinx.concept_relay.RelayDataHandler
+import chat.sphinx.concept_socket_io.SocketIOManager
 import chat.sphinx.feature_network_client.NetworkClientImpl
 import chat.sphinx.feature_network_query_chat.NetworkQueryChatImpl
 import chat.sphinx.feature_network_query_contact.NetworkQueryContactImpl
@@ -21,6 +22,7 @@ import chat.sphinx.feature_network_query_message.NetworkQueryMessageImpl
 import chat.sphinx.feature_network_query_subscription.NetworkQuerySubscriptionImpl
 import chat.sphinx.feature_network_relay_call.NetworkRelayCallImpl
 import chat.sphinx.feature_relay.RelayDataHandlerImpl
+import chat.sphinx.feature_socket_io.SocketIOManagerImpl
 import chat.sphinx.logger.SphinxLogger
 import coil.util.CoilUtils
 import com.squareup.moshi.Moshi
@@ -65,11 +67,13 @@ object NetworkModule {
     @Singleton
     fun provideNetworkClientImpl(
         @ApplicationContext appContext: Context,
-        buildConfigDebug: BuildConfigDebug
+        buildConfigDebug: BuildConfigDebug,
+        LOG: SphinxLogger,
     ): NetworkClientImpl =
         NetworkClientImpl(
             buildConfigDebug,
-            CoilUtils.createDefaultCache(appContext)
+            CoilUtils.createDefaultCache(appContext),
+            LOG,
         )
 
     @Provides
@@ -83,6 +87,29 @@ object NetworkModule {
         networkClientImpl: NetworkClientImpl
     ): NetworkClientCache =
         networkClientImpl
+
+    @Provides
+    @Singleton
+    fun provideSocketIOManagerImpl(
+        dispatchers: CoroutineDispatchers,
+        moshi: Moshi,
+        networkClient: NetworkClient,
+        relayDataHandler: RelayDataHandler,
+        LOG: SphinxLogger,
+    ): SocketIOManagerImpl =
+        SocketIOManagerImpl(
+            dispatchers,
+            moshi,
+            networkClient,
+            relayDataHandler,
+            LOG,
+        )
+
+    @Provides
+    fun provideSocketIOManager(
+        socketIOManagerImpl: SocketIOManagerImpl
+    ): SocketIOManager =
+        socketIOManagerImpl
 
     @Provides
     @Singleton

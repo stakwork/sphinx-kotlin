@@ -44,6 +44,8 @@ dependencies {
     implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-lightning')
     implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-message')
 
+    implementation project(path: ':sphinx:application:network:concepts:concept-socket-io')
+
     implementation deps.androidx.recyclerView
 
     implementation deps.androidx.lifecycle.hilt

@@ -2,6 +2,7 @@ package chat.sphinx.feature_repository.util
 
 import chat.sphinx.concept_network_query_chat.model.ChatDto
 import chat.sphinx.concept_network_query_contact.model.ContactDto
+import chat.sphinx.concept_network_query_invite.model.InviteDto
 import chat.sphinx.concept_network_query_lightning.model.balance.BalanceDto
 import chat.sphinx.concept_network_query_message.model.MessageDto
 import chat.sphinx.conceptcoredb.SphinxDatabaseQueries
@@ -43,6 +44,11 @@ inline fun BalanceDto.toNodeBalance(): NodeBalance =
         Sat(balance),
         Sat(pending_open_balance),
     )
+
+inline val MessageDto.updateChatDboLatestMessage: Boolean
+    get() = type.toMessageType().show           &&
+            type != MessageType.BOT_RES         &&
+            status != MessageStatus.DELETED
 
 @Suppress("NOTHING_TO_INLINE", "SpellCheckingInspection")
 inline fun SphinxDatabaseQueries.upsertChat(dto: ChatDto, moshi: Moshi) {
@@ -100,17 +106,20 @@ inline fun SphinxDatabaseQueries.upsertContact(dto: ContactDto) {
         dto.isOwnerActual.toOwner(),
         dto.created_at.toDateTime()
     )
-    dto.invite?.let { inviteDto ->
-        inviteUpsert(
-            InviteString(inviteDto.invite_string),
-            inviteDto.invoice?.toLightningPaymentRequest(),
-            inviteDto.status.toInviteStatus(),
-            inviteDto.price?.toSat(),
-            InviteId(inviteDto.id),
-            ContactId(inviteDto.contact_id),
-            inviteDto.created_at.toDateTime(),
-        )
-    }
+    dto.invite?.let { upsertInvite(it) }
+}
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun SphinxDatabaseQueries.upsertInvite(dto: InviteDto) {
+    inviteUpsert(
+        InviteString(dto.invite_string),
+        dto.invoice?.toLightningPaymentRequest(),
+        dto.status.toInviteStatus(),
+        dto.price?.toSat(),
+        InviteId(dto.id),
+        ContactId(dto.contact_id),
+        dto.created_at.toDateTime(),
+    )
 }
 
 @Suppress("SpellCheckingInspection")

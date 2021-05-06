@@ -8,6 +8,7 @@ dependencies {
     api project(path: ':kotlin:common:build-config')
 
     // Sphinx
+    api project(path: ':sphinx:application:common:logger')
     api project(path: ':sphinx:application:network:concepts:clients:concept-network-client-cache')
 
     implementation deps.kotlin.coroutinesCore
