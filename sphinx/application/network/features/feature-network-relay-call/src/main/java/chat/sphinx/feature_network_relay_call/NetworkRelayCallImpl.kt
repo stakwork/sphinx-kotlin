@@ -2,6 +2,7 @@ package chat.sphinx.feature_network_relay_call
 
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_network_client.NetworkClient
+import chat.sphinx.concept_network_client.NetworkClientClearedListener
 import chat.sphinx.concept_network_relay_call.NetworkRelayCall
 import chat.sphinx.concept_network_relay_call.RelayResponse
 import chat.sphinx.concept_relay.RelayDataHandler
@@ -11,18 +12,23 @@ import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.kotlin_response.message
 import chat.sphinx.logger.SphinxLogger
+import chat.sphinx.logger.d
 import chat.sphinx.logger.e
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
 import com.squareup.moshi.Moshi
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
 import okhttp3.RequestBody
 import okhttp3.internal.EMPTY_REQUEST
 import java.io.IOException
+import java.util.concurrent.TimeUnit
 
 @Suppress("NOTHING_TO_INLINE")
 @Throws(IllegalArgumentException::class)
@@ -106,7 +112,7 @@ class NetworkRelayCallImpl(
     private val networkClient: NetworkClient,
     private val relayDataHandler: RelayDataHandler,
     private val LOG: SphinxLogger,
-): NetworkRelayCall() {
+): NetworkRelayCall(), NetworkClientClearedListener {
 
     companion object {
         const val TAG = "NetworkRelayCallImpl"
@@ -228,9 +234,37 @@ class NetworkRelayCallImpl(
 
     }.flowOn(dispatchers.io)
 
+    @Volatile
+    private var extendedNetworkCallClient: OkHttpClient? = null
+    private val extendedClientLock = Mutex()
+
+    override fun networkClientCleared() {
+        extendedNetworkCallClient = null
+    }
+
+    init {
+        networkClient.addListener(this)
+    }
+
     @Throws(NullPointerException::class, IOException::class)
     private suspend fun <T: Any> call(jsonAdapter: Class<T>, request: Request): T {
-        val networkResponse = networkClient.getClient()
+
+        // TODO: Make less horrible. Needed for the `/contacts` endpoint for users who
+        //  have a large number of contacts as Relay needs more time than the default
+        //  client's settings. Replace once the `aa/contacts` endpoint gets pagination.
+        val client = if (request.url.pathSegments.joinToString("") == "contacts") {
+            extendedClientLock.withLock {
+                extendedNetworkCallClient ?: networkClient.getClient().newBuilder()
+                    .readTimeout(45, TimeUnit.SECONDS)
+                    .writeTimeout(45, TimeUnit.SECONDS)
+                    .build()
+                    .also { extendedNetworkCallClient = it }
+            }
+        } else {
+            networkClient.getClient()
+        }
+
+        val networkResponse = client
             .newCall(request)
             .execute()
 
