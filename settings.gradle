@@ -57,6 +57,8 @@ include ':sphinx:application:network:concepts:calls:concept-network-relay-call'
 include ':sphinx:application:network:features:feature-network-relay-call'
 include ':sphinx:application:network:concepts:concept-socket-io'
 include ':sphinx:application:network:features:feature-socket-io'
+include ':sphinx:application:network:concepts:tor:concept-network-tor'
+include ':sphinx:application:network:features:tor:feature-network-tor'
 
 // Activity
 include ':sphinx:activity:hilt-qualifiers'
