@@ -29,7 +29,8 @@ class NetworkQueryContactImpl(
         networkRelayCall.relayGet(
             responseJsonClass = GetContactsRelayResponse::class.java,
             relayEndpoint = ENDPOINT_CONTACTS,
-            relayData = relayData
+            relayData = relayData,
+            useExtendedNetworkCallClient = true,
         )
 
     ///////////

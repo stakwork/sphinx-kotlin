@@ -129,7 +129,8 @@ class NetworkRelayCallImpl(
     override fun <T: Any> get(
         url: String,
         responseJsonClass: Class<T>,
-        headers: Map<String, String>?
+        headers: Map<String, String>?,
+        useExtendedNetworkCallClient: Boolean
     ): Flow<LoadResponse<T, ResponseError>> = flow {
 
         emit(LoadResponse.Loading)
@@ -137,7 +138,7 @@ class NetworkRelayCallImpl(
         try {
             val requestBuilder = buildRequest(url, headers)
 
-            val response = call(responseJsonClass, requestBuilder.build())
+            val response = call(responseJsonClass, requestBuilder.build(), useExtendedNetworkCallClient)
 
             emit(Response.Success(response))
         } catch (e: Exception) {
@@ -247,12 +248,16 @@ class NetworkRelayCallImpl(
     }
 
     @Throws(NullPointerException::class, IOException::class)
-    private suspend fun <T: Any> call(jsonAdapter: Class<T>, request: Request): T {
+    private suspend fun <T: Any> call(
+        jsonAdapter: Class<T>,
+        request: Request,
+        useExtendedNetworkCallClient: Boolean = false
+    ): T {
 
         // TODO: Make less horrible. Needed for the `/contacts` endpoint for users who
         //  have a large number of contacts as Relay needs more time than the default
         //  client's settings. Replace once the `aa/contacts` endpoint gets pagination.
-        val client = if (request.url.pathSegments.joinToString("") == "contacts") {
+        val client = if (useExtendedNetworkCallClient) {
             extendedClientLock.withLock {
                 extendedNetworkCallClient ?: networkClient.getClient().newBuilder()
                     .readTimeout(45, TimeUnit.SECONDS)
@@ -297,7 +302,8 @@ class NetworkRelayCallImpl(
         responseJsonClass: Class<V>,
         relayEndpoint: String,
         additionalHeaders: Map<String, String>?,
-        relayData: Pair<AuthorizationToken, RelayUrl>?
+        relayData: Pair<AuthorizationToken, RelayUrl>?,
+        useExtendedNetworkCallClient: Boolean,
     ): Flow<LoadResponse<T, ResponseError>> = flow {
 
         val responseFlow: Flow<LoadResponse<V, ResponseError>>? = try {
@@ -307,7 +313,8 @@ class NetworkRelayCallImpl(
             get(
                 nnRelayData.second.value + relayEndpoint,
                 responseJsonClass,
-                mapRelayHeaders(nnRelayData, additionalHeaders)
+                mapRelayHeaders(nnRelayData, additionalHeaders),
+                useExtendedNetworkCallClient
             )
         } catch (e: Exception) {
             emit(handleException(LOG, GET, relayEndpoint, e))
