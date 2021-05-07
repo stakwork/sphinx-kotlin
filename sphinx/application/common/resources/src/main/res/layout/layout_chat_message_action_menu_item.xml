@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/layout_constraint_chat_message_action_menu_item"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/default_tap_target_min_height"
+    android:layout_height="@dimen/default_tap_target_xy"
     android:paddingHorizontal="@dimen/default_layout_margin">
 
 

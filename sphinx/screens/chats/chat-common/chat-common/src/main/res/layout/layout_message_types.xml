@@ -96,10 +96,17 @@
             tools:visibility="gone" />
 
 
-        <!-- Group Kick  -->
+        <!-- Group Action: User was kicked  -->
         <include
             android:id="@+id/include_message_type_group_kick"
             layout="@layout/layout_message_type_group_kick"
+            tools:visibility="gone" />
+
+
+        <!-- Group Action: Join Request  -->
+        <include
+            android:id="@+id/include_message_type_group_join_request"
+            layout="@layout/layout_message_type_group_join_request"
             tools:visibility="gone" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
