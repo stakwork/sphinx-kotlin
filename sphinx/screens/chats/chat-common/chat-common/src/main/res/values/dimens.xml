@@ -50,6 +50,8 @@
     <dimen name="message_type_leave_or_join_group_holder_height">40dp</dimen>
     <dimen name="message_type_group_kick_holder_height">65dp</dimen>
     <dimen name="message_type_group_join_request_holder_height">65dp</dimen>
+    <dimen name="message_type_call_invite_holder_height_large">212dp</dimen>
+    <dimen name="message_type_call_invite_holder_height_small">160dp</dimen>
 
 
     <!-- Icons -->

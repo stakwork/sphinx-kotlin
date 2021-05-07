@@ -19,4 +19,5 @@
         <item name="android:textColor">@color/textMessages</item>
         <item name="android:textSize">@dimen/default_text_size_caption1</item>
     </style>
+
 </resources>

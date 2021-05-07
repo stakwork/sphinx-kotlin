@@ -109,6 +109,13 @@
             layout="@layout/layout_message_type_group_join_request"
             tools:visibility="gone" />
 
+        <!--  Call Invite  -->
+        <include
+            android:id="@+id/include_message_type_call_invite"
+            layout="@layout/layout_message_type_call_invite"
+            tools:visibility="gone" />
+
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 
