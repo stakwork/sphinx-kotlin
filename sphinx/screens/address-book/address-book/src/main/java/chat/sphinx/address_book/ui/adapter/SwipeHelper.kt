@@ -4,12 +4,14 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.*
 import android.graphics.drawable.Drawable
+import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import androidx.annotation.ColorRes
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.tabs.TabLayout
 import java.util.*
 import kotlin.math.abs
 import kotlin.math.max
@@ -35,7 +37,7 @@ abstract class SwipeHelper(
         buttonsBuffer[swipedPosition]?.forEach { it.handle(event) }
         recoverQueue.add(swipedPosition)
         swipedPosition = -1
-        recoverSwipedItem()
+//        recoverSwipedItem()
         true
     }
 
@@ -43,10 +45,12 @@ abstract class SwipeHelper(
         recyclerView.setOnTouchListener(touchListener)
     }
 
-    private fun recoverSwipedItem() {
+    private fun recoverSwipedItem(swipingPosition: Int) {
         while (!recoverQueue.isEmpty()) {
             val position = recoverQueue.poll() ?: return
-            recyclerView.adapter?.notifyItemChanged(position)
+            if (swipingPosition != position) {
+                recyclerView.adapter?.notifyItemChanged(position)
+            }
         }
     }
 
@@ -122,7 +126,7 @@ abstract class SwipeHelper(
         val position = viewHolder.bindingAdapterPosition
         if (swipedPosition != position) recoverQueue.add(swipedPosition)
         swipedPosition = position
-        recoverSwipedItem()
+        recoverSwipedItem(position)
     }
 
     abstract fun instantiateUnderlayButton(position: Int): List<UnderlayButton>
@@ -142,11 +146,12 @@ abstract class SwipeHelper(
         private var icon: Drawable? = null
         private var textSize: Float = 0f
         private val textHorizontalPadding = 50.0f
-        private val iconHorizontalPadding = 100.0f
         var intrinsicWidth: Float = 0f
 
-        fun addText(_title: String,
-                    _textSize: Float) {
+        fun addText(
+            _title: String,
+            _textSize: Float
+        ) {
             title = _title
             textSize = _textSize
 
@@ -160,9 +165,9 @@ abstract class SwipeHelper(
             intrinsicWidth = titleBounds.width() + 2 * textHorizontalPadding
         }
 
-        fun addIcon(_icon: Drawable) {
+        fun addIcon(_icon: Drawable, width: Float) {
             icon = _icon
-            intrinsicWidth = _icon.intrinsicWidth + 2 * iconHorizontalPadding
+            intrinsicWidth = width
         }
 
         private fun getTextSizeInPixel() : Float {

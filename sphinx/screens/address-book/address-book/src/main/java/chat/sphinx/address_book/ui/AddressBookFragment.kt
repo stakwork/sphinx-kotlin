@@ -73,7 +73,7 @@ internal class AddressBookFragment: BaseFragment<
 
     private fun setupAddressBookHeader() {
         val activity = (requireActivity() as InsetterActivity)
-        activity.addStatusBarPadding(binding.layoutAddressBookHeader.layoutConstraintAddressBookHeader)
+        activity.addStatusBarPadding(header)
 
         header.layoutParams.height = header.layoutParams.height + activity.statusBarInsetHeight.top
         header.requestLayout()
@@ -106,14 +106,14 @@ internal class AddressBookFragment: BaseFragment<
     private fun deleteButton(addressBookListAdapter: AddressBookListAdapter, position: Int) : SwipeHelper.UnderlayButton {
         val button = SwipeHelper.UnderlayButton(
             requireContext(),
-            chat.sphinx.resources.R.color.primaryRed,
+            chat.sphinx.resources.R.color.badgeRed,
             object : SwipeHelper.UnderlayButtonClickListener {
             override fun onClick() {
                 addressBookListAdapter.removeAt(position)
             }
         })
         ContextCompat.getDrawable(requireContext(), R.drawable.ic_icon_delete)?.let {
-            button.addIcon(it)
+            button.addIcon(it, requireContext().resources.getDimension(R.dimen.recycler_view_holder_delete_button_width))
         }
 
         return button
