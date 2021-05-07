@@ -31,6 +31,9 @@ internal class AddFriendFragment: BaseFragment<
         binding.buttonAlreadyOnSphinx.setOnClickListener {
             lifecycleScope.launch { viewModel.navigator.toAddContactDetail() }
         }
+        binding.layoutAddFriendHeader.textViewAddFriendClose.setOnClickListener {
+            lifecycleScope.launch { viewModel.navigator.popBackStack() }
+        }
     }
 
     override suspend fun onViewStateFlowCollect(viewState: AddFriendViewState) {
