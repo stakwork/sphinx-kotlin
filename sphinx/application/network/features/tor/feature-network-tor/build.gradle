@@ -38,6 +38,6 @@ dependencies {
     implementation deps.kotlin.coroutinesCore
 
     implementation deps.matthewNelson.toplService
-    api deps.matthewNelson.toplServiceBase
+//    api deps.matthewNelson.toplServiceBase
     implementation deps.matthewNelson.torBinary
 }

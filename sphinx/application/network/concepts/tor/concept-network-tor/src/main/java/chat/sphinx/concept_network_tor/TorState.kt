@@ -11,9 +11,12 @@ sealed class TorNetworkState {
 }
 
 sealed class TorServiceState {
-    object OnCreate: TorServiceState()
-    object OnDestroy: TorServiceState()
-    object OnBind: TorServiceState()
-    object OnUnbind: TorServiceState()
-    object OnTaskRemoved: TorServiceState()
+
+    abstract val hashCode: Int
+
+    class OnCreate(override val hashCode: Int): TorServiceState()
+    class OnDestroy(override val hashCode: Int): TorServiceState()
+    class OnBind(override val hashCode: Int): TorServiceState()
+    class OnUnbind(override val hashCode: Int): TorServiceState()
+    class OnTaskRemoved(override val hashCode: Int): TorServiceState()
 }
