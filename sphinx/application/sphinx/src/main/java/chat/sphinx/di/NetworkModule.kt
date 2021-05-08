@@ -72,11 +72,15 @@ object NetworkModule {
     fun provideNetworkClientImpl(
         @ApplicationContext appContext: Context,
         buildConfigDebug: BuildConfigDebug,
+        torManager: TorManager,
+        dispatchers: CoroutineDispatchers,
         LOG: SphinxLogger,
     ): NetworkClientImpl =
         NetworkClientImpl(
             buildConfigDebug,
             CoilUtils.createDefaultCache(appContext),
+            dispatchers,
+            torManager,
             LOG,
         )
 
@@ -119,14 +123,18 @@ object NetworkModule {
     @Singleton
     fun provideTorManagerAndroid(
         application: Application,
+        authenticationStorage: AuthenticationStorage,
         buildConfigDebug: BuildConfigDebug,
         buildConfigVersionCode: BuildConfigVersionCode,
+        dispatchers: CoroutineDispatchers,
         LOG: SphinxLogger,
     ): TorManagerAndroid =
         TorManagerAndroid(
             application,
+            authenticationStorage,
             buildConfigDebug,
             buildConfigVersionCode,
+            dispatchers,
             LOG,
         )
 
