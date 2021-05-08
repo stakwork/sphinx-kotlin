@@ -179,7 +179,7 @@ class TorManagerAndroid(
 //                .setImageTorNetworkingDisabled()
 //                .setImageTorDataTransfer()
 //                .setImageTorErrors()
-//                .setCustomColor()
+                .setCustomColor(R.color.torPurple)
                 .setVisibility(Notification.VISIBILITY_PRIVATE)
                 .enableTorRestartButton(enable = false)
                 .enableTorStopButton(enable = false)
