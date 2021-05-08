@@ -5,6 +5,7 @@ import android.app.Notification
 import android.app.PendingIntent
 import chat.sphinx.concept_network_tor.SocksProxyAddress
 import chat.sphinx.concept_network_tor.TorManager
+import chat.sphinx.concept_network_tor.TorManagerListener
 import chat.sphinx.concept_network_tor.TorServiceState
 import chat.sphinx.concept_network_tor.TorState as KTorState
 import chat.sphinx.concept_network_tor.TorNetworkState as KTorNetworkState
@@ -14,6 +15,7 @@ import chat.sphinx.logger.e
 import chat.sphinx.logger.i
 import io.matthewnelson.build_config.BuildConfigDebug
 import io.matthewnelson.build_config.BuildConfigVersionCode
+import io.matthewnelson.concept_authentication.data.AuthenticationStorage
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.topl_service.TorServiceController
 import io.matthewnelson.topl_service.lifecycle.BackgroundManager
@@ -21,13 +23,16 @@ import io.matthewnelson.topl_service.notification.ServiceNotification
 import io.matthewnelson.topl_service_base.BaseServiceConsts
 import io.matthewnelson.topl_service_base.TorPortInfo
 import io.matthewnelson.topl_service_base.TorServiceEventBroadcaster
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 class TorManagerAndroid(
     application: Application,
+    private val authenticationStorage: AuthenticationStorage,
     buildConfigDebug: BuildConfigDebug,
     buildConfigVersionCode: BuildConfigVersionCode,
     private val dispatchers: CoroutineDispatchers,
@@ -36,6 +41,14 @@ class TorManagerAndroid(
 
     companion object {
         const val TAG = "TorManagerAndroid"
+
+        // PersistentStorage keys
+        const val TOR_MANAGER_REQUIRED = "TOR_MANAGER_REQUIRED"
+
+        @Volatile
+        private var isTorRequiredCache: Boolean? = null
+        const val TRUE = "T"
+        const val FALSE = "F"
     }
 
     private inner class SphinxBroadcaster: TorServiceEventBroadcaster() {
@@ -163,6 +176,123 @@ class TorManagerAndroid(
 
     override fun newIdentity() {
         TorServiceController.newIdentity()
+    }
+
+    /////////////////
+    /// Listeners ///
+    /////////////////
+    private inner class SynchronizedListenerHolder {
+        private val listeners: LinkedHashSet<TorManagerListener> = LinkedHashSet(0)
+
+        @Synchronized
+        fun addListener(listener: TorManagerListener): Boolean {
+            val bool = listeners.add(listener)
+            if (bool) {
+                LOG.d(TAG, "Listener ${listener.javaClass.simpleName} registered")
+            }
+            return bool
+        }
+
+        @Synchronized
+        fun removeListener(listener: TorManagerListener): Boolean {
+            val bool = listeners.remove(listener)
+            if (bool) {
+                LOG.d(TAG, "Listener ${listener.javaClass.simpleName} removed")
+            }
+            return bool
+        }
+
+        @Synchronized
+        suspend fun dispatchRequirementChange(required: Boolean) {
+            for (listener in listeners) {
+                listener.onTorRequirementChange(required)
+            }
+        }
+    }
+
+    private val synchronizedListeners: SynchronizedListenerHolder by lazy {
+        SynchronizedListenerHolder()
+    }
+
+    override fun addTorManagerListener(listener: TorManagerListener): Boolean {
+        return synchronizedListeners.addListener(listener)
+    }
+
+    override fun removeTorManagerListener(listener: TorManagerListener): Boolean {
+        return synchronizedListeners.removeListener(listener)
+    }
+
+    private val lock = Mutex()
+    private val supervisor: Job by lazy {
+        SupervisorJob()
+    }
+    private val torManagerScope: CoroutineScope by lazy {
+        CoroutineScope(supervisor + dispatchers.mainImmediate)
+    }
+    private val torManagerScopeLock = Mutex()
+
+    override suspend fun setTorRequired(required: Boolean) {
+        lock.withLock {
+            val requiredString = if (required) TRUE else FALSE
+
+            when (isTorRequiredCache) {
+                null -> {
+
+                    val persisted = authenticationStorage.getString(TOR_MANAGER_REQUIRED, null)
+
+                    torManagerScope.launch {
+                        if (persisted != requiredString) {
+                            torManagerScopeLock.withLock {
+                                authenticationStorage.putString(TOR_MANAGER_REQUIRED, requiredString)
+                                synchronizedListeners.dispatchRequirementChange(required)
+                            }
+                        }
+
+                        isTorRequiredCache = required
+                    }.join()
+
+                }
+                required -> {
+                    // no change, do nothing
+                }
+                else -> {
+                    torManagerScope.launch {
+                        torManagerScopeLock.withLock {
+                            authenticationStorage.putString(TOR_MANAGER_REQUIRED, requiredString)
+                            isTorRequiredCache = required
+                            synchronizedListeners.dispatchRequirementChange(required)
+                        }
+                    }.join()
+                }
+            }
+        }
+    }
+
+    override suspend fun isTorRequired(): Boolean? {
+        lock.withLock {
+            torManagerScopeLock.withLock {
+                // TODO: Remove `return true` once RelayData class implements RelayUrl
+                //  analysis when persisting the RelayUrl such that it checks for an
+                //  onion address and sets this setting.
+                return true
+//                return isTorRequiredCache ?: authenticationStorage
+//                    .getString(TOR_MANAGER_REQUIRED, null).let { persisted ->
+//                        when (persisted) {
+//                            null -> {
+//                                null
+//                            }
+//                            TRUE -> {
+//                                isTorRequiredCache = true
+//                                true
+//                            }
+//                            else -> {
+//                                isTorRequiredCache = false
+//                                false
+//                            }
+//                        }
+//                    }
+            }
+        }
     }
 
     init {
