@@ -3,6 +3,8 @@ package chat.sphinx.concept_network_tor
 sealed class TorState {
     object On: TorState()
     object Off: TorState()
+    object Starting: TorState()
+    object Stopping: TorState()
 }
 
 sealed class TorNetworkState {

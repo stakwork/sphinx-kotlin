@@ -3,7 +3,6 @@ package chat.sphinx.feature_network_tor
 import android.app.Application
 import android.app.Notification
 import android.app.PendingIntent
-import android.content.Context
 import chat.sphinx.concept_network_tor.SocksProxyAddress
 import chat.sphinx.concept_network_tor.TorManager
 import chat.sphinx.concept_network_tor.TorServiceState
@@ -15,22 +14,23 @@ import chat.sphinx.logger.e
 import chat.sphinx.logger.i
 import io.matthewnelson.build_config.BuildConfigDebug
 import io.matthewnelson.build_config.BuildConfigVersionCode
+import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.topl_service.TorServiceController
 import io.matthewnelson.topl_service.lifecycle.BackgroundManager
 import io.matthewnelson.topl_service.notification.ServiceNotification
 import io.matthewnelson.topl_service_base.BaseServiceConsts
-import io.matthewnelson.topl_service_base.ServiceExecutionHooks
 import io.matthewnelson.topl_service_base.TorPortInfo
 import io.matthewnelson.topl_service_base.TorServiceEventBroadcaster
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.withContext
 
 class TorManagerAndroid(
     application: Application,
     buildConfigDebug: BuildConfigDebug,
     buildConfigVersionCode: BuildConfigVersionCode,
+    private val dispatchers: CoroutineDispatchers,
     private val LOG: SphinxLogger,
 ): TorManager {
 
@@ -68,6 +68,7 @@ class TorManagerAndroid(
             }?.let { state ->
                 _torServiceStateFlow.value = state
             }
+            LOG.d(TAG, "$event@$hashCode")
         }
 
         override fun broadcastBandwidth(bytesRead: String, bytesWritten: String) {}
@@ -106,10 +107,19 @@ class TorManagerAndroid(
         }
 
         override fun broadcastTorState(state: String, networkState: String) {
-            _torStateFlow.value = if (state == TorState.ON) {
-                KTorState.On
-            } else {
-                KTorState.Off
+            _torStateFlow.value = when (state) {
+                TorState.ON -> {
+                    KTorState.On
+                }
+                TorState.STARTING -> {
+                    KTorState.Starting
+                }
+                TorState.STOPPING -> {
+                    KTorState.Stopping
+                }
+                else -> {
+                    KTorState.Off
+                }
             }
 
             _torNetworkStateFlow.value = if (networkState == TorNetworkState.ENABLED) {
@@ -124,6 +134,12 @@ class TorManagerAndroid(
 
     override val socksProxyAddressStateFlow: StateFlow<SocksProxyAddress?>
         get() = broadcaster._socksProxyAddressStateFlow.asStateFlow()
+
+    override suspend fun getSocksPortSetting(): String {
+        return withContext(dispatchers.io) {
+            TorServiceController.getServiceTorSettings().socksPort
+        }
+    }
 
     override val torStateFlow: StateFlow<KTorState>
         get() = broadcaster._torStateFlow.asStateFlow()

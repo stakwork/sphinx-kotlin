@@ -1,5 +1,6 @@
 package chat.sphinx.feature_network_tor
 
+import chat.sphinx.concept_network_tor.TorManager
 import io.matthewnelson.topl_service_base.ApplicationDefaultTorSettings
 
 internal class SphinxTorSettings: ApplicationDefaultTorSettings() {
@@ -99,7 +100,7 @@ internal class SphinxTorSettings: ApplicationDefaultTorSettings() {
     override val proxyType: String
         get() = ProxyType.DISABLED
 
-    override val proxyUser: String?
+    override val proxyUser: String
         get() = DEFAULT__PROXY_USER
 
     override val reachableAddressPorts: String
@@ -115,7 +116,7 @@ internal class SphinxTorSettings: ApplicationDefaultTorSettings() {
         get() = DEFAULT__RUN_AS_DAEMON
 
     override val socksPort: String
-        get() = "9250"
+        get() = TorManager.DEFAULT_SOCKS_PORT.toString()
 
     override val socksPortIsolationFlags: List<String>
         get() = listOf(
