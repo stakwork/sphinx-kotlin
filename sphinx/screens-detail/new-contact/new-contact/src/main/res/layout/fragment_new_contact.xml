@@ -93,6 +93,7 @@
             app:layout_constraintTop_toBottomOf="@+id/new_contact_address_label_field"
             app:layout_constraintStart_toStartOf="@+id/new_contact_address_label_field"
             app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/layout_constraint_new_contact_scan_button"
             android:textSize="@dimen/new_contact_field_size"
             android:inputType="textVisiblePassword"
             android:layout_marginLeft="@dimen/new_contact_field_neg_margin"
@@ -100,12 +101,34 @@
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/layout_constraint_new_contact_address_bottom_border"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="1dp"
             android:background="@color/secondaryText"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/layout_constraint_new_contact_scan_button"
             app:layout_constraintStart_toStartOf="@+id/new_contact_address_label_field" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layout_constraint_new_contact_scan_button"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:paddingLeft="60dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/scan_address_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="@+id/layout_constraint_new_contact_scan_button"
+                app:layout_constraintBottom_toBottomOf="parent"
+                android:background="@drawable/ic_scan_icon"
+                android:backgroundTint="@color/textInverted"
+                android:layout_marginBottom="@dimen/new_contact_scan_icon_bottom_margin"
+                />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -193,6 +216,7 @@
         <androidx.appcompat.widget.AppCompatToggleButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:enabled="false"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"/>
 
