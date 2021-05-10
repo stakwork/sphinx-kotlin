@@ -48,17 +48,44 @@ object NetworkModule {
 
     @Provides
     @Singleton
+    fun provideTorManagerAndroid(
+        application: Application,
+        authenticationStorage: AuthenticationStorage,
+        buildConfigDebug: BuildConfigDebug,
+        buildConfigVersionCode: BuildConfigVersionCode,
+        dispatchers: CoroutineDispatchers,
+        LOG: SphinxLogger,
+    ): TorManagerAndroid =
+        TorManagerAndroid(
+            application,
+            authenticationStorage,
+            buildConfigDebug,
+            buildConfigVersionCode,
+            dispatchers,
+            LOG,
+        )
+
+    @Provides
+    fun provideTorManager(
+        torManagerAndroid: TorManagerAndroid
+    ): TorManager =
+        torManagerAndroid
+
+    @Provides
+    @Singleton
     fun provideRelayDataHandlerImpl(
         authenticationStorage: AuthenticationStorage,
         authenticationCoreManager: AuthenticationCoreManager,
         dispatchers: CoroutineDispatchers,
         encryptionKeyHandler: EncryptionKeyHandler,
+        torManager: TorManager,
     ): RelayDataHandlerImpl =
         RelayDataHandlerImpl(
             authenticationStorage,
             authenticationCoreManager,
             dispatchers,
             encryptionKeyHandler,
+            torManager
         )
 
     @Provides
@@ -118,31 +145,6 @@ object NetworkModule {
         socketIOManagerImpl: SocketIOManagerImpl
     ): SocketIOManager =
         socketIOManagerImpl
-
-    @Provides
-    @Singleton
-    fun provideTorManagerAndroid(
-        application: Application,
-        authenticationStorage: AuthenticationStorage,
-        buildConfigDebug: BuildConfigDebug,
-        buildConfigVersionCode: BuildConfigVersionCode,
-        dispatchers: CoroutineDispatchers,
-        LOG: SphinxLogger,
-    ): TorManagerAndroid =
-        TorManagerAndroid(
-            application,
-            authenticationStorage,
-            buildConfigDebug,
-            buildConfigVersionCode,
-            dispatchers,
-            LOG,
-        )
-
-    @Provides
-    fun provideTorManager(
-        torManagerAndroid: TorManagerAndroid
-    ): TorManager =
-        torManagerAndroid
 
     @Provides
     @Singleton
