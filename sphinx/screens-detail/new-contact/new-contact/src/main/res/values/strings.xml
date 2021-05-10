@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="new_contact_header_name">NEW CONTACT</string>
+    <string name="new_contact_nickname_label">Nickname *</string>
+    <string name="new_contact_address_label">Address *</string>
+    <string name="new_contact_route_hint_label">Route Hint</string>
+    <string name="save_to_contacts_button">SAVE TO CONTACTS</string>
+    <string name="new_contact_pin_label">Privacy Setting @</string>
+    <string name="new_contact_pin_std_private_label">Standard PIN / Privacy PIN</string>
+</resources>
