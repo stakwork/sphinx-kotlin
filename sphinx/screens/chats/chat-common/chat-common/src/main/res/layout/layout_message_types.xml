@@ -76,6 +76,7 @@
             layout="@layout/layout_message_type_tribe_link_preview"
             tools:visibility="gone" />
 
+
         <!--  Replies  -->
         <include
             android:id="@+id/include_message_reply"
@@ -88,6 +89,25 @@
             layout="@layout/layout_message_type_deleted_message"
             tools:visibility="gone" />
 
+        <!-- Group Action: Leaving/Joining  -->
+        <include
+            android:id="@+id/include_message_type_leave_or_join_group"
+            layout="@layout/layout_message_type_leave_or_join_group"
+            tools:visibility="gone" />
+
+
+        <!-- Group Action: User was kicked  -->
+        <include
+            android:id="@+id/include_message_type_group_kick"
+            layout="@layout/layout_message_type_group_kick"
+            tools:visibility="gone" />
+
+
+        <!-- Group Action: Join Request  -->
+        <include
+            android:id="@+id/include_message_type_group_join_request"
+            layout="@layout/layout_message_type_group_join_request"
+            tools:visibility="gone" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

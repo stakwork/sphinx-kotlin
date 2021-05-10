@@ -10,10 +10,12 @@
     <dimen name="default_message_action_image_xy">28dp</dimen>
     <dimen name="default_header_margin_horizontal">24dp</dimen>
     <dimen name="default_header_headline_margin_horizontal">12dp</dimen>
+    <dimen name="default_header_headline_margin_vertical">8dp</dimen>
     <dimen name="default_bottom_bar_height">56dp</dimen>
     <dimen name="default_elevation">8dp</dimen>
 
     <dimen name="default_text_size_back_arrow">21sp</dimen>
+    <dimen name="default_text_size_tap_target_material_icon">20sp</dimen>
     <dimen name="default_text_size_headline">17sp</dimen>
     <dimen name="default_text_size_body">12sp</dimen>
     <dimen name="default_text_size_sub_headline">11sp</dimen>
@@ -31,4 +33,6 @@
     <dimen name="add_buttons_height">50dp</dimen>
     <dimen name="add_buttons_text_size">15sp</dimen>
     <dimen name="add_buttons_icon_xy">25sp</dimen>
+    <dimen name="default_tap_target_xy">44dp</dimen>
+    <dimen name="default_small_tap_target_xy">27dp</dimen>
 </resources>
