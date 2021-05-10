@@ -103,12 +103,15 @@ class NetworkClientImpl(
     ///////////////
     @Volatile
     private var client: OkHttpClient? = null
+    @Volatile
+    private var clearedClient: OkHttpClient? = null
+
     private val clientLock = Mutex()
     private var currentClientSocksProxyAddress: SocksProxyAddress? = null
 
     override suspend fun getClient(): OkHttpClient =
         clientLock.withLock {
-            client ?: OkHttpClient.Builder().apply {
+            client ?: (clearedClient?.newBuilder()?.also { clearedClient = null } ?: OkHttpClient.Builder()).apply {
                 connectTimeout(TIME_OUT, TimeUnit.SECONDS)
                 readTimeout(TIME_OUT, TimeUnit.SECONDS)
                 writeTimeout(TIME_OUT, TimeUnit.SECONDS)
@@ -196,20 +199,21 @@ class NetworkClientImpl(
                         proxy(null)
                         currentClientSocksProxyAddress = null
 
-                        if (torManager.torStateFlow.value !is TorState.Off) {
-                            torManager.stopTor()
-                        }
+                        torManager.stopTor()
 
                         LOG.d(
                             TAG,
                             """
                                 Tor requirement changed to false while building the network client.
-                                Proxy settings removed and TorStop called.
+                                Proxy settings removed and stopTor called.
                             """.trimIndent()
                         )
                     } else {
                         LOG.d(TAG, "Client built with $currentClientSocksProxyAddress")
                     }
+                } else {
+                    currentClientSocksProxyAddress = null
+                    proxy(null)
                 }
 
 
@@ -247,11 +251,47 @@ class NetworkClientImpl(
     /// TorManagerListener ///
     //////////////////////////
     override suspend fun onTorRequirementChange(required: Boolean) {
-//        if (required) {
-//
-//        } else {
-//
-//        }
+        cachingClientLock.withLock {
+            clientLock.withLock {
+                client?.let { nnClient ->
+                    if (required) {
+                        if (currentClientSocksProxyAddress == null) {
+                            clearedClient = nnClient
+                            client = null
+                            cachingClient = null
+                            synchronizedListeners.dispatchClearedEvent()
+                        }
+                    } else {
+                        if (currentClientSocksProxyAddress != null) {
+                            clearedClient = nnClient
+                            client = null
+                            cachingClient = null
+                            synchronizedListeners.dispatchClearedEvent()
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    override suspend fun onTorSocksProxyAddressChange(socksProxyAddress: SocksProxyAddress?) {
+        if (socksProxyAddress == null) {
+            return
+        }
+
+        cachingClientLock.withLock {
+            clientLock.withLock {
+                client?.let { nnClient ->
+                    // We don't want to close down the client,
+                    // just move it temporarily so it forces a rebuild
+                    // with the new proxy settings
+                    clearedClient = nnClient
+                    client = null
+                    cachingClient = null
+                    synchronizedListeners.dispatchClearedEvent()
+                }
+            }
+        }
     }
 
     init {

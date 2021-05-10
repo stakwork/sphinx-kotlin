@@ -3,6 +3,7 @@ package chat.sphinx.feature_network_tor
 import android.app.Application
 import android.app.Notification
 import android.app.PendingIntent
+import android.content.Context
 import chat.sphinx.concept_network_tor.SocksProxyAddress
 import chat.sphinx.concept_network_tor.TorManager
 import chat.sphinx.concept_network_tor.TorManagerListener
@@ -21,12 +22,14 @@ import io.matthewnelson.topl_service.TorServiceController
 import io.matthewnelson.topl_service.lifecycle.BackgroundManager
 import io.matthewnelson.topl_service.notification.ServiceNotification
 import io.matthewnelson.topl_service_base.BaseServiceConsts
+import io.matthewnelson.topl_service_base.ServiceExecutionHooks
 import io.matthewnelson.topl_service_base.TorPortInfo
 import io.matthewnelson.topl_service_base.TorServiceEventBroadcaster
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
@@ -208,6 +211,13 @@ class TorManagerAndroid(
                 listener.onTorRequirementChange(required)
             }
         }
+
+        @Synchronized
+        suspend fun dispatchSocksProxyAddressChange(socksProxyAddress: SocksProxyAddress?) {
+            for (listener in listeners) {
+                listener.onTorSocksProxyAddressChange(socksProxyAddress)
+            }
+        }
     }
 
     private val synchronizedListeners: SynchronizedListenerHolder by lazy {
@@ -229,7 +239,7 @@ class TorManagerAndroid(
     private val torManagerScope: CoroutineScope by lazy {
         CoroutineScope(supervisor + dispatchers.mainImmediate)
     }
-    private val torManagerScopeLock = Mutex()
+    private val requirementChangeLock = Mutex()
 
     override suspend fun setTorRequired(required: Boolean) {
         lock.withLock {
@@ -238,17 +248,18 @@ class TorManagerAndroid(
             when (isTorRequiredCache) {
                 null -> {
 
-                    val persisted = authenticationStorage.getString(TOR_MANAGER_REQUIRED, null)
-
                     torManagerScope.launch {
-                        if (persisted != requiredString) {
-                            torManagerScopeLock.withLock {
+                        requirementChangeLock.withLock {
+                            val persisted = authenticationStorage.getString(TOR_MANAGER_REQUIRED, null)
+
+                            if (persisted != requiredString) {
                                 authenticationStorage.putString(TOR_MANAGER_REQUIRED, requiredString)
+                                isTorRequiredCache = required
                                 synchronizedListeners.dispatchRequirementChange(required)
+                            } else {
+                                isTorRequiredCache = required
                             }
                         }
-
-                        isTorRequiredCache = required
                     }.join()
 
                 }
@@ -257,7 +268,7 @@ class TorManagerAndroid(
                 }
                 else -> {
                     torManagerScope.launch {
-                        torManagerScopeLock.withLock {
+                        requirementChangeLock.withLock {
                             authenticationStorage.putString(TOR_MANAGER_REQUIRED, requiredString)
                             isTorRequiredCache = required
                             synchronizedListeners.dispatchRequirementChange(required)
@@ -270,27 +281,33 @@ class TorManagerAndroid(
 
     override suspend fun isTorRequired(): Boolean? {
         lock.withLock {
-            torManagerScopeLock.withLock {
-                // TODO: Remove `return true` once RelayData class implements RelayUrl
-                //  analysis when persisting the RelayUrl such that it checks for an
-                //  onion address and sets this setting.
-                return true
-//                return isTorRequiredCache ?: authenticationStorage
-//                    .getString(TOR_MANAGER_REQUIRED, null).let { persisted ->
-//                        when (persisted) {
-//                            null -> {
-//                                null
-//                            }
-//                            TRUE -> {
-//                                isTorRequiredCache = true
-//                                true
-//                            }
-//                            else -> {
-//                                isTorRequiredCache = false
-//                                false
-//                            }
-//                        }
-//                    }
+            requirementChangeLock.withLock {
+                return isTorRequiredCache ?: authenticationStorage
+                    .getString(TOR_MANAGER_REQUIRED, null).let { persisted ->
+                        when (persisted) {
+                            null -> {
+                                null
+                            }
+                            TRUE -> {
+                                isTorRequiredCache = true
+                                true
+                            }
+                            else -> {
+                                isTorRequiredCache = false
+                                false
+                            }
+                        }
+                    }
+            }
+        }
+    }
+
+    private inner class SphinxHooks: ServiceExecutionHooks() {
+        override suspend fun executeOnCreateTorService(context: Context) {
+            socksProxyAddressStateFlow.collect { address ->
+                torManagerScope.launch {
+                    synchronizedListeners.dispatchSocksProxyAddressChange(address)
+                }.join()
             }
         }
     }
@@ -341,7 +358,7 @@ class TorManagerAndroid(
 //            .disableStopServiceOnTaskRemoved()
             .setBuildConfigDebug(buildConfigDebug = buildConfigDebug.value)
             .setEventBroadcaster(eventBroadcaster = broadcaster)
-//            .setServiceExecutionHooks()
+            .setServiceExecutionHooks(executionHooks = SphinxHooks())
 //            .useCustomTorConfigFiles()
             .build()
 
