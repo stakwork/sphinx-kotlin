@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="sats">sats</string>
     <string name="new_contact">New Contact</string>
 
@@ -16,11 +16,12 @@
     <string name="material_icon_name_play_button">play_arrow</string>
     <string name="material_icon_name_pause_button">pause</string>
     <string name="material_icon_name_videocam">videocam</string>
+    <string name="material_icon_name_microphone">mic</string>
     <string name="material_icon_name_payment_accepted">check</string>
     <string name="material_icon_name_payment_denied">error_outline</string>
     <string name="material_icon_name_message_editor_send">send</string>
     <string name="material_icon_name_message_editor_attachment">add</string>
-    <string name="material_icon_name_circled_close_button">cancel</string>
+    <string name="material_icon_name_circled_close_button" tools:ignore="ButtonCase">cancel</string>
 
     <!--  Message Action Material Icons  -->
     <string name="material_icon_name_message_action_delete">delete</string>
@@ -31,8 +32,12 @@
     <string name="material_icon_name_message_action_reply">reply</string>
     <string name="material_icon_name_message_action_save_file">file_download</string>
 
+    <!--  Group Action Material Icons  -->
+    <string name="material_icon_name_group_action_accept_join_request">done</string>
+    <string name="material_icon_name_group_action_reject_join_request">close</string>
 
-    <!--  Message Action Labels  -->
+
+    <!--  Message Action Labels -->
     <string name="message_action_label_delete">Delete Message</string>
     <string name="message_action_label_copy_text">Copy Text</string>
     <string name="message_action_label_copy_link">Copy Link</string>
@@ -41,4 +46,9 @@
     <string name="message_action_label_reply">Reply</string>
     <string name="message_action_label_save_file">Save File</string>
     <string name="message_action_label_boost">Boost</string>
+
+
+    <!--  Media Type Labels -->
+    <string name="media_type_label_audio">Audio</string>
+    <string name="media_type_label_video">Video</string>
 </resources>

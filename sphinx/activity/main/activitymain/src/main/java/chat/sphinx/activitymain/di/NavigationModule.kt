@@ -8,6 +8,7 @@ import chat.sphinx.activitymain.navigation.drivers.PrimaryNavigationDriver
 import chat.sphinx.activitymain.navigation.navigators.detail.NewContactNavigatorImpl
 import chat.sphinx.activitymain.navigation.navigators.primary.*
 import chat.sphinx.add_friend.navigation.AddFriendNavigator
+import chat.sphinx.address_book.navigation.AddressBookNavigator
 import chat.sphinx.chat_contact.navigation.ContactChatNavigator
 import chat.sphinx.chat_group.navigation.GroupChatNavigator
 import chat.sphinx.chat_tribe.navigation.TribeChatNavigator
@@ -132,4 +133,10 @@ object NavigationModule {
         tribeChatNavigatorImpl: TribeChatNavigatorImpl
     ): TribeChatNavigator =
         tribeChatNavigatorImpl
+
+    @Provides
+    fun provideAddressBookNavigator(
+        addressBookNavigatorImpl: AddressBookNavigatorImpl
+    ): AddressBookNavigator =
+        addressBookNavigatorImpl
 }

@@ -119,6 +119,10 @@ internal class DashboardViewModel @Inject constructor(
                         }
                     }
 
+                    // compare our old list with new prior to updating it
+                    // to see if this collection is for deletion of a contact.
+                    val contactDeleted = (_contactsStateFlow.value.size + 1 /*account owner*/ ) < contacts.size
+
                     _contactsStateFlow.value = newList.toList()
 
                     // Don't push update to chat view state, let it's collection do it.
@@ -146,10 +150,17 @@ internal class DashboardViewModel @Inject constructor(
 
                             contact?.let {
                                 // if the id of the currently displayed chat is not contained
-                                // in the list collected here, it's a new contact w/o a chat.
+                                // in the list collected here, it's either a new contact w/o
+                                // a chat, or a contact that was deleted which we need to remove
+                                // from the list of chats.
                                 if (!contactIds.contains(it.id)) {
                                     updateChatViewState = true
-                                    currentChats.add(DashboardChat.Inactive.Conversation(contact))
+
+                                    if (contactDeleted) {
+                                        currentChats.remove(chat)
+                                    } else {
+                                        currentChats.add(DashboardChat.Inactive.Conversation(contact))
+                                    }
                                 }
                             }
                         }

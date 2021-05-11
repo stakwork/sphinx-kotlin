@@ -1,4 +1,5 @@
 plugins {
+    id 'app.cash.exhaustive'
     id 'com.android.library'
     id 'dagger.hilt.android.plugin'
     id 'kotlin-android'
@@ -34,7 +35,14 @@ dependencies {
     implementation project(path: ':android:features:android-feature-screens')
 
     // Sphinx
+    implementation project(path: ':sphinx:activity:insetter-activity')
     implementation project(path: ':sphinx:application:common:resources')
+    implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-contact')
+    implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-contact')
+    implementation project(path: ':sphinx:application:data:concepts:concept-image-loader')
+    api project(path: ':sphinx:application:common:logger')
+
+    implementation deps.androidx.recyclerView
 
     implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt
