@@ -8,46 +8,75 @@
     android:visibility="gone"
     tools:background="@color/receivedMsgBG"
     tools:layout_width="200dp"
+    tools:padding="@dimen/default_layout_margin"
     tools:visibility="visible">
 
 
-    <!-- QR Icon -->
-    <androidx.appcompat.widget.AppCompatImageView
-        android:id="@+id/image_view_qr_invite_icon"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:tint="@color/text"
-        app:layout_constraintEnd_toStartOf="@+id/text_view_invoice_amount_number"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/ic_qr_code" />
-
-
-    <!-- Invoice Amount -->
-    <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/text_view_invoice_amount_number"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/default_layout_margin"
-        android:layout_marginRight="@dimen/default_inner_spacing_list_item_title"
-        android:lines="1"
-        android:textColor="@color/text"
-        app:layout_constraintBottom_toBottomOf="@+id/image_view_qr_invite_icon"
-        app:layout_constraintEnd_toStartOf="@+id/text_view_invoice_amount_unit"
-        app:layout_constraintStart_toEndOf="@+id/image_view_qr_invite_icon"
-        tools:text="2000" />
-
-    <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/text_view_invoice_amount_unit"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraint_layout_top_invoice_section"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:lines="1"
-        app:layout_constraintBottom_toBottomOf="@id/text_view_invoice_amount_number"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/text_view_invoice_amount_number"
-        app:layout_constraintTop_toTopOf="@id/text_view_invoice_amount_number"
-        tools:text="sat" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+
+        <!-- Leading QR Icon (For everything except expired received invoices) -->
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/image_view_qr_icon_leading"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:tint="@color/text"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@id/text_view_invoice_amount_number"
+            android:layout_marginEnd="@dimen/chat_message_inner_padding"
+            app:layout_constraintEnd_toStartOf="@+id/text_view_invoice_amount_number"
+            app:layout_constraintStart_toStartOf="parent"
+            app:srcCompat="@drawable/ic_qr_code"
+            tools:visibility="visible" />
+
+
+        <!-- Invoice Amount Number -->
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_invoice_amount_number"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/chat_message_inner_padding"
+            android:lines="1"
+            android:textColor="@color/text"
+            app:layout_constraintEnd_toStartOf="@+id/text_view_invoice_amount_unit"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:layout_editor_absoluteY="5dp"
+            tools:text="2000" />
+
+        <!-- Invoice Amount Unit Label -->
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_invoice_amount_unit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/chat_message_inner_padding"
+            android:lines="1"
+            app:layout_constraintBaseline_toBaselineOf="@id/text_view_invoice_amount_number"
+            app:layout_constraintStart_toEndOf="@+id/text_view_invoice_amount_number"
+            tools:layout_editor_absoluteY="5dp"
+            tools:layout_width="wrap_content"
+            tools:text="sat" />
+
+
+        <!-- Trailing QR Icon (For Expired Sent Invoices) -->
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/image_view_qr_icon_trailing"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginHorizontal="@dimen/chat_message_inner_padding"
+            android:tint="@color/text"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@id/text_view_invoice_amount_unit"
+            app:layout_constraintStart_toEndOf="@+id/text_view_invoice_amount_unit"
+            app:srcCompat="@drawable/ic_qr_code"
+            tools:visibility="gone" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 
     <!-- Optional Invoice Message -->
@@ -58,7 +87,7 @@
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/image_view_qr_invite_icon"
+        app:layout_constraintTop_toBottomOf="@id/constraint_layout_top_invoice_section"
         tools:text="Here's an invoice for you."
         tools:visibility="visible" />
 
@@ -110,3 +139,4 @@
         tools:visibility="visible" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
+
