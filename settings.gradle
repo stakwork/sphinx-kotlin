@@ -1,3 +1,4 @@
+include ':sphinx:test:test-tor-manager'
 rootProject.name = "Sphinx"
 
 ////////////////////////////////

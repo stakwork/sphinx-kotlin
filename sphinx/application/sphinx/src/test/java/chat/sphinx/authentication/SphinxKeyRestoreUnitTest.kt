@@ -13,7 +13,7 @@ import chat.sphinx.feature_crypto_rsa.RSAImpl
 import chat.sphinx.feature_network_tor.TorManagerAndroid
 import chat.sphinx.feature_relay.RelayDataHandlerImpl
 import chat.sphinx.key_restore.KeyRestoreResponse
-import chat.sphinx.logger.SphinxLogger
+import chat.sphinx.test_tor_manager.TestTorManager
 import chat.sphinx.util.SphinxLoggerImpl
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
@@ -96,15 +96,8 @@ class SphinxKeyRestoreUnitTest: CoroutineTestHelper() {
         )
     }
 
-    private val torManagerAndroid: TorManager by lazy {
-        TorManagerAndroid(
-            app,
-            sphinxStorage,
-            BuildConfigDebug(true),
-            BuildConfigVersionCode(1),
-            dispatchers,
-            SphinxLoggerImpl(BuildConfigDebug(true))
-        )
+    private val testTorManager: TorManager by lazy {
+        TestTorManager()
     }
 
     private val relayDataHandler: RelayDataHandlerImpl by lazy {
@@ -113,7 +106,7 @@ class SphinxKeyRestoreUnitTest: CoroutineTestHelper() {
             sphinxManager,
             dispatchers,
             sphinxKeyHandler,
-            torManagerAndroid,
+            testTorManager,
         )
     }
 

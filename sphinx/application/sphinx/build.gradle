@@ -106,6 +106,7 @@ dependencies {
     implementation deps.square.sqlDelightAndroid
 
     testImplementation project(path: ':kotlin:test:test-concept-coroutines')
+    testImplementation project(path: ':sphinx:test:test-tor-manager')
     testImplementation testDeps.robolectric
     testImplementation testDeps.androidx.core
 

@@ -15,4 +15,5 @@ dependencies {
     implementation deps.square.okhttp
 
     testImplementation project(path: ':kotlin:test:test-feature-authentication-core')
+    testImplementation project(path: ':sphinx:test:test-tor-manager')
 }
