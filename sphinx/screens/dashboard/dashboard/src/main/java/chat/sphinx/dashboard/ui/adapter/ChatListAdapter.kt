@@ -276,19 +276,20 @@ internal class ChatListAdapter(
 
                 // Message
                 val messageText = dashboardChat.getMessageText()
-                val lastMessageSeen = dashboardChat.getLastMessageIsSeen()
+                val hastUnseenMessages = dashboardChat.hasUnseenMessages()
 
                 if (messageText == DashboardChat.Active.DECRYPTION_ERROR) {
                     textViewChatHolderMessage.setTextColorExt(R.color.primaryRed)
                 } else {
-                    textViewChatHolderMessage.setTextColorExt(if (lastMessageSeen) R.color.placeholderText else R.color.text)
+                    textViewChatHolderMessage.setTextColorExt(if (hastUnseenMessages) R.color.text else R.color.placeholderText)
                 }
 
-                textViewChatHolderMessage.setTextFont(if (lastMessageSeen) R.font.roboto_regular else R.font.roboto_bold)
+                textViewChatHolderMessage.setTextFont(if (hastUnseenMessages) R.font.roboto_bold else R.font.roboto_regular)
 
                 textViewChatHolderMessage.text = messageText
 
-                textViewBadgeCount.invisibleIfFalse(!lastMessageSeen)
+                textViewBadgeCount.text = dashboardChat.getUnseenMessagesCount().toString()
+                textViewBadgeCount.invisibleIfFalse(hastUnseenMessages)
 
                 // Notification
                 if (dashboardChat is DashboardChat.Active) {

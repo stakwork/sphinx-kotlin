@@ -182,6 +182,13 @@ UPDATE messageDbo
 SET seen = :seen
 WHERE chat_id = ?;
 
+chatGetUnseenReceivedMessagesCount:
+SELECT COUNT(*)
+FROM messageDbo
+WHERE sender != :ownerId
+AND seen = 0
+AND chat_id = ?;
+
 CREATE TABLE contactDbo(
     id                          INTEGER         AS ContactId NOT NULL PRIMARY KEY,
     route_hint                  TEXT            AS LightningRouteHint,

@@ -22,7 +22,9 @@ sealed class DashboardChat {
 
     abstract fun getMessageText(): String
 
-    abstract fun getLastMessageIsSeen(): Boolean
+    abstract fun hasUnseenMessages(): Boolean
+
+    abstract fun getUnseenMessagesCount(): Long
 
     sealed class Active: DashboardChat() {
 
@@ -46,9 +48,14 @@ sealed class DashboardChat {
 
         abstract fun getMessageSender(message: Message, withColon: Boolean = true): String
 
-        override fun getLastMessageIsSeen(): Boolean {
-            val message: Message? = message
-            return message?.seen?.isTrue() ?: true
+        override fun hasUnseenMessages(): Boolean {
+            val lastMessageSeen = message?.seen?.isTrue() ?: true
+            val chatSeen = chat?.seen.isTrue() ?: true
+            return !lastMessageSeen && !chatSeen
+        }
+
+        override fun getUnseenMessagesCount(): Long {
+            return 0
         }
 
         @ExperimentalStdlibApi
@@ -239,8 +246,12 @@ sealed class DashboardChat {
                 return ""
             }
 
-            override fun getLastMessageIsSeen(): Boolean {
-                return true
+            override fun hasUnseenMessages(): Boolean {
+                return false
+            }
+
+            override fun getUnseenMessagesCount(): Long {
+                return 0
             }
 
         }

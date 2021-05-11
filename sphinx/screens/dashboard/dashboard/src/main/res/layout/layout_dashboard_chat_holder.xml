@@ -28,8 +28,8 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="51dp"
-            android:layout_height="51dp"
+            android:layout_width="52dp"
+            android:layout_height="52dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -44,7 +44,6 @@
                 android:fontFamily="@font/roboto_medium"
                 android:textSize="10sp"
                 android:textColor="@android:color/white"
-                android:text="1"
                 tools:text="990"
                 android:background="@drawable/chat_initials_circle"
                 android:backgroundTint="@color/badgeRed"
@@ -69,7 +68,7 @@
             android:ellipsize="end"
             android:fontFamily="@font/roboto_regular"
             android:gravity="center_vertical|start"
-            android:paddingTop="22dp"
+            android:paddingTop="19dp"
             android:singleLine="true"
             android:textColor="@color/primaryText"
             android:textSize="17sp"
@@ -100,7 +99,7 @@
             android:ellipsize="end"
             android:fontFamily="@font/roboto_regular"
             android:gravity="center_vertical"
-            android:paddingBottom="18dp"
+            android:paddingBottom="15dp"
             android:singleLine="true"
             android:textColor="@color/secondaryText"
             android:textSize="14sp"

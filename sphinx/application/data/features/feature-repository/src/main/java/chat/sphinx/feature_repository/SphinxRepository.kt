@@ -157,15 +157,25 @@ class SphinxRepository(
 
                                 queries.upsertMessage(msg.dto)
 
-                                msg.dto.chat_id?.let { nnChatId ->
+                                var chatId: ChatId? = null
 
-                                    if (msg.dto.updateChatDboLatestMessage) {
+                                msg.dto.chat?.let { chatDto ->
+                                    queries.upsertChat(chatDto, moshi)
+
+                                    chatId = ChatId(chatDto.id)
+                                }
+
+                                msg.dto.chat_id?.let { nnChatId ->
+                                    chatId = ChatId(nnChatId)
+                                }
+
+                                chatId?.let {  id ->
+                                    if (msg.dto.updateChatDboLatestMessage){
                                         queries.chatUpdateLatestMessage(
                                             MessageId(msg.dto.id),
-                                            ChatId(nnChatId)
+                                            id
                                         )
                                     }
-
                                 }
                             }
                         }
