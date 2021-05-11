@@ -8,6 +8,12 @@ inline fun String.toLightningNodePubKey(): LightningNodePubKey? =
         null
     }
 
+inline val LightningNodePubKey.isValid: Boolean
+        get() {
+            return !this.value.isNullOrBlank() &&
+                    this.value.matches("^[A-F0-9a-f]{66}\$".toRegex())
+        }
+
 inline class LightningNodePubKey(val value: String) {
     init {
         require(value.isNotEmpty()) {

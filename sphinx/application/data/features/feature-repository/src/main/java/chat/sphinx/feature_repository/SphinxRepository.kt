@@ -6,6 +6,7 @@ import chat.sphinx.concept_crypto_rsa.RSA
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
 import chat.sphinx.concept_network_query_chat.model.ChatDto
 import chat.sphinx.concept_network_query_contact.NetworkQueryContact
+import chat.sphinx.concept_network_query_contact.model.ContactDto
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_lightning.model.balance.BalanceDto
 import chat.sphinx.concept_network_query_message.NetworkQueryMessage
@@ -39,10 +40,14 @@ import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.chat.ChatId
 import chat.sphinx.wrapper_common.contact.ContactId
 import chat.sphinx.wrapper_common.invite.InviteId
+import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
+import chat.sphinx.wrapper_common.lightning.LightningRouteHint
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessagePagination
 import chat.sphinx.wrapper_common.toDateTime
 import chat.sphinx.wrapper_contact.Contact
+import chat.sphinx.wrapper_contact.ContactAlias
+import chat.sphinx.wrapper_contact.ContactStatus
 import chat.sphinx.wrapper_invite.Invite
 import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_message.*
@@ -352,7 +357,7 @@ class SphinxRepository(
                                     for (dto in loadResponse.value.contacts) {
                                         queries.upsertContact(dto)
 
-                                        contactIdsToRemove.remove(ContactId(dto.id))
+                                        contactIdsToRemove.remove(ContactId(dto.id!!))
                                     }
 
                                     for (id in contactIdsToRemove) {
@@ -425,6 +430,48 @@ class SphinxRepository(
         }
 
         return response
+    }
+
+    override fun createContact(
+        contactAlias: ContactAlias,
+        lightningNodePubKey: LightningNodePubKey,
+        lightningRouteHint: LightningRouteHint,
+    ): Flow<LoadResponse<Any, ResponseError>> = flow {
+        val queries = coreDB.getSphinxDatabaseQueries()
+
+        val contactDto = ContactDto(
+            alias = contactAlias.value,
+            public_key = lightningNodePubKey.value,
+            route_hint = lightningRouteHint.value,
+            status = ContactStatus.Confirmed.value
+        )
+
+        networkQueryContact.createContact(contactDto).collect { loadResponse ->
+            @Exhaustive
+            when (loadResponse) {
+                LoadResponse.Loading -> {
+                    LOG.d("SphinxRepo", "LOADING./../")
+                    emit(loadResponse)
+                }
+                is Response.Error -> {
+                    LOG.d("SphinxRepo", "ERROR./../")
+                    emit(loadResponse)
+                }
+                is Response.Success -> {
+                    LOG.d("SphinxRepo", "SUCCESS./../")
+                    contactLock.withLock {
+                        withContext(dispatchers.io) {
+                            queries.transaction {
+                                val dto = loadResponse.value.contact
+                                queries.upsertContact(dto)
+
+//                                this@flow.emit(Response.Success(true))
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     /////////////////

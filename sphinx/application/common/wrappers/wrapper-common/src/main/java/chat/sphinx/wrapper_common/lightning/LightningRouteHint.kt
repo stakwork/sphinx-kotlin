@@ -8,6 +8,12 @@ inline fun String.toLightningRouteHint(): LightningRouteHint? =
         null
     }
 
+inline val LightningRouteHint.isValid: Boolean
+    get() {
+        return !this.value.isNullOrBlank() &&
+                this.value.matches("^[A-F0-9a-f]{66}:[0-9]+\$".toRegex())
+    }
+
 inline class LightningRouteHint(val value: String) {
     init {
         require(value.isNotEmpty()) {

@@ -1,5 +1,7 @@
 package chat.sphinx.concept_network_query_contact
 
+import chat.sphinx.concept_network_query_contact.model.ContactDto
+import chat.sphinx.concept_network_query_contact.model.CreateContactResponse
 import chat.sphinx.concept_network_query_contact.model.GetContactsResponse
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.kotlin_response.LoadResponse
@@ -35,6 +37,11 @@ abstract class NetworkQueryContact {
 //    app.post('/contacts/tokens', contacts.generateToken)
 //    app.post('/contacts/:id/keys', contacts.exchangeKeys)
 //    app.post('/contacts', contacts.createContact)
+
+    abstract fun createContact(
+        contact: ContactDto,
+        relayData: Pair<AuthorizationToken, RelayUrl>? = null
+    ): Flow<LoadResponse<CreateContactResponse, ResponseError>>
 
     //////////////
     /// DELETE ///
