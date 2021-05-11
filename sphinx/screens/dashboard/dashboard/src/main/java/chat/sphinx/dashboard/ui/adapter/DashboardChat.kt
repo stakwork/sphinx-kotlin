@@ -2,10 +2,7 @@ package chat.sphinx.dashboard.ui.adapter
 
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.isConversation
-import chat.sphinx.wrapper_common.DateTime
-import chat.sphinx.wrapper_common.PhotoUrl
-import chat.sphinx.wrapper_common.hhmmElseDate
-import chat.sphinx.wrapper_common.time
+import chat.sphinx.wrapper_common.*
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message.media.MediaType
@@ -24,6 +21,8 @@ sealed class DashboardChat {
     abstract fun getDisplayTime(today00: DateTime): String
 
     abstract fun getMessageText(): String
+
+    abstract fun getLastMessageIsSeen(): Boolean
 
     sealed class Active: DashboardChat() {
 
@@ -46,6 +45,11 @@ sealed class DashboardChat {
             message.sender == chat.contactIds.firstOrNull()
 
         abstract fun getMessageSender(message: Message, withColon: Boolean = true): String
+
+        override fun getLastMessageIsSeen(): Boolean {
+            val message: Message? = message
+            return message?.seen?.isTrue() ?: true
+        }
 
         @ExperimentalStdlibApi
         override fun getMessageText(): String {
@@ -233,6 +237,10 @@ sealed class DashboardChat {
 
             override fun getMessageText(): String {
                 return ""
+            }
+
+            override fun getLastMessageIsSeen(): Boolean {
+                return true
             }
 
         }

@@ -7,25 +7,60 @@
     android:layout_height="@dimen/recycler_view_holder_height"
     android:background="@color/headerBG"
     android:elevation="4dp"
-    android:paddingStart="16dp"
     tools:ignore="RtlSymmetry">
 
-    <include
-        android:id="@+id/layout_dashboard_chat_initial_holder"
-        layout="@layout/layout_chat_image_initial_holder"
-        android:layout_width="@dimen/default_chat_initial_image_xy"
-        android:layout_height="@dimen/default_chat_initial_image_xy"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_dashboard_chat_avatar_holder"
+        android:layout_width="78dp"
+        android:layout_height="90dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent">
+
+        <include
+            android:id="@+id/layout_dashboard_chat_initial_holder"
+            layout="@layout/layout_chat_image_initial_holder"
+            android:layout_width="@dimen/default_chat_initial_image_xy"
+            android:layout_height="@dimen/default_chat_initial_image_xy"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="51dp"
+            android:layout_height="51dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_view_badge_count"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingLeft="4dp"
+                android:paddingRight="4dp"
+                android:fontFamily="@font/roboto_medium"
+                android:textSize="10sp"
+                android:textColor="@android:color/white"
+                android:text="1"
+                tools:text="990"
+                android:background="@drawable/chat_initials_circle"
+                android:backgroundTint="@color/badgeRed"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"/>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/layout_constraint_dashboard_chat_holder_content"
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_marginStart="@dimen/default_layout_margin"
         app:layout_constraintEnd_toStartOf="@+id/layout_constraint_chat_holder_details"
-        app:layout_constraintStart_toEndOf="@+id/layout_dashboard_chat_initial_holder">
+        app:layout_constraintStart_toEndOf="@+id/layout_dashboard_chat_avatar_holder">
 
         <TextView
             android:id="@+id/text_view_chat_holder_name"

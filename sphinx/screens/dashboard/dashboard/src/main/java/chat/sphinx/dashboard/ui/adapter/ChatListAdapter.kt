@@ -18,6 +18,7 @@ import chat.sphinx.dashboard.ui.collectChatViewState
 import chat.sphinx.dashboard.ui.currentChatViewState
 import chat.sphinx.resources.setBackgroundRandomColor
 import chat.sphinx.resources.setTextColorExt
+import chat.sphinx.resources.setTextFont
 import chat.sphinx.wrapper_chat.*
 import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_common.util.getInitials
@@ -29,6 +30,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.*
 import kotlin.collections.ArrayList
+
 
 internal class ChatListAdapter(
     private val imageLoader: ImageLoader<ImageView>,
@@ -274,12 +276,19 @@ internal class ChatListAdapter(
 
                 // Message
                 val messageText = dashboardChat.getMessageText()
+                val lastMessageSeen = dashboardChat.getLastMessageIsSeen()
 
                 if (messageText == DashboardChat.Active.DECRYPTION_ERROR) {
                     textViewChatHolderMessage.setTextColorExt(R.color.primaryRed)
+                } else {
+                    textViewChatHolderMessage.setTextColorExt(if (lastMessageSeen) R.color.placeholderText else R.color.text)
                 }
 
+                textViewChatHolderMessage.setTextFont(if (lastMessageSeen) R.font.roboto_regular else R.font.roboto_bold)
+
                 textViewChatHolderMessage.text = messageText
+
+                textViewBadgeCount.invisibleIfFalse(!lastMessageSeen)
 
                 // Notification
                 if (dashboardChat is DashboardChat.Active) {
