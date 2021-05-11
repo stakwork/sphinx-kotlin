@@ -116,6 +116,13 @@
             tools:visibility="gone" />
 
 
+        <!--  Invoice Message  -->
+        <include
+            android:id="@+id/include_message_type_invoice"
+            layout="@layout/layout_message_type_invoice"
+            tools:visibility="gone" />
+
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 
