@@ -357,7 +357,7 @@ class SphinxRepository(
                                     for (dto in loadResponse.value.contacts) {
                                         queries.upsertContact(dto)
 
-                                        contactIdsToRemove.remove(ContactId(dto.id!!))
+                                        contactIdsToRemove.remove(ContactId(dto.id))
                                     }
 
                                     for (id in contactIdsToRemove) {
