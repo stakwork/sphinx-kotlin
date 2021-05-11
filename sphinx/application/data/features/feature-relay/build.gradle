@@ -4,9 +4,16 @@ plugins {
 }
 
 dependencies {
-    api project(path: ':sphinx:application:data:concepts:concept-relay')
+    // KotlinAndroid
     implementation project(path: ':kotlin:crypto:k-openssl')
     implementation project(path: ':kotlin:features:authentication:feature-authentication-core')
 
+    // Sphinx
+    api project(path: ':sphinx:application:data:concepts:concept-relay')
+    api project(path: ':sphinx:application:network:concepts:tor:concept-network-tor')
+
+    implementation deps.square.okhttp
+
     testImplementation project(path: ':kotlin:test:test-feature-authentication-core')
+    testImplementation project(path: ':sphinx:test:test-tor-manager')
 }

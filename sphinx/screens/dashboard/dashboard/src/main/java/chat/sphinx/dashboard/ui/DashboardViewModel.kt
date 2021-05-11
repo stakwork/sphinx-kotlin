@@ -248,9 +248,11 @@ internal class DashboardViewModel @Inject constructor(
 
     init {
         viewModelScope.launch(dispatchers.mainImmediate) {
-            // TODO: Move to Service and observe state instead
-            //  to reflect changes on UI
-            socketIOManager.connect()
+            socketIOManager.socketIOStateFlow.collect { state ->
+                if (state is SocketIOState.Uninitialized) {
+                    socketIOManager.connect()
+                }
+            }
         }
     }
 

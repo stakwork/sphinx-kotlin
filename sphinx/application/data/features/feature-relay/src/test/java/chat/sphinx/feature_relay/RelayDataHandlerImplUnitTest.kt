@@ -2,8 +2,8 @@ package chat.sphinx.feature_relay
 
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.concept_relay.RelayDataHandler
+import chat.sphinx.test_tor_manager.TestTorManager
 import chat.sphinx.wrapper_relay.RelayUrl
-import io.matthewnelson.k_openssl.KOpenSSL
 import io.matthewnelson.k_openssl.isSalted
 import io.matthewnelson.test_feature_authentication_core.AuthenticationCoreDefaultsTestHelper
 import kotlinx.coroutines.test.runBlockingTest
@@ -22,7 +22,8 @@ class RelayDataHandlerImplUnitTest: AuthenticationCoreDefaultsTestHelper() {
             testStorage,
             testCoreManager,
             dispatchers,
-            testHandler
+            testHandler,
+            TestTorManager()
         )
     }
 

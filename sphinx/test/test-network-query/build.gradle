@@ -19,6 +19,8 @@ dependencies {
     api project(path: ':sphinx:application:network:features:feature-network-client')
     api project(path: ':sphinx:application:network:features:feature-network-relay-call')
 
+    api project(path: ':sphinx:test:test-tor-manager')
+
     api deps.square.moshi
 
     api deps.jncryptor

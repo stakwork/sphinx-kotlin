@@ -20,6 +20,7 @@ abstract class NetworkCall {
         url: String,
         responseJsonClass: Class<T>,
         headers: Map<String, String>? = null,
+        useExtendedNetworkCallClient: Boolean = false,
     ): Flow<LoadResponse<T, ResponseError>>
 
     /**
