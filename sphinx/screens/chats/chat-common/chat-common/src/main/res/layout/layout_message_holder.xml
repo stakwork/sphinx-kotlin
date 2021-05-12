@@ -15,17 +15,16 @@
         android:layout_height="@dimen/message_holder_in_photo_holder_xy"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/text_view_message_holder_time"
+
+    <!-- Status Header -->
+    <include
+        android:id="@+id/include_message_status_header"
+        layout="@layout/layout_message_status_header"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:textColor="@color/textInverted"
-        android:visibility="gone"
-        app:layout_constraintEnd_toStartOf="@+id/space_message_holder_right"
-        app:layout_constraintStart_toEndOf="@+id/space_message_holder_left"
         app:layout_constraintTop_toTopOf="parent"
-        tools:text="12:45 PM"
-        tools:visibility="visible" />
+        app:layout_constraintStart_toStartOf="@id/include_message_holder_message_types"
+        app:layout_constraintEnd_toEndOf="@id/include_message_holder_message_types" />
 
     <!-- width is programmatically set depending on sender -->
     <Space
@@ -52,7 +51,7 @@
         android:layout_height="wrap_content"
         app:layout_constraintEnd_toStartOf="@+id/space_message_holder_right"
         app:layout_constraintStart_toEndOf="@+id/space_message_holder_left"
-        app:layout_constraintTop_toBottomOf="@+id/text_view_message_holder_time" />
+        app:layout_constraintTop_toBottomOf="@+id/include_message_status_header" />
 
 
     <!--  Optional "New Day" Separator  -->
@@ -63,7 +62,7 @@
         android:layout_height="wrap_content"
         app:layout_constraintEnd_toStartOf="@+id/space_message_holder_right"
         app:layout_constraintStart_toEndOf="@+id/space_message_holder_left"
-        app:layout_constraintTop_toBottomOf="@+id/text_view_message_holder_time" />
+        app:layout_constraintTop_toBottomOf="@+id/include_message_status_header" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
