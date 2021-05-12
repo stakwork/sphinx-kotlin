@@ -13,4 +13,7 @@
     <dimen name="new_contact_scan_icon_bottom_margin">5dp</dimen>
     <dimen name="new_contact_scan_icon_width">21dp</dimen>
     <dimen name="new_contact_scan_icon_height">17dp</dimen>
+    <dimen name="save_progress_bar_width">25dp</dimen>
+    <dimen name="save_progress_bar_height">25dp</dimen>
+    <dimen name="save_progress_bar_margin_left">10dp</dimen>
 </resources>

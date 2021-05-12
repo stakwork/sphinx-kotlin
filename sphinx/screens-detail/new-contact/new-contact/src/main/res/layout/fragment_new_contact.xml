@@ -244,6 +244,20 @@
             android:background="@drawable/button_background_white_rad_48"
             android:backgroundTint="@color/primaryBlue"/>
 
+        <ProgressBar
+            android:layout_width="@dimen/save_progress_bar_width"
+            android:layout_height="@dimen/save_progress_bar_height"
+            android:layout_marginLeft="@dimen/save_progress_bar_margin_left"
+            android:id="@+id/new_contact_save_progress"
+            style="?android:attr/progressBarStyle"
+            android:indeterminateTint="@android:color/white"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:indeterminate="true"
+            android:visibility="gone"
+            />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

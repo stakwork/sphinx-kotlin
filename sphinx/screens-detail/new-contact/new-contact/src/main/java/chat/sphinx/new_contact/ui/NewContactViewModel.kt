@@ -27,7 +27,7 @@ internal class NewContactViewModel @Inject constructor(
     fun addContact(
         contactAlias: ContactAlias,
         lightningNodePubKey: LightningNodePubKey,
-        lightningRouteHint: LightningRouteHint,
+        lightningRouteHint: LightningRouteHint?,
     ) {
         viewModelScope.launch(dispatchers.mainImmediate) {
             contactRepository.createContact(
@@ -37,19 +37,14 @@ internal class NewContactViewModel @Inject constructor(
             ).collect { loadResponse ->
                 @Exhaustive
                 when(loadResponse) {
-                    LoadResponse.Loading -> {
-                        Log.d("TEST", "LOADING...")
-                    }
-                    is Response.Error -> {
-                        Log.d("TEST", "ERROR...")
-                    }
-                    is Response.Success -> {
-                        Log.d("TEST", "SUCCESS...")
-                    }
+                    LoadResponse.Loading ->
+                        viewStateContainer.updateViewState(NewContactViewState.Saving)
+                    is Response.Error ->
+                        viewStateContainer.updateViewState(NewContactViewState.Error)
+                    is Response.Success ->
+                        viewStateContainer.updateViewState(NewContactViewState.Saved)
                 }
             }
-
-            Log.d("TEST", "|||||=======>>>>>")
         }
     }
 }

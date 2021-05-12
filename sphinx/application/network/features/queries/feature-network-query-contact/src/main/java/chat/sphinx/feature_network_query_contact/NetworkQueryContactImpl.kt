@@ -52,7 +52,7 @@ class NetworkQueryContactImpl(
     override fun createContact(
         contact: ContactDto,
         relayData: Pair<AuthorizationToken, RelayUrl>?
-    ): Flow<LoadResponse<CreateContactResponse, ResponseError>> =
+    ): Flow<LoadResponse<ContactDto, ResponseError>> =
         networkRelayCall.relayPost(
             responseJsonClass = CreateContactRelayResponse::class.java,
             relayEndpoint = ENDPOINT_CREATE_CONTACT,

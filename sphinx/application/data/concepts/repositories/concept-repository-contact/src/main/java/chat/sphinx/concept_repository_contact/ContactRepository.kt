@@ -31,6 +31,6 @@ interface ContactRepository {
     fun createContact(
         contactAlias: ContactAlias,
         lightningNodePubKey: LightningNodePubKey,
-        lightningRouteHint: LightningRouteHint,
+        lightningRouteHint: LightningRouteHint?,
     ): Flow<LoadResponse<Any, ResponseError>>
 }

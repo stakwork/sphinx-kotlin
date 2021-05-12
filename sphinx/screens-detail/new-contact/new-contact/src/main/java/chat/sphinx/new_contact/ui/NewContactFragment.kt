@@ -1,7 +1,9 @@
 package chat.sphinx.new_contact.ui
 
+import android.opengl.Visibility
 import android.os.Bundle
 import android.view.View
+import android.widget.ProgressBar
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import by.kirich1409.viewbindingdelegate.viewBinding
@@ -31,7 +33,22 @@ internal class NewContactFragment : BaseFragment<
     override val binding: FragmentNewContactBinding by viewBinding(FragmentNewContactBinding::bind)
 
     override suspend fun onViewStateFlowCollect(viewState: NewContactViewState) {
-//        TODO("Not yet implemented")
+        when (viewState) {
+            is NewContactViewState.Saving -> {
+                binding.newContactSaveProgress.visibility = View.VISIBLE
+            }
+
+            is NewContactViewState.Saved -> {
+                binding.newContactSaveProgress.visibility = View.GONE
+
+                viewModel.navigator.popBackStack()
+                viewModel.navigator.popBackStack()
+            }
+
+            is NewContactViewState.Error -> {
+                binding.newContactSaveProgress.visibility = View.GONE
+            }
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -68,7 +85,7 @@ internal class NewContactFragment : BaseFragment<
             }
 
             val lightningNodePubKey = LightningNodePubKey(pubkey)
-            val lightningRouteHint = LightningRouteHint(routeHint)
+            var lightningRouteHint: LightningRouteHint? = null
 
             if (!lightningNodePubKey.isValid) {
                 ToastUtils().show(
@@ -78,15 +95,17 @@ internal class NewContactFragment : BaseFragment<
                 return@setOnClickListener
             }
 
-            if (!routeHint.isNullOrBlank() && !lightningRouteHint.isValid) {
-                ToastUtils().show(
-                    binding.root.context,
-                    R.string.new_contact_invalid_pubkey_error
-                )
+            if (!routeHint.isNullOrBlank()) {
+                lightningRouteHint = LightningRouteHint(routeHint)
+
+                if (!lightningRouteHint.isValid) {
+                    ToastUtils().show(
+                        binding.root.context,
+                        R.string.new_contact_invalid_pubkey_error
+                    )
+                }
                 return@setOnClickListener
             }
-
-            ToastUtils().show(binding.root.context,  "Adding Contact")
 
             viewModel.addContact(ContactAlias(nickname), lightningNodePubKey, lightningRouteHint)
         }

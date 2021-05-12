@@ -7,6 +7,7 @@ import chat.sphinx.concept_network_query_chat.NetworkQueryChat
 import chat.sphinx.concept_network_query_chat.model.ChatDto
 import chat.sphinx.concept_network_query_contact.NetworkQueryContact
 import chat.sphinx.concept_network_query_contact.model.ContactDto
+import chat.sphinx.concept_network_query_invite.model.InviteDto
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_lightning.model.balance.BalanceDto
 import chat.sphinx.concept_network_query_message.NetworkQueryMessage
@@ -435,40 +436,52 @@ class SphinxRepository(
     override fun createContact(
         contactAlias: ContactAlias,
         lightningNodePubKey: LightningNodePubKey,
-        lightningRouteHint: LightningRouteHint,
+        lightningRouteHint: LightningRouteHint?,
     ): Flow<LoadResponse<Any, ResponseError>> = flow {
         val queries = coreDB.getSphinxDatabaseQueries()
 
         val contactDto = ContactDto(
             alias = contactAlias.value,
             public_key = lightningNodePubKey.value,
-            route_hint = lightningRouteHint.value,
-            status = ContactStatus.Confirmed.value
+            route_hint = lightningRouteHint?.value,
+            status = ContactStatus.Confirmed.value,
+            id = 0,
+            node_alias = null,
+            photo_url = null,
+            private_photo = null,
+            is_owner = null,
+            deleted = false,
+            auth_token = null,
+            contact_key = null,
+            device_id = null,
+            created_at = "",
+            updated_at = "",
+            from_group = null,
+            notification_sound = null,
+            tip_amount = null,
+            invite = null
         )
 
         networkQueryContact.createContact(contactDto).collect { loadResponse ->
             @Exhaustive
             when (loadResponse) {
                 LoadResponse.Loading -> {
-                    LOG.d("SphinxRepo", "LOADING./../")
                     emit(loadResponse)
                 }
                 is Response.Error -> {
-                    LOG.d("SphinxRepo", "ERROR./../")
                     emit(loadResponse)
                 }
                 is Response.Success -> {
-                    LOG.d("SphinxRepo", "SUCCESS./../")
                     contactLock.withLock {
                         withContext(dispatchers.io) {
                             queries.transaction {
-                                val dto = loadResponse.value.contact
+                                val dto = loadResponse.value
                                 queries.upsertContact(dto)
-
-//                                this@flow.emit(Response.Success(true))
                             }
                         }
                     }
+
+                    emit(Response.Success(true))
                 }
             }
         }

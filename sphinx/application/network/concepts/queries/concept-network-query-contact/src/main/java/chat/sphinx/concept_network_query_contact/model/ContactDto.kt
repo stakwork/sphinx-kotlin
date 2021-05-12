@@ -21,7 +21,7 @@ data class ContactDto(
     val device_id: String?,
     val created_at: String,
     val updated_at: String,
-    val from_group: Any,
+    val from_group: Any?,
     val notification_sound: String?,
 //    val last_active: String?,
     val tip_amount: Long?,

@@ -41,7 +41,7 @@ abstract class NetworkQueryContact {
     abstract fun createContact(
         contact: ContactDto,
         relayData: Pair<AuthorizationToken, RelayUrl>? = null
-    ): Flow<LoadResponse<CreateContactResponse, ResponseError>>
+    ): Flow<LoadResponse<ContactDto, ResponseError>>
 
     //////////////
     /// DELETE ///
