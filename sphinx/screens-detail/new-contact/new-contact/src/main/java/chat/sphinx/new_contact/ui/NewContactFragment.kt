@@ -2,6 +2,8 @@ package chat.sphinx.new_contact.ui
 
 import android.opengl.Visibility
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.View
 import android.widget.ProgressBar
 import androidx.fragment.app.viewModels
@@ -71,6 +73,38 @@ internal class NewContactFragment : BaseFragment<
             )
         }
 
+        binding.newContactAddressField.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+            }
+
+            override fun afterTextChanged(s: Editable?) {
+                binding.newContactAddressField.removeTextChangedListener(this)
+
+                pastePubKey(s)
+
+                binding.newContactAddressField.addTextChangedListener(this)
+            }
+        })
+
+        binding.newContactRouteHintField.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+            }
+
+            override fun afterTextChanged(s: Editable?) {
+                binding.newContactRouteHintField.removeTextChangedListener(this)
+
+                pastePubKey(s)
+
+                binding.newContactRouteHintField.addTextChangedListener(this)
+            }
+        })
+
         binding.buttonAlreadyOnSphinx.setOnClickListener {
             var pubkey = binding.newContactAddressField.text.toString().trim()
             var nickname = binding.newContactNicknameField.text.toString().trim()
@@ -113,4 +147,15 @@ internal class NewContactFragment : BaseFragment<
         (requireActivity() as InsetterActivity).addNavigationBarPadding(binding.layoutConstraintNewContact)
     }
 
+    private fun pastePubKey(s: Editable?) {
+        if (!s.toString().trim().matches("^[A-F0-9a-f]{66}:[A-F0-9a-f]{66}:[0-9]+\$".toRegex())) {
+            return
+        }
+
+        s?.let {
+            val splitText = it.trim().split(":")
+            binding.newContactAddressField.setText(splitText[0])
+            binding.newContactRouteHintField.setText("${splitText[1]}:${splitText[2]}")
+        }
+    }
 }
