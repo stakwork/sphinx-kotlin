@@ -6,6 +6,7 @@ import chat.sphinx.wrapper_common.*
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message.media.MediaType
+import kotlinx.coroutines.flow.Flow
 
 /**
  * [DashboardChat]s are separated into 2 categories:
@@ -17,6 +18,8 @@ sealed class DashboardChat {
     abstract val chatName: String?
     abstract val photoUrl: PhotoUrl?
     abstract val sortBy: Long
+
+    abstract val unseenMessageFlow: Flow<Long?>?
 
     abstract fun getDisplayTime(today00: DateTime): String
 
@@ -166,6 +169,7 @@ sealed class DashboardChat {
             override val chat: Chat,
             override val message: Message?,
             val contact: Contact,
+            override val unseenMessageFlow: Flow<Long?>,
         ): Active() {
 
             init {
@@ -198,6 +202,7 @@ sealed class DashboardChat {
         class GroupOrTribe(
             override val chat: Chat,
             override val message: Message?,
+            override val unseenMessageFlow: Flow<Long?>,
         ): Active() {
 
             override val chatName: String?
@@ -241,6 +246,8 @@ sealed class DashboardChat {
 
             override val sortBy: Long
                 get() = contact.createdAt.time
+            override val unseenMessageFlow: Flow<Long?>?
+                get() = null
 
             override fun getMessageText(): String {
                 return ""
