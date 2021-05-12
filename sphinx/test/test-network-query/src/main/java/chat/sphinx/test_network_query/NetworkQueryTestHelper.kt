@@ -8,6 +8,7 @@ import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_message.NetworkQueryMessage
 import chat.sphinx.concept_network_query_subscription.NetworkQuerySubscription
 import chat.sphinx.concept_network_relay_call.NetworkRelayCall
+import chat.sphinx.concept_network_tor.*
 import chat.sphinx.concept_relay.RelayDataHandler
 import chat.sphinx.feature_network_client.NetworkClientImpl
 import chat.sphinx.feature_network_query_chat.NetworkQueryChatImpl
@@ -20,6 +21,7 @@ import chat.sphinx.feature_network_relay_call.NetworkRelayCallImpl
 import chat.sphinx.feature_relay.RelayDataHandlerImpl
 import chat.sphinx.logger.LogType
 import chat.sphinx.logger.SphinxLogger
+import chat.sphinx.test_tor_manager.TestTorManager
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
 import com.squareup.moshi.Moshi
@@ -104,6 +106,10 @@ abstract class NetworkQueryTestHelper: AuthenticationCoreDefaultsTestHelper() {
         }
     }
 
+    private val testTorManager: TorManager by lazy {
+        TestTorManager()
+    }
+
     protected data class Credentials(
         val privKey: String,
         val pubKey: String,
@@ -163,6 +169,8 @@ abstract class NetworkQueryTestHelper: AuthenticationCoreDefaultsTestHelper() {
             // true will add interceptors to the OkHttpClient
             BuildConfigDebug(useLoggingInterceptors),
             okHttpCache,
+            dispatchers,
+            testTorManager,
             testLogger,
         )
     }
@@ -172,7 +180,8 @@ abstract class NetworkQueryTestHelper: AuthenticationCoreDefaultsTestHelper() {
             testStorage,
             testCoreManager,
             dispatchers,
-            testHandler
+            testHandler,
+            testTorManager,
         )
     }
 
