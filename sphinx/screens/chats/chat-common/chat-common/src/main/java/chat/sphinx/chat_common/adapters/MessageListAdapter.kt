@@ -6,22 +6,15 @@ import android.widget.ImageView
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import chat.sphinx.chat_common.R
 import chat.sphinx.chat_common.ui.ChatViewModel
 import chat.sphinx.chat_common.databinding.LayoutMessageHolderBinding
-import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
-import chat.sphinx.chat_common.ui.viewstate.messageholder.HolderBackground
 import chat.sphinx.chat_common.ui.viewstate.messageholder.MessageHolderViewState
+import chat.sphinx.chat_common.ui.viewstate.messageholder.setDirectPaymentLayout
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
-import chat.sphinx.concept_image_loader.ImageLoaderOptions
-import chat.sphinx.concept_image_loader.Transformation
-import chat.sphinx.resources.setBackgroundRandomColor
 import chat.sphinx.wrapper_view.Px
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
-import io.matthewnelson.android_feature_screens.util.invisibleIfFalse
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisorScope
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -132,9 +125,10 @@ class MessageListAdapter(
         private var disposable: Disposable? = null
 
         fun bind(position: Int) {
+            val viewState = messages.elementAtOrNull(position) ?: return
+            disposable?.dispose()
+
             binding.apply {
-                val viewState = messages.elementAtOrNull(position) ?: return
-                disposable?.dispose()
 
                 supervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
                     disposable = viewState.initialHolder.setInitialHolder(
@@ -152,6 +146,8 @@ class MessageListAdapter(
                 } ?: includeMessageHolderMessageTypes.includeMessageTypeMessage.root.goneIfFalse(false)
 
                 viewState.background.setBackground(recyclerViewWidth, binding)
+
+                setDirectPaymentLayout(viewState.directPayment)
             }
         }
 
