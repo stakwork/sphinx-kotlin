@@ -182,7 +182,7 @@ UPDATE messageDbo
 SET seen = :seen
 WHERE chat_id = ?;
 
-chatGetUnseenReceivedMessagesCount:
+chatGetUnseenIncomingMessagesCount:
 SELECT COUNT(*)
 FROM messageDbo
 WHERE sender != :ownerId
