@@ -3,6 +3,7 @@ package chat.sphinx.dashboard.ui.adapter
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.isConversation
 import chat.sphinx.wrapper_common.*
+import chat.sphinx.wrapper_common.contact.ContactId
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message.media.MediaType
@@ -27,8 +28,6 @@ sealed class DashboardChat {
 
     abstract fun hasUnseenMessages(): Boolean
 
-    abstract fun getUnseenMessagesCount(): Long
-
     sealed class Active: DashboardChat() {
 
         companion object {
@@ -52,13 +51,11 @@ sealed class DashboardChat {
         abstract fun getMessageSender(message: Message, withColon: Boolean = true): String
 
         override fun hasUnseenMessages(): Boolean {
+            val ownerId: ContactId? = chat?.contactIds?.firstOrNull()
+            val isLastMessageOutgoing = message?.sender == ownerId
             val lastMessageSeen = message?.seen?.isTrue() ?: true
             val chatSeen = chat?.seen.isTrue() ?: true
-            return !lastMessageSeen && !chatSeen
-        }
-
-        override fun getUnseenMessagesCount(): Long {
-            return 0
+            return !lastMessageSeen && !chatSeen && !isLastMessageOutgoing
         }
 
         @ExperimentalStdlibApi
@@ -246,6 +243,7 @@ sealed class DashboardChat {
 
             override val sortBy: Long
                 get() = contact.createdAt.time
+
             override val unseenMessageFlow: Flow<Long?>?
                 get() = null
 
@@ -255,10 +253,6 @@ sealed class DashboardChat {
 
             override fun hasUnseenMessages(): Boolean {
                 return false
-            }
-
-            override fun getUnseenMessagesCount(): Long {
-                return 0
             }
 
         }
