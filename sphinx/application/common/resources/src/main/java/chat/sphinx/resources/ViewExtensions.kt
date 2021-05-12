@@ -1,19 +1,28 @@
 package chat.sphinx.resources
 
-import android.content.Context
-import android.os.Build
+import android.graphics.Typeface
 import android.view.View
 import android.widget.TextView
 import androidx.annotation.ColorInt
 import androidx.annotation.ColorRes
+import androidx.annotation.FontRes
 import androidx.annotation.DrawableRes
 import androidx.core.content.ContextCompat
+import androidx.core.content.res.ResourcesCompat
+
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun TextView.setTextColorExt(@ColorRes resId: Int): TextView {
     setTextColor(
         ContextCompat.getColor(context, resId)
     )
+    return this
+}
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun TextView.setTextFont(@FontRes resId: Int): TextView {
+    val typeface: Typeface? = ResourcesCompat.getFont(context, resId)
+    setTypeface(typeface)
     return this
 }
 

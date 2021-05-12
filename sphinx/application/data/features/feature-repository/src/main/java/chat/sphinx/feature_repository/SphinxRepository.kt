@@ -157,15 +157,25 @@ class SphinxRepository(
 
                                 queries.upsertMessage(msg.dto)
 
-                                msg.dto.chat_id?.let { nnChatId ->
+                                var chatId: ChatId? = null
 
-                                    if (msg.dto.updateChatDboLatestMessage) {
+                                msg.dto.chat?.let { chatDto ->
+                                    queries.upsertChat(chatDto, moshi)
+
+                                    chatId = ChatId(chatDto.id)
+                                }
+
+                                msg.dto.chat_id?.let { nnChatId ->
+                                    chatId = ChatId(nnChatId)
+                                }
+
+                                chatId?.let {  id ->
+                                    if (msg.dto.updateChatDboLatestMessage){
                                         queries.chatUpdateLatestMessage(
                                             MessageId(msg.dto.id),
-                                            ChatId(nnChatId)
+                                            id
                                         )
                                     }
-
                                 }
                             }
                         }
@@ -182,6 +192,14 @@ class SphinxRepository(
     private val chatLock = Mutex()
     private val chatDboPresenterMapper: ChatDboPresenterMapper by lazy {
         ChatDboPresenterMapper(dispatchers)
+    }
+
+    override suspend fun getUnseenMessagesByChatId(chat: Chat): Flow<Long?> {
+        return coreDB.getSphinxDatabaseQueries()
+            .chatGetUnseenIncomingMessagesCount(chat.contactIds.first(), chat.id)
+            .asFlow()
+            .mapToOneOrNull(dispatchers.io)
+            .distinctUntilChanged()
     }
 
     override suspend fun getChats(): Flow<List<Chat>> {

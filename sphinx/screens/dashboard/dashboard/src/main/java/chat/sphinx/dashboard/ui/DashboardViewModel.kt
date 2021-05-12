@@ -213,11 +213,20 @@ internal class DashboardViewModel @Inject constructor(
 
                                 newList.add(
                                     DashboardChat.Active.Conversation(
-                                        chat, message, contact
+                                        chat,
+                                        message,
+                                        contact,
+                                        chatRepository.getUnseenMessagesByChatId(chat),
                                     )
                                 )
                             } else {
-                                newList.add(DashboardChat.Active.GroupOrTribe(chat, message))
+                                newList.add(
+                                    DashboardChat.Active.GroupOrTribe(
+                                        chat,
+                                        message,
+                                        chatRepository.getUnseenMessagesByChatId(chat)
+                                    )
+                                )
                             }
                         }
                     }
