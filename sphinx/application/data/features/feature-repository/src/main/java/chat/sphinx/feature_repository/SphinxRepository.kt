@@ -194,6 +194,14 @@ class SphinxRepository(
         ChatDboPresenterMapper(dispatchers)
     }
 
+    override suspend fun getUnseenMessagesByChatId(chat: Chat): Flow<Long?> {
+        return coreDB.getSphinxDatabaseQueries()
+            .chatGetUnseenIncomingMessagesCount(chat.contactIds.first(), chat.id)
+            .asFlow()
+            .mapToOneOrNull(dispatchers.io)
+            .distinctUntilChanged()
+    }
+
     override suspend fun getChats(): Flow<List<Chat>> {
         return coreDB.getSphinxDatabaseQueries().chatGetAll()
             .asFlow()

@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.Flow
  * them, and thus proc any [Flow] being collected
  * */
 interface ChatRepository {
+    suspend fun getUnseenMessagesByChatId(chat: Chat): Flow<Long?>
     suspend fun getChats(): Flow<List<Chat>>
     suspend fun getChatById(chatId: ChatId): Flow<Chat?>
     suspend fun getChatByUUID(chatUUID: ChatUUID): Flow<Chat?>
