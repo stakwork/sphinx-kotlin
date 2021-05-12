@@ -1,7 +1,10 @@
 package chat.sphinx.chat_common.ui.viewstate.messageholder
 
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
+import chat.sphinx.wrapper_common.lightning.Sat
+import chat.sphinx.wrapper_common.lightning.unit
 import chat.sphinx.wrapper_message.Message
+import chat.sphinx.wrapper_message.isDirectPayment
 
 sealed class MessageHolderViewState {
 
@@ -9,11 +12,21 @@ sealed class MessageHolderViewState {
     abstract val background: HolderBackground
     abstract val initialHolder: InitialHolderViewState
 
+    abstract val directPayment: LayoutState.DirectPayment?
+
     class InComing(
         override val message: Message,
         override val background: HolderBackground.In,
         override val initialHolder: InitialHolderViewState,
-    ): MessageHolderViewState()
+    ): MessageHolderViewState() {
+        override val directPayment: LayoutState.DirectPayment? by lazy(LazyThreadSafetyMode.NONE) {
+            if (message.type.isDirectPayment()) {
+                LayoutState.DirectPayment(showSent = false, amount = message.amount)
+            } else {
+                null
+            }
+        }
+    }
 
     class OutGoing(
         override val message: Message,
@@ -21,5 +34,14 @@ sealed class MessageHolderViewState {
     ): MessageHolderViewState() {
         override val initialHolder: InitialHolderViewState
             get() = InitialHolderViewState.None
+
+        override val directPayment: LayoutState.DirectPayment? by lazy(LazyThreadSafetyMode.NONE) {
+            if (message.type.isDirectPayment()) {
+                LayoutState.DirectPayment(showSent = true, amount = message.amount)
+            } else {
+                null
+            }
+        }
+
     }
 }
