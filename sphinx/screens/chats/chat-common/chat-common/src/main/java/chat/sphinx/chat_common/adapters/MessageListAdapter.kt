@@ -146,7 +146,7 @@ class MessageListAdapter(
                         content
                 } ?: includeMessageHolderMessageTypes.includeMessageTypeMessage.root.goneIfFalse(false)
 
-                viewState.statusHeader.configureInHolder(recyclerViewWidth, binding)
+                viewState.statusHeader.configureInHolder(viewState.message, binding)
                 viewState.background.setBackground(recyclerViewWidth, binding)
 
                 setDirectPaymentLayout(viewState.directPayment)
