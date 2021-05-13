@@ -202,11 +202,14 @@ class SphinxRepository(
             .distinctUntilChanged()
     }
 
+    private val chatsFlow: SingletonFlow<List<Chat>> = SingletonFlow()
     override suspend fun getChats(): Flow<List<Chat>> {
-        return coreDB.getSphinxDatabaseQueries().chatGetAll()
-            .asFlow()
-            .mapToList(dispatchers.io)
-            .map { chatDboPresenterMapper.mapListFrom(it) }
+        return chatsFlow.getOrInstantiate {
+            coreDB.getSphinxDatabaseQueries().chatGetAll()
+                .asFlow()
+                .mapToList(dispatchers.io)
+                .map { chatDboPresenterMapper.mapListFrom(it) }
+        }
     }
 
     override suspend fun getChatById(chatId: ChatId): Flow<Chat?> {
@@ -307,11 +310,14 @@ class SphinxRepository(
         InviteDboPresenterMapper(dispatchers)
     }
 
+    private val contactsFlow: SingletonFlow<List<Contact>> = SingletonFlow()
     override suspend fun getContacts(): Flow<List<Contact>> {
-        return coreDB.getSphinxDatabaseQueries().contactGetAll()
-            .asFlow()
-            .mapToList(dispatchers.io)
-            .map { contactDboPresenterMapper.mapListFrom(it) }
+        return contactsFlow.getOrInstantiate {
+            coreDB.getSphinxDatabaseQueries().contactGetAll()
+                .asFlow()
+                .mapToList(dispatchers.io)
+                .map { contactDboPresenterMapper.mapListFrom(it) }
+        }
     }
 
     override suspend fun getContactById(contactId: ContactId): Flow<Contact?> {
@@ -338,12 +344,15 @@ class SphinxRepository(
             .distinctUntilChanged()
     }
 
+    private val ownerFlow: SingletonFlow<Contact?> = SingletonFlow()
     override suspend fun getOwner(): Flow<Contact?> {
-        return coreDB.getSphinxDatabaseQueries().contactGetOwner()
-            .asFlow()
-            .mapToOneOrNull(dispatchers.io)
-            .map { it?.let { contactDboPresenterMapper.mapFrom(it) } }
-            .distinctUntilChanged()
+        return ownerFlow.getOrInstantiate {
+            coreDB.getSphinxDatabaseQueries().contactGetOwner()
+                .asFlow()
+                .mapToOneOrNull(dispatchers.io)
+                .map { it?.let { contactDboPresenterMapper.mapFrom(it) } }
+                .distinctUntilChanged()
+        }
     }
 
     override fun networkRefreshContacts(): Flow<LoadResponse<Boolean, ResponseError>> = flow {
