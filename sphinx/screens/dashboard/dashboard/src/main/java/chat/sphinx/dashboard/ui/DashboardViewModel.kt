@@ -6,6 +6,7 @@ import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_lightning.LightningRepository
 import chat.sphinx.concept_repository_message.MessageRepository
+import chat.sphinx.concept_service_notification.PushNotificationRegistrar
 import chat.sphinx.concept_socket_io.SocketIOManager
 import chat.sphinx.concept_socket_io.SocketIOState
 import chat.sphinx.dashboard.navigation.DashboardBottomNavBarNavigator
@@ -61,6 +62,8 @@ internal class DashboardViewModel @Inject constructor(
     private val contactRepository: ContactRepository,
     private val lightningRepository: LightningRepository,
     private val messageRepository: MessageRepository,
+
+    private val pushNotificationRegistrar: PushNotificationRegistrar,
 
     private val socketIOManager: SocketIOManager,
 ): MotionLayoutViewModel<
@@ -268,6 +271,7 @@ internal class DashboardViewModel @Inject constructor(
     val networkStateFlow: StateFlow<LoadResponse<Boolean, ResponseError>>
         get() = _networkStateFlow.asStateFlow()
 
+    private var pushNotificationRegistrationUpdated: Boolean = false
     private var jobNetworkRefresh: Job? = null
     fun networkRefresh() {
         if (jobNetworkRefresh?.isActive == true) {
@@ -303,6 +307,20 @@ internal class DashboardViewModel @Inject constructor(
 
             if (_networkStateFlow.value is Response.Error) {
                 jobNetworkRefresh?.cancel()
+            }
+
+            if (!pushNotificationRegistrationUpdated) {
+                pushNotificationRegistrar.register().let { response ->
+                    @Exhaustive
+                    when (response) {
+                        is Response.Error -> {
+                            // TODO: Handle on the UI
+                        }
+                        is Response.Success -> {
+                            pushNotificationRegistrationUpdated = true
+                        }
+                    }
+                }
             }
 
             messageRepository.networkRefreshMessages().collect { response ->
