@@ -22,6 +22,7 @@
     <string name="material_icon_name_message_editor_send">send</string>
     <string name="material_icon_name_message_editor_attachment">add</string>
     <string name="material_icon_name_circled_close_button" tools:ignore="ButtonCase">cancel</string>
+    <string name="material_icon_name_help_outline">help_outline</string>
 
     <!--  Message Action Material Icons  -->
     <string name="material_icon_name_message_action_delete">delete</string>

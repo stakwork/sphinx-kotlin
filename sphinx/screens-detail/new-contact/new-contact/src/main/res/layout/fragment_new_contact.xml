@@ -19,12 +19,12 @@
         android:id="@+id/layout_constraint_nickname_content"
         android:layout_width="match_parent"
         android:layout_height="85dp"
-        android:layout_marginStart="@dimen/field_label_margin"
-        android:layout_marginEnd="@dimen/field_label_margin"
+        android:layout_marginStart="@dimen/new_contact_form_horizontal_margin"
+        android:layout_marginEnd="@dimen/new_contact_form_horizontal_margin"
         app:layout_constraintTop_toBottomOf="@+id/layout_new_contact_header">
 
         <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/new_contact_nickname_label_field"
+            android:id="@+id/new_contact_nickname_text_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/new_contact_nickname_label"
@@ -33,32 +33,32 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            android:textSize="@dimen/label_size"
+            android:textSize="@dimen/default_form_text_view_size"
             android:singleLine="true" />
 
         <androidx.appcompat.widget.AppCompatEditText
-            android:id="@+id/new_contact_nickname_field"
+            android:id="@+id/new_contact_nickname_edit_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColor="@color/secondaryText"
+            android:textColor="@color/text"
             android:fontFamily="@font/roboto_regular"
             app:backgroundTint="@android:color/transparent"
-            app:layout_constraintTop_toBottomOf="@+id/new_contact_nickname_label_field"
-            app:layout_constraintStart_toStartOf="@+id/new_contact_nickname_label_field"
+            app:layout_constraintTop_toBottomOf="@+id/new_contact_nickname_text_view"
             app:layout_constraintBottom_toBottomOf="parent"
-            android:textSize="@dimen/new_contact_field_size"
+            app:layout_constraintStart_toStartOf="parent"
+            android:textSize="@dimen/default_form_edit_view_size"
             android:inputType="textVisiblePassword"
-            android:layout_marginLeft="@dimen/new_contact_field_neg_margin"
+            android:layout_marginLeft="@dimen/new_contact_edit_text_left_margin"
             android:singleLine="true" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/layout_constraint_new_contact_nickname_bottom_border"
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:background="@color/secondaryText"
+            android:background="@color/lightDivider"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="@+id/new_contact_nickname_label_field" />
+            app:layout_constraintStart_toStartOf="@+id/new_contact_nickname_text_view" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -66,12 +66,12 @@
         android:id="@+id/layout_constraint_address_content"
         android:layout_width="match_parent"
         android:layout_height="85dp"
-        android:layout_marginStart="@dimen/field_label_margin"
-        android:layout_marginEnd="@dimen/field_label_margin"
+        android:layout_marginStart="@dimen/new_contact_form_horizontal_margin"
+        android:layout_marginEnd="@dimen/new_contact_form_horizontal_margin"
         app:layout_constraintTop_toBottomOf="@+id/layout_constraint_nickname_content">
 
         <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/new_contact_address_label_field"
+            android:id="@+id/new_contact_address_text_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/new_contact_address_label"
@@ -80,39 +80,38 @@
             app:layout_constraintStart_toStartOf="parent"
             android:textColor="@color/secondaryText"
             android:fontFamily="@font/roboto_regular"
-            android:textSize="@dimen/label_size"
+            android:textSize="@dimen/default_form_text_view_size"
             android:singleLine="true" />
 
         <androidx.appcompat.widget.AppCompatEditText
-            android:id="@+id/new_contact_address_field"
+            android:id="@+id/new_contact_address_edit_text"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:textColor="@color/secondaryText"
+            android:textColor="@color/text"
             android:fontFamily="@font/roboto_regular"
             app:backgroundTint="@android:color/transparent"
-            app:layout_constraintTop_toBottomOf="@+id/new_contact_address_label_field"
-            app:layout_constraintStart_toStartOf="@+id/new_contact_address_label_field"
+            app:layout_constraintTop_toBottomOf="@+id/new_contact_address_text_view"
             app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/layout_constraint_new_contact_scan_button"
-            android:textSize="@dimen/new_contact_field_size"
+            android:textSize="@dimen/default_form_edit_view_size"
             android:inputType="textVisiblePassword"
-            android:layout_marginLeft="@dimen/new_contact_field_neg_margin"
+            android:layout_marginLeft="@dimen/new_contact_edit_text_left_margin"
             android:singleLine="true" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/layout_constraint_new_contact_address_bottom_border"
             android:layout_width="0dp"
             android:layout_height="1dp"
-            android:background="@color/secondaryText"
+            android:background="@color/lightDivider"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/layout_constraint_new_contact_scan_button"
-            app:layout_constraintStart_toStartOf="@+id/new_contact_address_label_field" />
+            app:layout_constraintStart_toStartOf="@+id/new_contact_address_text_view" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/layout_constraint_new_contact_scan_button"
-            android:layout_width="0dp"
+            android:layout_width="60dp"
             android:layout_height="match_parent"
-            android:paddingLeft="60dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintEnd_toEndOf="parent">
@@ -124,7 +123,7 @@
                 app:layout_constraintEnd_toEndOf="@+id/layout_constraint_new_contact_scan_button"
                 app:layout_constraintBottom_toBottomOf="parent"
                 android:background="@drawable/ic_scan_icon"
-                android:backgroundTint="@color/textInverted"
+                android:backgroundTint="@color/secondaryText"
                 android:layout_marginBottom="@dimen/new_contact_scan_icon_bottom_margin"
                 />
 
@@ -136,12 +135,12 @@
         android:id="@+id/layout_constraint_route_hint_content"
         android:layout_width="match_parent"
         android:layout_height="85dp"
-        android:layout_marginStart="@dimen/field_label_margin"
-        android:layout_marginEnd="@dimen/field_label_margin"
+        android:layout_marginStart="@dimen/new_contact_form_horizontal_margin"
+        android:layout_marginEnd="@dimen/new_contact_form_horizontal_margin"
         app:layout_constraintTop_toBottomOf="@+id/layout_constraint_address_content">
 
         <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/new_contact_route_hint_label_field"
+            android:id="@+id/new_contact_route_hint_text_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/new_contact_route_hint_label"
@@ -150,74 +149,89 @@
             app:layout_constraintStart_toStartOf="parent"
             android:textColor="@color/secondaryText"
             android:fontFamily="@font/roboto_regular"
-            android:textSize="@dimen/label_size"
+            android:textSize="@dimen/default_form_text_view_size"
             android:singleLine="true" />
 
         <androidx.appcompat.widget.AppCompatEditText
-            android:id="@+id/new_contact_route_hint_field"
+            android:id="@+id/new_contact_route_hint_edit_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColor="@color/secondaryText"
-            app:backgroundTint="@android:color/transparent"
+            android:textColor="@color/text"
             android:fontFamily="@font/roboto_regular"
-            app:layout_constraintTop_toBottomOf="@+id/new_contact_route_hint_label_field"
-            app:layout_constraintStart_toStartOf="@+id/new_contact_route_hint_label_field"
+            app:backgroundTint="@android:color/transparent"
+            app:layout_constraintTop_toBottomOf="@+id/new_contact_route_hint_text_view"
             app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
             android:inputType="textVisiblePassword"
-            android:textSize="@dimen/new_contact_field_size"
-            android:layout_marginLeft="@dimen/new_contact_field_neg_margin"
+            android:textSize="@dimen/default_form_edit_view_size"
+            android:layout_marginLeft="@dimen/new_contact_edit_text_left_margin"
             android:singleLine="true" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/layout_constraint_new_contact_route_hint_bottom_border"
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:background="@color/secondaryText"
+            android:background="@color/lightDivider"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="@+id/new_contact_route_hint_label_field" />
+            app:layout_constraintStart_toStartOf="@+id/new_contact_route_hint_text_view" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/layout_constraint_pin_content"
         android:layout_width="match_parent"
-        android:layout_height="85dp"
-        android:layout_marginStart="@dimen/field_label_margin"
-        android:layout_marginEnd="@dimen/field_label_margin"
+        android:layout_height="65dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginStart="@dimen/new_contact_form_horizontal_margin"
+        android:layout_marginEnd="@dimen/new_contact_form_horizontal_margin"
         app:layout_constraintTop_toBottomOf="@+id/layout_constraint_route_hint_content">
 
         <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/new_contact_pin_label_field"
+            android:id="@+id/new_contact_pin_text_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/new_contact_pin_label"
-            android:clickable="true"
-            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginTop="15dp"
             android:textColor="@color/secondaryText"
             android:fontFamily="@font/roboto_regular"
-            android:textSize="@dimen/label_size"
+            android:textSize="@dimen/default_form_text_view_size"
             android:singleLine="true" />
 
         <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/new_contact_pin_field"
+            android:id="@+id/new_contact_pin_question_mark_text_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/new_contact_pin_std_private_label"
-            app:layout_constraintTop_toBottomOf="@+id/new_contact_pin_label_field"
+            android:layout_marginStart="5dp"
+            android:layout_marginTop="2dp"
+            android:text="@string/material_icon_name_help_outline"
+            android:clickable="true"
+            app:layout_constraintBottom_toBottomOf="@+id/new_contact_pin_text_view"
+            app:layout_constraintTop_toTopOf="@+id/new_contact_pin_text_view"
+            app:layout_constraintStart_toEndOf="@+id/new_contact_pin_text_view"
+            android:textColor="@color/secondaryText"
+            android:fontFamily="@font/material_icons_regular"
+            android:textSize="@dimen/pin_help_text_view_size"
+            android:singleLine="true" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/new_contact_pin_toggle_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/new_contact_pin_standard_private_label"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            android:textColor="@color/secondaryText"
+            android:textColor="@color/text"
             android:fontFamily="@font/roboto_regular"
-            android:textSize="@dimen/pin_label_size"
+            android:textSize="@dimen/pin_text_view_size"
             android:singleLine="true" />
 
         <androidx.appcompat.widget.AppCompatToggleButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:enabled="false"
+            android:enabled="true"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"/>
 
@@ -238,15 +252,14 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:text="@string/save_to_contacts_button"
-            android:textSize="@dimen/save_to_contacts_buttons_text_size"
-            android:fontFamily="@font/montserrat_semi_bold"
+            android:textSize="@dimen/save_to_contacts_button_text_size"
             android:textColor="@android:color/white"
             android:background="@drawable/button_background_white_rad_48"
             android:backgroundTint="@color/primaryBlue"/>
 
         <ProgressBar
-            android:layout_width="@dimen/save_progress_bar_width"
-            android:layout_height="@dimen/save_progress_bar_height"
+            android:layout_width="@dimen/save_progress_bar_xy"
+            android:layout_height="@dimen/save_progress_bar_xy"
             android:layout_marginLeft="@dimen/save_progress_bar_margin_left"
             android:id="@+id/new_contact_save_progress"
             style="?android:attr/progressBarStyle"
@@ -255,8 +268,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             android:indeterminate="true"
-            android:visibility="gone"
-            />
+            android:visibility="gone" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

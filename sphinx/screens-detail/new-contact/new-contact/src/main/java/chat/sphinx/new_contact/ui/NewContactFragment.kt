@@ -66,14 +66,14 @@ internal class NewContactFragment : BaseFragment<
             }
         }
 
-        binding.newContactPinLabelField.setOnClickListener {
+        binding.newContactPinQuestionMarkTextView.setOnClickListener {
             ToastUtils().show(
                 binding.root.context,
                 R.string.new_contact_privacy_setting_help
             )
         }
 
-        binding.newContactAddressField.addTextChangedListener(object : TextWatcher {
+        binding.newContactAddressEditText.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
             }
 
@@ -81,15 +81,15 @@ internal class NewContactFragment : BaseFragment<
             }
 
             override fun afterTextChanged(s: Editable?) {
-                binding.newContactAddressField.removeTextChangedListener(this)
+                binding.newContactAddressEditText.removeTextChangedListener(this)
 
                 pastePubKey(s)
 
-                binding.newContactAddressField.addTextChangedListener(this)
+                binding.newContactAddressEditText.addTextChangedListener(this)
             }
         })
 
-        binding.newContactRouteHintField.addTextChangedListener(object : TextWatcher {
+        binding.newContactRouteHintEditText.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
             }
 
@@ -97,20 +97,20 @@ internal class NewContactFragment : BaseFragment<
             }
 
             override fun afterTextChanged(s: Editable?) {
-                binding.newContactRouteHintField.removeTextChangedListener(this)
+                binding.newContactRouteHintEditText.removeTextChangedListener(this)
 
                 pastePubKey(s)
 
-                binding.newContactRouteHintField.addTextChangedListener(this)
+                binding.newContactRouteHintEditText.addTextChangedListener(this)
             }
         })
 
         binding.buttonAlreadyOnSphinx.setOnClickListener {
-            var pubkey = binding.newContactAddressField.text.toString().trim()
-            var nickname = binding.newContactNicknameField.text.toString().trim()
-            var routeHint = binding.newContactRouteHintField.text.toString().trim()
+            var pubkey = binding.newContactAddressEditText.text.toString().trim()
+            var nickname = binding.newContactNicknameEditText.text.toString().trim()
+            var routeHint = binding.newContactRouteHintEditText.text.toString().trim()
 
-            if (binding.newContactNicknameField.text.isNullOrBlank() || pubkey.isNullOrBlank()) {
+            if (binding.newContactNicknameEditText.text.isNullOrBlank() || pubkey.isNullOrBlank()) {
                 ToastUtils().show(
                     binding.root.context,
                     R.string.new_contact_nickname_address_empty
@@ -124,7 +124,7 @@ internal class NewContactFragment : BaseFragment<
             if (!lightningNodePubKey.isValid) {
                 ToastUtils().show(
                     binding.root.context,
-                    R.string.new_contact_invalid_pubkey_error
+                    R.string.new_contact_invalid_public_key_error
                 )
                 return@setOnClickListener
             }
@@ -135,7 +135,7 @@ internal class NewContactFragment : BaseFragment<
                 if (!lightningRouteHint.isValid) {
                     ToastUtils().show(
                         binding.root.context,
-                        R.string.new_contact_invalid_pubkey_error
+                        R.string.new_contact_invalid_public_key_error
                     )
                 }
                 return@setOnClickListener
@@ -154,8 +154,8 @@ internal class NewContactFragment : BaseFragment<
 
         s?.let {
             val splitText = it.trim().split(":")
-            binding.newContactAddressField.setText(splitText[0])
-            binding.newContactRouteHintField.setText("${splitText[1]}:${splitText[2]}")
+            binding.newContactAddressEditText.setText(splitText[0])
+            binding.newContactRouteHintEditText.setText("${splitText[1]}:${splitText[2]}")
         }
     }
 }

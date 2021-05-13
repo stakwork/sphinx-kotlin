@@ -5,6 +5,7 @@
     android:id="@+id/layout_constraint_new_contact_header"
     android:layout_width="match_parent"
     android:layout_height="@dimen/default_header_height"
+    android:elevation="6dp"
     android:background="@color/body"
     tools:context=".ui.NewContactFragment">
 

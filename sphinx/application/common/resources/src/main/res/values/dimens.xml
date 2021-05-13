@@ -38,4 +38,7 @@
     <dimen name="add_buttons_icon_xy">25sp</dimen>
     <dimen name="default_tap_target_xy">44dp</dimen>
     <dimen name="default_small_tap_target_xy">27dp</dimen>
+
+    <dimen name="default_form_text_view_size">12dp</dimen>
+    <dimen name="default_form_edit_view_size">17dp</dimen>
 </resources>
