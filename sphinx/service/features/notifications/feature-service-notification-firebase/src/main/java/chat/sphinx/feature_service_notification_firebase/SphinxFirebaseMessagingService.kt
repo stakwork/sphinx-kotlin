@@ -9,8 +9,11 @@ import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.*
 import javax.inject.Inject
 
+/*
+ * https://firebase.google.com/docs/cloud-messaging/android/first-message
+ * */
 @AndroidEntryPoint
-class SphinxFirebaseMessagingService: FirebaseMessagingService() {
+internal class SphinxFirebaseMessagingService: FirebaseMessagingService() {
 
     companion object {
         const val TAG = "SphinxFirebaseMessagingService"
@@ -34,12 +37,15 @@ class SphinxFirebaseMessagingService: FirebaseMessagingService() {
     override fun onMessageReceived(p0: RemoteMessage) {
         super.onMessageReceived(p0)
         LOG.d(TAG, "From: ${p0.from}")
-        LOG.d(TAG, "Notification: ${p0.notification?.body}")
+        LOG.d(TAG, "Notification Body: ${p0.notification?.body}")
+        for ((index, entry) in p0.data.entries.withIndex()) {
+            LOG.d(TAG, "Data: Index(value=$index), Key(value=${entry.key}), Value(value=${entry.value})")
+        }
     }
 
     override fun onNewToken(p0: String) {
         super.onNewToken(p0)
-        LOG.d(TAG, "TOKEN: $p0")
+        LOG.d(TAG, "onNewToken: $p0")
     }
 
     override fun onCreate() {

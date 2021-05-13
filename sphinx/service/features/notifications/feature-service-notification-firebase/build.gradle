@@ -8,6 +8,7 @@ buildscript {
 }
 
 plugins {
+    id 'app.cash.exhaustive'
     id 'com.android.library'
     id 'dagger.hilt.android.plugin'
     id 'kotlin-android'
@@ -44,6 +45,7 @@ dependencies {
     // Sphinx
     api project(path: ':sphinx:application:common:logger')
     implementation project(path: ':sphinx:application:common:resources')
+    api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-contact')
     api project(path: ':sphinx:service:concepts:concept-service-notification')
 
     implementation deps.google.hilt
