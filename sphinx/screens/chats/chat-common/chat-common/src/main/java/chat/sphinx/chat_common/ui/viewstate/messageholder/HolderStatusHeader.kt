@@ -3,6 +3,7 @@ package chat.sphinx.chat_common.ui.viewstate.messageholder
 import androidx.core.view.updateLayoutParams
 import chat.sphinx.chat_common.R
 import chat.sphinx.chat_common.databinding.LayoutMessageHolderBinding
+import chat.sphinx.wrapper_common.Seen
 import chat.sphinx.wrapper_message.Message
 import chat.sphinx.wrapper_view.Px
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
@@ -77,6 +78,10 @@ sealed class HolderStatusHeader {
 
             includeMessageStatusHeader.textViewSentMessageLockIcon.goneIfFalse(
                 message.messageContentDecrypted != null
+            )
+
+            includeMessageStatusHeader.textViewSentMessageBoltIcon.goneIfFalse(
+                message.seen.equals(Seen.SEEN)
             )
         }
 
