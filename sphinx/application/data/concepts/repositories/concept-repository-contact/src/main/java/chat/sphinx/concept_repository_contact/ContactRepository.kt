@@ -6,6 +6,7 @@ import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.wrapper_common.contact.ContactId
 import chat.sphinx.wrapper_common.invite.InviteId
 import chat.sphinx.wrapper_contact.Contact
+import chat.sphinx.wrapper_contact.DeviceId
 import chat.sphinx.wrapper_invite.Invite
 import kotlinx.coroutines.flow.Flow
 
@@ -21,6 +22,7 @@ interface ContactRepository {
     suspend fun getInviteByContactId(contactId: ContactId): Flow<Invite?>
 
     suspend fun getOwner(): Flow<Contact?>
+    suspend fun updateOwnerDeviceId(deviceId: DeviceId): Response<Any, ResponseError>
     fun networkRefreshContacts(): Flow<LoadResponse<Boolean, ResponseError>>
 
     suspend fun deleteContactById(contactId: ContactId): Response<Any, ResponseError>

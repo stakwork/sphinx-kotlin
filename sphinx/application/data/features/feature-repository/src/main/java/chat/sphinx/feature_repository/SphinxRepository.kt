@@ -6,6 +6,7 @@ import chat.sphinx.concept_crypto_rsa.RSA
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
 import chat.sphinx.concept_network_query_chat.model.ChatDto
 import chat.sphinx.concept_network_query_contact.NetworkQueryContact
+import chat.sphinx.concept_network_query_contact.model.UpdateContactDto
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_lightning.model.balance.BalanceDto
 import chat.sphinx.concept_network_query_message.NetworkQueryMessage
@@ -43,6 +44,7 @@ import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessagePagination
 import chat.sphinx.wrapper_common.toDateTime
 import chat.sphinx.wrapper_contact.Contact
+import chat.sphinx.wrapper_contact.DeviceId
 import chat.sphinx.wrapper_invite.Invite
 import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_message.*
@@ -353,6 +355,51 @@ class SphinxRepository(
                 .map { it?.let { contactDboPresenterMapper.mapFrom(it) } }
                 .distinctUntilChanged()
         }
+    }
+
+    override suspend fun updateOwnerDeviceId(deviceId: DeviceId): Response<Any, ResponseError> {
+        val queries = coreDB.getSphinxDatabaseQueries()
+        var response: Response<Any, ResponseError> = Response.Success(Any())
+
+        try {
+            getOwner().collect { owner ->
+
+                if (owner != null) {
+
+                    if (owner.deviceId != deviceId) {
+
+                        networkQueryContact.updateContact(
+                            owner.id,
+                            UpdateContactDto(device_id = deviceId.value)
+                        ).collect { loadResponse ->
+                            @Exhaustive
+                            when (loadResponse) {
+                                is LoadResponse.Loading -> {}
+                                is Response.Error -> {
+                                    response = loadResponse
+                                    throw Exception()
+                                }
+                                is Response.Success -> {
+                                    contactLock.withLock {
+                                        queries.upsertContact(loadResponse.value)
+                                    }
+                                    LOG.d(TAG, "DeviceId has been successfully updated")
+
+                                    throw Exception()
+                                }
+                            }
+                        }
+                    } else {
+                        LOG.d(TAG, "DeviceId is up to date")
+                        throw Exception()
+                    }
+
+                }
+
+            }
+        } catch (e: Exception) {}
+
+        return response
     }
 
     override fun networkRefreshContacts(): Flow<LoadResponse<Boolean, ResponseError>> = flow {
