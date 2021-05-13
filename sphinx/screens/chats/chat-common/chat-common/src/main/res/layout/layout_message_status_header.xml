@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_constraint_message_status_header"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:visibility="gone"
+    tools:visibility="visible">
+
+
+    <!-- Header for Received messages -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_received_message_content_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:visibility="visible">
+
+        <!-- Sender name (hidden in private chats) -->
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_received_message_sender_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/default_status_badge_inner_padding"
+            android:fontFamily="@font/roboto_medium"
+            android:lines="1"
+            android:textColor="@color/secondaryText"
+            android:textSize="@dimen/default_text_size_caption1"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/text_view_received_message_timestamp"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintHorizontal_chainStyle="packed"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="CypherPoet"
+            tools:textColor="#11FFFF"
+            tools:visibility="visible" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_received_message_timestamp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/default_status_badge_inner_padding"
+            android:fontFamily="@font/roboto_regular"
+            android:lines="1"
+            android:textColor="@color/secondaryText"
+            android:textSize="@dimen/default_text_size_caption1"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/text_view_received_message_lock_icon"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/text_view_received_message_sender_name"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="00:00 AM" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_received_message_lock_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/material_icons_regular"
+            android:text="@string/material_icon_name_lock"
+            android:textColor="@color/secondaryText"
+            android:textSize="@dimen/default_text_size_list_row_headline"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toEndOf="@+id/text_view_received_message_timestamp"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:visibility="visible" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+    <!-- Header for Sent messages -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_sent_message_content_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:visibility="visible">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_sent_message_bolt_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/default_status_badge_inner_padding"
+            android:fontFamily="@font/material_icons_regular"
+            android:text="@string/material_icon_name_bolt"
+            android:textColor="@color/secondaryText"
+            android:textSize="@dimen/default_text_size_list_row_headline"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/text_view_sent_message_lock_icon"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintHorizontal_chainStyle="packed"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_sent_message_lock_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/material_icons_regular"
+            android:text="@string/material_icon_name_lock"
+            android:textColor="@color/secondaryText"
+            android:textSize="@dimen/default_text_size_list_row_headline"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/text_view_sent_message_timestamp"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintHorizontal_chainStyle="packed"
+            app:layout_constraintStart_toEndOf="@id/text_view_sent_message_bolt_icon"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:visibility="visible" />
+
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_sent_message_timestamp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/default_status_badge_inner_padding"
+            android:fontFamily="@font/roboto_regular"
+            android:lines="1"
+            android:textColor="@color/secondaryText"
+            android:textSize="@dimen/default_text_size_caption1"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/text_view_sent_message_lock_icon"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="00:00 AM" />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
