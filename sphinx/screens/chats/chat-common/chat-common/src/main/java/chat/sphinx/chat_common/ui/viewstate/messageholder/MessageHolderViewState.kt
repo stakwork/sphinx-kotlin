@@ -10,6 +10,7 @@ sealed class MessageHolderViewState {
 
     abstract val message: Message
     abstract val background: HolderBackground
+    abstract val statusHeader: HolderStatusHeader
     abstract val initialHolder: InitialHolderViewState
 
     abstract val directPayment: LayoutState.DirectPayment?
@@ -17,6 +18,7 @@ sealed class MessageHolderViewState {
     class InComing(
         override val message: Message,
         override val background: HolderBackground.In,
+        override val statusHeader: HolderStatusHeader.In,
         override val initialHolder: InitialHolderViewState,
     ): MessageHolderViewState() {
         override val directPayment: LayoutState.DirectPayment? by lazy(LazyThreadSafetyMode.NONE) {
@@ -31,6 +33,7 @@ sealed class MessageHolderViewState {
     class OutGoing(
         override val message: Message,
         override val background: HolderBackground.Out,
+        override val statusHeader: HolderStatusHeader.Out,
     ): MessageHolderViewState() {
         override val initialHolder: InitialHolderViewState
             get() = InitialHolderViewState.None

@@ -4,6 +4,8 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.ColorInt
 import chat.sphinx.chat_common.R
+import chat.sphinx.chat_common.databinding.LayoutMessageStatusHeaderBinding
+import chat.sphinx.chat_common.ui.viewstate.messageholder.HolderStatusHeader
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
@@ -17,6 +19,7 @@ sealed class InitialHolderViewState {
     abstract suspend fun setInitialHolder(
         textViewInitials: TextView,
         imageViewPicture: ImageView,
+        statusHeader: LayoutMessageStatusHeaderBinding,
         imageLoader: ImageLoader<ImageView>
     ): Disposable?
 
@@ -24,10 +27,14 @@ sealed class InitialHolderViewState {
         override suspend fun setInitialHolder(
             textViewInitials: TextView,
             imageViewPicture: ImageView,
+            statusHeader: LayoutMessageStatusHeaderBinding,
             imageLoader: ImageLoader<ImageView>,
         ): Disposable? {
+            statusHeader.root.goneIfFalse(false)
+
             textViewInitials.goneIfFalse(false)
             imageViewPicture.goneIfFalse(false)
+
             return null
         }
     }
@@ -39,8 +46,11 @@ sealed class InitialHolderViewState {
         override suspend fun setInitialHolder(
             textViewInitials: TextView,
             imageViewPicture: ImageView,
+            statusHeader: LayoutMessageStatusHeaderBinding,
             imageLoader: ImageLoader<ImageView>,
         ): Disposable? {
+            statusHeader.root.goneIfFalse(false)
+
             textViewInitials.goneIfFalse(true)
             imageViewPicture.goneIfFalse(false)
             textViewInitials.text = initials
@@ -53,8 +63,11 @@ sealed class InitialHolderViewState {
         override suspend fun setInitialHolder(
             textViewInitials: TextView,
             imageViewPicture: ImageView,
+            statusHeader: LayoutMessageStatusHeaderBinding,
             imageLoader: ImageLoader<ImageView>
         ): Disposable {
+            statusHeader.root.goneIfFalse(false)
+
             textViewInitials.goneIfFalse(false)
             imageViewPicture.goneIfFalse(true)
             return imageLoader.load(

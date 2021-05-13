@@ -134,6 +134,7 @@ class MessageListAdapter(
                     disposable = viewState.initialHolder.setInitialHolder(
                         binding.includeMessageHolderChatImageInitialHolder.textViewInitials,
                         binding.includeMessageHolderChatImageInitialHolder.imageViewChatPicture,
+                        binding.includeMessageStatusHeader,
                         imageLoader
                     )
                 }
@@ -145,6 +146,7 @@ class MessageListAdapter(
                         content
                 } ?: includeMessageHolderMessageTypes.includeMessageTypeMessage.root.goneIfFalse(false)
 
+                viewState.statusHeader.configureInHolder(recyclerViewWidth, binding)
                 viewState.background.setBackground(recyclerViewWidth, binding)
 
                 setDirectPaymentLayout(viewState.directPayment)
