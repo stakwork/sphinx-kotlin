@@ -1,0 +1,56 @@
+buildscript {
+    repositories {
+        google()
+    }
+    dependencies {
+        classpath 'com.google.gms:google-services:4.3.5'
+    }
+}
+
+plugins {
+    id 'com.android.library'
+    id 'dagger.hilt.android.plugin'
+    id 'kotlin-android'
+    id 'kotlin-kapt'
+}
+
+android {
+    compileSdkVersion versions.compileSdk
+    buildToolsVersion versions.buildTools
+
+    defaultConfig {
+        minSdkVersion versions.minSdk
+        targetSdkVersion versions.compileSdk
+        versionCode VERSION_CODE.toInteger()
+        versionName VERSION_NAME
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunnerArguments disableAnalytics: 'true'
+        consumerProguardFiles "consumer-rules.pro"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: "libs", include: ["*.jar"])
+    // KotlinAndroid
+    api project(path: ':kotlin:concepts:concept-coroutines')
+
+    // Sphinx
+    api project(path: ':sphinx:application:common:logger')
+    implementation project(path: ':sphinx:application:common:resources')
+    api project(path: ':sphinx:service:concepts:concept-service-notification')
+
+    implementation deps.google.hilt
+    kapt kaptDeps.google.hilt
+
+    api platform('com.google.firebase:firebase-bom:27.1.0')
+    api 'com.google.firebase:firebase-messaging-ktx'
+}
+
+apply plugin: 'com.google.gms.google-services'
