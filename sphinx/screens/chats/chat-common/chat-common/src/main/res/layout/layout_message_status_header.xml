@@ -108,7 +108,6 @@
             android:id="@+id/text_view_sent_message_lock_icon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/default_status_badge_inner_padding"
             android:fontFamily="@font/material_icons_regular"
             android:text="@string/material_icon_name_lock"
             android:textColor="@color/secondaryText"
