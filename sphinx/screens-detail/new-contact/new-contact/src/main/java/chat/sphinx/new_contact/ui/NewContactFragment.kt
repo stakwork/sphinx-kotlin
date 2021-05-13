@@ -66,7 +66,8 @@ internal class NewContactFragment : BaseFragment<
             }
         }
 
-        binding.newContactPinQuestionMarkTextView.setOnClickListener {
+
+        binding.layoutGroupPinView.newContactPinQuestionMarkTextView.setOnClickListener {
             ToastUtils().show(
                 binding.root.context,
                 R.string.new_contact_privacy_setting_help

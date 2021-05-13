@@ -6,8 +6,6 @@
     <dimen name="save_to_contacts_button_text_size">14dp</dimen>
     <dimen name="save_to_contacts_button_bottom_margin">33dp</dimen>
     <dimen name="save_to_contacts_button_width">230dp</dimen>
-    <dimen name="pin_text_view_size">17dp</dimen>
-    <dimen name="pin_help_text_view_size">15dp</dimen>
     <dimen name="new_contact_scan_address_button_width">30dp</dimen>
     <dimen name="new_contact_scan_icon_bottom_margin">5dp</dimen>
     <dimen name="new_contact_scan_icon_width">21dp</dimen>
