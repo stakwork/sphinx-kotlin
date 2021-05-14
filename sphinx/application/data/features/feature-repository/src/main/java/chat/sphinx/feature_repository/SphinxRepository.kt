@@ -155,28 +155,34 @@ class SphinxRepository(
 
                     messageLock.withLock {
                         chatLock.withLock {
-                            queries.transaction {
+                            contactLock.withLock {
+                                queries.transaction {
 
-                                queries.upsertMessage(msg.dto)
+                                    queries.upsertMessage(msg.dto)
 
-                                var chatId: ChatId? = null
+                                    var chatId: ChatId? = null
 
-                                msg.dto.chat?.let { chatDto ->
-                                    queries.upsertChat(chatDto, moshi)
+                                    msg.dto.chat?.let { chatDto ->
+                                        queries.upsertChat(chatDto, moshi)
 
-                                    chatId = ChatId(chatDto.id)
-                                }
+                                        chatId = ChatId(chatDto.id)
+                                    }
 
-                                msg.dto.chat_id?.let { nnChatId ->
-                                    chatId = ChatId(nnChatId)
-                                }
+                                    msg.dto.contact?.let { contactDto ->
+                                        queries.upsertContact(contactDto)
+                                    }
 
-                                chatId?.let {  id ->
-                                    if (msg.dto.updateChatDboLatestMessage){
-                                        queries.chatUpdateLatestMessage(
-                                            MessageId(msg.dto.id),
-                                            id
-                                        )
+                                    msg.dto.chat_id?.let { nnChatId ->
+                                        chatId = ChatId(nnChatId)
+                                    }
+
+                                    chatId?.let {  id ->
+                                        if (msg.dto.updateChatDboLatestMessage){
+                                            queries.chatUpdateLatestMessage(
+                                                MessageId(msg.dto.id),
+                                                id
+                                            )
+                                        }
                                     }
                                 }
                             }
