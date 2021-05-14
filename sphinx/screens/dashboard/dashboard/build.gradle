@@ -35,16 +35,18 @@ dependencies {
     implementation project(path: ':android:features:android-feature-screens')
 
     // Sphinx
-    implementation project(path: ':sphinx:application:common:resources')
-    implementation project(path: ':sphinx:application:data:concepts:concept-image-loader')
-    api project(path: ':sphinx:application:common:wrappers:wrapper-chat')
     implementation project(path: ':sphinx:activity:insetter-activity')
+    implementation project(path: ':sphinx:application:common:resources')
+    api project(path: ':sphinx:application:common:wrappers:wrapper-chat')
+    implementation project(path: ':sphinx:application:data:concepts:concept-image-loader')
     implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-chat')
     implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-contact')
     implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-lightning')
     implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-message')
 
     implementation project(path: ':sphinx:application:network:concepts:concept-socket-io')
+
+    implementation project(path: ':sphinx:service:concepts:concept-service-notification')
 
     implementation deps.androidx.recyclerView
 
