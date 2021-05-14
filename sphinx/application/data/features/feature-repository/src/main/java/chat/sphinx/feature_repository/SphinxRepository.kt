@@ -327,148 +327,114 @@ class SphinxRepository(
         InviteDboPresenterMapper(dispatchers)
     }
 
-    private val contactsFlow: SingletonFlow<List<Contact>> = SingletonFlow()
-    override suspend fun getContacts(): Flow<List<Contact>> {
-        return contactsFlow.getOrInstantiate {
-            coreDB.getSphinxDatabaseQueries().contactGetAll()
-                .asFlow()
-                .mapToList(dispatchers.io)
-                .map { contactDboPresenterMapper.mapListFrom(it) }
+    override val accountOwner: Flow<Contact?> by lazy {
+        flow {
+            emitAll(
+                coreDB.getSphinxDatabaseQueries().contactGetOwner()
+                    .asFlow()
+                    .mapToOneOrNull(dispatchers.io)
+                    .map { it?.let { contactDboPresenterMapper.mapFrom(it) } }
+                    .distinctUntilChanged()
+            )
         }
     }
 
-    override suspend fun getContactById(contactId: ContactId): Flow<Contact?> {
-        return coreDB.getSphinxDatabaseQueries().contactGetById(contactId)
-            .asFlow()
-            .mapToOneOrNull(dispatchers.io)
-            .map { it?.let { contactDboPresenterMapper.mapFrom(it) } }
-            .distinctUntilChanged()
+    override val getAllContacts: Flow<List<Contact>> by lazy {
+        flow {
+            emitAll(
+                coreDB.getSphinxDatabaseQueries().contactGetAll()
+                    .asFlow()
+                    .mapToList(dispatchers.io)
+                    .map { contactDboPresenterMapper.mapListFrom(it) }
+            )
+        }
     }
 
-    override suspend fun getInviteById(inviteId: InviteId): Flow<Invite?> {
-        return coreDB.getSphinxDatabaseQueries().inviteGetById(inviteId)
-            .asFlow()
-            .mapToOneOrNull(dispatchers.io)
-            .map { it?.let { inviteDboPresenterMapper.mapFrom(it) } }
-            .distinctUntilChanged()
-    }
-
-    override suspend fun getInviteByContactId(contactId: ContactId): Flow<Invite?> {
-        return coreDB.getSphinxDatabaseQueries().inviteGetByContactId(contactId)
-            .asFlow()
-            .mapToOneOrNull(dispatchers.io)
-            .map { it?.let { inviteDboPresenterMapper.mapFrom(it) } }
-            .distinctUntilChanged()
-    }
-
-    private val ownerFlow: SingletonFlow<Contact?> = SingletonFlow()
-    override suspend fun getOwner(): Flow<Contact?> {
-        return ownerFlow.getOrInstantiate {
-            coreDB.getSphinxDatabaseQueries().contactGetOwner()
+    override fun getContactById(contactId: ContactId): Flow<Contact?> = flow {
+        emitAll(
+            coreDB.getSphinxDatabaseQueries().contactGetById(contactId)
                 .asFlow()
                 .mapToOneOrNull(dispatchers.io)
                 .map { it?.let { contactDboPresenterMapper.mapFrom(it) } }
                 .distinctUntilChanged()
-        }
+        )
     }
 
-    override suspend fun updateOwnerDeviceId(deviceId: DeviceId): Response<Any, ResponseError> {
-        val queries = coreDB.getSphinxDatabaseQueries()
-        var response: Response<Any, ResponseError> = Response.Success(Any())
+    override fun getInviteByContactId(contactId: ContactId): Flow<Invite?> = flow {
+        emitAll(
+            coreDB.getSphinxDatabaseQueries().inviteGetByContactId(contactId)
+                .asFlow()
+                .mapToOneOrNull(dispatchers.io)
+                .map { it?.let { inviteDboPresenterMapper.mapFrom(it) } }
+                .distinctUntilChanged()
+        )
+    }
 
-        try {
-            getOwner().collect { owner ->
+    override fun getInviteById(inviteId: InviteId): Flow<Invite?> = flow {
+        emitAll(
+            coreDB.getSphinxDatabaseQueries().inviteGetById(inviteId)
+                .asFlow()
+                .mapToOneOrNull(dispatchers.io)
+                .map { it?.let { inviteDboPresenterMapper.mapFrom(it) } }
+                .distinctUntilChanged()
+        )
+    }
 
-                if (owner != null) {
+    override val networkRefreshContacts: Flow<LoadResponse<Boolean, ResponseError>> by lazy {
+        flow {
+            networkQueryContact.getContacts().collect { loadResponse ->
 
-                    if (owner.deviceId != deviceId) {
+                @Exhaustive
+                when (loadResponse) {
+                    is Response.Error -> {
+                        emit(loadResponse)
+                    }
+                    is Response.Success -> {
 
-                        networkQueryContact.updateContact(
-                            owner.id,
-                            UpdateContactDto(device_id = deviceId.value)
-                        ).collect { loadResponse ->
-                            @Exhaustive
-                            when (loadResponse) {
-                                is LoadResponse.Loading -> {}
-                                is Response.Error -> {
-                                    response = loadResponse
-                                    throw Exception()
-                                }
-                                is Response.Success -> {
-                                    contactLock.withLock {
-                                        queries.upsertContact(loadResponse.value)
+                        val queries = coreDB.getSphinxDatabaseQueries()
+
+                        try {
+                            contactLock.withLock {
+                                withContext(dispatchers.io) {
+
+                                    val contactIdsToRemove = queries.contactGetAllIds()
+                                        .executeAsList()
+                                        .toMutableSet()
+
+                                    queries.transaction {
+                                        for (dto in loadResponse.value.contacts) {
+                                            queries.upsertContact(dto)
+
+                                            contactIdsToRemove.remove(ContactId(dto.id))
+                                        }
+
+                                        for (id in contactIdsToRemove) {
+                                            queries.contactDeleteById(id)
+                                            queries.inviteDeleteByContactId(id)
+                                        }
                                     }
-                                    LOG.d(TAG, "DeviceId has been successfully updated")
 
-                                    throw Exception()
                                 }
                             }
-                        }
-                    } else {
-                        LOG.d(TAG, "DeviceId is up to date")
-                        throw Exception()
-                    }
 
+                            emit(
+                                processChatDtos(loadResponse.value.chats)
+                            )
+
+                        } catch (e: ParseException) {
+                            val msg =
+                                "Failed to convert date/time from Relay while processing Contacts"
+                            LOG.e(TAG, msg, e)
+                            emit(Response.Error(ResponseError(msg, e)))
+                        }
+
+                    }
+                    is LoadResponse.Loading -> {
+                        emit(loadResponse)
+                    }
                 }
 
             }
-        } catch (e: Exception) {}
-
-        return response
-    }
-
-    override fun networkRefreshContacts(): Flow<LoadResponse<Boolean, ResponseError>> = flow {
-        networkQueryContact.getContacts().collect { loadResponse ->
-
-            @Exhaustive
-            when (loadResponse) {
-                is Response.Error -> {
-                    emit(loadResponse)
-                }
-                is Response.Success -> {
-
-                    val queries = coreDB.getSphinxDatabaseQueries()
-
-                    try {
-                        contactLock.withLock {
-                            withContext(dispatchers.io) {
-
-                                val contactIdsToRemove = queries.contactGetAllIds()
-                                    .executeAsList()
-                                    .toMutableSet()
-
-                                queries.transaction {
-                                    for (dto in loadResponse.value.contacts) {
-                                        queries.upsertContact(dto)
-
-                                        contactIdsToRemove.remove(ContactId(dto.id))
-                                    }
-
-                                    for (id in contactIdsToRemove) {
-                                        queries.contactDeleteById(id)
-                                        queries.inviteDeleteByContactId(id)
-                                    }
-                                }
-
-                            }
-                        }
-
-                        emit(
-                            processChatDtos(loadResponse.value.chats)
-                        )
-
-                    } catch (e: ParseException) {
-                        val msg = "Failed to convert date/time from Relay while processing Contacts"
-                        LOG.e(TAG, msg, e)
-                        emit(Response.Error(ResponseError(msg, e)))
-                    }
-
-                }
-                is LoadResponse.Loading -> {
-                    emit(loadResponse)
-                }
-            }
-
         }
     }
 
@@ -512,6 +478,51 @@ class SphinxRepository(
                 }
             }
         }
+
+        return response
+    }
+
+    override suspend fun updateOwnerDeviceId(deviceId: DeviceId): Response<Any, ResponseError> {
+        val queries = coreDB.getSphinxDatabaseQueries()
+        var response: Response<Any, ResponseError> = Response.Success(Any())
+
+        try {
+            accountOwner.collect { owner ->
+
+                if (owner != null) {
+
+                    if (owner.deviceId != deviceId) {
+
+                        networkQueryContact.updateContact(
+                            owner.id,
+                            UpdateContactDto(device_id = deviceId.value)
+                        ).collect { loadResponse ->
+                            @Exhaustive
+                            when (loadResponse) {
+                                is LoadResponse.Loading -> {}
+                                is Response.Error -> {
+                                    response = loadResponse
+                                    throw Exception()
+                                }
+                                is Response.Success -> {
+                                    contactLock.withLock {
+                                        queries.upsertContact(loadResponse.value)
+                                    }
+                                    LOG.d(TAG, "DeviceId has been successfully updated")
+
+                                    throw Exception()
+                                }
+                            }
+                        }
+                    } else {
+                        LOG.d(TAG, "DeviceId is up to date")
+                        throw Exception()
+                    }
+
+                }
+
+            }
+        } catch (e: Exception) {}
 
         return response
     }

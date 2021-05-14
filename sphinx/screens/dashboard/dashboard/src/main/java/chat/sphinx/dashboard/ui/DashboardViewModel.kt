@@ -99,7 +99,7 @@ internal class DashboardViewModel @Inject constructor(
 
     init {
         viewModelScope.launch(dispatchers.mainImmediate) {
-            contactRepository.getContacts().distinctUntilChanged().collect { contacts ->
+            contactRepository.getAllContacts.distinctUntilChanged().collect { contacts ->
                 collectionLock.withLock {
                     contactsCollectionInitialized = true
 
@@ -294,7 +294,7 @@ internal class DashboardViewModel @Inject constructor(
                 jobNetworkRefresh?.cancel()
             }
 
-            contactRepository.networkRefreshContacts().collect { response ->
+            contactRepository.networkRefreshContacts.collect { response ->
                 @Exhaustive
                 when (response) {
                     is LoadResponse.Loading -> {}
