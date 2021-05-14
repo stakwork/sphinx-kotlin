@@ -42,6 +42,7 @@ import chat.sphinx.wrapper_common.contact.ContactId
 import chat.sphinx.wrapper_common.invite.InviteId
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessagePagination
+import chat.sphinx.wrapper_common.time
 import chat.sphinx.wrapper_common.toDateTime
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_contact.DeviceId
@@ -176,13 +177,25 @@ class SphinxRepository(
                                         chatId = ChatId(nnChatId)
                                     }
 
-                                    chatId?.let {  id ->
-                                        if (msg.dto.updateChatDboLatestMessage){
-                                            queries.chatUpdateLatestMessage(
-                                                MessageId(msg.dto.id),
-                                                id
-                                            )
+                                    chatId?.let { id ->
+
+                                        val time = msg.dto.created_at.toDateTime().time
+
+                                        lastMessageUpdatedTimeMap.withLock { map ->
+
+                                            if (
+                                                msg.dto.updateChatDboLatestMessage &&
+                                                (map[id] ?: 0L) <= time
+                                            ){
+                                                queries.chatUpdateLatestMessage(
+                                                    MessageId(msg.dto.id),
+                                                    id
+                                                )
+                                                map[id] = time
+                                            }
+
                                         }
+
                                     }
                                 }
                             }
@@ -401,16 +414,47 @@ class SphinxRepository(
                                         .executeAsList()
                                         .toMutableSet()
 
-                                    queries.transaction {
-                                        for (dto in loadResponse.value.contacts) {
-                                            queries.upsertContact(dto)
+                                    messageLock.withLock {
+                                        chatLock.withLock {
 
-                                            contactIdsToRemove.remove(ContactId(dto.id))
-                                        }
+                                            queries.transaction {
+                                                var ownerId: ContactId? = null
 
-                                        for (id in contactIdsToRemove) {
-                                            queries.contactDeleteById(id)
-                                            queries.inviteDeleteByContactId(id)
+                                                for (dto in loadResponse.value.contacts) {
+
+                                                    queries.upsertContact(dto)
+
+                                                    if (dto.isOwnerActual) {
+                                                        ownerId = ContactId(dto.id)
+                                                    }
+
+                                                    contactIdsToRemove.remove(ContactId(dto.id))
+
+                                                }
+
+                                                for (contactId in contactIdsToRemove) {
+
+                                                    queries.contactDeleteById(contactId)
+                                                    queries.inviteDeleteByContactId(contactId)
+
+                                                    queries.chatGetConversationForContact(
+                                                        listOf(
+                                                            ownerId ?: continue,
+                                                            contactId
+                                                        )
+                                                    ).executeAsOneOrNull()?.let { chatDbo ->
+                                                        queries.messageDeleteByChatId(chatDbo.id)
+                                                        queries.chatDeleteById(chatDbo.id)
+
+                                                        lastMessageUpdatedTimeMap.withLock { map ->
+                                                            map.remove(chatDbo.id)
+                                                        }
+                                                    }
+
+                                                }
+
+                                            }
+
                                         }
                                     }
 
@@ -467,11 +511,16 @@ class SphinxRepository(
                                 .executeAsOneOrNull()
 
                         queries.transaction {
-                            chat?.let {
-                                queries.messageDeleteByChatId(it.id)
-                                queries.chatDeleteById(it.id)
+                            chat?.let { nnChat ->
+                                queries.messageDeleteByChatId(nnChat.id)
+                                queries.chatDeleteById(nnChat.id)
+
+                                lastMessageUpdatedTimeMap.withLock { map ->
+                                    map.remove(nnChat.id)
+                                }
                             }
                             queries.contactDeleteById(contactId)
+                            queries.inviteDeleteByContactId(contactId)
                         }
 
                     }
@@ -817,7 +866,15 @@ class SphinxRepository(
         networkQueryMessage.readMessages(chatId).collect { _ -> }
     }
 
-    @OptIn(UnencryptedDataAccess::class)
+    /*
+    * Used to hold in memory the chat table's latest message time to reduce disk IO
+    * and mitigate conflicting updates between SocketIO and networkRefreshMessages
+    * */
+    @Suppress("RemoveExplicitTypeArguments")
+    private val lastMessageUpdatedTimeMap: SynchronizedMap<ChatId, Long> by lazy {
+        SynchronizedMap<ChatId, Long>()
+    }
+
     override val networkRefreshMessages: Flow<LoadResponse<Boolean, ResponseError>> by lazy {
         flow {
             emit(LoadResponse.Loading)
@@ -909,7 +966,7 @@ class SphinxRepository(
                                                 )
 
                                                 val latestMessageMap =
-                                                    mutableMapOf<ChatId, MessageId>()
+                                                    mutableMapOf<ChatId, MessageDto>()
 
                                                 for (dto in newMessages) {
 
@@ -921,17 +978,27 @@ class SphinxRepository(
                                                         queries.upsertMessage(dto)
 
                                                         if (dto.updateChatDboLatestMessage) {
-                                                            latestMessageMap[ChatId(id)] =
-                                                                MessageId(dto.id)
+                                                            latestMessageMap[ChatId(id)] = dto
                                                         }
                                                     }
                                                 }
 
-                                                for (entry in latestMessageMap.entries) {
-                                                    queries.chatUpdateLatestMessage(
-                                                        entry.value,
-                                                        entry.key
-                                                    )
+                                                lastMessageUpdatedTimeMap.withLock { map ->
+
+                                                    for (entry in latestMessageMap.entries) {
+
+                                                        val time = entry.value.created_at.toDateTime().time
+
+                                                        if ((map[entry.key] ?: 0L) <= time) {
+                                                            queries.chatUpdateLatestMessage(
+                                                                MessageId(entry.value.id),
+                                                                entry.key
+                                                            )
+                                                            map[entry.key] = time
+                                                        }
+
+                                                    }
+
                                                 }
                                             }
 
