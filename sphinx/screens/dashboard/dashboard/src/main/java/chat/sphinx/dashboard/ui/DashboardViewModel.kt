@@ -193,24 +193,8 @@ internal class DashboardViewModel @Inject constructor(
                             if (chat.type.isConversation()) {
                                 val contactId: ContactId = chat.contactIds.lastOrNull() ?: continue
 
-                                val contact: Contact = if (contactsCollectionInitialized) {
-
-                                    var temp: Contact? = null
-                                    for (contact in _contactsStateFlow.value) {
-                                        if (contact.id == contactId) {
-                                            temp = contact
-                                            break
-                                        }
-                                    }
-                                    temp ?: continue
-
-                                } else {
-
-                                    contactRepository.getContactById(
-                                        chat.contactIds.lastOrNull() ?: continue
-                                    ).firstOrNull() ?: continue
-
-                                }
+                                val contact: Contact = contactRepository.getContactById(contactId)
+                                    .firstOrNull() ?: continue
 
                                 contactsAdded.add(contactId)
 
