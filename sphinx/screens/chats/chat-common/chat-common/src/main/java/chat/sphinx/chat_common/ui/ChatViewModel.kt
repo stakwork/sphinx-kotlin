@@ -70,7 +70,7 @@ class ChatViewModel @Inject constructor(
 
         chatData.chat?.let { chat ->
             messagesJob = viewModelScope.launch(dispatchers.mainImmediate) {
-                messageRepository.getMessagesForChat(chat.id).collect { messages ->
+                messageRepository.getAllMessagesToShowByChatId(chat.id).collect { messages ->
                     val newList = ArrayList<MessageHolderViewState>(messages.size)
                     withContext(dispatchers.default) {
                         for (message in messages) {

@@ -323,7 +323,7 @@ internal class DashboardViewModel @Inject constructor(
                 }
             }
 
-            messageRepository.networkRefreshMessages().collect { response ->
+            messageRepository.networkRefreshMessages.collect { response ->
                 _networkStateFlow.value = response
             }
         }
