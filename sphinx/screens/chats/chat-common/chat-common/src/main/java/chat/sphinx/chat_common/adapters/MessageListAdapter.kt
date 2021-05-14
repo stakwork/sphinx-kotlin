@@ -25,12 +25,12 @@ class MessageListAdapter(
     private val lifecycleOwner: LifecycleOwner,
     private val viewModel: ChatViewModel,
     private val imageLoader: ImageLoader<ImageView>,
-): RecyclerView.Adapter<MessageListAdapter.MessageViewHolder>(), DefaultLifecycleObserver {
+) : RecyclerView.Adapter<MessageListAdapter.MessageViewHolder>(), DefaultLifecycleObserver {
 
     private inner class Diff(
         private val oldList: List<MessageHolderViewState>,
         private val newList: List<MessageHolderViewState>
-    ): DiffUtil.Callback() {
+    ) : DiffUtil.Callback() {
         override fun getOldListSize(): Int {
             return oldList.size
         }
@@ -120,7 +120,7 @@ class MessageListAdapter(
 
     inner class MessageViewHolder(
         private val binding: LayoutMessageHolderBinding
-    ): RecyclerView.ViewHolder(binding.root) {
+    ) : RecyclerView.ViewHolder(binding.root) {
 
         private var disposable: Disposable? = null
 
@@ -146,7 +146,12 @@ class MessageListAdapter(
                         content
                 } ?: includeMessageHolderMessageTypes.includeMessageTypeMessage.root.goneIfFalse(false)
 
-                viewState.statusHeader.configureInHolder(viewState.message, binding)
+                viewState.statusHeader.configureInHolder(
+                    viewState.message,
+                    viewModel.chatDataStateFlow.value?.chat?.type,
+                    binding
+                )
+
                 viewState.background.setBackground(recyclerViewWidth, binding)
 
                 setDirectPaymentLayout(viewState.directPayment)

@@ -1,12 +1,11 @@
 package chat.sphinx.chat_common.ui.viewstate.messageholder
 
-import androidx.core.view.updateLayoutParams
-import chat.sphinx.chat_common.R
 import chat.sphinx.chat_common.databinding.LayoutMessageHolderBinding
+import chat.sphinx.wrapper_chat.ChatType
 import chat.sphinx.wrapper_common.Seen
 import chat.sphinx.wrapper_message.Message
-import chat.sphinx.wrapper_view.Px
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
+import io.matthewnelson.android_feature_screens.util.goneIfTrue
 
 sealed class HolderStatusHeader {
 
@@ -16,18 +15,19 @@ sealed class HolderStatusHeader {
 
     abstract fun configureInHolder(
         message: Message,
+        chatType: ChatType?,
         binding: LayoutMessageHolderBinding
     )
 
     object None : HolderStatusHeader() {
-        override fun configureInHolder(message: Message, binding: LayoutMessageHolderBinding) {
+        override fun configureInHolder(message: Message, chatType: ChatType?, binding: LayoutMessageHolderBinding) {
             binding.includeMessageStatusHeader.root.goneIfFalse(false)
         }
     }
 
     sealed class In : HolderStatusHeader() {
 
-        override fun configureInHolder(message: Message, binding: LayoutMessageHolderBinding) {
+        override fun configureInHolder(message: Message, chatType: ChatType?, binding: LayoutMessageHolderBinding) {
             val includeMessageStatusHeader = binding.includeMessageStatusHeader
 
             includeMessageStatusHeader.layoutConstraintSentMessageContentContainer.goneIfFalse(false)
@@ -36,41 +36,52 @@ sealed class HolderStatusHeader {
             includeMessageStatusHeader.textViewReceivedMessageLockIcon.goneIfFalse(
                 message.messageContentDecrypted != null
             )
+
+            includeMessageStatusHeader.textViewReceivedMessageSenderName.text = message.senderAlias?.value ?: ""
+
+            includeMessageStatusHeader.textViewReceivedMessageSenderName.goneIfTrue(
+                chatType?.value == ChatType.CONVERSATION
+            )
         }
 
         object First : In() {
-            override fun configureInHolder(message: Message, binding: LayoutMessageHolderBinding) {
-                binding.includeMessageStatusHeader.root.goneIfFalse(true)
+            override fun configureInHolder(message: Message, chatType: ChatType?, binding: LayoutMessageHolderBinding) {
+                val includeMessageStatusHeader = binding.includeMessageStatusHeader
 
-                super.configureInHolder(message, binding)
+                includeMessageStatusHeader.root.goneIfFalse(true)
+
+                super.configureInHolder(message, chatType, binding)
             }
         }
 
         object Middle : In() {
-            override fun configureInHolder(message: Message, binding: LayoutMessageHolderBinding) {
+            override fun configureInHolder(message: Message, chatType: ChatType?, binding: LayoutMessageHolderBinding) {
+                val includeMessageStatusHeader = binding.includeMessageStatusHeader
+
                 // TODO: Hide header on all but the `FIRST` message in a group
-//                binding.includeMessageStatusHeader.root.goneIfFalse(false)
-                binding.includeMessageStatusHeader.root.goneIfFalse(true)
+//                includeMessageStatusHeader.root.goneIfFalse(false)
+                includeMessageStatusHeader.root.goneIfFalse(true)
 
-
-                super.configureInHolder(message, binding)
+                super.configureInHolder(message, chatType, binding)
             }
         }
 
         object Last : In() {
-            override fun configureInHolder(message: Message, binding: LayoutMessageHolderBinding) {
-                // TODO: Hide header on all but the `FIRST` message in a group
-//                binding.includeMessageStatusHeader.root.goneIfFalse(false)
-                binding.includeMessageStatusHeader.root.goneIfFalse(true)
+            override fun configureInHolder(message: Message, chatType: ChatType?, binding: LayoutMessageHolderBinding) {
+                val includeMessageStatusHeader = binding.includeMessageStatusHeader
 
-                super.configureInHolder(message, binding)
+                // TODO: Hide header on all but the `FIRST` message in a group
+//                includeMessageStatusHeader.root.goneIfFalse(false)
+                includeMessageStatusHeader.root.goneIfFalse(true)
+
+                super.configureInHolder(message, chatType, binding)
             }
         }
     }
 
     sealed class Out : HolderStatusHeader() {
 
-        override fun configureInHolder(message: Message, binding: LayoutMessageHolderBinding) {
+        override fun configureInHolder(message: Message, chatType: ChatType?, binding: LayoutMessageHolderBinding) {
             val includeMessageStatusHeader = binding.includeMessageStatusHeader
 
             includeMessageStatusHeader.layoutConstraintSentMessageContentContainer.goneIfFalse(true)
@@ -86,30 +97,30 @@ sealed class HolderStatusHeader {
         }
 
         object First : Out() {
-            override fun configureInHolder(message: Message, binding: LayoutMessageHolderBinding) {
+            override fun configureInHolder(message: Message, chatType: ChatType?, binding: LayoutMessageHolderBinding) {
                 binding.includeMessageStatusHeader.root.goneIfFalse(true)
 
-                super.configureInHolder(message, binding)
+                super.configureInHolder(message, chatType, binding)
             }
         }
 
         object Middle : Out() {
-            override fun configureInHolder(message: Message, binding: LayoutMessageHolderBinding) {
+            override fun configureInHolder(message: Message, chatType: ChatType?, binding: LayoutMessageHolderBinding) {
                 // TODO: Hide header on all but the `FIRST` message in a group
 //                binding.includeMessageStatusHeader.root.goneIfFalse(false)
                 binding.includeMessageStatusHeader.root.goneIfFalse(true)
 
-                super.configureInHolder(message, binding)
+                super.configureInHolder(message, chatType, binding)
             }
         }
 
         object Last : Out() {
-            override fun configureInHolder(message: Message, binding: LayoutMessageHolderBinding) {
+            override fun configureInHolder(message: Message, chatType: ChatType?, binding: LayoutMessageHolderBinding) {
                 // TODO: Hide header on all but the `FIRST` message in a group
 //                binding.includeMessageStatusHeader.root.goneIfFalse(false)
                 binding.includeMessageStatusHeader.root.goneIfFalse(true)
 
-                super.configureInHolder(message, binding)
+                super.configureInHolder(message, chatType, binding)
             }
         }
     }
