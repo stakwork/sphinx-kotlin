@@ -23,3 +23,7 @@ To update only the submodules, run:
 ```
 git submodule update --remote
 ```
+
+## Notifications
+See [this](./sphinx/service/features/notifications/README.md) to enable building Sphinx
+with FirebaseMessaging

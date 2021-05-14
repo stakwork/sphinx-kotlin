@@ -18,6 +18,7 @@ import chat.sphinx.dashboard.ui.collectChatViewState
 import chat.sphinx.dashboard.ui.currentChatViewState
 import chat.sphinx.resources.setBackgroundRandomColor
 import chat.sphinx.resources.setTextColorExt
+import chat.sphinx.resources.setTextFont
 import chat.sphinx.wrapper_chat.*
 import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_common.util.getInitials
@@ -25,10 +26,13 @@ import chat.sphinx.wrapper_message.*
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.invisibleIfFalse
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisorScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.*
 import kotlin.collections.ArrayList
+
 
 internal class ChatListAdapter(
     private val imageLoader: ImageLoader<ImageView>,
@@ -178,10 +182,11 @@ internal class ChatListAdapter(
 
     inner class ChatViewHolder(
         private val binding: LayoutDashboardChatHolderBinding
-    ): RecyclerView.ViewHolder(binding.root) {
+    ): RecyclerView.ViewHolder(binding.root), DefaultLifecycleObserver {
 
         private var disposable: Disposable? = null
         private var dChat: DashboardChat? = null
+        private var badgeJob: Job? = null
 
         init {
             binding.layoutConstraintChatHolder.setOnClickListener {
@@ -228,11 +233,14 @@ internal class ChatListAdapter(
                 }
                 dChat = dashboardChat
                 disposable?.dispose()
+                badgeJob?.cancel()
 
                 // Set Defaults
                 layoutConstraintChatHolderBorder.goneIfFalse(position != dashboardChats.lastIndex)
                 textViewChatHolderName.setTextColorExt(android.R.color.white)
                 textViewChatHolderMessage.setTextColorExt(R.color.placeholderText)
+                textViewChatHolderMessage.setTextFont(R.font.roboto_regular)
+                textViewBadgeCount.invisibleIfFalse(false)
 
                 // Image
                 dashboardChat.photoUrl.let { url ->
@@ -274,12 +282,19 @@ internal class ChatListAdapter(
 
                 // Message
                 val messageText = dashboardChat.getMessageText()
+                val hastUnseenMessages = dashboardChat.hasUnseenMessages()
 
                 if (messageText == DashboardChat.Active.DECRYPTION_ERROR) {
                     textViewChatHolderMessage.setTextColorExt(R.color.primaryRed)
+                } else {
+                    textViewChatHolderMessage.setTextColorExt(if (hastUnseenMessages) R.color.text else R.color.placeholderText)
                 }
 
+                textViewChatHolderMessage.setTextFont(if (hastUnseenMessages) R.font.roboto_bold else R.font.roboto_regular)
+
                 textViewChatHolderMessage.text = messageText
+
+                handleUnseenMessageCount()
 
                 // Notification
                 if (dashboardChat is DashboardChat.Active) {
@@ -288,6 +303,34 @@ internal class ChatListAdapter(
                     imageViewChatHolderNotification.invisibleIfFalse(false)
                 }
             }
+        }
+
+        private fun handleUnseenMessageCount() {
+            dChat?.let { nnDashboardChat ->
+                badgeJob = supervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
+                    nnDashboardChat.unseenMessageFlow?.collect { unseen ->
+                        binding.textViewBadgeCount.apply {
+                            if (unseen != null && unseen > 0) {
+                                text = unseen.toString()
+                            }
+                            invisibleIfFalse(nnDashboardChat.hasUnseenMessages())
+                        }
+                    }
+                }
+            }
+        }
+
+        override fun onStart(owner: LifecycleOwner) {
+            super.onStart(owner)
+            badgeJob?.let {
+                if (!it.isActive) {
+                    handleUnseenMessageCount()
+                }
+            }
+        }
+
+        init {
+            lifecycleOwner.lifecycle.addObserver(this)
         }
 
     }

@@ -9,9 +9,9 @@ import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.LightningRouteHint
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_contact.ContactAlias
+import chat.sphinx.wrapper_contact.DeviceId
 import chat.sphinx.wrapper_invite.Invite
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 
 /**
  * All [Contact]s are cached to the DB such that a network refresh will update
@@ -25,6 +25,7 @@ interface ContactRepository {
     suspend fun getInviteByContactId(contactId: ContactId): Flow<Invite?>
 
     suspend fun getOwner(): Flow<Contact?>
+    suspend fun updateOwnerDeviceId(deviceId: DeviceId): Response<Any, ResponseError>
     fun networkRefreshContacts(): Flow<LoadResponse<Boolean, ResponseError>>
 
     suspend fun deleteContactById(contactId: ContactId): Response<Any, ResponseError>

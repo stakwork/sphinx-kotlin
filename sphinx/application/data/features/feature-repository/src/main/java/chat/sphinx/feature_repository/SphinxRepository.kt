@@ -8,6 +8,7 @@ import chat.sphinx.concept_network_query_chat.model.ChatDto
 import chat.sphinx.concept_network_query_contact.NetworkQueryContact
 import chat.sphinx.concept_network_query_contact.model.ContactDto
 import chat.sphinx.concept_network_query_invite.model.InviteDto
+import chat.sphinx.concept_network_query_contact.model.UpdateContactDto
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_lightning.model.balance.BalanceDto
 import chat.sphinx.concept_network_query_message.NetworkQueryMessage
@@ -49,6 +50,7 @@ import chat.sphinx.wrapper_common.toDateTime
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_contact.ContactAlias
 import chat.sphinx.wrapper_contact.ContactStatus
+import chat.sphinx.wrapper_contact.DeviceId
 import chat.sphinx.wrapper_invite.Invite
 import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_message.*
@@ -163,15 +165,25 @@ class SphinxRepository(
 
                                 queries.upsertMessage(msg.dto)
 
-                                msg.dto.chat_id?.let { nnChatId ->
+                                var chatId: ChatId? = null
 
-                                    if (msg.dto.updateChatDboLatestMessage) {
+                                msg.dto.chat?.let { chatDto ->
+                                    queries.upsertChat(chatDto, moshi)
+
+                                    chatId = ChatId(chatDto.id)
+                                }
+
+                                msg.dto.chat_id?.let { nnChatId ->
+                                    chatId = ChatId(nnChatId)
+                                }
+
+                                chatId?.let {  id ->
+                                    if (msg.dto.updateChatDboLatestMessage){
                                         queries.chatUpdateLatestMessage(
                                             MessageId(msg.dto.id),
-                                            ChatId(nnChatId)
+                                            id
                                         )
                                     }
-
                                 }
                             }
                         }
@@ -190,11 +202,22 @@ class SphinxRepository(
         ChatDboPresenterMapper(dispatchers)
     }
 
-    override suspend fun getChats(): Flow<List<Chat>> {
-        return coreDB.getSphinxDatabaseQueries().chatGetAll()
+    override suspend fun getUnseenMessagesByChatId(chat: Chat): Flow<Long?> {
+        return coreDB.getSphinxDatabaseQueries()
+            .chatGetUnseenIncomingMessagesCount(chat.contactIds.first(), chat.id)
             .asFlow()
-            .mapToList(dispatchers.io)
-            .map { chatDboPresenterMapper.mapListFrom(it) }
+            .mapToOneOrNull(dispatchers.io)
+            .distinctUntilChanged()
+    }
+
+    private val chatsFlow: SingletonFlow<List<Chat>> = SingletonFlow()
+    override suspend fun getChats(): Flow<List<Chat>> {
+        return chatsFlow.getOrInstantiate {
+            coreDB.getSphinxDatabaseQueries().chatGetAll()
+                .asFlow()
+                .mapToList(dispatchers.io)
+                .map { chatDboPresenterMapper.mapListFrom(it) }
+        }
     }
 
     override suspend fun getChatById(chatId: ChatId): Flow<Chat?> {
@@ -295,11 +318,14 @@ class SphinxRepository(
         InviteDboPresenterMapper(dispatchers)
     }
 
+    private val contactsFlow: SingletonFlow<List<Contact>> = SingletonFlow()
     override suspend fun getContacts(): Flow<List<Contact>> {
-        return coreDB.getSphinxDatabaseQueries().contactGetAll()
-            .asFlow()
-            .mapToList(dispatchers.io)
-            .map { contactDboPresenterMapper.mapListFrom(it) }
+        return contactsFlow.getOrInstantiate {
+            coreDB.getSphinxDatabaseQueries().contactGetAll()
+                .asFlow()
+                .mapToList(dispatchers.io)
+                .map { contactDboPresenterMapper.mapListFrom(it) }
+        }
     }
 
     override suspend fun getContactById(contactId: ContactId): Flow<Contact?> {
@@ -326,12 +352,60 @@ class SphinxRepository(
             .distinctUntilChanged()
     }
 
+    private val ownerFlow: SingletonFlow<Contact?> = SingletonFlow()
     override suspend fun getOwner(): Flow<Contact?> {
-        return coreDB.getSphinxDatabaseQueries().contactGetOwner()
-            .asFlow()
-            .mapToOneOrNull(dispatchers.io)
-            .map { it?.let { contactDboPresenterMapper.mapFrom(it) } }
-            .distinctUntilChanged()
+        return ownerFlow.getOrInstantiate {
+            coreDB.getSphinxDatabaseQueries().contactGetOwner()
+                .asFlow()
+                .mapToOneOrNull(dispatchers.io)
+                .map { it?.let { contactDboPresenterMapper.mapFrom(it) } }
+                .distinctUntilChanged()
+        }
+    }
+
+    override suspend fun updateOwnerDeviceId(deviceId: DeviceId): Response<Any, ResponseError> {
+        val queries = coreDB.getSphinxDatabaseQueries()
+        var response: Response<Any, ResponseError> = Response.Success(Any())
+
+        try {
+            getOwner().collect { owner ->
+
+                if (owner != null) {
+
+                    if (owner.deviceId != deviceId) {
+
+                        networkQueryContact.updateContact(
+                            owner.id,
+                            UpdateContactDto(device_id = deviceId.value)
+                        ).collect { loadResponse ->
+                            @Exhaustive
+                            when (loadResponse) {
+                                is LoadResponse.Loading -> {}
+                                is Response.Error -> {
+                                    response = loadResponse
+                                    throw Exception()
+                                }
+                                is Response.Success -> {
+                                    contactLock.withLock {
+                                        queries.upsertContact(loadResponse.value)
+                                    }
+                                    LOG.d(TAG, "DeviceId has been successfully updated")
+
+                                    throw Exception()
+                                }
+                            }
+                        }
+                    } else {
+                        LOG.d(TAG, "DeviceId is up to date")
+                        throw Exception()
+                    }
+
+                }
+
+            }
+        } catch (e: Exception) {}
+
+        return response
     }
 
     override fun networkRefreshContacts(): Flow<LoadResponse<Boolean, ResponseError>> = flow {

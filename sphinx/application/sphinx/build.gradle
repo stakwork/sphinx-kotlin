@@ -98,6 +98,14 @@ dependencies {
 
     implementation project(path: ':sphinx:screens:splash:key-restore')
 
+    // See `/sphinx/service/features/notifications/README.md`
+    if (findProperty("SPHINX_COMPILE_PUSH_NOTIFICATION_TYPE") == "firebase") {
+        // FirebaseMessaging
+        implementation project(path: ':sphinx:service:features:notifications:feature-service-notification-firebase')
+    } else {
+        implementation project(path: ':sphinx:service:features:notifications:feature-service-notification-empty')
+    }
+
     implementation deps.google.hilt
     kapt kaptDeps.google.hilt
 

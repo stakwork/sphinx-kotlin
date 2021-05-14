@@ -2,10 +2,11 @@ package chat.sphinx.feature_network_query_contact
 
 import chat.sphinx.concept_network_query_contact.NetworkQueryContact
 import chat.sphinx.concept_network_query_contact.model.ContactDto
-import chat.sphinx.concept_network_query_contact.model.CreateContactResponse
 import chat.sphinx.concept_network_query_contact.model.GetContactsResponse
+import chat.sphinx.concept_network_query_contact.model.UpdateContactDto
 import chat.sphinx.concept_network_relay_call.NetworkRelayCall
 import chat.sphinx.feature_network_query_contact.model.CreateContactRelayResponse
+import chat.sphinx.feature_network_query_contact.model.ContactRelayResponse
 import chat.sphinx.feature_network_query_contact.model.DeleteContactRelayResponse
 import chat.sphinx.feature_network_query_contact.model.GetContactsRelayResponse
 import chat.sphinx.kotlin_response.ResponseError
@@ -41,6 +42,18 @@ class NetworkQueryContactImpl(
     /// PUT ///
     ///////////
 //    app.put('/contacts/:id', contacts.updateContact)
+    override fun updateContact(
+        contactId: ContactId,
+        updateContactDto: UpdateContactDto,
+        relayData: Pair<AuthorizationToken, RelayUrl>?
+    ): Flow<LoadResponse<ContactDto, ResponseError>> =
+        networkRelayCall.relayPut(
+            responseJsonClass = ContactRelayResponse::class.java,
+            relayEndpoint = ENDPOINT_CONTACTS + "/${contactId.value}",
+            requestBodyJsonClass = UpdateContactDto::class.java,
+            requestBody = updateContactDto,
+            relayData = relayData,
+        )
 
     ////////////
     /// POST ///
