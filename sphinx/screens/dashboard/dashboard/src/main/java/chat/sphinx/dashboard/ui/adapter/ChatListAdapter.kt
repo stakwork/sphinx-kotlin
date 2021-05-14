@@ -266,16 +266,25 @@ internal class ChatListAdapter(
                 }
 
                 // Name
-                textViewChatHolderName.text = if (dashboardChat.chatName != null) {
+                val chatName = if (dashboardChat.chatName != null) {
                     dashboardChat.chatName
                 } else {
                     // Should never make it here, but just in case...
                     textViewChatHolderName.setTextColorExt(R.color.primaryRed)
+                    textViewChatHolderCenteredName.setTextColorExt(R.color.primaryRed)
                     "ERROR: NULL NAME"
                 }
 
+                textViewChatHolderName.text = chatName
+                textViewChatHolderCenteredName.text = chatName
+
                 // Lock
-                imageViewChatHolderLock.invisibleIfFalse(dashboardChat is DashboardChat.Active)
+                val encryptedChat = dashboardChat.isEncrypted()
+                imageViewChatHolderLock.invisibleIfFalse(encryptedChat)
+                imageViewChatHolderCenteredLock.invisibleIfFalse(encryptedChat)
+
+                layoutConstraintDashboardChatMessageHolder.invisibleIfFalse(dashboardChat is DashboardChat.Active)
+                layoutConstraintDashboardChatNoMessageHolder.invisibleIfFalse(dashboardChat !is DashboardChat.Active)
 
                 // Time
                 textViewChatHolderTime.text = dashboardChat.getDisplayTime(today00)

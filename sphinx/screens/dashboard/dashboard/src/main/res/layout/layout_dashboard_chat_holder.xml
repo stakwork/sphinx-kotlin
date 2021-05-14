@@ -61,51 +61,93 @@
         app:layout_constraintEnd_toStartOf="@+id/layout_constraint_chat_holder_details"
         app:layout_constraintStart_toEndOf="@+id/layout_dashboard_chat_avatar_holder">
 
-        <TextView
-            android:id="@+id/text_view_chat_holder_name"
-            android:layout_width="wrap_content"
-            android:layout_height="0dp"
-            android:ellipsize="end"
-            android:fontFamily="@font/roboto_regular"
-            android:gravity="center_vertical|start"
-            android:paddingTop="19dp"
-            android:singleLine="true"
-            android:textColor="@color/primaryText"
-            android:textSize="17sp"
-            app:layout_constraintBottom_toTopOf="@+id/text_view_chat_holder_message"
-            app:layout_constraintEnd_toStartOf="@+id/image_view_chat_holder_lock"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:text="Planet Sphinx" />
-
-        <TextView
-            android:id="@+id/image_view_chat_holder_lock"
-            android:layout_width="16dp"
-            android:layout_height="16dp"
-            android:layout_marginStart="4dp"
-            android:layout_marginBottom="2dp"
-            android:fontFamily="@font/material_icons_regular"
-            android:singleLine="true"
-            android:text="@string/material_icon_name_lock"
-            android:textColor="@color/secondaryText"
-            android:textSize="15sp"
-            app:layout_constraintBottom_toTopOf="@+id/text_view_chat_holder_message"
-            app:layout_constraintStart_toEndOf="@id/text_view_chat_holder_name" />
-
-        <TextView
-            android:id="@+id/text_view_chat_holder_message"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layout_constraint_dashboard_chat_message_holder"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:ellipsize="end"
-            android:fontFamily="@font/roboto_regular"
-            android:gravity="center_vertical"
-            android:paddingBottom="15dp"
-            android:singleLine="true"
-            android:textColor="@color/secondaryText"
-            android:textSize="14sp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/text_view_chat_holder_name"
-            tools:text="This is a test message" />
+            android:layout_height="match_parent">
+
+            <TextView
+                android:id="@+id/text_view_chat_holder_name"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:ellipsize="end"
+                android:fontFamily="@font/roboto_regular"
+                android:gravity="bottom|start"
+                android:singleLine="true"
+                android:textColor="@color/primaryText"
+                android:textSize="17sp"
+                app:layout_constraintBottom_toTopOf="@+id/text_view_chat_holder_message"
+                app:layout_constraintEnd_toStartOf="@+id/image_view_chat_holder_lock"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="Planet Sphinx" />
+
+            <TextView
+                android:id="@+id/image_view_chat_holder_lock"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_marginStart="4dp"
+                android:layout_marginBottom="2dp"
+                android:fontFamily="@font/material_icons_regular"
+                android:singleLine="true"
+                android:text="@string/material_icon_name_lock"
+                android:textColor="@color/secondaryText"
+                android:textSize="15sp"
+                android:gravity="bottom|start"
+                app:layout_constraintBottom_toBottomOf="@+id/text_view_chat_holder_name"
+                app:layout_constraintTop_toTopOf="@+id/text_view_chat_holder_name"
+                app:layout_constraintStart_toEndOf="@id/text_view_chat_holder_name" />
+
+            <TextView
+                android:id="@+id/text_view_chat_holder_message"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:ellipsize="end"
+                android:fontFamily="@font/roboto_regular"
+                android:gravity="center_vertical"
+                android:paddingBottom="15dp"
+                android:singleLine="true"
+                android:textColor="@color/secondaryText"
+                android:textSize="14sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/text_view_chat_holder_name"
+                tools:text="This is a test message" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layout_constraint_dashboard_chat_no_message_holder"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/text_view_chat_holder_centered_name"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:ellipsize="end"
+                android:fontFamily="@font/roboto_regular"
+                android:gravity="center_vertical|start"
+                android:singleLine="true"
+                android:textColor="@color/primaryText"
+                android:textSize="17sp"
+                app:layout_constraintStart_toStartOf="parent"
+                tools:text="Planet Sphinx"/>
+
+            <TextView
+                android:id="@+id/image_view_chat_holder_centered_lock"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginStart="4dp"
+                android:fontFamily="@font/material_icons_regular"
+                android:singleLine="true"
+                android:text="@string/material_icon_name_lock"
+                android:textColor="@color/secondaryText"
+                android:textSize="15sp"
+                android:gravity="center_vertical|start"
+                app:layout_constraintStart_toEndOf="@id/text_view_chat_holder_centered_name" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -118,9 +160,9 @@
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/image_view_chat_holder_notification"
-            android:layout_width="16dp"
+            android:layout_width="wrap_content"
             android:layout_height="0dp"
-            android:paddingTop="28dp"
+            android:paddingTop="26dp"
             android:src="@drawable/ic_baseline_notifications_off_24"
             android:visibility="invisible"
             app:layout_constraintBottom_toTopOf="@+id/text_view_chat_holder_time"
