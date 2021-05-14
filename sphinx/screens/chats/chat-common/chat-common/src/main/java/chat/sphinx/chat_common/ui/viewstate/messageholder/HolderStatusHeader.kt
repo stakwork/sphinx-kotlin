@@ -1,6 +1,8 @@
 package chat.sphinx.chat_common.ui.viewstate.messageholder
 
+import chat.sphinx.resources.R
 import chat.sphinx.chat_common.databinding.LayoutMessageHolderBinding
+import chat.sphinx.resources.setTextColorExt
 import chat.sphinx.wrapper_chat.ChatType
 import chat.sphinx.wrapper_common.Seen
 import chat.sphinx.wrapper_message.Message
@@ -37,11 +39,20 @@ sealed class HolderStatusHeader {
                 message.messageContentDecrypted != null
             )
 
-            includeMessageStatusHeader.textViewReceivedMessageSenderName.text = message.senderAlias?.value ?: ""
+            if (chatType?.value == ChatType.CONVERSATION) {
+                includeMessageStatusHeader.textViewReceivedMessageSenderName.goneIfTrue(true)
+            } else {
+                includeMessageStatusHeader.textViewReceivedMessageSenderName.goneIfTrue(false)
 
-            includeMessageStatusHeader.textViewReceivedMessageSenderName.goneIfTrue(
-                chatType?.value == ChatType.CONVERSATION
-            )
+                includeMessageStatusHeader.textViewReceivedMessageSenderName.text = message.senderAlias?.value ?: ""
+
+                /**
+                 *  TODO: Devise a way to derive random color values for sender aliases.
+                 *
+                 *  See the current iOS implementation: https://github.com/stakwork/sphinx/blob/9ee30302bc95091bcc9562e07ada87d52d27a5ad/sphinx/Scenes/Chat/Helpers/ChatHelper.swift#L12
+                 */
+                includeMessageStatusHeader.textViewReceivedMessageSenderName.setTextColorExt(R.color.lightPurple)
+            }
         }
 
         object First : In() {

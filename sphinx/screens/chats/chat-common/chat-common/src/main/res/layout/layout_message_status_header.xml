@@ -38,7 +38,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="CypherPoet"
-            tools:textColor="#11FFFF"
+            tools:textColor="@color/lightPurple"
             tools:visibility="visible" />
 
         <androidx.appcompat.widget.AppCompatTextView
