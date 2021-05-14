@@ -34,22 +34,18 @@ import chat.sphinx.logger.d
 import chat.sphinx.logger.e
 import chat.sphinx.logger.w
 import chat.sphinx.wrapper_chat.Chat
-import chat.sphinx.wrapper_common.DateTime
-import chat.sphinx.wrapper_common.Seen
+import chat.sphinx.wrapper_common.*
 import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.chat.ChatId
 import chat.sphinx.wrapper_common.contact.ContactId
 import chat.sphinx.wrapper_common.invite.InviteId
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessagePagination
-import chat.sphinx.wrapper_common.time
-import chat.sphinx.wrapper_common.toDateTime
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_contact.DeviceId
 import chat.sphinx.wrapper_invite.Invite
 import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_message.*
-import chat.sphinx.wrapper_message.media.MediaKeyDecrypted
 import chat.sphinx.wrapper_message.media.MessageMedia
 import chat.sphinx.wrapper_message.media.toMediaKeyDecrypted
 import chat.sphinx.wrapper_rsa.RsaPrivateKey
@@ -126,7 +122,11 @@ class SphinxRepository(
                     }
                 }
                 is SphinxSocketIOMessage.Type.ChatSeen -> {
-                    // TODO: Implement
+                    readMessagesImpl(
+                        chatId = ChatId(msg.dto.id),
+                        queries = queries,
+                        executeNetworkRequest = false
+                    )
                 }
                 is SphinxSocketIOMessage.Type.Group -> {
                     // TODO: Implement
@@ -165,7 +165,7 @@ class SphinxRepository(
                                     var chatId: ChatId? = null
 
                                     msg.dto.chat?.let { chatDto ->
-                                        queries.upsertChat(chatDto, moshi)
+                                        queries.upsertChat(chatDto, moshi, chatSeenMap)
 
                                         chatId = ChatId(chatDto.id)
                                     }
@@ -295,7 +295,7 @@ class SphinxRepository(
 
                         queries.transaction {
                             for (dto in chats) {
-                                queries.upsertChat(dto, moshi)
+                                queries.upsertChat(dto, moshi, chatSeenMap)
 
                                 chatIdsToRemove.remove(ChatId(dto.id))
                             }
@@ -846,19 +846,47 @@ class SphinxRepository(
         )
     }
 
-    override suspend fun readMessages(chatId: ChatId) {
-        val queries = coreDB.getSphinxDatabaseQueries()
+    @Suppress("RemoveExplicitTypeArguments")
+    private val chatSeenMap: SynchronizedMap<ChatId, Seen> by lazy {
+        SynchronizedMap<ChatId, Seen>()
+    }
 
+    override suspend fun readMessages(chatId: ChatId) {
+        readMessagesImpl(
+            chatId = chatId,
+            queries = coreDB.getSphinxDatabaseQueries(),
+            executeNetworkRequest = true
+        )
+    }
+
+    private suspend fun readMessagesImpl(
+        chatId: ChatId,
+        queries: SphinxDatabaseQueries,
+        executeNetworkRequest: Boolean
+    ) {
         chatLock.withLock {
             messageLock.withLock {
-                queries.transaction {
-                    queries.chatUpdateSeen(Seen.True, chatId)
-                    queries.chatMessagesUpdateSeen(Seen.True, chatId)
+                chatSeenMap.withLock { map ->
+
+                    if (map[chatId]?.isTrue() != true) {
+
+                        queries.transaction {
+                            queries.chatUpdateSeen(Seen.True, chatId)
+                            queries.chatMessagesUpdateSeen(Seen.True, chatId)
+                        }
+
+                        LOG.d(TAG, "Chat [$chatId] marked as Seen")
+
+                        map[chatId] = Seen.True
+
+                    }
                 }
             }
         }
 
-        networkQueryMessage.readMessages(chatId).collect { _ -> }
+        if (executeNetworkRequest) {
+            networkQueryMessage.readMessages(chatId).collect { _ -> }
+        }
     }
 
     /*

@@ -7,6 +7,7 @@ import chat.sphinx.concept_network_query_lightning.model.balance.BalanceDto
 import chat.sphinx.concept_network_query_message.model.MessageDto
 import chat.sphinx.conceptcoredb.SphinxDatabaseQueries
 import chat.sphinx.wrapper_chat.*
+import chat.sphinx.wrapper_common.*
 import chat.sphinx.wrapper_common.chat.ChatId
 import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.contact.ContactId
@@ -14,9 +15,6 @@ import chat.sphinx.wrapper_common.invite.InviteId
 import chat.sphinx.wrapper_common.invite.toInviteStatus
 import chat.sphinx.wrapper_common.lightning.*
 import chat.sphinx.wrapper_common.message.MessageId
-import chat.sphinx.wrapper_common.toDateTime
-import chat.sphinx.wrapper_common.toPhotoUrl
-import chat.sphinx.wrapper_common.toSeen
 import chat.sphinx.wrapper_contact.*
 import chat.sphinx.wrapper_invite.InviteString
 import chat.sphinx.wrapper_lightning.NodeBalance
@@ -27,7 +25,6 @@ import chat.sphinx.wrapper_message.media.toMediaKeyDecrypted
 import chat.sphinx.wrapper_message.media.toMediaType
 import chat.sphinx.wrapper_rsa.RsaPublicKey
 import com.squareup.moshi.Moshi
-import com.squareup.sqldelight.Transacter
 import com.squareup.sqldelight.TransactionCallbacks
 
 @Suppress("NOTHING_TO_INLINE")
@@ -53,7 +50,13 @@ inline val MessageDto.updateChatDboLatestMessage: Boolean
             status != MessageStatus.DELETED
 
 @Suppress("NOTHING_TO_INLINE", "SpellCheckingInspection")
-inline fun SphinxDatabaseQueries.upsertChat(dto: ChatDto, moshi: Moshi) {
+inline fun SphinxDatabaseQueries.upsertChat(
+    dto: ChatDto,
+    moshi: Moshi,
+    chatSeenMap: SynchronizedMap<ChatId, Seen>
+) {
+    val seen = dto.seenActual.toSeen()
+
     chatUpsert(
         dto.name?.toChatName(),
         dto.photo_url?.toPhotoUrl(),
@@ -67,7 +70,7 @@ inline fun SphinxDatabaseQueries.upsertChat(dto: ChatDto, moshi: Moshi) {
         dto.unlistedActual.toChatUnlisted(),
         dto.privateActual.toChatPrivate(),
         dto.owner_pub_key?.toLightningNodePubKey(),
-        dto.seenActual.toSeen(),
+        seen,
         dto.meta?.toChatMetaDataOrNull(moshi),
         dto.my_photo_url?.toPhotoUrl(),
         dto.my_alias?.toChatAlias(),
@@ -77,6 +80,8 @@ inline fun SphinxDatabaseQueries.upsertChat(dto: ChatDto, moshi: Moshi) {
         dto.type.toChatType(),
         dto.created_at.toDateTime()
     )
+
+    chatSeenMap.withLock { it[ChatId(dto.id)] = seen }
 }
 
 /**
@@ -177,12 +182,12 @@ fun TransactionCallbacks.upsertMessage(dto: MessageDto, queries: SphinxDatabaseQ
 inline fun TransactionCallbacks.deleteChatById(
     chatId: ChatId?,
     queries: SphinxDatabaseQueries,
-    map: SynchronizedMap<ChatId, Long>?,
+    lastMessageUpdatedTimeMap: SynchronizedMap<ChatId, Long>?,
 ) {
     queries.messageDeleteByChatId(chatId ?: return)
     queries.messageMediaDeleteByChatId(chatId)
     queries.chatDeleteById(chatId)
-    map?.withLock { it.remove(chatId) }
+    lastMessageUpdatedTimeMap?.withLock { it.remove(chatId) }
 }
 
 @Suppress("NOTHING_TO_INLINE")
