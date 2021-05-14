@@ -279,7 +279,7 @@ internal class DashboardViewModel @Inject constructor(
         }
 
         jobNetworkRefresh = viewModelScope.launch(dispatchers.mainImmediate) {
-            lightningRepository.networkRefreshBalance().collect { response ->
+            lightningRepository.networkRefreshBalance.collect { response ->
                 @Exhaustive
                 when (response) {
                     is LoadResponse.Loading,

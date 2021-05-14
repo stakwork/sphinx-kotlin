@@ -565,53 +565,55 @@ class SphinxRepository(
         return accountBalanceStateFlow.asStateFlow()
     }
 
-    override fun networkRefreshBalance(): Flow<LoadResponse<Boolean, ResponseError>> = flow {
-        networkQueryLightning.getBalance().collect { loadResponse ->
-            @Exhaustive
-            when (loadResponse) {
-                is LoadResponse.Loading -> {
-                    emit(loadResponse)
-                }
-                is Response.Error -> {
-                    emit(loadResponse)
-                }
-                is Response.Success -> {
+    override val networkRefreshBalance: Flow<LoadResponse<Boolean, ResponseError>> by lazy {
+        flow {
+            networkQueryLightning.getBalance().collect { loadResponse ->
+                @Exhaustive
+                when (loadResponse) {
+                    is LoadResponse.Loading -> {
+                        emit(loadResponse)
+                    }
+                    is Response.Error -> {
+                        emit(loadResponse)
+                    }
+                    is Response.Success -> {
 
-                    try {
-                        val jsonString: String = withContext(dispatchers.default) {
-                            moshi.adapter(BalanceDto::class.java)
-                                .toJson(loadResponse.value)
-                        } ?: throw NullPointerException("Converting BalanceDto to Json failed")
+                        try {
+                            val jsonString: String = withContext(dispatchers.default) {
+                                moshi.adapter(BalanceDto::class.java)
+                                    .toJson(loadResponse.value)
+                            } ?: throw NullPointerException("Converting BalanceDto to Json failed")
 
-                        balanceLock.withLock {
-                            accountBalanceStateFlow.value = loadResponse.value.toNodeBalance()
+                            balanceLock.withLock {
+                                accountBalanceStateFlow.value = loadResponse.value.toNodeBalance()
 
-                            authenticationStorage.putString(
-                                REPOSITORY_LIGHTNING_BALANCE,
-                                jsonString
-                            )
-                        }
+                                authenticationStorage.putString(
+                                    REPOSITORY_LIGHTNING_BALANCE,
+                                    jsonString
+                                )
+                            }
 
-                        emit(Response.Success(true))
-                    } catch (e: Exception) {
+                            emit(Response.Success(true))
+                        } catch (e: Exception) {
 
-                        // this should _never_ happen, as if the network call was
-                        // successful, it went from json -> dto, and we're just going
-                        // back from dto -> json to persist it...
-                        emit(
-                            Response.Error(
-                                ResponseError(
-                                    """
+                            // this should _never_ happen, as if the network call was
+                            // successful, it went from json -> dto, and we're just going
+                            // back from dto -> json to persist it...
+                            emit(
+                                Response.Error(
+                                    ResponseError(
+                                        """
                                         Network Fetching of balance was successful, but
                                         conversion to a string for persisting failed.
                                         ${loadResponse.value}
                                     """.trimIndent(),
-                                    e
+                                        e
+                                    )
                                 )
                             )
-                        )
-                    }
+                        }
 
+                    }
                 }
             }
         }
