@@ -121,7 +121,7 @@ class SphinxRepository(
                 is SphinxSocketIOMessage.Type.Contact -> {
                     contactLock.withLock {
                         queries.transaction {
-                            queries.upsertContact(msg.dto)
+                            upsertContact(msg.dto, queries)
                         }
                     }
                 }
@@ -160,7 +160,7 @@ class SphinxRepository(
                             contactLock.withLock {
                                 queries.transaction {
 
-                                    queries.upsertMessage(msg.dto)
+                                    upsertMessage(msg.dto, queries)
 
                                     var chatId: ChatId? = null
 
@@ -171,7 +171,7 @@ class SphinxRepository(
                                     }
 
                                     msg.dto.contact?.let { contactDto ->
-                                        queries.upsertContact(contactDto)
+                                        upsertContact(contactDto, queries)
                                     }
 
                                     msg.dto.chat_id?.let { nnChatId ->
@@ -419,7 +419,7 @@ class SphinxRepository(
                                             queries.transaction {
                                                 for (dto in loadResponse.value.contacts) {
 
-                                                    queries.upsertContact(dto)
+                                                    upsertContact(dto, queries)
 
                                                     contactIdsToRemove.remove(ContactId(dto.id))
 
@@ -523,7 +523,9 @@ class SphinxRepository(
                                 }
                                 is Response.Success -> {
                                     contactLock.withLock {
-                                        queries.upsertContact(loadResponse.value)
+                                        queries.transaction {
+                                            upsertContact(loadResponse.value, queries)
+                                        }
                                     }
                                     LOG.d(TAG, "DeviceId has been successfully updated")
 
@@ -966,9 +968,9 @@ class SphinxRepository(
                                                     val id: Long? = dto.chat_id
 
                                                     if (id == null) {
-                                                        queries.upsertMessage(dto)
+                                                        upsertMessage(dto, queries)
                                                     } else if (chatIds.contains(ChatId(id))) {
-                                                        queries.upsertMessage(dto)
+                                                        upsertMessage(dto, queries)
 
                                                         if (dto.updateChatDboLatestMessage) {
                                                             latestMessageMap[ChatId(id)] = dto

@@ -83,13 +83,13 @@ inline fun SphinxDatabaseQueries.upsertChat(dto: ChatDto, moshi: Moshi) {
  * Always use [SphinxDatabaseQueries.transaction] with this extension function.
  * */
 @Suppress("NOTHING_TO_INLINE", "SpellCheckingInspection")
-inline fun SphinxDatabaseQueries.upsertContact(dto: ContactDto) {
+inline fun TransactionCallbacks.upsertContact(dto: ContactDto, queries: SphinxDatabaseQueries) {
 
     if (dto.fromGroupActual) {
         return
     }
 
-    contactUpsert(
+    queries.contactUpsert(
         dto.route_hint?.toLightningRouteHint(),
         dto.public_key?.toLightningNodePubKey(),
         dto.node_alias?.toLightningNodeAlias(),
@@ -108,7 +108,7 @@ inline fun SphinxDatabaseQueries.upsertContact(dto: ContactDto) {
         dto.isOwnerActual.toOwner(),
         dto.created_at.toDateTime()
     )
-    dto.invite?.let { upsertInvite(it) }
+    dto.invite?.let { queries.upsertInvite(it) }
 }
 
 @Suppress("NOTHING_TO_INLINE")
@@ -125,7 +125,7 @@ inline fun SphinxDatabaseQueries.upsertInvite(dto: InviteDto) {
 }
 
 @Suppress("SpellCheckingInspection")
-fun SphinxDatabaseQueries.upsertMessage(dto: MessageDto) {
+fun TransactionCallbacks.upsertMessage(dto: MessageDto, queries: SphinxDatabaseQueries) {
 
     val chatId: ChatId = dto.chat_id?.let {
         ChatId(it)
@@ -133,7 +133,7 @@ fun SphinxDatabaseQueries.upsertMessage(dto: MessageDto) {
         ChatId(it)
     } ?: ChatId(ChatId.NULL_CHAT_ID.toLong())
 
-    messageUpsert(
+    queries.messageUpsert(
         dto.status.toMessageStatus(),
         dto.seenActual.toSeen(),
         dto.sender_alias?.toSenderAlias(),
@@ -160,7 +160,7 @@ fun SphinxDatabaseQueries.upsertMessage(dto: MessageDto) {
 
             if (mediaToken.isEmpty() || mediaType.isEmpty()) return
 
-            messageMediaUpsert(
+            queries.messageMediaUpsert(
                 dto.media_key?.toMediaKey(),
                 mediaType.toMediaType(),
                 MediaToken(mediaToken),
