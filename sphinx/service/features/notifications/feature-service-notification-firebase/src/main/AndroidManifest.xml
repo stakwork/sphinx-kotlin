@@ -3,6 +3,15 @@
     package="chat.sphinx">
 
     <application>
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/sphinx_white_notification" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_color"
+            android:resource="@color/primaryBlue" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="@string/fcm_notification_channel_id" />
         <service android:name=".feature_service_notification_firebase.SphinxFirebaseMessagingService"
             android:exported="false">
             <intent-filter>
