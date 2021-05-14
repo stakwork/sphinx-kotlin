@@ -47,9 +47,10 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             android:textSize="@dimen/default_form_edit_view_size"
-            android:inputType="textVisiblePassword"
+            android:inputType="textVisiblePassword|textCapWords"
             android:layout_marginLeft="@dimen/new_contact_edit_text_left_margin"
-            android:singleLine="true" />
+            android:singleLine="true"
+            tools:text= "Testing"/>
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/layout_constraint_new_contact_nickname_bottom_border"
@@ -85,7 +86,7 @@
 
         <androidx.appcompat.widget.AppCompatEditText
             android:id="@+id/new_contact_address_edit_text"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textColor="@color/text"
             android:fontFamily="@font/roboto_regular"
@@ -93,11 +94,13 @@
             app:layout_constraintTop_toBottomOf="@+id/new_contact_address_text_view"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/layout_constraint_new_contact_scan_button"
+            app:layout_constraintEnd_toEndOf="parent"
             android:textSize="@dimen/default_form_edit_view_size"
             android:inputType="textVisiblePassword"
             android:layout_marginLeft="@dimen/new_contact_edit_text_left_margin"
-            android:singleLine="true" />
+            android:layout_marginRight="@dimen/new_contact_scan_icon_container_width"
+            android:singleLine="true"
+            tools:text= "Testing" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/layout_constraint_new_contact_address_bottom_border"
@@ -110,7 +113,7 @@
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/layout_constraint_new_contact_scan_button"
-            android:layout_width="60dp"
+            android:layout_width="@dimen/new_contact_scan_icon_container_width"
             android:layout_height="match_parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toTopOf="parent"
