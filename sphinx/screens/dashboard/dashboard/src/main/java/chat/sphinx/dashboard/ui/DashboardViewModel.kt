@@ -178,7 +178,7 @@ internal class DashboardViewModel @Inject constructor(
 
         viewModelScope.launch(dispatchers.mainImmediate) {
             delay(25L)
-            chatRepository.getChats().distinctUntilChanged().collect { chats ->
+            chatRepository.getAllChats.distinctUntilChanged().collect { chats ->
                 collectionLock.withLock {
                     chatsCollectionInitialized = true
                     val newList = ArrayList<DashboardChat>(chats.size)

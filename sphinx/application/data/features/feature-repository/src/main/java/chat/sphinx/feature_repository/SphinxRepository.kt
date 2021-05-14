@@ -202,58 +202,67 @@ class SphinxRepository(
         ChatDboPresenterMapper(dispatchers)
     }
 
-    override suspend fun getUnseenMessagesByChatId(chat: Chat): Flow<Long?> {
-        return coreDB.getSphinxDatabaseQueries()
-            .chatGetUnseenIncomingMessagesCount(chat.contactIds.first(), chat.id)
-            .asFlow()
-            .mapToOneOrNull(dispatchers.io)
-            .distinctUntilChanged()
-    }
-
-    private val chatsFlow: SingletonFlow<List<Chat>> = SingletonFlow()
-    override suspend fun getChats(): Flow<List<Chat>> {
-        return chatsFlow.getOrInstantiate {
-            coreDB.getSphinxDatabaseQueries().chatGetAll()
-                .asFlow()
-                .mapToList(dispatchers.io)
-                .map { chatDboPresenterMapper.mapListFrom(it) }
+    override val getAllChats: Flow<List<Chat>> by lazy {
+        flow {
+            emitAll(
+                coreDB.getSphinxDatabaseQueries().chatGetAll()
+                    .asFlow()
+                    .mapToList(dispatchers.io)
+                    .map { chatDboPresenterMapper.mapListFrom(it) }
+            )
         }
     }
 
-    override suspend fun getChatById(chatId: ChatId): Flow<Chat?> {
-        return coreDB.getSphinxDatabaseQueries().chatGetById(chatId)
-            .asFlow()
-            .mapToOneOrNull(dispatchers.io)
-            .map { it?.let { chatDboPresenterMapper.mapFrom(it) } }
-            .distinctUntilChanged()
+    override fun getChatById(chatId: ChatId): Flow<Chat?> = flow {
+        emitAll(
+            coreDB.getSphinxDatabaseQueries().chatGetById(chatId)
+                .asFlow()
+                .mapToOneOrNull(dispatchers.io)
+                .map { it?.let { chatDboPresenterMapper.mapFrom(it) } }
+                .distinctUntilChanged()
+        )
     }
 
-    override suspend fun getChatByUUID(chatUUID: ChatUUID): Flow<Chat?> {
-        return coreDB.getSphinxDatabaseQueries().chatGetByUUID(chatUUID)
-            .asFlow()
-            .mapToOneOrNull(dispatchers.io)
-            .map { it?.let { chatDboPresenterMapper.mapFrom(it) } }
-            .distinctUntilChanged()
+    override fun getChatByUUID(chatUUID: ChatUUID): Flow<Chat?> = flow {
+        emitAll(
+            coreDB.getSphinxDatabaseQueries().chatGetByUUID(chatUUID)
+                .asFlow()
+                .mapToOneOrNull(dispatchers.io)
+                .map { it?.let { chatDboPresenterMapper.mapFrom(it) } }
+                .distinctUntilChanged()
+        )
     }
 
-    override fun networkRefreshChats(): Flow<LoadResponse<Boolean, ResponseError>> = flow {
-        networkQueryChat.getChats().collect { loadResponse ->
+    override fun getUnseenMessagesByChatId(chat: Chat): Flow<Long?> = flow {
+        emitAll(
+            coreDB.getSphinxDatabaseQueries()
+                .chatGetUnseenIncomingMessagesCount(chat.contactIds.first(), chat.id)
+                .asFlow()
+                .mapToOneOrNull(dispatchers.io)
+                .distinctUntilChanged()
+        )
+    }
 
-            @Exhaustive
-            when (loadResponse) {
-                is Response.Error -> {
-                    emit(loadResponse)
+    override val networkRefreshChats: Flow<LoadResponse<Boolean, ResponseError>> by lazy {
+        flow {
+            networkQueryChat.getChats().collect { loadResponse ->
+
+                @Exhaustive
+                when (loadResponse) {
+                    is Response.Error -> {
+                        emit(loadResponse)
+                    }
+                    is Response.Success -> {
+                        emit(
+                            processChatDtos(loadResponse.value)
+                        )
+                    }
+                    is LoadResponse.Loading -> {
+                        emit(loadResponse)
+                    }
                 }
-                is Response.Success -> {
-                    emit(
-                        processChatDtos(loadResponse.value)
-                    )
-                }
-                is LoadResponse.Loading -> {
-                    emit(loadResponse)
-                }
+
             }
-
         }
     }
 
