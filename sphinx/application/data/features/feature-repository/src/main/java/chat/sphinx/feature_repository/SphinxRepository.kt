@@ -444,6 +444,7 @@ class SphinxRepository(
                                                         )
                                                     ).executeAsOneOrNull()?.let { chatDbo ->
                                                         queries.messageDeleteByChatId(chatDbo.id)
+                                                        queries.messageMediaDeleteByChatId(chatDbo.id)
                                                         queries.chatDeleteById(chatDbo.id)
 
                                                         lastMessageUpdatedTimeMap.withLock { map ->
@@ -513,6 +514,7 @@ class SphinxRepository(
                         queries.transaction {
                             chat?.let { nnChat ->
                                 queries.messageDeleteByChatId(nnChat.id)
+                                queries.messageMediaDeleteByChatId(nnChat.id)
                                 queries.chatDeleteById(nnChat.id)
 
                                 lastMessageUpdatedTimeMap.withLock { map ->
