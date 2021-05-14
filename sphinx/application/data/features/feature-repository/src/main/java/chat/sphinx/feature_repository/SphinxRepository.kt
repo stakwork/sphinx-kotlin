@@ -51,6 +51,7 @@ import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message.media.MediaKeyDecrypted
 import chat.sphinx.wrapper_message.media.MessageMedia
+import chat.sphinx.wrapper_message.media.toMediaKeyDecrypted
 import chat.sphinx.wrapper_rsa.RsaPrivateKey
 import com.squareup.moshi.Moshi
 import com.squareup.sqldelight.runtime.coroutines.asFlow
@@ -302,9 +303,7 @@ class SphinxRepository(
                             // remove remaining chat's from DB
                             for (chatId in chatIdsToRemove) {
                                 LOG.d(TAG, "Removing Chats/Messages - chatId")
-                                queries.chatDeleteById(chatId)
-                                queries.messageDeleteByChatId(chatId)
-                                queries.messageMediaDeleteByChatId(chatId)
+                                deleteChatById(chatId, queries, lastMessageUpdatedTimeMap)
                             }
 
                         }
@@ -418,40 +417,16 @@ class SphinxRepository(
                                         chatLock.withLock {
 
                                             queries.transaction {
-                                                var ownerId: ContactId? = null
-
                                                 for (dto in loadResponse.value.contacts) {
 
                                                     queries.upsertContact(dto)
-
-                                                    if (dto.isOwnerActual) {
-                                                        ownerId = ContactId(dto.id)
-                                                    }
 
                                                     contactIdsToRemove.remove(ContactId(dto.id))
 
                                                 }
 
                                                 for (contactId in contactIdsToRemove) {
-
-                                                    queries.contactDeleteById(contactId)
-                                                    queries.inviteDeleteByContactId(contactId)
-
-                                                    queries.chatGetConversationForContact(
-                                                        listOf(
-                                                            ownerId ?: continue,
-                                                            contactId
-                                                        )
-                                                    ).executeAsOneOrNull()?.let { chatDbo ->
-                                                        queries.messageDeleteByChatId(chatDbo.id)
-                                                        queries.messageMediaDeleteByChatId(chatDbo.id)
-                                                        queries.chatDeleteById(chatDbo.id)
-
-                                                        lastMessageUpdatedTimeMap.withLock { map ->
-                                                            map.remove(chatDbo.id)
-                                                        }
-                                                    }
-
+                                                    deleteContactById(contactId, queries)
                                                 }
 
                                             }
@@ -512,17 +487,8 @@ class SphinxRepository(
                                 .executeAsOneOrNull()
 
                         queries.transaction {
-                            chat?.let { nnChat ->
-                                queries.messageDeleteByChatId(nnChat.id)
-                                queries.messageMediaDeleteByChatId(nnChat.id)
-                                queries.chatDeleteById(nnChat.id)
-
-                                lastMessageUpdatedTimeMap.withLock { map ->
-                                    map.remove(nnChat.id)
-                                }
-                            }
-                            queries.contactDeleteById(contactId)
-                            queries.inviteDeleteByContactId(contactId)
+                            deleteChatById(chat?.id, queries, lastMessageUpdatedTimeMap)
+                            deleteContactById(contactId, queries)
                         }
 
                     }
@@ -722,23 +688,32 @@ class SphinxRepository(
                     }
                     is Response.Success -> {
 
-                        val decryptedContent = MessageContentDecrypted(
-                            response.value.toUnencryptedString().value
-                        )
+                        val message: Message = messageDboPresenterMapper.mapFrom(messageDbo)
 
-                        messageLock.withLock {
-                            withContext(dispatchers.io) {
-                                queries.transaction {
-                                    queries.messageUpdateContentDecrypted(
-                                        decryptedContent,
-                                        messageDbo.id
-                                    )
+                        response.value
+                            .toUnencryptedString(trim = false)
+                            .value
+                            .toMessageContentDecrypted()
+                            ?.let { decryptedContent ->
+
+                                messageLock.withLock {
+
+                                    withContext(dispatchers.io) {
+                                        queries.transaction {
+                                            queries.messageUpdateContentDecrypted(
+                                                decryptedContent,
+                                                messageDbo.id
+                                            )
+                                        }
+                                    }
+
                                 }
-                            }
-                        }
 
-                        messageDboPresenterMapper.mapFrom(messageDbo)
-                            .setMessageContentDecrypted(decryptedContent)
+                                message.setMessageContentDecrypted(decryptedContent)
+
+                            } ?: message.setDecryptionError(null)
+
+                        message
                     }
                 }
 
@@ -775,27 +750,43 @@ class SphinxRepository(
                                     }
                                 }
                                 is Response.Success -> {
-                                    val decryptedKey = MediaKeyDecrypted(
-                                        response.value.toUnencryptedString().value
-                                    )
 
-                                    messageLock.withLock {
-                                        withContext(dispatchers.io) {
-                                            queries.messageMediaUpdateMediaKeyDecrypted(
-                                                decryptedKey,
-                                                mediaDbo.id
+                                    response.value
+                                        .toUnencryptedString(trim = false)
+                                        .value
+                                        .toMediaKeyDecrypted()
+                                        .let { decryptedKey ->
+
+                                            message.setMessageMedia(
+                                                MessageMedia(
+                                                    mediaDbo.media_key,
+                                                    decryptedKey,
+                                                    mediaDbo.media_type,
+                                                    mediaDbo.media_token
+                                                ).also {
+
+                                                    if (decryptedKey == null) {
+
+                                                        it.setDecryptionError(null)
+
+                                                    } else {
+
+                                                        messageLock.withLock {
+
+                                                            withContext(dispatchers.io) {
+                                                                queries.messageMediaUpdateMediaKeyDecrypted(
+                                                                    decryptedKey,
+                                                                    mediaDbo.id
+                                                                )
+                                                            }
+
+                                                        }
+
+                                                    }
+                                                }
                                             )
-                                        }
-                                    }
 
-                                    message.setMessageMedia(
-                                        MessageMedia(
-                                            mediaDbo.media_key,
-                                            decryptedKey,
-                                            mediaDbo.media_type,
-                                            mediaDbo.media_token
-                                        )
-                                    )
+                                        }
                                 }
                             }
                         } else {
@@ -1098,7 +1089,7 @@ class SphinxRepository(
                         }
                         is Response.Success -> {
                             message.setMessageContentDecrypted(
-                                decrypted.value.toUnencryptedString().value
+                                decrypted.value.toUnencryptedString(trim = false).value
                             )
                         }
                     }
@@ -1143,7 +1134,7 @@ class SphinxRepository(
                         }
                         is Response.Success -> {
                             message.setMediaKeyDecrypted(
-                                decrypted.value.toUnencryptedString().value
+                                decrypted.value.toUnencryptedString(trim = false).value
                             )
                         }
                     }

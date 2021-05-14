@@ -27,6 +27,8 @@ import chat.sphinx.wrapper_message.media.toMediaKeyDecrypted
 import chat.sphinx.wrapper_message.media.toMediaType
 import chat.sphinx.wrapper_rsa.RsaPublicKey
 import com.squareup.moshi.Moshi
+import com.squareup.sqldelight.Transacter
+import com.squareup.sqldelight.TransactionCallbacks
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun BalanceDto.toNodeBalanceOrNull(): NodeBalance? =
@@ -169,4 +171,25 @@ fun SphinxDatabaseQueries.upsertMessage(dto: MessageDto) {
 
         }
     }
+}
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun TransactionCallbacks.deleteChatById(
+    chatId: ChatId?,
+    queries: SphinxDatabaseQueries,
+    map: SynchronizedMap<ChatId, Long>?,
+) {
+    queries.messageDeleteByChatId(chatId ?: return)
+    queries.messageMediaDeleteByChatId(chatId)
+    queries.chatDeleteById(chatId)
+    map?.withLock { it.remove(chatId) }
+}
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun TransactionCallbacks.deleteContactById(
+    contactId: ContactId,
+    queries: SphinxDatabaseQueries
+) {
+    queries.contactDeleteById(contactId)
+    queries.inviteDeleteByContactId(contactId)
 }
