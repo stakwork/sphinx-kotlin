@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
 import androidx.constraintlayout.motion.widget.MotionLayout
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -66,11 +65,17 @@ internal class DashboardFragment : MotionLayoutFragment<
     override val viewModel: DashboardViewModel by viewModels()
     override val binding: FragmentDashboardBinding by viewBinding(FragmentDashboardBinding::bind)
 
+    private val onStopSupervisor: OnStopSupervisorScope by lazy(LazyThreadSafetyMode.NONE) {
+        OnStopSupervisorScope()
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         BackPressHandler(binding.root.context)
             .enableDoubleTapToClose(viewLifecycleOwner, SphinxToastUtils())
             .addCallback(viewLifecycleOwner, requireActivity())
+
+        onStopSupervisor.observe(viewLifecycleOwner)
 
         viewModel.networkRefresh()
 
@@ -198,13 +203,9 @@ internal class DashboardFragment : MotionLayoutFragment<
         }
     }
 
-    private val supervisor: OnStopSupervisorScope by lazy(LazyThreadSafetyMode.NONE) {
-        OnStopSupervisorScope(viewLifecycleOwner)
-    }
-
     override fun onStart() {
         super.onStart()
-        supervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
+        onStopSupervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
             viewModel.getAccountBalance().collect { nodeBalance ->
                 if (nodeBalance == null) return@collect
 
@@ -215,7 +216,7 @@ internal class DashboardFragment : MotionLayoutFragment<
             }
         }
 
-        supervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
+        onStopSupervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
             viewModel.networkStateFlow.collect { loadResponse ->
                 binding.layoutDashboardHeader.let { dashboardHeader ->
                     @Exhaustive
@@ -249,7 +250,7 @@ internal class DashboardFragment : MotionLayoutFragment<
             }
         }
 
-        supervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
+        onStopSupervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
             viewModel.accountOwnerStateFlow.collect { contactOwner ->
                 contactOwner?.let { owner ->
                     owner.photoUrl?.value?.let { url ->

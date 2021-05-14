@@ -84,11 +84,11 @@ internal class AddressBookListAdapter(
     }
 
     private val addressBookContacts = ArrayList<Contact>(viewModel.currentViewState.list)
-    private val supervisor = OnStopSupervisorScope(lifecycleOwner)
+    private val onStopSupervisor = OnStopSupervisorScope().observe(lifecycleOwner)
 
     override fun onStart(owner: LifecycleOwner) {
         super.onStart(owner)
-        supervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
+        onStopSupervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
             viewModel.collectViewState { viewState ->
 
                 if (addressBookContacts.isEmpty()) {
@@ -172,7 +172,7 @@ internal class AddressBookListAdapter(
                     layoutAddressBookInitialHolder.textViewInitials.goneIfFalse(url == null)
 
                     if (url != null) {
-                        supervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
+                        onStopSupervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
                             imageLoader.load(
                                 layoutAddressBookInitialHolder.imageViewChatPicture,
                                 url.value,

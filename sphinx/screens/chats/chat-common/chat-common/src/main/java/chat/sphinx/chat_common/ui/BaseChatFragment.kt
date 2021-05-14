@@ -64,12 +64,18 @@ abstract class BaseChatFragment<
 
     protected abstract val chatNavigator: ChatNavigator
 
+    protected val onStopSupervisor: OnStopSupervisorScope by lazy {
+        OnStopSupervisorScope()
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupChatHeader()
 
         ChatBackPressHandler(binding.root.context)
             .addCallback(viewLifecycleOwner, requireActivity())
+
+        onStopSupervisor.observe(viewLifecycleOwner)
 
         headerNavBack.setOnClickListener {
             onNavigationBack()
@@ -93,10 +99,6 @@ abstract class BaseChatFragment<
                 chatNavigator.popBackStack()
             }
         }
-    }
-
-    protected val onStopSupervisor: OnStopSupervisorScope by lazy {
-        OnStopSupervisorScope(viewLifecycleOwner)
     }
 
     private fun setupChatHeader() {
