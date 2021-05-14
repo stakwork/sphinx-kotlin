@@ -5,15 +5,12 @@ import chat.sphinx.chat_common.databinding.LayoutMessageHolderBinding
 import chat.sphinx.resources.setTextColorExt
 import chat.sphinx.wrapper_chat.ChatType
 import chat.sphinx.wrapper_common.Seen
+import chat.sphinx.wrapper_common.hhmmElseDate
 import chat.sphinx.wrapper_message.Message
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.goneIfTrue
 
 sealed class HolderStatusHeader {
-
-    companion object {
-        const val SPACE_WIDTH_MULTIPLE: Float = 0.2F
-    }
 
     abstract fun configureInHolder(
         message: Message,
@@ -35,15 +32,10 @@ sealed class HolderStatusHeader {
             includeMessageStatusHeader.layoutConstraintSentMessageContentContainer.goneIfFalse(false)
             includeMessageStatusHeader.layoutConstraintReceivedMessageContentContainer.goneIfFalse(true)
 
-            includeMessageStatusHeader.textViewReceivedMessageLockIcon.goneIfFalse(
-                message.messageContentDecrypted != null
-            )
-
             if (chatType?.value == ChatType.CONVERSATION) {
                 includeMessageStatusHeader.textViewReceivedMessageSenderName.goneIfTrue(true)
             } else {
                 includeMessageStatusHeader.textViewReceivedMessageSenderName.goneIfTrue(false)
-
                 includeMessageStatusHeader.textViewReceivedMessageSenderName.text = message.senderAlias?.value ?: ""
 
                 /**
@@ -53,6 +45,12 @@ sealed class HolderStatusHeader {
                  */
                 includeMessageStatusHeader.textViewReceivedMessageSenderName.setTextColorExt(R.color.lightPurple)
             }
+
+            includeMessageStatusHeader.textViewReceivedMessageLockIcon.goneIfTrue(
+                message.messageContentDecrypted == null
+            )
+
+            includeMessageStatusHeader.textViewReceivedMessageTimestamp.text = message.date.hhmmElseDate()
         }
 
         object First : In() {
@@ -98,8 +96,8 @@ sealed class HolderStatusHeader {
             includeMessageStatusHeader.layoutConstraintSentMessageContentContainer.goneIfFalse(true)
             includeMessageStatusHeader.layoutConstraintReceivedMessageContentContainer.goneIfFalse(false)
 
-            includeMessageStatusHeader.textViewSentMessageLockIcon.goneIfFalse(
-                message.messageContentDecrypted != null
+            includeMessageStatusHeader.textViewSentMessageLockIcon.goneIfTrue(
+                message.messageContentDecrypted == null
             )
 
             includeMessageStatusHeader.textViewSentMessageBoltIcon.goneIfFalse(
