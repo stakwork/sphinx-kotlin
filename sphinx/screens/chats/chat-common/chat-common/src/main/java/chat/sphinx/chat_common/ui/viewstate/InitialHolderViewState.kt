@@ -4,19 +4,26 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.ColorInt
 import chat.sphinx.chat_common.R
+import chat.sphinx.chat_common.databinding.LayoutMessageStatusHeaderBinding
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.resources.setBackgroundRandomColor
 import chat.sphinx.wrapper_common.PhotoUrl
+import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
+import io.matthewnelson.android_feature_screens.util.visible
 
+/*
+* TODO: Separate out logic for setting views into extension function(s)
+* */
 sealed class InitialHolderViewState {
 
     abstract suspend fun setInitialHolder(
         textViewInitials: TextView,
         imageViewPicture: ImageView,
+        statusHeader: LayoutMessageStatusHeaderBinding,
         imageLoader: ImageLoader<ImageView>
     ): Disposable?
 
@@ -24,10 +31,13 @@ sealed class InitialHolderViewState {
         override suspend fun setInitialHolder(
             textViewInitials: TextView,
             imageViewPicture: ImageView,
+            statusHeader: LayoutMessageStatusHeaderBinding,
             imageLoader: ImageLoader<ImageView>,
         ): Disposable? {
-            textViewInitials.goneIfFalse(false)
-            imageViewPicture.goneIfFalse(false)
+            statusHeader.root.gone
+            textViewInitials.gone
+            imageViewPicture.gone
+
             return null
         }
     }
@@ -39,10 +49,13 @@ sealed class InitialHolderViewState {
         override suspend fun setInitialHolder(
             textViewInitials: TextView,
             imageViewPicture: ImageView,
+            statusHeader: LayoutMessageStatusHeaderBinding,
             imageLoader: ImageLoader<ImageView>,
         ): Disposable? {
-            textViewInitials.goneIfFalse(true)
-            imageViewPicture.goneIfFalse(false)
+            statusHeader.root.gone
+            textViewInitials.visible
+            imageViewPicture.gone
+
             textViewInitials.text = initials
             textViewInitials.setBackgroundRandomColor(R.drawable.chat_initials_circle, color)
             return null
@@ -53,10 +66,13 @@ sealed class InitialHolderViewState {
         override suspend fun setInitialHolder(
             textViewInitials: TextView,
             imageViewPicture: ImageView,
+            statusHeader: LayoutMessageStatusHeaderBinding,
             imageLoader: ImageLoader<ImageView>
         ): Disposable {
-            textViewInitials.goneIfFalse(false)
-            imageViewPicture.goneIfFalse(true)
+            statusHeader.root.gone
+            textViewInitials.gone
+            imageViewPicture.visible
+
             return imageLoader.load(
                 imageViewPicture,
                 photoUrl.value,

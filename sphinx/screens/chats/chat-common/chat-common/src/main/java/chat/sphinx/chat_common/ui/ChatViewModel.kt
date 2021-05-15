@@ -78,7 +78,7 @@ class ChatViewModel @Inject constructor(
                                 newList.add(
                                     MessageHolderViewState.OutGoing(
                                         message,
-                                        HolderBackground.Out.Middle
+                                        HolderBackground.Out.Middle,
                                     )
                                 )
                             } else {

@@ -38,7 +38,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="CypherPoet"
-            tools:textColor="#11FFFF"
+            tools:textColor="@color/lightPurple"
             tools:visibility="visible" />
 
         <androidx.appcompat.widget.AppCompatTextView
@@ -94,14 +94,16 @@
             android:layout_marginStart="@dimen/default_status_badge_inner_padding"
             android:fontFamily="@font/material_icons_regular"
             android:text="@string/material_icon_name_bolt"
-            android:textColor="@color/secondaryText"
+            android:textColor="@color/primaryGreen"
             android:textSize="@dimen/default_text_size_list_row_headline"
+            android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/text_view_sent_message_lock_icon"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintHorizontal_chainStyle="packed"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            tools:visibility="visible" />
 
 
         <androidx.appcompat.widget.AppCompatTextView
