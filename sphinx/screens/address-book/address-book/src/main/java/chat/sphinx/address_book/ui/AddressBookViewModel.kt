@@ -17,9 +17,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 internal class AddressBookViewModel @Inject constructor(
-    val dispatchers: CoroutineDispatchers,
+    dispatchers: CoroutineDispatchers,
     private val contactRepository: ContactRepository,
-): BaseViewModel<AddressBookViewState>(AddressBookViewState.ListMode(listOf()))
+): BaseViewModel<AddressBookViewState>(dispatchers, AddressBookViewState.ListMode(listOf()))
 {
     private val addressBookViewStateContainer: AddressBookViewStateContainer by lazy {
         AddressBookViewStateContainer(dispatchers)
@@ -33,13 +33,13 @@ internal class AddressBookViewModel @Inject constructor(
     }
 
     fun deleteContact(deletedContact: Contact) {
-        viewModelScope.launch(dispatchers.mainImmediate) {
+        viewModelScope.launch(mainImmediate) {
             contactRepository.deleteContactById(deletedContact.id)
         }
     }
 
     init {
-        viewModelScope.launch(dispatchers.mainImmediate) {
+        viewModelScope.launch(mainImmediate) {
             contactRepository.getAllContacts.distinctUntilChanged().collect { contacts ->
                 if (contacts.isEmpty()) {
                     return@collect
@@ -47,7 +47,7 @@ internal class AddressBookViewModel @Inject constructor(
 
                 val mutableList = contacts.toMutableList()
 
-                withContext(dispatchers.default) {
+                withContext(default) {
                     for ((index, contact) in contacts.withIndex()) {
                         if (contact.isOwner.isTrue()) {
                             mutableList.removeAt(index)

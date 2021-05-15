@@ -27,7 +27,10 @@ class NetworkClientImpl(
     private val dispatchers: CoroutineDispatchers,
     private val torManager: TorManager,
     private val LOG: SphinxLogger,
-): NetworkClientCache(), TorManagerListener {
+) : NetworkClientCache(),
+    TorManagerListener,
+    CoroutineDispatchers by dispatchers
+{
 
     companion object {
         const val TAG = "NetworkClientImpl"
@@ -124,7 +127,7 @@ class NetworkClientImpl(
                     var torStateJob: Job? = null
 
                     coroutineScope {
-                        socksPortJob = launch(dispatchers.mainImmediate) {
+                        socksPortJob = launch(mainImmediate) {
                             try {
                                 // wait for Tor to start and publish its socks address after
                                 // being bootstrapped.
@@ -144,7 +147,7 @@ class NetworkClientImpl(
                             } catch (e: Exception) {}
                         }
 
-                        torStateJob = launch(dispatchers.mainImmediate) {
+                        torStateJob = launch(mainImmediate) {
                             var retry: Int = 3
                             delay(250L)
                             try {
