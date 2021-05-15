@@ -864,27 +864,29 @@ class SphinxRepository(
         queries: SphinxDatabaseQueries,
         executeNetworkRequest: Boolean
     ) {
-        chatLock.withLock {
-            messageLock.withLock {
-                chatSeenMap.withLock { map ->
+        val wasMarkedSeen: Boolean =
+            chatLock.withLock {
+                messageLock.withLock {
+                    chatSeenMap.withLock { map ->
 
-                    if (map[chatId]?.isTrue() != true) {
+                        if (map[chatId]?.isTrue() != true) {
 
-                        queries.transaction {
-                            queries.chatUpdateSeen(Seen.True, chatId)
-                            queries.chatMessagesUpdateSeen(Seen.True, chatId)
+                            queries.transaction {
+                                queries.chatUpdateSeen(Seen.True, chatId)
+                                queries.chatMessagesUpdateSeen(Seen.True, chatId)
+                            }
+                            LOG.d(TAG, "Chat [$chatId] marked as Seen")
+                            map[chatId] = Seen.True
+
+                            true
+                        } else {
+                            false
                         }
-
-                        LOG.d(TAG, "Chat [$chatId] marked as Seen")
-
-                        map[chatId] = Seen.True
-
                     }
                 }
-            }
         }
 
-        if (executeNetworkRequest) {
+        if (executeNetworkRequest && wasMarkedSeen) {
             networkQueryMessage.readMessages(chatId).collect { _ -> }
         }
     }
