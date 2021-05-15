@@ -52,7 +52,6 @@ internal class SplashFragment: MotionLayoutFragment<
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         OnBackPress(binding.root.context).addCallback(viewLifecycleOwner, requireActivity())
-        lifecycleScope.launch { onViewStateFlowCollect(viewModel.currentViewState) }
     }
 
     private var doublePressBackJob: Job? = null
@@ -61,7 +60,7 @@ internal class SplashFragment: MotionLayoutFragment<
             viewModel.currentViewState.let { viewState ->
                 if (viewState is SplashViewState.Set3_DecryptKeys) {
                     if (viewState.inputLock && doublePressBackJob?.isActive != true) {
-                        doublePressBackJob = lifecycleScope.launch {
+                        doublePressBackJob = lifecycleScope.launch(viewModel.mainImmediate) {
                             SphinxToastUtils().show(
                                 binding.root.context,
                                 R_screens.string.close_app_double_tap_toast_msg

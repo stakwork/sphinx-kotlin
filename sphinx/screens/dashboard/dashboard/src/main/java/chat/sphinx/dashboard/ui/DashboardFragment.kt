@@ -21,7 +21,6 @@ import chat.sphinx.dashboard.R
 import chat.sphinx.dashboard.databinding.FragmentDashboardBinding
 import chat.sphinx.dashboard.ui.adapter.ChatListAdapter
 import chat.sphinx.dashboard.ui.adapter.ChatListFooterAdapter
-import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisorScope
 import chat.sphinx.dashboard.ui.viewstates.NavDrawerViewState
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
@@ -65,17 +64,11 @@ internal class DashboardFragment : MotionLayoutFragment<
     override val viewModel: DashboardViewModel by viewModels()
     override val binding: FragmentDashboardBinding by viewBinding(FragmentDashboardBinding::bind)
 
-    private val onStopSupervisor: OnStopSupervisorScope by lazy(LazyThreadSafetyMode.NONE) {
-        OnStopSupervisorScope()
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         BackPressHandler(binding.root.context)
             .enableDoubleTapToClose(viewLifecycleOwner, SphinxToastUtils())
             .addCallback(viewLifecycleOwner, requireActivity())
-
-        onStopSupervisor.observe(viewLifecycleOwner)
 
         viewModel.networkRefresh()
 
@@ -110,7 +103,7 @@ internal class DashboardFragment : MotionLayoutFragment<
     }
 
     private fun setupChats() {
-        val chatListAdapter = ChatListAdapter(imageLoader, viewLifecycleOwner, viewModel)
+        val chatListAdapter = ChatListAdapter(imageLoader, viewLifecycleOwner, onStopSupervisor, viewModel)
         val chatListFooterAdapter = ChatListFooterAdapter(viewLifecycleOwner, viewModel)
         binding.layoutDashboardChats.recyclerViewChats.apply {
             this.setHasFixedSize(false)
@@ -205,7 +198,7 @@ internal class DashboardFragment : MotionLayoutFragment<
 
     override fun onStart() {
         super.onStart()
-        onStopSupervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.getAccountBalance().collect { nodeBalance ->
                 if (nodeBalance == null) return@collect
 
@@ -216,7 +209,7 @@ internal class DashboardFragment : MotionLayoutFragment<
             }
         }
 
-        onStopSupervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.networkStateFlow.collect { loadResponse ->
                 binding.layoutDashboardHeader.let { dashboardHeader ->
                     @Exhaustive
@@ -250,7 +243,7 @@ internal class DashboardFragment : MotionLayoutFragment<
             }
         }
 
-        onStopSupervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.accountOwnerStateFlow.collect { contactOwner ->
                 contactOwner?.let { owner ->
                     owner.photoUrl?.value?.let { url ->
@@ -275,10 +268,6 @@ internal class DashboardFragment : MotionLayoutFragment<
                 }
             }
         }
-    }
-
-    override fun onResume() {
-        super.onResume()
     }
 
     override fun onPause() {
