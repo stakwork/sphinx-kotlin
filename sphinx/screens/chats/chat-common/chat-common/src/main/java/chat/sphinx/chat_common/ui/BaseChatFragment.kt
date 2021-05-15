@@ -31,6 +31,7 @@ import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.util.getInitials
 import io.matthewnelson.android_feature_screens.navigation.CloseAppOnBackPress
 import io.matthewnelson.android_feature_screens.ui.base.BaseFragment
+import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -122,10 +123,10 @@ abstract class BaseChatFragment<
 
                     chatData.photoUrl.let { url ->
                         if (url != null) {
-                            headerInitials.goneIfFalse(false)
+                            headerInitials.gone
                             setChatImageFromUrl(url)
                         } else {
-                            headerChatPicture.goneIfFalse(false)
+                            headerChatPicture.gone
                             headerInitials.text = chatData.chatName?.getInitials() ?: ""
                         }
                     }

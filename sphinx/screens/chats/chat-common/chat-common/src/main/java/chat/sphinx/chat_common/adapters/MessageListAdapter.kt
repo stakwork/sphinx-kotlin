@@ -10,10 +10,14 @@ import androidx.recyclerview.widget.RecyclerView
 import chat.sphinx.chat_common.ui.ChatViewModel
 import chat.sphinx.chat_common.databinding.LayoutMessageHolderBinding
 import chat.sphinx.chat_common.ui.viewstate.messageholder.MessageHolderViewState
+import chat.sphinx.chat_common.ui.viewstate.messageholder.setBackground
+import chat.sphinx.chat_common.ui.viewstate.messageholder.setDirectPaymentLayout
+import chat.sphinx.chat_common.ui.viewstate.messageholder.setHeaderStatus
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.wrapper_view.Px
-import io.matthewnelson.android_feature_screens.util.goneIfFalse
+import io.matthewnelson.android_feature_screens.util.gone
+import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -124,26 +128,37 @@ class MessageListAdapter(
         private var disposable: Disposable? = null
 
         fun bind(position: Int) {
+            val viewState = messages.elementAtOrNull(position) ?: return
+            disposable?.dispose()
+
             binding.apply {
-                val viewState = messages.elementAtOrNull(position) ?: return
-                disposable?.dispose()
 
                 onStopSupervisor.scope.launch(viewModel.mainImmediate) {
                     disposable = viewState.initialHolder.setInitialHolder(
-                        binding.includeMessageHolderChatImageInitialHolder.textViewInitials,
-                        binding.includeMessageHolderChatImageInitialHolder.imageViewChatPicture,
+                        includeMessageHolderChatImageInitialHolder.textViewInitials,
+                        includeMessageHolderChatImageInitialHolder.imageViewChatPicture,
+                        includeMessageStatusHeader,
                         imageLoader
                     )
                 }
 
                 // TODO: refactor into view state
-                viewState.message.messageContentDecrypted?.value?.let { content ->
-                    includeMessageHolderMessageTypes.includeMessageTypeMessage.root.goneIfFalse(true)
-                    includeMessageHolderMessageTypes.includeMessageTypeMessage.textViewMessageTypeMessage.text =
-                        content
-                } ?: includeMessageHolderMessageTypes.includeMessageTypeMessage.root.goneIfFalse(false)
+                includeMessageHolderMessageTypes.includeMessageTypeMessage.apply {
+                    viewState.message.messageContentDecrypted?.value?.let { content ->
+                        root.visible
+                        textViewMessageTypeMessage.text = content
+                    } ?: root.gone
+                }
 
-                viewState.background.setBackground(recyclerViewWidth, binding)
+                setHeaderStatus(
+                    viewState.background,
+                    viewState.message,
+                    viewModel.chatDataStateFlow.value?.chat?.type
+                )
+
+                setBackground(viewState.background, recyclerViewWidth)
+
+                setDirectPaymentLayout(viewState.directPayment)
             }
         }
 
