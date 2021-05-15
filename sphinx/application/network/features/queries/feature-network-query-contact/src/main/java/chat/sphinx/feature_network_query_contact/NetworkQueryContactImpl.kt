@@ -25,7 +25,6 @@ class NetworkQueryContactImpl(
     companion object {
         private const val ENDPOINT_CONTACTS = "/contacts"
         private const val ENDPOINT_DELETE_CONTACT = "/contacts/%d"
-        private const val ENDPOINT_CREATE_CONTACT = "/contacts"
     }
 
     ///////////
@@ -83,7 +82,7 @@ class NetworkQueryContactImpl(
     ): Flow<LoadResponse<ContactDto, ResponseError>> =
         networkRelayCall.relayPost(
             responseJsonClass = ContactRelayResponse::class.java,
-            relayEndpoint = ENDPOINT_CREATE_CONTACT,
+            relayEndpoint = ENDPOINT_CONTACTS,
             requestBodyJsonClass = PostContactDto::class.java,
             requestBody = postContactDto,
             relayData = relayData
