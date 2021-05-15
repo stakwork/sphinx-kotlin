@@ -12,13 +12,26 @@ internal sealed class NewContactSideEffect: SideEffect<Context>() {
     @get:StringRes
     abstract val stringRes: Int
 
+    open val showIcon: Boolean
+        get() = true
+    open val toastLengthLong: Boolean
+        get() = false
+
     override suspend fun execute(value: Context) {
-        SphinxToastUtils().show(value, stringRes)
+
+        SphinxToastUtils(
+            toastLengthLong = toastLengthLong,
+            image = if (showIcon) SphinxToastUtils.DEFAULT_ICON else null
+        ).show(value, stringRes)
     }
 
     object PrivacyPinHelp: NewContactSideEffect() {
         override val stringRes: Int
             get() = R.string.new_contact_privacy_setting_help
+        override val showIcon: Boolean
+            get() = false
+        override val toastLengthLong: Boolean
+            get() = true
     }
 
     object NicknameAndAddressRequired: NewContactSideEffect() {
