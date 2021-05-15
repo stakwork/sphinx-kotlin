@@ -4,9 +4,9 @@ import chat.sphinx.resources.R
 import chat.sphinx.chat_common.databinding.LayoutMessageHolderBinding
 import chat.sphinx.resources.setTextColorExt
 import chat.sphinx.wrapper_chat.ChatType
-import chat.sphinx.wrapper_common.Seen
-import chat.sphinx.wrapper_common.hhmmElseDate
+import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_message.Message
+import chat.sphinx.wrapper_message.isReceived
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.goneIfTrue
 
@@ -50,7 +50,7 @@ sealed class HolderStatusHeader {
                 message.messageContentDecrypted == null
             )
 
-            includeMessageStatusHeader.textViewReceivedMessageTimestamp.text = message.date.hhmmElseDate()
+            includeMessageStatusHeader.textViewReceivedMessageTimestamp.text = DateTime.getFormathmma().format(message.date)
         }
 
         object First : In() {
@@ -94,15 +94,11 @@ sealed class HolderStatusHeader {
             val includeMessageStatusHeader = binding.includeMessageStatusHeader
 
             includeMessageStatusHeader.layoutConstraintSentMessageContentContainer.goneIfFalse(true)
-            includeMessageStatusHeader.layoutConstraintReceivedMessageContentContainer.goneIfFalse(false)
+            includeMessageStatusHeader.layoutConstraintReceivedMessageContentContainer.goneIfTrue(true)
 
-            includeMessageStatusHeader.textViewSentMessageLockIcon.goneIfTrue(
-                message.messageContentDecrypted == null
-            )
-
-            includeMessageStatusHeader.textViewSentMessageBoltIcon.goneIfFalse(
-                message.seen.equals(Seen.SEEN)
-            )
+            includeMessageStatusHeader.textViewSentMessageLockIcon.goneIfTrue(message.messageContentDecrypted == null)
+            includeMessageStatusHeader.textViewSentMessageBoltIcon.goneIfFalse(message.status.isReceived())
+            includeMessageStatusHeader.textViewSentMessageTimestamp.text = DateTime.getFormathmma().format(message.date)
         }
 
         object First : Out() {
