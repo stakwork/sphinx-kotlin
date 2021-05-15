@@ -99,7 +99,7 @@ internal class DashboardViewModel @Inject constructor(
 
     init {
         viewModelScope.launch(dispatchers.mainImmediate) {
-            contactRepository.getContacts().distinctUntilChanged().collect { contacts ->
+            contactRepository.getAllContacts.distinctUntilChanged().collect { contacts ->
                 collectionLock.withLock {
                     contactsCollectionInitialized = true
 
@@ -178,7 +178,7 @@ internal class DashboardViewModel @Inject constructor(
 
         viewModelScope.launch(dispatchers.mainImmediate) {
             delay(25L)
-            chatRepository.getChats().distinctUntilChanged().collect { chats ->
+            chatRepository.getAllChats.distinctUntilChanged().collect { chats ->
                 collectionLock.withLock {
                     chatsCollectionInitialized = true
                     val newList = ArrayList<DashboardChat>(chats.size)
@@ -193,24 +193,8 @@ internal class DashboardViewModel @Inject constructor(
                             if (chat.type.isConversation()) {
                                 val contactId: ContactId = chat.contactIds.lastOrNull() ?: continue
 
-                                val contact: Contact = if (contactsCollectionInitialized) {
-
-                                    var temp: Contact? = null
-                                    for (contact in _contactsStateFlow.value) {
-                                        if (contact.id == contactId) {
-                                            temp = contact
-                                            break
-                                        }
-                                    }
-                                    temp ?: continue
-
-                                } else {
-
-                                    contactRepository.getContactById(
-                                        chat.contactIds.lastOrNull() ?: continue
-                                    ).firstOrNull() ?: continue
-
-                                }
+                                val contact: Contact = contactRepository.getContactById(contactId)
+                                    .firstOrNull() ?: continue
 
                                 contactsAdded.add(contactId)
 
@@ -279,7 +263,7 @@ internal class DashboardViewModel @Inject constructor(
         }
 
         jobNetworkRefresh = viewModelScope.launch(dispatchers.mainImmediate) {
-            lightningRepository.networkRefreshBalance().collect { response ->
+            lightningRepository.networkRefreshBalance.collect { response ->
                 @Exhaustive
                 when (response) {
                     is LoadResponse.Loading,
@@ -294,7 +278,7 @@ internal class DashboardViewModel @Inject constructor(
                 jobNetworkRefresh?.cancel()
             }
 
-            contactRepository.networkRefreshContacts().collect { response ->
+            contactRepository.networkRefreshContacts.collect { response ->
                 @Exhaustive
                 when (response) {
                     is LoadResponse.Loading -> {}
@@ -323,7 +307,7 @@ internal class DashboardViewModel @Inject constructor(
                 }
             }
 
-            messageRepository.networkRefreshMessages().collect { response ->
+            messageRepository.networkRefreshMessages.collect { response ->
                 _networkStateFlow.value = response
             }
         }

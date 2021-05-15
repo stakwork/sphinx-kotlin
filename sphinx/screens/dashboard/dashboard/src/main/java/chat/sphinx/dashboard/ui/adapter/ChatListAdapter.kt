@@ -120,11 +120,11 @@ internal class ChatListAdapter(
     }
 
     private val dashboardChats = ArrayList<DashboardChat>(viewModel.currentChatViewState.list)
-    private val supervisor = OnStopSupervisorScope(lifecycleOwner)
+    private val onStopSupervisor = OnStopSupervisorScope().observe(lifecycleOwner)
 
     override fun onStart(owner: LifecycleOwner) {
         super.onStart(owner)
-        supervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
+        onStopSupervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
             viewModel.collectChatViewState { viewState ->
 
                 if (dashboardChats.isEmpty()) {
@@ -194,7 +194,7 @@ internal class ChatListAdapter(
                     @Exhaustive
                     when (dashboardChat) {
                         is DashboardChat.Active.Conversation -> {
-                            supervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
+                            onStopSupervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
                                 viewModel.dashboardNavigator.toChatContact(
                                     dashboardChat.chat,
                                     dashboardChat.contact
@@ -202,7 +202,7 @@ internal class ChatListAdapter(
                             }
                         }
                         is DashboardChat.Active.GroupOrTribe -> {
-                            supervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
+                            onStopSupervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
 
                                 if (dashboardChat.chat.type.isGroup()) {
                                     viewModel.dashboardNavigator.toChatGroup(dashboardChat.chat)
@@ -213,7 +213,7 @@ internal class ChatListAdapter(
                             }
                         }
                         is DashboardChat.Inactive.Conversation -> {
-                            supervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
+                            onStopSupervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
                                 viewModel.dashboardNavigator.toChatContact(
                                     null,
                                     dashboardChat.contact
@@ -249,7 +249,7 @@ internal class ChatListAdapter(
                     layoutDashboardChatInitialHolder.textViewInitials.goneIfFalse(url == null)
 
                     if (url != null) {
-                        supervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
+                        onStopSupervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
                             imageLoader.load(
                                 layoutDashboardChatInitialHolder.imageViewChatPicture,
                                 url.value,
@@ -307,7 +307,7 @@ internal class ChatListAdapter(
 
         private fun handleUnseenMessageCount() {
             dChat?.let { nnDashboardChat ->
-                badgeJob = supervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
+                badgeJob = onStopSupervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
                     nnDashboardChat.unseenMessageFlow?.collect { unseen ->
                         binding.textViewBadgeCount.apply {
                             if (unseen != null && unseen > 0) {

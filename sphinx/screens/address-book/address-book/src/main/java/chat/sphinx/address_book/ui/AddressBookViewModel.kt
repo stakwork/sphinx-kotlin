@@ -40,7 +40,7 @@ internal class AddressBookViewModel @Inject constructor(
 
     init {
         viewModelScope.launch(dispatchers.mainImmediate) {
-            contactRepository.getContacts().distinctUntilChanged().collect { contacts ->
+            contactRepository.getAllContacts.distinctUntilChanged().collect { contacts ->
                 if (contacts.isEmpty()) {
                     return@collect
                 }

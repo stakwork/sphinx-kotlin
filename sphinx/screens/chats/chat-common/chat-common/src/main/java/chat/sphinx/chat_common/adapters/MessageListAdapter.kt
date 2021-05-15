@@ -6,22 +6,14 @@ import android.widget.ImageView
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import chat.sphinx.chat_common.R
 import chat.sphinx.chat_common.ui.ChatViewModel
 import chat.sphinx.chat_common.databinding.LayoutMessageHolderBinding
-import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
-import chat.sphinx.chat_common.ui.viewstate.messageholder.HolderBackground
 import chat.sphinx.chat_common.ui.viewstate.messageholder.MessageHolderViewState
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
-import chat.sphinx.concept_image_loader.ImageLoaderOptions
-import chat.sphinx.concept_image_loader.Transformation
-import chat.sphinx.resources.setBackgroundRandomColor
 import chat.sphinx.wrapper_view.Px
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
-import io.matthewnelson.android_feature_screens.util.invisibleIfFalse
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisorScope
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -76,12 +68,12 @@ class MessageListAdapter(
         }
     }
 
-    private val supervisor = OnStopSupervisorScope(lifecycleOwner)
+    private val onStopSupervisor = OnStopSupervisorScope().observe(lifecycleOwner)
     private val messages = ArrayList<MessageHolderViewState>(viewModel.messageHolderViewStateFlow.value)
 
     override fun onStart(owner: LifecycleOwner) {
         super.onStart(owner)
-        supervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
+        onStopSupervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
             viewModel.messageHolderViewStateFlow.collect { list ->
                 if (messages.isEmpty()) {
                     messages.addAll(list)
@@ -136,7 +128,7 @@ class MessageListAdapter(
                 val viewState = messages.elementAtOrNull(position) ?: return
                 disposable?.dispose()
 
-                supervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
+                onStopSupervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
                     disposable = viewState.initialHolder.setInitialHolder(
                         binding.includeMessageHolderChatImageInitialHolder.textViewInitials,
                         binding.includeMessageHolderChatImageInitialHolder.imageViewChatPicture,
