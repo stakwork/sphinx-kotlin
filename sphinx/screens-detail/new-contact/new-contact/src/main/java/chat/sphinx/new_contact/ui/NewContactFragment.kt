@@ -1,5 +1,6 @@
 package chat.sphinx.new_contact.ui
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
 import android.text.Editable
@@ -115,6 +116,7 @@ internal class NewContactFragment : SideEffectFragment<
         (requireActivity() as InsetterActivity).addNavigationBarPadding(binding.layoutConstraintNewContact)
     }
 
+    @SuppressLint("SetTextI18n")
     private fun pastePubKey(s: Editable?) {
         if (!s.toString().trim().matches(PASTE_REGEX.toRegex())) {
             return
@@ -122,8 +124,10 @@ internal class NewContactFragment : SideEffectFragment<
 
         s?.let {
             val splitText = it.trim().split(":")
-            binding.newContactAddressEditText.setText(splitText[0])
-            binding.newContactRouteHintEditText.setText("${splitText[1]}:${splitText[2]}")
+            if (splitText.size == 3) {
+                binding.newContactAddressEditText.setText(splitText[0])
+                binding.newContactRouteHintEditText.setText("${splitText[1]}:${splitText[2]}")
+            }
         }
     }
 
