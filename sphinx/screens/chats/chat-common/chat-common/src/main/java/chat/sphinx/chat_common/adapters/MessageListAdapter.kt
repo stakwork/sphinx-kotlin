@@ -11,6 +11,7 @@ import chat.sphinx.chat_common.ui.ChatViewModel
 import chat.sphinx.chat_common.databinding.LayoutMessageHolderBinding
 import chat.sphinx.chat_common.ui.viewstate.messageholder.MessageHolderViewState
 import chat.sphinx.chat_common.ui.viewstate.messageholder.setDirectPaymentLayout
+import chat.sphinx.chat_common.ui.viewstate.messageholder.setHeaderStatus
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.wrapper_view.Px
@@ -25,12 +26,12 @@ class MessageListAdapter(
     private val lifecycleOwner: LifecycleOwner,
     private val viewModel: ChatViewModel,
     private val imageLoader: ImageLoader<ImageView>,
-) : RecyclerView.Adapter<MessageListAdapter.MessageViewHolder>(), DefaultLifecycleObserver {
+): RecyclerView.Adapter<MessageListAdapter.MessageViewHolder>(), DefaultLifecycleObserver {
 
     private inner class Diff(
         private val oldList: List<MessageHolderViewState>,
         private val newList: List<MessageHolderViewState>
-    ) : DiffUtil.Callback() {
+    ): DiffUtil.Callback() {
         override fun getOldListSize(): Int {
             return oldList.size
         }
@@ -120,7 +121,7 @@ class MessageListAdapter(
 
     inner class MessageViewHolder(
         private val binding: LayoutMessageHolderBinding
-    ) : RecyclerView.ViewHolder(binding.root) {
+    ): RecyclerView.ViewHolder(binding.root) {
 
         private var disposable: Disposable? = null
 
@@ -146,10 +147,10 @@ class MessageListAdapter(
                         content
                 } ?: includeMessageHolderMessageTypes.includeMessageTypeMessage.root.goneIfFalse(false)
 
-                viewState.statusHeader.configureInHolder(
+                setHeaderStatus(
+                    viewState.background,
                     viewState.message,
-                    viewModel.chatDataStateFlow.value?.chat?.type,
-                    binding
+                    viewModel.chatDataStateFlow.value?.chat?.type
                 )
 
                 viewState.background.setBackground(recyclerViewWidth, binding)
