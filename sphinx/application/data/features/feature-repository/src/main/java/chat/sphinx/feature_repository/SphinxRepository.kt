@@ -86,6 +86,7 @@ class SphinxRepository(
     ContactRepository,
     LightningRepository,
     MessageRepository,
+    CoroutineDispatchers by dispatchers,
     SphinxSocketIOMessageListener
 {
 
@@ -149,13 +150,13 @@ class SphinxRepository(
                     decryptMessageDtoContentIfAvailable(
                         msg.dto,
                         coroutineScope { this },
-                        dispatchers.io
+                        io
                     )?.join()
 
                     decryptMessageDtoMediaKeyIfAvailable(
                         msg.dto,
                         coroutineScope { this },
-                        dispatchers.io
+                        io
                     )?.join()
 
                     messageLock.withLock {
@@ -211,7 +212,7 @@ class SphinxRepository(
             emitAll(
                 coreDB.getSphinxDatabaseQueries().chatGetAll()
                     .asFlow()
-                    .mapToList(dispatchers.io)
+                    .mapToList(io)
                     .map { chatDboPresenterMapper.mapListFrom(it) }
             )
         }
@@ -221,7 +222,7 @@ class SphinxRepository(
         emitAll(
             coreDB.getSphinxDatabaseQueries().chatGetById(chatId)
                 .asFlow()
-                .mapToOneOrNull(dispatchers.io)
+                .mapToOneOrNull(io)
                 .map { it?.let { chatDboPresenterMapper.mapFrom(it) } }
                 .distinctUntilChanged()
         )
@@ -231,7 +232,7 @@ class SphinxRepository(
         emitAll(
             coreDB.getSphinxDatabaseQueries().chatGetByUUID(chatUUID)
                 .asFlow()
-                .mapToOneOrNull(dispatchers.io)
+                .mapToOneOrNull(io)
                 .map { it?.let { chatDboPresenterMapper.mapFrom(it) } }
                 .distinctUntilChanged()
         )
@@ -242,7 +243,7 @@ class SphinxRepository(
             coreDB.getSphinxDatabaseQueries()
                 .chatGetUnseenIncomingMessagesCount(chat.contactIds.first(), chat.id)
                 .asFlow()
-                .mapToOneOrNull(dispatchers.io)
+                .mapToOneOrNull(io)
                 .distinctUntilChanged()
         )
     }
@@ -275,7 +276,7 @@ class SphinxRepository(
             val queries = coreDB.getSphinxDatabaseQueries()
 
             chatLock.withLock {
-                withContext(dispatchers.io) {
+                withContext(io) {
 
                     val chatIdsToRemove = queries.chatGetAllIds()
                         .executeAsList()
@@ -334,7 +335,7 @@ class SphinxRepository(
             emitAll(
                 coreDB.getSphinxDatabaseQueries().contactGetOwner()
                     .asFlow()
-                    .mapToOneOrNull(dispatchers.io)
+                    .mapToOneOrNull(io)
                     .map { it?.let { contactDboPresenterMapper.mapFrom(it) } }
                     .distinctUntilChanged()
             )
@@ -346,7 +347,7 @@ class SphinxRepository(
             emitAll(
                 coreDB.getSphinxDatabaseQueries().contactGetAll()
                     .asFlow()
-                    .mapToList(dispatchers.io)
+                    .mapToList(io)
                     .map { contactDboPresenterMapper.mapListFrom(it) }
             )
         }
@@ -356,7 +357,7 @@ class SphinxRepository(
         emitAll(
             coreDB.getSphinxDatabaseQueries().contactGetById(contactId)
                 .asFlow()
-                .mapToOneOrNull(dispatchers.io)
+                .mapToOneOrNull(io)
                 .map { it?.let { contactDboPresenterMapper.mapFrom(it) } }
                 .distinctUntilChanged()
         )
@@ -366,7 +367,7 @@ class SphinxRepository(
         emitAll(
             coreDB.getSphinxDatabaseQueries().inviteGetByContactId(contactId)
                 .asFlow()
-                .mapToOneOrNull(dispatchers.io)
+                .mapToOneOrNull(io)
                 .map { it?.let { inviteDboPresenterMapper.mapFrom(it) } }
                 .distinctUntilChanged()
         )
@@ -376,7 +377,7 @@ class SphinxRepository(
         emitAll(
             coreDB.getSphinxDatabaseQueries().inviteGetById(inviteId)
                 .asFlow()
-                .mapToOneOrNull(dispatchers.io)
+                .mapToOneOrNull(io)
                 .map { it?.let { inviteDboPresenterMapper.mapFrom(it) } }
                 .distinctUntilChanged()
         )
@@ -397,7 +398,7 @@ class SphinxRepository(
 
                         try {
                             contactLock.withLock {
-                                withContext(dispatchers.io) {
+                                withContext(io) {
 
                                     val contactIdsToRemove = queries.contactGetAllIds()
                                         .executeAsList()
@@ -555,7 +556,7 @@ class SphinxRepository(
                     ?.let { balanceJsonString ->
 
                         val balanceDto: BalanceDto? = try {
-                            withContext(dispatchers.default) {
+                            withContext(default) {
                                 moshi.adapter(BalanceDto::class.java)
                                     .fromJson(balanceJsonString)
                             }
@@ -588,7 +589,7 @@ class SphinxRepository(
                     is Response.Success -> {
 
                         try {
-                            val jsonString: String = withContext(dispatchers.default) {
+                            val jsonString: String = withContext(default) {
                                 moshi.adapter(BalanceDto::class.java)
                                     .toJson(loadResponse.value)
                             } ?: throw NullPointerException("Converting BalanceDto to Json failed")
@@ -651,7 +652,7 @@ class SphinxRepository(
         return rsa.decrypt(
             rsaPrivateKey = RsaPrivateKey(privateKey),
             text = EncryptedString(messageContent.value),
-            dispatcher = dispatchers.default
+            dispatcher = default
         )
     }
 
@@ -690,7 +691,7 @@ class SphinxRepository(
 
                                 messageLock.withLock {
 
-                                    withContext(dispatchers.io) {
+                                    withContext(io) {
                                         queries.transaction {
                                             queries.messageUpdateContentDecrypted(
                                                 decryptedContent,
@@ -717,7 +718,7 @@ class SphinxRepository(
         } ?: messageDboPresenterMapper.mapFrom(messageDbo)
 
         if (message.type.canContainMedia) {
-            withContext(dispatchers.io) {
+            withContext(io) {
                 queries.messageMediaGetById(message.id).executeAsOneOrNull()
             }?.let { mediaDbo ->
 
@@ -765,7 +766,7 @@ class SphinxRepository(
 
                                                         messageLock.withLock {
 
-                                                            withContext(dispatchers.io) {
+                                                            withContext(io) {
                                                                 queries.messageMediaUpdateMediaKeyDecrypted(
                                                                     decryptedKey,
                                                                     mediaDbo.id
@@ -814,7 +815,7 @@ class SphinxRepository(
         emitAll(
             queries.messageGetAllToShowByChatId(chatId)
                 .asFlow()
-                .mapToList(dispatchers.io)
+                .mapToList(io)
                 .map { listMessageDbo ->
                     listMessageDbo.map {
                         mapMessageDboAndDecryptContentIfNeeded(queries, it)
@@ -828,7 +829,7 @@ class SphinxRepository(
         emitAll(
             queries.messageGetById(messageId)
                 .asFlow()
-                .mapToOneOrNull(dispatchers.io)
+                .mapToOneOrNull(io)
                 .map { it?.let { messageDbo ->
                     mapMessageDboAndDecryptContentIfNeeded(queries, messageDbo)
                 }}
@@ -857,7 +858,7 @@ class SphinxRepository(
         val wasMarkedSeen: Boolean =
             chatLock.withLock {
                 messageLock.withLock {
-                    withContext(dispatchers.io) {
+                    withContext(io) {
                         chatSeenMap.withLock { map ->
 
                             if (map[chatId]?.isTrue() != true) {
@@ -967,7 +968,7 @@ class SphinxRepository(
 
                                 chatLock.withLock {
                                     messageLock.withLock {
-                                        withContext(dispatchers.io) {
+                                        withContext(io) {
 
                                             queries.transaction {
                                                 val chatIds =
@@ -1077,7 +1078,7 @@ class SphinxRepository(
     private suspend fun decryptMessageDtoContentIfAvailable(
         message: MessageDto,
         scope: CoroutineScope,
-        dispatcher: CoroutineDispatcher = dispatchers.mainImmediate
+        dispatcher: CoroutineDispatcher = mainImmediate
     ): Job? =
         message.message_content?.let { content ->
 
@@ -1121,7 +1122,7 @@ class SphinxRepository(
     private suspend fun decryptMessageDtoMediaKeyIfAvailable(
         message: MessageDto,
         scope: CoroutineScope,
-        dispatcher: CoroutineDispatcher = dispatchers.mainImmediate,
+        dispatcher: CoroutineDispatcher = mainImmediate,
     ): Job? =
         message.media_key?.let { mediaKey ->
 

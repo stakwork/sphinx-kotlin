@@ -14,7 +14,7 @@ import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.wrapper_view.Px
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
-import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisorScope
+import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -22,6 +22,7 @@ import kotlinx.coroutines.withContext
 class MessageListAdapter(
     private val recyclerView: RecyclerView,
     private val lifecycleOwner: LifecycleOwner,
+    private val onStopSupervisor: OnStopSupervisor,
     private val viewModel: ChatViewModel,
     private val imageLoader: ImageLoader<ImageView>,
 ): RecyclerView.Adapter<MessageListAdapter.MessageViewHolder>(), DefaultLifecycleObserver {
@@ -68,12 +69,11 @@ class MessageListAdapter(
         }
     }
 
-    private val onStopSupervisor = OnStopSupervisorScope().observe(lifecycleOwner)
     private val messages = ArrayList<MessageHolderViewState>(viewModel.messageHolderViewStateFlow.value)
 
     override fun onStart(owner: LifecycleOwner) {
         super.onStart(owner)
-        onStopSupervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.messageHolderViewStateFlow.collect { list ->
                 if (messages.isEmpty()) {
                     messages.addAll(list)
@@ -128,7 +128,7 @@ class MessageListAdapter(
                 val viewState = messages.elementAtOrNull(position) ?: return
                 disposable?.dispose()
 
-                onStopSupervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
+                onStopSupervisor.scope.launch(viewModel.mainImmediate) {
                     disposable = viewState.initialHolder.setInitialHolder(
                         binding.includeMessageHolderChatImageInitialHolder.textViewInitials,
                         binding.includeMessageHolderChatImageInitialHolder.imageViewChatPicture,

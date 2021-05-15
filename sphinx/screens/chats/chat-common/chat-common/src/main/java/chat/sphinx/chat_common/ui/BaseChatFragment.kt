@@ -32,8 +32,6 @@ import chat.sphinx.wrapper_common.util.getInitials
 import io.matthewnelson.android_feature_screens.navigation.CloseAppOnBackPress
 import io.matthewnelson.android_feature_screens.ui.base.BaseFragment
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
-import io.matthewnelson.android_feature_viewmodel.updateViewState
-import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisorScope
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
@@ -64,18 +62,12 @@ abstract class BaseChatFragment<
 
     protected abstract val chatNavigator: ChatNavigator
 
-    protected val onStopSupervisor: OnStopSupervisorScope by lazy {
-        OnStopSupervisorScope()
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupChatHeader()
 
         ChatBackPressHandler(binding.root.context)
             .addCallback(viewLifecycleOwner, requireActivity())
-
-        onStopSupervisor.observe(viewLifecycleOwner)
 
         headerNavBack.setOnClickListener {
             onNavigationBack()
@@ -84,7 +76,13 @@ abstract class BaseChatFragment<
             }
         }
 
-        val messageListAdapter = MessageListAdapter(recyclerView, viewLifecycleOwner, viewModel, imageLoader)
+        val messageListAdapter = MessageListAdapter(
+            recyclerView,
+            viewLifecycleOwner,
+            onStopSupervisor,
+            viewModel,
+            imageLoader
+        )
         recyclerView.apply {
             setHasFixedSize(false)
             layoutManager = LinearLayoutManager(binding.root.context)
@@ -113,7 +111,7 @@ abstract class BaseChatFragment<
 
     override fun onStart() {
         super.onStart()
-        onStopSupervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.chatDataStateFlow.collect { chatData ->
                 if (chatData != null) {
                     if (chatData.muted.isTrue()) {
@@ -138,9 +136,9 @@ abstract class BaseChatFragment<
                 }
             }
         }
-        
-        onStopSupervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
-            viewModel.checkRoute().collect { response ->
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.checkRoute.collect { response ->
                 @Exhaustive
                 when (response) {
                     is LoadResponse.Loading -> {
@@ -170,7 +168,7 @@ abstract class BaseChatFragment<
             .placeholderResId(R.drawable.ic_profile_avatar_circle)
             .transformation(Transformation.CircleCrop)
 
-        onStopSupervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             imageLoader.load(headerChatPicture, photoUrl.value, options.build())
         }
     }

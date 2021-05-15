@@ -24,7 +24,7 @@ internal class AuthenticationViewModel @Inject constructor(
         FragmentActivity,
         AuthenticationSideEffect,
         AuthenticationViewState
-        >(AuthenticationViewState.Idle())
+        >(dispatchers, AuthenticationViewState.Idle())
 {
     override val viewStateContainer: ViewStateContainer<AuthenticationViewState>
         get() = authenticationViewModelContainer.viewStateContainer
