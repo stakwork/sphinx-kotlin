@@ -10,6 +10,7 @@ abstract class AddFriendNavigator(
 ): Navigator<NavController>(detailNavigationDriver) {
     abstract suspend fun toCreateInvitationDetail()
     abstract suspend fun toAddContactDetail()
+    abstract suspend fun closeDetailScreen()
     suspend fun popBackStack() {
         navigationDriver.submitNavigationRequest(PopBackStack())
     }

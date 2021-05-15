@@ -11,4 +11,5 @@ abstract class NewContactNavigator(
     suspend fun popBackStack() {
         navigationDriver.submitNavigationRequest(PopBackStack())
     }
+    abstract suspend fun closeDetailScreen()
 }

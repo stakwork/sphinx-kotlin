@@ -20,8 +20,7 @@ import chat.sphinx.wrapper_common.lightning.LightningRouteHint
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.visible
-import io.matthewnelson.android_feature_toast_utils.ToastUtils
-import io.matthewnelson.android_feature_toast_utils.show
+import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 
 @AndroidEntryPoint
 internal class NewContactFragment : SideEffectFragment<
@@ -47,14 +46,10 @@ internal class NewContactFragment : SideEffectFragment<
             is NewContactViewState.Saving -> {
                 binding.newContactSaveProgress.visible
             }
-
             is NewContactViewState.Saved -> {
                 binding.newContactSaveProgress.gone
-
-                viewModel.navigator.popBackStack()
-                viewModel.navigator.popBackStack()
+                viewModel.navigator.closeDetailScreen()
             }
-
             is NewContactViewState.Error -> {
                 binding.newContactSaveProgress.gone
             }
@@ -64,22 +59,17 @@ internal class NewContactFragment : SideEffectFragment<
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.layoutNewContactHeader.textViewNewContactHeaderNavBack.setOnClickListener {
-            lifecycleScope.launch { viewModel.navigator.popBackStack() }
+            lifecycleScope.launch(viewModel.mainImmediate) { viewModel.navigator.popBackStack() }
         }
 
         binding.layoutNewContactHeader.textViewNewContactClose.setOnClickListener {
-            lifecycleScope.launch {
-                viewModel.navigator.popBackStack()
-                viewModel.navigator.popBackStack()
-            }
+            lifecycleScope.launch(viewModel.mainImmediate) { viewModel.navigator.closeDetailScreen() }
         }
 
-
         binding.layoutGroupPinView.newContactPinQuestionMarkTextView.setOnClickListener {
-            ToastUtils().show(
-                binding.root.context,
-                R.string.new_contact_privacy_setting_help
-            )
+            lifecycleScope.launch(viewModel.mainImmediate) {
+                viewModel.submitSideEffect(NewContactSideEffect.PrivacyPinHelp)
+            }
         }
 
         binding.newContactAddressEditText.addTextChangedListener(object : TextWatcher {

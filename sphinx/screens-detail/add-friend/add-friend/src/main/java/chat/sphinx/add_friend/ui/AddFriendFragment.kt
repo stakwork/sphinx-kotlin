@@ -32,7 +32,7 @@ internal class AddFriendFragment: BaseFragment<
             lifecycleScope.launch { viewModel.navigator.toAddContactDetail() }
         }
         binding.layoutAddFriendHeader.textViewAddFriendClose.setOnClickListener {
-            lifecycleScope.launch { viewModel.navigator.popBackStack() }
+            lifecycleScope.launch { viewModel.navigator.closeDetailScreen() }
         }
     }
 
