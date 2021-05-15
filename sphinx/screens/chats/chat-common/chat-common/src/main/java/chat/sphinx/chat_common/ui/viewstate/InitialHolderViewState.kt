@@ -5,7 +5,6 @@ import android.widget.TextView
 import androidx.annotation.ColorInt
 import chat.sphinx.chat_common.R
 import chat.sphinx.chat_common.databinding.LayoutMessageStatusHeaderBinding
-import chat.sphinx.chat_common.ui.viewstate.messageholder.HolderStatusHeader
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
