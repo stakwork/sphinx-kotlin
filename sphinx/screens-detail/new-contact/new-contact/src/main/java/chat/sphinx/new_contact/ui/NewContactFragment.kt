@@ -1,5 +1,6 @@
 package chat.sphinx.new_contact.ui
 
+import android.content.Context
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -11,7 +12,6 @@ import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.new_contact.R
 import chat.sphinx.new_contact.databinding.FragmentNewContactBinding
 import dagger.hilt.android.AndroidEntryPoint
-import io.matthewnelson.android_feature_screens.ui.base.BaseFragment
 import kotlinx.coroutines.launch
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
@@ -19,11 +19,14 @@ import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.LightningRouteHint
 import chat.sphinx.wrapper_common.lightning.isValid
 import chat.sphinx.wrapper_contact.ContactAlias
+import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_toast_utils.ToastUtils
 import io.matthewnelson.android_feature_toast_utils.show
 
 @AndroidEntryPoint
-internal class NewContactFragment : BaseFragment<
+internal class NewContactFragment : SideEffectFragment<
+        Context,
+        NewContactSideEffect,
         NewContactViewState,
         NewContactViewModel,
         FragmentNewContactBinding
@@ -156,5 +159,9 @@ internal class NewContactFragment : BaseFragment<
             binding.newContactAddressEditText.setText(splitText[0])
             binding.newContactRouteHintEditText.setText("${splitText[1]}:${splitText[2]}")
         }
+    }
+
+    override suspend fun onSideEffectCollect(sideEffect: NewContactSideEffect) {
+        sideEffect.execute(binding.root.context)
     }
 }

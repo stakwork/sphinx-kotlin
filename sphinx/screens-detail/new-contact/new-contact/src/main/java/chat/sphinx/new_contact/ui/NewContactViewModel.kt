@@ -1,6 +1,6 @@
 package chat.sphinx.new_contact.ui
 
-import android.util.Log
+import android.content.Context
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.kotlin_response.LoadResponse
@@ -10,7 +10,7 @@ import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.LightningRouteHint
 import chat.sphinx.wrapper_contact.ContactAlias
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.matthewnelson.android_feature_viewmodel.BaseViewModel
+import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -22,7 +22,11 @@ internal class NewContactViewModel @Inject constructor(
     val navigator: NewContactNavigator,
     dispatchers: CoroutineDispatchers,
     private val contactRepository: ContactRepository,
-): BaseViewModel<NewContactViewState>(dispatchers, NewContactViewState.Idle)
+): SideEffectViewModel<
+        Context,
+        NewContactSideEffect,
+        NewContactViewState
+        >(dispatchers, NewContactViewState.Idle)
 {
     fun addContact(
         contactAlias: ContactAlias,
