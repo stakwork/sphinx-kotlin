@@ -17,7 +17,6 @@ import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.LightningRouteHint
-import chat.sphinx.wrapper_common.lightning.isValid
 import chat.sphinx.wrapper_contact.ContactAlias
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_toast_utils.ToastUtils
@@ -30,7 +29,13 @@ internal class NewContactFragment : SideEffectFragment<
         NewContactViewState,
         NewContactViewModel,
         FragmentNewContactBinding
-        >(R.layout.fragment_new_contact) {
+        >(R.layout.fragment_new_contact)
+{
+
+    companion object {
+        const val PASTE_REGEX = "^${LightningNodePubKey.REGEX}:${LightningRouteHint.REGEX}\$"
+    }
+
     override val viewModel: NewContactViewModel by viewModels()
     override val binding: FragmentNewContactBinding by viewBinding(FragmentNewContactBinding::bind)
 
@@ -150,7 +155,7 @@ internal class NewContactFragment : SideEffectFragment<
     }
 
     private fun pastePubKey(s: Editable?) {
-        if (!s.toString().trim().matches("^[A-F0-9a-f]{66}:[A-F0-9a-f]{66}:[0-9]+\$".toRegex())) {
+        if (!s.toString().trim().matches(PASTE_REGEX.toRegex())) {
             return
         }
 
