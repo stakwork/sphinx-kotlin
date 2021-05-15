@@ -6,7 +6,6 @@ import chat.sphinx.concept_network_query_contact.model.GetContactsResponse
 import chat.sphinx.concept_network_query_contact.model.PostContactDto
 import chat.sphinx.concept_network_query_contact.model.PutContactDto
 import chat.sphinx.concept_network_relay_call.NetworkRelayCall
-import chat.sphinx.feature_network_query_contact.model.CreateContactRelayResponse
 import chat.sphinx.feature_network_query_contact.model.ContactRelayResponse
 import chat.sphinx.feature_network_query_contact.model.DeleteContactRelayResponse
 import chat.sphinx.feature_network_query_contact.model.GetContactsRelayResponse
@@ -79,14 +78,14 @@ class NetworkQueryContactImpl(
 //    app.post('/contacts', contacts.createContact)
 
     override fun createContact(
-        contact: PostContactDto,
+        postContactDto: PostContactDto,
         relayData: Pair<AuthorizationToken, RelayUrl>?
     ): Flow<LoadResponse<ContactDto, ResponseError>> =
         networkRelayCall.relayPost(
-            responseJsonClass = CreateContactRelayResponse::class.java,
+            responseJsonClass = ContactRelayResponse::class.java,
             relayEndpoint = ENDPOINT_CREATE_CONTACT,
             requestBodyJsonClass = PostContactDto::class.java,
-            requestBody = contact,
+            requestBody = postContactDto,
             relayData = relayData
         )
 

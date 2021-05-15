@@ -38,7 +38,7 @@ abstract class NetworkQueryContact {
 //    app.post('/contacts', contacts.createContact)
 
     abstract fun createContact(
-        contact: PostContactDto,
+        postContactDto: PostContactDto,
         relayData: Pair<AuthorizationToken, RelayUrl>? = null
     ): Flow<LoadResponse<ContactDto, ResponseError>>
 
