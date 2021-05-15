@@ -52,22 +52,32 @@ inline val MessageDto.updateChatDboLatestMessage: Boolean
 @Suppress("NOTHING_TO_INLINE")
 inline fun MessageDto.updateChatDboLatestMessage(
     chatId: ChatId,
-    lastMessageUpdatedTimeMap: MutableMap<ChatId, Long>,
+    latestMessageUpdatedTimeMap: MutableMap<ChatId, DateTime>,
     queries: SphinxDatabaseQueries,
 ) {
-    val time = created_at.toDateTime().time
+    val dateTime = created_at.toDateTime()
 
     if (
         updateChatDboLatestMessage &&
-        (lastMessageUpdatedTimeMap[chatId] ?: 0L) <= time
+        (latestMessageUpdatedTimeMap[chatId]?.time ?: 0L) <= dateTime.time
     ){
         queries.chatUpdateLatestMessage(
             MessageId(id),
             chatId
         )
-        lastMessageUpdatedTimeMap[chatId] = time
+        latestMessageUpdatedTimeMap[chatId] = dateTime
     }
+}
 
+@Suppress("NOTHING_TO_INLINE")
+inline fun MessageDto.updateChatDboLatestMessage(
+    chatId: ChatId,
+    latestMessageUpdatedTimeMap: SynchronizedMap<ChatId, DateTime>,
+    queries: SphinxDatabaseQueries,
+) {
+    latestMessageUpdatedTimeMap.withLock { map ->
+        updateChatDboLatestMessage(chatId, map, queries)
+    }
 }
 
 @Suppress("NOTHING_TO_INLINE", "SpellCheckingInspection")
@@ -105,9 +115,6 @@ inline fun SphinxDatabaseQueries.upsertChat(
     chatSeenMap.withLock { it[ChatId(dto.id)] = seen }
 }
 
-/**
- * Always use [SphinxDatabaseQueries.transaction] with this extension function.
- * */
 @Suppress("NOTHING_TO_INLINE", "SpellCheckingInspection")
 inline fun TransactionCallbacks.upsertContact(dto: ContactDto, queries: SphinxDatabaseQueries) {
 
@@ -211,12 +218,12 @@ inline fun SphinxDatabaseQueries.updateSeen(chatId: ChatId) {
 inline fun TransactionCallbacks.deleteChatById(
     chatId: ChatId?,
     queries: SphinxDatabaseQueries,
-    lastMessageUpdatedTimeMap: SynchronizedMap<ChatId, Long>?,
+    latestMessageUpdatedTimeMap: SynchronizedMap<ChatId, DateTime>?,
 ) {
     queries.messageDeleteByChatId(chatId ?: return)
     queries.messageMediaDeleteByChatId(chatId)
     queries.chatDeleteById(chatId)
-    lastMessageUpdatedTimeMap?.withLock { it.remove(chatId) }
+    latestMessageUpdatedTimeMap?.withLock { it.remove(chatId) }
 }
 
 @Suppress("NOTHING_TO_INLINE")

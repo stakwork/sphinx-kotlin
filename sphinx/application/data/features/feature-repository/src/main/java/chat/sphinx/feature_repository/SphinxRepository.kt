@@ -109,6 +109,9 @@ class SphinxRepository(
         socketIOManager.addListener(this)
     }
 
+    /**
+     * Call is made on [Dispatchers.IO]
+     * */
     @Suppress("BlockingMethodInNonBlockingContext")
     override suspend fun onSocketIOMessageReceived(msg: SphinxSocketIOMessage) {
         coreDB.getSphinxDatabaseQueriesOrNull()?.let { queries ->
@@ -179,9 +182,11 @@ class SphinxRepository(
                                     }
 
                                     chatId?.let { id ->
-                                        latestMessageUpdatedTimeMap.withLock { map ->
-                                            msg.dto.updateChatDboLatestMessage(id, map, queries)
-                                        }
+                                        msg.dto.updateChatDboLatestMessage(
+                                            id,
+                                            latestMessageUpdatedTimeMap,
+                                            queries
+                                        )
                                     }
                                 }
                             }
@@ -287,7 +292,7 @@ class SphinxRepository(
 
                             // remove remaining chat's from DB
                             for (chatId in chatIdsToRemove) {
-                                LOG.d(TAG, "Removing Chats/Messages - chatId")
+                                LOG.d(TAG, "Removing Chats/Messages for $chatId")
                                 deleteChatById(chatId, queries, latestMessageUpdatedTimeMap)
                             }
 
@@ -880,8 +885,8 @@ class SphinxRepository(
     * and mitigate conflicting updates between SocketIO and networkRefreshMessages
     * */
     @Suppress("RemoveExplicitTypeArguments")
-    private val latestMessageUpdatedTimeMap: SynchronizedMap<ChatId, Long> by lazy {
-        SynchronizedMap<ChatId, Long>()
+    private val latestMessageUpdatedTimeMap: SynchronizedMap<ChatId, DateTime> by lazy {
+        SynchronizedMap<ChatId, DateTime>()
     }
 
     override val networkRefreshMessages: Flow<LoadResponse<Boolean, ResponseError>> by lazy {
