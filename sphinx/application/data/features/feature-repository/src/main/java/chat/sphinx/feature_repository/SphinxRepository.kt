@@ -179,24 +179,9 @@ class SphinxRepository(
                                     }
 
                                     chatId?.let { id ->
-
-                                        val time = msg.dto.created_at.toDateTime().time
-
-                                        lastMessageUpdatedTimeMap.withLock { map ->
-
-                                            if (
-                                                msg.dto.updateChatDboLatestMessage &&
-                                                (map[id] ?: 0L) <= time
-                                            ){
-                                                queries.chatUpdateLatestMessage(
-                                                    MessageId(msg.dto.id),
-                                                    id
-                                                )
-                                                map[id] = time
-                                            }
-
+                                        latestMessageUpdatedTimeMap.withLock { map ->
+                                            msg.dto.updateChatDboLatestMessage(id, map, queries)
                                         }
-
                                     }
                                 }
                             }
@@ -303,7 +288,7 @@ class SphinxRepository(
                             // remove remaining chat's from DB
                             for (chatId in chatIdsToRemove) {
                                 LOG.d(TAG, "Removing Chats/Messages - chatId")
-                                deleteChatById(chatId, queries, lastMessageUpdatedTimeMap)
+                                deleteChatById(chatId, queries, latestMessageUpdatedTimeMap)
                             }
 
                         }
@@ -487,7 +472,7 @@ class SphinxRepository(
                                 .executeAsOneOrNull()
 
                         queries.transaction {
-                            deleteChatById(chat?.id, queries, lastMessageUpdatedTimeMap)
+                            deleteChatById(chat?.id, queries, latestMessageUpdatedTimeMap)
                             deleteContactById(contactId, queries)
                         }
 
@@ -895,7 +880,7 @@ class SphinxRepository(
     * and mitigate conflicting updates between SocketIO and networkRefreshMessages
     * */
     @Suppress("RemoveExplicitTypeArguments")
-    private val lastMessageUpdatedTimeMap: SynchronizedMap<ChatId, Long> by lazy {
+    private val latestMessageUpdatedTimeMap: SynchronizedMap<ChatId, Long> by lazy {
         SynchronizedMap<ChatId, Long>()
     }
 
@@ -1007,19 +992,15 @@ class SphinxRepository(
                                                     }
                                                 }
 
-                                                lastMessageUpdatedTimeMap.withLock { map ->
+                                                latestMessageUpdatedTimeMap.withLock { map ->
 
                                                     for (entry in latestMessageMap.entries) {
 
-                                                        val time = entry.value.created_at.toDateTime().time
-
-                                                        if ((map[entry.key] ?: 0L) <= time) {
-                                                            queries.chatUpdateLatestMessage(
-                                                                MessageId(entry.value.id),
-                                                                entry.key
-                                                            )
-                                                            map[entry.key] = time
-                                                        }
+                                                        entry.value.updateChatDboLatestMessage(
+                                                            entry.key,
+                                                            map,
+                                                            queries
+                                                        )
 
                                                     }
 

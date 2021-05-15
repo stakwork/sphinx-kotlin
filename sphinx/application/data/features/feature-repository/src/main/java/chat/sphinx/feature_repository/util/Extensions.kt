@@ -49,6 +49,27 @@ inline val MessageDto.updateChatDboLatestMessage: Boolean
             type != MessageType.BOT_RES         &&
             status != MessageStatus.DELETED
 
+@Suppress("NOTHING_TO_INLINE")
+inline fun MessageDto.updateChatDboLatestMessage(
+    chatId: ChatId,
+    lastMessageUpdatedTimeMap: MutableMap<ChatId, Long>,
+    queries: SphinxDatabaseQueries,
+) {
+    val time = created_at.toDateTime().time
+
+    if (
+        updateChatDboLatestMessage &&
+        (lastMessageUpdatedTimeMap[chatId] ?: 0L) <= time
+    ){
+        queries.chatUpdateLatestMessage(
+            MessageId(id),
+            chatId
+        )
+        lastMessageUpdatedTimeMap[chatId] = time
+    }
+
+}
+
 @Suppress("NOTHING_TO_INLINE", "SpellCheckingInspection")
 inline fun SphinxDatabaseQueries.upsertChat(
     dto: ChatDto,
