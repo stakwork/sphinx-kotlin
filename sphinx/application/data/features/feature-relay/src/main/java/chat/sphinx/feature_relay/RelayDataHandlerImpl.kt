@@ -30,7 +30,7 @@ class RelayDataHandlerImpl(
     private val dispatchers: CoroutineDispatchers,
     private val encryptionKeyHandler: EncryptionKeyHandler,
     private val torManager: TorManager,
-) : RelayDataHandler() {
+) : RelayDataHandler(), CoroutineDispatchers by dispatchers {
 
     companion object {
         @Volatile
@@ -65,7 +65,7 @@ class RelayDataHandlerImpl(
                 privateKey,
                 encryptionKeyHandler.getTestStringEncryptHashIterations(privateKey),
                 data,
-                dispatchers.default
+                default
             )
         } catch (e: Exception) {
             throw EncryptionException("Failed to encrypt data", e)
@@ -91,7 +91,7 @@ class RelayDataHandlerImpl(
                 privateKey,
                 encryptionKeyHandler.getTestStringEncryptHashIterations(privateKey),
                 data,
-                dispatchers.default
+                default
             )
         } catch (e: Exception) {
             throw DecryptionException("Failed to decrypt data", e)

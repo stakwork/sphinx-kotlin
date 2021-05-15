@@ -24,12 +24,12 @@ internal class MainViewModel @Inject constructor(
     private val authenticationStateManager: AuthenticationStateManager,
     val authenticationDriver: AuthenticationNavigationDriver,
     val detailDriver: DetailNavigationDriver,
-    private val dispatchers: CoroutineDispatchers,
+    dispatchers: CoroutineDispatchers,
     override val navigationDriver: PrimaryNavigationDriver,
-): BaseViewModel<MainViewState>(MainViewState.DetailScreenInactive), NavigationViewModel<PrimaryNavigationDriver>
+): BaseViewModel<MainViewState>(dispatchers, MainViewState.DetailScreenInactive), NavigationViewModel<PrimaryNavigationDriver>
 {
     init {
-        viewModelScope.launch(dispatchers.mainImmediate) {
+        viewModelScope.launch(mainImmediate) {
             authenticationStateManager.authenticationStateFlow.collect { state ->
                 @Exhaustive
                 when (state) {

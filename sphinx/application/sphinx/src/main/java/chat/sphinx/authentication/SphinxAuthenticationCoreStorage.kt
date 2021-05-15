@@ -6,6 +6,7 @@ import io.matthewnelson.android_feature_authentication_core.data.AuthenticationS
 import io.matthewnelson.android_feature_authentication_core.data.MasterKeyAlias
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 
 open class SphinxAuthenticationCoreStorage(
     context: Context,
@@ -27,10 +28,12 @@ open class SphinxAuthenticationCoreStorage(
      * the implementation which lower layered modules have no idea about.
      * */
     suspend fun clearAuthenticationStorage() {
-        authenticationPrefs.edit().clear().let { editor ->
-            if (!editor.commit()) {
-                editor.apply()
-                delay(100L)
+        withContext(dispatchers.io) {
+            authenticationPrefs.edit().clear().let { editor ->
+                if (!editor.commit()) {
+                    editor.apply()
+                    delay(100L)
+                }
             }
         }
     }

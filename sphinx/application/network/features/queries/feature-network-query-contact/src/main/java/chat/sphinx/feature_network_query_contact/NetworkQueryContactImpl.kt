@@ -28,20 +28,35 @@ class NetworkQueryContactImpl(
         private const val ENDPOINT_CREATE_CONTACT = "/contacts"
     }
 
-    override fun getContacts(
-        relayData: Pair<AuthorizationToken, RelayUrl>?
-    ): Flow<LoadResponse<GetContactsResponse, ResponseError>> =
+    ///////////
+    /// GET ///
+    ///////////
+    private val getContactsFlowNullData: Flow<LoadResponse<GetContactsResponse, ResponseError>> by lazy {
         networkRelayCall.relayGet(
             responseJsonClass = GetContactsRelayResponse::class.java,
             relayEndpoint = ENDPOINT_CONTACTS,
-            relayData = relayData,
+            relayData = null,
             useExtendedNetworkCallClient = true,
         )
+    }
+
+    override fun getContacts(
+        relayData: Pair<AuthorizationToken, RelayUrl>?
+    ): Flow<LoadResponse<GetContactsResponse, ResponseError>> =
+        if (relayData == null) {
+            getContactsFlowNullData
+        } else {
+            networkRelayCall.relayGet(
+                responseJsonClass = GetContactsRelayResponse::class.java,
+                relayEndpoint = ENDPOINT_CONTACTS,
+                relayData = relayData,
+                useExtendedNetworkCallClient = true,
+            )
+        }
 
     ///////////
     /// PUT ///
     ///////////
-//    app.put('/contacts/:id', contacts.updateContact)
     override fun updateContact(
         contactId: ContactId,
         updateContactDto: UpdateContactDto,
@@ -83,7 +98,6 @@ class NetworkQueryContactImpl(
     //////////////
     /// DELETE ///
     //////////////
-//    app.delete('/contacts/:id', contacts.deleteContact)
     override suspend fun deleteContact(
         contactId: ContactId,
         relayData: Pair<AuthorizationToken, RelayUrl>?

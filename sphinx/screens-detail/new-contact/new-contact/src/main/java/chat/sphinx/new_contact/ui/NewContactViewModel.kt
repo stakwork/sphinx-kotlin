@@ -20,16 +20,16 @@ import javax.inject.Inject
 @HiltViewModel
 internal class NewContactViewModel @Inject constructor(
     val navigator: NewContactNavigator,
-    val dispatchers: CoroutineDispatchers,
+    dispatchers: CoroutineDispatchers,
     private val contactRepository: ContactRepository,
-): BaseViewModel<NewContactViewState>(NewContactViewState.Idle)
+): BaseViewModel<NewContactViewState>(dispatchers, NewContactViewState.Idle)
 {
     fun addContact(
         contactAlias: ContactAlias,
         lightningNodePubKey: LightningNodePubKey,
         lightningRouteHint: LightningRouteHint?,
     ) {
-        viewModelScope.launch(dispatchers.mainImmediate) {
+        viewModelScope.launch(mainImmediate) {
             contactRepository.createContact(
                 contactAlias,
                 lightningNodePubKey,

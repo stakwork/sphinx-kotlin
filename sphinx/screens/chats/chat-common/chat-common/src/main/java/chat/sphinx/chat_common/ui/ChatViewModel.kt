@@ -28,10 +28,10 @@ import javax.inject.Inject
 @SuppressLint("StaticFieldLeak")
 class ChatViewModel @Inject constructor(
     @ApplicationContext private val appContext: Context,
-    val dispatchers: CoroutineDispatchers,
+    dispatchers: CoroutineDispatchers,
     private val messageRepository: MessageRepository,
     private val networkQueryLightning: NetworkQueryLightning,
-): BaseViewModel<ChatViewState>(ChatViewState.Idle)
+): BaseViewModel<ChatViewState>(dispatchers, ChatViewState.Idle)
 {
     @Suppress("RemoveExplicitTypeArguments")
     private val _chatDataStateFlow: MutableStateFlow<ChatData?> by lazy {
@@ -69,16 +69,16 @@ class ChatViewModel @Inject constructor(
         }
 
         chatData.chat?.let { chat ->
-            messagesJob = viewModelScope.launch(dispatchers.mainImmediate) {
-                messageRepository.getMessagesForChat(chat.id).collect { messages ->
+            messagesJob = viewModelScope.launch(mainImmediate) {
+                messageRepository.getAllMessagesToShowByChatId(chat.id).collect { messages ->
                     val newList = ArrayList<MessageHolderViewState>(messages.size)
-                    withContext(dispatchers.default) {
+                    withContext(default) {
                         for (message in messages) {
                             if (message.sender == chat.contactIds.firstOrNull()) {
                                 newList.add(
                                     MessageHolderViewState.OutGoing(
                                         message,
-                                        HolderBackground.Out.Middle
+                                        HolderBackground.Out.Middle,
                                     )
                                 )
                             } else {
@@ -105,54 +105,56 @@ class ChatViewModel @Inject constructor(
         }
     }
 
-    fun checkRoute(): Flow<LoadResponse<Boolean, ResponseError>> = flow {
-        chatDataStateFlow.value?.let { chatData ->
-            when (chatData) {
-                is ChatData.Conversation -> {
-                    chatData.contact.nodePubKey?.let { pubKey ->
+    val checkRoute: Flow<LoadResponse<Boolean, ResponseError>> by lazy {
+        flow {
+            chatDataStateFlow.value?.let { chatData ->
+                when (chatData) {
+                    is ChatData.Conversation -> {
+                        chatData.contact.nodePubKey?.let { pubKey ->
 
-                        chatData.contact.routeHint?.let { hint ->
+                            chatData.contact.routeHint?.let { hint ->
 
-                            networkQueryLightning.checkRoute(pubKey, hint)
+                                networkQueryLightning.checkRoute(pubKey, hint)
 
-                        } ?: networkQueryLightning.checkRoute(pubKey)
+                            } ?: networkQueryLightning.checkRoute(pubKey)
 
-                    } ?: chatData.chat?.let { chat ->
+                        } ?: chatData.chat?.let { chat ->
 
-                        networkQueryLightning.checkRoute(chat.id)
+                            networkQueryLightning.checkRoute(chat.id)
 
+                        }
                     }
-                }
 
-                is ChatData.Group ->  {
-                    null
-                }
-
-                is ChatData.Tribe -> {
-                    networkQueryLightning.checkRoute(chatData.chat.id)
-                }
-
-            }?.collect { response ->
-                @Exhaustive
-                when (response) {
-                    is LoadResponse.Loading -> {
-                        emit(response)
+                    is ChatData.Group -> {
+                        null
                     }
-                    is Response.Error -> {
-                        emit(response)
+
+                    is ChatData.Tribe -> {
+                        networkQueryLightning.checkRoute(chatData.chat.id)
                     }
-                    is Response.Success -> {
-                        emit(Response.Success(response.value.success_prob > 0))
+
+                }?.collect { response ->
+                    @Exhaustive
+                    when (response) {
+                        is LoadResponse.Loading -> {
+                            emit(response)
+                        }
+                        is Response.Error -> {
+                            emit(response)
+                        }
+                        is Response.Success -> {
+                            emit(Response.Success(response.value.success_prob > 0))
+                        }
                     }
+                } ?: if (chatData is ChatData.Group) {
+
+                    emit(Response.Success(true))
+
+                } else {
+                    emit(
+                        Response.Error(ResponseError("ChatData was null"))
+                    )
                 }
-            } ?: if (chatData is ChatData.Group) {
-
-                emit(Response.Success(true))
-
-            } else {
-                emit(
-                    Response.Error(ResponseError("ChatData was null"))
-                )
             }
         }
     }
@@ -160,7 +162,7 @@ class ChatViewModel @Inject constructor(
     fun readMessages() {
         chatDataStateFlow.value?.let { chatData ->
             chatData.chat?.id?.let { chatId ->
-                viewModelScope.launch(dispatchers.mainImmediate) {
+                viewModelScope.launch(mainImmediate) {
                     messageRepository.readMessages(chatId)
                 }
             }

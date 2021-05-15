@@ -18,20 +18,22 @@ import kotlinx.coroutines.flow.Flow
  * them, and thus proc and [Flow] being collected.
  * */
 interface ContactRepository {
-    suspend fun getContacts(): Flow<List<Contact>>
-    suspend fun getContactById(contactId: ContactId): Flow<Contact?>
+    val accountOwner: Flow<Contact?>
 
-    suspend fun getInviteById(inviteId: InviteId): Flow<Invite?>
-    suspend fun getInviteByContactId(contactId: ContactId): Flow<Invite?>
-
-    suspend fun getOwner(): Flow<Contact?>
-    suspend fun updateOwnerDeviceId(deviceId: DeviceId): Response<Any, ResponseError>
-    fun networkRefreshContacts(): Flow<LoadResponse<Boolean, ResponseError>>
-
-    suspend fun deleteContactById(contactId: ContactId): Response<Any, ResponseError>
     fun createContact(
         contactAlias: ContactAlias,
         lightningNodePubKey: LightningNodePubKey,
         lightningRouteHint: LightningRouteHint?,
     ): Flow<LoadResponse<Any, ResponseError>>
+
+    val getAllContacts: Flow<List<Contact>>
+    fun getContactById(contactId: ContactId): Flow<Contact?>
+
+    fun getInviteByContactId(contactId: ContactId): Flow<Invite?>
+    fun getInviteById(inviteId: InviteId): Flow<Invite?>
+
+    val networkRefreshContacts: Flow<LoadResponse<Boolean, ResponseError>>
+
+    suspend fun deleteContactById(contactId: ContactId): Response<Any, ResponseError>
+    suspend fun updateOwnerDeviceId(deviceId: DeviceId): Response<Any, ResponseError>
 }

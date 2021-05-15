@@ -13,6 +13,7 @@ import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collect
+import java.io.IOException
 
 internal class FirebasePushNotificationRegistrar(
     private val contactRepository: ContactRepository,
@@ -32,6 +33,7 @@ internal class FirebasePushNotificationRegistrar(
                 val msg = "Fetching FCM registration token failed"
                 LOG.w(TAG, msg, task.exception)
                 tokenFetchResponse.value = Response.Error(ResponseError(msg, task.exception))
+                return@OnCompleteListener
             }
 
             val token = task.result

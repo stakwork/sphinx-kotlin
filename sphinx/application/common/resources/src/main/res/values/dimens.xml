@@ -27,7 +27,7 @@
 
     <dimen name="default_inner_spacing_list_item_title">10dp</dimen>
     <dimen name="default_vertical_spacing_action_button_column">6dp</dimen>
-    <dimen name="default_status_badge_inner_padding">4dp</dimen>
+    <dimen name="default_status_badge_inner_padding">3dp</dimen>
 
     <dimen name="default_tap_target_min_height">44dp</dimen>
 
