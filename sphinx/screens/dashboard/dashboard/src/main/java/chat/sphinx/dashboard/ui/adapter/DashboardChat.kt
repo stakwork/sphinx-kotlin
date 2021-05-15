@@ -2,13 +2,12 @@ package chat.sphinx.dashboard.ui.adapter
 
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.isConversation
-import chat.sphinx.wrapper_common.DateTime
-import chat.sphinx.wrapper_common.PhotoUrl
-import chat.sphinx.wrapper_common.hhmmElseDate
-import chat.sphinx.wrapper_common.time
+import chat.sphinx.wrapper_common.*
+import chat.sphinx.wrapper_common.contact.ContactId
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message.media.MediaType
+import kotlinx.coroutines.flow.Flow
 
 /**
  * [DashboardChat]s are separated into 2 categories:
@@ -21,9 +20,13 @@ sealed class DashboardChat {
     abstract val photoUrl: PhotoUrl?
     abstract val sortBy: Long
 
+    abstract val unseenMessageFlow: Flow<Long?>?
+
     abstract fun getDisplayTime(today00: DateTime): String
 
     abstract fun getMessageText(): String
+
+    abstract fun hasUnseenMessages(): Boolean
 
     sealed class Active: DashboardChat() {
 
@@ -46,6 +49,14 @@ sealed class DashboardChat {
             message.sender == chat.contactIds.firstOrNull()
 
         abstract fun getMessageSender(message: Message, withColon: Boolean = true): String
+
+        override fun hasUnseenMessages(): Boolean {
+            val ownerId: ContactId? = chat?.contactIds?.firstOrNull()
+            val isLastMessageOutgoing = message?.sender == ownerId
+            val lastMessageSeen = message?.seen?.isTrue() ?: true
+            val chatSeen = chat?.seen.isTrue() ?: true
+            return !lastMessageSeen && !chatSeen && !isLastMessageOutgoing
+        }
 
         @ExperimentalStdlibApi
         override fun getMessageText(): String {
@@ -155,6 +166,7 @@ sealed class DashboardChat {
             override val chat: Chat,
             override val message: Message?,
             val contact: Contact,
+            override val unseenMessageFlow: Flow<Long?>,
         ): Active() {
 
             init {
@@ -187,6 +199,7 @@ sealed class DashboardChat {
         class GroupOrTribe(
             override val chat: Chat,
             override val message: Message?,
+            override val unseenMessageFlow: Flow<Long?>,
         ): Active() {
 
             override val chatName: String?
@@ -231,8 +244,15 @@ sealed class DashboardChat {
             override val sortBy: Long
                 get() = contact.createdAt.time
 
+            override val unseenMessageFlow: Flow<Long?>?
+                get() = null
+
             override fun getMessageText(): String {
                 return ""
+            }
+
+            override fun hasUnseenMessages(): Boolean {
+                return false
             }
 
         }

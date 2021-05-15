@@ -34,7 +34,7 @@ import javax.inject.Inject
 internal class SplashViewModel @Inject constructor(
     private val authenticationCoordinator: AuthenticationCoordinator,
     private val backgroundLoginHandler: BackgroundLoginHandler,
-    private val dispatchers: CoroutineDispatchers,
+    dispatchers: CoroutineDispatchers,
     private val keyRestore: KeyRestore,
     private val lightningRepository: LightningRepository,
     private val navigator: SplashNavigator,
@@ -43,7 +43,7 @@ internal class SplashViewModel @Inject constructor(
         Context,
         SplashSideEffect,
         SplashViewState
-        >(SplashViewState.Start_ShowIcon)
+        >(dispatchers, SplashViewState.Start_ShowIcon)
 {
     private var screenInit: Boolean = false
     fun screenInit() {
@@ -55,11 +55,11 @@ internal class SplashViewModel @Inject constructor(
 
 
         // prime the account balance retrieval from SharePrefs
-        viewModelScope.launch(dispatchers.mainImmediate) {
+        viewModelScope.launch(mainImmediate) {
             lightningRepository.getAccountBalance().firstOrNull()
         }
 
-        viewModelScope.launch(dispatchers.mainImmediate) {
+        viewModelScope.launch(mainImmediate) {
             backgroundLoginHandler.attemptBackgroundLogin(
                 updateLastLoginTimeOnSuccess = true
             )?.let {
@@ -99,14 +99,14 @@ internal class SplashViewModel @Inject constructor(
 
     // TODO: Use coordinator pattern and limit
     fun navigateToScanner() {
-        viewModelScope.launch(dispatchers.mainImmediate) {
+        viewModelScope.launch(mainImmediate) {
             submitSideEffect(SplashSideEffect.NotImplementedYet)
         }
     }
 
     fun processUserInput(input: String?) {
         if (input.isNullOrEmpty()) {
-            viewModelScope.launch(dispatchers.mainImmediate) {
+            viewModelScope.launch(mainImmediate) {
                 submitSideEffect(SplashSideEffect.InputNullOrEmpty)
             }
             return
@@ -115,7 +115,7 @@ internal class SplashViewModel @Inject constructor(
         // Invite Code
         if (input.length == 40) {
             // TODO: Implement
-            viewModelScope.launch(dispatchers.mainImmediate) {
+            viewModelScope.launch(mainImmediate) {
                 submitSideEffect(SplashSideEffect.NotImplementedYet)
             }
             return
@@ -144,7 +144,7 @@ internal class SplashViewModel @Inject constructor(
             } // input not properly formatted `type::data`
         }
 
-        viewModelScope.launch(dispatchers.mainImmediate) {
+        viewModelScope.launch(mainImmediate) {
             submitSideEffect(SplashSideEffect.InvalidCode)
         }
     }
@@ -154,7 +154,7 @@ internal class SplashViewModel @Inject constructor(
         // TODO: Replace with automatic launching upon entering the 6th PIN character
         //  when Authentication View's Layout gets incorporated
         if (viewState.pinWriter.size() != 6 /*TODO: https://github.com/stakwork/sphinx-kotlin/issues/9*/) {
-            viewModelScope.launch(dispatchers.mainImmediate) {
+            viewModelScope.launch(mainImmediate) {
                 submitSideEffect(SplashSideEffect.InvalidPinLength)
             }
         }
@@ -164,7 +164,7 @@ internal class SplashViewModel @Inject constructor(
         }
 
         var decryptionJobException: Exception? = null
-        decryptionJob = viewModelScope.launch(dispatchers.default) {
+        decryptionJob = viewModelScope.launch(default) {
             try {
                 val pin = viewState.pinWriter.toCharArray()
                 val decryptedSplit = AES256JNCryptor()
@@ -218,7 +218,7 @@ internal class SplashViewModel @Inject constructor(
             }
         }
 
-        viewModelScope.launch(dispatchers.mainImmediate) {
+        viewModelScope.launch(mainImmediate) {
             decryptionJob?.join()
             decryptionJobException?.let { exception ->
                 updateViewState(

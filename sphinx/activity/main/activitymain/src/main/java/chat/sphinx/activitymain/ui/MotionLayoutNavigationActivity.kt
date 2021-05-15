@@ -3,7 +3,6 @@ package chat.sphinx.activitymain.ui
 import android.os.Bundle
 import androidx.annotation.LayoutRes
 import androidx.constraintlayout.motion.widget.MotionLayout
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.viewbinding.ViewBinding
 import io.matthewnelson.android_concept_views.MotionLayoutViewState
@@ -13,6 +12,7 @@ import io.matthewnelson.android_feature_viewmodel.BaseViewModel
 import io.matthewnelson.android_feature_viewmodel.collectViewState
 import io.matthewnelson.android_feature_viewmodel.currentViewState
 import io.matthewnelson.feature_navigation.NavigationDriver
+import kotlinx.coroutines.launch
 
 abstract class MotionLayoutNavigationActivity<
         MLVS: MotionLayoutViewState<MLVS>,
@@ -45,20 +45,29 @@ abstract class MotionLayoutNavigationActivity<
     protected abstract fun onCreatedRestoreMotionScene(viewState: MLVS, binding: VB)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        currentViewState = viewModel.currentViewState
         onCreatedRestoreMotionScene(viewModel.currentViewState, binding)
+    }
+
+    override fun onStart() {
+        super.onStart()
         subscribeToViewStateFlow()
     }
 
     protected abstract suspend fun onViewStateFlowCollect(viewState: MLVS)
+    protected var currentViewState: MLVS? = null
 
     /**
-     * Called from [onCreate]. Must be mindful if overriding to lazily start things
+     * Called from [onStart]. Must be mindful if overriding to lazily start things
      * using lifecycleScope.launchWhenStarted
      * */
     protected open fun subscribeToViewStateFlow() {
-        lifecycleScope.launchWhenStarted {
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.collectViewState { viewState ->
-                onViewStateFlowCollect(viewState)
+                if (currentViewState != viewState) {
+                    currentViewState = viewState
+                    onViewStateFlowCollect(viewState)
+                }
             }
         }
     }

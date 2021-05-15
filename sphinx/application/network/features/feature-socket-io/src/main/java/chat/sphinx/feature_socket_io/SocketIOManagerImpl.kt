@@ -26,6 +26,7 @@ import io.socket.client.client.IO
 import io.socket.client.client.Manager
 import io.socket.client.client.Socket
 import io.socket.engine.engineio.client.EngineIOException
+import io.socket.engine.engineio.client.Socket as EngineSocket
 import io.socket.engine.engineio.client.Transport
 import io.socket.engine.engineio.client.transports.Polling
 import io.socket.engine.engineio.client.transports.WebSocket
@@ -46,7 +47,10 @@ class SocketIOManagerImpl(
     private val networkClient: NetworkClient,
     private val relayDataHandler: RelayDataHandler,
     private val LOG: SphinxLogger,
-): SocketIOManager(), NetworkClientClearedListener {
+) : SocketIOManager(),
+    NetworkClientClearedListener,
+    CoroutineDispatchers by dispatchers
+{
 
     companion object {
         const val TAG = "SocketIOManagerImpl"
@@ -105,7 +109,7 @@ class SocketIOManagerImpl(
         fun dispatch(msg: SphinxSocketIOMessage) {
             synchronized(this) {
                 for (listener in listeners) {
-                    instance?.socketIOScope?.launch(dispatchers.io) {
+                    instance?.socketIOScope?.launch(io) {
                         try {
                             listener.onSocketIOMessageReceived(msg)
                         } catch (e: Exception) {
@@ -573,19 +577,19 @@ class SocketIOManagerImpl(
         }
 
         // Engine Socket Listeners
-        socket.io().on(io.socket.engine.engineio.client.Socket.EVENT_OPEN) { args ->
+        socket.io().on(EngineSocket.EVENT_OPEN) { args ->
             if (_socketIOStateFlow.value != SocketIOState.Uninitialized) {
                 _socketIOStateFlow.value = SocketIOState.Initialized.Opened
             }
             LOG.d(TAG, "OPEN" + args.joinToString(", ", ": "))
         }
-        socket.io().on(io.socket.engine.engineio.client.Socket.EVENT_CLOSE) { args ->
+        socket.io().on(EngineSocket.EVENT_CLOSE) { args ->
             if (_socketIOStateFlow.value != SocketIOState.Uninitialized) {
                 _socketIOStateFlow.value = SocketIOState.Initialized.Closed
             }
             LOG.d(TAG, "CLOSE" + args.joinToString(", ", ": "))
         }
-        socket.io().on(io.socket.engine.engineio.client.Socket.EVENT_UPGRADE_ERROR) { args ->
+        socket.io().on(EngineSocket.EVENT_UPGRADE_ERROR) { args ->
             LOG.e(
                 TAG,
                 "UPGRADE_ERROR: ",

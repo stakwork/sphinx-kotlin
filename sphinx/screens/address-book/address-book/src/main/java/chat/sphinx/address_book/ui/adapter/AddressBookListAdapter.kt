@@ -21,13 +21,14 @@ import chat.sphinx.wrapper_contact.Contact
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_viewmodel.collectViewState
 import io.matthewnelson.android_feature_viewmodel.currentViewState
-import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisorScope
+import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 internal class AddressBookListAdapter(
     private val imageLoader: ImageLoader<ImageView>,
     private val lifecycleOwner: LifecycleOwner,
+    private val onStopSupervisor: OnStopSupervisor,
     private val viewModel: AddressBookViewModel
 ): RecyclerView.Adapter<AddressBookListAdapter.AddressBookViewHolder>(), DefaultLifecycleObserver {
 
@@ -84,11 +85,10 @@ internal class AddressBookListAdapter(
     }
 
     private val addressBookContacts = ArrayList<Contact>(viewModel.currentViewState.list)
-    private val supervisor = OnStopSupervisorScope(lifecycleOwner)
 
     override fun onStart(owner: LifecycleOwner) {
         super.onStart(owner)
-        supervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.collectViewState { viewState ->
 
                 if (addressBookContacts.isEmpty()) {
@@ -172,7 +172,7 @@ internal class AddressBookListAdapter(
                     layoutAddressBookInitialHolder.textViewInitials.goneIfFalse(url == null)
 
                     if (url != null) {
-                        supervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
+                        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
                             imageLoader.load(
                                 layoutAddressBookInitialHolder.imageViewChatPicture,
                                 url.value,

@@ -6,6 +6,7 @@ import chat.sphinx.concept_crypto_rsa.RSA
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
 import chat.sphinx.concept_network_query_chat.model.ChatDto
 import chat.sphinx.concept_network_query_contact.NetworkQueryContact
+import chat.sphinx.concept_network_query_contact.model.UpdateContactDto
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_lightning.model.balance.BalanceDto
 import chat.sphinx.concept_network_query_message.NetworkQueryMessage
@@ -33,21 +34,20 @@ import chat.sphinx.logger.d
 import chat.sphinx.logger.e
 import chat.sphinx.logger.w
 import chat.sphinx.wrapper_chat.Chat
-import chat.sphinx.wrapper_common.DateTime
-import chat.sphinx.wrapper_common.Seen
+import chat.sphinx.wrapper_common.*
 import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.chat.ChatId
 import chat.sphinx.wrapper_common.contact.ContactId
 import chat.sphinx.wrapper_common.invite.InviteId
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessagePagination
-import chat.sphinx.wrapper_common.toDateTime
 import chat.sphinx.wrapper_contact.Contact
+import chat.sphinx.wrapper_contact.DeviceId
 import chat.sphinx.wrapper_invite.Invite
 import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_message.*
-import chat.sphinx.wrapper_message.media.MediaKeyDecrypted
 import chat.sphinx.wrapper_message.media.MessageMedia
+import chat.sphinx.wrapper_message.media.toMediaKeyDecrypted
 import chat.sphinx.wrapper_rsa.RsaPrivateKey
 import com.squareup.moshi.Moshi
 import com.squareup.sqldelight.runtime.coroutines.asFlow
@@ -86,6 +86,7 @@ class SphinxRepository(
     ContactRepository,
     LightningRepository,
     MessageRepository,
+    CoroutineDispatchers by dispatchers,
     SphinxSocketIOMessageListener
 {
 
@@ -109,6 +110,9 @@ class SphinxRepository(
         socketIOManager.addListener(this)
     }
 
+    /**
+     * Call is made on [Dispatchers.IO]
+     * */
     @Suppress("BlockingMethodInNonBlockingContext")
     override suspend fun onSocketIOMessageReceived(msg: SphinxSocketIOMessage) {
         coreDB.getSphinxDatabaseQueriesOrNull()?.let { queries ->
@@ -117,12 +121,16 @@ class SphinxRepository(
                 is SphinxSocketIOMessage.Type.Contact -> {
                     contactLock.withLock {
                         queries.transaction {
-                            queries.upsertContact(msg.dto)
+                            upsertContact(msg.dto, queries)
                         }
                     }
                 }
                 is SphinxSocketIOMessage.Type.ChatSeen -> {
-                    // TODO: Implement
+                    readMessagesImpl(
+                        chatId = ChatId(msg.dto.id),
+                        queries = queries,
+                        executeNetworkRequest = false
+                    )
                 }
                 is SphinxSocketIOMessage.Type.Group -> {
                     // TODO: Implement
@@ -142,30 +150,45 @@ class SphinxRepository(
                     decryptMessageDtoContentIfAvailable(
                         msg.dto,
                         coroutineScope { this },
-                        dispatchers.io
+                        io
                     )?.join()
 
                     decryptMessageDtoMediaKeyIfAvailable(
                         msg.dto,
                         coroutineScope { this },
-                        dispatchers.io
+                        io
                     )?.join()
 
                     messageLock.withLock {
                         chatLock.withLock {
-                            queries.transaction {
+                            contactLock.withLock {
+                                queries.transaction {
 
-                                queries.upsertMessage(msg.dto)
+                                    upsertMessage(msg.dto, queries)
 
-                                msg.dto.chat_id?.let { nnChatId ->
+                                    var chatId: ChatId? = null
 
-                                    if (msg.dto.updateChatDboLatestMessage) {
-                                        queries.chatUpdateLatestMessage(
-                                            MessageId(msg.dto.id),
-                                            ChatId(nnChatId)
-                                        )
+                                    msg.dto.chat?.let { chatDto ->
+                                        queries.upsertChat(chatDto, moshi, chatSeenMap)
+
+                                        chatId = ChatId(chatDto.id)
                                     }
 
+                                    msg.dto.contact?.let { contactDto ->
+                                        upsertContact(contactDto, queries)
+                                    }
+
+                                    msg.dto.chat_id?.let { nnChatId ->
+                                        chatId = ChatId(nnChatId)
+                                    }
+
+                                    chatId?.let { id ->
+                                        msg.dto.updateChatDboLatestMessage(
+                                            id,
+                                            latestMessageUpdatedTimeMap,
+                                            queries
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -184,47 +207,67 @@ class SphinxRepository(
         ChatDboPresenterMapper(dispatchers)
     }
 
-    override suspend fun getChats(): Flow<List<Chat>> {
-        return coreDB.getSphinxDatabaseQueries().chatGetAll()
-            .asFlow()
-            .mapToList(dispatchers.io)
-            .map { chatDboPresenterMapper.mapListFrom(it) }
+    override val getAllChats: Flow<List<Chat>> by lazy {
+        flow {
+            emitAll(
+                coreDB.getSphinxDatabaseQueries().chatGetAll()
+                    .asFlow()
+                    .mapToList(io)
+                    .map { chatDboPresenterMapper.mapListFrom(it) }
+            )
+        }
     }
 
-    override suspend fun getChatById(chatId: ChatId): Flow<Chat?> {
-        return coreDB.getSphinxDatabaseQueries().chatGetById(chatId)
-            .asFlow()
-            .mapToOneOrNull(dispatchers.io)
-            .map { it?.let { chatDboPresenterMapper.mapFrom(it) } }
-            .distinctUntilChanged()
+    override fun getChatById(chatId: ChatId): Flow<Chat?> = flow {
+        emitAll(
+            coreDB.getSphinxDatabaseQueries().chatGetById(chatId)
+                .asFlow()
+                .mapToOneOrNull(io)
+                .map { it?.let { chatDboPresenterMapper.mapFrom(it) } }
+                .distinctUntilChanged()
+        )
     }
 
-    override suspend fun getChatByUUID(chatUUID: ChatUUID): Flow<Chat?> {
-        return coreDB.getSphinxDatabaseQueries().chatGetByUUID(chatUUID)
-            .asFlow()
-            .mapToOneOrNull(dispatchers.io)
-            .map { it?.let { chatDboPresenterMapper.mapFrom(it) } }
-            .distinctUntilChanged()
+    override fun getChatByUUID(chatUUID: ChatUUID): Flow<Chat?> = flow {
+        emitAll(
+            coreDB.getSphinxDatabaseQueries().chatGetByUUID(chatUUID)
+                .asFlow()
+                .mapToOneOrNull(io)
+                .map { it?.let { chatDboPresenterMapper.mapFrom(it) } }
+                .distinctUntilChanged()
+        )
     }
 
-    override fun networkRefreshChats(): Flow<LoadResponse<Boolean, ResponseError>> = flow {
-        networkQueryChat.getChats().collect { loadResponse ->
+    override fun getUnseenMessagesByChatId(chat: Chat): Flow<Long?> = flow {
+        emitAll(
+            coreDB.getSphinxDatabaseQueries()
+                .chatGetUnseenIncomingMessagesCount(chat.contactIds.first(), chat.id)
+                .asFlow()
+                .mapToOneOrNull(io)
+                .distinctUntilChanged()
+        )
+    }
 
-            @Exhaustive
-            when (loadResponse) {
-                is Response.Error -> {
-                    emit(loadResponse)
+    override val networkRefreshChats: Flow<LoadResponse<Boolean, ResponseError>> by lazy {
+        flow {
+            networkQueryChat.getChats().collect { loadResponse ->
+
+                @Exhaustive
+                when (loadResponse) {
+                    is Response.Error -> {
+                        emit(loadResponse)
+                    }
+                    is Response.Success -> {
+                        emit(
+                            processChatDtos(loadResponse.value)
+                        )
+                    }
+                    is LoadResponse.Loading -> {
+                        emit(loadResponse)
+                    }
                 }
-                is Response.Success -> {
-                    emit(
-                        processChatDtos(loadResponse.value)
-                    )
-                }
-                is LoadResponse.Loading -> {
-                    emit(loadResponse)
-                }
+
             }
-
         }
     }
 
@@ -233,7 +276,7 @@ class SphinxRepository(
             val queries = coreDB.getSphinxDatabaseQueries()
 
             chatLock.withLock {
-                withContext(dispatchers.io) {
+                withContext(io) {
 
                     val chatIdsToRemove = queries.chatGetAllIds()
                         .executeAsList()
@@ -243,17 +286,15 @@ class SphinxRepository(
 
                         queries.transaction {
                             for (dto in chats) {
-                                queries.upsertChat(dto, moshi)
+                                queries.upsertChat(dto, moshi, chatSeenMap)
 
                                 chatIdsToRemove.remove(ChatId(dto.id))
                             }
 
                             // remove remaining chat's from DB
                             for (chatId in chatIdsToRemove) {
-                                LOG.d(TAG, "Removing Chats/Messages - chatId")
-                                queries.chatDeleteById(chatId)
-                                queries.messageDeleteByChatId(chatId)
-                                queries.messageMediaDeleteByChatId(chatId)
+                                LOG.d(TAG, "Removing Chats/Messages for $chatId")
+                                deleteChatById(chatId, queries, latestMessageUpdatedTimeMap)
                             }
 
                         }
@@ -289,97 +330,122 @@ class SphinxRepository(
         InviteDboPresenterMapper(dispatchers)
     }
 
-    override suspend fun getContacts(): Flow<List<Contact>> {
-        return coreDB.getSphinxDatabaseQueries().contactGetAll()
-            .asFlow()
-            .mapToList(dispatchers.io)
-            .map { contactDboPresenterMapper.mapListFrom(it) }
+    override val accountOwner: Flow<Contact?> by lazy {
+        flow {
+            emitAll(
+                coreDB.getSphinxDatabaseQueries().contactGetOwner()
+                    .asFlow()
+                    .mapToOneOrNull(io)
+                    .map { it?.let { contactDboPresenterMapper.mapFrom(it) } }
+                    .distinctUntilChanged()
+            )
+        }
     }
 
-    override suspend fun getContactById(contactId: ContactId): Flow<Contact?> {
-        return coreDB.getSphinxDatabaseQueries().contactGetById(contactId)
-            .asFlow()
-            .mapToOneOrNull(dispatchers.io)
-            .map { it?.let { contactDboPresenterMapper.mapFrom(it) } }
-            .distinctUntilChanged()
+    override val getAllContacts: Flow<List<Contact>> by lazy {
+        flow {
+            emitAll(
+                coreDB.getSphinxDatabaseQueries().contactGetAll()
+                    .asFlow()
+                    .mapToList(io)
+                    .map { contactDboPresenterMapper.mapListFrom(it) }
+            )
+        }
     }
 
-    override suspend fun getInviteById(inviteId: InviteId): Flow<Invite?> {
-        return coreDB.getSphinxDatabaseQueries().inviteGetById(inviteId)
-            .asFlow()
-            .mapToOneOrNull(dispatchers.io)
-            .map { it?.let { inviteDboPresenterMapper.mapFrom(it) } }
-            .distinctUntilChanged()
+    override fun getContactById(contactId: ContactId): Flow<Contact?> = flow {
+        emitAll(
+            coreDB.getSphinxDatabaseQueries().contactGetById(contactId)
+                .asFlow()
+                .mapToOneOrNull(io)
+                .map { it?.let { contactDboPresenterMapper.mapFrom(it) } }
+                .distinctUntilChanged()
+        )
     }
 
-    override suspend fun getInviteByContactId(contactId: ContactId): Flow<Invite?> {
-        return coreDB.getSphinxDatabaseQueries().inviteGetByContactId(contactId)
-            .asFlow()
-            .mapToOneOrNull(dispatchers.io)
-            .map { it?.let { inviteDboPresenterMapper.mapFrom(it) } }
-            .distinctUntilChanged()
+    override fun getInviteByContactId(contactId: ContactId): Flow<Invite?> = flow {
+        emitAll(
+            coreDB.getSphinxDatabaseQueries().inviteGetByContactId(contactId)
+                .asFlow()
+                .mapToOneOrNull(io)
+                .map { it?.let { inviteDboPresenterMapper.mapFrom(it) } }
+                .distinctUntilChanged()
+        )
     }
 
-    override suspend fun getOwner(): Flow<Contact?> {
-        return coreDB.getSphinxDatabaseQueries().contactGetOwner()
-            .asFlow()
-            .mapToOneOrNull(dispatchers.io)
-            .map { it?.let { contactDboPresenterMapper.mapFrom(it) } }
-            .distinctUntilChanged()
+    override fun getInviteById(inviteId: InviteId): Flow<Invite?> = flow {
+        emitAll(
+            coreDB.getSphinxDatabaseQueries().inviteGetById(inviteId)
+                .asFlow()
+                .mapToOneOrNull(io)
+                .map { it?.let { inviteDboPresenterMapper.mapFrom(it) } }
+                .distinctUntilChanged()
+        )
     }
 
-    override fun networkRefreshContacts(): Flow<LoadResponse<Boolean, ResponseError>> = flow {
-        networkQueryContact.getContacts().collect { loadResponse ->
+    override val networkRefreshContacts: Flow<LoadResponse<Boolean, ResponseError>> by lazy {
+        flow {
+            networkQueryContact.getContacts().collect { loadResponse ->
 
-            @Exhaustive
-            when (loadResponse) {
-                is Response.Error -> {
-                    emit(loadResponse)
-                }
-                is Response.Success -> {
+                @Exhaustive
+                when (loadResponse) {
+                    is Response.Error -> {
+                        emit(loadResponse)
+                    }
+                    is Response.Success -> {
 
-                    val queries = coreDB.getSphinxDatabaseQueries()
+                        val queries = coreDB.getSphinxDatabaseQueries()
 
-                    try {
-                        contactLock.withLock {
-                            withContext(dispatchers.io) {
+                        try {
+                            contactLock.withLock {
+                                withContext(io) {
 
-                                val contactIdsToRemove = queries.contactGetAllIds()
-                                    .executeAsList()
-                                    .toMutableSet()
+                                    val contactIdsToRemove = queries.contactGetAllIds()
+                                        .executeAsList()
+                                        .toMutableSet()
 
-                                queries.transaction {
-                                    for (dto in loadResponse.value.contacts) {
-                                        queries.upsertContact(dto)
+                                    messageLock.withLock {
+                                        chatLock.withLock {
 
-                                        contactIdsToRemove.remove(ContactId(dto.id))
+                                            queries.transaction {
+                                                for (dto in loadResponse.value.contacts) {
+
+                                                    upsertContact(dto, queries)
+
+                                                    contactIdsToRemove.remove(ContactId(dto.id))
+
+                                                }
+
+                                                for (contactId in contactIdsToRemove) {
+                                                    deleteContactById(contactId, queries)
+                                                }
+
+                                            }
+
+                                        }
                                     }
 
-                                    for (id in contactIdsToRemove) {
-                                        queries.contactDeleteById(id)
-                                        queries.inviteDeleteByContactId(id)
-                                    }
                                 }
-
                             }
+
+                            emit(
+                                processChatDtos(loadResponse.value.chats)
+                            )
+
+                        } catch (e: ParseException) {
+                            val msg =
+                                "Failed to convert date/time from Relay while processing Contacts"
+                            LOG.e(TAG, msg, e)
+                            emit(Response.Error(ResponseError(msg, e)))
                         }
 
-                        emit(
-                            processChatDtos(loadResponse.value.chats)
-                        )
-
-                    } catch (e: ParseException) {
-                        val msg = "Failed to convert date/time from Relay while processing Contacts"
-                        LOG.e(TAG, msg, e)
-                        emit(Response.Error(ResponseError(msg, e)))
                     }
+                    is LoadResponse.Loading -> {
+                        emit(loadResponse)
+                    }
+                }
 
-                }
-                is LoadResponse.Loading -> {
-                    emit(loadResponse)
-                }
             }
-
         }
     }
 
@@ -412,17 +478,61 @@ class SphinxRepository(
                                 .executeAsOneOrNull()
 
                         queries.transaction {
-                            chat?.let {
-                                queries.messageDeleteByChatId(it.id)
-                                queries.chatDeleteById(it.id)
-                            }
-                            queries.contactDeleteById(contactId)
+                            deleteChatById(chat?.id, queries, latestMessageUpdatedTimeMap)
+                            deleteContactById(contactId, queries)
                         }
 
                     }
                 }
             }
         }
+
+        return response
+    }
+
+    override suspend fun updateOwnerDeviceId(deviceId: DeviceId): Response<Any, ResponseError> {
+        val queries = coreDB.getSphinxDatabaseQueries()
+        var response: Response<Any, ResponseError> = Response.Success(Any())
+
+        try {
+            accountOwner.collect { owner ->
+
+                if (owner != null) {
+
+                    if (owner.deviceId != deviceId) {
+
+                        networkQueryContact.updateContact(
+                            owner.id,
+                            UpdateContactDto(device_id = deviceId.value)
+                        ).collect { loadResponse ->
+                            @Exhaustive
+                            when (loadResponse) {
+                                is LoadResponse.Loading -> {}
+                                is Response.Error -> {
+                                    response = loadResponse
+                                    throw Exception()
+                                }
+                                is Response.Success -> {
+                                    contactLock.withLock {
+                                        queries.transaction {
+                                            upsertContact(loadResponse.value, queries)
+                                        }
+                                    }
+                                    LOG.d(TAG, "DeviceId has been successfully updated")
+
+                                    throw Exception()
+                                }
+                            }
+                        }
+                    } else {
+                        LOG.d(TAG, "DeviceId is up to date")
+                        throw Exception()
+                    }
+
+                }
+
+            }
+        } catch (e: Exception) {}
 
         return response
     }
@@ -446,7 +556,7 @@ class SphinxRepository(
                     ?.let { balanceJsonString ->
 
                         val balanceDto: BalanceDto? = try {
-                            withContext(dispatchers.default) {
+                            withContext(default) {
                                 moshi.adapter(BalanceDto::class.java)
                                     .fromJson(balanceJsonString)
                             }
@@ -465,53 +575,55 @@ class SphinxRepository(
         return accountBalanceStateFlow.asStateFlow()
     }
 
-    override fun networkRefreshBalance(): Flow<LoadResponse<Boolean, ResponseError>> = flow {
-        networkQueryLightning.getBalance().collect { loadResponse ->
-            @Exhaustive
-            when (loadResponse) {
-                is LoadResponse.Loading -> {
-                    emit(loadResponse)
-                }
-                is Response.Error -> {
-                    emit(loadResponse)
-                }
-                is Response.Success -> {
+    override val networkRefreshBalance: Flow<LoadResponse<Boolean, ResponseError>> by lazy {
+        flow {
+            networkQueryLightning.getBalance().collect { loadResponse ->
+                @Exhaustive
+                when (loadResponse) {
+                    is LoadResponse.Loading -> {
+                        emit(loadResponse)
+                    }
+                    is Response.Error -> {
+                        emit(loadResponse)
+                    }
+                    is Response.Success -> {
 
-                    try {
-                        val jsonString: String = withContext(dispatchers.default) {
-                            moshi.adapter(BalanceDto::class.java)
-                                .toJson(loadResponse.value)
-                        } ?: throw NullPointerException("Converting BalanceDto to Json failed")
+                        try {
+                            val jsonString: String = withContext(default) {
+                                moshi.adapter(BalanceDto::class.java)
+                                    .toJson(loadResponse.value)
+                            } ?: throw NullPointerException("Converting BalanceDto to Json failed")
 
-                        balanceLock.withLock {
-                            accountBalanceStateFlow.value = loadResponse.value.toNodeBalance()
+                            balanceLock.withLock {
+                                accountBalanceStateFlow.value = loadResponse.value.toNodeBalance()
 
-                            authenticationStorage.putString(
-                                REPOSITORY_LIGHTNING_BALANCE,
-                                jsonString
-                            )
-                        }
+                                authenticationStorage.putString(
+                                    REPOSITORY_LIGHTNING_BALANCE,
+                                    jsonString
+                                )
+                            }
 
-                        emit(Response.Success(true))
-                    } catch (e: Exception) {
+                            emit(Response.Success(true))
+                        } catch (e: Exception) {
 
-                        // this should _never_ happen, as if the network call was
-                        // successful, it went from json -> dto, and we're just going
-                        // back from dto -> json to persist it...
-                        emit(
-                            Response.Error(
-                                ResponseError(
-                                    """
+                            // this should _never_ happen, as if the network call was
+                            // successful, it went from json -> dto, and we're just going
+                            // back from dto -> json to persist it...
+                            emit(
+                                Response.Error(
+                                    ResponseError(
+                                        """
                                         Network Fetching of balance was successful, but
                                         conversion to a string for persisting failed.
                                         ${loadResponse.value}
                                     """.trimIndent(),
-                                    e
+                                        e
+                                    )
                                 )
                             )
-                        )
-                    }
+                        }
 
+                    }
                 }
             }
         }
@@ -540,7 +652,7 @@ class SphinxRepository(
         return rsa.decrypt(
             rsaPrivateKey = RsaPrivateKey(privateKey),
             text = EncryptedString(messageContent.value),
-            dispatcher = dispatchers.default
+            dispatcher = default
         )
     }
 
@@ -569,23 +681,32 @@ class SphinxRepository(
                     }
                     is Response.Success -> {
 
-                        val decryptedContent = MessageContentDecrypted(
-                            response.value.toUnencryptedString().value
-                        )
+                        val message: Message = messageDboPresenterMapper.mapFrom(messageDbo)
 
-                        messageLock.withLock {
-                            withContext(dispatchers.io) {
-                                queries.transaction {
-                                    queries.messageUpdateContentDecrypted(
-                                        decryptedContent,
-                                        messageDbo.id
-                                    )
+                        response.value
+                            .toUnencryptedString(trim = false)
+                            .value
+                            .toMessageContentDecrypted()
+                            ?.let { decryptedContent ->
+
+                                messageLock.withLock {
+
+                                    withContext(io) {
+                                        queries.transaction {
+                                            queries.messageUpdateContentDecrypted(
+                                                decryptedContent,
+                                                messageDbo.id
+                                            )
+                                        }
+                                    }
+
                                 }
-                            }
-                        }
 
-                        messageDboPresenterMapper.mapFrom(messageDbo)
-                            .setMessageContentDecrypted(decryptedContent)
+                                message.setMessageContentDecrypted(decryptedContent)
+
+                            } ?: message.setDecryptionError(null)
+
+                        message
                     }
                 }
 
@@ -597,7 +718,7 @@ class SphinxRepository(
         } ?: messageDboPresenterMapper.mapFrom(messageDbo)
 
         if (message.type.canContainMedia) {
-            withContext(dispatchers.io) {
+            withContext(io) {
                 queries.messageMediaGetById(message.id).executeAsOneOrNull()
             }?.let { mediaDbo ->
 
@@ -622,27 +743,43 @@ class SphinxRepository(
                                     }
                                 }
                                 is Response.Success -> {
-                                    val decryptedKey = MediaKeyDecrypted(
-                                        response.value.toUnencryptedString().value
-                                    )
 
-                                    messageLock.withLock {
-                                        withContext(dispatchers.io) {
-                                            queries.messageMediaUpdateMediaKeyDecrypted(
-                                                decryptedKey,
-                                                mediaDbo.id
+                                    response.value
+                                        .toUnencryptedString(trim = false)
+                                        .value
+                                        .toMediaKeyDecrypted()
+                                        .let { decryptedKey ->
+
+                                            message.setMessageMedia(
+                                                MessageMedia(
+                                                    mediaDbo.media_key,
+                                                    decryptedKey,
+                                                    mediaDbo.media_type,
+                                                    mediaDbo.media_token
+                                                ).also {
+
+                                                    if (decryptedKey == null) {
+
+                                                        it.setDecryptionError(null)
+
+                                                    } else {
+
+                                                        messageLock.withLock {
+
+                                                            withContext(io) {
+                                                                queries.messageMediaUpdateMediaKeyDecrypted(
+                                                                    decryptedKey,
+                                                                    mediaDbo.id
+                                                                )
+                                                            }
+
+                                                        }
+
+                                                    }
+                                                }
                                             )
-                                        }
-                                    }
 
-                                    message.setMessageMedia(
-                                        MessageMedia(
-                                            mediaDbo.media_key,
-                                            decryptedKey,
-                                            mediaDbo.media_type,
-                                            mediaDbo.media_token
-                                        )
-                                    )
+                                        }
                                 }
                             }
                         } else {
@@ -673,209 +810,267 @@ class SphinxRepository(
         return message
     }
 
-    override suspend fun getMessageById(messageId: MessageId): Flow<Message?> {
+    override fun getAllMessagesToShowByChatId(chatId: ChatId): Flow<List<Message>> = flow {
         val queries = coreDB.getSphinxDatabaseQueries()
-        return queries.messageGetById(messageId)
-            .asFlow()
-            .mapToOneOrNull(dispatchers.io)
-            .map { it?.let { messageDbo ->
-                mapMessageDboAndDecryptContentIfNeeded(queries, messageDbo)
-            }}
-            .distinctUntilChanged()
+        emitAll(
+            queries.messageGetAllToShowByChatId(chatId)
+                .asFlow()
+                .mapToList(io)
+                .map { listMessageDbo ->
+                    listMessageDbo.map {
+                        mapMessageDboAndDecryptContentIfNeeded(queries, it)
+                    }
+                }
+        )
     }
 
-    override suspend fun getMessagesForChat(chatId: ChatId): Flow<List<Message>> {
+    override fun getMessageById(messageId: MessageId): Flow<Message?> = flow {
         val queries = coreDB.getSphinxDatabaseQueries()
-        return queries.messageGetAllToShowByChatId(chatId)
-            .asFlow()
-            .mapToList(dispatchers.io)
-            .map { listMessageDbo ->
-                listMessageDbo.map {
-                    mapMessageDboAndDecryptContentIfNeeded(queries, it)
-                }
-            }
+        emitAll(
+            queries.messageGetById(messageId)
+                .asFlow()
+                .mapToOneOrNull(io)
+                .map { it?.let { messageDbo ->
+                    mapMessageDboAndDecryptContentIfNeeded(queries, messageDbo)
+                }}
+                .distinctUntilChanged()
+        )
+    }
+
+    @Suppress("RemoveExplicitTypeArguments")
+    private val chatSeenMap: SynchronizedMap<ChatId, Seen> by lazy {
+        SynchronizedMap<ChatId, Seen>()
     }
 
     override suspend fun readMessages(chatId: ChatId) {
-        val queries = coreDB.getSphinxDatabaseQueries()
-
-        chatLock.withLock {
-            messageLock.withLock {
-                queries.transaction {
-                    queries.chatUpdateSeen(Seen.True, chatId)
-                    queries.chatMessagesUpdateSeen(Seen.True, chatId)
-                }
-            }
-        }
-
-        networkQueryMessage.readMessages(chatId).collect { _ -> }
+        readMessagesImpl(
+            chatId = chatId,
+            queries = coreDB.getSphinxDatabaseQueries(),
+            executeNetworkRequest = true
+        )
     }
 
-    @OptIn(UnencryptedDataAccess::class)
-    override fun networkRefreshMessages(): Flow<LoadResponse<Boolean, ResponseError>> = flow {
-        emit(LoadResponse.Loading)
-        val queries = coreDB.getSphinxDatabaseQueries()
+    private suspend fun readMessagesImpl(
+        chatId: ChatId,
+        queries: SphinxDatabaseQueries,
+        executeNetworkRequest: Boolean
+    ) {
+        val wasMarkedSeen: Boolean =
+            chatLock.withLock {
+                messageLock.withLock {
+                    withContext(io) {
+                        chatSeenMap.withLock { map ->
 
-        val lastSeenMessagesDate: String? = authenticationStorage.getString(
-            REPOSITORY_LAST_SEEN_MESSAGE_DATE,
-            null
-        )
+                            if (map[chatId]?.isTrue() != true) {
 
-        val page: Int = if (lastSeenMessagesDate == null) {
-            authenticationStorage.getString(
-                REPOSITORY_LAST_SEEN_MESSAGE_RESTORE_PAGE,
-                "0"
-            )!!.toInt()
-        } else {
-            0
+                                queries.updateSeen(chatId)
+                                LOG.d(TAG, "Chat [$chatId] marked as Seen")
+                                map[chatId] = Seen.True
+
+                                true
+                            } else {
+                                false
+                            }
+                        }
+                    }
+                }
         }
 
-        val lastSeenMessageDateResolved: DateTime = lastSeenMessagesDate?.toDateTime()
-            ?: DATE_NIXON_SHOCK.toDateTime()
+        if (executeNetworkRequest && wasMarkedSeen) {
+            networkQueryMessage.readMessages(chatId).collect { _ -> }
+        }
+    }
 
-        val now: String = DateTime.getFormatRelay().format(Date(System.currentTimeMillis()))
+    /*
+    * Used to hold in memory the chat table's latest message time to reduce disk IO
+    * and mitigate conflicting updates between SocketIO and networkRefreshMessages
+    * */
+    @Suppress("RemoveExplicitTypeArguments")
+    private val latestMessageUpdatedTimeMap: SynchronizedMap<ChatId, DateTime> by lazy {
+        SynchronizedMap<ChatId, DateTime>()
+    }
 
-        val supervisor = SupervisorJob(currentCoroutineContext().job)
-        val scope = CoroutineScope(supervisor)
+    override val networkRefreshMessages: Flow<LoadResponse<Boolean, ResponseError>> by lazy {
+        flow {
+            emit(LoadResponse.Loading)
+            val queries = coreDB.getSphinxDatabaseQueries()
 
-        var networkResponseError: Response.Error<ResponseError>? = null
+            val lastSeenMessagesDate: String? = authenticationStorage.getString(
+                REPOSITORY_LAST_SEEN_MESSAGE_DATE,
+                null
+            )
 
-        val jobList = ArrayList<Job>(MESSAGE_PAGINATION_LIMIT * 2 /* MessageDto fields to potentially decrypt */)
+            val page: Int = if (lastSeenMessagesDate == null) {
+                authenticationStorage.getString(
+                    REPOSITORY_LAST_SEEN_MESSAGE_RESTORE_PAGE,
+                    "0"
+                )!!.toInt()
+            } else {
+                0
+            }
 
-        var offset: Int = page * MESSAGE_PAGINATION_LIMIT
-        while (currentCoroutineContext().isActive && offset >= 0) {
+            val lastSeenMessageDateResolved: DateTime = lastSeenMessagesDate?.toDateTime()
+                ?: DATE_NIXON_SHOCK.toDateTime()
 
-            networkQueryMessage.getMessages(
-                MessagePagination.instantiate(
-                    limit = MESSAGE_PAGINATION_LIMIT,
-                    offset = offset,
-                    date = lastSeenMessageDateResolved
-                )
-            ).collect { response ->
+            val now: String = DateTime.getFormatRelay().format(Date(System.currentTimeMillis()))
 
-                @Exhaustive
-                when (response) {
-                    is LoadResponse.Loading -> {}
+            val supervisor = SupervisorJob(currentCoroutineContext().job)
+            val scope = CoroutineScope(supervisor)
 
-                    is Response.Error -> {
+            var networkResponseError: Response.Error<ResponseError>? = null
 
-                        offset = -1
-                        networkResponseError = response
+            val jobList =
+                ArrayList<Job>(MESSAGE_PAGINATION_LIMIT * 2 /* MessageDto fields to potentially decrypt */)
 
-                    }
+            var offset: Int = page * MESSAGE_PAGINATION_LIMIT
+            while (currentCoroutineContext().isActive && offset >= 0) {
 
-                    is Response.Success -> {
-                        val newMessages = response.value.new_messages
+                networkQueryMessage.getMessages(
+                    MessagePagination.instantiate(
+                        limit = MESSAGE_PAGINATION_LIMIT,
+                        offset = offset,
+                        date = lastSeenMessageDateResolved
+                    )
+                ).collect { response ->
 
-                        if (newMessages.isNotEmpty()) {
+                    @Exhaustive
+                    when (response) {
+                        is LoadResponse.Loading -> {
+                        }
 
-                            for (message in newMessages) {
+                        is Response.Error -> {
 
-                                decryptMessageDtoContentIfAvailable(message, scope)
-                                    ?.let { jobList.add(it) }
+                            offset = -1
+                            networkResponseError = response
 
-                                decryptMessageDtoMediaKeyIfAvailable(message, scope)
-                                    ?.let { jobList.add(it) }
+                        }
 
-                            }
+                        is Response.Success -> {
+                            val newMessages = response.value.new_messages
 
-                            var count = 0
-                            while (currentCoroutineContext().isActive) {
-                                jobList.elementAtOrNull(count)?.join() ?: break
-                                count++
-                            }
+                            if (newMessages.isNotEmpty()) {
 
-                            chatLock.withLock {
-                                messageLock.withLock {
-                                    withContext(dispatchers.io) {
+                                for (message in newMessages) {
 
-                                        queries.transaction {
-                                            val chatIds = queries.chatGetAllIds().executeAsList()
-                                            LOG.d(
-                                                TAG,
-                                                "Inserting Messages -" +
-                                                        " ${newMessages.firstOrNull()?.id}" +
-                                                        " - ${newMessages.lastOrNull()?.id}"
-                                            )
+                                    decryptMessageDtoContentIfAvailable(message, scope)
+                                        ?.let { jobList.add(it) }
 
-                                            val latestMessageMap = mutableMapOf<ChatId, MessageId>()
+                                    decryptMessageDtoMediaKeyIfAvailable(message, scope)
+                                        ?.let { jobList.add(it) }
 
-                                            for (dto in newMessages) {
+                                }
 
-                                                val id: Long? = dto.chat_id
+                                var count = 0
+                                while (currentCoroutineContext().isActive) {
+                                    jobList.elementAtOrNull(count)?.join() ?: break
+                                    count++
+                                }
 
-                                                if (id == null) {
-                                                    queries.upsertMessage(dto)
-                                                } else if (chatIds.contains(ChatId(id))) {
-                                                    queries.upsertMessage(dto)
+                                chatLock.withLock {
+                                    messageLock.withLock {
+                                        withContext(io) {
 
-                                                    if (dto.updateChatDboLatestMessage) {
-                                                        latestMessageMap[ChatId(id)] = MessageId(dto.id)
+                                            queries.transaction {
+                                                val chatIds =
+                                                    queries.chatGetAllIds().executeAsList()
+                                                LOG.d(
+                                                    TAG,
+                                                    "Inserting Messages -" +
+                                                            " ${newMessages.firstOrNull()?.id}" +
+                                                            " - ${newMessages.lastOrNull()?.id}"
+                                                )
+
+                                                val latestMessageMap =
+                                                    mutableMapOf<ChatId, MessageDto>()
+
+                                                for (dto in newMessages) {
+
+                                                    val id: Long? = dto.chat_id
+
+                                                    if (id == null) {
+                                                        upsertMessage(dto, queries)
+                                                    } else if (chatIds.contains(ChatId(id))) {
+                                                        upsertMessage(dto, queries)
+
+                                                        if (dto.updateChatDboLatestMessage) {
+                                                            latestMessageMap[ChatId(id)] = dto
+                                                        }
                                                     }
+                                                }
+
+                                                latestMessageUpdatedTimeMap.withLock { map ->
+
+                                                    for (entry in latestMessageMap.entries) {
+
+                                                        entry.value.updateChatDboLatestMessage(
+                                                            entry.key,
+                                                            map,
+                                                            queries
+                                                        )
+
+                                                    }
+
                                                 }
                                             }
 
-                                            for (entry in latestMessageMap.entries) {
-                                                queries.chatUpdateLatestMessage(entry.value, entry.key)
-                                            }
                                         }
-
                                     }
                                 }
+
                             }
 
-                        }
-
-                        when {
-                            offset == -1 -> {}
-                            newMessages.size >= MESSAGE_PAGINATION_LIMIT -> {
-                                offset += MESSAGE_PAGINATION_LIMIT
-
-                                if (lastSeenMessagesDate == null) {
-                                    val resumePageNumber = (offset / MESSAGE_PAGINATION_LIMIT)
-                                    authenticationStorage.putString(
-                                        REPOSITORY_LAST_SEEN_MESSAGE_RESTORE_PAGE,
-                                        resumePageNumber.toString()
-                                    )
-                                    LOG.d(
-                                        TAG,
-                                        "Persisting message restore page number: $resumePageNumber"
-                                    )
+                            when {
+                                offset == -1 -> {
                                 }
+                                newMessages.size >= MESSAGE_PAGINATION_LIMIT -> {
+                                    offset += MESSAGE_PAGINATION_LIMIT
 
-                                jobList.clear()
+                                    if (lastSeenMessagesDate == null) {
+                                        val resumePageNumber = (offset / MESSAGE_PAGINATION_LIMIT)
+                                        authenticationStorage.putString(
+                                            REPOSITORY_LAST_SEEN_MESSAGE_RESTORE_PAGE,
+                                            resumePageNumber.toString()
+                                        )
+                                        LOG.d(
+                                            TAG,
+                                            "Persisting message restore page number: $resumePageNumber"
+                                        )
+                                    }
 
-                            }
-                            else -> {
-                                offset = -1
+                                    jobList.clear()
+
+                                }
+                                else -> {
+                                    offset = -1
+                                }
                             }
                         }
                     }
                 }
             }
-        }
 
-        supervisor.cancelAndJoin()
+            supervisor.cancelAndJoin()
 
-        networkResponseError?.let { responseError ->
+            networkResponseError?.let { responseError ->
 
-            emit(responseError)
+                emit(responseError)
 
-        } ?: let {
+            } ?: let {
 
-            try {
-                authenticationStorage.putString(
-                    REPOSITORY_LAST_SEEN_MESSAGE_DATE,
-                    now
-                )
-            } finally {
-                if (lastSeenMessagesDate == null) {
-                    authenticationStorage.removeString(REPOSITORY_LAST_SEEN_MESSAGE_RESTORE_PAGE)
-                    LOG.d(TAG, "Removing message restore page number")
+                try {
+                    authenticationStorage.putString(
+                        REPOSITORY_LAST_SEEN_MESSAGE_DATE,
+                        now
+                    )
+                } finally {
+                    if (lastSeenMessagesDate == null) {
+                        authenticationStorage.removeString(REPOSITORY_LAST_SEEN_MESSAGE_RESTORE_PAGE)
+                        LOG.d(TAG, "Removing message restore page number")
+                    }
                 }
-            }
 
-            emit(Response.Success(true))
+                emit(Response.Success(true))
+            }
         }
     }
 
@@ -883,7 +1078,7 @@ class SphinxRepository(
     private suspend fun decryptMessageDtoContentIfAvailable(
         message: MessageDto,
         scope: CoroutineScope,
-        dispatcher: CoroutineDispatcher = dispatchers.mainImmediate
+        dispatcher: CoroutineDispatcher = mainImmediate
     ): Job? =
         message.message_content?.let { content ->
 
@@ -912,7 +1107,7 @@ class SphinxRepository(
                         }
                         is Response.Success -> {
                             message.setMessageContentDecrypted(
-                                decrypted.value.toUnencryptedString().value
+                                decrypted.value.toUnencryptedString(trim = false).value
                             )
                         }
                     }
@@ -927,7 +1122,7 @@ class SphinxRepository(
     private suspend fun decryptMessageDtoMediaKeyIfAvailable(
         message: MessageDto,
         scope: CoroutineScope,
-        dispatcher: CoroutineDispatcher = dispatchers.mainImmediate,
+        dispatcher: CoroutineDispatcher = mainImmediate,
     ): Job? =
         message.media_key?.let { mediaKey ->
 
@@ -957,7 +1152,7 @@ class SphinxRepository(
                         }
                         is Response.Success -> {
                             message.setMediaKeyDecrypted(
-                                decrypted.value.toUnencryptedString().value
+                                decrypted.value.toUnencryptedString(trim = false).value
                             )
                         }
                     }

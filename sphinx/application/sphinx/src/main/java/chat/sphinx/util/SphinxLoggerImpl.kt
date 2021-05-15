@@ -25,7 +25,7 @@ class SphinxLoggerImpl(private val buildConfigDebug: BuildConfigDebug): SphinxLo
                 }
             }
             LogType.Warning -> {
-                Log.w(tag, message)
+                Log.w(tag, message, throwable)
             }
             LogType.Verbose -> {
                 if (buildConfigDebug.value) {

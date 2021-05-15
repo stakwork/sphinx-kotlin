@@ -26,14 +26,26 @@ class NetworkQueryChatImpl(
     ///////////
     /// GET ///
     ///////////
-    override fun getChats(
-        relayData: Pair<AuthorizationToken, RelayUrl>?
-    ): Flow<LoadResponse<List<ChatDto>, ResponseError>> =
+    private val getChatsFlowNullData: Flow<LoadResponse<List<ChatDto>, ResponseError>> by lazy {
         networkRelayCall.relayGet(
             responseJsonClass = GetChatsRelayResponse::class.java,
             relayEndpoint = ENDPOINT_CHATS,
-            relayData = relayData
+            relayData = null
         )
+    }
+
+    override fun getChats(
+        relayData: Pair<AuthorizationToken, RelayUrl>?
+    ): Flow<LoadResponse<List<ChatDto>, ResponseError>> =
+        if (relayData == null) {
+            getChatsFlowNullData
+        } else {
+            networkRelayCall.relayGet(
+                responseJsonClass = GetChatsRelayResponse::class.java,
+                relayEndpoint = ENDPOINT_CHATS,
+                relayData = relayData
+            )
+        }
 
     ///////////
     /// PUT ///

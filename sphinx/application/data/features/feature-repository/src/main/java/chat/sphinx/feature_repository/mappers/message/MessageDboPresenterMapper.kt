@@ -38,7 +38,7 @@ internal class MessageDboPresenterMapper(
                 if (message.type.isMessage()) {
                     when {
                         decrypted.value.contains("boost::") -> {
-                            withContext(dispatchers.default) {
+                            withContext(default) {
                                 decrypted.value.split("::")
                                     .elementAtOrNull(1)
                                     ?.toPodBoostOrNull(moshi)
@@ -48,7 +48,7 @@ internal class MessageDboPresenterMapper(
                             }
                         }
                         decrypted.value.contains("giphy::") -> {
-                            withContext(dispatchers.default) {
+                            withContext(default) {
                                 decrypted.value.split("::")
                                     .elementAtOrNull(1)
                                     ?.decodeBase64ToArray()

@@ -12,7 +12,6 @@ import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.kotlin_response.message
 import chat.sphinx.logger.SphinxLogger
-import chat.sphinx.logger.d
 import chat.sphinx.logger.e
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
@@ -112,7 +111,10 @@ class NetworkRelayCallImpl(
     private val networkClient: NetworkClient,
     private val relayDataHandler: RelayDataHandler,
     private val LOG: SphinxLogger,
-): NetworkRelayCall(), NetworkClientClearedListener {
+) : NetworkRelayCall(),
+    NetworkClientClearedListener,
+    CoroutineDispatchers by dispatchers
+{
 
     companion object {
         const val TAG = "NetworkRelayCallImpl"
@@ -145,7 +147,7 @@ class NetworkRelayCallImpl(
             emit(handleException(LOG, GET, url, e))
         }
 
-    }.flowOn(dispatchers.io)
+    }.flowOn(io)
 
     override fun <T: Any, V: Any> put(
         url: String,
@@ -173,7 +175,7 @@ class NetworkRelayCallImpl(
             emit(handleException(LOG, PUT, url, e))
         }
 
-    }.flowOn(dispatchers.io)
+    }.flowOn(io)
 
     override fun <T: Any, V: Any> post(
         url: String,
@@ -201,7 +203,7 @@ class NetworkRelayCallImpl(
             emit(handleException(LOG, POST, url, e))
         }
 
-    }.flowOn(dispatchers.io)
+    }.flowOn(io)
 
     override fun <T: Any, V: Any> delete(
         url: String,
@@ -233,7 +235,7 @@ class NetworkRelayCallImpl(
             emit(handleException(LOG, DELETE, url, e))
         }
 
-    }.flowOn(dispatchers.io)
+    }.flowOn(io)
 
     @Volatile
     private var extendedNetworkCallClient: OkHttpClient? = null
@@ -326,7 +328,7 @@ class NetworkRelayCallImpl(
             emitAll(validateRelayResponse(it, GET, relayEndpoint))
         }
 
-    }.flowOn(dispatchers.io)
+    }.flowOn(io)
 
     override fun <T: Any, RequestBody: Any, V: RelayResponse<T>> relayPut(
         responseJsonClass: Class<V>,
@@ -359,7 +361,7 @@ class NetworkRelayCallImpl(
             emitAll(validateRelayResponse(it, PUT, relayEndpoint))
         }
 
-    }.flowOn(dispatchers.io)
+    }.flowOn(io)
 
     override fun <T: Any, RequestBody: Any, V: RelayResponse<T>> relayPost(
         responseJsonClass: Class<V>,
@@ -392,7 +394,7 @@ class NetworkRelayCallImpl(
             emitAll(validateRelayResponse(it, POST, relayEndpoint))
         }
 
-    }.flowOn(dispatchers.io)
+    }.flowOn(io)
 
     override fun <T: Any, RequestBody: Any, V: RelayResponse<T>> relayDelete(
         responseJsonClass: Class<V>,
@@ -425,7 +427,7 @@ class NetworkRelayCallImpl(
             emitAll(validateRelayResponse(it, DELETE, relayEndpoint))
         }
 
-    }.flowOn(dispatchers.io)
+    }.flowOn(io)
 
     @Throws(NullPointerException::class, AssertionError::class)
     private fun <T: Any, V: RelayResponse<T>> validateRelayResponse(

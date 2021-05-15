@@ -6,6 +6,7 @@ import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.wrapper_common.contact.ContactId
 import chat.sphinx.wrapper_common.invite.InviteId
 import chat.sphinx.wrapper_contact.Contact
+import chat.sphinx.wrapper_contact.DeviceId
 import chat.sphinx.wrapper_invite.Invite
 import kotlinx.coroutines.flow.Flow
 
@@ -14,14 +15,16 @@ import kotlinx.coroutines.flow.Flow
  * them, and thus proc and [Flow] being collected.
  * */
 interface ContactRepository {
-    suspend fun getContacts(): Flow<List<Contact>>
-    suspend fun getContactById(contactId: ContactId): Flow<Contact?>
+    val accountOwner: Flow<Contact?>
 
-    suspend fun getInviteById(inviteId: InviteId): Flow<Invite?>
-    suspend fun getInviteByContactId(contactId: ContactId): Flow<Invite?>
+    val getAllContacts: Flow<List<Contact>>
+    fun getContactById(contactId: ContactId): Flow<Contact?>
 
-    suspend fun getOwner(): Flow<Contact?>
-    fun networkRefreshContacts(): Flow<LoadResponse<Boolean, ResponseError>>
+    fun getInviteByContactId(contactId: ContactId): Flow<Invite?>
+    fun getInviteById(inviteId: InviteId): Flow<Invite?>
+
+    val networkRefreshContacts: Flow<LoadResponse<Boolean, ResponseError>>
 
     suspend fun deleteContactById(contactId: ContactId): Response<Any, ResponseError>
+    suspend fun updateOwnerDeviceId(deviceId: DeviceId): Response<Any, ResponseError>
 }
