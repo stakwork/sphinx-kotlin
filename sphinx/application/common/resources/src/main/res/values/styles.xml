@@ -14,4 +14,9 @@
         <item name="android:textColor">@color/text</item>
         <item name="android:textSize">@dimen/default_text_size_tap_target_material_icon</item>
     </style>
+
+    <style name="CustomSwitch" parent="Theme.AppCompat.Light">
+        <item name="colorControlActivated">@color/primaryBlue</item>
+        <item name="android:colorForeground">@color/lightDivider</item>
+    </style>
 </resources>

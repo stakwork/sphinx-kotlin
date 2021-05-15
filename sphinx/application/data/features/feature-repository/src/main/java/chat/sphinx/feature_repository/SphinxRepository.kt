@@ -6,7 +6,8 @@ import chat.sphinx.concept_crypto_rsa.RSA
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
 import chat.sphinx.concept_network_query_chat.model.ChatDto
 import chat.sphinx.concept_network_query_contact.NetworkQueryContact
-import chat.sphinx.concept_network_query_contact.model.UpdateContactDto
+import chat.sphinx.concept_network_query_contact.model.PostContactDto
+import chat.sphinx.concept_network_query_contact.model.PutContactDto
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_lightning.model.balance.BalanceDto
 import chat.sphinx.concept_network_query_message.NetworkQueryMessage
@@ -39,9 +40,12 @@ import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.chat.ChatId
 import chat.sphinx.wrapper_common.contact.ContactId
 import chat.sphinx.wrapper_common.invite.InviteId
+import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
+import chat.sphinx.wrapper_common.lightning.LightningRouteHint
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessagePagination
 import chat.sphinx.wrapper_contact.Contact
+import chat.sphinx.wrapper_contact.ContactAlias
 import chat.sphinx.wrapper_contact.DeviceId
 import chat.sphinx.wrapper_invite.Invite
 import chat.sphinx.wrapper_lightning.NodeBalance
@@ -490,6 +494,43 @@ class SphinxRepository(
         return response
     }
 
+    override fun createContact(
+        contactAlias: ContactAlias,
+        lightningNodePubKey: LightningNodePubKey,
+        lightningRouteHint: LightningRouteHint?,
+    ): Flow<LoadResponse<Any, ResponseError>> = flow {
+        val queries = coreDB.getSphinxDatabaseQueries()
+
+        val postContactDto = PostContactDto(
+            alias = contactAlias.value,
+            public_key = lightningNodePubKey.value,
+            route_hint = lightningRouteHint?.value,
+        )
+
+        networkQueryContact.createContact(postContactDto).collect { loadResponse ->
+            @Exhaustive
+            when (loadResponse) {
+                LoadResponse.Loading -> {
+                    emit(loadResponse)
+                }
+                is Response.Error -> {
+                    emit(loadResponse)
+                }
+                is Response.Success -> {
+                    contactLock.withLock {
+                        withContext(io) {
+                            queries.transaction {
+                                upsertContact(loadResponse.value, queries)
+                            }
+                        }
+                    }
+
+                    emit(Response.Success(true))
+                }
+            }
+        }
+    }
+
     override suspend fun updateOwnerDeviceId(deviceId: DeviceId): Response<Any, ResponseError> {
         val queries = coreDB.getSphinxDatabaseQueries()
         var response: Response<Any, ResponseError> = Response.Success(Any())
@@ -503,7 +544,7 @@ class SphinxRepository(
 
                         networkQueryContact.updateContact(
                             owner.id,
-                            UpdateContactDto(device_id = deviceId.value)
+                            PutContactDto(device_id = deviceId.value)
                         ).collect { loadResponse ->
                             @Exhaustive
                             when (loadResponse) {

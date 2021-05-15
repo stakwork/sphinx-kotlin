@@ -3,7 +3,8 @@ package chat.sphinx.feature_network_query_contact
 import chat.sphinx.concept_network_query_contact.NetworkQueryContact
 import chat.sphinx.concept_network_query_contact.model.ContactDto
 import chat.sphinx.concept_network_query_contact.model.GetContactsResponse
-import chat.sphinx.concept_network_query_contact.model.UpdateContactDto
+import chat.sphinx.concept_network_query_contact.model.PostContactDto
+import chat.sphinx.concept_network_query_contact.model.PutContactDto
 import chat.sphinx.concept_network_relay_call.NetworkRelayCall
 import chat.sphinx.feature_network_query_contact.model.ContactRelayResponse
 import chat.sphinx.feature_network_query_contact.model.DeleteContactRelayResponse
@@ -57,14 +58,14 @@ class NetworkQueryContactImpl(
     ///////////
     override fun updateContact(
         contactId: ContactId,
-        updateContactDto: UpdateContactDto,
+        putContactDto: PutContactDto,
         relayData: Pair<AuthorizationToken, RelayUrl>?
     ): Flow<LoadResponse<ContactDto, ResponseError>> =
         networkRelayCall.relayPut(
             responseJsonClass = ContactRelayResponse::class.java,
             relayEndpoint = ENDPOINT_CONTACTS + "/${contactId.value}",
-            requestBodyJsonClass = UpdateContactDto::class.java,
-            requestBody = updateContactDto,
+            requestBodyJsonClass = PutContactDto::class.java,
+            requestBody = putContactDto,
             relayData = relayData,
         )
 
@@ -74,6 +75,18 @@ class NetworkQueryContactImpl(
 //    app.post('/contacts/tokens', contacts.generateToken)
 //    app.post('/contacts/:id/keys', contacts.exchangeKeys)
 //    app.post('/contacts', contacts.createContact)
+
+    override fun createContact(
+        postContactDto: PostContactDto,
+        relayData: Pair<AuthorizationToken, RelayUrl>?
+    ): Flow<LoadResponse<ContactDto, ResponseError>> =
+        networkRelayCall.relayPost(
+            responseJsonClass = ContactRelayResponse::class.java,
+            relayEndpoint = ENDPOINT_CONTACTS,
+            requestBodyJsonClass = PostContactDto::class.java,
+            requestBody = postContactDto,
+            relayData = relayData
+        )
 
     //////////////
     /// DELETE ///

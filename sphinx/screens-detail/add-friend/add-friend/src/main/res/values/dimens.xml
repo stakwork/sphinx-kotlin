@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="add_friend_buttons_margin_horizontal">75dp</dimen>
+    <dimen name="add_friend_buttons_height">62dp</dimen>
+
+    <dimen name="add_friend_buttons_text_size">17sp</dimen>
+</resources>
