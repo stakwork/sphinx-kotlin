@@ -4,7 +4,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
 /**
- * Wraps a mutable map in a suspend function such that anything
+ * Wraps a mutable map such that anything
  * executed within the lambda holds a lock.
  * */
 class SynchronizedSuspendMap<K, V>(initialCapacity: Int = 0) {
@@ -16,13 +16,12 @@ class SynchronizedSuspendMap<K, V>(initialCapacity: Int = 0) {
 }
 
 /**
- * Wraps a mutable map in a suspend function such that anything
+ * Wraps a mutable map such that anything
  * executed within the lambda holds a lock.
  * */
 class SynchronizedMap<K, V>(initialCapacity: Int = 0) {
     private val map: MutableMap<K, V> = LinkedHashMap(initialCapacity)
-    private val lock = Object()
 
     fun<T> withLock(action: (MutableMap<K, V>) -> T): T =
-        synchronized(lock) { action(map) }
+        synchronized(this) { action(map) }
 }
