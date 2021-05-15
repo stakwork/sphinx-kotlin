@@ -17,8 +17,9 @@ import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.LightningRouteHint
-import chat.sphinx.wrapper_contact.ContactAlias
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
+import io.matthewnelson.android_feature_screens.util.gone
+import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_toast_utils.ToastUtils
 import io.matthewnelson.android_feature_toast_utils.show
 
@@ -42,19 +43,20 @@ internal class NewContactFragment : SideEffectFragment<
     override suspend fun onViewStateFlowCollect(viewState: NewContactViewState) {
         @Exhaustive
         when (viewState) {
+            is NewContactViewState.Idle -> {}
             is NewContactViewState.Saving -> {
-                binding.newContactSaveProgress.visibility = View.VISIBLE
+                binding.newContactSaveProgress.visible
             }
 
             is NewContactViewState.Saved -> {
-                binding.newContactSaveProgress.visibility = View.GONE
+                binding.newContactSaveProgress.gone
 
                 viewModel.navigator.popBackStack()
                 viewModel.navigator.popBackStack()
             }
 
             is NewContactViewState.Error -> {
-                binding.newContactSaveProgress.visibility = View.GONE
+                binding.newContactSaveProgress.gone
             }
         }
     }
@@ -114,8 +116,8 @@ internal class NewContactFragment : SideEffectFragment<
 
         binding.buttonAlreadyOnSphinx.setOnClickListener {
             viewModel.addContact(
-                binding.newContactAddressEditText.text?.toString() ?: "",
                 binding.newContactNicknameEditText.text?.toString() ?: "",
+                binding.newContactAddressEditText.text?.toString() ?: "",
                 binding.newContactRouteHintEditText.text?.toString()
             )
         }
