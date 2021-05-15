@@ -13,7 +13,7 @@ data class ContactDto(
     val photo_url: String?,
     val private_photo: Any?,
     val is_owner: Any?,
-    val deleted: Any,
+    val deleted: Any?,
     val auth_token: String?,
 //    val remote_id: Int?,
     val status: Int?,
