@@ -1,8 +1,10 @@
 package chat.sphinx.chat_common.ui.viewstate.messageholder
 
 import androidx.annotation.MainThread
+import androidx.core.view.updateLayoutParams
 import app.cash.exhaustive.Exhaustive
-import chat.sphinx.resources.R
+import chat.sphinx.chat_common.R
+import chat.sphinx.resources.R as common_R
 import chat.sphinx.chat_common.databinding.LayoutMessageHolderBinding
 import chat.sphinx.resources.setTextColorExt
 import chat.sphinx.wrapper_chat.ChatType
@@ -11,6 +13,7 @@ import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_message.Message
 import chat.sphinx.wrapper_message.isReceived
+import chat.sphinx.wrapper_view.Px
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.goneIfTrue
@@ -33,6 +36,71 @@ inline fun LayoutMessageHolderBinding.setDirectPaymentLayout(directPayment: Layo
         }
     }
 }
+
+@MainThread
+@Suppress("NOTHING_TO_INLINE")
+inline fun LayoutMessageHolderBinding.setBackground(
+    background: HolderBackground,
+    holderWidth: Px,
+) {
+    @Exhaustive
+    when (background) {
+        is HolderBackground.None -> {
+            includeMessageHolderMessageTypes.root.gone
+        }
+        is HolderBackground.In -> {
+            spaceMessageHolderLeft.updateLayoutParams {
+                width = root.context.resources.getDimensionPixelSize(R.dimen.message_holder_space_width_left)
+            }
+            spaceMessageHolderRight.updateLayoutParams {
+                width = (holderWidth.value * HolderBackground.SPACE_WIDTH_MULTIPLE).toInt()
+            }
+
+            includeMessageHolderMessageTypes.root.apply {
+                visible
+
+                @Exhaustive
+                when (background) {
+                    HolderBackground.In.First -> {
+                        setBackgroundResource(R.drawable.background_message_holder_in_first)
+                    }
+                    HolderBackground.In.Middle -> {
+                        setBackgroundResource(R.drawable.background_message_holder_in_middle)
+                    }
+                    HolderBackground.In.Last -> {
+                        setBackgroundResource(R.drawable.background_message_holder_in_last)
+                    }
+                }
+            }
+        }
+        is HolderBackground.Out -> {
+            spaceMessageHolderLeft.updateLayoutParams {
+                width = (holderWidth.value * HolderBackground.SPACE_WIDTH_MULTIPLE).toInt()
+            }
+            spaceMessageHolderRight.updateLayoutParams {
+                width = 0
+            }
+
+            includeMessageHolderMessageTypes.root.apply {
+                visible
+
+                @Exhaustive
+                when (background) {
+                    HolderBackground.Out.First -> {
+                        setBackgroundResource(R.drawable.background_message_holder_out_first)
+                    }
+                    HolderBackground.Out.Middle -> {
+                        setBackgroundResource(R.drawable.background_message_holder_out_middle)
+                    }
+                    HolderBackground.Out.Last -> {
+                        setBackgroundResource(R.drawable.background_message_holder_out_last)
+                    }
+                }
+            }
+        }
+    }
+}
+
 
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
@@ -85,7 +153,7 @@ inline fun LayoutMessageHolderBinding.setHeaderStatus(
                         *   context.getRandomColor()
                         *   setBackgroundRandomColor()
                         * */
-                        setTextColorExt(R.color.lightPurple)
+                        setTextColorExt(common_R.color.lightPurple)
                     }
                 }
 

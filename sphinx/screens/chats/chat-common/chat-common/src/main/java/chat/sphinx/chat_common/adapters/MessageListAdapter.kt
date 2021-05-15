@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView
 import chat.sphinx.chat_common.ui.ChatViewModel
 import chat.sphinx.chat_common.databinding.LayoutMessageHolderBinding
 import chat.sphinx.chat_common.ui.viewstate.messageholder.MessageHolderViewState
+import chat.sphinx.chat_common.ui.viewstate.messageholder.setBackground
 import chat.sphinx.chat_common.ui.viewstate.messageholder.setDirectPaymentLayout
 import chat.sphinx.chat_common.ui.viewstate.messageholder.setHeaderStatus
 import chat.sphinx.concept_image_loader.Disposable
@@ -153,7 +154,7 @@ class MessageListAdapter(
                     viewModel.chatDataStateFlow.value?.chat?.type
                 )
 
-                viewState.background.setBackground(recyclerViewWidth, binding)
+                setBackground(viewState.background, recyclerViewWidth)
 
                 setDirectPaymentLayout(viewState.directPayment)
             }
