@@ -1,13 +1,12 @@
 package chat.sphinx.new_contact.ui
 
-import android.opengl.Visibility
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
-import android.widget.ProgressBar
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import app.cash.exhaustive.Exhaustive
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.new_contact.R
 import chat.sphinx.new_contact.databinding.FragmentNewContactBinding
@@ -19,9 +18,7 @@ import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.LightningRouteHint
 import chat.sphinx.wrapper_common.lightning.isValid
-import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_contact.ContactAlias
-import chat.sphinx.wrapper_contact.ContactStatus
 import io.matthewnelson.android_feature_toast_utils.ToastUtils
 import io.matthewnelson.android_feature_toast_utils.show
 
@@ -35,6 +32,7 @@ internal class NewContactFragment : BaseFragment<
     override val binding: FragmentNewContactBinding by viewBinding(FragmentNewContactBinding::bind)
 
     override suspend fun onViewStateFlowCollect(viewState: NewContactViewState) {
+        @Exhaustive
         when (viewState) {
             is NewContactViewState.Saving -> {
                 binding.newContactSaveProgress.visibility = View.VISIBLE
