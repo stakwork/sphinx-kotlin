@@ -3,7 +3,7 @@ package chat.sphinx.concept_network_query_contact
 import chat.sphinx.concept_network_query_contact.model.ContactDto
 import chat.sphinx.concept_network_query_contact.model.GetContactsResponse
 import chat.sphinx.concept_network_query_contact.model.PostContactDto
-import chat.sphinx.concept_network_query_contact.model.UpdateContactDto
+import chat.sphinx.concept_network_query_contact.model.PutContactDto
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
@@ -26,7 +26,7 @@ abstract class NetworkQueryContact {
     ///////////
     abstract fun updateContact(
         contactId: ContactId,
-        updateContactDto: UpdateContactDto,
+        putContactDto: PutContactDto,
         relayData: Pair<AuthorizationToken, RelayUrl>? = null
     ): Flow<LoadResponse<ContactDto, ResponseError>>
 

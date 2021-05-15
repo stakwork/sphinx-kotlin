@@ -7,7 +7,7 @@ import chat.sphinx.concept_network_query_chat.NetworkQueryChat
 import chat.sphinx.concept_network_query_chat.model.ChatDto
 import chat.sphinx.concept_network_query_contact.NetworkQueryContact
 import chat.sphinx.concept_network_query_contact.model.PostContactDto
-import chat.sphinx.concept_network_query_contact.model.UpdateContactDto
+import chat.sphinx.concept_network_query_contact.model.PutContactDto
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_lightning.model.balance.BalanceDto
 import chat.sphinx.concept_network_query_message.NetworkQueryMessage
@@ -544,7 +544,7 @@ class SphinxRepository(
 
                         networkQueryContact.updateContact(
                             owner.id,
-                            UpdateContactDto(device_id = deviceId.value)
+                            PutContactDto(device_id = deviceId.value)
                         ).collect { loadResponse ->
                             @Exhaustive
                             when (loadResponse) {
