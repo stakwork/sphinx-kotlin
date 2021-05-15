@@ -179,6 +179,14 @@ fun TransactionCallbacks.upsertMessage(dto: MessageDto, queries: SphinxDatabaseQ
 }
 
 @Suppress("NOTHING_TO_INLINE")
+inline fun SphinxDatabaseQueries.updateSeen(chatId: ChatId) {
+    transaction {
+        chatUpdateSeen(Seen.True, chatId)
+        chatMessagesUpdateSeen(Seen.True, chatId)
+    }
+}
+
+@Suppress("NOTHING_TO_INLINE")
 inline fun TransactionCallbacks.deleteChatById(
     chatId: ChatId?,
     queries: SphinxDatabaseQueries,

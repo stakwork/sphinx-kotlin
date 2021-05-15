@@ -867,20 +867,19 @@ class SphinxRepository(
         val wasMarkedSeen: Boolean =
             chatLock.withLock {
                 messageLock.withLock {
-                    chatSeenMap.withLock { map ->
+                    withContext(dispatchers.io) {
+                        chatSeenMap.withLock { map ->
 
-                        if (map[chatId]?.isTrue() != true) {
+                            if (map[chatId]?.isTrue() != true) {
 
-                            queries.transaction {
-                                queries.chatUpdateSeen(Seen.True, chatId)
-                                queries.chatMessagesUpdateSeen(Seen.True, chatId)
+                                queries.updateSeen(chatId)
+                                LOG.d(TAG, "Chat [$chatId] marked as Seen")
+                                map[chatId] = Seen.True
+
+                                true
+                            } else {
+                                false
                             }
-                            LOG.d(TAG, "Chat [$chatId] marked as Seen")
-                            map[chatId] = Seen.True
-
-                            true
-                        } else {
-                            false
                         }
                     }
                 }
