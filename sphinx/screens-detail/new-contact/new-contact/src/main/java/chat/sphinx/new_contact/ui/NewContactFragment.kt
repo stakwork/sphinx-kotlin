@@ -113,42 +113,11 @@ internal class NewContactFragment : SideEffectFragment<
         })
 
         binding.buttonAlreadyOnSphinx.setOnClickListener {
-            var pubkey = binding.newContactAddressEditText.text.toString().trim()
-            var nickname = binding.newContactNicknameEditText.text.toString().trim()
-            var routeHint = binding.newContactRouteHintEditText.text.toString().trim()
-
-            if (binding.newContactNicknameEditText.text.isNullOrBlank() || pubkey.isNullOrBlank()) {
-                ToastUtils().show(
-                    binding.root.context,
-                    R.string.new_contact_nickname_address_empty
-                )
-                return@setOnClickListener
-            }
-
-            val lightningNodePubKey = LightningNodePubKey(pubkey)
-            var lightningRouteHint: LightningRouteHint? = null
-
-            if (!lightningNodePubKey.isValid) {
-                ToastUtils().show(
-                    binding.root.context,
-                    R.string.new_contact_invalid_public_key_error
-                )
-                return@setOnClickListener
-            }
-
-            if (!routeHint.isNullOrBlank()) {
-                lightningRouteHint = LightningRouteHint(routeHint)
-
-                if (!lightningRouteHint.isValid) {
-                    ToastUtils().show(
-                        binding.root.context,
-                        R.string.new_contact_invalid_public_key_error
-                    )
-                }
-                return@setOnClickListener
-            }
-
-            viewModel.addContact(ContactAlias(nickname), lightningNodePubKey, lightningRouteHint)
+            viewModel.addContact(
+                binding.newContactAddressEditText.text?.toString() ?: "",
+                binding.newContactNicknameEditText.text?.toString() ?: "",
+                binding.newContactRouteHintEditText.text?.toString()
+            )
         }
 
         (requireActivity() as InsetterActivity).addNavigationBarPadding(binding.layoutConstraintNewContact)
