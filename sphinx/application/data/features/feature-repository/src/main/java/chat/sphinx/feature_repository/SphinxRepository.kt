@@ -6,8 +6,7 @@ import chat.sphinx.concept_crypto_rsa.RSA
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
 import chat.sphinx.concept_network_query_chat.model.ChatDto
 import chat.sphinx.concept_network_query_contact.NetworkQueryContact
-import chat.sphinx.concept_network_query_contact.model.ContactDto
-import chat.sphinx.concept_network_query_invite.model.InviteDto
+import chat.sphinx.concept_network_query_contact.model.PostContactDto
 import chat.sphinx.concept_network_query_contact.model.UpdateContactDto
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_lightning.model.balance.BalanceDto
@@ -47,7 +46,6 @@ import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessagePagination
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_contact.ContactAlias
-import chat.sphinx.wrapper_contact.ContactStatus
 import chat.sphinx.wrapper_contact.DeviceId
 import chat.sphinx.wrapper_invite.Invite
 import chat.sphinx.wrapper_lightning.NodeBalance
@@ -503,29 +501,13 @@ class SphinxRepository(
     ): Flow<LoadResponse<Any, ResponseError>> = flow {
         val queries = coreDB.getSphinxDatabaseQueries()
 
-        val contactDto = ContactDto(
+        val postContactDto = PostContactDto(
             alias = contactAlias.value,
             public_key = lightningNodePubKey.value,
             route_hint = lightningRouteHint?.value,
-            status = ContactStatus.Confirmed.value,
-            id = 0,
-            node_alias = null,
-            photo_url = null,
-            private_photo = null,
-            is_owner = null,
-            deleted = false,
-            auth_token = null,
-            contact_key = null,
-            device_id = null,
-            created_at = "",
-            updated_at = "",
-            from_group = null,
-            notification_sound = null,
-            tip_amount = null,
-            invite = null
         )
 
-        networkQueryContact.createContact(contactDto).collect { loadResponse ->
+        networkQueryContact.createContact(postContactDto).collect { loadResponse ->
             @Exhaustive
             when (loadResponse) {
                 LoadResponse.Loading -> {
