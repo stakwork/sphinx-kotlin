@@ -34,12 +34,12 @@ internal class ChatListAdapter(
     private val imageLoader: ImageLoader<ImageView>,
     private val lifecycleOwner: LifecycleOwner,
     private val viewModel: DashboardViewModel,
-) : RecyclerView.Adapter<ChatListAdapter.ChatViewHolder>(), DefaultLifecycleObserver {
+): RecyclerView.Adapter<ChatListAdapter.ChatViewHolder>(), DefaultLifecycleObserver {
 
     private inner class Diff(
         private val oldList: List<DashboardChat>,
         private val newList: List<DashboardChat>,
-    ) : DiffUtil.Callback() {
+    ): DiffUtil.Callback() {
 
         override fun getOldListSize(): Int {
             return oldList.size
@@ -59,11 +59,11 @@ internal class ChatListAdapter(
 
                 val same: Boolean = when {
                     old is DashboardChat.Active && new is DashboardChat.Active -> {
-                        old.chat.id == new.chat.id &&
-                                old.chat.latestMessageId == new.chat.latestMessageId
+                        old.chat.id                 == new.chat.id                  &&
+                        old.chat.latestMessageId    == new.chat.latestMessageId
                     }
                     old is DashboardChat.Inactive && new is DashboardChat.Inactive -> {
-                        old.chatName == new.chatName
+                        old.chatName                == new.chatName
                     }
                     else -> {
                         false
@@ -88,11 +88,11 @@ internal class ChatListAdapter(
 
                 val same: Boolean = when {
                     old is DashboardChat.Active && new is DashboardChat.Active -> {
-                        old.chat.type == new.chat.type &&
-                                old.chatName == new.chatName &&
-                                old.chat.isMuted == new.chat.isMuted &&
-                                old.chat.seen == new.chat.seen &&
-                                old.chat.photoUrl == new.chat.photoUrl
+                        old.chat.type               == new.chat.type                &&
+                        old.chatName                == new.chatName                 &&
+                        old.chat.isMuted            == new.chat.isMuted             &&
+                        old.chat.seen               == new.chat.seen                &&
+                        old.chat.photoUrl           == new.chat.photoUrl
                     }
                     old is DashboardChat.Inactive && new is DashboardChat.Inactive -> {
                         old.chatName == new.chatName
@@ -178,7 +178,7 @@ internal class ChatListAdapter(
 
     inner class ChatViewHolder(
         private val binding: LayoutDashboardChatHolderBinding
-    ) : RecyclerView.ViewHolder(binding.root) {
+    ): RecyclerView.ViewHolder(binding.root) {
 
         private var disposable: Disposable? = null
         private var dChat: DashboardChat? = null
