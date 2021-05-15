@@ -38,8 +38,7 @@ inline fun LayoutMessageHolderBinding.setDirectPaymentLayout(directPayment: Layo
 }
 
 @MainThread
-@Suppress("NOTHING_TO_INLINE")
-inline fun LayoutMessageHolderBinding.setBackground(
+fun LayoutMessageHolderBinding.setBackground(
     background: HolderBackground,
     holderWidth: Px,
 ) {
@@ -103,8 +102,7 @@ inline fun LayoutMessageHolderBinding.setBackground(
 
 
 @MainThread
-@Suppress("NOTHING_TO_INLINE")
-inline fun LayoutMessageHolderBinding.setHeaderStatus(
+fun LayoutMessageHolderBinding.setHeaderStatus(
     background: HolderBackground,
     message: Message,
     chatType: ChatType?,
