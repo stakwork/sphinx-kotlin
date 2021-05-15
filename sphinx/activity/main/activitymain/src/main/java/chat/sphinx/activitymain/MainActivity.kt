@@ -104,9 +104,12 @@ internal class MainActivity: MotionLayoutNavigationActivity<
         }
 
         binding.viewMainInputLock.setOnClickListener { viewModel }
+    }
 
-        // Authentication Screen
-        lifecycleScope.launchWhenStarted {
+    override fun onStart() {
+        super.onStart()
+        // Authentication
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel
                 .authenticationDriver
                 .navigationRequestSharedFlow
@@ -117,8 +120,8 @@ internal class MainActivity: MotionLayoutNavigationActivity<
                 }
         }
 
-        // Detail Screens
-        lifecycleScope.launchWhenStarted {
+        // Detail Screen
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel
                 .detailDriver
                 .navigationRequestSharedFlow
