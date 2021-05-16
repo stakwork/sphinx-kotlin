@@ -7,7 +7,7 @@ import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.scanner.R
 import chat.sphinx.scanner.databinding.FragmentScannerBinding
 import chat.sphinx.scanner.navigation.BackType
-import chat.sphinx.scanner_view_model_coordinator.ScannerResponse
+import chat.sphinx.scanner_view_model_coordinator.response.ScannerResponse
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.base.BaseFragment
 
