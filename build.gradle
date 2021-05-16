@@ -2,9 +2,6 @@
 buildscript {
     apply from: rootProject.file('gradle/dependencies.gradle')
     apply from: rootProject.file('kotlin-android/gradle/dependencies.gradle')
-    ext {
-        versions.kotlin = '1.4.32'
-    }
 
     repositories {
         mavenCentral()
