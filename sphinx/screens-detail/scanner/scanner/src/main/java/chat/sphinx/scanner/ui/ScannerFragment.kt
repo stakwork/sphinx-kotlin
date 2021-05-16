@@ -1,5 +1,6 @@
 package chat.sphinx.scanner.ui
 
+import android.content.Context
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.viewModels
@@ -9,10 +10,12 @@ import chat.sphinx.scanner.databinding.FragmentScannerBinding
 import chat.sphinx.scanner.navigation.BackType
 import chat.sphinx.scanner_view_model_coordinator.response.ScannerResponse
 import dagger.hilt.android.AndroidEntryPoint
-import io.matthewnelson.android_feature_screens.ui.base.BaseFragment
+import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 
 @AndroidEntryPoint
-internal class ScannerFragment: BaseFragment<
+internal class ScannerFragment: SideEffectFragment<
+        Context,
+        NotifySideEffect,
         ScannerViewState,
         ScannerViewModel,
         FragmentScannerBinding
@@ -43,5 +46,9 @@ internal class ScannerFragment: BaseFragment<
 
     override suspend fun onViewStateFlowCollect(viewState: ScannerViewState) {
 //        TODO("Not yet implemented")
+    }
+
+    override suspend fun onSideEffectCollect(sideEffect: NotifySideEffect) {
+        sideEffect.execute(binding.root.context)
     }
 }

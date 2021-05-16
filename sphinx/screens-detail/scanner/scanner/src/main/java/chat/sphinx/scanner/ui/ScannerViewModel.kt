@@ -1,5 +1,6 @@
 package chat.sphinx.scanner.ui
 
+import android.content.Context
 import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_view_model_coordinator.RequestCancelled
@@ -10,7 +11,8 @@ import chat.sphinx.scanner.coordinator.ScannerViewModelCoordinator
 import chat.sphinx.scanner.navigation.BackType
 import chat.sphinx.scanner_view_model_coordinator.response.ScannerResponse
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.matthewnelson.android_feature_viewmodel.BaseViewModel
+import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
+import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
@@ -20,7 +22,11 @@ import javax.inject.Inject
 internal class ScannerViewModel @Inject constructor(
     dispatchers: CoroutineDispatchers,
     private val scannerViewModelCoordinator: ScannerViewModelCoordinator,
-): BaseViewModel<ScannerViewState>(dispatchers, ScannerViewState.Idle)
+): SideEffectViewModel<
+        Context,
+        NotifySideEffect,
+        ScannerViewState
+        >(dispatchers, ScannerViewState.Idle)
 {
     // Instantiate immediately so the request is pulled in
     // from shared flow via the coordinator
@@ -47,7 +53,9 @@ internal class ScannerViewModel @Inject constructor(
                             @Exhaustive
                             when (returned) {
                                 is Response.Error -> {
-                                    // TODO: SideEffect display notification
+                                    if (returned.cause.isNotEmpty()) {
+                                        submitSideEffect(NotifySideEffect(returned.cause))
+                                    }
                                     throw Exception()
                                 }
                                 is Response.Success -> {}
