@@ -9,6 +9,7 @@ import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.concept_service_notification.PushNotificationRegistrar
 import chat.sphinx.concept_socket_io.SocketIOManager
 import chat.sphinx.concept_socket_io.SocketIOState
+import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
 import chat.sphinx.dashboard.navigation.DashboardBottomNavBarNavigator
 import chat.sphinx.dashboard.navigation.DashboardNavDrawerNavigator
 import chat.sphinx.dashboard.navigation.DashboardNavigator
@@ -20,6 +21,8 @@ import chat.sphinx.dashboard.ui.viewstates.NavDrawerViewState
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
+import chat.sphinx.scanner_view_model_coordinator.ScannerRequest
+import chat.sphinx.scanner_view_model_coordinator.ScannerResponse
 import chat.sphinx.wrapper_chat.isConversation
 import chat.sphinx.wrapper_common.contact.ContactId
 import chat.sphinx.wrapper_contact.Contact
@@ -37,7 +40,9 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import java.util.*
 import javax.inject.Inject
+import kotlin.collections.ArrayList
 
 internal suspend inline fun DashboardViewModel.collectChatViewState(
     crossinline action: suspend (value: ChatViewState) -> Unit
@@ -65,6 +70,7 @@ internal class DashboardViewModel @Inject constructor(
 
     private val pushNotificationRegistrar: PushNotificationRegistrar,
 
+    private val scannerCoordinator: ViewModelCoordinator<ScannerRequest, ScannerResponse>,
     private val socketIOManager: SocketIOManager,
 ): MotionLayoutViewModel<
         Any,
@@ -73,6 +79,12 @@ internal class DashboardViewModel @Inject constructor(
         NavDrawerViewState
         >(dispatchers, NavDrawerViewState.Closed)
 {
+    fun toScanner() {
+        viewModelScope.launch(mainImmediate) {
+            val response = scannerCoordinator.submitRequest(ScannerRequest)
+            // TODO: Do something with response
+        }
+    }
 
     val chatViewStateContainer: ChatViewStateContainer by lazy {
         ChatViewStateContainer(dispatchers)

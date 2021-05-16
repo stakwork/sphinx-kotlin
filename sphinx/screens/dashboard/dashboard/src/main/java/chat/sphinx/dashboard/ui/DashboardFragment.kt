@@ -150,7 +150,7 @@ internal class DashboardFragment : MotionLayoutFragment<
             }
             navBar.navBarButtonScanner.setOnClickListener {
                 binding.searchBarClearFocus()
-                lifecycleScope.launch { viewModel.navBarNavigator.toScannerDetail() }
+                viewModel.toScanner()
             }
             navBar.navBarButtonPaymentSend.setOnClickListener {
                 binding.searchBarClearFocus()
