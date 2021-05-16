@@ -1,4 +1,5 @@
 plugins {
+    id 'app.cash.exhaustive'
     id 'com.android.library'
     id 'dagger.hilt.android.plugin'
     id 'kotlin-android'
@@ -32,8 +33,12 @@ dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
     // KotlinAndroid
     implementation project(path: ':android:features:android-feature-screens')
+    
     // Sphinx
     implementation project(path: ':sphinx:screens-detail:common:detail-resources')
+
+    implementation project(path: ':sphinx:activity:features:feature-view-model-coordinator')
+    api project(path: ':sphinx:screens-detail:scanner:scanner-view-model-coordinator')
 
     implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt

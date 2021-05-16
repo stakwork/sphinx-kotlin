@@ -75,6 +75,7 @@ dependencies {
 
     // Sphinx
     implementation project(path: ':sphinx:activity:main:activitymain')
+    implementation project(path: ':sphinx:activity:features:feature-view-model-coordinator')
 
     implementation project(path: ':sphinx:application:common:logger')
 
