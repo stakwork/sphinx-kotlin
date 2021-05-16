@@ -69,8 +69,12 @@ internal class NewContactFragment : SideEffectFragment<
 
         binding.layoutGroupPinView.newContactPinQuestionMarkTextView.setOnClickListener {
             lifecycleScope.launch(viewModel.mainImmediate) {
-                viewModel.submitSideEffect(NewContactSideEffect.PrivacyPinHelp)
+                viewModel.submitSideEffect(NewContactSideEffect.Notify.PrivacyPinHelp)
             }
+        }
+
+        binding.scanAddressButton.setOnClickListener {
+            viewModel.requestScanner()
         }
 
         binding.newContactAddressEditText.addTextChangedListener(object : TextWatcher {
@@ -132,6 +136,11 @@ internal class NewContactFragment : SideEffectFragment<
     }
 
     override suspend fun onSideEffectCollect(sideEffect: NewContactSideEffect) {
-        sideEffect.execute(binding.root.context)
+        if (sideEffect is NewContactSideEffect.FromScanner) {
+            // TODO: Check if it contains a route hint
+            binding.newContactAddressEditText.setText(sideEffect.value.value)
+        } else {
+            sideEffect.execute(binding.root.context)
+        }
     }
 }
