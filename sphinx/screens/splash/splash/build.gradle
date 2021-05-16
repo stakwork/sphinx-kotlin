@@ -42,6 +42,7 @@ dependencies {
     implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-lightning')
     implementation project(path: ':sphinx:screens:authentication:authentication-resources')
     implementation project(path: ':sphinx:screens:splash:key-restore')
+    implementation project(path: ':sphinx:screens-detail:scanner:scanner-view-model-coordinator')
     implementation deps.jncryptor
 
     implementation deps.androidx.lifecycle.hilt

@@ -5,8 +5,13 @@ import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_background_login.BackgroundLoginHandler
 import chat.sphinx.concept_repository_lightning.LightningRepository
+import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
 import chat.sphinx.key_restore.KeyRestore
 import chat.sphinx.key_restore.KeyRestoreResponse
+import chat.sphinx.kotlin_response.Response
+import chat.sphinx.scanner_view_model_coordinator.request.ScannerFilter
+import chat.sphinx.scanner_view_model_coordinator.request.ScannerRequest
+import chat.sphinx.scanner_view_model_coordinator.response.ScannerResponse
 import chat.sphinx.splash.navigation.SplashNavigator
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
@@ -38,6 +43,7 @@ internal class SplashViewModel @Inject constructor(
     private val keyRestore: KeyRestore,
     private val lightningRepository: LightningRepository,
     private val navigator: SplashNavigator,
+    private val scannerCoordinator: ViewModelCoordinator<ScannerRequest, ScannerResponse>
 ): MotionLayoutViewModel<
         Any,
         Context,
@@ -100,7 +106,36 @@ internal class SplashViewModel @Inject constructor(
     // TODO: Use coordinator pattern and limit
     fun navigateToScanner() {
         viewModelScope.launch(mainImmediate) {
-            submitSideEffect(SplashSideEffect.NotImplementedYet)
+            val response = scannerCoordinator.submitRequest(
+                ScannerRequest(
+                    showNavBackArrow = false,
+                    filter = object : ScannerFilter() {
+                        override suspend fun checkData(data: String): Response<Any, String> {
+                            data.decodeBase64ToArray()
+                                ?.decodeToString()
+                                ?.split("::")
+                                ?.let { decodedSplit ->
+
+                                    if (decodedSplit.size == 2) {
+                                        if (decodedSplit[0] == "ip") {
+                                            return Response.Error("Creating a new account is not yet implemented")
+                                        }
+                                        if (decodedSplit[0] == "keys") {
+                                            return Response.Success(Any())
+                                        }
+                                    }
+
+                                }
+
+                            // TODO: make better
+                            return Response.Error("QR code is not an account restore code")
+                        }
+                    }
+                )
+            )
+            if (response is Response.Success) {
+                submitSideEffect(SplashSideEffect.FromScanner(response.value))
+            }
         }
     }
 
