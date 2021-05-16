@@ -56,6 +56,7 @@ internal class ScannerViewModel @Inject constructor(
                                     if (returned.cause.isNotEmpty()) {
                                         submitSideEffect(NotifySideEffect(returned.cause))
                                     }
+                                    delay(1_000L)
                                     throw Exception()
                                 }
                                 is Response.Success -> {}
