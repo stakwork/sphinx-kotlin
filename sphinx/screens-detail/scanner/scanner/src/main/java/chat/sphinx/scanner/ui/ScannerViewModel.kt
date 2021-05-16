@@ -1,13 +1,69 @@
 package chat.sphinx.scanner.ui
 
+import androidx.lifecycle.viewModelScope
+import chat.sphinx.concept_view_model_coordinator.RequestCancelled
+import chat.sphinx.concept_view_model_coordinator.ResponseHolder
+import chat.sphinx.feature_view_model_coordinator.RequestCatcher
+import chat.sphinx.kotlin_response.Response
+import chat.sphinx.scanner.coordinator.ScannerViewModelCoordinator
+import chat.sphinx.scanner.navigation.BackType
+import chat.sphinx.scanner_view_model_coordinator.ScannerResponse
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.BaseViewModel
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.*
 import javax.inject.Inject
 
 @HiltViewModel
 internal class ScannerViewModel @Inject constructor(
     dispatchers: CoroutineDispatchers,
+    private val scannerViewModelCoordinator: ScannerViewModelCoordinator,
 ): BaseViewModel<ScannerViewState>(dispatchers, ScannerViewState.Idle)
 {
+    // Instantiate immediately so the request is pulled in
+    // from shared flow via the coordinator
+    private val requestCatcher =
+        RequestCatcher(viewModelScope, scannerViewModelCoordinator, mainImmediate)
+
+    private var responseJob: Job? = null
+    fun processResponse(scannerResponse: ScannerResponse) {
+        if (responseJob?.isActive == true) {
+            return
+        }
+
+        responseJob = viewModelScope.launch(mainImmediate) {
+            // Scanner coordinator is setup for handling a single response at a time
+            // so we're ok to collect which will be cancelled when navigating back
+            // as the scope will be cancelled.
+            requestCatcher.getCaughtRequestStateFlow().collect { list ->
+                list.firstOrNull()?.let { requestHolder ->
+                    scannerViewModelCoordinator.submitResponse(
+                        response = Response.Success(ResponseHolder(requestHolder, scannerResponse)),
+                        navigateBack = BackType.PopBackStack
+                    )
+                }
+            }
+        }
+    }
+
+    fun goBack(type: BackType) {
+        if (responseJob?.isActive == true) {
+            return
+        }
+
+        responseJob = viewModelScope.launch(mainImmediate) {
+            // Scanner coordinator is setup for handling a single response at a time
+            // so we're ok to collect which will be cancelled when navigating back
+            // as the scope will be cancelled.
+            requestCatcher.getCaughtRequestStateFlow().collect { list ->
+                list.firstOrNull()?.let { requestHolder ->
+                    scannerViewModelCoordinator.submitResponse(
+                        response = Response.Error(RequestCancelled(requestHolder)),
+                        navigateBack = type
+                    )
+                }
+            }
+        }
+    }
 }
