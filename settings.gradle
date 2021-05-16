@@ -90,6 +90,7 @@ include ':sphinx:screens-detail:new-contact:new-contact'
 include ':sphinx:screens-detail:payments:payment-receive:payment-receive'
 include ':sphinx:screens-detail:payments:payment-send:payment-send'
 include ':sphinx:screens-detail:scanner:scanner'
+include ':sphinx:screens-detail:scanner:scanner-view-model-coordinator'
 include ':sphinx:screens-detail:support-ticket:support-ticket'
 include ':sphinx:screens-detail:transactions:transactions'
 
