@@ -53,22 +53,9 @@ abstract class ViewModelCoordinatorImpl<BackType: Any, Request: Any, Success: An
 
     protected abstract suspend fun navigateToScreen(request: RequestHolder<Request>)
 
-    /**
-     * Returning a [Success] from this method will immediately return the
-     * response to the request submitter, and [submitRequest] will not
-     * navigate to the destination specified by [navigateToScreen].
-     *
-     * Return `null` to always navigate to the screen.
-     * */
-    protected abstract suspend fun checkRequest(request: RequestHolder<Request>): Success?
-
     override suspend fun submitRequestImpl(
         holder: RequestHolder<Request>
     ): Response<Success, RequestCancelled<Request>> {
-        checkRequest(holder)?.let {
-            return Response.Success(it)
-        }
-
         navigateToScreen(holder)
 
         var response: Response<Success, RequestCancelled<Request>>? = null

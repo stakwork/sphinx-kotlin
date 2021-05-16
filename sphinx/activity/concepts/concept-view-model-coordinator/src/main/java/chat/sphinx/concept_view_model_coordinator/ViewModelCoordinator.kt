@@ -18,7 +18,20 @@ abstract class ViewModelCoordinator<Request: Any, Success: Any>(
         Mutex()
     }
 
+    /**
+     * Returning a [Success] from this method will immediately return the
+     * response to the request submitter, and [submitRequest] will not
+     * navigate to the destination specified by the implementing class.
+     *
+     * Return `null` to always navigate to the screen.
+     * */
+    protected abstract suspend fun checkRequest(request: Request): Success?
+
     suspend fun submitRequest(request: Request): Response<Success, RequestCancelled<Request>> {
+        checkRequest(request)?.let {
+            return Response.Success(it)
+        }
+
         return if (handleMultipleRequests) {
             submitRequestImpl(RequestHolder.instantiate(request))
         } else {
