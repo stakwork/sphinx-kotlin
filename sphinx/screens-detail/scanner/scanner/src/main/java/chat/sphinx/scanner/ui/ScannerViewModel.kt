@@ -30,7 +30,7 @@ internal class ScannerViewModel @Inject constructor(
 {
     // Instantiate immediately so the request is pulled in
     // from shared flow via the coordinator
-    private val requestCatcher =
+    val requestCatcher =
         RequestCatcher(viewModelScope, scannerViewModelCoordinator, mainImmediate)
 
     private var responseJob: Job? = null
