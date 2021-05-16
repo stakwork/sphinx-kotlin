@@ -1,13 +1,14 @@
 package chat.sphinx.scanner.ui
 
 import androidx.lifecycle.viewModelScope
+import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_view_model_coordinator.RequestCancelled
 import chat.sphinx.concept_view_model_coordinator.ResponseHolder
 import chat.sphinx.feature_view_model_coordinator.RequestCatcher
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.scanner.coordinator.ScannerViewModelCoordinator
 import chat.sphinx.scanner.navigation.BackType
-import chat.sphinx.scanner_view_model_coordinator.ScannerResponse
+import chat.sphinx.scanner_view_model_coordinator.response.ScannerResponse
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.BaseViewModel
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
@@ -33,17 +34,39 @@ internal class ScannerViewModel @Inject constructor(
         }
 
         responseJob = viewModelScope.launch(mainImmediate) {
-            // Scanner coordinator is setup for handling a single response at a time
-            // so we're ok to collect which will be cancelled when navigating back
-            // as the scope will be cancelled.
-            requestCatcher.getCaughtRequestStateFlow().collect { list ->
-                list.firstOrNull()?.let { requestHolder ->
-                    scannerViewModelCoordinator.submitResponse(
-                        response = Response.Success(ResponseHolder(requestHolder, scannerResponse)),
-                        navigateBack = BackType.PopBackStack
-                    )
+
+            try {
+                requestCatcher.getCaughtRequestStateFlow().collect { list ->
+                    list.firstOrNull()?.let { requestHolder ->
+
+                        requestHolder.request.filter?.let { filter ->
+                            val returned = withContext(default) {
+                                filter.checkData(scannerResponse.value)
+                            }
+
+                            @Exhaustive
+                            when (returned) {
+                                is Response.Error -> {
+                                    // TODO: SideEffect display notification
+                                    throw Exception()
+                                }
+                                is Response.Success -> {}
+                            }
+
+                        }
+
+                        scannerViewModelCoordinator.submitResponse(
+                            response = Response.Success(
+                                ResponseHolder(
+                                    requestHolder,
+                                    scannerResponse
+                                )
+                            ),
+                            navigateBack = BackType.PopBackStack
+                        )
+                    }
                 }
-            }
+            } catch (e: Exception) {}
         }
     }
 

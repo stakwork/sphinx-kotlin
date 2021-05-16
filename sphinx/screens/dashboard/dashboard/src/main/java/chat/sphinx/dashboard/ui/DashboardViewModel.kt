@@ -22,8 +22,8 @@ import chat.sphinx.dashboard.ui.viewstates.NavDrawerViewState
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
-import chat.sphinx.scanner_view_model_coordinator.ScannerRequest
-import chat.sphinx.scanner_view_model_coordinator.ScannerResponse
+import chat.sphinx.scanner_view_model_coordinator.request.ScannerRequest
+import chat.sphinx.scanner_view_model_coordinator.response.ScannerResponse
 import chat.sphinx.wrapper_chat.isConversation
 import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_common.contact.ContactId
@@ -84,7 +84,7 @@ internal class DashboardViewModel @Inject constructor(
 {
     fun toScanner() {
         viewModelScope.launch(mainImmediate) {
-            val response = scannerCoordinator.submitRequest(ScannerRequest)
+            val response = scannerCoordinator.submitRequest(ScannerRequest(filter = null))
             // TODO: Do something with response
         }
     }
