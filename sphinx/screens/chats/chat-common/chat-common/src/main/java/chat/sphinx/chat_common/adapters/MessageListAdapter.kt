@@ -13,11 +13,10 @@ import chat.sphinx.chat_common.ui.viewstate.messageholder.MessageHolderViewState
 import chat.sphinx.chat_common.ui.viewstate.messageholder.setBackground
 import chat.sphinx.chat_common.ui.viewstate.messageholder.setDirectPaymentLayout
 import chat.sphinx.chat_common.ui.viewstate.messageholder.setHeaderStatus
+import chat.sphinx.chat_common.ui.viewstate.messageholder.setMessageTypeMessageLayout
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.wrapper_view.Px
-import io.matthewnelson.android_feature_screens.util.gone
-import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -142,14 +141,6 @@ class MessageListAdapter(
                     )
                 }
 
-                // TODO: refactor into view state
-                includeMessageHolderMessageTypes.includeMessageTypeMessage.apply {
-                    viewState.message.messageContentDecrypted?.value?.let { content ->
-                        root.visible
-                        textViewMessageTypeMessage.text = content
-                    } ?: root.gone
-                }
-
                 setHeaderStatus(
                     viewState.background,
                     viewState.message,
@@ -158,6 +149,7 @@ class MessageListAdapter(
 
                 setBackground(viewState.background, recyclerViewWidth)
 
+                setMessageTypeMessageLayout(viewState.messageTypeContent)
                 setDirectPaymentLayout(viewState.directPayment)
             }
         }

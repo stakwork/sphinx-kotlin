@@ -189,3 +189,16 @@ fun LayoutMessageHolderBinding.setHeaderStatus(
         }
     }
 }
+
+
+@MainThread
+fun LayoutMessageHolderBinding.setMessageTypeMessageLayout(
+    messageContent: LayoutState.MessageTypeContent
+) {
+    includeMessageHolderMessageTypes.includeMessageTypeMessage.apply {
+        messageContent.messageText?.let { content ->
+            root.visible
+            textViewMessageTypeMessage.text = content
+        } ?: root.gone
+    }
+}
