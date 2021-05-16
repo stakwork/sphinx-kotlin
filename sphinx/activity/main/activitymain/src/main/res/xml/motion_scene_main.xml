@@ -174,11 +174,11 @@
 
         <!-- Duration is set programmatically from MainActivity depending on view state -->
 
-        <OnSwipe
-            app:dragDirection="dragUp"
-            app:touchAnchorId="@id/space_detail_swipe_target"
-            app:touchAnchorSide="bottom"
-            app:touchRegionId="@id/space_detail_swipe_target" />
+<!--        <OnSwipe-->
+<!--            app:dragDirection="dragUp"-->
+<!--            app:touchAnchorId="@id/space_detail_swipe_target"-->
+<!--            app:touchAnchorSide="bottom"-->
+<!--            app:touchRegionId="@id/space_detail_swipe_target" />-->
     </Transition>
 
 </MotionScene>
