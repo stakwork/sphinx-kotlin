@@ -32,7 +32,7 @@ internal class ScannerViewModelCoordinator(
         scannerNavigator.toScannerScreen()
     }
 
-    override suspend fun checkRequest(request: RequestHolder<ScannerRequest>): ScannerResponse? {
+    override suspend fun checkRequest(request: ScannerRequest): ScannerResponse? {
         return null
     }
 }
