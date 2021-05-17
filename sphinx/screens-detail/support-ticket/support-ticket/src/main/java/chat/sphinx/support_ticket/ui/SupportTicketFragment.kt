@@ -3,11 +3,13 @@ package chat.sphinx.support_ticket.ui
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.support_ticket.R
 import chat.sphinx.support_ticket.databinding.FragmentSupportTicketBinding
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.base.BaseFragment
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 internal class SupportTicketFragment: BaseFragment<
@@ -23,9 +25,11 @@ internal class SupportTicketFragment: BaseFragment<
         super.onViewCreated(view, savedInstanceState)
         binding.includeSupportTicketHeader.apply {
             textViewDetailScreenHeaderName.text = getString(R.string.support_ticket_header_name)
-//            textViewDetailScreenClose.setOnClickListener {
-            // TODO: Navigate
-//            }
+            textViewDetailScreenClose.setOnClickListener {
+                lifecycleScope.launch(viewModel.mainImmediate) {
+                    viewModel.navigator.closeDetailScreen()
+                }
+            }
         }
     }
 
