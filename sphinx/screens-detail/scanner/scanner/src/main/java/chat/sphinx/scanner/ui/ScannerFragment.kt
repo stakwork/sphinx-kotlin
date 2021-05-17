@@ -4,7 +4,7 @@ import android.content.Context
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.lifecycleScope
+import app.cash.exhaustive.Exhaustive
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.scanner.R
 import chat.sphinx.scanner.databinding.FragmentScannerBinding
@@ -12,9 +12,8 @@ import chat.sphinx.scanner.navigation.BackType
 import chat.sphinx.scanner_view_model_coordinator.response.ScannerResponse
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
-import io.matthewnelson.android_feature_screens.util.invisibleIfFalse
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
+import io.matthewnelson.android_feature_screens.util.invisible
+import io.matthewnelson.android_feature_screens.util.visible
 
 @AndroidEntryPoint
 internal class ScannerFragment: SideEffectFragment<
@@ -34,19 +33,6 @@ internal class ScannerFragment: SideEffectFragment<
         // catch the request asap
         viewModel
 
-        lifecycleScope.launch(viewModel.mainImmediate) {
-            try {
-                viewModel.requestCatcher.getCaughtRequestStateFlow().collect { list ->
-                    list.firstOrNull()?.request?.let { request ->
-                        binding.textViewScannerHeaderNavBack.invisibleIfFalse(
-                            request.showNavBackArrow
-                        )
-                        throw Exception()
-                    }
-                }
-            } catch (e: Exception) {}
-        }
-
         binding.textViewScannerClose.setOnClickListener {
             viewModel.goBack(BackType.CloseDetailScreen)
         }
@@ -62,7 +48,15 @@ internal class ScannerFragment: SideEffectFragment<
     }
 
     override suspend fun onViewStateFlowCollect(viewState: ScannerViewState) {
-//        TODO("Not yet implemented")
+        @Exhaustive
+        when (viewState) {
+            ScannerViewState.HideNavBackButton -> {
+                binding.textViewScannerHeaderNavBack.invisible
+            }
+            ScannerViewState.ShowNavBackButton -> {
+                binding.textViewScannerHeaderNavBack.visible
+            }
+        }
     }
 
     override suspend fun onSideEffectCollect(sideEffect: NotifySideEffect) {
