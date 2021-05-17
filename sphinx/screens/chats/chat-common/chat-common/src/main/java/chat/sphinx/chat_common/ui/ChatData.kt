@@ -7,13 +7,17 @@ import chat.sphinx.wrapper_contact.Contact
 
 sealed class ChatData {
 
-    abstract val chat: Chat?
+    abstract var chat: Chat?
 
     abstract val chatName: String?
     abstract val photoUrl: PhotoUrl?
     abstract val muted: ChatMuted
 
-    class Conversation(override val chat: Chat?, val contact: Contact): ChatData() {
+    fun updateChat(chat: Chat?) {
+        this.chat = chat
+    }
+
+    class Conversation(override var chat: Chat?, val contact: Contact): ChatData() {
         override val chatName: String?
             get() = contact.alias?.value
         override val photoUrl: PhotoUrl?
@@ -22,21 +26,21 @@ sealed class ChatData {
             get() = chat?.isMuted ?: ChatMuted.False
     }
 
-    class Group(override val chat: Chat): ChatData() {
+    class Group(override var chat: Chat?): ChatData() {
         override val chatName: String?
-            get() = chat.name?.value
+            get() = chat?.name?.value
         override val photoUrl: PhotoUrl?
-            get() = chat.photoUrl
+            get() = chat?.photoUrl
         override val muted: ChatMuted
-            get() = chat.isMuted
+            get() = chat?.isMuted ?: ChatMuted.False
     }
 
-    class Tribe(override val chat: Chat): ChatData() {
+    class Tribe(override var chat: Chat?): ChatData() {
         override val chatName: String?
-            get() = chat.name?.value
+            get() = chat?.name?.value
         override val photoUrl: PhotoUrl?
-            get() = chat.photoUrl
+            get() = chat?.photoUrl
         override val muted: ChatMuted
-            get() = chat.isMuted
+            get() = chat?.isMuted ?: ChatMuted.False
     }
 }

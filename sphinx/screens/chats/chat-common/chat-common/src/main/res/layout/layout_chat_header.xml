@@ -114,6 +114,7 @@
         android:src="@drawable/ic_baseline_notifications_24"
         android:tint="@color/placeholderText"
         android:paddingHorizontal="@dimen/chat_header_mute_padding_horizontal"
+        android:clickable="true"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/text_view_chat_header_phone"
         app:layout_constraintTop_toTopOf="parent" />

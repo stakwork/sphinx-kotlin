@@ -25,6 +25,7 @@ import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.insetter_activity.addStatusBarPadding
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
+import chat.sphinx.resources.SphinxToastUtils
 import chat.sphinx.resources.setTextColorExt
 import chat.sphinx.wrapper_chat.isTrue
 import chat.sphinx.wrapper_common.PhotoUrl
@@ -33,6 +34,7 @@ import io.matthewnelson.android_feature_screens.navigation.CloseAppOnBackPress
 import io.matthewnelson.android_feature_screens.ui.base.BaseFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
+import io.matthewnelson.android_feature_toast_utils.show
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
@@ -110,16 +112,37 @@ abstract class BaseChatFragment<
         header.requestLayout()
     }
 
+    private fun setupChatMuted(showToast: Boolean = false) {
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.chatDataStateFlow.collect { chatData ->
+                chatData?.let {
+                    setupChatMuted(chatData.muted.isTrue(), showToast)
+                }
+            }
+        }
+    }
+
+    private fun setupChatMuted(muted: Boolean, showToast: Boolean = false) {
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            if (muted) {
+                imageLoader.load(headerMute, R.drawable.ic_baseline_notifications_off_24)
+
+                if (showToast) {
+                    SphinxToastUtils().show(binding.root.context, R.string.chat_muted_message)
+                }
+
+            } else {
+                imageLoader.load(headerMute, R.drawable.ic_baseline_notifications_24)
+            }
+        }
+    }
+
     override fun onStart() {
         super.onStart()
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.chatDataStateFlow.collect { chatData ->
-                if (chatData != null) {
-                    if (chatData.muted.isTrue()) {
-                        imageLoader.load(headerMute, R.drawable.ic_baseline_notifications_off_24)
-                    } else {
-                        imageLoader.load(headerMute, R.drawable.ic_baseline_notifications_24)
-                    }
+                chatData?.let {
+                    setupChatMuted()
 
                     chatData.photoUrl.let { url ->
                         if (url != null) {
@@ -156,6 +179,22 @@ abstract class BaseChatFragment<
                         }
 
                         headerConnectivityIcon.setTextColorExt(colorRes)
+                    }
+                }
+            }
+        }
+
+        headerMute.setOnClickListener {
+            viewModel.chatDataStateFlow.value?.let { chatData ->
+                setupChatMuted(!chatData.muted.isTrue())
+
+                onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                    viewModel.toggleChatMuted().collect { updatedChat ->
+
+                        chatData.updateChat(updatedChat)
+                        viewModel.setChatData(chatData)
+
+                        setupChatMuted(showToast = true)
                     }
                 }
             }
