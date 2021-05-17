@@ -33,12 +33,16 @@ internal class ScannerFragment: SideEffectFragment<
         // catch the request asap
         viewModel
 
-        binding.textViewScannerClose.setOnClickListener {
-            viewModel.goBack(BackType.CloseDetailScreen)
+        binding.includeScannerHeader.apply {
+            textViewDetailScreenHeaderName.text = getString(R.string.scanner_header_name)
+            textViewDetailScreenClose.setOnClickListener {
+                viewModel.goBack(BackType.CloseDetailScreen)
+            }
+            textViewDetailScreenHeaderNavBack.setOnClickListener {
+                viewModel.goBack(BackType.PopBackStack)
+            }
         }
-        binding.textViewScannerHeaderNavBack.setOnClickListener {
-            viewModel.goBack(BackType.PopBackStack)
-        }
+
         binding.buttonScannerInputStub.setOnClickListener {
             val input = binding.editTextScannerInputStub.text?.toString()
             if (input != null && input.isNotEmpty()) {
@@ -48,13 +52,15 @@ internal class ScannerFragment: SideEffectFragment<
     }
 
     override suspend fun onViewStateFlowCollect(viewState: ScannerViewState) {
-        @Exhaustive
-        when (viewState) {
-            ScannerViewState.HideNavBackButton -> {
-                binding.textViewScannerHeaderNavBack.invisible
-            }
-            ScannerViewState.ShowNavBackButton -> {
-                binding.textViewScannerHeaderNavBack.visible
+        binding.includeScannerHeader.textViewDetailScreenHeaderNavBack.apply {
+            @Exhaustive
+            when (viewState) {
+                ScannerViewState.HideNavBackButton -> {
+                    invisible
+                }
+                ScannerViewState.ShowNavBackButton -> {
+                    visible
+                }
             }
         }
     }
