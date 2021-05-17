@@ -122,13 +122,6 @@ internal class SplashFragment: MotionLayoutFragment<
                 binding.layoutOnBoard.editTextCodeInput.let { editText ->
                     editText.isEnabled = true
 
-                    (binding.root.context
-                        .getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
-                    )?.let { imm ->
-                        editText.requestFocus()
-                        imm.showSoftInput(editText, InputMethodManager.SHOW_IMPLICIT)
-                    }
-
                     editText.setOnEditorActionListener { _, actionId, _ ->
                         if (actionId == EditorInfo.IME_ACTION_DONE) {
                             viewModel.processUserInput(

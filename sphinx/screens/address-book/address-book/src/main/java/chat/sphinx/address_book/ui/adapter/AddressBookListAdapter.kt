@@ -104,7 +104,7 @@ internal class AddressBookListAdapter(
                         if (!diff.sameList) {
                             addressBookContacts.clear()
                             addressBookContacts.addAll(viewState.list)
-                            result.dispatchUpdatesTo(this@AddressBookListAdapter)
+                            this@AddressBookListAdapter.notifyDataSetChanged()
                         }
 
                     }

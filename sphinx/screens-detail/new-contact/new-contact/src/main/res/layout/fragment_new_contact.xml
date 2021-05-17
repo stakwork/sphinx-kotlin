@@ -201,7 +201,7 @@
         app:layout_constraintBottom_toBottomOf="parent">
 
         <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/button_already_on_sphinx"
+            android:id="@+id/button_save"
             style="@style/SaveToContactsButton"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
