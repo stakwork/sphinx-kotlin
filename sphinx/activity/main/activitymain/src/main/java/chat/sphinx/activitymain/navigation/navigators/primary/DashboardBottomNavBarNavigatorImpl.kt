@@ -7,7 +7,7 @@ import chat.sphinx.payment_send.navigation.ToPaymentSendDetail
 import chat.sphinx.transactions.navigation.ToTransactionsDetail
 import javax.inject.Inject
 
-class DashboardBottomNavBarNavigatorImpl @Inject constructor(
+internal class DashboardBottomNavBarNavigatorImpl @Inject constructor(
     navigationDriver: DetailNavigationDriver
 ): DashboardBottomNavBarNavigator(navigationDriver)
 {

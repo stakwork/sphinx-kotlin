@@ -7,7 +7,7 @@ import chat.sphinx.address_book.navigation.AddressBookNavigator
 import chat.sphinx.chat_contact.navigation.ContactChatNavigator
 import javax.inject.Inject
 
-class AddressBookNavigatorImpl @Inject constructor(
+internal class AddressBookNavigatorImpl @Inject constructor(
     private val detailDriver: DetailNavigationDriver,
     navigationDriver: PrimaryNavigationDriver
 ): AddressBookNavigator(navigationDriver)
