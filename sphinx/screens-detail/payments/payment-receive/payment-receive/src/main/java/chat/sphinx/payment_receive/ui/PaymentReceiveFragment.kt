@@ -1,5 +1,7 @@
 package chat.sphinx.payment_receive.ui
 
+import android.os.Bundle
+import android.view.View
 import androidx.fragment.app.viewModels
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.payment_receive.R
@@ -16,6 +18,16 @@ internal class PaymentReceiveFragment: BaseFragment<
 {
     override val viewModel: PaymentReceiveViewModel by viewModels()
     override val binding: FragmentPaymentReceiveBinding by viewBinding(FragmentPaymentReceiveBinding::bind)
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        binding.includePaymentReceiveHeader.apply {
+            textViewDetailScreenHeaderName.text = getString(R.string.payment_receive_header_name)
+//            textViewDetailScreenClose.setOnClickListener {
+            // TODO: Navigate
+//            }
+        }
+    }
 
     override suspend fun onViewStateFlowCollect(viewState: PaymentReceiveViewState) {
 //        TODO("Not yet implemented")
