@@ -8,5 +8,5 @@ import kotlinx.coroutines.flow.StateFlow
 
 interface LightningRepository {
     suspend fun getAccountBalance(): StateFlow<NodeBalance?>
-    fun networkRefreshBalance(): Flow<LoadResponse<Boolean, ResponseError>>
+    val networkRefreshBalance: Flow<LoadResponse<Boolean, ResponseError>>
 }

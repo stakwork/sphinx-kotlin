@@ -20,7 +20,6 @@ import chat.sphinx.address_book.ui.adapter.AddressBookFooterAdapter
 import chat.sphinx.address_book.ui.adapter.SwipeHelper
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.insetter_activity.InsetterActivity
-import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.insetter_activity.addStatusBarPadding
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.base.BaseFragment
@@ -47,9 +46,7 @@ internal class AddressBookFragment: BaseFragment<
         get() = binding.layoutAddressBookHeader.textViewAddressBookHeaderNavBack
 
     @Inject
-    protected lateinit var addressBookNavigatorInj: AddressBookNavigator
-    private val addressBookNavigator: AddressBookNavigator
-        get() = addressBookNavigatorInj
+    protected lateinit var addressBookNavigator: AddressBookNavigator
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -80,7 +77,7 @@ internal class AddressBookFragment: BaseFragment<
     }
 
     private fun setupContacts() {
-        val addressBookListAdapter = AddressBookListAdapter(imageLoader, viewLifecycleOwner, viewModel)
+        val addressBookListAdapter = AddressBookListAdapter(imageLoader, viewLifecycleOwner, onStopSupervisor, viewModel)
         val addressBookFooterAdapter = AddressBookFooterAdapter(requireActivity() as InsetterActivity)
         binding.recyclerViewContacts.apply {
             this.setHasFixedSize(false)

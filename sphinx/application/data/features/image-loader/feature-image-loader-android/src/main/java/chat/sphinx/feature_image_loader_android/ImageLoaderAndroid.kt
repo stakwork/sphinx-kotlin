@@ -28,7 +28,10 @@ class ImageLoaderAndroid(
     context: Context,
     private val dispatchers: CoroutineDispatchers,
     private val networkClientCache: NetworkClientCache
-): ImageLoader<ImageView>(), NetworkClientClearedListener {
+) : ImageLoader<ImageView>(),
+    NetworkClientClearedListener,
+    CoroutineDispatchers by dispatchers
+{
 
     private val appContext: Context = context.applicationContext
 
@@ -69,7 +72,7 @@ class ImageLoaderAndroid(
         loaderLock.withLock {
             val request = coil.request.ImageRequest.Builder(appContext)
                 .data(any)
-                .dispatcher(dispatchers.io)
+                .dispatcher(io)
                 .target(imageView)
 
             options?.let {

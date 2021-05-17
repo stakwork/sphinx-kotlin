@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="new_contact_form_horizontal_margin">30dp</dimen>
+    <dimen name="new_contact_edit_text_left_margin">-4dp</dimen>
+    <dimen name="save_contact_button_height">52dp</dimen>
+    <dimen name="save_to_contacts_button_text_size">14dp</dimen>
+    <dimen name="save_to_contacts_button_bottom_margin">33dp</dimen>
+    <dimen name="save_to_contacts_button_width">230dp</dimen>
+    <dimen name="new_contact_scan_address_button_width">30dp</dimen>
+    <dimen name="new_contact_scan_icon_bottom_margin">5dp</dimen>
+    <dimen name="new_contact_scan_icon_width">21dp</dimen>
+    <dimen name="new_contact_scan_icon_height">17dp</dimen>
+    <dimen name="new_contact_scan_icon_container_width">60dp</dimen>
+    <dimen name="save_progress_bar_xy">25dp</dimen>
+    <dimen name="save_progress_bar_margin_left">10dp</dimen>
+</resources>

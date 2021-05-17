@@ -40,7 +40,9 @@ class TorManagerAndroid(
     buildConfigVersionCode: BuildConfigVersionCode,
     private val dispatchers: CoroutineDispatchers,
     private val LOG: SphinxLogger,
-): TorManager {
+) : TorManager,
+    CoroutineDispatchers by dispatchers
+{
 
     companion object {
         const val TAG = "TorManagerAndroid"
@@ -152,7 +154,7 @@ class TorManagerAndroid(
         get() = broadcaster._socksProxyAddressStateFlow.asStateFlow()
 
     override suspend fun getSocksPortSetting(): String {
-        return withContext(dispatchers.io) {
+        return withContext(io) {
             TorServiceController.getServiceTorSettings().socksPort
         }
     }
@@ -237,7 +239,7 @@ class TorManagerAndroid(
         SupervisorJob()
     }
     private val torManagerScope: CoroutineScope by lazy {
-        CoroutineScope(supervisor + dispatchers.mainImmediate)
+        CoroutineScope(supervisor + mainImmediate)
     }
     private val requirementChangeLock = Mutex()
 

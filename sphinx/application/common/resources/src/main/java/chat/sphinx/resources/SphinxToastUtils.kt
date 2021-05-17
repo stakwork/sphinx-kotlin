@@ -11,7 +11,7 @@ class SphinxToastUtils(
     @ColorRes toastBackgroundTint: Int = R.color.primaryGreen,
     @ColorRes textColor: Int = android.R.color.white,
     @DrawableRes imageBackground: Int? = null,
-    @DrawableRes image: Int? = R.drawable.sphinx_white_notification
+    @DrawableRes image: Int? = DEFAULT_ICON
 ): ToastUtils(
     toastLengthLong,
     toastBackground,
@@ -19,4 +19,10 @@ class SphinxToastUtils(
     textColor,
     imageBackground,
     image
-)
+) {
+    companion object {
+        @get:DrawableRes
+        val DEFAULT_ICON: Int
+            get() = R.drawable.sphinx_white_notification
+    }
+}

@@ -25,7 +25,7 @@ import chat.sphinx.wrapper_common.util.getInitials
 import chat.sphinx.wrapper_message.*
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.invisibleIfFalse
-import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisorScope
+import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -37,6 +37,7 @@ import kotlin.collections.ArrayList
 internal class ChatListAdapter(
     private val imageLoader: ImageLoader<ImageView>,
     private val lifecycleOwner: LifecycleOwner,
+    private val onStopSupervisor: OnStopSupervisor,
     private val viewModel: DashboardViewModel,
 ): RecyclerView.Adapter<ChatListAdapter.ChatViewHolder>(), DefaultLifecycleObserver {
 
@@ -120,11 +121,10 @@ internal class ChatListAdapter(
     }
 
     private val dashboardChats = ArrayList<DashboardChat>(viewModel.currentChatViewState.list)
-    private val supervisor = OnStopSupervisorScope(lifecycleOwner)
 
     override fun onStart(owner: LifecycleOwner) {
         super.onStart(owner)
-        supervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.collectChatViewState { viewState ->
 
                 if (dashboardChats.isEmpty()) {
@@ -194,7 +194,7 @@ internal class ChatListAdapter(
                     @Exhaustive
                     when (dashboardChat) {
                         is DashboardChat.Active.Conversation -> {
-                            supervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
+                            lifecycleOwner.lifecycleScope.launch {
                                 viewModel.dashboardNavigator.toChatContact(
                                     dashboardChat.chat,
                                     dashboardChat.contact
@@ -202,8 +202,7 @@ internal class ChatListAdapter(
                             }
                         }
                         is DashboardChat.Active.GroupOrTribe -> {
-                            supervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
-
+                            lifecycleOwner.lifecycleScope.launch {
                                 if (dashboardChat.chat.type.isGroup()) {
                                     viewModel.dashboardNavigator.toChatGroup(dashboardChat.chat)
                                 } else if (dashboardChat.chat.type.isTribe()) {
@@ -213,7 +212,7 @@ internal class ChatListAdapter(
                             }
                         }
                         is DashboardChat.Inactive.Conversation -> {
-                            supervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
+                            lifecycleOwner.lifecycleScope.launch {
                                 viewModel.dashboardNavigator.toChatContact(
                                     null,
                                     dashboardChat.contact
@@ -249,7 +248,7 @@ internal class ChatListAdapter(
                     layoutDashboardChatInitialHolder.textViewInitials.goneIfFalse(url == null)
 
                     if (url != null) {
-                        supervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
+                        onStopSupervisor.scope.launch(viewModel.dispatchers.mainImmediate) {
                             imageLoader.load(
                                 layoutDashboardChatInitialHolder.imageViewChatPicture,
                                 url.value,
@@ -316,7 +315,7 @@ internal class ChatListAdapter(
 
         private fun handleUnseenMessageCount() {
             dChat?.let { nnDashboardChat ->
-                badgeJob = supervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
+                badgeJob = onStopSupervisor.scope.launch(viewModel.mainImmediate) {
                     nnDashboardChat.unseenMessageFlow?.collect { unseen ->
                         binding.textViewBadgeCount.apply {
                             if (unseen != null && unseen > 0) {

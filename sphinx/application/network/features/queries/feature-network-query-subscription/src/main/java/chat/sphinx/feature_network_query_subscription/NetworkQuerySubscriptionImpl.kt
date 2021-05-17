@@ -25,14 +25,26 @@ class NetworkQuerySubscriptionImpl(
     ///////////
     /// GET ///
     ///////////
-    override fun getSubscriptions(
-        relayData: Pair<AuthorizationToken, RelayUrl>?
-    ): Flow<LoadResponse<List<SubscriptionDto>, ResponseError>> =
+    private val getSubscriptionsFlowNullData: Flow<LoadResponse<List<SubscriptionDto>, ResponseError>> by lazy {
         networkRelayCall.relayGet(
             responseJsonClass = GetSubscriptionsRelayResponse::class.java,
             relayEndpoint = ENDPOINT_SUBSCRIPTIONS,
-            relayData = relayData
+            relayData = null
         )
+    }
+
+    override fun getSubscriptions(
+        relayData: Pair<AuthorizationToken, RelayUrl>?
+    ): Flow<LoadResponse<List<SubscriptionDto>, ResponseError>> =
+        if (relayData == null) {
+            getSubscriptionsFlowNullData
+        } else {
+            networkRelayCall.relayGet(
+                responseJsonClass = GetSubscriptionsRelayResponse::class.java,
+                relayEndpoint = ENDPOINT_SUBSCRIPTIONS,
+                relayData = relayData
+            )
+        }
 
     override fun getSubscriptionById(
         subscriptionId: SubscriptionId,

@@ -8,10 +8,18 @@ inline fun String.toLightningNodePubKey(): LightningNodePubKey? =
         null
     }
 
+inline val String.isValidLightningNodePubKey: Boolean
+    get() = isNotEmpty() && matches("^${LightningNodePubKey.REGEX}\$".toRegex())
+
 inline class LightningNodePubKey(val value: String) {
+
+    companion object {
+        const val REGEX = "[A-F0-9a-f]{66}"
+    }
+
     init {
-        require(value.isNotEmpty()) {
-            "LightningNodePubKey cannot be empty"
+        require(value.isValidLightningNodePubKey) {
+            "Invalid Lightning Node Public Key"
         }
     }
 }

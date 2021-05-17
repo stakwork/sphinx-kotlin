@@ -5,6 +5,7 @@ import chat.sphinx.activitymain.navigation.navigators.detail.AddFriendNavigatorI
 import chat.sphinx.activitymain.navigation.drivers.AuthenticationNavigationDriver
 import chat.sphinx.activitymain.navigation.drivers.DetailNavigationDriver
 import chat.sphinx.activitymain.navigation.drivers.PrimaryNavigationDriver
+import chat.sphinx.activitymain.navigation.navigators.detail.NewContactNavigatorImpl
 import chat.sphinx.activitymain.navigation.navigators.primary.*
 import chat.sphinx.add_friend.navigation.AddFriendNavigator
 import chat.sphinx.address_book.navigation.AddressBookNavigator
@@ -17,6 +18,7 @@ import chat.sphinx.dashboard.navigation.DashboardNavigator
 import chat.sphinx.hilt_qualifiers.AuthenticationDriver
 import chat.sphinx.hilt_qualifiers.DetailDriver
 import chat.sphinx.hilt_qualifiers.PrimaryDriver
+import chat.sphinx.new_contact.navigation.NewContactNavigator
 import chat.sphinx.onboard.navigation.OnBoardNavigator
 import chat.sphinx.splash.navigation.SplashNavigator
 import dagger.Module
@@ -107,6 +109,12 @@ object NavigationModule {
         addFriendNavigatorImpl: AddFriendNavigatorImpl
     ): AddFriendNavigator =
         addFriendNavigatorImpl
+
+    @Provides
+    fun provideNewContactNavigator(
+        newContactNavigatorImpl: NewContactNavigatorImpl
+    ): NewContactNavigator =
+        newContactNavigatorImpl
 
     @Provides
     fun provideContactChatNavigator(

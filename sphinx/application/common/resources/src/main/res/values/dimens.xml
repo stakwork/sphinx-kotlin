@@ -14,6 +14,7 @@
     <dimen name="default_bottom_bar_height">56dp</dimen>
     <dimen name="default_elevation">8dp</dimen>
 
+    <dimen name="default_header_text_size">14sp</dimen>
     <dimen name="default_text_size_back_arrow">21sp</dimen>
     <dimen name="default_text_size_tap_target_material_icon">20sp</dimen>
     <dimen name="default_text_size_headline">17sp</dimen>
@@ -26,7 +27,7 @@
 
     <dimen name="default_inner_spacing_list_item_title">10dp</dimen>
     <dimen name="default_vertical_spacing_action_button_column">6dp</dimen>
-    <dimen name="default_status_badge_inner_padding">4dp</dimen>
+    <dimen name="default_status_badge_inner_padding">3dp</dimen>
 
     <dimen name="default_tap_target_min_height">44dp</dimen>
 
@@ -37,4 +38,11 @@
     <dimen name="add_buttons_icon_xy">25sp</dimen>
     <dimen name="default_tap_target_xy">44dp</dimen>
     <dimen name="default_small_tap_target_xy">27dp</dimen>
+
+    <dimen name="default_form_horizontal_margin">30dp</dimen>
+    <dimen name="default_form_text_view_size">12dp</dimen>
+    <dimen name="default_form_edit_view_size">17dp</dimen>
+
+    <dimen name="pin_help_text_view_size">15dp</dimen>
+    <dimen name="pin_text_view_size">17dp</dimen>
 </resources>

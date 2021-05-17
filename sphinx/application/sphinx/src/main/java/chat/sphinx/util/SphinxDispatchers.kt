@@ -5,12 +5,12 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 
 class SphinxDispatchers(
-    default: CoroutineDispatcher,
-    io: CoroutineDispatcher,
-    main: CoroutineDispatcher,
-    mainImmediate: CoroutineDispatcher,
-    unconfined: CoroutineDispatcher
-): CoroutineDispatchers(default, io, main, mainImmediate, unconfined) {
+    override val default: CoroutineDispatcher,
+    override val io: CoroutineDispatcher,
+    override val main: CoroutineDispatcher,
+    override val mainImmediate: CoroutineDispatcher,
+    override val unconfined: CoroutineDispatcher
+): CoroutineDispatchers {
     constructor(): this(
         Dispatchers.Default,
         Dispatchers.IO,

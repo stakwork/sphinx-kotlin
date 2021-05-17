@@ -15,6 +15,9 @@ inline fun Long.toSat(): Sat? =
         null
     }
 
+inline val Sat.unit: String
+    get() = if (value > 1) "sats" else "sat"
+
 /**
  * Will format the value using the [separator] passed.
  *

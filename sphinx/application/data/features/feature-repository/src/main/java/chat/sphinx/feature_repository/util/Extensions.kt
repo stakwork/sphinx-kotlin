@@ -7,6 +7,7 @@ import chat.sphinx.concept_network_query_lightning.model.balance.BalanceDto
 import chat.sphinx.concept_network_query_message.model.MessageDto
 import chat.sphinx.conceptcoredb.SphinxDatabaseQueries
 import chat.sphinx.wrapper_chat.*
+import chat.sphinx.wrapper_common.*
 import chat.sphinx.wrapper_common.chat.ChatId
 import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.contact.ContactId
@@ -14,9 +15,6 @@ import chat.sphinx.wrapper_common.invite.InviteId
 import chat.sphinx.wrapper_common.invite.toInviteStatus
 import chat.sphinx.wrapper_common.lightning.*
 import chat.sphinx.wrapper_common.message.MessageId
-import chat.sphinx.wrapper_common.toDateTime
-import chat.sphinx.wrapper_common.toPhotoUrl
-import chat.sphinx.wrapper_common.toSeen
 import chat.sphinx.wrapper_contact.*
 import chat.sphinx.wrapper_invite.InviteString
 import chat.sphinx.wrapper_lightning.NodeBalance
@@ -27,6 +25,7 @@ import chat.sphinx.wrapper_message.media.toMediaKeyDecrypted
 import chat.sphinx.wrapper_message.media.toMediaType
 import chat.sphinx.wrapper_rsa.RsaPublicKey
 import com.squareup.moshi.Moshi
+import com.squareup.sqldelight.TransactionCallbacks
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun BalanceDto.toNodeBalanceOrNull(): NodeBalance? =
@@ -50,8 +49,45 @@ inline val MessageDto.updateChatDboLatestMessage: Boolean
             type != MessageType.BOT_RES         &&
             status != MessageStatus.DELETED
 
+@Suppress("NOTHING_TO_INLINE")
+inline fun MessageDto.updateChatDboLatestMessage(
+    chatId: ChatId,
+    latestMessageUpdatedTimeMap: MutableMap<ChatId, DateTime>,
+    queries: SphinxDatabaseQueries,
+) {
+    val dateTime = created_at.toDateTime()
+
+    if (
+        updateChatDboLatestMessage &&
+        (latestMessageUpdatedTimeMap[chatId]?.time ?: 0L) <= dateTime.time
+    ){
+        queries.chatUpdateLatestMessage(
+            MessageId(id),
+            chatId
+        )
+        latestMessageUpdatedTimeMap[chatId] = dateTime
+    }
+}
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun MessageDto.updateChatDboLatestMessage(
+    chatId: ChatId,
+    latestMessageUpdatedTimeMap: SynchronizedMap<ChatId, DateTime>,
+    queries: SphinxDatabaseQueries,
+) {
+    latestMessageUpdatedTimeMap.withLock { map ->
+        updateChatDboLatestMessage(chatId, map, queries)
+    }
+}
+
 @Suppress("NOTHING_TO_INLINE", "SpellCheckingInspection")
-inline fun SphinxDatabaseQueries.upsertChat(dto: ChatDto, moshi: Moshi) {
+inline fun SphinxDatabaseQueries.upsertChat(
+    dto: ChatDto,
+    moshi: Moshi,
+    chatSeenMap: SynchronizedMap<ChatId, Seen>
+) {
+    val seen = dto.seenActual.toSeen()
+
     chatUpsert(
         dto.name?.toChatName(),
         dto.photo_url?.toPhotoUrl(),
@@ -65,7 +101,7 @@ inline fun SphinxDatabaseQueries.upsertChat(dto: ChatDto, moshi: Moshi) {
         dto.unlistedActual.toChatUnlisted(),
         dto.privateActual.toChatPrivate(),
         dto.owner_pub_key?.toLightningNodePubKey(),
-        dto.seenActual.toSeen(),
+        seen,
         dto.meta?.toChatMetaDataOrNull(moshi),
         dto.my_photo_url?.toPhotoUrl(),
         dto.my_alias?.toChatAlias(),
@@ -75,19 +111,18 @@ inline fun SphinxDatabaseQueries.upsertChat(dto: ChatDto, moshi: Moshi) {
         dto.type.toChatType(),
         dto.created_at.toDateTime()
     )
+
+    chatSeenMap.withLock { it[ChatId(dto.id)] = seen }
 }
 
-/**
- * Always use [SphinxDatabaseQueries.transaction] with this extension function.
- * */
 @Suppress("NOTHING_TO_INLINE", "SpellCheckingInspection")
-inline fun SphinxDatabaseQueries.upsertContact(dto: ContactDto) {
+inline fun TransactionCallbacks.upsertContact(dto: ContactDto, queries: SphinxDatabaseQueries) {
 
     if (dto.fromGroupActual) {
         return
     }
 
-    contactUpsert(
+    queries.contactUpsert(
         dto.route_hint?.toLightningRouteHint(),
         dto.public_key?.toLightningNodePubKey(),
         dto.node_alias?.toLightningNodeAlias(),
@@ -106,7 +141,7 @@ inline fun SphinxDatabaseQueries.upsertContact(dto: ContactDto) {
         dto.isOwnerActual.toOwner(),
         dto.created_at.toDateTime()
     )
-    dto.invite?.let { upsertInvite(it) }
+    dto.invite?.let { queries.upsertInvite(it) }
 }
 
 @Suppress("NOTHING_TO_INLINE")
@@ -123,7 +158,7 @@ inline fun SphinxDatabaseQueries.upsertInvite(dto: InviteDto) {
 }
 
 @Suppress("SpellCheckingInspection")
-fun SphinxDatabaseQueries.upsertMessage(dto: MessageDto) {
+fun TransactionCallbacks.upsertMessage(dto: MessageDto, queries: SphinxDatabaseQueries) {
 
     val chatId: ChatId = dto.chat_id?.let {
         ChatId(it)
@@ -131,7 +166,7 @@ fun SphinxDatabaseQueries.upsertMessage(dto: MessageDto) {
         ChatId(it)
     } ?: ChatId(ChatId.NULL_CHAT_ID.toLong())
 
-    messageUpsert(
+    queries.messageUpsert(
         dto.status.toMessageStatus(),
         dto.seenActual.toSeen(),
         dto.sender_alias?.toSenderAlias(),
@@ -158,7 +193,7 @@ fun SphinxDatabaseQueries.upsertMessage(dto: MessageDto) {
 
             if (mediaToken.isEmpty() || mediaType.isEmpty()) return
 
-            messageMediaUpsert(
+            queries.messageMediaUpsert(
                 dto.media_key?.toMediaKey(),
                 mediaType.toMediaType(),
                 MediaToken(mediaToken),
@@ -169,4 +204,33 @@ fun SphinxDatabaseQueries.upsertMessage(dto: MessageDto) {
 
         }
     }
+}
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun SphinxDatabaseQueries.updateSeen(chatId: ChatId) {
+    transaction {
+        chatUpdateSeen(Seen.True, chatId)
+        chatMessagesUpdateSeen(Seen.True, chatId)
+    }
+}
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun TransactionCallbacks.deleteChatById(
+    chatId: ChatId?,
+    queries: SphinxDatabaseQueries,
+    latestMessageUpdatedTimeMap: SynchronizedMap<ChatId, DateTime>?,
+) {
+    queries.messageDeleteByChatId(chatId ?: return)
+    queries.messageMediaDeleteByChatId(chatId)
+    queries.chatDeleteById(chatId)
+    latestMessageUpdatedTimeMap?.withLock { it.remove(chatId) }
+}
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun TransactionCallbacks.deleteContactById(
+    contactId: ContactId,
+    queries: SphinxDatabaseQueries
+) {
+    queries.contactDeleteById(contactId)
+    queries.inviteDeleteByContactId(contactId)
 }

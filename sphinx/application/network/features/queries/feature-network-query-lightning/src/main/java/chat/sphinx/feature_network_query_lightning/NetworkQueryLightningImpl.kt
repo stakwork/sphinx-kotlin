@@ -39,41 +39,89 @@ class NetworkQueryLightningImpl(
     ///////////
     /// GET ///
     ///////////
-    override fun getInvoices(
-        relayData: Pair<AuthorizationToken, RelayUrl>?
-    ): Flow<LoadResponse<InvoicesDto, ResponseError>> =
+    private val getInvoicesFlowNullData: Flow<LoadResponse<InvoicesDto, ResponseError>> by lazy {
         networkRelayCall.relayGet(
             responseJsonClass = GetInvoicesRelayResponse::class.java,
             relayEndpoint = ENDPOINT_INVOICES,
-            relayData = relayData
+            relayData = null
         )
+    }
+
+    override fun getInvoices(
+        relayData: Pair<AuthorizationToken, RelayUrl>?
+    ): Flow<LoadResponse<InvoicesDto, ResponseError>> =
+        if (relayData == null) {
+            getInvoicesFlowNullData
+        } else {
+            networkRelayCall.relayGet(
+                responseJsonClass = GetInvoicesRelayResponse::class.java,
+                relayEndpoint = ENDPOINT_INVOICES,
+                relayData = relayData
+            )
+        }
+
+    private val getChannelsFlowNullData: Flow<LoadResponse<ChannelsDto, ResponseError>> by lazy {
+        networkRelayCall.relayGet(
+            responseJsonClass = GetChannelsRelayResponse::class.java,
+            relayEndpoint = ENDPOINT_CHANNELS,
+            relayData = null
+        )
+    }
 
     override fun getChannels(
         relayData: Pair<AuthorizationToken, RelayUrl>?
     ): Flow<LoadResponse<ChannelsDto, ResponseError>> =
+        if (relayData == null) {
+            getChannelsFlowNullData
+        } else {
+            networkRelayCall.relayGet(
+                responseJsonClass = GetChannelsRelayResponse::class.java,
+                relayEndpoint = ENDPOINT_CHANNELS,
+                relayData = relayData
+            )
+        }
+
+    private val getBalanceFlowNullData: Flow<LoadResponse<BalanceDto, ResponseError>> by lazy {
         networkRelayCall.relayGet(
-            responseJsonClass = GetChannelsRelayResponse::class.java,
-            relayEndpoint = ENDPOINT_CHANNELS,
-            relayData = relayData
+            responseJsonClass = GetBalanceRelayResponse::class.java,
+            relayEndpoint = ENDPOINT_BALANCE,
+            relayData = null
         )
+    }
 
     override fun getBalance(
         relayData: Pair<AuthorizationToken, RelayUrl>?
     ): Flow<LoadResponse<BalanceDto, ResponseError>> =
+        if (relayData == null) {
+            getBalanceFlowNullData
+        } else {
+            networkRelayCall.relayGet(
+                responseJsonClass = GetBalanceRelayResponse::class.java,
+                relayEndpoint = ENDPOINT_BALANCE,
+                relayData = relayData
+            )
+        }
+
+    private val getBalanceAllFlowNullData: Flow<LoadResponse<BalanceAllDto, ResponseError>> by lazy {
         networkRelayCall.relayGet(
-            responseJsonClass = GetBalanceRelayResponse::class.java,
-            relayEndpoint = ENDPOINT_BALANCE,
-            relayData = relayData
+            responseJsonClass = GetBalanceAllRelayResponse::class.java,
+            relayEndpoint = ENDPOINT_BALANCE_ALL,
+            relayData = null
         )
+    }
 
     override fun getBalanceAll(
         relayData: Pair<AuthorizationToken, RelayUrl>?
     ): Flow<LoadResponse<BalanceAllDto, ResponseError>> =
-        networkRelayCall.relayGet(
-            responseJsonClass = GetBalanceAllRelayResponse::class.java,
-            relayEndpoint = ENDPOINT_BALANCE_ALL,
-            relayData = relayData
-        )
+        if (relayData == null) {
+            getBalanceAllFlowNullData
+        } else {
+            networkRelayCall.relayGet(
+                responseJsonClass = GetBalanceAllRelayResponse::class.java,
+                relayEndpoint = ENDPOINT_BALANCE_ALL,
+                relayData = relayData
+            )
+        }
 
     override fun checkRoute(
         publicKey: LightningNodePubKey,
