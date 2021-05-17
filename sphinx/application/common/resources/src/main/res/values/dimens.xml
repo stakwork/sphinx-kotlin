@@ -40,9 +40,9 @@
     <dimen name="default_small_tap_target_xy">27dp</dimen>
 
     <dimen name="default_form_horizontal_margin">30dp</dimen>
-    <dimen name="default_form_text_view_size">12dp</dimen>
-    <dimen name="default_form_edit_view_size">17dp</dimen>
+    <dimen name="default_form_text_view_size">12sp</dimen>
+    <dimen name="default_form_edit_view_size">17sp</dimen>
 
-    <dimen name="pin_help_text_view_size">15dp</dimen>
-    <dimen name="pin_text_view_size">17dp</dimen>
+    <dimen name="pin_help_text_view_size">15sp</dimen>
+    <dimen name="pin_text_view_size">17sp</dimen>
 </resources>
