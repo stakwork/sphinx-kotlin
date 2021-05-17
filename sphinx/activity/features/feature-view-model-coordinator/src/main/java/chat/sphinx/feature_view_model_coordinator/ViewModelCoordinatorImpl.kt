@@ -98,7 +98,7 @@ abstract class ViewModelCoordinatorImpl<BackType: Any, Request: Any, Success: An
         val supervisor = SupervisorJob(currentCoroutineContext().job)
         val newScope = CoroutineScope(supervisor)
 
-        val requests = ArrayList<RequestHolder<Request>>(0)
+        val requests = ArrayList<RequestHolder<Request>>(1)
         val flow = _requestSharedFlow.asSharedFlow()
 
         newScope.launch(dispatcher) {
