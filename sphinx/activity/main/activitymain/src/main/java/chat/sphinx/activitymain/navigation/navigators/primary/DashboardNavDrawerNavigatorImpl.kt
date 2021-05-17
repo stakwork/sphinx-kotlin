@@ -11,7 +11,7 @@ import chat.sphinx.profile.navigation.ToProfileScreen
 import chat.sphinx.support_ticket.navigation.ToSupportTicketDetail
 import javax.inject.Inject
 
-class DashboardNavDrawerNavigatorImpl @Inject constructor(
+internal class DashboardNavDrawerNavigatorImpl @Inject constructor(
     private val detailDriver: DetailNavigationDriver,
     primaryDriver: PrimaryNavigationDriver
 ): DashboardNavDrawerNavigator(primaryDriver)

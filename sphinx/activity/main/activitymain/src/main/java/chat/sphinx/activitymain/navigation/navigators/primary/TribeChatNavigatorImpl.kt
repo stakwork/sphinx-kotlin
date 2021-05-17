@@ -4,7 +4,7 @@ import chat.sphinx.activitymain.navigation.drivers.PrimaryNavigationDriver
 import chat.sphinx.chat_tribe.navigation.TribeChatNavigator
 import javax.inject.Inject
 
-class TribeChatNavigatorImpl @Inject constructor(
+internal class TribeChatNavigatorImpl @Inject constructor(
     navigationDriver: PrimaryNavigationDriver
 ): TribeChatNavigator(navigationDriver)
 {

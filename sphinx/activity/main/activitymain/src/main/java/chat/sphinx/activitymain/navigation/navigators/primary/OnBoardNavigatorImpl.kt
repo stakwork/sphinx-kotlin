@@ -6,7 +6,7 @@ import chat.sphinx.dashboard.navigation.ToDashboardScreen
 import chat.sphinx.onboard.navigation.OnBoardNavigator
 import javax.inject.Inject
 
-class OnBoardNavigatorImpl @Inject constructor(
+internal class OnBoardNavigatorImpl @Inject constructor(
     navigationDriver: PrimaryNavigationDriver
 ): OnBoardNavigator(navigationDriver)
 {
