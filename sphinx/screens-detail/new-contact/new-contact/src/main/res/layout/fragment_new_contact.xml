@@ -9,8 +9,8 @@
     tools:context=".ui.NewContactFragment">
 
     <include
-        android:id="@+id/layout_new_contact_header"
-        layout="@layout/layout_new_contact_header"
+        android:id="@+id/include_new_contact_header"
+        layout="@layout/layout_detail_screen_header"
         android:layout_width="match_parent"
         android:layout_height="@dimen/default_header_height"
         app:layout_constraintTop_toTopOf="parent" />
@@ -21,7 +21,7 @@
         android:layout_height="85dp"
         android:layout_marginStart="@dimen/new_contact_form_horizontal_margin"
         android:layout_marginEnd="@dimen/new_contact_form_horizontal_margin"
-        app:layout_constraintTop_toBottomOf="@+id/layout_new_contact_header">
+        app:layout_constraintTop_toBottomOf="@+id/include_new_contact_header">
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/new_contact_nickname_text_view"

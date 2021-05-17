@@ -59,12 +59,24 @@ internal class NewContactFragment : SideEffectFragment<
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.layoutNewContactHeader.textViewNewContactHeaderNavBack.setOnClickListener {
-            lifecycleScope.launch(viewModel.mainImmediate) { viewModel.navigator.popBackStack() }
-        }
+        binding.includeNewContactHeader.apply {
 
-        binding.layoutNewContactHeader.textViewNewContactClose.setOnClickListener {
-            lifecycleScope.launch(viewModel.mainImmediate) { viewModel.navigator.closeDetailScreen() }
+            textViewDetailScreenHeaderName.text = getString(R.string.new_contact_header_name)
+
+            textViewDetailScreenHeaderNavBack.apply {
+                visible
+                setOnClickListener {
+                    lifecycleScope.launch(viewModel.mainImmediate) {
+                        viewModel.navigator.popBackStack()
+                    }
+                }
+            }
+
+            textViewDetailScreenClose.setOnClickListener {
+                lifecycleScope.launch(viewModel.mainImmediate) {
+                    viewModel.navigator.closeDetailScreen()
+                }
+            }
         }
 
         binding.layoutGroupPinView.newContactPinQuestionMarkTextView.setOnClickListener {
