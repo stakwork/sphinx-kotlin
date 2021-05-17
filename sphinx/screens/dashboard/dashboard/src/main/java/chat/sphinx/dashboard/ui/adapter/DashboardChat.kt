@@ -28,6 +28,8 @@ sealed class DashboardChat {
 
     abstract fun hasUnseenMessages(): Boolean
 
+    abstract fun isEncrypted(): Boolean
+
     sealed class Active: DashboardChat() {
 
         companion object {
@@ -56,6 +58,10 @@ sealed class DashboardChat {
             val lastMessageSeen = message?.seen?.isTrue() ?: true
             val chatSeen = chat?.seen.isTrue() ?: true
             return !lastMessageSeen && !chatSeen && !isLastMessageOutgoing
+        }
+
+        override fun isEncrypted(): Boolean {
+            return true
         }
 
         @ExperimentalStdlibApi
@@ -253,6 +259,10 @@ sealed class DashboardChat {
 
             override fun hasUnseenMessages(): Boolean {
                 return false
+            }
+
+            override fun isEncrypted(): Boolean {
+                return !(contact.rsaPublicKey?.value?.isEmpty() ?: true)
             }
 
         }
