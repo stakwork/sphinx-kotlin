@@ -32,7 +32,7 @@ import io.matthewnelson.concept_navigation.BaseNavigationDriver
 
 @Module
 @InstallIn(ActivityRetainedComponent::class)
-object NavigationModule {
+internal object NavigationModule {
 
     ///////////////
     /// Drivers ///
