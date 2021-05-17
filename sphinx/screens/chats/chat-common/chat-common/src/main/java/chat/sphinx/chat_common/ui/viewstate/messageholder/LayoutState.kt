@@ -6,7 +6,7 @@ import chat.sphinx.wrapper_message.Message
 
 sealed class LayoutState {
 
-    data class MessageTypeContent(
+    data class MessageTypeMessageContent(
         val message: Message,
     ): LayoutState() {
         val messageText: String? = message.messageContentDecrypted?.value

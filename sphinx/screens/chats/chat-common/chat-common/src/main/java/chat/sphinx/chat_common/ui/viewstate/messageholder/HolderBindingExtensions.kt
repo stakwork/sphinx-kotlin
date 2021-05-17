@@ -193,12 +193,16 @@ fun LayoutMessageHolderBinding.setHeaderStatus(
 
 @MainThread
 fun LayoutMessageHolderBinding.setMessageTypeMessageLayout(
-    messageContent: LayoutState.MessageTypeContent
+    messageContent: LayoutState.MessageTypeMessageContent?
 ) {
-    includeMessageHolderMessageTypes.includeMessageTypeMessage.apply {
-        messageContent.messageText?.let { content ->
-            root.visible
-            textViewMessageTypeMessage.text = content
-        } ?: root.gone
+    if (messageContent == null) {
+        root.gone
+    } else {
+        includeMessageHolderMessageTypes.includeMessageTypeMessage.apply {
+            messageContent.messageText?.let { content ->
+                root.visible
+                textViewMessageTypeMessage.text = content
+            } ?: root.gone
+        }
     }
 }

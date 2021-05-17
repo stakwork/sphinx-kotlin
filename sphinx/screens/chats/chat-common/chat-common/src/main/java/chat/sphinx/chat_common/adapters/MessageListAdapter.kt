@@ -149,7 +149,7 @@ class MessageListAdapter(
 
                 setBackground(viewState.background, recyclerViewWidth)
 
-                setMessageTypeMessageLayout(viewState.messageTypeContent)
+                setMessageTypeMessageLayout(viewState.messageTypeMessageContent)
                 setDirectPaymentLayout(viewState.directPayment)
             }
         }

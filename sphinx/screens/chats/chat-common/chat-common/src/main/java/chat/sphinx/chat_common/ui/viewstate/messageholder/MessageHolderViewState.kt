@@ -3,6 +3,7 @@ package chat.sphinx.chat_common.ui.viewstate.messageholder
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
 import chat.sphinx.wrapper_message.Message
 import chat.sphinx.wrapper_message.isDirectPayment
+import chat.sphinx.wrapper_message.isMessage
 
 sealed class MessageHolderViewState {
 
@@ -12,8 +13,12 @@ sealed class MessageHolderViewState {
 
     abstract val directPayment: LayoutState.DirectPayment?
 
-    val messageTypeContent: LayoutState.MessageTypeContent by lazy(LazyThreadSafetyMode.NONE) {
-        LayoutState.MessageTypeContent(message = message)
+    val messageTypeMessageContent: LayoutState.MessageTypeMessageContent? by lazy(LazyThreadSafetyMode.NONE) {
+        if (message.type.isMessage()) {
+            LayoutState.MessageTypeMessageContent(message = message)
+        } else {
+            null
+        }
     }
 
 
