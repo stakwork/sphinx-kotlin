@@ -8,11 +8,13 @@ import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
 import chat.sphinx.chat_common.ui.viewstate.messageholder.HolderBackground
 import chat.sphinx.chat_common.ui.viewstate.messageholder.MessageHolderViewState
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
+import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.resources.getRandomColor
+import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_common.util.getInitials
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -31,6 +33,7 @@ class ChatViewModel @Inject constructor(
     dispatchers: CoroutineDispatchers,
     private val messageRepository: MessageRepository,
     private val networkQueryLightning: NetworkQueryLightning,
+    private val chatRepository: ChatRepository,
 ): BaseViewModel<ChatViewState>(dispatchers, ChatViewState.Idle)
 {
     @Suppress("RemoveExplicitTypeArguments")
@@ -130,7 +133,7 @@ class ChatViewModel @Inject constructor(
                     }
 
                     is ChatData.Tribe -> {
-                        networkQueryLightning.checkRoute(chatData.chat.id)
+                        networkQueryLightning.checkRoute(chatData.chat!!.id)
                     }
 
                 }?.collect { response ->
@@ -154,6 +157,16 @@ class ChatViewModel @Inject constructor(
                     emit(
                         Response.Error(ResponseError("ChatData was null"))
                     )
+                }
+            }
+        }
+    }
+
+    val toggleChatMuted: Flow<Chat?> by lazy {
+        flow {
+            chatDataStateFlow.value?.let { chatData ->
+                chatData.chat?.let { chat ->
+                    emitAll(chatRepository.toggleChatMuted(chat))
                 }
             }
         }

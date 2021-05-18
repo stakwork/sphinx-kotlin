@@ -22,4 +22,6 @@ interface ChatRepository {
      * */
     fun getUnseenMessagesByChatId(chat: Chat): Flow<Long?>
     val networkRefreshChats: Flow<LoadResponse<Boolean, ResponseError>>
+
+    fun toggleChatMuted(chat: Chat): Flow<Chat?>
 }

@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="chat_muted_message"> Chat is now muted. You won\'t get push notifications for incoming messages on this chat</string>
+
     <string name="deleted_message_label_text">This message has been deleted</string>
     <string name="join_call_header_label_text">Join call by…</string>
 

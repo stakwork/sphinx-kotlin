@@ -928,6 +928,30 @@ class SphinxRepository(
         }
     }
 
+    override fun toggleChatMuted(chat: Chat): Flow<Chat?> = flow {
+        val queries = coreDB.getSphinxDatabaseQueries()
+
+        chat.id?.let { chatId ->
+            networkQueryChat.toggleMuteChat(chatId, chat.isMuted).collect { loadResponse ->
+                when (loadResponse) {
+                    is LoadResponse.Loading -> {}
+                    is Response.Error -> {
+                        emit(chat)
+                    }
+                    is Response.Success -> {
+                        chatLock.withLock {
+                            queries.upsertChat(loadResponse.value, moshi, chatSeenMap)
+                        }
+
+                        getChatById(chat.id).collect {
+                            emit(it)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     /*
     * Used to hold in memory the chat table's latest message time to reduce disk IO
     * and mitigate conflicting updates between SocketIO and networkRefreshMessages

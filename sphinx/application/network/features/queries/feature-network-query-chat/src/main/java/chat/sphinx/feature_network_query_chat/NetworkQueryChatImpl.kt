@@ -1,11 +1,15 @@
 package chat.sphinx.feature_network_query_chat
 
+import MuteChatRelayResponse
 import chat.sphinx.concept_network_query_chat.model.ChatDto
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
 import chat.sphinx.concept_network_relay_call.NetworkRelayCall
 import chat.sphinx.feature_network_query_chat.model.GetChatsRelayResponse
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.kotlin_response.LoadResponse
+import chat.sphinx.wrapper_chat.ChatMuted
+import chat.sphinx.wrapper_chat.isTrue
+import chat.sphinx.wrapper_common.chat.ChatId
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
 import kotlinx.coroutines.flow.*
@@ -17,6 +21,9 @@ class NetworkQueryChatImpl(
     companion object {
         private const val ENDPOINT_CHAT = "/chat"
         private const val ENDPOINT_CHATS = "/chats"
+        private const val ENDPOINT_MUTE_CHAT = "/chats/%d/%s"
+        private const val MUTE_CHAT = "mute"
+        private const val UN_MUTE_CHAT = "unmute"
         private const val ENDPOINT_GROUP = "/group"
         private const val ENDPOINT_KICK = "/kick"
         private const val ENDPOINT_MEMBER = "/member"
@@ -46,6 +53,28 @@ class NetworkQueryChatImpl(
                 relayData = relayData
             )
         }
+
+    override fun toggleMuteChat(
+        chatId: ChatId,
+        muted: ChatMuted,
+        relayData: Pair<AuthorizationToken, RelayUrl>?
+    ): Flow<LoadResponse<ChatDto, ResponseError>> =
+        toggleMuteChatImpl(
+            endpoint = String.format(ENDPOINT_MUTE_CHAT, chatId.value, (if (muted.isTrue()) UN_MUTE_CHAT else MUTE_CHAT)),
+            relayData = relayData
+        )
+
+    private fun toggleMuteChatImpl(
+        endpoint: String,
+        relayData: Pair<AuthorizationToken, RelayUrl>?
+    ): Flow<LoadResponse<ChatDto, ResponseError>> =
+        networkRelayCall.relayPost(
+            responseJsonClass = MuteChatRelayResponse::class.java,
+            relayEndpoint = endpoint,
+            requestBodyJsonClass = Map::class.java,
+            requestBody = mapOf(Pair("", "")),
+            relayData = relayData
+        )
 
     ///////////
     /// PUT ///
