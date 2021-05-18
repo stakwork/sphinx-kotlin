@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="profile_basic_info_holder_height">145dp</dimen>
+    <dimen name="profile_tabs_holder_height">30dp</dimen>
+
+    <dimen name="profile_basic_info_form_height">325dp</dimen>
+    <dimen name="profile_sound_appearance_form_height">250dp</dimen>
+    <dimen name="profile_servers_form_height">200dp</dimen>
+    <dimen name="profile_keys_backup_form_height">160dp</dimen>
+
+    <dimen name="profile_server_url_form_height">100dp</dimen>
+    <dimen name="profile_pin_timeout_form_height">100dp</dimen>
+    <dimen name="profile_standard_pin_form_height">80dp</dimen>
+    <dimen name="profile_privacy_pin_form_height">80dp</dimen>
+
+    <dimen name="profile_form_container_margin_top">10dp</dimen>
+
+    <dimen name="profile_tabs_text_size">13sp</dimen>
+</resources>

@@ -20,6 +20,7 @@ import chat.sphinx.hilt_qualifiers.DetailDriver
 import chat.sphinx.hilt_qualifiers.PrimaryDriver
 import chat.sphinx.new_contact.navigation.NewContactNavigator
 import chat.sphinx.onboard.navigation.OnBoardNavigator
+import chat.sphinx.profile.navigation.ProfileNavigator
 import chat.sphinx.splash.navigation.SplashNavigator
 import dagger.Module
 import dagger.Provides
@@ -139,4 +140,10 @@ object NavigationModule {
         addressBookNavigatorImpl: AddressBookNavigatorImpl
     ): AddressBookNavigator =
         addressBookNavigatorImpl
+
+    @Provides
+    fun provideProfileNavigator(
+        profileNavigatorImpl: ProfileNavigatorImpl
+    ): ProfileNavigator =
+        profileNavigatorImpl
 }

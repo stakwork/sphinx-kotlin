@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="profile_header_name">Profile</string>
+    <string name="profile_basic_tab">Basic</string>
+    <string name="profile_advanced_tab">Advanced</string>
+</resources>
