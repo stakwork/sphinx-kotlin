@@ -21,7 +21,7 @@ sealed class MessageHolderViewState {
 //                    LayoutState.MessageTypeMessageContent(text)
 //                }
                 LayoutState.MessageTypeMessageContent(giphyData.toString())
-            } ?: /*if (message.podBoost != null) {*/ // TODO: Uncomment once boost layout logic is implemented
+            } ?: /*if (message.podBoost == null) {*/ // TODO: Uncomment once boost layout logic is implemented
                 LayoutState.MessageTypeMessageContent(it.value)
 //            } else {
 //                null
