@@ -199,10 +199,8 @@ fun LayoutMessageHolderBinding.setMessageTypeMessageLayout(
         root.gone
     } else {
         includeMessageHolderMessageTypes.includeMessageTypeMessage.apply {
-            messageContent.messageText?.let { content ->
-                root.visible
-                textViewMessageTypeMessage.text = content
-            } ?: root.gone
+            root.visibility
+            textViewMessageTypeMessage.text = messageContent.messageContent.value
         }
     }
 }
