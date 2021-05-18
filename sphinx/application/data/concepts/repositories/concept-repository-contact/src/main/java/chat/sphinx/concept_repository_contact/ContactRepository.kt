@@ -33,6 +33,7 @@ interface ContactRepository {
     fun getInviteById(inviteId: InviteId): Flow<Invite?>
 
     val networkRefreshContacts: Flow<LoadResponse<Boolean, ResponseError>>
+    var updatedContactIds: MutableList<ContactId>
 
     suspend fun deleteContactById(contactId: ContactId): Response<Any, ResponseError>
     suspend fun updateOwnerDeviceId(deviceId: DeviceId): Response<Any, ResponseError>

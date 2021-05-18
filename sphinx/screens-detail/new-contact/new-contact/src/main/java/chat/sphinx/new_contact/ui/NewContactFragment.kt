@@ -105,7 +105,7 @@ internal class NewContactFragment : SideEffectFragment<
             }
         })
 
-        binding.buttonAlreadyOnSphinx.setOnClickListener {
+        binding.buttonSave.setOnClickListener {
             viewModel.addContact(
                 binding.newContactNicknameEditText.text?.toString() ?: "",
                 binding.newContactAddressEditText.text?.toString() ?: "",

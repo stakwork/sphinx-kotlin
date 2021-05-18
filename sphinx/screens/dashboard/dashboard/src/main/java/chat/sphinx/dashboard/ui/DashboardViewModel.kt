@@ -1,6 +1,7 @@
 package chat.sphinx.dashboard.ui
 
 import androidx.lifecycle.viewModelScope
+import androidx.recyclerview.widget.DiffUtil
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
@@ -21,7 +22,9 @@ import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.wrapper_chat.isConversation
+import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_common.contact.ContactId
+import chat.sphinx.wrapper_common.toDateTime
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_contact.isConfirmed
 import chat.sphinx.wrapper_contact.isTrue
@@ -37,7 +40,9 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import java.util.*
 import javax.inject.Inject
+import kotlin.collections.ArrayList
 
 internal suspend inline fun DashboardViewModel.collectChatViewState(
     crossinline action: suspend (value: ChatViewState) -> Unit
@@ -122,10 +127,6 @@ internal class DashboardViewModel @Inject constructor(
                         }
                     }
 
-                    // compare our old list with new prior to updating it
-                    // to see if this collection is for deletion of a contact.
-                    val contactDeleted = (_contactsStateFlow.value.size + 1 /*account owner*/ ) < contacts.size
-
                     _contactsStateFlow.value = newList.toList()
 
                     // Don't push update to chat view state, let it's collection do it.
@@ -135,6 +136,7 @@ internal class DashboardViewModel @Inject constructor(
 
                     withContext(default) {
                         val currentChats = currentChatViewState.list.toMutableList()
+                        val chatContactIds = mutableListOf<ContactId>()
 
                         var updateChatViewState = false
                         for (chat in currentChatViewState.list) {
@@ -152,24 +154,40 @@ internal class DashboardViewModel @Inject constructor(
                             }
 
                             contact?.let {
+                                chatContactIds.add(it.id)
                                 // if the id of the currently displayed chat is not contained
                                 // in the list collected here, it's either a new contact w/o
                                 // a chat, or a contact that was deleted which we need to remove
                                 // from the list of chats.
-                                if (!contactIds.contains(it.id)) {
-                                    updateChatViewState = true
 
-                                    if (contactDeleted) {
-                                        currentChats.remove(chat)
-                                    } else {
-                                        currentChats.add(DashboardChat.Inactive.Conversation(contact))
-                                    }
+                                if (!contactIds.contains(it.id)) {
+                                    //Contact deleted
+                                    updateChatViewState = true
+                                    currentChats.remove(chat)
+                                    chatContactIds.remove(it.id)
                                 }
+
+                                if (contactRepository.updatedContactIds.contains(it.id)) {
+                                    //Contact updated
+                                    currentChats.remove(chat)
+                                    chatContactIds.remove(it.id)
+                                }
+                            }
+                        }
+
+                        for (contact in _contactsStateFlow.value) {
+                            if (contact.status.isConfirmed() && !chatContactIds.contains(contact.id)) {
+                                updateChatViewState = true
+
+                                currentChats.add(
+                                    DashboardChat.Inactive.Conversation(contact)
+                                )
                             }
                         }
 
                         if (updateChatViewState) {
                             chatViewStateContainer.updateDashboardChats(currentChats.toList())
+                            contactRepository.updatedContactIds = mutableListOf()
                         }
                     }
                 }

@@ -46,6 +46,7 @@ import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessagePagination
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_contact.ContactAlias
+import chat.sphinx.wrapper_contact.ContactStatus
 import chat.sphinx.wrapper_contact.DeviceId
 import chat.sphinx.wrapper_invite.Invite
 import chat.sphinx.wrapper_lightning.NodeBalance
@@ -72,6 +73,7 @@ import kotlinx.coroutines.sync.withLock
 import java.text.ParseException
 import java.util.*
 import kotlin.collections.ArrayList
+import kotlin.math.absoluteValue
 
 class SphinxRepository(
     private val authenticationCoreManager: AuthenticationCoreManager,
@@ -114,7 +116,9 @@ class SphinxRepository(
         socketIOManager.addListener(this)
     }
 
-    /**
+    override var updatedContactIds: MutableList<ContactId> = mutableListOf()
+
+            /**
      * Call is made on [Dispatchers.IO]
      * */
     @Suppress("BlockingMethodInNonBlockingContext")
@@ -125,6 +129,7 @@ class SphinxRepository(
                 is SphinxSocketIOMessage.Type.Contact -> {
                     contactLock.withLock {
                         queries.transaction {
+                            updatedContactIds.add(ContactId(msg.dto.id))
                             upsertContact(msg.dto, queries)
                         }
                     }
@@ -505,6 +510,7 @@ class SphinxRepository(
             alias = contactAlias.value,
             public_key = lightningNodePubKey.value,
             route_hint = lightningRouteHint?.value,
+            status = ContactStatus.CONFIRMED.absoluteValue
         )
 
         networkQueryContact.createContact(postContactDto).collect { loadResponse ->
