@@ -200,10 +200,10 @@ fun LayoutMessageHolderBinding.setHeaderStatus(
 inline fun LayoutMessageHolderBinding.setMessageTypeMessageLayout(
     messageContent: LayoutState.MessageTypeMessageContent?
 ) {
-    if (messageContent == null) {
-        root.gone
-    } else {
-        includeMessageHolderMessageTypes.includeMessageTypeMessage.apply {
+    includeMessageHolderMessageTypes.includeMessageTypeMessage.apply {
+        if (messageContent == null) {
+            root.gone
+        } else {
             root.visible
             textViewMessageTypeMessage.text = messageContent.messageContent
         }
