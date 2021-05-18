@@ -115,8 +115,12 @@ abstract class BaseChatFragment<
     private fun setupChatMuted(showToast: Boolean = false) {
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.chatDataStateFlow.collect { chatData ->
-                chatData?.let {
-                    setupChatMuted(chatData.muted.isTrue(), showToast)
+                if (chatData?.chat == null) {
+                    headerMute.goneIfFalse(false)
+                } else {
+                    chatData?.let {
+                        setupChatMuted(chatData.muted.isTrue(), showToast)
+                    }
                 }
             }
         }

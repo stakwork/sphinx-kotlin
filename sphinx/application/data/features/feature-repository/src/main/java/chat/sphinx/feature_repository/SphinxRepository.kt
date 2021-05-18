@@ -935,10 +935,10 @@ class SphinxRepository(
                     is Response.Success -> {
                         chatLock.withLock {
                             queries.upsertChat(loadResponse.value, moshi, chatSeenMap)
+                        }
 
-                            getChatById(chat.id).collect {
-                                emit(it)
-                            }
+                        getChatById(chat.id).collect {
+                            emit(it)
                         }
                     }
                 }
