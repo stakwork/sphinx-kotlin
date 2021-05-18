@@ -199,7 +199,7 @@ inline fun LayoutMessageHolderBinding.setMessageTypeMessageLayout(
     } else {
         includeMessageHolderMessageTypes.includeMessageTypeMessage.apply {
             root.visible
-            textViewMessageTypeMessage.text = messageContent.messageContent.value
+            textViewMessageTypeMessage.text = messageContent.messageContent
         }
     }
 }

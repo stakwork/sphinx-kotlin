@@ -15,9 +15,14 @@ sealed class MessageHolderViewState {
 
     val messageTypeMessageContent: LayoutState.MessageTypeMessageContent? by lazy(LazyThreadSafetyMode.NONE) {
         message.messageContentDecrypted?.let {
-            // TODO: Uncomment once giphs and pod boosts layout rendering is implemented
-//            if (message.giphyData == null && message.podBoost == null) {
-                LayoutState.MessageTypeMessageContent(it)
+            message.giphyData?.let { giphyData ->
+                // TODO: show only the giphyData.text when rendering logic is implemented
+//                giphyData.text?.let { text ->
+//                    LayoutState.MessageTypeMessageContent(text)
+//                }
+                LayoutState.MessageTypeMessageContent(giphyData.toString())
+            } ?: /*if (message.podBoost != null) {*/ // TODO: Uncomment once boost layout logic is implemented
+                LayoutState.MessageTypeMessageContent(it.value)
 //            } else {
 //                null
 //            }

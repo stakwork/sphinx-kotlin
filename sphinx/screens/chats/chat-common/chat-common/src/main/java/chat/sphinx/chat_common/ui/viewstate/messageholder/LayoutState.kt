@@ -8,7 +8,7 @@ import chat.sphinx.wrapper_message.MessageContentDecrypted
 sealed class LayoutState {
 
     data class MessageTypeMessageContent(
-        val messageContent: MessageContentDecrypted
+        val messageContent: String
     ): LayoutState()
 
     data class DirectPayment(
