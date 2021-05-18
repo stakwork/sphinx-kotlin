@@ -8,7 +8,10 @@ sealed class LayoutState {
     data class MessageStatusHeader(
         val senderName: String?,
         val isOutGoingMessage: Boolean,
+
+        // TODO: rework bolt icon when sending messages to be yellow (sending), red (failed), green(sent)
         val showBoltIcon: Boolean,
+        
         val showLockIcon: Boolean,
         val timestamp: String,
     ) {
