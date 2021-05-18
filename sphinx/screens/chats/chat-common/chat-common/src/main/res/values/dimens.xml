@@ -30,7 +30,8 @@
 
 
     <!-- message_holder_in_photo_holder_xy + 8dp -->
-    <dimen name="message_holder_space_width_left">40dp</dimen>
+    <dimen name="message_holder_space_width_left">44dp</dimen>
+    <dimen name="message_holder_space_width_right">6dp</dimen>
 
 
     <!-- Message type heights  -->

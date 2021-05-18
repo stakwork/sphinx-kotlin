@@ -53,6 +53,22 @@
         app:layout_constraintStart_toEndOf="@+id/space_message_holder_left"
         app:layout_constraintTop_toBottomOf="@+id/include_message_status_header" />
 
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/received_bubble_arrow"
+        android:layout_width="4dp"
+        android:layout_height="10dp"
+        android:src="@drawable/received_bubble_arrow"
+        app:layout_constraintEnd_toStartOf="@+id/include_message_holder_message_types"
+        app:layout_constraintTop_toTopOf="@+id/include_message_holder_message_types" />
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/sent_bubble_arrow"
+        android:layout_width="6dp"
+        android:layout_height="10dp"
+        android:src="@drawable/sent_bubble_arrow"
+        app:layout_constraintStart_toEndOf="@+id/include_message_holder_message_types"
+        app:layout_constraintTop_toTopOf="@+id/include_message_holder_message_types" />
+
 
     <!--  Optional "New Day" Separator  -->
     <include

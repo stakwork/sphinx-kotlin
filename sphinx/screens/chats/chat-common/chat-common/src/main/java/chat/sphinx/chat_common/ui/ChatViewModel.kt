@@ -81,14 +81,14 @@ class ChatViewModel @Inject constructor(
                                 newList.add(
                                     MessageHolderViewState.OutGoing(
                                         message,
-                                        HolderBackground.Out.Middle,
+                                        HolderBackground.Out.Last,
                                     )
                                 )
                             } else {
                                 newList.add(
                                     MessageHolderViewState.InComing(
                                         message,
-                                        HolderBackground.In.Middle,
+                                        HolderBackground.In.Last,
                                         initialHolder
                                             ?: message.senderPic?.let { url ->
                                                 InitialHolderViewState.Url(url)

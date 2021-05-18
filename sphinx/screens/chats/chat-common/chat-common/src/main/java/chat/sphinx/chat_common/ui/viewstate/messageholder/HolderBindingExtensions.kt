@@ -55,6 +55,9 @@ fun LayoutMessageHolderBinding.setBackground(
                 width = (holderWidth.value * HolderBackground.SPACE_WIDTH_MULTIPLE).toInt()
             }
 
+            receivedBubbleArrow.goneIfFalse(true)
+            sentBubbleArrow.goneIfFalse(false)
+
             includeMessageHolderMessageTypes.root.apply {
                 visible
 
@@ -77,8 +80,11 @@ fun LayoutMessageHolderBinding.setBackground(
                 width = (holderWidth.value * HolderBackground.SPACE_WIDTH_MULTIPLE).toInt()
             }
             spaceMessageHolderRight.updateLayoutParams {
-                width = 0
+                width = root.context.resources.getDimensionPixelSize(R.dimen.message_holder_space_width_right)
             }
+
+            receivedBubbleArrow.goneIfFalse(false)
+            sentBubbleArrow.goneIfFalse(true)
 
             includeMessageHolderMessageTypes.root.apply {
                 visible
