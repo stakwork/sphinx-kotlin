@@ -8,15 +8,12 @@ sealed class HolderBackground {
 
     object None: HolderBackground()
 
-    sealed class In: HolderBackground() {
-        object First: In()
-        object Middle: In()
-        object Last: In()
+    sealed class First: HolderBackground() {
+        object Grouped: First()
+        object Isolated: First()
     }
 
-    sealed class Out: HolderBackground() {
-        object First: Out()
-        object Middle: Out()
-        object Last: Out()
-    }
+    object Middle: HolderBackground()
+
+    object Last: HolderBackground()
 }
