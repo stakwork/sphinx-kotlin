@@ -37,7 +37,7 @@ internal class MessageDboPresenterMapper(
             value.message_content_decrypted?.let { decrypted ->
                 if (message.type.isMessage()) {
                     when {
-                        decrypted.value.contains("boost::") -> {
+                        decrypted.value.startsWith("boost::") -> {
                             withContext(default) {
                                 decrypted.value.split("::")
                                     .elementAtOrNull(1)
@@ -47,7 +47,7 @@ internal class MessageDboPresenterMapper(
                                     }
                             }
                         }
-                        decrypted.value.contains("giphy::") -> {
+                        decrypted.value.startsWith("giphy::") -> {
                             withContext(default) {
                                 decrypted.value.split("::")
                                     .elementAtOrNull(1)

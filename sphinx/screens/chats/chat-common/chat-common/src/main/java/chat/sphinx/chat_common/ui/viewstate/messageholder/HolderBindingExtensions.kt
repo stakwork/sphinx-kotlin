@@ -100,7 +100,6 @@ fun LayoutMessageHolderBinding.setBackground(
     }
 }
 
-
 @MainThread
 fun LayoutMessageHolderBinding.setHeaderStatus(
     background: HolderBackground,
@@ -186,6 +185,21 @@ fun LayoutMessageHolderBinding.setHeaderStatus(
                 textViewSentMessageBoltIcon.goneIfFalse(message.status.isReceived())
                 textViewSentMessageTimestamp.text = DateTime.getFormathmma().format(message.date.value)
             }
+        }
+    }
+}
+
+@MainThread
+@Suppress("NOTHING_TO_INLINE")
+inline fun LayoutMessageHolderBinding.setMessageTypeMessageLayout(
+    messageContent: LayoutState.MessageTypeMessageContent?
+) {
+    if (messageContent == null) {
+        root.gone
+    } else {
+        includeMessageHolderMessageTypes.includeMessageTypeMessage.apply {
+            root.visible
+            textViewMessageTypeMessage.text = messageContent.messageContent
         }
     }
 }
