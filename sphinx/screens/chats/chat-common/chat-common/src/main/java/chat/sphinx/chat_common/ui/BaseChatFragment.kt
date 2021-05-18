@@ -189,7 +189,7 @@ abstract class BaseChatFragment<
                 setupChatMuted(!chatData.muted.isTrue())
 
                 onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-                    viewModel.toggleChatMuted().collect { updatedChat ->
+                    viewModel.toggleChatMuted.collect { updatedChat ->
 
                         chatData.updateChat(updatedChat)
                         viewModel.setChatData(chatData)

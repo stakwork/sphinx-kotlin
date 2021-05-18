@@ -162,11 +162,11 @@ class ChatViewModel @Inject constructor(
         }
     }
 
-    suspend fun toggleChatMuted(): Flow<Chat?> = flow {
-        chatDataStateFlow.value?.let { chatData ->
-            chatData.chat?.let { chat ->
-                chatRepository.toggleChatMuted(chat).collect {
-                    emit(it)
+    val toggleChatMuted: Flow<Chat?> by lazy {
+        flow {
+            chatDataStateFlow.value?.let { chatData ->
+                chatData.chat?.let { chat ->
+                    emitAll(chatRepository.toggleChatMuted(chat))
                 }
             }
         }

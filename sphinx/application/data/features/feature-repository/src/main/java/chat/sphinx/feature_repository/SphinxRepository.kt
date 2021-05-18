@@ -922,7 +922,7 @@ class SphinxRepository(
         }
     }
 
-    override suspend fun toggleChatMuted(chat: Chat): Flow<Chat?> = flow {
+    override fun toggleChatMuted(chat: Chat): Flow<Chat?> = flow {
         val queries = coreDB.getSphinxDatabaseQueries()
 
         chat.id?.let { chatId ->
@@ -933,10 +933,12 @@ class SphinxRepository(
                         emit(chat)
                     }
                     is Response.Success -> {
-                        queries.upsertChat(loadResponse.value, moshi, chatSeenMap)
+                        chatLock.withLock {
+                            queries.upsertChat(loadResponse.value, moshi, chatSeenMap)
 
-                        getChatById(chat.id).collect {
-                            emit(it)
+                            getChatById(chat.id).collect {
+                                emit(it)
+                            }
                         }
                     }
                 }
