@@ -15,24 +15,6 @@ sealed class MessageHolderViewState {
     abstract val background: HolderBackground
     abstract val initialHolder: InitialHolderViewState
 
-    abstract val directPayment: LayoutState.DirectPayment?
-
-    val messageTypeMessageContent: LayoutState.MessageTypeMessageContent? by lazy(LazyThreadSafetyMode.NONE) {
-        message.messageContentDecrypted?.let {
-            message.giphyData?.let { giphyData ->
-                // TODO: show only the giphyData.text when rendering logic is implemented
-//                giphyData.text?.let { text ->
-//                    LayoutState.MessageTypeMessageContent(text)
-//                }
-                LayoutState.MessageTypeMessageContent(giphyData.toString())
-            } ?: /*if (message.podBoost == null) {*/ // TODO: Uncomment once boost layout logic is implemented
-                LayoutState.MessageTypeMessageContent(it.value)
-//            } else {
-//                null
-//            }
-        }
-    }
-
     val statusHeader: LayoutState.MessageStatusHeader? by lazy(LazyThreadSafetyMode.NONE) {
         if (background is HolderBackground.First) {
             LayoutState.MessageStatusHeader(
@@ -47,37 +29,44 @@ sealed class MessageHolderViewState {
         }
     }
 
+    val directPayment: LayoutState.DirectPayment? by lazy(LazyThreadSafetyMode.NONE) {
+        if (message.type.isDirectPayment()) {
+            LayoutState.DirectPayment(showSent = this is OutGoing, amount = message.amount)
+        } else {
+            null
+        }
+    }
+
+    val messageTypeMessageContent: LayoutState.MessageTypeMessageContent? by lazy(LazyThreadSafetyMode.NONE) {
+        message.messageContentDecrypted?.let {
+            message.giphyData?.let { giphyData ->
+                // TODO: show only the giphyData.text when rendering logic is implemented
+//                giphyData.text?.let { text ->
+//                    LayoutState.MessageTypeMessageContent(text)
+//                }
+                LayoutState.MessageTypeMessageContent(giphyData.toString())
+            } ?: /*if (message.podBoost == null) {*/ // TODO: Uncomment once boost layout logic is implemented
+            LayoutState.MessageTypeMessageContent(it.value)
+//            } else {
+//                null
+//            }
+        }
+    }
+
 
     class InComing(
         override val message: Message,
         override val chatType: ChatType?,
         override val background: HolderBackground,
         override val initialHolder: InitialHolderViewState,
-    ) : MessageHolderViewState() {
-
-        override val directPayment: LayoutState.DirectPayment? by lazy(LazyThreadSafetyMode.NONE) {
-            if (message.type.isDirectPayment()) {
-                LayoutState.DirectPayment(showSent = false, amount = message.amount)
-            } else {
-                null
-            }
-        }
-    }
+    ): MessageHolderViewState()
 
     class OutGoing(
         override val message: Message,
         override val chatType: ChatType?,
         override val background: HolderBackground,
-    ) : MessageHolderViewState() {
+    ): MessageHolderViewState() {
         override val initialHolder: InitialHolderViewState
             get() = InitialHolderViewState.None
-
-        override val directPayment: LayoutState.DirectPayment? by lazy(LazyThreadSafetyMode.NONE) {
-            if (message.type.isDirectPayment()) {
-                LayoutState.DirectPayment(showSent = true, amount = message.amount)
-            } else {
-                null
-            }
-        }
     }
 }
