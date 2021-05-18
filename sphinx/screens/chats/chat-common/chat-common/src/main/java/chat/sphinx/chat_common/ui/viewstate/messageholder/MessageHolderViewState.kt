@@ -14,10 +14,13 @@ sealed class MessageHolderViewState {
     abstract val directPayment: LayoutState.DirectPayment?
 
     val messageTypeMessageContent: LayoutState.MessageTypeMessageContent? by lazy(LazyThreadSafetyMode.NONE) {
-        if (message.type.isMessage()) {
-            LayoutState.MessageTypeMessageContent(message = message)
-        } else {
-            null
+        message.messageContentDecrypted?.let {
+            // TODO: Uncomment once giphs and pod boosts layout rendering is implemented
+//            if (message.giphyData == null && message.podBoost == null) {
+                LayoutState.MessageTypeMessageContent(it)
+//            } else {
+//                null
+//            }
         }
     }
 
