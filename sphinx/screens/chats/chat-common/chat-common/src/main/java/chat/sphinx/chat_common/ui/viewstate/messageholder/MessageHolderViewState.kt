@@ -7,6 +7,7 @@ import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_message.Message
 import chat.sphinx.wrapper_message.isDirectPayment
 import chat.sphinx.wrapper_message.isReceived
+import chat.sphinx.wrapper_message.*
 
 internal sealed class MessageHolderViewState(
     val message: Message,
@@ -55,23 +56,36 @@ internal sealed class MessageHolderViewState(
     }
 
 
+    val paidMessageDetailsContent: LayoutState.PaidMessageDetailsContent? by lazy(LazyThreadSafetyMode.NONE) {
+        if (!message.isPaidMessage) {
+            null
+        } else {
+            LayoutState.PaidMessageDetailsContent(
+                isIncoming = this is InComing,
+                amount = message.amount
+            )
+        }
+    }
+
+
     class InComing(
         message: Message,
         chatType: ChatType?,
         background: HolderBackground,
         initialHolder: InitialHolderViewState,
-    ): MessageHolderViewState(
+    ) : MessageHolderViewState(
         message,
         chatType,
         background,
         initialHolder
     )
 
+
     class OutGoing(
         message: Message,
         chatType: ChatType?,
         background: HolderBackground,
-    ): MessageHolderViewState(
+    ) : MessageHolderViewState(
         message,
         chatType,
         background,

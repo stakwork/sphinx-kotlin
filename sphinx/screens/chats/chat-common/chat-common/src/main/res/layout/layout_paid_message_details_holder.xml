@@ -5,16 +5,16 @@
     android:id="@+id/layout_constraint_paid_message_details_holder"
     android:layout_width="match_parent"
     android:layout_height="@dimen/paid_message_details_holder_height"
+    android:background="@color/primaryGreen"
+    android:paddingHorizontal="@dimen/default_layout_margin"
     android:visibility="gone"
     app:layout_constraintTop_toBottomOf="@+id/layout_constraint_message_type_container"
-    tools:background="@color/primaryGreen"
-    tools:layout_editor_absoluteX="16dp"
     tools:visibility="visible">
 
 
-    <!-- Payment Direction Icon: Sent -->
+    <!-- Payment Direction Icon: Send Payment -->
     <androidx.appcompat.widget.AppCompatImageView
-        android:id="@+id/image_view_payment_sent_icon"
+        android:id="@+id/image_view_send_payment_icon"
         android:layout_width="@dimen/icon_container_message_payment_direction_xy"
         android:layout_height="@dimen/icon_container_message_payment_direction_xy"
         android:tint="@color/textMessages"
@@ -41,9 +41,9 @@
         tools:visibility="visible" />
 
 
-    <!-- Payment Status Icon -->
+    <!-- Payment Accepted Icon -->
     <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/text_view_payment_status_icon"
+        android:id="@+id/text_view_payment_accepted_icon"
         android:layout_width="@dimen/material_icon_text_size_message_payment_status"
         android:layout_height="@dimen/material_icon_text_size_message_payment_status"
         android:fontFamily="@font/material_icons_regular"
@@ -69,12 +69,10 @@
         android:textAllCaps="true"
         android:textColor="@color/textMessages"
         android:textSize="13sp"
-        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@id/text_view_payment_status_icon"
+        app:layout_constraintStart_toEndOf="@id/text_view_payment_accepted_icon"
         app:layout_constraintTop_toTopOf="parent"
-        tools:text="@string/paid_message_details_status_label_pay"
-        tools:visibility="visible" />
+        tools:text="@string/paid_message_details_status_label_pay" />
 
 
     <!--  Amount to Pay Label  -->
@@ -85,14 +83,13 @@
         android:fontFamily="@font/roboto_regular"
         android:textColor="@color/textMessages"
         android:textSize="@dimen/default_text_size_caption1"
-        android:visibility="gone"
+        android:textAllCaps="true"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toEndOf="@+id/text_view_payment_status_label"
         app:layout_constraintTop_toTopOf="parent"
-        tools:text="2000 SAT"
-        tools:visibility="visible" />
+        tools:text="2000 Sats" />
 
 
     <!-- Spinner for when payment is processing -->

@@ -1,6 +1,7 @@
 package chat.sphinx.chat_common.ui.viewstate.messageholder
 
 import chat.sphinx.wrapper_common.lightning.Sat
+import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.lightning.unit
 
 internal sealed class LayoutState {
@@ -11,7 +12,7 @@ internal sealed class LayoutState {
 
         // TODO: rework bolt icon when sending messages to be yellow (sending), red (failed), green(sent)
         val showBoltIcon: Boolean,
-        
+
         val showLockIcon: Boolean,
         val timestamp: String,
     ) {
@@ -34,4 +35,27 @@ internal sealed class LayoutState {
             get() = amount.unit
     }
 
+    data class PaidMessageDetailsContent(
+        val isIncoming: Boolean,
+        val amount: Sat
+    ): LayoutState() {
+        private val unitLabel: String = amount.unit
+
+        val amountText: String = "${amount.asFormattedString()} $unitLabel"
+
+        // TODO: Switch on the current payment processing state
+        val paymentStatusText: String
+            get() {
+                return "Pay"
+            }
+
+        // TODO: Switch on the resulting state of a completed payment
+        val isPaymentCompletedSuccessfully: Boolean
+            get() {
+                return false
+            }
+
+
+        val isPaymentProcessing: Boolean = false
+    }
 }

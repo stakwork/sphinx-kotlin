@@ -11,6 +11,7 @@ import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_view.Px
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
+import io.matthewnelson.android_feature_screens.util.goneIfTrue
 import io.matthewnelson.android_feature_screens.util.visible
 
 @MainThread
@@ -187,3 +188,29 @@ internal inline fun LayoutMessageHolderBinding.setMessageTypeMessageLayout(
         }
     }
 }
+
+
+@MainThread
+@Suppress("NOTHING_TO_INLINE")
+internal inline fun LayoutMessageHolderBinding.setPaidMessageDetailsLayout(
+    paidMessageDetailsContent: LayoutState.PaidMessageDetailsContent?
+) {
+    includeMessageHolderMessageTypes.includePaidMessageDetailsHolder.apply {
+        if (paidMessageDetailsContent == null) {
+            root.gone
+        } else {
+            root.visible
+
+            paidMessageDetailsContent.apply {
+                imageViewPaymentReceivedIcon.goneIfTrue(isIncoming || isPaymentProcessing)
+                imageViewSendPaymentIcon.goneIfFalse(isIncoming || isPaymentProcessing)
+                textViewPaymentAcceptedIcon.goneIfFalse(isPaymentCompletedSuccessfully)
+                progressWheelProcessingPayment.goneIfFalse(isPaymentProcessing)
+
+                textViewPaymentStatusLabel.text = paymentStatusText
+                textViewAmountToPayLabel.text = amountText
+            }
+        }
+    }
+}
+
