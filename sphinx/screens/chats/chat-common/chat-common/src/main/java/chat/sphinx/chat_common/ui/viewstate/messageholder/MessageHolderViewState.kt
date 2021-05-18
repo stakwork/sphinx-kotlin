@@ -1,13 +1,17 @@
 package chat.sphinx.chat_common.ui.viewstate.messageholder
 
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
+import chat.sphinx.wrapper_chat.ChatType
+import chat.sphinx.wrapper_chat.isConversation
+import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_message.Message
 import chat.sphinx.wrapper_message.isDirectPayment
-import chat.sphinx.wrapper_message.isMessage
+import chat.sphinx.wrapper_message.isReceived
 
 sealed class MessageHolderViewState {
 
     abstract val message: Message
+    abstract val chatType: ChatType?
     abstract val background: HolderBackground
     abstract val initialHolder: InitialHolderViewState
 
@@ -29,10 +33,25 @@ sealed class MessageHolderViewState {
         }
     }
 
+    val statusHeader: LayoutState.MessageStatusHeader? by lazy(LazyThreadSafetyMode.NONE) {
+        if (background is HolderBackground.First) {
+            LayoutState.MessageStatusHeader(
+                if (chatType?.isConversation() != false) null else message.senderAlias?.value,
+                this is OutGoing,
+                this is OutGoing && message.status.isReceived(),
+                message.messageContentDecrypted != null,
+                DateTime.getFormathmma().format(message.date.value),
+            )
+        } else {
+            null
+        }
+    }
+
 
     class InComing(
         override val message: Message,
-        override val background: HolderBackground.In,
+        override val chatType: ChatType?,
+        override val background: HolderBackground,
         override val initialHolder: InitialHolderViewState,
     ) : MessageHolderViewState() {
 
@@ -47,7 +66,8 @@ sealed class MessageHolderViewState {
 
     class OutGoing(
         override val message: Message,
-        override val background: HolderBackground.Out,
+        override val chatType: ChatType?,
+        override val background: HolderBackground,
     ) : MessageHolderViewState() {
         override val initialHolder: InitialHolderViewState
             get() = InitialHolderViewState.None
