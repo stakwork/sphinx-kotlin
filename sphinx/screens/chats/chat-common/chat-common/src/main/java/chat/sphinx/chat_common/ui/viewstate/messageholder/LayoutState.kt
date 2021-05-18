@@ -2,10 +2,19 @@ package chat.sphinx.chat_common.ui.viewstate.messageholder
 
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.lightning.unit
-import chat.sphinx.wrapper_message.Message
-import chat.sphinx.wrapper_message.MessageContentDecrypted
 
 sealed class LayoutState {
+
+    data class MessageStatusHeader(
+        val senderName: String?,
+        val isOutGoingMessage: Boolean,
+        val showBoltIcon: Boolean,
+        val showLockIcon: Boolean,
+        val timestamp: String,
+    ) {
+        val isIncomingMessage: Boolean
+            get() = !isOutGoingMessage
+    }
 
     data class MessageTypeMessageContent(
         val messageContent: String
@@ -15,8 +24,11 @@ sealed class LayoutState {
         val showSent: Boolean,
         val amount: Sat
     ): LayoutState() {
-        val showReceived: Boolean = !showSent
-        val unitLabel: String = amount.unit
+        val showReceived: Boolean
+            get() = !showSent
+
+        val unitLabel: String
+            get() = amount.unit
     }
 
 }
