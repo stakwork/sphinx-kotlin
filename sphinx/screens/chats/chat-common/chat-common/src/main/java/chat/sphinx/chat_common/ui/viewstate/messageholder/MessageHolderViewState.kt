@@ -39,6 +39,7 @@ sealed class MessageHolderViewState(
 
     val messageTypeMessageContent: LayoutState.MessageTypeMessageContent? by lazy(LazyThreadSafetyMode.NONE) {
         message.messageContentDecrypted?.let {
+            // TODO: Handle podcast clips
             message.giphyData?.let { giphyData ->
                 // TODO: show only the giphyData.text when rendering logic is implemented
 //                giphyData.text?.let { text ->
