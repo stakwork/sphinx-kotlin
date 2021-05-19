@@ -62,7 +62,8 @@ internal sealed class MessageHolderViewState(
         } else {
             LayoutState.PaidMessageDetailsContent(
                 isIncoming = this is InComing,
-                amount = message.amount
+                amount = message.amount,
+                purchaseStatus = message.purchaseStatus ?: MessagePurchaseStatus.NoStatusMessage
             )
         }
     }

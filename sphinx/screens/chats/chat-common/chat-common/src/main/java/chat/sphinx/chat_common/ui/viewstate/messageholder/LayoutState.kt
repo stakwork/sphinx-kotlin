@@ -3,6 +3,10 @@ package chat.sphinx.chat_common.ui.viewstate.messageholder
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.lightning.unit
+import chat.sphinx.wrapper_message.MessagePurchaseStatus
+import chat.sphinx.wrapper_message.isAccepted
+import chat.sphinx.wrapper_message.isProcessing
+import chat.sphinx.wrapper_message.labelText
 
 internal sealed class LayoutState {
 
@@ -37,25 +41,21 @@ internal sealed class LayoutState {
 
     data class PaidMessageDetailsContent(
         val isIncoming: Boolean,
-        val amount: Sat
+        val amount: Sat,
+        val purchaseStatus: MessagePurchaseStatus = MessagePurchaseStatus.NoStatusMessage,
     ): LayoutState() {
-        private val unitLabel: String = amount.unit
+        val showSentMessageStatusHeader: Boolean
+            get() = !isIncoming
 
-        val amountText: String = "${amount.asFormattedString()} $unitLabel"
+        val amountText: String = amount.asFormattedString(appendUnit = true)
 
-        // TODO: Switch on the current payment processing state
         val paymentStatusText: String
-            get() {
-                return "Pay"
-            }
+            get() = purchaseStatus.labelText
 
-        // TODO: Switch on the resulting state of a completed payment
-        val isPaymentCompletedSuccessfully: Boolean
-            get() {
-                return false
-            }
+        val isPaymentProcessing: Boolean
+            get() = purchaseStatus.isProcessing
 
-
-        val isPaymentProcessing: Boolean = false
+        val isPaymentAccepted: Boolean
+            get() = purchaseStatus.isAccepted
     }
 }

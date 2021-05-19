@@ -68,7 +68,7 @@ inline val MessagePurchaseStatus.labelText: String
             "Processing payment"
         }
         else -> {
-            "Pending"
+            "Pay"
         }
     }
 

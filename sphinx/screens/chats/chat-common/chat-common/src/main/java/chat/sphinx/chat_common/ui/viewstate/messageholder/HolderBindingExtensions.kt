@@ -195,22 +195,41 @@ internal inline fun LayoutMessageHolderBinding.setMessageTypeMessageLayout(
 internal inline fun LayoutMessageHolderBinding.setPaidMessageDetailsLayout(
     paidMessageDetailsContent: LayoutState.PaidMessageDetailsContent?
 ) {
+    setPaidMessageSentStatusHeader(paidMessageDetailsContent)
+
     includeMessageHolderMessageTypes.includePaidMessageDetailsHolder.apply {
-        if (paidMessageDetailsContent == null) {
-            root.gone
-        } else {
+        paidMessageDetailsContent?.let {
             root.visible
 
             paidMessageDetailsContent.apply {
                 imageViewPaymentReceivedIcon.goneIfTrue(isIncoming || isPaymentProcessing)
                 imageViewSendPaymentIcon.goneIfFalse(isIncoming || isPaymentProcessing)
-                textViewPaymentAcceptedIcon.goneIfFalse(isPaymentCompletedSuccessfully)
+                textViewPaymentAcceptedIcon.goneIfFalse(isPaymentAccepted)
                 progressWheelProcessingPayment.goneIfFalse(isPaymentProcessing)
 
                 textViewPaymentStatusLabel.text = paymentStatusText
                 textViewAmountToPayLabel.text = amountText
             }
-        }
+        } ?: root.gone
     }
 }
 
+
+@MainThread
+@Suppress("NOTHING_TO_INLINE")
+inline fun LayoutMessageHolderBinding.setPaidMessageSentStatusHeader(
+    paidMessageDetailsContent: LayoutState.PaidMessageDetailsContent?
+) {
+    includeMessageHolderMessageTypes.includePaidMessageSentStatusDetails.apply {
+        paidMessageDetailsContent?.let {
+            if (paidMessageDetailsContent.showSentMessageStatusHeader) {
+                paidMessageDetailsContent.apply {
+                    attachmentPriceAmountLabel.text = amountText
+                    attachmentPriceStatusLabel.text = paymentStatusText
+                }
+            } else {
+                root.gone
+            }
+        } ?: root.gone
+    }
+}

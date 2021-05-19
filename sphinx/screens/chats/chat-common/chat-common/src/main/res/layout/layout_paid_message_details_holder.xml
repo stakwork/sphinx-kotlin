@@ -4,11 +4,12 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/layout_constraint_paid_message_details_holder"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/paid_message_details_holder_height"
+    android:layout_height="match_parent"
     android:background="@color/primaryGreen"
     android:paddingHorizontal="@dimen/default_layout_margin"
     android:visibility="gone"
     app:layout_constraintTop_toBottomOf="@+id/layout_constraint_message_type_container"
+    tools:layout_height="@dimen/paid_message_details_holder_height"
     tools:visibility="visible">
 
 
@@ -81,9 +82,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:fontFamily="@font/roboto_regular"
+        android:textAllCaps="true"
         android:textColor="@color/textMessages"
         android:textSize="@dimen/default_text_size_caption1"
-        android:textAllCaps="true"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1.0"
