@@ -10,6 +10,7 @@
         android:id="@+id/layout_constraint_message_type_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:padding="@dimen/default_layout_margin"
         app:layout_constraintTop_toTopOf="parent">
 
         <!--   Status Row for Paid Message Sent  -->
