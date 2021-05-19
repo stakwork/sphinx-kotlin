@@ -27,8 +27,8 @@ internal inline fun LayoutMessageHolderBinding.setDirectPaymentLayout(
             imageViewDirectPaymentSent.goneIfFalse(directPayment.showSent)
             imageViewDirectPaymentReceived.goneIfFalse(directPayment.showReceived)
             includeDirectPaymentAmountTextGroup.apply {
-                textViewBoostAmount.text = directPayment.amount.asFormattedString()
-                textViewBoostUnitLabel.text = directPayment.unitLabel
+                textViewSatsAmount.text = directPayment.amount.asFormattedString()
+                textViewSatsUnitLabel.text = directPayment.unitLabel
             }
         }
     }
