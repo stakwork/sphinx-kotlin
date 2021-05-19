@@ -25,6 +25,7 @@ data class Message(
     val expirationDate: DateTime?,
     val messageContent: MessageContent?,
     val status: MessageStatus,
+    val purchaseStatus: MessagePurchaseStatus? = null,
     val seen: Seen,
     val senderAlias: SenderAlias?,
     val senderPic: PhotoUrl?,
