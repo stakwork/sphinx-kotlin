@@ -8,12 +8,12 @@ import chat.sphinx.wrapper_message.Message
 import chat.sphinx.wrapper_message.isDirectPayment
 import chat.sphinx.wrapper_message.isReceived
 
-sealed class MessageHolderViewState {
-
-    abstract val message: Message
-    abstract val chatType: ChatType?
-    abstract val background: HolderBackground
-    abstract val initialHolder: InitialHolderViewState
+sealed class MessageHolderViewState(
+    val message: Message,
+    chatType: ChatType?,
+    val background: HolderBackground,
+    val initialHolder: InitialHolderViewState
+) {
 
     val statusHeader: LayoutState.MessageStatusHeader? by lazy(LazyThreadSafetyMode.NONE) {
         if (background is HolderBackground.First) {
@@ -55,18 +55,25 @@ sealed class MessageHolderViewState {
 
 
     class InComing(
-        override val message: Message,
-        override val chatType: ChatType?,
-        override val background: HolderBackground,
-        override val initialHolder: InitialHolderViewState,
-    ): MessageHolderViewState()
+        message: Message,
+        chatType: ChatType?,
+        background: HolderBackground,
+        initialHolder: InitialHolderViewState,
+    ): MessageHolderViewState(
+        message,
+        chatType,
+        background,
+        initialHolder
+    )
 
     class OutGoing(
-        override val message: Message,
-        override val chatType: ChatType?,
-        override val background: HolderBackground,
-    ): MessageHolderViewState() {
-        override val initialHolder: InitialHolderViewState
-            get() = InitialHolderViewState.None
-    }
+        message: Message,
+        chatType: ChatType?,
+        background: HolderBackground,
+    ): MessageHolderViewState(
+        message,
+        chatType,
+        background,
+        InitialHolderViewState.None
+    )
 }
