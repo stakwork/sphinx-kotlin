@@ -250,7 +250,7 @@ class SphinxRepository(
     override fun getUnseenMessagesByChatId(chat: Chat): Flow<Long?> = flow {
         emitAll(
             coreDB.getSphinxDatabaseQueries()
-                .chatGetUnseenIncomingMessagesCount(chat.contactIds.first(), chat.id)
+                .messageGetUnseenIncomingMessageCountByChatId(chat.contactIds.first(), chat.id)
                 .asFlow()
                 .mapToOneOrNull(io)
                 .distinctUntilChanged()
