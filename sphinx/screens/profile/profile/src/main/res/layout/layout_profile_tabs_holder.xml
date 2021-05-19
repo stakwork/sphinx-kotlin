@@ -17,25 +17,29 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:background="@color/primaryBlue"
+        android:layout_height="0dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/center_line">
+        app:layout_constraintEnd_toStartOf="@+id/center_line"
+        app:layout_constraintTop_toBottomOf="@+id/top_line"
+        app:layout_constraintBottom_toTopOf="@+id/bottom_line">
 
-        <androidx.appcompat.widget.AppCompatTextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/basic_tab_button"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:fontFamily="@font/roboto_medium"
             android:gravity="center"
             android:text="@string/profile_basic_tab"
             android:textColor="@color/text"
             android:textSize="@dimen/profile_tabs_text_size"
+            android:textAllCaps="false"
+            android:background="@color/primaryBlue"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
-        </androidx.appcompat.widget.AppCompatTextView>
+        </androidx.appcompat.widget.AppCompatButton>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -51,24 +55,29 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="0dp"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
         app:layout_constraintStart_toEndOf="@+id/center_line"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/top_line"
+        app:layout_constraintBottom_toTopOf="@+id/bottom_line">
 
-        <androidx.appcompat.widget.AppCompatTextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/advanced_tab_button"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:fontFamily="@font/roboto_medium"
             android:gravity="center"
             android:text="@string/profile_advanced_tab"
             android:textColor="@color/text"
+            android:background="@color/body"
             android:textSize="@dimen/profile_tabs_text_size"
+            android:textAllCaps="false"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
-        </androidx.appcompat.widget.AppCompatTextView>
+        </androidx.appcompat.widget.AppCompatButton>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

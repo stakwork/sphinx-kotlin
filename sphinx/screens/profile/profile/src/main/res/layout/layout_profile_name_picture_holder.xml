@@ -1,7 +1,67 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/body">
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/profile_image_view_picture"
+        android:layout_width="@dimen/profile_picture_xy"
+        android:layout_height="@dimen/profile_picture_xy"
+        android:src="@drawable/ic_profile_avatar_circle"
+        android:layout_marginStart="@dimen/default_double_layout_margin"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/profile_text_view_name"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/default_layout_margin"
+        android:layout_marginEnd="@dimen/default_layout_margin"
+        android:layout_marginTop="@dimen/default_half_layout_margin"
+        android:ellipsize="end"
+        android:gravity="center_vertical"
+        android:lines="2"
+        android:textAllCaps="true"
+        android:textColor="@color/primaryText"
+        android:textSize="@dimen/profile_name_text_size"
+        android:fontFamily="@font/montserrat_bold"
+        app:layout_constraintTop_toTopOf="@+id/profile_image_view_picture"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/profile_image_view_picture"
+        android:text="TEST NAME"
+        tools:text="TEST NAME"/>
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/profile_text_view_sat_balance"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:singleLine="true"
+        android:text="100 000"
+        android:textColor="@color/text"
+        android:textSize="14sp"
+        android:fontFamily="@font/montserrat_regular"
+        android:layout_marginTop="@dimen/default_half_layout_margin"
+        app:layout_constraintStart_toStartOf="@+id/profile_text_view_name"
+        app:layout_constraintTop_toBottomOf="@+id/profile_text_view_name"
+        tools:text="100,000,000" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/nav_drawer_text_view_balance_denomination"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:alpha=".5"
+        android:text="@string/sats"
+        android:textColor="@color/secondaryText"
+        android:textSize="14sp"
+        android:fontFamily="@font/montserrat_regular"
+        app:layout_constraintBottom_toBottomOf="@+id/profile_text_view_sat_balance"
+        app:layout_constraintStart_toEndOf="@+id/profile_text_view_sat_balance" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

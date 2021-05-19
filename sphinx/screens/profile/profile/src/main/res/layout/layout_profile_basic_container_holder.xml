@@ -2,6 +2,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_constraint_container_holder"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -10,6 +11,7 @@
         android:layout_height="match_parent">
 
         <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layout_scroll_view_content"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
@@ -24,20 +26,226 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent">
 
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/layout_constraint_nickname_content"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/profile_form_field_container_height"
+                    android:layout_marginStart="@dimen/default_form_horizontal_margin"
+                    android:layout_marginEnd="@dimen/default_form_horizontal_margin"
+                    app:layout_constraintTop_toTopOf="parent">
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/profile_user_name_text_view"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/profile_user_name"
+                        android:textColor="@color/secondaryText"
+                        android:fontFamily="@font/roboto_regular"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        android:textSize="@dimen/default_form_text_view_size"
+                        android:singleLine="true" />
+
+                    <androidx.appcompat.widget.AppCompatEditText
+                        android:id="@+id/profile_user_name_edit_text"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/text"
+                        android:fontFamily="@font/roboto_regular"
+                        app:backgroundTint="@android:color/transparent"
+                        app:layout_constraintTop_toBottomOf="@+id/profile_user_name_text_view"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        android:textSize="@dimen/default_form_edit_view_size"
+                        android:inputType="textVisiblePassword|textCapWords"
+                        android:layout_marginLeft="@dimen/default_form_edit_text_left_margin"
+                        android:singleLine="true"
+                        tools:text= "Testing"/>
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/layout_constraint_profile_user_name_bottom_border"
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@color/lightDivider"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="@+id/profile_user_name_text_view" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/layout_constraint_address_content"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/profile_form_field_container_height"
+                    android:layout_marginStart="@dimen/default_form_horizontal_margin"
+                    android:layout_marginEnd="@dimen/default_form_horizontal_margin"
+                    app:layout_constraintTop_toBottomOf="@+id/layout_constraint_nickname_content">
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/profile_address_text_view"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/profile_address"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        android:textColor="@color/secondaryText"
+                        android:fontFamily="@font/roboto_regular"
+                        android:textSize="@dimen/default_form_text_view_size"
+                        android:singleLine="true" />
+
+                    <androidx.appcompat.widget.AppCompatEditText
+                        android:id="@+id/profile_address_edit_text"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/text"
+                        android:fontFamily="@font/roboto_regular"
+                        app:backgroundTint="@android:color/transparent"
+                        app:layout_constraintTop_toBottomOf="@+id/profile_address_text_view"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        android:textSize="@dimen/default_form_edit_view_size"
+                        android:inputType="textVisiblePassword"
+                        android:layout_marginLeft="@dimen/default_form_edit_text_left_margin"
+                        android:layout_marginRight="@dimen/default_form_scan_icon_container_width"
+                        android:singleLine="true"
+                        tools:text= "Testing" />
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/layout_constraint_profile_address_bottom_border"
+                        android:layout_width="0dp"
+                        android:layout_height="1dp"
+                        android:background="@color/lightDivider"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toStartOf="@+id/layout_constraint_profile_scan_button"
+                        app:layout_constraintStart_toStartOf="@+id/profile_address_text_view" />
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/layout_constraint_profile_scan_button"
+                        android:layout_width="@dimen/default_form_scan_icon_container_width"
+                        android:layout_height="match_parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent">
+
+                        <androidx.appcompat.widget.AppCompatButton
+                            android:id="@+id/scan_address_button"
+                            android:layout_width="@dimen/default_form_scan_icon_width"
+                            android:layout_height="@dimen/default_form_scan_icon_height"
+                            app:layout_constraintEnd_toEndOf="@+id/layout_constraint_profile_scan_button"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            android:background="@drawable/ic_scan_icon"
+                            android:backgroundTint="@color/secondaryText"
+                            android:layout_marginBottom="@dimen/default_form_scan_icon_bottom_margin"
+                            />
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/layout_constraint_route_hint_content"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/profile_form_field_container_height"
+                    android:layout_marginStart="@dimen/default_form_horizontal_margin"
+                    android:layout_marginEnd="@dimen/default_form_horizontal_margin"
+                    app:layout_constraintTop_toBottomOf="@+id/layout_constraint_address_content">
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/profile_route_hint_text_view"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/profile_route_hint"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        android:textColor="@color/secondaryText"
+                        android:fontFamily="@font/roboto_regular"
+                        android:textSize="@dimen/default_form_text_view_size"
+                        android:singleLine="true" />
+
+                    <androidx.appcompat.widget.AppCompatEditText
+                        android:id="@+id/profile_route_hint_edit_text"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/text"
+                        android:fontFamily="@font/roboto_regular"
+                        app:backgroundTint="@android:color/transparent"
+                        app:layout_constraintTop_toBottomOf="@+id/profile_route_hint_text_view"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        android:inputType="textVisiblePassword"
+                        android:textSize="@dimen/default_form_edit_view_size"
+                        android:layout_marginLeft="@dimen/default_form_edit_text_left_margin"
+                        android:singleLine="true" />
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/layout_constraint_profile_route_hint_bottom_border"
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@color/lightDivider"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="@+id/profile_route_hint_text_view" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/layout_constraint_share_picture_content"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/profile_form_field_container_height"
+                    android:layout_marginStart="@dimen/default_form_horizontal_margin"
+                    android:layout_marginEnd="@dimen/default_form_horizontal_margin"
+                    app:layout_constraintTop_toBottomOf="@+id/layout_constraint_route_hint_content">
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/profile_pin_toggle_text_view"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/text"
+                        android:fontFamily="@font/roboto_regular"
+                        android:textSize="@dimen/pin_text_view_size"
+                        android:maxLines="2"
+                        android:text="@string/profile_share_picture"
+                        android:layout_marginEnd="@dimen/default_layout_margin"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toStartOf="@+id/pin_switch"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <androidx.appcompat.widget.SwitchCompat
+                        android:id="@+id/pin_switch"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checked="false"
+                        android:theme="@style/CustomSwitch"
+                        android:thumb="@drawable/switch_thumb_selector"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toEndOf="@id/profile_pin_toggle_text_view"
+                        app:track="@drawable/switch_track_selector" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+
             </androidx.constraintlayout.widget.ConstraintLayout>
 
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/sound_appearance_form"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/profile_sound_appearance_form_height"
-                android:background="@color/body"
-                android:layout_marginTop="@dimen/profile_form_container_margin_top"
-                android:elevation="8dp"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/basic_info_form">
+<!--            <androidx.constraintlayout.widget.ConstraintLayout-->
+<!--                android:id="@+id/sound_appearance_form"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="@dimen/profile_sound_appearance_form_height"-->
+<!--                android:background="@color/body"-->
+<!--                android:layout_marginTop="@dimen/profile_form_container_margin_top"-->
+<!--                android:elevation="8dp"-->
+<!--                app:layout_constraintStart_toStartOf="parent"-->
+<!--                app:layout_constraintEnd_toEndOf="parent"-->
+<!--                app:layout_constraintTop_toBottomOf="@+id/basic_info_form">-->
+<!--                -->
 
-            </androidx.constraintlayout.widget.ConstraintLayout>
+<!--            </androidx.constraintlayout.widget.ConstraintLayout>-->
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/servers_form"
@@ -48,7 +256,105 @@
                 android:elevation="8dp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/sound_appearance_form">
+                app:layout_constraintTop_toBottomOf="@+id/basic_info_form">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/layout_constraint_tip_content"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/profile_form_field_container_height"
+                    android:layout_marginStart="@dimen/default_form_horizontal_margin"
+                    android:layout_marginEnd="@dimen/default_form_horizontal_margin"
+                    app:layout_constraintTop_toTopOf="parent">
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/profile_tip_text_view"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/profile_tip"
+                        android:textColor="@color/secondaryText"
+                        android:fontFamily="@font/roboto_regular"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        android:textSize="@dimen/default_form_text_view_size"
+                        android:singleLine="true" />
+
+                    <androidx.appcompat.widget.AppCompatEditText
+                        android:id="@+id/profile_tip_edit_text"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/text"
+                        android:fontFamily="@font/roboto_regular"
+                        app:backgroundTint="@android:color/transparent"
+                        app:layout_constraintTop_toBottomOf="@+id/profile_tip_text_view"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        android:textSize="@dimen/default_form_edit_view_size"
+                        android:inputType="textVisiblePassword|textCapWords"
+                        android:layout_marginLeft="@dimen/default_form_edit_text_left_margin"
+                        android:singleLine="true"
+                        android:text= "20"
+                        tools:text= "100"/>
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/layout_constraint_profile_tip_bottom_border"
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@color/lightDivider"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="@+id/profile_tip_text_view" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/layout_constraint_meeting_server_content"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/profile_form_field_container_height"
+                    android:layout_marginStart="@dimen/default_form_horizontal_margin"
+                    android:layout_marginEnd="@dimen/default_form_horizontal_margin"
+                    app:layout_constraintTop_toBottomOf="@+id/layout_constraint_tip_content">
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/profile_meeting_server_text_view"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/profile_meeting_server"
+                        android:textColor="@color/secondaryText"
+                        android:fontFamily="@font/roboto_regular"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        android:textSize="@dimen/default_form_text_view_size"
+                        android:singleLine="true" />
+
+                    <androidx.appcompat.widget.AppCompatEditText
+                        android:id="@+id/profile_meeting_server_edit_text"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/text"
+                        android:fontFamily="@font/roboto_regular"
+                        app:backgroundTint="@android:color/transparent"
+                        app:layout_constraintTop_toBottomOf="@+id/profile_meeting_server_text_view"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        android:textSize="@dimen/default_form_edit_view_size"
+                        android:inputType="textVisiblePassword|textCapWords"
+                        android:layout_marginLeft="@dimen/default_form_edit_text_left_margin"
+                        android:singleLine="true"
+                        android:text="https://jitsi.sphinx.chat"
+                        tools:text="https://jitsi.sphinx.chat"/>
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/layout_constraint_profile_meeting_server_bottom_border"
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@color/lightDivider"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="@+id/profile_meeting_server_text_view" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -62,6 +368,52 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/servers_form">
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/profile_sync_devices_text_view"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/profile_sync_devices"
+                    android:textColor="@color/text"
+                    android:fontFamily="@font/roboto_regular"
+                    android:textSize="@dimen/profile_sync_devices_text_size"
+                    android:singleLine="true"
+                    android:layout_marginTop="@dimen/default_double_layout_margin"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent" />
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/button_save"
+                    style="@style/RoundedBlueButton"
+                    android:textAllCaps="false"
+                    android:layout_width="match_parent"
+                    android:layout_height="52dp"
+                    android:layout_marginStart="@dimen/default_double_layout_margin"
+                    android:layout_marginEnd="@dimen/default_double_layout_margin"
+                    android:layout_marginBottom="@dimen/default_double_layout_margin"
+                    android:text="@string/profile_backup_keys"
+                    android:textSize="@dimen/profile_backup_keys_text_size"
+                    android:textColor="@android:color/white"
+                    android:background="@drawable/button_background_white_rad_48"
+                    android:backgroundTint="@color/primaryBlue"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"/>
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/profile_key_text_view"
+                    android:layout_width="wrap_content"
+                    android:layout_height="0dp"
+                    android:gravity="center"
+                    android:layout_marginEnd="@dimen/default_layout_margin"
+                    android:text="@string/material_icon_name_key"
+                    android:textColor="@color/text"
+                    android:fontFamily="@font/material_icons_regular"
+                    android:textSize="@dimen/profile_backup_keys_icon_text_size"
+                    app:layout_constraintTop_toTopOf="@+id/button_save"
+                    app:layout_constraintBottom_toBottomOf="@+id/button_save"
+                    app:layout_constraintEnd_toEndOf="@+id/button_save" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 

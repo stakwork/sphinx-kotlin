@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <dimen name="default_half_layout_margin">8dp</dimen>
     <dimen name="default_layout_margin">16dp</dimen>
+    <dimen name="default_double_layout_margin">32dp</dimen>
     <dimen name="default_list_row_padding_vertical">10dp</dimen>
     <dimen name="default_header_height">65dp</dimen>
     <dimen name="default_header_navigation_xy">56dp</dimen>
@@ -40,8 +42,15 @@
     <dimen name="default_small_tap_target_xy">27dp</dimen>
 
     <dimen name="default_form_horizontal_margin">30dp</dimen>
+    <dimen name="default_form_edit_text_left_margin">-4dp</dimen>
     <dimen name="default_form_text_view_size">12dp</dimen>
     <dimen name="default_form_edit_view_size">17dp</dimen>
+
+    <dimen name="default_form_scan_address_button_width">30dp</dimen>
+    <dimen name="default_form_scan_icon_bottom_margin">5dp</dimen>
+    <dimen name="default_form_scan_icon_width">21dp</dimen>
+    <dimen name="default_form_scan_icon_height">17dp</dimen>
+    <dimen name="default_form_scan_icon_container_width">60dp</dimen>
 
     <dimen name="pin_help_text_view_size">15dp</dimen>
     <dimen name="pin_text_view_size">17dp</dimen>

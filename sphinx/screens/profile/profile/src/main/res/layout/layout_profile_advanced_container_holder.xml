@@ -2,6 +2,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_constraint_container_holder"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -10,6 +11,7 @@
         android:layout_height="match_parent">
 
         <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layout_scroll_view_content"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
@@ -23,6 +25,55 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/layout_constraint_server_url_content"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/profile_form_field_container_height"
+                    android:layout_marginStart="@dimen/default_form_horizontal_margin"
+                    android:layout_marginEnd="@dimen/default_form_horizontal_margin"
+                    app:layout_constraintTop_toTopOf="parent">
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/profile_server_url_text_view"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/profile_tip"
+                        android:textColor="@color/secondaryText"
+                        android:fontFamily="@font/roboto_regular"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        android:textSize="@dimen/default_form_text_view_size"
+                        android:singleLine="true" />
+
+                    <androidx.appcompat.widget.AppCompatEditText
+                        android:id="@+id/profile_server_url_edit_text"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/text"
+                        android:fontFamily="@font/roboto_regular"
+                        app:backgroundTint="@android:color/transparent"
+                        app:layout_constraintTop_toBottomOf="@+id/profile_server_url_text_view"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        android:textSize="@dimen/default_form_edit_view_size"
+                        android:inputType="textVisiblePassword|textCapWords"
+                        android:layout_marginLeft="@dimen/default_form_edit_text_left_margin"
+                        android:singleLine="true"
+                        android:text= "20"
+                        tools:text= "100"/>
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/layout_constraint_profile_server_url_bottom_border"
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@color/lightDivider"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="@+id/profile_server_url_text_view" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -50,6 +101,15 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/pin_timeout_form">
 
+                <androidx.appcompat.widget.AppCompatButton
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:text="@string/profile_change_pin"
+                    android:fontFamily="@font/roboto_medium"
+                    android:textSize="@dimen/profile_pin_button_text_size"
+                    android:textColor="@color/primaryBlue"></androidx.appcompat.widget.AppCompatButton>
+
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <androidx.constraintlayout.widget.ConstraintLayout
@@ -58,10 +118,20 @@
                 android:layout_height="@dimen/profile_privacy_pin_form_height"
                 android:background="@color/body"
                 android:layout_marginTop="@dimen/profile_form_container_margin_top"
+                android:layout_marginBottom="40dp"
                 android:elevation="8dp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/standard_pin_form">
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:text="@string/profile_change_privacy_pin"
+                    android:fontFamily="@font/roboto_medium"
+                    android:textSize="@dimen/profile_pin_button_text_size"
+                    android:textColor="@color/primaryBlue"></androidx.appcompat.widget.AppCompatButton>
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
