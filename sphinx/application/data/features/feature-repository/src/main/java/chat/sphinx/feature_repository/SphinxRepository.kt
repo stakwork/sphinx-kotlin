@@ -20,7 +20,6 @@ import chat.sphinx.concept_socket_io.SocketIOManager
 import chat.sphinx.concept_socket_io.SphinxSocketIOMessageListener
 import chat.sphinx.concept_socket_io.SphinxSocketIOMessage
 import chat.sphinx.conceptcoredb.ChatDbo
-import chat.sphinx.conceptcoredb.ContactDbo
 import chat.sphinx.conceptcoredb.MessageDbo
 import chat.sphinx.conceptcoredb.SphinxDatabaseQueries
 import chat.sphinx.feature_repository.mappers.chat.ChatDboPresenterMapper
@@ -35,6 +34,7 @@ import chat.sphinx.logger.d
 import chat.sphinx.logger.e
 import chat.sphinx.logger.w
 import chat.sphinx.wrapper_chat.Chat
+import chat.sphinx.wrapper_chat.isTrue
 import chat.sphinx.wrapper_common.*
 import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.chat.ChatId
@@ -250,6 +250,33 @@ class SphinxRepository(
         )
     }
 
+    override fun getConversationByContactId(contactId: ContactId): Flow<Chat?> = flow {
+        var ownerId: ContactId? = accountOwner.value?.id
+
+        if (ownerId == null) {
+            try {
+                accountOwner.collect {
+                    if (it != null) {
+                        ownerId = it.id
+                        delay(25L)
+                        throw Exception()
+                    } else {
+                        emit(null)
+                    }
+                }
+            } catch (e: Exception) {}
+        }
+
+        emitAll(
+            coreDB.getSphinxDatabaseQueries()
+                .chatGetConversationForContact(listOf(ownerId!!, contactId))
+                .asFlow()
+                .mapToOneOrNull(io)
+                .map { it?.let { chatDboPresenterMapper.mapFrom(it) } }
+                .distinctUntilChanged()
+        )
+    }
+
     override fun getUnseenMessagesByChatId(chat: Chat): Flow<Long?> = flow {
         emitAll(
             coreDB.getSphinxDatabaseQueries()
@@ -350,16 +377,19 @@ class SphinxRepository(
         InviteDboPresenterMapper(dispatchers)
     }
 
-    override val accountOwner: Flow<Contact?> by lazy {
+    override val accountOwner: StateFlow<Contact?> by lazy {
         flow {
             emitAll(
                 coreDB.getSphinxDatabaseQueries().contactGetOwner()
                     .asFlow()
                     .mapToOneOrNull(io)
                     .map { it?.let { contactDboPresenterMapper.mapFrom(it) } }
-                    .distinctUntilChanged()
             )
-        }
+        }.stateIn(
+            repositoryScope,
+            SharingStarted.WhileSubscribed(5_000),
+            null
+        )
     }
 
     override val getAllContacts: Flow<List<Contact>> by lazy {
@@ -483,15 +513,23 @@ class SphinxRepository(
     override suspend fun deleteContactById(contactId: ContactId): Response<Any, ResponseError> {
         val queries = coreDB.getSphinxDatabaseQueries()
 
-        val owner: ContactDbo = queries.contactGetOwner().executeAsOneOrNull()
-            ?: let {
-                val msg = "Account Owner was not in the DB. Something is very wrong..."
-                LOG.w(TAG, msg)
-                return Response.Error(ResponseError(msg))
-            }
 
-        if (owner.id == contactId) {
-            val msg = "deleteContactById called for account owner. Deletion not permitted."
+        var owner: Contact? = accountOwner.value
+
+        if (owner == null) {
+            try {
+                accountOwner.collect {
+                    if (it != null) {
+                        owner = it
+                        throw Exception()
+                    }
+                }
+            } catch (e: Exception) {}
+            delay(25L)
+        }
+
+        if (owner?.id == null || owner!!.id == contactId) {
+            val msg = "Account Owner was null, or deleteContactById was called for account owner."
             LOG.w(TAG, msg)
             return Response.Error(ResponseError(msg))
         }
@@ -509,7 +547,7 @@ class SphinxRepository(
                         contactLock.withLock {
 
                             val chat: ChatDbo? =
-                                queries.chatGetConversationForContact(listOf(owner.id, contactId))
+                                queries.chatGetConversationForContact(listOf(owner!!.id, contactId))
                                     .executeAsOneOrNull()
 
                             queries.transaction {
@@ -970,27 +1008,31 @@ class SphinxRepository(
         }
     }
 
-    override fun toggleChatMuted(chat: Chat): Flow<Chat?> = flow {
-        val queries = coreDB.getSphinxDatabaseQueries()
+    override suspend fun toggleChatMuted(chat: Chat): Response<Boolean, ResponseError> {
+        var response: Response<Boolean, ResponseError> = Response.Success(!chat.isMuted.isTrue())
 
-        // TODO: Move to Repository Scope after refactoring.
-        networkQueryChat.toggleMuteChat(chat.id, chat.isMuted).collect { loadResponse ->
-            when (loadResponse) {
-                is LoadResponse.Loading -> {}
-                is Response.Error -> {
-                    emit(chat)
-                }
-                is Response.Success -> {
-                    chatLock.withLock {
-                        queries.upsertChat(loadResponse.value, moshi, chatSeenMap)
+        repositoryScope.launch(mainImmediate) {
+            networkQueryChat.toggleMuteChat(chat.id, chat.isMuted).collect { loadResponse ->
+                when (loadResponse) {
+                    is LoadResponse.Loading -> {}
+                    is Response.Error -> {
+                        response = loadResponse
                     }
+                    is Response.Success -> {
+                        val queries = coreDB.getSphinxDatabaseQueries()
 
-                    getChatById(chat.id).collect {
-                        emit(it)
+                        chatLock.withLock {
+                            withContext(io) {
+                                queries.upsertChat(loadResponse.value, moshi, chatSeenMap)
+                            }
+                        }
+
                     }
                 }
             }
-        }
+        }.join()
+
+        return response
     }
 
     /*
