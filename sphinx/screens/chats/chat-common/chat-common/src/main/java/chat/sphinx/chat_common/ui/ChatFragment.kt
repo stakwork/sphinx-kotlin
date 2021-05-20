@@ -19,30 +19,24 @@ import chat.sphinx.chat_common.navigation.ChatNavigator
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
 import chat.sphinx.chat_common.ui.viewstate.header.ChatHeaderViewState
 import chat.sphinx.concept_image_loader.ImageLoader
-import chat.sphinx.concept_image_loader.ImageLoaderOptions
-import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.insetter_activity.addStatusBarPadding
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
-import chat.sphinx.resources.SphinxToastUtils
 import chat.sphinx.resources.setBackgroundRandomColor
 import chat.sphinx.resources.setTextColorExt
 import chat.sphinx.wrapper_chat.isTrue
-import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.lightning.unit
-import chat.sphinx.wrapper_common.util.getInitials
 import io.matthewnelson.android_feature_screens.ui.base.BaseFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.visible
-import io.matthewnelson.android_feature_toast_utils.show
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
-abstract class BaseChatFragment<
+abstract class ChatFragment<
         VB: ViewBinding,
         ARGS: NavArgs,
         VM: ChatViewModel<ARGS>,
@@ -60,18 +54,14 @@ abstract class BaseChatFragment<
 
     protected abstract val chatNavigator: ChatNavigator
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        viewModel.init()
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setupChatHeaderFooter()
-
-        footerBinding
-        headerBinding
-
-        headerBinding.textViewChatHeaderNavBack.setOnClickListener {
-            lifecycleScope.launch {
-                chatNavigator.popBackStack()
-            }
-        }
+        setupHeaderFooter()
 
         val messageListAdapter = MessageListAdapter(
             recyclerView,
@@ -87,7 +77,7 @@ abstract class BaseChatFragment<
         }
     }
 
-    private fun setupChatHeaderFooter() {
+    private fun setupHeaderFooter() {
         val activity = (requireActivity() as InsetterActivity)
 
         headerBinding.apply {
@@ -96,38 +86,15 @@ abstract class BaseChatFragment<
 
             root.layoutParams.height = root.layoutParams.height + activity.statusBarInsetHeight.top
             root.requestLayout()
-        }
-    }
 
-    private fun setupChatMuted(showToast: Boolean = false) {
-        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-            viewModel.chatDataStateFlow.collect { chatData ->
-                if (chatData?.chat == null) {
-                    headerBinding.imageViewChatHeaderMuted.gone
-                } else {
-                    setupChatMuted(chatData.muted.isTrue(), showToast)
-                }
+            imageViewChatHeaderMuted.setOnClickListener {
+                viewModel.toggleChatMuted()
             }
-        }
-    }
 
-    private fun setupChatMuted(muted: Boolean, showToast: Boolean = false) {
-        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-            if (muted) {
-                imageLoader.load(
-                    headerBinding.imageViewChatHeaderMuted,
-                    R.drawable.ic_baseline_notifications_off_24
-                )
-
-                if (showToast) {
-                    SphinxToastUtils().show(binding.root.context, R.string.chat_muted_message)
+            textViewChatHeaderNavBack.setOnClickListener {
+                lifecycleScope.launch {
+                    chatNavigator.popBackStack()
                 }
-
-            } else {
-                imageLoader.load(
-                    headerBinding.imageViewChatHeaderMuted,
-                    R.drawable.ic_baseline_notifications_24
-                )
             }
         }
     }
@@ -135,35 +102,50 @@ abstract class BaseChatFragment<
     override fun onStart() {
         super.onStart()
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-            viewModel.chatDataStateFlow.collect { chatData ->
-                chatData?.let {
-                    setupChatMuted()
+            viewModel.headerInitialHolderSharedFlow.collect { viewState ->
 
-                    headerBinding.apply {
-                        chatData.photoUrl.let { url ->
-                            if (url != null) {
-                                layoutChatInitialHolder.textViewInitials.gone
-                                setChatImageFromUrl(url)
-                            } else {
-                                layoutChatInitialHolder.apply {
-                                    imageViewChatPicture.gone
-                                    textViewInitials.text = chatData.chatName?.getInitials() ?: ""
-                                }
+                headerBinding.layoutChatInitialHolder.apply {
+                    @Exhaustive
+                    when (viewState) {
+                        is InitialHolderViewState.Initials -> {
+                            imageViewChatPicture.gone
+                            textViewInitials.apply {
+                                visible
+                                text = viewState.initials
+                                setBackgroundRandomColor(
+                                    R.drawable.chat_initials_circle,
+                                    viewState.color,
+                                )
                             }
-                        }
 
-                        textViewChatHeaderName.text = chatData.chatName ?: ""
-                        textViewChatHeaderLock.goneIfFalse(chatData.chat != null)
+                        }
+                        is InitialHolderViewState.None -> {
+                            textViewInitials.gone
+                            imageViewChatPicture.visible
+                            imageLoader.load(
+                                imageViewChatPicture,
+                                R.drawable.ic_profile_avatar_circle,
+                            )
+                        }
+                        is InitialHolderViewState.Url -> {
+                            textViewInitials.gone
+                            imageViewChatPicture.visible
+                            imageLoader.load(
+                                imageViewChatPicture,
+                                viewState.photoUrl.value,
+                                viewModel.imageLoaderDefaults,
+                            )
+                        }
                     }
                 }
             }
         }
 
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-            viewModel.checkRoute.collect { response ->
+            viewModel.checkRoute.collect { loadResponse ->
                 headerBinding.textViewChatHeaderConnectivity.apply {
                     @Exhaustive
-                    when (response) {
+                    when (loadResponse) {
                         is LoadResponse.Loading -> {
                             setTextColorExt(R.color.washedOutReceivedText)
                         }
@@ -171,7 +153,7 @@ abstract class BaseChatFragment<
                             setTextColorExt(R.color.sphinxOrange)
                         }
                         is Response.Success -> {
-                            val colorRes = if (response.value) {
+                            val colorRes = if (loadResponse.value) {
                                 R.color.primaryGreen
                             } else {
                                 R.color.sphinxOrange
@@ -184,37 +166,7 @@ abstract class BaseChatFragment<
             }
         }
 
-        headerBinding.imageViewChatHeaderMuted.setOnClickListener {
-            viewModel.chatDataStateFlow.value?.let { chatData ->
-                setupChatMuted(!chatData.muted.isTrue())
-
-                onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-                    viewModel.toggleChatMuted.collect { updatedChat ->
-
-                        chatData.updateChat(updatedChat)
-                        viewModel.setChatData(chatData)
-
-                        setupChatMuted(showToast = true)
-                    }
-                }
-            }
-        }
-
         viewModel.readMessages()
-    }
-
-    private fun setChatImageFromUrl(photoUrl: PhotoUrl) {
-        val options = ImageLoaderOptions.Builder()
-            .placeholderResId(R.drawable.ic_profile_avatar_circle)
-            .transformation(Transformation.CircleCrop)
-
-        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-            imageLoader.load(
-                headerBinding.layoutChatInitialHolder.imageViewChatPicture,
-                photoUrl.value,
-                options.build()
-            )
-        }
     }
 
     override suspend fun onViewStateFlowCollect(viewState: ChatHeaderViewState) {
@@ -223,58 +175,9 @@ abstract class BaseChatFragment<
             is ChatHeaderViewState.Idle -> {}
             is ChatHeaderViewState.Initialized -> {
                 headerBinding.apply {
-                    layoutChatInitialHolder.apply {
-                        @Exhaustive
-                        when (viewState.initialHolderViewState) {
-                            is InitialHolderViewState.Initials -> {
-                                imageViewChatPicture.gone
-                                textViewInitials.apply {
-                                    text = viewState.initialHolderViewState.initials
-                                    setBackgroundRandomColor(
-                                        R.drawable.chat_initials_circle,
-                                        viewState.initialHolderViewState.color
-                                    )
-                                }
-
-                            }
-                            is InitialHolderViewState.None -> {
-                                // TODO: remove when IHVS is refacotred such that Initials and URL
-                                // are within their own inner sealed class
-                            }
-                            is InitialHolderViewState.Url -> {
-                                textViewInitials.gone
-                                imageLoader.load(
-                                    imageViewChatPicture,
-                                    viewState.initialHolderViewState.photoUrl.value,
-                                    viewModel.imageLoaderDefaults,
-                                )
-                            }
-                        }
-                    }
 
                     textViewChatHeaderName.text = viewState.chatHeaderName
                     textViewChatHeaderLock.goneIfFalse(viewState.showLock)
-
-                    textViewChatHeaderConnectivity.apply {
-                        @Exhaustive
-                        when (viewState.connectivity) {
-                            is LoadResponse.Loading -> {
-                                setTextColorExt(R.color.washedOutReceivedText)
-                            }
-                            is Response.Error -> {
-                                setTextColorExt(R.color.sphinxOrange)
-                            }
-                            is Response.Success -> {
-                                val colorRes = if (viewState.connectivity.value) {
-                                    R.color.primaryGreen
-                                } else {
-                                    R.color.sphinxOrange
-                                }
-
-                                setTextColorExt(colorRes)
-                            }
-                        }
-                    }
 
                     viewState.contributions?.let {
                         imageViewChatHeaderContributions.visible
