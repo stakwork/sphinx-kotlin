@@ -8,13 +8,23 @@
     android:visibility="gone"
     tools:visibility="visible">
 
+    <!-- Offset text when a paid sent message status header is showing -->
+    <androidx.legacy.widget.Space
+        android:id="@+id/space_top_payment_status_area"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/paid_message_details_holder_height"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/text_view_message_type_message"
         style="@style/chat_message_body_text"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/space_top_payment_status_area"
         tools:text="Contrary to popular belief, Lorem Ipsum is not simply random text. Latin from 45 BC, making it over 2000 years old." />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

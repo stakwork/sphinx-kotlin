@@ -6,7 +6,6 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:elevation="2dp"
-    android:padding="@dimen/status_badge_row_padding"
     android:visibility="gone"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toStartOf="parent"
@@ -31,9 +30,9 @@
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/attachment_price_status_label"
         style="@style/PaymentStatusBadge"
-        android:textAllCaps="false"
         android:background="@drawable/background_status_badge_rad_4"
         android:backgroundTint="@color/primaryGreen"
+        android:textAllCaps="false"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"

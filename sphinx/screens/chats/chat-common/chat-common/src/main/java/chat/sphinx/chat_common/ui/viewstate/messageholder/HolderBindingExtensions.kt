@@ -4,7 +4,6 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.MainThread
 import androidx.core.view.updateLayoutParams
 import chat.sphinx.chat_common.R
-import chat.sphinx.resources.R as common_R
 import chat.sphinx.chat_common.databinding.LayoutMessageHolderBinding
 import chat.sphinx.resources.setTextColorExt
 import chat.sphinx.wrapper_common.lightning.asFormattedString
@@ -13,6 +12,8 @@ import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.goneIfTrue
 import io.matthewnelson.android_feature_screens.util.visible
+import chat.sphinx.resources.R as sphinxCommonR
+
 
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
@@ -40,12 +41,12 @@ internal fun LayoutMessageHolderBinding.setBackground(
     holderWidth: Px,
 ) {
     if (viewState.background is HolderBackground.None) {
-
         includeMessageHolderMessageTypes.root.gone
+
         val defaultMargins = root
             .context
             .resources
-            .getDimensionPixelSize(common_R.dimen.default_layout_margin)
+            .getDimensionPixelSize(sphinxCommonR.dimen.default_layout_margin)
 
         receivedBubbleArrow.gone
         sentBubbleArrow.gone
@@ -157,7 +158,7 @@ internal inline fun LayoutMessageHolderBinding.setStatusHeader(
                         *   context.getRandomColor()
                         *   setBackgroundRandomColor()
                         * */
-                        setTextColorExt(common_R.color.lightPurple)
+                        setTextColorExt(sphinxCommonR.color.lightPurple)
                     }
                 } ?: gone
             }
@@ -188,6 +189,7 @@ internal inline fun LayoutMessageHolderBinding.setMessageTypeMessageLayout(
         } else {
             root.visible
             textViewMessageTypeMessage.text = messageContent.messageContent
+            spaceTopPaymentStatusArea.goneIfFalse(messageContent.hasExtraTopPadding)
         }
     }
 }
@@ -225,7 +227,7 @@ internal inline fun LayoutMessageHolderBinding.setPaidMessageDetailsLayout(
 
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
-inline fun LayoutMessageHolderBinding.setPaidMessageSentStatusHeader(
+internal inline fun LayoutMessageHolderBinding.setPaidMessageSentStatusHeader(
     paidMessageDetailsContent: LayoutState.PaidMessageDetailsContent?
 ) {
     includeMessageHolderMessageTypes.includePaidMessageSentStatusDetails.apply {

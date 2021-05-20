@@ -40,15 +40,23 @@ internal sealed class MessageHolderViewState(
 
     val messageTypeMessageContent: LayoutState.MessageTypeMessageContent? by lazy(LazyThreadSafetyMode.NONE) {
         message.messageContentDecrypted?.let {
+            val hasExtraTopPadding = this is OutGoing && message.isPaidMessage
+
             // TODO: Handle podcast clips
             message.giphyData?.let { giphyData ->
                 // TODO: show only the giphyData.text when rendering logic is implemented
 //                giphyData.text?.let { text ->
 //                    LayoutState.MessageTypeMessageContent(text)
 //                }
-                LayoutState.MessageTypeMessageContent(giphyData.toString())
+                LayoutState.MessageTypeMessageContent(
+                    messageContent = giphyData.toString(),
+                    hasExtraTopPadding = hasExtraTopPadding,
+                )
             } ?: /*if (message.podBoost == null) {*/ // TODO: Uncomment once boost layout logic is implemented
-            LayoutState.MessageTypeMessageContent(it.value)
+            LayoutState.MessageTypeMessageContent(
+                messageContent = it.value,
+                hasExtraTopPadding = hasExtraTopPadding,
+            )
 //            } else {
 //                null
 //            }

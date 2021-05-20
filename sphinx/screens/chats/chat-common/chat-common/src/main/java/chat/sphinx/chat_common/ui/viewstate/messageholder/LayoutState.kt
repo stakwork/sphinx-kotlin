@@ -22,7 +22,8 @@ internal sealed class LayoutState {
     }
 
     data class MessageTypeMessageContent(
-        val messageContent: String
+        val messageContent: String,
+        val hasExtraTopPadding: Boolean = false
     ) : LayoutState()
 
     data class DirectPayment(
