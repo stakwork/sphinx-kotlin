@@ -8,6 +8,10 @@
     <fragment
         android:id="@+id/navigation_scanner_fragment"
         android:name="chat.sphinx.scanner.ui.ScannerFragment"
-        tools:layout="@layout/fragment_scanner" />
+        tools:layout="@layout/fragment_scanner" >
+        <argument
+            android:name="argShowBackArrow"
+            app:argType="boolean" />
+    </fragment>
 
 </navigation>

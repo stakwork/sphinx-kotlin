@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.navArgs
 import app.cash.exhaustive.Exhaustive
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.scanner.R
@@ -14,6 +15,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.invisible
 import io.matthewnelson.android_feature_screens.util.visible
+import io.matthewnelson.android_feature_viewmodel.updateViewState
 
 @AndroidEntryPoint
 internal class ScannerFragment: SideEffectFragment<
@@ -24,14 +26,24 @@ internal class ScannerFragment: SideEffectFragment<
         FragmentScannerBinding
         >(R.layout.fragment_scanner)
 {
-    override val viewModel: ScannerViewModel by viewModels()
+    private val args: ScannerFragmentArgs by navArgs()
     override val binding: FragmentScannerBinding by viewBinding(FragmentScannerBinding::bind)
+    override val viewModel: ScannerViewModel by viewModels()
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
         // have to call it here so it gets injected and can
         // catch the request asap
         viewModel
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        if (args.argShowBackArrow) {
+            viewModel.updateViewState(ScannerViewState.ShowNavBackButton)
+        } else {
+            viewModel.updateViewState(ScannerViewState.HideNavBackButton)
+        }
 
         binding.includeScannerHeader.apply {
             textViewDetailScreenHeaderName.text = getString(R.string.scanner_header_name)
