@@ -1,11 +1,11 @@
 package chat.sphinx.chat_group.ui
 
 import android.widget.ImageView
-import android.widget.TextView
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.RecyclerView
 import by.kirich1409.viewbindingdelegate.viewBinding
+import chat.sphinx.chat_common.databinding.LayoutChatFooterBinding
+import chat.sphinx.chat_common.databinding.LayoutChatHeaderBinding
 import chat.sphinx.chat_common.ui.BaseChatFragment
 import chat.sphinx.chat_common.navigation.ChatNavigator
 import chat.sphinx.chat_group.R
@@ -23,30 +23,12 @@ internal class ChatGroupFragment: BaseChatFragment<
         >(R.layout.fragment_chat_group)
 {
     override val binding: FragmentChatGroupBinding by viewBinding(FragmentChatGroupBinding::bind)
-    override val viewModel: ChatGroupViewModel by viewModels()
-
-    override val header: ConstraintLayout
-        get() = binding.layoutChatHeader.layoutConstraintChatHeader
-    override val headerChatPicture: ImageView
-        get() = binding.layoutChatHeader.layoutChatInitialHolder.imageViewChatPicture
-    override val headerConnectivityIcon: TextView
-        get() = binding.layoutChatHeader.textViewChatHeaderConnectivity
-    override val headerInitials: TextView
-        get() = binding.layoutChatHeader.layoutChatInitialHolder.textViewInitials
-    override val headerLockIcon: TextView
-        get() = binding.layoutChatHeader.textViewChatHeaderLock
-    override val headerMute: ImageView
-        get() = binding.layoutChatHeader.imageViewChatHeaderMuted
-    override val headerName: TextView
-        get() = binding.layoutChatHeader.textViewChatHeaderName
-    override val headerNavBack: TextView
-        get() = binding.layoutChatHeader.textViewChatHeaderNavBack
-
-    override val footer: ConstraintLayout
-        get() = binding.layoutChatFooter.layoutConstraintChatFooter
-
+    override val footerBinding: LayoutChatFooterBinding by viewBinding(LayoutChatFooterBinding::bind, R.id.include_chat_group_footer)
+    override val headerBinding: LayoutChatHeaderBinding by viewBinding(LayoutChatHeaderBinding::bind, R.id.include_chat_group_header)
     override val recyclerView: RecyclerView
         get() = binding.recyclerViewMessages
+
+    override val viewModel: ChatGroupViewModel by viewModels()
 
     @Inject
     protected lateinit var imageLoaderInj: ImageLoader<ImageView>
