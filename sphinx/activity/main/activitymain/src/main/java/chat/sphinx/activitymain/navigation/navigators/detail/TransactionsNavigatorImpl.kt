@@ -1,12 +1,12 @@
 package chat.sphinx.activitymain.navigation.navigators.detail
 
 import chat.sphinx.activitymain.navigation.drivers.DetailNavigationDriver
-import chat.sphinx.new_contact.navigation.NewContactNavigator
+import chat.sphinx.transactions.navigation.TransactionsNavigator
 import javax.inject.Inject
 
-internal class NewContactNavigatorImpl @Inject constructor(
+internal class TransactionsNavigatorImpl @Inject constructor(
     detailDriver: DetailNavigationDriver,
-): NewContactNavigator(detailDriver) {
+): TransactionsNavigator(detailDriver) {
     override suspend fun closeDetailScreen() {
         (navigationDriver as DetailNavigationDriver).closeDetailScreen()
     }

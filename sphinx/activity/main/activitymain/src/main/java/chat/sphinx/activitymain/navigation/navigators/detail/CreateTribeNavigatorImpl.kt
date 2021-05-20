@@ -1,12 +1,12 @@
 package chat.sphinx.activitymain.navigation.navigators.detail
 
 import chat.sphinx.activitymain.navigation.drivers.DetailNavigationDriver
-import chat.sphinx.new_contact.navigation.NewContactNavigator
+import chat.sphinx.create_tribe.navigation.CreateTribeNavigator
 import javax.inject.Inject
 
-internal class NewContactNavigatorImpl @Inject constructor(
+internal class CreateTribeNavigatorImpl @Inject constructor(
     detailDriver: DetailNavigationDriver,
-): NewContactNavigator(detailDriver) {
+): CreateTribeNavigator(detailDriver) {
     override suspend fun closeDetailScreen() {
         (navigationDriver as DetailNavigationDriver).closeDetailScreen()
     }

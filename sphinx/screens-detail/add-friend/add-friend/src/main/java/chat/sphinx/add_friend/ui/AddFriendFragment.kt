@@ -25,14 +25,17 @@ internal class AddFriendFragment: BaseFragment<
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        binding.includeAddFriendHeader.apply {
+            textViewDetailScreenHeaderName.text = getString(R.string.add_friend_header_name)
+            textViewDetailScreenClose.setOnClickListener {
+                lifecycleScope.launch { viewModel.navigator.closeDetailScreen() }
+            }
+        }
         binding.buttonNewToSphinx.setOnClickListener {
             lifecycleScope.launch { viewModel.navigator.toCreateInvitationDetail() }
         }
         binding.buttonAlreadyOnSphinx.setOnClickListener {
             lifecycleScope.launch { viewModel.navigator.toAddContactDetail() }
-        }
-        binding.layoutAddFriendHeader.textViewAddFriendClose.setOnClickListener {
-            lifecycleScope.launch { viewModel.navigator.closeDetailScreen() }
         }
     }
 

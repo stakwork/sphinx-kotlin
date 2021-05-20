@@ -9,7 +9,7 @@ import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_contact.Contact
 import javax.inject.Inject
 
-class DashboardNavigatorImpl @Inject constructor(
+internal class DashboardNavigatorImpl @Inject constructor(
     navigationDriver: PrimaryNavigationDriver
 ): DashboardNavigator(navigationDriver)
 {
