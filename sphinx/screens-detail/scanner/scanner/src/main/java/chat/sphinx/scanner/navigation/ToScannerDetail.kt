@@ -1,7 +1,6 @@
 package chat.sphinx.scanner.navigation
 
 import androidx.navigation.NavController
-import androidx.navigation.NavOptions
 import chat.sphinx.detail_resources.DetailNavOptions
 import chat.sphinx.scanner.R
 import chat.sphinx.scanner.ui.ScannerFragmentArgs
