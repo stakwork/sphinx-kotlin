@@ -17,6 +17,8 @@
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/attachment_price_amount_label"
         style="@style/PaymentStatusBadge"
+        android:background="@drawable/background_status_badge_rad_4"
+        android:backgroundTint="@color/primaryGreen"
         android:textAllCaps="true"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/attachment_price_status_label"
@@ -30,6 +32,8 @@
         android:id="@+id/attachment_price_status_label"
         style="@style/PaymentStatusBadge"
         android:textAllCaps="false"
+        android:background="@drawable/background_status_badge_rad_4"
+        android:backgroundTint="@color/primaryGreen"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
