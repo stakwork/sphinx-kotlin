@@ -38,7 +38,7 @@
                         android:id="@+id/profile_server_url_text_view"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/profile_tip"
+                        android:text="@string/profile_server_url"
                         android:textColor="@color/secondaryText"
                         android:fontFamily="@font/roboto_regular"
                         app:layout_constraintBottom_toBottomOf="parent"
@@ -61,8 +61,8 @@
                         android:inputType="textVisiblePassword|textCapWords"
                         android:layout_marginLeft="@dimen/default_form_edit_text_left_margin"
                         android:singleLine="true"
-                        android:text= "20"
-                        tools:text= "100"/>
+                        android:text= "https://sphinx.relay"
+                        tools:text= "https://sphinx.relay"/>
 
                     <androidx.constraintlayout.widget.ConstraintLayout
                         android:id="@+id/layout_constraint_profile_server_url_bottom_border"
