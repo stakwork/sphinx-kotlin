@@ -5,9 +5,13 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavArgs
 import app.cash.exhaustive.Exhaustive
+import chat.sphinx.chat_common.R
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
+import chat.sphinx.chat_common.ui.viewstate.header.ChatHeaderViewState
 import chat.sphinx.chat_common.ui.viewstate.messageholder.HolderBackground
 import chat.sphinx.chat_common.ui.viewstate.messageholder.MessageHolderViewState
+import chat.sphinx.concept_image_loader.ImageLoaderOptions
+import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_message.MessageRepository
@@ -31,9 +35,16 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     protected val messageRepository: MessageRepository,
     protected val networkQueryLightning: NetworkQueryLightning,
     protected val savedStateHandle: SavedStateHandle
-): BaseViewModel<ChatViewState>(dispatchers, ChatViewState.Idle)
+): BaseViewModel<ChatHeaderViewState>(dispatchers, ChatHeaderViewState.Idle)
 {
     abstract val args: ARGS
+
+    val imageLoaderDefaults by lazy {
+        ImageLoaderOptions.Builder()
+            .placeholderResId(R.drawable.ic_profile_avatar_circle)
+            .transformation(Transformation.CircleCrop)
+            .build()
+    }
 
     @Suppress("RemoveExplicitTypeArguments")
     private val _chatDataStateFlow: MutableStateFlow<ChatData?> by lazy {
