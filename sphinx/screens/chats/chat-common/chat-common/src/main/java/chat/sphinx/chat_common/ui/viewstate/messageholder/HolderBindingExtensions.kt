@@ -91,6 +91,9 @@ internal fun LayoutMessageHolderBinding.setBackground(
         includeMessageHolderMessageTypes.root.apply {
             visible
 
+            // TODO: Figure out why this doesn't seem to clip the paid message details layout
+            includeMessageHolderMessageTypes.root.clipToOutline = true
+
             @DrawableRes
             val resId: Int? = when (viewState.background) {
                 HolderBackground.First.Grouped -> {
@@ -198,7 +201,12 @@ internal inline fun LayoutMessageHolderBinding.setPaidMessageDetailsLayout(
     setPaidMessageSentStatusHeader(paidMessageDetailsContent)
 
     includeMessageHolderMessageTypes.includePaidMessageDetailsHolder.apply {
-        paidMessageDetailsContent?.let {
+        if (
+            paidMessageDetailsContent == null ||
+            !paidMessageDetailsContent.isIncoming
+        ) {
+            root.gone
+        } else {
             root.visible
 
             paidMessageDetailsContent.apply {
@@ -210,7 +218,7 @@ internal inline fun LayoutMessageHolderBinding.setPaidMessageDetailsLayout(
                 textViewPaymentStatusLabel.text = paymentStatusText
                 textViewAmountToPayLabel.text = amountText
             }
-        } ?: root.gone
+        }
     }
 }
 
@@ -221,15 +229,18 @@ inline fun LayoutMessageHolderBinding.setPaidMessageSentStatusHeader(
     paidMessageDetailsContent: LayoutState.PaidMessageDetailsContent?
 ) {
     includeMessageHolderMessageTypes.includePaidMessageSentStatusDetails.apply {
-        paidMessageDetailsContent?.let {
-            if (paidMessageDetailsContent.showSentMessageStatusHeader) {
-                paidMessageDetailsContent.apply {
-                    attachmentPriceAmountLabel.text = amountText
-                    attachmentPriceStatusLabel.text = paymentStatusText
-                }
-            } else {
-                root.gone
+        if (
+            paidMessageDetailsContent == null ||
+            !paidMessageDetailsContent.showSentMessageStatusHeader
+        ) {
+            root.gone
+        } else {
+            root.visible
+
+            paidMessageDetailsContent.apply {
+                attachmentPriceAmountLabel.text = paidMessageDetailsContent.amountText
+                attachmentPriceStatusLabel.text = paidMessageDetailsContent.paymentStatusText
             }
-        } ?: root.gone
+        }
     }
 }

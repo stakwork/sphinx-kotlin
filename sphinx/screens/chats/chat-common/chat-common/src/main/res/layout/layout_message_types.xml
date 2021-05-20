@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    tools:background="@drawable/background_message_holder_in_last">
+    android:background="@drawable/background_message_holder_in_last"
+    android:outlineProvider="background">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/layout_constraint_message_type_container"
