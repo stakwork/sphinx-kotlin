@@ -11,8 +11,20 @@ import chat.sphinx.chat_contact.R
 import chat.sphinx.chat_contact.databinding.FragmentChatContactBinding
 import chat.sphinx.chat_contact.navigation.ContactChatNavigator
 import chat.sphinx.concept_image_loader.ImageLoader
+import chat.sphinx.wrapper_common.chat.ChatId
+import chat.sphinx.wrapper_common.contact.ContactId
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
+
+internal inline val ChatContactFragmentArgs.chatId: ChatId?
+    get() = if (argChatId == ChatId.NULL_CHAT_ID.toLong()) {
+        null
+    } else {
+        ChatId(argChatId)
+    }
+
+internal inline val ChatContactFragmentArgs.contactId: ContactId
+    get() = ContactId(argContactId)
 
 @AndroidEntryPoint
 internal class ChatContactFragment: BaseChatFragment<

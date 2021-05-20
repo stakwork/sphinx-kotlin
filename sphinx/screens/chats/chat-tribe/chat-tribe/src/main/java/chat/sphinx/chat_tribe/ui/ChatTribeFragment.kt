@@ -11,8 +11,12 @@ import chat.sphinx.chat_tribe.R
 import chat.sphinx.chat_tribe.databinding.FragmentChatTribeBinding
 import chat.sphinx.chat_tribe.navigation.TribeChatNavigator
 import chat.sphinx.concept_image_loader.ImageLoader
+import chat.sphinx.wrapper_common.chat.ChatId
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
+
+internal inline val ChatTribeFragmentArgs.chatId: ChatId
+    get() = ChatId(argChatId)
 
 @AndroidEntryPoint
 internal class ChatTribeFragment: BaseChatFragment<
