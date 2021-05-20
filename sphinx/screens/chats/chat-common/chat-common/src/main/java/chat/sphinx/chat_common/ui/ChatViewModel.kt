@@ -1,6 +1,7 @@
 package chat.sphinx.chat_common.ui
 
 import android.app.Application
+import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavArgs
@@ -18,11 +19,14 @@ import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
+import chat.sphinx.kotlin_response.message
 import chat.sphinx.resources.getRandomColor
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.ChatName
 import chat.sphinx.wrapper_message.Message
 import io.matthewnelson.android_feature_viewmodel.BaseViewModel
+import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
+import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import kotlinx.coroutines.Job
@@ -38,7 +42,11 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     protected val messageRepository: MessageRepository,
     protected val networkQueryLightning: NetworkQueryLightning,
     protected val savedStateHandle: SavedStateHandle
-): BaseViewModel<ChatHeaderViewState>(dispatchers, ChatHeaderViewState.Idle)
+): SideEffectViewModel<
+        Context,
+        ChatSideEffect,
+        ChatHeaderViewState
+        >(dispatchers, ChatHeaderViewState.Idle)
 {
     abstract val args: ARGS
 
@@ -180,10 +188,22 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     abstract fun readMessages()
 
     private var toggleChatMutedJob: Job? = null
+    protected var notifyJob: Job? = null
     fun toggleChatMuted() {
         if (toggleChatMutedJob?.isActive == true) {
-            // TODO: Show notification that we're waiting for network, b/c
-            //  that is the only reason it's not done and we don't want
+            if (notifyJob?.isActive == true) {
+                return
+            }
+
+            notifyJob = viewModelScope.launch(mainImmediate) {
+                submitSideEffect(
+                    ChatSideEffect.Notify(
+                        app.getString(R.string.chat_muted_waiting_on_network),
+                        notificationLengthLong = false
+                    )
+                )
+                delay(1_000)
+            }
             return
         }
         // by the time the user has the ability to click mute, chatSharedFlow
@@ -196,12 +216,18 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                 @Exhaustive
                 when (response) {
                     is Response.Error -> {
-                        // TODO: Do something
+                        submitSideEffect(
+                            ChatSideEffect.Notify(response.message)
+                        )
+                        delay(2_000)
                     }
                     is Response.Success -> {
                         if (response.value) {
-                            val i = 0
-                            // TODO: Submit notification side effect
+                            submitSideEffect(
+                                ChatSideEffect.Notify(
+                                    app.getString(R.string.chat_muted_message)
+                                )
+                            )
                         }
                     }
                 }

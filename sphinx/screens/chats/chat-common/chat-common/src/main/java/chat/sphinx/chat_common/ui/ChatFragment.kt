@@ -1,6 +1,7 @@
 package chat.sphinx.chat_common.ui
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
@@ -30,6 +31,7 @@ import chat.sphinx.wrapper_chat.isTrue
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.lightning.unit
 import io.matthewnelson.android_feature_screens.ui.base.BaseFragment
+import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.visible
@@ -40,7 +42,9 @@ abstract class ChatFragment<
         VB: ViewBinding,
         ARGS: NavArgs,
         VM: ChatViewModel<ARGS>,
-        >(@LayoutRes layoutId: Int): BaseFragment<
+        >(@LayoutRes layoutId: Int): SideEffectFragment<
+        Context,
+        ChatSideEffect,
         ChatHeaderViewState,
         VM,
         VB
@@ -198,10 +202,6 @@ abstract class ChatFragment<
                                     headerBinding.imageViewChatHeaderMuted,
                                     R.drawable.ic_baseline_notifications_off_24
                                 )
-
-                                // TODO: Show Toast if was switched from on to off
-                                //  this needs to be handled in the ViewModel as a
-                                //  side effect as the network call could fail.
                             } else {
                                 imageLoader.load(
                                     headerBinding.imageViewChatHeaderMuted,
@@ -218,5 +218,9 @@ abstract class ChatFragment<
     override fun onPause() {
         super.onPause()
         viewModel.readMessages()
+    }
+
+    override suspend fun onSideEffectCollect(sideEffect: ChatSideEffect) {
+        sideEffect.execute(binding.root.context)
     }
 }
