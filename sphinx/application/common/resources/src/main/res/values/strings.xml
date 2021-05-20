@@ -11,6 +11,7 @@
     <string name="material_icon_name_call_button">phone</string>
     <string name="material_icon_name_close">close</string>
     <string name="material_icon_name_nav_back">arrow_back</string>
+    <string name="material_icon_name_nav_forward">arrow_forward</string>
     <string name="material_icon_name_file_attachment">insert_drive_file</string>
     <string name="material_icon_name_file_download">file_download</string>
     <string name="material_icon_name_play_button">play_arrow</string>

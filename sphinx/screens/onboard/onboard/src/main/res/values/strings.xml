@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="side_effect_decryption_failed">Decryption Failed</string>
+
+    <string name="get_started_button">Get Started</string>
+    <string name="finish_button">Finish</string>
+    <string name="invited_join_sphinx">You've been invited<br/>to join Sphinx</string>
 </resources>
