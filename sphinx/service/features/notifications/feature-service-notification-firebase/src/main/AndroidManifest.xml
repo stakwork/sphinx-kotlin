@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="chat.sphinx">
+    package="chat.sphinx.feature_service_notification_firebase">
 
     <application>
         <meta-data
@@ -12,7 +12,7 @@
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_channel_id"
             android:value="@string/fcm_notification_channel_id" />
-        <service android:name=".feature_service_notification_firebase.SphinxFirebaseMessagingService"
+        <service android:name=".SphinxFirebaseMessagingService"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
