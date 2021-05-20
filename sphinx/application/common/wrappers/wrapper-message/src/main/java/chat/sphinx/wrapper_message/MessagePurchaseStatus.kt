@@ -53,7 +53,7 @@ inline fun Int?.toMessagePurchaseStatus(): MessagePurchaseStatus =
 
 
 @Suppress("NOTHING_TO_INLINE")
-inline val MessagePurchaseStatus.labelText: String
+inline val MessagePurchaseStatus.incomingLabelText: String
     get() = when (this) {
         MessagePurchaseStatus.Pending -> {
             "Pending"
@@ -72,6 +72,26 @@ inline val MessagePurchaseStatus.labelText: String
         }
     }
 
+
+@Suppress("NOTHING_TO_INLINE")
+inline val MessagePurchaseStatus.outgoingLabelText: String
+    get() = when (this) {
+        MessagePurchaseStatus.Pending -> {
+            "Pending"
+        }
+        MessagePurchaseStatus.Accepted -> {
+            "Succeeded"
+        }
+        MessagePurchaseStatus.Denied -> {
+            "Denied"
+        }
+        MessagePurchaseStatus.Processing -> {
+            "Processing"
+        }
+        else -> {
+            "Unknown"
+        }
+    }
 
 sealed class MessagePurchaseStatus {
 
