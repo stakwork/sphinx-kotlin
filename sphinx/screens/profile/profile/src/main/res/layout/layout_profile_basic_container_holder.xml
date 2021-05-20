@@ -382,37 +382,45 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintEnd_toEndOf="parent" />
 
-                <androidx.appcompat.widget.AppCompatButton
-                    android:id="@+id/button_save"
-                    style="@style/RoundedBlueButton"
-                    android:textAllCaps="false"
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/layout_constraint_finish_content"
                     android:layout_width="match_parent"
                     android:layout_height="52dp"
                     android:layout_marginStart="@dimen/default_double_layout_margin"
                     android:layout_marginEnd="@dimen/default_double_layout_margin"
                     android:layout_marginBottom="@dimen/default_double_layout_margin"
-                    android:text="@string/profile_backup_keys"
-                    android:textSize="@dimen/profile_backup_keys_text_size"
-                    android:textColor="@android:color/white"
                     android:background="@drawable/button_background_white_rad_48"
                     android:backgroundTint="@color/primaryBlue"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="parent"
-                    app:layout_constraintBottom_toBottomOf="parent"/>
+                    app:layout_constraintBottom_toBottomOf="parent">
 
-                <androidx.appcompat.widget.AppCompatTextView
-                    android:id="@+id/profile_key_text_view"
-                    android:layout_width="wrap_content"
-                    android:layout_height="0dp"
-                    android:gravity="center"
-                    android:layout_marginEnd="@dimen/default_layout_margin"
-                    android:text="@string/material_icon_name_key"
-                    android:textColor="@color/text"
-                    android:fontFamily="@font/material_icons_regular"
-                    android:textSize="@dimen/profile_backup_keys_icon_text_size"
-                    app:layout_constraintTop_toTopOf="@+id/button_save"
-                    app:layout_constraintBottom_toBottomOf="@+id/button_save"
-                    app:layout_constraintEnd_toEndOf="@+id/button_save" />
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/profile_key_text_view"
+                        android:layout_width="wrap_content"
+                        android:layout_height="0dp"
+                        android:gravity="center"
+                        android:layout_marginEnd="@dimen/default_layout_margin"
+                        android:text="@string/material_icon_name_key"
+                        android:textColor="@color/text"
+                        android:fontFamily="@font/material_icons_regular"
+                        android:textSize="@dimen/profile_backup_keys_icon_text_size"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent" />
+
+                    <androidx.appcompat.widget.AppCompatButton
+                        android:id="@+id/button_backup_keys"
+                        style="@style/RoundedBlueButton"
+                        android:textAllCaps="false"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:text="@string/profile_backup_keys"
+                        android:textSize="@dimen/profile_backup_keys_text_size"
+                        android:textColor="@android:color/white"
+                        android:background="@android:color/transparent"/>
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
