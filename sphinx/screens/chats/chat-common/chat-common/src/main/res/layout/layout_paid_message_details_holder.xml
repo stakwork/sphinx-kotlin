@@ -4,12 +4,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/layout_constraint_paid_message_details_holder"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:background="@color/primaryGreen"
     android:paddingHorizontal="@dimen/default_layout_margin"
+    android:paddingVertical="@dimen/default_list_row_padding_vertical"
     android:visibility="gone"
-    app:layout_constraintTop_toBottomOf="@+id/layout_constraint_message_type_container"
-    tools:layout_height="@dimen/paid_message_details_holder_height"
     tools:visibility="visible">
 
 

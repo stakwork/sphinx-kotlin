@@ -55,6 +55,8 @@ internal fun LayoutMessageHolderBinding.setBackground(
         spaceMessageHolderRight.updateLayoutParams { width = defaultMargins }
 
     } else {
+        // TODO: Figure out why this doesn't seem to clip the paid message details layout
+        includeMessageHolderMessageTypes.layoutConstraintMessageReactionContainer.clipChildren = true
 
         // TODO: Implement variable widths dependant on data
         val isIncoming: Boolean = when (viewState) {
@@ -91,9 +93,6 @@ internal fun LayoutMessageHolderBinding.setBackground(
 
         includeMessageHolderMessageTypes.root.apply {
             visible
-
-            // TODO: Figure out why this doesn't seem to clip the paid message details layout
-            includeMessageHolderMessageTypes.root.clipToOutline = true
 
             @DrawableRes
             val resId: Int? = when (viewState.background) {

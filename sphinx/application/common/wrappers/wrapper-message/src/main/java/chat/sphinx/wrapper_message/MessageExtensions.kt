@@ -1,13 +1,18 @@
 package chat.sphinx.wrapper_message
 
 
-val Message.isPaidMessage: Boolean
+/**
+ * Messages are consider "paid" if they have a type equalling `ATTACHMENT`,
+ * and if the price that can be extracted from the mediaToken is greater than 0.
+ */
+inline val Message.isPaidMessage: Boolean
     get() {
-        // TODO: Implement logic for properly detecting paid messages
-        return (Math.random() * 5).toInt() < 2
+         // TODO: Implement logic at the repository level for extracting a price from the media token.
+//        return isAttachment && messageMedia.priceFromToken > 0
+        return false
     }
 
-val Message.isAttachment: Boolean
+inline val Message.isAttachment: Boolean
     get() {
-        return type.value == MessageType.ATTACHMENT
+        return type.isAttachment()
     }
