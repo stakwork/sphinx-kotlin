@@ -8,7 +8,7 @@ import chat.sphinx.wrapper_message.Message
 import chat.sphinx.wrapper_message.isDirectPayment
 import chat.sphinx.wrapper_message.isReceived
 
-sealed class MessageHolderViewState(
+internal sealed class MessageHolderViewState(
     val message: Message,
     chatType: ChatType?,
     val background: HolderBackground,

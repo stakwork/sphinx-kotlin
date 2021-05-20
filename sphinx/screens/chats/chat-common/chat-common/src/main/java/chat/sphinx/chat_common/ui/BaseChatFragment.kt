@@ -8,8 +8,8 @@ import android.widget.TextView
 import androidx.annotation.CallSuper
 import androidx.annotation.LayoutRes
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.NavArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
@@ -39,15 +39,15 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 abstract class BaseChatFragment<
-        VB: ViewBinding
+        VB: ViewBinding,
+        ARGS: NavArgs,
+        VM: ChatViewModel<ARGS>,
         >(@LayoutRes layoutId: Int): BaseFragment<
         ChatViewState,
-        ChatViewModel,
+        VM,
         VB
         >(layoutId)
 {
-    override val viewModel: ChatViewModel by activityViewModels()
-
     protected abstract val header: ConstraintLayout
     protected abstract val headerChatPicture: ImageView
     protected abstract val headerConnectivityIcon: TextView
@@ -69,11 +69,7 @@ abstract class BaseChatFragment<
         super.onViewCreated(view, savedInstanceState)
         setupChatHeader()
 
-        ChatBackPressHandler(binding.root.context)
-            .addCallback(viewLifecycleOwner, requireActivity())
-
         headerNavBack.setOnClickListener {
-            onNavigationBack()
             lifecycleScope.launch {
                 chatNavigator.popBackStack()
             }
@@ -90,15 +86,6 @@ abstract class BaseChatFragment<
             setHasFixedSize(false)
             layoutManager = LinearLayoutManager(binding.root.context)
             adapter = messageListAdapter
-        }
-    }
-
-    private inner class ChatBackPressHandler(context: Context): CloseAppOnBackPress(context) {
-        override fun handleOnBackPressed() {
-            onNavigationBack()
-            lifecycleScope.launch {
-                chatNavigator.popBackStack()
-            }
         }
     }
 
@@ -219,11 +206,6 @@ abstract class BaseChatFragment<
 
     override suspend fun onViewStateFlowCollect(viewState: ChatViewState) {}
     override fun subscribeToViewStateFlow() {}
-
-    @CallSuper
-    protected open fun onNavigationBack() {
-        viewModel.onNavigationBack()
-    }
 
     override fun onPause() {
         super.onPause()

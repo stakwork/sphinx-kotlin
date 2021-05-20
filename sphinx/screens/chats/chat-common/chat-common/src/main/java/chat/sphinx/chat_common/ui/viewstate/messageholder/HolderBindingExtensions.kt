@@ -15,7 +15,9 @@ import io.matthewnelson.android_feature_screens.util.visible
 
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
-inline fun LayoutMessageHolderBinding.setDirectPaymentLayout(directPayment: LayoutState.DirectPayment?) {
+internal inline fun LayoutMessageHolderBinding.setDirectPaymentLayout(
+    directPayment: LayoutState.DirectPayment?
+) {
     includeMessageHolderMessageTypes.includeMessageTypeDirectPayment.apply {
         if (directPayment == null) {
             root.gone
@@ -32,7 +34,7 @@ inline fun LayoutMessageHolderBinding.setDirectPaymentLayout(directPayment: Layo
 }
 
 @MainThread
-fun LayoutMessageHolderBinding.setBackground(
+internal fun LayoutMessageHolderBinding.setBackground(
     viewState: MessageHolderViewState,
     holderWidth: Px,
 ) {
@@ -125,7 +127,9 @@ fun LayoutMessageHolderBinding.setBackground(
 
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
-inline fun LayoutMessageHolderBinding.setStatusHeader(statusHeader: LayoutState.MessageStatusHeader?) {
+internal inline fun LayoutMessageHolderBinding.setStatusHeader(
+    statusHeader: LayoutState.MessageStatusHeader?
+) {
     includeMessageStatusHeader.apply {
         if (statusHeader == null) {
             root.gone
@@ -171,7 +175,7 @@ inline fun LayoutMessageHolderBinding.setStatusHeader(statusHeader: LayoutState.
 
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
-inline fun LayoutMessageHolderBinding.setMessageTypeMessageLayout(
+internal inline fun LayoutMessageHolderBinding.setMessageTypeMessageLayout(
     messageContent: LayoutState.MessageTypeMessageContent?
 ) {
     includeMessageHolderMessageTypes.includeMessageTypeMessage.apply {

@@ -1,9 +1,7 @@
 plugins {
     id 'app.cash.exhaustive'
     id 'com.android.library'
-    id 'dagger.hilt.android.plugin'
     id 'kotlin-android'
-    id 'kotlin-kapt'
 }
 
 android {
@@ -44,8 +42,4 @@ dependencies {
     api project(path: ':sphinx:activity:insetter-activity')
 
     api deps.androidx.recyclerView
-
-    implementation deps.androidx.lifecycle.hilt
-    implementation deps.google.hilt
-    kapt kaptDeps.google.hilt
 }

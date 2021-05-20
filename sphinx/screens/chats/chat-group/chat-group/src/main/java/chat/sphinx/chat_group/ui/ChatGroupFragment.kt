@@ -3,6 +3,7 @@ package chat.sphinx.chat_group.ui
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.RecyclerView
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.chat_common.ui.BaseChatFragment
@@ -11,19 +12,18 @@ import chat.sphinx.chat_group.R
 import chat.sphinx.chat_group.databinding.FragmentChatGroupBinding
 import chat.sphinx.chat_group.navigation.GroupChatNavigator
 import chat.sphinx.concept_image_loader.ImageLoader
-import chat.sphinx.wrapper_common.chat.ChatId
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
-internal inline val ChatGroupFragmentArgs.chatId: ChatId
-    get() = ChatId(argChatId)
-
 @AndroidEntryPoint
 internal class ChatGroupFragment: BaseChatFragment<
-        FragmentChatGroupBinding
+        FragmentChatGroupBinding,
+        ChatGroupFragmentArgs,
+        ChatGroupViewModel,
         >(R.layout.fragment_chat_group)
 {
     override val binding: FragmentChatGroupBinding by viewBinding(FragmentChatGroupBinding::bind)
+    override val viewModel: ChatGroupViewModel by viewModels()
 
     override val header: ConstraintLayout
         get() = binding.layoutChatHeader.layoutConstraintChatHeader

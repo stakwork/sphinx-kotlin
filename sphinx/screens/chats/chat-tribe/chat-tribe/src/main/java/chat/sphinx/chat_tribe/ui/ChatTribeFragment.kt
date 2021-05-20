@@ -3,6 +3,7 @@ package chat.sphinx.chat_tribe.ui
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.RecyclerView
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.chat_common.ui.BaseChatFragment
@@ -11,19 +12,18 @@ import chat.sphinx.chat_tribe.R
 import chat.sphinx.chat_tribe.databinding.FragmentChatTribeBinding
 import chat.sphinx.chat_tribe.navigation.TribeChatNavigator
 import chat.sphinx.concept_image_loader.ImageLoader
-import chat.sphinx.wrapper_common.chat.ChatId
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
-internal inline val ChatTribeFragmentArgs.chatId: ChatId
-    get() = ChatId(argChatId)
-
 @AndroidEntryPoint
 internal class ChatTribeFragment: BaseChatFragment<
-        FragmentChatTribeBinding
+        FragmentChatTribeBinding,
+        ChatTribeFragmentArgs,
+        ChatTribeViewModel,
         >(R.layout.fragment_chat_tribe)
 {
     override val binding: FragmentChatTribeBinding by viewBinding(FragmentChatTribeBinding::bind)
+    override val viewModel: ChatTribeViewModel by viewModels()
 
     override val header: ConstraintLayout
         get() = binding.layoutChatHeader.layoutConstraintChatHeader

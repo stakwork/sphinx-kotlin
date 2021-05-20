@@ -1,6 +1,6 @@
 package chat.sphinx.chat_common.ui.viewstate.messageholder
 
-sealed class HolderBackground {
+internal sealed class HolderBackground {
 
     companion object {
         const val SPACE_WIDTH_MULTIPLE: Float = 0.2F

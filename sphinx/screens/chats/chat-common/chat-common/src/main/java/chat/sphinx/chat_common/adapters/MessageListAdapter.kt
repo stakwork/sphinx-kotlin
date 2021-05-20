@@ -5,6 +5,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import androidx.navigation.NavArgs
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import chat.sphinx.chat_common.ui.ChatViewModel
@@ -22,13 +23,13 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class MessageListAdapter(
+internal class MessageListAdapter<ARGS: NavArgs>(
     private val recyclerView: RecyclerView,
     private val lifecycleOwner: LifecycleOwner,
     private val onStopSupervisor: OnStopSupervisor,
-    private val viewModel: ChatViewModel,
+    private val viewModel: ChatViewModel<ARGS>,
     private val imageLoader: ImageLoader<ImageView>,
-): RecyclerView.Adapter<MessageListAdapter.MessageViewHolder>(), DefaultLifecycleObserver {
+): RecyclerView.Adapter<MessageListAdapter<ARGS>.MessageViewHolder>(), DefaultLifecycleObserver {
 
     private inner class Diff(
         private val oldList: List<MessageHolderViewState>,

@@ -1,8 +1,9 @@
 package chat.sphinx.chat_common.ui
 
-import android.annotation.SuppressLint
-import android.content.Context
+import android.app.Application
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.NavArgs
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
 import chat.sphinx.chat_common.ui.viewstate.messageholder.HolderBackground
@@ -16,26 +17,24 @@ import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.resources.getRandomColor
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_common.util.getInitials
-import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import io.matthewnelson.android_feature_viewmodel.BaseViewModel
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import javax.inject.Inject
 
-@HiltViewModel
-@SuppressLint("StaticFieldLeak")
-class ChatViewModel @Inject constructor(
-    @ApplicationContext private val appContext: Context,
+abstract class ChatViewModel<ARGS: NavArgs>(
+    private val app: Application,
     dispatchers: CoroutineDispatchers,
-    private val messageRepository: MessageRepository,
-    private val networkQueryLightning: NetworkQueryLightning,
-    private val chatRepository: ChatRepository,
+    protected val chatRepository: ChatRepository,
+    protected val messageRepository: MessageRepository,
+    protected val networkQueryLightning: NetworkQueryLightning,
+    protected val savedStateHandle: SavedStateHandle
 ): BaseViewModel<ChatViewState>(dispatchers, ChatViewState.Idle)
 {
+    abstract val args: ARGS
+
     @Suppress("RemoveExplicitTypeArguments")
     private val _chatDataStateFlow: MutableStateFlow<ChatData?> by lazy {
         MutableStateFlow<ChatData?>(null)
@@ -44,15 +43,11 @@ class ChatViewModel @Inject constructor(
     val chatDataStateFlow: StateFlow<ChatData?>
         get() = _chatDataStateFlow.asStateFlow()
 
-    fun onNavigationBack() {
-        messagesJob?.cancel()
-    }
-
     private val _messageHolderViewStateFlow: MutableStateFlow<List<MessageHolderViewState>> by lazy {
         MutableStateFlow(emptyList())
     }
 
-    val messageHolderViewStateFlow: StateFlow<List<MessageHolderViewState>>
+    internal val messageHolderViewStateFlow: StateFlow<List<MessageHolderViewState>>
         get() = _messageHolderViewStateFlow.asStateFlow()
 
     private var messagesJob: Job? = null
@@ -65,7 +60,7 @@ class ChatViewModel @Inject constructor(
                 InitialHolderViewState.Url(url)
             } ?: InitialHolderViewState.Initials(
                 chatData.contact.alias?.value?.getInitials() ?: "",
-                appContext.getRandomColor()
+                app.getRandomColor()
             )
         } else {
             null

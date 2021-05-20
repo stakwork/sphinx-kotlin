@@ -3,7 +3,7 @@ package chat.sphinx.chat_common.ui.viewstate.messageholder
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.lightning.unit
 
-sealed class LayoutState {
+internal sealed class LayoutState {
 
     data class MessageStatusHeader(
         val senderName: String?,

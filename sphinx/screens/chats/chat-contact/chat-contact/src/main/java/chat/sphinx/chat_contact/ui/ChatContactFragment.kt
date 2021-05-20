@@ -3,35 +3,28 @@ package chat.sphinx.chat_contact.ui
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.RecyclerView
 import by.kirich1409.viewbindingdelegate.viewBinding
+import chat.sphinx.chat_common.databinding.LayoutChatFooterBinding
 import chat.sphinx.chat_common.ui.BaseChatFragment
 import chat.sphinx.chat_common.navigation.ChatNavigator
 import chat.sphinx.chat_contact.R
 import chat.sphinx.chat_contact.databinding.FragmentChatContactBinding
 import chat.sphinx.chat_contact.navigation.ContactChatNavigator
 import chat.sphinx.concept_image_loader.ImageLoader
-import chat.sphinx.wrapper_common.chat.ChatId
-import chat.sphinx.wrapper_common.contact.ContactId
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
-internal inline val ChatContactFragmentArgs.chatId: ChatId?
-    get() = if (argChatId == ChatId.NULL_CHAT_ID.toLong()) {
-        null
-    } else {
-        ChatId(argChatId)
-    }
-
-internal inline val ChatContactFragmentArgs.contactId: ContactId
-    get() = ContactId(argContactId)
-
 @AndroidEntryPoint
 internal class ChatContactFragment: BaseChatFragment<
-        FragmentChatContactBinding
+        FragmentChatContactBinding,
+        ChatContactFragmentArgs,
+        ChatContactViewModel,
         >(R.layout.fragment_chat_contact)
 {
     override val binding: FragmentChatContactBinding by viewBinding(FragmentChatContactBinding::bind)
+    override val viewModel: ChatContactViewModel by viewModels()
 
     override val header: ConstraintLayout
         get() = binding.layoutChatHeader.layoutConstraintChatHeader
