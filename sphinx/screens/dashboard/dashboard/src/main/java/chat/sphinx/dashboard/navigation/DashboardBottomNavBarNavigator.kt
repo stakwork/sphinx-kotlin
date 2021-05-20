@@ -7,7 +7,6 @@ import io.matthewnelson.concept_navigation.Navigator
 abstract class DashboardBottomNavBarNavigator(
     navigationDriver: BaseNavigationDriver<NavController>
 ): Navigator<NavController>(navigationDriver) {
-    abstract suspend fun toScannerDetail()
     abstract suspend fun toTransactionsDetail()
     abstract suspend fun toPaymentReceiveDetail()
     abstract suspend fun toPaymentSendDetail()

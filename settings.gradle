@@ -64,6 +64,8 @@ include ':sphinx:application:network:features:tor:feature-network-tor'
 include ':sphinx:activity:hilt-qualifiers'
 include ':sphinx:activity:insetter-activity'
 include ':sphinx:activity:main:activitymain'
+include ':sphinx:activity:concepts:concept-view-model-coordinator'
+include ':sphinx:activity:features:feature-view-model-coordinator'
 
 // Screens
 include ':sphinx:screens:add-sats:add-sats'
@@ -88,6 +90,7 @@ include ':sphinx:screens-detail:new-contact:new-contact'
 include ':sphinx:screens-detail:payments:payment-receive:payment-receive'
 include ':sphinx:screens-detail:payments:payment-send:payment-send'
 include ':sphinx:screens-detail:scanner:scanner'
+include ':sphinx:screens-detail:scanner:scanner-view-model-coordinator'
 include ':sphinx:screens-detail:support-ticket:support-ticket'
 include ':sphinx:screens-detail:transactions:transactions'
 

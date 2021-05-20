@@ -10,8 +10,6 @@ import javax.inject.Inject
 class SplashNavigatorImpl @Inject constructor(
     navigationDriver: PrimaryNavigationDriver
 ): SplashNavigator(navigationDriver) {
-    override suspend fun toScannerDetail() {}
-
     override suspend fun toDashboardScreen(privateMode: Boolean) {
         navigationDriver.submitNavigationRequest(
             ToDashboardScreen(R.id.main_primary_nav_graph)
