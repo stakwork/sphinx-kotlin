@@ -33,7 +33,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            android:textSize="@dimen/default_form_text_view_size"
+            android:textSize="@dimen/default_form_text_view_text_size"
             android:singleLine="true" />
 
         <androidx.appcompat.widget.AppCompatEditText
@@ -46,7 +46,7 @@
             app:layout_constraintTop_toBottomOf="@+id/new_contact_nickname_text_view"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            android:textSize="@dimen/default_form_edit_view_size"
+            android:textSize="@dimen/default_form_edit_view_text_size"
             android:inputType="textVisiblePassword|textCapWords"
             android:layout_marginLeft="@dimen/new_contact_edit_text_left_margin"
             android:singleLine="true"
@@ -81,7 +81,7 @@
             app:layout_constraintStart_toStartOf="parent"
             android:textColor="@color/secondaryText"
             android:fontFamily="@font/roboto_regular"
-            android:textSize="@dimen/default_form_text_view_size"
+            android:textSize="@dimen/default_form_text_view_text_size"
             android:singleLine="true" />
 
         <androidx.appcompat.widget.AppCompatEditText
@@ -95,7 +95,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            android:textSize="@dimen/default_form_edit_view_size"
+            android:textSize="@dimen/default_form_edit_view_text_size"
             android:inputType="textVisiblePassword"
             android:layout_marginLeft="@dimen/new_contact_edit_text_left_margin"
             android:layout_marginRight="@dimen/default_form_scan_icon_container_width"
@@ -152,7 +152,7 @@
             app:layout_constraintStart_toStartOf="parent"
             android:textColor="@color/secondaryText"
             android:fontFamily="@font/roboto_regular"
-            android:textSize="@dimen/default_form_text_view_size"
+            android:textSize="@dimen/default_form_text_view_text_size"
             android:singleLine="true" />
 
         <androidx.appcompat.widget.AppCompatEditText
@@ -166,7 +166,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             android:inputType="textVisiblePassword"
-            android:textSize="@dimen/default_form_edit_view_size"
+            android:textSize="@dimen/default_form_edit_view_text_size"
             android:layout_marginLeft="@dimen/new_contact_edit_text_left_margin"
             android:singleLine="true" />
 

@@ -13,7 +13,7 @@
     <string name="profile_backup_keys">Backup your key</string>
     <string name="profile_server_url">Server URL</string>
     <string name="profile_pin_timeout">PIN Timeout</string>
-    <string name="profile_pin_timeout_hours">hours</string>
+    <string name="profile_pin_timeout_hours">12 hours</string>
     <string name="profile_change_pin">Change PIN</string>
     <string name="profile_change_privacy_pin">Change Privacy PIN</string>
 </resources>

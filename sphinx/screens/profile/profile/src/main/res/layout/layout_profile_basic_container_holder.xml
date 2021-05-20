@@ -44,7 +44,7 @@
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        android:textSize="@dimen/default_form_text_view_size"
+                        android:textSize="@dimen/default_form_text_view_text_size"
                         android:singleLine="true" />
 
                     <androidx.appcompat.widget.AppCompatEditText
@@ -57,7 +57,7 @@
                         app:layout_constraintTop_toBottomOf="@+id/profile_user_name_text_view"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        android:textSize="@dimen/default_form_edit_view_size"
+                        android:textSize="@dimen/default_form_edit_view_text_size"
                         android:inputType="textVisiblePassword|textCapWords"
                         android:layout_marginLeft="@dimen/default_form_edit_text_left_margin"
                         android:singleLine="true"
@@ -92,7 +92,7 @@
                         app:layout_constraintStart_toStartOf="parent"
                         android:textColor="@color/secondaryText"
                         android:fontFamily="@font/roboto_regular"
-                        android:textSize="@dimen/default_form_text_view_size"
+                        android:textSize="@dimen/default_form_text_view_text_size"
                         android:singleLine="true" />
 
                     <androidx.appcompat.widget.AppCompatEditText
@@ -106,7 +106,7 @@
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
-                        android:textSize="@dimen/default_form_edit_view_size"
+                        android:textSize="@dimen/default_form_edit_view_text_size"
                         android:inputType="textVisiblePassword"
                         android:layout_marginLeft="@dimen/default_form_edit_text_left_margin"
                         android:layout_marginRight="@dimen/default_form_scan_icon_container_width"
@@ -132,14 +132,12 @@
 
                         <androidx.appcompat.widget.AppCompatButton
                             android:id="@+id/scan_address_button"
-                            android:layout_width="@dimen/default_form_scan_icon_width"
-                            android:layout_height="@dimen/default_form_scan_icon_height"
+                            android:layout_width="@dimen/profile_form_qr_code_icon_xy"
+                            android:layout_height="@dimen/profile_form_qr_code_icon_xy"
                             app:layout_constraintEnd_toEndOf="@+id/layout_constraint_profile_scan_button"
                             app:layout_constraintBottom_toBottomOf="parent"
-                            android:background="@drawable/ic_scan_icon"
-                            android:backgroundTint="@color/secondaryText"
-                            android:layout_marginBottom="@dimen/default_form_scan_icon_bottom_margin"
-                            />
+                            android:background="@drawable/ic_qr_code"
+                            android:backgroundTint="@color/text" />
 
                     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -163,7 +161,7 @@
                         app:layout_constraintStart_toStartOf="parent"
                         android:textColor="@color/secondaryText"
                         android:fontFamily="@font/roboto_regular"
-                        android:textSize="@dimen/default_form_text_view_size"
+                        android:textSize="@dimen/default_form_text_view_text_size"
                         android:singleLine="true" />
 
                     <androidx.appcompat.widget.AppCompatEditText
@@ -177,7 +175,7 @@
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         android:inputType="textVisiblePassword"
-                        android:textSize="@dimen/default_form_edit_view_size"
+                        android:textSize="@dimen/default_form_edit_view_text_size"
                         android:layout_marginLeft="@dimen/default_form_edit_text_left_margin"
                         android:singleLine="true" />
 
@@ -196,6 +194,7 @@
                     android:id="@+id/layout_constraint_share_picture_content"
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/profile_form_field_container_height"
+                    android:layout_marginTop="@dimen/default_half_layout_margin"
                     android:layout_marginStart="@dimen/default_form_horizontal_margin"
                     android:layout_marginEnd="@dimen/default_form_horizontal_margin"
                     app:layout_constraintTop_toBottomOf="@+id/layout_constraint_route_hint_content">
@@ -276,7 +275,7 @@
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        android:textSize="@dimen/default_form_text_view_size"
+                        android:textSize="@dimen/default_form_text_view_text_size"
                         android:singleLine="true" />
 
                     <androidx.appcompat.widget.AppCompatEditText
@@ -289,7 +288,7 @@
                         app:layout_constraintTop_toBottomOf="@+id/profile_tip_text_view"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        android:textSize="@dimen/default_form_edit_view_size"
+                        android:textSize="@dimen/default_form_edit_view_text_size"
                         android:inputType="textVisiblePassword|textCapWords"
                         android:layout_marginLeft="@dimen/default_form_edit_text_left_margin"
                         android:singleLine="true"
@@ -325,7 +324,7 @@
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        android:textSize="@dimen/default_form_text_view_size"
+                        android:textSize="@dimen/default_form_text_view_text_size"
                         android:singleLine="true" />
 
                     <androidx.appcompat.widget.AppCompatEditText
@@ -338,7 +337,7 @@
                         app:layout_constraintTop_toBottomOf="@+id/profile_meeting_server_text_view"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        android:textSize="@dimen/default_form_edit_view_size"
+                        android:textSize="@dimen/default_form_edit_view_text_size"
                         android:inputType="textVisiblePassword|textCapWords"
                         android:layout_marginLeft="@dimen/default_form_edit_text_left_margin"
                         android:singleLine="true"
