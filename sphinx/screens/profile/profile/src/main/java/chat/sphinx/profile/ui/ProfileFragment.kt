@@ -2,22 +2,26 @@ package chat.sphinx.profile.ui
 
 import android.os.Bundle
 import android.view.View
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import by.kirich1409.viewbindingdelegate.viewBinding
+import chat.sphinx.concept_image_loader.ImageLoader
+import chat.sphinx.concept_image_loader.ImageLoaderOptions
+import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.insetter_activity.addStatusBarPadding
 import chat.sphinx.profile.R
 import chat.sphinx.profile.databinding.FragmentProfileBinding
 import chat.sphinx.profile.navigation.ProfileNavigator
-import chat.sphinx.resources.setBackgroundRandomColor
+import chat.sphinx.wrapper_common.lightning.asFormattedString
 import dagger.hilt.android.AndroidEntryPoint
-import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.ui.base.BaseFragment
+import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.annotation.meta.Exhaustive
@@ -30,6 +34,10 @@ internal class ProfileFragment: BaseFragment<
         FragmentProfileBinding
         >(R.layout.fragment_profile)
 {
+    @Inject
+    @Suppress("ProtectedInFinal")
+    protected lateinit var imageLoader: ImageLoader<ImageView>
+
     override val viewModel: ProfileViewModel by viewModels()
     override val binding: FragmentProfileBinding by viewBinding(FragmentProfileBinding::bind)
 
@@ -57,6 +65,7 @@ internal class ProfileFragment: BaseFragment<
 
         setupProfileHeader()
         setupProfileTabs()
+        setupProfile()
     }
 
     private fun setupProfileTabs() {
@@ -103,31 +112,45 @@ internal class ProfileFragment: BaseFragment<
     }
 
     private fun setupProfile() {
-//        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-//            viewModel.accountOwnerStateFlow.collect { contactOwner ->
-//                contactOwner?.let { owner ->
-//                    owner.photoUrl?.value?.let { url ->
-//                        imageLoader.load(
-//                            binding.layoutDashboardNavDrawer.navDrawerImageViewUserProfilePicture,
-//                            url,
-//                            ImageLoaderOptions.Builder()
-//                                .placeholderResId(R.drawable.ic_profile_avatar_circle)
-//                                .transformation(Transformation.CircleCrop)
-//                                .build()
-//                        )
-//                    } ?: binding.layoutDashboardNavDrawer
-//                        .navDrawerImageViewUserProfilePicture
-//                        .setImageDrawable(
-//                            ContextCompat.getDrawable(
-//                                binding.root.context,
-//                                R.drawable.ic_profile_avatar_circle
-//                            )
-//                        )
-//                    binding.layoutDashboardNavDrawer.navDrawerTextViewProfileName.text =
-//                        owner.alias?.value ?: ""
-//                }
-//            }
-//        }
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.getAccountBalance().collect { nodeBalance ->
+                if (nodeBalance == null) return@collect
+
+                nodeBalance.balance.asFormattedString().let { balance ->
+                    binding.layoutProfileBasicInfoHolder.profileTextViewSatBalance.text = balance
+                }
+            }
+        }
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.accountOwnerStateFlow.collect { contactOwner ->
+                contactOwner?.let { owner ->
+                    owner.photoUrl?.value?.let { url ->
+                        imageLoader.load(
+                            binding.layoutProfileBasicInfoHolder.profileImageViewPicture,
+                            url,
+                            ImageLoaderOptions.Builder()
+                                .placeholderResId(R.drawable.ic_profile_avatar_circle)
+                                .transformation(Transformation.CircleCrop)
+                                .build()
+                        )
+                    } ?: binding.layoutProfileBasicInfoHolder.profileImageViewPicture
+                        .setImageDrawable(
+                            ContextCompat.getDrawable(
+                                binding.root.context,
+                                R.drawable.ic_profile_avatar_circle
+                            )
+                        )
+
+                    binding.layoutProfileBasicInfoHolder.profileTextViewName.text =
+                        owner.alias?.value ?: ""
+
+                    binding.layoutProfileBasicContainerHolder.profileUserNameEditText.setText(owner.alias?.value ?: "")
+                    binding.layoutProfileBasicContainerHolder.profileAddressEditText.setText(owner.nodePubKey?.value ?: "")
+                    binding.layoutProfileBasicContainerHolder.profileRouteHintEditText.setText(owner.routeHint?.value ?: "")
+                }
+            }
+        }
     }
 
     override suspend fun onViewStateFlowCollect(viewState: ProfileViewState) {
