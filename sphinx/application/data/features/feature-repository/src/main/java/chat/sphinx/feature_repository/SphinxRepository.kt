@@ -377,20 +377,18 @@ class SphinxRepository(
         InviteDboPresenterMapper(dispatchers)
     }
 
-    override val accountOwner: StateFlow<Contact?> by lazy {
-        flow {
-            emitAll(
-                coreDB.getSphinxDatabaseQueries().contactGetOwner()
-                    .asFlow()
-                    .mapToOneOrNull(io)
-                    .map { it?.let { contactDboPresenterMapper.mapFrom(it) } }
-            )
-        }.stateIn(
-            repositoryScope,
-            SharingStarted.WhileSubscribed(5_000),
-            null
+    override val accountOwner: StateFlow<Contact?> = flow {
+        emitAll(
+            coreDB.getSphinxDatabaseQueries().contactGetOwner()
+                .asFlow()
+                .mapToOneOrNull(io)
+                .map { it?.let { contactDboPresenterMapper.mapFrom(it) } }
         )
-    }
+    }.stateIn(
+        repositoryScope,
+        SharingStarted.WhileSubscribed(5_000),
+        null
+    )
 
     override val getAllContacts: Flow<List<Contact>> by lazy {
         flow {
