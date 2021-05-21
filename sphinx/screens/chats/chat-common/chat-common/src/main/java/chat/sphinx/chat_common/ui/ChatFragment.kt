@@ -20,6 +20,7 @@ import chat.sphinx.chat_common.navigation.ChatNavigator
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
 import chat.sphinx.chat_common.ui.viewstate.header.ChatHeaderViewState
 import chat.sphinx.concept_image_loader.ImageLoader
+import chat.sphinx.concept_repository_message.SendMessage
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.insetter_activity.addStatusBarPadding
@@ -57,6 +58,8 @@ abstract class ChatFragment<
 
     protected abstract val chatNavigator: ChatNavigator
 
+    protected val sendMessageBuilder = SendMessage.Builder()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         viewModel.init()
@@ -73,6 +76,17 @@ abstract class ChatFragment<
     private fun setupFooter(insetterActivity: InsetterActivity) {
         footerBinding.apply {
             insetterActivity.addNavigationBarPadding(root)
+
+            textViewChatFooterSend.setOnClickListener {
+
+                sendMessageBuilder.setText(editTextChatFooter.text?.toString())
+
+                viewModel.sendMessage(sendMessageBuilder)?.let {
+                    // if it did not return null that means it was valid
+                    sendMessageBuilder.clear()
+                    editTextChatFooter.setText("")
+                }
+            }
         }
     }
 

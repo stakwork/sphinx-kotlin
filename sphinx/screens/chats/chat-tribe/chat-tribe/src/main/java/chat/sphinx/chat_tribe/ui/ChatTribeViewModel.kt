@@ -9,6 +9,7 @@ import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_lightning.model.route.isRouteAvailable
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_message.MessageRepository
+import chat.sphinx.concept_repository_message.SendMessage
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
@@ -113,5 +114,10 @@ internal class ChatTribeViewModel @Inject constructor(
         viewModelScope.launch(mainImmediate) {
             messageRepository.readMessages(args.chatId)
         }
+    }
+
+    override fun sendMessage(builder: SendMessage.Builder): SendMessage? {
+        builder.setChatId(args.chatId)
+        return super.sendMessage(builder)
     }
 }
