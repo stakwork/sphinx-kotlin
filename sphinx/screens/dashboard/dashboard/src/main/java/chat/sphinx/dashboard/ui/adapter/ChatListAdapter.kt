@@ -196,17 +196,17 @@ internal class ChatListAdapter(
                         is DashboardChat.Active.Conversation -> {
                             lifecycleOwner.lifecycleScope.launch {
                                 viewModel.dashboardNavigator.toChatContact(
-                                    dashboardChat.chat,
-                                    dashboardChat.contact
+                                    dashboardChat.chat.id,
+                                    dashboardChat.contact.id
                                 )
                             }
                         }
                         is DashboardChat.Active.GroupOrTribe -> {
                             lifecycleOwner.lifecycleScope.launch {
                                 if (dashboardChat.chat.type.isGroup()) {
-                                    viewModel.dashboardNavigator.toChatGroup(dashboardChat.chat)
+                                    viewModel.dashboardNavigator.toChatGroup(dashboardChat.chat.id)
                                 } else if (dashboardChat.chat.type.isTribe()) {
-                                    viewModel.dashboardNavigator.toChatTribe(dashboardChat.chat)
+                                    viewModel.dashboardNavigator.toChatTribe(dashboardChat.chat.id)
                                 }
 
                             }
@@ -215,7 +215,7 @@ internal class ChatListAdapter(
                             lifecycleOwner.lifecycleScope.launch {
                                 viewModel.dashboardNavigator.toChatContact(
                                     null,
-                                    dashboardChat.contact
+                                    dashboardChat.contact.id
                                 )
                             }
                         }

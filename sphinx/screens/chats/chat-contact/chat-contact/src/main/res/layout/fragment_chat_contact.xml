@@ -8,7 +8,7 @@
     tools:context=".ui.ChatContactFragment">
 
     <include
-        android:id="@+id/layout_chat_header"
+        android:id="@+id/include_chat_contact_header"
         layout="@layout/layout_chat_header"
         android:layout_width="match_parent"
         android:layout_height="@dimen/default_header_height" />
@@ -18,8 +18,8 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:background="@color/body"
-        app:layout_constraintBottom_toTopOf="@+id/layout_chat_footer"
-        app:layout_constraintTop_toBottomOf="@+id/layout_chat_header"
+        app:layout_constraintBottom_toTopOf="@+id/include_chat_contact_footer"
+        app:layout_constraintTop_toBottomOf="@+id/include_chat_contact_header"
         tools:listitem="@layout/layout_message_holder" />
 
     <androidx.appcompat.widget.AppCompatImageView
@@ -27,10 +27,10 @@
         android:layout_width="match_parent"
         android:layout_height="8dp"
         android:src="@drawable/bottom_bar_elevation_gradient"
-        app:layout_constraintBottom_toTopOf="@+id/layout_chat_footer" />
+        app:layout_constraintBottom_toTopOf="@+id/include_chat_contact_footer" />
 
     <include
-        android:id="@+id/layout_chat_footer"
+        android:id="@+id/include_chat_contact_footer"
         layout="@layout/layout_chat_footer"
         android:layout_width="match_parent"
         android:layout_height="0dp"

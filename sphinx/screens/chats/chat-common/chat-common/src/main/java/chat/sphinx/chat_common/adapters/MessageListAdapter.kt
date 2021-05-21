@@ -5,6 +5,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import androidx.navigation.NavArgs
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import chat.sphinx.chat_common.ui.ChatViewModel
@@ -12,7 +13,7 @@ import chat.sphinx.chat_common.databinding.LayoutMessageHolderBinding
 import chat.sphinx.chat_common.ui.viewstate.messageholder.MessageHolderViewState
 import chat.sphinx.chat_common.ui.viewstate.messageholder.setBackground
 import chat.sphinx.chat_common.ui.viewstate.messageholder.setDirectPaymentLayout
-import chat.sphinx.chat_common.ui.viewstate.messageholder.setHeaderStatus
+import chat.sphinx.chat_common.ui.viewstate.messageholder.setStatusHeader
 import chat.sphinx.chat_common.ui.viewstate.messageholder.setMessageTypeMessageLayout
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
@@ -22,13 +23,13 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class MessageListAdapter(
+internal class MessageListAdapter<ARGS: NavArgs>(
     private val recyclerView: RecyclerView,
     private val lifecycleOwner: LifecycleOwner,
     private val onStopSupervisor: OnStopSupervisor,
-    private val viewModel: ChatViewModel,
+    private val viewModel: ChatViewModel<ARGS>,
     private val imageLoader: ImageLoader<ImageView>,
-): RecyclerView.Adapter<MessageListAdapter.MessageViewHolder>(), DefaultLifecycleObserver {
+): RecyclerView.Adapter<MessageListAdapter<ARGS>.MessageViewHolder>(), DefaultLifecycleObserver {
 
     private inner class Diff(
         private val oldList: List<MessageHolderViewState>,
@@ -141,14 +142,8 @@ class MessageListAdapter(
                     )
                 }
 
-                setHeaderStatus(
-                    viewState.background,
-                    viewState.message,
-                    viewModel.chatDataStateFlow.value?.chat?.type
-                )
-
-                setBackground(viewState.background, recyclerViewWidth)
-
+                setBackground(viewState, recyclerViewWidth)
+                setStatusHeader(viewState.statusHeader)
                 setMessageTypeMessageLayout(viewState.messageTypeMessageContent)
                 setDirectPaymentLayout(viewState.directPayment)
             }

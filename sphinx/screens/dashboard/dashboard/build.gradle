@@ -46,6 +46,8 @@ dependencies {
 
     implementation project(path: ':sphinx:application:network:concepts:concept-socket-io')
 
+    implementation project(path: ':sphinx:screens-detail:scanner:scanner-view-model-coordinator')
+
     implementation project(path: ':sphinx:service:concepts:concept-service-notification')
 
     implementation deps.androidx.recyclerView

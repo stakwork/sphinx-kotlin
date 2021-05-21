@@ -3,8 +3,6 @@
     android:shape="rectangle">
     <solid android:color="@color/primaryBlue" />
 
-    <!-- TODO: top right niche -->
-
     <corners
         android:bottomLeftRadius="@dimen/background_message_holder_default_corner_rad"
         android:topLeftRadius="@dimen/background_message_holder_default_corner_rad" />

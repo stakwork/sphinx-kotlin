@@ -2,6 +2,7 @@ package chat.sphinx.splash.ui
 
 import android.content.Context
 import chat.sphinx.resources.SphinxToastUtils
+import chat.sphinx.scanner_view_model_coordinator.response.ScannerResponse
 import chat.sphinx.splash.R
 import io.matthewnelson.android_feature_toast_utils.show
 import io.matthewnelson.concept_views.sideeffect.SideEffect
@@ -36,5 +37,9 @@ internal sealed class SplashSideEffect: SideEffect<Context>() {
         override suspend fun execute(value: Context) {
             SphinxToastUtils().show(value, R.string.side_effect_invalid_pin)
         }
+    }
+
+    data class FromScanner(val value: ScannerResponse): SplashSideEffect() {
+        override suspend fun execute(value: Context) {}
     }
 }

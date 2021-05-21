@@ -7,6 +7,13 @@
     android:background="@drawable/background_detail_screen"
     tools:context=".ui.SupportTicketFragment">
 
+    <include
+        android:id="@+id/include_support_ticket_header"
+        layout="@layout/layout_detail_screen_header"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/default_header_height"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <TextView
         android:layout_width="match_parent"
         android:layout_height="match_parent"

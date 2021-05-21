@@ -1,17 +1,23 @@
 package chat.sphinx.activitymain.di
 
 import androidx.navigation.NavController
-import chat.sphinx.activitymain.navigation.navigators.detail.AddFriendNavigatorImpl
 import chat.sphinx.activitymain.navigation.drivers.AuthenticationNavigationDriver
 import chat.sphinx.activitymain.navigation.drivers.DetailNavigationDriver
 import chat.sphinx.activitymain.navigation.drivers.PrimaryNavigationDriver
+import chat.sphinx.activitymain.navigation.navigators.detail.*
+import chat.sphinx.activitymain.navigation.navigators.detail.AddFriendNavigatorImpl
+import chat.sphinx.activitymain.navigation.navigators.detail.CreateTribeNavigatorImpl
 import chat.sphinx.activitymain.navigation.navigators.detail.NewContactNavigatorImpl
+import chat.sphinx.activitymain.navigation.navigators.detail.PaymentReceiveNavigatorImpl
+import chat.sphinx.activitymain.navigation.navigators.detail.PaymentSendNavigatorImpl
+import chat.sphinx.activitymain.navigation.navigators.detail.ScannerNavigatorImpl
 import chat.sphinx.activitymain.navigation.navigators.primary.*
 import chat.sphinx.add_friend.navigation.AddFriendNavigator
 import chat.sphinx.address_book.navigation.AddressBookNavigator
 import chat.sphinx.chat_contact.navigation.ContactChatNavigator
 import chat.sphinx.chat_group.navigation.GroupChatNavigator
 import chat.sphinx.chat_tribe.navigation.TribeChatNavigator
+import chat.sphinx.create_tribe.navigation.CreateTribeNavigator
 import chat.sphinx.dashboard.navigation.DashboardBottomNavBarNavigator
 import chat.sphinx.dashboard.navigation.DashboardNavDrawerNavigator
 import chat.sphinx.dashboard.navigation.DashboardNavigator
@@ -21,7 +27,12 @@ import chat.sphinx.hilt_qualifiers.PrimaryDriver
 import chat.sphinx.new_contact.navigation.NewContactNavigator
 import chat.sphinx.onboard.navigation.OnBoardNavigator
 import chat.sphinx.profile.navigation.ProfileNavigator
+import chat.sphinx.payment_receive.navigation.PaymentReceiveNavigator
+import chat.sphinx.payment_send.navigation.PaymentSendNavigator
+import chat.sphinx.scanner.navigation.ScannerNavigator
 import chat.sphinx.splash.navigation.SplashNavigator
+import chat.sphinx.support_ticket.navigation.SupportTicketNavigator
+import chat.sphinx.transactions.navigation.TransactionsNavigator
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -31,7 +42,7 @@ import io.matthewnelson.concept_navigation.BaseNavigationDriver
 
 @Module
 @InstallIn(ActivityRetainedComponent::class)
-object NavigationModule {
+internal object NavigationModule {
 
     ///////////////
     /// Drivers ///
@@ -72,9 +83,21 @@ object NavigationModule {
     ): BaseNavigationDriver<NavController> =
         primaryNavigationDriver
 
-    //////////////////
-    /// Navigators ///
-    //////////////////
+    //////////////////////////
+    /// Primary Navigators ///
+    //////////////////////////
+    @Provides
+    fun provideAddressBookNavigator(
+        addressBookNavigatorImpl: AddressBookNavigatorImpl
+    ): AddressBookNavigator =
+        addressBookNavigatorImpl
+
+    @Provides
+    fun provideContactChatNavigator(
+        contactChatNavigatorImpl: ContactChatNavigatorImpl
+    ): ContactChatNavigator =
+        contactChatNavigatorImpl
+
     @Provides
     fun provideDashboardBottomNavBarNavigator(
         dashboardBottomNavBarNavigatorImpl: DashboardBottomNavBarNavigatorImpl
@@ -94,6 +117,12 @@ object NavigationModule {
         dashboardNavigatorImpl
 
     @Provides
+    fun provideGroupChatNavigator(
+        groupChatNavigatorImpl: GroupChatNavigatorImpl
+    ): GroupChatNavigator =
+        groupChatNavigatorImpl
+
+    @Provides
     fun provideOnBoardNavigator(
         onBoardNavigatorImpl: OnBoardNavigatorImpl
     ): OnBoardNavigator =
@@ -106,10 +135,25 @@ object NavigationModule {
         splashNavigatorImpl
 
     @Provides
+    fun provideTribeChatNavigator(
+        tribeChatNavigatorImpl: TribeChatNavigatorImpl
+    ): TribeChatNavigator =
+        tribeChatNavigatorImpl
+
+    ////////////////////////////////
+    /// Detail Screen Navigators ///
+    ////////////////////////////////
+    @Provides
     fun provideAddFriendNavigator(
         addFriendNavigatorImpl: AddFriendNavigatorImpl
     ): AddFriendNavigator =
         addFriendNavigatorImpl
+
+    @Provides
+    fun provideCreateTribeNavigator(
+        createTribeNavigatorImpl: CreateTribeNavigatorImpl
+    ): CreateTribeNavigator =
+        createTribeNavigatorImpl
 
     @Provides
     fun provideNewContactNavigator(
@@ -118,32 +162,38 @@ object NavigationModule {
         newContactNavigatorImpl
 
     @Provides
-    fun provideContactChatNavigator(
-        contactChatNavigatorImpl: ContactChatNavigatorImpl
-    ): ContactChatNavigator =
-        contactChatNavigatorImpl
+    fun providePaymentReceiveNavigator(
+        paymentReceiveNavigatorImpl: PaymentReceiveNavigatorImpl
+    ): PaymentReceiveNavigator =
+        paymentReceiveNavigatorImpl
 
     @Provides
-    fun provideGroupChatNavigator(
-        groupChatNavigatorImpl: GroupChatNavigatorImpl
-    ): GroupChatNavigator =
-        groupChatNavigatorImpl
+    fun providePaymentSendNavigator(
+        paymentSendNavigatorImpl: PaymentSendNavigatorImpl
+    ): PaymentSendNavigator =
+        paymentSendNavigatorImpl
 
     @Provides
-    fun provideTribeChatNavigator(
-        tribeChatNavigatorImpl: TribeChatNavigatorImpl
-    ): TribeChatNavigator =
-        tribeChatNavigatorImpl
-
-    @Provides
-    fun provideAddressBookNavigator(
-        addressBookNavigatorImpl: AddressBookNavigatorImpl
-    ): AddressBookNavigator =
-        addressBookNavigatorImpl
+    fun provideScannerNavigator(
+        scannerNavigatorImpl: ScannerNavigatorImpl
+    ): ScannerNavigator =
+        scannerNavigatorImpl
 
     @Provides
     fun provideProfileNavigator(
         profileNavigatorImpl: ProfileNavigatorImpl
     ): ProfileNavigator =
         profileNavigatorImpl
+
+    @Provides
+    fun provideSupportTicketNavigator(
+        supportTicketNavigatorImpl: SupportTicketNavigatorImpl
+    ): SupportTicketNavigator =
+        supportTicketNavigatorImpl
+
+    @Provides
+    fun provideTransactionsNavigator(
+        transactionsNavigatorImpl: TransactionsNavigatorImpl
+    ): TransactionsNavigator =
+        transactionsNavigatorImpl
 }

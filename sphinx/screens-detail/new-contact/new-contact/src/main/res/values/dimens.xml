@@ -4,7 +4,7 @@
     <dimen name="new_contact_edit_text_left_margin">-4dp</dimen>
     <dimen name="new_contact_form_field_container_height">85dp</dimen>
     <dimen name="save_contact_button_height">52dp</dimen>
-    <dimen name="save_to_contacts_button_text_size">14dp</dimen>
+    <dimen name="save_to_contacts_button_text_size">14sp</dimen>
     <dimen name="save_to_contacts_button_bottom_margin">33dp</dimen>
     <dimen name="save_to_contacts_button_width">230dp</dimen>
     <dimen name="save_progress_bar_xy">25dp</dimen>

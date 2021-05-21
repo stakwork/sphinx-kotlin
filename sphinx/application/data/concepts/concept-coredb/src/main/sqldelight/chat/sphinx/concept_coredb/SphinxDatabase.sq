@@ -177,18 +177,6 @@ UPDATE chatDbo
 SET seen = :seen
 WHERE id = ?;
 
-chatMessagesUpdateSeen:
-UPDATE messageDbo
-SET seen = :seen
-WHERE chat_id = ?;
-
-chatGetUnseenIncomingMessagesCount:
-SELECT COUNT(*)
-FROM messageDbo
-WHERE sender != :ownerId
-AND seen = 0
-AND chat_id = ?;
-
 CREATE TABLE contactDbo(
     id                          INTEGER         AS ContactId NOT NULL PRIMARY KEY,
     route_hint                  TEXT            AS LightningRouteHint,
@@ -399,7 +387,19 @@ AND type IN(0, 5)
 --     OR type = 15
 --     OR type = 25
 --     OR type = 29
-ORDER BY id;
+ORDER BY date;
+
+messageGetUnseenIncomingMessageCountByChatId:
+SELECT COUNT(*)
+FROM messageDbo
+WHERE sender != :ownerId
+AND seen = 0
+AND chat_id = ?;
+
+messageUpdateSeenByChatId:
+UPDATE messageDbo
+SET seen = :seen
+WHERE chat_id = ?;
 
 messageUpdateContentDecrypted:
 UPDATE messageDbo

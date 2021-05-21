@@ -86,7 +86,11 @@ internal class SplashFragment: MotionLayoutFragment<
     /// Side Effects ///
     ////////////////////
     override suspend fun onSideEffectCollect(sideEffect: SplashSideEffect) {
-        sideEffect.execute(binding.root.context)
+        if (sideEffect is SplashSideEffect.FromScanner) {
+            binding.layoutOnBoard.editTextCodeInput.setText(sideEffect.value.value)
+        } else {
+            sideEffect.execute(binding.root.context)
+        }
     }
 
     /////////////////////

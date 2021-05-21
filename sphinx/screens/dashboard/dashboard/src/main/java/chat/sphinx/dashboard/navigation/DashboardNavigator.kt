@@ -11,7 +11,7 @@ import io.matthewnelson.concept_navigation.Navigator
 abstract class DashboardNavigator(
     navigationDriver: BaseNavigationDriver<NavController>
 ): Navigator<NavController>(navigationDriver) {
-    abstract suspend fun toChatContact(chat: Chat?, contact: Contact)
-    abstract suspend fun toChatGroup(chat: Chat)
-    abstract suspend fun toChatTribe(chat: Chat)
+    abstract suspend fun toChatContact(chatId: ChatId?, contactId: ContactId)
+    abstract suspend fun toChatGroup(chatId: ChatId)
+    abstract suspend fun toChatTribe(chatId: ChatId)
 }

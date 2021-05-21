@@ -12,13 +12,14 @@ import chat.sphinx.wrapper_contact.ContactAlias
 import chat.sphinx.wrapper_contact.DeviceId
 import chat.sphinx.wrapper_invite.Invite
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 
 /**
  * All [Contact]s are cached to the DB such that a network refresh will update
  * them, and thus proc and [Flow] being collected.
  * */
 interface ContactRepository {
-    val accountOwner: Flow<Contact?>
+    val accountOwner: StateFlow<Contact?>
 
     fun createContact(
         contactAlias: ContactAlias,
