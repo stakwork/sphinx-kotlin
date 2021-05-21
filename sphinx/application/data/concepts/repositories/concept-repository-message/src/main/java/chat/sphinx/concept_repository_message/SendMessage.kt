@@ -66,7 +66,11 @@ class SendMessage private constructor(
 
         @Synchronized
         fun setText(text: String?): Builder {
-            this.text = text
+            if (text == null || text.isEmpty()) {
+                this.text = null
+            } else {
+                this.text = text
+            }
             return this
         }
 
