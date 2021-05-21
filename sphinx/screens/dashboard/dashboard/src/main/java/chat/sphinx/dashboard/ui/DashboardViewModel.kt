@@ -264,9 +264,15 @@ internal class DashboardViewModel @Inject constructor(
             }
         }
 
-        // Prime it
+        // Prime it...
         viewModelScope.launch(mainImmediate) {
-            contactRepository.accountOwner.firstOrNull()
+            try {
+                contactRepository.accountOwner.collect {
+                    if (it != null) {
+                        throw Exception()
+                    }
+                }
+            } catch (e: Exception) {}
         }
     }
 
