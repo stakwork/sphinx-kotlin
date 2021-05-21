@@ -4,8 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/layout_constraint_message_type_deleted_message"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/message_type_deleted_message_height"
-    android:padding="@dimen/chat_message_inner_padding"
+    android:layout_height="wrap_content"
     android:visibility="gone"
     tools:visibility="visible">
 

@@ -10,11 +10,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import chat.sphinx.chat_common.ui.ChatViewModel
 import chat.sphinx.chat_common.databinding.LayoutMessageHolderBinding
-import chat.sphinx.chat_common.ui.viewstate.messageholder.MessageHolderViewState
-import chat.sphinx.chat_common.ui.viewstate.messageholder.setBackground
-import chat.sphinx.chat_common.ui.viewstate.messageholder.setDirectPaymentLayout
-import chat.sphinx.chat_common.ui.viewstate.messageholder.setStatusHeader
-import chat.sphinx.chat_common.ui.viewstate.messageholder.setMessageTypeMessageLayout
+import chat.sphinx.chat_common.ui.viewstate.messageholder.*
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.wrapper_view.Px
@@ -146,6 +142,7 @@ internal class MessageListAdapter<ARGS: NavArgs>(
                 setStatusHeader(viewState.statusHeader)
                 setMessageTypeMessageLayout(viewState.messageTypeMessageContent)
                 setDirectPaymentLayout(viewState.directPayment)
+                setDeletedMessageLayout(viewState.deletedMessage)
             }
         }
 

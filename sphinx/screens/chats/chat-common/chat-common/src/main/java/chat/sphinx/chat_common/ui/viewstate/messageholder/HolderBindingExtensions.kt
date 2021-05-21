@@ -1,5 +1,6 @@
 package chat.sphinx.chat_common.ui.viewstate.messageholder
 
+import android.view.Gravity
 import androidx.annotation.DrawableRes
 import androidx.annotation.MainThread
 import androidx.core.view.updateLayoutParams
@@ -8,9 +9,11 @@ import chat.sphinx.resources.R as common_R
 import chat.sphinx.chat_common.databinding.LayoutMessageHolderBinding
 import chat.sphinx.resources.setTextColorExt
 import chat.sphinx.wrapper_common.lightning.asFormattedString
+import chat.sphinx.wrapper_message.isDeleted
 import chat.sphinx.wrapper_view.Px
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
+import io.matthewnelson.android_feature_screens.util.goneIfTrue
 import io.matthewnelson.android_feature_screens.util.visible
 
 @MainThread
@@ -39,8 +42,8 @@ internal fun LayoutMessageHolderBinding.setBackground(
     holderWidth: Px,
 ) {
     if (viewState.background is HolderBackground.None) {
-
         includeMessageHolderMessageTypes.root.gone
+
         val defaultMargins = root
             .context
             .resources
@@ -84,14 +87,23 @@ internal fun LayoutMessageHolderBinding.setBackground(
             }
         }
 
-        receivedBubbleArrow.goneIfFalse(viewState.background is HolderBackground.First && isIncoming)
-        sentBubbleArrow.goneIfFalse(viewState.background is HolderBackground.First && !isIncoming)
+        receivedBubbleArrow.goneIfTrue(
+            viewState.background !is HolderBackground.First ||
+                    !isIncoming ||
+                    viewState.message.status.isDeleted()
+        )
+
+        sentBubbleArrow.goneIfTrue(
+            viewState.background !is HolderBackground.First ||
+                    isIncoming ||
+                    viewState.message.status.isDeleted()
+        )
 
         includeMessageHolderMessageTypes.root.apply {
             visible
 
             @DrawableRes
-            val resId: Int? = when (viewState.background) {
+            val resId: Int? = if (viewState.message.status.isDeleted()) null else when (viewState.background) {
                 HolderBackground.First.Grouped -> {
                     if (isIncoming) {
                         R.drawable.background_message_holder_in_first
@@ -185,5 +197,26 @@ internal inline fun LayoutMessageHolderBinding.setMessageTypeMessageLayout(
             root.visible
             textViewMessageTypeMessage.text = messageContent.messageContent
         }
+    }
+}
+
+
+@MainThread
+@Suppress("NOTHING_TO_INLINE")
+internal inline fun LayoutMessageHolderBinding.setDeletedMessageLayout(
+    deletedMessage: LayoutState.DeletedMessage?
+) {
+    includeMessageHolderMessageTypes.includeMessageTypeDeletedMessage.apply {
+        deletedMessage?.let {
+            root.visible
+
+            when {
+                deletedMessage.isOutGoingMessage ->
+                    textViewDeleteMessageLabel.gravity = Gravity.END
+                else ->
+                    textViewDeleteMessageLabel.gravity = Gravity.START
+            }
+
+        } ?: root.gone
     }
 }

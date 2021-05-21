@@ -11,7 +11,7 @@ internal sealed class LayoutState {
 
         // TODO: rework bolt icon when sending messages to be yellow (sending), red (failed), green(sent)
         val showBoltIcon: Boolean,
-        
+
         val showLockIcon: Boolean,
         val timestamp: String,
     ) {
@@ -21,12 +21,13 @@ internal sealed class LayoutState {
 
     data class MessageTypeMessageContent(
         val messageContent: String
-    ): LayoutState()
+    ) : LayoutState()
+
 
     data class DirectPayment(
         val showSent: Boolean,
         val amount: Sat
-    ): LayoutState() {
+    ) : LayoutState() {
         val showReceived: Boolean
             get() = !showSent
 
@@ -34,4 +35,7 @@ internal sealed class LayoutState {
             get() = amount.unit
     }
 
+    data class DeletedMessage(
+        val isOutGoingMessage: Boolean
+    ) : LayoutState()
 }
