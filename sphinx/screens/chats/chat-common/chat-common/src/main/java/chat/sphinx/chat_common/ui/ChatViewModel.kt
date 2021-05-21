@@ -172,14 +172,23 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         // Prime our states immediately so they're already
         // updated by the time the Fragment's onStart is called
         // where they're collected.
-        viewModelScope.launch(dispatchers.mainImmediate) {
+        val setupChatFlowJob = viewModelScope.launch(mainImmediate) {
             chatSharedFlow.firstOrNull()
         }
-        viewModelScope.launch(dispatchers.mainImmediate) {
+        val setupHeaderInitialHolderJob = viewModelScope.launch(mainImmediate) {
             headerInitialHolderSharedFlow.firstOrNull()
         }
-        viewModelScope.launch(dispatchers.mainImmediate) {
+        val setupViewStateContainerJob = viewModelScope.launch(mainImmediate) {
             viewStateContainer.viewStateFlow.firstOrNull()
+        }
+        viewModelScope.launch(mainImmediate) {
+            delay(500)
+            // cancel the setup jobs as the view has taken over observation
+            // and we don't want to continue collecting endlessly if any of
+            // them are still active. WhileSubscribed will take over.
+            setupChatFlowJob.cancel()
+            setupHeaderInitialHolderJob.cancel()
+            setupViewStateContainerJob.cancel()
         }
     }
 
