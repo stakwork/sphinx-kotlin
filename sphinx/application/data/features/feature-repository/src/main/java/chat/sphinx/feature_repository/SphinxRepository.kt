@@ -12,6 +12,7 @@ import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_lightning.model.balance.BalanceDto
 import chat.sphinx.concept_network_query_message.NetworkQueryMessage
 import chat.sphinx.concept_network_query_message.model.MessageDto
+import chat.sphinx.concept_network_query_message.model.PostMessageDto
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_lightning.LightningRepository
@@ -21,6 +22,7 @@ import chat.sphinx.concept_socket_io.SocketIOManager
 import chat.sphinx.concept_socket_io.SphinxSocketIOMessageListener
 import chat.sphinx.concept_socket_io.SphinxSocketIOMessage
 import chat.sphinx.conceptcoredb.ChatDbo
+import chat.sphinx.conceptcoredb.ContactDbo
 import chat.sphinx.conceptcoredb.MessageDbo
 import chat.sphinx.conceptcoredb.SphinxDatabaseQueries
 import chat.sphinx.feature_repository.mappers.chat.ChatDboPresenterMapper
@@ -43,6 +45,7 @@ import chat.sphinx.wrapper_common.contact.ContactId
 import chat.sphinx.wrapper_common.invite.InviteId
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.LightningRouteHint
+import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessagePagination
 import chat.sphinx.wrapper_contact.Contact
@@ -55,6 +58,7 @@ import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message.media.MessageMedia
 import chat.sphinx.wrapper_message.media.toMediaKeyDecrypted
 import chat.sphinx.wrapper_rsa.RsaPrivateKey
+import chat.sphinx.wrapper_rsa.RsaPublicKey
 import com.squareup.moshi.Moshi
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
@@ -65,6 +69,7 @@ import io.matthewnelson.crypto_common.annotations.RawPasswordAccess
 import io.matthewnelson.crypto_common.annotations.UnencryptedDataAccess
 import io.matthewnelson.crypto_common.clazzes.EncryptedString
 import io.matthewnelson.crypto_common.clazzes.UnencryptedByteArray
+import io.matthewnelson.crypto_common.clazzes.UnencryptedString
 import io.matthewnelson.crypto_common.clazzes.toUnencryptedString
 import io.matthewnelson.feature_authentication_core.AuthenticationCoreManager
 import kotlinx.coroutines.*
@@ -72,7 +77,6 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.text.ParseException
-import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.math.absoluteValue
 
@@ -976,11 +980,6 @@ class SphinxRepository(
         )
     }
 
-    override fun sendMessage(sendMessage: SendMessage?) {
-        if (sendMessage == null) return
-//        TODO("Not yet implemented")
-    }
-
     private suspend fun readMessagesImpl(
         chatId: ChatId,
         queries: SphinxDatabaseQueries,
@@ -1009,6 +1008,241 @@ class SphinxRepository(
 
         if (executeNetworkRequest && wasMarkedSeen) {
             networkQueryMessage.readMessages(chatId).collect { _ -> }
+        }
+    }
+
+    private val provisionalMessageLock = Mutex()
+
+    // TODO: Rework to handle different message types
+    @OptIn(RawPasswordAccess::class)
+    override fun sendMessage(sendMessage: SendMessage?) {
+        if (sendMessage == null) return
+
+        repositoryScope.launch(mainImmediate) {
+            val queries = coreDB.getSphinxDatabaseQueries()
+
+            // TODO: Update SendMessage to accept a Chat && Contact instead of just IDs
+            val chat: ChatDbo? = sendMessage.chatId?.let {
+                withContext(io) {
+                    queries.chatGetById(it).executeAsOneOrNull()
+                }
+            }
+
+            val contact: ContactDbo? = sendMessage.contactId?.let {
+                withContext(io) {
+                    queries.contactGetById(it).executeAsOneOrNull()
+                }
+            }
+
+            val owner: Contact? = accountOwner.value
+                ?: let {
+                    // TODO: Handle this better...
+                    var owner: Contact? = null
+                    try {
+                        accountOwner.collect {
+                            if (it != null) {
+                                owner = it
+                                throw Exception()
+                            }
+                        }
+                    } catch (e: Exception) {}
+                    delay(25L)
+                    owner
+                }
+
+            if (owner == null) {
+                LOG.w(TAG, "Owner returned null")
+                return@launch
+            }
+
+            // encrypt text
+            sendMessage.text?.let { msgText ->
+
+                val selfEncrypted: MessageContent? = owner
+                    .rsaPublicKey
+                    ?.let { pubKey ->
+                        val response = rsa.encrypt(
+                            pubKey,
+                            UnencryptedString(msgText),
+                            formatOutput = false,
+                            dispatcher = default,
+                        )
+
+                        @Exhaustive
+                        when (response) {
+                            is Response.Error -> {
+                                LOG.e(TAG, response.message, response.exception)
+                                null
+                            }
+                            is Response.Success -> {
+                                MessageContent(response.value.value)
+                            }
+                        }
+                    }
+
+                if (selfEncrypted != null) {
+
+                    val messagePrice = chat?.price_per_message ?: Sat(0)
+
+                    val provisionalMessageId: MessageId? = chat?.let { chatDbo ->
+                        // Build provisional message and insert
+                        provisionalMessageLock.withLock {
+                            val currentProvisionalId: MessageId? = withContext(io) {
+                                queries.messageGetLowestProvisionalMessageId().executeAsOneOrNull()
+                            }
+
+                            val provisionalId = MessageId((currentProvisionalId?.value ?: 0L) - 1)
+
+                            withContext(io) {
+                                queries.messageUpsert(
+                                    MessageStatus.Pending,
+                                    Seen.True,
+                                    chatDbo.my_alias?.value?.toSenderAlias(),
+                                    chatDbo.my_photo_url,
+                                    null,
+                                    null,
+                                    provisionalId,
+                                    null,
+                                    chatDbo.id,
+                                    MessageType.Message,
+                                    owner.id,
+                                    sendMessage.contactId,
+                                    messagePrice,
+                                    null,
+                                    null,
+                                    DateTime.nowUTC().toDateTime(),
+                                    null,
+                                    selfEncrypted,
+                                    MessageContentDecrypted(msgText),
+                                )
+                            }
+
+                            provisionalId
+                        }
+                    }
+
+                    val remoteTextMap: Map<String, String>? = sendMessage.contactId?.let { nnContactId ->
+                        // we know it's a conversation as the contactId is always sent
+                        contact?.public_key?.let { pubKey ->
+                            val response = rsa.encrypt(
+                                pubKey,
+                                UnencryptedString(msgText),
+                                formatOutput = false,
+                                dispatcher = default,
+                            )
+
+                            @Exhaustive
+                            when (response) {
+                                is Response.Error -> {
+                                    LOG.e(TAG, response.message, response.exception)
+                                    null
+                                }
+                                is Response.Success -> {
+                                    mapOf(Pair(nnContactId.value.toString(), response.value.value))
+                                }
+                            }
+                        }
+
+                    } ?: chat?.group_key?.value?.let { rsaPubKeyString ->
+                        val response = rsa.encrypt(
+                            RsaPublicKey(rsaPubKeyString.toCharArray()),
+                            UnencryptedString(msgText),
+                            formatOutput = false,
+                            dispatcher = default,
+                        )
+
+                        @Exhaustive
+                        when (response) {
+                            is Response.Error -> {
+                                LOG.e(TAG, response.message, response.exception)
+                                null
+                            }
+                            is Response.Success -> {
+                                mapOf(Pair("chat", response.value.value))
+                            }
+                        }
+                    }
+
+                    remoteTextMap?.let { map ->
+                        val postMessageDto: PostMessageDto? = try {
+                            PostMessageDto(
+                                sendMessage.chatId?.value,
+                                sendMessage.contactId?.value,
+                                messagePrice.value,
+                                sendMessage.replyUUID?.value,
+                                selfEncrypted.value,
+                                map,
+                            )
+                        } catch (e: IllegalArgumentException) {
+                            LOG.e(TAG, "Failed to create PostMessageDto", e)
+
+                            provisionalMessageId?.let { provId ->
+                                withContext(io) {
+                                    queries
+                                        .messageUpdateStatus(MessageStatus.Failed, provId)
+                                }
+                            }
+
+                            null
+                        }
+
+                        if (postMessageDto != null) {
+                            networkQueryMessage.sendMessage(postMessageDto).collect { loadResponse ->
+                                @Exhaustive
+                                when (loadResponse) {
+                                    is LoadResponse.Loading -> {}
+                                    is Response.Error -> {
+                                        LOG.e(TAG, loadResponse.message, loadResponse.exception)
+
+                                        provisionalMessageId?.let { provId ->
+                                            withContext(io) {
+                                                queries
+                                                    .messageUpdateStatus(MessageStatus.Failed, provId)
+                                            }
+                                        }
+
+                                    }
+                                    is Response.Success -> {
+                                        messageLock.withLock {
+                                            chatLock.withLock {
+                                                contactLock.withLock {
+                                                    withContext(io) {
+
+                                                        // chat is returned only if this is the
+                                                        // first message sent to a new contact
+                                                        loadResponse.value.chat?.let { chatDto ->
+                                                            queries.upsertChat(
+                                                                chatDto,
+                                                                moshi,
+                                                                chatSeenMap,
+                                                            )
+                                                        }
+
+                                                        queries.transaction {
+
+                                                            loadResponse.value.contact?.let { contactDto ->
+                                                                upsertContact(contactDto, queries)
+                                                            }
+
+                                                            upsertMessage(loadResponse.value, queries)
+
+                                                            provisionalMessageId?.let { provId ->
+                                                                queries.messageDeleteById(provId)
+                                                            }
+
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                }
+            }
         }
     }
 
