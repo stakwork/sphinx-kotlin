@@ -374,6 +374,13 @@ SELECT *
 FROM messageDbo
 WHERE id = ?;
 
+messageGetLowestProvisionalMessageId:
+SELECT id
+FROM messageDbo
+WHERE id < 0
+ORDER BY id
+LIMIT 1;
+
 messageGetAllToShowByChatId:
 SELECT *
 FROM messageDbo
