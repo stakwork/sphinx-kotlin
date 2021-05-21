@@ -263,6 +263,11 @@ internal class DashboardViewModel @Inject constructor(
                 }
             }
         }
+
+        // Prime it
+        viewModelScope.launch(mainImmediate) {
+            contactRepository.accountOwner.firstOrNull()
+        }
     }
 
     private val _networkStateFlow: MutableStateFlow<LoadResponse<Boolean, ResponseError>> by lazy {
