@@ -413,6 +413,11 @@ UPDATE messageDbo
 SET message_content_decrypted = :message_content_decrypted
 WHERE id = ?;
 
+messageUpdateStatus:
+UPDATE messageDbo
+SET status = :status
+WHERE id = ?;
+
 -- If the message exists in the DB, it will update all fields _except_
 -- for message_content_decrypted as to not overwrite it.
 messageUpsert {
