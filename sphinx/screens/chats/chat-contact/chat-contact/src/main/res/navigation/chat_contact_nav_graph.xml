@@ -8,6 +8,13 @@
     <fragment
         android:id="@+id/navigation_chat_contact_fragment"
         android:name="chat.sphinx.chat_contact.ui.ChatContactFragment"
-        tools:layout="@layout/fragment_chat_contact" />
+        tools:layout="@layout/fragment_chat_contact" >
+        <argument
+            android:name="argContactId"
+            app:argType="long" />
+        <argument
+            android:name="argChatId"
+            app:argType="long" />
+    </fragment>
 
 </navigation>

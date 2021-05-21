@@ -8,8 +8,8 @@
     tools:context=".ui.AddFriendFragment">
 
     <include
-        android:id="@+id/layout_add_friend_header"
-        layout="@layout/layout_add_friend_header"
+        android:id="@+id/include_add_friend_header"
+        layout="@layout/layout_detail_screen_header"
         android:layout_width="match_parent"
         android:layout_height="@dimen/default_header_height"
         app:layout_constraintTop_toTopOf="parent" />

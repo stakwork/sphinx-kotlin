@@ -12,11 +12,6 @@ import chat.sphinx.activitymain.databinding.ActivityMainBinding
 import chat.sphinx.activitymain.navigation.drivers.PrimaryNavigationDriver
 import chat.sphinx.activitymain.ui.MainViewState
 import chat.sphinx.activitymain.ui.MotionLayoutNavigationActivity
-import chat.sphinx.chat_common.ui.ChatData
-import chat.sphinx.chat_common.ui.ChatViewModel
-import chat.sphinx.chat_contact.navigation.ToChatContactScreen
-import chat.sphinx.chat_group.navigation.ToChatGroupScreen
-import chat.sphinx.chat_tribe.navigation.ToChatTribeScreen
 import chat.sphinx.insetter_activity.InsetPadding
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.resources.R as R_common
@@ -24,7 +19,6 @@ import dagger.hilt.android.AndroidEntryPoint
 import dev.chrisbanes.insetter.applyInsetter
 import io.matthewnelson.android_feature_navigation.requests.PopBackStack
 import io.matthewnelson.android_feature_viewmodel.updateViewState
-import io.matthewnelson.concept_navigation.NavigationRequest
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
@@ -52,8 +46,6 @@ internal class MainActivity: MotionLayoutNavigationActivity<
     override val viewModel: MainViewModel by viewModels()
     override val navigationViewModel: MainViewModel
         get() = viewModel
-
-    private val chatViewModel: ChatViewModel by viewModels()
 
     companion object {
         // Setting these here at initial load time will negate the need to query the view
@@ -90,7 +82,6 @@ internal class MainActivity: MotionLayoutNavigationActivity<
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
         setTransitionListener(binding.layoutMotionMain)
-        chatViewModel
 
         binding.layoutConstraintMainStatusBar.applyInsetter {
             type(statusBars = true) {
@@ -179,27 +170,6 @@ internal class MainActivity: MotionLayoutNavigationActivity<
                     )
                 }
             }
-    }
-
-    override suspend fun onPostNavigationRequestExecution(request: NavigationRequest<NavController>) {
-        super.onPostNavigationRequestExecution(request)
-        when (request) {
-            is ToChatContactScreen -> {
-                chatViewModel.setChatData(
-                    ChatData.Conversation(request.chat, request.contact)
-                )
-            }
-            is ToChatGroupScreen -> {
-                chatViewModel.setChatData(
-                    ChatData.Group(request.chat)
-                )
-            }
-            is ToChatTribeScreen -> {
-                chatViewModel.setChatData(
-                    ChatData.Tribe(request.chat)
-                )
-            }
-        }
     }
 
     override fun onBackPressed() {

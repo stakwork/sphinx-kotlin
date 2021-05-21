@@ -113,6 +113,11 @@ ext.debugDeps = [
 
 ext.plugin = [
     androidGradle: "com.android.tools.build:gradle:${versions.androidGradle}",
+    androidx: [
+        navigation: [
+            safeArgs: "androidx.navigation:navigation-safe-args-gradle-plugin:${versions.navigation}",
+        ],
+    ],
     google: [
         hilt: "com.google.dagger:hilt-android-gradle-plugin:${versions.hilt}",
     ],

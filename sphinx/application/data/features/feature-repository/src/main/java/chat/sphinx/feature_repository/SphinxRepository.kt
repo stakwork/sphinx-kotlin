@@ -20,7 +20,6 @@ import chat.sphinx.concept_socket_io.SocketIOManager
 import chat.sphinx.concept_socket_io.SphinxSocketIOMessageListener
 import chat.sphinx.concept_socket_io.SphinxSocketIOMessage
 import chat.sphinx.conceptcoredb.ChatDbo
-import chat.sphinx.conceptcoredb.ContactDbo
 import chat.sphinx.conceptcoredb.MessageDbo
 import chat.sphinx.conceptcoredb.SphinxDatabaseQueries
 import chat.sphinx.feature_repository.mappers.chat.ChatDboPresenterMapper
@@ -35,6 +34,7 @@ import chat.sphinx.logger.d
 import chat.sphinx.logger.e
 import chat.sphinx.logger.w
 import chat.sphinx.wrapper_chat.Chat
+import chat.sphinx.wrapper_chat.isTrue
 import chat.sphinx.wrapper_common.*
 import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.chat.ChatId
@@ -109,6 +109,9 @@ class SphinxRepository(
         const val DATE_NIXON_SHOCK = "1971-08-15T00:00:00.000Z"
     }
 
+    private val supervisor = SupervisorJob()
+    private val repositoryScope = CoroutineScope(supervisor)
+
     ////////////////
     /// SocketIO ///
     ////////////////
@@ -118,7 +121,7 @@ class SphinxRepository(
 
     override var updatedContactIds: MutableList<ContactId> = mutableListOf()
 
-            /**
+    /**
      * Call is made on [Dispatchers.IO]
      * */
     @Suppress("BlockingMethodInNonBlockingContext")
@@ -247,10 +250,37 @@ class SphinxRepository(
         )
     }
 
+    override fun getConversationByContactId(contactId: ContactId): Flow<Chat?> = flow {
+        var ownerId: ContactId? = accountOwner.value?.id
+
+        if (ownerId == null) {
+            try {
+                accountOwner.collect {
+                    if (it != null) {
+                        ownerId = it.id
+                        delay(25L)
+                        throw Exception()
+                    } else {
+                        emit(null)
+                    }
+                }
+            } catch (e: Exception) {}
+        }
+
+        emitAll(
+            coreDB.getSphinxDatabaseQueries()
+                .chatGetConversationForContact(listOf(ownerId!!, contactId))
+                .asFlow()
+                .mapToOneOrNull(io)
+                .map { it?.let { chatDboPresenterMapper.mapFrom(it) } }
+                .distinctUntilChanged()
+        )
+    }
+
     override fun getUnseenMessagesByChatId(chat: Chat): Flow<Long?> = flow {
         emitAll(
             coreDB.getSphinxDatabaseQueries()
-                .chatGetUnseenIncomingMessagesCount(chat.contactIds.first(), chat.id)
+                .messageGetUnseenIncomingMessageCountByChatId(chat.contactIds.first(), chat.id)
                 .asFlow()
                 .mapToOneOrNull(io)
                 .distinctUntilChanged()
@@ -281,11 +311,16 @@ class SphinxRepository(
     }
 
     private suspend fun processChatDtos(chats: List<ChatDto>): Response<Boolean, ResponseError> {
+        val queries = coreDB.getSphinxDatabaseQueries()
         try {
-            val queries = coreDB.getSphinxDatabaseQueries()
 
-            chatLock.withLock {
-                withContext(io) {
+            var error: Throwable? = null
+            val handler = CoroutineExceptionHandler { _, throwable ->
+                error = throwable
+            }
+
+            repositoryScope.launch(io + handler) {
+                chatLock.withLock {
 
                     val chatIdsToRemove = queries.chatGetAllIds()
                         .executeAsList()
@@ -311,7 +346,10 @@ class SphinxRepository(
                     }
 
                 }
+            }.join()
 
+            error?.let {
+                throw it
             }
 
             return Response.Success(true)
@@ -339,17 +377,18 @@ class SphinxRepository(
         InviteDboPresenterMapper(dispatchers)
     }
 
-    override val accountOwner: Flow<Contact?> by lazy {
-        flow {
-            emitAll(
-                coreDB.getSphinxDatabaseQueries().contactGetOwner()
-                    .asFlow()
-                    .mapToOneOrNull(io)
-                    .map { it?.let { contactDboPresenterMapper.mapFrom(it) } }
-                    .distinctUntilChanged()
-            )
-        }
-    }
+    override val accountOwner: StateFlow<Contact?> = flow {
+        emitAll(
+            coreDB.getSphinxDatabaseQueries().contactGetOwner()
+                .asFlow()
+                .mapToOneOrNull(io)
+                .map { it?.let { contactDboPresenterMapper.mapFrom(it) } }
+        )
+    }.stateIn(
+        repositoryScope,
+        SharingStarted.WhileSubscribed(5_000),
+        null
+    )
 
     override val getAllContacts: Flow<List<Contact>> by lazy {
         flow {
@@ -406,8 +445,15 @@ class SphinxRepository(
                         val queries = coreDB.getSphinxDatabaseQueries()
 
                         try {
-                            contactLock.withLock {
-                                withContext(io) {
+                            var error: Throwable? = null
+                            val handler = CoroutineExceptionHandler { _, throwable ->
+                                error = throwable
+                            }
+
+                            var processChatsResponse: Response<Boolean, ResponseError> = Response.Success(true)
+
+                            repositoryScope.launch(io + handler) {
+                                contactLock.withLock {
 
                                     val contactIdsToRemove = queries.contactGetAllIds()
                                         .executeAsList()
@@ -435,11 +481,15 @@ class SphinxRepository(
                                     }
 
                                 }
+
+                                processChatsResponse = processChatDtos(loadResponse.value.chats)
+                            }.join()
+
+                            error?.let {
+                                throw it
                             }
 
-                            emit(
-                                processChatDtos(loadResponse.value.chats)
-                            )
+                            emit(processChatsResponse)
 
                         } catch (e: ParseException) {
                             val msg =
@@ -461,42 +511,55 @@ class SphinxRepository(
     override suspend fun deleteContactById(contactId: ContactId): Response<Any, ResponseError> {
         val queries = coreDB.getSphinxDatabaseQueries()
 
-        val owner: ContactDbo = queries.contactGetOwner().executeAsOneOrNull()
-            ?: let {
-                val msg = "Account Owner was not in the DB. Something is very wrong..."
-                LOG.w(TAG, msg)
-                return Response.Error(ResponseError(msg))
-            }
 
-        if (owner.id == contactId) {
-            val msg = "deleteContactById called for account owner. Deletion not permitted."
+        var owner: Contact? = accountOwner.value
+
+        if (owner == null) {
+            try {
+                accountOwner.collect {
+                    if (it != null) {
+                        owner = it
+                        throw Exception()
+                    }
+                }
+            } catch (e: Exception) {}
+            delay(25L)
+        }
+
+        if (owner?.id == null || owner!!.id == contactId) {
+            val msg = "Account Owner was null, or deleteContactById was called for account owner."
             LOG.w(TAG, msg)
             return Response.Error(ResponseError(msg))
         }
 
-        val response = networkQueryContact.deleteContact(contactId)
+        var deleteContactResponse: Response<Any, ResponseError> = Response.Success(Any())
 
-        if (response is Response.Success) {
+        repositoryScope.launch(mainImmediate) {
+            val response = networkQueryContact.deleteContact(contactId)
+            deleteContactResponse = response
 
-            chatLock.withLock {
-                messageLock.withLock {
-                    contactLock.withLock {
+            if (response is Response.Success) {
 
-                        val chat: ChatDbo? =
-                            queries.chatGetConversationForContact(listOf(owner.id, contactId))
-                                .executeAsOneOrNull()
+                chatLock.withLock {
+                    messageLock.withLock {
+                        contactLock.withLock {
 
-                        queries.transaction {
-                            deleteChatById(chat?.id, queries, latestMessageUpdatedTimeMap)
-                            deleteContactById(contactId, queries)
+                            val chat: ChatDbo? =
+                                queries.chatGetConversationForContact(listOf(owner!!.id, contactId))
+                                    .executeAsOneOrNull()
+
+                            queries.transaction {
+                                deleteChatById(chat?.id, queries, latestMessageUpdatedTimeMap)
+                                deleteContactById(contactId, queries)
+                            }
+
                         }
-
                     }
                 }
             }
-        }
+        }.join()
 
-        return response
+        return deleteContactResponse
     }
 
     override fun createContact(
@@ -513,26 +576,41 @@ class SphinxRepository(
             status = ContactStatus.CONFIRMED.absoluteValue
         )
 
-        networkQueryContact.createContact(postContactDto).collect { loadResponse ->
-            @Exhaustive
-            when (loadResponse) {
-                LoadResponse.Loading -> {
-                    emit(loadResponse)
-                }
-                is Response.Error -> {
-                    emit(loadResponse)
-                }
-                is Response.Success -> {
-                    contactLock.withLock {
-                        withContext(io) {
-                            queries.transaction {
-                                upsertContact(loadResponse.value, queries)
+        val sharedFlow: MutableSharedFlow<Response<Boolean, ResponseError>> =
+            MutableSharedFlow(1, 0)
+
+        repositoryScope.launch(mainImmediate) {
+
+            networkQueryContact.createContact(postContactDto).collect { loadResponse ->
+                @Exhaustive
+                when (loadResponse) {
+                    LoadResponse.Loading -> {}
+                    is Response.Error -> {
+                        sharedFlow.emit(loadResponse)
+                    }
+                    is Response.Success -> {
+                        contactLock.withLock {
+                            withContext(io) {
+                                queries.transaction {
+                                    upsertContact(loadResponse.value, queries)
+                                }
                             }
                         }
-                    }
 
-                    emit(Response.Success(true))
+                        sharedFlow.emit(Response.Success(true))
+                    }
                 }
+            }
+
+        }
+
+        emit(LoadResponse.Loading)
+
+        sharedFlow.asSharedFlow().firstOrNull().let { response ->
+            if (response == null) {
+                emit(Response.Error(ResponseError("")))
+            } else {
+                emit(response)
             }
         }
     }
@@ -928,28 +1006,31 @@ class SphinxRepository(
         }
     }
 
-    override fun toggleChatMuted(chat: Chat): Flow<Chat?> = flow {
-        val queries = coreDB.getSphinxDatabaseQueries()
+    override suspend fun toggleChatMuted(chat: Chat): Response<Boolean, ResponseError> {
+        var response: Response<Boolean, ResponseError> = Response.Success(!chat.isMuted.isTrue())
 
-        chat.id?.let { chatId ->
-            networkQueryChat.toggleMuteChat(chatId, chat.isMuted).collect { loadResponse ->
+        repositoryScope.launch(mainImmediate) {
+            networkQueryChat.toggleMuteChat(chat.id, chat.isMuted).collect { loadResponse ->
                 when (loadResponse) {
                     is LoadResponse.Loading -> {}
                     is Response.Error -> {
-                        emit(chat)
+                        response = loadResponse
                     }
                     is Response.Success -> {
+                        val queries = coreDB.getSphinxDatabaseQueries()
+
                         chatLock.withLock {
-                            queries.upsertChat(loadResponse.value, moshi, chatSeenMap)
+                            withContext(io) {
+                                queries.upsertChat(loadResponse.value, moshi, chatSeenMap)
+                            }
                         }
 
-                        getChatById(chat.id).collect {
-                            emit(it)
-                        }
                     }
                 }
             }
-        }
+        }.join()
+
+        return response
     }
 
     /*
@@ -1037,9 +1118,10 @@ class SphinxRepository(
                                     count++
                                 }
 
-                                chatLock.withLock {
-                                    messageLock.withLock {
-                                        withContext(io) {
+                                repositoryScope.launch(io) {
+
+                                    chatLock.withLock {
+                                        messageLock.withLock {
 
                                             queries.transaction {
                                                 val chatIds =
@@ -1086,13 +1168,12 @@ class SphinxRepository(
 
                                         }
                                     }
-                                }
+                                }.join()
 
                             }
 
                             when {
-                                offset == -1 -> {
-                                }
+                                offset == -1 -> {}
                                 newMessages.size >= MESSAGE_PAGINATION_LIMIT -> {
                                     offset += MESSAGE_PAGINATION_LIMIT
 
@@ -1126,22 +1207,21 @@ class SphinxRepository(
 
                 emit(responseError)
 
-            } ?: let {
+            } ?: repositoryScope.launch(mainImmediate) {
 
-                try {
-                    authenticationStorage.putString(
-                        REPOSITORY_LAST_SEEN_MESSAGE_DATE,
-                        now
-                    )
-                } finally {
-                    if (lastSeenMessagesDate == null) {
-                        authenticationStorage.removeString(REPOSITORY_LAST_SEEN_MESSAGE_RESTORE_PAGE)
-                        LOG.d(TAG, "Removing message restore page number")
-                    }
+                authenticationStorage.putString(
+                    REPOSITORY_LAST_SEEN_MESSAGE_DATE,
+                    now
+                )
+
+                if (lastSeenMessagesDate == null) {
+                    authenticationStorage.removeString(REPOSITORY_LAST_SEEN_MESSAGE_RESTORE_PAGE)
+                    LOG.d(TAG, "Removing message restore page number")
                 }
 
-                emit(Response.Success(true))
-            }
+            }.join()
+
+            emit(Response.Success(true))
         }
     }
 

@@ -1,182 +1,235 @@
 package chat.sphinx.chat_common.ui
 
-import android.annotation.SuppressLint
+import android.app.Application
 import android.content.Context
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.NavArgs
 import app.cash.exhaustive.Exhaustive
+import chat.sphinx.chat_common.R
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
+import chat.sphinx.chat_common.ui.viewstate.header.ChatHeaderViewState
 import chat.sphinx.chat_common.ui.viewstate.messageholder.HolderBackground
 import chat.sphinx.chat_common.ui.viewstate.messageholder.MessageHolderViewState
+import chat.sphinx.concept_image_loader.ImageLoaderOptions
+import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
+import chat.sphinx.kotlin_response.message
 import chat.sphinx.resources.getRandomColor
 import chat.sphinx.wrapper_chat.Chat
-import chat.sphinx.wrapper_common.util.getInitials
-import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
+import chat.sphinx.wrapper_chat.ChatName
+import chat.sphinx.wrapper_message.Message
 import io.matthewnelson.android_feature_viewmodel.BaseViewModel
+import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
+import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
+import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import javax.inject.Inject
 
-@HiltViewModel
-@SuppressLint("StaticFieldLeak")
-class ChatViewModel @Inject constructor(
-    @ApplicationContext private val appContext: Context,
+abstract class ChatViewModel<ARGS: NavArgs>(
+    protected val app: Application,
     dispatchers: CoroutineDispatchers,
-    private val messageRepository: MessageRepository,
-    private val networkQueryLightning: NetworkQueryLightning,
-    private val chatRepository: ChatRepository,
-): BaseViewModel<ChatViewState>(dispatchers, ChatViewState.Idle)
+    protected val chatRepository: ChatRepository,
+    protected val messageRepository: MessageRepository,
+    protected val networkQueryLightning: NetworkQueryLightning,
+    protected val savedStateHandle: SavedStateHandle
+): SideEffectViewModel<
+        Context,
+        ChatSideEffect,
+        ChatHeaderViewState
+        >(dispatchers, ChatHeaderViewState.Idle)
 {
-    @Suppress("RemoveExplicitTypeArguments")
-    private val _chatDataStateFlow: MutableStateFlow<ChatData?> by lazy {
-        MutableStateFlow<ChatData?>(null)
+    abstract val args: ARGS
+
+    val imageLoaderDefaults by lazy {
+        ImageLoaderOptions.Builder()
+            .placeholderResId(R.drawable.ic_profile_avatar_circle)
+            .transformation(Transformation.CircleCrop)
+            .build()
     }
 
-    val chatDataStateFlow: StateFlow<ChatData?>
-        get() = _chatDataStateFlow.asStateFlow()
-
-    fun onNavigationBack() {
-        messagesJob?.cancel()
+    protected val headerInitialsTextViewColor: Int by lazy {
+        app.getRandomColor()
     }
 
-    private val _messageHolderViewStateFlow: MutableStateFlow<List<MessageHolderViewState>> by lazy {
-        MutableStateFlow(emptyList())
-    }
+    protected abstract val chatSharedFlow: SharedFlow<Chat?>
+    abstract val headerInitialHolderSharedFlow: SharedFlow<InitialHolderViewState>
 
-    val messageHolderViewStateFlow: StateFlow<List<MessageHolderViewState>>
-        get() = _messageHolderViewStateFlow.asStateFlow()
+    protected abstract suspend fun getChatNameIfNull(): ChatName?
 
-    private var messagesJob: Job? = null
-    fun setChatData(chatData: ChatData) {
-        _chatDataStateFlow.value = chatData
-        _messageHolderViewStateFlow.value = emptyList()
+    private inner class ChatHeaderViewStateContainer: ViewStateContainer<ChatHeaderViewState>(ChatHeaderViewState.Idle) {
+        override val viewStateFlow: StateFlow<ChatHeaderViewState> = flow<ChatHeaderViewState> {
+            chatSharedFlow.collect { chat ->
 
-        val initialHolder: InitialHolderViewState? = if (chatData is ChatData.Conversation) {
-            chatData.contact.photoUrl?.let { url ->
-                InitialHolderViewState.Url(url)
-            } ?: InitialHolderViewState.Initials(
-                chatData.contact.alias?.value?.getInitials() ?: "",
-                appContext.getRandomColor()
-            )
-        } else {
-            null
-        }
+                emit(
+                    ChatHeaderViewState.Initialized(
+                        chatHeaderName = chat?.name?.value ?: getChatNameIfNull()?.value ?: "",
+                        showLock = chat != null,
 
-        chatData.chat?.let { chat ->
-            messagesJob = viewModelScope.launch(mainImmediate) {
-                messageRepository.getAllMessagesToShowByChatId(chat.id).collect { messages ->
-                    val newList = ArrayList<MessageHolderViewState>(messages.size)
-                    withContext(default) {
-                        for (message in messages) {
-                            if (message.sender == chat.contactIds.firstOrNull()) {
-                                newList.add(
-                                    MessageHolderViewState.OutGoing(
-                                        message,
-                                        HolderBackground.Out.Last,
-                                    )
-                                )
-                            } else {
-                                newList.add(
-                                    MessageHolderViewState.InComing(
-                                        message,
-                                        HolderBackground.In.Last,
-                                        initialHolder
-                                            ?: message.senderPic?.let { url ->
-                                                InitialHolderViewState.Url(url)
-                                            } ?: message.senderAlias?.let { alias ->
-                                                InitialHolderViewState.Initials(
-                                                    alias.value.getInitials()
-                                                )
-                                            } ?: InitialHolderViewState.None
-                                    )
-                                )
-                            }
-                        }
-                    }
-                    _messageHolderViewStateFlow.value = newList
-                }
-            }
-        }
-    }
+                        // TODO: Implement for Tribes with a podcast
+                        contributions = null,
 
-    val checkRoute: Flow<LoadResponse<Boolean, ResponseError>> by lazy {
-        flow {
-            chatDataStateFlow.value?.let { chatData ->
-                when (chatData) {
-                    is ChatData.Conversation -> {
-                        chatData.contact.nodePubKey?.let { pubKey ->
-
-                            chatData.contact.routeHint?.let { hint ->
-
-                                networkQueryLightning.checkRoute(pubKey, hint)
-
-                            } ?: networkQueryLightning.checkRoute(pubKey)
-
-                        } ?: chatData.chat?.let { chat ->
-
-                            networkQueryLightning.checkRoute(chat.id)
-
-                        }
-                    }
-
-                    is ChatData.Group -> {
-                        null
-                    }
-
-                    is ChatData.Tribe -> {
-                        networkQueryLightning.checkRoute(chatData.chat!!.id)
-                    }
-
-                }?.collect { response ->
-                    @Exhaustive
-                    when (response) {
-                        is LoadResponse.Loading -> {
-                            emit(response)
-                        }
-                        is Response.Error -> {
-                            emit(response)
-                        }
-                        is Response.Success -> {
-                            emit(Response.Success(response.value.success_prob > 0))
-                        }
-                    }
-                } ?: if (chatData is ChatData.Group) {
-
-                    emit(Response.Success(true))
-
-                } else {
-                    emit(
-                        Response.Error(ResponseError("ChatData was null"))
+                        chat?.isMuted,
                     )
-                }
+                )
+
             }
+        }.stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5_000),
+            ChatHeaderViewState.Idle
+        )
+
+        @Throws(IllegalStateException::class)
+        override fun updateViewState(viewState: ChatHeaderViewState) {
+            throw IllegalStateException(
+                """
+                    ChatHeaderViewState updates automatically.
+                    This method does nothing and should not be called.
+                """.trimIndent()
+            )
         }
     }
 
-    val toggleChatMuted: Flow<Chat?> by lazy {
-        flow {
-            chatDataStateFlow.value?.let { chatData ->
-                chatData.chat?.let { chat ->
-                    emitAll(chatRepository.toggleChatMuted(chat))
+    override val viewStateContainer: ViewStateContainer<ChatHeaderViewState> by lazy {
+        ChatHeaderViewStateContainer()
+    }
+
+    private suspend fun getChat(): Chat {
+        chatSharedFlow.replayCache.firstOrNull()?.let { chat ->
+            return chat
+        }
+
+        chatSharedFlow.firstOrNull()?.let { chat ->
+            return chat
+        }
+
+        var chat: Chat? = null
+
+        try {
+            chatSharedFlow.collect {
+                if (it != null) {
+                    chat = it
+                    throw Exception()
                 }
             }
+        } catch (e: Exception) {}
+        delay(25L)
+
+        return chat!!
+    }
+
+    abstract suspend fun getInitialHolderViewStateForReceivedMessage(
+        message: Message
+    ): InitialHolderViewState
+
+    internal val messageHolderViewStateFlow: StateFlow<List<MessageHolderViewState>> = flow {
+        val chat = getChat()
+
+        messageRepository.getAllMessagesToShowByChatId(chat.id).collect { messages ->
+            val newList = ArrayList<MessageHolderViewState>(messages.size)
+            withContext(default) {
+                for (message in messages) {
+                    if (message.sender == chat.contactIds.firstOrNull()) {
+                        newList.add(
+                            MessageHolderViewState.OutGoing(
+                                message,
+                                chat.type,
+                                HolderBackground.First.Isolated,
+                            )
+                        )
+                    } else {
+                        newList.add(
+                            MessageHolderViewState.InComing(
+                                message,
+                                chat.type,
+                                HolderBackground.First.Isolated,
+                                getInitialHolderViewStateForReceivedMessage(message)
+                            )
+                        )
+                    }
+                }
+            }
+
+            emit(newList.toList())
+        }
+    }.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5_000),
+        emptyList()
+    )
+
+    fun init() {
+        // Prime our states immediately so they're already
+        // updated by the time the Fragment's onStart is called
+        // where they're collected.
+        viewModelScope.launch(dispatchers.mainImmediate) {
+            chatSharedFlow.firstOrNull()
+        }
+        viewModelScope.launch(dispatchers.mainImmediate) {
+            headerInitialHolderSharedFlow.firstOrNull()
+        }
+        viewModelScope.launch(dispatchers.mainImmediate) {
+            viewStateContainer.viewStateFlow.firstOrNull()
         }
     }
 
-    fun readMessages() {
-        chatDataStateFlow.value?.let { chatData ->
-            chatData.chat?.id?.let { chatId ->
-                viewModelScope.launch(mainImmediate) {
-                    messageRepository.readMessages(chatId)
+    abstract val checkRoute: Flow<LoadResponse<Boolean, ResponseError>>
+
+    abstract fun readMessages()
+
+    private var toggleChatMutedJob: Job? = null
+    protected var notifyJob: Job? = null
+    fun toggleChatMuted() {
+        if (toggleChatMutedJob?.isActive == true) {
+            if (notifyJob?.isActive == true) {
+                return
+            }
+
+            notifyJob = viewModelScope.launch(mainImmediate) {
+                submitSideEffect(
+                    ChatSideEffect.Notify(
+                        app.getString(R.string.chat_muted_waiting_on_network),
+                        notificationLengthLong = false
+                    )
+                )
+                delay(1_000)
+            }
+            return
+        }
+        // by the time the user has the ability to click mute, chatSharedFlow
+        // will be instantiated. If there is no chat for the given
+        // conversation (such as with a new contact), the mute button is
+        // invisible, so...
+        chatSharedFlow.replayCache.firstOrNull()?.let { chat ->
+            toggleChatMutedJob = viewModelScope.launch(mainImmediate) {
+                val response = chatRepository.toggleChatMuted(chat)
+                @Exhaustive
+                when (response) {
+                    is Response.Error -> {
+                        submitSideEffect(
+                            ChatSideEffect.Notify(response.message)
+                        )
+                        delay(2_000)
+                    }
+                    is Response.Success -> {
+                        if (response.value) {
+                            submitSideEffect(
+                                ChatSideEffect.Notify(
+                                    app.getString(R.string.chat_muted_message)
+                                )
+                            )
+                        }
+                    }
                 }
             }
         }

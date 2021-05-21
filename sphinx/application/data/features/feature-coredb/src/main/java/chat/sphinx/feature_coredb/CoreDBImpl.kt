@@ -102,7 +102,7 @@ abstract class CoreDBImpl(private val moshi: Moshi): CoreDB() {
                     chat_idAdapter = ChatIdAdapter.getInstance(),
                     typeAdapter = MessageTypeAdapter(),
                     senderAdapter = ContactIdAdapter.getInstance(),
-                    receiverAdapter = ContactIdAdapter.getInstance(),
+                    receiver_Adapter = ContactIdAdapter.getInstance(),
                     amountAdapter = SatAdapter.getInstance(),
                     payment_hashAdapter = LightningPaymentHashAdapter.getInstance(),
                     payment_requestAdapter = LightningPaymentRequestAdapter.getInstance(),

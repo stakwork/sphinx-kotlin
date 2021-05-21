@@ -1,5 +1,6 @@
 plugins {
     id 'com.android.library'
+    id 'androidx.navigation.safeargs'
     id 'dagger.hilt.android.plugin'
     id 'kotlin-android'
     id 'kotlin-kapt'
