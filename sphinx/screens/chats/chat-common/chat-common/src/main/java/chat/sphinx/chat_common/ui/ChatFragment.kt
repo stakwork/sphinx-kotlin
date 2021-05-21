@@ -30,7 +30,6 @@ import chat.sphinx.resources.setTextColorExt
 import chat.sphinx.wrapper_chat.isTrue
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.lightning.unit
-import io.matthewnelson.android_feature_screens.ui.base.BaseFragment
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
@@ -65,30 +64,24 @@ abstract class ChatFragment<
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setupHeaderFooter()
+        val insetterActivity = (requireActivity() as InsetterActivity)
+        setupFooter(insetterActivity)
+        setupHeader(insetterActivity)
+        setupRecyclerView()
+    }
 
-        val messageListAdapter = MessageListAdapter(
-            recyclerView,
-            viewLifecycleOwner,
-            onStopSupervisor,
-            viewModel,
-            imageLoader
-        )
-        recyclerView.apply {
-            setHasFixedSize(false)
-            layoutManager = LinearLayoutManager(binding.root.context)
-            adapter = messageListAdapter
+    private fun setupFooter(insetterActivity: InsetterActivity) {
+        footerBinding.apply {
+            insetterActivity.addNavigationBarPadding(root)
         }
     }
 
-    private fun setupHeaderFooter() {
-        val activity = (requireActivity() as InsetterActivity)
-
+    private fun setupHeader(insetterActivity: InsetterActivity) {
         headerBinding.apply {
-            activity.addNavigationBarPadding(footerBinding.root)
-                .addStatusBarPadding(root)
+            insetterActivity.addStatusBarPadding(root)
 
-            root.layoutParams.height = root.layoutParams.height + activity.statusBarInsetHeight.top
+            root.layoutParams.height =
+                root.layoutParams.height + insetterActivity.statusBarInsetHeight.top
             root.requestLayout()
 
             imageViewChatHeaderMuted.setOnClickListener {
@@ -100,6 +93,21 @@ abstract class ChatFragment<
                     chatNavigator.popBackStack()
                 }
             }
+        }
+    }
+
+    private fun setupRecyclerView() {
+        val messageListAdapter = MessageListAdapter(
+            recyclerView,
+            viewLifecycleOwner,
+            onStopSupervisor,
+            viewModel,
+            imageLoader
+        )
+        recyclerView.apply {
+            setHasFixedSize(false)
+            layoutManager = LinearLayoutManager(binding.root.context)
+            adapter = messageListAdapter
         }
     }
 
