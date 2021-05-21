@@ -33,7 +33,7 @@ internal class ProfileViewModel @Inject constructor(
 
     init {
         viewModelScope.launch(mainImmediate) {
-            contactRepository.accountOwner.distinctUntilChanged().collect { contact ->
+            contactRepository.accountOwner.collect { contact ->
                 _accountOwnerStateFlow.value = contact
             }
         }
