@@ -72,7 +72,7 @@ class SendMessage private constructor(
 
         @Synchronized
         fun build(): SendMessage? =
-            if (isValid) {
+            if (!isValid) {
                 null
             } else {
                 SendMessage(

@@ -67,4 +67,12 @@ class SendMessageUnitTest {
         builder.setFile(File(path))
         assertTrue
     }
+
+    @Test
+    fun `build() returns null if invalid`() {
+        builder.setText("some text")
+        Assert.assertNull(builder.build())
+        builder.setChatId(ChatId(1))
+        Assert.assertNotNull(builder.build())
+    }
 }
