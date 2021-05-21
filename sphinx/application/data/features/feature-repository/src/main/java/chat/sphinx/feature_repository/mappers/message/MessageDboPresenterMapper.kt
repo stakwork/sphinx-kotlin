@@ -20,7 +20,7 @@ internal class MessageDboPresenterMapper(
             chatId = value.chat_id,
             type = value.type,
             sender = value.sender,
-            receiver = value.receiver,
+            receiver = value.receiver_,
             amount = value.amount,
             paymentHash = value.payment_hash,
             paymentRequest = value.payment_request,
@@ -59,6 +59,8 @@ internal class MessageDboPresenterMapper(
                                     }
                             }
                         }
+                        // TODO: Handle podcast audio clips
+                        // clip::{"ts":8818,"feedID":226249,"text":"Marty, I agree there is no climate emergency.","pubkey":"02683c5d0cf435fe8a0f42ba9a5999a98291476e82947707313cef69612000f718","itemID":2361506482,"title":"Rabbit Hole Recap: Bitcoin Week of 2021.05.10","url":"https://anchor.fm/s/558f520/podcast/play/33445131/https%3A%2F%2Fd3ctxlq1ktw2nl.cloudfront.net%2Fstaging%2F2021-4-13%2F186081984-44100-2-d892325769c3.m4a"}
                     }
                 }
 
@@ -74,7 +76,7 @@ internal class MessageDboPresenterMapper(
             chat_id = value.chatId,
             type = value.type,
             sender = value.sender,
-            receiver = value.receiver,
+            receiver_ = value.receiver,
             amount = value.amount,
             payment_hash = value.paymentHash,
             payment_request = value.paymentRequest,

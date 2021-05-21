@@ -41,7 +41,6 @@ internal class NewContactViewModel @Inject constructor(
         viewModelScope.launch(mainImmediate) {
             val response = scannerCoordinator.submitRequest(
                 ScannerRequest(
-                    showNavBackArrow = true,
                     filter = object : ScannerFilter() {
                         override suspend fun checkData(data: String): Response<Any, String> {
                             if (data.trim().matches(NewContactFragment.PASTE_REGEX.toRegex())) {

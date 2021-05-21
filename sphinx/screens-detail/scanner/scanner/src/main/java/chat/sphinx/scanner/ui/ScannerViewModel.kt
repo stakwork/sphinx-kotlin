@@ -13,7 +13,6 @@ import chat.sphinx.scanner_view_model_coordinator.response.ScannerResponse
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
-import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
@@ -31,26 +30,11 @@ internal class ScannerViewModel @Inject constructor(
 {
     // Instantiate immediately so the request is pulled in
     // from shared flow via the coordinator
-    private val requestCatcher =
-        RequestCatcher(viewModelScope, scannerViewModelCoordinator, mainImmediate)
-
-    init {
-        viewModelScope.launch(mainImmediate) {
-            try {
-                requestCatcher.getCaughtRequestStateFlow().collect {
-                    it.firstOrNull()?.request?.let { request->
-                        if (request.showNavBackArrow) {
-                            updateViewState(ScannerViewState.ShowNavBackButton)
-                        } else {
-                            updateViewState(ScannerViewState.HideNavBackButton)
-                        }
-
-                        throw Exception()
-                    }
-                }
-            } catch (e: Exception) {}
-        }
-    }
+    private val requestCatcher = RequestCatcher(
+        viewModelScope,
+        scannerViewModelCoordinator,
+        mainImmediate
+    )
 
     private var responseJob: Job? = null
     fun processResponse(scannerResponse: ScannerResponse) {

@@ -1,7 +1,6 @@
 package chat.sphinx.dashboard.ui
 
 import androidx.lifecycle.viewModelScope
-import androidx.recyclerview.widget.DiffUtil
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
@@ -25,9 +24,7 @@ import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.scanner_view_model_coordinator.request.ScannerRequest
 import chat.sphinx.scanner_view_model_coordinator.response.ScannerResponse
 import chat.sphinx.wrapper_chat.isConversation
-import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_common.contact.ContactId
-import chat.sphinx.wrapper_common.toDateTime
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_contact.isConfirmed
 import chat.sphinx.wrapper_contact.isTrue
@@ -85,10 +82,7 @@ internal class DashboardViewModel @Inject constructor(
     fun toScanner() {
         viewModelScope.launch(mainImmediate) {
             val response = scannerCoordinator.submitRequest(
-                ScannerRequest(
-                    showNavBackArrow = false,
-                    filter = null
-                )
+                ScannerRequest(filter = null)
             )
             // TODO: Do something with response
         }

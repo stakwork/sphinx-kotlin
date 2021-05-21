@@ -210,7 +210,7 @@ fun TransactionCallbacks.upsertMessage(dto: MessageDto, queries: SphinxDatabaseQ
 inline fun SphinxDatabaseQueries.updateSeen(chatId: ChatId) {
     transaction {
         chatUpdateSeen(Seen.True, chatId)
-        chatMessagesUpdateSeen(Seen.True, chatId)
+        messageUpdateSeenByChatId(Seen.True, chatId)
     }
 }
 

@@ -3,6 +3,7 @@ package chat.sphinx.scanner.navigation
 import androidx.navigation.NavController
 import chat.sphinx.detail_resources.DetailNavOptions
 import chat.sphinx.scanner.R
+import chat.sphinx.scanner.ui.ScannerFragmentArgs
 import io.matthewnelson.android_feature_navigation.R as nav_R
 import io.matthewnelson.concept_navigation.NavigationRequest
 
@@ -18,7 +19,11 @@ internal class ToScannerDetail: NavigationRequest<NavController>() {
 
         controller.navigate(
             R.id.scanner_nav_graph,
-            null,
+
+            ScannerFragmentArgs.Builder(controller.previousBackStackEntry != null)
+                .build()
+                .toBundle(),
+
             if (controller.previousBackStackEntry == null) {
                 DetailNavOptions.defaultBuilt
             } else {

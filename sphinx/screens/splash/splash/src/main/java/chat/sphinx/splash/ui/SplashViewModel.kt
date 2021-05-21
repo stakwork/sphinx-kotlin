@@ -108,7 +108,6 @@ internal class SplashViewModel @Inject constructor(
         viewModelScope.launch(mainImmediate) {
             val response = scannerCoordinator.submitRequest(
                 ScannerRequest(
-                    showNavBackArrow = false,
                     filter = object : ScannerFilter() {
                         override suspend fun checkData(data: String): Response<Any, String> {
                             data.decodeBase64ToArray()
