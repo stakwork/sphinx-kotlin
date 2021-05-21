@@ -60,6 +60,7 @@ internal class ChatContactViewModel @Inject constructor(
     savedStateHandle,
 ) {
     override val args: ChatContactFragmentArgs by savedStateHandle.navArgs()
+    private var chatId: ChatId? = args.chatId
 
     private val contactSharedFlow: SharedFlow<Contact?> = flow {
         emitAll(contactRepository.getContactById(args.contactId))
@@ -70,9 +71,12 @@ internal class ChatContactViewModel @Inject constructor(
     )
 
     override val chatSharedFlow: SharedFlow<Chat?> = flow {
-        args.chatId?.let { chatId ->
+        chatId?.let { chatId ->
             emitAll(chatRepository.getChatById(chatId))
-        } ?: emitAll(chatRepository.getConversationByContactId(args.contactId))
+        } ?: chatRepository.getConversationByContactId(args.contactId).collect { chat ->
+            chatId = chat?.id
+            emit(chat)
+        }
     }.distinctUntilChanged().shareIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(2_000),
@@ -217,7 +221,7 @@ internal class ChatContactViewModel @Inject constructor(
 
     override fun sendMessage(builder: SendMessage.Builder): SendMessage? {
         builder.setContactId(args.contactId)
-        builder.setChatId(args.chatId)
+        builder.setChatId(chatId)
         return super.sendMessage(builder)
     }
 }
