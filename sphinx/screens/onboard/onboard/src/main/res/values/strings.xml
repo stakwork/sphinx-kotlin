@@ -4,5 +4,8 @@
 
     <string name="get_started_button">Get Started</string>
     <string name="finish_button">Finish</string>
+    <string name="next_button">Next</string>
+    <string name="name_edit_text_hint">Set Your Name</string>
+    <string name="name_text_view">Your Name</string>
     <string name="invited_join_sphinx">You've been invited<br/>to join Sphinx</string>
 </resources>

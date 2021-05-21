@@ -3,6 +3,82 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/lightBG">
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/sign_up_name_text_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="@string/name_text_view"
+        android:textColor="@color/secondaryText"
+        android:fontFamily="@font/roboto_regular"
+        android:textSize="@dimen/sign_up_name_text_view_text_size"
+        android:layout_marginBottom="10dp"
+        app:layout_constraintBottom_toTopOf="@+id/constraint_sign_up_name_edit_text_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraint_sign_up_name_edit_text_content"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/sign_up_edit_text_height"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        android:layout_marginHorizontal="@dimen/default_double_layout_margin"
+        android:background="@drawable/edit_text_sign_up_bordered_rad_48">
+
+        <androidx.appcompat.widget.AppCompatEditText
+            android:id="@+id/sign_up_name_edit_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/text"
+            android:fontFamily="@font/roboto_regular"
+            android:inputType="textVisiblePassword"
+            android:textSize="@dimen/sign_up_edit_text_text_size"
+            android:layout_marginHorizontal="@dimen/default_double_layout_margin"
+            android:singleLine="true"
+            android:gravity="center"
+            android:textColorHint="@color/secondaryText"
+            android:hint="@string/name_edit_text_hint"
+            app:backgroundTint="@android:color/transparent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <ProgressBar
+        android:id="@+id/sign_up_name_progress_bar"
+        android:layout_width="@dimen/sign_up_name_progress_bar_xy"
+        android:layout_height="@dimen/sign_up_name_progress_bar_xy"
+        style="?android:attr/progressBarStyle"
+        android:indeterminateTint="@android:color/white"
+        android:indeterminate="true"
+        android:layout_marginTop="@dimen/sign_up_name_progress_bar_top_margin"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/constraint_sign_up_name_edit_text_content" />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/button_next"
+        android:layout_width="@dimen/next_button_width"
+        android:layout_height="@dimen/next_button_height"
+        android:textAllCaps="true"
+        android:gravity="center"
+        android:fontFamily="@font/montserrat_semi_bold"
+        android:text="@string/next_button"
+        android:textSize="@dimen/sphinx_ready_button_text_size"
+        android:textColor="@android:color/white"
+        android:background="@drawable/button_background_white_rad_48"
+        android:backgroundTint="@color/primaryBlue"
+        android:layout_marginRight="@dimen/default_double_layout_margin"
+        android:layout_marginBottom="@dimen/sign_up_button_bottom_margin"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
