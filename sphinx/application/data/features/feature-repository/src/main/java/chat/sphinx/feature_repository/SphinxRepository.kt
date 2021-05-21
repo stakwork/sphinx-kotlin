@@ -16,6 +16,7 @@ import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_lightning.LightningRepository
 import chat.sphinx.concept_repository_message.MessageRepository
+import chat.sphinx.concept_repository_message.SendMessage
 import chat.sphinx.concept_socket_io.SocketIOManager
 import chat.sphinx.concept_socket_io.SphinxSocketIOMessageListener
 import chat.sphinx.concept_socket_io.SphinxSocketIOMessage
@@ -975,6 +976,11 @@ class SphinxRepository(
             queries = coreDB.getSphinxDatabaseQueries(),
             executeNetworkRequest = true
         )
+    }
+
+    override fun sendMessage(sendMessage: SendMessage?) {
+        if (sendMessage == null) return
+//        TODO("Not yet implemented")
     }
 
     private suspend fun readMessagesImpl(
