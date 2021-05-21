@@ -122,6 +122,7 @@ abstract class ChatFragment<
             setHasFixedSize(false)
             layoutManager = LinearLayoutManager(binding.root.context)
             adapter = messageListAdapter
+            itemAnimator = null
         }
     }
 

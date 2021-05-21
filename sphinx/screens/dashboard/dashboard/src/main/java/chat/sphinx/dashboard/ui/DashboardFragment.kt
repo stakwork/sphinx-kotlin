@@ -109,6 +109,7 @@ internal class DashboardFragment : MotionLayoutFragment<
             this.setHasFixedSize(false)
             layoutManager = LinearLayoutManager(binding.root.context)
             adapter = ConcatAdapter(chatListAdapter, chatListFooterAdapter)
+            itemAnimator = null
         }
     }
 
