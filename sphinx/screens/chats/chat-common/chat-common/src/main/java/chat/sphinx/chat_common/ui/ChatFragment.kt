@@ -111,8 +111,10 @@ abstract class ChatFragment<
     }
 
     private fun setupRecyclerView() {
+        val linearLayoutManager = LinearLayoutManager(binding.root.context)
         val messageListAdapter = MessageListAdapter(
             recyclerView,
+            linearLayoutManager,
             viewLifecycleOwner,
             onStopSupervisor,
             viewModel,
@@ -120,7 +122,7 @@ abstract class ChatFragment<
         )
         recyclerView.apply {
             setHasFixedSize(false)
-            layoutManager = LinearLayoutManager(binding.root.context)
+            layoutManager = linearLayoutManager
             adapter = messageListAdapter
             itemAnimator = null
         }
