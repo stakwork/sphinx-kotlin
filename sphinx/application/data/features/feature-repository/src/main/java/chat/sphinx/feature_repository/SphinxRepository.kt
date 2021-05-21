@@ -1066,7 +1066,7 @@ class SphinxRepository(
             val lastSeenMessageDateResolved: DateTime = lastSeenMessagesDate?.toDateTime()
                 ?: DATE_NIXON_SHOCK.toDateTime()
 
-            val now: String = DateTime.getFormatRelay().format(Date(System.currentTimeMillis()))
+            val now: String = DateTime.nowUTC()
 
             val supervisor = SupervisorJob(currentCoroutineContext().job)
             val scope = CoroutineScope(supervisor)
