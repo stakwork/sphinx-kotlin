@@ -38,7 +38,7 @@ internal sealed class MessageHolderViewState(
         }
     }
 
-    val directPayment: LayoutState.Bubble.DirectPayment? by lazy(LazyThreadSafetyMode.NONE) {
+    val bubbleDirectPayment: LayoutState.Bubble.DirectPayment? by lazy(LazyThreadSafetyMode.NONE) {
         if (message.type.isDirectPayment()) {
             LayoutState.Bubble.DirectPayment(showSent = this is Sent, amount = message.amount)
         } else {
@@ -46,17 +46,17 @@ internal sealed class MessageHolderViewState(
         }
     }
 
-    val messageTypeMessageContent: LayoutState.Bubble.Message? by lazy(LazyThreadSafetyMode.NONE) {
+    val bubbleMessage: LayoutState.Bubble.Message? by lazy(LazyThreadSafetyMode.NONE) {
         message.messageContentDecrypted?.let {
             // TODO: Handle podcast clips
             message.giphyData?.let { giphyData ->
                 // TODO: show only the giphyData.text when rendering logic is implemented
 //                giphyData.text?.let { text ->
-//                    LayoutState.MessageTypeMessageContent(text)
+//                    LayoutState.Bubble.Message(text = text)
 //                }
-                LayoutState.Bubble.Message(giphyData.toString())
+                LayoutState.Bubble.Message(text = giphyData.toString())
             } ?: /*if (message.podBoost == null) {*/ // TODO: Uncomment once boost layout logic is implemented
-            LayoutState.Bubble.Message(it.value)
+            LayoutState.Bubble.Message(text = it.value)
 //            } else {
 //                null
 //            }

@@ -166,8 +166,8 @@ internal class MessageListAdapter<ARGS: NavArgs>(
                 setBubbleBackground(viewState, recyclerViewWidth)
 
                 if (viewState.background !is BubbleBackground.Gone) {
-                    setBubbleMessageLayout(viewState.messageTypeMessageContent)
-                    setBubbleDirectPaymentLayout(viewState.directPayment)
+                    setBubbleMessageLayout(viewState.bubbleMessage)
+                    setBubbleDirectPaymentLayout(viewState.bubbleDirectPayment)
                 }
             }
         }
