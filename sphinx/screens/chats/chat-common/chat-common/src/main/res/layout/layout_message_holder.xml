@@ -23,8 +23,8 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="@id/include_message_holder_message_types"
-        app:layout_constraintEnd_toEndOf="@id/include_message_holder_message_types" />
+        app:layout_constraintStart_toStartOf="@id/include_message_holder_bubble"
+        app:layout_constraintEnd_toEndOf="@id/include_message_holder_bubble" />
 
     <!-- width is programmatically set depending on sender -->
     <Space
@@ -45,8 +45,8 @@
         tools:layout_width="80dp" />
 
     <include
-        android:id="@+id/include_message_holder_message_types"
-        layout="@layout/layout_message_types"
+        android:id="@+id/include_message_holder_bubble"
+        layout="@layout/layout_message_holder_bubble"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         app:layout_constraintEnd_toStartOf="@+id/space_message_holder_right"
@@ -58,16 +58,16 @@
         android:layout_width="4dp"
         android:layout_height="10dp"
         android:src="@drawable/received_bubble_arrow"
-        app:layout_constraintEnd_toStartOf="@+id/include_message_holder_message_types"
-        app:layout_constraintTop_toTopOf="@+id/include_message_holder_message_types" />
+        app:layout_constraintEnd_toStartOf="@+id/include_message_holder_bubble"
+        app:layout_constraintTop_toTopOf="@+id/include_message_holder_bubble" />
 
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/sent_bubble_arrow"
         android:layout_width="6dp"
         android:layout_height="10dp"
         android:src="@drawable/sent_bubble_arrow"
-        app:layout_constraintStart_toEndOf="@+id/include_message_holder_message_types"
-        app:layout_constraintTop_toTopOf="@+id/include_message_holder_message_types" />
+        app:layout_constraintStart_toEndOf="@+id/include_message_holder_bubble"
+        app:layout_constraintTop_toTopOf="@+id/include_message_holder_bubble" />
 
 
     <!--  Optional "New Day" Separator  -->

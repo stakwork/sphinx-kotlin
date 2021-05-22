@@ -4,10 +4,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    tools:background="@drawable/background_message_holder_in_last">
+    tools:background="@drawable/background_message_bubble_received_last">
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/layout_constraint_message_type_container"
+        android:id="@+id/layout_constraint_message_bubble_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="parent">
@@ -127,10 +127,10 @@
 
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/layout_constraint_message_reaction_container"
+        android:id="@+id/layout_constraint_message_bubble_reaction_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_message_type_container">
+        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_message_bubble_container">
 
         <!-- Paid Message Information -->
         <include

@@ -11,16 +11,16 @@ import chat.sphinx.wrapper_message.isReceived
 internal sealed class MessageHolderViewState(
     val message: Message,
     chatType: ChatType?,
-    val background: HolderBackground,
+    val background: BubbleBackground,
     val initialHolder: InitialHolderViewState
 ) {
 
     val statusHeader: LayoutState.MessageStatusHeader? by lazy(LazyThreadSafetyMode.NONE) {
-        if (background is HolderBackground.First) {
+        if (background is BubbleBackground.First) {
             LayoutState.MessageStatusHeader(
                 if (chatType?.isConversation() != false) null else message.senderAlias?.value,
-                this is OutGoing,
-                this is OutGoing && message.status.isReceived(),
+                this is Sent,
+                this is Sent && message.status.isReceived(),
                 message.messageContentDecrypted != null,
                 DateTime.getFormathmma().format(message.date.value),
             )
@@ -29,15 +29,15 @@ internal sealed class MessageHolderViewState(
         }
     }
 
-    val directPayment: LayoutState.DirectPayment? by lazy(LazyThreadSafetyMode.NONE) {
+    val directPayment: LayoutState.Bubble.DirectPayment? by lazy(LazyThreadSafetyMode.NONE) {
         if (message.type.isDirectPayment()) {
-            LayoutState.DirectPayment(showSent = this is OutGoing, amount = message.amount)
+            LayoutState.Bubble.DirectPayment(showSent = this is Sent, amount = message.amount)
         } else {
             null
         }
     }
 
-    val messageTypeMessageContent: LayoutState.MessageTypeMessageContent? by lazy(LazyThreadSafetyMode.NONE) {
+    val messageTypeMessageContent: LayoutState.Bubble.Message? by lazy(LazyThreadSafetyMode.NONE) {
         message.messageContentDecrypted?.let {
             // TODO: Handle podcast clips
             message.giphyData?.let { giphyData ->
@@ -45,36 +45,35 @@ internal sealed class MessageHolderViewState(
 //                giphyData.text?.let { text ->
 //                    LayoutState.MessageTypeMessageContent(text)
 //                }
-                LayoutState.MessageTypeMessageContent(giphyData.toString())
+                LayoutState.Bubble.Message(giphyData.toString())
             } ?: /*if (message.podBoost == null) {*/ // TODO: Uncomment once boost layout logic is implemented
-            LayoutState.MessageTypeMessageContent(it.value)
+            LayoutState.Bubble.Message(it.value)
 //            } else {
 //                null
 //            }
         }
     }
 
-
-    class InComing(
+    class Sent(
         message: Message,
         chatType: ChatType?,
-        background: HolderBackground,
+        background: BubbleBackground,
+    ): MessageHolderViewState(
+        message,
+        chatType,
+        background,
+        InitialHolderViewState.None
+    )
+
+    class Received(
+        message: Message,
+        chatType: ChatType?,
+        background: BubbleBackground,
         initialHolder: InitialHolderViewState,
     ): MessageHolderViewState(
         message,
         chatType,
         background,
         initialHolder
-    )
-
-    class OutGoing(
-        message: Message,
-        chatType: ChatType?,
-        background: HolderBackground,
-    ): MessageHolderViewState(
-        message,
-        chatType,
-        background,
-        InitialHolderViewState.None
     )
 }

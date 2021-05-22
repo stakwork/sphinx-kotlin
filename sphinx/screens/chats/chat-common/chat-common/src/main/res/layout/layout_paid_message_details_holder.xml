@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="@dimen/paid_message_details_holder_height"
     android:visibility="gone"
-    app:layout_constraintTop_toBottomOf="@+id/layout_constraint_message_type_container"
+    app:layout_constraintTop_toBottomOf="@+id/layout_constraint_message_bubble_container"
     tools:background="@color/primaryGreen"
     tools:layout_editor_absoluteX="16dp"
     tools:visibility="visible">

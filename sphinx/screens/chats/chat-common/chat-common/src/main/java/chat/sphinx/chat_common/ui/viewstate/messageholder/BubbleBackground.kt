@@ -1,19 +1,19 @@
 package chat.sphinx.chat_common.ui.viewstate.messageholder
 
-internal sealed class HolderBackground {
+internal sealed class BubbleBackground {
 
     companion object {
         const val SPACE_WIDTH_MULTIPLE: Float = 0.2F
     }
 
-    object None: HolderBackground()
+    object Gone: BubbleBackground()
 
-    sealed class First: HolderBackground() {
+    sealed class First: BubbleBackground() {
         object Grouped: First()
         object Isolated: First()
     }
 
-    object Middle: HolderBackground()
+    object Middle: BubbleBackground()
 
-    object Last: HolderBackground()
+    object Last: BubbleBackground()
 }

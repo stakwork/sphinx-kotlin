@@ -15,10 +15,10 @@ import io.matthewnelson.android_feature_screens.util.visible
 
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
-internal inline fun LayoutMessageHolderBinding.setDirectPaymentLayout(
-    directPayment: LayoutState.DirectPayment?
+internal inline fun LayoutMessageHolderBinding.setBubbleDirectPaymentLayout(
+    directPayment: LayoutState.Bubble.DirectPayment?
 ) {
-    includeMessageHolderMessageTypes.includeMessageTypeDirectPayment.apply {
+    includeMessageHolderBubble.includeMessageTypeDirectPayment.apply {
         if (directPayment == null) {
             root.gone
         } else {
@@ -34,13 +34,13 @@ internal inline fun LayoutMessageHolderBinding.setDirectPaymentLayout(
 }
 
 @MainThread
-internal fun LayoutMessageHolderBinding.setBackground(
+internal fun LayoutMessageHolderBinding.setBubbleBackground(
     viewState: MessageHolderViewState,
     holderWidth: Px,
 ) {
-    if (viewState.background is HolderBackground.None) {
+    if (viewState.background is BubbleBackground.Gone) {
 
-        includeMessageHolderMessageTypes.root.gone
+        includeMessageHolderBubble.root.gone
         val defaultMargins = root
             .context
             .resources
@@ -55,8 +55,8 @@ internal fun LayoutMessageHolderBinding.setBackground(
     } else {
 
         // TODO: Implement variable widths dependant on data
-        val isIncoming: Boolean = when (viewState) {
-            is MessageHolderViewState.InComing -> {
+        val isReceived: Boolean = when (viewState) {
+            is MessageHolderViewState.Received -> {
                 spaceMessageHolderLeft.updateLayoutParams {
                     width = root
                         .context
@@ -64,14 +64,14 @@ internal fun LayoutMessageHolderBinding.setBackground(
                         .getDimensionPixelSize(R.dimen.message_holder_space_width_left)
                 }
                 spaceMessageHolderRight.updateLayoutParams {
-                    width = (holderWidth.value * HolderBackground.SPACE_WIDTH_MULTIPLE).toInt()
+                    width = (holderWidth.value * BubbleBackground.SPACE_WIDTH_MULTIPLE).toInt()
                 }
 
                 true
             }
-            is MessageHolderViewState.OutGoing -> {
+            is MessageHolderViewState.Sent -> {
                 spaceMessageHolderLeft.updateLayoutParams {
-                    width = (holderWidth.value * HolderBackground.SPACE_WIDTH_MULTIPLE).toInt()
+                    width = (holderWidth.value * BubbleBackground.SPACE_WIDTH_MULTIPLE).toInt()
                 }
                 spaceMessageHolderRight.updateLayoutParams {
                     width = root
@@ -84,37 +84,37 @@ internal fun LayoutMessageHolderBinding.setBackground(
             }
         }
 
-        receivedBubbleArrow.goneIfFalse(viewState.background is HolderBackground.First && isIncoming)
-        sentBubbleArrow.goneIfFalse(viewState.background is HolderBackground.First && !isIncoming)
+        receivedBubbleArrow.goneIfFalse(viewState.background is BubbleBackground.First && isReceived)
+        sentBubbleArrow.goneIfFalse(viewState.background is BubbleBackground.First && !isReceived)
 
-        includeMessageHolderMessageTypes.root.apply {
+        includeMessageHolderBubble.root.apply {
             visible
 
             @DrawableRes
             val resId: Int? = when (viewState.background) {
-                HolderBackground.First.Grouped -> {
-                    if (isIncoming) {
-                        R.drawable.background_message_holder_in_first
+                BubbleBackground.First.Grouped -> {
+                    if (isReceived) {
+                        R.drawable.background_message_bubble_received_first
                     } else {
-                        R.drawable.background_message_holder_out_first
+                        R.drawable.background_message_bubble_sent_first
                     }
                 }
-                HolderBackground.First.Isolated,
-                HolderBackground.Last -> {
-                    if (isIncoming) {
-                        R.drawable.background_message_holder_in_last
+                BubbleBackground.First.Isolated,
+                BubbleBackground.Last -> {
+                    if (isReceived) {
+                        R.drawable.background_message_bubble_received_last
                     } else {
-                        R.drawable.background_message_holder_out_last
+                        R.drawable.background_message_bubble_sent_last
                     }
                 }
-                HolderBackground.Middle -> {
-                    if (isIncoming) {
-                        R.drawable.background_message_holder_in_middle
+                BubbleBackground.Middle -> {
+                    if (isReceived) {
+                        R.drawable.background_message_bubble_received_middle
                     } else {
-                        R.drawable.background_message_holder_out_middle
+                        R.drawable.background_message_bubble_sent_middle
                     }
                 }
-                HolderBackground.None -> {
+                BubbleBackground.Gone -> {
                     /* will never make it here as this is already checked for */
                     null
                 }
@@ -158,10 +158,10 @@ internal inline fun LayoutMessageHolderBinding.setStatusHeader(
                 } ?: gone
             }
 
-            layoutConstraintSentMessageContentContainer.goneIfFalse(statusHeader.isOutGoingMessage)
-            layoutConstraintReceivedMessageContentContainer.goneIfFalse(statusHeader.isIncomingMessage)
+            layoutConstraintSentMessageContentContainer.goneIfFalse(statusHeader.showSent)
+            layoutConstraintReceivedMessageContentContainer.goneIfFalse(statusHeader.showReceived)
 
-            if (statusHeader.isOutGoingMessage) {
+            if (statusHeader.showSent) {
                 textViewSentMessageTimestamp.text = statusHeader.timestamp
                 textViewSentMessageBoltIcon.goneIfFalse(statusHeader.showBoltIcon)
                 textViewSentMessageLockIcon.goneIfFalse(statusHeader.showLockIcon)
@@ -175,15 +175,15 @@ internal inline fun LayoutMessageHolderBinding.setStatusHeader(
 
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
-internal inline fun LayoutMessageHolderBinding.setMessageTypeMessageLayout(
-    messageContent: LayoutState.MessageTypeMessageContent?
+internal inline fun LayoutMessageHolderBinding.setBubbleMessageLayout(
+    message: LayoutState.Bubble.Message?
 ) {
-    includeMessageHolderMessageTypes.includeMessageTypeMessage.apply {
-        if (messageContent == null) {
+    includeMessageHolderBubble.includeMessageTypeMessage.apply {
+        if (message == null) {
             root.gone
         } else {
             root.visible
-            textViewMessageTypeMessage.text = messageContent.messageContent
+            textViewMessageTypeMessage.text = message.text
         }
     }
 }

@@ -10,7 +10,7 @@ import app.cash.exhaustive.Exhaustive
 import chat.sphinx.chat_common.R
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
 import chat.sphinx.chat_common.ui.viewstate.header.ChatHeaderViewState
-import chat.sphinx.chat_common.ui.viewstate.messageholder.HolderBackground
+import chat.sphinx.chat_common.ui.viewstate.messageholder.BubbleBackground
 import chat.sphinx.chat_common.ui.viewstate.messageholder.MessageHolderViewState
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
@@ -142,18 +142,18 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                 for (message in messages) {
                     if (message.sender == chat.contactIds.firstOrNull()) {
                         newList.add(
-                            MessageHolderViewState.OutGoing(
+                            MessageHolderViewState.Sent(
                                 message,
                                 chat.type,
-                                HolderBackground.First.Isolated,
+                                BubbleBackground.First.Isolated,
                             )
                         )
                     } else {
                         newList.add(
-                            MessageHolderViewState.InComing(
+                            MessageHolderViewState.Received(
                                 message,
                                 chat.type,
-                                HolderBackground.First.Isolated,
+                                BubbleBackground.First.Isolated,
                                 getInitialHolderViewStateForReceivedMessage(message)
                             )
                         )
