@@ -5,6 +5,7 @@ import chat.sphinx.wrapper_chat.ChatType
 import chat.sphinx.wrapper_chat.isConversation
 import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_message.Message
+import chat.sphinx.wrapper_message.isConfirmed
 import chat.sphinx.wrapper_message.isDirectPayment
 import chat.sphinx.wrapper_message.isReceived
 
@@ -29,7 +30,7 @@ internal sealed class MessageHolderViewState(
             LayoutState.MessageStatusHeader(
                 if (chatType?.isConversation() != false) null else message.senderAlias?.value,
                 this is Sent,
-                this is Sent && message.status.isReceived(),
+                this is Sent && (message.status.isReceived() || message.status.isConfirmed()),
                 message.messageContentDecrypted != null,
                 DateTime.getFormathmma().format(message.date.value),
             )
