@@ -5,7 +5,9 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:elevation="2dp"
-    android:padding="@dimen/status_badge_row_padding"
+    android:paddingHorizontal="@dimen/default_layout_margin"
+    android:paddingTop="@dimen/default_list_row_padding_vertical"
+
     android:visibility="gone"
     tools:visibility="visible">
 
@@ -13,6 +15,8 @@
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/text_view_paid_message_sent_status_amount"
         style="@style/PaymentStatusBadge"
+        android:background="@drawable/background_status_badge_rad_4"
+        android:backgroundTint="@color/primaryGreen"
         android:textAllCaps="true"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/text_view_paid_message_sent_status"
@@ -20,11 +24,13 @@
         app:layout_constraintHorizontal_chainStyle="spread_inside"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:text="21 SAT" />
+        tools:text="21 Sat" />
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/text_view_paid_message_sent_status"
         style="@style/PaymentStatusBadge"
+        android:background="@drawable/background_status_badge_rad_4"
+        android:backgroundTint="@color/primaryGreen"
         android:textAllCaps="false"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

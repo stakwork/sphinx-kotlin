@@ -7,7 +7,7 @@
     android:layout_height="26dp">
 
     <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/text_view_boost_amount"
+        android:id="@+id/text_view_sats_amount"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:fontFamily="@font/roboto_bold"
@@ -21,7 +21,7 @@
         tools:text="21 000" />
 
     <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/text_view_boost_unit_label"
+        android:id="@+id/text_view_sats_unit_label"
         android:layout_width="wrap_content"
         android:layout_height="0dp"
         android:layout_marginStart="4dp"
@@ -29,8 +29,8 @@
         android:textAlignment="textStart"
         android:textColor="@color/secondaryTextSent"
         android:textSize="@dimen/default_text_size_sub_headline"
-        app:layout_constraintBaseline_toBaselineOf="@+id/text_view_boost_amount"
-        app:layout_constraintStart_toEndOf="@+id/text_view_boost_amount"
+        app:layout_constraintBaseline_toBaselineOf="@+id/text_view_sats_amount"
+        app:layout_constraintStart_toEndOf="@+id/text_view_sats_amount"
         tools:text="sat" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

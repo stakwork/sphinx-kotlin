@@ -82,3 +82,37 @@ data class Message(
         return this
     }
 }
+
+
+/**
+ * Messages are consider "paid" if they have a type equalling `ATTACHMENT`,
+ * and if the price that can be extracted from the mediaToken is greater than 0.
+ */
+inline val Message.isPaidMessage: Boolean
+    get() {
+        // TODO: Implement logic at the repository level for extracting a price from the media token.
+//        return isAttachment && messageMedia.priceFromToken > 0
+        return false
+    }
+
+inline val Message.isAttachment: Boolean
+    get() {
+        return type.isAttachment()
+    }
+
+
+inline val Message.purchaseStatus: MessagePurchaseStatus
+    get() {
+        if (status.isPending()) return MessagePurchaseStatus.Pending
+
+        return when (type) {
+            MessageType.PurchaseAccept ->
+                MessagePurchaseStatus.Accepted
+            MessageType.PurchaseDeny ->
+                MessagePurchaseStatus.Denied
+            MessageType.Purchase ->
+                MessagePurchaseStatus.Processing
+            else ->
+                MessagePurchaseStatus.NoStatusMessage
+        }
+    }

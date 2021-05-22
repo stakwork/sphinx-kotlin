@@ -1,5 +1,6 @@
 package chat.sphinx.chat_common.ui.viewstate.messageholder
 
+import android.content.res.Resources
 import androidx.annotation.DrawableRes
 import androidx.annotation.MainThread
 import androidx.core.view.updateLayoutParams
@@ -9,6 +10,7 @@ import chat.sphinx.resources.R as common_R
 import chat.sphinx.chat_common.databinding.LayoutMessageHolderBinding
 import chat.sphinx.resources.setTextColorExt
 import chat.sphinx.wrapper_common.lightning.asFormattedString
+import chat.sphinx.wrapper_message.MessagePurchaseStatus
 import chat.sphinx.wrapper_view.Px
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
@@ -27,8 +29,8 @@ internal inline fun LayoutMessageHolderBinding.setBubbleDirectPaymentLayout(
             imageViewDirectPaymentSent.goneIfFalse(directPayment.showSent)
             imageViewDirectPaymentReceived.goneIfFalse(directPayment.showReceived)
             includeDirectPaymentAmountTextGroup.apply {
-                textViewBoostAmount.text = directPayment.amount.asFormattedString()
-                textViewBoostUnitLabel.text = directPayment.unitLabel
+                textViewSatsAmount.text = directPayment.amount.asFormattedString()
+                textViewSatsUnitLabel.text = directPayment.unitLabel
             }
         }
     }
@@ -188,6 +190,93 @@ internal inline fun LayoutMessageHolderBinding.setBubbleMessageLayout(
         } else {
             visible
             text = message.text
+        }
+    }
+}
+
+
+@MainThread
+@Suppress("NOTHING_TO_INLINE")
+internal inline fun LayoutMessageHolderBinding.setBubblePaidMessageDetailsLayout(
+    messageDetails: LayoutState.Bubble.PaidMessageDetails?
+) {
+    includeMessageHolderBubble.includePaidMessageReceivedDetailsHolder.apply {
+        if (messageDetails == null) {
+            root.gone
+        } else {
+            root.visible
+
+            messageDetails.apply {
+                imageViewPaidMessageReceivedIcon.goneIfFalse(showPaymentReceivedIcon)
+                imageViewPaidMessageSentIcon.goneIfFalse(showSendPaymentIcon)
+                textViewPaymentAcceptedIcon.goneIfFalse(showPaymentAcceptedIcon)
+                progressBarPaidMessage.goneIfFalse(showPaymentProgressWheel)
+
+                textViewPaidMessageStatusLabel.text = labelTextFromResources(root.context.resources)
+                textViewPaidMessageAmountToPayLabel.text = amountText
+            }
+        }
+    }
+}
+
+
+@MainThread
+@Suppress("NOTHING_TO_INLINE")
+internal inline fun LayoutMessageHolderBinding.setBubblePaidMessageSentStatusLayout(
+    messageDetails: LayoutState.Bubble.PaidMessageSentStatus?
+) {
+    includeMessageHolderBubble.includePaidMessageSentStatusDetails.apply {
+        if (messageDetails == null) {
+            root.gone
+        } else {
+            root.visible
+
+            messageDetails.apply {
+                textViewPaidMessageSentStatusAmount.text = messageDetails.amountText
+                textViewPaidMessageSentStatus.text = labelTextFromResources(root.context.resources)
+            }
+        }
+    }
+}
+
+
+private fun LayoutState.Bubble.PaidMessageDetails.labelTextFromResources(resources: Resources): String {
+    return when (purchaseStatus) {
+        MessagePurchaseStatus.Pending -> {
+           resources.getString(R.string.purchase_status_label_paid_message_details_pending)
+        }
+        MessagePurchaseStatus.Accepted -> {
+            resources.getString(R.string.purchase_status_label_paid_message_details_accepted)
+        }
+        MessagePurchaseStatus.Denied -> {
+            resources.getString(R.string.purchase_status_label_paid_message_details_denied)
+        }
+        MessagePurchaseStatus.Processing -> {
+            resources.getString(R.string.purchase_status_label_paid_message_details_processing)
+        }
+        else -> {
+            resources.getString(R.string.purchase_status_label_paid_message_details_default)
+        }
+    }
+}
+
+
+private fun LayoutState.Bubble.PaidMessageSentStatus.labelTextFromResources(resources: Resources): String {
+    return when (purchaseStatus) {
+        MessagePurchaseStatus.Pending -> {
+           resources.getString(R.string.purchase_status_label_paid_message_sent_status_pending)
+        }
+        MessagePurchaseStatus.Accepted -> {
+            resources.getString(R.string.purchase_status_label_paid_message_sent_status_accepted)
+        }
+        MessagePurchaseStatus.Denied -> {
+            resources.getString(R.string.purchase_status_label_paid_message_sent_status_denied)
+        }
+        MessagePurchaseStatus.Processing -> {
+            resources.getString(R.string.purchase_status_label_paid_message_sent_status_processing)
+        }
+        else -> {
+            resources.getString(R.string.purchase_status_label_paid_message_sent_status_default)
         }
     }
 }
