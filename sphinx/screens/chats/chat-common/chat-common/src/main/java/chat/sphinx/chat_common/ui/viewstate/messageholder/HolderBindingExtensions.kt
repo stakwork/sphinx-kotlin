@@ -140,7 +140,7 @@ internal inline fun LayoutMessageHolderBinding.setStatusHeader(
         } else {
             root.visible
 
-            textViewReceivedMessageSenderName.apply {
+            textViewMessageStatusReceivedSenderName.apply {
                 statusHeader.senderName?.let { name ->
                     if (name.isEmpty()) {
                         gone
@@ -162,16 +162,16 @@ internal inline fun LayoutMessageHolderBinding.setStatusHeader(
                 } ?: gone
             }
 
-            layoutConstraintSentMessageContentContainer.goneIfFalse(statusHeader.showSent)
-            layoutConstraintReceivedMessageContentContainer.goneIfFalse(statusHeader.showReceived)
+            layoutConstraintMessageStatusSentContainer.goneIfFalse(statusHeader.showSent)
+            layoutConstraintMessageStatusReceivedContainer.goneIfFalse(statusHeader.showReceived)
 
             if (statusHeader.showSent) {
-                textViewSentMessageTimestamp.text = statusHeader.timestamp
-                textViewSentMessageBoltIcon.goneIfFalse(statusHeader.showBoltIcon)
-                textViewSentMessageLockIcon.goneIfFalse(statusHeader.showLockIcon)
+                textViewMessageStatusSentTimestamp.text = statusHeader.timestamp
+                textViewMessageStatusSentBoltIcon.goneIfFalse(statusHeader.showBoltIcon)
+                textViewMessageStatusSentLockIcon.goneIfFalse(statusHeader.showLockIcon)
             } else {
-                textViewReceivedMessageTimestamp.text = statusHeader.timestamp
-                textViewReceivedMessageLockIcon.goneIfFalse(statusHeader.showLockIcon)
+                textViewMessageStatusReceivedTimestamp.text = statusHeader.timestamp
+                textViewMessageStatusReceivedLockIcon.goneIfFalse(statusHeader.showLockIcon)
             }
         }
     }
@@ -182,12 +182,12 @@ internal inline fun LayoutMessageHolderBinding.setStatusHeader(
 internal inline fun LayoutMessageHolderBinding.setBubbleMessageLayout(
     message: LayoutState.Bubble.Message?
 ) {
-    includeMessageHolderBubble.includeMessageTypeMessage.apply {
+    includeMessageHolderBubble.textViewMessageText.apply {
         if (message == null) {
-            root.gone
+            gone
         } else {
-            root.visible
-            textViewMessageTypeMessage.text = message.text
+            visible
+            text = message.text
         }
     }
 }

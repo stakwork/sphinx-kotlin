@@ -2,11 +2,9 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/layout_constraint_paid_message_details_holder"
     android:layout_width="match_parent"
     android:layout_height="@dimen/paid_message_details_holder_height"
     android:visibility="gone"
-    app:layout_constraintTop_toBottomOf="@+id/layout_constraint_message_bubble_container"
     tools:background="@color/primaryGreen"
     tools:layout_editor_absoluteX="16dp"
     tools:visibility="visible">
@@ -14,13 +12,13 @@
 
     <!-- Payment Direction Icon: Sent -->
     <androidx.appcompat.widget.AppCompatImageView
-        android:id="@+id/image_view_payment_sent_icon"
+        android:id="@+id/image_view_paid_message_sent_icon"
         android:layout_width="@dimen/icon_container_message_payment_direction_xy"
         android:layout_height="@dimen/icon_container_message_payment_direction_xy"
         android:tint="@color/textMessages"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/text_view_payment_status_label"
+        app:layout_constraintEnd_toStartOf="@+id/text_view_paid_message_status_label"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/ic_sent"
@@ -29,7 +27,7 @@
 
     <!-- Payment Direction Icon: Received -->
     <androidx.appcompat.widget.AppCompatImageView
-        android:id="@+id/image_view_payment_received_icon"
+        android:id="@+id/image_view_paid_message_received_icon"
         android:layout_width="@dimen/icon_container_message_payment_direction_xy"
         android:layout_height="@dimen/icon_container_message_payment_direction_xy"
         android:tint="@color/receivedIcon"
@@ -43,7 +41,7 @@
 
     <!-- Payment Status Icon -->
     <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/text_view_payment_status_icon"
+        android:id="@+id/text_view_paid_message_status_icon"
         android:layout_width="@dimen/material_icon_text_size_message_payment_status"
         android:layout_height="@dimen/material_icon_text_size_message_payment_status"
         android:fontFamily="@font/material_icons_regular"
@@ -53,15 +51,15 @@
         android:textSize="@dimen/material_icon_text_size_message_payment_status"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/text_view_payment_status_label"
-        app:layout_constraintStart_toEndOf="@id/image_view_payment_received_icon"
+        app:layout_constraintEnd_toStartOf="@+id/text_view_paid_message_status_label"
+        app:layout_constraintStart_toEndOf="@id/image_view_paid_message_received_icon"
         app:layout_constraintTop_toTopOf="parent"
         tools:visibility="visible" />
 
 
     <!--  Payment Status Label  -->
     <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/text_view_payment_status_label"
+        android:id="@+id/text_view_paid_message_status_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="@dimen/default_inner_spacing_list_item_title"
@@ -71,7 +69,7 @@
         android:textSize="13sp"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@id/text_view_payment_status_icon"
+        app:layout_constraintStart_toEndOf="@id/text_view_paid_message_status_icon"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="@string/paid_message_details_status_label_pay"
         tools:visibility="visible" />
@@ -79,7 +77,7 @@
 
     <!--  Amount to Pay Label  -->
     <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/text_view_amount_to_pay_label"
+        android:id="@+id/text_view_paid_message_amount_to_pay_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:fontFamily="@font/roboto_regular"
@@ -89,7 +87,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toEndOf="@+id/text_view_payment_status_label"
+        app:layout_constraintStart_toEndOf="@+id/text_view_paid_message_status_label"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="2000 SAT"
         tools:visibility="visible" />
@@ -97,7 +95,7 @@
 
     <!-- Spinner for when payment is processing -->
     <ProgressBar
-        android:id="@+id/progress_wheel_processing_payment"
+        android:id="@+id/progress_bar_paid_message"
         android:layout_width="@dimen/loading_wheel_message_payment_processing_xy"
         android:layout_height="@dimen/loading_wheel_message_payment_processing_xy"
         android:indeterminate="true"
@@ -106,7 +104,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toEndOf="@+id/text_view_payment_status_label"
+        app:layout_constraintStart_toEndOf="@+id/text_view_paid_message_status_label"
         app:layout_constraintTop_toTopOf="parent"
         tools:visibility="visible" />
 

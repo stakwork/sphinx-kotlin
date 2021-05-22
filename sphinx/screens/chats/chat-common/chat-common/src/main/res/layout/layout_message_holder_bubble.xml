@@ -7,7 +7,7 @@
     tools:background="@drawable/background_message_bubble_received_last">
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/layout_constraint_message_bubble_container"
+        android:id="@+id/layout_constraint_message_bubble_container_top"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="parent">
@@ -15,14 +15,7 @@
         <!--   Status Row for Paid Message Sent  -->
         <include
             android:id="@+id/include_paid_message_sent_status_details"
-            layout="@layout/layout_paid_message_sent_status_details"
-            tools:visibility="visible" />
-
-
-        <!--   Standard Text Message  -->
-        <include
-            android:id="@+id/include_message_type_message"
-            layout="@layout/layout_message_type_message"
+            layout="@layout/layout_paid_message_sent"
             tools:visibility="visible" />
 
         <!--   Direct Payment Message  -->
@@ -57,38 +50,21 @@
             tools:visibility="gone" />
 
 
-        <!-- Web link preview  -->
-        <include
-            android:id="@+id/include_message_type_web_link_preview"
-            layout="@layout/layout_message_type_web_link_preview"
-            tools:visibility="gone" />
-
-
-        <!-- Contact link preview  -->
-        <include
-            android:id="@+id/include_message_type_contact_link_preview"
-            layout="@layout/layout_message_type_contact_link_preview"
-            tools:visibility="gone" />
-
-        <!-- Tribe link preview  -->
-        <include
-            android:id="@+id/include_message_type_tribe_link_preview"
-            layout="@layout/layout_message_type_tribe_link_preview"
-            tools:visibility="gone" />
-
-
         <!--  Replies  -->
         <include
             android:id="@+id/include_message_reply"
             layout="@layout/layout_message_reply"
             tools:visibility="gone" />
 
+        <!-- TODO: Move out of bubble layout -->
+        <!-- TODO: Add time -->
         <!--  Deleted Message  -->
         <include
             android:id="@+id/include_message_type_deleted_message"
             layout="@layout/layout_message_type_deleted_message"
             tools:visibility="gone" />
 
+        <!-- TODO: Move out of bubble layout -->
         <!-- Group Action: Leaving/Joining  -->
         <include
             android:id="@+id/include_message_type_leave_or_join_group"
@@ -96,13 +72,14 @@
             tools:visibility="gone" />
 
 
+        <!-- TODO: Move out of bubble layout -->
         <!-- Group Action: User was kicked  -->
         <include
             android:id="@+id/include_message_type_group_kick"
             layout="@layout/layout_message_type_group_kick"
             tools:visibility="gone" />
 
-
+        <!-- TODO: Move out of bubble layout -->
         <!-- Group Action: Join Request  -->
         <include
             android:id="@+id/include_message_type_group_join_request"
@@ -125,24 +102,73 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/layout_constraint_message_bubble_reaction_container"
+        android:id="@+id/layout_constraint_message_bubble_container_middle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_message_bubble_container">
+        app:layout_constraintBottom_toTopOf="@+id/layout_constraint_message_bubble_container_bottom"
+        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_message_bubble_container_top">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_message_text"
+            style="@style/chat_message_body_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Contrary to popular belief, Lorem Ipsum is not simply random text. Latin from 45 BC, making it over 2000 years old."
+            tools:visibility="visible" />
+
+
+        <!-- Contact link preview  -->
+        <include
+            android:id="@+id/include_message_link_preview_contact"
+            layout="@layout/layout_message_link_preview_contact"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@+id/text_view_message_text"
+            tools:visibility="gone" />
+
+
+        <!-- Tribe link preview  -->
+        <include
+            android:id="@+id/include_message_link_preview_tribe"
+            layout="@layout/layout_message_link_preview_tribe"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@+id/text_view_message_text"
+            tools:visibility="gone" />
+
+
+        <!-- Url link preview  -->
+        <include
+            android:id="@+id/include_message_link_preview_url"
+            layout="@layout/layout_message_link_preview_url"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@+id/text_view_message_text"
+            tools:visibility="visible" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_message_bubble_container_bottom"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_message_bubble_container_middle">
+
 
         <!-- Paid Message Information -->
         <include
             android:id="@+id/include_paid_message_details_holder"
-            layout="@layout/layout_paid_message_details_holder"
+            layout="@layout/layout_paid_message_received"
             android:layout_width="match_parent"
             android:layout_height="@dimen/paid_message_details_holder_height"
             android:layout_marginTop="8dp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            tools:visibility="visible" />
 
 
         <!-- Boost Details -->
@@ -153,8 +179,6 @@
             android:layout_height="@dimen/message_type_boost_height"
             android:layout_marginTop="8dp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:visibility="gone" />
 
