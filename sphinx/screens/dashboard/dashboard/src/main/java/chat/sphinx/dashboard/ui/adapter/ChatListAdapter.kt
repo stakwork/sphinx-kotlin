@@ -5,6 +5,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.lifecycle.*
 import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_image_loader.Disposable
@@ -35,6 +36,8 @@ import kotlin.collections.ArrayList
 
 
 internal class ChatListAdapter(
+    private val recyclerView: RecyclerView,
+    private val layoutManager: LinearLayoutManager,
     private val imageLoader: ImageLoader<ImageView>,
     private val lifecycleOwner: LifecycleOwner,
     private val onStopSupervisor: OnStopSupervisor,
@@ -139,9 +142,18 @@ internal class ChatListAdapter(
                     }.let { result ->
 
                         if (!diff.sameList) {
+                            val firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition()
+
                             dashboardChats.clear()
                             dashboardChats.addAll(viewState.list)
                             result.dispatchUpdatesTo(this@ChatListAdapter)
+
+                            if (
+                                firstVisibleItemPosition == 0                               &&
+                                recyclerView.scrollState == RecyclerView.SCROLL_STATE_IDLE
+                            ) {
+                                recyclerView.scrollToPosition(0)
+                            }
                         }
 
                     }

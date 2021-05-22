@@ -103,11 +103,20 @@ internal class DashboardFragment : MotionLayoutFragment<
     }
 
     private fun setupChats() {
-        val chatListAdapter = ChatListAdapter(imageLoader, viewLifecycleOwner, onStopSupervisor, viewModel)
-        val chatListFooterAdapter = ChatListFooterAdapter(viewLifecycleOwner, viewModel)
         binding.layoutDashboardChats.recyclerViewChats.apply {
+            val linearLayoutManager = LinearLayoutManager(context)
+            val chatListAdapter = ChatListAdapter(
+                this,
+                linearLayoutManager,
+                imageLoader,
+                viewLifecycleOwner,
+                onStopSupervisor,
+                viewModel
+            )
+
+            val chatListFooterAdapter = ChatListFooterAdapter(viewLifecycleOwner, viewModel)
             this.setHasFixedSize(false)
-            layoutManager = LinearLayoutManager(binding.root.context)
+            layoutManager = linearLayoutManager
             adapter = ConcatAdapter(chatListAdapter, chatListFooterAdapter)
             itemAnimator = null
         }
