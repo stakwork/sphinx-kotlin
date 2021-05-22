@@ -3,7 +3,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/message_type_boost_height"
+    android:layout_height="wrap_content"
+    android:paddingHorizontal="@dimen/default_layout_margin"
+    android:paddingVertical="@dimen/chat_message_inner_padding"
     android:visibility="gone"
     tools:visibility="visible">
 
@@ -19,23 +21,27 @@
         tools:backgroundTint="@color/receivedIcon" />
 
     <!--Amount Text -->
-
     <include
         android:id="@+id/include_boost_amount_text_group"
         layout="@layout/layout_text_sats_amount"
         android:layout_width="0dp"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:layout_marginHorizontal="@dimen/default_layout_margin"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/include_boost_reactions_group"
-        app:layout_constraintStart_toEndOf="@+id/image_view_boost_message_icon" />
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/image_view_boost_message_icon"
+        app:layout_constraintTop_toTopOf="parent" />
+
 
     <!-- Boost Reactions -->
-
     <include
         android:id="@+id/include_boost_reactions_group"
         layout="@layout/layout_message_type_boost_reaction_group"
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

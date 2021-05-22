@@ -41,6 +41,8 @@ internal sealed class LayoutState {
         data class PaidMessageDetails(
             val amount: Sat,
             val purchaseType: MessageType.Purchase?,
+            val bubbleBackground: BubbleBackground,
+            val isShowingReceivedMessage: Boolean,
             val showPaymentAcceptedIcon: Boolean,
             val showPaymentProgressWheel: Boolean,
             val showSendPaymentIcon: Boolean,
@@ -58,5 +60,4 @@ internal sealed class LayoutState {
                 get() = amount.asFormattedString(appendUnit = true)
         }
     }
-
 }
