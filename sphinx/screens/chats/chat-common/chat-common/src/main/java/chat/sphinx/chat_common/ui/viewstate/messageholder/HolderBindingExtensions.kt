@@ -204,15 +204,15 @@ internal inline fun LayoutMessageHolderBinding.setPaidMessageDetailsLayout(
     includeMessageHolderMessageTypes.includePaidMessageDetailsHolder.apply {
         if (
             paidMessageDetailsContent == null ||
-            !paidMessageDetailsContent.isIncoming
+            !paidMessageDetailsContent.showPaidMessageReceivedDetails
         ) {
             root.gone
         } else {
             root.visible
 
             paidMessageDetailsContent.apply {
-                imageViewPaymentReceivedIcon.goneIfTrue(isIncoming || isPaymentProcessing)
-                imageViewSendPaymentIcon.goneIfFalse(isIncoming || isPaymentProcessing)
+                imageViewPaymentReceiveIcon.goneIfTrue(showPaymentReceivedIcon)
+                imageViewPaymentSendIcon.goneIfFalse(showSendPaymentIcon)
                 textViewPaymentAcceptedIcon.goneIfFalse(isPaymentAccepted)
                 progressWheelProcessingPayment.goneIfFalse(isPaymentProcessing)
 

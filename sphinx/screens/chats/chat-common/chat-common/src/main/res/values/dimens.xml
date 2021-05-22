@@ -41,8 +41,8 @@
     <dimen name="message_type_file_attachment_height">60dp</dimen>
     <dimen name="message_type_audio_attachment_height">62dp</dimen>
     <dimen name="message_type_video_attachment_height">210dp</dimen>
-    <dimen name="paid_message_details_holder_height">42dp</dimen>
-    <dimen name="paid_message_sent_details_holder_height">56dp</dimen>
+    <dimen name="paid_message_details_holder_received_height">42dp</dimen>
+    <dimen name="paid_message_details_holder_sent_height">56dp</dimen>
     <dimen name="paywall_overlay_text_message_received_height">50dp</dimen>
     <dimen name="paywall_overlay_image_message_received_height">210dp</dimen>
     <dimen name="paywall_overlay_video_message_received_height">210dp</dimen>

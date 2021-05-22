@@ -14,7 +14,7 @@
 
     <!-- Payment Direction Icon: Send Payment -->
     <androidx.appcompat.widget.AppCompatImageView
-        android:id="@+id/image_view_send_payment_icon"
+        android:id="@+id/image_view_payment_send_icon"
         android:layout_width="@dimen/icon_container_message_payment_direction_xy"
         android:layout_height="@dimen/icon_container_message_payment_direction_xy"
         android:tint="@color/textMessages"
@@ -29,7 +29,7 @@
 
     <!-- Payment Direction Icon: Received -->
     <androidx.appcompat.widget.AppCompatImageView
-        android:id="@+id/image_view_payment_received_icon"
+        android:id="@+id/image_view_payment_receive_icon"
         android:layout_width="@dimen/icon_container_message_payment_direction_xy"
         android:layout_height="@dimen/icon_container_message_payment_direction_xy"
         android:tint="@color/receivedIcon"
@@ -54,7 +54,7 @@
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/text_view_payment_status_label"
-        app:layout_constraintStart_toEndOf="@id/image_view_payment_received_icon"
+        app:layout_constraintStart_toEndOf="@id/image_view_payment_receive_icon"
         app:layout_constraintTop_toTopOf="parent"
         tools:visibility="visible" />
 

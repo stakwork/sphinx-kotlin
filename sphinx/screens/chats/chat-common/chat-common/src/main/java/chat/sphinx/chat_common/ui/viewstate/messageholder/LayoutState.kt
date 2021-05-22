@@ -38,22 +38,33 @@ internal sealed class LayoutState {
     }
 
     data class PaidMessageDetailsContent(
-        val isIncoming: Boolean,
         val amount: Sat,
-        val purchaseStatus: MessagePurchaseStatus = MessagePurchaseStatus.NoStatusMessage,
+        val paymentStatusText: String,
+        val showPaidMessageReceivedDetails: Bool,
+//        val purchaseStatus: MessagePurchaseStatus = MessagePurchaseStatus.NoStatusMessage,
+        val isPaymentProcessing: Boolean,
+        val isPaymentAccepted: Boolean,
+        val showSendPaymentIcon: Boolean,
+        val showPaymentReceivedIcon: Boolean,
     ) : LayoutState() {
         val showSentMessageStatusHeader: Boolean
-            get() = !isIncoming
+            get() = !showPaidMessageReceivedDetails
 
         val amountText: String = amount.asFormattedString(appendUnit = true)
 
-        val paymentStatusText: String
-            get() = if (isIncoming) purchaseStatus.incomingLabelText else purchaseStatus.outgoingLabelText
+//        val paymentStatusText: String
+//            get() = if (isIncoming) purchaseStatus.incomingLabelText else purchaseStatus.outgoingLabelText
 
-        val isPaymentProcessing: Boolean
-            get() = purchaseStatus.isProcessing
-
-        val isPaymentAccepted: Boolean
-            get() = purchaseStatus.isAccepted
+//        val isPaymentProcessing: Boolean
+//            get() = purchaseStatus.isProcessing
+//
+//        val isPaymentAccepted: Boolean
+//            get() = purchaseStatus.isAccepted
+//
+//        val showSendPaymentIcon: Boolean
+//            get() = isIncoming && !isPaymentProcessing
+//
+//        val showPaymentReceivedIcon: Boolean
+//            get() = !isIncoming && !isPaymentProcessing
     }
 }

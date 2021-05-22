@@ -12,7 +12,7 @@
     <androidx.legacy.widget.Space
         android:id="@+id/space_top_payment_status_area"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/paid_message_details_holder_height"
+        android:layout_height="@dimen/paid_message_details_holder_received_height"
         android:visibility="gone"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

@@ -25,7 +25,6 @@ data class Message(
     val expirationDate: DateTime?,
     val messageContent: MessageContent?,
     val status: MessageStatus,
-    val purchaseStatus: MessagePurchaseStatus? = null,
     val seen: Seen,
     val senderAlias: SenderAlias?,
     val senderPic: PhotoUrl?,
@@ -82,4 +81,37 @@ data class Message(
         this.giphyData = giphyData
         return this
     }
+
+
+    /**
+     * Messages are consider "paid" if they have a type equalling `ATTACHMENT`,
+     * and if the price that can be extracted from the mediaToken is greater than 0.
+     */
+    val isPaidMessage: Boolean
+        get() {
+            // TODO: Implement logic at the repository level for extracting a price from the media token.
+//        return isAttachment && messageMedia.priceFromToken > 0
+            return false
+        }
+
+    val isAttachment: Boolean
+        get() {
+            return type.isAttachment()
+        }
 }
+
+
+inline val Message.purchaseStatus: MessagePurchaseStatus
+    get() {
+        return when (type) {
+            MessageType.PurchaseAccept ->
+                MessagePurchaseStatus.Accepted
+            MessageType.PurchaseDeny ->
+                MessagePurchaseStatus.Denied
+            MessageType.Purchase ->
+                MessagePurchaseStatus.Pending
+            else ->
+                MessagePurchaseStatus.NoStatusMessage
+        }
+    }
+

@@ -68,10 +68,22 @@ internal sealed class MessageHolderViewState(
         if (!message.isPaidMessage) {
             null
         } else {
+            val isIncoming = this is InComing
+//            val isPaymentProcessing = message.isPaymentProcessing
+//            val isPaymentAccepted = message.isPaymentAccepted
+            val isPaymentAccepted = false
+            val isPaymentProcessing = false
+            val purchaseStatus = message.purchaseStatus
+            val paymentStatusText = if (isIncoming) purchaseStatus.incomingLabelText else purchaseStatus.outgoingLabelText
+
             LayoutState.PaidMessageDetailsContent(
-                isIncoming = this is InComing,
                 amount = message.amount,
-                purchaseStatus = message.purchaseStatus ?: MessagePurchaseStatus.NoStatusMessage
+                paymentStatusText = paymentStatusText,
+                showPaidMessageReceivedDetails = isIncoming,
+                isPaymentAccepted = isPaymentAccepted,
+                isPaymentProcessing = isPaymentProcessing,
+                showSendPaymentIcon = isIncoming && !isPaymentProcessing,
+                showPaymentReceivedIcon = !isIncoming && !isPaymentProcessing,
             )
         }
     }
