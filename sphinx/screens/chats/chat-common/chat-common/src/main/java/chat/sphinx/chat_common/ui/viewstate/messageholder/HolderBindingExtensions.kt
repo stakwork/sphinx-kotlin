@@ -3,6 +3,7 @@ package chat.sphinx.chat_common.ui.viewstate.messageholder
 import androidx.annotation.DrawableRes
 import androidx.annotation.MainThread
 import androidx.core.view.updateLayoutParams
+import app.cash.exhaustive.Exhaustive
 import chat.sphinx.chat_common.R
 import chat.sphinx.resources.R as common_R
 import chat.sphinx.chat_common.databinding.LayoutMessageHolderBinding
@@ -33,6 +34,7 @@ internal inline fun LayoutMessageHolderBinding.setBubbleDirectPaymentLayout(
     }
 }
 
+// TODO: Refactor setting of spaces out of this extension function
 @MainThread
 internal fun LayoutMessageHolderBinding.setBubbleBackground(
     viewState: MessageHolderViewState,
@@ -41,51 +43,12 @@ internal fun LayoutMessageHolderBinding.setBubbleBackground(
     if (viewState.background is BubbleBackground.Gone) {
 
         includeMessageHolderBubble.root.gone
-        val defaultMargins = root
-            .context
-            .resources
-            .getDimensionPixelSize(common_R.dimen.default_layout_margin)
-
         receivedBubbleArrow.gone
         sentBubbleArrow.gone
 
-        spaceMessageHolderLeft.updateLayoutParams { width = defaultMargins }
-        spaceMessageHolderRight.updateLayoutParams { width = defaultMargins }
-
     } else {
-
-        // TODO: Implement variable widths dependant on data
-        val isReceived: Boolean = when (viewState) {
-            is MessageHolderViewState.Received -> {
-                spaceMessageHolderLeft.updateLayoutParams {
-                    width = root
-                        .context
-                        .resources
-                        .getDimensionPixelSize(R.dimen.message_holder_space_width_left)
-                }
-                spaceMessageHolderRight.updateLayoutParams {
-                    width = (holderWidth.value * BubbleBackground.SPACE_WIDTH_MULTIPLE).toInt()
-                }
-
-                true
-            }
-            is MessageHolderViewState.Sent -> {
-                spaceMessageHolderLeft.updateLayoutParams {
-                    width = (holderWidth.value * BubbleBackground.SPACE_WIDTH_MULTIPLE).toInt()
-                }
-                spaceMessageHolderRight.updateLayoutParams {
-                    width = root
-                        .context
-                        .resources
-                        .getDimensionPixelSize(R.dimen.message_holder_space_width_right)
-                }
-
-                false
-            }
-        }
-
-        receivedBubbleArrow.goneIfFalse(viewState.background is BubbleBackground.First && isReceived)
-        sentBubbleArrow.goneIfFalse(viewState.background is BubbleBackground.First && !isReceived)
+        receivedBubbleArrow.goneIfFalse(viewState.showReceivedBubbleArrow)
+        sentBubbleArrow.goneIfFalse(viewState.showSentBubbleArrow)
 
         includeMessageHolderBubble.root.apply {
             visible
@@ -93,7 +56,7 @@ internal fun LayoutMessageHolderBinding.setBubbleBackground(
             @DrawableRes
             val resId: Int? = when (viewState.background) {
                 BubbleBackground.First.Grouped -> {
-                    if (isReceived) {
+                    if (viewState.isReceived) {
                         R.drawable.background_message_bubble_received_first
                     } else {
                         R.drawable.background_message_bubble_sent_first
@@ -101,26 +64,67 @@ internal fun LayoutMessageHolderBinding.setBubbleBackground(
                 }
                 BubbleBackground.First.Isolated,
                 BubbleBackground.Last -> {
-                    if (isReceived) {
+                    if (viewState.isReceived) {
                         R.drawable.background_message_bubble_received_last
                     } else {
                         R.drawable.background_message_bubble_sent_last
                     }
                 }
                 BubbleBackground.Middle -> {
-                    if (isReceived) {
+                    if (viewState.isReceived) {
                         R.drawable.background_message_bubble_received_middle
                     } else {
                         R.drawable.background_message_bubble_sent_middle
                     }
                 }
-                BubbleBackground.Gone -> {
+                is BubbleBackground.Gone -> {
                     /* will never make it here as this is already checked for */
                     null
                 }
             }
 
             resId?.let { setBackgroundResource(it) }
+        }
+
+
+
+        if (viewState.background is BubbleBackground.Gone && viewState.background.setSpacingEqual) {
+
+            val defaultMargins = root
+                .context
+                .resources
+                .getDimensionPixelSize(common_R.dimen.default_layout_margin)
+
+            spaceMessageHolderLeft.updateLayoutParams { width = defaultMargins }
+            spaceMessageHolderRight.updateLayoutParams { width = defaultMargins }
+
+        } else {
+
+            @Exhaustive
+            when (viewState) {
+                is MessageHolderViewState.Received -> {
+                    spaceMessageHolderLeft.updateLayoutParams {
+                        width = root
+                            .context
+                            .resources
+                            .getDimensionPixelSize(R.dimen.message_holder_space_width_left)
+                    }
+                    spaceMessageHolderRight.updateLayoutParams {
+                        width = (holderWidth.value * BubbleBackground.SPACE_WIDTH_MULTIPLE).toInt()
+                    }
+                }
+                is MessageHolderViewState.Sent -> {
+                    spaceMessageHolderLeft.updateLayoutParams {
+                        width = (holderWidth.value * BubbleBackground.SPACE_WIDTH_MULTIPLE).toInt()
+                    }
+                    spaceMessageHolderRight.updateLayoutParams {
+                        width = root
+                            .context
+                            .resources
+                            .getDimensionPixelSize(R.dimen.message_holder_space_width_right)
+                    }
+                }
+            }
         }
     }
 }

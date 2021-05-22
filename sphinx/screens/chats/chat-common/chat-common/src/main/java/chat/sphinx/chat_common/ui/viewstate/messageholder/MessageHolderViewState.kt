@@ -8,6 +8,15 @@ import chat.sphinx.wrapper_message.Message
 import chat.sphinx.wrapper_message.isDirectPayment
 import chat.sphinx.wrapper_message.isReceived
 
+internal inline val MessageHolderViewState.isReceived: Boolean
+    get() = this is MessageHolderViewState.Received
+
+internal inline val MessageHolderViewState.showReceivedBubbleArrow: Boolean
+    get() = background is BubbleBackground.First && this is MessageHolderViewState.Received
+
+internal val MessageHolderViewState.showSentBubbleArrow: Boolean
+    get() = background is BubbleBackground.First && this is MessageHolderViewState.Sent
+
 internal sealed class MessageHolderViewState(
     val message: Message,
     chatType: ChatType?,
