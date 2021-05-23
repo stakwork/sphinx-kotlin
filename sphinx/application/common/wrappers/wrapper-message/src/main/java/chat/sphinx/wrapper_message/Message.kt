@@ -18,12 +18,9 @@ import chat.sphinx.wrapper_message.media.MessageMedia
 inline val Message.isPaidMessage: Boolean
     get() {
         // TODO: Implement logic at the repository level for extracting a price from the media token.
-//        return isAttachment && (messageMedia?.priceFromToken ?: 0) > 0
+//        return type.isAttachment() && (messageMedia?.priceFromToken ?: 0) > 0
         return false
     }
-
-inline val Message.isAttachment: Boolean
-    get() = type.isAttachment()
 
 inline val Message.purchaseStatus: MessagePurchaseStatus
     get() {
