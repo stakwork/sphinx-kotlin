@@ -8,6 +8,7 @@ import app.cash.exhaustive.Exhaustive
 import chat.sphinx.chat_common.R
 import chat.sphinx.resources.R as common_R
 import chat.sphinx.chat_common.databinding.LayoutMessageHolderBinding
+import chat.sphinx.resources.getString
 import chat.sphinx.resources.setTextColorExt
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_message.MessagePurchaseStatus
@@ -194,7 +195,6 @@ internal inline fun LayoutMessageHolderBinding.setBubbleMessageLayout(
     }
 }
 
-
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun LayoutMessageHolderBinding.setBubblePaidMessageDetailsLayout(
@@ -212,13 +212,28 @@ internal inline fun LayoutMessageHolderBinding.setBubblePaidMessageDetailsLayout
                 textViewPaymentAcceptedIcon.goneIfFalse(showPaymentAcceptedIcon)
                 progressBarPaidMessage.goneIfFalse(showPaymentProgressWheel)
 
-                textViewPaidMessageStatusLabel.text = labelTextFromResources(root.context.resources)
+                textViewPaidMessageStatusLabel.text = when (purchaseStatus) {
+                    MessagePurchaseStatus.Pending -> {
+                        getString(R.string.purchase_status_label_paid_message_details_pending)
+                    }
+                    MessagePurchaseStatus.Accepted -> {
+                        getString(R.string.purchase_status_label_paid_message_details_accepted)
+                    }
+                    MessagePurchaseStatus.Denied -> {
+                        getString(R.string.purchase_status_label_paid_message_details_denied)
+                    }
+                    MessagePurchaseStatus.Processing -> {
+                        getString(R.string.purchase_status_label_paid_message_details_processing)
+                    }
+                    else -> {
+                        getString(R.string.purchase_status_label_paid_message_details_default)
+                    }
+                }
                 textViewPaidMessageAmountToPayLabel.text = amountText
             }
         }
     }
 }
-
 
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
@@ -233,50 +248,24 @@ internal inline fun LayoutMessageHolderBinding.setBubblePaidMessageSentStatusLay
 
             messageDetails.apply {
                 textViewPaidMessageSentStatusAmount.text = messageDetails.amountText
-                textViewPaidMessageSentStatus.text = labelTextFromResources(root.context.resources)
+                textViewPaidMessageSentStatus.text = when (purchaseStatus) {
+                    MessagePurchaseStatus.Pending -> {
+                        getString(R.string.purchase_status_label_paid_message_sent_status_pending)
+                    }
+                    MessagePurchaseStatus.Accepted -> {
+                        getString(R.string.purchase_status_label_paid_message_sent_status_accepted)
+                    }
+                    MessagePurchaseStatus.Denied -> {
+                        getString(R.string.purchase_status_label_paid_message_sent_status_denied)
+                    }
+                    MessagePurchaseStatus.Processing -> {
+                        getString(R.string.purchase_status_label_paid_message_sent_status_processing)
+                    }
+                    else -> {
+                        getString(R.string.purchase_status_label_paid_message_sent_status_default)
+                    }
+                }
             }
-        }
-    }
-}
-
-
-private fun LayoutState.Bubble.PaidMessageDetails.labelTextFromResources(resources: Resources): String {
-    return when (purchaseStatus) {
-        MessagePurchaseStatus.Pending -> {
-           resources.getString(R.string.purchase_status_label_paid_message_details_pending)
-        }
-        MessagePurchaseStatus.Accepted -> {
-            resources.getString(R.string.purchase_status_label_paid_message_details_accepted)
-        }
-        MessagePurchaseStatus.Denied -> {
-            resources.getString(R.string.purchase_status_label_paid_message_details_denied)
-        }
-        MessagePurchaseStatus.Processing -> {
-            resources.getString(R.string.purchase_status_label_paid_message_details_processing)
-        }
-        else -> {
-            resources.getString(R.string.purchase_status_label_paid_message_details_default)
-        }
-    }
-}
-
-
-private fun LayoutState.Bubble.PaidMessageSentStatus.labelTextFromResources(resources: Resources): String {
-    return when (purchaseStatus) {
-        MessagePurchaseStatus.Pending -> {
-           resources.getString(R.string.purchase_status_label_paid_message_sent_status_pending)
-        }
-        MessagePurchaseStatus.Accepted -> {
-            resources.getString(R.string.purchase_status_label_paid_message_sent_status_accepted)
-        }
-        MessagePurchaseStatus.Denied -> {
-            resources.getString(R.string.purchase_status_label_paid_message_sent_status_denied)
-        }
-        MessagePurchaseStatus.Processing -> {
-            resources.getString(R.string.purchase_status_label_paid_message_sent_status_processing)
-        }
-        else -> {
-            resources.getString(R.string.purchase_status_label_paid_message_sent_status_default)
         }
     }
 }
