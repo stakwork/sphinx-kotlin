@@ -22,22 +22,51 @@ inline val Message.isPaidMessage: Boolean
         return false
     }
 
-inline val Message.purchaseStatus: MessagePurchaseStatus
+inline val Message.purchaseStatus: MessagePurchaseStatus?
     get() {
         if (status.isPending()) return MessagePurchaseStatus.Pending
 
         return when (type) {
-            MessageType.PurchaseAccept -> {
+            is MessageType.PurchaseAccept -> {
                 MessagePurchaseStatus.Accepted
             }
-            MessageType.PurchaseDeny -> {
+            is MessageType.PurchaseDeny -> {
                 MessagePurchaseStatus.Denied
             }
-            MessageType.Purchase -> {
+            is MessageType.Purchase -> {
                 MessagePurchaseStatus.Processing
             }
-            else -> {
-                MessagePurchaseStatus.NoStatusMessage
+            is MessageType.Attachment,
+            is MessageType.Boost,
+            is MessageType.BotCmd,
+            is MessageType.BotInstall,
+            is MessageType.BotRes,
+            is MessageType.Cancellation,
+            is MessageType.Confirmation,
+            is MessageType.ContactKey,
+            is MessageType.ContactKeyConfirmation,
+            is MessageType.Delete,
+            is MessageType.DirectPayment,
+            is MessageType.GroupCreate,
+            is MessageType.GroupInvite,
+            is MessageType.GroupJoin,
+            is MessageType.GroupKick,
+            is MessageType.GroupLeave,
+            is MessageType.Heartbeat,
+            is MessageType.HeartbeatConfirmation,
+            is MessageType.Invoice,
+            is MessageType.KeySend,
+            is MessageType.MemberApprove,
+            is MessageType.MemberReject,
+            is MessageType.MemberRequest,
+            is MessageType.Message,
+            is MessageType.Payment,
+            is MessageType.Query,
+            is MessageType.QueryResponse,
+            is MessageType.Repayment,
+            is MessageType.TribeDelete,
+            is MessageType.Unknown -> {
+                null
             }
         }
     }
