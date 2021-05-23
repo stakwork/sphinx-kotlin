@@ -40,15 +40,17 @@ internal sealed class LayoutState {
             val showPaymentProgressWheel: Boolean,
             val showSendPaymentIcon: Boolean,
             val showPaymentReceivedIcon: Boolean,
-        ) : LayoutState() {
-            val amountText: String = amount.asFormattedString(appendUnit = true)
+        ): LayoutState() {
+            val amountText: String
+                get() = amount.asFormattedString(appendUnit = true)
         }
 
         data class PaidMessageSentStatus(
             val amount: Sat,
             val purchaseStatus: MessagePurchaseStatus,
-        ) : LayoutState() {
-            val amountText: String = amount.asFormattedString(appendUnit = true)
+        ): LayoutState() {
+            val amountText: String
+                get() = amount.asFormattedString(appendUnit = true)
         }
     }
 
