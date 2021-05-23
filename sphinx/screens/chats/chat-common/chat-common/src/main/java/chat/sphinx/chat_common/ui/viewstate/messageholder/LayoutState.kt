@@ -16,16 +16,16 @@ internal sealed class LayoutState {
 
         val showLockIcon: Boolean,
         val timestamp: String,
-    ) : LayoutState() {
+    ): LayoutState() {
         val showReceived: Boolean
             get() = !showSent
     }
 
-    sealed class Bubble : LayoutState() {
+    sealed class Bubble: LayoutState() {
 
-        data class Message(val text: String) : Bubble()
+        data class Message(val text: String): Bubble()
 
-        data class DirectPayment(val showSent: Boolean, val amount: Sat) : Bubble() {
+        data class DirectPayment(val showSent: Boolean, val amount: Sat): Bubble() {
             val showReceived: Boolean
                 get() = !showSent
 
