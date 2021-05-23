@@ -319,6 +319,14 @@ sealed class MessageType {
     abstract val show: Boolean
     abstract val value: Int
 
+    val purchaseStatus: PurchaseStatus
+        get() = when (this) {
+            Purchase -> PurchaseStatus.Processing
+            PurchaseAccept -> PurchaseStatus.Accepted
+            PurchaseDeny -> PurchaseStatus.Denied
+            else -> PurchaseStatus.None
+        }
+
     object Message: MessageType() {
         override val canContainMedia: Boolean
             get() = CAN_NOT_CONTAIN_MEDIA
@@ -677,5 +685,24 @@ sealed class MessageType {
 
         override val show: Boolean
             get() = DO_NOT_SHOW
+    }
+
+    sealed class PurchaseStatus {
+        inline val isNone: Boolean
+            get() = this is None
+
+        inline val isAccepted: Boolean
+            get() = this is Accepted
+
+        inline val isDenied: Boolean
+            get() = this is Denied
+
+        inline val isProcessing: Boolean
+            get() = this is Processing
+
+        object None: PurchaseStatus()
+        object Accepted: PurchaseStatus()
+        object Denied: PurchaseStatus()
+        object Processing: PurchaseStatus()
     }
 }

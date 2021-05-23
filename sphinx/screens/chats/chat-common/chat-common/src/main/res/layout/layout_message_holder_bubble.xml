@@ -166,7 +166,7 @@
             android:id="@+id/include_paid_message_received_details_holder"
             layout="@layout/layout_paid_message_received"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/paid_message_details_holder_height"
+            android:layout_height="wrap_content"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:visibility="visible" />
@@ -177,7 +177,7 @@
             android:id="@+id/include_message_type_boost"
             layout="@layout/layout_message_type_boost"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/message_type_boost_height"
+            android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toTopOf="parent"

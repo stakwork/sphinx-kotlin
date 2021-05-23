@@ -3,7 +3,7 @@ package chat.sphinx.chat_common.ui.viewstate.messageholder
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.lightning.unit
-import chat.sphinx.wrapper_message.MessagePurchaseStatus
+import chat.sphinx.wrapper_message.MessageType
 
 internal sealed class LayoutState {
 
@@ -35,7 +35,7 @@ internal sealed class LayoutState {
 
         data class PaidMessageDetails(
             val amount: Sat,
-            val purchaseStatus: MessagePurchaseStatus,
+            val purchaseStatus: MessageType.PurchaseStatus,
             val showPaymentAcceptedIcon: Boolean,
             val showPaymentProgressWheel: Boolean,
             val showSendPaymentIcon: Boolean,
@@ -47,7 +47,7 @@ internal sealed class LayoutState {
 
         data class PaidMessageSentStatus(
             val amount: Sat,
-            val purchaseStatus: MessagePurchaseStatus,
+            val purchaseStatus: MessageType.PurchaseStatus,
         ): LayoutState() {
             val amountText: String
                 get() = amount.asFormattedString(appendUnit = true)

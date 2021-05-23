@@ -66,18 +66,17 @@ internal sealed class MessageHolderViewState(
         if (!message.isPaidMessage) {
             null
         } else {
-            message.purchaseStatus?.let { purchaseStatus ->
-                val isPaymentProcessing = purchaseStatus.isProcessing
+            val purchaseStatus = message.type.purchaseStatus
+            val isPaymentPending = message.status.isPending()
 
-                LayoutState.Bubble.PaidMessageDetails(
-                    amount = message.amount,
-                    purchaseStatus = purchaseStatus,
-                    showPaymentAcceptedIcon = purchaseStatus.isAccepted,
-                    showPaymentProgressWheel = purchaseStatus.isPending,
-                    showSendPaymentIcon = this !is Sent && !isPaymentProcessing,
-                    showPaymentReceivedIcon = this is Sent && !isPaymentProcessing,
-                )
-            }
+            LayoutState.Bubble.PaidMessageDetails(
+                amount = message.amount,
+                purchaseStatus = purchaseStatus,
+                showPaymentAcceptedIcon = purchaseStatus.isAccepted && !isPaymentPending,
+                showPaymentProgressWheel = isPaymentPending,
+                showSendPaymentIcon = this !is Sent && !isPaymentPending,
+                showPaymentReceivedIcon = this is Sent && !isPaymentPending,
+            )
         }
     }
 
@@ -86,12 +85,10 @@ internal sealed class MessageHolderViewState(
         if (!message.isPaidMessage || this !is Sent) {
             null
         } else {
-            message.purchaseStatus?.let { purchaseStatus ->
-                LayoutState.Bubble.PaidMessageSentStatus(
-                    amount = message.amount,
-                    purchaseStatus = purchaseStatus,
-                )
-            }
+            LayoutState.Bubble.PaidMessageSentStatus(
+                amount = message.amount,
+                purchaseStatus = message.type.purchaseStatus,
+            )
         }
     }
 
@@ -100,7 +97,7 @@ internal sealed class MessageHolderViewState(
         message: Message,
         chatType: ChatType?,
         background: BubbleBackground,
-    ): MessageHolderViewState(
+    ) : MessageHolderViewState(
         message,
         chatType,
         background,
@@ -112,7 +109,7 @@ internal sealed class MessageHolderViewState(
         chatType: ChatType?,
         background: BubbleBackground,
         initialHolder: InitialHolderViewState,
-    ): MessageHolderViewState(
+    ) : MessageHolderViewState(
         message,
         chatType,
         background,
