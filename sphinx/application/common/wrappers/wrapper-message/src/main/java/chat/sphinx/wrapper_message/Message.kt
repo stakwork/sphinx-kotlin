@@ -30,14 +30,18 @@ inline val Message.purchaseStatus: MessagePurchaseStatus
         if (status.isPending()) return MessagePurchaseStatus.Pending
 
         return when (type) {
-            MessageType.PurchaseAccept ->
+            MessageType.PurchaseAccept -> {
                 MessagePurchaseStatus.Accepted
-            MessageType.PurchaseDeny ->
+            }
+            MessageType.PurchaseDeny -> {
                 MessagePurchaseStatus.Denied
-            MessageType.Purchase ->
+            }
+            MessageType.Purchase -> {
                 MessagePurchaseStatus.Processing
-            else ->
+            }
+            else -> {
                 MessagePurchaseStatus.NoStatusMessage
+            }
         }
     }
 
