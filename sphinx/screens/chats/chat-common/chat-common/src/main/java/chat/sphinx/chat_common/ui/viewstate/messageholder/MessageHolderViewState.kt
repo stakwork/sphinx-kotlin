@@ -66,18 +66,16 @@ internal sealed class MessageHolderViewState(
         if (!message.isPaidMessage) {
             null
         } else {
-            val isSentMessage = this is Sent
             val purchaseStatus = message.purchaseStatus
-            val isPaymentAccepted = purchaseStatus.isAccepted
             val isPaymentProcessing = purchaseStatus.isProcessing
 
             LayoutState.Bubble.PaidMessageDetails(
                 amount = message.amount,
                 purchaseStatus = purchaseStatus,
-                showPaymentAcceptedIcon = isPaymentAccepted,
+                showPaymentAcceptedIcon = purchaseStatus.isAccepted,
                 showPaymentProgressWheel = purchaseStatus.isPending,
-                showSendPaymentIcon = !isSentMessage && !isPaymentProcessing,
-                showPaymentReceivedIcon = isSentMessage && !isPaymentProcessing,
+                showSendPaymentIcon = this !is Sent && !isPaymentProcessing,
+                showPaymentReceivedIcon = this is Sent && !isPaymentProcessing,
             )
         }
     }
