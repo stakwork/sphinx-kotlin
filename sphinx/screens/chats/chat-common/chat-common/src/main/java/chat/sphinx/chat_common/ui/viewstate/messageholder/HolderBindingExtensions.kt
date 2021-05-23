@@ -206,31 +206,29 @@ internal inline fun LayoutMessageHolderBinding.setBubblePaidMessageDetailsLayout
         } else {
             root.visible
 
-            messageDetails.apply {
-                imageViewPaidMessageReceivedIcon.goneIfFalse(showPaymentReceivedIcon)
-                imageViewPaidMessageSentIcon.goneIfFalse(showSendPaymentIcon)
-                textViewPaymentAcceptedIcon.goneIfFalse(showPaymentAcceptedIcon)
-                progressBarPaidMessage.goneIfFalse(showPaymentProgressWheel)
+            imageViewPaidMessageReceivedIcon.goneIfFalse(messageDetails.showPaymentReceivedIcon)
+            imageViewPaidMessageSentIcon.goneIfFalse(messageDetails.showSendPaymentIcon)
+            textViewPaymentAcceptedIcon.goneIfFalse(messageDetails.showPaymentAcceptedIcon)
+            progressBarPaidMessage.goneIfFalse(messageDetails.showPaymentProgressWheel)
 
-                textViewPaidMessageStatusLabel.text = when (purchaseStatus) {
-                    MessagePurchaseStatus.Pending -> {
-                        getString(R.string.purchase_status_label_paid_message_details_pending)
-                    }
-                    MessagePurchaseStatus.Accepted -> {
-                        getString(R.string.purchase_status_label_paid_message_details_accepted)
-                    }
-                    MessagePurchaseStatus.Denied -> {
-                        getString(R.string.purchase_status_label_paid_message_details_denied)
-                    }
-                    MessagePurchaseStatus.Processing -> {
-                        getString(R.string.purchase_status_label_paid_message_details_processing)
-                    }
-                    else -> {
-                        getString(R.string.purchase_status_label_paid_message_details_default)
-                    }
+            textViewPaidMessageStatusLabel.text = when (messageDetails.purchaseStatus) {
+                MessagePurchaseStatus.Pending -> {
+                    getString(R.string.purchase_status_label_paid_message_details_pending)
                 }
-                textViewPaidMessageAmountToPayLabel.text = amountText
+                MessagePurchaseStatus.Accepted -> {
+                    getString(R.string.purchase_status_label_paid_message_details_accepted)
+                }
+                MessagePurchaseStatus.Denied -> {
+                    getString(R.string.purchase_status_label_paid_message_details_denied)
+                }
+                MessagePurchaseStatus.Processing -> {
+                    getString(R.string.purchase_status_label_paid_message_details_processing)
+                }
+                else -> {
+                    getString(R.string.purchase_status_label_paid_message_details_default)
+                }
             }
+            textViewPaidMessageAmountToPayLabel.text = messageDetails.amountText
         }
     }
 }
@@ -246,24 +244,22 @@ internal inline fun LayoutMessageHolderBinding.setBubblePaidMessageSentStatusLay
         } else {
             root.visible
 
-            messageDetails.apply {
-                textViewPaidMessageSentStatusAmount.text = messageDetails.amountText
-                textViewPaidMessageSentStatus.text = when (purchaseStatus) {
-                    MessagePurchaseStatus.Pending -> {
-                        getString(R.string.purchase_status_label_paid_message_sent_status_pending)
-                    }
-                    MessagePurchaseStatus.Accepted -> {
-                        getString(R.string.purchase_status_label_paid_message_sent_status_accepted)
-                    }
-                    MessagePurchaseStatus.Denied -> {
-                        getString(R.string.purchase_status_label_paid_message_sent_status_denied)
-                    }
-                    MessagePurchaseStatus.Processing -> {
-                        getString(R.string.purchase_status_label_paid_message_sent_status_processing)
-                    }
-                    else -> {
-                        getString(R.string.purchase_status_label_paid_message_sent_status_default)
-                    }
+            textViewPaidMessageSentStatusAmount.text = messageDetails.amountText
+            textViewPaidMessageSentStatus.text = when (messageDetails.purchaseStatus) {
+                MessagePurchaseStatus.Pending -> {
+                    getString(R.string.purchase_status_label_paid_message_sent_status_pending)
+                }
+                MessagePurchaseStatus.Accepted -> {
+                    getString(R.string.purchase_status_label_paid_message_sent_status_accepted)
+                }
+                MessagePurchaseStatus.Denied -> {
+                    getString(R.string.purchase_status_label_paid_message_sent_status_denied)
+                }
+                MessagePurchaseStatus.Processing -> {
+                    getString(R.string.purchase_status_label_paid_message_sent_status_processing)
+                }
+                else -> {
+                    getString(R.string.purchase_status_label_paid_message_sent_status_default)
                 }
             }
         }
