@@ -21,6 +21,8 @@ dependencies {
 
     api project(path: ':sphinx:test:test-tor-manager')
 
+    // needed to override moshi's use of 1.4.31
+    api deps.kotlin.reflect
     api deps.square.moshi
 
     api deps.jncryptor

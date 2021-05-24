@@ -11,7 +11,8 @@ inline fun String.toLightningNodePubKey(): LightningNodePubKey? =
 inline val String.isValidLightningNodePubKey: Boolean
     get() = isNotEmpty() && matches("^${LightningNodePubKey.REGEX}\$".toRegex())
 
-inline class LightningNodePubKey(val value: String) {
+@JvmInline
+value class LightningNodePubKey(val value: String) {
 
     companion object {
         const val REGEX = "[A-F0-9a-f]{66}"

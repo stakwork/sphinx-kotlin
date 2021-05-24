@@ -8,7 +8,8 @@ inline fun String.toLightningPaymentHash(): LightningPaymentHash? =
         null
     }
 
-inline class LightningPaymentHash(val value: String) {
+@JvmInline
+value class LightningPaymentHash(val value: String) {
     init {
         require(value.isNotEmpty()) {
             "LightningPaymentHash cannot be empty"

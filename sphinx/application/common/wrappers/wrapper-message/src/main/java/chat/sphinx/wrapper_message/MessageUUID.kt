@@ -8,7 +8,8 @@ inline fun String.toMessageUUID(): MessageUUID? =
         null
     }
 
-inline class MessageUUID(val value: String) {
+@JvmInline
+value class MessageUUID(val value: String) {
     init {
         require(value.isNotEmpty()) {
             "MessageUUID cannot be empty"

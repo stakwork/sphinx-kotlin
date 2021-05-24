@@ -16,4 +16,5 @@ inline fun Dp.multiplyBy(dp: Dp): Dp =
 inline fun Dp.divideBy(dp: Dp): Dp =
     Dp(value / dp.value)
 
-inline class Dp(val value: Float)
+@JvmInline
+value class Dp(val value: Float)

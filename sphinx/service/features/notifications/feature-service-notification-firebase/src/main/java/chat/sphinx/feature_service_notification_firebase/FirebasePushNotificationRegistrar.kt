@@ -13,7 +13,6 @@ import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collect
-import java.io.IOException
 
 internal class FirebasePushNotificationRegistrar(
     private val contactRepository: ContactRepository,
