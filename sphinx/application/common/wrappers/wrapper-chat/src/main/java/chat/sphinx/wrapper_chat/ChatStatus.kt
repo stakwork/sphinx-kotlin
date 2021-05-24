@@ -75,5 +75,5 @@ sealed class ChatStatus {
             get() = REJECTED
     }
 
-    class Unknown(override val value: Int) : ChatStatus()
+    data class Unknown(override val value: Int): ChatStatus()
 }

@@ -72,5 +72,5 @@ sealed class ContactStatus {
             get() = CONFIRMED
     }
 
-    class Unknown(override val value: Int) : ContactStatus()
+    data class Unknown(override val value: Int) : ContactStatus()
 }

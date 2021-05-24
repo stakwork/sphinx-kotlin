@@ -2,6 +2,7 @@ package chat.sphinx.chat_common.ui
 
 import android.app.Application
 import android.content.Context
+import androidx.annotation.CallSuper
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavArgs
@@ -9,13 +10,14 @@ import app.cash.exhaustive.Exhaustive
 import chat.sphinx.chat_common.R
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
 import chat.sphinx.chat_common.ui.viewstate.header.ChatHeaderViewState
-import chat.sphinx.chat_common.ui.viewstate.messageholder.HolderBackground
+import chat.sphinx.chat_common.ui.viewstate.messageholder.BubbleBackground
 import chat.sphinx.chat_common.ui.viewstate.messageholder.MessageHolderViewState
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_message.MessageRepository
+import chat.sphinx.concept_repository_message.SendMessage
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
@@ -24,7 +26,6 @@ import chat.sphinx.resources.getRandomColor
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.ChatName
 import chat.sphinx.wrapper_message.Message
-import io.matthewnelson.android_feature_viewmodel.BaseViewModel
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
@@ -141,18 +142,18 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                 for (message in messages) {
                     if (message.sender == chat.contactIds.firstOrNull()) {
                         newList.add(
-                            MessageHolderViewState.OutGoing(
+                            MessageHolderViewState.Sent(
                                 message,
                                 chat.type,
-                                HolderBackground.First.Isolated,
+                                BubbleBackground.First.Isolated,
                             )
                         )
                     } else {
                         newList.add(
-                            MessageHolderViewState.InComing(
+                            MessageHolderViewState.Received(
                                 message,
                                 chat.type,
-                                HolderBackground.First.Isolated,
+                                BubbleBackground.First.Isolated,
                                 getInitialHolderViewStateForReceivedMessage(message)
                             )
                         )
@@ -172,20 +173,41 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         // Prime our states immediately so they're already
         // updated by the time the Fragment's onStart is called
         // where they're collected.
-        viewModelScope.launch(dispatchers.mainImmediate) {
+        val setupChatFlowJob = viewModelScope.launch(mainImmediate) {
             chatSharedFlow.firstOrNull()
         }
-        viewModelScope.launch(dispatchers.mainImmediate) {
+        val setupHeaderInitialHolderJob = viewModelScope.launch(mainImmediate) {
             headerInitialHolderSharedFlow.firstOrNull()
         }
-        viewModelScope.launch(dispatchers.mainImmediate) {
+        val setupViewStateContainerJob = viewModelScope.launch(mainImmediate) {
             viewStateContainer.viewStateFlow.firstOrNull()
+        }
+        viewModelScope.launch(mainImmediate) {
+            delay(500)
+            // cancel the setup jobs as the view has taken over observation
+            // and we don't want to continue collecting endlessly if any of
+            // them are still active. WhileSubscribed will take over.
+            setupChatFlowJob.cancel()
+            setupHeaderInitialHolderJob.cancel()
+            setupViewStateContainerJob.cancel()
         }
     }
 
     abstract val checkRoute: Flow<LoadResponse<Boolean, ResponseError>>
 
     abstract fun readMessages()
+
+    /**
+     * Builds the [SendMessage] and returns it (or null if it was invalid),
+     * then passes it off to the [MessageRepository] for processing.
+     * */
+    @CallSuper
+    open fun sendMessage(builder: SendMessage.Builder): SendMessage? {
+        val msg = builder.build()
+        // TODO: if null figure out why and notify user via side effect
+        messageRepository.sendMessage(msg)
+        return msg
+    }
 
     private var toggleChatMutedJob: Job? = null
     protected var notifyJob: Job? = null

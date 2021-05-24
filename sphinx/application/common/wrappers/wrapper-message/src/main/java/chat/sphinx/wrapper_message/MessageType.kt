@@ -671,7 +671,7 @@ sealed class MessageType {
             get() = QUERY_RESPONSE
     }
 
-    class Unknown(override val value: Int) : MessageType() {
+    data class Unknown(override val value: Int): MessageType() {
         override val canContainMedia: Boolean
             get() = CAN_NOT_CONTAIN_MEDIA
 
