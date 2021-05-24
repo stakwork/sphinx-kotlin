@@ -1,6 +1,7 @@
 package chat.sphinx.wrapper_common.chat
 
-inline class ChatId(val value: Long) {
+@JvmInline
+value class ChatId(val value: Long) {
 
     companion object {
         const val NULL_CHAT_ID = Int.MAX_VALUE

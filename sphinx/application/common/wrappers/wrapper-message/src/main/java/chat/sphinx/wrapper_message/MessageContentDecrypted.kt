@@ -8,7 +8,8 @@ inline fun String.toMessageContentDecrypted(): MessageContentDecrypted? =
         null
     }
 
-inline class MessageContentDecrypted(val value: String) {
+@JvmInline
+value class MessageContentDecrypted(val value: String) {
     init {
         require(value.isNotEmpty()) {
             "MessageContentDecrypted cannot be empty"

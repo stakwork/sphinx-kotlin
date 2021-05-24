@@ -29,7 +29,8 @@ inline val Sat.unit: String
 inline fun Sat.asFormattedString(separator: Char = ' ') =
     NumberFormat.getInstance(Locale.ENGLISH).format(value).replace(',', separator)
 
-inline class Sat(val value: Long) {
+@JvmInline
+value class Sat(val value: Long) {
     init {
         require(value >= 0L) {
             "Sat must be greater than or equal to 0"

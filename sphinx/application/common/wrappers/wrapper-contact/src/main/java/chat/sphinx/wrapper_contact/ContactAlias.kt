@@ -8,7 +8,8 @@ inline fun String.toContactAlias(): ContactAlias? =
         null
     }
 
-inline class ContactAlias(val value: String) {
+@JvmInline
+value class ContactAlias(val value: String) {
     init {
         require(value.isNotEmpty()) {
             "ContactAlias cannot be empty"

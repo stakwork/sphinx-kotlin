@@ -8,7 +8,8 @@ inline fun String.toMessageContent(): MessageContent? =
         null
     }
 
-inline class MessageContent(val value: String) {
+@JvmInline
+value class MessageContent(val value: String) {
     init {
         require(value.isNotEmpty()) {
             "MessageContent cannot be empty"
