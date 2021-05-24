@@ -14,6 +14,16 @@
         android:layout_height="@dimen/default_header_height"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <androidx.camera.view.PreviewView
+        android:id="@+id/previewView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toBottomOf="@+id/include_scanner_header"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/edit_text_scanner_input_stub"
+        />
+
     <EditText
         android:id="@+id/edit_text_scanner_input_stub"
         android:layout_width="match_parent"

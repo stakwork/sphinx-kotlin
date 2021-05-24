@@ -10,18 +10,18 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import app.cash.exhaustive.Exhaustive
 import by.kirich1409.viewbindingdelegate.viewBinding
-import chat.sphinx.new_contact.R
-import chat.sphinx.new_contact.databinding.FragmentNewContactBinding
-import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
+import chat.sphinx.new_contact.R
+import chat.sphinx.new_contact.databinding.FragmentNewContactBinding
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.LightningRouteHint
+import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 internal class NewContactFragment : SideEffectFragment<
