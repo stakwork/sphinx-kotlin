@@ -5,22 +5,32 @@ import chat.sphinx.wrapper_chat.ChatType
 import chat.sphinx.wrapper_chat.isConversation
 import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_message.Message
+import chat.sphinx.wrapper_message.isConfirmed
 import chat.sphinx.wrapper_message.isDirectPayment
 import chat.sphinx.wrapper_message.isReceived
+
+internal inline val MessageHolderViewState.isReceived: Boolean
+    get() = this is MessageHolderViewState.Received
+
+internal inline val MessageHolderViewState.showReceivedBubbleArrow: Boolean
+    get() = background is BubbleBackground.First && this is MessageHolderViewState.Received
+
+internal val MessageHolderViewState.showSentBubbleArrow: Boolean
+    get() = background is BubbleBackground.First && this is MessageHolderViewState.Sent
 
 internal sealed class MessageHolderViewState(
     val message: Message,
     chatType: ChatType?,
-    val background: HolderBackground,
+    val background: BubbleBackground,
     val initialHolder: InitialHolderViewState
 ) {
 
     val statusHeader: LayoutState.MessageStatusHeader? by lazy(LazyThreadSafetyMode.NONE) {
-        if (background is HolderBackground.First) {
+        if (background is BubbleBackground.First) {
             LayoutState.MessageStatusHeader(
                 if (chatType?.isConversation() != false) null else message.senderAlias?.value,
-                this is OutGoing,
-                this is OutGoing && message.status.isReceived(),
+                this is Sent,
+                this is Sent && (message.status.isReceived() || message.status.isConfirmed()),
                 message.messageContentDecrypted != null,
                 DateTime.getFormathmma().format(message.date.value),
             )
@@ -29,52 +39,51 @@ internal sealed class MessageHolderViewState(
         }
     }
 
-    val directPayment: LayoutState.DirectPayment? by lazy(LazyThreadSafetyMode.NONE) {
+    val bubbleDirectPayment: LayoutState.Bubble.DirectPayment? by lazy(LazyThreadSafetyMode.NONE) {
         if (message.type.isDirectPayment()) {
-            LayoutState.DirectPayment(showSent = this is OutGoing, amount = message.amount)
+            LayoutState.Bubble.DirectPayment(showSent = this is Sent, amount = message.amount)
         } else {
             null
         }
     }
 
-    val messageTypeMessageContent: LayoutState.MessageTypeMessageContent? by lazy(LazyThreadSafetyMode.NONE) {
+    val bubbleMessage: LayoutState.Bubble.Message? by lazy(LazyThreadSafetyMode.NONE) {
         message.messageContentDecrypted?.let {
             // TODO: Handle podcast clips
             message.giphyData?.let { giphyData ->
                 // TODO: show only the giphyData.text when rendering logic is implemented
 //                giphyData.text?.let { text ->
-//                    LayoutState.MessageTypeMessageContent(text)
+//                    LayoutState.Bubble.Message(text = text)
 //                }
-                LayoutState.MessageTypeMessageContent(giphyData.toString())
+                LayoutState.Bubble.Message(text = giphyData.toString())
             } ?: /*if (message.podBoost == null) {*/ // TODO: Uncomment once boost layout logic is implemented
-            LayoutState.MessageTypeMessageContent(it.value)
+            LayoutState.Bubble.Message(text = it.value)
 //            } else {
 //                null
 //            }
         }
     }
 
-
-    class InComing(
+    class Sent(
         message: Message,
         chatType: ChatType?,
-        background: HolderBackground,
+        background: BubbleBackground,
+    ): MessageHolderViewState(
+        message,
+        chatType,
+        background,
+        InitialHolderViewState.None
+    )
+
+    class Received(
+        message: Message,
+        chatType: ChatType?,
+        background: BubbleBackground,
         initialHolder: InitialHolderViewState,
     ): MessageHolderViewState(
         message,
         chatType,
         background,
         initialHolder
-    )
-
-    class OutGoing(
-        message: Message,
-        chatType: ChatType?,
-        background: HolderBackground,
-    ): MessageHolderViewState(
-        message,
-        chatType,
-        background,
-        InitialHolderViewState.None
     )
 }

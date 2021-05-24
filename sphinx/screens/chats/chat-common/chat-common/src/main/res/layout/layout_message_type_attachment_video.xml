@@ -2,7 +2,6 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/layout_constraint_message_type_video_attachment"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:visibility="gone"
@@ -10,10 +9,10 @@
     tools:visibility="visible">
 
     <VideoView
-        android:id="@+id/video_view"
+        android:id="@+id/video_view_attachment_video"
         android:layout_width="0dp"
         android:layout_height="@dimen/message_type_video_attachment_height"
-        app:layout_constraintBottom_toTopOf="@id/text_view_optional_message_body"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -21,42 +20,27 @@
 
     <!--  TODO: Create and apply drawable for Circular Play Button  -->
     <androidx.appcompat.widget.AppCompatImageButton
-        android:id="@+id/button_play_video"
+        android:id="@+id/button_attachment_video_play"
         android:layout_width="@dimen/video_attachment_play_pause_button_xy"
         android:layout_height="@dimen/video_attachment_play_pause_button_xy"
         android:src="@drawable/sphinx_white_logo"
-        app:layout_constraintBottom_toBottomOf="@id/video_view"
-        app:layout_constraintEnd_toEndOf="@id/video_view"
-        app:layout_constraintStart_toStartOf="@id/video_view"
-        app:layout_constraintTop_toTopOf="@id/video_view" />
+        app:layout_constraintBottom_toBottomOf="@id/video_view_attachment_video"
+        app:layout_constraintEnd_toEndOf="@id/video_view_attachment_video"
+        app:layout_constraintStart_toStartOf="@id/video_view_attachment_video"
+        app:layout_constraintTop_toTopOf="@id/video_view_attachment_video" />
 
 
     <!--  TODO: Create and apply drawable for Circular Pause Button  -->
     <androidx.appcompat.widget.AppCompatImageButton
-        android:id="@+id/button_pause_video"
+        android:id="@+id/button_attachment_video_pause"
         android:layout_width="@dimen/video_attachment_play_pause_button_xy"
         android:layout_height="@dimen/video_attachment_play_pause_button_xy"
         android:src="@drawable/sphinx_white_logo"
         android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="@id/video_view"
-        app:layout_constraintEnd_toEndOf="@id/video_view"
-        app:layout_constraintStart_toStartOf="@id/video_view"
-        app:layout_constraintTop_toTopOf="@id/video_view"
+        app:layout_constraintBottom_toBottomOf="@id/video_view_attachment_video"
+        app:layout_constraintEnd_toEndOf="@id/video_view_attachment_video"
+        app:layout_constraintStart_toStartOf="@id/video_view_attachment_video"
+        app:layout_constraintTop_toTopOf="@id/video_view_attachment_video"
         tools:visibility="gone" />
-
-
-    <!-- Optional Message   -->
-    <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/text_view_optional_message_body"
-        style="@style/chat_message_body_text"
-        android:layout_width="0dp"
-        android:padding="@dimen/background_message_holder_default_padding"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/video_view"
-        android:visibility="gone"
-        tools:text="Contrary to popular belief, Lorem Ipsum is not simply random text. Latin from 45 BC, making it over 2000 years old."
-        tools:visibility="visible" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

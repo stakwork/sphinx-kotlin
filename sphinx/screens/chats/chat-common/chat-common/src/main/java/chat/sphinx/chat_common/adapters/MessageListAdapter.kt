@@ -11,11 +11,13 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import chat.sphinx.chat_common.ui.ChatViewModel
 import chat.sphinx.chat_common.databinding.LayoutMessageHolderBinding
+import chat.sphinx.chat_common.ui.viewstate.messageholder.*
+import chat.sphinx.chat_common.ui.viewstate.messageholder.BubbleBackground
 import chat.sphinx.chat_common.ui.viewstate.messageholder.MessageHolderViewState
-import chat.sphinx.chat_common.ui.viewstate.messageholder.setBackground
-import chat.sphinx.chat_common.ui.viewstate.messageholder.setDirectPaymentLayout
+import chat.sphinx.chat_common.ui.viewstate.messageholder.setBubbleBackground
+import chat.sphinx.chat_common.ui.viewstate.messageholder.setBubbleDirectPaymentLayout
+import chat.sphinx.chat_common.ui.viewstate.messageholder.setBubbleMessageLayout
 import chat.sphinx.chat_common.ui.viewstate.messageholder.setStatusHeader
-import chat.sphinx.chat_common.ui.viewstate.messageholder.setMessageTypeMessageLayout
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.wrapper_view.Px
@@ -59,11 +61,11 @@ internal class MessageListAdapter<ARGS: NavArgs>(
                 val new = newList[newItemPosition]
 
                 when {
-                    old is MessageHolderViewState.InComing && new is MessageHolderViewState.InComing -> {
+                    old is MessageHolderViewState.Received && new is MessageHolderViewState.Received -> {
                         old.background == new.background        &&
                         old.message    == new.message
                     }
-                    old is MessageHolderViewState.OutGoing && new is MessageHolderViewState.OutGoing -> {
+                    old is MessageHolderViewState.Sent && new is MessageHolderViewState.Sent -> {
                         old.background == new.background        &&
                         old.message    == new.message
                     }
@@ -160,10 +162,13 @@ internal class MessageListAdapter<ARGS: NavArgs>(
                     )
                 }
 
-                setBackground(viewState, recyclerViewWidth)
                 setStatusHeader(viewState.statusHeader)
-                setMessageTypeMessageLayout(viewState.messageTypeMessageContent)
-                setDirectPaymentLayout(viewState.directPayment)
+                setBubbleBackground(viewState, recyclerViewWidth)
+
+                if (viewState.background !is BubbleBackground.Gone) {
+                    setBubbleMessageLayout(viewState.bubbleMessage)
+                    setBubbleDirectPaymentLayout(viewState.bubbleDirectPayment)
+                }
             }
         }
 
