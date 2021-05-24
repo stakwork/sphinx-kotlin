@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="scanner_header_name">SCAN A QR CODE</string>
+    <string name="scanner_header_name">SCAN</string>
+    <string name="scanner_bottom_content_label">OR ENTER MANUALLY</string>
+    <string name="scanner_edit_text_hint">Enter Code</string>
 </resources>

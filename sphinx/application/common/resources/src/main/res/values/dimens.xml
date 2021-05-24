@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <dimen name="default_half_layout_margin">8dp</dimen>
     <dimen name="default_layout_margin">16dp</dimen>
+    <dimen name="default_double_layout_margin">32dp</dimen>
     <dimen name="default_list_row_padding_vertical">10dp</dimen>
     <dimen name="default_header_height">65dp</dimen>
     <dimen name="default_header_navigation_xy">56dp</dimen>
@@ -42,6 +44,7 @@
     <dimen name="default_form_horizontal_margin">30dp</dimen>
     <dimen name="default_form_text_view_size">12sp</dimen>
     <dimen name="default_form_edit_view_size">17sp</dimen>
+    <dimen name="default_edit_text_left_margin">-4dp</dimen>
 
     <dimen name="pin_help_text_view_size">15sp</dimen>
     <dimen name="pin_text_view_size">17sp</dimen>

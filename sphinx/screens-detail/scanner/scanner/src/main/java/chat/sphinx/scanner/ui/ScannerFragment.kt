@@ -21,6 +21,8 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.navigation.fragment.navArgs
 import app.cash.exhaustive.Exhaustive
 import by.kirich1409.viewbindingdelegate.viewBinding
+import chat.sphinx.insetter_activity.InsetterActivity
+import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.logger.d
 import chat.sphinx.resources.SphinxToastUtils
@@ -35,6 +37,7 @@ import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.common.InputImage
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
+import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.invisible
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_toast_utils.show
@@ -87,11 +90,15 @@ internal class ScannerFragment: SideEffectFragment<
             )
         }
 
+        (requireActivity() as InsetterActivity).addNavigationBarPadding(binding.root)
+
         if (args.argShowBackArrow) {
             viewModel.updateViewState(ScannerViewState.ShowNavBackButton)
         } else {
             viewModel.updateViewState(ScannerViewState.HideNavBackButton)
         }
+
+        binding.editTextScannerInputContent.goneIfFalse(args.argShowBottomView)
 
         binding.includeScannerHeader.apply {
             textViewDetailScreenHeaderName.text = getString(R.string.scanner_header_name)
@@ -103,8 +110,8 @@ internal class ScannerFragment: SideEffectFragment<
             }
         }
 
-        binding.buttonScannerInputStub.setOnClickListener {
-            val input = binding.editTextScannerInputStub.text?.toString()
+        binding.buttonScannerSave.setOnClickListener {
+            val input = binding.codeEditText.text?.toString()
             if (input != null && input.isNotEmpty()) {
                 viewModel.processResponse(ScannerResponse(input))
             }
