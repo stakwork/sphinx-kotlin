@@ -1,5 +1,6 @@
 package chat.sphinx.chat_common.ui.viewstate.messageholder
 
+import chat.sphinx.chat_common.R
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
 import chat.sphinx.wrapper_chat.ChatType
 import chat.sphinx.wrapper_chat.isConversation
@@ -66,14 +67,28 @@ internal sealed class MessageHolderViewState(
         if (!message.isPaidMessage) {
             null
         } else {
-            val purchaseStatus = message.type.purchaseStatus
             val isPaymentPending = message.status.isPending()
+
+            val statusTextResID = when (message.type) {
+                MessageType.Purchase.Accept -> {
+                    R.string.purchase_status_label_paid_message_details_accepted
+                }
+                MessageType.Purchase.Deny -> {
+                    R.string.purchase_status_label_paid_message_details_denied
+                }
+                MessageType.Purchase.Processing -> {
+                    R.string.purchase_status_label_paid_message_details_processing
+                }
+                else -> {
+                    R.string.purchase_status_label_paid_message_details_default
+                }
+            }
 
             LayoutState.Bubble.PaidMessageDetails(
                 amount = message.amount,
-                purchaseStatus = purchaseStatus,
-                showPaymentAcceptedIcon = purchaseStatus.isAccepted && !isPaymentPending,
-                showPaymentProgressWheel = isPaymentPending,
+                statusTextResID = statusTextResID,
+                showPaymentAcceptedIcon = message.type is MessageType.Purchase.Accept,
+                showPaymentProgressWheel = message.type is MessageType.Purchase.Processing,
                 showSendPaymentIcon = this !is Sent && !isPaymentPending,
                 showPaymentReceivedIcon = this is Sent && !isPaymentPending,
             )
@@ -85,9 +100,24 @@ internal sealed class MessageHolderViewState(
         if (!message.isPaidMessage || this !is Sent) {
             null
         } else {
+            val statusTextResID = when (message.type) {
+                MessageType.Purchase.Accept -> {
+                    R.string.purchase_status_label_paid_message_sent_status_accepted
+                }
+                MessageType.Purchase.Deny -> {
+                    R.string.purchase_status_label_paid_message_sent_status_denied
+                }
+                MessageType.Purchase.Processing -> {
+                    R.string.purchase_status_label_paid_message_sent_status_processing
+                }
+                else -> {
+                    R.string.purchase_status_label_paid_message_sent_status_default
+                }
+            }
+
             LayoutState.Bubble.PaidMessageSentStatus(
                 amount = message.amount,
-                purchaseStatus = message.type.purchaseStatus,
+                statusTextResID = statusTextResID,
             )
         }
     }

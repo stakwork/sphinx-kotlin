@@ -244,7 +244,7 @@ inline fun Int.toMessageType(): MessageType =
  *  - 4 (Cancellation)
  *  - 5 (Direct Payment)
  *  - 6 (Attachment)
- *  - 7 (Purchase)
+ *  - 7 (Purchase Pending)
  *  - 8 (Purchase Accept)
  *  - 9 (Purchase Deny)
  *  - 10 (Contact Key)
@@ -318,14 +318,6 @@ sealed class MessageType {
     abstract val canContainMedia: Boolean
     abstract val show: Boolean
     abstract val value: Int
-
-//    val purchaseStatus: Purchase
-//        get() = when (this) {
-//            Purchase -> Purchase.Processing
-//            PurchaseAccept -> Purchase.Accepted
-//            PurchaseDeny -> Purchase.Denied
-//            else -> Purchase.None
-//        }
 
     object Message: MessageType() {
         override val canContainMedia: Boolean
@@ -405,22 +397,6 @@ sealed class MessageType {
     }
 
     sealed class Purchase: MessageType() {
-//        inline val isNone: Boolean
-//            get() = this is None
-//
-//        inline val isAccepted: Boolean
-//            get() = this is Accepted
-//
-//        inline val isDenied: Boolean
-//            get() = this is Denied
-//
-//        inline val isProcessing: Boolean
-//            get() = this is Processing
-//
-//        object None: PurchaseLL()
-
-        // logic to see if we have a purchase message needs to include
-        // checking for an attachment that has an amount > 0
         /**
          * A paid attachment that has been paid for, but is awaiting the
          * response from the sender to unlock it.
