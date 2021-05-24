@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/message_type_deleted_message_height"
+    android:layout_height="wrap_content"
     android:padding="@dimen/chat_message_inner_padding"
     android:visibility="gone"
     tools:visibility="visible">

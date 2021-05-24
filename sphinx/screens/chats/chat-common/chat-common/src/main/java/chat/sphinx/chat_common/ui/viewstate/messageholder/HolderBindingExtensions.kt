@@ -177,6 +177,24 @@ internal inline fun LayoutMessageHolderBinding.setStatusHeader(
     }
 }
 
+
+@MainThread
+@Suppress("NOTHING_TO_INLINE")
+internal inline fun LayoutMessageHolderBinding.setDeletedMessageLayout(
+    messageDetails: LayoutState.DeletedMessageDetails?
+) {
+    includeMessageTypeDeletedMessage.apply {
+        if (messageDetails == null) {
+            root.gone
+        } else {
+            root.visible
+
+            textViewDeleteMessageLabel.gravity = messageDetails.messageTextGravity
+        }
+    }
+}
+
+
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun LayoutMessageHolderBinding.setBubbleMessageLayout(

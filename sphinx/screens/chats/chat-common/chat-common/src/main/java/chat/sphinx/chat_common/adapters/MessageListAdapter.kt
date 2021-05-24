@@ -163,6 +163,7 @@ internal class MessageListAdapter<ARGS: NavArgs>(
                 }
 
                 setStatusHeader(viewState.statusHeader)
+                setDeletedMessageLayout(viewState.deletedMessageDetails)
                 setBubbleBackground(viewState, recyclerViewWidth)
 
                 if (viewState.background !is BubbleBackground.Gone) {

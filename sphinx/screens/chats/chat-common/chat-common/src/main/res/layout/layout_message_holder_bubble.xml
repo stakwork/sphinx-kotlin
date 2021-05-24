@@ -57,14 +57,6 @@
             tools:visibility="gone" />
 
         <!-- TODO: Move out of bubble layout -->
-        <!-- TODO: Add time -->
-        <!--  Deleted Message  -->
-        <include
-            android:id="@+id/include_message_type_deleted_message"
-            layout="@layout/layout_message_type_deleted_message"
-            tools:visibility="gone" />
-
-        <!-- TODO: Move out of bubble layout -->
         <!-- Group Action: Leaving/Joining  -->
         <include
             android:id="@+id/include_message_type_leave_or_join_group"

@@ -1,13 +1,11 @@
 package chat.sphinx.chat_common.ui.viewstate.messageholder
 
+import android.view.Gravity
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
 import chat.sphinx.wrapper_chat.ChatType
 import chat.sphinx.wrapper_chat.isConversation
 import chat.sphinx.wrapper_common.DateTime
-import chat.sphinx.wrapper_message.Message
-import chat.sphinx.wrapper_message.isConfirmed
-import chat.sphinx.wrapper_message.isDirectPayment
-import chat.sphinx.wrapper_message.isReceived
+import chat.sphinx.wrapper_message.*
 
 internal inline val MessageHolderViewState.isReceived: Boolean
     get() = this is MessageHolderViewState.Received
@@ -33,6 +31,18 @@ internal sealed class MessageHolderViewState(
                 this is Sent && (message.status.isReceived() || message.status.isConfirmed()),
                 message.messageContentDecrypted != null,
                 DateTime.getFormathmma().format(message.date.value),
+            )
+        } else {
+            null
+        }
+    }
+
+    val deletedMessageDetails: LayoutState.DeletedMessageDetails? by lazy(LazyThreadSafetyMode.NONE) {
+        if (message.status.isDeleted()) {
+            val messageTextGravity = if (this is Received) Gravity.START else Gravity.END
+
+            LayoutState.DeletedMessageDetails(
+                messageTextGravity = messageTextGravity
             )
         } else {
             null

@@ -23,8 +23,8 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="@id/include_message_holder_bubble"
-        app:layout_constraintEnd_toEndOf="@id/include_message_holder_bubble" />
+        app:layout_constraintEnd_toStartOf="@+id/space_message_holder_right"
+        app:layout_constraintStart_toEndOf="@+id/space_message_holder_left" />
 
     <!-- width is programmatically set depending on sender -->
     <Space
@@ -45,13 +45,24 @@
         tools:layout_width="80dp" />
 
     <include
+        android:id="@+id/include_message_type_deleted_message"
+        layout="@layout/layout_message_type_deleted_message"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@+id/include_message_status_header"
+        app:layout_constraintStart_toStartOf="@id/include_message_status_header"
+        app:layout_constraintEnd_toEndOf="@id/include_message_status_header"
+        tools:visibility="gone" />
+
+    <include
         android:id="@+id/include_message_holder_bubble"
         layout="@layout/layout_message_holder_bubble"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         app:layout_constraintEnd_toStartOf="@+id/space_message_holder_right"
         app:layout_constraintStart_toEndOf="@+id/space_message_holder_left"
-        app:layout_constraintTop_toBottomOf="@+id/include_message_status_header" />
+        app:layout_constraintTop_toBottomOf="@+id/include_message_status_header"
+        tools:visibility="visible" />
 
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/received_bubble_arrow"
