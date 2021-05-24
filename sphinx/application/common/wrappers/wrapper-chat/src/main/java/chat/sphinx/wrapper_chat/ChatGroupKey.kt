@@ -8,7 +8,8 @@ inline fun String.toChatGroupKey(): ChatGroupKey? =
         null
     }
 
-inline class ChatGroupKey(val value: String) {
+@JvmInline
+value class ChatGroupKey(val value: String) {
     init {
         require(value.isNotEmpty()) {
             "ChatGroupKey cannot be empty"

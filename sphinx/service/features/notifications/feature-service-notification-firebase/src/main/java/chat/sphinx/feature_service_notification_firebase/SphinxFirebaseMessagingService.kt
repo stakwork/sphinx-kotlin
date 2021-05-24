@@ -12,6 +12,7 @@ import javax.inject.Inject
 /*
  * https://firebase.google.com/docs/cloud-messaging/android/first-message
  * */
+@Suppress("PropertyName")
 @AndroidEntryPoint
 internal class SphinxFirebaseMessagingService: FirebaseMessagingService() {
 

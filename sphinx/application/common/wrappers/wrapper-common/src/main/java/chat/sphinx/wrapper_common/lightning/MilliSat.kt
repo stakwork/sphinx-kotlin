@@ -12,7 +12,8 @@ inline fun Long.toMilliSat(): MilliSat? =
         null
     }
 
-inline class MilliSat(val value: Long) {
+@JvmInline
+value class MilliSat(val value: Long) {
     init {
         require(value >= 0L) {
             "MilliSat must be greater than or equal to 0"

@@ -8,7 +8,8 @@ inline fun String.toMediaKey(): MediaKey? =
         null
     }
 
-inline class MediaKey(val value: String) {
+@JvmInline
+value class MediaKey(val value: String) {
     init {
         require(value.isNotEmpty()) {
             "MediaKey cannot be empty"

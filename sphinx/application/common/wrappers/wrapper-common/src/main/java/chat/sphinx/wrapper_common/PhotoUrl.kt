@@ -8,7 +8,8 @@ inline fun String.toPhotoUrl(): PhotoUrl? =
         null
     }
 
-inline class PhotoUrl(val value: String) {
+@JvmInline
+value class PhotoUrl(val value: String) {
     init {
         require(value.isNotEmpty()) {
             "PhotoUrl cannot be empty"
