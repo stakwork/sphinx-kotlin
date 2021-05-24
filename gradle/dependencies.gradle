@@ -79,6 +79,7 @@ ext.deps = [
     kotlin: [
         coroutinesAndroid: "org.jetbrains.kotlinx:kotlinx-coroutines-android:${versions.coroutines}",
         coroutinesCore: "org.jetbrains.kotlinx:kotlinx-coroutines-core:${versions.coroutines}",
+        reflect: "org.jetbrains.kotlin:kotlin-reflect:${versions.kotlin}",
     ],
     matthewNelson: [
         toplService: "io.matthewnelson.topl-android:topl-service:${versions.toplAndroid}",

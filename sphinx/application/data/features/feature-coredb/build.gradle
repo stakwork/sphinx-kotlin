@@ -12,6 +12,9 @@ dependencies {
     api project(path: ':sphinx:application:data:concepts:concept-coredb')
     
     implementation deps.kotlin.coroutinesCore
+
+    // needed to override moshi's use of 1.4.31
+    implementation deps.kotlin.reflect
     implementation deps.square.moshi
 
     testImplementation deps.square.sqlDelightJvm
