@@ -8,4 +8,6 @@ dependencies {
     api project(path: ':sphinx:application:common:wrappers:wrapper-message')
 
     implementation deps.kotlin.coroutinesCore
+
+    testImplementation testDeps.junit
 }
