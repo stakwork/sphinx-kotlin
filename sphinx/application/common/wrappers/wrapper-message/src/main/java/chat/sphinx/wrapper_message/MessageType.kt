@@ -29,16 +29,16 @@ inline fun MessageType.isAttachment(): Boolean =
     this is MessageType.Attachment
 
 @Suppress("NOTHING_TO_INLINE")
-inline fun MessageType.isPurchase(): Boolean =
-    this is MessageType.Purchase
+inline fun MessageType.isPurchaseProcessing(): Boolean =
+    this is MessageType.Purchase.Processing
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun MessageType.isPurchaseAccept(): Boolean =
-    this is MessageType.PurchaseAccept
+    this is MessageType.Purchase.Accept
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun MessageType.isPurchaseDeny(): Boolean =
-    this is MessageType.PurchaseDeny
+    this is MessageType.Purchase.Deny
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun MessageType.isContactKey(): Boolean =
@@ -155,14 +155,14 @@ inline fun Int.toMessageType(): MessageType =
         MessageType.ATTACHMENT -> {
             MessageType.Attachment
         }
-        MessageType.PURCHASE -> {
-            MessageType.Purchase
+        MessageType.PURCHASE_PENDING -> {
+            MessageType.Purchase.Processing
         }
         MessageType.PURCHASE_ACCEPT -> {
-            MessageType.PurchaseAccept
+            MessageType.Purchase.Accept
         }
         MessageType.PURCHASE_DENY -> {
-            MessageType.PurchaseDeny
+            MessageType.Purchase.Deny
         }
         MessageType.CONTACT_KEY -> {
             MessageType.ContactKey
@@ -282,7 +282,7 @@ sealed class MessageType {
         const val CANCELLATION = 4
         const val DIRECT_PAYMENT = 5 // SHOW
         const val ATTACHMENT = 6 // SHOW
-        const val PURCHASE = 7
+        const val PURCHASE_PENDING = 7
         const val PURCHASE_ACCEPT = 8
         const val PURCHASE_DENY = 9
         const val CONTACT_KEY = 10
@@ -319,13 +319,13 @@ sealed class MessageType {
     abstract val show: Boolean
     abstract val value: Int
 
-    val purchaseStatus: PurchaseStatus
-        get() = when (this) {
-            Purchase -> PurchaseStatus.Processing
-            PurchaseAccept -> PurchaseStatus.Accepted
-            PurchaseDeny -> PurchaseStatus.Denied
-            else -> PurchaseStatus.None
-        }
+//    val purchaseStatus: Purchase
+//        get() = when (this) {
+//            Purchase -> Purchase.Processing
+//            PurchaseAccept -> Purchase.Accepted
+//            PurchaseDeny -> Purchase.Denied
+//            else -> Purchase.None
+//        }
 
     object Message: MessageType() {
         override val canContainMedia: Boolean
@@ -404,37 +404,65 @@ sealed class MessageType {
             get() = ATTACHMENT
     }
 
-    object Purchase: MessageType() {
-        override val canContainMedia: Boolean
-            get() = CAN_CONTAIN_MEDIA
+    sealed class Purchase: MessageType() {
+//        inline val isNone: Boolean
+//            get() = this is None
+//
+//        inline val isAccepted: Boolean
+//            get() = this is Accepted
+//
+//        inline val isDenied: Boolean
+//            get() = this is Denied
+//
+//        inline val isProcessing: Boolean
+//            get() = this is Processing
+//
+//        object None: PurchaseLL()
 
-        override val show: Boolean
-            get() = DO_NOT_SHOW
+        // logic to see if we have a purchase message needs to include
+        // checking for an attachment that has an amount > 0
+        /**
+         * A paid attachment that has been paid for, but is awaiting the
+         * response from the sender to unlock it.
+         * */
+        object Processing: Purchase() {
+            override val canContainMedia: Boolean
+                get() = CAN_CONTAIN_MEDIA
 
-        override val value: Int
-            get() = PURCHASE
-    }
+            override val show: Boolean
+                get() = DO_NOT_SHOW
 
-    object PurchaseAccept: MessageType() {
-        override val canContainMedia: Boolean
-            get() = CAN_CONTAIN_MEDIA
+            override val value: Int
+                get() = PURCHASE_PENDING
+        }
 
-        override val show: Boolean
-            get() = DO_NOT_SHOW
+        /**
+         * The paid attachment amount was accepted by the sender of the attachment.
+         * */
+        object Accept: Purchase() {
+            override val canContainMedia: Boolean
+                get() = CAN_CONTAIN_MEDIA
 
-        override val value: Int
-            get() = PURCHASE_ACCEPT
-    }
+            override val show: Boolean
+                get() = DO_NOT_SHOW
 
-    object PurchaseDeny: MessageType() {
-        override val canContainMedia: Boolean
-            get() = CAN_CONTAIN_MEDIA
+            override val value: Int
+                get() = PURCHASE_ACCEPT
+        }
 
-        override val show: Boolean
-            get() = DO_NOT_SHOW
+        /**
+         * The paid attachment amount was denied by the sender of the attachment.
+         * */
+        object Deny: Purchase() {
+            override val canContainMedia: Boolean
+                get() = CAN_CONTAIN_MEDIA
 
-        override val value: Int
-            get() = PURCHASE_DENY
+            override val show: Boolean
+                get() = DO_NOT_SHOW
+
+            override val value: Int
+                get() = PURCHASE_DENY
+        }
     }
 
     object ContactKey: MessageType() {
@@ -685,24 +713,5 @@ sealed class MessageType {
 
         override val show: Boolean
             get() = DO_NOT_SHOW
-    }
-
-    sealed class PurchaseStatus {
-        inline val isNone: Boolean
-            get() = this is None
-
-        inline val isAccepted: Boolean
-            get() = this is Accepted
-
-        inline val isDenied: Boolean
-            get() = this is Denied
-
-        inline val isProcessing: Boolean
-            get() = this is Processing
-
-        object None: PurchaseStatus()
-        object Accepted: PurchaseStatus()
-        object Denied: PurchaseStatus()
-        object Processing: PurchaseStatus()
     }
 }

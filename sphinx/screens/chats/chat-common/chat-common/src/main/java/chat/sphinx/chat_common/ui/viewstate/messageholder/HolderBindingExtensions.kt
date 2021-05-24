@@ -1,6 +1,5 @@
 package chat.sphinx.chat_common.ui.viewstate.messageholder
 
-import android.content.res.Resources
 import androidx.annotation.DrawableRes
 import androidx.annotation.MainThread
 import androidx.core.view.updateLayoutParams
@@ -212,16 +211,16 @@ internal inline fun LayoutMessageHolderBinding.setBubblePaidMessageDetailsLayout
             progressBarPaidMessage.goneIfFalse(messageDetails.showPaymentProgressWheel)
 
             textViewPaidMessageStatusLabel.text = when (messageDetails.purchaseStatus) {
-                MessageType.PurchaseStatus.None -> {
+                MessageType.Purchase.None -> {
                     getString(R.string.purchase_status_label_paid_message_details_pending)
                 }
-                MessageType.PurchaseStatus.Accepted -> {
+                MessageType.Purchase.Accepted -> {
                     getString(R.string.purchase_status_label_paid_message_details_accepted)
                 }
-                MessageType.PurchaseStatus.Denied -> {
+                MessageType.Purchase.Denied -> {
                     getString(R.string.purchase_status_label_paid_message_details_denied)
                 }
-                MessageType.PurchaseStatus.Processing -> {
+                MessageType.Purchase.Processing -> {
                     getString(R.string.purchase_status_label_paid_message_details_processing)
                 }
                 else -> {
@@ -246,16 +245,16 @@ internal inline fun LayoutMessageHolderBinding.setBubblePaidMessageSentStatusLay
 
             textViewPaidMessageSentStatusAmount.text = messageDetails.amountText
             textViewPaidMessageSentStatus.text = when (messageDetails.purchaseStatus) {
-                MessageType.PurchaseStatus.None -> {
+                MessageType.Purchase.None -> {
                     getString(R.string.purchase_status_label_paid_message_sent_status_pending)
                 }
-                MessageType.PurchaseStatus.Accepted -> {
+                MessageType.Purchase.Accepted -> {
                     getString(R.string.purchase_status_label_paid_message_sent_status_accepted)
                 }
-                MessageType.PurchaseStatus.Denied -> {
+                MessageType.Purchase.Denied -> {
                     getString(R.string.purchase_status_label_paid_message_sent_status_denied)
                 }
-                MessageType.PurchaseStatus.Processing -> {
+                MessageType.Purchase.Processing -> {
                     getString(R.string.purchase_status_label_paid_message_sent_status_processing)
                 }
             }
