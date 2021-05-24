@@ -4,9 +4,11 @@ import chat.sphinx.wrapper_common.message.MessagePagination
 import chat.sphinx.concept_network_query_message.NetworkQueryMessage
 import chat.sphinx.concept_network_query_message.model.GetMessagesResponse
 import chat.sphinx.concept_network_query_message.model.MessageDto
+import chat.sphinx.concept_network_query_message.model.PostMessageDto
 import chat.sphinx.concept_network_relay_call.NetworkRelayCall
 import chat.sphinx.feature_network_query_message.model.GetMessagesRelayResponse
 import chat.sphinx.feature_network_query_message.model.GetPaymentsRelayResponse
+import chat.sphinx.feature_network_query_message.model.MessageRelayResponse
 import chat.sphinx.feature_network_query_message.model.ReadMessagesRelayResponse
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.ResponseError
@@ -69,7 +71,19 @@ class NetworkQueryMessageImpl(
     ////////////
     /// POST ///
     ////////////
-//    app.post('/messages', messages.sendMessage)
+    override fun sendMessage(
+        postMessageDto: PostMessageDto,
+        relayData: Pair<AuthorizationToken, RelayUrl>?
+    ): Flow<LoadResponse<MessageDto, ResponseError>> =
+        networkRelayCall.relayPost(
+            responseJsonClass = MessageRelayResponse::class.java,
+            relayEndpoint = ENDPOINT_MESSAGES,
+            requestBodyJsonClass = PostMessageDto::class.java,
+            requestBody = postMessageDto,
+            relayData = relayData
+        )
+
+
 //    app.post('/messages/:chat_id/read', messages.readMessages)
     override fun readMessages(
         chatId: ChatId,

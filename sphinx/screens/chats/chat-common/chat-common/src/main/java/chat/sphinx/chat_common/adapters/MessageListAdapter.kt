@@ -7,6 +7,7 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.navigation.NavArgs
 import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import chat.sphinx.chat_common.ui.ChatViewModel
 import chat.sphinx.chat_common.databinding.LayoutMessageHolderBinding
@@ -25,6 +26,7 @@ import kotlinx.coroutines.withContext
 
 internal class MessageListAdapter<ARGS: NavArgs>(
     private val recyclerView: RecyclerView,
+    private val layoutManager: LinearLayoutManager,
     private val lifecycleOwner: LifecycleOwner,
     private val onStopSupervisor: OnStopSupervisor,
     private val viewModel: ChatViewModel<ARGS>,
@@ -58,10 +60,12 @@ internal class MessageListAdapter<ARGS: NavArgs>(
 
                 when {
                     old is MessageHolderViewState.InComing && new is MessageHolderViewState.InComing -> {
-                        old.background == new.background
+                        old.background == new.background        &&
+                        old.message    == new.message
                     }
                     old is MessageHolderViewState.OutGoing && new is MessageHolderViewState.OutGoing -> {
-                        old.background == new.background
+                        old.background == new.background        &&
+                        old.message    == new.message
                     }
                     else -> {
                         false
@@ -90,9 +94,23 @@ internal class MessageListAdapter<ARGS: NavArgs>(
                             Diff(messages, list)
                         )
                     }.let { result ->
+
+                        val lastVisibleItemPositionBeforeDispatch = layoutManager.findLastVisibleItemPosition()
+                        val listSizeBeforeDispatch = messages.size - 1
+
                         messages.clear()
                         messages.addAll(list)
                         result.dispatchUpdatesTo(this@MessageListAdapter)
+
+                        val listSizeAfterDispatch = messages.size - 1
+
+                        if (
+                                listSizeAfterDispatch > listSizeBeforeDispatch                  &&
+                                recyclerView.scrollState == RecyclerView.SCROLL_STATE_IDLE      &&
+                                lastVisibleItemPositionBeforeDispatch == listSizeBeforeDispatch
+                        ) {
+                            recyclerView.scrollToPosition(listSizeAfterDispatch)
+                        }
                     }
                 }
             }

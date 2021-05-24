@@ -374,6 +374,13 @@ SELECT *
 FROM messageDbo
 WHERE id = ?;
 
+messageGetLowestProvisionalMessageId:
+SELECT id
+FROM messageDbo
+WHERE id < 0
+ORDER BY id
+LIMIT 1;
+
 messageGetAllToShowByChatId:
 SELECT *
 FROM messageDbo
@@ -404,6 +411,11 @@ WHERE chat_id = ?;
 messageUpdateContentDecrypted:
 UPDATE messageDbo
 SET message_content_decrypted = :message_content_decrypted
+WHERE id = ?;
+
+messageUpdateStatus:
+UPDATE messageDbo
+SET status = :status
 WHERE id = ?;
 
 -- If the message exists in the DB, it will update all fields _except_

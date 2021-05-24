@@ -71,5 +71,5 @@ sealed class ChatType {
             get() = TRIBE
     }
 
-    class Unknown(override val value: Int) : ChatType()
+    data class Unknown(override val value: Int): ChatType()
 }

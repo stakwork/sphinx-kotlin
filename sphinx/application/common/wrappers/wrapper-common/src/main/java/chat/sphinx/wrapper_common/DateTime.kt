@@ -82,6 +82,12 @@ inline class DateTime(val value: Date) {
                     }
             }
 
+        /**
+         * Returns a string value using [FORMAT_RELAY]
+         * */
+        fun nowUTC(): String =
+            getFormatRelay().format(Date(System.currentTimeMillis()))
+
         @Volatile
         private var formatToday00: SimpleDateFormat? = null
         fun getFormatToday00(): SimpleDateFormat =

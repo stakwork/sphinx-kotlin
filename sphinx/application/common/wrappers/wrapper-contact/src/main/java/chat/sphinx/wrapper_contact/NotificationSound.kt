@@ -129,5 +129,5 @@ sealed class NotificationSound {
             get() = TWEET
     }
 
-    class Unknown(override val value: String) : NotificationSound()
+    data class Unknown(override val value: String) : NotificationSound()
 }
