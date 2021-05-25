@@ -24,6 +24,17 @@
         app:layout_constraintBottom_toTopOf="@+id/edit_text_scanner_input_content"
         />
 
+    <androidx.appcompat.widget.AppCompatImageView
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:src="@drawable/scanner_square"
+        android:layout_marginHorizontal="@dimen/scanner_square_horizontal_margin"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintEnd_toEndOf="@+id/previewView"
+        app:layout_constraintStart_toStartOf="@+id/previewView"
+        app:layout_constraintTop_toTopOf="@+id/previewView"
+        app:layout_constraintBottom_toBottomOf="@+id/previewView"/>
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/edit_text_scanner_input_content"
         android:layout_width="match_parent"
