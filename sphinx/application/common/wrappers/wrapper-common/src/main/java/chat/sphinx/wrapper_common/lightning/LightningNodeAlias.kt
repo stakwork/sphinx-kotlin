@@ -8,7 +8,8 @@ inline fun String.toLightningNodeAlias(): LightningNodeAlias? =
         null
     }
 
-inline class LightningNodeAlias(val value: String) {
+@JvmInline
+value class LightningNodeAlias(val value: String) {
     init {
         require(value.isNotEmpty()) {
             "LightningNodeAlias cannot be empty"

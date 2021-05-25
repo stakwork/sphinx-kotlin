@@ -30,6 +30,7 @@ abstract class ViewModelCoordinatorImpl<BackType: Any, Request: Any, Success: An
         }
     }
 
+    @Suppress("PropertyName")
     protected val TAG: String by lazy {
         this.javaClass.simpleName
     }
@@ -109,6 +110,7 @@ abstract class ViewModelCoordinatorImpl<BackType: Any, Request: Any, Success: An
             if (_responseSharedFlow.subscriptionCount.value > 0) {
                 // OK to use GlobalScope here as it's uncancelable and
                 // we want to make sure all jobs are completed.
+                @Suppress("EXPERIMENTAL_API_USAGE")
                 GlobalScope.launch(dispatcher) {
                     LOG.d(TAG, "invokeOnCompletion emitting cancellation responses")
                     for (requestHolder in requests) {

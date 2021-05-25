@@ -8,7 +8,8 @@ inline fun String.toLightningPaymentRequest(): LightningPaymentRequest? =
         null
     }
 
-inline class LightningPaymentRequest(val value: String) {
+@JvmInline
+value class LightningPaymentRequest(val value: String) {
     init {
         require(value.isNotEmpty()) {
             "LightningPaymentRequest cannot be empty"

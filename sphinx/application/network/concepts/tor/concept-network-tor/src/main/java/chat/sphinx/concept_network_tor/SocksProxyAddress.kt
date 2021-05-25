@@ -6,4 +6,5 @@ inline val SocksProxyAddress.host: String
 inline val SocksProxyAddress.port: Int
     get() = value.split(':')[1].toInt()
 
-inline class SocksProxyAddress(val value: String)
+@JvmInline
+value class SocksProxyAddress(val value: String)

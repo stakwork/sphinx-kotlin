@@ -8,7 +8,8 @@ inline fun String.toDeviceId(): DeviceId? =
         null
     }
 
-inline class DeviceId(val value: String) {
+@JvmInline
+value class DeviceId(val value: String) {
     init {
         require(value.isNotEmpty()) {
             "DeviceId cannot be empty"

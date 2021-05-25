@@ -8,7 +8,8 @@ inline fun String.toSenderAlias(): SenderAlias? =
         null
     }
 
-inline class SenderAlias(val value: String) {
+@JvmInline
+value class SenderAlias(val value: String) {
     init {
         require(value.isNotEmpty()) {
             "SenderAlias cannot be empty"

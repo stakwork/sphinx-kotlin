@@ -16,7 +16,8 @@ inline fun MessagePagination.instantiateOrNull(
         null
     }
 
-inline class MessagePagination private constructor(val value: String) {
+@JvmInline
+value class MessagePagination private constructor(val value: String) {
 
     companion object {
 

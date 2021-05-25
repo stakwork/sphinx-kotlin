@@ -60,7 +60,8 @@ inline fun DateTime.before(dateTime: DateTime): Boolean =
  *
  * See https://www.datetimeformatter.com/how-to-format-date-time-in-java-7/#examples
  * */
-inline class DateTime(val value: Date) {
+@JvmInline
+value class DateTime(val value: Date) {
 
     companion object {
         const val UTC = "UTC"
