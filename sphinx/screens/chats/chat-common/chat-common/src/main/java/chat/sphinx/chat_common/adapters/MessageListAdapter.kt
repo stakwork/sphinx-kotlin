@@ -1,6 +1,9 @@
 package chat.sphinx.chat_common.adapters
 
+import android.content.ContentValues.TAG
+import android.util.Log
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.lifecycle.DefaultLifecycleObserver
@@ -115,6 +118,19 @@ internal class MessageListAdapter<ARGS: NavArgs>(
                         }
                     }
                 }
+            }
+        }
+
+        recyclerView.addOnLayoutChangeListener { _, _, _, _, bottom, _, _, _, oldBottom ->
+            if (bottom != oldBottom) {
+                val lastPosition = messages.size - 1
+                if (
+                    recyclerView.scrollState == RecyclerView.SCROLL_STATE_IDLE &&
+                    layoutManager.findLastVisibleItemPosition() == lastPosition
+                ) {
+                    recyclerView.scrollToPosition(lastPosition)
+                }
+
             }
         }
     }
