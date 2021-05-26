@@ -1,11 +1,12 @@
 package chat.sphinx.scanner.ui
 
-import android.Manifest.permission.CAMERA
+import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.View
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy
@@ -54,10 +55,6 @@ internal class ScannerFragment: SideEffectFragment<
     }
     private val processingBarcode = AtomicBoolean(false)
 
-    companion object {
-        private val REQUIRED_PERMISSIONS = arrayOf(CAMERA)
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -66,17 +63,29 @@ internal class ScannerFragment: SideEffectFragment<
         viewModel
     }
 
+    private val requestPermissionLauncher by lazy {
+        registerForActivityResult(
+            ActivityResultContracts.RequestPermission()
+        ) { granted ->
+            if (granted) {
+                startCamera()
+            } else {
+                lifecycleScope.launch(viewModel.mainImmediate) {
+                    viewModel.submitSideEffect(
+                        NotifySideEffect(getString(R.string.scanner_notify_permissions_needed))
+                    )
+                }
+            }
+        }
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         if (allPermissionsGranted()) {
             startCamera()
         } else {
-            lifecycleScope.launch(viewModel.mainImmediate) {
-                viewModel.submitSideEffect(
-                    NotifySideEffect(getString(R.string.scanner_notify_permissions_needed))
-                )
-            }
+            requestPermissionLauncher.launch(Manifest.permission.CAMERA)
         }
 
         (requireActivity() as InsetterActivity).addNavigationBarPadding(binding.root)
@@ -195,7 +204,7 @@ internal class ScannerFragment: SideEffectFragment<
         }
     }
 
-    private fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {
+    private fun allPermissionsGranted() = arrayOf(Manifest.permission.CAMERA).all {
         ContextCompat.checkSelfPermission(
             requireContext(), it
         ) == PackageManager.PERMISSION_GRANTED
