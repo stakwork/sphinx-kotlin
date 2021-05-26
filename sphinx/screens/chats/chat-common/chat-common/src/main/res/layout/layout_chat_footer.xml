@@ -5,8 +5,7 @@
     android:id="@+id/layout_constraint_chat_footer"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/headerBG"
-    android:paddingVertical="8dp">
+    android:background="@color/headerBG">
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/text_view_chat_footer_attachment"
@@ -43,7 +42,7 @@
             android:inputType="textMultiLine"
             android:maxLines="4"
             android:paddingHorizontal="@dimen/default_layout_margin"
-            android:paddingVertical="8dp"
+            android:paddingVertical="16dp"
             android:textColor="@color/text"
             android:textCursorDrawable="@drawable/cursor"
             tools:text="line 1\nline 2\nline 3\nline 4\nline 5" />

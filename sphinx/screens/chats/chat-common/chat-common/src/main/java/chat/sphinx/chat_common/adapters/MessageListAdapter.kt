@@ -1,6 +1,9 @@
 package chat.sphinx.chat_common.adapters
 
+import android.content.ContentValues.TAG
+import android.util.Log
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.lifecycle.DefaultLifecycleObserver
@@ -33,7 +36,10 @@ internal class MessageListAdapter<ARGS: NavArgs>(
     private val onStopSupervisor: OnStopSupervisor,
     private val viewModel: ChatViewModel<ARGS>,
     private val imageLoader: ImageLoader<ImageView>,
-): RecyclerView.Adapter<MessageListAdapter<ARGS>.MessageViewHolder>(), DefaultLifecycleObserver {
+) : RecyclerView.Adapter<MessageListAdapter<ARGS>.MessageViewHolder>(),
+    DefaultLifecycleObserver,
+    View.OnLayoutChangeListener
+{
 
     private inner class Diff(
         private val oldList: List<MessageHolderViewState>,
@@ -117,6 +123,38 @@ internal class MessageListAdapter<ARGS: NavArgs>(
                 }
             }
         }
+    }
+
+    override fun onLayoutChange(
+        v: View?,
+        left: Int,
+        top: Int,
+        right: Int,
+        bottom: Int,
+        oldLeft: Int,
+        oldTop: Int,
+        oldRight: Int,
+        oldBottom: Int
+    ) {
+        if (bottom != oldBottom) {
+            val lastPosition = messages.size - 1
+            if (
+                recyclerView.scrollState == RecyclerView.SCROLL_STATE_IDLE &&
+                layoutManager.findLastVisibleItemPosition() == lastPosition
+            ) {
+                recyclerView.scrollToPosition(lastPosition)
+            }
+
+        }
+    }
+
+    init {
+        recyclerView.addOnLayoutChangeListener(this)
+    }
+
+    override fun onDestroy(owner: LifecycleOwner) {
+        super.onDestroy(owner)
+        recyclerView.removeOnLayoutChangeListener(this)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MessageViewHolder {
