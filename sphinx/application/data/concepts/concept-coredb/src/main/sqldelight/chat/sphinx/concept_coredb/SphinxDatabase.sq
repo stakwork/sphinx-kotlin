@@ -11,9 +11,10 @@ import chat.sphinx.wrapper_chat.ChatUnlisted;
 import chat.sphinx.wrapper_common.DateTime;
 import chat.sphinx.wrapper_common.PhotoUrl;
 import chat.sphinx.wrapper_common.Seen;
-import chat.sphinx.wrapper_common.dashboard.ChatId;
 import chat.sphinx.wrapper_common.chat.ChatUUID;
+import chat.sphinx.wrapper_common.dashboard.ChatId;
 import chat.sphinx.wrapper_common.dashboard.ContactId;
+import chat.sphinx.wrapper_common.dashboard.DashboardItemId;
 import chat.sphinx.wrapper_common.dashboard.InviteId;
 import chat.sphinx.wrapper_common.invite.InviteStatus;
 import chat.sphinx.wrapper_common.lightning.LightningNodeAlias;
@@ -340,6 +341,57 @@ WHERE id = ?;
 inviteDeleteByContactId:
 DELETE FROM inviteDbo
 WHERE contact_id = ?;
+
+CREATE TABLE dashboardDbo(
+    id                          TEXT            AS DashboardItemId NOT NULL PRIMARY KEY,
+    date                        INTEGER         AS DateTime NOT NULL,
+
+--  This is for contacts only. When a Chat of type Conversation comes in, the Contact held
+--  here is updated as `include_in_return=false`
+    include_in_return            INTEGER         AS Boolean DEFAULT 1 NOT NULL,
+
+    latest_message_id           INTEGER         AS MessageId DEFAULT NULL
+);
+
+dashboardCount:
+SELECT COUNT(*)
+FROM dashboardDbo
+WHERE include_in_return = 1;
+
+dashboardPagination:
+SELECT *
+FROM dashboardDbo
+WHERE include_in_return = 1
+ORDER BY
+    SUBSTR(id, 1, 1),
+    date
+LIMIT :limit OFFSET :offset;
+
+dashboardUpdateLatestMessage:
+UPDATE dashboardDbo
+SET date = :date,
+    latest_message_id = :latest_message_id
+WHERE id = ?;
+
+dashboardUpdateIncludeInReturn:
+UPDATE dashboardDbo
+SET include_in_return = :include_in_return
+WHERE id = ?;
+
+dashboardInsert {
+    INSERT OR IGNORE INTO dashboardDbo(
+        id,
+        date
+    )
+    VALUES (
+        :id,
+        :date
+    );
+}
+
+dashboardDeleteById:
+DELETE FROM dashboardDbo
+WHERE id = ?;
 
 -- Cannot use inline classes if there are 23 or more columns
 -- https://youtrack.jetbrains.com/issue/KT-45084

@@ -96,6 +96,20 @@ abstract class CoreDBImpl(private val moshi: Moshi): CoreDB() {
                     invite_idAdapter = InviteIdAdapter.getInstance(),
                     invite_statusAdapter = InviteStatusAdapter.getInstance(),
                 ),
+                inviteDboAdapter = InviteDbo.Adapter(
+                    idAdapter = InviteIdAdapter.getInstance(),
+                    invite_stringAdapter = InviteStringAdapter(),
+                    invoiceAdapter = LightningPaymentRequestAdapter.getInstance(),
+                    contact_idAdapter = ContactIdAdapter.getInstance(),
+                    statusAdapter = InviteStatusAdapter.getInstance(),
+                    priceAdapter = SatAdapter.getInstance(),
+                    created_atAdapter = DateTimeAdapter.getInstance(),
+                ),
+                dashboardDboAdapter = DashboardDbo.Adapter(
+                    idAdapter = DashboardIdAdapter(),
+                    dateAdapter = DateTimeAdapter.getInstance(),
+                    latest_message_idAdapter = MessageIdAdapter.getInstance()
+                ),
                 messageDboAdapter = MessageDbo.Adapter(
                     idAdapter = MessageIdAdapter.getInstance(),
                     uuidAdapter = MessageUUIDAdapter(),
@@ -125,15 +139,6 @@ abstract class CoreDBImpl(private val moshi: Moshi): CoreDB() {
                     media_typeAdapter = MediaTypeAdapter(),
                     media_tokenAdapter = MediaTokenAdapter(),
                 ),
-                inviteDboAdapter = InviteDbo.Adapter(
-                    idAdapter = InviteIdAdapter.getInstance(),
-                    invite_stringAdapter = InviteStringAdapter(),
-                    invoiceAdapter = LightningPaymentRequestAdapter.getInstance(),
-                    contact_idAdapter = ContactIdAdapter.getInstance(),
-                    statusAdapter = InviteStatusAdapter.getInstance(),
-                    priceAdapter = SatAdapter.getInstance(),
-                    created_atAdapter = DateTimeAdapter.getInstance(),
-                )
             ).sphinxDatabaseQueries
         }
     }
