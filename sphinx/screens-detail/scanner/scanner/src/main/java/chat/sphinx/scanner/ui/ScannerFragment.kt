@@ -63,7 +63,7 @@ internal class ScannerFragment: SideEffectFragment<
         viewModel
     }
 
-    private val requestPermissionLauncher by lazy {
+    private val requestPermissionLauncher by lazy(LazyThreadSafetyMode.NONE) {
         registerForActivityResult(
             ActivityResultContracts.RequestPermission()
         ) { granted ->
