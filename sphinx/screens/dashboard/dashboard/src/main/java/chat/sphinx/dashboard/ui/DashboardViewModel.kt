@@ -82,7 +82,7 @@ internal class DashboardViewModel @Inject constructor(
     fun toScanner() {
         viewModelScope.launch(mainImmediate) {
             val response = scannerCoordinator.submitRequest(
-                ScannerRequest(filter = null)
+                ScannerRequest(filter = null, showBottomView = true)
             )
             // TODO: Do something with response
         }

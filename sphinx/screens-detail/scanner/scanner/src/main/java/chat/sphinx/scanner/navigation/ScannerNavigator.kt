@@ -9,8 +9,8 @@ abstract class ScannerNavigator(
     navigationDriver: BaseNavigationDriver<NavController>
 ): Navigator<NavController>(navigationDriver) {
     @JvmSynthetic
-    internal suspend fun toScannerScreen() {
-        navigationDriver.submitNavigationRequest(ToScannerDetail())
+    internal suspend fun toScannerScreen(showBottomView: Boolean = false) {
+        navigationDriver.submitNavigationRequest(ToScannerDetail(showBottomView))
     }
 
     @JvmSynthetic

@@ -29,7 +29,7 @@ internal class ScannerViewModelCoordinator(
     }
 
     override suspend fun navigateToScreen(request: RequestHolder<ScannerRequest>) {
-        scannerNavigator.toScannerScreen()
+        scannerNavigator.toScannerScreen(request.request.showBottomView)
     }
 
     override suspend fun checkRequest(request: ScannerRequest): ScannerResponse? {

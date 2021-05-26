@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="new_contact_form_horizontal_margin">30dp</dimen>
-    <dimen name="new_contact_edit_text_left_margin">-4dp</dimen>
     <dimen name="save_contact_button_height">52dp</dimen>
     <dimen name="save_to_contacts_button_text_size">14sp</dimen>
     <dimen name="save_to_contacts_button_bottom_margin">33dp</dimen>
