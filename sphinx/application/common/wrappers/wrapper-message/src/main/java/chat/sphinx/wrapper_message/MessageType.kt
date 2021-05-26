@@ -1,5 +1,8 @@
 package chat.sphinx.wrapper_message
 
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.contract
+
 @Suppress("NOTHING_TO_INLINE")
 inline fun MessageType.isMessage(): Boolean =
     this is MessageType.Message
@@ -28,17 +31,27 @@ inline fun MessageType.isDirectPayment(): Boolean =
 inline fun MessageType.isAttachment(): Boolean =
     this is MessageType.Attachment
 
+@OptIn(ExperimentalContracts::class)
+@Suppress("NOTHING_TO_INLINE")
+inline fun MessageType.isPurchase(): Boolean {
+    contract {
+        returns(true) implies (this@isPurchase is MessageType.Purchase)
+    }
+
+    return this is MessageType.Purchase
+}
+
 @Suppress("NOTHING_TO_INLINE")
 inline fun MessageType.isPurchaseProcessing(): Boolean =
     this is MessageType.Purchase.Processing
 
 @Suppress("NOTHING_TO_INLINE")
-inline fun MessageType.isPurchaseAccept(): Boolean =
-    this is MessageType.Purchase.Accept
+inline fun MessageType.isPurchaseAccepted(): Boolean =
+    this is MessageType.Purchase.Accepted
 
 @Suppress("NOTHING_TO_INLINE")
-inline fun MessageType.isPurchaseDeny(): Boolean =
-    this is MessageType.Purchase.Deny
+inline fun MessageType.isPurchaseDenied(): Boolean =
+    this is MessageType.Purchase.Denied
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun MessageType.isContactKey(): Boolean =
@@ -155,14 +168,14 @@ inline fun Int.toMessageType(): MessageType =
         MessageType.ATTACHMENT -> {
             MessageType.Attachment
         }
-        MessageType.PURCHASE_PENDING -> {
+        MessageType.PURCHASE_PROCESSING -> {
             MessageType.Purchase.Processing
         }
-        MessageType.PURCHASE_ACCEPT -> {
-            MessageType.Purchase.Accept
+        MessageType.PURCHASE_ACCEPTED -> {
+            MessageType.Purchase.Accepted
         }
-        MessageType.PURCHASE_DENY -> {
-            MessageType.Purchase.Deny
+        MessageType.PURCHASE_DENIED -> {
+            MessageType.Purchase.Denied
         }
         MessageType.CONTACT_KEY -> {
             MessageType.ContactKey
@@ -244,7 +257,7 @@ inline fun Int.toMessageType(): MessageType =
  *  - 4 (Cancellation)
  *  - 5 (Direct Payment)
  *  - 6 (Attachment)
- *  - 7 (Purchase Pending)
+ *  - 7 (Purchase Processing)
  *  - 8 (Purchase Accept)
  *  - 9 (Purchase Deny)
  *  - 10 (Contact Key)
@@ -282,9 +295,9 @@ sealed class MessageType {
         const val CANCELLATION = 4
         const val DIRECT_PAYMENT = 5 // SHOW
         const val ATTACHMENT = 6 // SHOW
-        const val PURCHASE_PENDING = 7
-        const val PURCHASE_ACCEPT = 8
-        const val PURCHASE_DENY = 9
+        const val PURCHASE_PROCESSING = 7
+        const val PURCHASE_ACCEPTED = 8
+        const val PURCHASE_DENIED = 9
         const val CONTACT_KEY = 10
         const val CONTACT_KEY_CONFIRMATION = 11
         const val GROUP_CREATE = 12
@@ -409,13 +422,13 @@ sealed class MessageType {
                 get() = DO_NOT_SHOW
 
             override val value: Int
-                get() = PURCHASE_PENDING
+                get() = PURCHASE_PROCESSING
         }
 
         /**
          * The paid attachment amount was accepted by the sender of the attachment.
          * */
-        object Accept: Purchase() {
+        object Accepted: Purchase() {
             override val canContainMedia: Boolean
                 get() = CAN_CONTAIN_MEDIA
 
@@ -423,13 +436,13 @@ sealed class MessageType {
                 get() = DO_NOT_SHOW
 
             override val value: Int
-                get() = PURCHASE_ACCEPT
+                get() = PURCHASE_ACCEPTED
         }
 
         /**
          * The paid attachment amount was denied by the sender of the attachment.
          * */
-        object Deny: Purchase() {
+        object Denied: Purchase() {
             override val canContainMedia: Boolean
                 get() = CAN_CONTAIN_MEDIA
 
@@ -437,7 +450,7 @@ sealed class MessageType {
                 get() = DO_NOT_SHOW
 
             override val value: Int
-                get() = PURCHASE_DENY
+                get() = PURCHASE_DENIED
         }
     }
 

@@ -70,10 +70,10 @@ internal sealed class MessageHolderViewState(
             val isPaymentPending = message.status.isPending()
 
             val statusTextResID = when (message.type) {
-                MessageType.Purchase.Accept -> {
+                MessageType.Purchase.Accepted -> {
                     R.string.purchase_status_label_paid_message_details_accepted
                 }
-                MessageType.Purchase.Deny -> {
+                MessageType.Purchase.Denied -> {
                     R.string.purchase_status_label_paid_message_details_denied
                 }
                 MessageType.Purchase.Processing -> {
@@ -87,7 +87,7 @@ internal sealed class MessageHolderViewState(
             LayoutState.Bubble.PaidMessageDetails(
                 amount = message.amount,
                 statusTextResID = statusTextResID,
-                showPaymentAcceptedIcon = message.type is MessageType.Purchase.Accept,
+                showPaymentAcceptedIcon = message.type is MessageType.Purchase.Accepted,
                 showPaymentProgressWheel = message.type is MessageType.Purchase.Processing,
                 showSendPaymentIcon = this !is Sent && !isPaymentPending,
                 showPaymentReceivedIcon = this is Sent && !isPaymentPending,
@@ -101,10 +101,10 @@ internal sealed class MessageHolderViewState(
             null
         } else {
             val statusTextResID = when (message.type) {
-                MessageType.Purchase.Accept -> {
+                MessageType.Purchase.Accepted -> {
                     R.string.purchase_status_label_paid_message_sent_status_accepted
                 }
-                MessageType.Purchase.Deny -> {
+                MessageType.Purchase.Denied -> {
                     R.string.purchase_status_label_paid_message_sent_status_denied
                 }
                 MessageType.Purchase.Processing -> {
