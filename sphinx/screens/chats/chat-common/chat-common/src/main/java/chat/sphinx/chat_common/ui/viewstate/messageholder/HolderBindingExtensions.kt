@@ -86,44 +86,43 @@ internal fun LayoutMessageHolderBinding.setBubbleBackground(
 
             resId?.let { setBackgroundResource(it) }
         }
+    }
 
+    // Set background spacing
+    if (viewState.background is BubbleBackground.Gone && viewState.background.setSpacingEqual) {
 
+        val defaultMargins = root
+            .context
+            .resources
+            .getDimensionPixelSize(common_R.dimen.default_layout_margin)
 
-        if (viewState.background is BubbleBackground.Gone && viewState.background.setSpacingEqual) {
+        spaceMessageHolderLeft.updateLayoutParams { width = defaultMargins }
+        spaceMessageHolderRight.updateLayoutParams { width = defaultMargins }
 
-            val defaultMargins = root
-                .context
-                .resources
-                .getDimensionPixelSize(common_R.dimen.default_layout_margin)
+    } else {
 
-            spaceMessageHolderLeft.updateLayoutParams { width = defaultMargins }
-            spaceMessageHolderRight.updateLayoutParams { width = defaultMargins }
-
-        } else {
-
-            @Exhaustive
-            when (viewState) {
-                is MessageHolderViewState.Received -> {
-                    spaceMessageHolderLeft.updateLayoutParams {
-                        width = root
-                            .context
-                            .resources
-                            .getDimensionPixelSize(R.dimen.message_holder_space_width_left)
-                    }
-                    spaceMessageHolderRight.updateLayoutParams {
-                        width = (holderWidth.value * BubbleBackground.SPACE_WIDTH_MULTIPLE).toInt()
-                    }
+        @Exhaustive
+        when (viewState) {
+            is MessageHolderViewState.Received -> {
+                spaceMessageHolderLeft.updateLayoutParams {
+                    width = root
+                        .context
+                        .resources
+                        .getDimensionPixelSize(R.dimen.message_holder_space_width_left)
                 }
-                is MessageHolderViewState.Sent -> {
-                    spaceMessageHolderLeft.updateLayoutParams {
-                        width = (holderWidth.value * BubbleBackground.SPACE_WIDTH_MULTIPLE).toInt()
-                    }
-                    spaceMessageHolderRight.updateLayoutParams {
-                        width = root
-                            .context
-                            .resources
-                            .getDimensionPixelSize(R.dimen.message_holder_space_width_right)
-                    }
+                spaceMessageHolderRight.updateLayoutParams {
+                    width = (holderWidth.value * BubbleBackground.SPACE_WIDTH_MULTIPLE).toInt()
+                }
+            }
+            is MessageHolderViewState.Sent -> {
+                spaceMessageHolderLeft.updateLayoutParams {
+                    width = (holderWidth.value * BubbleBackground.SPACE_WIDTH_MULTIPLE).toInt()
+                }
+                spaceMessageHolderRight.updateLayoutParams {
+                    width = root
+                        .context
+                        .resources
+                        .getDimensionPixelSize(R.dimen.message_holder_space_width_right)
                 }
             }
         }
