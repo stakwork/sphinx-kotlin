@@ -14,7 +14,6 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.fragment.navArgs
 import app.cash.exhaustive.Exhaustive
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.insetter_activity.InsetterActivity
@@ -30,10 +29,7 @@ import com.google.mlkit.vision.common.InputImage
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
-import io.matthewnelson.android_feature_screens.util.invisible
-import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
-import io.matthewnelson.android_feature_viewmodel.updateViewState
 import kotlinx.coroutines.launch
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -50,7 +46,6 @@ internal class ScannerFragment: SideEffectFragment<
         FragmentScannerBinding
         >(R.layout.fragment_scanner)
 {
-    private val args: ScannerFragmentArgs by navArgs()
     override val binding: FragmentScannerBinding by viewBinding(FragmentScannerBinding::bind)
     override val viewModel: ScannerViewModel by viewModels()
 
@@ -86,14 +81,6 @@ internal class ScannerFragment: SideEffectFragment<
 
         (requireActivity() as InsetterActivity).addNavigationBarPadding(binding.root)
 
-        if (args.argShowBackArrow) {
-            viewModel.updateViewState(ScannerViewState.ShowNavBackButton)
-        } else {
-            viewModel.updateViewState(ScannerViewState.HideNavBackButton)
-        }
-
-        binding.editTextScannerInputContent.goneIfFalse(args.argShowBottomView)
-
         binding.includeScannerHeader.apply {
             textViewDetailScreenHeaderName.text = getString(R.string.scanner_header_name)
             textViewDetailScreenClose.setOnClickListener {
@@ -113,14 +100,12 @@ internal class ScannerFragment: SideEffectFragment<
     }
 
     override suspend fun onViewStateFlowCollect(viewState: ScannerViewState) {
-        binding.includeScannerHeader.textViewDetailScreenHeaderNavBack.apply {
+        binding.apply {
             @Exhaustive
             when (viewState) {
-                ScannerViewState.HideNavBackButton -> {
-                    invisible
-                }
-                ScannerViewState.ShowNavBackButton -> {
-                    visible
+                is ScannerViewState.LayoutVisibility -> {
+                    includeScannerHeader.textViewDetailScreenHeaderNavBack.goneIfFalse(viewState.showBackButton)
+                    editTextScannerInputContent.goneIfFalse(viewState.showBottomView)
                 }
             }
         }
