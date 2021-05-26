@@ -29,6 +29,7 @@ import chat.sphinx.wrapper_chat.ChatName
 import chat.sphinx.wrapper_chat.isConversation
 import chat.sphinx.wrapper_message.Message
 import chat.sphinx.wrapper_message.isDeleted
+import chat.sphinx.wrapper_message.isGroupAction
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
@@ -172,13 +173,19 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                             MessageHolderViewState.Sent(
                                 message,
                                 chat,
-
-                                if (message.status.isDeleted()) {
-                                    BubbleBackground.Gone(setSpacingEqual = false)
-                                } else {
-                                    BubbleBackground.First.Isolated
-                                },
-
+                                chatOwnerPubKey = chat.ownerPubKey,
+                                accountOwnerPubKey = null, // TODO: Devise a way to read this here
+                                background =  when {
+                                    message.status.isDeleted() -> {
+                                        BubbleBackground.Gone(setSpacingEqual = false)
+                                    }
+                                    message.type.isGroupAction() -> {
+                                        BubbleBackground.Gone(setSpacingEqual = true)
+                                    }
+                                    else -> {
+                                        BubbleBackground.First.Isolated
+                                    }
+                                }
                             ) { replyMessage ->
                                 when {
                                     replyMessage.sender == chat.contactIds.firstOrNull() -> {
@@ -201,19 +208,24 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                             MessageHolderViewState.Received(
                                 message,
                                 chat,
-
-                                if (isDeleted) {
-                                    BubbleBackground.Gone(setSpacingEqual = false)
-                                } else {
-                                    BubbleBackground.First.Isolated
+                                chatOwnerPubKey = chat.ownerPubKey,
+                                accountOwnerPubKey = null, // TODO: Devise a way to read this here
+                                background = when {
+                                    isDeleted -> {
+                                        BubbleBackground.Gone(setSpacingEqual = false)
+                                    }
+                                    message.type.isGroupAction() -> {
+                                        BubbleBackground.Gone(setSpacingEqual = true)
+                                    }
+                                    else -> {
+                                        BubbleBackground.First.Isolated
+                                    }
                                 },
-
-                                if (isDeleted) {
+                                initialHolder = if (isDeleted) {
                                     InitialHolderViewState.None
                                 } else {
                                     getInitialHolderViewStateForReceivedMessage(message)
                                 },
-
                             ) { replyMessage ->
                                 when {
                                     replyMessage.sender == chat.contactIds.firstOrNull() -> {

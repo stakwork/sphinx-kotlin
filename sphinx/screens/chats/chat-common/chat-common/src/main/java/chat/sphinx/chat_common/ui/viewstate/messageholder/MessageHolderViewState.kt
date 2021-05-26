@@ -5,6 +5,7 @@ import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.isConversation
 import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_common.lightning.Sat
+import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_message.*
 
 internal inline val MessageHolderViewState.isReceived: Boolean
@@ -19,6 +20,8 @@ internal val MessageHolderViewState.showSentBubbleArrow: Boolean
 internal sealed class MessageHolderViewState(
     val message: Message,
     chat: Chat,
+    private val chatOwnerPubKey: LightningNodePubKey?,
+    private val accountOwnerPubKey: LightningNodePubKey?,
     val background: BubbleBackground,
     val initialHolder: InitialHolderViewState,
     val messageSenderName: (Message) -> String,
@@ -148,14 +151,40 @@ internal sealed class MessageHolderViewState(
         }
     }
 
+    val groupActionIndicator: LayoutState.GroupActionIndicator? by lazy(LazyThreadSafetyMode.NONE) {
+        if (
+            !message.type.isGroupAction() ||
+            chat.type == null ||
+            message.senderAlias == null
+        ) {
+            null
+        } else {
+            LayoutState.GroupActionIndicator(
+                actionType = message.type as MessageType.GroupAction,
+                isAdminView = if (chatOwnerPubKey == null || accountOwnerPubKey == null) {
+                    false
+                } else {
+                    chatOwnerPubKey == accountOwnerPubKey
+                },
+                chatType = chat.type,
+                subjectName = message.senderAlias!!.value
+            )
+        }
+    }
+
+
     class Sent(
         message: Message,
         chat: Chat,
+        chatOwnerPubKey: LightningNodePubKey?,
+        accountOwnerPubKey: LightningNodePubKey?,
         background: BubbleBackground,
         replyMessageSenderName: (Message) -> String,
-    ): MessageHolderViewState(
+    ) : MessageHolderViewState(
         message,
         chat,
+        chatOwnerPubKey,
+        accountOwnerPubKey,
         background,
         InitialHolderViewState.None,
         replyMessageSenderName,
@@ -164,12 +193,16 @@ internal sealed class MessageHolderViewState(
     class Received(
         message: Message,
         chat: Chat,
+        chatOwnerPubKey: LightningNodePubKey?,
+        accountOwnerPubKey: LightningNodePubKey?,
         background: BubbleBackground,
         initialHolder: InitialHolderViewState,
         replyMessageSenderName: (Message) -> String,
-    ): MessageHolderViewState(
+    ) : MessageHolderViewState(
         message,
         chat,
+        chatOwnerPubKey,
+        accountOwnerPubKey,
         background,
         initialHolder,
         replyMessageSenderName,

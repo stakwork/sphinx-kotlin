@@ -8,6 +8,19 @@
     android:layout_marginVertical="4dp"
     android:elevation="@dimen/default_elevation">
 
+
+    <!-- Group Action Indicator  -->
+    <include
+        android:id="@+id/include_message_type_group_action_holder"
+        layout="@layout/layout_message_type_group_action_holder"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:visibility="visible" />
+
+
     <include
         android:id="@+id/include_message_holder_chat_image_initial_holder"
         layout="@layout/layout_chat_image_initial_holder"
@@ -23,10 +36,10 @@
         layout="@layout/layout_message_status_header"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:layout_constraintEnd_toStartOf="@+id/space_message_holder_right"
-        app:layout_constraintStart_toEndOf="@+id/space_message_holder_left"
+        app:layout_constraintEnd_toEndOf="@id/include_message_holder_bubble"
+        app:layout_constraintStart_toStartOf="@id/include_message_holder_bubble"
         app:layout_constraintTop_toTopOf="parent"
-        tools:visibility="gone" />
+        tools:visibility="visible" />
 
     <!-- width is programmatically set depending on sender -->
     <Space
@@ -35,7 +48,8 @@
         android:layout_height="0dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:layout_width="@dimen/message_holder_space_width_left" />
+        tools:layout_width="@dimen/message_holder_space_width_left"
+        tools:visibility="visible" />
 
     <!-- width is programmatically set depending on sender -->
     <Space
@@ -44,7 +58,8 @@
         android:layout_height="0dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:layout_width="80dp" />
+        tools:layout_width="80dp"
+        tools:visibility="visible" />
 
     <include
         android:id="@+id/include_deleted_message"
@@ -72,7 +87,8 @@
         android:layout_height="10dp"
         android:src="@drawable/received_bubble_arrow"
         app:layout_constraintEnd_toStartOf="@+id/include_message_holder_bubble"
-        app:layout_constraintTop_toTopOf="@+id/include_message_holder_bubble" />
+        app:layout_constraintTop_toTopOf="@+id/include_message_holder_bubble"
+        tools:visibility="visible" />
 
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/sent_bubble_arrow"
@@ -80,6 +96,7 @@
         android:layout_height="10dp"
         android:src="@drawable/sent_bubble_arrow"
         app:layout_constraintStart_toEndOf="@+id/include_message_holder_bubble"
-        app:layout_constraintTop_toTopOf="@+id/include_message_holder_bubble" />
+        app:layout_constraintTop_toTopOf="@+id/include_message_holder_bubble"
+        tools:visibility="visible" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
