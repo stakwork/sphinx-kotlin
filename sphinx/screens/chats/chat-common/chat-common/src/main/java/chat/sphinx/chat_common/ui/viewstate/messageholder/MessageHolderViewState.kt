@@ -1,6 +1,5 @@
 package chat.sphinx.chat_common.ui.viewstate.messageholder
 
-import chat.sphinx.chat_common.R
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
 import chat.sphinx.wrapper_chat.ChatType
 import chat.sphinx.wrapper_chat.isConversation
@@ -62,63 +61,35 @@ internal sealed class MessageHolderViewState(
         }
     }
 
-
     val bubblePaidMessageDetails: LayoutState.Bubble.PaidMessageDetails? by lazy(LazyThreadSafetyMode.NONE) {
         if (!message.isPaidMessage) {
             null
         } else {
             val isPaymentPending = message.status.isPending()
 
-            val statusTextResID = when (message.type) {
-                MessageType.Purchase.Accepted -> {
-                    R.string.purchase_status_label_paid_message_details_accepted
-                }
-                MessageType.Purchase.Denied -> {
-                    R.string.purchase_status_label_paid_message_details_denied
-                }
-                MessageType.Purchase.Processing -> {
-                    R.string.purchase_status_label_paid_message_details_processing
-                }
-                else -> {
-                    R.string.purchase_status_label_paid_message_details_default
-                }
+            message.type.let { type ->
+                LayoutState.Bubble.PaidMessageDetails(
+                    amount = message.amount,
+                    purchaseType = if (type.isPurchase()) type else null,
+                    showPaymentAcceptedIcon = type.isPurchaseAccepted(),
+                    showPaymentProgressWheel = type.isPurchaseProcessing(),
+                    showSendPaymentIcon = this !is Sent && !isPaymentPending,
+                    showPaymentReceivedIcon = this is Sent && !isPaymentPending,
+                )
             }
-
-            LayoutState.Bubble.PaidMessageDetails(
-                amount = message.amount,
-                statusTextResID = statusTextResID,
-                showPaymentAcceptedIcon = message.type is MessageType.Purchase.Accepted,
-                showPaymentProgressWheel = message.type is MessageType.Purchase.Processing,
-                showSendPaymentIcon = this !is Sent && !isPaymentPending,
-                showPaymentReceivedIcon = this is Sent && !isPaymentPending,
-            )
         }
     }
-
 
     val bubblePaidMessageSentStatus: LayoutState.Bubble.PaidMessageSentStatus? by lazy(LazyThreadSafetyMode.NONE) {
         if (!message.isPaidMessage || this !is Sent) {
             null
         } else {
-            val statusTextResID = when (message.type) {
-                MessageType.Purchase.Accepted -> {
-                    R.string.purchase_status_label_paid_message_sent_status_accepted
-                }
-                MessageType.Purchase.Denied -> {
-                    R.string.purchase_status_label_paid_message_sent_status_denied
-                }
-                MessageType.Purchase.Processing -> {
-                    R.string.purchase_status_label_paid_message_sent_status_processing
-                }
-                else -> {
-                    R.string.purchase_status_label_paid_message_sent_status_default
-                }
+            message.type.let { type ->
+                LayoutState.Bubble.PaidMessageSentStatus(
+                    amount = message.amount,
+                    purchaseType = if (type.isPurchase()) type else null,
+                )
             }
-
-            LayoutState.Bubble.PaidMessageSentStatus(
-                amount = message.amount,
-                statusTextResID = statusTextResID,
-            )
         }
     }
 

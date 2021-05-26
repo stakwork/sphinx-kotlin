@@ -205,11 +205,26 @@ internal inline fun LayoutMessageHolderBinding.setBubblePaidMessageDetailsLayout
         } else {
             root.visible
 
+            val statusTextResID = when (messageDetails.purchaseType) {
+                MessageType.Purchase.Accepted -> {
+                    R.string.purchase_status_label_paid_message_details_accepted
+                }
+                MessageType.Purchase.Denied -> {
+                    R.string.purchase_status_label_paid_message_details_denied
+                }
+                MessageType.Purchase.Processing -> {
+                    R.string.purchase_status_label_paid_message_details_processing
+                }
+                null -> {
+                    R.string.purchase_status_label_paid_message_details_default
+                }
+            }
+
             imageViewPaidMessageReceivedIcon.goneIfFalse(messageDetails.showPaymentReceivedIcon)
             imageViewPaidMessageSentIcon.goneIfFalse(messageDetails.showSendPaymentIcon)
             textViewPaymentAcceptedIcon.goneIfFalse(messageDetails.showPaymentAcceptedIcon)
             progressBarPaidMessage.goneIfFalse(messageDetails.showPaymentProgressWheel)
-            textViewPaidMessageStatusLabel.text = getString(messageDetails.statusTextResID)
+            textViewPaidMessageStatusLabel.text = getString(statusTextResID)
             textViewPaidMessageAmountToPayLabel.text = messageDetails.amountText
         }
     }
@@ -226,8 +241,23 @@ internal inline fun LayoutMessageHolderBinding.setBubblePaidMessageSentStatusLay
         } else {
             root.visible
 
+            val statusTextResID = when (messageDetails.purchaseType) {
+                MessageType.Purchase.Accepted -> {
+                    R.string.purchase_status_label_paid_message_sent_status_accepted
+                }
+                MessageType.Purchase.Denied -> {
+                    R.string.purchase_status_label_paid_message_sent_status_denied
+                }
+                MessageType.Purchase.Processing -> {
+                    R.string.purchase_status_label_paid_message_sent_status_processing
+                }
+                null -> {
+                    R.string.purchase_status_label_paid_message_sent_status_default
+                }
+            }
+
             textViewPaidMessageSentStatusAmount.text = messageDetails.amountText
-            textViewPaidMessageSentStatus.text = getString(messageDetails.statusTextResID)
+            textViewPaidMessageSentStatus.text = getString(statusTextResID)
         }
     }
 }
