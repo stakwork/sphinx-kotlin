@@ -61,8 +61,10 @@ internal class ScannerFragment: SideEffectFragment<
     override val binding: FragmentScannerBinding by viewBinding(FragmentScannerBinding::bind)
     override val viewModel: ScannerViewModel by viewModels()
 
-    private lateinit var cameraExecutor: ExecutorService
-    private var processingBarcode = AtomicBoolean(false)
+    private val cameraExecutor: ExecutorService by lazy(LazyThreadSafetyMode.NONE) {
+        Executors.newSingleThreadExecutor()
+    }
+    private val processingBarcode = AtomicBoolean(false)
 
     companion object {
         private val REQUIRED_PERMISSIONS = arrayOf(CAMERA)
@@ -70,8 +72,6 @@ internal class ScannerFragment: SideEffectFragment<
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        cameraExecutor = Executors.newSingleThreadExecutor()
 
         // have to call it here so it gets injected and can
         // catch the request asap
@@ -177,8 +177,8 @@ internal class ScannerFragment: SideEffectFragment<
         }, ContextCompat.getMainExecutor(requireContext()))
     }
 
-    private fun retrieveCode(code: String) {
-        if (code == null || code.isEmpty()) {
+    private fun retrieveCode(code: String?) {
+        if (code.isNullOrEmpty()) {
             return
         }
 
