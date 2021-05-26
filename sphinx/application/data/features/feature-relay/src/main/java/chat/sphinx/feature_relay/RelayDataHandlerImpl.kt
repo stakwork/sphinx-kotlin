@@ -3,6 +3,7 @@ package chat.sphinx.feature_relay
 import chat.sphinx.concept_network_tor.TorManager
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.concept_relay.RelayDataHandler
+import chat.sphinx.wrapper_relay.PINTimeout
 import chat.sphinx.wrapper_relay.RelayUrl
 import io.matthewnelson.concept_authentication.data.AuthenticationStorage
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
@@ -39,8 +40,12 @@ class RelayDataHandlerImpl(
         @Volatile
         private var tokenCache: AuthorizationToken? = null
 
+        @Volatile
+        private var pinTimeoutCache: PINTimeout? = null
+
         const val RELAY_URL_KEY = "RELAY_URL_KEY"
         const val RELAY_AUTHORIZATION_KEY = "RELAY_JWT_KEY"
+        const val RELAY_PIN_TIMEOUT_KEY = "RELAY_PIN_TIMEOUT_KEY"
     }
 
     private val kOpenSSL: KOpenSSL by lazy {
@@ -161,6 +166,21 @@ class RelayDataHandlerImpl(
                         }
                     }
             }
+        }
+    }
+
+    override suspend fun persistPINTimeout(pinTimeout: PINTimeout?): Boolean {
+        return lock.withLock {
+            authenticationStorage.putString(RELAY_PIN_TIMEOUT_KEY, pinTimeout?.value.toString())
+            pinTimeoutCache = pinTimeout
+            return true
+        }
+    }
+
+    override suspend fun retrievePINTimeout(): PINTimeout? {
+        return lock.withLock {
+            pinTimeoutCache ?: authenticationStorage.
+                getString(RELAY_PIN_TIMEOUT_KEY, "12")?.let { PINTimeout(it.toInt()) }
         }
     }
 

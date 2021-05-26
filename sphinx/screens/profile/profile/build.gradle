@@ -39,6 +39,7 @@ dependencies {
     implementation project(path: ':sphinx:application:common:resources')
     implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-contact')
     implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-lightning')
+    implementation project(path: ':sphinx:application:data:concepts:concept-relay')
 
     implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt

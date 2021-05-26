@@ -3,6 +3,7 @@ package chat.sphinx.concept_relay
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.wrapper_relay.AuthorizationToken
+import chat.sphinx.wrapper_relay.PINTimeout
 import chat.sphinx.wrapper_relay.RelayUrl
 
 @Suppress("NOTHING_TO_INLINE")
@@ -29,6 +30,8 @@ suspend inline fun RelayDataHandler.retrieveRelayUrlAndAuthorizationToken(): Res
 abstract class RelayDataHandler {
     abstract suspend fun persistRelayUrl(url: RelayUrl): Boolean
     abstract suspend fun retrieveRelayUrl(): RelayUrl?
+    abstract suspend fun persistPINTimeout(timeout: PINTimeout?): Boolean
+    abstract suspend fun retrievePINTimeout(): PINTimeout?
 
     /**
      * Send `null` to clear the token from persistent storage
