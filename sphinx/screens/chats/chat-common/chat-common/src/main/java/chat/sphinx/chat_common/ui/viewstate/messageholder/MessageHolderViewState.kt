@@ -1,6 +1,5 @@
 package chat.sphinx.chat_common.ui.viewstate.messageholder
 
-import android.view.Gravity
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
 import chat.sphinx.wrapper_chat.ChatType
 import chat.sphinx.wrapper_chat.isConversation
@@ -37,12 +36,11 @@ internal sealed class MessageHolderViewState(
         }
     }
 
-    val deletedMessageDetails: LayoutState.DeletedMessageDetails? by lazy(LazyThreadSafetyMode.NONE) {
+    val deletedMessage: LayoutState.DeletedMessage? by lazy(LazyThreadSafetyMode.NONE) {
         if (message.status.isDeleted()) {
-            val messageTextGravity = if (this is Received) Gravity.START else Gravity.END
-
-            LayoutState.DeletedMessageDetails(
-                messageTextGravity = messageTextGravity
+            LayoutState.DeletedMessage(
+                gravityStart = this is Received,
+                timestamp = DateTime.getFormathmma().format(message.date.value)
             )
         } else {
             null

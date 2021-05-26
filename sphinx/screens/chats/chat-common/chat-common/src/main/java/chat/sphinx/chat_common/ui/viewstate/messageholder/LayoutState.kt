@@ -19,11 +19,10 @@ internal sealed class LayoutState {
             get() = !showSent
     }
 
-
-    data class DeletedMessageDetails(
-        val messageTextGravity: Int
+    data class DeletedMessage(
+        val gravityStart: Boolean,
+        val timestamp: String,
     ): LayoutState()
-
 
     sealed class Bubble: LayoutState() {
 

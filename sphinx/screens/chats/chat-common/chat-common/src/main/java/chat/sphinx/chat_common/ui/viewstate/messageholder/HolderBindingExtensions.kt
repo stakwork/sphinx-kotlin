@@ -1,5 +1,6 @@
 package chat.sphinx.chat_common.ui.viewstate.messageholder
 
+import android.view.Gravity
 import androidx.annotation.DrawableRes
 import androidx.annotation.MainThread
 import androidx.core.view.updateLayoutParams
@@ -181,15 +182,23 @@ internal inline fun LayoutMessageHolderBinding.setStatusHeader(
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun LayoutMessageHolderBinding.setDeletedMessageLayout(
-    messageDetails: LayoutState.DeletedMessageDetails?
+    deletedMessage: LayoutState.DeletedMessage?
 ) {
-    includeMessageTypeDeletedMessage.apply {
-        if (messageDetails == null) {
+    includeDeletedMessage.apply {
+        if (deletedMessage == null) {
             root.gone
         } else {
             root.visible
 
-            textViewDeleteMessageLabel.gravity = messageDetails.messageTextGravity
+            val gravity = if (deletedMessage.gravityStart) {
+                Gravity.START
+            } else {
+                Gravity.END
+            }
+
+            textViewDeletedMessageTimestamp.text = deletedMessage.timestamp
+            textViewDeletedMessageTimestamp.gravity = gravity
+            textViewDeleteMessageLabel.gravity = gravity
         }
     }
 }
