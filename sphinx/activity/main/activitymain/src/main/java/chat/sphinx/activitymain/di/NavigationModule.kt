@@ -29,6 +29,7 @@ import chat.sphinx.onboard.navigation.OnBoardNavigator
 import chat.sphinx.profile.navigation.ProfileNavigator
 import chat.sphinx.payment_receive.navigation.PaymentReceiveNavigator
 import chat.sphinx.payment_send.navigation.PaymentSendNavigator
+import chat.sphinx.qr_code.navigation.QRCodeNavigator
 import chat.sphinx.scanner.navigation.ScannerNavigator
 import chat.sphinx.splash.navigation.SplashNavigator
 import chat.sphinx.support_ticket.navigation.SupportTicketNavigator
@@ -178,6 +179,12 @@ internal object NavigationModule {
         scannerNavigatorImpl: ScannerNavigatorImpl
     ): ScannerNavigator =
         scannerNavigatorImpl
+
+    @Provides
+    fun provideQRCodeNavigator(
+        qrCodeNavigatorImpl: QRCodeNavigatorImpl
+    ): QRCodeNavigator =
+        qrCodeNavigatorImpl
 
     @Provides
     fun provideProfileNavigator(

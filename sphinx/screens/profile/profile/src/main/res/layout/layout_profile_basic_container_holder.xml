@@ -122,11 +122,11 @@
                         android:layout_height="1dp"
                         android:background="@color/lightDivider"
                         app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@+id/layout_constraint_profile_scan_button"
+                        app:layout_constraintEnd_toStartOf="@+id/layout_constraint_profile_qr_code_button"
                         app:layout_constraintStart_toStartOf="@+id/profile_address_text_view" />
 
                     <androidx.constraintlayout.widget.ConstraintLayout
-                        android:id="@+id/layout_constraint_profile_scan_button"
+                        android:id="@+id/layout_constraint_profile_qr_code_button"
                         android:layout_width="@dimen/default_form_scan_icon_container_width"
                         android:layout_height="match_parent"
                         app:layout_constraintBottom_toBottomOf="parent"
@@ -134,10 +134,10 @@
                         app:layout_constraintEnd_toEndOf="parent">
 
                         <androidx.appcompat.widget.AppCompatButton
-                            android:id="@+id/scan_address_button"
+                            android:id="@+id/qr_code_button"
                             android:layout_width="@dimen/profile_form_qr_code_icon_xy"
                             android:layout_height="@dimen/profile_form_qr_code_icon_xy"
-                            app:layout_constraintEnd_toEndOf="@+id/layout_constraint_profile_scan_button"
+                            app:layout_constraintEnd_toEndOf="@+id/layout_constraint_profile_qr_code_button"
                             app:layout_constraintBottom_toBottomOf="parent"
                             android:background="@drawable/ic_qr_code"
                             android:backgroundTint="@color/text" />

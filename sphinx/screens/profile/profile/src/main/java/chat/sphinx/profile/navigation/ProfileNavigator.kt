@@ -6,9 +6,11 @@ import io.matthewnelson.concept_navigation.BaseNavigationDriver
 import io.matthewnelson.concept_navigation.Navigator
 
 abstract class ProfileNavigator(
-        navigationDriver: BaseNavigationDriver<NavController>
+    navigationDriver: BaseNavigationDriver<NavController>
 ): Navigator<NavController>(navigationDriver)
 {
+    abstract suspend fun toQRCodeDetail(qrText: String)
+
     suspend fun popBackStack() {
         navigationDriver.submitNavigationRequest(
                 PopBackStack()

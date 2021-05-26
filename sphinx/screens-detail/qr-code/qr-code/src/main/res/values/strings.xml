@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="qr_code_header_name">PUBLIC KEY</string>
+    <string name="share">Share</string>
+    <string name="copy">Copy</string>
+</resources>

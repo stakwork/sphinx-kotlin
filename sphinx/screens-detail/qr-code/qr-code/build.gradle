@@ -1,5 +1,7 @@
 plugins {
+    id 'app.cash.exhaustive'
     id 'com.android.library'
+    id 'androidx.navigation.safeargs'
     id 'dagger.hilt.android.plugin'
     id 'kotlin-android'
     id 'kotlin-kapt'
@@ -35,14 +37,11 @@ dependencies {
 
     // Sphinx
     implementation project(path: ':sphinx:screens-detail:common:detail-resources')
-    implementation project(path: ':sphinx:screens-detail:qr-code:qr-code')
-    implementation project(path: ':sphinx:application:data:concepts:concept-image-loader')
-    implementation project(path: ':sphinx:activity:insetter-activity')
-    implementation project(path: ':sphinx:application:common:resources')
-    implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-contact')
-    implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-lightning')
-    implementation project(path: ':sphinx:application:data:concepts:concept-relay')
 
+    implementation project(path: ':sphinx:activity:features:feature-view-model-coordinator')
+    api project(path: ':sphinx:screens-detail:scanner:scanner-view-model-coordinator')
+
+    implementation 'com.google.zxing:core:3.4.0'
     implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt
     kapt kaptDeps.google.hilt

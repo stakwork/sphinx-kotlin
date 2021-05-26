@@ -170,11 +170,17 @@ internal class ProfileFragment: BaseFragment<
                     binding.layoutProfileBasicInfoHolder.profileTextViewName.text =
                         owner.alias?.value ?: ""
 
+                    val nodePubkey = owner.nodePubKey?.value ?: ""
+
                     binding.layoutProfileBasicContainerHolder.profileUserNameEditText.setText(owner.alias?.value ?: "")
-                    binding.layoutProfileBasicContainerHolder.profileAddressEditText.setText(owner.nodePubKey?.value ?: "")
+                    binding.layoutProfileBasicContainerHolder.profileAddressEditText.setText(nodePubkey)
                     binding.layoutProfileBasicContainerHolder.profileRouteHintEditText.setText(owner.routeHint?.value ?: "")
                     binding.layoutProfileBasicContainerHolder.profileTipEditText.setText("${owner.tipAmount?.value ?: "100"}")
                     binding.layoutProfileBasicContainerHolder.pinSwitch.isChecked = !owner.privatePhoto.value.toPrivatePhoto().isTrue()
+
+                    binding.layoutProfileBasicContainerHolder.qrCodeButton.setOnClickListener {
+                        lifecycleScope.launch { profileNavigator.toQRCodeDetail(nodePubkey) }
+                    }
                 }
             }
         }
