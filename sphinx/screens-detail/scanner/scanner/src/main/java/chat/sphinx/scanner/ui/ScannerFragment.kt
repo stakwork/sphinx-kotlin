@@ -3,12 +3,8 @@ package chat.sphinx.scanner.ui
 import android.Manifest.permission.CAMERA
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.Intent
 import android.content.pm.PackageManager
-import android.net.Uri
 import android.os.Bundle
-import android.provider.Settings
-import android.util.Log
 import android.view.View
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
@@ -17,20 +13,16 @@ import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
 import app.cash.exhaustive.Exhaustive
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
-import chat.sphinx.logger.SphinxLogger
-import chat.sphinx.logger.d
-import chat.sphinx.resources.SphinxToastUtils
 import chat.sphinx.scanner.R
 import chat.sphinx.scanner.databinding.FragmentScannerBinding
 import chat.sphinx.scanner.navigation.BackType
 import chat.sphinx.scanner_view_model_coordinator.response.ScannerResponse
-import com.google.common.util.concurrent.ListenableFuture
 import com.google.mlkit.vision.barcode.Barcode
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.barcode.BarcodeScanning
@@ -40,8 +32,9 @@ import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.invisible
 import io.matthewnelson.android_feature_screens.util.visible
-import io.matthewnelson.android_feature_toast_utils.show
+import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.android_feature_viewmodel.updateViewState
+import kotlinx.coroutines.launch
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicBoolean
@@ -84,10 +77,11 @@ internal class ScannerFragment: SideEffectFragment<
         if (allPermissionsGranted()) {
             startCamera()
         } else {
-            SphinxToastUtils().show(
-                requireContext(),
-                "Camera Permissions are required to use this feature, please enable them in Settings."
-            )
+            lifecycleScope.launch(viewModel.mainImmediate) {
+                viewModel.submitSideEffect(
+                    NotifySideEffect(getString(R.string.scanner_notify_permissions_needed))
+                )
+            }
         }
 
         (requireActivity() as InsetterActivity).addNavigationBarPadding(binding.root)
