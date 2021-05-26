@@ -26,6 +26,7 @@ import chat.sphinx.resources.getRandomColor
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.ChatName
 import chat.sphinx.wrapper_message.Message
+import chat.sphinx.wrapper_message.isDeleted
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
@@ -145,16 +146,36 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                             MessageHolderViewState.Sent(
                                 message,
                                 chat.type,
-                                BubbleBackground.First.Isolated,
+
+                                if (message.status.isDeleted()) {
+                                    BubbleBackground.Gone(setSpacingEqual = false)
+                                } else {
+                                    BubbleBackground.First.Isolated
+                                },
+
                             )
                         )
                     } else {
+
+                        val isDeleted = message.status.isDeleted()
+
                         newList.add(
                             MessageHolderViewState.Received(
                                 message,
                                 chat.type,
-                                BubbleBackground.First.Isolated,
-                                getInitialHolderViewStateForReceivedMessage(message)
+
+                                if (isDeleted) {
+                                    BubbleBackground.Gone(setSpacingEqual = false)
+                                } else {
+                                    BubbleBackground.First.Isolated
+                                },
+
+                                if (isDeleted) {
+                                    InitialHolderViewState.None
+                                } else {
+                                    getInitialHolderViewStateForReceivedMessage(message)
+                                },
+
                             )
                         )
                     }

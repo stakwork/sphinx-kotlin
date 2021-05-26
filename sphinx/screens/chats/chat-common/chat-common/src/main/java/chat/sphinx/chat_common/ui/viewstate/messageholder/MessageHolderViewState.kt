@@ -36,6 +36,17 @@ internal sealed class MessageHolderViewState(
         }
     }
 
+    val deletedMessage: LayoutState.DeletedMessage? by lazy(LazyThreadSafetyMode.NONE) {
+        if (message.status.isDeleted()) {
+            LayoutState.DeletedMessage(
+                gravityStart = this is Received,
+                timestamp = DateTime.getFormathmma().format(message.date.value)
+            )
+        } else {
+            null
+        }
+    }
+
     val bubbleDirectPayment: LayoutState.Bubble.DirectPayment? by lazy(LazyThreadSafetyMode.NONE) {
         if (message.type.isDirectPayment()) {
             LayoutState.Bubble.DirectPayment(showSent = this is Sent, amount = message.amount)
