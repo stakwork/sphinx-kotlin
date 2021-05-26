@@ -13,7 +13,8 @@
         layout="@layout/layout_chat_image_initial_holder"
         android:layout_width="@dimen/message_holder_in_photo_holder_xy"
         android:layout_height="@dimen/message_holder_in_photo_holder_xy"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        tools:visibility="visible" />
 
 
     <!-- Status Header -->
@@ -22,9 +23,10 @@
         layout="@layout/layout_message_status_header"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/space_message_holder_right"
-        app:layout_constraintStart_toEndOf="@+id/space_message_holder_left" />
+        app:layout_constraintStart_toEndOf="@+id/space_message_holder_left"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:visibility="gone" />
 
     <!-- width is programmatically set depending on sender -->
     <Space
@@ -45,13 +47,13 @@
         tools:layout_width="80dp" />
 
     <include
-        android:id="@+id/include_message_type_deleted_message"
-        layout="@layout/layout_message_type_deleted_message"
+        android:id="@+id/include_deleted_message"
+        layout="@layout/layout_deleted_message"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@+id/include_message_status_header"
-        app:layout_constraintStart_toStartOf="@id/include_message_status_header"
-        app:layout_constraintEnd_toEndOf="@id/include_message_status_header"
+        app:layout_constraintEnd_toStartOf="@+id/space_message_holder_right"
+        app:layout_constraintStart_toEndOf="@+id/space_message_holder_left"
+        app:layout_constraintTop_toTopOf="parent"
         tools:visibility="gone" />
 
     <include
