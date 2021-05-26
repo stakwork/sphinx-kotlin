@@ -4,10 +4,7 @@ import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
 import chat.sphinx.wrapper_chat.ChatType
 import chat.sphinx.wrapper_chat.isConversation
 import chat.sphinx.wrapper_common.DateTime
-import chat.sphinx.wrapper_message.Message
-import chat.sphinx.wrapper_message.isConfirmed
-import chat.sphinx.wrapper_message.isDirectPayment
-import chat.sphinx.wrapper_message.isReceived
+import chat.sphinx.wrapper_message.*
 
 internal inline val MessageHolderViewState.isReceived: Boolean
     get() = this is MessageHolderViewState.Received
@@ -63,6 +60,39 @@ internal sealed class MessageHolderViewState(
 //            }
         }
     }
+
+    val bubblePaidMessageDetails: LayoutState.Bubble.PaidMessageDetails? by lazy(LazyThreadSafetyMode.NONE) {
+        if (!message.isPaidMessage) {
+            null
+        } else {
+            val isPaymentPending = message.status.isPending()
+
+            message.type.let { type ->
+                LayoutState.Bubble.PaidMessageDetails(
+                    amount = message.amount,
+                    purchaseType = if (type.isPurchase()) type else null,
+                    showPaymentAcceptedIcon = type.isPurchaseAccepted(),
+                    showPaymentProgressWheel = type.isPurchaseProcessing(),
+                    showSendPaymentIcon = this !is Sent && !isPaymentPending,
+                    showPaymentReceivedIcon = this is Sent && !isPaymentPending,
+                )
+            }
+        }
+    }
+
+    val bubblePaidMessageSentStatus: LayoutState.Bubble.PaidMessageSentStatus? by lazy(LazyThreadSafetyMode.NONE) {
+        if (!message.isPaidMessage || this !is Sent) {
+            null
+        } else {
+            message.type.let { type ->
+                LayoutState.Bubble.PaidMessageSentStatus(
+                    amount = message.amount,
+                    purchaseType = if (type.isPurchase()) type else null,
+                )
+            }
+        }
+    }
+
 
     class Sent(
         message: Message,

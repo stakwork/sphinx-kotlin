@@ -7,8 +7,10 @@ import app.cash.exhaustive.Exhaustive
 import chat.sphinx.chat_common.R
 import chat.sphinx.resources.R as common_R
 import chat.sphinx.chat_common.databinding.LayoutMessageHolderBinding
+import chat.sphinx.resources.getString
 import chat.sphinx.resources.setTextColorExt
 import chat.sphinx.wrapper_common.lightning.asFormattedString
+import chat.sphinx.wrapper_message.MessageType
 import chat.sphinx.wrapper_view.Px
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
@@ -27,8 +29,8 @@ internal inline fun LayoutMessageHolderBinding.setBubbleDirectPaymentLayout(
             imageViewDirectPaymentSent.goneIfFalse(directPayment.showSent)
             imageViewDirectPaymentReceived.goneIfFalse(directPayment.showReceived)
             includeDirectPaymentAmountTextGroup.apply {
-                textViewBoostAmount.text = directPayment.amount.asFormattedString()
-                textViewBoostUnitLabel.text = directPayment.unitLabel
+                textViewSatsAmount.text = directPayment.amount.asFormattedString()
+                textViewSatsUnitLabel.text = directPayment.unitLabel
             }
         }
     }
@@ -188,6 +190,74 @@ internal inline fun LayoutMessageHolderBinding.setBubbleMessageLayout(
         } else {
             visible
             text = message.text
+        }
+    }
+}
+
+@MainThread
+@Suppress("NOTHING_TO_INLINE")
+internal inline fun LayoutMessageHolderBinding.setBubblePaidMessageDetailsLayout(
+    paidDetails: LayoutState.Bubble.PaidMessageDetails?
+) {
+    includeMessageHolderBubble.includePaidMessageReceivedDetailsHolder.apply {
+        if (paidDetails == null) {
+            root.gone
+        } else {
+            root.visible
+
+            val statusTextResID = when (paidDetails.purchaseType) {
+                MessageType.Purchase.Accepted -> {
+                    R.string.purchase_status_label_paid_message_details_accepted
+                }
+                MessageType.Purchase.Denied -> {
+                    R.string.purchase_status_label_paid_message_details_denied
+                }
+                MessageType.Purchase.Processing -> {
+                    R.string.purchase_status_label_paid_message_details_processing
+                }
+                null -> {
+                    R.string.purchase_status_label_paid_message_details_default
+                }
+            }
+
+            imageViewPaidMessageReceivedIcon.goneIfFalse(paidDetails.showPaymentReceivedIcon)
+            imageViewPaidMessageSentIcon.goneIfFalse(paidDetails.showSendPaymentIcon)
+            textViewPaymentAcceptedIcon.goneIfFalse(paidDetails.showPaymentAcceptedIcon)
+            progressBarPaidMessage.goneIfFalse(paidDetails.showPaymentProgressWheel)
+            textViewPaidMessageStatusLabel.text = getString(statusTextResID)
+            textViewPaidMessageAmountToPayLabel.text = paidDetails.amountText
+        }
+    }
+}
+
+@MainThread
+@Suppress("NOTHING_TO_INLINE")
+internal inline fun LayoutMessageHolderBinding.setBubblePaidMessageSentStatusLayout(
+    paidSentStatus: LayoutState.Bubble.PaidMessageSentStatus?
+) {
+    includeMessageHolderBubble.includePaidMessageSentStatusDetails.apply {
+        if (paidSentStatus == null) {
+            root.gone
+        } else {
+            root.visible
+
+            val statusTextResID = when (paidSentStatus.purchaseType) {
+                MessageType.Purchase.Accepted -> {
+                    R.string.purchase_status_label_paid_message_sent_status_accepted
+                }
+                MessageType.Purchase.Denied -> {
+                    R.string.purchase_status_label_paid_message_sent_status_denied
+                }
+                MessageType.Purchase.Processing -> {
+                    R.string.purchase_status_label_paid_message_sent_status_processing
+                }
+                null -> {
+                    R.string.purchase_status_label_paid_message_sent_status_default
+                }
+            }
+
+            textViewPaidMessageSentStatusAmount.text = paidSentStatus.amountText
+            textViewPaidMessageSentStatus.text = getString(statusTextResID)
         }
     }
 }
