@@ -98,7 +98,7 @@ internal sealed class MessageHolderViewState(
         message: Message,
         chatType: ChatType?,
         background: BubbleBackground,
-    ) : MessageHolderViewState(
+    ): MessageHolderViewState(
         message,
         chatType,
         background,
@@ -110,7 +110,7 @@ internal sealed class MessageHolderViewState(
         chatType: ChatType?,
         background: BubbleBackground,
         initialHolder: InitialHolderViewState,
-    ) : MessageHolderViewState(
+    ): MessageHolderViewState(
         message,
         chatType,
         background,
