@@ -24,7 +24,7 @@ import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.scanner_view_model_coordinator.request.ScannerRequest
 import chat.sphinx.scanner_view_model_coordinator.response.ScannerResponse
 import chat.sphinx.wrapper_chat.isConversation
-import chat.sphinx.wrapper_common.contact.ContactId
+import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_contact.isConfirmed
 import chat.sphinx.wrapper_contact.isTrue

@@ -3,8 +3,8 @@ package chat.sphinx.wrapper_message
 import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.Seen
-import chat.sphinx.wrapper_common.chat.ChatId
-import chat.sphinx.wrapper_common.contact.ContactId
+import chat.sphinx.wrapper_common.dashboard.ChatId
+import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.LightningPaymentHash
 import chat.sphinx.wrapper_common.lightning.LightningPaymentRequest
 import chat.sphinx.wrapper_common.lightning.Sat

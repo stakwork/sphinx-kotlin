@@ -12,7 +12,7 @@ import chat.sphinx.feature_network_query_message.model.MessageRelayResponse
 import chat.sphinx.feature_network_query_message.model.ReadMessagesRelayResponse
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.ResponseError
-import chat.sphinx.wrapper_common.chat.ChatId
+import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
 import kotlinx.coroutines.flow.Flow
@@ -86,8 +86,8 @@ class NetworkQueryMessageImpl(
 
 //    app.post('/messages/:chat_id/read', messages.readMessages)
     override fun readMessages(
-        chatId: ChatId,
-        relayData: Pair<AuthorizationToken, RelayUrl>?
+    chatId: ChatId,
+    relayData: Pair<AuthorizationToken, RelayUrl>?
     ): Flow<LoadResponse<Any?, ResponseError>> =
         networkRelayCall.relayPost(
             responseJsonClass = ReadMessagesRelayResponse::class.java,

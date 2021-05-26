@@ -40,9 +40,9 @@ import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.isTrue
 import chat.sphinx.wrapper_common.*
 import chat.sphinx.wrapper_common.chat.ChatUUID
-import chat.sphinx.wrapper_common.chat.ChatId
-import chat.sphinx.wrapper_common.contact.ContactId
-import chat.sphinx.wrapper_common.invite.InviteId
+import chat.sphinx.wrapper_common.dashboard.ChatId
+import chat.sphinx.wrapper_common.dashboard.ContactId
+import chat.sphinx.wrapper_common.dashboard.InviteId
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.LightningRouteHint
 import chat.sphinx.wrapper_common.lightning.Sat

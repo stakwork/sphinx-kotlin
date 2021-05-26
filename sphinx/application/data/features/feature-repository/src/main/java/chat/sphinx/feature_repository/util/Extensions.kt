@@ -8,10 +8,10 @@ import chat.sphinx.concept_network_query_message.model.MessageDto
 import chat.sphinx.conceptcoredb.SphinxDatabaseQueries
 import chat.sphinx.wrapper_chat.*
 import chat.sphinx.wrapper_common.*
-import chat.sphinx.wrapper_common.chat.ChatId
+import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.chat.ChatUUID
-import chat.sphinx.wrapper_common.contact.ContactId
-import chat.sphinx.wrapper_common.invite.InviteId
+import chat.sphinx.wrapper_common.dashboard.ContactId
+import chat.sphinx.wrapper_common.dashboard.InviteId
 import chat.sphinx.wrapper_common.invite.toInviteStatus
 import chat.sphinx.wrapper_common.lightning.*
 import chat.sphinx.wrapper_common.message.MessageId

@@ -1,7 +1,7 @@
 package chat.sphinx.concept_repository_message
 
-import chat.sphinx.wrapper_common.chat.ChatId
-import chat.sphinx.wrapper_common.contact.ContactId
+import chat.sphinx.wrapper_common.dashboard.ChatId
+import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_message.ReplyUUID
 import java.io.File
 

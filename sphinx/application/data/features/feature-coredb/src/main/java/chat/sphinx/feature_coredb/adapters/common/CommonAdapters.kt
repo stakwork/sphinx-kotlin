@@ -1,9 +1,9 @@
 package chat.sphinx.feature_coredb.adapters.common
 
 import chat.sphinx.wrapper_common.*
-import chat.sphinx.wrapper_common.chat.ChatId
-import chat.sphinx.wrapper_common.contact.ContactId
-import chat.sphinx.wrapper_common.invite.InviteId
+import chat.sphinx.wrapper_common.dashboard.ChatId
+import chat.sphinx.wrapper_common.dashboard.ContactId
+import chat.sphinx.wrapper_common.dashboard.InviteId
 import chat.sphinx.wrapper_common.invite.InviteStatus
 import chat.sphinx.wrapper_common.invite.toInviteStatus
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey

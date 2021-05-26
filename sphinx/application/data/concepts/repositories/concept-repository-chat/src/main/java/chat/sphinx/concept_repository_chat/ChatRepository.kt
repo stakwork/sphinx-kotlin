@@ -5,8 +5,8 @@ import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_common.chat.ChatUUID
-import chat.sphinx.wrapper_common.chat.ChatId
-import chat.sphinx.wrapper_common.contact.ContactId
+import chat.sphinx.wrapper_common.dashboard.ChatId
+import chat.sphinx.wrapper_common.dashboard.ContactId
 import kotlinx.coroutines.flow.Flow
 
 /**
