@@ -197,15 +197,15 @@ internal inline fun LayoutMessageHolderBinding.setBubbleMessageLayout(
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun LayoutMessageHolderBinding.setBubblePaidMessageDetailsLayout(
-    messageDetails: LayoutState.Bubble.PaidMessageDetails?
+    paidDetails: LayoutState.Bubble.PaidMessageDetails?
 ) {
     includeMessageHolderBubble.includePaidMessageReceivedDetailsHolder.apply {
-        if (messageDetails == null) {
+        if (paidDetails == null) {
             root.gone
         } else {
             root.visible
 
-            val statusTextResID = when (messageDetails.purchaseType) {
+            val statusTextResID = when (paidDetails.purchaseType) {
                 MessageType.Purchase.Accepted -> {
                     R.string.purchase_status_label_paid_message_details_accepted
                 }
@@ -220,12 +220,12 @@ internal inline fun LayoutMessageHolderBinding.setBubblePaidMessageDetailsLayout
                 }
             }
 
-            imageViewPaidMessageReceivedIcon.goneIfFalse(messageDetails.showPaymentReceivedIcon)
-            imageViewPaidMessageSentIcon.goneIfFalse(messageDetails.showSendPaymentIcon)
-            textViewPaymentAcceptedIcon.goneIfFalse(messageDetails.showPaymentAcceptedIcon)
-            progressBarPaidMessage.goneIfFalse(messageDetails.showPaymentProgressWheel)
+            imageViewPaidMessageReceivedIcon.goneIfFalse(paidDetails.showPaymentReceivedIcon)
+            imageViewPaidMessageSentIcon.goneIfFalse(paidDetails.showSendPaymentIcon)
+            textViewPaymentAcceptedIcon.goneIfFalse(paidDetails.showPaymentAcceptedIcon)
+            progressBarPaidMessage.goneIfFalse(paidDetails.showPaymentProgressWheel)
             textViewPaidMessageStatusLabel.text = getString(statusTextResID)
-            textViewPaidMessageAmountToPayLabel.text = messageDetails.amountText
+            textViewPaidMessageAmountToPayLabel.text = paidDetails.amountText
         }
     }
 }
@@ -233,15 +233,15 @@ internal inline fun LayoutMessageHolderBinding.setBubblePaidMessageDetailsLayout
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun LayoutMessageHolderBinding.setBubblePaidMessageSentStatusLayout(
-    messageDetails: LayoutState.Bubble.PaidMessageSentStatus?
+    paidSentStatus: LayoutState.Bubble.PaidMessageSentStatus?
 ) {
     includeMessageHolderBubble.includePaidMessageSentStatusDetails.apply {
-        if (messageDetails == null) {
+        if (paidSentStatus == null) {
             root.gone
         } else {
             root.visible
 
-            val statusTextResID = when (messageDetails.purchaseType) {
+            val statusTextResID = when (paidSentStatus.purchaseType) {
                 MessageType.Purchase.Accepted -> {
                     R.string.purchase_status_label_paid_message_sent_status_accepted
                 }
@@ -256,7 +256,7 @@ internal inline fun LayoutMessageHolderBinding.setBubblePaidMessageSentStatusLay
                 }
             }
 
-            textViewPaidMessageSentStatusAmount.text = messageDetails.amountText
+            textViewPaidMessageSentStatusAmount.text = paidSentStatus.amountText
             textViewPaidMessageSentStatus.text = getString(statusTextResID)
         }
     }
