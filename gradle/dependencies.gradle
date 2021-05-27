@@ -48,6 +48,7 @@ ext.deps = [
             fragment: "androidx.navigation:navigation-fragment-ktx:${versions.navigation}",
             ui: "androidx.navigation:navigation-ui-ktx:${versions.navigation}",
         ],
+        paging3: "androidx.paging:paging-runtime:3.0.0",
         recyclerView: "androidx.recyclerview:recyclerview:1.2.0",
         securityCrypto: "androidx.security:security-crypto:1.1.0-alpha03",
         sqlite: "androidx.sqlite:sqlite-ktx:2.1.0",

@@ -29,4 +29,6 @@ android {
 dependencies {
     api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-dashboard-android')
     api project(path: ':sphinx:application:data:features:feature-repository')
+
+    api deps.square.sqlDelightAndroidPaging3
 }
