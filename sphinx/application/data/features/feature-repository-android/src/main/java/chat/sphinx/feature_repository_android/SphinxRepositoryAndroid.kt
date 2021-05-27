@@ -6,8 +6,11 @@ import chat.sphinx.concept_network_query_chat.NetworkQueryChat
 import chat.sphinx.concept_network_query_contact.NetworkQueryContact
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_message.NetworkQueryMessage
+import chat.sphinx.concept_paging.PageSourceWrapper
+import chat.sphinx.concept_repository_dashboard.DashboardItem
 import chat.sphinx.concept_repository_dashboard_android.RepositoryDashboardAndroid
 import chat.sphinx.concept_socket_io.SocketIOManager
+import chat.sphinx.conceptcoredb.DashboardDbo
 import chat.sphinx.feature_repository.SphinxRepository
 import chat.sphinx.logger.SphinxLogger
 import com.squareup.moshi.Moshi
@@ -41,6 +44,9 @@ class SphinxRepositoryAndroid(
     rsa,
     socketIOManager,
     LOG,
-), RepositoryDashboardAndroid
+), RepositoryDashboardAndroid<DashboardDbo>
 {
+    override suspend fun getDashboardItemPagingSource(): PageSourceWrapper<Long, DashboardItem, DashboardDbo> {
+        TODO("Not yet implemented")
+    }
 }

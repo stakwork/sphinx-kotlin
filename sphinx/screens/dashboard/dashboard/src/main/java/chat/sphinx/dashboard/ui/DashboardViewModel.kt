@@ -61,7 +61,7 @@ internal class DashboardViewModel @Inject constructor(
 
     dispatchers: CoroutineDispatchers,
 
-    private val repositoryDashboard: RepositoryDashboardAndroid,
+    private val repositoryDashboard: RepositoryDashboardAndroid<Any>,
 
     private val pushNotificationRegistrar: PushNotificationRegistrar,
 
