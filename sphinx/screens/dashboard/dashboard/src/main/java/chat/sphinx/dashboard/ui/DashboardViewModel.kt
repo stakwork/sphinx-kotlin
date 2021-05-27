@@ -2,7 +2,7 @@ package chat.sphinx.dashboard.ui
 
 import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
-import chat.sphinx.concept_repository_dashboard.RepositoryDashboard
+import chat.sphinx.concept_repository_dashboard_android.RepositoryDashboardAndroid
 import chat.sphinx.concept_service_notification.PushNotificationRegistrar
 import chat.sphinx.concept_socket_io.SocketIOManager
 import chat.sphinx.concept_socket_io.SocketIOState
@@ -61,7 +61,7 @@ internal class DashboardViewModel @Inject constructor(
 
     dispatchers: CoroutineDispatchers,
 
-    private val repositoryDashboard: RepositoryDashboard,
+    private val repositoryDashboard: RepositoryDashboardAndroid,
 
     private val pushNotificationRegistrar: PushNotificationRegistrar,
 

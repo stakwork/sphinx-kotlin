@@ -9,7 +9,7 @@ import chat.sphinx.concept_network_query_contact.NetworkQueryContact
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_message.NetworkQueryMessage
 import chat.sphinx.concept_repository_contact.ContactRepository
-import chat.sphinx.concept_repository_dashboard.RepositoryDashboard
+import chat.sphinx.concept_repository_dashboard_android.RepositoryDashboardAndroid
 import chat.sphinx.concept_repository_lightning.LightningRepository
 import chat.sphinx.concept_socket_io.SocketIOManager
 import chat.sphinx.database.SphinxCoreDBImpl
@@ -107,8 +107,8 @@ object RepositoryModule {
         sphinxRepositoryAndroid
 
     @Provides
-    fun provideRepositoryDashboard(
+    fun provideRepositoryDashboardAndroid(
         sphinxRepositoryAndroid: SphinxRepositoryAndroid
-    ): RepositoryDashboard =
+    ): RepositoryDashboardAndroid =
         sphinxRepositoryAndroid
 }

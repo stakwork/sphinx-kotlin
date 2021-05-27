@@ -1,0 +1,6 @@
+package chat.sphinx.concept_repository_dashboard_android
+
+import chat.sphinx.concept_repository_dashboard.RepositoryDashboard
+
+interface RepositoryDashboardAndroid: RepositoryDashboard {
+}
