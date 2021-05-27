@@ -185,14 +185,14 @@ class SphinxRepository(
 
                                     var chatId: ChatId? = null
 
-                                    msg.dto.chat?.let { chatDto ->
-                                        queries.upsertChat(chatDto, moshi, chatSeenMap)
-
-                                        chatId = ChatId(chatDto.id)
-                                    }
-
                                     msg.dto.contact?.let { contactDto ->
                                         upsertContact(contactDto, queries)
+                                    }
+
+                                    msg.dto.chat?.let { chatDto ->
+                                        upsertChat(chatDto, moshi, chatSeenMap, queries)
+
+                                        chatId = ChatId(chatDto.id)
                                     }
 
                                     msg.dto.chat_id?.let { nnChatId ->
@@ -200,7 +200,8 @@ class SphinxRepository(
                                     }
 
                                     chatId?.let { id ->
-                                        msg.dto.updateChatDboLatestMessage(
+                                        updateChatDboLatestMessage(
+                                            msg.dto,
                                             id,
                                             latestMessageUpdatedTimeMap,
                                             queries
@@ -335,7 +336,7 @@ class SphinxRepository(
 
                         queries.transaction {
                             for (dto in chats) {
-                                queries.upsertChat(dto, moshi, chatSeenMap)
+                                upsertChat(dto, moshi, chatSeenMap, queries)
 
                                 chatIdsToRemove.remove(ChatId(dto.id))
                             }
@@ -1211,11 +1212,14 @@ class SphinxRepository(
                                                         // chat is returned only if this is the
                                                         // first message sent to a new contact
                                                         loadResponse.value.chat?.let { chatDto ->
-                                                            queries.upsertChat(
-                                                                chatDto,
-                                                                moshi,
-                                                                chatSeenMap,
-                                                            )
+                                                            queries.transaction {
+                                                                upsertChat(
+                                                                    chatDto,
+                                                                    moshi,
+                                                                    chatSeenMap,
+                                                                    queries,
+                                                                )
+                                                            }
                                                         }
 
                                                         queries.transaction {
@@ -1261,7 +1265,9 @@ class SphinxRepository(
 
                         chatLock.withLock {
                             withContext(io) {
-                                queries.upsertChat(loadResponse.value, moshi, chatSeenMap)
+                                queries.transaction {
+                                    upsertChat(loadResponse.value, moshi, chatSeenMap, queries)
+                                }
                             }
                         }
 
@@ -1395,7 +1401,8 @@ class SphinxRepository(
 
                                                     for (entry in latestMessageMap.entries) {
 
-                                                        entry.value.updateChatDboLatestMessage(
+                                                        updateChatDboLatestMessage(
+                                                            entry.value,
                                                             entry.key,
                                                             map,
                                                             queries
