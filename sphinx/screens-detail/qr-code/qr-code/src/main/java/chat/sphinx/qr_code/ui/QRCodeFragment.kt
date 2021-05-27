@@ -11,6 +11,8 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.navArgs
 import app.cash.exhaustive.Exhaustive
 import by.kirich1409.viewbindingdelegate.viewBinding
+import chat.sphinx.insetter_activity.InsetterActivity
+import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.qr_code.R
 import chat.sphinx.qr_code.databinding.FragmentQrCodeBinding
 import chat.sphinx.qr_code.navigation.BackType
@@ -50,6 +52,8 @@ internal class QRCodeFragment: SideEffectFragment<
         } else {
             viewModel.updateViewState(QRCodeViewState.HideNavBackButton)
         }
+
+        (requireActivity() as InsetterActivity).addNavigationBarPadding(binding.layoutConstraintQrCodeFragment)
 
         binding.qrCodeLabel.text = viewModel.args.qrText
 

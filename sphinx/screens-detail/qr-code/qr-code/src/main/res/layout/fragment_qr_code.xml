@@ -2,6 +2,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_constraint_qr_code_fragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/background_detail_screen"
@@ -17,57 +18,72 @@
     <ImageView
         android:id="@+id/qr_code"
         android:layout_width="match_parent"
-        android:layout_height="300dp"
-        android:layout_centerHorizontal="true"
+        android:layout_marginHorizontal="@dimen/default_double_layout_margin"
+        android:layout_height="0dp"
+        android:layout_marginTop="60dp"
         app:layout_constraintTop_toBottomOf="@+id/include_qr_code_header"
-        android:layout_marginTop="50dp" />
+        app:layout_constraintDimensionRatio="1:1" />
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/qr_code_label"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/qr_code"
-        app:layout_constraintStart_toStartOf="parent"
-        android:textColor="@color/secondaryText"
+        android:textColor="@color/text"
         android:fontFamily="@font/roboto_regular"
         android:textSize="@dimen/default_form_text_view_text_size"
-        android:singleLine="true" />
+        android:singleLine="false"
+        android:layout_marginHorizontal="@dimen/default_double_layout_margin"
+        android:layout_marginTop="30dp"
+        app:layout_constraintTop_toBottomOf="@+id/qr_code"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="30dp"
+        android:layout_marginHorizontal="30dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        android:layout_marginBottom="50dp">
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/button_qr_code_share"
             style="@style/RoundedBlueButton"
-            android:layout_width="100dp"
-            android:layout_height="52dp"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
             android:text="@string/share"
             android:textSize="12dp"
             android:textColor="@android:color/white"
             android:background="@drawable/button_background_white_rad_48"
             android:backgroundTint="@color/primaryBlue"
-            android:layout_marginBottom="@dimen/default_layout_margin"
+            android:layout_marginEnd="@dimen/default_layout_margin"
             app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/guide_v50"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"/>
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guide_v50"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent=".5" />
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/button_qr_code_copy"
             style="@style/RoundedBlueButton"
-            android:layout_width="100dp"
-            android:layout_height="52dp"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
             android:text="@string/copy"
             android:textSize="12dp"
             android:textColor="@android:color/white"
             android:background="@drawable/button_background_white_rad_48"
             android:backgroundTint="@color/primaryBlue"
-            android:layout_marginTop="@dimen/default_layout_margin"
+            android:layout_marginStart="@dimen/default_layout_margin"
+            app:layout_constraintStart_toEndOf="@+id/guide_v50"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
