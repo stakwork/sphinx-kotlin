@@ -8,7 +8,8 @@ inline fun String.toChatAlias(): ChatAlias? =
         null
     }
 
-inline class ChatAlias(val value: String) {
+@JvmInline
+value class ChatAlias(val value: String) {
     init {
         require(value.isNotEmpty()) {
             "ChatAlias cannot be empty"

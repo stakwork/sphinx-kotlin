@@ -60,7 +60,8 @@ inline fun DateTime.before(dateTime: DateTime): Boolean =
  *
  * See https://www.datetimeformatter.com/how-to-format-date-time-in-java-7/#examples
  * */
-inline class DateTime(val value: Date) {
+@JvmInline
+value class DateTime(val value: Date) {
 
     companion object {
         const val UTC = "UTC"
@@ -81,6 +82,12 @@ inline class DateTime(val value: Date) {
                         formatRelay = it
                     }
             }
+
+        /**
+         * Returns a string value using [FORMAT_RELAY]
+         * */
+        fun nowUTC(): String =
+            getFormatRelay().format(Date(System.currentTimeMillis()))
 
         @Volatile
         private var formatToday00: SimpleDateFormat? = null

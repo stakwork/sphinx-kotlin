@@ -7,14 +7,17 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.navigation.NavArgs
 import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import chat.sphinx.chat_common.ui.ChatViewModel
 import chat.sphinx.chat_common.databinding.LayoutMessageHolderBinding
+import chat.sphinx.chat_common.ui.viewstate.messageholder.*
+import chat.sphinx.chat_common.ui.viewstate.messageholder.BubbleBackground
 import chat.sphinx.chat_common.ui.viewstate.messageholder.MessageHolderViewState
-import chat.sphinx.chat_common.ui.viewstate.messageholder.setBackground
-import chat.sphinx.chat_common.ui.viewstate.messageholder.setDirectPaymentLayout
+import chat.sphinx.chat_common.ui.viewstate.messageholder.setBubbleBackground
+import chat.sphinx.chat_common.ui.viewstate.messageholder.setBubbleDirectPaymentLayout
+import chat.sphinx.chat_common.ui.viewstate.messageholder.setBubbleMessageLayout
 import chat.sphinx.chat_common.ui.viewstate.messageholder.setStatusHeader
-import chat.sphinx.chat_common.ui.viewstate.messageholder.setMessageTypeMessageLayout
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.wrapper_view.Px
@@ -25,6 +28,7 @@ import kotlinx.coroutines.withContext
 
 internal class MessageListAdapter<ARGS: NavArgs>(
     private val recyclerView: RecyclerView,
+    private val layoutManager: LinearLayoutManager,
     private val lifecycleOwner: LifecycleOwner,
     private val onStopSupervisor: OnStopSupervisor,
     private val viewModel: ChatViewModel<ARGS>,
@@ -57,11 +61,13 @@ internal class MessageListAdapter<ARGS: NavArgs>(
                 val new = newList[newItemPosition]
 
                 when {
-                    old is MessageHolderViewState.InComing && new is MessageHolderViewState.InComing -> {
-                        old.background == new.background
+                    old is MessageHolderViewState.Received && new is MessageHolderViewState.Received -> {
+                        old.background == new.background        &&
+                        old.message    == new.message
                     }
-                    old is MessageHolderViewState.OutGoing && new is MessageHolderViewState.OutGoing -> {
-                        old.background == new.background
+                    old is MessageHolderViewState.Sent && new is MessageHolderViewState.Sent -> {
+                        old.background == new.background        &&
+                        old.message    == new.message
                     }
                     else -> {
                         false
@@ -90,9 +96,23 @@ internal class MessageListAdapter<ARGS: NavArgs>(
                             Diff(messages, list)
                         )
                     }.let { result ->
+
+                        val lastVisibleItemPositionBeforeDispatch = layoutManager.findLastVisibleItemPosition()
+                        val listSizeBeforeDispatch = messages.size - 1
+
                         messages.clear()
                         messages.addAll(list)
                         result.dispatchUpdatesTo(this@MessageListAdapter)
+
+                        val listSizeAfterDispatch = messages.size - 1
+
+                        if (
+                                listSizeAfterDispatch > listSizeBeforeDispatch                  &&
+                                recyclerView.scrollState == RecyclerView.SCROLL_STATE_IDLE      &&
+                                lastVisibleItemPositionBeforeDispatch == listSizeBeforeDispatch
+                        ) {
+                            recyclerView.scrollToPosition(listSizeAfterDispatch)
+                        }
                     }
                 }
             }
@@ -142,10 +162,13 @@ internal class MessageListAdapter<ARGS: NavArgs>(
                     )
                 }
 
-                setBackground(viewState, recyclerViewWidth)
                 setStatusHeader(viewState.statusHeader)
-                setMessageTypeMessageLayout(viewState.messageTypeMessageContent)
-                setDirectPaymentLayout(viewState.directPayment)
+                setBubbleBackground(viewState, recyclerViewWidth)
+
+                if (viewState.background !is BubbleBackground.Gone) {
+                    setBubbleMessageLayout(viewState.bubbleMessage)
+                    setBubbleDirectPaymentLayout(viewState.bubbleDirectPayment)
+                }
             }
         }
 

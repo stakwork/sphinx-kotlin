@@ -24,7 +24,7 @@ import java.security.interfaces.RSAPublicKey
 import javax.crypto.Cipher
 
 @Suppress("NOTHING_TO_INLINE")
-inline fun RSA_PEM.clear(byte: Byte = '0'.toByte()) {
+inline fun RSA_PEM.clear(byte: Byte = '0'.code.toByte()) {
     Key_Modulus?.fill(byte)
     Key_Exponent?.fill(byte)
     Key_D?.fill(byte)
@@ -66,7 +66,7 @@ open class RSAImpl(val algorithm: RSAAlgorithm): RSA() {
                         RsaPublicKey(keys.public.encoded.encodeBase64ToByteArray().toCharArray())
                     )
                 ).also {
-                    keys.private.encoded?.fill('0'.toByte())
+                    keys.private.encoded?.fill('0'.code.toByte())
                 }
             }
 
@@ -78,7 +78,7 @@ open class RSAImpl(val algorithm: RSAAlgorithm): RSA() {
                     RsaPublicKey(rsaPem.ToPEM_PKCS1_Bytes(true).toCharArray()),
                 )
             ).also {
-                keys.private.encoded?.fill('0'.toByte())
+                keys.private.encoded?.fill('0'.code.toByte())
                 rsaPem.clear()
             }
 
@@ -148,7 +148,7 @@ open class RSAImpl(val algorithm: RSAAlgorithm): RSA() {
                     } finally {
 
                         for (ba in arr) {
-                            ba.fill('0'.toByte())
+                            ba.fill('0'.code.toByte())
                         }
                         rsaPem.clear()
 
@@ -156,7 +156,7 @@ open class RSAImpl(val algorithm: RSAAlgorithm): RSA() {
 
                     buffer.array().let { decrypted ->
                         decrypted.copyOfRange(fromIndex = 0, toIndex = finalSize).also {
-                            decrypted.fill('0'.toByte())
+                            decrypted.fill('0'.code.toByte())
                         }
                     }
 

@@ -11,7 +11,8 @@ inline fun String.toLightningRouteHint(): LightningRouteHint? =
 inline val String.isValidLightningRouteHint: Boolean
     get() = isNotEmpty() && matches("^${LightningRouteHint.REGEX}\$".toRegex())
 
-inline class LightningRouteHint(val value: String) {
+@JvmInline
+value class LightningRouteHint(val value: String) {
 
     companion object {
         const val REGEX = "[A-F0-9a-f]{66}:[0-9]+"

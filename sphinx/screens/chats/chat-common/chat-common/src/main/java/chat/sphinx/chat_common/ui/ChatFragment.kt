@@ -20,6 +20,7 @@ import chat.sphinx.chat_common.navigation.ChatNavigator
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
 import chat.sphinx.chat_common.ui.viewstate.header.ChatHeaderViewState
 import chat.sphinx.concept_image_loader.ImageLoader
+import chat.sphinx.concept_repository_message.SendMessage
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.insetter_activity.addStatusBarPadding
@@ -30,7 +31,6 @@ import chat.sphinx.resources.setTextColorExt
 import chat.sphinx.wrapper_chat.isTrue
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.lightning.unit
-import io.matthewnelson.android_feature_screens.ui.base.BaseFragment
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
@@ -58,6 +58,8 @@ abstract class ChatFragment<
 
     protected abstract val chatNavigator: ChatNavigator
 
+    protected val sendMessageBuilder = SendMessage.Builder()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         viewModel.init()
@@ -65,30 +67,35 @@ abstract class ChatFragment<
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setupHeaderFooter()
+        val insetterActivity = (requireActivity() as InsetterActivity)
+        setupFooter(insetterActivity)
+        setupHeader(insetterActivity)
+        setupRecyclerView()
+    }
 
-        val messageListAdapter = MessageListAdapter(
-            recyclerView,
-            viewLifecycleOwner,
-            onStopSupervisor,
-            viewModel,
-            imageLoader
-        )
-        recyclerView.apply {
-            setHasFixedSize(false)
-            layoutManager = LinearLayoutManager(binding.root.context)
-            adapter = messageListAdapter
+    private fun setupFooter(insetterActivity: InsetterActivity) {
+        footerBinding.apply {
+            insetterActivity.addNavigationBarPadding(root)
+
+            textViewChatFooterSend.setOnClickListener {
+
+                sendMessageBuilder.setText(editTextChatFooter.text?.toString())
+
+                viewModel.sendMessage(sendMessageBuilder)?.let {
+                    // if it did not return null that means it was valid
+                    sendMessageBuilder.clear()
+                    editTextChatFooter.setText("")
+                }
+            }
         }
     }
 
-    private fun setupHeaderFooter() {
-        val activity = (requireActivity() as InsetterActivity)
-
+    private fun setupHeader(insetterActivity: InsetterActivity) {
         headerBinding.apply {
-            activity.addNavigationBarPadding(footerBinding.root)
-                .addStatusBarPadding(root)
+            insetterActivity.addStatusBarPadding(root)
 
-            root.layoutParams.height = root.layoutParams.height + activity.statusBarInsetHeight.top
+            root.layoutParams.height =
+                root.layoutParams.height + insetterActivity.statusBarInsetHeight.top
             root.requestLayout()
 
             imageViewChatHeaderMuted.setOnClickListener {
@@ -100,6 +107,24 @@ abstract class ChatFragment<
                     chatNavigator.popBackStack()
                 }
             }
+        }
+    }
+
+    private fun setupRecyclerView() {
+        val linearLayoutManager = LinearLayoutManager(binding.root.context)
+        val messageListAdapter = MessageListAdapter(
+            recyclerView,
+            linearLayoutManager,
+            viewLifecycleOwner,
+            onStopSupervisor,
+            viewModel,
+            imageLoader
+        )
+        recyclerView.apply {
+            setHasFixedSize(false)
+            layoutManager = linearLayoutManager
+            adapter = messageListAdapter
+            itemAnimator = null
         }
     }
 

@@ -21,6 +21,8 @@ dependencies {
     implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-lightning')
     implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-message')
 
+    // needed to override moshi's use of 1.4.31
+    api deps.kotlin.reflect
     api deps.square.moshi
     kapt kaptDeps.square.moshiCodegen
 }

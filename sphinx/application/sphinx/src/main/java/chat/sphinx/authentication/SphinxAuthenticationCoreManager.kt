@@ -1,5 +1,6 @@
 package chat.sphinx.authentication
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.Application
 import android.content.pm.ActivityInfo
@@ -40,6 +41,7 @@ class SphinxAuthenticationCoreManager(
         setAuthenticationStateRequired(AuthenticationState.Required.InitialLogIn)
     }
 
+    @SuppressLint("SourceLockedOrientationActivity")
     override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
         super.onActivityCreated(activity, savedInstanceState)
         activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT

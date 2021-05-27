@@ -16,4 +16,5 @@ inline fun Px.multiplyBy(px: Px): Px =
 inline fun Px.divideBy(px: Px): Px =
     Px(value / px.value)
 
-inline class Px(val value: Float)
+@JvmInline
+value class Px(val value: Float)

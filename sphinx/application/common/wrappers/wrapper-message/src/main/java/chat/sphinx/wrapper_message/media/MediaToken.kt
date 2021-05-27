@@ -8,7 +8,8 @@ inline fun String.toMediaToken(): MediaToken? =
         null
     }
 
-inline class MediaToken(val value: String) {
+@JvmInline
+value class MediaToken(val value: String) {
     init {
         require(value.isNotEmpty()) {
             "MediaToken cannot be empty"

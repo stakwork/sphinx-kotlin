@@ -153,7 +153,7 @@ class ImageLoaderAndroid(
             .okHttpClient(okHttpClient)
             .componentRegistry {
                 if (Build.VERSION.SDK_INT >= 28) {
-                    add(ImageDecoderDecoder())
+                    add(ImageDecoderDecoder(appContext))
                 } else {
                     add(GifDecoder())
                 }
