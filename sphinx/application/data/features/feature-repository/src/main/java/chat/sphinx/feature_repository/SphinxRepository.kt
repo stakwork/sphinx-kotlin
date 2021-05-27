@@ -81,10 +81,10 @@ import java.text.ParseException
 import kotlin.collections.ArrayList
 import kotlin.math.absoluteValue
 
-class SphinxRepository(
+abstract class SphinxRepository(
     private val authenticationCoreManager: AuthenticationCoreManager,
     private val authenticationStorage: AuthenticationStorage,
-    private val coreDB: CoreDB,
+    protected val coreDB: CoreDB,
     private val dispatchers: CoroutineDispatchers,
     private val moshi: Moshi,
     private val networkQueryChat: NetworkQueryChat,
