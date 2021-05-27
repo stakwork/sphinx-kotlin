@@ -1,5 +1,7 @@
 package chat.sphinx.feature_repository_android
 
+import androidx.paging.PagingConfig
+import androidx.paging.PagingSource
 import chat.sphinx.concept_coredb.CoreDB
 import chat.sphinx.concept_crypto_rsa.RSA
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
@@ -11,9 +13,11 @@ import chat.sphinx.concept_repository_dashboard.DashboardItem
 import chat.sphinx.concept_repository_dashboard_android.RepositoryDashboardAndroid
 import chat.sphinx.concept_socket_io.SocketIOManager
 import chat.sphinx.conceptcoredb.DashboardDbo
+import chat.sphinx.conceptcoredb.SphinxDatabaseQueries
 import chat.sphinx.feature_repository.SphinxRepository
 import chat.sphinx.logger.SphinxLogger
 import com.squareup.moshi.Moshi
+import com.squareup.sqldelight.android.paging3.QueryPagingSource
 import io.matthewnelson.concept_authentication.data.AuthenticationStorage
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.feature_authentication_core.AuthenticationCoreManager
@@ -46,7 +50,51 @@ class SphinxRepositoryAndroid(
     LOG,
 ), RepositoryDashboardAndroid<DashboardDbo>
 {
-    override suspend fun getDashboardItemPagingSource(): PageSourceWrapper<Long, DashboardItem, DashboardDbo> {
-        TODO("Not yet implemented")
+    companion object {
+        const val PAGING_DASHBOARD_PAGE_SIZE = 30
+        const val PAGING_DASHBOARD_PREFETCH_DISTANCE = PAGING_DASHBOARD_PAGE_SIZE / 2
+        const val PAGING_DASHBOARD_INITIAL_LOAD_SIZE = PAGING_DASHBOARD_PREFETCH_DISTANCE
+        const val PAGING_DASHBOARD_MAX_SIZE =
+            (PAGING_DASHBOARD_PREFETCH_DISTANCE * 2) + PAGING_DASHBOARD_PAGE_SIZE
     }
+
+    private inner class DashboardPageSourceWrapper(
+        private val queries: SphinxDatabaseQueries,
+        initialSource: PagingSource<Long, DashboardDbo>
+    ): PageSourceWrapper<Long, DashboardItem, DashboardDbo>(initialSource) {
+        override val config: PagingConfig by lazy {
+            PagingConfig(
+                pageSize = PAGING_DASHBOARD_PAGE_SIZE,
+                prefetchDistance = PAGING_DASHBOARD_PREFETCH_DISTANCE,
+                initialLoadSize = PAGING_DASHBOARD_INITIAL_LOAD_SIZE,
+                maxSize = PAGING_DASHBOARD_MAX_SIZE,
+            )
+        }
+
+        override fun createNewPagerSource(): PagingSource<Long, DashboardDbo> {
+            return createNewDashboardItemPagingSource(queries)
+        }
+
+        override suspend fun mapOriginal(original: DashboardDbo): DashboardItem {
+            TODO("Not yet implemented")
+        }
+    }
+
+    override suspend fun getDashboardItemPagingSource(): PageSourceWrapper<Long, DashboardItem, DashboardDbo> {
+        val queries = coreDB.getSphinxDatabaseQueries()
+        return DashboardPageSourceWrapper(
+            queries,
+            createNewDashboardItemPagingSource(queries),
+        )
+    }
+
+    private fun createNewDashboardItemPagingSource(
+        queries: SphinxDatabaseQueries
+    ): PagingSource<Long, DashboardDbo> =
+        QueryPagingSource(
+            countQuery = queries.dashboardCount(),
+            transacter = queries,
+            dispatcher = io,
+            queryProvider = queries::dashboardPagination
+        )
 }
