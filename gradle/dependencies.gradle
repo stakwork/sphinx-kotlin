@@ -93,6 +93,7 @@ ext.deps = [
         okhttpLogging: "com.squareup.okhttp3:logging-interceptor:${versions.okhttp}",
         moshi: "com.squareup.moshi:moshi-kotlin:${versions.moshi}",
         sqlDelightAndroid: "com.squareup.sqldelight:android-driver:${versions.sqlDelight}",
+        sqlDelightAndroidPaging3: "com.squareup.sqldelight:android-paging3-extensions:${versions.sqlDelight}",
         sqlDelightCoroutines: "com.squareup.sqldelight:coroutines-extensions:${versions.sqlDelight}",
         sqlDelightJvm: "com.squareup.sqldelight:sqlite-driver:${versions.sqlDelight}",
         sqlDelightNative: "com.squareup.sqldelight:native-driver:${versions.sqlDelight}",

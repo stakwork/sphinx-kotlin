@@ -10,7 +10,6 @@ dependencies {
     api project(path: ':sphinx:application:common:wrappers:wrapper-contact')
     api project(path: ':sphinx:application:common:wrappers:wrapper-lightning')
     api project(path: ':sphinx:application:common:wrappers:wrapper-message')
-    api project(path: ':sphinx:application:data:concepts:concept-paging')
 
     implementation deps.kotlin.coroutinesCore
 }
