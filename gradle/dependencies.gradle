@@ -96,6 +96,7 @@ ext.deps = [
         sqlDelightCoroutines: "com.squareup.sqldelight:coroutines-extensions:${versions.sqlDelight}",
         sqlDelightJvm: "com.squareup.sqldelight:sqlite-driver:${versions.sqlDelight}",
         sqlDelightNative: "com.squareup.sqldelight:native-driver:${versions.sqlDelight}",
+        sqlDelightRuntime: "com.squareup.sqldelight:runtime:${versions.sqlDelight}",
     ],
     viewBindingDelegateNoReflect: "com.github.kirich1409:viewbindingpropertydelegate-noreflection:1.4.6",
 ]
