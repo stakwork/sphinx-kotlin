@@ -1,5 +1,6 @@
 package chat.sphinx.chat_common.ui.viewstate.messageholder
 
+import android.view.Gravity
 import androidx.annotation.DrawableRes
 import androidx.annotation.MainThread
 import androidx.core.view.updateLayoutParams
@@ -7,8 +8,10 @@ import app.cash.exhaustive.Exhaustive
 import chat.sphinx.chat_common.R
 import chat.sphinx.resources.R as common_R
 import chat.sphinx.chat_common.databinding.LayoutMessageHolderBinding
+import chat.sphinx.resources.getString
 import chat.sphinx.resources.setTextColorExt
 import chat.sphinx.wrapper_common.lightning.asFormattedString
+import chat.sphinx.wrapper_message.MessageType
 import chat.sphinx.wrapper_view.Px
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
@@ -27,8 +30,8 @@ internal inline fun LayoutMessageHolderBinding.setBubbleDirectPaymentLayout(
             imageViewDirectPaymentSent.goneIfFalse(directPayment.showSent)
             imageViewDirectPaymentReceived.goneIfFalse(directPayment.showReceived)
             includeDirectPaymentAmountTextGroup.apply {
-                textViewBoostAmount.text = directPayment.amount.asFormattedString()
-                textViewBoostUnitLabel.text = directPayment.unitLabel
+                textViewSatsAmount.text = directPayment.amount.asFormattedString()
+                textViewSatsUnitLabel.text = directPayment.unitLabel
             }
         }
     }
@@ -85,44 +88,43 @@ internal fun LayoutMessageHolderBinding.setBubbleBackground(
 
             resId?.let { setBackgroundResource(it) }
         }
+    }
 
+    // Set background spacing
+    if (viewState.background is BubbleBackground.Gone && viewState.background.setSpacingEqual) {
 
+        val defaultMargins = root
+            .context
+            .resources
+            .getDimensionPixelSize(common_R.dimen.default_layout_margin)
 
-        if (viewState.background is BubbleBackground.Gone && viewState.background.setSpacingEqual) {
+        spaceMessageHolderLeft.updateLayoutParams { width = defaultMargins }
+        spaceMessageHolderRight.updateLayoutParams { width = defaultMargins }
 
-            val defaultMargins = root
-                .context
-                .resources
-                .getDimensionPixelSize(common_R.dimen.default_layout_margin)
+    } else {
 
-            spaceMessageHolderLeft.updateLayoutParams { width = defaultMargins }
-            spaceMessageHolderRight.updateLayoutParams { width = defaultMargins }
-
-        } else {
-
-            @Exhaustive
-            when (viewState) {
-                is MessageHolderViewState.Received -> {
-                    spaceMessageHolderLeft.updateLayoutParams {
-                        width = root
-                            .context
-                            .resources
-                            .getDimensionPixelSize(R.dimen.message_holder_space_width_left)
-                    }
-                    spaceMessageHolderRight.updateLayoutParams {
-                        width = (holderWidth.value * BubbleBackground.SPACE_WIDTH_MULTIPLE).toInt()
-                    }
+        @Exhaustive
+        when (viewState) {
+            is MessageHolderViewState.Received -> {
+                spaceMessageHolderLeft.updateLayoutParams {
+                    width = root
+                        .context
+                        .resources
+                        .getDimensionPixelSize(R.dimen.message_holder_space_width_left)
                 }
-                is MessageHolderViewState.Sent -> {
-                    spaceMessageHolderLeft.updateLayoutParams {
-                        width = (holderWidth.value * BubbleBackground.SPACE_WIDTH_MULTIPLE).toInt()
-                    }
-                    spaceMessageHolderRight.updateLayoutParams {
-                        width = root
-                            .context
-                            .resources
-                            .getDimensionPixelSize(R.dimen.message_holder_space_width_right)
-                    }
+                spaceMessageHolderRight.updateLayoutParams {
+                    width = (holderWidth.value * BubbleBackground.SPACE_WIDTH_MULTIPLE).toInt()
+                }
+            }
+            is MessageHolderViewState.Sent -> {
+                spaceMessageHolderLeft.updateLayoutParams {
+                    width = (holderWidth.value * BubbleBackground.SPACE_WIDTH_MULTIPLE).toInt()
+                }
+                spaceMessageHolderRight.updateLayoutParams {
+                    width = root
+                        .context
+                        .resources
+                        .getDimensionPixelSize(R.dimen.message_holder_space_width_right)
                 }
             }
         }
@@ -177,6 +179,32 @@ internal inline fun LayoutMessageHolderBinding.setStatusHeader(
     }
 }
 
+
+@MainThread
+@Suppress("NOTHING_TO_INLINE")
+internal inline fun LayoutMessageHolderBinding.setDeletedMessageLayout(
+    deletedMessage: LayoutState.DeletedMessage?
+) {
+    includeDeletedMessage.apply {
+        if (deletedMessage == null) {
+            root.gone
+        } else {
+            root.visible
+
+            val gravity = if (deletedMessage.gravityStart) {
+                Gravity.START
+            } else {
+                Gravity.END
+            }
+
+            textViewDeletedMessageTimestamp.text = deletedMessage.timestamp
+            textViewDeletedMessageTimestamp.gravity = gravity
+            textViewDeleteMessageLabel.gravity = gravity
+        }
+    }
+}
+
+
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun LayoutMessageHolderBinding.setBubbleMessageLayout(
@@ -188,6 +216,74 @@ internal inline fun LayoutMessageHolderBinding.setBubbleMessageLayout(
         } else {
             visible
             text = message.text
+        }
+    }
+}
+
+@MainThread
+@Suppress("NOTHING_TO_INLINE")
+internal inline fun LayoutMessageHolderBinding.setBubblePaidMessageDetailsLayout(
+    paidDetails: LayoutState.Bubble.PaidMessageDetails?
+) {
+    includeMessageHolderBubble.includePaidMessageReceivedDetailsHolder.apply {
+        if (paidDetails == null) {
+            root.gone
+        } else {
+            root.visible
+
+            val statusTextResID = when (paidDetails.purchaseType) {
+                MessageType.Purchase.Accepted -> {
+                    R.string.purchase_status_label_paid_message_details_accepted
+                }
+                MessageType.Purchase.Denied -> {
+                    R.string.purchase_status_label_paid_message_details_denied
+                }
+                MessageType.Purchase.Processing -> {
+                    R.string.purchase_status_label_paid_message_details_processing
+                }
+                null -> {
+                    R.string.purchase_status_label_paid_message_details_default
+                }
+            }
+
+            imageViewPaidMessageReceivedIcon.goneIfFalse(paidDetails.showPaymentReceivedIcon)
+            imageViewPaidMessageSentIcon.goneIfFalse(paidDetails.showSendPaymentIcon)
+            textViewPaymentAcceptedIcon.goneIfFalse(paidDetails.showPaymentAcceptedIcon)
+            progressBarPaidMessage.goneIfFalse(paidDetails.showPaymentProgressWheel)
+            textViewPaidMessageStatusLabel.text = getString(statusTextResID)
+            textViewPaidMessageAmountToPayLabel.text = paidDetails.amountText
+        }
+    }
+}
+
+@MainThread
+@Suppress("NOTHING_TO_INLINE")
+internal inline fun LayoutMessageHolderBinding.setBubblePaidMessageSentStatusLayout(
+    paidSentStatus: LayoutState.Bubble.PaidMessageSentStatus?
+) {
+    includeMessageHolderBubble.includePaidMessageSentStatusDetails.apply {
+        if (paidSentStatus == null) {
+            root.gone
+        } else {
+            root.visible
+
+            val statusTextResID = when (paidSentStatus.purchaseType) {
+                MessageType.Purchase.Accepted -> {
+                    R.string.purchase_status_label_paid_message_sent_status_accepted
+                }
+                MessageType.Purchase.Denied -> {
+                    R.string.purchase_status_label_paid_message_sent_status_denied
+                }
+                MessageType.Purchase.Processing -> {
+                    R.string.purchase_status_label_paid_message_sent_status_processing
+                }
+                null -> {
+                    R.string.purchase_status_label_paid_message_sent_status_default
+                }
+            }
+
+            textViewPaidMessageSentStatusAmount.text = paidSentStatus.amountText
+            textViewPaidMessageSentStatus.text = getString(statusTextResID)
         }
     }
 }

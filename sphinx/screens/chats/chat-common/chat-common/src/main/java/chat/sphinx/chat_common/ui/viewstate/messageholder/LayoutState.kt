@@ -1,7 +1,9 @@
 package chat.sphinx.chat_common.ui.viewstate.messageholder
 
 import chat.sphinx.wrapper_common.lightning.Sat
+import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.lightning.unit
+import chat.sphinx.wrapper_message.MessageType
 
 internal sealed class LayoutState {
 
@@ -19,6 +21,11 @@ internal sealed class LayoutState {
             get() = !showSent
     }
 
+    data class DeletedMessage(
+        val gravityStart: Boolean,
+        val timestamp: String,
+    ): LayoutState()
+
     sealed class Bubble: LayoutState() {
 
         data class Message(val text: String): Bubble()
@@ -29,6 +36,26 @@ internal sealed class LayoutState {
 
             val unitLabel: String
                 get() = amount.unit
+        }
+
+        data class PaidMessageDetails(
+            val amount: Sat,
+            val purchaseType: MessageType.Purchase?,
+            val showPaymentAcceptedIcon: Boolean,
+            val showPaymentProgressWheel: Boolean,
+            val showSendPaymentIcon: Boolean,
+            val showPaymentReceivedIcon: Boolean,
+        ): LayoutState() {
+            val amountText: String
+                get() = amount.asFormattedString(appendUnit = true)
+        }
+
+        data class PaidMessageSentStatus(
+            val amount: Sat,
+            val purchaseType: MessageType.Purchase?,
+        ): LayoutState() {
+            val amountText: String
+                get() = amount.asFormattedString(appendUnit = true)
         }
     }
 

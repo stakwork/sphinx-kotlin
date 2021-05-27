@@ -53,6 +53,7 @@
     <dimen name="default_form_scan_icon_container_width">60dp</dimen>
     <dimen name="default_form_text_view_size">12sp</dimen>
     <dimen name="default_form_edit_view_size">17sp</dimen>
+    <dimen name="default_edit_text_left_margin">-4dp</dimen>
 
     <dimen name="pin_help_text_view_size">15sp</dimen>
     <dimen name="pin_text_view_size">17sp</dimen>

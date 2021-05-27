@@ -29,4 +29,18 @@
 
     <!-- Group Actions -->
     <string name="message_action_group_kick">The admin has removed you\n from this group</string>
+
+    <!--  Purchase Status Labels: Paid Message Details  -->
+    <string name="purchase_status_label_paid_message_details_pending">Pending</string>
+    <string name="purchase_status_label_paid_message_details_accepted">Purchase Succeeded</string>
+    <string name="purchase_status_label_paid_message_details_denied">Purchase Denied</string>
+    <string name="purchase_status_label_paid_message_details_processing">Processing Payment</string>
+    <string name="purchase_status_label_paid_message_details_default">Pay</string>
+
+    <!--  Purchase Status Labels: Paid Message Sent Status  -->
+    <string name="purchase_status_label_paid_message_sent_status_pending">Pending</string>
+    <string name="purchase_status_label_paid_message_sent_status_accepted">Succeeded</string>
+    <string name="purchase_status_label_paid_message_sent_status_denied">Denied</string>
+    <string name="purchase_status_label_paid_message_sent_status_processing">Processing</string>
+    <string name="purchase_status_label_paid_message_sent_status_default">Unknown</string>
 </resources>

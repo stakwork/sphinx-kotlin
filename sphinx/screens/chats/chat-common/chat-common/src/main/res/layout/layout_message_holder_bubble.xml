@@ -57,14 +57,6 @@
             tools:visibility="gone" />
 
         <!-- TODO: Move out of bubble layout -->
-        <!-- TODO: Add time -->
-        <!--  Deleted Message  -->
-        <include
-            android:id="@+id/include_message_type_deleted_message"
-            layout="@layout/layout_message_type_deleted_message"
-            tools:visibility="gone" />
-
-        <!-- TODO: Move out of bubble layout -->
         <!-- Group Action: Leaving/Joining  -->
         <include
             android:id="@+id/include_message_type_leave_or_join_group"
@@ -99,13 +91,15 @@
             layout="@layout/layout_message_type_invoice"
             tools:visibility="gone" />
 
-
     </androidx.constraintlayout.widget.ConstraintLayout>
+
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/layout_constraint_message_bubble_container_middle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:paddingVertical="@dimen/default_inner_spacing_list_item_title"
+        android:paddingHorizontal="@dimen/default_layout_margin"
         app:layout_constraintBottom_toTopOf="@+id/layout_constraint_message_bubble_container_bottom"
         app:layout_constraintTop_toBottomOf="@+id/layout_constraint_message_bubble_container_top">
 
@@ -161,11 +155,10 @@
 
         <!-- Paid Message Information -->
         <include
-            android:id="@+id/include_paid_message_details_holder"
+            android:id="@+id/include_paid_message_received_details_holder"
             layout="@layout/layout_paid_message_received"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/paid_message_details_holder_height"
-            android:layout_marginTop="8dp"
+            android:layout_height="wrap_content"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:visibility="visible" />
@@ -176,7 +169,7 @@
             android:id="@+id/include_message_type_boost"
             layout="@layout/layout_message_type_boost"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/message_type_boost_height"
+            android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toTopOf="parent"

@@ -18,9 +18,9 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/layout_constraint_nickname_content"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/new_contact_form_field_container_height"
-        android:layout_marginStart="@dimen/new_contact_form_horizontal_margin"
-        android:layout_marginEnd="@dimen/new_contact_form_horizontal_margin"
+        android:layout_height="85dp"
+        android:layout_marginStart="@dimen/default_form_horizontal_margin"
+        android:layout_marginEnd="@dimen/default_form_horizontal_margin"
         app:layout_constraintTop_toBottomOf="@+id/include_new_contact_header">
 
         <androidx.appcompat.widget.AppCompatTextView
@@ -48,7 +48,7 @@
             app:layout_constraintStart_toStartOf="parent"
             android:textSize="@dimen/default_form_edit_view_text_size"
             android:inputType="textVisiblePassword|textCapWords"
-            android:layout_marginLeft="@dimen/new_contact_edit_text_left_margin"
+            android:layout_marginLeft="@dimen/default_edit_text_left_margin"
             android:singleLine="true"
             tools:text= "Testing"/>
 
@@ -66,9 +66,9 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/layout_constraint_address_content"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/new_contact_form_field_container_height"
-        android:layout_marginStart="@dimen/new_contact_form_horizontal_margin"
-        android:layout_marginEnd="@dimen/new_contact_form_horizontal_margin"
+        android:layout_height="85dp"
+        android:layout_marginStart="@dimen/default_form_horizontal_margin"
+        android:layout_marginEnd="@dimen/default_form_horizontal_margin"
         app:layout_constraintTop_toBottomOf="@+id/layout_constraint_nickname_content">
 
         <androidx.appcompat.widget.AppCompatTextView
@@ -97,7 +97,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             android:textSize="@dimen/default_form_edit_view_text_size"
             android:inputType="textVisiblePassword"
-            android:layout_marginLeft="@dimen/new_contact_edit_text_left_margin"
+            android:layout_marginLeft="@dimen/default_edit_text_left_margin"
             android:layout_marginRight="@dimen/default_form_scan_icon_container_width"
             android:singleLine="true"
             tools:text= "Testing" />
@@ -137,9 +137,9 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/layout_constraint_route_hint_content"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/new_contact_form_field_container_height"
-        android:layout_marginStart="@dimen/new_contact_form_horizontal_margin"
-        android:layout_marginEnd="@dimen/new_contact_form_horizontal_margin"
+        android:layout_height="85dp"
+        android:layout_marginStart="@dimen/default_form_horizontal_margin"
+        android:layout_marginEnd="@dimen/default_form_horizontal_margin"
         app:layout_constraintTop_toBottomOf="@+id/layout_constraint_address_content">
 
         <androidx.appcompat.widget.AppCompatTextView
@@ -166,8 +166,8 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             android:inputType="textVisiblePassword"
-            android:textSize="@dimen/default_form_edit_view_text_size"
-            android:layout_marginLeft="@dimen/new_contact_edit_text_left_margin"
+            android:textSize="@dimen/default_form_edit_view_size"
+            android:layout_marginLeft="@dimen/default_edit_text_left_margin"
             android:singleLine="true" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -187,8 +187,8 @@
         android:layout_width="match_parent"
         android:layout_height="65dp"
         android:layout_marginTop="20dp"
-        android:layout_marginStart="@dimen/new_contact_form_horizontal_margin"
-        android:layout_marginEnd="@dimen/new_contact_form_horizontal_margin"
+        android:layout_marginStart="@dimen/default_form_horizontal_margin"
+        android:layout_marginEnd="@dimen/default_form_horizontal_margin"
         app:layout_constraintTop_toBottomOf="@+id/layout_constraint_route_hint_content" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
