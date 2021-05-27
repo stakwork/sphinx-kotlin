@@ -36,5 +36,6 @@
     <dimen name="sign_up_picture_uploaded_text_view">11sp</dimen>
 
     <dimen name="sign_up_sphinx_ready_message_text_size">30sp</dimen>
+    <dimen name="sign_up_sphinx_ready_balance_text_size">17sp</dimen>
     <dimen name="sign_up_sphinx_ready_button_text_size">14sp</dimen>
 </resources>
