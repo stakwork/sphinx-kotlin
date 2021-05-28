@@ -1,7 +1,42 @@
 package chat.sphinx.concept_repository_dashboard
 
+import chat.sphinx.wrapper_common.dashboard.ChatId
+import chat.sphinx.wrapper_common.dashboard.ContactId
+import chat.sphinx.wrapper_common.dashboard.InviteId
+import chat.sphinx.wrapper_common.message.MessageId
+
 sealed class DashboardItem {
-    class Chat(): DashboardItem()
-    class Contact(): DashboardItem()
-    class Invite(): DashboardItem()
+
+    sealed class Active: DashboardItem() {
+
+        abstract val chatId: ChatId
+        abstract val messageId: MessageId?
+
+        data class Conversation(
+            override val chatId: ChatId,
+            val contactId: ContactId,
+            override val messageId: MessageId?
+        ): Active()
+
+        data class GroupOrTribe(
+            override val chatId: ChatId,
+            override val messageId: MessageId?
+        ): Active()
+
+    }
+
+    /**
+     * Inactive chats are for newly added contacts that are awaiting
+     * messages to be sent (the Chat has not been created yet)
+     * */
+    sealed class Inactive: DashboardItem() {
+
+        data class Conversation(
+            val contactId: ContactId,
+        ): Inactive()
+
+        data class PendingInvite(
+            val inviteId: InviteId,
+        ): Inactive()
+    }
 }

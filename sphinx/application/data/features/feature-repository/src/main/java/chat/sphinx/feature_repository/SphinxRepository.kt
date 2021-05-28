@@ -6,6 +6,7 @@ import chat.sphinx.concept_crypto_rsa.RSA
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
 import chat.sphinx.concept_network_query_chat.model.ChatDto
 import chat.sphinx.concept_network_query_contact.NetworkQueryContact
+import chat.sphinx.concept_network_query_contact.model.ContactDto
 import chat.sphinx.concept_network_query_contact.model.PostContactDto
 import chat.sphinx.concept_network_query_contact.model.PutContactDto
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
@@ -38,7 +39,9 @@ import chat.sphinx.logger.d
 import chat.sphinx.logger.e
 import chat.sphinx.logger.w
 import chat.sphinx.wrapper_chat.Chat
+import chat.sphinx.wrapper_chat.ChatType
 import chat.sphinx.wrapper_chat.isTrue
+import chat.sphinx.wrapper_chat.toChatMuted
 import chat.sphinx.wrapper_common.*
 import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.dashboard.ChatId
@@ -93,7 +96,7 @@ abstract class SphinxRepository(
     private val networkQueryMessage: NetworkQueryMessage,
     private val rsa: RSA,
     private val socketIOManager: SocketIOManager,
-    private val LOG: SphinxLogger,
+    protected val LOG: SphinxLogger,
 ) : ChatRepository,
     ContactRepository,
     LightningRepository,
@@ -192,7 +195,7 @@ abstract class SphinxRepository(
                                     }
 
                                     msg.dto.chat?.let { chatDto ->
-                                        upsertChat(chatDto, moshi, chatSeenMap, queries)
+                                        upsertChat(chatDto, moshi, chatSeenMap, queries, msg.dto.contact)
 
                                         chatId = ChatId(chatDto.id)
                                     }
@@ -285,10 +288,24 @@ abstract class SphinxRepository(
         )
     }
 
-    override fun getUnseenMessagesByChatId(chat: Chat): Flow<Long?> = flow {
+    override fun getUnseenMessagesByChatId(chatId: ChatId): Flow<Long?> = flow {
+        var ownerId: ContactId? = accountOwner.value?.id
+
+        if (ownerId == null) {
+            try {
+                accountOwner.collect { contact ->
+                    if (contact != null) {
+                        ownerId = contact.id
+                        throw Exception()
+                    }
+                }
+            } catch (e: Exception) {}
+            delay(25L)
+        }
+
         emitAll(
             coreDB.getSphinxDatabaseQueries()
-                .messageGetUnseenIncomingMessageCountByChatId(chat.contactIds.first(), chat.id)
+                .messageGetUnseenIncomingMessageCountByChatId(ownerId!!, chatId)
                 .asFlow()
                 .mapToOneOrNull(io)
                 .distinctUntilChanged()
@@ -318,7 +335,10 @@ abstract class SphinxRepository(
         }
     }
 
-    private suspend fun processChatDtos(chats: List<ChatDto>): Response<Boolean, ResponseError> {
+    private suspend fun processChatDtos(
+        chats: List<ChatDto>,
+        contacts: Map<ContactId, ContactDto>? = null
+    ): Response<Boolean, ResponseError> {
         val queries = coreDB.getSphinxDatabaseQueries()
         try {
 
@@ -338,7 +358,16 @@ abstract class SphinxRepository(
 
                         queries.transaction {
                             for (dto in chats) {
-                                upsertChat(dto, moshi, chatSeenMap, queries)
+
+                                val contactDto: ContactDto? = if (dto.type == ChatType.CONVERSATION) {
+                                    dto.contact_ids.elementAtOrNull(1)?.let { contactId ->
+                                        contacts?.get(ContactId(contactId))
+                                    }
+                                } else {
+                                    null
+                                }
+
+                                upsertChat(dto, moshi, chatSeenMap, queries, contactDto)
 
                                 chatIdsToRemove.remove(ChatId(dto.id))
                             }
@@ -461,6 +490,10 @@ abstract class SphinxRepository(
                             var processChatsResponse: Response<Boolean, ResponseError> = Response.Success(true)
 
                             repositoryScope.launch(io + handler) {
+
+                                val contactMap: MutableMap<ContactId, ContactDto> =
+                                    LinkedHashMap(loadResponse.value.contacts.size)
+
                                 contactLock.withLock {
 
                                     val contactIdsToRemove = queries.contactGetAllIds()
@@ -474,6 +507,7 @@ abstract class SphinxRepository(
                                                 for (dto in loadResponse.value.contacts) {
 
                                                     upsertContact(dto, queries)
+                                                    contactMap[ContactId(dto.id)] = dto
 
                                                     contactIdsToRemove.remove(ContactId(dto.id))
 
@@ -490,7 +524,10 @@ abstract class SphinxRepository(
 
                                 }
 
-                                processChatsResponse = processChatDtos(loadResponse.value.chats)
+                                processChatsResponse = processChatDtos(
+                                    loadResponse.value.chats,
+                                    contactMap,
+                                )
                             }.join()
 
                             error?.let {
@@ -1220,6 +1257,7 @@ abstract class SphinxRepository(
                                                                     moshi,
                                                                     chatSeenMap,
                                                                     queries,
+                                                                    loadResponse.value.contact,
                                                                 )
                                                             }
                                                         }
@@ -1268,7 +1306,11 @@ abstract class SphinxRepository(
                         chatLock.withLock {
                             withContext(io) {
                                 queries.transaction {
-                                    upsertChat(loadResponse.value, moshi, chatSeenMap, queries)
+                                    updateChatMuted(
+                                        chat.id,
+                                        loadResponse.value.isMutedActual.toChatMuted(),
+                                        queries
+                                    )
                                 }
                             }
                         }

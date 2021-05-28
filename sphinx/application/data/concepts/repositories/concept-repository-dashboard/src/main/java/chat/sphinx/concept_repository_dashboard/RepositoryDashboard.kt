@@ -3,6 +3,7 @@ package chat.sphinx.concept_repository_dashboard
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.wrapper_chat.Chat
+import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_contact.Contact
@@ -15,7 +16,7 @@ interface RepositoryDashboard {
     suspend fun getAccountBalance(): StateFlow<NodeBalance?>
 
     val getAllChats: Flow<List<Chat>>
-    fun getUnseenMessagesByChatId(chat: Chat): Flow<Long?>
+    fun getUnseenMessagesByChatId(chatId: ChatId): Flow<Long?>
 
     val accountOwner: StateFlow<Contact?>
     val getAllContacts: Flow<List<Contact>>

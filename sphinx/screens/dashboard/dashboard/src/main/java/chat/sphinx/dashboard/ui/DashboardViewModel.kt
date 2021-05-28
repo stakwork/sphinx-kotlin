@@ -1,7 +1,10 @@
 package chat.sphinx.dashboard.ui
 
 import androidx.lifecycle.viewModelScope
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import app.cash.exhaustive.Exhaustive
+import chat.sphinx.concept_repository_dashboard.DashboardItem
 import chat.sphinx.concept_repository_dashboard_android.RepositoryDashboardAndroid
 import chat.sphinx.concept_service_notification.PushNotificationRegistrar
 import chat.sphinx.concept_socket_io.SocketIOManager
@@ -82,6 +85,32 @@ internal class DashboardViewModel @Inject constructor(
             // TODO: Do something with response
         }
     }
+
+//    @Volatile
+//    private var pagerFlow: Flow<PagingData<DashboardItem>>? = null
+//    private val pagerFlowLock = Mutex()
+//
+//    fun dashboardPagingDataFlow(): Flow<PagingData<DashboardItem>> = flow {
+//        val flow: Flow<PagingData<DashboardItem>> = pagerFlow ?: pagerFlowLock.withLock {
+//            pagerFlow ?: repositoryDashboard
+//                .getDashboardItemPagingSource()
+//                .let { sourceWrapper ->
+//                    sourceWrapper.pagingDataFlow.map { pagingData ->
+//                        pagingData.map { item ->
+//
+//                        }
+//                        pagingData.insertSeparators { item: DashboardItem?, item2: DashboardItem? ->
+//
+//                        }
+//                    }
+//                    sourceWrapper.pagingDataFlow
+//                        .cachedIn(viewModelScope)
+//                        .also { pagerFlow = it }
+//                }
+//        }
+//
+//        emitAll(flow)
+//    }
 
     val chatViewStateContainer: ChatViewStateContainer by lazy {
         ChatViewStateContainer(dispatchers)
@@ -225,7 +254,7 @@ internal class DashboardViewModel @Inject constructor(
                                         chat,
                                         message,
                                         contact,
-                                        repositoryDashboard.getUnseenMessagesByChatId(chat),
+                                        repositoryDashboard.getUnseenMessagesByChatId(chat.id),
                                     )
                                 )
                             } else {
@@ -233,7 +262,7 @@ internal class DashboardViewModel @Inject constructor(
                                     DashboardChat.Active.GroupOrTribe(
                                         chat,
                                         message,
-                                        repositoryDashboard.getUnseenMessagesByChatId(chat)
+                                        repositoryDashboard.getUnseenMessagesByChatId(chat.id)
                                     )
                                 )
                             }

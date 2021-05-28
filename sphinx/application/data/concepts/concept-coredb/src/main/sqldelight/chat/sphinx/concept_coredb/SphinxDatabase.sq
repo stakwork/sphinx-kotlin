@@ -76,6 +76,11 @@ UPDATE chatDbo
 SET latest_message_id = :latest_message_id
 WHERE id = ?;
 
+chatUpdateMuted:
+UPDATE chatDbo
+SET is_muted = :muted
+WHERE id = ?;
+
 chatGetAll:
 SELECT *
 FROM chatDbo;
@@ -344,11 +349,16 @@ WHERE contact_id = ?;
 
 CREATE TABLE dashboardDbo(
     id                          TEXT            AS DashboardItemId NOT NULL PRIMARY KEY,
+    contact_id                  INTEGER         AS ContactId,
     date                        INTEGER         AS DateTime NOT NULL,
+    display_name                TEXT,
+    muted                       INTEGER         AS ChatMuted NOT NULL DEFAULT 1,
+    seen                        INTEGER         AS Seen NOT NULL,
+    photo_url                   TEXT            AS PhotoUrl,
 
 --  This is for contacts only. When a Chat of type Conversation comes in, the Contact held
 --  here is updated as `include_in_return=false`
-    include_in_return            INTEGER         AS Boolean DEFAULT 1 NOT NULL,
+    include_in_return            INTEGER        AS Boolean DEFAULT 1 NOT NULL,
 
     latest_message_id           INTEGER         AS MessageId DEFAULT NULL
 );
@@ -378,14 +388,36 @@ UPDATE dashboardDbo
 SET include_in_return = :include_in_return
 WHERE id = ?;
 
-dashboardInsert {
+dashboardUpdateMuted:
+UPDATE dashboardDbo
+SET muted = :muted
+WHERE id = ?;
+
+dashboardUpsert {
+    UPDATE dashboardDbo
+    SET display_name = :display_name,
+        muted = :muted,
+        seen = :seen,
+        photo_url = :photo_url
+    WHERE id = :id;
+
     INSERT OR IGNORE INTO dashboardDbo(
         id,
-        date
+        contact_id,
+        date,
+        display_name,
+        muted,
+        seen,
+        photo_url
     )
     VALUES (
         :id,
-        :date
+        :contact_id,
+        :date,
+        :display_name,
+        :muted,
+        :seen,
+        :photo_url
     );
 }
 

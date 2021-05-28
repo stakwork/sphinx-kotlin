@@ -61,7 +61,7 @@ abstract class CoreDBImpl(private val moshi: Moshi): CoreDB() {
                     typeAdapter = ChatTypeAdapter(),
                     statusAdapter = ChatStatusAdapter(),
                     contact_idsAdapter = ContactIdsAdapter.getInstance(),
-                    is_mutedAdapter = ChatMutedAdapter(),
+                    is_mutedAdapter = ChatMutedAdapter.getInstance(),
                     created_atAdapter = DateTimeAdapter.getInstance(),
                     group_keyAdapter = ChatGroupKeyAdapter(),
                     hostAdapter = ChatHostAdapter(),
@@ -107,7 +107,11 @@ abstract class CoreDBImpl(private val moshi: Moshi): CoreDB() {
                 ),
                 dashboardDboAdapter = DashboardDbo.Adapter(
                     idAdapter = DashboardIdAdapter(),
+                    contact_idAdapter = ContactIdAdapter.getInstance(),
                     dateAdapter = DateTimeAdapter.getInstance(),
+                    mutedAdapter = ChatMutedAdapter.getInstance(),
+                    seenAdapter = SeenAdapter.getInstance(),
+                    photo_urlAdapter = PhotoUrlAdapter.getInstance(),
                     latest_message_idAdapter = MessageIdAdapter.getInstance()
                 ),
                 messageDboAdapter = MessageDbo.Adapter(

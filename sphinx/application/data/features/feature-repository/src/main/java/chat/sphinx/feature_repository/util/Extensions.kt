@@ -88,23 +88,38 @@ inline fun TransactionCallbacks.updateChatDboLatestMessage(
     }
 }
 
+@Suppress("NOTHING_TO_INLINE")
+inline fun TransactionCallbacks.updateChatMuted(
+    chatId: ChatId,
+    muted: ChatMuted,
+    queries: SphinxDatabaseQueries
+) {
+    queries.chatUpdateMuted(muted, chatId)
+    queries.dashboardUpdateMuted(muted, chatId)
+}
+
 @Suppress("NOTHING_TO_INLINE", "SpellCheckingInspection")
 inline fun TransactionCallbacks.upsertChat(
     dto: ChatDto,
     moshi: Moshi,
     chatSeenMap: SynchronizedMap<ChatId, Seen>,
     queries: SphinxDatabaseQueries,
+    contactDto: ContactDto? = null,
 ) {
     val seen = dto.seenActual.toSeen()
     val chatId = ChatId(dto.id)
+    val chatType = dto.type.toChatType()
     val createdAt = dto.created_at.toDateTime()
+    val contactIds = dto.contact_ids.map { ContactId(it) }
+    val muted = dto.isMutedActual.toChatMuted()
+    val chatPhotoUrl = dto.photo_url?.toPhotoUrl()
 
     queries.chatUpsert(
         dto.name?.toChatName(),
-        dto.photo_url?.toPhotoUrl(),
+        chatPhotoUrl,
         dto.status.toChatStatus(),
-        dto.contact_ids.map { ContactId(it) },
-        dto.isMutedActual.toChatMuted(),
+        contactIds,
+        muted,
         dto.group_key?.toChatGroupKey(),
         dto.host?.toChatHost(),
         dto.price_per_message?.toSat(),
@@ -119,17 +134,36 @@ inline fun TransactionCallbacks.upsertChat(
         dto.pending_contact_ids?.map { ContactId(it) },
         chatId,
         ChatUUID(dto.uuid),
-        dto.type.toChatType(),
+        chatType,
         createdAt,
     )
 
-    queries.dashboardInsert(chatId, createdAt)
-
-    if (dto.type.toChatType().isConversation()) {
-        dto.contact_ids.elementAtOrNull(1)?.let { contactId ->
-            queries.dashboardUpdateIncludeInReturn(false, ContactId(contactId))
+    val conversationContactId: ContactId? = if (chatType.isConversation()) {
+        contactIds.elementAtOrNull(1)?.let { contactId ->
+            queries.dashboardUpdateIncludeInReturn(false, contactId)
+            contactId
         }
+    } else {
+        null
     }
+
+    queries.dashboardUpsert(
+        if (conversationContactId != null && contactDto != null) {
+            contactDto.alias
+        } else {
+            dto.name ?: " "
+        },
+        muted,
+        seen,
+        if (conversationContactId != null && contactDto != null) {
+            contactDto.photo_url?.toPhotoUrl()
+        } else {
+            chatPhotoUrl
+        },
+        chatId,
+        conversationContactId,
+        createdAt
+    )
 
     chatSeenMap.withLock { it[ChatId(dto.id)] = seen }
 }
@@ -144,13 +178,14 @@ inline fun TransactionCallbacks.upsertContact(dto: ContactDto, queries: SphinxDa
     val contactId = ContactId(dto.id)
     val createdAt = dto.created_at.toDateTime()
     val isOwner = dto.isOwnerActual.toOwner()
+    val photoUrl = dto.photo_url?.toPhotoUrl()
 
     queries.contactUpsert(
         dto.route_hint?.toLightningRouteHint(),
         dto.public_key?.toLightningNodePubKey(),
         dto.node_alias?.toLightningNodeAlias(),
         dto.alias.toContactAlias(),
-        dto.photo_url?.toPhotoUrl(),
+        photoUrl,
         dto.privatePhotoActual.toPrivatePhoto(),
         dto.status.toContactStatus(),
         dto.contact_key?.let { RsaPublicKey(it.toCharArray()) },
@@ -166,8 +201,13 @@ inline fun TransactionCallbacks.upsertContact(dto: ContactDto, queries: SphinxDa
     )
 
     if (!isOwner.isTrue()) {
-        queries.dashboardInsert(
+        queries.dashboardUpsert(
+            dto.alias,
+            ChatMuted.False,
+            Seen.True,
+            photoUrl,
             contactId,
+            null,
             createdAt,
         )
     }

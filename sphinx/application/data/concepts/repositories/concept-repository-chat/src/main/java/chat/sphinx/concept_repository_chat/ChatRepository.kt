@@ -28,7 +28,7 @@ interface ChatRepository {
      * Throws [NoSuchElementException] on collection if [Chat.contactIds]
      * is empty.
      * */
-    fun getUnseenMessagesByChatId(chat: Chat): Flow<Long?>
+    fun getUnseenMessagesByChatId(chatId: ChatId): Flow<Long?>
     
     val networkRefreshChats: Flow<LoadResponse<Boolean, ResponseError>>
 
