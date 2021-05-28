@@ -3,6 +3,7 @@ package chat.sphinx.activitymain.navigation.navigators.primary
 import chat.sphinx.activitymain.navigation.drivers.DetailNavigationDriver
 import chat.sphinx.activitymain.navigation.drivers.PrimaryNavigationDriver
 import chat.sphinx.add_friend.navigation.ToAddFriendDetail
+import chat.sphinx.join_tribe.navigation.ToJoinTribeDetail
 import chat.sphinx.add_sats.navigation.ToAddSatsScreen
 import chat.sphinx.address_book.navigation.ToAddressBookScreen
 import chat.sphinx.create_tribe.navigation.ToCreateTribeDetail
@@ -39,6 +40,10 @@ internal class DashboardNavDrawerNavigatorImpl @Inject constructor(
 
     override suspend fun toSupportTicketDetail() {
         detailDriver.submitNavigationRequest(ToSupportTicketDetail())
+    }
+
+    override suspend fun toJoinTribeDetail() {
+        detailDriver.submitNavigationRequest(ToJoinTribeDetail())
     }
 
     override suspend fun logout() {
