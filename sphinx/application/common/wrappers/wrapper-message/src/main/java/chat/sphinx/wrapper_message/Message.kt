@@ -93,4 +93,14 @@ data class Message(
         this.giphyData = giphyData
         return this
     }
+
+    @Volatile
+    var reactions: List<Message>? = null
+        private set
+
+    fun setReactions(reactions: List<Message>?) {
+        if (reactions != null && reactions.isNotEmpty()) {
+            this.reactions = reactions
+        }
+    }
 }
