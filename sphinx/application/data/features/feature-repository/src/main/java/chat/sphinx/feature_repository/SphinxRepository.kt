@@ -1001,19 +1001,23 @@ abstract class SphinxRepository(
                             }
                         }
 
-                        queries.messageGetAllReactionsByUUID(
-                            chatId,
-                            map.keys.map { ReplyUUID(it.value) }
-                        ).executeAsList()
-                            .let { response ->
-                                response.forEach { dbo ->
-                                    dbo.reply_uuid?.let { uuid ->
-                                        map[MessageUUID(uuid.value)]?.add(
-                                            mapMessageDboAndDecryptContentIfNeeded(queries, dbo)
-                                        )
+                        val replyUUIDs = map.keys.map { ReplyUUID(it.value) }
+
+                        replyUUIDs.chunked(500).forEach { chunkedIds ->
+                            queries.messageGetAllReactionsByUUID(
+                                chatId,
+                                chunkedIds,
+                            ).executeAsList()
+                                .let { response ->
+                                    response.forEach { dbo ->
+                                        dbo.reply_uuid?.let { uuid ->
+                                            map[MessageUUID(uuid.value)]?.add(
+                                                mapMessageDboAndDecryptContentIfNeeded(queries, dbo)
+                                            )
+                                        }
                                     }
                                 }
-                            }
+                        }
 
                         listMessageDbo.map { dbo ->
                             mapMessageDboAndDecryptContentIfNeeded(
