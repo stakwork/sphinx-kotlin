@@ -160,7 +160,8 @@ internal class DashboardFragment : MotionLayoutFragment<
             }
             navBar.navBarButtonScanner.setOnClickListener {
                 binding.searchBarClearFocus()
-                viewModel.toScanner()
+                lifecycleScope.launch { viewModel.navDrawerNavigator.toJoinTribeDetail() }
+//                viewModel.toScanner()
             }
             navBar.navBarButtonPaymentSend.setOnClickListener {
                 binding.searchBarClearFocus()
@@ -191,8 +192,7 @@ internal class DashboardFragment : MotionLayoutFragment<
                 lifecycleScope.launch { viewModel.navDrawerNavigator.toProfileScreen() }
             }
             navDrawer.layoutButtonAddFriend.layoutConstraintButtonAddFriend.setOnClickListener {
-//                lifecycleScope.launch { viewModel.navDrawerNavigator.toAddFriendDetail() }
-                lifecycleScope.launch { viewModel.navDrawerNavigator.toJoinTribeDetail() }
+                lifecycleScope.launch { viewModel.navDrawerNavigator.toAddFriendDetail() }
             }
             navDrawer.layoutButtonCreateTribe.layoutConstraintButtonCreateTribe.setOnClickListener {
                 lifecycleScope.launch { viewModel.navDrawerNavigator.toCreateTribeDetail() }

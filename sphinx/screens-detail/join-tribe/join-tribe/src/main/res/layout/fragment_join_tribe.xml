@@ -1,12 +1,169 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/background_detail_screen"
-    android:backgroundTint="@color/badgeRed"
     tools:context=".ui.JoinTribeFragment">
 
+    <include
+        android:id="@+id/include_join_tribe_header"
+        layout="@layout/layout_detail_screen_header"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/default_header_height"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/include_join_tribe_header">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layout_scroll_view_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="30dp">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/image_view_tribe_picture"
+                android:layout_width="@dimen/tribe_picture_xy"
+                android:layout_height="@dimen/tribe_picture_xy"
+                android:src="@drawable/ic_tribe_placeholder"
+                android:tint="@color/secondaryText"
+                android:layout_marginTop="35dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_view_tribe_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:textSize="30sp"
+                android:fontFamily="@font/roboto_medium"
+                android:textColor="@color/text"
+                android:layout_margin="25dp"
+                android:gravity="center"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/image_view_tribe_picture"
+                tools:text="Tribe Name"/>
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_view_tribe_description"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:textSize="15sp"
+                android:fontFamily="@font/roboto_regular"
+                android:textColor="@color/secondaryText"
+                android:layout_margin="25dp"
+                android:gravity="center"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/text_view_tribe_name"
+                tools:text="This is the description of the tribe. Let's add a large description to see how it looks"/>
+
+            <include
+                android:id="@+id/include_tribe_price"
+                layout="@layout/layout_tribe_price"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/tribe_price_container_height"
+                android:layout_marginHorizontal="50dp"
+                android:layout_marginVertical="30dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/text_view_tribe_description" />
+
+            <include
+                android:id="@+id/include_tribe_member_info"
+                layout="@layout/layout_tribe_member_info"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/tribe_member_info_container_height"
+                android:layout_marginHorizontal="50dp"
+                android:layout_marginVertical="30dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/include_tribe_price" />
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/layout_constraint_save_content"
+                android:layout_width="@dimen/join_tribe_button_width"
+                android:layout_height="@dimen/join_tribe_button_height"
+                android:layout_marginTop="30dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/include_tribe_member_info">
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/button_save"
+                    style="@style/JoinTribeButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:text="@string/join_tribe_button"
+                    android:textSize="@dimen/join_tribe_button_text_size"
+                    android:textColor="@android:color/white"
+                    android:background="@drawable/button_background_white_rad_48"
+                    android:backgroundTint="@color/primaryBlue"/>
+
+                <ProgressBar
+                    android:layout_width="@dimen/default_progress_bar_xy"
+                    android:layout_height="@dimen/default_progress_bar_xy"
+                    android:layout_marginLeft="@dimen/default_progress_bar_margin_left"
+                    android:id="@+id/new_contact_save_progress"
+                    style="?android:attr/progressBarStyle"
+                    android:indeterminateTint="@android:color/white"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    android:indeterminate="true"
+                    android:visibility="gone" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/loading_tribe_info_content"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/include_join_tribe_header"
+        android:background="@drawable/background_detail_screen"
+        android:visibility="gone">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_dashboard_header_balance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/loading_tribe_text_view"
+            android:textSize="13sp"
+            android:fontFamily="@font/roboto_regular"
+            android:textColor="@color/secondaryText"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ProgressBar
+            android:layout_width="@dimen/default_progress_bar_xy"
+            android:layout_height="@dimen/default_progress_bar_xy"
+            android:id="@+id/loading_tribe_save_progress"
+            style="?android:attr/progressBarStyle"
+            android:indeterminateTint="@color/secondaryText"
+            android:indeterminate="true"
+            android:layout_marginTop="@dimen/default_layout_margin"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/text_view_dashboard_header_balance"/>
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
