@@ -393,6 +393,12 @@ UPDATE dashboardDbo
 SET muted = :muted
 WHERE id = ?;
 
+dashboardUpdateConversation:
+UPDATE dashboardDbo
+SET display_name = :display_name,
+    photo_url = :photo_url
+WHERE contact_id = :contact_id;
+
 dashboardUpsert {
     UPDATE dashboardDbo
     SET display_name = :display_name,

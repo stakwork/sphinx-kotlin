@@ -210,6 +210,11 @@ inline fun TransactionCallbacks.upsertContact(dto: ContactDto, queries: SphinxDa
             null,
             createdAt,
         )
+        queries.dashboardUpdateConversation(
+            dto.alias,
+            photoUrl,
+            contactId
+        )
     }
 
     dto.invite?.let {
