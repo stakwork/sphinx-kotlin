@@ -12,6 +12,18 @@
         android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="parent">
 
+        <!-- Placeholder for unsupported Message Types -->
+        <include
+            android:id="@+id/include_unsupported_message_type_placeholder"
+            layout="@layout/layout_unsupported_message_type_placeholder"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:visibility="visible" />
+
+
         <!--   Status Row for Paid Message Sent  -->
         <include
             android:id="@+id/include_paid_message_sent_status_details"

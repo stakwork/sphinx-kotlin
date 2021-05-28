@@ -7,6 +7,12 @@ import chat.sphinx.wrapper_message.MessageType
 
 internal sealed class LayoutState {
 
+    data class UnsupportedMessageType(
+        val messageType: MessageType,
+        val gravityStart: Boolean,
+    ): LayoutState()
+
+
     data class MessageStatusHeader(
         val senderName: String?,
         val showSent: Boolean,

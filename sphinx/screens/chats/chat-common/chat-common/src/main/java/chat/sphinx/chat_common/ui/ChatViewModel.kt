@@ -172,7 +172,6 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                             MessageHolderViewState.Sent(
                                 message,
                                 chat,
-
                                 if (message.status.isDeleted()) {
                                     BubbleBackground.Gone(setSpacingEqual = false)
                                 } else {
