@@ -11,7 +11,9 @@ import chat.sphinx.join_tribe.R
 import chat.sphinx.join_tribe.databinding.FragmentJoinTribeBinding
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.base.BaseFragment
+import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import kotlinx.coroutines.launch
+import javax.annotation.meta.Exhaustive
 
 @AndroidEntryPoint
 internal class JoinTribeFragment: BaseFragment<
@@ -34,9 +36,26 @@ internal class JoinTribeFragment: BaseFragment<
                 lifecycleScope.launch { viewModel.navigator.closeDetailScreen() }
             }
         }
+
+        viewModel.loadTribeData()
     }
 
     override suspend fun onViewStateFlowCollect(viewState: JoinTribeViewState) {
-//        TODO("Not yet implemented")
+        binding.apply {
+            @Exhaustive
+            when (viewState) {
+                is JoinTribeViewState.LoadingTribeInfo -> {
+                    loadingTribeInfoContent.goneIfFalse(true)
+                }
+                is JoinTribeViewState.LoadingTribeFailed -> {
+                    viewModel.navigator.closeDetailScreen()
+                }
+                is JoinTribeViewState.TribeInfo -> {
+                    textViewTribeName.text = viewState.host
+                    textViewTribeDescription.text = viewState.uuid
+                    loadingTribeInfoContent.goneIfFalse(false)
+                }
+            }
+        }
     }
 }

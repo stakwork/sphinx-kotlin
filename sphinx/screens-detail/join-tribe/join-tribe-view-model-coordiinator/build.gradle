@@ -1,8 +1,0 @@
-plugins {
-    id 'java-library'
-    id 'kotlin'
-}
-
-dependencies {
-    api project(path: ':sphinx:activity:concepts:concept-view-model-coordinator')
-}

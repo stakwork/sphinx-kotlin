@@ -8,6 +8,10 @@
     <fragment
         android:id="@+id/navigation_join_tribe_fragment"
         android:name="chat.sphinx.join_tribe.ui.JoinTribeFragment"
-        tools:layout="@layout/fragment_join_tribe" />
+        tools:layout="@layout/fragment_join_tribe" >
+        <argument
+            android:name="argTribeLink"
+            app:argType="string" />
+    </fragment>
 
 </navigation>

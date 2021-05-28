@@ -13,6 +13,5 @@ abstract class DashboardNavDrawerNavigator(
     abstract suspend fun toAddFriendDetail()
     abstract suspend fun toCreateTribeDetail()
     abstract suspend fun toSupportTicketDetail()
-    abstract suspend fun toJoinTribeDetail()
     abstract suspend fun logout()
 }

@@ -42,10 +42,6 @@ internal class DashboardNavDrawerNavigatorImpl @Inject constructor(
         detailDriver.submitNavigationRequest(ToSupportTicketDetail())
     }
 
-    override suspend fun toJoinTribeDetail() {
-        detailDriver.submitNavigationRequest(ToJoinTribeDetail())
-    }
-
     override suspend fun logout() {
         // TODO: Add API to AuthenticationCoordinator and AuthenticationManager
         //  to log out then send to splash screen.
