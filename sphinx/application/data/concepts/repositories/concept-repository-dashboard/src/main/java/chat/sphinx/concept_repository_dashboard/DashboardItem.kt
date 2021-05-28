@@ -5,6 +5,16 @@ import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.dashboard.InviteId
 import chat.sphinx.wrapper_common.message.MessageId
 
+// TODO: Rework model to handle
+//  DashboardDbo.contact_id
+//  DashboardDbo.id
+//  DashboardDbo.date
+//  DashboardDbo.display_name
+//  DashboardDbo.include_in_return
+//  DashboardDbo.latest_message_id
+//  DashboardDbo.muted
+//  DashboardDbo.photo_url
+//  DashboardDbo.seen
 sealed class DashboardItem {
 
     sealed class Active: DashboardItem() {

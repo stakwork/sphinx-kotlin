@@ -2,7 +2,6 @@ package chat.sphinx.feature_repository_android
 
 import androidx.paging.PagingConfig
 import androidx.paging.PagingSource
-import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_coredb.CoreDB
 import chat.sphinx.concept_crypto_rsa.RSA
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
@@ -17,8 +16,6 @@ import chat.sphinx.conceptcoredb.DashboardDbo
 import chat.sphinx.conceptcoredb.SphinxDatabaseQueries
 import chat.sphinx.feature_repository.SphinxRepository
 import chat.sphinx.logger.SphinxLogger
-import chat.sphinx.logger.d
-import chat.sphinx.wrapper_chat.isConversation
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.dashboard.InviteId
@@ -27,9 +24,6 @@ import com.squareup.sqldelight.android.paging3.QueryPagingSource
 import io.matthewnelson.concept_authentication.data.AuthenticationStorage
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.feature_authentication_core.AuthenticationCoreManager
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.shareIn
 
 class SphinxRepositoryAndroid(
     authenticationCoreManager: AuthenticationCoreManager,
@@ -84,6 +78,8 @@ class SphinxRepositoryAndroid(
             return createNewDashboardItemPagingSource(queries)
         }
 
+        // TODO: Rework mapping from DBO -> Presenter after DashboardItem
+        //  gets re-worked.
         override suspend fun mapOriginal(original: DashboardDbo): DashboardItem {
             return when (val id = original.id) {
                 is ChatId -> {
