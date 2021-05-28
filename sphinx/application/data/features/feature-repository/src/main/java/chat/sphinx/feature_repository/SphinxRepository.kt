@@ -9,6 +9,7 @@ import chat.sphinx.concept_network_query_contact.NetworkQueryContact
 import chat.sphinx.concept_network_query_contact.model.PostContactDto
 import chat.sphinx.concept_network_query_contact.model.PutContactDto
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
+import chat.sphinx.concept_network_query_lightning.model.balance.BalanceAllDto
 import chat.sphinx.concept_network_query_lightning.model.balance.BalanceDto
 import chat.sphinx.concept_network_query_message.NetworkQueryMessage
 import chat.sphinx.concept_network_query_message.model.MessageDto
@@ -54,6 +55,7 @@ import chat.sphinx.wrapper_contact.ContactStatus
 import chat.sphinx.wrapper_contact.DeviceId
 import chat.sphinx.wrapper_invite.Invite
 import chat.sphinx.wrapper_lightning.NodeBalance
+import chat.sphinx.wrapper_lightning.NodeBalanceAll
 import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message.media.MessageMedia
 import chat.sphinx.wrapper_message.media.toMediaKeyDecrypted
@@ -67,10 +69,7 @@ import io.matthewnelson.concept_authentication.data.AuthenticationStorage
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.crypto_common.annotations.RawPasswordAccess
 import io.matthewnelson.crypto_common.annotations.UnencryptedDataAccess
-import io.matthewnelson.crypto_common.clazzes.EncryptedString
-import io.matthewnelson.crypto_common.clazzes.UnencryptedByteArray
-import io.matthewnelson.crypto_common.clazzes.UnencryptedString
-import io.matthewnelson.crypto_common.clazzes.toUnencryptedString
+import io.matthewnelson.crypto_common.clazzes.*
 import io.matthewnelson.feature_authentication_core.AuthenticationCoreManager
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
@@ -667,6 +666,54 @@ class SphinxRepository(
         return response
     }
 
+    @OptIn(RawPasswordAccess::class)
+    override suspend fun updateOwnerNameAndKey(name: String, contactKey: Password): Response<Any, ResponseError> {
+        val queries = coreDB.getSphinxDatabaseQueries()
+        var response: Response<Any, ResponseError> = Response.Success(Any())
+
+        val publicKey = StringBuilder().let { sb ->
+            sb.append(contactKey.value)
+            sb.toString()
+        }
+
+        try {
+            accountOwner.collect { owner ->
+                if (owner != null) {
+                    networkQueryContact.updateContact(
+                        owner.id,
+                        PutContactDto(
+                            alias = name,
+                            contact_key = publicKey
+                        )
+                    ).collect { loadResponse ->
+                        @Exhaustive
+                        when (loadResponse) {
+                            is LoadResponse.Loading -> {}
+                            is Response.Error -> {
+                                response = loadResponse
+                                throw Exception()
+                            }
+                            is Response.Success -> {
+                                contactLock.withLock {
+                                    queries.transaction {
+                                        upsertContact(loadResponse.value, queries)
+                                    }
+                                }
+                                LOG.d(TAG, "Owner name and key has been successfully updated")
+
+                                throw Exception()
+                            }
+                        }
+                    }
+
+                }
+
+            }
+        } catch (e: Exception) {}
+
+        return response
+    }
+
     /////////////////
     /// Lightning ///
     /////////////////
@@ -759,6 +806,26 @@ class SphinxRepository(
         }
     }
 
+    override suspend fun getAccountBalanceAll(): Flow<LoadResponse<NodeBalanceAll, ResponseError>> = flow {
+        networkQueryLightning.getBalanceAll().collect { loadResponse ->
+            @Exhaustive
+            when (loadResponse) {
+                is LoadResponse.Loading -> {
+                    emit(loadResponse)
+                }
+                is Response.Error -> {
+                    emit(loadResponse)
+                }
+                is Response.Success -> {
+                    val nodeBalanceAll = NodeBalanceAll(
+                        Sat(loadResponse.value.local_balance),
+                        Sat(loadResponse.value.remote_balance)
+                    )
+                    emit(Response.Success(nodeBalanceAll))
+                }
+            }
+        }
+    }
 
     ////////////////
     /// Messages ///

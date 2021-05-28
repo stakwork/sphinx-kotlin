@@ -102,14 +102,14 @@
             android:layout_width="@dimen/sign_up_button_progress_bar_xy"
             android:layout_height="@dimen/sign_up_button_progress_bar_xy"
             android:layout_marginLeft="@dimen/default_layout_margin"
-            android:id="@+id/new_contact_save_progress"
+            android:id="@+id/welcome_get_started_progress"
             style="?android:attr/progressBarStyle"
             android:indeterminateTint="@android:color/white"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             android:indeterminate="true"
-            android:visibility="visible" />
+            android:visibility="gone" />
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/button_continue"

@@ -9,7 +9,7 @@ data class ContactDto(
     val route_hint: String?,
     val public_key: String?,
     val node_alias: String?,
-    val alias: String,
+    val alias: String?,
     val photo_url: String?,
     val private_photo: Any?,
     val is_owner: Any?,

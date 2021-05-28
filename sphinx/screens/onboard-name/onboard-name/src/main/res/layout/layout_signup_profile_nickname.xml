@@ -60,6 +60,7 @@
         android:indeterminateTint="@android:color/white"
         android:indeterminate="true"
         android:layout_marginTop="@dimen/sign_up_name_progress_bar_top_margin"
+        android:visibility="gone"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/constraint_sign_up_name_edit_text_content" />

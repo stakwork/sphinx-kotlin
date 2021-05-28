@@ -11,6 +11,7 @@ import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_contact.ContactAlias
 import chat.sphinx.wrapper_contact.DeviceId
 import chat.sphinx.wrapper_invite.Invite
+import io.matthewnelson.crypto_common.clazzes.Password
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -38,4 +39,5 @@ interface ContactRepository {
 
     suspend fun deleteContactById(contactId: ContactId): Response<Any, ResponseError>
     suspend fun updateOwnerDeviceId(deviceId: DeviceId): Response<Any, ResponseError>
+    suspend fun updateOwnerNameAndKey(name: String, contactKey: Password): Response<Any, ResponseError>
 }

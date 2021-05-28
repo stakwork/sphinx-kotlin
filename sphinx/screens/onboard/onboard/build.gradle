@@ -40,7 +40,14 @@ dependencies {
 
     implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt
+    implementation project(path: ':sphinx:application:common:wrappers:wrapper-relay')
+    implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-contact')
+    implementation project(path: ':sphinx:application:network:concepts:tor:concept-network-tor')
+    implementation project(path: ':sphinx:application:data:concepts:concept-relay')
+
     kapt kaptDeps.google.hilt
+
+    implementation deps.square.okhttp
 
     testImplementation testDeps.junit
 

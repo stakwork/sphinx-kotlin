@@ -52,8 +52,6 @@ dependencies {
     implementation project(path: ':sphinx:application:data:concepts:concept-relay')
     kapt kaptDeps.google.hilt
 
-    implementation deps.square.okhttp
-
     testImplementation testDeps.junit
 
     androidTestImplementation testDeps.androidx.core

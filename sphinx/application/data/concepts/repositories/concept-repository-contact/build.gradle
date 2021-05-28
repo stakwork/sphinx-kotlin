@@ -9,4 +9,5 @@ dependencies {
     api project(path: ':sphinx:application:common:wrappers:wrapper-invite')
 
     implementation deps.kotlin.coroutinesCore
+    implementation project(path: ':kotlin:crypto:crypto-common')
 }

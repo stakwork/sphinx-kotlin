@@ -26,6 +26,8 @@ import chat.sphinx.hilt_qualifiers.DetailDriver
 import chat.sphinx.hilt_qualifiers.PrimaryDriver
 import chat.sphinx.new_contact.navigation.NewContactNavigator
 import chat.sphinx.onboard.navigation.OnBoardNavigator
+import chat.sphinx.onboard_name.navigation.OnBoardNameNavigator
+import chat.sphinx.onboard_ready.navigation.OnBoardReadyNavigator
 import chat.sphinx.payment_receive.navigation.PaymentReceiveNavigator
 import chat.sphinx.payment_send.navigation.PaymentSendNavigator
 import chat.sphinx.scanner.navigation.ScannerNavigator
@@ -126,6 +128,18 @@ internal object NavigationModule {
         onBoardNavigatorImpl: OnBoardNavigatorImpl
     ): OnBoardNavigator =
         onBoardNavigatorImpl
+
+    @Provides
+    fun provideOnBoardNameNavigator(
+        onBoardNameNavigatorImpl: OnBoardNameNavigatorImpl
+    ): OnBoardNameNavigator =
+        onBoardNameNavigatorImpl
+
+    @Provides
+    fun provideOnBoardReadyNavigator(
+        onBoardReadyNavigatorImpl: OnBoardReadyNavigatorImpl
+    ): OnBoardReadyNavigator =
+        onBoardReadyNavigatorImpl
 
     @Provides
     fun provideSplashNavigator(
