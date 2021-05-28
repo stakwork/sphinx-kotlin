@@ -829,7 +829,8 @@ abstract class SphinxRepository(
     @OptIn(UnencryptedDataAccess::class)
     private suspend fun mapMessageDboAndDecryptContentIfNeeded(
         queries: SphinxDatabaseQueries,
-        messageDbo: MessageDbo
+        messageDbo: MessageDbo,
+        reactions: List<Message>? = null,
     ): Message {
 
         val message: Message = messageDbo.message_content?.let { messageContent ->
@@ -977,6 +978,8 @@ abstract class SphinxRepository(
             } // else do nothing
         }
 
+        message.setReactions(reactions)
+
         return message
     }
 
@@ -987,8 +990,39 @@ abstract class SphinxRepository(
                 .asFlow()
                 .mapToList(io)
                 .map { listMessageDbo ->
-                    listMessageDbo.map {
-                        mapMessageDboAndDecryptContentIfNeeded(queries, it)
+                    withContext(default) {
+
+                        val map: MutableMap<MessageUUID, ArrayList<Message>> =
+                            LinkedHashMap(listMessageDbo.size)
+
+                        for (dbo in listMessageDbo) {
+                            dbo.uuid?.let {
+                                map[it] = ArrayList(0)
+                            }
+                        }
+
+                        queries.messageGetAllReactionsByUUID(
+                            chatId,
+                            map.keys.map { ReplyUUID(it.value) }
+                        ).executeAsList()
+                            .let { response ->
+                                response.forEach { dbo ->
+                                    dbo.reply_uuid?.let { uuid ->
+                                        map[MessageUUID(uuid.value)]?.add(
+                                            mapMessageDboAndDecryptContentIfNeeded(queries, dbo)
+                                        )
+                                    }
+                                }
+                            }
+
+                        listMessageDbo.map { dbo ->
+                            mapMessageDboAndDecryptContentIfNeeded(
+                                queries,
+                                dbo,
+                                dbo.uuid?.let { map[it] }
+                            )
+                        }
+
                     }
                 }
         )
