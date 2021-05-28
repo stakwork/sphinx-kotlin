@@ -4,6 +4,8 @@ import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
 import chat.sphinx.wrapper_chat.ChatType
 import chat.sphinx.wrapper_chat.isConversation
 import chat.sphinx.wrapper_common.DateTime
+import chat.sphinx.wrapper_common.lightning.Sat
+import chat.sphinx.wrapper_common.util.getInitials
 import chat.sphinx.wrapper_message.*
 
 internal inline val MessageHolderViewState.isReceived: Boolean
@@ -14,6 +16,13 @@ internal inline val MessageHolderViewState.showReceivedBubbleArrow: Boolean
 
 internal val MessageHolderViewState.showSentBubbleArrow: Boolean
     get() = background is BubbleBackground.First && this is MessageHolderViewState.Sent
+
+fun main() {
+    val set: MutableSet<String> = LinkedHashSet(3)
+    println(set.size)
+    set.add("new string")
+    println(set.size)
+}
 
 internal sealed class MessageHolderViewState(
     val message: Message,
@@ -103,6 +112,36 @@ internal sealed class MessageHolderViewState(
             }
         }
     }
+
+    // don't use by lazy as this uses a for loop and needs to be initialized on a background
+    // thread (so, while the MHVS is being created)
+    val bubbleReactionBoosts: LayoutState.Bubble.Reaction.Boost? =
+        message.reactions?.let { nnReactions ->
+            if (nnReactions.isEmpty()) {
+                null
+            } else {
+                val set: MutableSet<BoostReactionImageHolder> = LinkedHashSet(3)
+                var total: Long = 0
+                var count = 0
+                for (reaction in nnReactions) {
+                    if (set.size < 3) {
+                        reaction.senderPic?.value?.let { url ->
+                            set.add(SenderPhotoUrl(url))
+                        } ?: reaction.senderAlias?.value?.let { alias ->
+                            set.add(SenderInitials(alias.getInitials()))
+                        }
+                    }
+                    total += reaction.amount.value
+                    count++
+                }
+
+                LayoutState.Bubble.Reaction.Boost(
+                    totalAmount = Sat(total),
+                    senderPics = set,
+                    numberOfBoosts = count
+                )
+            }
+        }
 
 
     class Sent(

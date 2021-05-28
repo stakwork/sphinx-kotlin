@@ -1,5 +1,6 @@
 package chat.sphinx.chat_common.ui.viewstate.messageholder
 
+import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.lightning.unit
@@ -57,6 +58,45 @@ internal sealed class LayoutState {
             val amountText: String
                 get() = amount.asFormattedString(appendUnit = true)
         }
+
+
+
+
+
+        sealed class Reaction: Bubble() {
+
+            class Boost(
+                private val totalAmount: Sat,
+
+                // Will only be the first 3 reactions
+                val senderPics: Set<BoostReactionImageHolder>,
+
+                private val numberOfBoosts: Int
+            ): Reaction() {
+                val amountText: String
+                    get() = totalAmount.asFormattedString()
+
+                val amountUnitLabel: String
+                    get() = totalAmount.unit
+
+                // will be gone if null is returned
+                val numberBoosts: Int?
+                    get() = if (numberOfBoosts > 1) {
+                        numberOfBoosts
+                    } else {
+                        null
+                    }
+            }
+        }
     }
 
 }
+
+// TODO: TEMPORARY!!! until Initial holder can be refactored...
+@JvmInline
+value class SenderPhotoUrl(val value: String): BoostReactionImageHolder
+
+@JvmInline
+value class SenderInitials(val value: String): BoostReactionImageHolder
+
+sealed interface BoostReactionImageHolder

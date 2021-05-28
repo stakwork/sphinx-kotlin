@@ -1,7 +1,5 @@
 package chat.sphinx.chat_common.adapters
 
-import android.content.ContentValues.TAG
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -183,21 +181,26 @@ internal class MessageListAdapter<ARGS: NavArgs>(
         private val binding: LayoutMessageHolderBinding
     ): RecyclerView.ViewHolder(binding.root) {
 
-        private var disposable: Disposable? = null
+        private val disposables: ArrayList<Disposable> = ArrayList(1)
 
         fun bind(position: Int) {
             val viewState = messages.elementAtOrNull(position) ?: return
-            disposable?.dispose()
+            disposables.forEach {
+                it.dispose()
+            }
+            disposables.clear()
 
             binding.apply {
 
                 onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-                    disposable = viewState.initialHolder.setInitialHolder(
+                    viewState.initialHolder.setInitialHolder(
                         includeMessageHolderChatImageInitialHolder.textViewInitials,
                         includeMessageHolderChatImageInitialHolder.imageViewChatPicture,
                         includeMessageStatusHeader,
                         imageLoader
-                    )
+                    )?.also {
+                        disposables.add(it)
+                    }
                 }
 
                 setStatusHeader(viewState.statusHeader)
@@ -209,6 +212,12 @@ internal class MessageListAdapter<ARGS: NavArgs>(
                     setBubbleDirectPaymentLayout(viewState.bubbleDirectPayment)
                     setBubblePaidMessageDetailsLayout(viewState.bubblePaidMessageDetails)
                     setBubblePaidMessageSentStatusLayout(viewState.bubblePaidMessageSentStatus)
+                    setBubbleReactionBoosts(viewState.bubbleReactionBoosts) { imageView, url ->
+                        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                            imageLoader.load(imageView, url.value, viewModel.imageLoaderDefaults)
+                                .also { disposables.add(it) }
+                        }
+                    }
                 }
             }
         }
