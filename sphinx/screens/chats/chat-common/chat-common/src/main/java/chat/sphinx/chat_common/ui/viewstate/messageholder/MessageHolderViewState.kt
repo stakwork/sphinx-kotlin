@@ -120,25 +120,20 @@ internal sealed class MessageHolderViewState(
             if (nnReactions.isEmpty()) {
                 null
             } else {
-                val set: MutableSet<BoostReactionImageHolder> = LinkedHashSet(3)
+                val set: MutableSet<BoostReactionImageHolder> = LinkedHashSet(1)
                 var total: Long = 0
-                var count = 0
                 for (reaction in nnReactions) {
-                    if (set.size < 3) {
-                        reaction.senderPic?.value?.let { url ->
-                            set.add(SenderPhotoUrl(url))
-                        } ?: reaction.senderAlias?.value?.let { alias ->
-                            set.add(SenderInitials(alias.getInitials()))
-                        }
+                    reaction.senderPic?.value?.let { url ->
+                        set.add(SenderPhotoUrl(url))
+                    } ?: reaction.senderAlias?.value?.let { alias ->
+                        set.add(SenderInitials(alias.getInitials()))
                     }
                     total += reaction.amount.value
-                    count++
                 }
 
                 LayoutState.Bubble.Reaction.Boost(
                     totalAmount = Sat(total),
                     senderPics = set,
-                    numberOfBoosts = count
                 )
             }
         }

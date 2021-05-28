@@ -67,11 +67,7 @@ internal sealed class LayoutState {
 
             class Boost(
                 private val totalAmount: Sat,
-
-                // Will only be the first 3 reactions
-                val senderPics: Set<BoostReactionImageHolder>,
-
-                private val numberOfBoosts: Int
+                val senderPics: Set<BoostReactionImageHolder>
             ): Reaction() {
                 val amountText: String
                     get() = totalAmount.asFormattedString()
@@ -80,9 +76,9 @@ internal sealed class LayoutState {
                     get() = totalAmount.unit
 
                 // will be gone if null is returned
-                val numberBoosts: Int?
-                    get() = if (numberOfBoosts > 1) {
-                        numberOfBoosts
+                val numberUniqueBoosters: Int?
+                    get() = if (senderPics.size > 1) {
+                        senderPics.size
                     } else {
                         null
                     }

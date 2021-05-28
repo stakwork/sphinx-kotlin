@@ -4,14 +4,11 @@ import android.view.Gravity
 import android.widget.ImageView
 import androidx.annotation.DrawableRes
 import androidx.annotation.MainThread
-import androidx.core.graphics.scaleMatrix
 import androidx.core.view.updateLayoutParams
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.chat_common.R
 import chat.sphinx.resources.R as common_R
 import chat.sphinx.chat_common.databinding.LayoutMessageHolderBinding
-import chat.sphinx.concept_image_loader.ImageLoader
-import chat.sphinx.resources.getRandomColor
 import chat.sphinx.resources.getString
 import chat.sphinx.resources.setBackgroundRandomColor
 import chat.sphinx.resources.setTextColorExt
@@ -21,8 +18,6 @@ import chat.sphinx.wrapper_view.Px
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.visible
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
@@ -391,7 +386,7 @@ internal inline fun LayoutMessageHolderBinding.setBubbleReactionBoosts(
                 }
 
                 textViewBoostReactionCount.apply {
-                    boost.numberBoosts?.let { count ->
+                    boost.numberUniqueBoosters?.let { count ->
                         visible
                         text = count.toString()
                     } ?: gone
