@@ -191,7 +191,8 @@ internal class DashboardFragment : MotionLayoutFragment<
                 lifecycleScope.launch { viewModel.navDrawerNavigator.toProfileScreen() }
             }
             navDrawer.layoutButtonAddFriend.layoutConstraintButtonAddFriend.setOnClickListener {
-                lifecycleScope.launch { viewModel.navDrawerNavigator.toAddFriendDetail() }
+//                lifecycleScope.launch { viewModel.navDrawerNavigator.toAddFriendDetail() }
+                lifecycleScope.launch { viewModel.navDrawerNavigator.toJoinTribeDetail() }
             }
             navDrawer.layoutButtonCreateTribe.layoutConstraintButtonCreateTribe.setOnClickListener {
                 lifecycleScope.launch { viewModel.navDrawerNavigator.toCreateTribeDetail() }

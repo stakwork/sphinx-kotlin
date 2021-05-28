@@ -227,3 +227,4 @@ project(':kotlin:test:test-k-openssl').projectDir =
 //include ':sample'
 //project(':sample').projectDir = file(new File(rootDir, 'kotlin-android/sample'))
 include ':sphinx:screens-detail:join-tribe:join-tribe'
+include ':sphinx:screens-detail:join-tribe:join-tribe-view-model-coordiinator'
