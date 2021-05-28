@@ -363,6 +363,34 @@ class NetworkRelayCallImpl(
 
     }.flowOn(io)
 
+    override fun <T: Any, RequestBody: Any, V: RelayResponse<T>> relayUnauthenticatedPost(
+        responseJsonClass: Class<V>,
+        relayEndpoint: String,
+        requestBodyJsonClass: Class<RequestBody>,
+        requestBody: RequestBody,
+        mediaType: String?,
+        relayUrl: RelayUrl
+    ): Flow<LoadResponse<T, ResponseError>> = flow {
+
+        val responseFlow: Flow<LoadResponse<V, ResponseError>>? = try {
+            post(
+                relayUrl.value + relayEndpoint,
+                responseJsonClass,
+                requestBodyJsonClass,
+                requestBody,
+                mediaType
+            )
+        } catch (e: Exception) {
+            emit(handleException(LOG, POST, relayEndpoint, e))
+            null
+        }
+
+        responseFlow?.let {
+            emitAll(validateRelayResponse(it, POST, relayEndpoint))
+        }
+
+    }.flowOn(io)
+
     override fun <T: Any, RequestBody: Any, V: RelayResponse<T>> relayPost(
         responseJsonClass: Class<V>,
         relayEndpoint: String,

@@ -1,13 +1,11 @@
 package chat.sphinx.feature_network_query_contact
 
 import chat.sphinx.concept_network_query_contact.NetworkQueryContact
-import chat.sphinx.concept_network_query_contact.model.ContactDto
-import chat.sphinx.concept_network_query_contact.model.GetContactsResponse
-import chat.sphinx.concept_network_query_contact.model.PostContactDto
-import chat.sphinx.concept_network_query_contact.model.PutContactDto
+import chat.sphinx.concept_network_query_contact.model.*
 import chat.sphinx.concept_network_relay_call.NetworkRelayCall
 import chat.sphinx.feature_network_query_contact.model.ContactRelayResponse
 import chat.sphinx.feature_network_query_contact.model.DeleteContactRelayResponse
+import chat.sphinx.feature_network_query_contact.model.GenerateTokenRelayResponse
 import chat.sphinx.feature_network_query_contact.model.GetContactsRelayResponse
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.kotlin_response.LoadResponse
@@ -25,6 +23,7 @@ class NetworkQueryContactImpl(
     companion object {
         private const val ENDPOINT_CONTACTS = "/contacts"
         private const val ENDPOINT_DELETE_CONTACT = "/contacts/%d"
+        private const val ENDPOINT_GENERATE_TOKEN = "/contacts/tokens"
     }
 
     ///////////
@@ -72,9 +71,27 @@ class NetworkQueryContactImpl(
     ////////////
     /// POST ///
     ////////////
-//    app.post('/contacts/tokens', contacts.generateToken)
 //    app.post('/contacts/:id/keys', contacts.exchangeKeys)
 //    app.post('/contacts', contacts.createContact)
+
+    override fun generateToken(
+        relayUrl: RelayUrl,
+        token: AuthorizationToken,
+        password: String?,
+        pubkey: String?
+    ): Flow<LoadResponse<GenerateTokenResponse, ResponseError>> {
+        return networkRelayCall.relayUnauthenticatedPost(
+            responseJsonClass = GenerateTokenRelayResponse::class.java,
+            relayEndpoint = ENDPOINT_GENERATE_TOKEN,
+            requestBodyJsonClass = Map::class.java,
+            requestBody = mapOf(
+                Pair("token", token.value),
+                Pair("password", password),
+                Pair("pubkey", pubkey),
+            ),
+            relayUrl = relayUrl
+        )
+    }
 
     override fun createContact(
         postContactDto: PostContactDto,

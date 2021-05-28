@@ -7,4 +7,10 @@
     android:background="@drawable/background_splash"
     tools:context=".ui.OnBoardFragment">
 
+    <include
+        android:id="@+id/include_welcome_screen"
+        layout="@layout/layout_signup_welcome_message"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

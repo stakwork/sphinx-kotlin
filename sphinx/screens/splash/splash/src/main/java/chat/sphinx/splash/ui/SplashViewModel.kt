@@ -4,10 +4,14 @@ import android.content.Context
 import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_background_login.BackgroundLoginHandler
+import chat.sphinx.concept_network_query_contact.NetworkQueryContact
+import chat.sphinx.concept_network_tor.TorManager
+import chat.sphinx.concept_relay.RelayDataHandler
 import chat.sphinx.concept_repository_lightning.LightningRepository
 import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
 import chat.sphinx.key_restore.KeyRestore
 import chat.sphinx.key_restore.KeyRestoreResponse
+import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.scanner_view_model_coordinator.request.ScannerFilter
 import chat.sphinx.scanner_view_model_coordinator.request.ScannerRequest
@@ -30,10 +34,12 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
+import okhttp3.HttpUrl.Companion.toHttpUrl
 import okio.base64.decodeBase64ToArray
 import org.cryptonode.jncryptor.AES256JNCryptor
 import org.cryptonode.jncryptor.CryptorException
 import javax.inject.Inject
+import kotlin.random.Random
 
 @HiltViewModel
 internal class SplashViewModel @Inject constructor(
@@ -43,7 +49,10 @@ internal class SplashViewModel @Inject constructor(
     private val keyRestore: KeyRestore,
     private val lightningRepository: LightningRepository,
     private val navigator: SplashNavigator,
-    private val scannerCoordinator: ViewModelCoordinator<ScannerRequest, ScannerResponse>
+    private val scannerCoordinator: ViewModelCoordinator<ScannerRequest, ScannerResponse>,
+    private val networkQueryContact: NetworkQueryContact,
+    private val torManager: TorManager,
+    private val relayDataHandler: RelayDataHandler,
 ): MotionLayoutViewModel<
         Any,
         Context,
@@ -116,12 +125,12 @@ internal class SplashViewModel @Inject constructor(
                                 ?.let { decodedSplit ->
 
                                     if (decodedSplit.size == 2) {
-                                        if (decodedSplit[0] == "ip") {
-                                            return Response.Error("Creating a new account is not yet implemented")
-                                        }
-                                        if (decodedSplit[0] == "keys") {
+//                                        if (decodedSplit[0] == "ip") {
+//                                            return Response.Error("Creating a new account is not yet implemented")
+//                                        }
+//                                        if (decodedSplit[0] == "keys") {
                                             return Response.Success(Any())
-                                        }
+//                                        }
                                     }
 
                                 }
@@ -156,16 +165,55 @@ internal class SplashViewModel @Inject constructor(
         }
 
         input.decodeBase64ToArray()?.decodeToString()?.split("::")?.let { decodedSplit ->
-            if (decodedSplit.size == 2) {
-
+            if (decodedSplit.size == 3) {
                 if (decodedSplit.elementAt(0) == "ip") {
-                    // TODO: Implement
-                    viewModelScope.launch(dispatchers.mainImmediate) {
-                        submitSideEffect(SplashSideEffect.NotImplementedYet)
+                    val ip = decodedSplit.elementAt(1)
+                    val code = decodedSplit.elementAt(2)
+
+                    viewModelScope.launch(mainImmediate) {
+                        val authToken = generateToken()
+                        val relayUrl = parseRelayUrl(RelayUrl(ip))
+
+                        networkQueryContact.generateToken(relayUrl, authToken, code)
+                            .collect { loadResponse ->
+                                @Exhaustive
+                                when (loadResponse) {
+                                    is LoadResponse.Loading -> {
+                                    }
+                                    is Response.Error -> {
+                                        submitSideEffect(SplashSideEffect.NotImplementedYet)
+                                    }
+                                    is Response.Success -> {
+                                        authenticationCoordinator.submitAuthenticationRequest(
+                                            AuthenticationRequest.LogIn()
+                                        ).firstOrNull().let { response ->
+                                            @Exhaustive
+                                            when (response) {
+                                                null,
+                                                is AuthenticationResponse.Failure -> {
+                                                    // will not be returned as back press for handling
+                                                    // a LogIn request minimizes the application until
+                                                    // User has authenticated
+                                                }
+                                                is AuthenticationResponse.Success.Authenticated -> {
+                                                    relayDataHandler.persistAuthorizationToken(authToken)
+                                                    relayDataHandler.persistRelayUrl(relayUrl)
+
+                                                    navigator.toOnBoardScreen("")
+                                                }
+                                                is AuthenticationResponse.Success.Key -> {
+                                                    // will never be returned
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                     }
+
                     return
                 }
-
+            } else if (decodedSplit.size == 2) {
                 if (decodedSplit.elementAt(0) == "keys") {
                     decodedSplit.elementAt(1).decodeBase64ToArray()?.let { toDecryptByteArray ->
                         updateViewState(
@@ -180,6 +228,40 @@ internal class SplashViewModel @Inject constructor(
 
         viewModelScope.launch(mainImmediate) {
             submitSideEffect(SplashSideEffect.InvalidCode)
+        }
+    }
+
+    private fun generateToken(): AuthorizationToken {
+        val charPool: List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9')
+        val token = (1..20)
+            .map { Random.nextInt(0, charPool.size) }
+            .map(charPool::get)
+            .joinToString("")
+
+        return AuthorizationToken(token)
+    }
+
+    private inline val String.isOnionAddress: Boolean
+        get() = matches("([a-z2-7]{56}).onion.*".toRegex())
+
+    suspend fun parseRelayUrl(relayUrl: RelayUrl): RelayUrl {
+        return try {
+            val httpUrl = relayUrl.value.toHttpUrl()
+            torManager.setTorRequired(httpUrl.host.isOnionAddress)
+
+            // is a valid url with scheme
+            relayUrl
+        } catch (e: IllegalArgumentException) {
+
+            // does not contain http, https... check if it's an onion address
+            if (relayUrl.value.isOnionAddress) {
+                // only use http if it is an onion address
+                torManager.setTorRequired(true)
+                RelayUrl("http://${relayUrl.value}")
+            } else {
+                torManager.setTorRequired(false)
+                RelayUrl("http://${relayUrl.value}")
+            }
         }
     }
 
