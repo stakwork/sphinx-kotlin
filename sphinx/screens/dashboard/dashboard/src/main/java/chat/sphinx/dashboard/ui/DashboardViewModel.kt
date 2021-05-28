@@ -25,10 +25,10 @@ import chat.sphinx.scanner_view_model_coordinator.request.ScannerFilter
 import chat.sphinx.scanner_view_model_coordinator.request.ScannerRequest
 import chat.sphinx.scanner_view_model_coordinator.response.ScannerResponse
 import chat.sphinx.wrapper_chat.isConversation
-import chat.sphinx.wrapper_common.TribeJoinLink
+import chat.sphinx.wrapper_common.tribe.TribeJoinLink
 import chat.sphinx.wrapper_common.contact.ContactId
-import chat.sphinx.wrapper_common.toTribeJoinLink
-import chat.sphinx.wrapper_common.isValidTribeJoinLink
+import chat.sphinx.wrapper_common.tribe.toTribeJoinLink
+import chat.sphinx.wrapper_common.tribe.isValidTribeJoinLink
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_contact.isConfirmed
 import chat.sphinx.wrapper_contact.isTrue
@@ -101,7 +101,7 @@ internal class DashboardViewModel @Inject constructor(
                 )
             )
             if (response is Response.Success) {
-                
+
                 val code = response.value.value
 
                 if (code.isValidTribeJoinLink) {

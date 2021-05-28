@@ -6,7 +6,7 @@ import chat.sphinx.join_tribe.navigation.ToJoinTribeDetail
 import chat.sphinx.payment_receive.navigation.ToPaymentReceiveDetail
 import chat.sphinx.payment_send.navigation.ToPaymentSendDetail
 import chat.sphinx.transactions.navigation.ToTransactionsDetail
-import chat.sphinx.wrapper_common.TribeJoinLink
+import chat.sphinx.wrapper_common.tribe.TribeJoinLink
 import javax.inject.Inject
 
 internal class DashboardBottomNavBarNavigatorImpl @Inject constructor(

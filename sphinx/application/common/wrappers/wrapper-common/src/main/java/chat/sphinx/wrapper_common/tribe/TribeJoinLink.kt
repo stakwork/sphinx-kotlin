@@ -1,4 +1,4 @@
-package chat.sphinx.wrapper_common
+package chat.sphinx.wrapper_common.tribe
 
 import java.text.SimpleDateFormat
 import java.util.*

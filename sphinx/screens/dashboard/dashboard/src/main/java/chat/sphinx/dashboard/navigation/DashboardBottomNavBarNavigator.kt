@@ -1,7 +1,7 @@
 package chat.sphinx.dashboard.navigation
 
 import androidx.navigation.NavController
-import chat.sphinx.wrapper_common.TribeJoinLink
+import chat.sphinx.wrapper_common.tribe.TribeJoinLink
 import io.matthewnelson.concept_navigation.BaseNavigationDriver
 import io.matthewnelson.concept_navigation.Navigator
 

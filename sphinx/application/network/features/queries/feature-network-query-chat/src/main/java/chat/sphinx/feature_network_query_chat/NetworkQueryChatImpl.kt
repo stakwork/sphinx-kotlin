@@ -3,6 +3,7 @@ package chat.sphinx.feature_network_query_chat
 import MuteChatRelayResponse
 import chat.sphinx.concept_network_query_chat.model.ChatDto
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
+import chat.sphinx.concept_network_query_chat.model.TribeDto
 import chat.sphinx.concept_network_relay_call.NetworkRelayCall
 import chat.sphinx.feature_network_query_chat.model.GetChatsRelayResponse
 import chat.sphinx.kotlin_response.ResponseError
@@ -10,6 +11,8 @@ import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.wrapper_chat.ChatMuted
 import chat.sphinx.wrapper_chat.isTrue
 import chat.sphinx.wrapper_common.chat.ChatId
+import chat.sphinx.wrapper_common.tribe.TribeHost
+import chat.sphinx.wrapper_common.tribe.TribeUUID
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
 import kotlinx.coroutines.flow.*
@@ -28,6 +31,8 @@ class NetworkQueryChatImpl(
         private const val ENDPOINT_KICK = "/kick"
         private const val ENDPOINT_MEMBER = "/member"
         private const val ENDPOINT_TRIBE = "/tribe"
+
+        private const val GET_TRIBE_INFO_URL = "https://%s/tribes/%s"
     }
 
     ///////////
@@ -74,6 +79,15 @@ class NetworkQueryChatImpl(
             requestBodyJsonClass = Map::class.java,
             requestBody = mapOf(Pair("", "")),
             relayData = relayData
+        )
+
+    override fun getTribeInfo(
+        host: TribeHost,
+        uuid: TribeUUID
+    ): Flow<LoadResponse<TribeDto, ResponseError>> =
+        networkRelayCall.get(
+            url = String.format(GET_TRIBE_INFO_URL, host.value, uuid.value),
+            responseJsonClass = TribeDto::class.java,
         )
 
     ///////////

@@ -5,7 +5,7 @@ import androidx.navigation.NavOptions
 import chat.sphinx.detail_resources.DetailNavOptions
 import chat.sphinx.join_tribe.R
 import chat.sphinx.join_tribe.ui.JoinTribeFragmentArgs
-import chat.sphinx.wrapper_common.TribeJoinLink
+import chat.sphinx.wrapper_common.tribe.TribeJoinLink
 import io.matthewnelson.concept_navigation.NavigationRequest
 
 class ToJoinTribeDetail(

@@ -31,7 +31,6 @@
                 android:layout_width="@dimen/tribe_picture_xy"
                 android:layout_height="@dimen/tribe_picture_xy"
                 android:src="@drawable/ic_tribe_placeholder"
-                android:tint="@color/secondaryText"
                 android:layout_marginTop="35dp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
