@@ -1,7 +1,5 @@
 package chat.sphinx.qr_code.ui
 
-import android.content.ClipData
-import android.content.ClipboardManager
 import android.content.Context
 import android.os.Bundle
 import android.view.View
@@ -15,7 +13,6 @@ import chat.sphinx.qr_code.databinding.FragmentQrCodeBinding
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
-import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -58,16 +55,7 @@ internal class QRCodeFragment: SideEffectFragment<
         }
 
         binding.buttonQrCodeCopy.setOnClickListener {
-            val textToCopy = binding.qrCodeLabel.text
-            val clipboardManager = binding.root.context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-            val clipData = ClipData.newPlainText("text", textToCopy)
-            clipboardManager.setPrimaryClip(clipData)
-
-            lifecycleScope.launch(viewModel.mainImmediate) {
-                viewModel.submitSideEffect(
-                    NotifySideEffect(getString(R.string.qr_code_notify_copied))
-                )
-            }
+            viewModel.copyCodeToClipboard()
         }
     }
 
