@@ -267,13 +267,13 @@ abstract class SphinxRepository(
                 accountOwner.collect {
                     if (it != null) {
                         ownerId = it.id
-                        delay(25L)
                         throw Exception()
                     } else {
                         emit(null)
                     }
                 }
             } catch (e: Exception) {}
+            delay(25L)
         }
 
         emitAll(
@@ -874,6 +874,7 @@ abstract class SphinxRepository(
         queries: SphinxDatabaseQueries,
         messageDbo: MessageDbo,
         reactions: List<Message>? = null,
+        replyMessage: ReplyUUID? = null,
     ): Message {
 
         val message: MessageDboWrapper = messageDbo.message_content?.let { messageContent ->
@@ -1022,6 +1023,12 @@ abstract class SphinxRepository(
 
         message._reactions = reactions
 
+        replyMessage?.value?.toMessageUUID().let { uuid ->
+            queries.messageGetToShowByUUID(uuid).executeAsOneOrNull()?.let { replyDbo ->
+                message._replyMessage = mapMessageDboAndDecryptContentIfNeeded(queries, replyDbo)
+            }
+        }
+
         return message
     }
 
@@ -1034,16 +1041,16 @@ abstract class SphinxRepository(
                 .map { listMessageDbo ->
                     withContext(default) {
 
-                        val map: MutableMap<MessageUUID, ArrayList<Message>> =
+                        val reactionsMap: MutableMap<MessageUUID, ArrayList<Message>> =
                             LinkedHashMap(listMessageDbo.size)
 
                         for (dbo in listMessageDbo) {
-                            dbo.uuid?.let {
-                                map[it] = ArrayList(0)
+                            dbo.uuid?.let { uuid ->
+                                reactionsMap[uuid] = ArrayList(0)
                             }
                         }
 
-                        val replyUUIDs = map.keys.map { ReplyUUID(it.value) }
+                        val replyUUIDs = reactionsMap.keys.map { ReplyUUID(it.value) }
 
                         replyUUIDs.chunked(500).forEach { chunkedIds ->
                             queries.messageGetAllReactionsByUUID(
@@ -1053,7 +1060,7 @@ abstract class SphinxRepository(
                                 .let { response ->
                                     response.forEach { dbo ->
                                         dbo.reply_uuid?.let { uuid ->
-                                            map[MessageUUID(uuid.value)]?.add(
+                                            reactionsMap[MessageUUID(uuid.value)]?.add(
                                                 mapMessageDboAndDecryptContentIfNeeded(queries, dbo)
                                             )
                                         }
@@ -1065,7 +1072,8 @@ abstract class SphinxRepository(
                             mapMessageDboAndDecryptContentIfNeeded(
                                 queries,
                                 dbo,
-                                dbo.uuid?.let { map[it] }
+                                dbo.uuid?.let { reactionsMap[it] },
+                                dbo.reply_uuid,
                             )
                         }
 
