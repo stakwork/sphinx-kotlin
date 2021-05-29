@@ -1,8 +1,11 @@
 package chat.sphinx.chat_common.ui.viewstate.messageholder
 
 import android.view.Gravity
+import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
 import androidx.annotation.MainThread
+import androidx.annotation.StringRes
+import androidx.core.content.ContextCompat
 import androidx.core.view.updateLayoutParams
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.chat_common.R
@@ -223,14 +226,53 @@ internal inline fun LayoutMessageHolderBinding.setBubbleMessageLayout(
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun LayoutMessageHolderBinding.setBubblePaidMessageDetailsLayout(
-    paidDetails: LayoutState.Bubble.PaidMessageDetails?
+    paidDetails: LayoutState.Bubble.PaidMessageDetails?,
+    bubbleBackground: BubbleBackground
 ) {
     includeMessageHolderBubble.includePaidMessageReceivedDetailsHolder.apply {
         if (paidDetails == null) {
             root.gone
         } else {
             root.visible
+            root.clipToOutline = true
 
+            @ColorRes
+            val backgroundTintResId = if (paidDetails.purchaseType is MessageType.Purchase.Denied) {
+                R.color.badgeRed
+            } else {
+                R.color.primaryGreen
+            }
+
+            @DrawableRes
+            val backgroundDrawableResId: Int? = when (bubbleBackground) {
+                BubbleBackground.First.Grouped -> {
+                    if (paidDetails.isShowingReceivedMessage) {
+                        R.drawable.background_paid_message_details_bubble_footer_received_first
+                    } else {
+                        R.drawable.background_paid_message_details_bubble_footer_sent_first
+                    }
+                }
+                BubbleBackground.First.Isolated,
+                BubbleBackground.Last -> {
+                    if (paidDetails.isShowingReceivedMessage) {
+                        R.drawable.background_paid_message_details_bubble_footer_received_last
+                    } else {
+                        R.drawable.background_paid_message_details_bubble_footer_sent_last
+                    }
+                }
+                BubbleBackground.Middle -> {
+                    if (paidDetails.isShowingReceivedMessage) {
+                        R.drawable.background_paid_message_details_bubble_footer_received_middle
+                    } else {
+                        R.drawable.background_paid_message_details_bubble_footer_sent_middle
+                    }
+                }
+                else -> {
+                    null
+                }
+            }
+
+            @StringRes
             val statusTextResID = when (paidDetails.purchaseType) {
                 MessageType.Purchase.Accepted -> {
                     R.string.purchase_status_label_paid_message_details_accepted
@@ -245,6 +287,9 @@ internal inline fun LayoutMessageHolderBinding.setBubblePaidMessageDetailsLayout
                     R.string.purchase_status_label_paid_message_details_default
                 }
             }
+
+            backgroundDrawableResId?.let { root.setBackgroundResource(it) }
+            root.backgroundTintList = ContextCompat.getColorStateList(root.context, backgroundTintResId)
 
             imageViewPaidMessageReceivedIcon.goneIfFalse(paidDetails.showPaymentReceivedIcon)
             imageViewPaidMessageSentIcon.goneIfFalse(paidDetails.showSendPaymentIcon)

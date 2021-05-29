@@ -8,7 +8,6 @@
     tools:visibility="visible">
 
     <!-- Boost Icon -->
-
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/image_view_boost_message_icon"
         android:layout_width="wrap_content"
@@ -19,7 +18,6 @@
         tools:backgroundTint="@color/receivedIcon" />
 
     <!--Amount Text -->
-
     <include
         android:id="@+id/include_boost_amount_text_group"
         layout="@layout/layout_text_sats_amount"
@@ -28,9 +26,8 @@
         android:layout_marginHorizontal="@dimen/default_layout_margin"
         app:layout_constraintEnd_toStartOf="@id/include_boost_reactions_group"
         app:layout_constraintStart_toEndOf="@+id/image_view_boost_message_icon" />
-
+    
     <!-- Boost Reactions -->
-
     <include
         android:id="@+id/include_boost_reactions_group"
         layout="@layout/layout_message_type_boost_reaction_group"

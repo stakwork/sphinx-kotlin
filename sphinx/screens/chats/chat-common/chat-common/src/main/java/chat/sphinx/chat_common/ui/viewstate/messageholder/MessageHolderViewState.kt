@@ -82,6 +82,7 @@ internal sealed class MessageHolderViewState(
                 LayoutState.Bubble.PaidMessageDetails(
                     amount = message.amount,
                     purchaseType = if (type.isPurchase()) type else null,
+                    isShowingReceivedMessage = this is Received,
                     showPaymentAcceptedIcon = type.isPurchaseAccepted(),
                     showPaymentProgressWheel = type.isPurchaseProcessing(),
                     showSendPaymentIcon = this !is Sent && !isPaymentPending,

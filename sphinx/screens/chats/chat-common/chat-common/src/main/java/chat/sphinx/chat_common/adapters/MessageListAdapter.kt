@@ -1,7 +1,5 @@
 package chat.sphinx.chat_common.adapters
 
-import android.content.ContentValues.TAG
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,15 +10,9 @@ import androidx.navigation.NavArgs
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import chat.sphinx.chat_common.ui.ChatViewModel
 import chat.sphinx.chat_common.databinding.LayoutMessageHolderBinding
+import chat.sphinx.chat_common.ui.ChatViewModel
 import chat.sphinx.chat_common.ui.viewstate.messageholder.*
-import chat.sphinx.chat_common.ui.viewstate.messageholder.BubbleBackground
-import chat.sphinx.chat_common.ui.viewstate.messageholder.MessageHolderViewState
-import chat.sphinx.chat_common.ui.viewstate.messageholder.setBubbleBackground
-import chat.sphinx.chat_common.ui.viewstate.messageholder.setBubbleDirectPaymentLayout
-import chat.sphinx.chat_common.ui.viewstate.messageholder.setBubbleMessageLayout
-import chat.sphinx.chat_common.ui.viewstate.messageholder.setStatusHeader
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.wrapper_view.Px
@@ -207,7 +199,10 @@ internal class MessageListAdapter<ARGS: NavArgs>(
                 if (viewState.background !is BubbleBackground.Gone) {
                     setBubbleMessageLayout(viewState.bubbleMessage)
                     setBubbleDirectPaymentLayout(viewState.bubbleDirectPayment)
-                    setBubblePaidMessageDetailsLayout(viewState.bubblePaidMessageDetails)
+                    setBubblePaidMessageDetailsLayout(
+                        viewState.bubblePaidMessageDetails,
+                        viewState.background
+                    )
                     setBubblePaidMessageSentStatusLayout(viewState.bubblePaidMessageSentStatus)
                 }
             }
