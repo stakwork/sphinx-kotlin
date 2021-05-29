@@ -36,6 +36,7 @@ dependencies {
 
     // Sphinx
     implementation project(path: ':sphinx:activity:insetter-activity')
+    implementation project(path: ':sphinx:application:data:concepts:concept-background-login')
     implementation project(path: ':sphinx:application:data:concepts:concept-image-loader')
     implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-contact')
     implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-lightning')

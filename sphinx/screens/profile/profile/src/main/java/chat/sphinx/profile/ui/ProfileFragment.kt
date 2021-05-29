@@ -125,17 +125,15 @@ internal class ProfileFragment: BaseFragment<
             layoutProfileAdvancedContainerHolder.seekBar.setOnSeekBarChangeListener(object :
                 SeekBar.OnSeekBarChangeListener {
                 override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                    setPINTimeoutString(progress)
-
-                    onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-                        viewModel.updatePINTimeout(progress)
-                    }
+                    viewModel.updatePINTimeOutStateFlow(progress)
                 }
 
                 override fun onStartTrackingTouch(seekBar: SeekBar?) {
                 }
 
                 override fun onStopTrackingTouch(seekBar: SeekBar?) {
+                    // only persist when tracking is stopped (key up)
+                    viewModel.persistPINTimeout()
                 }
             })
         }
