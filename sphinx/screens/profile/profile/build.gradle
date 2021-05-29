@@ -35,7 +35,6 @@ dependencies {
 
     // Sphinx
     implementation project(path: ':sphinx:screens-detail:common:detail-resources')
-    implementation project(path: ':sphinx:screens-detail:qr-code:qr-code')
     implementation project(path: ':sphinx:application:data:concepts:concept-image-loader')
     implementation project(path: ':sphinx:activity:insetter-activity')
     implementation project(path: ':sphinx:application:common:resources')
