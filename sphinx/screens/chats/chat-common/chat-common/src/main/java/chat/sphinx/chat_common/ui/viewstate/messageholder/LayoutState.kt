@@ -41,6 +41,7 @@ internal sealed class LayoutState {
         data class PaidMessageDetails(
             val amount: Sat,
             val purchaseType: MessageType.Purchase?,
+            val isShowingReceivedMessage: Boolean,
             val showPaymentAcceptedIcon: Boolean,
             val showPaymentProgressWheel: Boolean,
             val showSendPaymentIcon: Boolean,
@@ -80,7 +81,6 @@ internal sealed class LayoutState {
             }
         }
     }
-
 }
 
 // TODO: TEMPORARY!!! until Initial holder can be refactored...
