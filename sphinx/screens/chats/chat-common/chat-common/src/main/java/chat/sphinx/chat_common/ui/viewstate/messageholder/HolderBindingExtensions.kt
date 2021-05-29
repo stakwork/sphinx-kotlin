@@ -226,7 +226,8 @@ internal inline fun LayoutMessageHolderBinding.setBubbleMessageLayout(
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun LayoutMessageHolderBinding.setBubblePaidMessageDetailsLayout(
-    paidDetails: LayoutState.Bubble.PaidMessageDetails?
+    paidDetails: LayoutState.Bubble.PaidMessageDetails?,
+    bubbleBackground: BubbleBackground
 ) {
     includeMessageHolderBubble.includePaidMessageReceivedDetailsHolder.apply {
         if (paidDetails == null) {
@@ -243,7 +244,7 @@ internal inline fun LayoutMessageHolderBinding.setBubblePaidMessageDetailsLayout
             }
 
             @DrawableRes
-            val backgroundDrawableResId: Int? = when (paidDetails.bubbleBackground) {
+            val backgroundDrawableResId: Int? = when (bubbleBackground) {
                 BubbleBackground.First.Grouped -> {
                     if (paidDetails.isShowingReceivedMessage) {
                         R.drawable.background_paid_message_details_bubble_footer_received_first

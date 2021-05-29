@@ -199,7 +199,10 @@ internal class MessageListAdapter<ARGS: NavArgs>(
                 if (viewState.background !is BubbleBackground.Gone) {
                     setBubbleMessageLayout(viewState.bubbleMessage)
                     setBubbleDirectPaymentLayout(viewState.bubbleDirectPayment)
-                    setBubblePaidMessageDetailsLayout(viewState.bubblePaidMessageDetails)
+                    setBubblePaidMessageDetailsLayout(
+                        viewState.bubblePaidMessageDetails,
+                        viewState.background
+                    )
                     setBubblePaidMessageSentStatusLayout(viewState.bubblePaidMessageSentStatus)
                 }
             }
