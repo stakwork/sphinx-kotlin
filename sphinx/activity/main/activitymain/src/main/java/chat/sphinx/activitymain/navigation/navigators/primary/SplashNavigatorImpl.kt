@@ -10,9 +10,15 @@ import javax.inject.Inject
 internal class SplashNavigatorImpl @Inject constructor(
     navigationDriver: PrimaryNavigationDriver
 ): SplashNavigator(navigationDriver) {
-    override suspend fun toDashboardScreen(privateMode: Boolean) {
+    override suspend fun toDashboardScreen(
+        privateMode: Boolean,
+        updateBackgroundLoginTime: Boolean,
+    ) {
         navigationDriver.submitNavigationRequest(
-            ToDashboardScreen(R.id.main_primary_nav_graph)
+            ToDashboardScreen(
+                popUpToId = R.id.main_primary_nav_graph,
+                updateBackgroundLoginTime = updateBackgroundLoginTime,
+            )
         )
     }
 
