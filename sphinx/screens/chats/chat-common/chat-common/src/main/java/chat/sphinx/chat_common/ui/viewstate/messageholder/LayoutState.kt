@@ -1,6 +1,5 @@
 package chat.sphinx.chat_common.ui.viewstate.messageholder
 
-import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.lightning.unit
@@ -59,16 +58,12 @@ internal sealed class LayoutState {
                 get() = amount.asFormattedString(appendUnit = true)
         }
 
-
-
-
-
-        sealed class Reaction: Bubble() {
+        sealed class ContainerBottom: Bubble() {
 
             class Boost(
                 private val totalAmount: Sat,
                 val senderPics: Set<BoostReactionImageHolder>
-            ): Reaction() {
+            ): ContainerBottom() {
                 val amountText: String
                     get() = totalAmount.asFormattedString()
 

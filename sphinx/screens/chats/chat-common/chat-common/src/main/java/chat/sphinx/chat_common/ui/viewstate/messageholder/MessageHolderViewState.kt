@@ -5,7 +5,6 @@ import chat.sphinx.wrapper_chat.ChatType
 import chat.sphinx.wrapper_chat.isConversation
 import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_common.lightning.Sat
-import chat.sphinx.wrapper_common.util.getInitials
 import chat.sphinx.wrapper_message.*
 
 internal inline val MessageHolderViewState.isReceived: Boolean
@@ -115,7 +114,7 @@ internal sealed class MessageHolderViewState(
 
     // don't use by lazy as this uses a for loop and needs to be initialized on a background
     // thread (so, while the MHVS is being created)
-    val bubbleReactionBoosts: LayoutState.Bubble.Reaction.Boost? =
+    val bubbleReactionBoosts: LayoutState.Bubble.ContainerBottom.Boost? =
         message.reactions?.let { nnReactions ->
             if (nnReactions.isEmpty()) {
                 null
@@ -123,15 +122,32 @@ internal sealed class MessageHolderViewState(
                 val set: MutableSet<BoostReactionImageHolder> = LinkedHashSet(1)
                 var total: Long = 0
                 for (reaction in nnReactions) {
-                    reaction.senderPic?.value?.let { url ->
-                        set.add(SenderPhotoUrl(url))
-                    } ?: reaction.senderAlias?.value?.let { alias ->
-                        set.add(SenderInitials(alias.getInitials()))
-                    }
+//                    if (chatType?.isConversation() != true) {
+//                        reaction.senderPic?.value?.let { url ->
+//                            set.add(SenderPhotoUrl(url))
+//                        } ?: reaction.senderAlias?.value?.let { alias ->
+//                            set.add(SenderInitials(alias.getInitials()))
+//                        }
+//                    }
                     total += reaction.amount.value
                 }
 
-                LayoutState.Bubble.Reaction.Boost(
+//                if (chatType?.isConversation() == true) {
+//
+//                    // TODO: Use Account Owner Initial Holder depending on sent/received
+//                    @Exhaustive
+//                    when (initialHolder) {
+//                        is InitialHolderViewState.Initials -> {
+//                            set.add(SenderInitials(initialHolder.initials))
+//                        }
+//                        is InitialHolderViewState.None -> {}
+//                        is InitialHolderViewState.Url -> {
+//                            set.add(SenderPhotoUrl(initialHolder.photoUrl.value))
+//                        }
+//                    }
+//                }
+
+                LayoutState.Bubble.ContainerBottom.Boost(
                     totalAmount = Sat(total),
                     senderPics = set,
                 )

@@ -293,7 +293,7 @@ internal inline fun LayoutMessageHolderBinding.setBubblePaidMessageSentStatusLay
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun LayoutMessageHolderBinding.setBubbleReactionBoosts(
-    boost: LayoutState.Bubble.Reaction.Boost?,
+    boost: LayoutState.Bubble.ContainerBottom.Boost?,
     loadImage: (ImageView, SenderPhotoUrl) -> Unit,
 ) {
     includeMessageHolderBubble.includeMessageTypeBoost.apply {
