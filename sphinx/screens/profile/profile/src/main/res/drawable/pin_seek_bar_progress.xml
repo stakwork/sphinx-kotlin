@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@android:id/background">
+        <shape
+            android:shape="line">
+            <stroke
+                android:color="@color/semitransparentText"
+                android:width="@dimen/profile_pin_seek_bar_line_height"/>
+        </shape>
+    </item>
+    <item android:id="@android:id/secondaryProgress">
+        <clip>
+            <shape
+                android:shape="line">
+                <stroke
+                    android:color="@color/semitransparentText"
+                    android:width="@dimen/profile_pin_seek_bar_line_height"/>
+            </shape>
+        </clip>
+    </item>
+
+    <item android:id="@android:id/progress">
+        <clip>
+            <shape
+                android:shape="line">
+                <stroke
+                    android:color="@color/primaryBlue"
+                    android:width="@dimen/profile_pin_seek_bar_line_height"/>
+            </shape>
+        </clip>
+    </item>
+
+</layer-list>

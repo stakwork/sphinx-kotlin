@@ -10,6 +10,7 @@
     <include app:graph="@navigation/payment_receive_nav_graph" />
     <include app:graph="@navigation/payment_send_nav_graph" />
     <include app:graph="@navigation/scanner_nav_graph" />
+    <include app:graph="@navigation/qr_code_nav_graph" />
     <include app:graph="@navigation/support_ticket_nav_graph" />
     <include app:graph="@navigation/transactions_nav_graph" />
     <include app:graph="@navigation/new_contact_nav_graph" />

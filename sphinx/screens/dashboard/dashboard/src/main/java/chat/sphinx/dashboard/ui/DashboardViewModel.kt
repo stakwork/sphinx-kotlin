@@ -1,10 +1,9 @@
 package chat.sphinx.dashboard.ui
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import androidx.paging.PagingData
-import androidx.paging.cachedIn
 import app.cash.exhaustive.Exhaustive
-import chat.sphinx.concept_repository_dashboard.DashboardItem
+import chat.sphinx.concept_background_login.BackgroundLoginHandler
 import chat.sphinx.concept_repository_dashboard_android.RepositoryDashboardAndroid
 import chat.sphinx.concept_service_notification.PushNotificationRegistrar
 import chat.sphinx.concept_socket_io.SocketIOManager
@@ -31,6 +30,7 @@ import chat.sphinx.wrapper_contact.isTrue
 import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_message.Message
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.MotionLayoutViewModel
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.sideeffect.SideEffect
@@ -58,6 +58,9 @@ internal suspend inline fun DashboardViewModel.updateChatListFilter(filter: Chat
 
 @HiltViewModel
 internal class DashboardViewModel @Inject constructor(
+    private val backgroundLoginHandler: BackgroundLoginHandler,
+    handler: SavedStateHandle,
+
     val dashboardNavigator: DashboardNavigator,
     val navBarNavigator: DashboardBottomNavBarNavigator,
     val navDrawerNavigator: DashboardNavDrawerNavigator,
@@ -77,6 +80,14 @@ internal class DashboardViewModel @Inject constructor(
         NavDrawerViewState
         >(dispatchers, NavDrawerViewState.Closed)
 {
+    init {
+        if (handler.navArgs<DashboardFragmentArgs>().value.updateBackgroundLoginTime) {
+            viewModelScope.launch(default) {
+                backgroundLoginHandler.updateLoginTime()
+            }
+        }
+    }
+
     fun toScanner() {
         viewModelScope.launch(mainImmediate) {
             val response = scannerCoordinator.submitRequest(

@@ -7,7 +7,7 @@
     android:layout_height="65dp"
     android:layout_marginTop="20dp"
     android:alpha=".5"
-    app:layout_constraintTop_toBottomOf="@+id/layout_constraint_route_hint_content">
+    app:layout_constraintTop_toBottomOf="@+id/layout_constraint_profile_basic_container_route_hint_content">
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/new_contact_pin_text_view"
@@ -19,7 +19,7 @@
         android:layout_marginTop="15dp"
         android:textColor="@color/secondaryText"
         android:fontFamily="@font/roboto_regular"
-        android:textSize="@dimen/default_form_text_view_size"
+        android:textSize="@dimen/default_form_text_view_text_size"
         android:singleLine="true" />
 
     <androidx.appcompat.widget.AppCompatTextView
@@ -51,7 +51,7 @@
         android:singleLine="true" />
 
     <androidx.appcompat.widget.SwitchCompat
-        android:id="@+id/pin_switch"
+        android:id="@+id/switch_profile_basic_container_pin"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:checked="false"

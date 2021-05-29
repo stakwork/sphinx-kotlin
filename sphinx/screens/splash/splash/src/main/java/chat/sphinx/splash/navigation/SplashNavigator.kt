@@ -8,6 +8,10 @@ abstract class SplashNavigator(
     navigationDriver: BaseNavigationDriver<NavController>
 ): Navigator<NavController>(navigationDriver)
 {
-    abstract suspend fun toDashboardScreen(privateMode: Boolean = false)
+    abstract suspend fun toDashboardScreen(
+        privateMode: Boolean = false,
+        updateBackgroundLoginTime: Boolean = false,
+    )
+
     abstract suspend fun toOnBoardScreen(input: String)
 }

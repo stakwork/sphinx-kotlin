@@ -31,7 +31,7 @@
         android:text="@string/address_book_header_name"
         android:textAllCaps="true"
         android:textColor="@color/primaryText"
-        android:textSize="@dimen/address_book_header_default_text_size"
+        android:textSize="@dimen/default_header_text_size"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

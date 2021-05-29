@@ -7,9 +7,11 @@ import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.dashboard.InviteId
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.LightningRouteHint
+import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_contact.ContactAlias
 import chat.sphinx.wrapper_contact.DeviceId
+import chat.sphinx.wrapper_contact.PrivatePhoto
 import chat.sphinx.wrapper_invite.Invite
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
@@ -38,4 +40,5 @@ interface ContactRepository {
 
     suspend fun deleteContactById(contactId: ContactId): Response<Any, ResponseError>
     suspend fun updateOwnerDeviceId(deviceId: DeviceId): Response<Any, ResponseError>
+    suspend fun updateOwner(alias: String?, privatePhoto: PrivatePhoto?, tipAmount: Sat?): Response<Any, ResponseError>
 }

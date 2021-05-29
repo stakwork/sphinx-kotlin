@@ -53,10 +53,7 @@ import chat.sphinx.wrapper_common.lightning.LightningRouteHint
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessagePagination
-import chat.sphinx.wrapper_contact.Contact
-import chat.sphinx.wrapper_contact.ContactAlias
-import chat.sphinx.wrapper_contact.ContactStatus
-import chat.sphinx.wrapper_contact.DeviceId
+import chat.sphinx.wrapper_contact.*
 import chat.sphinx.wrapper_invite.Invite
 import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_message.*
@@ -659,6 +656,51 @@ abstract class SphinxRepository(
                 emit(response)
             }
         }
+    }
+
+    override suspend fun updateOwner(
+        alias: String?, privatePhoto: PrivatePhoto?, tipAmount: Sat?
+    ): Response<Any, ResponseError> {
+        val queries = coreDB.getSphinxDatabaseQueries()
+        var response: Response<Any, ResponseError> = Response.Success(Any())
+
+        try {
+            accountOwner.collect { owner ->
+
+                if (owner != null) {
+                    networkQueryContact.updateContact(
+                        owner.id,
+                        PutContactDto(
+                            alias = alias,
+                            private_photo = privatePhoto?.isTrue(),
+                            tip_amount = tipAmount?.value
+                        )
+                    ).collect { loadResponse ->
+                        @Exhaustive
+                        when (loadResponse) {
+                            is LoadResponse.Loading -> {}
+                            is Response.Error -> {
+                                response = loadResponse
+                                throw Exception()
+                            }
+                            is Response.Success -> {
+                                contactLock.withLock {
+                                    queries.transaction {
+                                        upsertContact(loadResponse.value, queries)
+                                    }
+                                }
+                                LOG.d(TAG, "Owner has been successfully updated")
+
+                                throw Exception()
+                            }
+                        }
+                    }
+                }
+
+            }
+        } catch (e: Exception) {}
+
+        return response
     }
 
     override suspend fun updateOwnerDeviceId(deviceId: DeviceId): Response<Any, ResponseError> {
