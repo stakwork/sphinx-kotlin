@@ -150,8 +150,6 @@
         android:id="@+id/layout_constraint_message_bubble_container_bottom"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="@id/layout_constraint_message_bubble_container_middle"
-        app:layout_constraintEnd_toEndOf="@id/layout_constraint_message_bubble_container_middle"
         app:layout_constraintTop_toBottomOf="@+id/layout_constraint_message_bubble_container_middle">
 
 
@@ -163,8 +161,6 @@
             android:layout_height="wrap_content"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
             tools:visibility="visible" />
 
 
@@ -176,8 +172,6 @@
             android:layout_height="wrap_content"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
             tools:visibility="gone" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
