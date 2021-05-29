@@ -30,7 +30,7 @@ internal class ProfileViewModel @Inject constructor(
     private val contactRepository: ContactRepository,
     private val lightningRepository: LightningRepository,
     private val relayDataHandler: RelayDataHandler,
-): BaseViewModel<ProfileViewState>(dispatchers, ProfileViewState.Idle)
+): BaseViewModel<ProfileViewState>(dispatchers, ProfileViewState.Basic)
 {
 
     suspend fun getAccountBalance(): StateFlow<NodeBalance?> =
