@@ -1,6 +1,7 @@
 package chat.sphinx.profile.ui
 
 import androidx.lifecycle.viewModelScope
+import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_background_login.BackgroundLoginHandler
 import chat.sphinx.concept_relay.RelayDataHandler
 import chat.sphinx.concept_repository_contact.ContactRepository
@@ -13,7 +14,11 @@ import chat.sphinx.wrapper_contact.PrivatePhoto
 import chat.sphinx.wrapper_lightning.NodeBalance
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.BaseViewModel
+import io.matthewnelson.concept_authentication.coordinator.AuthenticationCoordinator
+import io.matthewnelson.concept_authentication.coordinator.AuthenticationRequest
+import io.matthewnelson.concept_authentication.coordinator.AuthenticationResponse
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -21,12 +26,35 @@ import javax.inject.Inject
 @HiltViewModel
 internal class ProfileViewModel @Inject constructor(
     dispatchers: CoroutineDispatchers,
+    private val authenticationCoordinator: AuthenticationCoordinator,
     private val backgroundLoginHandler: BackgroundLoginHandler,
     private val contactRepository: ContactRepository,
     private val lightningRepository: LightningRepository,
     private val relayDataHandler: RelayDataHandler,
 ): BaseViewModel<ProfileViewState>(dispatchers, ProfileViewState.Basic)
 {
+
+    private var resetPINJob: Job? = null
+    fun resetPIN() {
+        if (resetPINJob?.isActive == true) return
+
+        resetPINJob = viewModelScope.launch(mainImmediate) {
+            authenticationCoordinator.submitAuthenticationRequest(
+                AuthenticationRequest.ResetPassword()
+            ).firstOrNull()?.let { response ->
+                @Exhaustive
+                when (response) {
+                    is AuthenticationResponse.Failure -> {
+                        // handle
+                    }
+                    is AuthenticationResponse.Success.Authenticated -> {
+                        // handle
+                    }
+                    is AuthenticationResponse.Success.Key -> {}
+                }
+            }
+        }
+    }
 
     suspend fun getAccountBalance(): StateFlow<NodeBalance?> =
         lightningRepository.getAccountBalance()

@@ -122,20 +122,32 @@ internal class ProfileFragment: BaseFragment<
                 }
             }
 
-            layoutProfileAdvancedContainerHolder.seekBar.setOnSeekBarChangeListener(object :
-                SeekBar.OnSeekBarChangeListener {
-                override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                    viewModel.updatePINTimeOutStateFlow(progress)
+            layoutProfileAdvancedContainerHolder.apply {
+                seekBar.setOnSeekBarChangeListener(
+                    object : SeekBar.OnSeekBarChangeListener {
+                        override fun onProgressChanged(
+                            seekBar: SeekBar?,
+                            progress: Int,
+                            fromUser: Boolean
+                        ) {
+                            viewModel.updatePINTimeOutStateFlow(progress)
+                        }
+
+                        override fun onStartTrackingTouch(seekBar: SeekBar?) {
+                        }
+
+                        override fun onStopTrackingTouch(seekBar: SeekBar?) {
+                            // only persist when tracking is stopped (key up)
+                            viewModel.persistPINTimeout()
+                        }
+                    }
+                )
+
+                buttonProfileAdvancedChangePin.setOnClickListener {
+                    viewModel.resetPIN()
                 }
 
-                override fun onStartTrackingTouch(seekBar: SeekBar?) {
-                }
-
-                override fun onStopTrackingTouch(seekBar: SeekBar?) {
-                    // only persist when tracking is stopped (key up)
-                    viewModel.persistPINTimeout()
-                }
-            })
+            }
         }
     }
 
