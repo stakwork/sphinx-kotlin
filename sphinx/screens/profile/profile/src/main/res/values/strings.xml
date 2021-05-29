@@ -16,4 +16,5 @@
     <string name="profile_pin_timeout_hours">12 hours</string>
     <string name="profile_change_pin">Change PIN</string>
     <string name="profile_change_privacy_pin">Change Privacy PIN</string>
+    <string name="profile_always_require_pin">Always require PIN</string>
 </resources>

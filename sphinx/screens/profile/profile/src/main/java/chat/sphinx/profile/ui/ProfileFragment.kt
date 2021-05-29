@@ -181,13 +181,16 @@ internal class ProfileFragment: BaseFragment<
 
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.pinTimeoutStateFlow.collect { pinTimeout ->
-                pinTimeout?.let {
-                    binding
-                        .includeProfileAdvancedContainerHolder
-                        .seekBarProfileAdvancedContainerPinTimeout
-                        .progress = it
-
-                    setPINTimeoutString(it)
+                pinTimeout?.let { nnTimeout ->
+                    binding.includeProfileAdvancedContainerHolder.apply {
+                        seekBarProfileAdvancedContainerPinTimeout.progress = nnTimeout
+                        textViewProfileAdvancedContainerPinTimeoutValue.text =
+                            if (nnTimeout == 0) {
+                                getString(R.string.profile_always_require_pin)
+                            } else {
+                                "$nnTimeout hours"
+                            }
+                    }
                 }
             }
         }
@@ -227,19 +230,6 @@ internal class ProfileFragment: BaseFragment<
                 }
             }
         }
-    }
-
-    private fun setPINTimeoutString(progress: Int) {
-        binding
-            .includeProfileAdvancedContainerHolder
-            .textViewProfileAdvancedContainerPinTimeoutValue
-            .apply {
-                text = if (progress == 0) {
-                    "Always require PIN"
-                } else {
-                    "$progress hours"
-                }
-            }
     }
 
     private fun updateOwnerDetails() {
