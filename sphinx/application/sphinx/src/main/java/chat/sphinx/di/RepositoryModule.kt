@@ -9,11 +9,12 @@ import chat.sphinx.concept_network_query_contact.NetworkQueryContact
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_message.NetworkQueryMessage
 import chat.sphinx.concept_repository_contact.ContactRepository
+import chat.sphinx.concept_repository_dashboard_android.RepositoryDashboardAndroid
 import chat.sphinx.concept_repository_lightning.LightningRepository
 import chat.sphinx.concept_socket_io.SocketIOManager
 import chat.sphinx.database.SphinxCoreDBImpl
 import chat.sphinx.feature_coredb.CoreDBImpl
-import chat.sphinx.feature_repository.SphinxRepository
+import chat.sphinx.feature_repository_android.SphinxRepositoryAndroid
 import chat.sphinx.logger.SphinxLogger
 import com.squareup.moshi.Moshi
 import dagger.Module
@@ -52,7 +53,7 @@ object RepositoryModule {
 
     @Provides
     @Singleton
-    fun provideSphinxRepository(
+    fun provideSphinxRepositoryAndroid(
         authenticationCoreManager: AuthenticationCoreManager,
         authenticationStorage: AuthenticationStorage,
         coreDBImpl: CoreDBImpl,
@@ -65,8 +66,8 @@ object RepositoryModule {
         socketIOManager: SocketIOManager,
         rsa: RSA,
         sphinxLogger: SphinxLogger,
-    ): SphinxRepository =
-        SphinxRepository(
+    ): SphinxRepositoryAndroid =
+        SphinxRepositoryAndroid(
             authenticationCoreManager,
             authenticationStorage,
             coreDBImpl,
@@ -83,25 +84,32 @@ object RepositoryModule {
 
     @Provides
     fun provideChatRepository(
-        sphinxRepository: SphinxRepository
+        sphinxRepositoryAndroid: SphinxRepositoryAndroid
     ): ChatRepository =
-        sphinxRepository
+        sphinxRepositoryAndroid
 
     @Provides
     fun provideContactRepository(
-        sphinxRepository: SphinxRepository
+        sphinxRepositoryAndroid: SphinxRepositoryAndroid
     ): ContactRepository =
-        sphinxRepository
+        sphinxRepositoryAndroid
 
     @Provides
     fun provideLightningRepository(
-        sphinxRepository: SphinxRepository
+        sphinxRepositoryAndroid: SphinxRepositoryAndroid
     ): LightningRepository =
-        sphinxRepository
+        sphinxRepositoryAndroid
 
     @Provides
     fun provideMessageRepository(
-        sphinxRepository: SphinxRepository
+        sphinxRepositoryAndroid: SphinxRepositoryAndroid
     ): MessageRepository =
-        sphinxRepository
+        sphinxRepositoryAndroid
+
+    @Provides
+    @Suppress("UNCHECKED_CAST")
+    fun provideRepositoryDashboardAndroid(
+        sphinxRepositoryAndroid: SphinxRepositoryAndroid
+    ): RepositoryDashboardAndroid<Any> =
+        sphinxRepositoryAndroid as RepositoryDashboardAndroid<Any>
 }

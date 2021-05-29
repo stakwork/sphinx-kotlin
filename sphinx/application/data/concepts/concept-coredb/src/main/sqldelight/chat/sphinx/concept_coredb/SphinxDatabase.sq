@@ -11,10 +11,11 @@ import chat.sphinx.wrapper_chat.ChatUnlisted;
 import chat.sphinx.wrapper_common.DateTime;
 import chat.sphinx.wrapper_common.PhotoUrl;
 import chat.sphinx.wrapper_common.Seen;
-import chat.sphinx.wrapper_common.chat.ChatId;
 import chat.sphinx.wrapper_common.chat.ChatUUID;
-import chat.sphinx.wrapper_common.contact.ContactId;
-import chat.sphinx.wrapper_common.invite.InviteId;
+import chat.sphinx.wrapper_common.dashboard.ChatId;
+import chat.sphinx.wrapper_common.dashboard.ContactId;
+import chat.sphinx.wrapper_common.dashboard.DashboardItemId;
+import chat.sphinx.wrapper_common.dashboard.InviteId;
 import chat.sphinx.wrapper_common.invite.InviteStatus;
 import chat.sphinx.wrapper_common.lightning.LightningNodeAlias;
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey;
@@ -73,6 +74,11 @@ CREATE TABLE chatDbo(
 chatUpdateLatestMessage:
 UPDATE chatDbo
 SET latest_message_id = :latest_message_id
+WHERE id = ?;
+
+chatUpdateMuted:
+UPDATE chatDbo
+SET is_muted = :muted
 WHERE id = ?;
 
 chatGetAll:
@@ -341,6 +347,90 @@ inviteDeleteByContactId:
 DELETE FROM inviteDbo
 WHERE contact_id = ?;
 
+CREATE TABLE dashboardDbo(
+    id                          TEXT            AS DashboardItemId NOT NULL PRIMARY KEY,
+    contact_id                  INTEGER         AS ContactId,
+    date                        INTEGER         AS DateTime NOT NULL,
+    display_name                TEXT,
+    muted                       INTEGER         AS ChatMuted NOT NULL DEFAULT 1,
+    seen                        INTEGER         AS Seen NOT NULL,
+    photo_url                   TEXT            AS PhotoUrl,
+
+--  This is for contacts only. When a Chat of type Conversation comes in, the Contact held
+--  here is updated as `include_in_return=false`
+    include_in_return            INTEGER        AS Boolean DEFAULT 1 NOT NULL,
+
+    latest_message_id           INTEGER         AS MessageId DEFAULT NULL
+);
+
+dashboardCount:
+SELECT COUNT(*)
+FROM dashboardDbo
+WHERE include_in_return = 1;
+
+dashboardPagination:
+SELECT *
+FROM dashboardDbo
+WHERE include_in_return = 1
+ORDER BY
+    SUBSTR(id, 1, 1),
+    date
+LIMIT :limit OFFSET :offset;
+
+dashboardUpdateLatestMessage:
+UPDATE dashboardDbo
+SET date = :date,
+    latest_message_id = :latest_message_id
+WHERE id = ?;
+
+dashboardUpdateIncludeInReturn:
+UPDATE dashboardDbo
+SET include_in_return = :include_in_return
+WHERE id = ?;
+
+dashboardUpdateMuted:
+UPDATE dashboardDbo
+SET muted = :muted
+WHERE id = ?;
+
+dashboardUpdateConversation:
+UPDATE dashboardDbo
+SET display_name = :display_name,
+    photo_url = :photo_url
+WHERE contact_id = :contact_id;
+
+dashboardUpsert {
+    UPDATE dashboardDbo
+    SET display_name = :display_name,
+        muted = :muted,
+        seen = :seen,
+        photo_url = :photo_url
+    WHERE id = :id;
+
+    INSERT OR IGNORE INTO dashboardDbo(
+        id,
+        contact_id,
+        date,
+        display_name,
+        muted,
+        seen,
+        photo_url
+    )
+    VALUES (
+        :id,
+        :contact_id,
+        :date,
+        :display_name,
+        :muted,
+        :seen,
+        :photo_url
+    );
+}
+
+dashboardDeleteById:
+DELETE FROM dashboardDbo
+WHERE id = ?;
+
 -- Cannot use inline classes if there are 23 or more columns
 -- https://youtrack.jetbrains.com/issue/KT-45084
 -- https://github.com/cashapp/sqldelight/issues/2266
@@ -367,6 +457,14 @@ CREATE TABLE messageDbo(
     sender_pic                  TEXT            AS PhotoUrl,
     original_muid               TEXT            AS MessageMUID,
     reply_uuid                  TEXT            AS ReplyUUID
+);
+
+messageGetAllReactionsByUUID:
+SELECT *
+FROM messageDbo
+WHERE chat_id = :chat_id
+AND (type = 29
+    AND reply_uuid IN :reply_uuids
 );
 
 messageGetById:

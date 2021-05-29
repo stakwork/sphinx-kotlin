@@ -6,6 +6,7 @@ import chat.sphinx.concept_crypto_rsa.RSA
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
 import chat.sphinx.concept_network_query_chat.model.ChatDto
 import chat.sphinx.concept_network_query_contact.NetworkQueryContact
+import chat.sphinx.concept_network_query_contact.model.ContactDto
 import chat.sphinx.concept_network_query_contact.model.PostContactDto
 import chat.sphinx.concept_network_query_contact.model.PutContactDto
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
@@ -15,6 +16,7 @@ import chat.sphinx.concept_network_query_message.model.MessageDto
 import chat.sphinx.concept_network_query_message.model.PostMessageDto
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
+import chat.sphinx.concept_repository_dashboard.RepositoryDashboard
 import chat.sphinx.concept_repository_lightning.LightningRepository
 import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.concept_repository_message.SendMessage
@@ -30,6 +32,7 @@ import chat.sphinx.feature_repository.mappers.contact.ContactDboPresenterMapper
 import chat.sphinx.feature_repository.mappers.invite.InviteDboPresenterMapper
 import chat.sphinx.feature_repository.mappers.mapListFrom
 import chat.sphinx.feature_repository.mappers.message.MessageDboPresenterMapper
+import chat.sphinx.feature_repository.model.MessageDboWrapper
 import chat.sphinx.feature_repository.util.*
 import chat.sphinx.kotlin_response.*
 import chat.sphinx.logger.SphinxLogger
@@ -37,12 +40,14 @@ import chat.sphinx.logger.d
 import chat.sphinx.logger.e
 import chat.sphinx.logger.w
 import chat.sphinx.wrapper_chat.Chat
+import chat.sphinx.wrapper_chat.ChatType
 import chat.sphinx.wrapper_chat.isTrue
+import chat.sphinx.wrapper_chat.toChatMuted
 import chat.sphinx.wrapper_common.*
 import chat.sphinx.wrapper_common.chat.ChatUUID
-import chat.sphinx.wrapper_common.chat.ChatId
-import chat.sphinx.wrapper_common.contact.ContactId
-import chat.sphinx.wrapper_common.invite.InviteId
+import chat.sphinx.wrapper_common.dashboard.ChatId
+import chat.sphinx.wrapper_common.dashboard.ContactId
+import chat.sphinx.wrapper_common.dashboard.InviteId
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.LightningRouteHint
 import chat.sphinx.wrapper_common.lightning.Sat
@@ -77,10 +82,10 @@ import java.text.ParseException
 import kotlin.collections.ArrayList
 import kotlin.math.absoluteValue
 
-class SphinxRepository(
+abstract class SphinxRepository(
     private val authenticationCoreManager: AuthenticationCoreManager,
     private val authenticationStorage: AuthenticationStorage,
-    private val coreDB: CoreDB,
+    protected val coreDB: CoreDB,
     private val dispatchers: CoroutineDispatchers,
     private val moshi: Moshi,
     private val networkQueryChat: NetworkQueryChat,
@@ -89,11 +94,12 @@ class SphinxRepository(
     private val networkQueryMessage: NetworkQueryMessage,
     private val rsa: RSA,
     private val socketIOManager: SocketIOManager,
-    private val LOG: SphinxLogger,
+    protected val LOG: SphinxLogger,
 ) : ChatRepository,
     ContactRepository,
     LightningRepository,
     MessageRepository,
+    RepositoryDashboard,
     CoroutineDispatchers by dispatchers,
     SphinxSocketIOMessageListener
 {
@@ -182,14 +188,14 @@ class SphinxRepository(
 
                                     var chatId: ChatId? = null
 
-                                    msg.dto.chat?.let { chatDto ->
-                                        queries.upsertChat(chatDto, moshi, chatSeenMap)
-
-                                        chatId = ChatId(chatDto.id)
-                                    }
-
                                     msg.dto.contact?.let { contactDto ->
                                         upsertContact(contactDto, queries)
+                                    }
+
+                                    msg.dto.chat?.let { chatDto ->
+                                        upsertChat(chatDto, moshi, chatSeenMap, queries, msg.dto.contact)
+
+                                        chatId = ChatId(chatDto.id)
                                     }
 
                                     msg.dto.chat_id?.let { nnChatId ->
@@ -197,7 +203,8 @@ class SphinxRepository(
                                     }
 
                                     chatId?.let { id ->
-                                        msg.dto.updateChatDboLatestMessage(
+                                        updateChatDboLatestMessage(
+                                            msg.dto,
                                             id,
                                             latestMessageUpdatedTimeMap,
                                             queries
@@ -279,10 +286,24 @@ class SphinxRepository(
         )
     }
 
-    override fun getUnseenMessagesByChatId(chat: Chat): Flow<Long?> = flow {
+    override fun getUnseenMessagesByChatId(chatId: ChatId): Flow<Long?> = flow {
+        var ownerId: ContactId? = accountOwner.value?.id
+
+        if (ownerId == null) {
+            try {
+                accountOwner.collect { contact ->
+                    if (contact != null) {
+                        ownerId = contact.id
+                        throw Exception()
+                    }
+                }
+            } catch (e: Exception) {}
+            delay(25L)
+        }
+
         emitAll(
             coreDB.getSphinxDatabaseQueries()
-                .messageGetUnseenIncomingMessageCountByChatId(chat.contactIds.first(), chat.id)
+                .messageGetUnseenIncomingMessageCountByChatId(ownerId!!, chatId)
                 .asFlow()
                 .mapToOneOrNull(io)
                 .distinctUntilChanged()
@@ -312,7 +333,10 @@ class SphinxRepository(
         }
     }
 
-    private suspend fun processChatDtos(chats: List<ChatDto>): Response<Boolean, ResponseError> {
+    private suspend fun processChatDtos(
+        chats: List<ChatDto>,
+        contacts: Map<ContactId, ContactDto>? = null
+    ): Response<Boolean, ResponseError> {
         val queries = coreDB.getSphinxDatabaseQueries()
         try {
 
@@ -332,7 +356,16 @@ class SphinxRepository(
 
                         queries.transaction {
                             for (dto in chats) {
-                                queries.upsertChat(dto, moshi, chatSeenMap)
+
+                                val contactDto: ContactDto? = if (dto.type == ChatType.CONVERSATION) {
+                                    dto.contact_ids.elementAtOrNull(1)?.let { contactId ->
+                                        contacts?.get(ContactId(contactId))
+                                    }
+                                } else {
+                                    null
+                                }
+
+                                upsertChat(dto, moshi, chatSeenMap, queries, contactDto)
 
                                 chatIdsToRemove.remove(ChatId(dto.id))
                             }
@@ -455,6 +488,10 @@ class SphinxRepository(
                             var processChatsResponse: Response<Boolean, ResponseError> = Response.Success(true)
 
                             repositoryScope.launch(io + handler) {
+
+                                val contactMap: MutableMap<ContactId, ContactDto> =
+                                    LinkedHashMap(loadResponse.value.contacts.size)
+
                                 contactLock.withLock {
 
                                     val contactIdsToRemove = queries.contactGetAllIds()
@@ -468,6 +505,7 @@ class SphinxRepository(
                                                 for (dto in loadResponse.value.contacts) {
 
                                                     upsertContact(dto, queries)
+                                                    contactMap[ContactId(dto.id)] = dto
 
                                                     contactIdsToRemove.remove(ContactId(dto.id))
 
@@ -484,7 +522,10 @@ class SphinxRepository(
 
                                 }
 
-                                processChatsResponse = processChatDtos(loadResponse.value.chats)
+                                processChatsResponse = processChatDtos(
+                                    loadResponse.value.chats,
+                                    contactMap,
+                                )
                             }.join()
 
                             error?.let {
@@ -831,10 +872,11 @@ class SphinxRepository(
     @OptIn(UnencryptedDataAccess::class)
     private suspend fun mapMessageDboAndDecryptContentIfNeeded(
         queries: SphinxDatabaseQueries,
-        messageDbo: MessageDbo
+        messageDbo: MessageDbo,
+        reactions: List<Message>? = null,
     ): Message {
 
-        val message: Message = messageDbo.message_content?.let { messageContent ->
+        val message: MessageDboWrapper = messageDbo.message_content?.let { messageContent ->
 
             if (
                 messageDbo.type !is MessageType.KeySend &&
@@ -847,13 +889,14 @@ class SphinxRepository(
                 when (response) {
                     is Response.Error -> {
                         messageDboPresenterMapper.mapFrom(messageDbo).let { message ->
-                            message.setDecryptionError(response.exception)
+                            message._messageDecryptionException = response.exception
+                            message._messageDecryptionError = true
                             message
                         }
                     }
                     is Response.Success -> {
 
-                        val message: Message = messageDboPresenterMapper.mapFrom(messageDbo)
+                        val message: MessageDboWrapper = messageDboPresenterMapper.mapFrom(messageDbo)
 
                         response.value
                             .toUnencryptedString(trim = false)
@@ -874,9 +917,9 @@ class SphinxRepository(
 
                                 }
 
-                                message.setMessageContentDecrypted(decryptedContent)
+                                message._messageContentDecrypted = decryptedContent
 
-                            } ?: message.setDecryptionError(null)
+                            } ?: message.also { it._messageDecryptionError = true }
 
                         message
                     }
@@ -911,7 +954,7 @@ class SphinxRepository(
                                         mediaDbo.media_token
                                     ).also {
                                         it.setDecryptionError(response.exception)
-                                        message.setMessageMedia(it)
+                                        message._messageMedia = it
                                     }
                                 }
                                 is Response.Success -> {
@@ -922,7 +965,7 @@ class SphinxRepository(
                                         .toMediaKeyDecrypted()
                                         .let { decryptedKey ->
 
-                                            message.setMessageMedia(
+                                            message._messageMedia =
                                                 MessageMedia(
                                                     mediaDbo.media_key,
                                                     decryptedKey,
@@ -949,35 +992,35 @@ class SphinxRepository(
 
                                                     }
                                                 }
-                                            )
-
                                         }
                                 }
                             }
                         } else {
-                            message.setMessageMedia(
+                            message._messageMedia =
                                 MessageMedia(
                                     mediaDbo.media_key,
                                     decrypted,
                                     mediaDbo.media_type,
                                     mediaDbo.media_token
                                 )
-                            )
                         }
 
                     }
 
-                } ?: message.setMessageMedia(
-                    MessageMedia(
-                        mediaDbo.media_key,
-                        mediaDbo.media_key_decrypted,
-                        mediaDbo.media_type,
-                        mediaDbo.media_token
-                    )
-                )
+                } ?: message.also {
+                    it._messageMedia =
+                        MessageMedia(
+                            mediaDbo.media_key,
+                            mediaDbo.media_key_decrypted,
+                            mediaDbo.media_type,
+                            mediaDbo.media_token
+                        )
+                }
 
             } // else do nothing
         }
+
+        message._reactions = reactions
 
         return message
     }
@@ -989,8 +1032,43 @@ class SphinxRepository(
                 .asFlow()
                 .mapToList(io)
                 .map { listMessageDbo ->
-                    listMessageDbo.map {
-                        mapMessageDboAndDecryptContentIfNeeded(queries, it)
+                    withContext(default) {
+
+                        val map: MutableMap<MessageUUID, ArrayList<Message>> =
+                            LinkedHashMap(listMessageDbo.size)
+
+                        for (dbo in listMessageDbo) {
+                            dbo.uuid?.let {
+                                map[it] = ArrayList(0)
+                            }
+                        }
+
+                        val replyUUIDs = map.keys.map { ReplyUUID(it.value) }
+
+                        replyUUIDs.chunked(500).forEach { chunkedIds ->
+                            queries.messageGetAllReactionsByUUID(
+                                chatId,
+                                chunkedIds,
+                            ).executeAsList()
+                                .let { response ->
+                                    response.forEach { dbo ->
+                                        dbo.reply_uuid?.let { uuid ->
+                                            map[MessageUUID(uuid.value)]?.add(
+                                                mapMessageDboAndDecryptContentIfNeeded(queries, dbo)
+                                            )
+                                        }
+                                    }
+                                }
+                        }
+
+                        listMessageDbo.map { dbo ->
+                            mapMessageDboAndDecryptContentIfNeeded(
+                                queries,
+                                dbo,
+                                dbo.uuid?.let { map[it] }
+                            )
+                        }
+
                     }
                 }
         )
@@ -1253,11 +1331,15 @@ class SphinxRepository(
                                                         // chat is returned only if this is the
                                                         // first message sent to a new contact
                                                         loadResponse.value.chat?.let { chatDto ->
-                                                            queries.upsertChat(
-                                                                chatDto,
-                                                                moshi,
-                                                                chatSeenMap,
-                                                            )
+                                                            queries.transaction {
+                                                                upsertChat(
+                                                                    chatDto,
+                                                                    moshi,
+                                                                    chatSeenMap,
+                                                                    queries,
+                                                                    loadResponse.value.contact,
+                                                                )
+                                                            }
                                                         }
 
                                                         queries.transaction {
@@ -1303,7 +1385,13 @@ class SphinxRepository(
 
                         chatLock.withLock {
                             withContext(io) {
-                                queries.upsertChat(loadResponse.value, moshi, chatSeenMap)
+                                queries.transaction {
+                                    updateChatMuted(
+                                        chat.id,
+                                        loadResponse.value.isMutedActual.toChatMuted(),
+                                        queries
+                                    )
+                                }
                             }
                         }
 
@@ -1437,7 +1525,8 @@ class SphinxRepository(
 
                                                     for (entry in latestMessageMap.entries) {
 
-                                                        entry.value.updateChatDboLatestMessage(
+                                                        updateChatDboLatestMessage(
+                                                            entry.value,
                                                             entry.key,
                                                             map,
                                                             queries

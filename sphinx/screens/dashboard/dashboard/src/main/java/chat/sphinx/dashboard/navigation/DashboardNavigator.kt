@@ -1,10 +1,8 @@
 package chat.sphinx.dashboard.navigation
 
 import androidx.navigation.NavController
-import chat.sphinx.wrapper_chat.Chat
-import chat.sphinx.wrapper_common.chat.ChatId
-import chat.sphinx.wrapper_common.contact.ContactId
-import chat.sphinx.wrapper_contact.Contact
+import chat.sphinx.wrapper_common.dashboard.ChatId
+import chat.sphinx.wrapper_common.dashboard.ContactId
 import io.matthewnelson.concept_navigation.BaseNavigationDriver
 import io.matthewnelson.concept_navigation.Navigator
 

@@ -137,7 +137,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     internal val messageHolderViewStateFlow: StateFlow<List<MessageHolderViewState>> = flow {
         val chat = getChat()
 
-        messageRepository.getAllMessagesToShowByChatId(chat.id).collect { messages ->
+        messageRepository.getAllMessagesToShowByChatId(chat.id).distinctUntilChanged().collect { messages ->
             val newList = ArrayList<MessageHolderViewState>(messages.size)
             withContext(default) {
                 for (message in messages) {

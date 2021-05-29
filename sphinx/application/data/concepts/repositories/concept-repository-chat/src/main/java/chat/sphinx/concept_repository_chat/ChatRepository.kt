@@ -5,8 +5,8 @@ import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_common.chat.ChatUUID
-import chat.sphinx.wrapper_common.chat.ChatId
-import chat.sphinx.wrapper_common.contact.ContactId
+import chat.sphinx.wrapper_common.dashboard.ChatId
+import chat.sphinx.wrapper_common.dashboard.ContactId
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -28,7 +28,7 @@ interface ChatRepository {
      * Throws [NoSuchElementException] on collection if [Chat.contactIds]
      * is empty.
      * */
-    fun getUnseenMessagesByChatId(chat: Chat): Flow<Long?>
+    fun getUnseenMessagesByChatId(chatId: ChatId): Flow<Long?>
     
     val networkRefreshChats: Flow<LoadResponse<Boolean, ResponseError>>
 
