@@ -6,7 +6,6 @@ import chat.sphinx.scanner.navigation.ScannerNavigator
 import dagger.hilt.android.scopes.ActivityRetainedScoped
 import javax.inject.Inject
 
-@ActivityRetainedScoped
 internal class QRCodeNavigatorImpl @Inject constructor(
     detailDriver: DetailNavigationDriver,
 ): QRCodeNavigator(detailDriver) {

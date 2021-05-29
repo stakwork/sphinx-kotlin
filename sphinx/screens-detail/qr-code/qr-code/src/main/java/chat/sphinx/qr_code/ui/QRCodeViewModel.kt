@@ -17,14 +17,18 @@ import javax.inject.Inject
 internal class QRCodeViewModel @Inject constructor(
     private val navigator: QRCodeNavigator,
     dispatchers: CoroutineDispatchers,
-    val savedStateHandle: SavedStateHandle
+    private val handle: SavedStateHandle,
 ): SideEffectViewModel<
         Context,
         NotifySideEffect,
         QRCodeViewState
-        >(dispatchers, QRCodeViewState.ShowNavBackButton)
+        >(
+            dispatchers,
+            handle.navArgs<QRCodeFragmentArgs>().let {
+                QRCodeViewState.LayoutVisibility(it.value.argShowBackArrow)
+            },
+        )
 {
-    val args: QRCodeFragmentArgs by savedStateHandle.navArgs()
 
     fun goBack(type: BackType) {
         when (type) {

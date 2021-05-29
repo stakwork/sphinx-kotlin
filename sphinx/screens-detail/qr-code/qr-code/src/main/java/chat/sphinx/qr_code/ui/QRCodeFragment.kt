@@ -21,10 +21,8 @@ import com.google.zxing.BarcodeFormat
 import com.google.zxing.qrcode.QRCodeWriter
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
-import io.matthewnelson.android_feature_screens.util.invisible
-import io.matthewnelson.android_feature_screens.util.visible
+import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_toast_utils.show
-import io.matthewnelson.android_feature_viewmodel.updateViewState
 
 @AndroidEntryPoint
 internal class QRCodeFragment: SideEffectFragment<
@@ -35,30 +33,19 @@ internal class QRCodeFragment: SideEffectFragment<
         FragmentQrCodeBinding
         >(R.layout.fragment_qr_code)
 {
+    private val args: QRCodeFragmentArgs by navArgs()
     override val binding: FragmentQrCodeBinding by viewBinding(FragmentQrCodeBinding::bind)
     override val viewModel: QRCodeViewModel by viewModels()
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        // have to call it here so it gets injected and can
-        // catch the request asap
-        viewModel
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        if (viewModel.args.argShowBackArrow) {
-            viewModel.updateViewState(QRCodeViewState.ShowNavBackButton)
-        } else {
-            viewModel.updateViewState(QRCodeViewState.HideNavBackButton)
-        }
 
         (requireActivity() as InsetterActivity).addNavigationBarPadding(binding.layoutConstraintQrCodeFragment)
 
-        binding.qrCodeLabel.text = viewModel.args.qrText
+        binding.qrCodeLabel.text = args.qrText
 
         val writer = QRCodeWriter()
-        val bitMatrix = writer.encode(viewModel.args.qrText, BarcodeFormat.QR_CODE, 512, 512)
+        val bitMatrix = writer.encode(args.qrText, BarcodeFormat.QR_CODE, 512, 512)
         val width = bitMatrix.width
         val height = bitMatrix.height
         val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565)
@@ -93,11 +80,8 @@ internal class QRCodeFragment: SideEffectFragment<
         binding.includeQrCodeHeader.textViewDetailScreenHeaderNavBack.apply {
             @Exhaustive
             when (viewState) {
-                QRCodeViewState.HideNavBackButton -> {
-                    invisible
-                }
-                QRCodeViewState.ShowNavBackButton -> {
-                    visible
+                is QRCodeViewState.LayoutVisibility -> {
+                    goneIfFalse(viewState.showBackButton)
                 }
             }
         }
