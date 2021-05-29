@@ -43,15 +43,15 @@ dependencies {
     api project(path: ':sphinx:screens-detail:scanner:scanner-view-model-coordinator')
 
     //ML Kit Barcode Scanning
-    implementation 'com.google.mlkit:barcode-scanning:16.1.1'
+    implementation deps.google.mlKitBarcodeScanning
 
     //CameraX Dependencies
-    implementation "androidx.camera:camera-core:1.1.0-alpha04"
-    implementation "androidx.camera:camera-camera2:1.1.0-alpha04"
-    implementation "androidx.camera:camera-lifecycle:1.1.0-alpha04"
-    implementation "androidx.camera:camera-view:1.0.0-alpha24"
-    implementation "androidx.camera:camera-extensions:1.0.0-alpha24"
-    implementation 'com.google.android.material:material:1.4.0-beta01'
+    implementation deps.androidx.camera.core
+    implementation deps.androidx.camera.camera2
+    implementation deps.androidx.camera.lifecycle
+    implementation deps.androidx.camera.view
+    implementation deps.androidx.camera.extensions
+    implementation deps.google.material
 
     implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt

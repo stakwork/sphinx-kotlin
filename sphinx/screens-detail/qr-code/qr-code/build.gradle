@@ -39,7 +39,8 @@ dependencies {
     implementation project(path: ':sphinx:activity:insetter-activity')
     implementation project(path: ':sphinx:screens-detail:common:detail-resources')
 
-    implementation 'com.google.zxing:core:3.4.0'
+    implementation deps.google.zxing
+
     implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt
     kapt kaptDeps.google.hilt
