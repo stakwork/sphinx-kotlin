@@ -16,7 +16,7 @@ import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.resources.getRandomColor
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.ChatName
-import chat.sphinx.wrapper_common.chat.ChatId
+import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.util.getInitials
 import chat.sphinx.wrapper_message.Message
 import dagger.hilt.android.lifecycle.HiltViewModel

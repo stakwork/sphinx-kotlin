@@ -3,7 +3,7 @@ package chat.sphinx.concept_network_query_subscription
 import chat.sphinx.concept_network_query_subscription.model.SubscriptionDto
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.kotlin_response.LoadResponse
-import chat.sphinx.wrapper_common.contact.ContactId
+import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.subscription.SubscriptionId
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl

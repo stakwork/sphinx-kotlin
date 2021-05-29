@@ -1,9 +1,7 @@
 package chat.sphinx.feature_coredb.adapters.common
 
 import chat.sphinx.wrapper_common.*
-import chat.sphinx.wrapper_common.chat.ChatId
-import chat.sphinx.wrapper_common.contact.ContactId
-import chat.sphinx.wrapper_common.invite.InviteId
+import chat.sphinx.wrapper_common.dashboard.*
 import chat.sphinx.wrapper_common.invite.InviteStatus
 import chat.sphinx.wrapper_common.invite.toInviteStatus
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
@@ -77,6 +75,16 @@ internal class ContactIdsAdapter private constructor(): ColumnAdapter<List<Conta
 
     override fun encode(value: List<ContactId>): String {
         return value.joinToString(",") { it.value.toString() }
+    }
+}
+
+internal class DashboardIdAdapter: ColumnAdapter<DashboardItemId, String> {
+    override fun decode(databaseValue: String): DashboardItemId {
+        return databaseValue.toDashboardItemId()
+    }
+
+    override fun encode(value: DashboardItemId): String {
+        return value.toDashboardIdString()
     }
 }
 
