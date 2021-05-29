@@ -53,10 +53,10 @@ sealed class DashboardChat {
         abstract fun getMessageSender(message: Message, withColon: Boolean = true): String
 
         override fun hasUnseenMessages(): Boolean {
-            val ownerId: ContactId? = chat?.contactIds?.firstOrNull()
+            val ownerId: ContactId? = chat.contactIds.firstOrNull()
             val isLastMessageOutgoing = message?.sender == ownerId
             val lastMessageSeen = message?.seen?.isTrue() ?: true
-            val chatSeen = chat?.seen.isTrue() ?: true
+            val chatSeen = chat.seen.isTrue()
             return !lastMessageSeen && !chatSeen && !isLastMessageOutgoing
         }
 
