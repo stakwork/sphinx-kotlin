@@ -16,13 +16,12 @@ import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.qr_code.R
 import chat.sphinx.qr_code.databinding.FragmentQrCodeBinding
-import chat.sphinx.resources.SphinxToastUtils
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.qrcode.QRCodeWriter
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
-import io.matthewnelson.android_feature_toast_utils.show
+import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -77,7 +76,11 @@ internal class QRCodeFragment: SideEffectFragment<
             val clipData = ClipData.newPlainText("text", textToCopy)
             clipboardManager.setPrimaryClip(clipData)
 
-            SphinxToastUtils().show(binding.root.context, "Public Key copied to clipboard")
+            lifecycleScope.launch(viewModel.mainImmediate) {
+                viewModel.submitSideEffect(
+                    NotifySideEffect(getString(R.string.qr_code_notify_copied))
+                )
+            }
         }
     }
 
