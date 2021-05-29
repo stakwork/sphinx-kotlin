@@ -22,90 +22,6 @@ inline val Message.isPaidMessage: Boolean
         return false
     }
 
-
-//data class Message(
-//    val id: MessageId,
-//    val uuid: MessageUUID?,
-//    val chatId: ChatId,
-//    val type: MessageType,
-//    val sender: ContactId,
-//    val receiver: ContactId?,
-//    val amount: Sat,
-//    val paymentHash: LightningPaymentHash?,
-//    val paymentRequest: LightningPaymentRequest?,
-//    val date: DateTime,
-//    val expirationDate: DateTime?,
-//    val messageContent: MessageContent?,
-//    val status: MessageStatus,
-//    val seen: Seen,
-//    val senderAlias: SenderAlias?,
-//    val senderPic: PhotoUrl?,
-////    val mediaTerms: String?, // TODO: Ask Tomas what this field is for
-////    val receipt: String?, // TODO: Ask Tomas what this field is for
-//    val originalMUID: MessageMUID?,
-//    val replyUUID: ReplyUUID?,
-//    val reactionIds: List<MessageId>?,
-//) {
-//    @Volatile
-//    var messageContentDecrypted: MessageContentDecrypted? = null
-//        private set
-//
-//    fun setMessageContentDecrypted(messageContentDecrypted: MessageContentDecrypted): Message {
-//        this.messageContentDecrypted = messageContentDecrypted
-//        return this
-//    }
-//
-//    @Volatile
-//    var messageDecryptionError: Boolean = false
-//        private set
-//
-//    @Volatile
-//    var messageDecryptionException: Exception? = null
-//        private set
-//
-//    fun setDecryptionError(e: Exception?): Message {
-//        messageDecryptionError = true
-//        messageDecryptionException = e
-//        return this
-//    }
-//
-//    @Volatile
-//    var messageMedia: MessageMedia? = null
-//
-//    fun setMessageMedia(messageMedia: MessageMedia): Message {
-//        this.messageMedia = messageMedia
-//        return this
-//    }
-//
-//    @Volatile
-//    var podBoost: PodBoost? = null
-//        private set
-//
-//    fun setPodBoost(podBoost: PodBoost): Message {
-//        this.podBoost = podBoost
-//        return this
-//    }
-//
-//    @Volatile
-//    var giphyData: GiphyData? = null
-//        private set
-//
-//    fun setGiphyData(giphyData: GiphyData): Message {
-//        this.giphyData = giphyData
-//        return this
-//    }
-//
-//    @Volatile
-//    var reactions: List<Message>? = null
-//        private set
-//
-//    fun setReactions(reactions: List<Message>?) {
-//        if (reactions != null && reactions.isNotEmpty()) {
-//            this.reactions = reactions
-//        }
-//    }
-//}
-
 abstract class Message {
     abstract val id: MessageId
     abstract val uuid: MessageUUID?
@@ -123,7 +39,7 @@ abstract class Message {
     abstract val seen: Seen
     abstract val senderAlias: SenderAlias?
     abstract val senderPic: PhotoUrl?
-    //    abstract val mediaTerms: String?, // TODO: Ask Tomas what this field is for
+//    abstract val mediaTerms: String?, // TODO: Ask Tomas what this field is for
 //    abstract val receipt: String?, // TODO: Ask Tomas what this field is for
     abstract val originalMUID: MessageMUID?
     abstract val replyUUID: ReplyUUID?
