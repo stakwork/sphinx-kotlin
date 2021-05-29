@@ -39,9 +39,6 @@ dependencies {
     implementation project(path: ':sphinx:activity:insetter-activity')
     implementation project(path: ':sphinx:screens-detail:common:detail-resources')
 
-    implementation project(path: ':sphinx:activity:features:feature-view-model-coordinator')
-    api project(path: ':sphinx:screens-detail:scanner:scanner-view-model-coordinator')
-
     implementation 'com.google.zxing:core:3.4.0'
     implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt
