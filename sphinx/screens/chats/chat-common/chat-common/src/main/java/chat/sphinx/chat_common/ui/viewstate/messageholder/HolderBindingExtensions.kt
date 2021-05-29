@@ -1,6 +1,7 @@
 package chat.sphinx.chat_common.ui.viewstate.messageholder
 
 import android.view.Gravity
+import android.widget.ImageView
 import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
 import androidx.annotation.MainThread
@@ -12,6 +13,7 @@ import chat.sphinx.chat_common.R
 import chat.sphinx.resources.R as common_R
 import chat.sphinx.chat_common.databinding.LayoutMessageHolderBinding
 import chat.sphinx.resources.getString
+import chat.sphinx.resources.setBackgroundRandomColor
 import chat.sphinx.resources.setTextColorExt
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_message.MessageType
@@ -329,6 +331,112 @@ internal inline fun LayoutMessageHolderBinding.setBubblePaidMessageSentStatusLay
 
             textViewPaidMessageSentStatusAmount.text = paidSentStatus.amountText
             textViewPaidMessageSentStatus.text = getString(statusTextResID)
+        }
+    }
+}
+
+@MainThread
+@Suppress("NOTHING_TO_INLINE")
+internal inline fun LayoutMessageHolderBinding.setBubbleReactionBoosts(
+    boost: LayoutState.Bubble.ContainerBottom.Boost?,
+    loadImage: (ImageView, SenderPhotoUrl) -> Unit,
+) {
+    includeMessageHolderBubble.includeMessageTypeBoost.apply {
+        if (boost == null) {
+            root.gone
+        } else {
+            root.visible
+
+//            imageViewBoostMessageIcon
+            includeBoostAmountTextGroup.apply {
+                textViewSatsAmount.text = boost.amountText
+                textViewSatsUnitLabel.text = boost.amountUnitLabel
+            }
+
+            includeBoostReactionsGroup.apply {
+
+                includeBoostReactionImageHolder1.apply {
+                    boost.senderPics.elementAtOrNull(0).let { holder ->
+                        if (holder == null) {
+                            root.gone
+                        } else {
+                            root.visible
+
+                            @Exhaustive
+                            when (holder) {
+                                is SenderInitials -> {
+                                    textViewInitials.visible
+                                    textViewInitials.text = holder.value
+                                    textViewInitials.setBackgroundRandomColor(R.drawable.chat_initials_circle)
+                                    imageViewChatPicture.gone
+                                }
+                                is SenderPhotoUrl -> {
+                                    textViewInitials.gone
+                                    imageViewChatPicture.visible
+                                    loadImage(imageViewChatPicture, holder)
+                                }
+                            }
+                        }
+                    }
+                }
+
+                includeBoostReactionImageHolder2.apply {
+                    boost.senderPics.elementAtOrNull(1).let { holder ->
+                        if (holder == null) {
+                            root.gone
+                        } else {
+                            root.visible
+
+                            @Exhaustive
+                            when (holder) {
+                                is SenderInitials -> {
+                                    textViewInitials.visible
+                                    textViewInitials.text = holder.value
+                                    textViewInitials.setBackgroundRandomColor(R.drawable.chat_initials_circle)
+                                    imageViewChatPicture.gone
+                                }
+                                is SenderPhotoUrl -> {
+                                    textViewInitials.gone
+                                    imageViewChatPicture.visible
+                                    loadImage(imageViewChatPicture, holder)
+                                }
+                            }
+                        }
+                    }
+                }
+
+                includeBoostReactionImageHolder3.apply {
+                    boost.senderPics.elementAtOrNull(2).let { holder ->
+                        if (holder == null) {
+                            root.gone
+                        } else {
+                            root.visible
+
+                            @Exhaustive
+                            when (holder) {
+                                is SenderInitials -> {
+                                    textViewInitials.visible
+                                    textViewInitials.text = holder.value
+                                    textViewInitials.setBackgroundRandomColor(R.drawable.chat_initials_circle)
+                                    imageViewChatPicture.gone
+                                }
+                                is SenderPhotoUrl -> {
+                                    textViewInitials.gone
+                                    imageViewChatPicture.visible
+                                    loadImage(imageViewChatPicture, holder)
+                                }
+                            }
+                        }
+                    }
+                }
+
+                textViewBoostReactionCount.apply {
+                    boost.numberUniqueBoosters?.let { count ->
+                        visible
+                        text = count.toString()
+                    } ?: gone
+                }
+            }
         }
     }
 }

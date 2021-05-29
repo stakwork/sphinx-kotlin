@@ -4,6 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="@dimen/message_type_boost_height"
+    android:paddingStart="@dimen/default_list_row_padding_vertical"
+    android:paddingEnd="@dimen/default_layout_margin"
     android:visibility="gone"
     tools:visibility="visible">
 
@@ -11,22 +13,24 @@
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/image_view_boost_message_icon"
         android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:src="@drawable/ic_received"
-        app:layout_constraintEnd_toStartOf="@+id/include_boost_amount_text_group"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_sent"
+        android:tint="@color/primaryGreen"
         app:layout_constraintStart_toStartOf="parent"
-        tools:backgroundTint="@color/receivedIcon" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <!--Amount Text -->
     <include
         android:id="@+id/include_boost_amount_text_group"
         layout="@layout/layout_text_sats_amount"
         android:layout_width="0dp"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
         android:layout_marginHorizontal="@dimen/default_layout_margin"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/include_boost_reactions_group"
-        app:layout_constraintStart_toEndOf="@+id/image_view_boost_message_icon" />
-    
+        app:layout_constraintStart_toEndOf="@+id/image_view_boost_message_icon"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <!-- Boost Reactions -->
     <include
         android:id="@+id/include_boost_reactions_group"

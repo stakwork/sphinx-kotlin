@@ -459,6 +459,14 @@ CREATE TABLE messageDbo(
     reply_uuid                  TEXT            AS ReplyUUID
 );
 
+messageGetAllReactionsByUUID:
+SELECT *
+FROM messageDbo
+WHERE chat_id = :chat_id
+AND (type = 29
+    AND reply_uuid IN :reply_uuids
+);
+
 messageGetById:
 SELECT *
 FROM messageDbo

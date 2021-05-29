@@ -58,5 +58,36 @@ internal sealed class LayoutState {
             val amountText: String
                 get() = amount.asFormattedString(appendUnit = true)
         }
+
+        sealed class ContainerBottom: Bubble() {
+
+            class Boost(
+                private val totalAmount: Sat,
+                val senderPics: Set<BoostReactionImageHolder>
+            ): ContainerBottom() {
+                val amountText: String
+                    get() = totalAmount.asFormattedString()
+
+                val amountUnitLabel: String
+                    get() = totalAmount.unit
+
+                // will be gone if null is returned
+                val numberUniqueBoosters: Int?
+                    get() = if (senderPics.size > 1) {
+                        senderPics.size
+                    } else {
+                        null
+                    }
+            }
+        }
     }
 }
+
+// TODO: TEMPORARY!!! until Initial holder can be refactored...
+@JvmInline
+value class SenderPhotoUrl(val value: String): BoostReactionImageHolder
+
+@JvmInline
+value class SenderInitials(val value: String): BoostReactionImageHolder
+
+sealed interface BoostReactionImageHolder

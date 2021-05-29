@@ -32,6 +32,7 @@ import chat.sphinx.feature_repository.mappers.contact.ContactDboPresenterMapper
 import chat.sphinx.feature_repository.mappers.invite.InviteDboPresenterMapper
 import chat.sphinx.feature_repository.mappers.mapListFrom
 import chat.sphinx.feature_repository.mappers.message.MessageDboPresenterMapper
+import chat.sphinx.feature_repository.model.MessageDboWrapper
 import chat.sphinx.feature_repository.util.*
 import chat.sphinx.kotlin_response.*
 import chat.sphinx.logger.SphinxLogger
@@ -829,10 +830,11 @@ abstract class SphinxRepository(
     @OptIn(UnencryptedDataAccess::class)
     private suspend fun mapMessageDboAndDecryptContentIfNeeded(
         queries: SphinxDatabaseQueries,
-        messageDbo: MessageDbo
+        messageDbo: MessageDbo,
+        reactions: List<Message>? = null,
     ): Message {
 
-        val message: Message = messageDbo.message_content?.let { messageContent ->
+        val message: MessageDboWrapper = messageDbo.message_content?.let { messageContent ->
 
             if (
                 messageDbo.type !is MessageType.KeySend &&
@@ -845,13 +847,14 @@ abstract class SphinxRepository(
                 when (response) {
                     is Response.Error -> {
                         messageDboPresenterMapper.mapFrom(messageDbo).let { message ->
-                            message.setDecryptionError(response.exception)
+                            message._messageDecryptionException = response.exception
+                            message._messageDecryptionError = true
                             message
                         }
                     }
                     is Response.Success -> {
 
-                        val message: Message = messageDboPresenterMapper.mapFrom(messageDbo)
+                        val message: MessageDboWrapper = messageDboPresenterMapper.mapFrom(messageDbo)
 
                         response.value
                             .toUnencryptedString(trim = false)
@@ -872,9 +875,9 @@ abstract class SphinxRepository(
 
                                 }
 
-                                message.setMessageContentDecrypted(decryptedContent)
+                                message._messageContentDecrypted = decryptedContent
 
-                            } ?: message.setDecryptionError(null)
+                            } ?: message.also { it._messageDecryptionError = true }
 
                         message
                     }
@@ -909,7 +912,7 @@ abstract class SphinxRepository(
                                         mediaDbo.media_token
                                     ).also {
                                         it.setDecryptionError(response.exception)
-                                        message.setMessageMedia(it)
+                                        message._messageMedia = it
                                     }
                                 }
                                 is Response.Success -> {
@@ -920,7 +923,7 @@ abstract class SphinxRepository(
                                         .toMediaKeyDecrypted()
                                         .let { decryptedKey ->
 
-                                            message.setMessageMedia(
+                                            message._messageMedia =
                                                 MessageMedia(
                                                     mediaDbo.media_key,
                                                     decryptedKey,
@@ -947,35 +950,35 @@ abstract class SphinxRepository(
 
                                                     }
                                                 }
-                                            )
-
                                         }
                                 }
                             }
                         } else {
-                            message.setMessageMedia(
+                            message._messageMedia =
                                 MessageMedia(
                                     mediaDbo.media_key,
                                     decrypted,
                                     mediaDbo.media_type,
                                     mediaDbo.media_token
                                 )
-                            )
                         }
 
                     }
 
-                } ?: message.setMessageMedia(
-                    MessageMedia(
-                        mediaDbo.media_key,
-                        mediaDbo.media_key_decrypted,
-                        mediaDbo.media_type,
-                        mediaDbo.media_token
-                    )
-                )
+                } ?: message.also {
+                    it._messageMedia =
+                        MessageMedia(
+                            mediaDbo.media_key,
+                            mediaDbo.media_key_decrypted,
+                            mediaDbo.media_type,
+                            mediaDbo.media_token
+                        )
+                }
 
             } // else do nothing
         }
+
+        message._reactions = reactions
 
         return message
     }
@@ -987,8 +990,43 @@ abstract class SphinxRepository(
                 .asFlow()
                 .mapToList(io)
                 .map { listMessageDbo ->
-                    listMessageDbo.map {
-                        mapMessageDboAndDecryptContentIfNeeded(queries, it)
+                    withContext(default) {
+
+                        val map: MutableMap<MessageUUID, ArrayList<Message>> =
+                            LinkedHashMap(listMessageDbo.size)
+
+                        for (dbo in listMessageDbo) {
+                            dbo.uuid?.let {
+                                map[it] = ArrayList(0)
+                            }
+                        }
+
+                        val replyUUIDs = map.keys.map { ReplyUUID(it.value) }
+
+                        replyUUIDs.chunked(500).forEach { chunkedIds ->
+                            queries.messageGetAllReactionsByUUID(
+                                chatId,
+                                chunkedIds,
+                            ).executeAsList()
+                                .let { response ->
+                                    response.forEach { dbo ->
+                                        dbo.reply_uuid?.let { uuid ->
+                                            map[MessageUUID(uuid.value)]?.add(
+                                                mapMessageDboAndDecryptContentIfNeeded(queries, dbo)
+                                            )
+                                        }
+                                    }
+                                }
+                        }
+
+                        listMessageDbo.map { dbo ->
+                            mapMessageDboAndDecryptContentIfNeeded(
+                                queries,
+                                dbo,
+                                dbo.uuid?.let { map[it] }
+                            )
+                        }
+
                     }
                 }
         )
