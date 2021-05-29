@@ -472,6 +472,13 @@ SELECT *
 FROM messageDbo
 WHERE id = ?;
 
+messageGetToShowByUUID:
+SELECT *
+FROM messageDbo
+WHERE uuid = ?
+AND type IN(0, 5)
+LIMIT 1;
+
 messageGetLowestProvisionalMessageId:
 SELECT id
 FROM messageDbo
