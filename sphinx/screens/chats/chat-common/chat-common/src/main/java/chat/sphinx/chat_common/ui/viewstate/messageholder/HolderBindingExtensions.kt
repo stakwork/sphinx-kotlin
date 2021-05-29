@@ -236,9 +236,11 @@ internal inline fun LayoutMessageHolderBinding.setBubblePaidMessageDetailsLayout
             root.clipToOutline = true
 
             @ColorRes
-            val backgroundTintResId = if (paidDetails.purchaseType is MessageType.Purchase.Denied)
+            val backgroundTintResId = if (paidDetails.purchaseType is MessageType.Purchase.Denied) {
                 R.color.badgeRed
-                else R.color.primaryGreen
+            } else {
+                R.color.primaryGreen
+            }
 
             @DrawableRes
             val backgroundDrawableResId: Int? = when (paidDetails.bubbleBackground) {
