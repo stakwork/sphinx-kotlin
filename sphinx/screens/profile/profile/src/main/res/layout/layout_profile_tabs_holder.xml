@@ -7,7 +7,7 @@
     android:background="@color/body">
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/top_line"
+        android:id="@+id/layout_constraint_profile_tab_top_line"
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:background="@color/lightDivider"
@@ -19,12 +19,12 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/center_line"
-        app:layout_constraintTop_toBottomOf="@+id/top_line"
-        app:layout_constraintBottom_toTopOf="@+id/bottom_line">
+        app:layout_constraintEnd_toStartOf="@+id/layout_constraint_profile_tab_center_line"
+        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_profile_tab_top_line"
+        app:layout_constraintBottom_toTopOf="@+id/layout_constraint_profile_tab_bottom_line">
 
         <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/basic_tab_button"
+            android:id="@+id/button_profile_tab_basic"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:fontFamily="@font/roboto_medium"
@@ -44,7 +44,7 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/center_line"
+        android:id="@+id/layout_constraint_profile_tab_center_line"
         android:layout_width="1dp"
         android:layout_height="match_parent"
         android:background="@color/lightDivider"
@@ -56,13 +56,13 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintStart_toEndOf="@+id/center_line"
+        app:layout_constraintStart_toEndOf="@+id/layout_constraint_profile_tab_center_line"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/top_line"
-        app:layout_constraintBottom_toTopOf="@+id/bottom_line">
+        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_profile_tab_top_line"
+        app:layout_constraintBottom_toTopOf="@+id/layout_constraint_profile_tab_bottom_line">
 
         <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/advanced_tab_button"
+            android:id="@+id/button_profile_tab_advanced"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:fontFamily="@font/roboto_medium"
@@ -82,7 +82,7 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/bottom_line"
+        android:id="@+id/layout_constraint_profile_tab_bottom_line"
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:background="@color/lightDivider"

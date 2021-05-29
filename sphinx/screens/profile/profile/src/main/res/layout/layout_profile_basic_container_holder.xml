@@ -2,7 +2,6 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/layout_constraint_container_holder"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -11,12 +10,12 @@
         android:layout_height="match_parent">
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/layout_scroll_view_content"
+            android:id="@+id/layout_constraint_profile_advanced_container_scroll_view_content"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
             <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/basic_info_form"
+                android:id="@+id/layout_constraint_profile_basic_container_info_form"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/profile_basic_info_form_height"
                 android:background="@color/body"
@@ -27,7 +26,7 @@
                 app:layout_constraintTop_toTopOf="parent">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/layout_constraint_nickname_content"
+                    android:id="@+id/layout_constraint_profile_basic_container_nickname_content"
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/profile_form_field_container_height"
                     android:layout_marginStart="@dimen/default_form_horizontal_margin"
@@ -35,7 +34,7 @@
                     app:layout_constraintTop_toTopOf="parent">
 
                     <androidx.appcompat.widget.AppCompatTextView
-                        android:id="@+id/profile_user_name_text_view"
+                        android:id="@+id/text_view_profile_basic_container_user_name"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/profile_user_name"
@@ -48,13 +47,13 @@
                         android:singleLine="true" />
 
                     <androidx.appcompat.widget.AppCompatEditText
-                        android:id="@+id/profile_user_name_edit_text"
+                        android:id="@+id/edit_text_profile_basic_container_user_name"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:textColor="@color/text"
                         android:fontFamily="@font/roboto_regular"
                         app:backgroundTint="@android:color/transparent"
-                        app:layout_constraintTop_toBottomOf="@+id/profile_user_name_text_view"
+                        app:layout_constraintTop_toBottomOf="@+id/text_view_profile_basic_container_user_name"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         android:textSize="@dimen/default_form_edit_view_text_size"
@@ -64,26 +63,26 @@
                         tools:text= "Testing"/>
 
                     <androidx.constraintlayout.widget.ConstraintLayout
-                        android:id="@+id/layout_constraint_profile_user_name_bottom_border"
+                        android:id="@+id/layout_constraint_profile_basic_container_user_name_bottom_border"
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
                         android:background="@color/lightDivider"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="@+id/profile_user_name_text_view" />
+                        app:layout_constraintStart_toStartOf="@+id/text_view_profile_basic_container_user_name" />
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
                 <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/layout_constraint_address_content"
+                    android:id="@+id/layout_constraint_profile_basic_container_address_content"
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/profile_form_field_container_height"
                     android:layout_marginStart="@dimen/default_form_horizontal_margin"
                     android:layout_marginEnd="@dimen/default_form_horizontal_margin"
-                    app:layout_constraintTop_toBottomOf="@+id/layout_constraint_nickname_content">
+                    app:layout_constraintTop_toBottomOf="@+id/layout_constraint_profile_basic_container_nickname_content">
 
                     <androidx.appcompat.widget.AppCompatTextView
-                        android:id="@+id/profile_address_text_view"
+                        android:id="@+id/text_view_profile_basic_container_address"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/profile_address"
@@ -96,13 +95,13 @@
                         android:singleLine="true" />
 
                     <androidx.appcompat.widget.AppCompatEditText
-                        android:id="@+id/profile_address_edit_text"
+                        android:id="@+id/edit_text_profile_basic_container_address"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:textColor="@color/text"
                         android:fontFamily="@font/roboto_regular"
                         app:backgroundTint="@android:color/transparent"
-                        app:layout_constraintTop_toBottomOf="@+id/profile_address_text_view"
+                        app:layout_constraintTop_toBottomOf="@+id/text_view_profile_basic_container_address"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
@@ -117,16 +116,16 @@
                         tools:text= "Testing" />
 
                     <androidx.constraintlayout.widget.ConstraintLayout
-                        android:id="@+id/layout_constraint_profile_address_bottom_border"
+                        android:id="@+id/layout_constraint_profile_basic_container_address_bottom_border"
                         android:layout_width="0dp"
                         android:layout_height="1dp"
                         android:background="@color/lightDivider"
                         app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@+id/layout_constraint_profile_qr_code_button"
-                        app:layout_constraintStart_toStartOf="@+id/profile_address_text_view" />
+                        app:layout_constraintEnd_toStartOf="@+id/layout_constraint_profile_basic_container_qr_code_button"
+                        app:layout_constraintStart_toStartOf="@+id/text_view_profile_basic_container_address" />
 
                     <androidx.constraintlayout.widget.ConstraintLayout
-                        android:id="@+id/layout_constraint_profile_qr_code_button"
+                        android:id="@+id/layout_constraint_profile_basic_container_qr_code_button"
                         android:layout_width="@dimen/default_form_scan_icon_container_width"
                         android:layout_height="match_parent"
                         app:layout_constraintBottom_toBottomOf="parent"
@@ -134,10 +133,10 @@
                         app:layout_constraintEnd_toEndOf="parent">
 
                         <androidx.appcompat.widget.AppCompatButton
-                            android:id="@+id/qr_code_button"
+                            android:id="@+id/button_profile_basic_container_qr_code"
                             android:layout_width="@dimen/profile_form_qr_code_icon_xy"
                             android:layout_height="@dimen/profile_form_qr_code_icon_xy"
-                            app:layout_constraintEnd_toEndOf="@+id/layout_constraint_profile_qr_code_button"
+                            app:layout_constraintEnd_toEndOf="@+id/layout_constraint_profile_basic_container_qr_code_button"
                             app:layout_constraintBottom_toBottomOf="parent"
                             android:background="@drawable/ic_qr_code"
                             android:backgroundTint="@color/text" />
@@ -147,15 +146,15 @@
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
                 <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/layout_constraint_route_hint_content"
+                    android:id="@+id/layout_constraint_profile_basic_container_route_hint_content"
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/profile_form_field_container_height"
                     android:layout_marginStart="@dimen/default_form_horizontal_margin"
                     android:layout_marginEnd="@dimen/default_form_horizontal_margin"
-                    app:layout_constraintTop_toBottomOf="@+id/layout_constraint_address_content">
+                    app:layout_constraintTop_toBottomOf="@+id/layout_constraint_profile_basic_container_address_content">
 
                     <androidx.appcompat.widget.AppCompatTextView
-                        android:id="@+id/profile_route_hint_text_view"
+                        android:id="@+id/text_view_profile_basic_container_route_hint"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/profile_route_hint"
@@ -168,13 +167,13 @@
                         android:singleLine="true" />
 
                     <androidx.appcompat.widget.AppCompatEditText
-                        android:id="@+id/profile_route_hint_edit_text"
+                        android:id="@+id/edit_text_profile_basic_container_route_hint"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:textColor="@color/text"
                         android:fontFamily="@font/roboto_regular"
                         app:backgroundTint="@android:color/transparent"
-                        app:layout_constraintTop_toBottomOf="@+id/profile_route_hint_text_view"
+                        app:layout_constraintTop_toBottomOf="@+id/text_view_profile_basic_container_route_hint"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         android:inputType="none"
@@ -186,27 +185,27 @@
                         android:singleLine="true" />
 
                     <androidx.constraintlayout.widget.ConstraintLayout
-                        android:id="@+id/layout_constraint_profile_route_hint_bottom_border"
+                        android:id="@+id/layout_constraint_profile_basic_container_route_hint_bottom_border"
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
                         android:background="@color/lightDivider"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="@+id/profile_route_hint_text_view" />
+                        app:layout_constraintStart_toStartOf="@+id/text_view_profile_basic_container_route_hint" />
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
                 <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/layout_constraint_share_picture_content"
+                    android:id="@+id/layout_constraint_profile_basic_container_share_picture_content"
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/profile_form_field_container_height"
                     android:layout_marginTop="@dimen/default_half_layout_margin"
                     android:layout_marginStart="@dimen/default_form_horizontal_margin"
                     android:layout_marginEnd="@dimen/default_form_horizontal_margin"
-                    app:layout_constraintTop_toBottomOf="@+id/layout_constraint_route_hint_content">
+                    app:layout_constraintTop_toBottomOf="@+id/layout_constraint_profile_basic_container_route_hint_content">
 
                     <androidx.appcompat.widget.AppCompatTextView
-                        android:id="@+id/profile_pin_toggle_text_view"
+                        android:id="@+id/text_view_profile_basic_container_pin_toggle"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:textColor="@color/text"
@@ -216,12 +215,12 @@
                         android:text="@string/profile_share_picture"
                         android:layout_marginEnd="@dimen/default_layout_margin"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintEnd_toStartOf="@+id/pin_switch"
+                        app:layout_constraintEnd_toStartOf="@+id/switch_profile_basic_container_pin"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
 
                     <androidx.appcompat.widget.SwitchCompat
-                        android:id="@+id/pin_switch"
+                        android:id="@+id/switch_profile_basic_container_pin"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:checked="false"
@@ -230,7 +229,7 @@
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toEndOf="@id/profile_pin_toggle_text_view"
+                        app:layout_constraintStart_toEndOf="@id/text_view_profile_basic_container_pin_toggle"
                         app:track="@drawable/switch_track_selector" />
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
@@ -253,7 +252,7 @@
 <!--            </androidx.constraintlayout.widget.ConstraintLayout>-->
 
             <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/servers_form"
+                android:id="@+id/layout_constraint_profile_basic_container_servers_form"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/profile_servers_form_height"
                 android:background="@color/body"
@@ -261,10 +260,10 @@
                 android:elevation="8dp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/basic_info_form">
+                app:layout_constraintTop_toBottomOf="@+id/layout_constraint_profile_basic_container_info_form">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/layout_constraint_tip_content"
+                    android:id="@+id/layout_constraint_profile_basic_tip_content"
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/profile_form_field_container_height"
                     android:layout_marginStart="@dimen/default_form_horizontal_margin"
@@ -272,7 +271,7 @@
                     app:layout_constraintTop_toTopOf="parent">
 
                     <androidx.appcompat.widget.AppCompatTextView
-                        android:id="@+id/profile_tip_text_view"
+                        android:id="@+id/text_view_profile_basic_container_tip"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/profile_tip"
@@ -285,13 +284,13 @@
                         android:singleLine="true" />
 
                     <androidx.appcompat.widget.AppCompatEditText
-                        android:id="@+id/profile_tip_edit_text"
+                        android:id="@+id/edit_text_profile_basic_container_tip"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:textColor="@color/text"
                         android:fontFamily="@font/roboto_regular"
                         app:backgroundTint="@android:color/transparent"
-                        app:layout_constraintTop_toBottomOf="@+id/profile_tip_text_view"
+                        app:layout_constraintTop_toBottomOf="@+id/text_view_profile_basic_container_tip"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         android:textSize="@dimen/default_form_edit_view_text_size"
@@ -303,26 +302,26 @@
                         tools:text= "100"/>
 
                     <androidx.constraintlayout.widget.ConstraintLayout
-                        android:id="@+id/layout_constraint_profile_tip_bottom_border"
+                        android:id="@+id/layout_constraint_profile_basic_container_tip_bottom_border"
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
                         android:background="@color/lightDivider"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="@+id/profile_tip_text_view" />
+                        app:layout_constraintStart_toStartOf="@+id/text_view_profile_basic_container_tip" />
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
                 <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/layout_constraint_meeting_server_content"
+                    android:id="@+id/layout_constraint_profile_basic_container_meeting_server_content"
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/profile_form_field_container_height"
                     android:layout_marginStart="@dimen/default_form_horizontal_margin"
                     android:layout_marginEnd="@dimen/default_form_horizontal_margin"
-                    app:layout_constraintTop_toBottomOf="@+id/layout_constraint_tip_content">
+                    app:layout_constraintTop_toBottomOf="@+id/layout_constraint_profile_basic_tip_content">
 
                     <androidx.appcompat.widget.AppCompatTextView
-                        android:id="@+id/profile_meeting_server_text_view"
+                        android:id="@+id/text_view_profile_basic_container_meeting_server"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/profile_meeting_server"
@@ -335,13 +334,13 @@
                         android:singleLine="true" />
 
                     <androidx.appcompat.widget.AppCompatEditText
-                        android:id="@+id/profile_meeting_server_edit_text"
+                        android:id="@+id/edit_text_profile_basic_container_meeting_server"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:textColor="@color/text"
                         android:fontFamily="@font/roboto_regular"
                         app:backgroundTint="@android:color/transparent"
-                        app:layout_constraintTop_toBottomOf="@+id/profile_meeting_server_text_view"
+                        app:layout_constraintTop_toBottomOf="@+id/text_view_profile_basic_container_meeting_server"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         android:textSize="@dimen/default_form_edit_view_text_size"
@@ -355,20 +354,20 @@
                         tools:text="https://jitsi.sphinx.chat"/>
 
                     <androidx.constraintlayout.widget.ConstraintLayout
-                        android:id="@+id/layout_constraint_profile_meeting_server_bottom_border"
+                        android:id="@+id/layout_constraint_profile_basic_container_meeting_server_bottom_border"
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
                         android:background="@color/lightDivider"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="@+id/profile_meeting_server_text_view" />
+                        app:layout_constraintStart_toStartOf="@+id/text_view_profile_basic_container_meeting_server" />
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/keys_backup_form"
+                android:id="@+id/layout_constraint_profile_basic_container_keys_backup_form"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/profile_keys_backup_form_height"
                 android:background="@color/body"
@@ -376,10 +375,10 @@
                 android:elevation="8dp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/servers_form">
+                app:layout_constraintTop_toBottomOf="@+id/layout_constraint_profile_basic_container_servers_form">
 
                 <androidx.appcompat.widget.AppCompatTextView
-                    android:id="@+id/profile_sync_devices_text_view"
+                    android:id="@+id/text_view_profile_basic_container_sync_devices"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/profile_sync_devices"
@@ -393,7 +392,7 @@
                     app:layout_constraintEnd_toEndOf="parent" />
 
                 <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/layout_constraint_finish_content"
+                    android:id="@+id/layout_constraint_profile_basic_container_finish_content"
                     android:layout_width="match_parent"
                     android:layout_height="52dp"
                     android:layout_marginStart="@dimen/default_double_layout_margin"
@@ -406,7 +405,7 @@
                     app:layout_constraintBottom_toBottomOf="parent">
 
                     <androidx.appcompat.widget.AppCompatTextView
-                        android:id="@+id/profile_key_text_view"
+                        android:id="@+id/text_view_profile_basic_container_key_backup"
                         android:layout_width="wrap_content"
                         android:layout_height="0dp"
                         android:gravity="center"
@@ -420,7 +419,7 @@
                         app:layout_constraintEnd_toEndOf="parent" />
 
                     <androidx.appcompat.widget.AppCompatButton
-                        android:id="@+id/button_backup_keys"
+                        android:id="@+id/button_profile_basic_container_key_backup"
                         style="@style/RoundedBlueButton"
                         android:textAllCaps="false"
                         android:layout_width="match_parent"

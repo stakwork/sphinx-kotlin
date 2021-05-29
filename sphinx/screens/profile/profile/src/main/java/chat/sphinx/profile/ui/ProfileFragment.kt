@@ -19,8 +19,8 @@ import chat.sphinx.profile.R
 import chat.sphinx.profile.databinding.FragmentProfileBinding
 import chat.sphinx.profile.navigation.ProfileNavigator
 import chat.sphinx.resources.getColor
-import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.lightning.asFormattedString
+import chat.sphinx.wrapper_common.lightning.toSat
 import chat.sphinx.wrapper_contact.isTrue
 import chat.sphinx.wrapper_contact.toPrivatePhoto
 import dagger.hilt.android.AndroidEntryPoint
@@ -62,11 +62,17 @@ internal class ProfileFragment: BaseFragment<
         val activity = (requireActivity() as InsetterActivity)
 
         binding.apply {
-            activity.addStatusBarPadding(layoutProfileHeader.root)
-                .addNavigationBarPadding(layoutProfileBasicContainerHolder.layoutScrollViewContent)
-                .addNavigationBarPadding(layoutProfileAdvancedContainerHolder.layoutScrollViewContent)
+            activity.addStatusBarPadding(includeProfileHeader.root)
+                .addNavigationBarPadding(
+                    includeProfileBasicContainerHolder
+                        .layoutConstraintProfileAdvancedContainerScrollViewContent
+                )
+                .addNavigationBarPadding(
+                    includeProfileAdvancedContainerHolder
+                        .layoutConstraintProfileAdvancedContainerScrollViewContent
+                )
 
-            layoutProfileHeader.apply {
+            includeProfileHeader.apply {
                 root.layoutParams.height = root.layoutParams.height + activity.statusBarInsetHeight.top
                 root.requestLayout()
 
@@ -80,20 +86,21 @@ internal class ProfileFragment: BaseFragment<
     }
 
     private fun setupProfileTabs() {
-        binding.layoutProfileTabsHolder.basicTabButton.setOnClickListener {
-            viewModel.updateViewState(ProfileViewState.Basic)
-        }
-
-        binding.layoutProfileTabsHolder.advancedTabButton.setOnClickListener {
-            viewModel.updateViewState(ProfileViewState.Advanced)
+        binding.includeProfileTabsHolder.apply {
+            buttonProfileTabBasic.setOnClickListener {
+                viewModel.updateViewState(ProfileViewState.Basic)
+            }
+            buttonProfileTabAdvanced.setOnClickListener {
+                viewModel.updateViewState(ProfileViewState.Advanced)
+            }
         }
     }
 
     private fun setupProfile() {
         binding.apply {
-            layoutProfileBasicContainerHolder.apply {
+            includeProfileBasicContainerHolder.apply {
 
-                profileUserNameEditText.setOnFocusChangeListener { _, hasFocus ->
+                editTextProfileBasicContainerUserName.setOnFocusChangeListener { _, hasFocus ->
                     if (hasFocus) {
                         return@setOnFocusChangeListener
                     }
@@ -101,7 +108,7 @@ internal class ProfileFragment: BaseFragment<
                     updateOwnerDetails()
                 }
 
-                profileTipEditText.setOnFocusChangeListener { _, hasFocus ->
+                editTextProfileBasicContainerTip.setOnFocusChangeListener { _, hasFocus ->
                     if (hasFocus) {
                         return@setOnFocusChangeListener
                     }
@@ -109,11 +116,11 @@ internal class ProfileFragment: BaseFragment<
                     updateOwnerDetails()
                 }
 
-                pinSwitch.setOnCheckedChangeListener { _, _ ->
+                switchProfileBasicContainerPin.setOnCheckedChangeListener { _, _ ->
                     updateOwnerDetails()
                 }
 
-                qrCodeButton.setOnClickListener {
+                buttonProfileBasicContainerQrCode.setOnClickListener {
                     viewModel.accountOwnerStateFlow.value?.nodePubKey?.let { pubKey ->
                         lifecycleScope.launch(viewModel.mainImmediate) {
                             profileNavigator.toQRCodeDetail(pubKey.value)
@@ -122,8 +129,8 @@ internal class ProfileFragment: BaseFragment<
                 }
             }
 
-            layoutProfileAdvancedContainerHolder.apply {
-                seekBar.setOnSeekBarChangeListener(
+            includeProfileAdvancedContainerHolder.apply {
+                seekBarProfileAdvancedContainerPinTimeout.setOnSeekBarChangeListener(
                     object : SeekBar.OnSeekBarChangeListener {
                         override fun onProgressChanged(
                             seekBar: SeekBar?,
@@ -143,7 +150,7 @@ internal class ProfileFragment: BaseFragment<
                     }
                 )
 
-                buttonProfileAdvancedChangePin.setOnClickListener {
+                buttonProfileAdvancedContainerChangePin.setOnClickListener {
                     viewModel.resetPIN()
                 }
 
@@ -158,23 +165,27 @@ internal class ProfileFragment: BaseFragment<
                 if (nodeBalance == null) return@collect
 
                 nodeBalance.balance.asFormattedString().let { balance ->
-                    binding.layoutProfileBasicInfoHolder.profileTextViewSatBalance.text = balance
+                    binding.includeProfileNamePictureHolder.textViewProfileSatBalance.text = balance
                 }
             }
         }
 
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.relayUrlStateFlow.collect { relayUrl ->
-                binding.layoutProfileAdvancedContainerHolder.profileServerUrlEditText.setText(
-                    relayUrl
-                )
+                binding
+                    .includeProfileAdvancedContainerHolder
+                    .editTextProfileAdvancedContainerServerUrl
+                    .setText(relayUrl)
             }
         }
 
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.pinTimeoutStateFlow.collect { pinTimeout ->
                 pinTimeout?.let {
-                    binding.layoutProfileAdvancedContainerHolder.seekBar.progress = it
+                    binding
+                        .includeProfileAdvancedContainerHolder
+                        .seekBarProfileAdvancedContainerPinTimeout
+                        .progress = it
 
                     setPINTimeoutString(it)
                 }
@@ -185,32 +196,32 @@ internal class ProfileFragment: BaseFragment<
             viewModel.accountOwnerStateFlow.collect { contactOwner ->
                 contactOwner?.let { owner ->
                     binding.apply {
-                        layoutProfileBasicInfoHolder.apply {
+                        includeProfileNamePictureHolder.apply {
                             owner.photoUrl?.value?.let { url ->
                                 imageLoader.load(
-                                    profileImageViewPicture,
+                                    imageViewProfilePicture,
                                     url,
                                     ImageLoaderOptions.Builder()
                                         .placeholderResId(R.drawable.ic_profile_avatar_circle)
                                         .transformation(Transformation.CircleCrop)
                                         .build()
                                 )
-                            } ?: profileImageViewPicture.setImageDrawable(
+                            } ?: imageViewProfilePicture.setImageDrawable(
                                 ContextCompat.getDrawable(
                                     binding.root.context,
                                     R.drawable.ic_profile_avatar_circle
                                 )
                             )
 
-                            profileTextViewName.text = owner.alias?.value ?: ""
+                            textViewProfileName.text = owner.alias?.value ?: ""
                         }
 
-                        layoutProfileBasicContainerHolder.apply {
-                            profileUserNameEditText.setText(owner.alias?.value ?: "")
-                            profileAddressEditText.setText(owner.nodePubKey?.value ?: "")
-                            profileRouteHintEditText.setText(owner.routeHint?.value ?: "")
-                            profileTipEditText.setText("${owner.tipAmount?.value ?: "100"}")
-                            pinSwitch.isChecked = !owner.privatePhoto.value.toPrivatePhoto().isTrue()
+                        includeProfileBasicContainerHolder.apply {
+                            editTextProfileBasicContainerUserName.setText(owner.alias?.value ?: "")
+                            editTextProfileBasicContainerAddress.setText(owner.nodePubKey?.value ?: "")
+                            editTextProfileBasicContainerRouteHint.setText(owner.routeHint?.value ?: "")
+                            editTextProfileBasicContainerTip.setText("${owner.tipAmount?.value ?: "100"}")
+                            switchProfileBasicContainerPin.isChecked = !owner.privatePhoto.value.toPrivatePhoto().isTrue()
                         }
                     }
                 }
@@ -219,25 +230,35 @@ internal class ProfileFragment: BaseFragment<
     }
 
     private fun setPINTimeoutString(progress: Int) {
-        if (progress == 0) {
-            binding.layoutProfileAdvancedContainerHolder.profilePinTimeoutValueTextView.text = "Always require PIN"
-        } else {
-            binding.layoutProfileAdvancedContainerHolder.profilePinTimeoutValueTextView.text = "${progress} hours"
-        }
+        binding
+            .includeProfileAdvancedContainerHolder
+            .textViewProfileAdvancedContainerPinTimeoutValue
+            .apply {
+                text = if (progress == 0) {
+                    "Always require PIN"
+                } else {
+                    "$progress hours"
+                }
+            }
     }
 
     private fun updateOwnerDetails() {
-        val alias = binding.layoutProfileBasicContainerHolder.profileUserNameEditText.text.toString()
-        val tipAmount = binding.layoutProfileBasicContainerHolder.profileTipEditText.text.toString().toLong()
-        val privatePhoto = !binding.layoutProfileBasicContainerHolder.pinSwitch.isChecked
+        binding.includeProfileBasicContainerHolder.let {
+            try {
+                val alias = it.editTextProfileBasicContainerUserName.text?.toString()
+                val privatePhoto = !it.switchProfileBasicContainerPin.isChecked
+                val tipAmount = it.editTextProfileBasicContainerTip.text?.toString()?.toLong()
 
-        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-            viewModel.updateOwner(
-                alias,
-                privatePhoto.toPrivatePhoto(),
-                Sat(value = tipAmount)
-            )
+                onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                    viewModel.updateOwner(
+                        alias,
+                        privatePhoto.toPrivatePhoto(),
+                        tipAmount?.toSat()
+                    )
+                }
+            } catch (e: NumberFormatException) {}
         }
+
     }
 
     override suspend fun onViewStateFlowCollect(viewState: ProfileViewState) {
@@ -246,20 +267,20 @@ internal class ProfileFragment: BaseFragment<
             @Exhaustive
             when (viewState) {
                 is ProfileViewState.Advanced -> {
-                    layoutProfileTabsHolder.apply {
-                        basicTabButton.setBackgroundColor(getColor(R.color.body))
-                        advancedTabButton.setBackgroundColor(getColor(R.color.primaryBlue))
+                    includeProfileTabsHolder.apply {
+                        buttonProfileTabBasic.setBackgroundColor(getColor(R.color.body))
+                        buttonProfileTabAdvanced.setBackgroundColor(getColor(R.color.primaryBlue))
                     }
-                    layoutProfileBasicContainerHolder.root.gone
-                    layoutProfileAdvancedContainerHolder.root.visible
+                    includeProfileBasicContainerHolder.root.gone
+                    includeProfileAdvancedContainerHolder.root.visible
                 }
                 is ProfileViewState.Basic -> {
-                    layoutProfileTabsHolder.apply {
-                        basicTabButton.setBackgroundColor(getColor(R.color.primaryBlue))
-                        advancedTabButton.setBackgroundColor(getColor(R.color.body))
+                    includeProfileTabsHolder.apply {
+                        buttonProfileTabBasic.setBackgroundColor(getColor(R.color.primaryBlue))
+                        buttonProfileTabAdvanced.setBackgroundColor(getColor(R.color.body))
                     }
-                    layoutProfileBasicContainerHolder.root.visible
-                    layoutProfileAdvancedContainerHolder.root.gone
+                    includeProfileBasicContainerHolder.root.visible
+                    includeProfileAdvancedContainerHolder.root.gone
                 }
             }
 
