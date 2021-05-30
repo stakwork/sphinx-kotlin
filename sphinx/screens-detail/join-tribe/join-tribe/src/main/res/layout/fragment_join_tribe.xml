@@ -89,7 +89,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/include_tribe_price" />
 
             <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/layout_constraint_save_content"
+                android:id="@+id/layout_constraint_button_content"
                 android:layout_width="@dimen/join_tribe_button_width"
                 android:layout_height="@dimen/join_tribe_button_height"
                 android:layout_marginTop="30dp"
@@ -98,7 +98,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/include_tribe_member_info">
 
                 <androidx.appcompat.widget.AppCompatButton
-                    android:id="@+id/button_save"
+                    android:id="@+id/button_join"
                     style="@style/JoinTribeButton"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
@@ -112,7 +112,7 @@
                     android:layout_width="@dimen/default_progress_bar_xy"
                     android:layout_height="@dimen/default_progress_bar_xy"
                     android:layout_marginLeft="@dimen/default_progress_bar_margin_left"
-                    android:id="@+id/new_contact_save_progress"
+                    android:id="@+id/join_tribe_save_progress"
                     style="?android:attr/progressBarStyle"
                     android:indeterminateTint="@android:color/white"
                     app:layout_constraintStart_toStartOf="parent"

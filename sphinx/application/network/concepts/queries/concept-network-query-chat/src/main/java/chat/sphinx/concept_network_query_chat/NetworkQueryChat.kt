@@ -32,6 +32,11 @@ abstract class NetworkQueryChat {
         uuid: TribeUUID
     ): Flow<LoadResponse<TribeDto, ResponseError>>
 
+    abstract fun joinTribe(
+        tribeDto: TribeDto,
+        relayData: Pair<AuthorizationToken, RelayUrl>? = null
+    ): Flow<LoadResponse<ChatDto, ResponseError>>
+
     ///////////
     /// PUT ///
     ///////////

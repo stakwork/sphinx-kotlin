@@ -5,6 +5,7 @@ import chat.sphinx.concept_coredb.CoreDB
 import chat.sphinx.concept_crypto_rsa.RSA
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
 import chat.sphinx.concept_network_query_chat.model.ChatDto
+import chat.sphinx.concept_network_query_chat.model.TribeDto
 import chat.sphinx.concept_network_query_contact.NetworkQueryContact
 import chat.sphinx.concept_network_query_contact.model.PostContactDto
 import chat.sphinx.concept_network_query_contact.model.PutContactDto
@@ -1271,6 +1272,51 @@ class SphinxRepository(
         }.join()
 
         return response
+    }
+
+    override fun joinTribe(
+        tribeDto: TribeDto,
+    ): Flow<LoadResponse<Any, ResponseError>> = flow {
+        val queries = coreDB.getSphinxDatabaseQueries()
+
+        val sharedFlow: MutableSharedFlow<Response<Boolean, ResponseError>> =
+            MutableSharedFlow(1, 0)
+
+        repositoryScope.launch(mainImmediate) {
+
+            networkQueryChat.joinTribe(tribeDto).collect { loadResponse ->
+                @Exhaustive
+                when (loadResponse) {
+                    LoadResponse.Loading -> {}
+                    is Response.Error -> {
+                        sharedFlow.emit(loadResponse)
+                    }
+                    is Response.Success -> {
+                        chatLock.withLock {
+                            withContext(io) {
+                                queries.transaction {
+                                    val updatePricePerMessage = tribeDto.price_per_message
+                                    queries.upsertChat(loadResponse.value, moshi, chatSeenMap, updatePricePerMessage)
+                                }
+                            }
+                        }
+
+                        sharedFlow.emit(Response.Success(true))
+                    }
+                }
+            }
+
+        }
+
+        emit(LoadResponse.Loading)
+
+        sharedFlow.asSharedFlow().firstOrNull().let { response ->
+            if (response == null) {
+                emit(Response.Error(ResponseError("")))
+            } else {
+                emit(response)
+            }
+        }
     }
 
     /*

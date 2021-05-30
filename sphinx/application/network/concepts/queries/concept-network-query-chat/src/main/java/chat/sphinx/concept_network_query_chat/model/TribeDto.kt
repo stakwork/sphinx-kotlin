@@ -4,26 +4,33 @@ import com.squareup.moshi.JsonClass
 
 @JsonClass(generateAdapter = true)
 data class TribeDto(
-    val host: String?,
-    val uuid: String?,
-    val name: String?,
-    val description: String?,
+    var host: String?,
+    var uuid: String?,
+    val name: String,
+    val description: String,
     val img: String?,
-    val group_key: String?,
-    val owner_pubkey: String?,
+    val group_key: String,
+    val owner_pubkey: String,
     val owner_route_hint: String?,
     val owner_alias: String?,
-    val price_to_join: Long?,
-    val price_per_message: Long?,
-    val escrow_amount: Long?,
-    val escrow_millis: Long?,
+    val price_to_join: Long = 0,
+    val price_per_message: Long = 0,
+    val escrow_amount: Long = 0,
+    val escrow_millis: Long = 0,
     val unlisted: Any?,
     val private: Any?,
     val deleted: Any?,
     val app_url: String?,
     val feed_url: String?,
+    var amount: Long?,
+    var my_alias: String?,
 ) {
 
     val hourToStake: Long
-        get() = (escrow_millis ?: 0) / 60 / 60 / 1000
+        get() = (escrow_millis) / 60 / 60 / 1000
+
+    fun set(host: String?, uuid: String) {
+        this.host = host
+        this.uuid = uuid
+    }
 }

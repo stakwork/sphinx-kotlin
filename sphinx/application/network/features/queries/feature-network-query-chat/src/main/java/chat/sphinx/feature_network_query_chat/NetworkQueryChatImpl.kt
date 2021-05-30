@@ -3,6 +3,7 @@ package chat.sphinx.feature_network_query_chat
 import MuteChatRelayResponse
 import chat.sphinx.concept_network_query_chat.model.ChatDto
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
+import chat.sphinx.concept_network_query_chat.model.JoinTribeRelayResponse
 import chat.sphinx.concept_network_query_chat.model.TribeDto
 import chat.sphinx.concept_network_relay_call.NetworkRelayCall
 import chat.sphinx.feature_network_query_chat.model.GetChatsRelayResponse
@@ -88,6 +89,18 @@ class NetworkQueryChatImpl(
         networkRelayCall.get(
             url = String.format(GET_TRIBE_INFO_URL, host.value, uuid.value),
             responseJsonClass = TribeDto::class.java,
+        )
+
+    override fun joinTribe(
+        tribeDto: TribeDto,
+        relayData: Pair<AuthorizationToken, RelayUrl>?
+    ): Flow<LoadResponse<ChatDto, ResponseError>> =
+        networkRelayCall.relayPost(
+            responseJsonClass = JoinTribeRelayResponse::class.java,
+            relayEndpoint = ENDPOINT_TRIBE,
+            requestBodyJsonClass = TribeDto::class.java,
+            requestBody = tribeDto,
+            relayData = relayData
         )
 
     ///////////

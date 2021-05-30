@@ -1,5 +1,6 @@
 package chat.sphinx.join_tribe.ui
 
+import android.content.Context
 import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
@@ -15,8 +16,9 @@ import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.join_tribe.R
 import chat.sphinx.join_tribe.databinding.FragmentJoinTribeBinding
+import chat.sphinx.wrapper_contact.toContactAlias
 import dagger.hilt.android.AndroidEntryPoint
-import io.matthewnelson.android_feature_screens.ui.base.BaseFragment
+import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -24,7 +26,9 @@ import javax.annotation.meta.Exhaustive
 import javax.inject.Inject
 
 @AndroidEntryPoint
-internal class JoinTribeFragment: BaseFragment<
+internal class JoinTribeFragment: SideEffectFragment<
+        Context,
+        JoinTribeSideEffect,
         JoinTribeViewState,
         JoinTribeViewModel,
         FragmentJoinTribeBinding
@@ -49,6 +53,10 @@ internal class JoinTribeFragment: BaseFragment<
             }
         }
 
+        binding.buttonJoin.setOnClickListener {
+            joinTribe()
+        }
+
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.accountOwnerStateFlow.collect { owner ->
                 owner?.alias?.value.let { ownerAlias ->
@@ -63,15 +71,25 @@ internal class JoinTribeFragment: BaseFragment<
     override suspend fun onViewStateFlowCollect(viewState: JoinTribeViewState) {
         @Exhaustive
         when (viewState) {
-            is JoinTribeViewState.LoadingTribeInfo -> {
+            is JoinTribeViewState.LoadingTribe -> {
                 binding.loadingTribeInfoContent.goneIfFalse(true)
             }
-            is JoinTribeViewState.LoadingTribeFailed -> {
+            is JoinTribeViewState.ErrorLoadingTribe -> {
                 viewModel.navigator.closeDetailScreen()
             }
             is JoinTribeViewState.TribeInfo -> {
-                val tribeDto = viewState.tribe
-                showTribeData(tribeDto)
+                showTribeData(viewState.tribe)
+            }
+
+            is JoinTribeViewState.JoiningTribe -> {
+                binding.buttonJoin.isEnabled = false
+                binding.joinTribeSaveProgress.goneIfFalse(true)
+            }
+            is JoinTribeViewState.ErrorJoiningTribe -> {
+                viewModel.navigator.closeDetailScreen()
+            }
+            is JoinTribeViewState.TribeJoined -> {
+                viewModel.navigator.closeDetailScreen()
             }
         }
     }
@@ -80,28 +98,35 @@ internal class JoinTribeFragment: BaseFragment<
         binding.apply {
             loadTribeImage(tribe)
 
-            textViewTribeName.text = tribe.name ?: "No Name"
-            textViewTribeDescription.text = tribe.description ?: "No Description"
-            includeTribePrice.textViewPricePerMessage.text = (tribe.price_per_message ?: 0).toString()
-            includeTribePrice.textViewPriceToJoin.text = (tribe.price_to_join ?: 0).toString()
-            includeTribePrice.textViewAmountToStake.text = (tribe.escrow_amount ?: 0).toString()
+            textViewTribeName.text = tribe.name
+            textViewTribeDescription.text = tribe.description
+            includeTribePrice.textViewPricePerMessage.text = tribe.price_per_message.toString()
+            includeTribePrice.textViewPriceToJoin.text = tribe.price_to_join.toString()
+            includeTribePrice.textViewAmountToStake.text = tribe.escrow_amount.toString()
             includeTribePrice.textViewTimeToStake.text = tribe.hourToStake.toString()
 
             loadingTribeInfoContent.goneIfFalse(false)
         }
     }
 
+    private fun joinTribe() {
+        val aliasString = binding.includeTribeMemberInfo.tribeMemberAliasEditText.text.toString()
+        viewModel.joinTribe(aliasString)
+    }
+
     private fun loadTribeImage(tribe: TribeDto) {
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             tribe.img?.let { img ->
-                imageLoader.load(
-                    binding.imageViewTribePicture,
-                    img,
-                    ImageLoaderOptions.Builder()
-                        .placeholderResId(R.drawable.ic_tribe_placeholder)
-                        .transformation(Transformation.CircleCrop)
-                        .build()
-                )
+                if (img.isNotEmpty()) {
+                    imageLoader.load(
+                        binding.imageViewTribePicture,
+                        img,
+                        ImageLoaderOptions.Builder()
+                            .placeholderResId(R.drawable.ic_tribe_placeholder)
+                            .transformation(Transformation.CircleCrop)
+                            .build()
+                    )
+                }
             } ?: binding.imageViewTribePicture
                 .setImageDrawable(
                     ContextCompat.getDrawable(
@@ -110,5 +135,9 @@ internal class JoinTribeFragment: BaseFragment<
                     )
                 )
         }
+    }
+
+    override suspend fun onSideEffectCollect(sideEffect: JoinTribeSideEffect) {
+        sideEffect.execute(binding.root.context)
     }
 }

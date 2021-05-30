@@ -84,7 +84,8 @@ inline fun MessageDto.updateChatDboLatestMessage(
 inline fun SphinxDatabaseQueries.upsertChat(
     dto: ChatDto,
     moshi: Moshi,
-    chatSeenMap: SynchronizedMap<ChatId, Seen>
+    chatSeenMap: SynchronizedMap<ChatId, Seen>,
+    pricePerMessage: Long? = null,
 ) {
     val seen = dto.seenActual.toSeen()
 
@@ -96,7 +97,7 @@ inline fun SphinxDatabaseQueries.upsertChat(
         dto.isMutedActual.toChatMuted(),
         dto.group_key?.toChatGroupKey(),
         dto.host?.toChatHost(),
-        dto.price_per_message?.toSat(),
+        (pricePerMessage ?: dto.price_per_message)?.toSat(),
         dto.escrow_amount?.toSat(),
         dto.unlistedActual.toChatUnlisted(),
         dto.privateActual.toChatPrivate(),

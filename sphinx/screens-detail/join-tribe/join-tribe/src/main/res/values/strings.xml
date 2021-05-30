@@ -10,4 +10,7 @@
     <string name="time_to_stake_label">Time to stake (hours):</string>
 
     <string name="alias_edit_text_label">Alias</string>
+    <string name="join_tribe_alias_empty">Alias is required.</string>
+    <string name="invalid_tribe">Invalid Tribe</string>
+    <string name="error_joining">There was an error joining tribe. Please try again later</string>
 </resources>

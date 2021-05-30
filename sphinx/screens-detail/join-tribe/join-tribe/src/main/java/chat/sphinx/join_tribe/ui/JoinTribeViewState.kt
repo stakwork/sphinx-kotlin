@@ -4,8 +4,12 @@ import chat.sphinx.concept_network_query_chat.model.TribeDto
 import io.matthewnelson.concept_views.viewstate.ViewState
 
 internal sealed class JoinTribeViewState: ViewState<JoinTribeViewState>() {
-    object LoadingTribeInfo : JoinTribeViewState()
-    object LoadingTribeFailed : JoinTribeViewState()
+    object LoadingTribe : JoinTribeViewState()
+    object ErrorLoadingTribe : JoinTribeViewState()
+
+    object JoiningTribe: JoinTribeViewState()
+    object ErrorJoiningTribe: JoinTribeViewState()
+    object TribeJoined: JoinTribeViewState()
 
     data class TribeInfo(
         val tribe: TribeDto

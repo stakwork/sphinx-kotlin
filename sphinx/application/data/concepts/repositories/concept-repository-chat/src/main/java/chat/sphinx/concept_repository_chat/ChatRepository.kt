@@ -1,5 +1,6 @@
 package chat.sphinx.concept_repository_chat
 
+import chat.sphinx.concept_network_query_chat.model.TribeDto
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
@@ -42,4 +43,8 @@ interface ChatRepository {
      * Returns error if something went wrong (networking)
      * */
     suspend fun toggleChatMuted(chat: Chat): Response<Boolean, ResponseError>
+
+    fun joinTribe(
+        tribeDto: TribeDto,
+    ): Flow<LoadResponse<Any, ResponseError>>
 }
