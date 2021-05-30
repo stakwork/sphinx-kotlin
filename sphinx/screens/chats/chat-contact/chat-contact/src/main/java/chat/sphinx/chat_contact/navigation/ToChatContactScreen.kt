@@ -3,8 +3,8 @@ package chat.sphinx.chat_contact.navigation
 import androidx.navigation.NavController
 import chat.sphinx.chat_contact.R
 import chat.sphinx.chat_contact.ui.ChatContactFragmentArgs
-import chat.sphinx.wrapper_common.chat.ChatId
-import chat.sphinx.wrapper_common.contact.ContactId
+import chat.sphinx.wrapper_common.dashboard.ChatId
+import chat.sphinx.wrapper_common.dashboard.ContactId
 import io.matthewnelson.android_feature_navigation.DefaultNavOptions
 import io.matthewnelson.concept_navigation.NavigationRequest
 

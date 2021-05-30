@@ -19,6 +19,12 @@
 
 
     <!-- Button Styles -->
+    <style name="RoundedBlueButton" parent="Widget.AppCompat.Button">
+        <item name="textAllCaps">true</item>
+        <item name="android:stateListAnimator">@null</item>
+        <item name="elevation">4dp</item>
+        <item name="fontFamily">@font/montserrat_semi_bold</item>
+    </style>
 
     <style name="BaseButton" parent="Widget.AppCompat.Button">
         <item name="textAllCaps">false</item>

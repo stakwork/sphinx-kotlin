@@ -8,6 +8,8 @@ ext.versions = [
 
     'androidGradle': '4.2.1',
     'arch': '2.1.0',
+    'camera': '1.1.0-alpha04',
+    'cameraView': '1.0.0-alpha24',
     'coil': '1.2.1',
     'coroutines': '1.5.0',
     'insetter': '0.5.0',
@@ -33,6 +35,13 @@ ext.deps = [
     androidx: [
         annotation: "androidx.annotation:annotation:1.2.0",
         appCompat: "androidx.appcompat:appcompat:1.3.0",
+        camera: [
+            core: "androidx.camera:camera-core:${versions.camera}",
+            camera2: "androidx.camera:camera-camera2:${versions.camera}",
+            lifecycle: "androidx.camera:camera-lifecycle:${versions.camera}",
+            view: "androidx.camera:camera-view:${versions.cameraView}",
+            extensions: "androidx.camera:camera-extensions:${versions.cameraView}",
+        ],
         constraintLayout: "androidx.constraintlayout:constraintlayout:2.0.4",
         core: "androidx.core:core-ktx:1.5.0",
         lifecycle: [
@@ -48,6 +57,7 @@ ext.deps = [
             fragment: "androidx.navigation:navigation-fragment-ktx:${versions.navigation}",
             ui: "androidx.navigation:navigation-ui-ktx:${versions.navigation}",
         ],
+        paging3: "androidx.paging:paging-runtime:3.0.0",
         recyclerView: "androidx.recyclerview:recyclerview:1.2.0",
         securityCrypto: "androidx.security:security-crypto:1.1.0-alpha03",
         sqlite: "androidx.sqlite:sqlite-ktx:2.1.0",
@@ -56,6 +66,9 @@ ext.deps = [
 //    bouncyCastle: "org.bouncycastle:bcprov-jdk15on:1.65",
     google: [
         hilt: "com.google.dagger:hilt-android:${versions.hilt}",
+        material: "com.google.android.material:material:1.4.0-beta01",
+        mlKitBarcodeScanning: "com.google.mlkit:barcode-scanning:16.1.1",
+        zxing: "com.google.zxing:core:3.4.0",
     ],
     guardianProject: [
         jtorctl: "info.guardianproject:jtorctl:0.4",
@@ -93,9 +106,11 @@ ext.deps = [
         okhttpLogging: "com.squareup.okhttp3:logging-interceptor:${versions.okhttp}",
         moshi: "com.squareup.moshi:moshi-kotlin:${versions.moshi}",
         sqlDelightAndroid: "com.squareup.sqldelight:android-driver:${versions.sqlDelight}",
+        sqlDelightAndroidPaging3: "com.squareup.sqldelight:android-paging3-extensions:${versions.sqlDelight}",
         sqlDelightCoroutines: "com.squareup.sqldelight:coroutines-extensions:${versions.sqlDelight}",
         sqlDelightJvm: "com.squareup.sqldelight:sqlite-driver:${versions.sqlDelight}",
         sqlDelightNative: "com.squareup.sqldelight:native-driver:${versions.sqlDelight}",
+        sqlDelightRuntime: "com.squareup.sqldelight:runtime:${versions.sqlDelight}",
     ],
     viewBindingDelegateNoReflect: "com.github.kirich1409:viewbindingpropertydelegate-noreflection:1.4.6",
 ]

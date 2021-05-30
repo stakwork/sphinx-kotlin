@@ -1,5 +1,6 @@
 package chat.sphinx.feature_coredb.adapters.chat
 
+import chat.sphinx.feature_coredb.adapters.common.DateTimeAdapter
 import chat.sphinx.wrapper_chat.*
 import chat.sphinx.wrapper_common.chat.ChatUUID
 import com.squareup.moshi.Moshi
@@ -45,7 +46,18 @@ internal class ChatStatusAdapter: ColumnAdapter<ChatStatus, Long> {
     }
 }
 
-internal class ChatMutedAdapter: ColumnAdapter<ChatMuted, Long> {
+internal class ChatMutedAdapter private constructor(): ColumnAdapter<ChatMuted, Long> {
+
+    companion object {
+        @Volatile
+        private var instance: ChatMutedAdapter? = null
+        fun getInstance(): ChatMutedAdapter =
+            instance ?: synchronized(this) {
+                instance ?: ChatMutedAdapter()
+                    .also { instance = it }
+            }
+    }
+
     override fun decode(databaseValue: Long): ChatMuted {
         return databaseValue.toInt().toChatMuted()
     }

@@ -55,3 +55,10 @@ inline fun Px.toDp(context: Context): Dp =
 @Throws(Resources.NotFoundException::class)
 inline fun ViewBinding.getString(@StringRes stringRes: Int): String =
     root.context.resources.getString(stringRes)
+
+@ColorInt
+@Suppress("NOTHING_TO_INLINE")
+@Throws(Resources.NotFoundException::class)
+inline fun ViewBinding.getColor(@ColorRes colorRes: Int): Int {
+    return ContextCompat.getColor(root.context, colorRes)
+}

@@ -11,9 +11,9 @@ import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.wrapper_chat.ChatMuted
 import chat.sphinx.wrapper_chat.isTrue
-import chat.sphinx.wrapper_common.chat.ChatId
 import chat.sphinx.wrapper_common.tribe.TribeHost
 import chat.sphinx.wrapper_common.tribe.TribeUUID
+import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
 import kotlinx.coroutines.flow.*

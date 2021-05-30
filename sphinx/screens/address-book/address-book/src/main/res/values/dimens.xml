@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <dimen name="address_book_contact_holder_text_size">17sp</dimen>
-    <dimen name="address_book_header_default_text_size">16sp</dimen>
     <dimen name="address_book_search_bar_margin_horizontal">14dp</dimen>
     <dimen name="address_book_search_bar_margin_vertical">6dp</dimen>
     <dimen name="address_book_search_text_size">14sp</dimen>

@@ -1,4 +1,5 @@
 plugins {
+    id 'app.cash.exhaustive'
     id 'com.android.library'
     id 'dagger.hilt.android.plugin'
     id 'kotlin-android'
@@ -32,9 +33,16 @@ dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
     // KotlinAndroid
     implementation project(path: ':android:features:android-feature-screens')
+    implementation project(path: ':kotlin:concepts:authentication:concept-authentication')
 
     // Sphinx
-    implementation project(path: ':sphinx:application:common:resources')
+    implementation project(path: ':sphinx:activity:insetter-activity')
+    implementation project(path: ':sphinx:application:data:concepts:concept-background-login')
+    implementation project(path: ':sphinx:application:data:concepts:concept-image-loader')
+    implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-contact')
+    implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-lightning')
+    implementation project(path: ':sphinx:application:data:concepts:concept-relay')
+    implementation project(path: ':sphinx:screens-detail:common:detail-resources')
 
     implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt
