@@ -12,6 +12,9 @@
         <argument
             android:name="argShowBackArrow"
             app:argType="boolean" />
+        <argument
+            android:name="argShowBottomView"
+            app:argType="boolean" />
     </fragment>
 
 </navigation>

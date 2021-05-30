@@ -1,10 +1,13 @@
 package chat.sphinx.resources
 
 import android.content.Context
+import android.content.res.Resources
 import android.view.inputmethod.InputMethodManager
 import androidx.annotation.ColorInt
 import androidx.annotation.ColorRes
+import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
+import androidx.viewbinding.ViewBinding
 import chat.sphinx.wrapper_view.Dp
 import chat.sphinx.wrapper_view.Px
 
@@ -47,3 +50,15 @@ inline fun Dp.toPx(context: Context): Px =
 @Suppress("NOTHING_TO_INLINE")
 inline fun Px.toDp(context: Context): Dp =
     Dp(value / context.resources.displayMetrics.density)
+
+@Suppress("NOTHING_TO_INLINE")
+@Throws(Resources.NotFoundException::class)
+inline fun ViewBinding.getString(@StringRes stringRes: Int): String =
+    root.context.resources.getString(stringRes)
+
+@ColorInt
+@Suppress("NOTHING_TO_INLINE")
+@Throws(Resources.NotFoundException::class)
+inline fun ViewBinding.getColor(@ColorRes colorRes: Int): Int {
+    return ContextCompat.getColor(root.context, colorRes)
+}

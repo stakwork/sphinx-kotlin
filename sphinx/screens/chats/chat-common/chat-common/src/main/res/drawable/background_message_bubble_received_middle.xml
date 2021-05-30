@@ -5,9 +5,4 @@
     <corners
         android:bottomRightRadius="@dimen/background_message_holder_default_corner_rad"
         android:topRightRadius="@dimen/background_message_holder_default_corner_rad" />
-    <padding
-        android:bottom="@dimen/background_message_holder_default_padding"
-        android:left="@dimen/background_message_holder_default_padding"
-        android:right="@dimen/background_message_holder_default_padding"
-        android:top="@dimen/background_message_holder_default_padding_top" />
 </shape>

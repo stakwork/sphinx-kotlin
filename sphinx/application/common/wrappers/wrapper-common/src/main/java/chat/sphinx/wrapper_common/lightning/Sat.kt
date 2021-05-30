@@ -19,15 +19,22 @@ inline val Sat.unit: String
     get() = if (value > 1) "sats" else "sat"
 
 /**
- * Will format the value using the [separator] passed.
+ * Will format the value using the [separator] passed,
+ * optionally appending the `Sat.unit` text with a space.
  *
  * ex:
  *  (separator = ',') 1000000 -> 1,000,000
  *  (separator = ' ') 1000000 -> 1 000 000
  * */
 @Suppress("NOTHING_TO_INLINE")
-inline fun Sat.asFormattedString(separator: Char = ' ') =
-    NumberFormat.getInstance(Locale.ENGLISH).format(value).replace(',', separator)
+inline fun Sat.asFormattedString(separator: Char = ' ', appendUnit: Boolean = false): String =
+    NumberFormat
+        .getInstance(Locale.ENGLISH)
+        .format(value)
+        .replace(',', separator)
+        .plus(
+            if (appendUnit) " $unit" else ""
+        )
 
 @JvmInline
 value class Sat(val value: Long) {

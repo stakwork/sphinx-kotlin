@@ -14,31 +14,101 @@
         android:layout_height="@dimen/default_header_height"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <EditText
-        android:id="@+id/edit_text_scanner_input_stub"
+    <androidx.camera.view.PreviewView
+        android:id="@+id/previewView"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="40dp"
-        android:background="@drawable/background_message_text"
-        android:gravity="center"
-        android:hint="Stub: Input Data"
-        android:inputType="text"
-        android:singleLine="true"
-        android:textColor="@color/secondaryText"
-        android:textColorHint="@color/secondaryText"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toBottomOf="@+id/include_scanner_header"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/edit_text_scanner_input_content"
+        />
 
-    <Button
-        android:id="@+id/button_scanner_input_stub"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:text="submit"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/edit_text_scanner_input_stub" />
+    <androidx.appcompat.widget.AppCompatImageView
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:src="@drawable/scanner_square"
+        android:layout_marginHorizontal="@dimen/scanner_square_horizontal_margin"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintEnd_toEndOf="@+id/previewView"
+        app:layout_constraintStart_toStartOf="@+id/previewView"
+        app:layout_constraintTop_toTopOf="@+id/previewView"
+        app:layout_constraintBottom_toBottomOf="@+id/previewView"/>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/edit_text_scanner_input_content"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/scanner_bottom_content_height"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:visibility="gone">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/new_contact_route_hint_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/scanner_bottom_content_label"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="@dimen/scanner_bottom_text_view_top_margin"
+            android:textColor="@color/text"
+            android:fontFamily="@font/montserrat_semi_bold"
+            android:textSize="@dimen/scanner_bottom_text_view_text_size"
+            android:singleLine="true" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layout_constraint_nickname_content"
+            android:layout_width="match_parent"
+            android:layout_height="65dp"
+            android:layout_marginStart="@dimen/default_form_horizontal_margin"
+            android:layout_marginEnd="@dimen/default_form_horizontal_margin"
+            android:paddingBottom="20dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <androidx.appcompat.widget.AppCompatEditText
+                android:id="@+id/code_edit_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/text"
+                android:fontFamily="@font/roboto_regular"
+                app:backgroundTint="@android:color/transparent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                android:hint="@string/scanner_edit_text_hint"
+                android:textColorHint="@color/secondaryText"
+                android:textSize="@dimen/default_form_edit_view_size"
+                android:inputType="textVisiblePassword|textCapWords"
+                android:layout_marginLeft="@dimen/default_edit_text_left_margin"
+                android:singleLine="true" />
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/layout_constraint_new_contact_nickname_bottom_border"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/lightDivider"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/button_scanner_save"
+            style="@style/BaseButton"
+            android:layout_width="@dimen/scanner_bottom_verify_button_width"
+            android:layout_height="@dimen/scanner_bottom_verify_button_height"
+            android:text="VERIFY"
+            android:fontFamily="@font/montserrat_bold"
+            android:textSize="@dimen/scanner_bottom_verify_button_text_size"
+            android:textColor="@android:color/white"
+            android:background="@drawable/button_background_white_rad_48"
+            android:backgroundTint="@color/primaryBlue"
+            android:layout_marginBottom="@dimen/scanner_bottom_verify_button_bottom_margin"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

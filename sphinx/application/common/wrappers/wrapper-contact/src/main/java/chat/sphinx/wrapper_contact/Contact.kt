@@ -2,8 +2,8 @@ package chat.sphinx.wrapper_contact
 
 import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_common.PhotoUrl
-import chat.sphinx.wrapper_common.contact.ContactId
-import chat.sphinx.wrapper_common.invite.InviteId
+import chat.sphinx.wrapper_common.dashboard.ContactId
+import chat.sphinx.wrapper_common.dashboard.InviteId
 import chat.sphinx.wrapper_common.invite.InviteStatus
 import chat.sphinx.wrapper_common.lightning.LightningNodeAlias
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey

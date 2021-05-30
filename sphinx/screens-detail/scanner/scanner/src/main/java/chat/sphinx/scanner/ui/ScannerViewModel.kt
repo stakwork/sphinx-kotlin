@@ -1,6 +1,7 @@
 package chat.sphinx.scanner.ui
 
 import android.content.Context
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_view_model_coordinator.RequestCancelled
@@ -11,6 +12,7 @@ import chat.sphinx.scanner.coordinator.ScannerViewModelCoordinator
 import chat.sphinx.scanner.navigation.BackType
 import chat.sphinx.scanner_view_model_coordinator.response.ScannerResponse
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
@@ -22,11 +24,20 @@ import javax.inject.Inject
 internal class ScannerViewModel @Inject constructor(
     dispatchers: CoroutineDispatchers,
     private val scannerViewModelCoordinator: ScannerViewModelCoordinator,
+    private val handle: SavedStateHandle,
 ): SideEffectViewModel<
         Context,
         NotifySideEffect,
         ScannerViewState
-        >(dispatchers, ScannerViewState.ShowNavBackButton)
+        >(
+            dispatchers,
+            handle.navArgs<ScannerFragmentArgs>().let {
+                ScannerViewState.LayoutVisibility(
+                    it.value.argShowBackArrow,
+                    it.value.argShowBottomView,
+                )
+            },
+        )
 {
     // Instantiate immediately so the request is pulled in
     // from shared flow via the coordinator

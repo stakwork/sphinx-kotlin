@@ -1,14 +1,22 @@
 package chat.sphinx.chat_common.ui.viewstate.messageholder
 
+import android.view.Gravity
+import android.widget.ImageView
+import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
 import androidx.annotation.MainThread
+import androidx.annotation.StringRes
+import androidx.core.content.ContextCompat
 import androidx.core.view.updateLayoutParams
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.chat_common.R
 import chat.sphinx.resources.R as common_R
 import chat.sphinx.chat_common.databinding.LayoutMessageHolderBinding
+import chat.sphinx.resources.getString
+import chat.sphinx.resources.setBackgroundRandomColor
 import chat.sphinx.resources.setTextColorExt
 import chat.sphinx.wrapper_common.lightning.asFormattedString
+import chat.sphinx.wrapper_message.MessageType
 import chat.sphinx.wrapper_view.Px
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
@@ -27,8 +35,8 @@ internal inline fun LayoutMessageHolderBinding.setBubbleDirectPaymentLayout(
             imageViewDirectPaymentSent.goneIfFalse(directPayment.showSent)
             imageViewDirectPaymentReceived.goneIfFalse(directPayment.showReceived)
             includeDirectPaymentAmountTextGroup.apply {
-                textViewBoostAmount.text = directPayment.amount.asFormattedString()
-                textViewBoostUnitLabel.text = directPayment.unitLabel
+                textViewSatsAmount.text = directPayment.amount.asFormattedString()
+                textViewSatsUnitLabel.text = directPayment.unitLabel
             }
         }
     }
@@ -85,44 +93,43 @@ internal fun LayoutMessageHolderBinding.setBubbleBackground(
 
             resId?.let { setBackgroundResource(it) }
         }
+    }
 
+    // Set background spacing
+    if (viewState.background is BubbleBackground.Gone && viewState.background.setSpacingEqual) {
 
+        val defaultMargins = root
+            .context
+            .resources
+            .getDimensionPixelSize(common_R.dimen.default_layout_margin)
 
-        if (viewState.background is BubbleBackground.Gone && viewState.background.setSpacingEqual) {
+        spaceMessageHolderLeft.updateLayoutParams { width = defaultMargins }
+        spaceMessageHolderRight.updateLayoutParams { width = defaultMargins }
 
-            val defaultMargins = root
-                .context
-                .resources
-                .getDimensionPixelSize(common_R.dimen.default_layout_margin)
+    } else {
 
-            spaceMessageHolderLeft.updateLayoutParams { width = defaultMargins }
-            spaceMessageHolderRight.updateLayoutParams { width = defaultMargins }
-
-        } else {
-
-            @Exhaustive
-            when (viewState) {
-                is MessageHolderViewState.Received -> {
-                    spaceMessageHolderLeft.updateLayoutParams {
-                        width = root
-                            .context
-                            .resources
-                            .getDimensionPixelSize(R.dimen.message_holder_space_width_left)
-                    }
-                    spaceMessageHolderRight.updateLayoutParams {
-                        width = (holderWidth.value * BubbleBackground.SPACE_WIDTH_MULTIPLE).toInt()
-                    }
+        @Exhaustive
+        when (viewState) {
+            is MessageHolderViewState.Received -> {
+                spaceMessageHolderLeft.updateLayoutParams {
+                    width = root
+                        .context
+                        .resources
+                        .getDimensionPixelSize(R.dimen.message_holder_space_width_left)
                 }
-                is MessageHolderViewState.Sent -> {
-                    spaceMessageHolderLeft.updateLayoutParams {
-                        width = (holderWidth.value * BubbleBackground.SPACE_WIDTH_MULTIPLE).toInt()
-                    }
-                    spaceMessageHolderRight.updateLayoutParams {
-                        width = root
-                            .context
-                            .resources
-                            .getDimensionPixelSize(R.dimen.message_holder_space_width_right)
-                    }
+                spaceMessageHolderRight.updateLayoutParams {
+                    width = (holderWidth.value * BubbleBackground.SPACE_WIDTH_MULTIPLE).toInt()
+                }
+            }
+            is MessageHolderViewState.Sent -> {
+                spaceMessageHolderLeft.updateLayoutParams {
+                    width = (holderWidth.value * BubbleBackground.SPACE_WIDTH_MULTIPLE).toInt()
+                }
+                spaceMessageHolderRight.updateLayoutParams {
+                    width = root
+                        .context
+                        .resources
+                        .getDimensionPixelSize(R.dimen.message_holder_space_width_right)
                 }
             }
         }
@@ -177,6 +184,32 @@ internal inline fun LayoutMessageHolderBinding.setStatusHeader(
     }
 }
 
+
+@MainThread
+@Suppress("NOTHING_TO_INLINE")
+internal inline fun LayoutMessageHolderBinding.setDeletedMessageLayout(
+    deletedMessage: LayoutState.DeletedMessage?
+) {
+    includeDeletedMessage.apply {
+        if (deletedMessage == null) {
+            root.gone
+        } else {
+            root.visible
+
+            val gravity = if (deletedMessage.gravityStart) {
+                Gravity.START
+            } else {
+                Gravity.END
+            }
+
+            textViewDeletedMessageTimestamp.text = deletedMessage.timestamp
+            textViewDeletedMessageTimestamp.gravity = gravity
+            textViewDeleteMessageLabel.gravity = gravity
+        }
+    }
+}
+
+
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun LayoutMessageHolderBinding.setBubbleMessageLayout(
@@ -188,6 +221,222 @@ internal inline fun LayoutMessageHolderBinding.setBubbleMessageLayout(
         } else {
             visible
             text = message.text
+        }
+    }
+}
+
+@MainThread
+@Suppress("NOTHING_TO_INLINE")
+internal inline fun LayoutMessageHolderBinding.setBubblePaidMessageDetailsLayout(
+    paidDetails: LayoutState.Bubble.PaidMessageDetails?,
+    bubbleBackground: BubbleBackground
+) {
+    includeMessageHolderBubble.includePaidMessageReceivedDetailsHolder.apply {
+        if (paidDetails == null) {
+            root.gone
+        } else {
+            root.visible
+            root.clipToOutline = true
+
+            @ColorRes
+            val backgroundTintResId = if (paidDetails.purchaseType is MessageType.Purchase.Denied) {
+                R.color.badgeRed
+            } else {
+                R.color.primaryGreen
+            }
+
+            @DrawableRes
+            val backgroundDrawableResId: Int? = when (bubbleBackground) {
+                BubbleBackground.First.Grouped -> {
+                    if (paidDetails.isShowingReceivedMessage) {
+                        R.drawable.background_paid_message_details_bubble_footer_received_first
+                    } else {
+                        R.drawable.background_paid_message_details_bubble_footer_sent_first
+                    }
+                }
+                BubbleBackground.First.Isolated,
+                BubbleBackground.Last -> {
+                    if (paidDetails.isShowingReceivedMessage) {
+                        R.drawable.background_paid_message_details_bubble_footer_received_last
+                    } else {
+                        R.drawable.background_paid_message_details_bubble_footer_sent_last
+                    }
+                }
+                BubbleBackground.Middle -> {
+                    if (paidDetails.isShowingReceivedMessage) {
+                        R.drawable.background_paid_message_details_bubble_footer_received_middle
+                    } else {
+                        R.drawable.background_paid_message_details_bubble_footer_sent_middle
+                    }
+                }
+                else -> {
+                    null
+                }
+            }
+
+            @StringRes
+            val statusTextResID = when (paidDetails.purchaseType) {
+                MessageType.Purchase.Accepted -> {
+                    R.string.purchase_status_label_paid_message_details_accepted
+                }
+                MessageType.Purchase.Denied -> {
+                    R.string.purchase_status_label_paid_message_details_denied
+                }
+                MessageType.Purchase.Processing -> {
+                    R.string.purchase_status_label_paid_message_details_processing
+                }
+                null -> {
+                    R.string.purchase_status_label_paid_message_details_default
+                }
+            }
+
+            backgroundDrawableResId?.let { root.setBackgroundResource(it) }
+            root.backgroundTintList = ContextCompat.getColorStateList(root.context, backgroundTintResId)
+
+            imageViewPaidMessageReceivedIcon.goneIfFalse(paidDetails.showPaymentReceivedIcon)
+            imageViewPaidMessageSentIcon.goneIfFalse(paidDetails.showSendPaymentIcon)
+            textViewPaymentAcceptedIcon.goneIfFalse(paidDetails.showPaymentAcceptedIcon)
+            progressBarPaidMessage.goneIfFalse(paidDetails.showPaymentProgressWheel)
+            textViewPaidMessageStatusLabel.text = getString(statusTextResID)
+            textViewPaidMessageAmountToPayLabel.text = paidDetails.amountText
+        }
+    }
+}
+
+@MainThread
+@Suppress("NOTHING_TO_INLINE")
+internal inline fun LayoutMessageHolderBinding.setBubblePaidMessageSentStatusLayout(
+    paidSentStatus: LayoutState.Bubble.PaidMessageSentStatus?
+) {
+    includeMessageHolderBubble.includePaidMessageSentStatusDetails.apply {
+        if (paidSentStatus == null) {
+            root.gone
+        } else {
+            root.visible
+
+            val statusTextResID = when (paidSentStatus.purchaseType) {
+                MessageType.Purchase.Accepted -> {
+                    R.string.purchase_status_label_paid_message_sent_status_accepted
+                }
+                MessageType.Purchase.Denied -> {
+                    R.string.purchase_status_label_paid_message_sent_status_denied
+                }
+                MessageType.Purchase.Processing -> {
+                    R.string.purchase_status_label_paid_message_sent_status_processing
+                }
+                null -> {
+                    R.string.purchase_status_label_paid_message_sent_status_default
+                }
+            }
+
+            textViewPaidMessageSentStatusAmount.text = paidSentStatus.amountText
+            textViewPaidMessageSentStatus.text = getString(statusTextResID)
+        }
+    }
+}
+
+@MainThread
+@Suppress("NOTHING_TO_INLINE")
+internal inline fun LayoutMessageHolderBinding.setBubbleReactionBoosts(
+    boost: LayoutState.Bubble.ContainerBottom.Boost?,
+    loadImage: (ImageView, SenderPhotoUrl) -> Unit,
+) {
+    includeMessageHolderBubble.includeMessageTypeBoost.apply {
+        if (boost == null) {
+            root.gone
+        } else {
+            root.visible
+
+//            imageViewBoostMessageIcon
+            includeBoostAmountTextGroup.apply {
+                textViewSatsAmount.text = boost.amountText
+                textViewSatsUnitLabel.text = boost.amountUnitLabel
+            }
+
+            includeBoostReactionsGroup.apply {
+
+                includeBoostReactionImageHolder1.apply {
+                    boost.senderPics.elementAtOrNull(0).let { holder ->
+                        if (holder == null) {
+                            root.gone
+                        } else {
+                            root.visible
+
+                            @Exhaustive
+                            when (holder) {
+                                is SenderInitials -> {
+                                    textViewInitials.visible
+                                    textViewInitials.text = holder.value
+                                    textViewInitials.setBackgroundRandomColor(R.drawable.chat_initials_circle)
+                                    imageViewChatPicture.gone
+                                }
+                                is SenderPhotoUrl -> {
+                                    textViewInitials.gone
+                                    imageViewChatPicture.visible
+                                    loadImage(imageViewChatPicture, holder)
+                                }
+                            }
+                        }
+                    }
+                }
+
+                includeBoostReactionImageHolder2.apply {
+                    boost.senderPics.elementAtOrNull(1).let { holder ->
+                        if (holder == null) {
+                            root.gone
+                        } else {
+                            root.visible
+
+                            @Exhaustive
+                            when (holder) {
+                                is SenderInitials -> {
+                                    textViewInitials.visible
+                                    textViewInitials.text = holder.value
+                                    textViewInitials.setBackgroundRandomColor(R.drawable.chat_initials_circle)
+                                    imageViewChatPicture.gone
+                                }
+                                is SenderPhotoUrl -> {
+                                    textViewInitials.gone
+                                    imageViewChatPicture.visible
+                                    loadImage(imageViewChatPicture, holder)
+                                }
+                            }
+                        }
+                    }
+                }
+
+                includeBoostReactionImageHolder3.apply {
+                    boost.senderPics.elementAtOrNull(2).let { holder ->
+                        if (holder == null) {
+                            root.gone
+                        } else {
+                            root.visible
+
+                            @Exhaustive
+                            when (holder) {
+                                is SenderInitials -> {
+                                    textViewInitials.visible
+                                    textViewInitials.text = holder.value
+                                    textViewInitials.setBackgroundRandomColor(R.drawable.chat_initials_circle)
+                                    imageViewChatPicture.gone
+                                }
+                                is SenderPhotoUrl -> {
+                                    textViewInitials.gone
+                                    imageViewChatPicture.visible
+                                    loadImage(imageViewChatPicture, holder)
+                                }
+                            }
+                        }
+                    }
+                }
+
+                textViewBoostReactionCount.apply {
+                    boost.numberUniqueBoosters?.let { count ->
+                        visible
+                        text = count.toString()
+                    } ?: gone
+                }
+            }
         }
     }
 }

@@ -1,11 +1,10 @@
 package chat.sphinx.dashboard.ui
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
-import chat.sphinx.concept_repository_chat.ChatRepository
-import chat.sphinx.concept_repository_contact.ContactRepository
-import chat.sphinx.concept_repository_lightning.LightningRepository
-import chat.sphinx.concept_repository_message.MessageRepository
+import chat.sphinx.concept_background_login.BackgroundLoginHandler
+import chat.sphinx.concept_repository_dashboard_android.RepositoryDashboardAndroid
 import chat.sphinx.concept_service_notification.PushNotificationRegistrar
 import chat.sphinx.concept_socket_io.SocketIOManager
 import chat.sphinx.concept_socket_io.SocketIOState
@@ -24,13 +23,14 @@ import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.scanner_view_model_coordinator.request.ScannerRequest
 import chat.sphinx.scanner_view_model_coordinator.response.ScannerResponse
 import chat.sphinx.wrapper_chat.isConversation
-import chat.sphinx.wrapper_common.contact.ContactId
+import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_contact.isConfirmed
 import chat.sphinx.wrapper_contact.isTrue
 import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_message.Message
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.MotionLayoutViewModel
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.sideeffect.SideEffect
@@ -58,15 +58,16 @@ internal suspend inline fun DashboardViewModel.updateChatListFilter(filter: Chat
 
 @HiltViewModel
 internal class DashboardViewModel @Inject constructor(
+    private val backgroundLoginHandler: BackgroundLoginHandler,
+    handler: SavedStateHandle,
+
     val dashboardNavigator: DashboardNavigator,
     val navBarNavigator: DashboardBottomNavBarNavigator,
     val navDrawerNavigator: DashboardNavDrawerNavigator,
 
     dispatchers: CoroutineDispatchers,
-    private val chatRepository: ChatRepository,
-    private val contactRepository: ContactRepository,
-    private val lightningRepository: LightningRepository,
-    private val messageRepository: MessageRepository,
+
+    private val repositoryDashboard: RepositoryDashboardAndroid<Any>,
 
     private val pushNotificationRegistrar: PushNotificationRegistrar,
 
@@ -79,14 +80,48 @@ internal class DashboardViewModel @Inject constructor(
         NavDrawerViewState
         >(dispatchers, NavDrawerViewState.Closed)
 {
+    init {
+        if (handler.navArgs<DashboardFragmentArgs>().value.updateBackgroundLoginTime) {
+            viewModelScope.launch(default) {
+                backgroundLoginHandler.updateLoginTime()
+            }
+        }
+    }
+
     fun toScanner() {
         viewModelScope.launch(mainImmediate) {
             val response = scannerCoordinator.submitRequest(
-                ScannerRequest(filter = null)
+                ScannerRequest(filter = null, showBottomView = true)
             )
             // TODO: Do something with response
         }
     }
+
+//    @Volatile
+//    private var pagerFlow: Flow<PagingData<DashboardItem>>? = null
+//    private val pagerFlowLock = Mutex()
+//
+//    fun dashboardPagingDataFlow(): Flow<PagingData<DashboardItem>> = flow {
+//        val flow: Flow<PagingData<DashboardItem>> = pagerFlow ?: pagerFlowLock.withLock {
+//            pagerFlow ?: repositoryDashboard
+//                .getDashboardItemPagingSource()
+//                .let { sourceWrapper ->
+//                    sourceWrapper.pagingDataFlow.map { pagingData ->
+//                        pagingData.map { item ->
+//
+//                        }
+//                        pagingData.insertSeparators { item: DashboardItem?, item2: DashboardItem? ->
+//
+//                        }
+//                    }
+//                    sourceWrapper.pagingDataFlow
+//                        .cachedIn(viewModelScope)
+//                        .also { pagerFlow = it }
+//                }
+//        }
+//
+//        emitAll(flow)
+//    }
 
     val chatViewStateContainer: ChatViewStateContainer by lazy {
         ChatViewStateContainer(dispatchers)
@@ -100,7 +135,7 @@ internal class DashboardViewModel @Inject constructor(
         get() = _accountOwnerStateFlow.asStateFlow()
 
     suspend fun getAccountBalance(): StateFlow<NodeBalance?> =
-        lightningRepository.getAccountBalance()
+        repositoryDashboard.getAccountBalance()
 
     private val _contactsStateFlow: MutableStateFlow<List<Contact>> by lazy {
         MutableStateFlow(emptyList())
@@ -113,7 +148,7 @@ internal class DashboardViewModel @Inject constructor(
 
     init {
         viewModelScope.launch(mainImmediate) {
-            contactRepository.getAllContacts.distinctUntilChanged().collect { contacts ->
+            repositoryDashboard.getAllContacts.distinctUntilChanged().collect { contacts ->
                 collectionLock.withLock {
                     contactsCollectionInitialized = true
 
@@ -176,7 +211,7 @@ internal class DashboardViewModel @Inject constructor(
                                     chatContactIds.remove(it.id)
                                 }
 
-                                if (contactRepository.updatedContactIds.contains(it.id)) {
+                                if (repositoryDashboard.updatedContactIds.contains(it.id)) {
                                     //Contact updated
                                     currentChats.remove(chat)
                                     chatContactIds.remove(it.id)
@@ -196,7 +231,7 @@ internal class DashboardViewModel @Inject constructor(
 
                         if (updateChatViewState) {
                             chatViewStateContainer.updateDashboardChats(currentChats.toList())
-                            contactRepository.updatedContactIds = mutableListOf()
+                            repositoryDashboard.updatedContactIds = mutableListOf()
                         }
                     }
                 }
@@ -205,7 +240,7 @@ internal class DashboardViewModel @Inject constructor(
 
         viewModelScope.launch(mainImmediate) {
             delay(25L)
-            chatRepository.getAllChats.distinctUntilChanged().collect { chats ->
+            repositoryDashboard.getAllChats.distinctUntilChanged().collect { chats ->
                 collectionLock.withLock {
                     chatsCollectionInitialized = true
                     val newList = ArrayList<DashboardChat>(chats.size)
@@ -214,13 +249,13 @@ internal class DashboardViewModel @Inject constructor(
                     withContext(default) {
                         for (chat in chats) {
                             val message: Message? = chat.latestMessageId?.let {
-                                messageRepository.getMessageById(it).firstOrNull()
+                                repositoryDashboard.getMessageById(it).firstOrNull()
                             }
 
                             if (chat.type.isConversation()) {
                                 val contactId: ContactId = chat.contactIds.lastOrNull() ?: continue
 
-                                val contact: Contact = contactRepository.getContactById(contactId)
+                                val contact: Contact = repositoryDashboard.getContactById(contactId)
                                     .firstOrNull() ?: continue
 
                                 contactsAdded.add(contactId)
@@ -230,7 +265,7 @@ internal class DashboardViewModel @Inject constructor(
                                         chat,
                                         message,
                                         contact,
-                                        chatRepository.getUnseenMessagesByChatId(chat),
+                                        repositoryDashboard.getUnseenMessagesByChatId(chat.id),
                                     )
                                 )
                             } else {
@@ -238,7 +273,7 @@ internal class DashboardViewModel @Inject constructor(
                                     DashboardChat.Active.GroupOrTribe(
                                         chat,
                                         message,
-                                        chatRepository.getUnseenMessagesByChatId(chat)
+                                        repositoryDashboard.getUnseenMessagesByChatId(chat.id)
                                     )
                                 )
                             }
@@ -267,7 +302,7 @@ internal class DashboardViewModel @Inject constructor(
         // Prime it...
         viewModelScope.launch(mainImmediate) {
             try {
-                contactRepository.accountOwner.collect {
+                repositoryDashboard.accountOwner.collect {
                     if (it != null) {
                         throw Exception()
                     }
@@ -301,7 +336,7 @@ internal class DashboardViewModel @Inject constructor(
         }
 
         jobNetworkRefresh = viewModelScope.launch(mainImmediate) {
-            lightningRepository.networkRefreshBalance.collect { response ->
+            repositoryDashboard.networkRefreshBalance.collect { response ->
                 @Exhaustive
                 when (response) {
                     is LoadResponse.Loading,
@@ -316,7 +351,7 @@ internal class DashboardViewModel @Inject constructor(
                 jobNetworkRefresh?.cancel()
             }
 
-            contactRepository.networkRefreshContacts.collect { response ->
+            repositoryDashboard.networkRefreshContacts.collect { response ->
                 @Exhaustive
                 when (response) {
                     is LoadResponse.Loading -> {}
@@ -345,7 +380,7 @@ internal class DashboardViewModel @Inject constructor(
                 }
             }
 
-            messageRepository.networkRefreshMessages.collect { response ->
+            repositoryDashboard.networkRefreshMessages.collect { response ->
                 _networkStateFlow.value = response
             }
         }

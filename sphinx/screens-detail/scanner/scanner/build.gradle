@@ -36,10 +36,22 @@ dependencies {
     implementation project(path: ':android:features:android-feature-screens')
     
     // Sphinx
+    implementation project(path: ':sphinx:activity:insetter-activity')
     implementation project(path: ':sphinx:screens-detail:common:detail-resources')
 
     implementation project(path: ':sphinx:activity:features:feature-view-model-coordinator')
     api project(path: ':sphinx:screens-detail:scanner:scanner-view-model-coordinator')
+
+    //ML Kit Barcode Scanning
+    implementation deps.google.mlKitBarcodeScanning
+
+    //CameraX Dependencies
+    implementation deps.androidx.camera.core
+    implementation deps.androidx.camera.camera2
+    implementation deps.androidx.camera.lifecycle
+    implementation deps.androidx.camera.view
+    implementation deps.androidx.camera.extensions
+    implementation deps.google.material
 
     implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt

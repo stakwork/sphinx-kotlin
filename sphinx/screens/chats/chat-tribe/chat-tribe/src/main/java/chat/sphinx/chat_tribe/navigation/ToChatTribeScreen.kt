@@ -3,7 +3,7 @@ package chat.sphinx.chat_tribe.navigation
 import androidx.navigation.NavController
 import chat.sphinx.chat_tribe.R
 import chat.sphinx.chat_tribe.ui.ChatTribeFragmentArgs
-import chat.sphinx.wrapper_common.chat.ChatId
+import chat.sphinx.wrapper_common.dashboard.ChatId
 import io.matthewnelson.android_feature_navigation.DefaultNavOptions
 import io.matthewnelson.concept_navigation.NavigationRequest
 

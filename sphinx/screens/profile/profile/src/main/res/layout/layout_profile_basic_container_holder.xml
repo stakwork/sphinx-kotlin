@@ -1,0 +1,440 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layout_constraint_profile_advanced_container_scroll_view_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/layout_constraint_profile_basic_container_info_form"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/profile_basic_info_form_height"
+                android:background="@color/body"
+                android:layout_marginTop="@dimen/profile_form_container_margin_top"
+                android:elevation="8dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/layout_constraint_profile_basic_container_nickname_content"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/profile_form_field_container_height"
+                    android:layout_marginStart="@dimen/default_form_horizontal_margin"
+                    android:layout_marginEnd="@dimen/default_form_horizontal_margin"
+                    app:layout_constraintTop_toTopOf="parent">
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/text_view_profile_basic_container_user_name"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/profile_user_name"
+                        android:textColor="@color/secondaryText"
+                        android:fontFamily="@font/roboto_regular"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        android:textSize="@dimen/default_form_text_view_text_size"
+                        android:singleLine="true" />
+
+                    <androidx.appcompat.widget.AppCompatEditText
+                        android:id="@+id/edit_text_profile_basic_container_user_name"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/text"
+                        android:fontFamily="@font/roboto_regular"
+                        app:backgroundTint="@android:color/transparent"
+                        app:layout_constraintTop_toBottomOf="@+id/text_view_profile_basic_container_user_name"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        android:textSize="@dimen/default_form_edit_view_text_size"
+                        android:inputType="textVisiblePassword|textCapWords"
+                        android:layout_marginLeft="@dimen/default_form_edit_text_left_margin"
+                        android:singleLine="true"
+                        tools:text= "Testing"/>
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/layout_constraint_profile_basic_container_user_name_bottom_border"
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@color/lightDivider"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="@+id/text_view_profile_basic_container_user_name" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/layout_constraint_profile_basic_container_address_content"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/profile_form_field_container_height"
+                    android:layout_marginStart="@dimen/default_form_horizontal_margin"
+                    android:layout_marginEnd="@dimen/default_form_horizontal_margin"
+                    app:layout_constraintTop_toBottomOf="@+id/layout_constraint_profile_basic_container_nickname_content">
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/text_view_profile_basic_container_address"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/profile_address"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        android:textColor="@color/secondaryText"
+                        android:fontFamily="@font/roboto_regular"
+                        android:textSize="@dimen/default_form_text_view_text_size"
+                        android:singleLine="true" />
+
+                    <androidx.appcompat.widget.AppCompatEditText
+                        android:id="@+id/edit_text_profile_basic_container_address"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/text"
+                        android:fontFamily="@font/roboto_regular"
+                        app:backgroundTint="@android:color/transparent"
+                        app:layout_constraintTop_toBottomOf="@+id/text_view_profile_basic_container_address"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        android:textSize="@dimen/default_form_edit_view_text_size"
+                        android:inputType="none"
+                        android:focusable="false"
+                        android:cursorVisible="false"
+                        android:clickable="false"
+                        android:layout_marginLeft="@dimen/default_form_edit_text_left_margin"
+                        android:layout_marginRight="@dimen/default_form_scan_icon_container_width"
+                        android:singleLine="true"
+                        tools:text= "Testing" />
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/layout_constraint_profile_basic_container_address_bottom_border"
+                        android:layout_width="0dp"
+                        android:layout_height="1dp"
+                        android:background="@color/lightDivider"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toStartOf="@+id/layout_constraint_profile_basic_container_qr_code_button"
+                        app:layout_constraintStart_toStartOf="@+id/text_view_profile_basic_container_address" />
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/layout_constraint_profile_basic_container_qr_code_button"
+                        android:layout_width="@dimen/default_form_scan_icon_container_width"
+                        android:layout_height="match_parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent">
+
+                        <androidx.appcompat.widget.AppCompatButton
+                            android:id="@+id/button_profile_basic_container_qr_code"
+                            android:layout_width="@dimen/profile_form_qr_code_icon_xy"
+                            android:layout_height="@dimen/profile_form_qr_code_icon_xy"
+                            app:layout_constraintEnd_toEndOf="@+id/layout_constraint_profile_basic_container_qr_code_button"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            android:background="@drawable/ic_qr_code"
+                            android:backgroundTint="@color/text" />
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/layout_constraint_profile_basic_container_route_hint_content"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/profile_form_field_container_height"
+                    android:layout_marginStart="@dimen/default_form_horizontal_margin"
+                    android:layout_marginEnd="@dimen/default_form_horizontal_margin"
+                    app:layout_constraintTop_toBottomOf="@+id/layout_constraint_profile_basic_container_address_content">
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/text_view_profile_basic_container_route_hint"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/profile_route_hint"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        android:textColor="@color/secondaryText"
+                        android:fontFamily="@font/roboto_regular"
+                        android:textSize="@dimen/default_form_text_view_text_size"
+                        android:singleLine="true" />
+
+                    <androidx.appcompat.widget.AppCompatEditText
+                        android:id="@+id/edit_text_profile_basic_container_route_hint"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/text"
+                        android:fontFamily="@font/roboto_regular"
+                        app:backgroundTint="@android:color/transparent"
+                        app:layout_constraintTop_toBottomOf="@+id/text_view_profile_basic_container_route_hint"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        android:inputType="none"
+                        android:focusable="false"
+                        android:cursorVisible="false"
+                        android:clickable="false"
+                        android:textSize="@dimen/default_form_edit_view_text_size"
+                        android:layout_marginLeft="@dimen/default_form_edit_text_left_margin"
+                        android:singleLine="true" />
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/layout_constraint_profile_basic_container_route_hint_bottom_border"
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@color/lightDivider"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="@+id/text_view_profile_basic_container_route_hint" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/layout_constraint_profile_basic_container_share_picture_content"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/profile_form_field_container_height"
+                    android:layout_marginTop="@dimen/default_half_layout_margin"
+                    android:layout_marginStart="@dimen/default_form_horizontal_margin"
+                    android:layout_marginEnd="@dimen/default_form_horizontal_margin"
+                    app:layout_constraintTop_toBottomOf="@+id/layout_constraint_profile_basic_container_route_hint_content">
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/text_view_profile_basic_container_pin_toggle"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/text"
+                        android:fontFamily="@font/roboto_regular"
+                        android:textSize="@dimen/pin_text_view_size"
+                        android:maxLines="2"
+                        android:text="@string/profile_share_picture"
+                        android:layout_marginEnd="@dimen/default_layout_margin"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toStartOf="@+id/switch_profile_basic_container_pin"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <androidx.appcompat.widget.SwitchCompat
+                        android:id="@+id/switch_profile_basic_container_pin"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checked="false"
+                        android:theme="@style/CustomSwitch"
+                        android:thumb="@drawable/switch_thumb_selector"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toEndOf="@id/text_view_profile_basic_container_pin_toggle"
+                        app:track="@drawable/switch_track_selector" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+<!--            <androidx.constraintlayout.widget.ConstraintLayout-->
+<!--                android:id="@+id/sound_appearance_form"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="@dimen/profile_sound_appearance_form_height"-->
+<!--                android:background="@color/body"-->
+<!--                android:layout_marginTop="@dimen/profile_form_container_margin_top"-->
+<!--                android:elevation="8dp"-->
+<!--                app:layout_constraintStart_toStartOf="parent"-->
+<!--                app:layout_constraintEnd_toEndOf="parent"-->
+<!--                app:layout_constraintTop_toBottomOf="@+id/basic_info_form">-->
+<!--                -->
+
+<!--            </androidx.constraintlayout.widget.ConstraintLayout>-->
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/layout_constraint_profile_basic_container_servers_form"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/profile_servers_form_height"
+                android:background="@color/body"
+                android:layout_marginTop="@dimen/profile_form_container_margin_top"
+                android:elevation="8dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/layout_constraint_profile_basic_container_info_form">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/layout_constraint_profile_basic_tip_content"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/profile_form_field_container_height"
+                    android:layout_marginStart="@dimen/default_form_horizontal_margin"
+                    android:layout_marginEnd="@dimen/default_form_horizontal_margin"
+                    app:layout_constraintTop_toTopOf="parent">
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/text_view_profile_basic_container_tip"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/profile_tip"
+                        android:textColor="@color/secondaryText"
+                        android:fontFamily="@font/roboto_regular"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        android:textSize="@dimen/default_form_text_view_text_size"
+                        android:singleLine="true" />
+
+                    <androidx.appcompat.widget.AppCompatEditText
+                        android:id="@+id/edit_text_profile_basic_container_tip"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/text"
+                        android:fontFamily="@font/roboto_regular"
+                        app:backgroundTint="@android:color/transparent"
+                        app:layout_constraintTop_toBottomOf="@+id/text_view_profile_basic_container_tip"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        android:textSize="@dimen/default_form_edit_view_text_size"
+                        android:inputType="number"
+                        android:digits="0123456789"
+                        android:layout_marginLeft="@dimen/default_form_edit_text_left_margin"
+                        android:singleLine="true"
+                        android:text= "20"
+                        tools:text= "100"/>
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/layout_constraint_profile_basic_container_tip_bottom_border"
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@color/lightDivider"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="@+id/text_view_profile_basic_container_tip" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/layout_constraint_profile_basic_container_meeting_server_content"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/profile_form_field_container_height"
+                    android:layout_marginStart="@dimen/default_form_horizontal_margin"
+                    android:layout_marginEnd="@dimen/default_form_horizontal_margin"
+                    app:layout_constraintTop_toBottomOf="@+id/layout_constraint_profile_basic_tip_content">
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/text_view_profile_basic_container_meeting_server"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/profile_meeting_server"
+                        android:textColor="@color/secondaryText"
+                        android:fontFamily="@font/roboto_regular"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        android:textSize="@dimen/default_form_text_view_text_size"
+                        android:singleLine="true" />
+
+                    <androidx.appcompat.widget.AppCompatEditText
+                        android:id="@+id/edit_text_profile_basic_container_meeting_server"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/text"
+                        android:fontFamily="@font/roboto_regular"
+                        app:backgroundTint="@android:color/transparent"
+                        app:layout_constraintTop_toBottomOf="@+id/text_view_profile_basic_container_meeting_server"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        android:textSize="@dimen/default_form_edit_view_text_size"
+                        android:layout_marginLeft="@dimen/default_form_edit_text_left_margin"
+                        android:singleLine="true"
+                        android:inputType="none"
+                        android:focusable="false"
+                        android:cursorVisible="false"
+                        android:clickable="false"
+                        android:text="https://jitsi.sphinx.chat"
+                        tools:text="https://jitsi.sphinx.chat"/>
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/layout_constraint_profile_basic_container_meeting_server_bottom_border"
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@color/lightDivider"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="@+id/text_view_profile_basic_container_meeting_server" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/layout_constraint_profile_basic_container_keys_backup_form"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/profile_keys_backup_form_height"
+                android:background="@color/body"
+                android:layout_marginTop="@dimen/profile_form_container_margin_top"
+                android:elevation="8dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/layout_constraint_profile_basic_container_servers_form">
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/text_view_profile_basic_container_sync_devices"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/profile_sync_devices"
+                    android:textColor="@color/text"
+                    android:fontFamily="@font/roboto_regular"
+                    android:textSize="@dimen/profile_sync_devices_text_size"
+                    android:singleLine="true"
+                    android:layout_marginTop="@dimen/default_double_layout_margin"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent" />
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/layout_constraint_profile_basic_container_finish_content"
+                    android:layout_width="match_parent"
+                    android:layout_height="52dp"
+                    android:layout_marginStart="@dimen/default_double_layout_margin"
+                    android:layout_marginEnd="@dimen/default_double_layout_margin"
+                    android:layout_marginBottom="@dimen/default_double_layout_margin"
+                    android:background="@drawable/button_background_white_rad_48"
+                    android:backgroundTint="@color/primaryBlue"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent">
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/text_view_profile_basic_container_key_backup"
+                        android:layout_width="wrap_content"
+                        android:layout_height="0dp"
+                        android:gravity="center"
+                        android:layout_marginEnd="@dimen/default_layout_margin"
+                        android:text="@string/material_icon_name_key"
+                        android:textColor="@color/text"
+                        android:fontFamily="@font/material_icons_regular"
+                        android:textSize="@dimen/profile_backup_keys_icon_text_size"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent" />
+
+                    <androidx.appcompat.widget.AppCompatButton
+                        android:id="@+id/button_profile_basic_container_key_backup"
+                        style="@style/RoundedBlueButton"
+                        android:textAllCaps="false"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:text="@string/profile_backup_keys"
+                        android:textSize="@dimen/profile_backup_keys_text_size"
+                        android:textColor="@android:color/white"
+                        android:background="@android:color/transparent"/>
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

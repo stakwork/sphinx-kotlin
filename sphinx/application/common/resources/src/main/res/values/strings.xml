@@ -2,6 +2,7 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <string name="sats">sats</string>
     <string name="new_contact">New Contact</string>
+    <string name="default_sats_amount">…</string>
 
     <!--  Material Icons   -->
     <string name="material_icon_name_lock_outline">lock_outline</string>
@@ -25,6 +26,7 @@
     <string name="material_icon_name_circled_close_button" tools:ignore="ButtonCase">cancel</string>
     <string name="material_icon_name_help_outline">help_outline</string>
     <string name="material_icon_name_replay">replay</string>
+    <string name="material_icon_name_key">vpn_key</string>
 
     <!--  Message Action Material Icons  -->
     <string name="material_icon_name_message_action_delete">delete</string>
@@ -56,4 +58,5 @@
     <!--  Group Pin View -->
     <string name="group_pin_label">Privacy Setting</string>
     <string name="new_contact_pin_standard_private_label">Standard PIN / Privacy PIN</string>
+
 </resources>

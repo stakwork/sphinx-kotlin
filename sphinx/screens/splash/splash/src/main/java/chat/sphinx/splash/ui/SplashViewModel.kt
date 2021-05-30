@@ -69,7 +69,10 @@ internal class SplashViewModel @Inject constructor(
             backgroundLoginHandler.attemptBackgroundLogin(
                 updateLastLoginTimeOnSuccess = true
             )?.let {
-                navigator.toDashboardScreen()
+                navigator.toDashboardScreen(
+                    // No need as it was already updated
+                    updateBackgroundLoginTime = false
+                )
             } ?: let {
                 if (authenticationCoordinator.isAnEncryptionKeySet()) {
                     authenticationCoordinator.submitAuthenticationRequest(
@@ -84,10 +87,7 @@ internal class SplashViewModel @Inject constructor(
                                 // User has authenticated
                             }
                             is AuthenticationResponse.Success.Authenticated -> {
-                                // Prime relay cache data before navigating (takes an extra ~ .3s)
-                                // TODO: Enable once SplashFragment backpress handling is cleaned up
-//                                backgroundLoginHandler.updateLoginTime()
-                                navigator.toDashboardScreen()
+                                navigator.toDashboardScreen(updateBackgroundLoginTime = true)
                             }
                             is AuthenticationResponse.Success.Key -> {
                                 // will never be returned
@@ -235,9 +235,7 @@ internal class SplashViewModel @Inject constructor(
                         viewState.pinWriter.append('0')
                     }
 
-                    // TODO: Enable once SplashFragment backpress handling is cleaned up
-//                    backgroundLoginHandler.updateLoginTime()
-                    navigator.toDashboardScreen()
+                    navigator.toDashboardScreen(updateBackgroundLoginTime = true)
 
                 } ?: updateViewState(
                     SplashViewState.Set3_DecryptKeys(viewState.toDecrypt)
