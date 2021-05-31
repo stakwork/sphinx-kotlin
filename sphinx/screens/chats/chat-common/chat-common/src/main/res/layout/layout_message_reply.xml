@@ -60,6 +60,7 @@
         android:id="@+id/text_view_reply_sender_label"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/default_inner_spacing_list_item_title"
         android:ellipsize="end"
         android:fontFamily="@font/roboto_bold"
         android:lines="1"
@@ -67,8 +68,8 @@
         android:textColor="@color/primaryText"
         android:textSize="@dimen/default_text_size_list_row_headline"
         app:layout_constraintBottom_toTopOf="@id/text_view_reply_message_label"
-        app:layout_constraintEnd_toEndOf="@+id/text_view_reply_message_label"
-        app:layout_constraintStart_toStartOf="@+id/text_view_reply_message_label"
+        app:layout_constraintEnd_toStartOf="@+id/text_view_reply_close"
+        app:layout_constraintStart_toEndOf="@id/image_view_reply_media_image"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="Name of Original Sender" />
 
@@ -84,7 +85,6 @@
         android:textColor="@color/text"
         app:layout_constraintBottom_toTopOf="@+id/layout_constraint_message_reply_divider_bottom"
         app:layout_constraintEnd_toStartOf="@+id/text_view_reply_close"
-        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toEndOf="@id/image_view_reply_media_image"
         app:layout_constraintTop_toBottomOf="@id/text_view_reply_sender_label"
         tools:text="Text content of original message" />
