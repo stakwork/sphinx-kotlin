@@ -21,6 +21,7 @@ internal sealed class MessageHolderViewState(
     chat: Chat,
     val background: BubbleBackground,
     val initialHolder: InitialHolderViewState,
+    val messageSenderName: (Message) -> String,
 ) {
 
     val statusHeader: LayoutState.MessageStatusHeader? by lazy(LazyThreadSafetyMode.NONE) {
@@ -140,7 +141,7 @@ internal sealed class MessageHolderViewState(
     val bubbleReplyMessage: LayoutState.Bubble.ReplyMessage? by lazy {
         message.replyMessage?.let { nnMessage ->
             LayoutState.Bubble.ReplyMessage(
-                nnMessage.senderAlias?.value ?: "",
+                messageSenderName(nnMessage),
 
                 nnMessage.retrieveTextToShow() ?: "",
             )
@@ -151,11 +152,13 @@ internal sealed class MessageHolderViewState(
         message: Message,
         chat: Chat,
         background: BubbleBackground,
+        replyMessageSenderName: (Message) -> String,
     ): MessageHolderViewState(
         message,
         chat,
         background,
-        InitialHolderViewState.None
+        InitialHolderViewState.None,
+        replyMessageSenderName,
     )
 
     class Received(
@@ -163,10 +166,12 @@ internal sealed class MessageHolderViewState(
         chat: Chat,
         background: BubbleBackground,
         initialHolder: InitialHolderViewState,
+        replyMessageSenderName: (Message) -> String,
     ): MessageHolderViewState(
         message,
         chat,
         background,
-        initialHolder
+        initialHolder,
+        replyMessageSenderName,
     )
 }

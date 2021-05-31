@@ -16,6 +16,7 @@ import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_repository_chat.ChatRepository
+import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.concept_repository_message.SendMessage
 import chat.sphinx.kotlin_response.LoadResponse
@@ -25,6 +26,7 @@ import chat.sphinx.kotlin_response.message
 import chat.sphinx.resources.getRandomColor
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.ChatName
+import chat.sphinx.wrapper_chat.isConversation
 import chat.sphinx.wrapper_message.Message
 import chat.sphinx.wrapper_message.isDeleted
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
@@ -41,6 +43,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     protected val app: Application,
     dispatchers: CoroutineDispatchers,
     protected val chatRepository: ChatRepository,
+    protected val contactRepository: ContactRepository,
     protected val messageRepository: MessageRepository,
     protected val networkQueryLightning: NetworkQueryLightning,
     protected val savedStateHandle: SavedStateHandle
@@ -136,6 +139,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 
     internal val messageHolderViewStateFlow: StateFlow<List<MessageHolderViewState>> = flow {
         val chat = getChat()
+        val chatName = getChatNameIfNull()
 
         messageRepository.getAllMessagesToShowByChatId(chat.id).distinctUntilChanged().collect { messages ->
             val newList = ArrayList<MessageHolderViewState>(messages.size)
@@ -153,7 +157,19 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                                     BubbleBackground.First.Isolated
                                 },
 
-                            )
+                            ) { replyMessage ->
+                                when {
+                                    replyMessage.sender == chat.contactIds.firstOrNull() -> {
+                                        contactRepository.accountOwner.value?.alias?.value ?: ""
+                                    }
+                                    chat.type.isConversation() -> {
+                                        chatName?.value ?: ""
+                                    }
+                                    else -> {
+                                        replyMessage.senderAlias?.value ?: ""
+                                    }
+                                }
+                            }
                         )
                     } else {
 
@@ -176,7 +192,19 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                                     getInitialHolderViewStateForReceivedMessage(message)
                                 },
 
-                            )
+                            ) { replyMessage ->
+                                when {
+                                    replyMessage.sender == chat.contactIds.firstOrNull() -> {
+                                        contactRepository.accountOwner.value?.alias?.value ?: ""
+                                    }
+                                    chat.type.isConversation() -> {
+                                        chatName?.value ?: ""
+                                    }
+                                    else -> {
+                                        replyMessage.senderAlias?.value ?: ""
+                                    }
+                                }
+                            }
                         )
                     }
                 }

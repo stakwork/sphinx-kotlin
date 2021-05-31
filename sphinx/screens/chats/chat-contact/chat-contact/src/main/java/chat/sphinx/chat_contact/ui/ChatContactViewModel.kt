@@ -55,6 +55,7 @@ internal class ChatContactViewModel @Inject constructor(
     app,
     dispatchers,
     chatRepository,
+    contactRepository,
     messageRepository,
     networkQueryLightning,
     savedStateHandle,
