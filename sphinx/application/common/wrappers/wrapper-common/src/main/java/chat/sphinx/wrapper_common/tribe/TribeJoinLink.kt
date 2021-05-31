@@ -1,8 +1,5 @@
 package chat.sphinx.wrapper_common.tribe
 
-import java.text.SimpleDateFormat
-import java.util.*
-
 @Suppress("NOTHING_TO_INLINE")
 inline fun String.toTribeJoinLink(): TribeJoinLink? =
     try {

@@ -114,7 +114,7 @@ internal class DashboardViewModel @Inject constructor(
                 val code = response.value.value
 
                 if (code.isValidTribeJoinLink) {
-                    navBarNavigator.toJoinTribeDetail(TribeJoinLink(code))
+                    dashboardNavigator.toJoinTribeDetail(TribeJoinLink(code))
                 }
             }
         }

@@ -24,8 +24,4 @@ internal class DashboardBottomNavBarNavigatorImpl @Inject constructor(
     override suspend fun toPaymentSendDetail() {
         navigationDriver.submitNavigationRequest(ToPaymentSendDetail())
     }
-
-    override suspend fun toJoinTribeDetail(tribeLink: TribeJoinLink) {
-        navigationDriver.submitNavigationRequest(ToJoinTribeDetail(tribeLink))
-    }
 }
