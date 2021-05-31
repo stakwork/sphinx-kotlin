@@ -90,6 +90,7 @@ include ':sphinx:screens:splash:key-restore'
 include ':sphinx:screens-detail:add-friend:add-friend'
 include ':sphinx:screens-detail:common:detail-resources'
 include ':sphinx:screens-detail:create-tribe:create-tribe'
+include ':sphinx:screens-detail:join-tribe:join-tribe'
 include ':sphinx:screens-detail:new-contact:new-contact'
 include ':sphinx:screens-detail:payments:payment-receive:payment-receive'
 include ':sphinx:screens-detail:payments:payment-send:payment-send'
@@ -231,5 +232,3 @@ project(':kotlin:test:test-k-openssl').projectDir =
 
 //include ':sample'
 //project(':sample').projectDir = file(new File(rootDir, 'kotlin-android/sample'))
-include ':sphinx:screens-detail:join-tribe:join-tribe'
-include ':sphinx:screens-detail:join-tribe:join-tribe-view-model-coordiinator'
