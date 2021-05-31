@@ -9,6 +9,7 @@ import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.onboard_ready.navigation.OnBoardReadyNavigator
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
+import chat.sphinx.wrapper_common.lightning.LightningRouteHint
 import chat.sphinx.wrapper_contact.ContactAlias
 import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_lightning.NodeBalanceAll
@@ -35,15 +36,16 @@ internal class OnBoardReadyViewModel @Inject constructor(
         OnBoardReadyViewState
         >(dispatchers, OnBoardReadyViewState.Idle)
 {
-    fun saveInviterAndFinish(nickname: String, pubkey: String) {
+    fun saveInviterAndFinish(nickname: String, pubkey: String, routeHint: String?) {
         viewModelScope.launch(mainImmediate) {
             val alias = ContactAlias(nickname)
             val pubKey = LightningNodePubKey(pubkey)
+            val routeHint = routeHint?.let { LightningRouteHint(it) }
 
             contactRepository.createContact(
                 alias,
                 pubKey,
-                null
+                routeHint
             ).collect { loadResponse ->
                 @Exhaustive
                 when (loadResponse) {

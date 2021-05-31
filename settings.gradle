@@ -82,6 +82,8 @@ include ':sphinx:screens:chats:chat-group:chat-group'
 include ':sphinx:screens:chats:chat-tribe:chat-tribe'
 include ':sphinx:screens:dashboard:dashboard'
 include ':sphinx:screens:onboard:onboard'
+include ':sphinx:screens:onboard-name:onboard-name'
+include ':sphinx:screens:onboard-ready:onboard-ready'
 include ':sphinx:screens:profile:profile'
 include ':sphinx:screens:splash:splash'
 include ':sphinx:screens:splash:key-restore'
@@ -231,5 +233,3 @@ project(':kotlin:test:test-k-openssl').projectDir =
 
 //include ':sample'
 //project(':sample').projectDir = file(new File(rootDir, 'kotlin-android/sample'))
-include ':sphinx:screens:onboard-name:onboard-name'
-include ':sphinx:screens:onboard-ready:onboard-ready'

@@ -1,13 +1,18 @@
 package chat.sphinx.splash.ui
 
+import android.app.Application
 import android.content.Context
 import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_background_login.BackgroundLoginHandler
+import chat.sphinx.concept_network_query_invite.NetworkQueryInvite
+import chat.sphinx.concept_network_query_invite.model.InviteDto
+import chat.sphinx.concept_network_query_invite.model.RedeemInviteDto
 import chat.sphinx.concept_repository_lightning.LightningRepository
 import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
 import chat.sphinx.key_restore.KeyRestore
 import chat.sphinx.key_restore.KeyRestoreResponse
+import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.scanner_view_model_coordinator.request.ScannerFilter
 import chat.sphinx.scanner_view_model_coordinator.request.ScannerRequest
@@ -44,6 +49,8 @@ internal class SplashViewModel @Inject constructor(
     private val lightningRepository: LightningRepository,
     private val navigator: SplashNavigator,
     private val scannerCoordinator: ViewModelCoordinator<ScannerRequest, ScannerResponse>,
+    private val networkQueryInvite: NetworkQueryInvite,
+    private val app: Application,
 ): MotionLayoutViewModel<
         Any,
         Context,
@@ -146,11 +153,13 @@ internal class SplashViewModel @Inject constructor(
             return
         }
 
+        // Maybe we can have a SignupStyle class to reflect this? Since there's a lot of decoding
+        // going on in different classes
         // Invite Code
         if (input.length == 40) {
             // TODO: Implement
             viewModelScope.launch(mainImmediate) {
-                submitSideEffect(SplashSideEffect.NotImplementedYet)
+                redeemInvite(input)
             }
             return
         }
@@ -159,9 +168,7 @@ internal class SplashViewModel @Inject constructor(
             if (decodedSplit.size == 3) {
                 if (decodedSplit.elementAt(0) == "ip") {
                     viewModelScope.launch(mainImmediate) {
-                        input.decodeBase64ToArray()?.decodeToString()?.let {
-                            navigator.toOnBoardScreen(it)
-                        }
+                        navigator.toOnBoardScreen(input)
                     }
 
                     return
@@ -181,6 +188,51 @@ internal class SplashViewModel @Inject constructor(
 
         viewModelScope.launch(mainImmediate) {
             submitSideEffect(SplashSideEffect.InvalidCode)
+        }
+    }
+
+    private fun redeemInvite(input: String) {
+        viewModelScope.launch(mainImmediate) {
+            networkQueryInvite.redeemInvite(input).collect { loadResponse ->
+                @javax.annotation.meta.Exhaustive
+                when (loadResponse) {
+                    is LoadResponse.Loading -> {
+                    }
+                    is Response.Error -> {
+                        submitSideEffect(SplashSideEffect.InvalidCode)
+                    }
+                    is Response.Success -> {
+                        val inviteResponse = loadResponse.value.response
+
+                        inviteResponse?.invite?.let { invite ->
+                            storeTemporaryInviteAndIP(invite, inviteResponse.ip)
+                        }
+
+                        navigator.toOnBoardScreen(input)
+                    }
+                }
+            }
+        }
+    }
+
+    private fun storeTemporaryInviteAndIP(invite: RedeemInviteDto, ip: String) {
+        // I needed a way to store this to transition between fragments
+        // but I wasn't sure what to use besides this
+        app.getSharedPreferences("sphinx_temp_prefs", Context.MODE_PRIVATE).let {
+                sharedPrefs ->
+            sharedPrefs?.edit()?.let { editor ->
+                editor.putString("sphinx_temp_nickname", invite.nickname)
+                    .putString("sphinx_temp_pubkey", invite.pubkey)
+                    .putString("sphinx_temp_message", invite.message)
+                    .putString("sphinx_temp_route_hint", invite.route_hint)
+                    .putString("sphinx_temp_action", invite.action)
+                    .putString("sphinx_temp_ip", ip)
+                    .let { editor ->
+                        if (!editor.commit()) {
+                            editor.apply()
+                        }
+                    }
+            }
         }
     }
 

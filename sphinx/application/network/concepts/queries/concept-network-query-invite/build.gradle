@@ -12,5 +12,6 @@ dependencies {
     // needed to override moshi's use of 1.4.31
     implementation deps.kotlin.reflect
     implementation deps.square.moshi
+    implementation project(path: ':sphinx:application:network:concepts:calls:concept-network-relay-call')
     kapt kaptDeps.square.moshiCodegen
 }

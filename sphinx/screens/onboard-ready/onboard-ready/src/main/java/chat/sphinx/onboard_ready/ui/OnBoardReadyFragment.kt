@@ -42,8 +42,7 @@ internal class OnBoardReadyFragment: SideEffectFragment<
             viewModel.getBalances().collect { loadResponse ->
                 @Exhaustive
                 when (loadResponse) {
-                    LoadResponse.Loading ->
-                        viewModel.updateViewState(OnBoardReadyViewState.Saving)
+                    LoadResponse.Loading -> {}
                     is Response.Error -> {
                         viewModel.updateViewState(OnBoardReadyViewState.Error)
                         viewModel.submitSideEffect(OnBoardReadySideEffect.CreateInviterFailed)
@@ -51,7 +50,7 @@ internal class OnBoardReadyFragment: SideEffectFragment<
                     is Response.Success -> {
                         val balance = loadResponse.value
 
-                        binding.balanceTextView.text = "You can send messages,\\nspend ${balance.localBalance} sats, or receive\\up to ${balance.remoteBalance} sats."
+                        binding.balanceTextView.text = "You can send messages,\\nspend ${balance.localBalance.value} sats, or receive\\up to ${balance.remoteBalance.value} sats."
                     }
                 }
             }
@@ -62,11 +61,12 @@ internal class OnBoardReadyFragment: SideEffectFragment<
 
             context?.getSharedPreferences("sphinx_temp_prefs", Context.MODE_PRIVATE)?.let { sharedPrefs ->
                 val nickname = sharedPrefs.getString("sphinx_temp_nickname", "")
-                val pubkey = sharedPrefs.getString("sphinx_temp_pubkey", "")
+                val pubkey = sharedPrefs.getString("sphinx_temp_pubkey", null)
+                val routeHint = sharedPrefs.getString("sphinx_temp_route_hint", null)
 
                 nickname?.let { nickname ->
                     pubkey?.let { pubkey ->
-                        viewModel.saveInviterAndFinish(nickname, pubkey)
+                        viewModel.saveInviterAndFinish(nickname, pubkey, routeHint)
                     }
                 }
             }

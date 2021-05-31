@@ -1,5 +1,6 @@
 package chat.sphinx.onboard.ui
 
+import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.lifecycle.viewModelScope
@@ -10,6 +11,8 @@ import chat.sphinx.concept_relay.RelayDataHandler
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import androidx.lifecycle.viewModelScope
+import chat.sphinx.concept_network_query_invite.NetworkQueryInvite
+import chat.sphinx.concept_network_query_invite.model.InviteDto
 import chat.sphinx.onboard.navigation.OnBoardNavigator
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
@@ -27,13 +30,16 @@ import kotlinx.coroutines.launch
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import javax.annotation.meta.Exhaustive
 import javax.inject.Inject
+import kotlin.coroutines.coroutineContext
 import kotlin.random.Random
 
 @HiltViewModel
 internal class OnBoardViewModel @Inject constructor(
+    private val app: Application,
     dispatchers: CoroutineDispatchers,
     val navigator: OnBoardNavigator,
     private val networkQueryContact: NetworkQueryContact,
+    private val networkQueryInvite: NetworkQueryInvite,
     private val torManager: TorManager,
     private val relayDataHandler: RelayDataHandler,
     private val authenticationCoordinator: AuthenticationCoordinator
@@ -43,7 +49,8 @@ internal class OnBoardViewModel @Inject constructor(
         OnBoardViewState
         >(dispatchers, OnBoardViewState.Idle)
 {
-    fun generateToken(ip: String, code: String) {
+
+    fun generateToken(ip: String, code: String? = null) {
         viewModelScope.launch(mainImmediate) {
             val authToken = generateToken()
             val relayUrl = parseRelayUrl(RelayUrl(ip))
@@ -59,30 +66,53 @@ internal class OnBoardViewModel @Inject constructor(
                         submitSideEffect(OnBoardSideEffect.GenerateTokenFailed)
                     }
                     is Response.Success -> {
-                        authenticationCoordinator.submitAuthenticationRequest(
-                            AuthenticationRequest.LogIn()
-                        ).firstOrNull().let { response ->
-                            @Exhaustive
-                            when (response) {
-                                null,
-                                is AuthenticationResponse.Failure -> {
-                                    // will not be returned as back press for handling
-                                    // a LogIn request minimizes the application until
-                                    // User has authenticated
-                                }
-                                is AuthenticationResponse.Success.Authenticated -> {
-                                    relayDataHandler.persistAuthorizationToken(authToken)
-                                    relayDataHandler.persistRelayUrl(relayUrl)
-
-                                    goToOnBoardNameScreen()
-                                }
-                                is AuthenticationResponse.Success.Key -> {
-                                    // will never be returned
-                                }
-                            }
-                        }
+                        presentLoginModal(authToken, relayUrl)
                     }
                 }
+            }
+        }
+    }
+
+    private suspend fun presentLoginModal(
+        authToken: AuthorizationToken,
+        relayUrl: RelayUrl
+    ) {
+        authenticationCoordinator.submitAuthenticationRequest(
+            AuthenticationRequest.LogIn()
+        ).firstOrNull().let { response ->
+            @Exhaustive
+            when (response) {
+                null,
+                is AuthenticationResponse.Failure -> {
+                    // will not be returned as back press for handling
+                    // a LogIn request minimizes the application until
+                    // User has authenticated
+                }
+                is AuthenticationResponse.Success.Authenticated -> {
+                    relayDataHandler.persistAuthorizationToken(authToken)
+                    relayDataHandler.persistRelayUrl(relayUrl)
+
+                    goToOnBoardNameScreen()
+                }
+                is AuthenticationResponse.Success.Key -> {
+                    // will never be returned
+                }
+            }
+        }
+    }
+
+    fun storeTemporaryInviter(nickname: String?, pubKey: String?, message: String?) {
+        app.getSharedPreferences("sphinx_temp_prefs", Context.MODE_PRIVATE).let {
+                sharedPrefs ->
+            sharedPrefs?.edit()?.let { editor ->
+                editor.putString("sphinx_temp_nickname", nickname)
+                    .putString("sphinx_temp_pubkey", pubKey)
+                    .putString("sphinx_temp_message", message)
+                    .let { editor ->
+                        if (!editor.commit()) {
+                            editor.apply()
+                        }
+                    }
             }
         }
     }
@@ -103,10 +133,12 @@ internal class OnBoardViewModel @Inject constructor(
         return AuthorizationToken(token)
     }
 
+    // I had to copy this from the RelayDataHandlerImpl class, I needed this methods outside
+    // but I wasn't sure where to put them
     private inline val String.isOnionAddress: Boolean
         get() = matches("([a-z2-7]{56}).onion.*".toRegex())
 
-    suspend fun parseRelayUrl(relayUrl: RelayUrl): RelayUrl {
+    private suspend fun parseRelayUrl(relayUrl: RelayUrl): RelayUrl {
         return try {
             val httpUrl = relayUrl.value.toHttpUrl()
             torManager.setTorRequired(httpUrl.host.isOnionAddress)
