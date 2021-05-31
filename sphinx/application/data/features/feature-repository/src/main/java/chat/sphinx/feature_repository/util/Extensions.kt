@@ -117,6 +117,12 @@ inline fun TransactionCallbacks.updateChatTribeData(
         photoUrl,
         chatId,
     )
+
+    queries.dashboardUpdateTribe(
+        name?.value ?: "",
+        photoUrl,
+        chatId
+    )
 }
 
 @Suppress("NOTHING_TO_INLINE", "SpellCheckingInspection")

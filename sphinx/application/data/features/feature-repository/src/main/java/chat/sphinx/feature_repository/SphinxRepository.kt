@@ -1448,9 +1448,7 @@ abstract class SphinxRepository(
         }
     }
 
-    override fun updateTribeInfo(
-        chat: Chat,
-    ): Flow<Chat> = flow {
+    override suspend fun updateTribeInfo(chat: Chat) {
 
         chat.host?.let { chatHost ->
             val chatUUID = chat.uuid
@@ -1473,38 +1471,23 @@ abstract class SphinxRepository(
                                 val tribeDto = loadResponse.value
 
                                 val didChangeNameOrPhotoUrl = (
-                                        tribeDto.name != chat.name.toString() ||
-                                                tribeDto.img != chat.photoUrl.toString()
-                                        )
+                                    tribeDto.name != chat.name?.value ?: "" ||
+                                    tribeDto.img != chat.photoUrl?.value ?: ""
+                                )
 
                                 chatLock.withLock {
-                                    withContext(io) {
-                                        queries.transaction {
-                                            updateChatTribeData(loadResponse.value, chat.id, queries)
-                                        }
+                                    queries.transaction {
+                                        updateChatTribeData(tribeDto, chat.id, queries)
                                     }
                                 }
 
                                 if (didChangeNameOrPhotoUrl) {
                                     networkQueryChat.updateChat(chat.id,
                                         PutChatDto(
-                                            chat.name.toString(),
-                                            chat.photoUrl.toString()
+                                            tribeDto.name,
+                                            tribeDto.img ?: "",
                                         )
-                                    ).collect {
-                                        @Exhaustive
-                                        when (loadResponse) {
-
-                                            is LoadResponse.Loading -> {}
-                                            is Response.Error -> {}
-
-                                            is Response.Success -> {
-                                                emit(chat)
-                                            }
-                                        }
-                                    }
-                                } else {
-                                    emit(chat)
+                                    ).collect {}
                                 }
                             }
                         }

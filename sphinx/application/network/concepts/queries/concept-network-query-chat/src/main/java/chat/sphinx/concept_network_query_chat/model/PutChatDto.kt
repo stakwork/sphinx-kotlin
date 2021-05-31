@@ -5,5 +5,5 @@ import com.squareup.moshi.JsonClass
 @JsonClass(generateAdapter = true)
 data class PutChatDto(
     val name: String,
-    val img: String
+    val img: String = ""
 )

@@ -1,21 +1,18 @@
 package chat.sphinx.chat_tribe.ui
 
-import android.content.ContentValues.TAG
-import android.util.Log
 import android.widget.ImageView
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.RecyclerView
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.chat_common.databinding.LayoutChatFooterBinding
 import chat.sphinx.chat_common.databinding.LayoutChatHeaderBinding
-import chat.sphinx.chat_common.ui.ChatFragment
 import chat.sphinx.chat_common.navigation.ChatNavigator
+import chat.sphinx.chat_common.ui.ChatFragment
 import chat.sphinx.chat_tribe.R
 import chat.sphinx.chat_tribe.databinding.FragmentChatTribeBinding
 import chat.sphinx.chat_tribe.navigation.TribeChatNavigator
 import chat.sphinx.concept_image_loader.ImageLoader
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -48,12 +45,7 @@ internal class ChatTribeFragment: ChatFragment<
         super.onStart()
 
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-            viewModel.updateTribeInfo().collect { chat ->
-                Log.d(TAG, "Price per message: ${chat.pricePerMessage.toString()}")
-                Log.d(TAG, "Amount to Stake: ${chat.escrowAmount.toString()}")
-                Log.d(TAG, "Name: ${chat.name.toString()}")
-                Log.d(TAG, "Img: ${chat.photoUrl.toString()}")
-            }
+            viewModel.updateTribeInfo()
         }
     }
 }

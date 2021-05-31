@@ -401,6 +401,12 @@ UPDATE dashboardDbo
 SET muted = :muted
 WHERE id = ?;
 
+dashboardUpdateTribe:
+UPDATE dashboardDbo
+SET display_name = :display_name,
+    photo_url = :photo_url
+WHERE id = :id;
+
 dashboardUpdateConversation:
 UPDATE dashboardDbo
 SET display_name = :display_name,
