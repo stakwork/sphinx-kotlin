@@ -440,3 +440,42 @@ internal inline fun LayoutMessageHolderBinding.setBubbleReactionBoosts(
         }
     }
 }
+
+@MainThread
+@Suppress("NOTHING_TO_INLINE")
+internal inline fun LayoutMessageHolderBinding.setBubbleReplyMessage(
+    replyMessage: LayoutState.Bubble.ReplyMessage?
+) {
+    includeMessageHolderBubble.includeMessageReply.apply {
+        if (replyMessage == null) {
+            root.gone
+        } else {
+            root.visible
+
+            imageViewReplyMediaImage.apply {
+//                @Exhaustive
+//                when (replyMessage.media) {
+//                    is MediaUrl -> {
+//                        visible
+//                    }
+//                    is MediaFile -> {
+//                        visible
+//                    }
+//                    null -> {
+//                        gone
+//                    }
+//                }
+                // TODO: handle attachment types and make visible
+                gone
+            }
+            imageViewReplyTextOverlay.gone
+
+            // Only used in the footer when replying to a message
+            textViewReplyClose.gone
+
+            textViewReplyMessageLabel.text = replyMessage.text
+            textViewReplySenderLabel.text = replyMessage.sender
+            viewReplyBarLeading.setBackgroundRandomColor(null)
+        }
+    }
+}

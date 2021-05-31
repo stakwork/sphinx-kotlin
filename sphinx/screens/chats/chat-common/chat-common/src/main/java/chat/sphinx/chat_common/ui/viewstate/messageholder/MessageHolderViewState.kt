@@ -137,6 +137,15 @@ internal sealed class MessageHolderViewState(
             }
         }
 
+    val bubbleReplyMessage: LayoutState.Bubble.ReplyMessage? by lazy {
+        message.replyMessage?.let { nnMessage ->
+            LayoutState.Bubble.ReplyMessage(
+                nnMessage.senderAlias?.value ?: "",
+
+                nnMessage.retrieveTextToShow() ?: "",
+            )
+        }
+    }
 
     class Sent(
         message: Message,
