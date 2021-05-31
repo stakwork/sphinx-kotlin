@@ -1023,7 +1023,7 @@ abstract class SphinxRepository(
 
         message._reactions = reactions
 
-        replyMessage?.value?.toMessageUUID().let { uuid ->
+        replyMessage?.value?.toMessageUUID()?.let { uuid ->
             queries.messageGetToShowByUUID(uuid).executeAsOneOrNull()?.let { replyDbo ->
                 message._replyMessage = mapMessageDboAndDecryptContentIfNeeded(queries, replyDbo)
             }
