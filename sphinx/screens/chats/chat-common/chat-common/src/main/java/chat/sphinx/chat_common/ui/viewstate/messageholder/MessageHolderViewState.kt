@@ -57,19 +57,8 @@ internal sealed class MessageHolderViewState(
     }
 
     val bubbleMessage: LayoutState.Bubble.Message? by lazy(LazyThreadSafetyMode.NONE) {
-        message.messageContentDecrypted?.let {
-            // TODO: Handle podcast clips
-            message.giphyData?.let { giphyData ->
-                // TODO: show only the giphyData.text when rendering logic is implemented
-//                giphyData.text?.let { text ->
-//                    LayoutState.Bubble.Message(text = text)
-//                }
-                LayoutState.Bubble.Message(text = giphyData.toString())
-            } ?: /*if (message.podBoost == null) {*/ // TODO: Uncomment once boost layout logic is implemented
-            LayoutState.Bubble.Message(text = it.value)
-//            } else {
-//                null
-//            }
+        message.retrieveTextToShow()?.let { text ->
+            LayoutState.Bubble.Message(text = text)
         }
     }
 

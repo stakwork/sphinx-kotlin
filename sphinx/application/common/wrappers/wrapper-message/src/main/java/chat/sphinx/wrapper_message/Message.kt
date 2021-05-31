@@ -22,6 +22,21 @@ inline val Message.isPaidMessage: Boolean
         return false
     }
 
+@Suppress("NOTHING_TO_INLINE")
+inline fun Message.retrieveTextToShow(): String? =
+    messageContentDecrypted?.let { decrypted ->
+        // TODO Handle podcast clips `clip::.....`
+        giphyData
+//            ?.text
+//            ?: if (podBoost == null) {
+//                decrypted.value
+//            } else {
+//                null
+//            }
+            ?.toString()
+            ?: decrypted.value
+    }
+
 abstract class Message {
     abstract val id: MessageId
     abstract val uuid: MessageUUID?
