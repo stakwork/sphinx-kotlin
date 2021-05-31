@@ -12,6 +12,7 @@
     <View
         android:id="@+id/view_reply_bar_leading"
         android:layout_width="5dp"
+        android:layout_marginStart="@dimen/default_inner_spacing_list_item_title"
         android:layout_height="@dimen/reply_message_media_image_xy"
         app:layout_constraintBottom_toTopOf="@+id/layout_constraint_message_reply_divider_bottom"
         app:layout_constraintEnd_toStartOf="@+id/image_view_reply_media_image"
@@ -27,6 +28,7 @@
         android:layout_height="@dimen/reply_message_media_image_xy"
         android:contentDescription="@string/reply_message_media_content_description"
         android:scaleType="fitCenter"
+        android:layout_marginStart="@dimen/default_inner_spacing_list_item_title"
         android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@+id/layout_constraint_message_reply_divider_bottom"
         app:layout_constraintEnd_toStartOf="@+id/text_view_reply_sender_label"
