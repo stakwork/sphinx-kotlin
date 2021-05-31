@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="on_board_welcome">Welcome</string>
-    <string name="on_board_welcome_info_code">Paste the invitation text\nor scan the QR code</string>
+    <string name="on_board_welcome_info_code">Paste the connection string\nor scan the QR code</string>
     <string name="on_board_edit_text_hint_code">Enter Code …</string>
 
     <string name="on_board_welcome_info_decrypt">Enter PIN\nto decrypt</string>
