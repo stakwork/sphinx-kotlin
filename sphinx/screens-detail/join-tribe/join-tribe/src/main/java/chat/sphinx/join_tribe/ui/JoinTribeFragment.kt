@@ -77,7 +77,7 @@ internal class JoinTribeFragment: SideEffectFragment<
             is JoinTribeViewState.ErrorLoadingTribe -> {
                 viewModel.navigator.closeDetailScreen()
             }
-            is JoinTribeViewState.TribeInfo -> {
+            is JoinTribeViewState.TribeLoaded -> {
                 showTribeData(viewState.tribe)
             }
 

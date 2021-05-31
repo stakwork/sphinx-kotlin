@@ -76,7 +76,7 @@ internal class JoinTribeViewModel @Inject constructor(
                             if (loadResponse.value is TribeDto) {
                                 tribeInfo = loadResponse.value
                                 tribeInfo?.set(tribeJoinLink.tribeHost, tribeJoinLink.tribeUUID)
-                                viewStateContainer.updateViewState(JoinTribeViewState.TribeInfo(tribeInfo!!))
+                                viewStateContainer.updateViewState(JoinTribeViewState.TribeLoaded(tribeInfo!!))
                             } else {
                                 viewStateContainer.updateViewState(JoinTribeViewState.ErrorLoadingTribe)
                             }

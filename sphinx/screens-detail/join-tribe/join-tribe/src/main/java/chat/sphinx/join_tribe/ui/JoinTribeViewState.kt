@@ -7,11 +7,11 @@ internal sealed class JoinTribeViewState: ViewState<JoinTribeViewState>() {
     object LoadingTribe : JoinTribeViewState()
     object ErrorLoadingTribe : JoinTribeViewState()
 
+    data class TribeLoaded(
+        val tribe: TribeDto
+    ): JoinTribeViewState()
+
     object JoiningTribe: JoinTribeViewState()
     object ErrorJoiningTribe: JoinTribeViewState()
     object TribeJoined: JoinTribeViewState()
-
-    data class TribeInfo(
-        val tribe: TribeDto
-    ): JoinTribeViewState()
 }

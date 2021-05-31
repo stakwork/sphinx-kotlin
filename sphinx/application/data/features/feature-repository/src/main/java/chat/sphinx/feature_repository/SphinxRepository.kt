@@ -1425,8 +1425,8 @@ abstract class SphinxRepository(
                         chatLock.withLock {
                             withContext(io) {
                                 queries.transaction {
-                                    val updatePricePerMessage = tribeDto.price_per_message
-                                    upsertChat(loadResponse.value, moshi, chatSeenMap, queries, null, updatePricePerMessage)
+                                    upsertChat(loadResponse.value, moshi, chatSeenMap, queries, null)
+                                    updateChatTribeData(tribeDto, ChatId(loadResponse.value.id))
                                 }
                             }
                         }

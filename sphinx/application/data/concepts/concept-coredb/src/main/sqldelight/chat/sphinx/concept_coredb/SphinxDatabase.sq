@@ -183,6 +183,14 @@ UPDATE chatDbo
 SET seen = :seen
 WHERE id = ?;
 
+chatUpdateTribeData:
+UPDATE chatDbo
+SET price_per_message = :price_per_message,
+escrow_amount = :escrow_amount,
+name = :name,
+photo_url = :photo_url
+WHERE id = ?;
+
 CREATE TABLE contactDbo(
     id                          INTEGER         AS ContactId NOT NULL PRIMARY KEY,
     route_hint                  TEXT            AS LightningRouteHint,
