@@ -50,6 +50,7 @@ import chat.sphinx.wrapper_common.dashboard.InviteId
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.LightningRouteHint
 import chat.sphinx.wrapper_common.lightning.Sat
+import chat.sphinx.wrapper_common.lightning.toSat
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessagePagination
 import chat.sphinx.wrapper_contact.*
@@ -1201,8 +1202,9 @@ abstract class SphinxRepository(
 
                 if (selfEncrypted != null) {
 
-                    val messagePrice = chat?.price_per_message ?: Sat(0)
-                    val amountToStake = chat?.escrow_amount ?: Sat(0)
+                    val pricePerMessage = chat?.price_per_message?.value ?: 0
+                    val escrowAmount = chat?.escrow_amount?.value ?: 0
+                    val messagePrice = (pricePerMessage + escrowAmount).toSat() ?: Sat(0)
 
                     val provisionalMessageId: MessageId? = chat?.let { chatDbo ->
                         // Build provisional message and insert
@@ -1288,7 +1290,7 @@ abstract class SphinxRepository(
                             PostMessageDto(
                                 sendMessage.chatId?.value,
                                 sendMessage.contactId?.value,
-                                messagePrice.value + amountToStake.value,
+                                messagePrice?.value ?: 0,
                                 sendMessage.replyUUID?.value,
                                 selfEncrypted.value,
                                 map,
