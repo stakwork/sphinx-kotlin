@@ -1,7 +1,7 @@
 package chat.sphinx.chat_common.ui.viewstate.messageholder
 
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
-import chat.sphinx.wrapper_chat.ChatType
+import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.isConversation
 import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_common.lightning.Sat
@@ -18,15 +18,15 @@ internal val MessageHolderViewState.showSentBubbleArrow: Boolean
 
 internal sealed class MessageHolderViewState(
     val message: Message,
-    chatType: ChatType?,
+    chat: Chat,
     val background: BubbleBackground,
-    val initialHolder: InitialHolderViewState
+    val initialHolder: InitialHolderViewState,
 ) {
 
     val statusHeader: LayoutState.MessageStatusHeader? by lazy(LazyThreadSafetyMode.NONE) {
         if (background is BubbleBackground.First) {
             LayoutState.MessageStatusHeader(
-                if (chatType?.isConversation() != false) null else message.senderAlias?.value,
+                if (chat.type.isConversation()) null else message.senderAlias?.value,
                 this is Sent,
                 this is Sent && (message.status.isReceived() || message.status.isConfirmed()),
                 message.messageContentDecrypted != null,
@@ -149,23 +149,23 @@ internal sealed class MessageHolderViewState(
 
     class Sent(
         message: Message,
-        chatType: ChatType?,
+        chat: Chat,
         background: BubbleBackground,
     ): MessageHolderViewState(
         message,
-        chatType,
+        chat,
         background,
         InitialHolderViewState.None
     )
 
     class Received(
         message: Message,
-        chatType: ChatType?,
+        chat: Chat,
         background: BubbleBackground,
         initialHolder: InitialHolderViewState,
     ): MessageHolderViewState(
         message,
-        chatType,
+        chat,
         background,
         initialHolder
     )

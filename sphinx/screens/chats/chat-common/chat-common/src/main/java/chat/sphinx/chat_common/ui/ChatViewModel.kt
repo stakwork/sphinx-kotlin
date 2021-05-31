@@ -145,7 +145,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                         newList.add(
                             MessageHolderViewState.Sent(
                                 message,
-                                chat.type,
+                                chat,
 
                                 if (message.status.isDeleted()) {
                                     BubbleBackground.Gone(setSpacingEqual = false)
@@ -162,7 +162,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                         newList.add(
                             MessageHolderViewState.Received(
                                 message,
-                                chat.type,
+                                chat,
 
                                 if (isDeleted) {
                                     BubbleBackground.Gone(setSpacingEqual = false)
