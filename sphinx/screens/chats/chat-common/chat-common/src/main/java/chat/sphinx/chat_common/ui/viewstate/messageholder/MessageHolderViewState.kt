@@ -16,13 +16,6 @@ internal inline val MessageHolderViewState.showReceivedBubbleArrow: Boolean
 internal val MessageHolderViewState.showSentBubbleArrow: Boolean
     get() = background is BubbleBackground.First && this is MessageHolderViewState.Sent
 
-fun main() {
-    val set: MutableSet<String> = LinkedHashSet(3)
-    println(set.size)
-    set.add("new string")
-    println(set.size)
-}
-
 internal sealed class MessageHolderViewState(
     val message: Message,
     chatType: ChatType?,
