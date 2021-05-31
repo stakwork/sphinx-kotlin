@@ -47,4 +47,8 @@ interface ChatRepository {
     fun joinTribe(
         tribeDto: TribeDto,
     ): Flow<LoadResponse<Any, ResponseError>>
+
+    fun updateTribeInfo(
+        chat: Chat,
+    ): Flow<Chat>
 }

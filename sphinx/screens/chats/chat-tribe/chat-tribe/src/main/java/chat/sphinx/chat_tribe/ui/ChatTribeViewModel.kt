@@ -120,4 +120,16 @@ internal class ChatTribeViewModel @Inject constructor(
         builder.setChatId(args.chatId)
         return super.sendMessage(builder)
     }
+
+    fun updateTribeInfo(): Flow<Chat> = flow {
+        viewModelScope.launch(mainImmediate) {
+            chatSharedFlow.collect { chat ->
+                chat?.let { chat ->
+                    chatRepository.updateTribeInfo(chat).collect { chat ->
+                        emit(chat)
+                    }
+                }
+            }
+        }
+    }
 }

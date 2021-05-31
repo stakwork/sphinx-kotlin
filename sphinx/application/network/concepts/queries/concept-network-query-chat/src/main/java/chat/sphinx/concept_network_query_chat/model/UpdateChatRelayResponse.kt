@@ -4,7 +4,7 @@ import com.squareup.moshi.JsonClass
 
 
 @JsonClass(generateAdapter = true)
-data class MuteChatRelayResponse(
+data class UpdateChatRelayResponse(
     override val success: Boolean,
     override val response: ChatDto,
     override val error: String?

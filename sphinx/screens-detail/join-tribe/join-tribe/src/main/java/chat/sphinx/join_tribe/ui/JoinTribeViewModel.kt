@@ -10,8 +10,8 @@ import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.join_tribe.navigation.JoinTribeNavigator
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
-import chat.sphinx.wrapper_common.tribe.TribeHost
-import chat.sphinx.wrapper_common.tribe.TribeUUID
+import chat.sphinx.wrapper_chat.ChatHost
+import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.tribe.toTribeJoinLink
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_contact.ContactAlias
@@ -64,7 +64,7 @@ internal class JoinTribeViewModel @Inject constructor(
     fun loadTribeData() {
         args.argTribeLink.toTribeJoinLink()?.let { tribeJoinLink ->
             viewModelScope.launch(mainImmediate) {
-                networkQueryChat.getTribeInfo(TribeHost(tribeJoinLink.tribeHost), TribeUUID(tribeJoinLink.tribeUUID)).collect { loadResponse ->
+                networkQueryChat.getTribeInfo(ChatHost(tribeJoinLink.tribeHost), ChatUUID(tribeJoinLink.tribeUUID)).collect { loadResponse ->
                     when (loadResponse) {
                         is LoadResponse.Loading ->
                             viewStateContainer.updateViewState(JoinTribeViewState.LoadingTribe)

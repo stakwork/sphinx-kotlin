@@ -5,6 +5,7 @@ import chat.sphinx.concept_coredb.CoreDB
 import chat.sphinx.concept_crypto_rsa.RSA
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
 import chat.sphinx.concept_network_query_chat.model.ChatDto
+import chat.sphinx.concept_network_query_chat.model.PutChatDto
 import chat.sphinx.concept_network_query_chat.model.TribeDto
 import chat.sphinx.concept_network_query_contact.NetworkQueryContact
 import chat.sphinx.concept_network_query_contact.model.ContactDto
@@ -40,10 +41,7 @@ import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.logger.d
 import chat.sphinx.logger.e
 import chat.sphinx.logger.w
-import chat.sphinx.wrapper_chat.Chat
-import chat.sphinx.wrapper_chat.ChatType
-import chat.sphinx.wrapper_chat.isTrue
-import chat.sphinx.wrapper_chat.toChatMuted
+import chat.sphinx.wrapper_chat.*
 import chat.sphinx.wrapper_common.*
 import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.dashboard.ChatId
@@ -1204,6 +1202,7 @@ abstract class SphinxRepository(
                 if (selfEncrypted != null) {
 
                     val messagePrice = chat?.price_per_message ?: Sat(0)
+                    val amountToStake = chat?.escrow_amount ?: Sat(0)
 
                     val provisionalMessageId: MessageId? = chat?.let { chatDbo ->
                         // Build provisional message and insert
@@ -1289,7 +1288,7 @@ abstract class SphinxRepository(
                             PostMessageDto(
                                 sendMessage.chatId?.value,
                                 sendMessage.contactId?.value,
-                                messagePrice.value,
+                                messagePrice.value + amountToStake.value,
                                 sendMessage.replyUUID?.value,
                                 selfEncrypted.value,
                                 map,
@@ -1426,7 +1425,7 @@ abstract class SphinxRepository(
                             withContext(io) {
                                 queries.transaction {
                                     upsertChat(loadResponse.value, moshi, chatSeenMap, queries, null)
-                                    updateChatTribeData(tribeDto, ChatId(loadResponse.value.id))
+                                    updateChatTribeData(tribeDto, ChatId(loadResponse.value.id), queries)
                                 }
                             }
                         }
@@ -1446,6 +1445,73 @@ abstract class SphinxRepository(
             } else {
                 emit(response)
             }
+        }
+    }
+
+    override fun updateTribeInfo(
+        chat: Chat,
+    ): Flow<Chat> = flow {
+
+        chat.host?.let { chatHost ->
+            val chatUUID = chat.uuid
+
+            if (chat.isTribe() &&
+                chatHost.toString().isNotEmpty() &&
+                chatUUID.toString().isNotEmpty()
+            ) {
+
+                val queries = coreDB.getSphinxDatabaseQueries()
+
+                networkQueryChat.getTribeInfo(chatHost, chatUUID).collect { loadResponse ->
+                    when (loadResponse) {
+
+                        is LoadResponse.Loading -> {}
+                        is Response.Error -> {}
+
+                        is Response.Success -> {
+                            if (loadResponse.value is TribeDto) {
+                                val tribeDto = loadResponse.value
+
+                                val didChangeNameOrPhotoUrl = (
+                                        tribeDto.name != chat.name.toString() ||
+                                                tribeDto.img != chat.photoUrl.toString()
+                                        )
+
+                                chatLock.withLock {
+                                    withContext(io) {
+                                        queries.transaction {
+                                            updateChatTribeData(loadResponse.value, chat.id, queries)
+                                        }
+                                    }
+                                }
+
+                                if (didChangeNameOrPhotoUrl) {
+                                    networkQueryChat.updateChat(chat.id,
+                                        PutChatDto(
+                                            chat.name.toString(),
+                                            chat.photoUrl.toString()
+                                        )
+                                    ).collect {
+                                        @Exhaustive
+                                        when (loadResponse) {
+
+                                            is LoadResponse.Loading -> {}
+                                            is Response.Error -> {}
+
+                                            is Response.Success -> {
+                                                emit(chat)
+                                            }
+                                        }
+                                    }
+                                } else {
+                                    emit(chat)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
         }
     }
 
