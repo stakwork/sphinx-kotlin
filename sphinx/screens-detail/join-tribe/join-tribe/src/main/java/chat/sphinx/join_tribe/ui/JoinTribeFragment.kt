@@ -57,6 +57,11 @@ internal class JoinTribeFragment: SideEffectFragment<
             joinTribe()
         }
 
+        viewModel.loadTribeData()
+    }
+
+    override fun onStart() {
+        super.onStart()
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.accountOwnerStateFlow.collect { owner ->
                 owner?.alias?.value.let { ownerAlias ->
@@ -64,8 +69,6 @@ internal class JoinTribeFragment: SideEffectFragment<
                 }
             }
         }
-
-        viewModel.loadTribeData()
     }
 
     override suspend fun onViewStateFlowCollect(viewState: JoinTribeViewState) {
