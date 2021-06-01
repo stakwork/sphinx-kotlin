@@ -27,6 +27,7 @@ import chat.sphinx.resources.getRandomColor
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.ChatName
 import chat.sphinx.wrapper_chat.isConversation
+import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_message.Message
 import chat.sphinx.wrapper_message.isDeleted
 import chat.sphinx.wrapper_message.isGroupAction
@@ -152,6 +153,24 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     internal val messageHolderViewStateFlow: StateFlow<List<MessageHolderViewState>> = flow {
         val chat = getChat()
         val chatName = getChatNameIfNull()
+        val owner: Contact = contactRepository.accountOwner.value.let { contact ->
+            if (contact != null) {
+                contact
+            } else {
+                var resolvedOwner: Contact? = null
+                try {
+                    contactRepository.accountOwner.collect { ownerContact ->
+                        if (ownerContact != null) {
+                            resolvedOwner = ownerContact
+                            throw Exception()
+                        }
+                    }
+                } catch (e: Exception) {}
+                delay(25L)
+
+                resolvedOwner!!
+            }
+        }
 
         messageRepository.getAllMessagesToShowByChatId(chat.id).distinctUntilChanged().collect { messages ->
             val newList = ArrayList<MessageHolderViewState>(messages.size)
@@ -173,8 +192,6 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                             MessageHolderViewState.Sent(
                                 message,
                                 chat,
-                                chatOwnerPubKey = chat.ownerPubKey,
-                                accountOwnerPubKey = null, // TODO: Devise a way to read this here
                                 background =  when {
                                     message.status.isDeleted() -> {
                                         BubbleBackground.Gone(setSpacingEqual = false)
@@ -185,20 +202,22 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                                     else -> {
                                         BubbleBackground.First.Isolated
                                     }
-                                }
-                            ) { replyMessage ->
-                                when {
-                                    replyMessage.sender == chat.contactIds.firstOrNull() -> {
-                                        contactRepository.accountOwner.value?.alias?.value ?: ""
+                                },
+                                replyMessageSenderName = { replyMessage ->
+                                    when {
+                                        replyMessage.sender == chat.contactIds.firstOrNull() -> {
+                                            contactRepository.accountOwner.value?.alias?.value ?: ""
+                                        }
+                                        chat.type.isConversation() -> {
+                                            chatName?.value ?: ""
+                                        }
+                                        else -> {
+                                            replyMessage.senderAlias?.value ?: ""
+                                        }
                                     }
-                                    chat.type.isConversation() -> {
-                                        chatName?.value ?: ""
-                                    }
-                                    else -> {
-                                        replyMessage.senderAlias?.value ?: ""
-                                    }
-                                }
-                            }
+                                },
+                                accountOwner = { owner }
+                            )
                         )
                     } else {
 
@@ -208,8 +227,6 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                             MessageHolderViewState.Received(
                                 message,
                                 chat,
-                                chatOwnerPubKey = chat.ownerPubKey,
-                                accountOwnerPubKey = null, // TODO: Devise a way to read this here
                                 background = when {
                                     isDeleted -> {
                                         BubbleBackground.Gone(setSpacingEqual = false)
@@ -221,24 +238,30 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                                         BubbleBackground.First.Isolated
                                     }
                                 },
-                                initialHolder = if (isDeleted) {
-                                    InitialHolderViewState.None
-                                } else {
-                                    getInitialHolderViewStateForReceivedMessage(message)
-                                },
-                            ) { replyMessage ->
-                                when {
-                                    replyMessage.sender == chat.contactIds.firstOrNull() -> {
-                                        contactRepository.accountOwner.value?.alias?.value ?: ""
-                                    }
-                                    chat.type.isConversation() -> {
-                                        chatName?.value ?: ""
+                                initialHolder = when {
+                                    isDeleted ||
+                                    message.type.isGroupAction() -> {
+                                        InitialHolderViewState.None
                                     }
                                     else -> {
-                                        replyMessage.senderAlias?.value ?: ""
+                                        getInitialHolderViewStateForReceivedMessage(message)
                                     }
-                                }
-                            }
+                                },
+                                replyMessageSenderName = { replyMessage ->
+                                    when {
+                                        replyMessage.sender == chat.contactIds.firstOrNull() -> {
+                                            contactRepository.accountOwner.value?.alias?.value ?: ""
+                                        }
+                                        chat.type.isConversation() -> {
+                                            chatName?.value ?: ""
+                                        }
+                                        else -> {
+                                            replyMessage.senderAlias?.value ?: ""
+                                        }
+                                    }
+                                },
+                                accountOwner = { owner }
+                            )
                         )
                     }
                 }
