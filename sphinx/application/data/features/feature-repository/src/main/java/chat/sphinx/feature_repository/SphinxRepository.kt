@@ -1453,6 +1453,22 @@ abstract class SphinxRepository(
 
     override suspend fun updateTribeInfo(chat: Chat) {
 
+        var owner: Contact? = accountOwner.value
+
+        if (owner == null) {
+            try {
+                accountOwner.collect {
+                    if (it != null) {
+                        owner = it
+                        throw Exception()
+                    }
+                }
+            } catch (e: Exception) {}
+            delay(25L)
+        }
+
+        if (owner?.nodePubKey == chat.ownerPubKey) return
+
         chat.host?.let { chatHost ->
             val chatUUID = chat.uuid
 
