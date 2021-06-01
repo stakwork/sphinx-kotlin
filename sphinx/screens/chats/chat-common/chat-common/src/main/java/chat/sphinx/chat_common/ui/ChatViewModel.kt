@@ -76,9 +76,6 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     private inner class ChatHeaderViewStateContainer: ViewStateContainer<ChatHeaderViewState>(ChatHeaderViewState.Idle) {
         override val viewStateFlow: StateFlow<ChatHeaderViewState> = flow<ChatHeaderViewState> {
             chatSharedFlow.collect { chat ->
-
-                showUpdatedPrice(chat)
-
                 emit(
                     ChatHeaderViewState.Initialized(
                         chatHeaderName = chat?.name?.value ?: getChatNameIfNull()?.value ?: "",
@@ -108,17 +105,6 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 
     override val viewStateContainer: ViewStateContainer<ChatHeaderViewState> by lazy {
         ChatHeaderViewStateContainer()
-    }
-
-    private fun showUpdatedPrice(chat: Chat?) {
-        viewModelScope.launch(mainImmediate) {
-            val pricePerMessage = chat?.pricePerMessage?.value ?: 0
-            val escrowAmount = chat?.escrowAmount?.value ?: 0
-
-            if (pricePerMessage + escrowAmount > 0) {
-                submitSideEffect(ChatSideEffect.Notify("Price per message: $pricePerMessage\n Amount to Stake: $escrowAmount"))
-            }
-        }
     }
 
     private suspend fun getChat(): Chat {
