@@ -1410,8 +1410,9 @@ abstract class SphinxRepository(
     ): Flow<LoadResponse<Any, ResponseError>> = flow {
         val queries = coreDB.getSphinxDatabaseQueries()
 
-        val sharedFlow: MutableSharedFlow<Response<Boolean, ResponseError>> =
-            MutableSharedFlow(1, 0)
+        var response: Response<Any, ResponseError>? = null
+
+        emit(LoadResponse.Loading)
 
         repositoryScope.launch(mainImmediate) {
 
@@ -1420,7 +1421,7 @@ abstract class SphinxRepository(
                 when (loadResponse) {
                     LoadResponse.Loading -> {}
                     is Response.Error -> {
-                        sharedFlow.emit(loadResponse)
+                        response = loadResponse
                     }
                     is Response.Success -> {
                         chatLock.withLock {
@@ -1432,22 +1433,14 @@ abstract class SphinxRepository(
                             }
                         }
 
-                        sharedFlow.emit(Response.Success(true))
+                        response = Response.Success(true)
                     }
                 }
             }
 
-        }
+        }.join()
 
-        emit(LoadResponse.Loading)
-
-        sharedFlow.asSharedFlow().firstOrNull().let { response ->
-            if (response == null) {
-                emit(Response.Error(ResponseError("")))
-            } else {
-                emit(response)
-            }
-        }
+        emit(response ?: Response.Error(ResponseError("")))
     }
 
     override suspend fun updateTribeInfo(chat: Chat) {
