@@ -92,4 +92,10 @@ class MessageDboWrapper(val messageDbo: MessageDbo): Message() {
     var _reactions: List<Message>? = null
     override val reactions: List<Message>?
         get() = _reactions
+
+    @Volatile
+    @Suppress("PropertyName")
+    var _replyMessage: Message? = null
+    override val replyMessage: Message?
+        get() = _replyMessage
 }

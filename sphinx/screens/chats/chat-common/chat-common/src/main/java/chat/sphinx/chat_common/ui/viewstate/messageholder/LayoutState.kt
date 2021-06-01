@@ -59,6 +59,13 @@ internal sealed class LayoutState {
                 get() = amount.asFormattedString(appendUnit = true)
         }
 
+        data class ReplyMessage(
+            // TODO: Make sealed interface for handling a url or file
+//            val media: String?,
+            val sender: String,
+            val text: String,
+        ): LayoutState()
+
         sealed class ContainerBottom: Bubble() {
 
             class Boost(

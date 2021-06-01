@@ -215,6 +215,7 @@ internal class MessageListAdapter<ARGS: NavArgs>(
                                 .also { disposables.add(it) }
                         }
                     }
+                    setBubbleReplyMessage(viewState.bubbleReplyMessage)
                 }
             }
         }
