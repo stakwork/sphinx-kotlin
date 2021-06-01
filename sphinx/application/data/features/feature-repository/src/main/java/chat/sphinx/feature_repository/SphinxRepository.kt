@@ -1428,7 +1428,7 @@ abstract class SphinxRepository(
                             withContext(io) {
                                 queries.transaction {
                                     upsertChat(loadResponse.value, moshi, chatSeenMap, queries, null)
-//                                    updateChatTribeData(tribeDto, ChatId(loadResponse.value.id), queries)
+                                    updateChatTribeData(tribeDto, ChatId(loadResponse.value.id), queries)
                                 }
                             }
                         }
