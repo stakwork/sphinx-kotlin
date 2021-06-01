@@ -26,6 +26,29 @@ internal sealed class MessageHolderViewState(
     val accountOwner: () -> Contact,
 ) {
 
+    companion object {
+        val unsupportedMessageTypes: List<MessageType> by lazy {
+            listOf(
+                MessageType.Attachment,
+                MessageType.BotRes,
+                MessageType.Invoice,
+                MessageType.Payment,
+                MessageType.GroupAction.TribeDelete,
+            )
+        }
+    }
+
+    val unsupportedMessageType: LayoutState.UnsupportedMessageType? by lazy(LazyThreadSafetyMode.NONE) {
+        if (unsupportedMessageTypes.contains(message.type)) {
+            LayoutState.UnsupportedMessageType(
+                messageType = message.type,
+                gravityStart = this is Received,
+            )
+        } else {
+            null
+        }
+    }
+
     val statusHeader: LayoutState.MessageStatusHeader? by lazy(LazyThreadSafetyMode.NONE) {
         if (background is BubbleBackground.First) {
             LayoutState.MessageStatusHeader(

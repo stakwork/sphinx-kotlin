@@ -23,6 +23,82 @@ import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.visible
 
+
+@MainThread
+@Suppress("NOTHING_TO_INLINE")
+internal inline fun LayoutMessageHolderBinding.setUnsupportedMessageTypeLayout(
+    messageTypeDetails: LayoutState.UnsupportedMessageType?
+) {
+    if (messageTypeDetails == null) {
+        root.gone
+    } else {
+        includeMessageHolderBubble.includeUnsupportedMessageTypePlaceholder.apply {
+            root.visible
+
+            val messageTypeDisplayString = when (messageTypeDetails.messageType) {
+                MessageType.Delete,
+                MessageType.DirectPayment,
+                MessageType.GroupAction.Join,
+                MessageType.GroupAction.Leave,
+                MessageType.Message -> {
+                    // 🤔 We should never get here since these message types ARE supported.
+                    getString(R.string.placeholder_unsupported_message_type_default)
+                }
+                MessageType.Attachment -> {
+                    getString(R.string.placeholder_display_name_message_type_attachment)
+                }
+                MessageType.BotRes -> {
+                    getString(R.string.placeholder_display_name_message_type_bot_response)
+                }
+                MessageType.Invoice -> {
+                    getString(R.string.placeholder_display_name_message_type_invoice)
+                }
+                MessageType.Payment -> {
+                    getString(R.string.placeholder_display_name_message_type_payment)
+                }
+                MessageType.GroupAction.TribeDelete -> {
+                    getString(R.string.placeholder_display_name_message_type_tribe_delete)
+                }
+                MessageType.Cancellation,
+                MessageType.Confirmation,
+                MessageType.ContactKey,
+                MessageType.ContactKeyConfirmation,
+                MessageType.GroupAction.Create,
+                MessageType.GroupAction.Invite,
+                MessageType.GroupAction.Kick,
+                MessageType.Heartbeat,
+                MessageType.HeartbeatConfirmation,
+                MessageType.KeySend,
+                MessageType.Purchase.Accepted,
+                MessageType.Purchase.Denied,
+                MessageType.Purchase.Processing,
+                MessageType.GroupAction.MemberApprove,
+                MessageType.GroupAction.MemberReject,
+                MessageType.GroupAction.MemberRequest,
+                MessageType.Query,
+                MessageType.QueryResponse,
+                MessageType.Repayment,
+                MessageType.Boost,
+                MessageType.BotCmd,
+                MessageType.BotInstall,
+                is MessageType.Unknown -> {
+                    // ❓: Should we ever get here if the type isn't one we plan to
+                    // render a unique message for?
+                    getString(R.string.placeholder_unsupported_message_type_default)
+                }
+            }
+
+            textViewPlaceholderMessage.text = root.context.getString(
+                R.string.unsupported_message_type_placeholder_text,
+                messageTypeDisplayString
+            )
+
+            textViewPlaceholderMessage.gravity = if (messageTypeDetails.gravityStart) Gravity.START else Gravity.END
+        }
+    }
+}
+
+
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun LayoutMessageHolderBinding.setBubbleDirectPaymentLayout(
