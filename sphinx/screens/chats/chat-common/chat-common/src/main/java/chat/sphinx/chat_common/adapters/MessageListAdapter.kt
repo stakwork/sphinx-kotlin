@@ -202,6 +202,7 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                 setStatusHeader(viewState.statusHeader)
                 setDeletedMessageLayout(viewState.deletedMessage)
                 setBubbleBackground(viewState, recyclerViewWidth)
+                setGroupActionIndicatorLayout(viewState.groupActionIndicator)
 
                 if (MessageHolderViewState.unsupportedMessageTypes.contains(viewState.message.type)) {
                     setUnsupportedMessageTypeLayout(viewState.unsupportedMessageType)

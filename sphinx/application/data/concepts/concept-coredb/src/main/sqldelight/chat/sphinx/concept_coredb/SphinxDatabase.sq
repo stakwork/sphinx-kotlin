@@ -504,7 +504,7 @@ messageGetAllToShowByChatId:
 SELECT *
 FROM messageDbo
 WHERE chat_id = ?
-AND type IN(0, 5)
+AND type IN(0, 5, 14, 15)
 --     OR type = 2
 --     OR type = 3
 --     OR type = 5

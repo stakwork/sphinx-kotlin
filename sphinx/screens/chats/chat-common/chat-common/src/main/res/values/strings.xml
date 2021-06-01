@@ -52,4 +52,13 @@
     <string name="purchase_status_label_paid_message_sent_status_denied">Denied</string>
     <string name="purchase_status_label_paid_message_sent_status_processing">Processing</string>
     <string name="purchase_status_label_paid_message_sent_status_default">Unknown</string>
+
+
+    <!--  Group Action Indicator Labels  -->
+    <string name="group_join_announcement_tribe">%1$s has joined the tribe</string>
+    <string name="group_join_announcement_group">%1$s has joined the group</string>
+    <string name="group_leave_announcement_tribe">%1$s just left the tribe</string>
+    <string name="group_leave_announcement_group">%1$s just left the group</string>
+    <string name="group_kick_announcement_group_user_facing">The admin has removed you from this group</string>
+    <string name="group_kick_announcement_tribe_user_facing">The admin has removed you from this tribe</string>
 </resources>

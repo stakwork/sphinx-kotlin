@@ -68,27 +68,6 @@
             layout="@layout/layout_message_reply"
             tools:visibility="gone" />
 
-        <!-- TODO: Move out of bubble layout -->
-        <!-- Group Action: Leaving/Joining  -->
-        <include
-            android:id="@+id/include_message_type_leave_or_join_group"
-            layout="@layout/layout_message_type_leave_or_join_group"
-            tools:visibility="gone" />
-
-
-        <!-- TODO: Move out of bubble layout -->
-        <!-- Group Action: User was kicked  -->
-        <include
-            android:id="@+id/include_message_type_group_kick"
-            layout="@layout/layout_message_type_group_kick"
-            tools:visibility="gone" />
-
-        <!-- TODO: Move out of bubble layout -->
-        <!-- Group Action: Join Request  -->
-        <include
-            android:id="@+id/include_message_type_group_join_request"
-            layout="@layout/layout_message_type_group_join_request"
-            tools:visibility="gone" />
 
         <!--  Call Invite  -->
         <include

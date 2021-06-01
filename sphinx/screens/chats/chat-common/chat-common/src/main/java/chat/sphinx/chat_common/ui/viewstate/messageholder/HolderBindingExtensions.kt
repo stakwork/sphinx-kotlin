@@ -15,6 +15,7 @@ import chat.sphinx.chat_common.databinding.LayoutMessageHolderBinding
 import chat.sphinx.resources.getString
 import chat.sphinx.resources.setBackgroundRandomColor
 import chat.sphinx.resources.setTextColorExt
+import chat.sphinx.wrapper_chat.ChatType
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_message.MessageType
 import chat.sphinx.wrapper_view.Px
@@ -185,7 +186,6 @@ internal fun LayoutMessageHolderBinding.setBubbleBackground(
         spaceMessageHolderRight.updateLayoutParams { width = defaultMargins }
 
     } else {
-
         @Exhaustive
         when (viewState) {
             is MessageHolderViewState.Received -> {
@@ -518,6 +518,130 @@ internal inline fun LayoutMessageHolderBinding.setBubbleReactionBoosts(
         }
     }
 }
+
+
+@MainThread
+@Suppress("NOTHING_TO_INLINE")
+internal inline fun LayoutMessageHolderBinding.setGroupActionIndicatorLayout(
+    groupActionDetails: LayoutState.GroupActionIndicator?
+) {
+    if (groupActionDetails == null) {
+        includeMessageTypeGroupActionHolder.root.gone
+    } else {
+        includeMessageTypeGroupActionHolder.root.visible
+
+        when (groupActionDetails.actionType) {
+            MessageType.GroupAction.Join,
+            MessageType.GroupAction.Leave -> {
+                setGroupActionAnnouncementLayout(groupActionDetails)
+            }
+            MessageType.GroupAction.Kick,
+            MessageType.GroupAction.TribeDelete -> {
+                setGroupActionMemberRemovalLayout(groupActionDetails)
+            }
+            MessageType.GroupAction.MemberApprove -> {
+                if (groupActionDetails.isAdminView) {
+                    setGroupActionJoinRequestAdminLayout(groupActionDetails)
+                } else {
+                    setGroupActionAnnouncementLayout(groupActionDetails)
+                }
+            }
+            MessageType.GroupAction.MemberReject -> {
+                if (groupActionDetails.isAdminView) {
+                    setGroupActionJoinRequestAdminLayout(groupActionDetails)
+                } else {
+                    setGroupActionMemberRemovalLayout(groupActionDetails)
+                }
+            }
+            MessageType.GroupAction.MemberRequest -> {
+                if (groupActionDetails.isAdminView) {
+                    setGroupActionJoinRequestAdminLayout(groupActionDetails)
+                } else {
+                    includeMessageTypeGroupActionHolder.root.gone
+                }
+            }
+            else -> {
+                // If we get here, it's an action that we don't have layouts
+                // designed for yet.
+                includeMessageTypeGroupActionHolder.root.gone
+            }
+        }
+    }
+}
+
+
+/**
+ * Announces the result of a group action.
+ *
+ * When this is the result of handling a join request, it will
+ * either tell an admin what they did, or tell a user what an admin did to them.
+ */
+@MainThread
+@Suppress("NOTHING_TO_INLINE")
+private inline fun LayoutMessageHolderBinding.setGroupActionAnnouncementLayout(
+    groupActionDetails: LayoutState.GroupActionIndicator
+) {
+    includeMessageTypeGroupActionHolder.includeMessageTypeGroupActionAnnouncement.apply {
+        root.visible
+
+        val actionLabelText = when (groupActionDetails.actionType) {
+            MessageType.GroupAction.Join -> {
+                if (groupActionDetails.chatType == ChatType.Tribe) {
+                    root.context.getString(R.string.group_join_announcement_tribe, groupActionDetails.subjectName)
+                } else {
+                    root.context.getString(R.string.group_join_announcement_group, groupActionDetails.subjectName)
+                }
+            }
+            MessageType.GroupAction.Leave -> {
+                if (groupActionDetails.chatType == ChatType.Tribe) {
+                    root.context.getString(R.string.group_leave_announcement_tribe, groupActionDetails.subjectName)
+                } else {
+                    root.context.getString(R.string.group_leave_announcement_group, groupActionDetails.subjectName)
+                }
+            }
+            else -> {
+                null
+            }
+        }
+
+        actionLabelText?.let {
+            textViewGroupActionLabel.text = it
+        } ?: root.gone
+    }
+}
+
+/**
+ * Presents a view for an admin to handle a group membership request
+ */
+@MainThread
+@Suppress("NOTHING_TO_INLINE")
+private inline fun LayoutMessageHolderBinding.setGroupActionJoinRequestAdminLayout(
+    groupActionDetails: LayoutState.GroupActionIndicator
+) {
+    includeMessageTypeGroupActionHolder.includeMessageTypeGroupActionJoinRequestAdminView.apply {
+        root.visible
+
+        // TODO: Set text and wire up action button click handlers.
+    }
+}
+
+
+/**
+ * Tells a member that they've been removed from a group and shows
+ * a button that lets them delete the group.
+ */
+@MainThread
+@Suppress("NOTHING_TO_INLINE")
+private inline fun LayoutMessageHolderBinding.setGroupActionMemberRemovalLayout(
+    groupActionDetails: LayoutState.GroupActionIndicator
+) {
+    includeMessageTypeGroupActionHolder.includeMessageTypeGroupActionMemberRemoval.apply {
+        root.visible
+
+        // TODO: Set text and wire up action button click handler.
+    }
+}
+
 
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
