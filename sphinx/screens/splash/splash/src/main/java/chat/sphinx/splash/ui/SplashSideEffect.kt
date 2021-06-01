@@ -8,6 +8,11 @@ import io.matthewnelson.android_feature_toast_utils.show
 import io.matthewnelson.concept_views.sideeffect.SideEffect
 
 internal sealed class SplashSideEffect: SideEffect<Context>() {
+    object GenerateTokenFailed: SplashSideEffect() {
+        override suspend fun execute(value: Context) {
+            SphinxToastUtils().show(value, R.string.side_effect_generate_token_failed)
+        }
+    }
     object NotImplementedYet: SplashSideEffect() {
         override suspend fun execute(value: Context) {
             SphinxToastUtils().show(value, R.string.side_effect_feature_not_implemented)

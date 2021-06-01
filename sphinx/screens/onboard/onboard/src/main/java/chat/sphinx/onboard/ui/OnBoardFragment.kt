@@ -1,12 +1,10 @@
 package chat.sphinx.onboard.ui
 
 import android.content.Context
-import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.viewModelScope
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
@@ -14,26 +12,18 @@ import chat.sphinx.insetter_activity.addStatusBarPadding
 import chat.sphinx.onboard.R
 import chat.sphinx.onboard.databinding.FragmentOnBoardBinding
 import chat.sphinx.onboard.navigation.ToOnBoardScreen
+import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.navigation.CloseAppOnBackPress
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.visible
-import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.android_feature_viewmodel.updateViewState
-import io.matthewnelson.concept_authentication.coordinator.AuthenticationRequest
-import io.matthewnelson.concept_authentication.coordinator.AuthenticationResponse
-import io.matthewnelson.concept_authentication.data.AuthenticationStorage
 import io.matthewnelson.crypto_common.extensions.decodeToString
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import okio.base64.decodeBase64ToArray
 import javax.annotation.meta.Exhaustive
-import kotlin.random.Random
 
 @AndroidEntryPoint
 internal class OnBoardFragment: SideEffectFragment<
@@ -88,28 +78,13 @@ internal class OnBoardFragment: SideEffectFragment<
         binding.buttonContinue.setOnClickListener {
             viewModel.updateViewState(OnBoardViewState.Saving)
 
-            arguments?.getString(ToOnBoardScreen.USER_INPUT)?.let { input ->
-                if (input.length == 40) {
-                    context?.getSharedPreferences("sphinx_temp_prefs", Context.MODE_PRIVATE)?.let { sharedPrefs ->
-                        val ip = sharedPrefs.getString("sphinx_temp_ip", "")
+            context?.getSharedPreferences("sphinx_temp_prefs", Context.MODE_PRIVATE)?.let { sharedPrefs ->
+                val authToken = sharedPrefs.getString("sphinx_temp_auth_token", "")
+                val ip = sharedPrefs.getString("sphinx_temp_ip", "")
 
-                        ip?.let {
-                            viewModel.generateToken(ip)
-                        }
-                    }
-                } else {
-                    input.decodeBase64ToArray()?.decodeToString()?.split("::")?.let { decodedSplit ->
-                        //Token coming from Umbrel for example.
-                        if (decodedSplit.size == 3) {
-                            if (decodedSplit.elementAt(0) == "ip") {
-                                val ip = decodedSplit.elementAt(1)
-                                val code = decodedSplit.elementAt(2)
-
-                                viewModel.generateToken(ip, code)
-                            }
-                        } else {
-                            //TODO(gaune): INVITE CODE
-                        }
+                authToken?.let {
+                    ip?.let {
+                        viewModel.presentLoginModal(AuthorizationToken(authToken), RelayUrl(ip))
                     }
                 }
             }

@@ -5,9 +5,10 @@ import android.content.Context
 import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_background_login.BackgroundLoginHandler
+import chat.sphinx.concept_network_query_contact.NetworkQueryContact
 import chat.sphinx.concept_network_query_invite.NetworkQueryInvite
-import chat.sphinx.concept_network_query_invite.model.InviteDto
 import chat.sphinx.concept_network_query_invite.model.RedeemInviteDto
+import chat.sphinx.concept_network_tor.TorManager
 import chat.sphinx.concept_repository_lightning.LightningRepository
 import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
 import chat.sphinx.key_restore.KeyRestore
@@ -35,10 +36,12 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
+import okhttp3.HttpUrl.Companion.toHttpUrl
 import okio.base64.decodeBase64ToArray
 import org.cryptonode.jncryptor.AES256JNCryptor
 import org.cryptonode.jncryptor.CryptorException
 import javax.inject.Inject
+import kotlin.random.Random
 
 @HiltViewModel
 internal class SplashViewModel @Inject constructor(
@@ -50,6 +53,8 @@ internal class SplashViewModel @Inject constructor(
     private val navigator: SplashNavigator,
     private val scannerCoordinator: ViewModelCoordinator<ScannerRequest, ScannerResponse>,
     private val networkQueryInvite: NetworkQueryInvite,
+    private val networkQueryContact: NetworkQueryContact,
+    private val torManager: TorManager,
     private val app: Application,
 ): MotionLayoutViewModel<
         Any,
@@ -166,9 +171,13 @@ internal class SplashViewModel @Inject constructor(
 
         input.decodeBase64ToArray()?.decodeToString()?.split("::")?.let { decodedSplit ->
             if (decodedSplit.size == 3) {
+                //Token coming from Umbrel for example.
                 if (decodedSplit.elementAt(0) == "ip") {
                     viewModelScope.launch(mainImmediate) {
-                        navigator.toOnBoardScreen(input)
+                        val ip = decodedSplit.elementAt(1)
+                        val code = decodedSplit.elementAt(2)
+
+                        generateToken(input, ip, code)
                     }
 
                     return
@@ -206,13 +215,76 @@ internal class SplashViewModel @Inject constructor(
 
                         inviteResponse?.invite?.let { invite ->
                             storeTemporaryInviteAndIP(invite, inviteResponse.ip)
-                        }
 
-                        navigator.toOnBoardScreen(input)
+                            generateToken(input, inviteResponse.ip)
+                        }
                     }
                 }
             }
         }
+    }
+
+    private fun generateToken(input: String, ip: String, code: String? = null) {
+        viewModelScope.launch(mainImmediate) {
+            val authToken = generateRandomToken()
+            val relayUrl = parseRelayUrl(RelayUrl(ip))
+
+            storeToken(authToken.value, relayUrl.value)
+
+            networkQueryContact.generateToken(relayUrl, authToken, code).collect { loadResponse ->
+                @javax.annotation.meta.Exhaustive
+                when (loadResponse) {
+                    is LoadResponse.Loading -> {
+                    }
+                    is Response.Error -> {
+//                        updateViewState(SplashViewState.Error)
+
+                        submitSideEffect(SplashSideEffect.GenerateTokenFailed)
+                    }
+                    is Response.Success -> {
+                        viewModelScope.launch(mainImmediate) {
+                            navigator.toOnBoardScreen(input)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // I had to copy this from the RelayDataHandlerImpl class, I needed this methods outside
+    // but I wasn't sure where to put them
+    private inline val String.isOnionAddress: Boolean
+        get() = matches("([a-z2-7]{56}).onion.*".toRegex())
+
+    private suspend fun parseRelayUrl(relayUrl: RelayUrl): RelayUrl {
+        return try {
+            val httpUrl = relayUrl.value.toHttpUrl()
+            torManager.setTorRequired(httpUrl.host.isOnionAddress)
+
+            // is a valid url with scheme
+            relayUrl
+        } catch (e: IllegalArgumentException) {
+
+            // does not contain http, https... check if it's an onion address
+            if (relayUrl.value.isOnionAddress) {
+                // only use http if it is an onion address
+                torManager.setTorRequired(true)
+                RelayUrl("http://${relayUrl.value}")
+            } else {
+                torManager.setTorRequired(false)
+                RelayUrl("http://${relayUrl.value}")
+            }
+        }
+    }
+
+    private fun generateRandomToken(): AuthorizationToken {
+        val charPool: List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9')
+        val token = (1..20)
+            .map { Random.nextInt(0, charPool.size) }
+            .map(charPool::get)
+            .joinToString("")
+
+        return AuthorizationToken(token)
     }
 
     private fun storeTemporaryInviteAndIP(invite: RedeemInviteDto, ip: String) {
@@ -227,6 +299,24 @@ internal class SplashViewModel @Inject constructor(
                     .putString("sphinx_temp_route_hint", invite.route_hint)
                     .putString("sphinx_temp_action", invite.action)
                     .putString("sphinx_temp_ip", ip)
+                    .putString("sphinx_temp_auth_token", generateRandomToken().value)
+                    .let { editor ->
+                        if (!editor.commit()) {
+                            editor.apply()
+                        }
+                    }
+            }
+        }
+    }
+
+    private fun storeToken(token: String, ip: String) {
+        // I needed a way to store this to transition between fragments
+        // but I wasn't sure what to use besides this
+        app.getSharedPreferences("sphinx_temp_prefs", Context.MODE_PRIVATE).let {
+                sharedPrefs ->
+            sharedPrefs?.edit()?.let { editor ->
+                editor.putString("sphinx_temp_ip", ip)
+                    .putString("sphinx_temp_auth_token", token)
                     .let { editor ->
                         if (!editor.commit()) {
                             editor.apply()

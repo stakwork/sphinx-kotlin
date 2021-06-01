@@ -42,13 +42,9 @@ dependencies {
     implementation project(path: ':sphinx:application:common:resources')
     implementation project(path: ':sphinx:activity:insetter-activity')
     implementation project(path: ':sphinx:application:common:wrappers:wrapper-relay')
-    implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-contact')
-    implementation project(path: ':sphinx:application:network:concepts:tor:concept-network-tor')
     implementation project(path: ':sphinx:application:data:concepts:concept-relay')
 
     kapt kaptDeps.google.hilt
-
-    implementation deps.square.okhttp
 
     testImplementation testDeps.junit
 
