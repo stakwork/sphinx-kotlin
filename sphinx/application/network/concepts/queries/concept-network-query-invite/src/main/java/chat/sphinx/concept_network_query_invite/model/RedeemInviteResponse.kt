@@ -6,5 +6,5 @@ import com.squareup.moshi.JsonClass
 data class RedeemInviteResponse(
     val ip: String,
     val invite: RedeemInviteDto,
-    val pubkey: String
+    val pubkey: String?
 )

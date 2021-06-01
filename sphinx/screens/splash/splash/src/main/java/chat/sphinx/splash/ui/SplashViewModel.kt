@@ -162,7 +162,6 @@ internal class SplashViewModel @Inject constructor(
         // going on in different classes
         // Invite Code
         if (input.length == 40) {
-            // TODO: Implement
             viewModelScope.launch(mainImmediate) {
                 redeemInvite(input)
             }
@@ -174,10 +173,11 @@ internal class SplashViewModel @Inject constructor(
                 //Token coming from Umbrel for example.
                 if (decodedSplit.elementAt(0) == "ip") {
                     viewModelScope.launch(mainImmediate) {
+                        storeTemporaryInvite()
+
                         val ip = decodedSplit.elementAt(1)
                         val code = decodedSplit.elementAt(2)
-
-                        generateToken(input, ip, code)
+                        generateToken(ip, null, code)
                     }
 
                     return
@@ -203,7 +203,7 @@ internal class SplashViewModel @Inject constructor(
     private fun redeemInvite(input: String) {
         viewModelScope.launch(mainImmediate) {
             networkQueryInvite.redeemInvite(input).collect { loadResponse ->
-                @javax.annotation.meta.Exhaustive
+                @Exhaustive
                 when (loadResponse) {
                     is LoadResponse.Loading -> {
                     }
@@ -214,9 +214,9 @@ internal class SplashViewModel @Inject constructor(
                         val inviteResponse = loadResponse.value.response
 
                         inviteResponse?.invite?.let { invite ->
-                            storeTemporaryInviteAndIP(invite, inviteResponse.ip)
+                            storeTemporaryInvite(invite)
 
-                            generateToken(input, inviteResponse.ip)
+                            generateToken(inviteResponse.ip, inviteResponse.pubkey, null)
                         }
                     }
                 }
@@ -224,26 +224,24 @@ internal class SplashViewModel @Inject constructor(
         }
     }
 
-    private fun generateToken(input: String, ip: String, code: String? = null) {
+    private fun generateToken(ip: String, nodePubKey: String? = null, code: String? = null) {
         viewModelScope.launch(mainImmediate) {
             val authToken = generateRandomToken()
             val relayUrl = parseRelayUrl(RelayUrl(ip))
 
             storeToken(authToken.value, relayUrl.value)
 
-            networkQueryContact.generateToken(relayUrl, authToken, code).collect { loadResponse ->
-                @javax.annotation.meta.Exhaustive
+            networkQueryContact.generateToken(relayUrl, authToken, code, nodePubKey).collect { loadResponse ->
+                @Exhaustive
                 when (loadResponse) {
                     is LoadResponse.Loading -> {
                     }
                     is Response.Error -> {
-//                        updateViewState(SplashViewState.Error)
-
                         submitSideEffect(SplashSideEffect.GenerateTokenFailed)
                     }
                     is Response.Success -> {
                         viewModelScope.launch(mainImmediate) {
-                            navigator.toOnBoardScreen(input)
+                            navigator.toOnBoardScreen()
                         }
                     }
                 }
@@ -287,24 +285,35 @@ internal class SplashViewModel @Inject constructor(
         return AuthorizationToken(token)
     }
 
-    private fun storeTemporaryInviteAndIP(invite: RedeemInviteDto, ip: String) {
+    private fun storeTemporaryInvite(invite: RedeemInviteDto? = null) {
         // I needed a way to store this to transition between fragments
         // but I wasn't sure what to use besides this
         app.getSharedPreferences("sphinx_temp_prefs", Context.MODE_PRIVATE).let {
                 sharedPrefs ->
             sharedPrefs?.edit()?.let { editor ->
-                editor.putString("sphinx_temp_nickname", invite.nickname)
-                    .putString("sphinx_temp_pubkey", invite.pubkey)
-                    .putString("sphinx_temp_message", invite.message)
-                    .putString("sphinx_temp_route_hint", invite.route_hint)
-                    .putString("sphinx_temp_action", invite.action)
-                    .putString("sphinx_temp_ip", ip)
-                    .putString("sphinx_temp_auth_token", generateRandomToken().value)
-                    .let { editor ->
-                        if (!editor.commit()) {
-                            editor.apply()
+                invite?.let { invite ->
+                    editor
+                        .putString("sphinx_temp_inviter_nickname", invite.nickname)
+                        .putString("sphinx_temp_inviter_pubkey", invite.pubkey)
+                        .putString("sphinx_temp_inviter_route_hint", invite.route_hint)
+                        .putString("sphinx_temp_invite_message", invite.message)
+                        .putString("sphinx_temp_invite_action", invite.action)
+                        .let { editor ->
+                            if (!editor.commit()) {
+                                editor.apply()
+                            }
                         }
-                    }
+                } ?: run {
+                    editor
+                        .putString("sphinx_temp_inviter_nickname", "Sphinx Support")
+                        .putString("sphinx_temp_inviter_pubkey", "023d70f2f76d283c6c4e58109ee3a2816eb9d8feb40b23d62469060a2b2867b77f")
+                        .putString("sphinx_temp_invite_message", "Welcome to Sphinx")
+                        .let { editor ->
+                            if (!editor.commit()) {
+                                editor.apply()
+                            }
+                        }
+                }
             }
         }
     }
@@ -312,10 +321,11 @@ internal class SplashViewModel @Inject constructor(
     private fun storeToken(token: String, ip: String) {
         // I needed a way to store this to transition between fragments
         // but I wasn't sure what to use besides this
-        app.getSharedPreferences("sphinx_temp_prefs", Context.MODE_PRIVATE).let {
-                sharedPrefs ->
+        app.getSharedPreferences("sphinx_temp_prefs", Context.MODE_PRIVATE).let { sharedPrefs ->
+
             sharedPrefs?.edit()?.let { editor ->
-                editor.putString("sphinx_temp_ip", ip)
+                editor
+                    .putString("sphinx_temp_ip", ip)
                     .putString("sphinx_temp_auth_token", token)
                     .let { editor ->
                         if (!editor.commit()) {

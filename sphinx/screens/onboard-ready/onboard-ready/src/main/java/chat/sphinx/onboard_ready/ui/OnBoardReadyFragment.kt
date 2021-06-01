@@ -66,9 +66,9 @@ internal class OnBoardReadyFragment: SideEffectFragment<
             viewModel.updateViewState(OnBoardReadyViewState.Saving)
 
             context?.getSharedPreferences("sphinx_temp_prefs", Context.MODE_PRIVATE)?.let { sharedPrefs ->
-                val nickname = sharedPrefs.getString("sphinx_temp_nickname", "")
-                val pubkey = sharedPrefs.getString("sphinx_temp_pubkey", null)
-                val routeHint = sharedPrefs.getString("sphinx_temp_route_hint", null)
+                val nickname = sharedPrefs.getString("sphinx_temp_inviter_nickname", "")
+                val pubkey = sharedPrefs.getString("sphinx_temp_inviter_pubkey", null)
+                val routeHint = sharedPrefs.getString("sphinx_temp_inviter_route_hint", null)
 
                 nickname?.let { nickname ->
                     pubkey?.let { pubkey ->

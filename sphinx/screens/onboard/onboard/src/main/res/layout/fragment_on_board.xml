@@ -14,7 +14,7 @@
         android:layout_height="0dp"
         android:gravity="center"
         android:layout_marginHorizontal="@dimen/default_layout_margin"
-        android:text="@string/sign_up_invited_join_sphinx"
+        android:text="@string/sign_up_friend_message"
         android:textColor="@color/text"
         android:fontFamily="@font/roboto_light"
         android:textSize="@dimen/sign_up_welcome_message_invited_to_sphinx_text_size"

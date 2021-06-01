@@ -66,9 +66,9 @@ internal class OnBoardViewModel @Inject constructor(
         app.getSharedPreferences("sphinx_temp_prefs", Context.MODE_PRIVATE).let {
                 sharedPrefs ->
             sharedPrefs?.edit()?.let { editor ->
-                editor.putString("sphinx_temp_nickname", nickname)
-                    .putString("sphinx_temp_pubkey", pubKey)
-                    .putString("sphinx_temp_message", message)
+                editor.putString("sphinx_temp_inviter_nickname", nickname)
+                    .putString("sphinx_temp_inviter_pubkey", pubKey)
+                    .putString("sphinx_temp_invite_message", message)
                     .let { editor ->
                         if (!editor.commit()) {
                             editor.apply()

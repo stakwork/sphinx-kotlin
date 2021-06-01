@@ -44,35 +44,12 @@ internal class OnBoardFragment: SideEffectFragment<
 
         BackPressHandler(binding.root.context).addCallback(viewLifecycleOwner, requireActivity())
 
-        binding.invitedToSphinxTextView.text = "A message from your friend.."
+        context?.getSharedPreferences("sphinx_temp_prefs", Context.MODE_PRIVATE)?.let { sharedPrefs ->
+            val nickname = sharedPrefs.getString("sphinx_temp_inviter_nickname", "")
+            val message = sharedPrefs.getString("sphinx_temp_invite_message", "")
 
-        arguments?.getString(ToOnBoardScreen.USER_INPUT)?.let { input ->
-            if (input.length == 40) {
-                context?.getSharedPreferences("sphinx_temp_prefs", Context.MODE_PRIVATE)?.let { sharedPrefs ->
-                    val nickname = sharedPrefs.getString("sphinx_temp_nickname", "")
-                    val message = sharedPrefs.getString("sphinx_temp_message", "")
-
-                    binding.inviterNameTextView.text = nickname
-                    binding.inviterMessageTextView.text = message
-                }
-            } else {
-                input.decodeBase64ToArray()?.decodeToString()?.split("::")?.let { decodedSplit ->
-                    //Token coming from Umbrel for example.
-                    if (decodedSplit.size == 3) {
-                        // This is hardcoded in the iOS app as well, the most important part is the
-                        // pubkey which later is being used to create the only contact this user
-                        // will have.
-                        val inviterNickname = "Sphinx Support"
-                        val inviterPubKey = "023d70f2f76d283c6c4e58109ee3a2816eb9d8feb40b23d62469060a2b2867b77f"
-                        val inviterMessage = "Welcome to Sphinx"
-
-                        binding.inviterNameTextView.text = inviterNickname
-                        binding.inviterMessageTextView.text = inviterMessage
-
-                        viewModel.storeTemporaryInviter(inviterNickname, inviterPubKey, inviterMessage)
-                    }
-                }
-            }
+            binding.inviterNameTextView.text = nickname
+            binding.inviterMessageTextView.text = message
         }
 
         binding.buttonContinue.setOnClickListener {
@@ -98,7 +75,7 @@ internal class OnBoardFragment: SideEffectFragment<
     }
 
     override suspend fun onSideEffectCollect(sideEffect: OnBoardSideEffect) {
-        // TODO("Not yet implemented")
+        sideEffect.execute(binding.root.context)
     }
 
     override suspend fun onViewStateFlowCollect(viewState: OnBoardViewState) {

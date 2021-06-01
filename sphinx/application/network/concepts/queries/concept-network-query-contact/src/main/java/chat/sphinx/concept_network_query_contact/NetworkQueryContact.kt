@@ -30,15 +30,12 @@ abstract class NetworkQueryContact {
     ////////////
     /// POST ///
     ////////////
-
     abstract fun generateToken(
         relayUrl: RelayUrl,
         token: AuthorizationToken,
         password: String?,
         pubkey: String? = null
     ): Flow<LoadResponse<GenerateTokenResponse, ResponseError>>
-//    app.post('/contacts/:id/keys', contacts.exchangeKeys)
-//    app.post('/contacts', contacts.createContact)
 
     abstract fun createContact(
         postContactDto: PostContactDto,
@@ -52,4 +49,8 @@ abstract class NetworkQueryContact {
         contactId: ContactId,
         relayData: Pair<AuthorizationToken, RelayUrl>? = null,
     ): Response<Any, ResponseError>
+
+
+    //    app.post('/contacts/:id/keys', contacts.exchangeKeys)
+    //    app.post('/contacts', contacts.createContact)
 }
