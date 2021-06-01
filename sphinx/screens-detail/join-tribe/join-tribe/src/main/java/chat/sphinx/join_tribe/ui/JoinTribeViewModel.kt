@@ -101,6 +101,7 @@ internal class JoinTribeViewModel @Inject constructor(
                 return@launch
             }
             tribeInfo.my_alias = myAlias.value
+            tribeInfo.amount = tribeInfo.price_to_join
 
             chatRepository.joinTribe(tribeInfo).collect { loadResponse ->
                 @Exhaustive
