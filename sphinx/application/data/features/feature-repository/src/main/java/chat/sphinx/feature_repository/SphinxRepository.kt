@@ -1068,7 +1068,7 @@ abstract class SphinxRepository(
                                 }
                         }
 
-                        listMessageDbo.map { dbo ->
+                        listMessageDbo.reversed().map { dbo ->
                             mapMessageDboAndDecryptContentIfNeeded(
                                 queries,
                                 dbo,
