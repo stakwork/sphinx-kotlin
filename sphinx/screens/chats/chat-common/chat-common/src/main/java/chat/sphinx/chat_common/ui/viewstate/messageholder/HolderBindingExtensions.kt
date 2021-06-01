@@ -35,48 +35,46 @@ internal inline fun LayoutMessageHolderBinding.setUnsupportedMessageTypeLayout(
         includeMessageHolderBubble.includeUnsupportedMessageTypePlaceholder.apply {
             root.visible
 
-            val context = root.context
-
             val messageTypeDisplayString = when (messageTypeDetails.messageType) {
                 MessageType.Delete,
                 MessageType.DirectPayment,
-                MessageType.GroupJoin,
-                MessageType.GroupLeave,
+                MessageType.GroupAction.Join,
+                MessageType.GroupAction.Leave,
                 MessageType.Message -> {
                     // 🤔 We should never get here since these message types ARE supported.
-                    context.getString(R.string.placeholder_unsupported_message_type_default)
+                    getString(R.string.placeholder_unsupported_message_type_default)
                 }
                 MessageType.Attachment -> {
-                    context.getString(R.string.placeholder_display_name_message_type_attachment)
+                    getString(R.string.placeholder_display_name_message_type_attachment)
                 }
                 MessageType.BotRes -> {
-                    context.getString(R.string.placeholder_display_name_message_type_bot_response)
+                    getString(R.string.placeholder_display_name_message_type_bot_response)
                 }
                 MessageType.Invoice -> {
-                    context.getString(R.string.placeholder_display_name_message_type_invoice)
+                    getString(R.string.placeholder_display_name_message_type_invoice)
                 }
                 MessageType.Payment -> {
-                    context.getString(R.string.placeholder_display_name_message_type_payment)
+                    getString(R.string.placeholder_display_name_message_type_payment)
                 }
-                MessageType.TribeDelete -> {
-                    context.getString(R.string.placeholder_display_name_message_type_tribe_delete)
+                MessageType.GroupAction.TribeDelete -> {
+                    getString(R.string.placeholder_display_name_message_type_tribe_delete)
                 }
                 MessageType.Cancellation,
                 MessageType.Confirmation,
                 MessageType.ContactKey,
                 MessageType.ContactKeyConfirmation,
-                MessageType.GroupCreate,
-                MessageType.GroupInvite,
-                MessageType.GroupKick,
+                MessageType.GroupAction.Create,
+                MessageType.GroupAction.Invite,
+                MessageType.GroupAction.Kick,
                 MessageType.Heartbeat,
                 MessageType.HeartbeatConfirmation,
                 MessageType.KeySend,
                 MessageType.Purchase.Accepted,
                 MessageType.Purchase.Denied,
                 MessageType.Purchase.Processing,
-                MessageType.MemberApprove,
-                MessageType.MemberReject,
-                MessageType.MemberRequest,
+                MessageType.GroupAction.MemberApprove,
+                MessageType.GroupAction.MemberReject,
+                MessageType.GroupAction.MemberRequest,
                 MessageType.Query,
                 MessageType.QueryResponse,
                 MessageType.Repayment,
@@ -86,7 +84,7 @@ internal inline fun LayoutMessageHolderBinding.setUnsupportedMessageTypeLayout(
                 is MessageType.Unknown -> {
                     // ❓: Should we ever get here if the type isn't one we plan to
                     // render a unique message for?
-                    context.getString(R.string.placeholder_unsupported_message_type_default)
+                    getString(R.string.placeholder_unsupported_message_type_default)
                 }
             }
 

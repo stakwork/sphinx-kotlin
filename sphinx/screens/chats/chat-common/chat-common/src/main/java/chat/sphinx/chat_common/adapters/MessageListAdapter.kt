@@ -21,7 +21,6 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-
 internal class MessageListAdapter<ARGS : NavArgs>(
     private val recyclerView: RecyclerView,
     private val layoutManager: LinearLayoutManager,
@@ -198,13 +197,12 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                     }
                 }
 
-
                 setStatusHeader(viewState.statusHeader)
                 setDeletedMessageLayout(viewState.deletedMessage)
                 setBubbleBackground(viewState, recyclerViewWidth)
                 setGroupActionIndicatorLayout(viewState.groupActionIndicator)
 
-                if (MessageHolderViewState.unsupportedMessageTypes.contains(viewState.message.type)) {
+                if (viewState.unsupportedMessageType != null) {
                     setUnsupportedMessageTypeLayout(viewState.unsupportedMessageType)
                 } else {
                     if (viewState.background !is BubbleBackground.Gone) {
