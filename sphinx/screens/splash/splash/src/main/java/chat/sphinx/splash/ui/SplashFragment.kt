@@ -15,12 +15,14 @@ import chat.sphinx.authentication_resources.databinding.LayoutAuthenticationBind
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.resources.SphinxToastUtils
+import chat.sphinx.resources.inputMethodManager
 import chat.sphinx.splash.R
 import chat.sphinx.splash.databinding.FragmentSplashBinding
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.navigation.CloseAppOnBackPress
 import io.matthewnelson.android_feature_screens.R as R_screens
 import io.matthewnelson.android_feature_screens.ui.motionlayout.MotionLayoutFragment
+import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.invisibleIfFalse
 import io.matthewnelson.android_feature_toast_utils.show
 import io.matthewnelson.android_feature_viewmodel.currentViewState
@@ -88,6 +90,7 @@ internal class SplashFragment: MotionLayoutFragment<
     override suspend fun onSideEffectCollect(sideEffect: SplashSideEffect) {
         if (sideEffect is SplashSideEffect.FromScanner) {
             binding.layoutOnBoard.editTextCodeInput.setText(sideEffect.value.value)
+            processUserInput()
         } else {
             sideEffect.execute(binding.root.context)
         }
@@ -99,6 +102,9 @@ internal class SplashFragment: MotionLayoutFragment<
     override suspend fun onViewStateFlowCollect(viewState: SplashViewState) {
         @Exhaustive
         when (viewState) {
+            is SplashViewState.SignupFailed -> {
+                binding.layoutOnBoard.signUpProgressBar.goneIfFalse(false)
+            }
             is SplashViewState.Start_ShowIcon -> {
                 binding.layoutOnBoard.imageButtonScanner.let { imageButton ->
                     imageButton.isEnabled = false
@@ -128,9 +134,7 @@ internal class SplashFragment: MotionLayoutFragment<
 
                     editText.setOnEditorActionListener { _, actionId, _ ->
                         if (actionId == EditorInfo.IME_ACTION_DONE) {
-                            viewModel.processUserInput(
-                                editText.text?.toString()
-                            )
+                            processUserInput()
                             true
                         } else {
                             false
@@ -225,6 +229,23 @@ internal class SplashFragment: MotionLayoutFragment<
                             updatePinHints(viewState)
                         }
                     }
+                }
+            }
+        }
+    }
+
+    private fun processUserInput() {
+        binding.root.context.inputMethodManager?.let { imm ->
+            binding.layoutOnBoard.apply {
+                editTextCodeInput.let { editText ->
+                    if (imm.isActive(editText)) {
+                        imm.hideSoftInputFromWindow(editText.windowToken, 0)
+                    }
+                    signUpProgressBar.goneIfFalse(true)
+
+                    viewModel.processUserInput(
+                        editText.text?.toString()
+                    )
                 }
             }
         }

@@ -1,6 +1,5 @@
 package chat.sphinx.onboard.ui
 
-import android.app.Application
 import android.content.Context
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_relay.RelayDataHandler
@@ -20,7 +19,6 @@ import javax.inject.Inject
 
 @HiltViewModel
 internal class OnBoardViewModel @Inject constructor(
-    private val app: Application,
     dispatchers: CoroutineDispatchers,
     val navigator: OnBoardNavigator,
     private val relayDataHandler: RelayDataHandler,
@@ -58,22 +56,6 @@ internal class OnBoardViewModel @Inject constructor(
                         // will never be returned
                     }
                 }
-            }
-        }
-    }
-
-    fun storeTemporaryInviter(nickname: String?, pubKey: String?, message: String?) {
-        app.getSharedPreferences("sphinx_temp_prefs", Context.MODE_PRIVATE).let {
-                sharedPrefs ->
-            sharedPrefs?.edit()?.let { editor ->
-                editor.putString("sphinx_temp_inviter_nickname", nickname)
-                    .putString("sphinx_temp_inviter_pubkey", pubKey)
-                    .putString("sphinx_temp_invite_message", message)
-                    .let { editor ->
-                        if (!editor.commit()) {
-                            editor.apply()
-                        }
-                    }
             }
         }
     }

@@ -45,6 +45,8 @@ internal class OnBoardReadyFragment: SideEffectFragment<
 
         BackPressHandler(binding.root.context).addCallback(viewLifecycleOwner, requireActivity())
 
+        binding.balanceTextView.text = getString(R.string.sphinx_ready_loading_balance)
+
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.getBalances().collect { loadResponse ->
                 @Exhaustive
@@ -80,9 +82,9 @@ internal class OnBoardReadyFragment: SideEffectFragment<
     }
 
     private fun setupHeaderAndFooter() {
-        val insetterActivity = (requireActivity() as InsetterActivity)
-        insetterActivity.addStatusBarPadding(binding.layoutConstraintOnBoardReady)
-        insetterActivity.addNavigationBarPadding(binding.layoutConstraintOnBoardReady)
+        (requireActivity() as InsetterActivity)
+            .addStatusBarPadding(binding.layoutConstraintOnBoardReady)
+            .addNavigationBarPadding(binding.layoutConstraintOnBoardReady)
     }
 
     override suspend fun onSideEffectCollect(sideEffect: OnBoardReadySideEffect) {

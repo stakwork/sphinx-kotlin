@@ -47,9 +47,9 @@ internal class OnBoardNameFragment: SideEffectFragment<
     }
 
     private fun setupHeaderAndFooter() {
-        val insetterActivity = (requireActivity() as InsetterActivity)
-        insetterActivity.addStatusBarPadding(binding.layoutConstraintOnBoardName)
-        insetterActivity.addNavigationBarPadding(binding.layoutConstraintOnBoardName)
+        (requireActivity() as InsetterActivity)
+            .addStatusBarPadding(binding.layoutConstraintOnBoardName)
+            .addNavigationBarPadding(binding.layoutConstraintOnBoardName)
     }
 
     override suspend fun onSideEffectCollect(sideEffect: OnBoardNameSideEffect) {

@@ -11,7 +11,6 @@ import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.insetter_activity.addStatusBarPadding
 import chat.sphinx.onboard.R
 import chat.sphinx.onboard.databinding.FragmentOnBoardBinding
-import chat.sphinx.onboard.navigation.ToOnBoardScreen
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
 import dagger.hilt.android.AndroidEntryPoint
@@ -20,9 +19,7 @@ import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.updateViewState
-import io.matthewnelson.crypto_common.extensions.decodeToString
 import kotlinx.coroutines.launch
-import okio.base64.decodeBase64ToArray
 import javax.annotation.meta.Exhaustive
 
 @AndroidEntryPoint
@@ -69,9 +66,9 @@ internal class OnBoardFragment: SideEffectFragment<
     }
 
     private fun setupHeaderAndFooter() {
-        val insetterActivity = (requireActivity() as InsetterActivity)
-        insetterActivity.addStatusBarPadding(binding.layoutConstraintOnBoard)
-        insetterActivity.addNavigationBarPadding(binding.layoutConstraintOnBoard)
+        (requireActivity() as InsetterActivity)
+            .addStatusBarPadding(binding.layoutConstraintOnBoard)
+            .addNavigationBarPadding(binding.layoutConstraintOnBoard)
     }
 
     override suspend fun onSideEffectCollect(sideEffect: OnBoardSideEffect) {

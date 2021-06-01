@@ -40,7 +40,7 @@
             android:layout_height="wrap_content"
             android:textColor="@color/text"
             android:fontFamily="@font/roboto_regular"
-            android:inputType="textVisiblePassword"
+            android:inputType="textVisiblePassword|textCapWords"
             android:textSize="@dimen/sign_up_edit_text_text_size"
             android:layout_marginHorizontal="@dimen/default_double_layout_margin"
             android:singleLine="true"

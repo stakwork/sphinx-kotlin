@@ -127,13 +127,10 @@ internal class SplashViewModel @Inject constructor(
                                 ?.split("::")
                                 ?.let { decodedSplit ->
 
-                                    if (decodedSplit.size == 2) {
-//                                        if (decodedSplit[0] == "ip") {
-//                                            return Response.Error("Creating a new account is not yet implemented")
-//                                        }
-//                                        if (decodedSplit[0] == "keys") {
+                                    if (decodedSplit.size == 3) {
+                                        if (decodedSplit[0] == "ip") {
                                             return Response.Success(Any())
-//                                        }
+                                        }
                                     }
 
                                 }
@@ -196,6 +193,7 @@ internal class SplashViewModel @Inject constructor(
         }
 
         viewModelScope.launch(mainImmediate) {
+            updateViewState(SplashViewState.SignupFailed)
             submitSideEffect(SplashSideEffect.InvalidCode)
         }
     }
@@ -208,6 +206,7 @@ internal class SplashViewModel @Inject constructor(
                     is LoadResponse.Loading -> {
                     }
                     is Response.Error -> {
+                        updateViewState(SplashViewState.SignupFailed)
                         submitSideEffect(SplashSideEffect.InvalidCode)
                     }
                     is Response.Success -> {
@@ -237,6 +236,7 @@ internal class SplashViewModel @Inject constructor(
                     is LoadResponse.Loading -> {
                     }
                     is Response.Error -> {
+                        updateViewState(SplashViewState.SignupFailed)
                         submitSideEffect(SplashSideEffect.GenerateTokenFailed)
                     }
                     is Response.Success -> {
