@@ -1427,7 +1427,7 @@ abstract class SphinxRepository(
                             withContext(io) {
                                 queries.transaction {
                                     upsertChat(loadResponse.value, moshi, chatSeenMap, queries, null)
-                                    updateChatTribeData(tribeDto, ChatId(loadResponse.value.id), queries)
+//                                    updateChatTribeData(tribeDto, ChatId(loadResponse.value.id), queries)
                                 }
                             }
                         }
@@ -1469,28 +1469,26 @@ abstract class SphinxRepository(
                         is Response.Error -> {}
 
                         is Response.Success -> {
-                            if (loadResponse.value is TribeDto) {
-                                val tribeDto = loadResponse.value
+                            val tribeDto = loadResponse.value
 
-                                val didChangeNameOrPhotoUrl = (
-                                    tribeDto.name != chat.name?.value ?: "" ||
-                                    tribeDto.img != chat.photoUrl?.value ?: ""
-                                )
+                            val didChangeNameOrPhotoUrl = (
+                                tribeDto.name != chat.name?.value ?: "" ||
+                                tribeDto.img != chat.photoUrl?.value ?: ""
+                            )
 
-                                chatLock.withLock {
-                                    queries.transaction {
-                                        updateChatTribeData(tribeDto, chat.id, queries)
-                                    }
+                            chatLock.withLock {
+                                queries.transaction {
+                                    updateChatTribeData(tribeDto, chat.id, queries)
                                 }
+                            }
 
-                                if (didChangeNameOrPhotoUrl) {
-                                    networkQueryChat.updateChat(chat.id,
-                                        PutChatDto(
-                                            tribeDto.name,
-                                            tribeDto.img ?: "",
-                                        )
-                                    ).collect {}
-                                }
+                            if (didChangeNameOrPhotoUrl) {
+                                networkQueryChat.updateChat(chat.id,
+                                    PutChatDto(
+                                        tribeDto.name,
+                                        tribeDto.img ?: "",
+                                    )
+                                ).collect {}
                             }
                         }
                     }
