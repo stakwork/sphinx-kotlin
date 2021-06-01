@@ -513,7 +513,8 @@ AND type IN(0, 5)
 --     OR type = 15
 --     OR type = 25
 --     OR type = 29
-ORDER BY date;
+ORDER BY date DESC
+LIMIT 200;
 
 messageGetUnseenIncomingMessageCountByChatId:
 SELECT COUNT(*)
