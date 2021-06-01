@@ -16,7 +16,7 @@
         <include
             android:id="@+id/include_paid_message_sent_status_details"
             layout="@layout/layout_paid_message_sent"
-            tools:visibility="visible" />
+            tools:visibility="gone" />
 
         <!--   Direct Payment Message  -->
         <include
@@ -77,18 +77,27 @@
         android:id="@+id/layout_constraint_message_bubble_container_middle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingVertical="@dimen/default_inner_spacing_list_item_title"
-        android:paddingHorizontal="@dimen/default_layout_margin"
         app:layout_constraintBottom_toTopOf="@+id/layout_constraint_message_bubble_container_bottom"
         app:layout_constraintTop_toBottomOf="@+id/layout_constraint_message_bubble_container_top">
+
+        <!-- Placeholder for unsupported Message Types -->
+        <include
+            android:id="@+id/include_unsupported_message_type_placeholder"
+            layout="@layout/layout_unsupported_message_type_placeholder"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="@+id/layout_constraint_message_bubble_container_middle"
+            tools:visibility="visible" />
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/text_view_message_text"
             style="@style/chat_message_body_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:paddingHorizontal="@dimen/default_layout_margin"
+            android:paddingVertical="@dimen/default_inner_spacing_list_item_title"
             android:visibility="gone"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/include_unsupported_message_type_placeholder"
             tools:text="Contrary to popular belief, Lorem Ipsum is not simply random text. Latin from 45 BC, making it over 2000 years old."
             tools:visibility="visible" />
 
@@ -149,7 +158,6 @@
             layout="@layout/layout_message_type_boost"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/default_list_row_padding_vertical"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:visibility="visible" />
