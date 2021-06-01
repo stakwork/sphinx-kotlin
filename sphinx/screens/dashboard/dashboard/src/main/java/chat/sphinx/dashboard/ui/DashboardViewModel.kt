@@ -20,9 +20,13 @@ import chat.sphinx.dashboard.ui.viewstates.NavDrawerViewState
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
+import chat.sphinx.scanner_view_model_coordinator.request.ScannerFilter
 import chat.sphinx.scanner_view_model_coordinator.request.ScannerRequest
 import chat.sphinx.scanner_view_model_coordinator.response.ScannerResponse
 import chat.sphinx.wrapper_chat.isConversation
+import chat.sphinx.wrapper_common.tribe.TribeJoinLink
+import chat.sphinx.wrapper_common.tribe.toTribeJoinLink
+import chat.sphinx.wrapper_common.tribe.isValidTribeJoinLink
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_contact.isConfirmed
@@ -32,6 +36,7 @@ import chat.sphinx.wrapper_message.Message
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.MotionLayoutViewModel
+import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.sideeffect.SideEffect
 import io.matthewnelson.concept_views.viewstate.collect
@@ -91,9 +96,27 @@ internal class DashboardViewModel @Inject constructor(
     fun toScanner() {
         viewModelScope.launch(mainImmediate) {
             val response = scannerCoordinator.submitRequest(
-                ScannerRequest(filter = null, showBottomView = true)
+                ScannerRequest(
+                    filter = object : ScannerFilter() {
+                        override suspend fun checkData(data: String): Response<Any, String> {
+                            if (data.toTribeJoinLink() != null) {
+                                return Response.Success(Any())
+                            }
+
+                            return Response.Error("QR code is not a Join Tribe link")
+                        }
+                    },
+                    showBottomView = true
+                )
             )
-            // TODO: Do something with response
+            if (response is Response.Success) {
+
+                val code = response.value.value
+
+                if (code.isValidTribeJoinLink) {
+                    dashboardNavigator.toJoinTribeDetail(TribeJoinLink(code))
+                }
+            }
         }
     }
 

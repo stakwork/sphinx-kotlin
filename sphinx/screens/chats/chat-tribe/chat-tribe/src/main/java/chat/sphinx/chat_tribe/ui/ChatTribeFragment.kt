@@ -1,18 +1,21 @@
 package chat.sphinx.chat_tribe.ui
 
+import android.os.Bundle
+import android.view.View
 import android.widget.ImageView
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.RecyclerView
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.chat_common.databinding.LayoutChatFooterBinding
 import chat.sphinx.chat_common.databinding.LayoutChatHeaderBinding
-import chat.sphinx.chat_common.ui.ChatFragment
 import chat.sphinx.chat_common.navigation.ChatNavigator
+import chat.sphinx.chat_common.ui.ChatFragment
 import chat.sphinx.chat_tribe.R
 import chat.sphinx.chat_tribe.databinding.FragmentChatTribeBinding
 import chat.sphinx.chat_tribe.navigation.TribeChatNavigator
 import chat.sphinx.concept_image_loader.ImageLoader
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint

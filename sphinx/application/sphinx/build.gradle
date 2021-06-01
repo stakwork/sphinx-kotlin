@@ -111,8 +111,8 @@ dependencies {
     implementation deps.google.hilt
     kapt kaptDeps.google.hilt
 
-    implementation deps.androidx.sqlite
     implementation deps.sqlCipher
+    implementation deps.sqlRequery
     implementation deps.square.sqlDelightAndroid
 
     testImplementation project(path: ':kotlin:test:test-concept-coroutines')

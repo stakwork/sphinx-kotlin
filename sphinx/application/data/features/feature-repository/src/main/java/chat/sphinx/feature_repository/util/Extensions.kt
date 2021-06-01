@@ -1,6 +1,7 @@
 package chat.sphinx.feature_repository.util
 
 import chat.sphinx.concept_network_query_chat.model.ChatDto
+import chat.sphinx.concept_network_query_chat.model.TribeDto
 import chat.sphinx.concept_network_query_contact.model.ContactDto
 import chat.sphinx.concept_network_query_invite.model.InviteDto
 import chat.sphinx.concept_network_query_lightning.model.balance.BalanceDto
@@ -99,12 +100,38 @@ inline fun TransactionCallbacks.updateChatMuted(
 }
 
 @Suppress("NOTHING_TO_INLINE", "SpellCheckingInspection")
+inline fun TransactionCallbacks.updateChatTribeData(
+    tribe: TribeDto,
+    chatId: ChatId,
+    queries: SphinxDatabaseQueries,
+) {
+    val pricePerMessage = tribe.price_per_message.toSat()
+    val escrowAmount = tribe.escrow_amount.toSat()
+    val name = tribe.name.toChatName()
+    val photoUrl = tribe.img?.toPhotoUrl()
+
+    queries.chatUpdateTribeData(
+        pricePerMessage,
+        escrowAmount,
+        name,
+        photoUrl,
+        chatId,
+    )
+
+    queries.dashboardUpdateTribe(
+        name?.value ?: "",
+        photoUrl,
+        chatId
+    )
+}
+
+@Suppress("NOTHING_TO_INLINE", "SpellCheckingInspection")
 inline fun TransactionCallbacks.upsertChat(
     dto: ChatDto,
     moshi: Moshi,
     chatSeenMap: SynchronizedMap<ChatId, Seen>,
     queries: SphinxDatabaseQueries,
-    contactDto: ContactDto? = null,
+    contactDto: ContactDto? = null
 ) {
     val seen = dto.seenActual.toSeen()
     val chatId = ChatId(dto.id)
@@ -113,17 +140,18 @@ inline fun TransactionCallbacks.upsertChat(
     val contactIds = dto.contact_ids.map { ContactId(it) }
     val muted = dto.isMutedActual.toChatMuted()
     val chatPhotoUrl = dto.photo_url?.toPhotoUrl()
+    val pricePerMessage = dto.price_per_message?.toSat()
+    val escrowAmount = dto.escrow_amount?.toSat()
+    val chatName = dto.name?.toChatName()
 
     queries.chatUpsert(
-        dto.name?.toChatName(),
+        chatName,
         chatPhotoUrl,
         dto.status.toChatStatus(),
         contactIds,
         muted,
         dto.group_key?.toChatGroupKey(),
         dto.host?.toChatHost(),
-        dto.price_per_message?.toSat(),
-        dto.escrow_amount?.toSat(),
         dto.unlistedActual.toChatUnlisted(),
         dto.privateActual.toChatPrivate(),
         dto.owner_pub_key?.toLightningNodePubKey(),
@@ -136,7 +164,13 @@ inline fun TransactionCallbacks.upsertChat(
         ChatUUID(dto.uuid),
         chatType,
         createdAt,
+        pricePerMessage,
+        escrowAmount,
     )
+
+    if (chatType.isTribe() && (pricePerMessage != null || escrowAmount != null)) {
+        queries.chatUpdateTribeData(pricePerMessage, escrowAmount, chatName, chatPhotoUrl, chatId)
+    }
 
     val conversationContactId: ContactId? = if (chatType.isConversation()) {
         contactIds.elementAtOrNull(1)?.let { contactId ->

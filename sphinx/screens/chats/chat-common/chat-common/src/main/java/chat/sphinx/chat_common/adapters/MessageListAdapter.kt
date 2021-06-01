@@ -200,6 +200,7 @@ internal class MessageListAdapter<ARGS: NavArgs>(
                 setStatusHeader(viewState.statusHeader)
                 setDeletedMessageLayout(viewState.deletedMessage)
                 setBubbleBackground(viewState, recyclerViewWidth)
+                setGroupActionIndicatorLayout(viewState.groupActionIndicator)
 
                 if (viewState.background !is BubbleBackground.Gone) {
                     setBubbleMessageLayout(viewState.bubbleMessage)
@@ -215,6 +216,7 @@ internal class MessageListAdapter<ARGS: NavArgs>(
                                 .also { disposables.add(it) }
                         }
                     }
+                    setBubbleReplyMessage(viewState.bubbleReplyMessage)
                 }
             }
         }

@@ -1,10 +1,11 @@
 package chat.sphinx.chat_common.ui.viewstate.messageholder
 
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
-import chat.sphinx.wrapper_chat.ChatType
+import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.isConversation
 import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_common.lightning.Sat
+import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_message.*
 
 internal inline val MessageHolderViewState.isReceived: Boolean
@@ -16,24 +17,19 @@ internal inline val MessageHolderViewState.showReceivedBubbleArrow: Boolean
 internal val MessageHolderViewState.showSentBubbleArrow: Boolean
     get() = background is BubbleBackground.First && this is MessageHolderViewState.Sent
 
-fun main() {
-    val set: MutableSet<String> = LinkedHashSet(3)
-    println(set.size)
-    set.add("new string")
-    println(set.size)
-}
-
 internal sealed class MessageHolderViewState(
     val message: Message,
-    chatType: ChatType?,
+    chat: Chat,
     val background: BubbleBackground,
-    val initialHolder: InitialHolderViewState
+    val initialHolder: InitialHolderViewState,
+    val messageSenderName: (Message) -> String,
+    val accountOwner: () -> Contact,
 ) {
 
     val statusHeader: LayoutState.MessageStatusHeader? by lazy(LazyThreadSafetyMode.NONE) {
         if (background is BubbleBackground.First) {
             LayoutState.MessageStatusHeader(
-                if (chatType?.isConversation() != false) null else message.senderAlias?.value,
+                if (chat.type.isConversation()) null else message.senderAlias?.value,
                 this is Sent,
                 this is Sent && (message.status.isReceived() || message.status.isConfirmed()),
                 message.messageContentDecrypted != null,
@@ -64,19 +60,8 @@ internal sealed class MessageHolderViewState(
     }
 
     val bubbleMessage: LayoutState.Bubble.Message? by lazy(LazyThreadSafetyMode.NONE) {
-        message.messageContentDecrypted?.let {
-            // TODO: Handle podcast clips
-            message.giphyData?.let { giphyData ->
-                // TODO: show only the giphyData.text when rendering logic is implemented
-//                giphyData.text?.let { text ->
-//                    LayoutState.Bubble.Message(text = text)
-//                }
-                LayoutState.Bubble.Message(text = giphyData.toString())
-            } ?: /*if (message.podBoost == null) {*/ // TODO: Uncomment once boost layout logic is implemented
-            LayoutState.Bubble.Message(text = it.value)
-//            } else {
-//                null
-//            }
+        message.retrieveTextToShow()?.let { text ->
+            LayoutState.Bubble.Message(text = text)
         }
     }
 
@@ -155,27 +140,65 @@ internal sealed class MessageHolderViewState(
             }
         }
 
+    val bubbleReplyMessage: LayoutState.Bubble.ReplyMessage? by lazy {
+        message.replyMessage?.let { nnMessage ->
+            LayoutState.Bubble.ReplyMessage(
+                messageSenderName(nnMessage),
+
+                nnMessage.retrieveTextToShow() ?: "",
+            )
+        }
+    }
+
+    val groupActionIndicator: LayoutState.GroupActionIndicator? by lazy(LazyThreadSafetyMode.NONE) {
+        if (
+            !message.type.isGroupAction() ||
+            message.senderAlias == null
+        ) {
+            null
+        } else {
+            LayoutState.GroupActionIndicator(
+                actionType = message.type as MessageType.GroupAction,
+                isAdminView = if (chat.ownerPubKey == null || accountOwner().nodePubKey == null) {
+                    false
+                } else {
+                    chat.ownerPubKey == accountOwner().nodePubKey
+                },
+                chatType = chat.type,
+                subjectName = message.senderAlias!!.value
+            )
+        }
+    }
+
 
     class Sent(
         message: Message,
-        chatType: ChatType?,
+        chat: Chat,
         background: BubbleBackground,
-    ): MessageHolderViewState(
+        replyMessageSenderName: (Message) -> String,
+        accountOwner: () -> Contact,
+    ) : MessageHolderViewState(
         message,
-        chatType,
+        chat,
         background,
-        InitialHolderViewState.None
+        InitialHolderViewState.None,
+        replyMessageSenderName,
+        accountOwner,
     )
 
     class Received(
         message: Message,
-        chatType: ChatType?,
+        chat: Chat,
         background: BubbleBackground,
         initialHolder: InitialHolderViewState,
-    ): MessageHolderViewState(
+        replyMessageSenderName: (Message) -> String,
+        accountOwner: () -> Contact,
+    ) : MessageHolderViewState(
         message,
-        chatType,
+        chat,
         background,
-        initialHolder
+        initialHolder,
+        replyMessageSenderName,
+        accountOwner,
     )
 }

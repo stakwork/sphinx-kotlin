@@ -1,6 +1,8 @@
 package chat.sphinx.chat_tribe.ui
 
 import android.app.Application
+import android.content.ContentValues.TAG
+import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.chat_common.ui.ChatViewModel
@@ -8,6 +10,7 @@ import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_lightning.model.route.isRouteAvailable
 import chat.sphinx.concept_repository_chat.ChatRepository
+import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.concept_repository_message.SendMessage
 import chat.sphinx.kotlin_response.LoadResponse
@@ -35,6 +38,7 @@ internal class ChatTribeViewModel @Inject constructor(
     app: Application,
     dispatchers: CoroutineDispatchers,
     chatRepository: ChatRepository,
+    contactRepository: ContactRepository,
     messageRepository: MessageRepository,
     networkQueryLightning: NetworkQueryLightning,
     savedStateHandle: SavedStateHandle,
@@ -42,6 +46,7 @@ internal class ChatTribeViewModel @Inject constructor(
     app,
     dispatchers,
     chatRepository,
+    contactRepository,
     messageRepository,
     networkQueryLightning,
     savedStateHandle,
@@ -119,5 +124,15 @@ internal class ChatTribeViewModel @Inject constructor(
     override fun sendMessage(builder: SendMessage.Builder): SendMessage? {
         builder.setChatId(args.chatId)
         return super.sendMessage(builder)
+    }
+
+    init {
+        viewModelScope.launch(mainImmediate) {
+            chatRepository.getChatById(args.chatId).firstOrNull()?.let { chat ->
+                chatRepository.updateTribeInfo(chat)
+
+                Log.d(TAG, "Price per message ${chat.pricePerMessage.toString()}")
+            }
+        }
     }
 }

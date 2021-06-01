@@ -1,5 +1,6 @@
 package chat.sphinx.chat_common.ui.viewstate.messageholder
 
+import chat.sphinx.wrapper_chat.ChatType
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.lightning.unit
@@ -20,6 +21,15 @@ internal sealed class LayoutState {
         val showReceived: Boolean
             get() = !showSent
     }
+
+
+    data class GroupActionIndicator(
+        val actionType: MessageType.GroupAction,
+        val chatType: ChatType?,
+        val isAdminView: Boolean,
+        val subjectName: String?,
+    ): LayoutState()
+
 
     data class DeletedMessage(
         val gravityStart: Boolean,
@@ -58,6 +68,13 @@ internal sealed class LayoutState {
             val amountText: String
                 get() = amount.asFormattedString(appendUnit = true)
         }
+
+        data class ReplyMessage(
+            // TODO: Make sealed interface for handling a url or file
+//            val media: String?,
+            val sender: String,
+            val text: String,
+        ): LayoutState()
 
         sealed class ContainerBottom: Bubble() {
 

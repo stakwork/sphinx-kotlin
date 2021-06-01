@@ -16,6 +16,7 @@ import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_repository_chat.ChatRepository
+import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.concept_repository_message.SendMessage
 import chat.sphinx.kotlin_response.LoadResponse
@@ -25,8 +26,11 @@ import chat.sphinx.kotlin_response.message
 import chat.sphinx.resources.getRandomColor
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.ChatName
+import chat.sphinx.wrapper_chat.isConversation
+import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_message.Message
 import chat.sphinx.wrapper_message.isDeleted
+import chat.sphinx.wrapper_message.isGroupAction
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
@@ -41,6 +45,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     protected val app: Application,
     dispatchers: CoroutineDispatchers,
     protected val chatRepository: ChatRepository,
+    protected val contactRepository: ContactRepository,
     protected val messageRepository: MessageRepository,
     protected val networkQueryLightning: NetworkQueryLightning,
     protected val savedStateHandle: SavedStateHandle
@@ -72,14 +77,13 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         override val viewStateFlow: StateFlow<ChatHeaderViewState> = flow<ChatHeaderViewState> {
             chatSharedFlow.collect { chat ->
 
+                showUpdatedPrice(chat)
+
                 emit(
                     ChatHeaderViewState.Initialized(
                         chatHeaderName = chat?.name?.value ?: getChatNameIfNull()?.value ?: "",
                         showLock = chat != null,
-
-                        // TODO: Implement for Tribes with a podcast
                         contributions = null,
-
                         chat?.isMuted,
                     )
                 )
@@ -104,6 +108,17 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 
     override val viewStateContainer: ViewStateContainer<ChatHeaderViewState> by lazy {
         ChatHeaderViewStateContainer()
+    }
+
+    private fun showUpdatedPrice(chat: Chat?) {
+        viewModelScope.launch(mainImmediate) {
+            val pricePerMessage = chat?.pricePerMessage?.value ?: 0
+            val escrowAmount = chat?.escrowAmount?.value ?: 0
+
+            if (pricePerMessage + escrowAmount > 0) {
+                submitSideEffect(ChatSideEffect.Notify("Price per message: $pricePerMessage\n Amount to Stake: $escrowAmount"))
+            }
+        }
     }
 
     private suspend fun getChat(): Chat {
@@ -134,25 +149,74 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         message: Message
     ): InitialHolderViewState
 
+    private var notify200Limit: Boolean = false
     internal val messageHolderViewStateFlow: StateFlow<List<MessageHolderViewState>> = flow {
         val chat = getChat()
+        val chatName = getChatNameIfNull()
+        val owner: Contact = contactRepository.accountOwner.value.let { contact ->
+            if (contact != null) {
+                contact
+            } else {
+                var resolvedOwner: Contact? = null
+                try {
+                    contactRepository.accountOwner.collect { ownerContact ->
+                        if (ownerContact != null) {
+                            resolvedOwner = ownerContact
+                            throw Exception()
+                        }
+                    }
+                } catch (e: Exception) {}
+                delay(25L)
+
+                resolvedOwner!!
+            }
+        }
 
         messageRepository.getAllMessagesToShowByChatId(chat.id).distinctUntilChanged().collect { messages ->
             val newList = ArrayList<MessageHolderViewState>(messages.size)
+
+            if (messages.size > 199 && !notify200Limit) {
+                viewModelScope.launch(mainImmediate) {
+                    notify200Limit = true
+                    delay(2_000)
+                    submitSideEffect(ChatSideEffect.Notify(
+                        "Messages are temporarily limited to 200 for this chat"
+                    ))
+                }
+            }
+
             withContext(default) {
                 for (message in messages) {
                     if (message.sender == chat.contactIds.firstOrNull()) {
                         newList.add(
                             MessageHolderViewState.Sent(
                                 message,
-                                chat.type,
-
-                                if (message.status.isDeleted()) {
-                                    BubbleBackground.Gone(setSpacingEqual = false)
-                                } else {
-                                    BubbleBackground.First.Isolated
+                                chat,
+                                background =  when {
+                                    message.status.isDeleted() -> {
+                                        BubbleBackground.Gone(setSpacingEqual = false)
+                                    }
+                                    message.type.isGroupAction() -> {
+                                        BubbleBackground.Gone(setSpacingEqual = true)
+                                    }
+                                    else -> {
+                                        BubbleBackground.First.Isolated
+                                    }
                                 },
-
+                                replyMessageSenderName = { replyMessage ->
+                                    when {
+                                        replyMessage.sender == chat.contactIds.firstOrNull() -> {
+                                            contactRepository.accountOwner.value?.alias?.value ?: ""
+                                        }
+                                        chat.type.isConversation() -> {
+                                            chatName?.value ?: ""
+                                        }
+                                        else -> {
+                                            replyMessage.senderAlias?.value ?: ""
+                                        }
+                                    }
+                                },
+                                accountOwner = { owner }
                             )
                         )
                     } else {
@@ -162,20 +226,41 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                         newList.add(
                             MessageHolderViewState.Received(
                                 message,
-                                chat.type,
-
-                                if (isDeleted) {
-                                    BubbleBackground.Gone(setSpacingEqual = false)
-                                } else {
-                                    BubbleBackground.First.Isolated
+                                chat,
+                                background = when {
+                                    isDeleted -> {
+                                        BubbleBackground.Gone(setSpacingEqual = false)
+                                    }
+                                    message.type.isGroupAction() -> {
+                                        BubbleBackground.Gone(setSpacingEqual = true)
+                                    }
+                                    else -> {
+                                        BubbleBackground.First.Isolated
+                                    }
                                 },
-
-                                if (isDeleted) {
-                                    InitialHolderViewState.None
-                                } else {
-                                    getInitialHolderViewStateForReceivedMessage(message)
+                                initialHolder = when {
+                                    isDeleted ||
+                                    message.type.isGroupAction() -> {
+                                        InitialHolderViewState.None
+                                    }
+                                    else -> {
+                                        getInitialHolderViewStateForReceivedMessage(message)
+                                    }
                                 },
-
+                                replyMessageSenderName = { replyMessage ->
+                                    when {
+                                        replyMessage.sender == chat.contactIds.firstOrNull() -> {
+                                            contactRepository.accountOwner.value?.alias?.value ?: ""
+                                        }
+                                        chat.type.isConversation() -> {
+                                            chatName?.value ?: ""
+                                        }
+                                        else -> {
+                                            replyMessage.senderAlias?.value ?: ""
+                                        }
+                                    }
+                                },
+                                accountOwner = { owner }
                             )
                         )
                     }

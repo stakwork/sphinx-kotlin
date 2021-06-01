@@ -22,6 +22,21 @@ inline val Message.isPaidMessage: Boolean
         return false
     }
 
+@Suppress("NOTHING_TO_INLINE")
+inline fun Message.retrieveTextToShow(): String? =
+    messageContentDecrypted?.let { decrypted ->
+        // TODO Handle podcast clips `clip::.....`
+        giphyData
+//            ?.text
+//            ?: if (podBoost == null) {
+//                decrypted.value
+//            } else {
+//                null
+//            }
+            ?.toString()
+            ?: decrypted.value
+    }
+
 abstract class Message {
     abstract val id: MessageId
     abstract val uuid: MessageUUID?
@@ -51,6 +66,7 @@ abstract class Message {
     abstract val podBoost: PodBoost?
     abstract val giphyData: GiphyData?
     abstract val reactions: List<Message>?
+    abstract val replyMessage: Message?
 
     override fun equals(other: Any?): Boolean {
         return  other                               is Message                      &&
@@ -83,7 +99,8 @@ abstract class Message {
                         (a.isNullOrEmpty() && b.isNullOrEmpty()) ||
                         (a?.containsAll(b ?: emptyList()) == true && b?.containsAll(a) == true)
                     }
-                }
+                }                                                                   &&
+                other.replyMessage                  == replyMessage
     }
 
     override fun hashCode(): Int {
@@ -113,6 +130,7 @@ abstract class Message {
         result = 31 * result + podBoost.hashCode()
         result = 31 * result + giphyData.hashCode()
         reactions?.forEach { result = 31 * result + it.hashCode() }
+        result = 31 * result + replyMessage.hashCode()
         return result
     }
 
@@ -126,6 +144,6 @@ abstract class Message {
                 "messageDecryptionError=$messageDecryptionError,"                           +
                 "messageDecryptionException=$messageDecryptionException,"                   +
                 "messageMedia=$messageMedia,podBoost=$podBoost,giphyData=$giphyData,"       +
-                "reactions=$reactions)"
+                "reactions=$reactions,replyMessage=$replyMessage)"
     }
 }
