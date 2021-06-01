@@ -60,7 +60,6 @@ ext.deps = [
         paging3: "androidx.paging:paging-runtime:3.0.0",
         recyclerView: "androidx.recyclerview:recyclerview:1.2.0",
         securityCrypto: "androidx.security:security-crypto:1.1.0-alpha03",
-        sqlite: "androidx.sqlite:sqlite-ktx:2.1.0",
         viewBinding: "androidx.databinding:viewbinding:${versions.androidGradle}",
     ],
 //    bouncyCastle: "org.bouncycastle:bcprov-jdk15on:1.65",
@@ -100,6 +99,7 @@ ext.deps = [
         torBinary: "io.matthewnelson.topl-android:tor-binary:0.4.6.2-alpha",
     ],
     sqlCipher: "net.zetetic:android-database-sqlcipher:4.4.3",
+    sqlRequery: "com.github.requery:sqlite-android:3.35.5",
     square: [
         okio: "com.squareup.okio:okio:2.9.0",
         okhttp: "com.squareup.okhttp3:okhttp:${versions.okhttp}",
