@@ -7,5 +7,7 @@ dependencies {
     api project(path: ':sphinx:application:common:kotlin-response')
     api project(path: ':sphinx:application:common:wrappers:wrapper-chat')
 
+    implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-chat')
+
     implementation deps.kotlin.coroutinesCore
 }

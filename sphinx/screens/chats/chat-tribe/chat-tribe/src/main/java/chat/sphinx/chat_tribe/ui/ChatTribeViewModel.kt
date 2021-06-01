@@ -1,6 +1,8 @@
 package chat.sphinx.chat_tribe.ui
 
 import android.app.Application
+import android.content.ContentValues.TAG
+import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.chat_common.ui.ChatViewModel
@@ -119,5 +121,15 @@ internal class ChatTribeViewModel @Inject constructor(
     override fun sendMessage(builder: SendMessage.Builder): SendMessage? {
         builder.setChatId(args.chatId)
         return super.sendMessage(builder)
+    }
+
+    fun updateTribeInfo() {
+        viewModelScope.launch(mainImmediate) {
+            chatRepository.getChatById(args.chatId).firstOrNull()?.let { chat ->
+                chatRepository.updateTribeInfo(chat)
+
+                Log.d(TAG, "Price per message ${chat.pricePerMessage.toString()}")
+            }
+        }
     }
 }

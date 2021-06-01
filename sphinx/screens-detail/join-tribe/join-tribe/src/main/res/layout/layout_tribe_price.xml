@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/tribe_price_container_height"
+    android:background="@drawable/background_tribe_price_container">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/price_to_join_container"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/join_tribe_price_row_height"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_price_to_join_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/price_to_join_label"
+            android:textSize="@dimen/join_tribe_price_text_size"
+            android:fontFamily="@font/roboto_regular"
+            android:textColor="@color/secondaryText"
+            android:layout_marginStart="@dimen/join_tribe_price_label_margin"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_price_to_join"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0"
+            android:textSize="@dimen/join_tribe_price_text_size"
+            android:fontFamily="@font/roboto_medium"
+            android:textColor="@color/secondaryText"
+            android:layout_marginEnd="@dimen/join_tribe_price_label_margin"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/first_divider"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/lightDivider"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/price_to_join_container"></androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/price_per_message_container"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/join_tribe_price_row_height"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/first_divider">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_price_per_message_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/price_per_message_label"
+            android:textSize="@dimen/join_tribe_price_text_size"
+            android:fontFamily="@font/roboto_regular"
+            android:textColor="@color/secondaryText"
+            android:layout_marginStart="@dimen/join_tribe_price_label_margin"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_price_per_message"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0"
+            android:textSize="@dimen/join_tribe_price_text_size"
+            android:fontFamily="@font/roboto_medium"
+            android:textColor="@color/secondaryText"
+            android:layout_marginEnd="@dimen/join_tribe_price_label_margin"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/second_divider"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/lightDivider"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/price_per_message_container"></androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/amount_to_stake_container"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/join_tribe_price_row_height"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/second_divider">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_amount_to_stake_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/amount_to_stake_label"
+            android:textSize="@dimen/join_tribe_price_text_size"
+            android:fontFamily="@font/roboto_regular"
+            android:textColor="@color/secondaryText"
+            android:layout_marginStart="@dimen/join_tribe_price_label_margin"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_amount_to_stake"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0"
+            android:textSize="@dimen/join_tribe_price_text_size"
+            android:fontFamily="@font/roboto_medium"
+            android:textColor="@color/secondaryText"
+            android:layout_marginEnd="@dimen/join_tribe_price_label_margin"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/third_divider"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/lightDivider"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/amount_to_stake_container"></androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/hours_to_stake_container"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/join_tribe_price_row_height"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/third_divider">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_time_to_stake_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/time_to_stake_label"
+            android:textSize="@dimen/join_tribe_price_text_size"
+            android:fontFamily="@font/roboto_regular"
+            android:textColor="@color/secondaryText"
+            android:layout_marginStart="@dimen/join_tribe_price_label_margin"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_time_to_stake"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0"
+            android:textSize="@dimen/join_tribe_price_text_size"
+            android:fontFamily="@font/roboto_medium"
+            android:textColor="@color/secondaryText"
+            android:layout_marginEnd="@dimen/join_tribe_price_label_margin"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

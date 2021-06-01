@@ -31,6 +31,10 @@ inline fun Chat.hasBeenSeen(): Boolean =
 inline fun Chat.hasPendingContacts(): Boolean =
     !pendingContactIds.isNullOrEmpty()
 
+@Suppress("NOTHING_TO_INLINE")
+inline fun Chat.isTribe(): Boolean =
+    type.isTribe()
+
 data class Chat(
     val id: ChatId,
     val uuid: ChatUUID,

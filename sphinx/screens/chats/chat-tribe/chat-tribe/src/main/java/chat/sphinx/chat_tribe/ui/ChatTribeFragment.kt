@@ -6,13 +6,14 @@ import androidx.recyclerview.widget.RecyclerView
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.chat_common.databinding.LayoutChatFooterBinding
 import chat.sphinx.chat_common.databinding.LayoutChatHeaderBinding
-import chat.sphinx.chat_common.ui.ChatFragment
 import chat.sphinx.chat_common.navigation.ChatNavigator
+import chat.sphinx.chat_common.ui.ChatFragment
 import chat.sphinx.chat_tribe.R
 import chat.sphinx.chat_tribe.databinding.FragmentChatTribeBinding
 import chat.sphinx.chat_tribe.navigation.TribeChatNavigator
 import chat.sphinx.concept_image_loader.ImageLoader
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -39,4 +40,12 @@ internal class ChatTribeFragment: ChatFragment<
     protected lateinit var chatNavigatorInj: TribeChatNavigator
     override val chatNavigator: ChatNavigator
         get() = chatNavigatorInj
+
+    override fun onStart() {
+        super.onStart()
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.updateTribeInfo()
+        }
+    }
 }

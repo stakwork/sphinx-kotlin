@@ -114,8 +114,8 @@ chatUpsert {
         is_muted = :is_muted,
         group_key = :group_key,
         host = :host,
-        price_per_message = :price_per_message,
-        escrow_amount = :escrow_amount,
+--         price_per_message = :price_per_message,
+--         escrow_amount = :escrow_amount,
         unlisted = :unlisted,
         private_tribe = :private_tribe,
         owner_pub_key = :owner_pub_key,
@@ -181,6 +181,14 @@ WHERE id = ?;
 chatUpdateSeen:
 UPDATE chatDbo
 SET seen = :seen
+WHERE id = ?;
+
+chatUpdateTribeData:
+UPDATE chatDbo
+SET price_per_message = :price_per_message,
+    escrow_amount = :escrow_amount,
+    name = :name,
+    photo_url = :photo_url
 WHERE id = ?;
 
 CREATE TABLE contactDbo(
@@ -393,11 +401,17 @@ UPDATE dashboardDbo
 SET muted = :muted
 WHERE id = ?;
 
+dashboardUpdateTribe:
+UPDATE dashboardDbo
+SET display_name = :display_name,
+    photo_url = :photo_url
+WHERE id = ?;
+
 dashboardUpdateConversation:
 UPDATE dashboardDbo
 SET display_name = :display_name,
     photo_url = :photo_url
-WHERE contact_id = :contact_id;
+WHERE contact_id = ?;
 
 dashboardUpsert {
     UPDATE dashboardDbo

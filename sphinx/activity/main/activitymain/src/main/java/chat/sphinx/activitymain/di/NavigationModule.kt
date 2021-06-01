@@ -5,12 +5,6 @@ import chat.sphinx.activitymain.navigation.drivers.AuthenticationNavigationDrive
 import chat.sphinx.activitymain.navigation.drivers.DetailNavigationDriver
 import chat.sphinx.activitymain.navigation.drivers.PrimaryNavigationDriver
 import chat.sphinx.activitymain.navigation.navigators.detail.*
-import chat.sphinx.activitymain.navigation.navigators.detail.AddFriendNavigatorImpl
-import chat.sphinx.activitymain.navigation.navigators.detail.CreateTribeNavigatorImpl
-import chat.sphinx.activitymain.navigation.navigators.detail.NewContactNavigatorImpl
-import chat.sphinx.activitymain.navigation.navigators.detail.PaymentReceiveNavigatorImpl
-import chat.sphinx.activitymain.navigation.navigators.detail.PaymentSendNavigatorImpl
-import chat.sphinx.activitymain.navigation.navigators.detail.ScannerNavigatorImpl
 import chat.sphinx.activitymain.navigation.navigators.primary.*
 import chat.sphinx.add_friend.navigation.AddFriendNavigator
 import chat.sphinx.address_book.navigation.AddressBookNavigator
@@ -24,6 +18,7 @@ import chat.sphinx.dashboard.navigation.DashboardNavigator
 import chat.sphinx.hilt_qualifiers.AuthenticationDriver
 import chat.sphinx.hilt_qualifiers.DetailDriver
 import chat.sphinx.hilt_qualifiers.PrimaryDriver
+import chat.sphinx.join_tribe.navigation.JoinTribeNavigator
 import chat.sphinx.new_contact.navigation.NewContactNavigator
 import chat.sphinx.onboard.navigation.OnBoardNavigator
 import chat.sphinx.profile.navigation.ProfileNavigator
@@ -203,4 +198,10 @@ internal object NavigationModule {
         transactionsNavigatorImpl: TransactionsNavigatorImpl
     ): TransactionsNavigator =
         transactionsNavigatorImpl
+
+    @Provides
+    fun provideJoinTribeNavigator(
+        joinTribeNavigatorImpl: JoinTribeNavigatorImpl
+    ): JoinTribeNavigator =
+        joinTribeNavigatorImpl
 }

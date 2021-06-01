@@ -55,6 +55,9 @@
     <dimen name="default_form_edit_view_size">17sp</dimen>
     <dimen name="default_edit_text_left_margin">-4dp</dimen>
 
+    <dimen name="default_progress_bar_xy">25dp</dimen>
+    <dimen name="default_progress_bar_margin_left">10dp</dimen>
+
     <dimen name="pin_help_text_view_size">15sp</dimen>
     <dimen name="pin_text_view_size">17sp</dimen>
 </resources>

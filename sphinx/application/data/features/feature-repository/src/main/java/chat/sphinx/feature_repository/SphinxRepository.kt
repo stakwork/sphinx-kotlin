@@ -5,6 +5,8 @@ import chat.sphinx.concept_coredb.CoreDB
 import chat.sphinx.concept_crypto_rsa.RSA
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
 import chat.sphinx.concept_network_query_chat.model.ChatDto
+import chat.sphinx.concept_network_query_chat.model.PutChatDto
+import chat.sphinx.concept_network_query_chat.model.TribeDto
 import chat.sphinx.concept_network_query_contact.NetworkQueryContact
 import chat.sphinx.concept_network_query_contact.model.ContactDto
 import chat.sphinx.concept_network_query_contact.model.PostContactDto
@@ -39,10 +41,7 @@ import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.logger.d
 import chat.sphinx.logger.e
 import chat.sphinx.logger.w
-import chat.sphinx.wrapper_chat.Chat
-import chat.sphinx.wrapper_chat.ChatType
-import chat.sphinx.wrapper_chat.isTrue
-import chat.sphinx.wrapper_chat.toChatMuted
+import chat.sphinx.wrapper_chat.*
 import chat.sphinx.wrapper_common.*
 import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.dashboard.ChatId
@@ -51,6 +50,7 @@ import chat.sphinx.wrapper_common.dashboard.InviteId
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.LightningRouteHint
 import chat.sphinx.wrapper_common.lightning.Sat
+import chat.sphinx.wrapper_common.lightning.toSat
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessagePagination
 import chat.sphinx.wrapper_contact.*
@@ -1202,7 +1202,9 @@ abstract class SphinxRepository(
 
                 if (selfEncrypted != null) {
 
-                    val messagePrice = chat?.price_per_message ?: Sat(0)
+                    val pricePerMessage = chat?.price_per_message?.value ?: 0
+                    val escrowAmount = chat?.escrow_amount?.value ?: 0
+                    val messagePrice = (pricePerMessage + escrowAmount).toSat() ?: Sat(0)
 
                     val provisionalMessageId: MessageId? = chat?.let { chatDbo ->
                         // Build provisional message and insert
@@ -1288,7 +1290,7 @@ abstract class SphinxRepository(
                             PostMessageDto(
                                 sendMessage.chatId?.value,
                                 sendMessage.contactId?.value,
-                                messagePrice.value,
+                                messagePrice?.value ?: 0,
                                 sendMessage.replyUUID?.value,
                                 selfEncrypted.value,
                                 map,
@@ -1401,6 +1403,92 @@ abstract class SphinxRepository(
         }.join()
 
         return response
+    }
+
+    override fun joinTribe(
+        tribeDto: TribeDto,
+    ): Flow<LoadResponse<Any, ResponseError>> = flow {
+        val queries = coreDB.getSphinxDatabaseQueries()
+
+        var response: Response<Any, ResponseError>? = null
+
+        emit(LoadResponse.Loading)
+
+        repositoryScope.launch(mainImmediate) {
+
+            networkQueryChat.joinTribe(tribeDto).collect { loadResponse ->
+                @Exhaustive
+                when (loadResponse) {
+                    LoadResponse.Loading -> {}
+                    is Response.Error -> {
+                        response = loadResponse
+                    }
+                    is Response.Success -> {
+                        chatLock.withLock {
+                            withContext(io) {
+                                queries.transaction {
+                                    upsertChat(loadResponse.value, moshi, chatSeenMap, queries, null)
+                                    updateChatTribeData(tribeDto, ChatId(loadResponse.value.id), queries)
+                                }
+                            }
+                        }
+
+                        response = Response.Success(true)
+                    }
+                }
+            }
+
+        }.join()
+
+        emit(response ?: Response.Error(ResponseError("")))
+    }
+
+    override suspend fun updateTribeInfo(chat: Chat) {
+
+        chat.host?.let { chatHost ->
+            val chatUUID = chat.uuid
+
+            if (chat.isTribe() &&
+                chatHost.toString().isNotEmpty() &&
+                chatUUID.toString().isNotEmpty()
+            ) {
+
+                val queries = coreDB.getSphinxDatabaseQueries()
+
+                networkQueryChat.getTribeInfo(chatHost, chatUUID).collect { loadResponse ->
+                    when (loadResponse) {
+
+                        is LoadResponse.Loading -> {}
+                        is Response.Error -> {}
+
+                        is Response.Success -> {
+                            val tribeDto = loadResponse.value
+
+                            val didChangeNameOrPhotoUrl = (
+                                tribeDto.name != chat.name?.value ?: "" ||
+                                tribeDto.img != chat.photoUrl?.value ?: ""
+                            )
+
+                            chatLock.withLock {
+                                queries.transaction {
+                                    updateChatTribeData(tribeDto, chat.id, queries)
+                                }
+                            }
+
+                            if (didChangeNameOrPhotoUrl) {
+                                networkQueryChat.updateChat(chat.id,
+                                    PutChatDto(
+                                        tribeDto.name,
+                                        tribeDto.img ?: "",
+                                    )
+                                ).collect {}
+                            }
+                        }
+                    }
+                }
+            }
+
+        }
     }
 
     /*
