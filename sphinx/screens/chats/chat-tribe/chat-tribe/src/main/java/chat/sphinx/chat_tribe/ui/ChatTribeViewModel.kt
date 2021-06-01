@@ -126,7 +126,7 @@ internal class ChatTribeViewModel @Inject constructor(
         return super.sendMessage(builder)
     }
 
-    fun updateTribeInfo() {
+    init {
         viewModelScope.launch(mainImmediate) {
             chatRepository.getChatById(args.chatId).firstOrNull()?.let { chat ->
                 chatRepository.updateTribeInfo(chat)

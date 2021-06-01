@@ -1,5 +1,7 @@
 package chat.sphinx.chat_tribe.ui
 
+import android.os.Bundle
+import android.view.View
 import android.widget.ImageView
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.RecyclerView
@@ -40,12 +42,4 @@ internal class ChatTribeFragment: ChatFragment<
     protected lateinit var chatNavigatorInj: TribeChatNavigator
     override val chatNavigator: ChatNavigator
         get() = chatNavigatorInj
-
-    override fun onStart() {
-        super.onStart()
-
-        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-            viewModel.updateTribeInfo()
-        }
-    }
 }
