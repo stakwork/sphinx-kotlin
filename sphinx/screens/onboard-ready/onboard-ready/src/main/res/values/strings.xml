@@ -3,5 +3,5 @@
     <string name="sign_up_finish_button">Finish</string>
     <string name="side_effect_create_inviter_failed">Failed to create inviter</string>
     <string name="sphinx_ready_label">"You&#39;re ready<br/>to use Sphinx!"</string>
-    <string name="sphinx_ready_balance_label">"You can send messages, spend %d sats, or receive up to %d sats."</string>
+    <string name="sphinx_ready_balance_label">"You can send messages,<br/>spend %d sats, or receive<br/>up to %d sats."</string>
 </resources>
