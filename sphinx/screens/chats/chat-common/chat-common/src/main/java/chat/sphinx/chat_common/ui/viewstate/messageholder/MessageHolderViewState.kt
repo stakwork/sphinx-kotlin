@@ -5,6 +5,7 @@ import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.isConversation
 import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_common.lightning.Sat
+import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_message.*
 
 internal inline val MessageHolderViewState.isReceived: Boolean
@@ -22,6 +23,7 @@ internal sealed class MessageHolderViewState(
     val background: BubbleBackground,
     val initialHolder: InitialHolderViewState,
     val messageSenderName: (Message) -> String,
+    val accountOwner: () -> Contact,
 ) {
 
     val statusHeader: LayoutState.MessageStatusHeader? by lazy(LazyThreadSafetyMode.NONE) {
@@ -148,17 +150,40 @@ internal sealed class MessageHolderViewState(
         }
     }
 
+    val groupActionIndicator: LayoutState.GroupActionIndicator? by lazy(LazyThreadSafetyMode.NONE) {
+        if (
+            !message.type.isGroupAction() ||
+            message.senderAlias == null
+        ) {
+            null
+        } else {
+            LayoutState.GroupActionIndicator(
+                actionType = message.type as MessageType.GroupAction,
+                isAdminView = if (chat.ownerPubKey == null || accountOwner().nodePubKey == null) {
+                    false
+                } else {
+                    chat.ownerPubKey == accountOwner().nodePubKey
+                },
+                chatType = chat.type,
+                subjectName = message.senderAlias!!.value
+            )
+        }
+    }
+
+
     class Sent(
         message: Message,
         chat: Chat,
         background: BubbleBackground,
         replyMessageSenderName: (Message) -> String,
-    ): MessageHolderViewState(
+        accountOwner: () -> Contact,
+    ) : MessageHolderViewState(
         message,
         chat,
         background,
         InitialHolderViewState.None,
         replyMessageSenderName,
+        accountOwner,
     )
 
     class Received(
@@ -167,11 +192,13 @@ internal sealed class MessageHolderViewState(
         background: BubbleBackground,
         initialHolder: InitialHolderViewState,
         replyMessageSenderName: (Message) -> String,
-    ): MessageHolderViewState(
+        accountOwner: () -> Contact,
+    ) : MessageHolderViewState(
         message,
         chat,
         background,
         initialHolder,
         replyMessageSenderName,
+        accountOwner,
     )
 }
