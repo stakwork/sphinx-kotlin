@@ -16,17 +16,6 @@ internal inline val MessageHolderViewState.showReceivedBubbleArrow: Boolean
 internal val MessageHolderViewState.showSentBubbleArrow: Boolean
     get() = background is BubbleBackground.First && this is MessageHolderViewState.Sent
 
-
-internal inline val MessageHolderViewState.unsupportedMessageTypes: List<MessageType>
-    get() = listOf(
-        MessageType.Attachment,
-        MessageType.BotRes,
-        MessageType.Invoice,
-        MessageType.Payment,
-        MessageType.TribeDelete,
-    )
-
-
 fun main() {
     val set: MutableSet<String> = LinkedHashSet(3)
     println(set.size)
@@ -41,6 +30,18 @@ internal sealed class MessageHolderViewState(
     val initialHolder: InitialHolderViewState,
     val messageSenderName: (Message) -> String,
 ) {
+
+    companion object {
+        val unsupportedMessageTypes: List<MessageType> by lazy {
+            listOf(
+                MessageType.Attachment,
+                MessageType.BotRes,
+                MessageType.Invoice,
+                MessageType.Payment,
+                MessageType.TribeDelete,
+            )
+        }
+    }
 
     val unsupportedMessageType: LayoutState.UnsupportedMessageType? by lazy(LazyThreadSafetyMode.NONE) {
         if (unsupportedMessageTypes.contains(message.type)) {

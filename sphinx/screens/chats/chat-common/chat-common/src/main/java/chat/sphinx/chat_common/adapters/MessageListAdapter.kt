@@ -203,7 +203,7 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                 setDeletedMessageLayout(viewState.deletedMessage)
                 setBubbleBackground(viewState, recyclerViewWidth)
 
-                if (viewState.unsupportedMessageTypes.contains(viewState.message.type)) {
+                if (MessageHolderViewState.unsupportedMessageTypes.contains(viewState.message.type)) {
                     setUnsupportedMessageTypeLayout(viewState.unsupportedMessageType)
                 } else {
                     if (viewState.background !is BubbleBackground.Gone) {
