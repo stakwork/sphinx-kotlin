@@ -7,6 +7,8 @@ import com.squareup.moshi.JsonClass
 
 @JsonClass(generateAdapter = true)
 class RedeemInviteRelayResponse(
+    // I marked this as default true because Hub doesn't return a success field but I need one
+    // here because it inherits it from RelayResponse
     override val success: Boolean = true,
 
     @Json(name = "object")
