@@ -8,4 +8,5 @@ abstract class TribeChatNavigator(
     navigationDriver: BaseNavigationDriver<NavController>
 ): ChatNavigator(navigationDriver)
 {
+    abstract suspend fun toTribeChatPodcastPlayerDetail()
 }

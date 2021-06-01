@@ -218,4 +218,11 @@ internal object NavigationModule {
         joinTribeNavigatorImpl: JoinTribeNavigatorImpl
     ): JoinTribeNavigator =
         joinTribeNavigatorImpl
+
+
+    @Provides
+    fun provideChatTribePodcastPlayerNavigator(
+        tribeChatPodcastPlayerNavigatorImpl: TribeChatPodcastPlayerNavigatorImpl
+    ): TribeChatPodcastPlayerNavigatorImpl =
+        tribeChatPodcastPlayerNavigatorImpl
 }

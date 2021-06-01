@@ -52,8 +52,9 @@ dependencies {
     api project(path: ':sphinx:screens:onboard:onboard-ready')
     api project(path: ':sphinx:screens:profile:profile')
     api project(path: ':sphinx:screens:splash:splash')
-    
+
     api project(path: ':sphinx:screens-detail:add-friend:add-friend')
+    api project(path: ':sphinx:screens-detail:chat-tribe:podcast-player')
     api project(path: ':sphinx:screens-detail:create-tribe:create-tribe')
     api project(path: ':sphinx:screens-detail:new-contact:new-contact')
     api project(path: ':sphinx:screens-detail:payments:payment-receive:payment-receive')
