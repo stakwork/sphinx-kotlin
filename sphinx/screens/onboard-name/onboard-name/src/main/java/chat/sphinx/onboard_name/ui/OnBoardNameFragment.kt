@@ -5,6 +5,9 @@ import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.viewModels
 import by.kirich1409.viewbindingdelegate.viewBinding
+import chat.sphinx.insetter_activity.InsetterActivity
+import chat.sphinx.insetter_activity.addNavigationBarPadding
+import chat.sphinx.insetter_activity.addStatusBarPadding
 import chat.sphinx.onboard_name.R
 import chat.sphinx.onboard_name.databinding.FragmentOnBoardNameBinding
 import dagger.hilt.android.AndroidEntryPoint
@@ -29,15 +32,24 @@ internal class OnBoardNameFragment: SideEffectFragment<
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        setupHeaderAndFooter()
+
         BackPressHandler(binding.root.context).addCallback(viewLifecycleOwner, requireActivity())
 
-        binding.includeWelcomeScreen.buttonNext.setOnClickListener {
+        binding.buttonNext.setOnClickListener {
             viewModel.updateViewState(OnBoardNameViewState.Saving)
 
-            val name = binding.includeWelcomeScreen.signUpNameEditText.text?.trim().toString()
+            val name = binding.signUpNameEditText.text?.trim().toString()
 
             viewModel.updateOwner(name)
         }
+    }
+
+    private fun setupHeaderAndFooter() {
+        val insetterActivity = (requireActivity() as InsetterActivity)
+        insetterActivity.addStatusBarPadding(binding.layoutConstraintOnBoardName)
+        insetterActivity.addNavigationBarPadding(binding.layoutConstraintOnBoardName)
     }
 
     override suspend fun onSideEffectCollect(sideEffect: OnBoardNameSideEffect) {
@@ -49,10 +61,10 @@ internal class OnBoardNameFragment: SideEffectFragment<
         when (viewState) {
             is OnBoardNameViewState.Idle -> {}
             is OnBoardNameViewState.Saving -> {
-                binding.includeWelcomeScreen.signUpNameProgressBar.visible
+                binding.signUpNameProgressBar.visible
             }
             is OnBoardNameViewState.Error -> {
-                binding.includeWelcomeScreen.signUpNameProgressBar.gone
+                binding.signUpNameProgressBar.gone
             }
         }
     }

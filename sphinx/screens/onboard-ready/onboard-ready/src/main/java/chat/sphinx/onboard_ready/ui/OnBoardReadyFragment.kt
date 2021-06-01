@@ -6,10 +6,14 @@ import android.view.View
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.viewModelScope
 import by.kirich1409.viewbindingdelegate.viewBinding
+import chat.sphinx.insetter_activity.InsetterActivity
+import chat.sphinx.insetter_activity.addNavigationBarPadding
+import chat.sphinx.insetter_activity.addStatusBarPadding
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.onboard_ready.R
 import chat.sphinx.onboard_ready.databinding.FragmentOnBoardReadyBinding
+import chat.sphinx.wrapper_chat.isTrue
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.navigation.CloseAppOnBackPress
@@ -36,6 +40,9 @@ internal class OnBoardReadyFragment: SideEffectFragment<
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        setupHeaderAndFooter()
+
         BackPressHandler(binding.root.context).addCallback(viewLifecycleOwner, requireActivity())
 
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
@@ -49,8 +56,7 @@ internal class OnBoardReadyFragment: SideEffectFragment<
                     }
                     is Response.Success -> {
                         val balance = loadResponse.value
-
-                        binding.balanceTextView.text = "You can send messages,\\nspend ${balance.localBalance.value} sats, or receive\\up to ${balance.remoteBalance.value} sats."
+                        binding.balanceTextView.text = String.format(getString(R.string.sphinx_ready_balance_label), balance.localBalance.value, balance.remoteBalance.value)
                     }
                 }
             }
@@ -71,6 +77,12 @@ internal class OnBoardReadyFragment: SideEffectFragment<
                 }
             }
         }
+    }
+
+    private fun setupHeaderAndFooter() {
+        val insetterActivity = (requireActivity() as InsetterActivity)
+        insetterActivity.addStatusBarPadding(binding.layoutConstraintOnBoardReady)
+        insetterActivity.addNavigationBarPadding(binding.layoutConstraintOnBoardReady)
     }
 
     override suspend fun onSideEffectCollect(sideEffect: OnBoardReadySideEffect) {

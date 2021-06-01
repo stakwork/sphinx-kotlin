@@ -30,20 +30,22 @@ android {
 
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
+    
     // KotlinAndroid
     implementation project(path: ':android:features:android-feature-screens')
     implementation project(path: ':kotlin:concepts:authentication:concept-authentication')
     implementation project(path: ':kotlin:encoders:base64')
+    implementation project(path: ':kotlin:concepts:authentication:concept-authentication-core')
+    implementation project(path: ':kotlin:features:authentication:feature-authentication-core')
 
     // Sphinx
     implementation project(path: ':sphinx:application:common:resources')
+    implementation project(path: ':sphinx:activity:insetter-activity')
+    implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-contact')
+    implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-contact')
 
     implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt
-    implementation project(path: ':kotlin:concepts:authentication:concept-authentication-core')
-    implementation project(path: ':kotlin:features:authentication:feature-authentication-core')
-    implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-contact')
-    implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-contact')
     kapt kaptDeps.google.hilt
 
     testImplementation testDeps.junit

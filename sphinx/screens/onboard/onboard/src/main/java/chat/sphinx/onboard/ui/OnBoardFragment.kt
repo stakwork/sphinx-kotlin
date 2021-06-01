@@ -8,6 +8,9 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewModelScope
 import by.kirich1409.viewbindingdelegate.viewBinding
+import chat.sphinx.insetter_activity.InsetterActivity
+import chat.sphinx.insetter_activity.addNavigationBarPadding
+import chat.sphinx.insetter_activity.addStatusBarPadding
 import chat.sphinx.onboard.R
 import chat.sphinx.onboard.databinding.FragmentOnBoardBinding
 import chat.sphinx.onboard.navigation.ToOnBoardScreen
@@ -47,9 +50,11 @@ internal class OnBoardFragment: SideEffectFragment<
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        setupHeaderAndFooter()
+
         BackPressHandler(binding.root.context).addCallback(viewLifecycleOwner, requireActivity())
 
-        binding.includeWelcomeScreen.invitedToSphinxTextView.text = "A message from your friend.."
+        binding.invitedToSphinxTextView.text = "A message from your friend.."
 
         arguments?.getString(ToOnBoardScreen.USER_INPUT)?.let { input ->
             if (input.length == 40) {
@@ -57,8 +62,8 @@ internal class OnBoardFragment: SideEffectFragment<
                     val nickname = sharedPrefs.getString("sphinx_temp_nickname", "")
                     val message = sharedPrefs.getString("sphinx_temp_message", "")
 
-                    binding.includeWelcomeScreen.inviterNameTextView.text = nickname
-                    binding.includeWelcomeScreen.inviterMessageTextView.text = message
+                    binding.inviterNameTextView.text = nickname
+                    binding.inviterMessageTextView.text = message
                 }
             } else {
                 input.decodeBase64ToArray()?.decodeToString()?.split("::")?.let { decodedSplit ->
@@ -71,8 +76,8 @@ internal class OnBoardFragment: SideEffectFragment<
                         val inviterPubKey = "023d70f2f76d283c6c4e58109ee3a2816eb9d8feb40b23d62469060a2b2867b77f"
                         val inviterMessage = "Welcome to Sphinx"
 
-                        binding.includeWelcomeScreen.inviterNameTextView.text = inviterNickname
-                        binding.includeWelcomeScreen.inviterMessageTextView.text = inviterMessage
+                        binding.inviterNameTextView.text = inviterNickname
+                        binding.inviterMessageTextView.text = inviterMessage
 
                         viewModel.storeTemporaryInviter(inviterNickname, inviterPubKey, inviterMessage)
                     }
@@ -80,7 +85,7 @@ internal class OnBoardFragment: SideEffectFragment<
             }
         }
 
-        binding.includeWelcomeScreen.buttonContinue.setOnClickListener {
+        binding.buttonContinue.setOnClickListener {
             viewModel.updateViewState(OnBoardViewState.Saving)
 
             arguments?.getString(ToOnBoardScreen.USER_INPUT)?.let { input ->
@@ -93,7 +98,7 @@ internal class OnBoardFragment: SideEffectFragment<
                         }
                     }
                 } else {
-                    input.split("::")?.let { decodedSplit ->
+                    input.decodeBase64ToArray()?.decodeToString()?.split("::")?.let { decodedSplit ->
                         //Token coming from Umbrel for example.
                         if (decodedSplit.size == 3) {
                             if (decodedSplit.elementAt(0) == "ip") {
@@ -111,6 +116,12 @@ internal class OnBoardFragment: SideEffectFragment<
         }
     }
 
+    private fun setupHeaderAndFooter() {
+        val insetterActivity = (requireActivity() as InsetterActivity)
+        insetterActivity.addStatusBarPadding(binding.layoutConstraintOnBoard)
+        insetterActivity.addNavigationBarPadding(binding.layoutConstraintOnBoard)
+    }
+
     override suspend fun onSideEffectCollect(sideEffect: OnBoardSideEffect) {
         // TODO("Not yet implemented")
     }
@@ -120,10 +131,10 @@ internal class OnBoardFragment: SideEffectFragment<
         when (viewState) {
             is OnBoardViewState.Idle -> {}
             is OnBoardViewState.Saving -> {
-                binding.includeWelcomeScreen.welcomeGetStartedProgress.visible
+                binding.welcomeGetStartedProgress.visible
             }
             is OnBoardViewState.Error -> {
-                binding.includeWelcomeScreen.welcomeGetStartedProgress.gone
+                binding.welcomeGetStartedProgress.gone
             }
         }
     }

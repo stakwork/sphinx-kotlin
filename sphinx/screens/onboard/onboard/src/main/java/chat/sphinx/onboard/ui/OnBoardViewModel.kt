@@ -2,17 +2,12 @@ package chat.sphinx.onboard.ui
 
 import android.app.Application
 import android.content.Context
-import android.content.SharedPreferences
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_network_query_contact.NetworkQueryContact
-import chat.sphinx.concept_network_query_contact.model.ContactDto
 import chat.sphinx.concept_network_tor.TorManager
 import chat.sphinx.concept_relay.RelayDataHandler
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
-import androidx.lifecycle.viewModelScope
-import chat.sphinx.concept_network_query_invite.NetworkQueryInvite
-import chat.sphinx.concept_network_query_invite.model.InviteDto
 import chat.sphinx.onboard.navigation.OnBoardNavigator
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
@@ -30,7 +25,6 @@ import kotlinx.coroutines.launch
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import javax.annotation.meta.Exhaustive
 import javax.inject.Inject
-import kotlin.coroutines.coroutineContext
 import kotlin.random.Random
 
 @HiltViewModel
@@ -39,7 +33,6 @@ internal class OnBoardViewModel @Inject constructor(
     dispatchers: CoroutineDispatchers,
     val navigator: OnBoardNavigator,
     private val networkQueryContact: NetworkQueryContact,
-    private val networkQueryInvite: NetworkQueryInvite,
     private val torManager: TorManager,
     private val relayDataHandler: RelayDataHandler,
     private val authenticationCoordinator: AuthenticationCoordinator

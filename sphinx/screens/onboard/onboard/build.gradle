@@ -35,11 +35,12 @@ dependencies {
     implementation project(path: ':kotlin:concepts:authentication:concept-authentication')
     implementation project(path: ':kotlin:encoders:base64')
 
-    // Sphinx
-    implementation project(path: ':sphinx:application:common:resources')
-
     implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt
+
+    // Sphinx
+    implementation project(path: ':sphinx:application:common:resources')
+    implementation project(path: ':sphinx:activity:insetter-activity')
     implementation project(path: ':sphinx:application:common:wrappers:wrapper-relay')
     implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-contact')
     implementation project(path: ':sphinx:application:network:concepts:tor:concept-network-tor')
