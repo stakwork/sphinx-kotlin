@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="scanner_bottom_content_height">200dp</dimen>
+    <dimen name="scanner_bottom_text_view_top_margin">30dp</dimen>
+    <dimen name="scanner_bottom_verify_button_height">37dp</dimen>
+    <dimen name="scanner_bottom_verify_button_width">150dp</dimen>
+    <dimen name="scanner_bottom_verify_button_bottom_margin">20dp</dimen>
+
+    <dimen name="scanner_square_horizontal_margin">42dp</dimen>
+
+    <dimen name="scanner_bottom_text_view_text_size">10sp</dimen>
+    <dimen name="scanner_bottom_verify_button_text_size">14sp</dimen>
+</resources>

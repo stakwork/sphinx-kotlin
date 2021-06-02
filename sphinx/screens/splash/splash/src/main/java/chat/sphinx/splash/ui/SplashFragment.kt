@@ -15,12 +15,14 @@ import chat.sphinx.authentication_resources.databinding.LayoutAuthenticationBind
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.resources.SphinxToastUtils
+import chat.sphinx.resources.inputMethodManager
 import chat.sphinx.splash.R
 import chat.sphinx.splash.databinding.FragmentSplashBinding
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.navigation.CloseAppOnBackPress
 import io.matthewnelson.android_feature_screens.R as R_screens
 import io.matthewnelson.android_feature_screens.ui.motionlayout.MotionLayoutFragment
+import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.invisibleIfFalse
 import io.matthewnelson.android_feature_toast_utils.show
 import io.matthewnelson.android_feature_viewmodel.currentViewState
@@ -52,7 +54,6 @@ internal class SplashFragment: MotionLayoutFragment<
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         OnBackPress(binding.root.context).addCallback(viewLifecycleOwner, requireActivity())
-        lifecycleScope.launch { onViewStateFlowCollect(viewModel.currentViewState) }
     }
 
     private var doublePressBackJob: Job? = null
@@ -61,7 +62,7 @@ internal class SplashFragment: MotionLayoutFragment<
             viewModel.currentViewState.let { viewState ->
                 if (viewState is SplashViewState.Set3_DecryptKeys) {
                     if (viewState.inputLock && doublePressBackJob?.isActive != true) {
-                        doublePressBackJob = lifecycleScope.launch {
+                        doublePressBackJob = lifecycleScope.launch(viewModel.mainImmediate) {
                             SphinxToastUtils().show(
                                 binding.root.context,
                                 R_screens.string.close_app_double_tap_toast_msg
@@ -87,7 +88,12 @@ internal class SplashFragment: MotionLayoutFragment<
     /// Side Effects ///
     ////////////////////
     override suspend fun onSideEffectCollect(sideEffect: SplashSideEffect) {
-        sideEffect.execute(binding.root.context)
+        if (sideEffect is SplashSideEffect.FromScanner) {
+            binding.layoutOnBoard.editTextCodeInput.setText(sideEffect.value.value)
+            processConnectionCode()
+        } else {
+            sideEffect.execute(binding.root.context)
+        }
     }
 
     /////////////////////
@@ -96,6 +102,9 @@ internal class SplashFragment: MotionLayoutFragment<
     override suspend fun onViewStateFlowCollect(viewState: SplashViewState) {
         @Exhaustive
         when (viewState) {
+            is SplashViewState.HideLoadingWheel -> {
+                binding.layoutOnBoard.signUpProgressBar.goneIfFalse(false)
+            }
             is SplashViewState.Start_ShowIcon -> {
                 binding.layoutOnBoard.imageButtonScanner.let { imageButton ->
                     imageButton.isEnabled = false
@@ -123,18 +132,9 @@ internal class SplashFragment: MotionLayoutFragment<
                 binding.layoutOnBoard.editTextCodeInput.let { editText ->
                     editText.isEnabled = true
 
-                    (binding.root.context
-                        .getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
-                    )?.let { imm ->
-                        editText.requestFocus()
-                        imm.showSoftInput(editText, InputMethodManager.SHOW_IMPLICIT)
-                    }
-
                     editText.setOnEditorActionListener { _, actionId, _ ->
                         if (actionId == EditorInfo.IME_ACTION_DONE) {
-                            viewModel.processUserInput(
-                                editText.text?.toString()
-                            )
+                            processConnectionCode()
                             true
                         } else {
                             false
@@ -229,6 +229,23 @@ internal class SplashFragment: MotionLayoutFragment<
                             updatePinHints(viewState)
                         }
                     }
+                }
+            }
+        }
+    }
+
+    private fun processConnectionCode() {
+        binding.root.context.inputMethodManager?.let { imm ->
+            binding.layoutOnBoard.apply {
+                editTextCodeInput.let { editText ->
+                    if (imm.isActive(editText)) {
+                        imm.hideSoftInputFromWindow(editText.windowToken, 0)
+                    }
+                    signUpProgressBar.goneIfFalse(true)
+
+                    viewModel.processConnectionCode(
+                        editText.text?.toString()
+                    )
                 }
             }
         }

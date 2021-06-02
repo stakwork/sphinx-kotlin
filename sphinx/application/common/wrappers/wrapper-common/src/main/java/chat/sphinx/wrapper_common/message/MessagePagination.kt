@@ -1,6 +1,8 @@
 package chat.sphinx.wrapper_common.message
 
 import chat.sphinx.wrapper_common.DateTime
+import java.text.SimpleDateFormat
+import java.util.*
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun MessagePagination.instantiateOrNull(
@@ -14,9 +16,26 @@ inline fun MessagePagination.instantiateOrNull(
         null
     }
 
-inline class MessagePagination private constructor(val value: String) {
+@JvmInline
+value class MessagePagination private constructor(val value: String) {
 
     companion object {
+
+        const val FORMAT_PAGINATION_PERCENT_ESCAPED = "yyyy-MM-dd'%20'HH:mm:ss"
+
+        @Volatile
+        private var formatPercentEscapedPagination: SimpleDateFormat? = null
+        fun getFormatPaginationPercentEscaped(): SimpleDateFormat =
+            formatPercentEscapedPagination ?: synchronized(this) {
+                formatPercentEscapedPagination ?: SimpleDateFormat(
+                    FORMAT_PAGINATION_PERCENT_ESCAPED,
+                    Locale.ENGLISH
+                )
+                    .also {
+                        it.timeZone = TimeZone.getTimeZone(DateTime.UTC)
+                        formatPercentEscapedPagination = it
+                    }
+            }
 
         @Throws(IllegalArgumentException::class)
         fun instantiate(
@@ -32,7 +51,7 @@ inline class MessagePagination private constructor(val value: String) {
             }
 
             val dateString = date?.let {
-                "&date=$it"
+                "&date=${getFormatPaginationPercentEscaped().format(it.value)}"
             } ?: ""
 
             return MessagePagination("?limit=$limit&offset=${offset}$dateString")

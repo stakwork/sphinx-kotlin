@@ -1,34 +1,234 @@
 package chat.sphinx.feature_network_client
 
+import chat.sphinx.concept_network_client.NetworkClientClearedListener
 import chat.sphinx.concept_network_client_cache.NetworkClientCache
+import chat.sphinx.concept_network_tor.*
+import chat.sphinx.logger.SphinxLogger
+import chat.sphinx.logger.d
 import io.matthewnelson.build_config.BuildConfigDebug
+import io.matthewnelson.concept_coroutines.CoroutineDispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import okhttp3.Cache
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
+import java.net.InetSocketAddress
+import java.net.Proxy
 import java.util.concurrent.TimeUnit
 
 class NetworkClientImpl(
     private val debug: BuildConfigDebug,
     private val cache: Cache,
-): NetworkClientCache() {
+    private val dispatchers: CoroutineDispatchers,
+    private val torManager: TorManager,
+    private val LOG: SphinxLogger,
+) : NetworkClientCache(),
+    TorManagerListener,
+    CoroutineDispatchers by dispatchers
+{
 
     companion object {
-        const val TIME_OUT = 20L
-        const val PING_INTERVAL = 30L
+        const val TAG = "NetworkClientImpl"
+
+        const val TIME_OUT = 15L
+        const val PING_INTERVAL = 25L
 
         const val CACHE_CONTROL = "Cache-Control"
         const val MAX_STALE = "public, max-stale=$MAX_STALE_VALUE"
     }
 
+    /////////////////
+    /// Listeners ///
+    /////////////////
+    private inner class SynchronizedListenerHolder {
+        private val listeners: LinkedHashSet<NetworkClientClearedListener> = LinkedHashSet(0)
+
+        fun addListener(listener: NetworkClientClearedListener): Boolean {
+            synchronized(this) {
+                val bool = listeners.add(listener)
+                if (bool) {
+                    LOG.d(TAG, "Listener ${listener.javaClass.simpleName} registered")
+                }
+                return bool
+            }
+        }
+
+        fun removeListener(listener: NetworkClientClearedListener): Boolean {
+            synchronized(this) {
+                val bool = listeners.remove(listener)
+                if (bool) {
+                    LOG.d(TAG, "Listener ${listener.javaClass.simpleName} removed")
+                }
+                return bool
+            }
+        }
+
+        fun clear() {
+            synchronized(this) {
+                if (listeners.isNotEmpty()) {
+                    listeners.clear()
+                    LOG.d(TAG, "Listeners cleared")
+                }
+            }
+        }
+
+        fun dispatchClearedEvent() {
+            synchronized(this) {
+                for (listener in listeners) {
+                    listener.networkClientCleared()
+                }
+            }
+        }
+
+        val hasListeners: Boolean
+            get() = synchronized(this) {
+                listeners.isNotEmpty()
+            }
+    }
+
+    private val synchronizedListeners = SynchronizedListenerHolder()
+
+    override fun addListener(listener: NetworkClientClearedListener): Boolean {
+        return synchronizedListeners.addListener(listener)
+    }
+
+    override fun removeListener(listener: NetworkClientClearedListener): Boolean {
+        return synchronizedListeners.removeListener(listener)
+    }
+
+    ///////////////
+    /// Clients ///
+    ///////////////
     @Volatile
     private var client: OkHttpClient? = null
+    @Volatile
+    private var clearedClient: OkHttpClient? = null
+
     private val clientLock = Mutex()
+    private var currentClientSocksProxyAddress: SocksProxyAddress? = null
 
     override suspend fun getClient(): OkHttpClient =
         clientLock.withLock {
-            client ?: createClientImpl().build()
+            client ?: (clearedClient?.newBuilder()?.also { clearedClient = null } ?: OkHttpClient.Builder()).apply {
+                connectTimeout(TIME_OUT, TimeUnit.SECONDS)
+                readTimeout(TIME_OUT, TimeUnit.SECONDS)
+                writeTimeout(TIME_OUT, TimeUnit.SECONDS)
+
+                if (torManager.isTorRequired() == true) {
+
+                    torManager.startTor()
+
+                    var socksPortJob: Job? = null
+                    var torStateJob: Job? = null
+
+                    coroutineScope {
+                        socksPortJob = launch(mainImmediate) {
+                            try {
+                                // wait for Tor to start and publish its socks address after
+                                // being bootstrapped.
+                                torManager.socksProxyAddressStateFlow.collect { socksAddress ->
+                                    if (socksAddress != null) {
+                                        proxy(
+                                            Proxy(
+                                                Proxy.Type.SOCKS,
+                                                InetSocketAddress(socksAddress.host, socksAddress.port)
+                                            )
+                                        )
+                                        currentClientSocksProxyAddress = socksAddress
+
+                                        throw Exception()
+                                    }
+                                }
+                            } catch (e: Exception) {}
+                        }
+
+                        torStateJob = launch(mainImmediate) {
+                            var retry: Int = 3
+                            delay(250L)
+                            try {
+                                torManager.torStateFlow.collect { state ->
+                                    if (state is TorState.Off) {
+                                        if (retry >= 0) {
+                                            LOG.d(TAG, "Tor failed to start, retrying: $retry")
+                                            torManager.startTor()
+                                            retry--
+                                        } else {
+                                            socksPortJob?.cancel()
+                                            throw Exception()
+                                        }
+                                    }
+
+                                    if (state is TorState.On) {
+                                        throw Exception()
+                                    }
+                                }
+                            } catch (e: Exception) {}
+                        }
+                    }
+
+                    torStateJob?.join()
+                    socksPortJob?.join()
+
+                    // Tor failed to start, but we still want to set the proxy port
+                    // so we don't leak _any_ network requests.
+                    if (
+                        currentClientSocksProxyAddress == null &&
+                        torManager.torStateFlow.value == TorState.Off
+                    ) {
+                        val socksPort: Int = try {
+                            // could be `auto` if user set it to that, which will mean we won't
+                            // know the port just yet so use the default setting,
+                            torManager.getSocksPortSetting().toInt()
+                        } catch (e: NumberFormatException) {
+                            TorManager.DEFAULT_SOCKS_PORT
+                        }
+
+                        proxy(
+                            Proxy(
+                                Proxy.Type.SOCKS,
+                                InetSocketAddress("127.0.0.1", socksPort)
+                            )
+                        )
+                        currentClientSocksProxyAddress = SocksProxyAddress("127.0.0.1:$socksPort")
+                    }
+
+                    // check again in case the setting has changed
+                    if (torManager.isTorRequired() != true) {
+                        proxy(null)
+                        currentClientSocksProxyAddress = null
+
+                        torManager.stopTor()
+
+                        LOG.d(
+                            TAG,
+                            """
+                                Tor requirement changed to false while building the network client.
+                                Proxy settings removed and stopTor called.
+                            """.trimIndent()
+                        )
+                    } else {
+                        LOG.d(TAG, "Client built with $currentClientSocksProxyAddress")
+                    }
+                } else {
+                    currentClientSocksProxyAddress = null
+                    proxy(null)
+                }
+
+
+                if (debug.value) {
+                    HttpLoggingInterceptor().let { interceptor ->
+                        interceptor.level = HttpLoggingInterceptor.Level.BODY
+                        addNetworkInterceptor(interceptor)
+                    }
+                }
+
+            }
+                .build()
                 .also { client = it }
         }
 
@@ -38,7 +238,7 @@ class NetworkClientImpl(
 
     override suspend fun getCachingClient(): OkHttpClient =
         cachingClientLock.withLock {
-            cachingClient ?: createClientImpl()
+            cachingClient ?: getClient().newBuilder()
                 .cache(cache)
                 .addInterceptor { chain ->
                     val request = chain.request().newBuilder()
@@ -50,32 +250,54 @@ class NetworkClientImpl(
                 .also { cachingClient = it }
         }
 
-    private var callback: () -> Unit? = {}
-    override fun addOnClientClearedCallback(onClear: () -> Unit) {
-        callback = onClear
-    }
-
-    override fun removeOnClientClearedCallback() {
-        callback = {}
-    }
-
-    private suspend fun createClientImpl(): OkHttpClient.Builder =
-        OkHttpClient.Builder().let { builder ->
-
-            builder.callTimeout(TIME_OUT * 3, TimeUnit.SECONDS)
-            builder.connectTimeout(TIME_OUT, TimeUnit.SECONDS)
-            builder.readTimeout(TIME_OUT, TimeUnit.SECONDS)
-            builder.writeTimeout(TIME_OUT, TimeUnit.SECONDS)
-
-            builder.pingInterval(PING_INTERVAL, TimeUnit.SECONDS)
-
-            if (debug.value) {
-                HttpLoggingInterceptor().let { interceptor ->
-                    interceptor.level = HttpLoggingInterceptor.Level.BODY
-                    builder.addNetworkInterceptor(interceptor)
+    //////////////////////////
+    /// TorManagerListener ///
+    //////////////////////////
+    override suspend fun onTorRequirementChange(required: Boolean) {
+        cachingClientLock.withLock {
+            clientLock.withLock {
+                client?.let { nnClient ->
+                    if (required) {
+                        if (currentClientSocksProxyAddress == null) {
+                            clearedClient = nnClient
+                            client = null
+                            cachingClient = null
+                            synchronizedListeners.dispatchClearedEvent()
+                        }
+                    } else {
+                        if (currentClientSocksProxyAddress != null) {
+                            clearedClient = nnClient
+                            client = null
+                            cachingClient = null
+                            synchronizedListeners.dispatchClearedEvent()
+                        }
+                    }
                 }
             }
-
-            return builder
         }
+    }
+
+    override suspend fun onTorSocksProxyAddressChange(socksProxyAddress: SocksProxyAddress?) {
+        if (socksProxyAddress == null) {
+            return
+        }
+
+        cachingClientLock.withLock {
+            clientLock.withLock {
+                client?.let { nnClient ->
+                    // We don't want to close down the client,
+                    // just move it temporarily so it forces a rebuild
+                    // with the new proxy settings
+                    clearedClient = nnClient
+                    client = null
+                    cachingClient = null
+                    synchronizedListeners.dispatchClearedEvent()
+                }
+            }
+        }
+    }
+
+    init {
+        torManager.addTorManagerListener(this)
+    }
 }

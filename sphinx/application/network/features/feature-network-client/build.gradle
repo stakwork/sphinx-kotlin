@@ -6,10 +6,12 @@ plugins {
 dependencies {
     // KotlinAndroid
     api project(path: ':kotlin:common:build-config')
+    api project(path: ':kotlin:concepts:concept-coroutines')
 
     // Sphinx
+    api project(path: ':sphinx:application:common:logger')
     api project(path: ':sphinx:application:network:concepts:clients:concept-network-client-cache')
+    api project(path: ':sphinx:application:network:concepts:tor:concept-network-tor')
 
-    implementation deps.kotlin.coroutinesCore
     implementation deps.square.okhttpLogging
 }

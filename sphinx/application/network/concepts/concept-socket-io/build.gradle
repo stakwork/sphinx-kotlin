@@ -1,0 +1,14 @@
+plugins {
+    id 'java-library'
+    id 'kotlin'
+}
+
+dependencies {
+    api project(path: ':sphinx:application:common:kotlin-response')
+    api project(path: ':sphinx:application:data:concepts:concept-relay')
+    implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-invite')
+    implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-lightning')
+    implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-message')
+
+    implementation deps.kotlin.coroutinesCore
+}

@@ -1,8 +1,9 @@
 package chat.sphinx.dashboard.navigation
 
 import androidx.navigation.NavController
-import chat.sphinx.wrapper_common.chat.ChatId
-import chat.sphinx.wrapper_common.contact.ContactId
+import chat.sphinx.wrapper_common.dashboard.ChatId
+import chat.sphinx.wrapper_common.dashboard.ContactId
+import chat.sphinx.wrapper_common.tribe.TribeJoinLink
 import io.matthewnelson.concept_navigation.BaseNavigationDriver
 import io.matthewnelson.concept_navigation.Navigator
 
@@ -12,4 +13,5 @@ abstract class DashboardNavigator(
     abstract suspend fun toChatContact(chatId: ChatId?, contactId: ContactId)
     abstract suspend fun toChatGroup(chatId: ChatId)
     abstract suspend fun toChatTribe(chatId: ChatId)
+    abstract suspend fun toJoinTribeDetail(tribeLink: TribeJoinLink)
 }

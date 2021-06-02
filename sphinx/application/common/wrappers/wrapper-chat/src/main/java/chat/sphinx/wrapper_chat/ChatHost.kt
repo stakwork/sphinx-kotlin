@@ -8,7 +8,8 @@ inline fun String.toChatHost(): ChatHost? =
         null
     }
 
-inline class ChatHost(val value: String) {
+@JvmInline
+value class ChatHost(val value: String) {
     init {
         require(value.isNotEmpty()) {
             "ChatHost cannot be empty"

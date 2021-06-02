@@ -23,11 +23,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="@string/sphinx_authentication_lock_icon"
-                android:textAllCaps="true"
                 android:textColor="@android:color/white"
                 android:fontFamily="@font/material_icons_regular"
                 android:textSize="@dimen/lock_icon_text_size"
+                android:text="@string/material_icon_name_lock_outline"
                 app:layout_constraintBottom_toTopOf="@+id/layout_pin_hint"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -46,6 +45,22 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/text_view_lock" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_view_sub_header"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:paddingLeft="20dp"
+                android:paddingRight="20dp"
+                android:gravity="center"
+                android:fontFamily="@font/roboto_regular"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/sub_header_text_size"
+                android:visibility="gone"
+                app:layout_constraintTop_toBottomOf="@+id/text_view_header"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
 
             <include
                 android:id="@+id/layout_pin_hint"

@@ -21,7 +21,6 @@ import chat.sphinx.dashboard.R
 import chat.sphinx.dashboard.databinding.FragmentDashboardBinding
 import chat.sphinx.dashboard.ui.adapter.ChatListAdapter
 import chat.sphinx.dashboard.ui.adapter.ChatListFooterAdapter
-import chat.sphinx.dashboard.ui.adapter.OnStartStopSupervisor
 import chat.sphinx.dashboard.ui.viewstates.NavDrawerViewState
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
@@ -104,20 +103,40 @@ internal class DashboardFragment : MotionLayoutFragment<
     }
 
     private fun setupChats() {
-        val chatListAdapter = ChatListAdapter(imageLoader, viewLifecycleOwner, viewModel)
-        val chatListFooterAdapter = ChatListFooterAdapter(viewLifecycleOwner, viewModel)
         binding.layoutDashboardChats.recyclerViewChats.apply {
+            val linearLayoutManager = LinearLayoutManager(context)
+            val chatListAdapter = ChatListAdapter(
+                this,
+                linearLayoutManager,
+                imageLoader,
+                viewLifecycleOwner,
+                onStopSupervisor,
+                viewModel
+            )
+
+            val chatListFooterAdapter = ChatListFooterAdapter(viewLifecycleOwner, viewModel)
             this.setHasFixedSize(false)
-            layoutManager = LinearLayoutManager(binding.root.context)
+            layoutManager = linearLayoutManager
             adapter = ConcatAdapter(chatListAdapter, chatListFooterAdapter)
+            itemAnimator = null
         }
     }
 
     private fun setupDashboardHeader() {
         binding.layoutDashboardHeader.let { header ->
+            val activity = (requireActivity() as InsetterActivity)
 
-            (requireActivity() as InsetterActivity)
-                .addStatusBarPadding(header.layoutConstraintDashboardHeader)
+            activity.addStatusBarPadding(header.layoutConstraintDashboardHeader)
+
+            val newHeaderHeight = header.layoutConstraintDashboardHeader.layoutParams.height + activity.statusBarInsetHeight.top
+
+            binding.layoutMotionDashboard.getConstraintSet(R.id.motion_scene_dashboard_drawer_closed)?.let { constraintSet ->
+                constraintSet.constrainHeight(R.id.layout_dashboard_header, newHeaderHeight)
+            }
+
+            binding.layoutMotionDashboard.getConstraintSet(R.id.motion_scene_dashboard_drawer_open)?.let { constraintSet ->
+                constraintSet.constrainHeight(R.id.layout_dashboard_header, newHeaderHeight)
+            }
 
             header.imageViewNavDrawerMenu.setOnClickListener {
                 viewModel.updateViewState(NavDrawerViewState.Open)
@@ -141,7 +160,7 @@ internal class DashboardFragment : MotionLayoutFragment<
             }
             navBar.navBarButtonScanner.setOnClickListener {
                 binding.searchBarClearFocus()
-                lifecycleScope.launch { viewModel.navBarNavigator.toScannerDetail() }
+                viewModel.toScanner()
             }
             navBar.navBarButtonPaymentSend.setOnClickListener {
                 binding.searchBarClearFocus()
@@ -187,13 +206,9 @@ internal class DashboardFragment : MotionLayoutFragment<
         }
     }
 
-    private val supervisor: OnStartStopSupervisor by lazy(LazyThreadSafetyMode.NONE) {
-        OnStartStopSupervisor(viewLifecycleOwner)
-    }
-
     override fun onStart() {
         super.onStart()
-        supervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.getAccountBalance().collect { nodeBalance ->
                 if (nodeBalance == null) return@collect
 
@@ -204,47 +219,33 @@ internal class DashboardFragment : MotionLayoutFragment<
             }
         }
 
-        supervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.networkStateFlow.collect { loadResponse ->
                 binding.layoutDashboardHeader.let { dashboardHeader ->
                     @Exhaustive
                     when (loadResponse) {
                         is LoadResponse.Loading -> {
                             dashboardHeader.progressBarDashboardHeaderNetwork.invisibleIfFalse(true)
-                            dashboardHeader.imageViewDashboardHeaderNetwork.invisibleIfFalse(false)
+                            dashboardHeader.textViewDashboardHeaderNetwork.invisibleIfFalse(false)
                         }
                         is Response.Error -> {
                             dashboardHeader.progressBarDashboardHeaderNetwork.invisibleIfFalse(false)
-                            dashboardHeader.imageViewDashboardHeaderNetwork.invisibleIfFalse(true)
-                            dashboardHeader.imageViewDashboardHeaderNetwork.setImageDrawable(
-                                ContextCompat.getDrawable(
+                            dashboardHeader.textViewDashboardHeaderNetwork.invisibleIfFalse(true)
+                            dashboardHeader.textViewDashboardHeaderNetwork.setTextColor(
+                                ContextCompat.getColor(
                                     binding.root.context,
-                                    R.drawable.ic_network_state_white
-                                ).also { drawable ->
-                                    drawable?.setTint(
-                                        ContextCompat.getColor(
-                                            binding.root.context,
-                                            R.color.primaryRed
-                                        )
-                                    )
-                                }
+                                    R.color.primaryRed
+                                )
                             )
                         }
                         is Response.Success -> {
                             dashboardHeader.progressBarDashboardHeaderNetwork.invisibleIfFalse(false)
-                            dashboardHeader.imageViewDashboardHeaderNetwork.invisibleIfFalse(true)
-                            dashboardHeader.imageViewDashboardHeaderNetwork.setImageDrawable(
-                                ContextCompat.getDrawable(
+                            dashboardHeader.textViewDashboardHeaderNetwork.invisibleIfFalse(true)
+                            dashboardHeader.textViewDashboardHeaderNetwork.setTextColor(
+                                ContextCompat.getColor(
                                     binding.root.context,
-                                    R.drawable.ic_network_state_white
-                                ).also { drawable ->
-                                    drawable?.setTint(
-                                        ContextCompat.getColor(
-                                            binding.root.context,
-                                            R.color.primaryGreen
-                                        )
-                                    )
-                                }
+                                    R.color.primaryGreen
+                                )
                             )
                         }
                     }
@@ -252,7 +253,7 @@ internal class DashboardFragment : MotionLayoutFragment<
             }
         }
 
-        supervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.accountOwnerStateFlow.collect { contactOwner ->
                 contactOwner?.let { owner ->
                     owner.photoUrl?.value?.let { url ->
@@ -277,10 +278,6 @@ internal class DashboardFragment : MotionLayoutFragment<
                 }
             }
         }
-    }
-
-    override fun onResume() {
-        super.onResume()
     }
 
     override fun onPause() {

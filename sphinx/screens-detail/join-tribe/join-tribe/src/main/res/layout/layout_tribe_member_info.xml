@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/body">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_alias_content"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/join_tribe_form_field_height"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tribe_member_alias_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/alias_edit_text_label"
+            android:layout_marginTop="@dimen/default_layout_margin"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            android:textColor="@color/secondaryText"
+            android:fontFamily="@font/roboto_regular"
+            android:textSize="@dimen/default_form_text_view_size"
+            android:singleLine="true" />
+
+        <androidx.appcompat.widget.AppCompatEditText
+            android:id="@+id/tribe_member_alias_edit_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/text"
+            android:fontFamily="@font/roboto_regular"
+            app:backgroundTint="@android:color/transparent"
+            app:layout_constraintTop_toBottomOf="@+id/tribe_member_alias_text_view"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            android:inputType="textVisiblePassword"
+            android:textSize="@dimen/default_form_edit_view_size"
+            android:layout_marginLeft="@dimen/default_edit_text_left_margin"
+            android:singleLine="true" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layout_constraint_tribe_member_alias_hint_bottom_border"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/lightDivider"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/tribe_member_alias_text_view" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

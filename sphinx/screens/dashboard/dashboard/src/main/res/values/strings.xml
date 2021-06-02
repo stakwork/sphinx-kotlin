@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="default_sats_amount">…</string>
     <string name="add_icon"></string>
     <string name="add_friend">Add Friend</string>
     <string name="create_tribe">Create Tribe</string>

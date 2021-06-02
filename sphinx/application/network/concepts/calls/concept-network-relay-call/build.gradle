@@ -1,0 +1,11 @@
+plugins {
+    id 'java-library'
+    id 'kotlin'
+}
+
+dependencies {
+    api project(path: ':sphinx:application:common:wrappers:wrapper-relay')
+    api project(path: ':sphinx:application:network:concepts:calls:concept-network-call')
+
+    implementation deps.kotlin.coroutinesCore
+}

@@ -7,10 +7,33 @@
     android:background="@color/deepNight"
     tools:context=".ui.ChatGroupFragment">
 
-    <TextView
+    <include
+        android:id="@+id/include_chat_group_header"
+        layout="@layout/layout_chat_header"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center"
-        android:text="CHAT GROUP" />
+        android:layout_height="@dimen/default_header_height" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_view_messages"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:background="@color/body"
+        app:layout_constraintBottom_toTopOf="@+id/include_chat_group_footer"
+        app:layout_constraintTop_toBottomOf="@+id/include_chat_group_header"
+        tools:listitem="@layout/layout_message_holder" />
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/image_view_chat_footer_shadow"
+        android:layout_width="match_parent"
+        android:layout_height="8dp"
+        android:src="@drawable/bottom_bar_elevation_gradient"
+        app:layout_constraintBottom_toTopOf="@+id/include_chat_group_footer" />
+
+    <include
+        android:id="@+id/include_chat_group_footer"
+        layout="@layout/layout_chat_footer"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

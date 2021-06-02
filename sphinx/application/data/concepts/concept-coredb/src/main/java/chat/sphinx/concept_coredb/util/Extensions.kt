@@ -16,7 +16,7 @@ inline fun SphinxDatabaseQueries.upsertMessage(dbo: MessageDbo): Unit =
         dbo.chat_id,
         dbo.type,
         dbo.sender,
-        dbo.receiver,
+        dbo.receiver_,
         dbo.amount,
         dbo.payment_hash,
         dbo.payment_request,

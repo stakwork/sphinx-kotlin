@@ -11,10 +11,11 @@ import chat.sphinx.wrapper_chat.ChatUnlisted;
 import chat.sphinx.wrapper_common.DateTime;
 import chat.sphinx.wrapper_common.PhotoUrl;
 import chat.sphinx.wrapper_common.Seen;
-import chat.sphinx.wrapper_common.chat.ChatId;
 import chat.sphinx.wrapper_common.chat.ChatUUID;
-import chat.sphinx.wrapper_common.contact.ContactId;
-import chat.sphinx.wrapper_common.invite.InviteId;
+import chat.sphinx.wrapper_common.dashboard.ChatId;
+import chat.sphinx.wrapper_common.dashboard.ContactId;
+import chat.sphinx.wrapper_common.dashboard.DashboardItemId;
+import chat.sphinx.wrapper_common.dashboard.InviteId;
 import chat.sphinx.wrapper_common.invite.InviteStatus;
 import chat.sphinx.wrapper_common.lightning.LightningNodeAlias;
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey;
@@ -75,6 +76,11 @@ UPDATE chatDbo
 SET latest_message_id = :latest_message_id
 WHERE id = ?;
 
+chatUpdateMuted:
+UPDATE chatDbo
+SET is_muted = :muted
+WHERE id = ?;
+
 chatGetAll:
 SELECT *
 FROM chatDbo;
@@ -93,6 +99,12 @@ SELECT *
 FROM chatDbo
 WHERE uuid = ?;
 
+chatGetConversationForContact:
+SELECT *
+FROM chatDbo
+WHERE type = 0 AND contact_ids = ?
+LIMIT 1;
+
 chatUpsert {
     UPDATE chatDbo
     SET name = :name,
@@ -102,8 +114,8 @@ chatUpsert {
         is_muted = :is_muted,
         group_key = :group_key,
         host = :host,
-        price_per_message = :price_per_message,
-        escrow_amount = :escrow_amount,
+--         price_per_message = :price_per_message,
+--         escrow_amount = :escrow_amount,
         unlisted = :unlisted,
         private_tribe = :private_tribe,
         owner_pub_key = :owner_pub_key,
@@ -164,6 +176,19 @@ chatUpsert {
 
 chatDeleteById:
 DELETE FROM chatDbo
+WHERE id = ?;
+
+chatUpdateSeen:
+UPDATE chatDbo
+SET seen = :seen
+WHERE id = ?;
+
+chatUpdateTribeData:
+UPDATE chatDbo
+SET price_per_message = :price_per_message,
+    escrow_amount = :escrow_amount,
+    name = :name,
+    photo_url = :photo_url
 WHERE id = ?;
 
 CREATE TABLE contactDbo(
@@ -330,6 +355,96 @@ inviteDeleteByContactId:
 DELETE FROM inviteDbo
 WHERE contact_id = ?;
 
+CREATE TABLE dashboardDbo(
+    id                          TEXT            AS DashboardItemId NOT NULL PRIMARY KEY,
+    contact_id                  INTEGER         AS ContactId,
+    date                        INTEGER         AS DateTime NOT NULL,
+    display_name                TEXT,
+    muted                       INTEGER         AS ChatMuted NOT NULL DEFAULT 1,
+    seen                        INTEGER         AS Seen NOT NULL,
+    photo_url                   TEXT            AS PhotoUrl,
+
+--  This is for contacts only. When a Chat of type Conversation comes in, the Contact held
+--  here is updated as `include_in_return=false`
+    include_in_return            INTEGER        AS Boolean DEFAULT 1 NOT NULL,
+
+    latest_message_id           INTEGER         AS MessageId DEFAULT NULL
+);
+
+dashboardCount:
+SELECT COUNT(*)
+FROM dashboardDbo
+WHERE include_in_return = 1;
+
+dashboardPagination:
+SELECT *
+FROM dashboardDbo
+WHERE include_in_return = 1
+ORDER BY
+    SUBSTR(id, 1, 1),
+    date
+LIMIT :limit OFFSET :offset;
+
+dashboardUpdateLatestMessage:
+UPDATE dashboardDbo
+SET date = :date,
+    latest_message_id = :latest_message_id
+WHERE id = ?;
+
+dashboardUpdateIncludeInReturn:
+UPDATE dashboardDbo
+SET include_in_return = :include_in_return
+WHERE id = ?;
+
+dashboardUpdateMuted:
+UPDATE dashboardDbo
+SET muted = :muted
+WHERE id = ?;
+
+dashboardUpdateTribe:
+UPDATE dashboardDbo
+SET display_name = :display_name,
+    photo_url = :photo_url
+WHERE id = ?;
+
+dashboardUpdateConversation:
+UPDATE dashboardDbo
+SET display_name = :display_name,
+    photo_url = :photo_url
+WHERE contact_id = ?;
+
+dashboardUpsert {
+    UPDATE dashboardDbo
+    SET display_name = :display_name,
+        muted = :muted,
+        seen = :seen,
+        photo_url = :photo_url
+    WHERE id = :id;
+
+    INSERT OR IGNORE INTO dashboardDbo(
+        id,
+        contact_id,
+        date,
+        display_name,
+        muted,
+        seen,
+        photo_url
+    )
+    VALUES (
+        :id,
+        :contact_id,
+        :date,
+        :display_name,
+        :muted,
+        :seen,
+        :photo_url
+    );
+}
+
+dashboardDeleteById:
+DELETE FROM dashboardDbo
+WHERE id = ?;
+
 -- Cannot use inline classes if there are 23 or more columns
 -- https://youtrack.jetbrains.com/issue/KT-45084
 -- https://github.com/cashapp/sqldelight/issues/2266
@@ -358,38 +473,69 @@ CREATE TABLE messageDbo(
     reply_uuid                  TEXT            AS ReplyUUID
 );
 
+messageGetAllReactionsByUUID:
+SELECT *
+FROM messageDbo
+WHERE chat_id = :chat_id
+AND (type = 29
+    AND reply_uuid IN :reply_uuids
+);
+
 messageGetById:
 SELECT *
 FROM messageDbo
 WHERE id = ?;
 
-messageGetLatestId:
-SELECT id
+messageGetToShowByUUID:
+SELECT *
 FROM messageDbo
-ORDER BY id DESC
+WHERE uuid = ?
+AND type IN(0, 5)
 LIMIT 1;
 
--- Retrieves the latest message for the given ChatID that will be shown
--- to the User. See [MessageType] for more detail
-messageGetLatestToShowByChatId:
+messageGetLowestProvisionalMessageId:
+SELECT id
+FROM messageDbo
+WHERE id < 0
+ORDER BY id
+LIMIT 1;
+
+messageGetAllToShowByChatId:
 SELECT *
 FROM messageDbo
 WHERE chat_id = ?
-AND type = 0
-    OR type = 2
-    OR type = 3
-    OR type = 5
-    OR type = 6
-    OR type = 14
-    OR type = 15
-    OR type = 25
-    OR type = 29
-ORDER BY id DESC
-LIMIT 1;
+AND type IN(0, 2, 3, 5, 6, 14, 15, 25)
+--     OR type = 2
+--     OR type = 3
+--     OR type = 5
+--     OR type = 6
+--     OR type = 14
+--     OR type = 15
+--     OR type = 25
+--     OR type = 29
+ORDER BY date DESC
+LIMIT 200;
+
+messageGetUnseenIncomingMessageCountByChatId:
+SELECT COUNT(*)
+FROM messageDbo
+WHERE sender != :ownerId
+AND seen = 0
+AND chat_id = ?;
+
+messageUpdateSeenByChatId:
+UPDATE messageDbo
+SET seen = :seen
+WHERE chat_id = ?;
 
 messageUpdateContentDecrypted:
 UPDATE messageDbo
 SET message_content_decrypted = :message_content_decrypted
+WHERE id = ?;
+
+messageUpdateStatus:
+UPDATE messageDbo
+SET status = :status
 WHERE id = ?;
 
 -- If the message exists in the DB, it will update all fields _except_

@@ -1,0 +1,9 @@
+plugins {
+    id 'java-library'
+    id 'kotlin'
+}
+
+dependencies {
+    implementation project(path: ':sphinx:application:network:concepts:tor:concept-network-tor')
+    implementation deps.kotlin.coroutinesCore
+}

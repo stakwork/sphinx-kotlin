@@ -11,4 +11,6 @@
     <string name="flow_response_decrypting_key">Validating PIN</string>
     <string name="flow_response_encrypting_key_with_new_pin">Re-encrypting your key with new PIN</string>
     <string name="flow_response_generating_encrypting_key">Generating and encrypting your key</string>
+
+    <string name="enter_pin_encrypt">Enter your PIN to encrypt your keys. You will need it when restoring your account on another device</string>
 </resources>

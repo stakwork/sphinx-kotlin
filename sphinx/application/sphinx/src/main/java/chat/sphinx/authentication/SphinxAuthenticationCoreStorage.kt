@@ -1,21 +1,18 @@
 package chat.sphinx.authentication
 
 import android.content.Context
-import dagger.hilt.android.qualifiers.ApplicationContext
 import io.matthewnelson.android_feature_authentication_core.data.AuthenticationCoreStorageAndroid
 import io.matthewnelson.android_feature_authentication_core.data.AuthenticationSharedPrefsName
 import io.matthewnelson.android_feature_authentication_core.data.MasterKeyAlias
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.delay
-import javax.inject.Inject
-import javax.inject.Singleton
+import kotlinx.coroutines.withContext
 
-@Singleton
-open class SphinxAuthenticationCoreStorage @Inject constructor(
-    @ApplicationContext appContext: Context,
+open class SphinxAuthenticationCoreStorage(
+    context: Context,
     dispatchers: CoroutineDispatchers
 ): AuthenticationCoreStorageAndroid(
-    appContext,
+    context.applicationContext,
     MasterKeyAlias(AUTHENTICATION_STORAGE_MASTER_KEY),
     AuthenticationSharedPrefsName(AUTHENTICATION_STORAGE_NAME),
     dispatchers
@@ -31,10 +28,12 @@ open class SphinxAuthenticationCoreStorage @Inject constructor(
      * the implementation which lower layered modules have no idea about.
      * */
     suspend fun clearAuthenticationStorage() {
-        authenticationPrefs.edit().clear().let { editor ->
-            if (!editor.commit()) {
-                editor.apply()
-                delay(100L)
+        withContext(dispatchers.io) {
+            authenticationPrefs.edit().clear().let { editor ->
+                if (!editor.commit()) {
+                    editor.apply()
+                    delay(100L)
+                }
             }
         }
     }

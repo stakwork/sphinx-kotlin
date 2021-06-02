@@ -3,6 +3,7 @@ package chat.sphinx.activitymain.navigation.navigators.primary
 import chat.sphinx.activitymain.navigation.drivers.DetailNavigationDriver
 import chat.sphinx.activitymain.navigation.drivers.PrimaryNavigationDriver
 import chat.sphinx.add_friend.navigation.ToAddFriendDetail
+import chat.sphinx.join_tribe.navigation.ToJoinTribeDetail
 import chat.sphinx.add_sats.navigation.ToAddSatsScreen
 import chat.sphinx.address_book.navigation.ToAddressBookScreen
 import chat.sphinx.create_tribe.navigation.ToCreateTribeDetail
@@ -11,7 +12,7 @@ import chat.sphinx.profile.navigation.ToProfileScreen
 import chat.sphinx.support_ticket.navigation.ToSupportTicketDetail
 import javax.inject.Inject
 
-class DashboardNavDrawerNavigatorImpl @Inject constructor(
+internal class DashboardNavDrawerNavigatorImpl @Inject constructor(
     private val detailDriver: DetailNavigationDriver,
     primaryDriver: PrimaryNavigationDriver
 ): DashboardNavDrawerNavigator(primaryDriver)

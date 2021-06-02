@@ -16,8 +16,8 @@ inline fun SphinxLogger.i(tag: String, message: String) {
 }
 
 @Suppress("NOTHING_TO_INLINE")
-inline fun SphinxLogger.w(tag: String, message: String) {
-    log(tag, message, LogType.Warning)
+inline fun SphinxLogger.w(tag: String, message: String, e: Exception? = null) {
+    log(tag, message, LogType.Warning, e)
 }
 
 @Suppress("NOTHING_TO_INLINE")

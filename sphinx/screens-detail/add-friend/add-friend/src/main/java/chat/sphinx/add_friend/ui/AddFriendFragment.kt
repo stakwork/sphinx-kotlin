@@ -1,9 +1,7 @@
 package chat.sphinx.add_friend.ui
 
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import by.kirich1409.viewbindingdelegate.viewBinding
@@ -25,9 +23,15 @@ internal class AddFriendFragment: BaseFragment<
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.buttonNewToSphinx.setOnClickListener {
-            lifecycleScope.launch { viewModel.navigator.toCreateInvitationDetail() }
+        binding.includeAddFriendHeader.apply {
+            textViewDetailScreenHeaderName.text = getString(R.string.add_friend_header_name)
+            textViewDetailScreenClose.setOnClickListener {
+                lifecycleScope.launch { viewModel.navigator.closeDetailScreen() }
+            }
         }
+//        binding.buttonNewToSphinx.setOnClickListener {
+//            lifecycleScope.launch { viewModel.navigator.toCreateInvitationDetail() }
+//        }
         binding.buttonAlreadyOnSphinx.setOnClickListener {
             lifecycleScope.launch { viewModel.navigator.toAddContactDetail() }
         }

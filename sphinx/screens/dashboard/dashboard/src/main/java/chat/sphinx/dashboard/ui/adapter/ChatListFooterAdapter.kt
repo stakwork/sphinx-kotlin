@@ -5,7 +5,7 @@ import android.view.ViewGroup
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
-import chat.sphinx.dashboard.databinding.LayoutChatFooterBinding
+import chat.sphinx.dashboard.databinding.LayoutDashboardChatsFooterBinding
 import chat.sphinx.dashboard.ui.DashboardViewModel
 import kotlinx.coroutines.launch
 
@@ -15,7 +15,7 @@ internal class ChatListFooterAdapter(
 ): RecyclerView.Adapter<ChatListFooterAdapter.FooterViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FooterViewHolder {
-        val binding = LayoutChatFooterBinding.inflate(
+        val binding = LayoutDashboardChatsFooterBinding.inflate(
             LayoutInflater.from(parent.context),
             parent,
             false
@@ -31,7 +31,7 @@ internal class ChatListFooterAdapter(
     }
 
     inner class FooterViewHolder(
-        private val binding: LayoutChatFooterBinding
+        private val binding: LayoutDashboardChatsFooterBinding
     ): RecyclerView.ViewHolder(binding.root) {
 
         init {

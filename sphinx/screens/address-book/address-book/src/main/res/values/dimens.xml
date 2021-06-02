@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="address_book_contact_holder_text_size">17sp</dimen>
+    <dimen name="address_book_search_bar_margin_horizontal">14dp</dimen>
+    <dimen name="address_book_search_bar_margin_vertical">6dp</dimen>
+    <dimen name="address_book_search_text_size">14sp</dimen>
+
+    <dimen name="address_book_add_buttons_holder_height">75dp</dimen>
+    <dimen name="address_book_add_buttons_height">50dp</dimen>
+
+    <dimen name="recycler_view_holder_height">85dp</dimen>
+    <dimen name="recycler_view_holder_delete_button_width">85dp</dimen>
+    <dimen name="recycler_view_holder_end_margin">30dp</dimen>
+    <dimen name="recycler_view_header_holder_height">45dp</dimen>
+</resources>

@@ -19,7 +19,6 @@ import dagger.hilt.android.AndroidEntryPoint
 import dev.chrisbanes.insetter.applyInsetter
 import io.matthewnelson.android_feature_navigation.requests.PopBackStack
 import io.matthewnelson.android_feature_viewmodel.updateViewState
-import io.matthewnelson.concept_navigation.NavigationRequest
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
@@ -47,7 +46,6 @@ internal class MainActivity: MotionLayoutNavigationActivity<
     override val viewModel: MainViewModel by viewModels()
     override val navigationViewModel: MainViewModel
         get() = viewModel
-
 
     companion object {
         // Setting these here at initial load time will negate the need to query the view
@@ -97,9 +95,12 @@ internal class MainActivity: MotionLayoutNavigationActivity<
         }
 
         binding.viewMainInputLock.setOnClickListener { viewModel }
+    }
 
-        // Authentication Screen
-        lifecycleScope.launchWhenStarted {
+    override fun onStart() {
+        super.onStart()
+        // Authentication
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel
                 .authenticationDriver
                 .navigationRequestSharedFlow
@@ -110,8 +111,8 @@ internal class MainActivity: MotionLayoutNavigationActivity<
                 }
         }
 
-        // Detail Screens
-        lifecycleScope.launchWhenStarted {
+        // Detail Screen
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel
                 .detailDriver
                 .navigationRequestSharedFlow
@@ -169,10 +170,6 @@ internal class MainActivity: MotionLayoutNavigationActivity<
                     )
                 }
             }
-    }
-
-    override suspend fun onPostNavigationRequestExecution(request: NavigationRequest<NavController>) {
-        super.onPostNavigationRequestExecution(request)
     }
 
     override fun onBackPressed() {

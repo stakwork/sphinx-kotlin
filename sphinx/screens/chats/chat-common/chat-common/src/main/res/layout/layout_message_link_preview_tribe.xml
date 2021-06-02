@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/contact_link_preview_holder_height"
+    android:paddingHorizontal="@dimen/chat_message_inner_padding"
+    android:visibility="gone"
+    tools:visibility="visible">
+
+
+    <!-- Tribe Image -->
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/image_view_message_link_preview_tribe"
+        android:layout_width="@dimen/contact_link_preview_avatar_image_xy"
+        android:layout_height="@dimen/contact_link_preview_avatar_image_xy"
+        app:layout_constraintBottom_toTopOf="@id/text_view_message_link_preview_tribe_see_banner"
+        app:layout_constraintEnd_toStartOf="@id/text_view_message_link_preview_tribe_name_label"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ic_tribe"
+        app:tint="@color/secondaryText" />
+
+    <!-- Tribe Name -->
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/text_view_message_link_preview_tribe_name_label"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/default_inner_spacing_list_item_title"
+        android:fontFamily="@font/roboto_medium"
+        android:maxLines="2"
+        android:textColor="@color/text"
+        android:textSize="@dimen/chat_header_headline_text_size"
+        app:layout_constraintBottom_toTopOf="@id/text_view_message_link_preview_tribe_description"
+        app:layout_constraintStart_toEndOf="@id/image_view_message_link_preview_tribe"
+        app:layout_constraintTop_toTopOf="@id/image_view_message_link_preview_tribe"
+        app:layout_constraintVertical_chainStyle="packed"
+        tools:text="Planet Sphinx" />
+
+
+    <!-- Tribe Description Block -->
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/text_view_message_link_preview_tribe_description"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:fontFamily="@font/roboto_regular"
+        android:maxLines="4"
+        android:textColor="@color/secondaryText"
+        android:textSize="@dimen/default_text_size_body"
+        app:layout_constraintBottom_toBottomOf="@id/image_view_message_link_preview_tribe"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@id/text_view_message_link_preview_tribe_name_label"
+        app:layout_constraintTop_toBottomOf="@id/text_view_message_link_preview_tribe_name_label"
+        tools:text="Trading bitcoin tips, TA exchanges, short/long ratio, trading strategies and more." />
+
+
+    <!-- "See Tribe" Banner -->
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/text_view_message_link_preview_tribe_see_banner"
+        android:layout_width="0dp"
+        android:layout_height="@dimen/link_preview_action_button_height"
+        android:background="@color/primaryBlue"
+        android:fontFamily="@font/montserrat_regular"
+        android:gravity="center"
+        android:text="@string/link_preview_see_tribe_banner_label"
+        android:textAlignment="center"
+        android:textAllCaps="true"
+        android:textColor="@android:color/white"
+        android:textSize="@dimen/default_text_size_caption1"
+        android:layout_marginVertical="@dimen/default_layout_margin"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+
+    <androidx.constraintlayout.widget.Group
+        android:id="@+id/message_link_preview_group_tribe_name_and_description"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:constraint_referenced_ids="text_view_message_link_preview_tribe_description,text_view_message_link_preview_tribe_name_label"
+        app:layout_constraintBottom_toBottomOf="@id/image_view_message_link_preview_tribe"
+        app:layout_constraintEnd_toStartOf="parent"
+        app:layout_constraintStart_toEndOf="@id/image_view_message_link_preview_tribe"
+        app:layout_constraintTop_toTopOf="@id/image_view_message_link_preview_tribe" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

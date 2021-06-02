@@ -7,7 +7,7 @@ import chat.sphinx.feature_network_query_subscription.model.GetSubscriptionRelay
 import chat.sphinx.feature_network_query_subscription.model.GetSubscriptionsRelayResponse
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.ResponseError
-import chat.sphinx.wrapper_common.contact.ContactId
+import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.subscription.SubscriptionId
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
@@ -25,21 +25,33 @@ class NetworkQuerySubscriptionImpl(
     ///////////
     /// GET ///
     ///////////
+    private val getSubscriptionsFlowNullData: Flow<LoadResponse<List<SubscriptionDto>, ResponseError>> by lazy {
+        networkRelayCall.relayGet(
+            responseJsonClass = GetSubscriptionsRelayResponse::class.java,
+            relayEndpoint = ENDPOINT_SUBSCRIPTIONS,
+            relayData = null
+        )
+    }
+
     override fun getSubscriptions(
         relayData: Pair<AuthorizationToken, RelayUrl>?
     ): Flow<LoadResponse<List<SubscriptionDto>, ResponseError>> =
-        networkRelayCall.get(
-            jsonAdapter = GetSubscriptionsRelayResponse::class.java,
-            relayEndpoint = ENDPOINT_SUBSCRIPTIONS,
-            relayData = relayData
-        )
+        if (relayData == null) {
+            getSubscriptionsFlowNullData
+        } else {
+            networkRelayCall.relayGet(
+                responseJsonClass = GetSubscriptionsRelayResponse::class.java,
+                relayEndpoint = ENDPOINT_SUBSCRIPTIONS,
+                relayData = relayData
+            )
+        }
 
     override fun getSubscriptionById(
         subscriptionId: SubscriptionId,
         relayData: Pair<AuthorizationToken, RelayUrl>?
     ): Flow<LoadResponse<SubscriptionDto, ResponseError>> =
-        networkRelayCall.get(
-            jsonAdapter = GetSubscriptionRelayResponse::class.java,
+        networkRelayCall.relayGet(
+            responseJsonClass = GetSubscriptionRelayResponse::class.java,
             relayEndpoint = "$ENDPOINT_SUBSCRIPTION/${subscriptionId.value}",
             relayData = relayData
         )
@@ -48,8 +60,8 @@ class NetworkQuerySubscriptionImpl(
         contactId: ContactId,
         relayData: Pair<AuthorizationToken, RelayUrl>?
     ): Flow<LoadResponse<List<SubscriptionDto>, ResponseError>> =
-        networkRelayCall.get(
-            jsonAdapter = GetSubscriptionsRelayResponse::class.java,
+        networkRelayCall.relayGet(
+            responseJsonClass = GetSubscriptionsRelayResponse::class.java,
             relayEndpoint = "$ENDPOINT_SUBSCRIPTIONS/contact/${contactId.value}",
             relayData = relayData
         )

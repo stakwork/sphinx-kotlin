@@ -229,7 +229,12 @@ class RSAImplUnitTest: NetworkQueryTestHelper() {
                 }
 
                 System.getenv("SPHINX_CHAT_LINUX_CLIENT_ENCRYPTED")?.let { encryptedMessage ->
-                    System.getenv("SPHINX_CHAT_LINUX_CLIENT_DECRYPTED")?.let { expected ->
+                    System.getenv("SPHINX_CHAT_LINUX_CLIENT_DECRYPTED")?.let decrypted@ { expected ->
+                        if (encryptedMessage.isEmpty() || expected.isEmpty()) {
+                            printError()
+                            return@decrypted
+                        }
+                        
                         decrypt(
                             RsaPrivateKey(testCoreManager.getEncryptionKey()!!.privateKey.value),
                             EncryptedString(encryptedMessage)

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/join_tribe_nav_graph"
+    app:startDestination="@+id/navigation_join_tribe_fragment">
+
+    <fragment
+        android:id="@+id/navigation_join_tribe_fragment"
+        android:name="chat.sphinx.join_tribe.ui.JoinTribeFragment"
+        tools:layout="@layout/fragment_join_tribe" >
+        <argument
+            android:name="argTribeLink"
+            app:argType="string" />
+    </fragment>
+
+</navigation>

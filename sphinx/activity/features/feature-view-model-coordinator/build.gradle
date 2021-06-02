@@ -1,0 +1,12 @@
+plugins {
+    id 'app.cash.exhaustive'
+    id 'java-library'
+    id 'kotlin'
+}
+
+dependencies {
+    api project(path: ':sphinx:application:common:logger')
+    api project(path: ':sphinx:activity:concepts:concept-view-model-coordinator')
+
+    implementation deps.kotlin.coroutinesCore
+}

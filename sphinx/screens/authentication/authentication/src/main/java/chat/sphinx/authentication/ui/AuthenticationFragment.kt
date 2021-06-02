@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import app.cash.exhaustive.Exhaustive
 import by.kirich1409.viewbindingdelegate.viewBinding
@@ -17,7 +16,9 @@ import chat.sphinx.resources.SphinxToastUtils
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.navigation.CloseAppOnBackPress
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
+import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.invisibleIfFalse
+import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.currentViewState
 import io.matthewnelson.feature_authentication_view.ui.AuthenticationViewModelContainer
 import io.matthewnelson.feature_authentication_view.ui.AuthenticationViewState
@@ -76,8 +77,6 @@ internal class AuthenticationFragment: SideEffectFragment<
                 pinPad.button9.text = chars[9].toString()
             }
         }
-
-        lifecycleScope.launch { onViewStateFlowCollect(viewModel.currentViewState) }
     }
 
     private inner class BackPressHandler(context: Context): CloseAppOnBackPress(context) {
@@ -137,7 +136,7 @@ internal class AuthenticationFragment: SideEffectFragment<
     override fun subscribeToViewStateFlow() {
         super.subscribeToViewStateFlow()
         // Ensures returning responses is only had when view is in foreground
-        lifecycleScope.launchWhenStarted {
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModelContainer.getAuthenticationFinishedStateFlow().collect { responses ->
                 responses?.let { nnResponses ->
                     delay(100L)

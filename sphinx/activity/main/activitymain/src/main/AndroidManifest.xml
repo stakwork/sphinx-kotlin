@@ -3,9 +3,11 @@
     package="chat.sphinx.activitymain">
 
     <application>
-        <activity android:name=".MainActivity"
+        <activity
+            android:name=".MainActivity"
             android:launchMode="singleTask"
-            android:theme="@style/AppLaunchTheme">
+            android:theme="@style/AppLaunchTheme"
+            android:windowSoftInputMode="adjustPan">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

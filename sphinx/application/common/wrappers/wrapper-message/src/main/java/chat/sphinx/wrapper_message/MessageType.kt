@@ -1,5 +1,8 @@
 package chat.sphinx.wrapper_message
 
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.contract
+
 @Suppress("NOTHING_TO_INLINE")
 inline fun MessageType.isMessage(): Boolean =
     this is MessageType.Message
@@ -28,17 +31,37 @@ inline fun MessageType.isDirectPayment(): Boolean =
 inline fun MessageType.isAttachment(): Boolean =
     this is MessageType.Attachment
 
+@OptIn(ExperimentalContracts::class)
 @Suppress("NOTHING_TO_INLINE")
-inline fun MessageType.isPurchase(): Boolean =
-    this is MessageType.Purchase
+inline fun MessageType.isPurchase(): Boolean {
+    contract {
+        returns(true) implies (this@isPurchase is MessageType.Purchase)
+    }
+
+    return this is MessageType.Purchase
+}
+
+@OptIn(ExperimentalContracts::class)
+@Suppress("NOTHING_TO_INLINE")
+inline fun MessageType.isGroupAction(): Boolean {
+    contract {
+        returns(true) implies (this@isGroupAction is MessageType.GroupAction)
+    }
+
+    return this is MessageType.GroupAction
+}
 
 @Suppress("NOTHING_TO_INLINE")
-inline fun MessageType.isPurchaseAccept(): Boolean =
-    this is MessageType.PurchaseAccept
+inline fun MessageType.isPurchaseProcessing(): Boolean =
+    this is MessageType.Purchase.Processing
 
 @Suppress("NOTHING_TO_INLINE")
-inline fun MessageType.isPurchaseDeny(): Boolean =
-    this is MessageType.PurchaseDeny
+inline fun MessageType.isPurchaseAccepted(): Boolean =
+    this is MessageType.Purchase.Accepted
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun MessageType.isPurchaseDenied(): Boolean =
+    this is MessageType.Purchase.Denied
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun MessageType.isContactKey(): Boolean =
@@ -50,23 +73,23 @@ inline fun MessageType.isContactKeyConfirmation(): Boolean =
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun MessageType.isGroupCreate(): Boolean =
-    this is MessageType.GroupCreate
+    this is MessageType.GroupAction.Create
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun MessageType.isGroupInvite(): Boolean =
-    this is MessageType.GroupInvite
+    this is MessageType.GroupAction.Invite
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun MessageType.isGroupJoin(): Boolean =
-    this is MessageType.GroupJoin
+    this is MessageType.GroupAction.Join
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun MessageType.isGroupLeave(): Boolean =
-    this is MessageType.GroupLeave
+    this is MessageType.GroupAction.Leave
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun MessageType.isGroupKick(): Boolean =
-    this is MessageType.GroupKick
+    this is MessageType.GroupAction.Kick
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun MessageType.isDelete(): Boolean =
@@ -78,19 +101,19 @@ inline fun MessageType.isRepayment(): Boolean =
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun MessageType.isMemberRequest(): Boolean =
-    this is MessageType.MemberRequest
+    this is MessageType.GroupAction.MemberRequest
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun MessageType.isMemberApprove(): Boolean =
-    this is MessageType.MemberApprove
+    this is MessageType.GroupAction.MemberApprove
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun MessageType.isMemberReject(): Boolean =
-    this is MessageType.MemberReject
+    this is MessageType.GroupAction.MemberReject
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun MessageType.isTribeDelete(): Boolean =
-    this is MessageType.TribeDelete
+    this is MessageType.GroupAction.TribeDelete
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun MessageType.isBotInstall(): Boolean =
@@ -155,14 +178,14 @@ inline fun Int.toMessageType(): MessageType =
         MessageType.ATTACHMENT -> {
             MessageType.Attachment
         }
-        MessageType.PURCHASE -> {
-            MessageType.Purchase
+        MessageType.PURCHASE_PROCESSING -> {
+            MessageType.Purchase.Processing
         }
-        MessageType.PURCHASE_ACCEPT -> {
-            MessageType.PurchaseAccept
+        MessageType.PURCHASE_ACCEPTED -> {
+            MessageType.Purchase.Accepted
         }
-        MessageType.PURCHASE_DENY -> {
-            MessageType.PurchaseDeny
+        MessageType.PURCHASE_DENIED -> {
+            MessageType.Purchase.Denied
         }
         MessageType.CONTACT_KEY -> {
             MessageType.ContactKey
@@ -171,19 +194,19 @@ inline fun Int.toMessageType(): MessageType =
             MessageType.ContactKeyConfirmation
         }
         MessageType.GROUP_CREATE -> {
-            MessageType.GroupCreate
+            MessageType.GroupAction.Create
         }
         MessageType.GROUP_INVITE -> {
-            MessageType.GroupInvite
+            MessageType.GroupAction.Invite
         }
         MessageType.GROUP_JOIN -> {
-            MessageType.GroupJoin
+            MessageType.GroupAction.Join
         }
         MessageType.GROUP_LEAVE -> {
-            MessageType.GroupLeave
+            MessageType.GroupAction.Leave
         }
         MessageType.GROUP_KICK -> {
-            MessageType.GroupKick
+            MessageType.GroupAction.Kick
         }
         MessageType.DELETE -> {
             MessageType.Delete
@@ -192,16 +215,16 @@ inline fun Int.toMessageType(): MessageType =
             MessageType.Repayment
         }
         MessageType.MEMBER_REQUEST -> {
-            MessageType.MemberRequest
+            MessageType.GroupAction.MemberRequest
         }
         MessageType.MEMBER_APPROVE -> {
-            MessageType.MemberApprove
+            MessageType.GroupAction.MemberApprove
         }
         MessageType.MEMBER_REJECT -> {
-            MessageType.MemberReject
+            MessageType.GroupAction.MemberReject
         }
         MessageType.TRIBE_DELETE -> {
-            MessageType.TribeDelete
+            MessageType.GroupAction.TribeDelete
         }
         MessageType.BOT_INSTALL -> {
             MessageType.BotInstall
@@ -244,7 +267,7 @@ inline fun Int.toMessageType(): MessageType =
  *  - 4 (Cancellation)
  *  - 5 (Direct Payment)
  *  - 6 (Attachment)
- *  - 7 (Purchase)
+ *  - 7 (Purchase Processing)
  *  - 8 (Purchase Accept)
  *  - 9 (Purchase Deny)
  *  - 10 (Contact Key)
@@ -282,9 +305,9 @@ sealed class MessageType {
         const val CANCELLATION = 4
         const val DIRECT_PAYMENT = 5 // SHOW
         const val ATTACHMENT = 6 // SHOW
-        const val PURCHASE = 7
-        const val PURCHASE_ACCEPT = 8
-        const val PURCHASE_DENY = 9
+        const val PURCHASE_PROCESSING = 7
+        const val PURCHASE_ACCEPTED = 8
+        const val PURCHASE_DENIED = 9
         const val CONTACT_KEY = 10
         const val CONTACT_KEY_CONFIRMATION = 11
         const val GROUP_CREATE = 12
@@ -319,7 +342,7 @@ sealed class MessageType {
     abstract val show: Boolean
     abstract val value: Int
 
-    object Message: MessageType() {
+    object Message : MessageType() {
         override val canContainMedia: Boolean
             get() = CAN_NOT_CONTAIN_MEDIA
 
@@ -330,7 +353,7 @@ sealed class MessageType {
             get() = MESSAGE
     }
 
-    object Confirmation: MessageType() {
+    object Confirmation : MessageType() {
         override val canContainMedia: Boolean
             get() = CAN_NOT_CONTAIN_MEDIA
 
@@ -341,7 +364,7 @@ sealed class MessageType {
             get() = CONFIRMATION
     }
 
-    object Invoice: MessageType() {
+    object Invoice : MessageType() {
         override val canContainMedia: Boolean
             get() = CAN_NOT_CONTAIN_MEDIA
 
@@ -352,7 +375,7 @@ sealed class MessageType {
             get() = INVOICE
     }
 
-    object Payment: MessageType() {
+    object Payment : MessageType() {
         override val canContainMedia: Boolean
             get() = CAN_NOT_CONTAIN_MEDIA
 
@@ -363,7 +386,7 @@ sealed class MessageType {
             get() = PAYMENT
     }
 
-    object Cancellation: MessageType() {
+    object Cancellation : MessageType() {
         override val canContainMedia: Boolean
             get() = CAN_NOT_CONTAIN_MEDIA
 
@@ -374,7 +397,7 @@ sealed class MessageType {
             get() = CANCELLATION
     }
 
-    object DirectPayment: MessageType() {
+    object DirectPayment : MessageType() {
         override val canContainMedia: Boolean
             get() = CAN_CONTAIN_MEDIA
 
@@ -385,7 +408,7 @@ sealed class MessageType {
             get() = DIRECT_PAYMENT
     }
 
-    object Attachment: MessageType() {
+    object Attachment : MessageType() {
         override val canContainMedia: Boolean
             get() = CAN_CONTAIN_MEDIA
 
@@ -396,37 +419,49 @@ sealed class MessageType {
             get() = ATTACHMENT
     }
 
-    object Purchase: MessageType() {
-        override val canContainMedia: Boolean
-            get() = CAN_CONTAIN_MEDIA
+    sealed class Purchase: MessageType() {
+        /**
+         * A paid attachment that has been paid for, but is awaiting the
+         * response from the sender to unlock it.
+         * */
+        object Processing: Purchase() {
+            override val canContainMedia: Boolean
+                get() = CAN_CONTAIN_MEDIA
 
-        override val show: Boolean
-            get() = DO_NOT_SHOW
+            override val show: Boolean
+                get() = DO_NOT_SHOW
 
-        override val value: Int
-            get() = PURCHASE
-    }
+            override val value: Int
+                get() = PURCHASE_PROCESSING
+        }
 
-    object PurchaseAccept: MessageType() {
-        override val canContainMedia: Boolean
-            get() = CAN_CONTAIN_MEDIA
+        /**
+         * The paid attachment amount was accepted by the sender of the attachment.
+         * */
+        object Accepted: Purchase() {
+            override val canContainMedia: Boolean
+                get() = CAN_CONTAIN_MEDIA
 
-        override val show: Boolean
-            get() = DO_NOT_SHOW
+            override val show: Boolean
+                get() = DO_NOT_SHOW
 
-        override val value: Int
-            get() = PURCHASE_ACCEPT
-    }
+            override val value: Int
+                get() = PURCHASE_ACCEPTED
+        }
 
-    object PurchaseDeny: MessageType() {
-        override val canContainMedia: Boolean
-            get() = CAN_CONTAIN_MEDIA
+        /**
+         * The paid attachment amount was denied by the sender of the attachment.
+         * */
+        object Denied: Purchase() {
+            override val canContainMedia: Boolean
+                get() = CAN_CONTAIN_MEDIA
 
-        override val show: Boolean
-            get() = DO_NOT_SHOW
+            override val show: Boolean
+                get() = DO_NOT_SHOW
 
-        override val value: Int
-            get() = PURCHASE_DENY
+            override val value: Int
+                get() = PURCHASE_DENIED
+        }
     }
 
     object ContactKey: MessageType() {
@@ -451,62 +486,110 @@ sealed class MessageType {
             get() = CONTACT_KEY_CONFIRMATION
     }
 
-    object GroupCreate: MessageType() {
-        override val canContainMedia: Boolean
-            get() = CAN_NOT_CONTAIN_MEDIA
 
-        override val show: Boolean
-            get() = DO_NOT_SHOW
+    sealed class GroupAction : MessageType() {
 
-        override val value: Int
-            get() = GROUP_CREATE
+        object Create : GroupAction() {
+            override val canContainMedia: Boolean
+                get() = CAN_NOT_CONTAIN_MEDIA
+
+            override val show: Boolean
+                get() = DO_NOT_SHOW
+
+            override val value: Int
+                get() = GROUP_CREATE
+        }
+
+        object Invite : GroupAction() {
+            override val canContainMedia: Boolean
+                get() = CAN_NOT_CONTAIN_MEDIA
+
+            override val show: Boolean
+                get() = DO_NOT_SHOW
+
+            override val value: Int
+                get() = GROUP_INVITE
+        }
+
+        object Join : GroupAction() {
+            override val canContainMedia: Boolean
+                get() = CAN_NOT_CONTAIN_MEDIA
+
+            override val show: Boolean
+                get() = SHOW
+
+            override val value: Int
+                get() = GROUP_JOIN
+        }
+
+        object Leave : GroupAction() {
+            override val canContainMedia: Boolean
+                get() = CAN_NOT_CONTAIN_MEDIA
+
+            override val show: Boolean
+                get() = SHOW
+
+            override val value: Int
+                get() = GROUP_LEAVE
+        }
+
+        object Kick : GroupAction() {
+            override val canContainMedia: Boolean
+                get() = CAN_NOT_CONTAIN_MEDIA
+
+            override val show: Boolean
+                get() = DO_NOT_SHOW
+
+            override val value: Int
+                get() = GROUP_KICK
+        }
+
+        object MemberRequest : GroupAction() {
+            override val canContainMedia: Boolean
+                get() = CAN_NOT_CONTAIN_MEDIA
+
+            override val show: Boolean
+                get() = DO_NOT_SHOW
+
+            override val value: Int
+                get() = MEMBER_REQUEST
+        }
+
+        object MemberApprove : GroupAction() {
+            override val canContainMedia: Boolean
+                get() = CAN_NOT_CONTAIN_MEDIA
+
+            override val show: Boolean
+                get() = DO_NOT_SHOW
+
+            override val value: Int
+                get() = MEMBER_APPROVE
+        }
+
+        object MemberReject : GroupAction() {
+            override val canContainMedia: Boolean
+                get() = CAN_NOT_CONTAIN_MEDIA
+
+            override val show: Boolean
+                get() = DO_NOT_SHOW
+
+            override val value: Int
+                get() = MEMBER_REJECT
+        }
+
+        object TribeDelete : GroupAction() {
+            override val canContainMedia: Boolean
+                get() = CAN_NOT_CONTAIN_MEDIA
+
+            override val show: Boolean
+                get() = DO_NOT_SHOW
+
+            override val value: Int
+                get() = TRIBE_DELETE
+        }
     }
 
-    object GroupInvite: MessageType() {
-        override val canContainMedia: Boolean
-            get() = CAN_NOT_CONTAIN_MEDIA
-
-        override val show: Boolean
-            get() = DO_NOT_SHOW
-
-        override val value: Int
-            get() = GROUP_INVITE
-    }
-
-    object GroupJoin: MessageType() {
-        override val canContainMedia: Boolean
-            get() = CAN_NOT_CONTAIN_MEDIA
-
-        override val show: Boolean
-            get() = SHOW
-
-        override val value: Int
-            get() = GROUP_JOIN
-    }
-
-    object GroupLeave: MessageType() {
-        override val canContainMedia: Boolean
-            get() = CAN_NOT_CONTAIN_MEDIA
-
-        override val show: Boolean
-            get() = SHOW
-
-        override val value: Int
-            get() = GROUP_LEAVE
-    }
-
-    object GroupKick: MessageType() {
-        override val canContainMedia: Boolean
-            get() = CAN_NOT_CONTAIN_MEDIA
-
-        override val show: Boolean
-            get() = DO_NOT_SHOW
-
-        override val value: Int
-            get() = GROUP_KICK
-    }
-
-    object Delete: MessageType() {
+    object Delete : MessageType() {
         override val canContainMedia: Boolean
             get() = CAN_NOT_CONTAIN_MEDIA
 
@@ -517,7 +600,7 @@ sealed class MessageType {
             get() = DELETE
     }
 
-    object Repayment: MessageType() {
+    object Repayment : MessageType() {
         override val canContainMedia: Boolean
             get() = CAN_NOT_CONTAIN_MEDIA
 
@@ -528,51 +611,7 @@ sealed class MessageType {
             get() = REPAYMENT
     }
 
-    object MemberRequest: MessageType() {
-        override val canContainMedia: Boolean
-            get() = CAN_NOT_CONTAIN_MEDIA
-
-        override val show: Boolean
-            get() = DO_NOT_SHOW
-
-        override val value: Int
-            get() = MEMBER_REQUEST
-    }
-
-    object MemberApprove: MessageType() {
-        override val canContainMedia: Boolean
-            get() = CAN_NOT_CONTAIN_MEDIA
-
-        override val show: Boolean
-            get() = DO_NOT_SHOW
-
-        override val value: Int
-            get() = MEMBER_APPROVE
-    }
-
-    object MemberReject: MessageType() {
-        override val canContainMedia: Boolean
-            get() = CAN_NOT_CONTAIN_MEDIA
-
-        override val show: Boolean
-            get() = DO_NOT_SHOW
-
-        override val value: Int
-            get() = MEMBER_REJECT
-    }
-
-    object TribeDelete: MessageType() {
-        override val canContainMedia: Boolean
-            get() = CAN_NOT_CONTAIN_MEDIA
-
-        override val show: Boolean
-            get() = DO_NOT_SHOW
-
-        override val value: Int
-            get() = TRIBE_DELETE
-    }
-
-    object BotInstall: MessageType() {
+    object BotInstall : MessageType() {
         override val canContainMedia: Boolean
             get() = CAN_NOT_CONTAIN_MEDIA
 
@@ -583,7 +622,7 @@ sealed class MessageType {
             get() = BOT_INSTALL
     }
 
-    object BotCmd: MessageType() {
+    object BotCmd : MessageType() {
         override val canContainMedia: Boolean
             get() = CAN_NOT_CONTAIN_MEDIA
 
@@ -594,7 +633,7 @@ sealed class MessageType {
             get() = BOT_CMD
     }
 
-    object BotRes: MessageType() {
+    object BotRes : MessageType() {
         override val canContainMedia: Boolean
             get() = CAN_NOT_CONTAIN_MEDIA
 
@@ -605,7 +644,7 @@ sealed class MessageType {
             get() = BOT_RES
     }
 
-    object Heartbeat: MessageType() {
+    object Heartbeat : MessageType() {
         override val canContainMedia: Boolean
             get() = CAN_NOT_CONTAIN_MEDIA
 
@@ -616,7 +655,7 @@ sealed class MessageType {
             get() = HEARTBEAT
     }
 
-    object HeartbeatConfirmation: MessageType() {
+    object HeartbeatConfirmation : MessageType() {
         override val canContainMedia: Boolean
             get() = CAN_NOT_CONTAIN_MEDIA
 
@@ -627,7 +666,7 @@ sealed class MessageType {
             get() = HEARTBEAT_CONFIRMATION
     }
 
-    object KeySend: MessageType() {
+    object KeySend : MessageType() {
         override val canContainMedia: Boolean
             get() = CAN_NOT_CONTAIN_MEDIA
 
@@ -638,7 +677,7 @@ sealed class MessageType {
             get() = KEY_SEND
     }
 
-    object Boost: MessageType() {
+    object Boost : MessageType() {
         override val canContainMedia: Boolean
             get() = CAN_NOT_CONTAIN_MEDIA
 
@@ -649,7 +688,7 @@ sealed class MessageType {
             get() = BOOST
     }
 
-    object Query: MessageType() {
+    object Query : MessageType() {
         override val canContainMedia: Boolean
             get() = CAN_NOT_CONTAIN_MEDIA
 
@@ -660,7 +699,7 @@ sealed class MessageType {
             get() = QUERY
     }
 
-    object QueryResponse: MessageType() {
+    object QueryResponse : MessageType() {
         override val canContainMedia: Boolean
             get() = CAN_NOT_CONTAIN_MEDIA
 
@@ -671,7 +710,7 @@ sealed class MessageType {
             get() = QUERY_RESPONSE
     }
 
-    class Unknown(override val value: Int) : MessageType() {
+    data class Unknown(override val value: Int) : MessageType() {
         override val canContainMedia: Boolean
             get() = CAN_NOT_CONTAIN_MEDIA
 

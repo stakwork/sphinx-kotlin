@@ -1,0 +1,23 @@
+plugins {
+    id 'com.github.node-gradle.node' version '3.1.0'
+    id 'java-library'
+    id 'kotlin'
+}
+
+node {
+    download = true
+    version = nodeVersion
+    npmVersion = ""
+    workDir = file(nodeWorkDir)
+    nodeProjectDir = file("$projectDir/src/test/resources")
+}
+
+compileTestJava.dependsOn(npmInstall)
+
+dependencies {
+    api deps.square.okhttp
+    api deps.json
+
+    testImplementation testDeps.junit
+    testImplementation testDeps.hamcrest
+}

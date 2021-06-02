@@ -125,5 +125,5 @@ sealed class InviteStatus {
             get() = PAYMENT_PENDING
     }
 
-    class Unknown(override val value: Int): InviteStatus()
+    data class Unknown(override val value: Int): InviteStatus()
 }

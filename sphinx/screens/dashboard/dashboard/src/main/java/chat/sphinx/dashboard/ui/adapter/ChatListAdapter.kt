@@ -5,6 +5,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.lifecycle.*
 import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_image_loader.Disposable
@@ -12,40 +13,34 @@ import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.dashboard.R
-import chat.sphinx.dashboard.databinding.LayoutChatHolderBinding
+import chat.sphinx.dashboard.databinding.LayoutDashboardChatHolderBinding
 import chat.sphinx.dashboard.ui.DashboardViewModel
 import chat.sphinx.dashboard.ui.collectChatViewState
 import chat.sphinx.dashboard.ui.currentChatViewState
 import chat.sphinx.resources.setBackgroundRandomColor
 import chat.sphinx.resources.setTextColorExt
+import chat.sphinx.resources.setTextFont
 import chat.sphinx.wrapper_chat.*
 import chat.sphinx.wrapper_common.DateTime
+import chat.sphinx.wrapper_common.util.getInitials
 import chat.sphinx.wrapper_message.*
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.invisibleIfFalse
+import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.*
 import kotlin.collections.ArrayList
 
-@Suppress("NOTHING_TO_INLINE")
-private inline fun String.getInitials(charLimit: Int = 2): String {
-    val sb = StringBuilder()
-    this.split(' ').let { splits ->
-        for ((index, split) in splits.withIndex()) {
-            if (index < charLimit) {
-                sb.append(split.firstOrNull() ?: "")
-            } else {
-                break
-            }
-        }
-    }
-    return sb.toString()
-}
 
 internal class ChatListAdapter(
+    private val recyclerView: RecyclerView,
+    private val layoutManager: LinearLayoutManager,
     private val imageLoader: ImageLoader<ImageView>,
     private val lifecycleOwner: LifecycleOwner,
+    private val onStopSupervisor: OnStopSupervisor,
     private val viewModel: DashboardViewModel,
 ): RecyclerView.Adapter<ChatListAdapter.ChatViewHolder>(), DefaultLifecycleObserver {
 
@@ -129,11 +124,10 @@ internal class ChatListAdapter(
     }
 
     private val dashboardChats = ArrayList<DashboardChat>(viewModel.currentChatViewState.list)
-    private val supervisor = OnStartStopSupervisor(lifecycleOwner)
 
     override fun onStart(owner: LifecycleOwner) {
         super.onStart(owner)
-        supervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.collectChatViewState { viewState ->
 
                 if (dashboardChats.isEmpty()) {
@@ -148,9 +142,18 @@ internal class ChatListAdapter(
                     }.let { result ->
 
                         if (!diff.sameList) {
+                            val firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition()
+
                             dashboardChats.clear()
                             dashboardChats.addAll(viewState.list)
                             result.dispatchUpdatesTo(this@ChatListAdapter)
+
+                            if (
+                                firstVisibleItemPosition == 0                               &&
+                                recyclerView.scrollState == RecyclerView.SCROLL_STATE_IDLE
+                            ) {
+                                recyclerView.scrollToPosition(0)
+                            }
                         }
 
                     }
@@ -165,7 +168,7 @@ internal class ChatListAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ChatListAdapter.ChatViewHolder {
-        val binding = LayoutChatHolderBinding.inflate(
+        val binding = LayoutDashboardChatHolderBinding.inflate(
             LayoutInflater.from(parent.context),
             parent,
             false
@@ -190,79 +193,20 @@ internal class ChatListAdapter(
     }
 
     inner class ChatViewHolder(
-        private val binding: LayoutChatHolderBinding
-    ): RecyclerView.ViewHolder(binding.root) {
+        private val binding: LayoutDashboardChatHolderBinding
+    ): RecyclerView.ViewHolder(binding.root), DefaultLifecycleObserver {
 
         private var disposable: Disposable? = null
+        private var dChat: DashboardChat? = null
+        private var badgeJob: Job? = null
 
-        fun bind(position: Int) {
-            binding.apply {
-                val dashboardChat = dashboardChats.getOrNull(position) ?: return
-                disposable?.dispose()
-
-                // Set Defaults
-                layoutConstraintChatHolderBorder.goneIfFalse(position != dashboardChats.lastIndex)
-                textViewChatHolderName.setTextColorExt(android.R.color.white)
-                textViewChatHolderMessage.setTextColorExt(R.color.placeholderText)
-
-                // Image
-                dashboardChat.photoUrl.let { url ->
-
-                    imageViewChatHolder.goneIfFalse(url != null)
-                    textViewInitials.goneIfFalse(url == null)
-
-                    if (url != null) {
-                        supervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
-                            imageLoader.load(
-                                imageViewChatHolder,
-                                url.value,
-                                imageLoaderOptions
-                            )
-                        }
-                    } else {
-                        textViewInitials.text = dashboardChat.chatName?.getInitials() ?: ""
-                        textViewInitials.setBackgroundRandomColor(R.drawable.chat_initials_circle)
-                    }
-
-                }
-
-                // Name
-                textViewChatHolderName.text = if (dashboardChat.chatName != null) {
-                    dashboardChat.chatName
-                } else {
-                    // Should never make it here, but just in case...
-                    textViewChatHolderName.setTextColorExt(R.color.primaryRed)
-                    "ERROR: NULL NAME"
-                }
-
-                // Lock
-                imageViewChatHolderLock.invisibleIfFalse(dashboardChat is DashboardChat.Active)
-
-                // Time
-                textViewChatHolderTime.text = dashboardChat.getDisplayTime(today00)
-
-                // Message
-                val messageText = dashboardChat.getMessageText()
-
-                if (messageText == DashboardChat.Active.DECRYPTION_ERROR) {
-                    textViewChatHolderMessage.setTextColorExt(R.color.primaryRed)
-                }
-
-                textViewChatHolderMessage.text = messageText
-
-                // Notification
-                if (dashboardChat is DashboardChat.Active) {
-                    imageViewChatHolderNotification.invisibleIfFalse(dashboardChat.chat.isMuted())
-                } else {
-                    imageViewChatHolderNotification.invisibleIfFalse(false)
-                }
-
-                // ClickListener
-                layoutConstraintChatHolder.setOnClickListener {
+        init {
+            binding.layoutConstraintChatHolder.setOnClickListener {
+                dChat?.let { dashboardChat ->
                     @Exhaustive
                     when (dashboardChat) {
                         is DashboardChat.Active.Conversation -> {
-                            supervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
+                            lifecycleOwner.lifecycleScope.launch {
                                 viewModel.dashboardNavigator.toChatContact(
                                     dashboardChat.chat.id,
                                     dashboardChat.contact.id
@@ -270,8 +214,7 @@ internal class ChatListAdapter(
                             }
                         }
                         is DashboardChat.Active.GroupOrTribe -> {
-                            supervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
-
+                            lifecycleOwner.lifecycleScope.launch {
                                 if (dashboardChat.chat.type.isGroup()) {
                                     viewModel.dashboardNavigator.toChatGroup(dashboardChat.chat.id)
                                 } else if (dashboardChat.chat.type.isTribe()) {
@@ -281,7 +224,7 @@ internal class ChatListAdapter(
                             }
                         }
                         is DashboardChat.Inactive.Conversation -> {
-                            supervisor.scope().launch(viewModel.dispatchers.mainImmediate) {
+                            lifecycleOwner.lifecycleScope.launch {
                                 viewModel.dashboardNavigator.toChatContact(
                                     null,
                                     dashboardChat.contact.id
@@ -291,6 +234,123 @@ internal class ChatListAdapter(
                     }
                 }
             }
+        }
+
+        fun bind(position: Int) {
+            binding.apply {
+                val dashboardChat: DashboardChat = dashboardChats.getOrNull(position) ?: let {
+                    dChat = null
+                    return
+                }
+                dChat = dashboardChat
+                disposable?.dispose()
+                badgeJob?.cancel()
+
+                // Set Defaults
+                layoutConstraintChatHolderBorder.goneIfFalse(position != dashboardChats.lastIndex)
+                textViewChatHolderName.setTextColorExt(android.R.color.white)
+                textViewChatHolderMessage.setTextColorExt(R.color.placeholderText)
+                textViewChatHolderMessage.setTextFont(R.font.roboto_regular)
+                textViewBadgeCount.invisibleIfFalse(false)
+
+                // Image
+                dashboardChat.photoUrl.let { url ->
+
+                    layoutDashboardChatInitialHolder.imageViewChatPicture.goneIfFalse(url != null)
+                    layoutDashboardChatInitialHolder.textViewInitials.goneIfFalse(url == null)
+
+                    if (url != null) {
+                        onStopSupervisor.scope.launch(viewModel.dispatchers.mainImmediate) {
+                            imageLoader.load(
+                                layoutDashboardChatInitialHolder.imageViewChatPicture,
+                                url.value,
+                                imageLoaderOptions
+                            )
+                        }
+                    } else {
+                        layoutDashboardChatInitialHolder.textViewInitials.text =
+                            dashboardChat.chatName?.getInitials() ?: ""
+                        layoutDashboardChatInitialHolder.textViewInitials
+                            .setBackgroundRandomColor(R.drawable.chat_initials_circle)
+                    }
+
+                }
+
+                // Name
+                val chatName = if (dashboardChat.chatName != null) {
+                    dashboardChat.chatName
+                } else {
+                    // Should never make it here, but just in case...
+                    textViewChatHolderName.setTextColorExt(R.color.primaryRed)
+                    textViewChatHolderCenteredName.setTextColorExt(R.color.primaryRed)
+                    "ERROR: NULL NAME"
+                }
+
+                textViewChatHolderName.text = chatName
+                textViewChatHolderCenteredName.text = chatName
+
+                // Lock
+                val encryptedChat = dashboardChat.isEncrypted()
+                imageViewChatHolderLock.invisibleIfFalse(encryptedChat)
+                imageViewChatHolderCenteredLock.invisibleIfFalse(encryptedChat)
+
+                layoutConstraintDashboardChatMessageHolder.invisibleIfFalse(dashboardChat is DashboardChat.Active)
+                layoutConstraintDashboardChatNoMessageHolder.invisibleIfFalse(dashboardChat !is DashboardChat.Active)
+
+                // Time
+                textViewChatHolderTime.text = dashboardChat.getDisplayTime(today00)
+
+                // Message
+                val messageText = dashboardChat.getMessageText()
+                val hastUnseenMessages = dashboardChat.hasUnseenMessages()
+
+                if (messageText == DashboardChat.Active.DECRYPTION_ERROR) {
+                    textViewChatHolderMessage.setTextColorExt(R.color.primaryRed)
+                } else {
+                    textViewChatHolderMessage.setTextColorExt(if (hastUnseenMessages) R.color.text else R.color.placeholderText)
+                }
+
+                textViewChatHolderMessage.setTextFont(if (hastUnseenMessages) R.font.roboto_bold else R.font.roboto_regular)
+
+                textViewChatHolderMessage.text = messageText
+
+                handleUnseenMessageCount()
+
+                // Notification
+                if (dashboardChat is DashboardChat.Active) {
+                    imageViewChatHolderNotification.invisibleIfFalse(dashboardChat.chat.isMuted())
+                } else {
+                    imageViewChatHolderNotification.invisibleIfFalse(false)
+                }
+            }
+        }
+
+        private fun handleUnseenMessageCount() {
+            dChat?.let { nnDashboardChat ->
+                badgeJob = onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                    nnDashboardChat.unseenMessageFlow?.collect { unseen ->
+                        binding.textViewBadgeCount.apply {
+                            if (unseen != null && unseen > 0) {
+                                text = unseen.toString()
+                            }
+                            invisibleIfFalse(nnDashboardChat.hasUnseenMessages())
+                        }
+                    }
+                }
+            }
+        }
+
+        override fun onStart(owner: LifecycleOwner) {
+            super.onStart(owner)
+            badgeJob?.let {
+                if (!it.isActive) {
+                    handleUnseenMessageCount()
+                }
+            }
+        }
+
+        init {
+            lifecycleOwner.lifecycle.addObserver(this)
         }
 
     }

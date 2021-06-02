@@ -5,13 +5,8 @@ import app.cash.exhaustive.Exhaustive
 import chat.sphinx.logger.LogType
 import chat.sphinx.logger.SphinxLogger
 import io.matthewnelson.build_config.BuildConfigDebug
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class SphinxLoggerImpl @Inject constructor(
-    private val buildConfigDebug: BuildConfigDebug,
-): SphinxLogger() {
+class SphinxLoggerImpl(private val buildConfigDebug: BuildConfigDebug): SphinxLogger() {
 
     override fun log(tag: String, message: String, type: LogType, throwable: Throwable?) {
         @Exhaustive
@@ -30,7 +25,7 @@ class SphinxLoggerImpl @Inject constructor(
                 }
             }
             LogType.Warning -> {
-                Log.w(tag, message)
+                Log.w(tag, message, throwable)
             }
             LogType.Verbose -> {
                 if (buildConfigDebug.value) {

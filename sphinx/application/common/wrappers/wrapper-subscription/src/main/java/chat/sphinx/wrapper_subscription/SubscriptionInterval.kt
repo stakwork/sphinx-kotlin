@@ -70,5 +70,5 @@ sealed class SubscriptionInterval {
             get() = MONTHLY
     }
 
-    class Unknown(override val value: String): SubscriptionInterval()
+    data class Unknown(override val value: String): SubscriptionInterval()
 }

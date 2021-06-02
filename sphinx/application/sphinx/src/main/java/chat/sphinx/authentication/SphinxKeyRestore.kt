@@ -12,9 +12,8 @@ import io.matthewnelson.crypto_common.annotations.RawPasswordAccess
 import io.matthewnelson.crypto_common.clazzes.Password
 import io.matthewnelson.crypto_common.clazzes.compare
 import kotlinx.coroutines.flow.*
-import javax.inject.Inject
 
-class SphinxKeyRestore @Inject constructor(
+class SphinxKeyRestore(
     private val authenticationManager: SphinxAuthenticationCoreManager,
     private val authenticationStorage: SphinxAuthenticationCoreStorage,
     private val encryptionKeyHandler: SphinxEncryptionKeyHandler,
@@ -116,7 +115,7 @@ class SphinxKeyRestore @Inject constructor(
                         }
                 }
 
-                completionResponse?.let { success ->
+                completionResponse?.let { _ ->
                     authenticationManager.getEncryptionKey()?.let { encryptionKey ->
                         // validate encryption key correctness
                         if (

@@ -8,7 +8,8 @@ inline fun String.toAppUrl(): AppUrl? =
         null
     }
 
-inline class AppUrl(val value: String) {
+@JvmInline
+value class AppUrl(val value: String) {
     init {
         require(value.isNotEmpty()) {
             "AppUrl cannot be empty"

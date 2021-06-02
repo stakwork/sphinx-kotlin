@@ -8,7 +8,8 @@ inline fun String.toFeedUrl(): FeedUrl? =
         null
     }
 
-inline class FeedUrl(val value: String) {
+@JvmInline
+value class FeedUrl(val value: String) {
     init {
         require(value.isNotEmpty()) {
             "FeedUrl cannot be empty"

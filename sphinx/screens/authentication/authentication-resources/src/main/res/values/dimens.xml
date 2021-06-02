@@ -6,4 +6,5 @@
     <dimen name="pin_pad_backspace_text_size">24sp</dimen>
     <dimen name="pin_pad_padding">16dp</dimen>
     <dimen name="pin_pad_backspace_padding">20dp</dimen>
+    <dimen name="sub_header_text_size">12dp</dimen>
 </resources>

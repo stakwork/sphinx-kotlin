@@ -25,10 +25,22 @@ import javax.inject.Singleton
 object AppModule {
 
     @Provides
+    @Singleton
+    fun provideSphinxDispatchers(): SphinxDispatchers =
+        SphinxDispatchers()
+
+    @Provides
     fun provideCoroutineDispatchers(
         sphinxDispatchers: SphinxDispatchers
     ): CoroutineDispatchers =
         sphinxDispatchers
+
+    @Provides
+    @Singleton
+    fun provideSphinxLoggerImpl(
+        buildConfigDebug: BuildConfigDebug,
+    ): SphinxLoggerImpl =
+        SphinxLoggerImpl(buildConfigDebug)
 
     @Provides
     fun provideSphinxLogger(

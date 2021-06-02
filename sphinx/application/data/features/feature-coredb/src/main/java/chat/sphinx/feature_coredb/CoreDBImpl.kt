@@ -32,6 +32,10 @@ abstract class CoreDBImpl(private val moshi: Moshi): CoreDB() {
     override val isInitialized: Boolean
         get() = sphinxDatabaseQueriesStateFlow.value != null
 
+    override fun getSphinxDatabaseQueriesOrNull(): SphinxDatabaseQueries? {
+        return sphinxDatabaseQueriesStateFlow.value
+    }
+
     protected abstract fun getSqlDriver(encryptionKey: EncryptionKey): SqlDriver
 
     private val initializationLock = Object()
@@ -57,7 +61,7 @@ abstract class CoreDBImpl(private val moshi: Moshi): CoreDB() {
                     typeAdapter = ChatTypeAdapter(),
                     statusAdapter = ChatStatusAdapter(),
                     contact_idsAdapter = ContactIdsAdapter.getInstance(),
-                    is_mutedAdapter = ChatMutedAdapter(),
+                    is_mutedAdapter = ChatMutedAdapter.getInstance(),
                     created_atAdapter = DateTimeAdapter.getInstance(),
                     group_keyAdapter = ChatGroupKeyAdapter(),
                     hostAdapter = ChatHostAdapter(),
@@ -92,13 +96,31 @@ abstract class CoreDBImpl(private val moshi: Moshi): CoreDB() {
                     invite_idAdapter = InviteIdAdapter.getInstance(),
                     invite_statusAdapter = InviteStatusAdapter.getInstance(),
                 ),
+                inviteDboAdapter = InviteDbo.Adapter(
+                    idAdapter = InviteIdAdapter.getInstance(),
+                    invite_stringAdapter = InviteStringAdapter(),
+                    invoiceAdapter = LightningPaymentRequestAdapter.getInstance(),
+                    contact_idAdapter = ContactIdAdapter.getInstance(),
+                    statusAdapter = InviteStatusAdapter.getInstance(),
+                    priceAdapter = SatAdapter.getInstance(),
+                    created_atAdapter = DateTimeAdapter.getInstance(),
+                ),
+                dashboardDboAdapter = DashboardDbo.Adapter(
+                    idAdapter = DashboardIdAdapter(),
+                    contact_idAdapter = ContactIdAdapter.getInstance(),
+                    dateAdapter = DateTimeAdapter.getInstance(),
+                    mutedAdapter = ChatMutedAdapter.getInstance(),
+                    seenAdapter = SeenAdapter.getInstance(),
+                    photo_urlAdapter = PhotoUrlAdapter.getInstance(),
+                    latest_message_idAdapter = MessageIdAdapter.getInstance()
+                ),
                 messageDboAdapter = MessageDbo.Adapter(
                     idAdapter = MessageIdAdapter.getInstance(),
                     uuidAdapter = MessageUUIDAdapter(),
                     chat_idAdapter = ChatIdAdapter.getInstance(),
                     typeAdapter = MessageTypeAdapter(),
                     senderAdapter = ContactIdAdapter.getInstance(),
-                    receiverAdapter = ContactIdAdapter.getInstance(),
+                    receiver_Adapter = ContactIdAdapter.getInstance(),
                     amountAdapter = SatAdapter.getInstance(),
                     payment_hashAdapter = LightningPaymentHashAdapter.getInstance(),
                     payment_requestAdapter = LightningPaymentRequestAdapter.getInstance(),
@@ -121,15 +143,6 @@ abstract class CoreDBImpl(private val moshi: Moshi): CoreDB() {
                     media_typeAdapter = MediaTypeAdapter(),
                     media_tokenAdapter = MediaTokenAdapter(),
                 ),
-                inviteDboAdapter = InviteDbo.Adapter(
-                    idAdapter = InviteIdAdapter.getInstance(),
-                    invite_stringAdapter = InviteStringAdapter(),
-                    invoiceAdapter = LightningPaymentRequestAdapter.getInstance(),
-                    contact_idAdapter = ContactIdAdapter.getInstance(),
-                    statusAdapter = InviteStatusAdapter.getInstance(),
-                    priceAdapter = SatAdapter.getInstance(),
-                    created_atAdapter = DateTimeAdapter.getInstance(),
-                )
             ).sphinxDatabaseQueries
         }
     }

@@ -68,6 +68,13 @@
         android:id="@+id/motion_scene_dashboard_drawer_open"
         app:deriveConstraintsFrom="@+id/motion_scene_dashboard_drawer_closed">
 
+        <Constraint android:id="@+id/layout_dashboard_header">
+            <Layout
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/default_header_height"
+                app:layout_constraintTop_toTopOf="parent" />
+        </Constraint>
+
         <Constraint android:id="@+id/dashboard_nav_drawer_input_lock">
             <PropertySet
                 android:alpha="@dimen/nav_drawer_input_lock_alpha"

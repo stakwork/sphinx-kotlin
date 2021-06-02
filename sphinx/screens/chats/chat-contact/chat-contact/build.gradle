@@ -1,5 +1,6 @@
 plugins {
     id 'com.android.library'
+    id 'androidx.navigation.safeargs'
     id 'dagger.hilt.android.plugin'
     id 'kotlin-android'
     id 'kotlin-kapt'
@@ -34,7 +35,7 @@ dependencies {
     implementation project(path: ':android:features:android-feature-screens')
 
     // Sphinx
-    implementation project(path: ':sphinx:application:common:resources')
+    api project(path: ':sphinx:screens:chats:chat-common:chat-common')
 
     implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt

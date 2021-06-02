@@ -1,11 +1,14 @@
 package chat.sphinx.dashboard.ui
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
-import chat.sphinx.concept_repository_chat.ChatRepository
-import chat.sphinx.concept_repository_contact.ContactRepository
-import chat.sphinx.concept_repository_lightning.LightningRepository
-import chat.sphinx.concept_repository_message.MessageRepository
+import chat.sphinx.concept_background_login.BackgroundLoginHandler
+import chat.sphinx.concept_repository_dashboard_android.RepositoryDashboardAndroid
+import chat.sphinx.concept_service_notification.PushNotificationRegistrar
+import chat.sphinx.concept_socket_io.SocketIOManager
+import chat.sphinx.concept_socket_io.SocketIOState
+import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
 import chat.sphinx.dashboard.navigation.DashboardBottomNavBarNavigator
 import chat.sphinx.dashboard.navigation.DashboardNavDrawerNavigator
 import chat.sphinx.dashboard.navigation.DashboardNavigator
@@ -17,28 +20,34 @@ import chat.sphinx.dashboard.ui.viewstates.NavDrawerViewState
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
+import chat.sphinx.scanner_view_model_coordinator.request.ScannerFilter
+import chat.sphinx.scanner_view_model_coordinator.request.ScannerRequest
+import chat.sphinx.scanner_view_model_coordinator.response.ScannerResponse
 import chat.sphinx.wrapper_chat.isConversation
-import chat.sphinx.wrapper_common.contact.ContactId
-import chat.sphinx.wrapper_common.lightning.Sat
+import chat.sphinx.wrapper_common.tribe.TribeJoinLink
+import chat.sphinx.wrapper_common.tribe.toTribeJoinLink
+import chat.sphinx.wrapper_common.tribe.isValidTribeJoinLink
+import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_contact.isConfirmed
 import chat.sphinx.wrapper_contact.isTrue
 import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_message.Message
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.MotionLayoutViewModel
+import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.sideeffect.SideEffect
 import io.matthewnelson.concept_views.viewstate.collect
 import io.matthewnelson.concept_views.viewstate.value
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.withContext
+import java.util.*
 import javax.inject.Inject
+import kotlin.collections.ArrayList
 
 internal suspend inline fun DashboardViewModel.collectChatViewState(
     crossinline action: suspend (value: ChatViewState) -> Unit
@@ -54,22 +63,88 @@ internal suspend inline fun DashboardViewModel.updateChatListFilter(filter: Chat
 
 @HiltViewModel
 internal class DashboardViewModel @Inject constructor(
+    private val backgroundLoginHandler: BackgroundLoginHandler,
+    handler: SavedStateHandle,
+
     val dashboardNavigator: DashboardNavigator,
     val navBarNavigator: DashboardBottomNavBarNavigator,
     val navDrawerNavigator: DashboardNavDrawerNavigator,
 
-    val dispatchers: CoroutineDispatchers,
-    private val chatRepository: ChatRepository,
-    private val contactRepository: ContactRepository,
-    private val lightningRepository: LightningRepository,
-    private val messageRepository: MessageRepository,
+    dispatchers: CoroutineDispatchers,
+
+    private val repositoryDashboard: RepositoryDashboardAndroid<Any>,
+
+    private val pushNotificationRegistrar: PushNotificationRegistrar,
+
+    private val scannerCoordinator: ViewModelCoordinator<ScannerRequest, ScannerResponse>,
+    private val socketIOManager: SocketIOManager,
 ): MotionLayoutViewModel<
         Any,
         Nothing,
         SideEffect<Nothing>,
         NavDrawerViewState
-        >(NavDrawerViewState.Closed)
+        >(dispatchers, NavDrawerViewState.Closed)
 {
+    init {
+        if (handler.navArgs<DashboardFragmentArgs>().value.updateBackgroundLoginTime) {
+            viewModelScope.launch(default) {
+                backgroundLoginHandler.updateLoginTime()
+            }
+        }
+    }
+
+    fun toScanner() {
+        viewModelScope.launch(mainImmediate) {
+            val response = scannerCoordinator.submitRequest(
+                ScannerRequest(
+                    filter = object : ScannerFilter() {
+                        override suspend fun checkData(data: String): Response<Any, String> {
+                            if (data.toTribeJoinLink() != null) {
+                                return Response.Success(Any())
+                            }
+
+                            return Response.Error("QR code is not a Join Tribe link")
+                        }
+                    },
+                    showBottomView = true
+                )
+            )
+            if (response is Response.Success) {
+
+                val code = response.value.value
+
+                if (code.isValidTribeJoinLink) {
+                    dashboardNavigator.toJoinTribeDetail(TribeJoinLink(code))
+                }
+            }
+        }
+    }
+
+//    @Volatile
+//    private var pagerFlow: Flow<PagingData<DashboardItem>>? = null
+//    private val pagerFlowLock = Mutex()
+//
+//    fun dashboardPagingDataFlow(): Flow<PagingData<DashboardItem>> = flow {
+//        val flow: Flow<PagingData<DashboardItem>> = pagerFlow ?: pagerFlowLock.withLock {
+//            pagerFlow ?: repositoryDashboard
+//                .getDashboardItemPagingSource()
+//                .let { sourceWrapper ->
+//                    sourceWrapper.pagingDataFlow.map { pagingData ->
+//                        pagingData.map { item ->
+//
+//                        }
+//                        pagingData.insertSeparators { item: DashboardItem?, item2: DashboardItem? ->
+//
+//                        }
+//                    }
+//                    sourceWrapper.pagingDataFlow
+//                        .cachedIn(viewModelScope)
+//                        .also { pagerFlow = it }
+//                }
+//        }
+//
+//        emitAll(flow)
+//    }
 
     val chatViewStateContainer: ChatViewStateContainer by lazy {
         ChatViewStateContainer(dispatchers)
@@ -83,7 +158,7 @@ internal class DashboardViewModel @Inject constructor(
         get() = _accountOwnerStateFlow.asStateFlow()
 
     suspend fun getAccountBalance(): StateFlow<NodeBalance?> =
-        lightningRepository.getAccountBalance()
+        repositoryDashboard.getAccountBalance()
 
     private val _contactsStateFlow: MutableStateFlow<List<Contact>> by lazy {
         MutableStateFlow(emptyList())
@@ -95,8 +170,8 @@ internal class DashboardViewModel @Inject constructor(
     private var chatsCollectionInitialized: Boolean = false
 
     init {
-        viewModelScope.launch(dispatchers.mainImmediate) {
-            contactRepository.getContacts().distinctUntilChanged().collect { contacts ->
+        viewModelScope.launch(mainImmediate) {
+            repositoryDashboard.getAllContacts.distinctUntilChanged().collect { contacts ->
                 collectionLock.withLock {
                     contactsCollectionInitialized = true
 
@@ -107,7 +182,7 @@ internal class DashboardViewModel @Inject constructor(
                     val newList = ArrayList<Contact>(contacts.size)
                     val contactIds = ArrayList<ContactId>(contacts.size)
 
-                    withContext(dispatchers.default) {
+                    withContext(default) {
                         for (contact in contacts) {
                             if (contact.isOwner.isTrue()) {
                                 _accountOwnerStateFlow.value = contact
@@ -126,8 +201,9 @@ internal class DashboardViewModel @Inject constructor(
                         return@withLock
                     }
 
-                    withContext(dispatchers.default) {
+                    withContext(default) {
                         val currentChats = currentChatViewState.list.toMutableList()
+                        val chatContactIds = mutableListOf<ContactId>()
 
                         var updateChatViewState = false
                         for (chat in currentChatViewState.list) {
@@ -145,74 +221,90 @@ internal class DashboardViewModel @Inject constructor(
                             }
 
                             contact?.let {
+                                chatContactIds.add(it.id)
                                 // if the id of the currently displayed chat is not contained
-                                // in the list collected here, it's a new contact w/o a chat.
+                                // in the list collected here, it's either a new contact w/o
+                                // a chat, or a contact that was deleted which we need to remove
+                                // from the list of chats.
+
                                 if (!contactIds.contains(it.id)) {
+                                    //Contact deleted
                                     updateChatViewState = true
-                                    currentChats.add(DashboardChat.Inactive.Conversation(contact))
+                                    currentChats.remove(chat)
+                                    chatContactIds.remove(it.id)
                                 }
+
+                                if (repositoryDashboard.updatedContactIds.contains(it.id)) {
+                                    //Contact updated
+                                    currentChats.remove(chat)
+                                    chatContactIds.remove(it.id)
+                                }
+                            }
+                        }
+
+                        for (contact in _contactsStateFlow.value) {
+                            if (contact.status.isConfirmed() && !chatContactIds.contains(contact.id)) {
+                                updateChatViewState = true
+
+                                currentChats.add(
+                                    DashboardChat.Inactive.Conversation(contact)
+                                )
                             }
                         }
 
                         if (updateChatViewState) {
                             chatViewStateContainer.updateDashboardChats(currentChats.toList())
+                            repositoryDashboard.updatedContactIds = mutableListOf()
                         }
                     }
                 }
             }
         }
 
-        viewModelScope.launch(dispatchers.mainImmediate) {
+        viewModelScope.launch(mainImmediate) {
             delay(25L)
-            chatRepository.getChats().distinctUntilChanged().collect { chats ->
+            repositoryDashboard.getAllChats.distinctUntilChanged().collect { chats ->
                 collectionLock.withLock {
                     chatsCollectionInitialized = true
                     val newList = ArrayList<DashboardChat>(chats.size)
                     val contactsAdded = mutableListOf<ContactId>()
 
-                    withContext(dispatchers.default) {
+                    withContext(default) {
                         for (chat in chats) {
                             val message: Message? = chat.latestMessageId?.let {
-                                messageRepository.getMessageById(it).firstOrNull()
+                                repositoryDashboard.getMessageById(it).firstOrNull()
                             }
 
                             if (chat.type.isConversation()) {
                                 val contactId: ContactId = chat.contactIds.lastOrNull() ?: continue
 
-                                val contact: Contact = if (contactsCollectionInitialized) {
-
-                                    var temp: Contact? = null
-                                    for (contact in _contactsStateFlow.value) {
-                                        if (contact.id == contactId) {
-                                            temp = contact
-                                            break
-                                        }
-                                    }
-                                    temp ?: continue
-
-                                } else {
-
-                                    contactRepository.getContactById(
-                                        chat.contactIds.lastOrNull() ?: continue
-                                    ).firstOrNull() ?: continue
-
-                                }
+                                val contact: Contact = repositoryDashboard.getContactById(contactId)
+                                    .firstOrNull() ?: continue
 
                                 contactsAdded.add(contactId)
 
                                 newList.add(
                                     DashboardChat.Active.Conversation(
-                                        chat, message, contact
+                                        chat,
+                                        message,
+                                        contact,
+                                        repositoryDashboard.getUnseenMessagesByChatId(chat.id),
                                     )
                                 )
                             } else {
-                                newList.add(DashboardChat.Active.GroupOrTribe(chat, message))
+                                newList.add(
+                                    DashboardChat.Active.GroupOrTribe(
+                                        chat,
+                                        message,
+                                        repositoryDashboard.getUnseenMessagesByChatId(chat.id)
+                                    )
+                                )
                             }
                         }
                     }
 
                     if (contactsCollectionInitialized) {
-                        withContext(dispatchers.default) {
+                        withContext(default) {
                             for (contact in _contactsStateFlow.value) {
 
                                 if (contact.status.isConfirmed() && !contactsAdded.contains(contact.id)) {
@@ -229,23 +321,45 @@ internal class DashboardViewModel @Inject constructor(
                 }
             }
         }
+
+        // Prime it...
+        viewModelScope.launch(mainImmediate) {
+            try {
+                repositoryDashboard.accountOwner.collect {
+                    if (it != null) {
+                        throw Exception()
+                    }
+                }
+            } catch (e: Exception) {}
+        }
     }
 
     private val _networkStateFlow: MutableStateFlow<LoadResponse<Boolean, ResponseError>> by lazy {
         MutableStateFlow(LoadResponse.Loading)
     }
 
+    init {
+        viewModelScope.launch(mainImmediate) {
+            socketIOManager.socketIOStateFlow.collect { state ->
+                if (state is SocketIOState.Uninitialized) {
+                    socketIOManager.connect()
+                }
+            }
+        }
+    }
+
     val networkStateFlow: StateFlow<LoadResponse<Boolean, ResponseError>>
         get() = _networkStateFlow.asStateFlow()
 
+    private var pushNotificationRegistrationUpdated: Boolean = false
     private var jobNetworkRefresh: Job? = null
     fun networkRefresh() {
         if (jobNetworkRefresh?.isActive == true) {
             return
         }
 
-        jobNetworkRefresh = viewModelScope.launch(dispatchers.mainImmediate) {
-            lightningRepository.networkRefreshBalance().collect { response ->
+        jobNetworkRefresh = viewModelScope.launch(mainImmediate) {
+            repositoryDashboard.networkRefreshBalance.collect { response ->
                 @Exhaustive
                 when (response) {
                     is LoadResponse.Loading,
@@ -260,7 +374,7 @@ internal class DashboardViewModel @Inject constructor(
                 jobNetworkRefresh?.cancel()
             }
 
-            contactRepository.networkRefreshContacts().collect { response ->
+            repositoryDashboard.networkRefreshContacts.collect { response ->
                 @Exhaustive
                 when (response) {
                     is LoadResponse.Loading -> {}
@@ -275,7 +389,21 @@ internal class DashboardViewModel @Inject constructor(
                 jobNetworkRefresh?.cancel()
             }
 
-            messageRepository.networkRefreshMessages().collect { response ->
+            if (!pushNotificationRegistrationUpdated) {
+                pushNotificationRegistrar.register().let { response ->
+                    @Exhaustive
+                    when (response) {
+                        is Response.Error -> {
+                            // TODO: Handle on the UI
+                        }
+                        is Response.Success -> {
+                            pushNotificationRegistrationUpdated = true
+                        }
+                    }
+                }
+            }
+
+            repositoryDashboard.networkRefreshMessages.collect { response ->
                 _networkStateFlow.value = response
             }
         }

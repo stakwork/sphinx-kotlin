@@ -4,5 +4,6 @@ import io.matthewnelson.concept_views.viewstate.ViewState
 
 internal sealed class OnBoardViewState: ViewState<OnBoardViewState>() {
     object Idle: OnBoardViewState()
-    object DecryptKeys: OnBoardViewState()
+    object Saving: OnBoardViewState()
+    object Error: OnBoardViewState()
 }

@@ -1,5 +1,6 @@
 package chat.sphinx.authentication
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.Application
 import android.content.pm.ActivityInfo
@@ -11,11 +12,8 @@ import io.matthewnelson.concept_authentication.state.AuthenticationState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_encryption_key.EncryptionKey
 import io.matthewnelson.crypto_common.clazzes.HashIterations
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class SphinxAuthenticationCoreManager @Inject constructor(
+class SphinxAuthenticationCoreManager(
     application: Application,
     dispatchers: CoroutineDispatchers,
     encryptionKeyHandler: SphinxEncryptionKeyHandler,
@@ -43,6 +41,7 @@ class SphinxAuthenticationCoreManager @Inject constructor(
         setAuthenticationStateRequired(AuthenticationState.Required.InitialLogIn)
     }
 
+    @SuppressLint("SourceLockedOrientationActivity")
     override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
         super.onActivityCreated(activity, savedInstanceState)
         activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT

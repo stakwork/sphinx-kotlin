@@ -138,7 +138,8 @@ inline fun String.toRsaPublicKey(): RsaPublicKey {
     return RsaPublicKey(sb.toString().toCharArray())
 }
 
-inline class RsaPrivateKey(val value: CharArray) {
+@JvmInline
+value class RsaPrivateKey(val value: CharArray) {
     companion object {
         const val CERT_PKCS1_HEADER = "-----BEGIN RSA PRIVATE KEY-----"
         const val CERT_PKCS1_FOOTER = "-----END RSA PRIVATE KEY-----"
@@ -147,7 +148,8 @@ inline class RsaPrivateKey(val value: CharArray) {
     }
 }
 
-inline class RsaPublicKey(val value: CharArray) {
+@JvmInline
+value class RsaPublicKey(val value: CharArray) {
     companion object {
         const val CERT_PKCS1_HEADER = "-----BEGIN RSA PUBLIC KEY-----"
         const val CERT_PKCS1_FOOTER = "-----END RSA PUBLIC KEY-----"

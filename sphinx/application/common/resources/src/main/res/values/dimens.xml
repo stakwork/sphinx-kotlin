@@ -1,8 +1,63 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <dimen name="default_half_layout_margin">8dp</dimen>
     <dimen name="default_layout_margin">16dp</dimen>
-    <dimen name="default_header_height">72dp</dimen>
+    <dimen name="default_double_layout_margin">32dp</dimen>
+    <dimen name="default_list_row_padding_vertical">10dp</dimen>
+    <dimen name="default_header_height">65dp</dimen>
+    <dimen name="default_header_navigation_xy">56dp</dimen>
+    <dimen name="default_header_navigation_padding">16dp</dimen>
+    <dimen name="default_header_navigation_margin_start">8dp</dimen>
+    <dimen name="default_chat_initial_image_xy">46dp</dimen>
+    <dimen name="default_message_action_image_xy">28dp</dimen>
     <dimen name="default_header_margin_horizontal">24dp</dimen>
+    <dimen name="default_header_headline_margin_horizontal">12dp</dimen>
+    <dimen name="default_header_headline_margin_vertical">8dp</dimen>
     <dimen name="default_bottom_bar_height">56dp</dimen>
     <dimen name="default_elevation">8dp</dimen>
+
+    <dimen name="default_text_size_back_arrow">21sp</dimen>
+    <dimen name="default_text_size_tap_target_material_icon">20sp</dimen>
+    <dimen name="default_header_text_size">14sp</dimen>
+    <dimen name="default_text_size_headline">17sp</dimen>
+    <dimen name="default_text_size_body">12sp</dimen>
+    <dimen name="default_text_size_action_button_label">12sp</dimen>
+    <dimen name="default_text_size_sub_headline">11sp</dimen>
+    <dimen name="default_text_size_list_row_headline">13sp</dimen>
+    <dimen name="default_text_size_caption1">10sp</dimen>
+    <dimen name="default_text_size_caption2">9sp</dimen>
+
+    <dimen name="default_inner_spacing_list_item_title">10dp</dimen>
+    <dimen name="default_vertical_spacing_action_button_column">6dp</dimen>
+    <dimen name="default_status_badge_inner_padding">3dp</dimen>
+
+    <dimen name="default_tap_target_min_height">44dp</dimen>
+
+    <dimen name="search_bar_height">50dp</dimen>
+
+    <dimen name="add_buttons_height">50dp</dimen>
+    <dimen name="add_buttons_text_size">15sp</dimen>
+    <dimen name="add_buttons_icon_xy">25sp</dimen>
+    <dimen name="default_tap_target_xy">44dp</dimen>
+    <dimen name="default_small_tap_target_xy">27dp</dimen>
+
+    <dimen name="default_form_horizontal_margin">30dp</dimen>
+    <dimen name="default_form_edit_text_left_margin">-4dp</dimen>
+    <dimen name="default_form_text_view_text_size">12sp</dimen>
+    <dimen name="default_form_edit_view_text_size">17sp</dimen>
+
+    <dimen name="default_form_scan_address_button_width">30dp</dimen>
+    <dimen name="default_form_scan_icon_bottom_margin">5dp</dimen>
+    <dimen name="default_form_scan_icon_width">21dp</dimen>
+    <dimen name="default_form_scan_icon_height">17dp</dimen>
+    <dimen name="default_form_scan_icon_container_width">60dp</dimen>
+    <dimen name="default_form_text_view_size">12sp</dimen>
+    <dimen name="default_form_edit_view_size">17sp</dimen>
+    <dimen name="default_edit_text_left_margin">-4dp</dimen>
+
+    <dimen name="default_progress_bar_xy">25dp</dimen>
+    <dimen name="default_progress_bar_margin_left">10dp</dimen>
+
+    <dimen name="pin_help_text_view_size">15sp</dimen>
+    <dimen name="pin_text_view_size">17sp</dimen>
 </resources>
