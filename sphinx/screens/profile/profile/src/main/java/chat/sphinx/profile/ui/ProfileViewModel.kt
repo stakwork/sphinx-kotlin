@@ -150,6 +150,8 @@ internal class ProfileViewModel @Inject constructor(
                     }
                     is AuthenticationResponse.Success.Key -> { }
                 }
+
+                passwordPin?.clear()
             }
         }
     }
