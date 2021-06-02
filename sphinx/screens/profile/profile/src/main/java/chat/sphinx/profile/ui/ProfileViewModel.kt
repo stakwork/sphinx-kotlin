@@ -1,6 +1,5 @@
 package chat.sphinx.profile.ui
 
-import android.app.AlertDialog
 import android.app.Application
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -15,12 +14,10 @@ import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_lightning.LightningRepository
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
-import chat.sphinx.profile.R
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_contact.PrivatePhoto
 import chat.sphinx.wrapper_lightning.NodeBalance
-import chat.sphinx.wrapper_rsa.RsaPublicKey
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
@@ -28,16 +25,25 @@ import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_authentication.coordinator.AuthenticationCoordinator
 import io.matthewnelson.concept_authentication.coordinator.AuthenticationRequest
 import io.matthewnelson.concept_authentication.coordinator.AuthenticationResponse
+import io.matthewnelson.concept_authentication.coordinator.ConfirmedPinListener
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
+import io.matthewnelson.concept_encryption_key.EncryptionKey
 import io.matthewnelson.crypto_common.annotations.RawPasswordAccess
+import io.matthewnelson.crypto_common.annotations.UnencryptedDataAccess
+import io.matthewnelson.crypto_common.clazzes.Password
 import io.matthewnelson.crypto_common.clazzes.UnencryptedString
+import io.matthewnelson.crypto_common.clazzes.toUnencryptedByteArray
+import io.matthewnelson.crypto_common.clazzes.toUnencryptedCharArray
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
+import okio.base64.decodeBase64ToArray
 import okio.base64.encodeBase64
+import org.cryptonode.jncryptor.AES256JNCryptor
+import org.cryptonode.jncryptor.CryptorException
 import javax.inject.Inject
 
 @HiltViewModel
@@ -58,6 +64,8 @@ internal class ProfileViewModel @Inject constructor(
 
     companion object {
         var exportedKeys: String = ""
+            private set
+        var passwordPin: CharArray? = null
             private set
     }
 
@@ -112,7 +120,11 @@ internal class ProfileViewModel @Inject constructor(
     fun backupKeys() {
         viewModelScope.launch(mainImmediate) {
             authenticationCoordinator.submitAuthenticationRequest(
-                AuthenticationRequest.ExportKeys()
+                AuthenticationRequest.ConfirmPin(object : ConfirmedPinListener() {
+                    override suspend fun doWithConfirmedPassword(password: Password) {
+                        passwordPin = password.value
+                    }
+                })
             ).firstOrNull().let { response ->
                 @Exhaustive
                 when (response) {
@@ -123,9 +135,9 @@ internal class ProfileViewModel @Inject constructor(
                     is AuthenticationResponse.Success.Authenticated -> {
                         authenticationCoordinator.submitAuthenticationRequest(
                             AuthenticationRequest.GetEncryptionKey()
-                        ).firstOrNull().let { response ->
+                        ).firstOrNull().let { keyResponse ->
                             @Exhaustive
-                            when (response) {
+                            when (keyResponse) {
                                 null,
                                 is AuthenticationResponse.Failure -> {
                                     submitSideEffect(ProfileSideEffect.BackupKeysFailed)
@@ -134,36 +146,7 @@ internal class ProfileViewModel @Inject constructor(
 
                                 }
                                 is AuthenticationResponse.Success.Key -> {
-                                    val relayUrl = relayDataHandler.retrieveRelayUrl()?.value
-                                    val authToken = relayDataHandler.retrieveAuthorizationToken()?.value
-                                    val privateKey = response.encryptionKey.privateKey.value
-                                    val publicKey = response.encryptionKey.publicKey.value
-
-                                    val encryptedString = "$privateKey::$publicKey::${relayUrl}::${authToken}"
-
-                                    val response = rsa.encrypt(
-                                        RsaPublicKey(publicKey),
-                                        UnencryptedString(encryptedString),
-                                        formatOutput = false,
-                                        dispatcher = default,
-                                    )
-
-                                    @Exhaustive
-                                    when (response) {
-                                        is Response.Error -> {
-
-                                        }
-                                        is Response.Success -> {
-
-                                            val finalString = "keys::${response.value.value}"
-                                                .toByteArray()
-                                                .encodeBase64()
-
-                                            exportedKeys = finalString
-
-                                            updateViewState(ProfileViewState.ExportingKeys)
-                                        }
-                                    }
+                                    encryptKeysAndExport(keyResponse.encryptionKey)
                                 }
                             }
                         }
@@ -171,6 +154,34 @@ internal class ProfileViewModel @Inject constructor(
                     is AuthenticationResponse.Success.Key -> { }
                 }
             }
+        }
+    }
+
+    @OptIn(RawPasswordAccess::class)
+    private suspend fun encryptKeysAndExport(encryptionKey: EncryptionKey) {
+        val relayUrl = relayDataHandler.retrieveRelayUrl()?.value
+        val authToken = relayDataHandler.retrieveAuthorizationToken()?.value
+        val privateKey = String(encryptionKey.privateKey.value)
+        val publicKey = String(encryptionKey.publicKey.value)
+
+        val keysString = "$privateKey::$publicKey::${relayUrl}::${authToken}"
+
+        try {
+            val encryptedString = AES256JNCryptor()
+                .encryptData(keysString.toByteArray(), passwordPin)
+                .encodeBase64()
+
+            val finalString = "keys::${encryptedString}"
+                .toByteArray()
+                .encodeBase64()
+
+            exportedKeys = finalString
+
+            updateViewState(ProfileViewState.ExportingKeys)
+        } catch (e: CryptorException) {
+            submitSideEffect(ProfileSideEffect.BackupKeysFailed)
+        } catch (e: IllegalArgumentException) {
+            submitSideEffect(ProfileSideEffect.BackupKeysFailed)
         }
     }
 

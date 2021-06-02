@@ -111,7 +111,6 @@ internal class AuthenticationFragment: SideEffectFragment<
                 R.string.header_confirm_pin
             }
             is AuthenticationViewState.Idle,
-            is AuthenticationViewState.ExportKeys,
             is AuthenticationViewState.LogIn -> {
                 R.string.header_enter_pin
             }
@@ -123,16 +122,6 @@ internal class AuthenticationFragment: SideEffectFragment<
             }
         }.let { headerTextId ->
             binding.textViewHeader.text = resources.getString(headerTextId)
-        }
-
-        when (viewState) {
-            is AuthenticationViewState.ExportKeys -> {
-                binding.textViewSubHeader.visible
-                binding.textViewSubHeader.text = resources.getString(R.string.enter_pin_encrypt)
-            }
-            else -> {
-                binding.textViewSubHeader.gone
-            }
         }
 
         // Check current view state, not viewState that is being collected here

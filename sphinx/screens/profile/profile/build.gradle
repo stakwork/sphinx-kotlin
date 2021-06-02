@@ -45,6 +45,7 @@ dependencies {
     implementation project(path: ':sphinx:application:data:concepts:concept-relay')
     implementation project(path: ':sphinx:screens-detail:common:detail-resources')
 
+    implementation deps.jncryptor
     implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt
     implementation project(path: ':sphinx:application:data:concepts:crypto:concept-crypto-rsa')
