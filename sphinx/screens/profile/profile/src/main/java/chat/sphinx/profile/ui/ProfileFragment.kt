@@ -265,16 +265,6 @@ internal class ProfileFragment: SideEffectFragment<
 
             @Exhaustive
             when (viewState) {
-                is ProfileViewState.ExportingKeys -> {
-                    val builder = AlertDialog.Builder(binding.root.context)
-                    builder.setTitle(binding.root.context.getString(R.string.profile_export_keys_title_alert))
-                    builder.setMessage(binding.root.context.getString(R.string.profile_keys_copied_clipboard))
-                    builder.setPositiveButton(android.R.string.ok) { _, _ ->
-                        viewModel.copyToClipboard()
-                    }
-
-                    builder.show()
-                }
                 is ProfileViewState.Advanced -> {
                     includeProfileTabsHolder.apply {
                         buttonProfileTabBasic.setBackgroundColor(getColor(R.color.body))

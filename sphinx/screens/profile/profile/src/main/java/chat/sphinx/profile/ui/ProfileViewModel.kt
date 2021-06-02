@@ -58,9 +58,6 @@ internal class ProfileViewModel @Inject constructor(
         ProfileSideEffect,
         ProfileViewState>(dispatchers, ProfileViewState.Basic)
 {
-
-    private var exportedKeys: String = ""
-
     private var resetPINJob: Job? = null
     fun resetPIN() {
         if (resetPINJob?.isActive == true) return
@@ -175,24 +172,11 @@ internal class ProfileViewModel @Inject constructor(
                 .encodeBase64()
                 .replace("(.{64})".toRegex(), "$1\n")
 
-            exportedKeys = finalString
-
-            updateViewState(ProfileViewState.ExportingKeys)
+            submitSideEffect(ProfileSideEffect.CopyBackupToClipboard(finalString))
         } catch (e: CryptorException) {
             submitSideEffect(ProfileSideEffect.BackupKeysFailed)
         } catch (e: IllegalArgumentException) {
             submitSideEffect(ProfileSideEffect.BackupKeysFailed)
-        }
-    }
-
-    fun copyToClipboard() {
-        (app.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager)?.let { manager ->
-            val clipData = ClipData.newPlainText("text", exportedKeys)
-            manager.setPrimaryClip(clipData)
-
-            viewModelScope.launch(mainImmediate) {
-                submitSideEffect(ProfileSideEffect.BackupKeysExported)
-            }
         }
     }
 
