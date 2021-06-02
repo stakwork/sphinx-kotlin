@@ -11,6 +11,7 @@ import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.insetter_activity.addStatusBarPadding
 import chat.sphinx.onboard.R
 import chat.sphinx.onboard.databinding.FragmentOnBoardBinding
+import chat.sphinx.resources.SphinxToastUtils
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
 import dagger.hilt.android.AndroidEntryPoint
@@ -40,7 +41,9 @@ internal class OnBoardFragment: SideEffectFragment<
 
         setupHeaderAndFooter()
 
-        BackPressHandler(binding.root.context).addCallback(viewLifecycleOwner, requireActivity())
+        CloseAppOnBackPress(view.context)
+            .enableDoubleTapToClose(viewLifecycleOwner, SphinxToastUtils())
+            .addCallback(viewLifecycleOwner, requireActivity())
 
         context?.getSharedPreferences("sphinx_temp_prefs", Context.MODE_PRIVATE)?.let { sharedPrefs ->
             val nickname = sharedPrefs.getString("sphinx_temp_inviter_nickname", "")

@@ -12,6 +12,7 @@ import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.onboard_ready.R
 import chat.sphinx.onboard_ready.databinding.FragmentOnBoardReadyBinding
+import chat.sphinx.resources.SphinxToastUtils
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.navigation.CloseAppOnBackPress
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
@@ -40,7 +41,9 @@ internal class OnBoardReadyFragment: SideEffectFragment<
 
         setupHeaderAndFooter()
 
-        BackPressHandler(binding.root.context).addCallback(viewLifecycleOwner, requireActivity())
+        CloseAppOnBackPress(view.context)
+            .enableDoubleTapToClose(viewLifecycleOwner, SphinxToastUtils())
+            .addCallback(viewLifecycleOwner, requireActivity())
 
         binding.balanceTextView.text = getString(R.string.sphinx_ready_loading_balance)
 
@@ -98,12 +101,6 @@ internal class OnBoardReadyFragment: SideEffectFragment<
             is OnBoardReadyViewState.Error -> {
                 binding.onboardFinishProgress.gone
             }
-        }
-    }
-
-    private inner class BackPressHandler(context: Context): CloseAppOnBackPress(context) {
-        override fun handleOnBackPressed() {
-            return
         }
     }
 }

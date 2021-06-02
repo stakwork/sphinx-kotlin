@@ -10,6 +10,7 @@ import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.insetter_activity.addStatusBarPadding
 import chat.sphinx.onboard_name.R
 import chat.sphinx.onboard_name.databinding.FragmentOnBoardNameBinding
+import chat.sphinx.resources.SphinxToastUtils
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.navigation.CloseAppOnBackPress
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
@@ -35,7 +36,9 @@ internal class OnBoardNameFragment: SideEffectFragment<
 
         setupHeaderAndFooter()
 
-        BackPressHandler(binding.root.context).addCallback(viewLifecycleOwner, requireActivity())
+        CloseAppOnBackPress(view.context)
+            .enableDoubleTapToClose(viewLifecycleOwner, SphinxToastUtils())
+            .addCallback(viewLifecycleOwner, requireActivity())
 
         binding.buttonNext.setOnClickListener {
             viewModel.updateViewState(OnBoardNameViewState.Saving)
@@ -66,12 +69,6 @@ internal class OnBoardNameFragment: SideEffectFragment<
             is OnBoardNameViewState.Error -> {
                 binding.signUpNameProgressBar.gone
             }
-        }
-    }
-
-    private inner class BackPressHandler(context: Context): CloseAppOnBackPress(context) {
-        override fun handleOnBackPressed() {
-            return
         }
     }
 }
