@@ -2,6 +2,7 @@
 <resources>
     <dimen name="chat_footer_initial_holder_xy">45dp</dimen>
     <dimen name="chat_footer_button_xy">30dp</dimen>
+    <dimen name="chat_footer_button_icon_text_size">21sp</dimen>
     <dimen name="chat_footer_send_button_xy">37dp</dimen>
     <dimen name="chat_footer_send_button_margin_horizontal">11dp</dimen>
     <dimen name="chat_header_mute_padding_horizontal">4dp</dimen>
