@@ -159,8 +159,6 @@ internal class ProfileViewModel @Inject constructor(
                                                 .toByteArray()
                                                 .encodeBase64()
 
-                                            Log.d("NONE", finalString)
-
                                             exportedKeys = finalString
 
                                             updateViewState(ProfileViewState.ExportingKeys)

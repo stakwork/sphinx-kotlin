@@ -267,7 +267,7 @@ internal class ProfileFragment: SideEffectFragment<
             when (viewState) {
                 is ProfileViewState.ExportingKeys -> {
                     val builder = AlertDialog.Builder(binding.root.context)
-                    builder.setTitle("Export Keys")
+                    builder.setTitle(binding.root.context.getString(R.string.profile_export_keys_title_alert))
                     builder.setMessage(binding.root.context.getString(R.string.profile_keys_copied_clipboard))
                     builder.setPositiveButton(android.R.string.ok) { _, _ ->
                         viewModel.copyToClipboard()
