@@ -1,5 +1,6 @@
 package chat.sphinx.profile.ui
 
+import android.content.Context
 import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_background_login.BackgroundLoginHandler
@@ -13,14 +14,25 @@ import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_contact.PrivatePhoto
 import chat.sphinx.wrapper_lightning.NodeBalance
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.matthewnelson.android_feature_viewmodel.BaseViewModel
+import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
+import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.concept_authentication.coordinator.AuthenticationCoordinator
 import io.matthewnelson.concept_authentication.coordinator.AuthenticationRequest
 import io.matthewnelson.concept_authentication.coordinator.AuthenticationResponse
+import io.matthewnelson.concept_authentication.coordinator.ConfirmedPinListener
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
+import io.matthewnelson.concept_encryption_key.EncryptionKey
+import io.matthewnelson.crypto_common.annotations.RawPasswordAccess
+import io.matthewnelson.crypto_common.clazzes.*
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
+import okio.base64.encodeBase64
+import org.cryptonode.jncryptor.AES256JNCryptor
+import org.cryptonode.jncryptor.CryptorException
 import javax.inject.Inject
 
 @HiltViewModel
@@ -31,9 +43,11 @@ internal class ProfileViewModel @Inject constructor(
     private val contactRepository: ContactRepository,
     private val lightningRepository: LightningRepository,
     private val relayDataHandler: RelayDataHandler,
-): BaseViewModel<ProfileViewState>(dispatchers, ProfileViewState.Basic)
+): SideEffectViewModel<
+        Context,
+        ProfileSideEffect,
+        ProfileViewState>(dispatchers, ProfileViewState.Basic)
 {
-
     private var resetPINJob: Job? = null
     fun resetPIN() {
         if (resetPINJob?.isActive == true) return
@@ -79,6 +93,81 @@ internal class ProfileViewModel @Inject constructor(
 
     fun updatePINTimeOutStateFlow(progress: Int) {
         _pinTimeoutStateFlow.value = progress
+    }
+
+    fun backupKeys() {
+        viewModelScope.launch(mainImmediate) {
+            submitSideEffect(ProfileSideEffect.BackupKeysPinNeeded)
+
+            var passwordPin: Password? = null
+
+            authenticationCoordinator.submitAuthenticationRequest(
+                AuthenticationRequest.ConfirmPin(object : ConfirmedPinListener() {
+                    override suspend fun doWithConfirmedPassword(password: Password) {
+                        passwordPin = password
+                    }
+                })
+            ).firstOrNull().let { response ->
+                @Exhaustive
+                when (response) {
+                    null,
+                    is AuthenticationResponse.Failure -> {
+                        submitSideEffect(ProfileSideEffect.WrongPIN)
+                    }
+                    is AuthenticationResponse.Success.Authenticated -> {
+                        authenticationCoordinator.submitAuthenticationRequest(
+                            AuthenticationRequest.GetEncryptionKey()
+                        ).firstOrNull().let { keyResponse ->
+                            @Exhaustive
+                            when (keyResponse) {
+                                null,
+                                is AuthenticationResponse.Failure -> {
+                                    submitSideEffect(ProfileSideEffect.BackupKeysFailed)
+                                }
+                                is AuthenticationResponse.Success.Authenticated -> {
+
+                                }
+                                is AuthenticationResponse.Success.Key -> {
+                                    passwordPin?.let {
+                                        encryptKeysAndExport(keyResponse.encryptionKey, it)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    is AuthenticationResponse.Success.Key -> { }
+                }
+
+                passwordPin?.clear()
+            }
+        }
+    }
+
+    @OptIn(RawPasswordAccess::class)
+    private suspend fun encryptKeysAndExport(encryptionKey: EncryptionKey, passwordPin: Password) {
+        val relayUrl = relayDataHandler.retrieveRelayUrl()?.value
+        val authToken = relayDataHandler.retrieveAuthorizationToken()?.value
+        val privateKey = String(encryptionKey.privateKey.value)
+        val publicKey = String(encryptionKey.publicKey.value)
+
+        val keysString = "$privateKey::$publicKey::${relayUrl}::${authToken}"
+
+        try {
+            val encryptedString = AES256JNCryptor()
+                .encryptData(keysString.toByteArray(), passwordPin.value)
+                .encodeBase64()
+
+            val finalString = "keys::${encryptedString}"
+                .toByteArray()
+                .encodeBase64()
+                .replace("(.{64})".toRegex(), "$1\n")
+
+            submitSideEffect(ProfileSideEffect.CopyBackupToClipboard(finalString))
+        } catch (e: CryptorException) {
+            submitSideEffect(ProfileSideEffect.BackupKeysFailed)
+        } catch (e: IllegalArgumentException) {
+            submitSideEffect(ProfileSideEffect.BackupKeysFailed)
+        }
     }
 
     private val _relayUrlStateFlow: MutableStateFlow<String?> by lazy {
