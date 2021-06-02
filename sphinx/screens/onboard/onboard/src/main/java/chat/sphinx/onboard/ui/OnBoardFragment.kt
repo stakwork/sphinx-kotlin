@@ -17,6 +17,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.navigation.CloseAppOnBackPress
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
+import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import kotlinx.coroutines.launch
@@ -80,10 +81,10 @@ internal class OnBoardFragment: SideEffectFragment<
         when (viewState) {
             is OnBoardViewState.Idle -> {}
             is OnBoardViewState.Saving -> {
-                binding.welcomeGetStartedProgress.visible
+                binding.welcomeGetStartedProgress.goneIfFalse(true)
             }
             is OnBoardViewState.Error -> {
-                binding.welcomeGetStartedProgress.gone
+                binding.welcomeGetStartedProgress.goneIfFalse(false)
             }
         }
     }

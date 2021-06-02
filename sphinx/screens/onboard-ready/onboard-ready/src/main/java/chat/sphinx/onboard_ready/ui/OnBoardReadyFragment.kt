@@ -19,6 +19,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.navigation.CloseAppOnBackPress
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
+import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.android_feature_viewmodel.updateViewState
@@ -68,14 +69,14 @@ internal class OnBoardReadyFragment: SideEffectFragment<
             viewModel.updateViewState(OnBoardReadyViewState.Saving)
 
             context?.getSharedPreferences("sphinx_temp_prefs", Context.MODE_PRIVATE)?.let { sharedPrefs ->
-                val nickname = sharedPrefs.getString("sphinx_temp_inviter_nickname", "")
+                val nickname = sharedPrefs.getString("sphinx_temp_inviter_nickname", null)
                 val pubkey = sharedPrefs.getString("sphinx_temp_inviter_pubkey", null)
                 val routeHint = sharedPrefs.getString("sphinx_temp_inviter_route_hint", null)
 
-                nickname?.let { nickname ->
-                    pubkey?.let { pubkey ->
-                        viewModel.saveInviterAndFinish(nickname, pubkey, routeHint)
-                    }
+                if (nickname != null && pubkey != null) {
+                    viewModel.saveInviterAndFinish(nickname, pubkey, routeHint)
+                } else {
+                    viewModel.loadAndJoinDefaultTribeData()
                 }
             }
         }
@@ -96,10 +97,10 @@ internal class OnBoardReadyFragment: SideEffectFragment<
         when (viewState) {
             is OnBoardReadyViewState.Idle -> {}
             is OnBoardReadyViewState.Saving -> {
-                binding.onboardFinishProgress.visible
+                binding.onboardFinishProgress.goneIfFalse(true)
             }
             is OnBoardReadyViewState.Error -> {
-                binding.onboardFinishProgress.gone
+                binding.onboardFinishProgress.goneIfFalse(false)
             }
         }
     }

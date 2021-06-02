@@ -66,14 +66,14 @@ internal class OnBoardReadyViewModel @Inject constructor(
                         submitSideEffect(OnBoardReadySideEffect.CreateInviterFailed)
                     }
                     is Response.Success -> {
-                        loadDefaultTribeData()
+                        loadAndJoinDefaultTribeData()
                     }
                 }
             }
         }
     }
 
-    private fun loadDefaultTribeData() {
+    fun loadAndJoinDefaultTribeData() {
         val planetSphinxTribeQuery = "sphinx.chat://?action=tribe&uuid=X3IWAiAW5vNrtOX5TLEJzqNWWr3rrUaXUwaqsfUXRMGNF7IWOHroTGbD4Gn2_rFuRZcsER0tZkrLw3sMnzj4RFAk_sx0&host=tribes.sphinx.chat"
 
         planetSphinxTribeQuery.toTribeJoinLink()?.let { tribeJoinLink ->

@@ -19,6 +19,7 @@ import chat.sphinx.scanner_view_model_coordinator.request.ScannerFilter
 import chat.sphinx.scanner_view_model_coordinator.request.ScannerRequest
 import chat.sphinx.scanner_view_model_coordinator.response.ScannerResponse
 import chat.sphinx.splash.navigation.SplashNavigator
+import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -63,6 +64,7 @@ internal class SplashViewModel @Inject constructor(
         SplashViewState
         >(dispatchers, SplashViewState.Start_ShowIcon)
 {
+
     private var screenInit: Boolean = false
     fun screenInit() {
         if (screenInit) {
@@ -70,7 +72,6 @@ internal class SplashViewModel @Inject constructor(
         } else {
             screenInit = true
         }
-
 
         // prime the account balance retrieval from SharePrefs
         viewModelScope.launch(mainImmediate) {
@@ -147,9 +148,13 @@ internal class SplashViewModel @Inject constructor(
         }
     }
 
-    fun processUserInput(input: String?) {
+    private inline val String.isInviteCode: Boolean
+        get() = matches("^[A-F0-9a-f]{40}\$".toRegex())
+
+    fun processConnectionCode(input: String?) {
         if (input.isNullOrEmpty()) {
             viewModelScope.launch(mainImmediate) {
+                updateViewState(SplashViewState.HideLoadingWheel)
                 submitSideEffect(SplashSideEffect.InputNullOrEmpty)
             }
             return
@@ -158,7 +163,7 @@ internal class SplashViewModel @Inject constructor(
         // Maybe we can have a SignupStyle class to reflect this? Since there's a lot of decoding
         // going on in different classes
         // Invite Code
-        if (input.length == 40) {
+        if (input.isInviteCode) {
             viewModelScope.launch(mainImmediate) {
                 redeemInvite(input)
             }
@@ -173,10 +178,9 @@ internal class SplashViewModel @Inject constructor(
                         storeTemporaryInvite()
 
                         val ip = decodedSplit.elementAt(1)
-                        val code = decodedSplit.elementAt(2)
-                        generateToken(ip, null, code)
+                        val password = decodedSplit.elementAt(2)
+                        generateToken(ip, null, password)
                     }
-
                     return
                 }
             } else if (decodedSplit.size == 2) {
@@ -193,7 +197,7 @@ internal class SplashViewModel @Inject constructor(
         }
 
         viewModelScope.launch(mainImmediate) {
-            updateViewState(SplashViewState.SignupFailed)
+            updateViewState(SplashViewState.HideLoadingWheel)
             submitSideEffect(SplashSideEffect.InvalidCode)
         }
     }
@@ -206,7 +210,7 @@ internal class SplashViewModel @Inject constructor(
                     is LoadResponse.Loading -> {
                     }
                     is Response.Error -> {
-                        updateViewState(SplashViewState.SignupFailed)
+                        updateViewState(SplashViewState.HideLoadingWheel)
                         submitSideEffect(SplashSideEffect.InvalidCode)
                     }
                     is Response.Success -> {
@@ -223,20 +227,20 @@ internal class SplashViewModel @Inject constructor(
         }
     }
 
-    private fun generateToken(ip: String, nodePubKey: String? = null, code: String? = null) {
+    private fun generateToken(ip: String, nodePubKey: String? = null, password: String? = null) {
         viewModelScope.launch(mainImmediate) {
             val authToken = generateRandomToken()
             val relayUrl = parseRelayUrl(RelayUrl(ip))
 
             storeToken(authToken.value, relayUrl.value)
 
-            networkQueryContact.generateToken(relayUrl, authToken, code, nodePubKey).collect { loadResponse ->
+            networkQueryContact.generateToken(relayUrl, authToken, password, nodePubKey).collect { loadResponse ->
                 @Exhaustive
                 when (loadResponse) {
                     is LoadResponse.Loading -> {
                     }
                     is Response.Error -> {
-                        updateViewState(SplashViewState.SignupFailed)
+                        updateViewState(SplashViewState.HideLoadingWheel)
                         submitSideEffect(SplashSideEffect.GenerateTokenFailed)
                     }
                     is Response.Success -> {
@@ -270,7 +274,7 @@ internal class SplashViewModel @Inject constructor(
                 RelayUrl("http://${relayUrl.value}")
             } else {
                 torManager.setTorRequired(false)
-                RelayUrl("http://${relayUrl.value}")
+                RelayUrl("https://${relayUrl.value}")
             }
         }
     }
@@ -292,6 +296,7 @@ internal class SplashViewModel @Inject constructor(
                 sharedPrefs ->
             sharedPrefs?.edit()?.let { editor ->
                 invite?.let { invite ->
+                    // Signing up with invite code. Inviter is coming from relay
                     editor
                         .putString("sphinx_temp_inviter_nickname", invite.nickname)
                         .putString("sphinx_temp_inviter_pubkey", invite.pubkey)
@@ -304,6 +309,7 @@ internal class SplashViewModel @Inject constructor(
                             }
                         }
                 } ?: run {
+                    // Signing up relay connection string. Using default inviter
                     editor
                         .putString("sphinx_temp_inviter_nickname", "Sphinx Support")
                         .putString("sphinx_temp_inviter_pubkey", "023d70f2f76d283c6c4e58109ee3a2816eb9d8feb40b23d62469060a2b2867b77f")

@@ -8,7 +8,7 @@ import java.io.CharArrayWriter
 @Suppress("ClassName")
 internal sealed class SplashViewState: MotionLayoutViewState<SplashViewState>() {
 
-    object SignupFailed: SplashViewState() {
+    object HideLoadingWheel: SplashViewState() {
         override val startSetId: Int
             get() = R.id.motion_scene_splash_set1
         override val endSetId: Int

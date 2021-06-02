@@ -90,7 +90,7 @@ internal class SplashFragment: MotionLayoutFragment<
     override suspend fun onSideEffectCollect(sideEffect: SplashSideEffect) {
         if (sideEffect is SplashSideEffect.FromScanner) {
             binding.layoutOnBoard.editTextCodeInput.setText(sideEffect.value.value)
-            processUserInput()
+            processConnectionCode()
         } else {
             sideEffect.execute(binding.root.context)
         }
@@ -102,7 +102,7 @@ internal class SplashFragment: MotionLayoutFragment<
     override suspend fun onViewStateFlowCollect(viewState: SplashViewState) {
         @Exhaustive
         when (viewState) {
-            is SplashViewState.SignupFailed -> {
+            is SplashViewState.HideLoadingWheel -> {
                 binding.layoutOnBoard.signUpProgressBar.goneIfFalse(false)
             }
             is SplashViewState.Start_ShowIcon -> {
@@ -134,7 +134,7 @@ internal class SplashFragment: MotionLayoutFragment<
 
                     editText.setOnEditorActionListener { _, actionId, _ ->
                         if (actionId == EditorInfo.IME_ACTION_DONE) {
-                            processUserInput()
+                            processConnectionCode()
                             true
                         } else {
                             false
@@ -234,7 +234,7 @@ internal class SplashFragment: MotionLayoutFragment<
         }
     }
 
-    private fun processUserInput() {
+    private fun processConnectionCode() {
         binding.root.context.inputMethodManager?.let { imm ->
             binding.layoutOnBoard.apply {
                 editTextCodeInput.let { editText ->
@@ -243,7 +243,7 @@ internal class SplashFragment: MotionLayoutFragment<
                     }
                     signUpProgressBar.goneIfFalse(true)
 
-                    viewModel.processUserInput(
+                    viewModel.processConnectionCode(
                         editText.text?.toString()
                     )
                 }
