@@ -30,10 +30,7 @@ import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_encryption_key.EncryptionKey
 import io.matthewnelson.crypto_common.annotations.RawPasswordAccess
 import io.matthewnelson.crypto_common.annotations.UnencryptedDataAccess
-import io.matthewnelson.crypto_common.clazzes.Password
-import io.matthewnelson.crypto_common.clazzes.UnencryptedString
-import io.matthewnelson.crypto_common.clazzes.toUnencryptedByteArray
-import io.matthewnelson.crypto_common.clazzes.toUnencryptedCharArray
+import io.matthewnelson.crypto_common.clazzes.*
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -62,12 +59,7 @@ internal class ProfileViewModel @Inject constructor(
         ProfileViewState>(dispatchers, ProfileViewState.Basic)
 {
 
-    companion object {
-        var exportedKeys: String = ""
-            private set
-        var passwordPin: CharArray? = null
-            private set
-    }
+    private var exportedKeys: String = ""
 
     private var resetPINJob: Job? = null
     fun resetPIN() {
@@ -116,15 +108,16 @@ internal class ProfileViewModel @Inject constructor(
         _pinTimeoutStateFlow.value = progress
     }
 
-    @OptIn(RawPasswordAccess::class)
     fun backupKeys() {
         viewModelScope.launch(mainImmediate) {
             submitSideEffect(ProfileSideEffect.BackupKeysPinNeeded)
 
+            var passwordPin: Password? = null
+
             authenticationCoordinator.submitAuthenticationRequest(
                 AuthenticationRequest.ConfirmPin(object : ConfirmedPinListener() {
                     override suspend fun doWithConfirmedPassword(password: Password) {
-                        passwordPin = password.value
+                        passwordPin = password
                     }
                 })
             ).firstOrNull().let { response ->
@@ -148,7 +141,9 @@ internal class ProfileViewModel @Inject constructor(
 
                                 }
                                 is AuthenticationResponse.Success.Key -> {
-                                    encryptKeysAndExport(keyResponse.encryptionKey)
+                                    passwordPin?.let {
+                                        encryptKeysAndExport(keyResponse.encryptionKey, it)
+                                    }
                                 }
                             }
                         }
@@ -160,7 +155,7 @@ internal class ProfileViewModel @Inject constructor(
     }
 
     @OptIn(RawPasswordAccess::class)
-    private suspend fun encryptKeysAndExport(encryptionKey: EncryptionKey) {
+    private suspend fun encryptKeysAndExport(encryptionKey: EncryptionKey, passwordPin: Password) {
         val relayUrl = relayDataHandler.retrieveRelayUrl()?.value
         val authToken = relayDataHandler.retrieveAuthorizationToken()?.value
         val privateKey = String(encryptionKey.privateKey.value)
@@ -170,7 +165,7 @@ internal class ProfileViewModel @Inject constructor(
 
         try {
             val encryptedString = AES256JNCryptor()
-                .encryptData(keysString.toByteArray(), passwordPin)
+                .encryptData(keysString.toByteArray(), passwordPin.value)
                 .encodeBase64()
 
             val finalString = "keys::${encryptedString}"
