@@ -102,11 +102,18 @@ internal sealed class LayoutState {
                         null
                     }
             }
+
+            class Giphy(val text: String, val pic: GiphyImageHolder?): ContainerBottom()
         }
     }
 }
 
 // TODO: TEMPORARY!!! until Initial holder can be refactored...
+@JvmInline
+value class GiphyUrl(val value: String): GiphyImageHolder
+
+sealed interface GiphyImageHolder
+
 @JvmInline
 value class SenderPhotoUrl(val value: String): BoostReactionImageHolder
 

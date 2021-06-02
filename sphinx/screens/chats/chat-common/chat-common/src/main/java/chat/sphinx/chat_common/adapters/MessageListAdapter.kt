@@ -219,6 +219,12 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                                     .also { disposables.add(it) }
                             }
                         }
+                        setBubbleGiphy(viewState.bubbleGiphy) { imageView, url ->
+                            onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                                imageLoader.load(imageView, url.value, viewModel.imageLoaderDefaults)
+                                    .also { disposables.add(it) }
+                            }
+                        }
                     }
                     setBubbleReplyMessage(viewState.bubbleReplyMessage)
                 }

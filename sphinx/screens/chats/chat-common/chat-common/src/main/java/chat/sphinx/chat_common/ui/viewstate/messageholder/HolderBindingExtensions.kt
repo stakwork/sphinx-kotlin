@@ -679,3 +679,24 @@ internal inline fun LayoutMessageHolderBinding.setBubbleReplyMessage(
         }
     }
 }
+
+@MainThread
+@Suppress("NOTHING_TO_INLINE")
+internal inline fun LayoutMessageHolderBinding.setBubbleGiphy(
+    message: LayoutState.Bubble.ContainerBottom.Giphy?,
+    loadImage: (ImageView, GiphyUrl) -> Unit,
+) {
+    includeMessageHolderBubble.textViewMessageText.apply {
+        if (message == null) {
+            gone
+        } else {
+            visible
+            text = message.text
+        }
+    }
+
+    includeMessageHolderBubble.includeMessageTypeImageAttachment.apply {
+        imageViewAttachmentImage.visible
+        loadImage(imageViewAttachmentImage, (message?.pic as GiphyUrl))
+    }
+}

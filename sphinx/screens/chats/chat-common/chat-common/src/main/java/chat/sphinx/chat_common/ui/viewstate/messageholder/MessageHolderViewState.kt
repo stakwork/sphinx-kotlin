@@ -88,6 +88,15 @@ internal sealed class MessageHolderViewState(
         }
     }
 
+    val bubbleGiphy: LayoutState.Bubble.ContainerBottom.Giphy? by lazy(LazyThreadSafetyMode.NONE) {
+        val set: MutableSet<GiphyImageHolder> = LinkedHashSet(1)
+
+        LayoutState.Bubble.ContainerBottom.Giphy(
+            text = message?.retrieveTextToShow().toString(),
+            pic = set.first(),
+        )
+    }
+
     val bubblePaidMessageDetails: LayoutState.Bubble.PaidMessageDetails? by lazy(LazyThreadSafetyMode.NONE) {
         if (!message.isPaidMessage) {
             null
