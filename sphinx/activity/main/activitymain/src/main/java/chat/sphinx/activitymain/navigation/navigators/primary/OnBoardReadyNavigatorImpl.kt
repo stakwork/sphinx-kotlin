@@ -12,7 +12,10 @@ internal class OnBoardReadyNavigatorImpl @Inject constructor(
 {
     override suspend fun toDashboardScreen() {
         navigationDriver.submitNavigationRequest(
-            ToDashboardScreen(R.id.main_primary_nav_graph)
+            ToDashboardScreen(
+                popUpToId = R.id.main_primary_nav_graph,
+                updateBackgroundLoginTime = true
+            )
         )
     }
 }

@@ -1,5 +1,6 @@
 package chat.sphinx.activitymain.navigation.navigators.primary
 
+import chat.sphinx.activitymain.R
 import chat.sphinx.activitymain.navigation.drivers.PrimaryNavigationDriver
 import chat.sphinx.onboard.navigation.OnBoardNavigator
 import chat.sphinx.onboard_name.navigation.ToOnBoardNameScreen
@@ -11,7 +12,7 @@ internal class OnBoardNavigatorImpl @Inject constructor(
 {
     override suspend fun toOnBoardNameScreen() {
         navigationDriver.submitNavigationRequest(
-            ToOnBoardNameScreen()
+            ToOnBoardNameScreen(popUpToId = R.id.main_primary_nav_graph)
         )
     }
 }

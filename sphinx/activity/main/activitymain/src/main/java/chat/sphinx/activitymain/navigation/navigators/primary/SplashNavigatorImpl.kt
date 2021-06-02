@@ -24,7 +24,7 @@ internal class SplashNavigatorImpl @Inject constructor(
 
     override suspend fun toOnBoardScreen() {
         navigationDriver.submitNavigationRequest(
-            ToOnBoardScreen()
+            ToOnBoardScreen(popUpToId = R.id.main_primary_nav_graph)
         )
     }
 }
