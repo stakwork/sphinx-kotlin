@@ -1,6 +1,5 @@
 package chat.sphinx.profile.ui
 
-import android.app.AlertDialog
 import android.content.Context
 import android.os.Bundle
 import android.view.View
@@ -26,7 +25,6 @@ import chat.sphinx.wrapper_common.lightning.toSat
 import chat.sphinx.wrapper_contact.isTrue
 import chat.sphinx.wrapper_contact.toPrivatePhoto
 import dagger.hilt.android.AndroidEntryPoint
-import io.matthewnelson.android_feature_screens.ui.base.BaseFragment
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.visible

@@ -1,14 +1,9 @@
 package chat.sphinx.profile.ui
 
-import android.app.Application
-import android.content.ClipData
-import android.content.ClipboardManager
 import android.content.Context
-import android.util.Log
 import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_background_login.BackgroundLoginHandler
-import chat.sphinx.concept_crypto_rsa.RSA
 import chat.sphinx.concept_relay.RelayDataHandler
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_lightning.LightningRepository
@@ -21,7 +16,6 @@ import chat.sphinx.wrapper_lightning.NodeBalance
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
-import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_authentication.coordinator.AuthenticationCoordinator
 import io.matthewnelson.concept_authentication.coordinator.AuthenticationRequest
 import io.matthewnelson.concept_authentication.coordinator.AuthenticationResponse
@@ -29,7 +23,6 @@ import io.matthewnelson.concept_authentication.coordinator.ConfirmedPinListener
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_encryption_key.EncryptionKey
 import io.matthewnelson.crypto_common.annotations.RawPasswordAccess
-import io.matthewnelson.crypto_common.annotations.UnencryptedDataAccess
 import io.matthewnelson.crypto_common.clazzes.*
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -37,7 +30,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
-import okio.base64.decodeBase64ToArray
 import okio.base64.encodeBase64
 import org.cryptonode.jncryptor.AES256JNCryptor
 import org.cryptonode.jncryptor.CryptorException
@@ -45,14 +37,12 @@ import javax.inject.Inject
 
 @HiltViewModel
 internal class ProfileViewModel @Inject constructor(
-    private val app: Application,
     dispatchers: CoroutineDispatchers,
     private val authenticationCoordinator: AuthenticationCoordinator,
     private val backgroundLoginHandler: BackgroundLoginHandler,
     private val contactRepository: ContactRepository,
     private val lightningRepository: LightningRepository,
     private val relayDataHandler: RelayDataHandler,
-    private val rsa: RSA,
 ): SideEffectViewModel<
         Context,
         ProfileSideEffect,
