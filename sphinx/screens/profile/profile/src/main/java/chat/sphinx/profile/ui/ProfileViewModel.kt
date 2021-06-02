@@ -119,6 +119,8 @@ internal class ProfileViewModel @Inject constructor(
     @OptIn(RawPasswordAccess::class)
     fun backupKeys() {
         viewModelScope.launch(mainImmediate) {
+            submitSideEffect(ProfileSideEffect.BackupKeysPinNeeded)
+
             authenticationCoordinator.submitAuthenticationRequest(
                 AuthenticationRequest.ConfirmPin(object : ConfirmedPinListener() {
                     override suspend fun doWithConfirmedPassword(password: Password) {
