@@ -22,12 +22,6 @@ internal class TribeChatPodcastPlayerFragment : BaseFragment<
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-//        binding.includeAddFriendHeader.apply {
-//            textViewDetailScreenHeaderName.text = getString(R.string.add_friend_header_name)
-//            textViewDetailScreenClose.setOnClickListener {
-//                lifecycleScope.launch { viewModel.navigator.closeDetailScreen() }
-//            }
-//        }
     }
 
     override suspend fun onViewStateFlowCollect(viewState: TribeChatPodcastPlayerViewState) {
