@@ -221,7 +221,7 @@ internal object NavigationModule {
 
 
     @Provides
-    fun provideChatTribePodcastPlayerNavigator(
+    fun provideTribeChatPodcastPlayerNavigator(
         tribeChatPodcastPlayerNavigatorImpl: TribeChatPodcastPlayerNavigatorImpl
     ): TribeChatPodcastPlayerNavigatorImpl =
         tribeChatPodcastPlayerNavigatorImpl
