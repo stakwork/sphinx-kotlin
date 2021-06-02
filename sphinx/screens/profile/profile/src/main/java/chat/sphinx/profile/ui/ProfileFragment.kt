@@ -1,5 +1,7 @@
 package chat.sphinx.profile.ui
 
+import android.app.AlertDialog
+import android.content.Context
 import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
@@ -25,6 +27,7 @@ import chat.sphinx.wrapper_contact.isTrue
 import chat.sphinx.wrapper_contact.toPrivatePhoto
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.base.BaseFragment
+import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.updateViewState
@@ -33,7 +36,9 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
-internal class ProfileFragment: BaseFragment<
+internal class ProfileFragment: SideEffectFragment<
+        Context,
+        ProfileSideEffect,
         ProfileViewState,
         ProfileViewModel,
         FragmentProfileBinding
@@ -126,6 +131,10 @@ internal class ProfileFragment: BaseFragment<
                             profileNavigator.toQRCodeDetail(pubKey.value)
                         }
                     }
+                }
+
+                buttonProfileBasicContainerKeyBackup.setOnClickListener {
+                    viewModel.backupKeys()
                 }
             }
 
@@ -256,6 +265,16 @@ internal class ProfileFragment: BaseFragment<
 
             @Exhaustive
             when (viewState) {
+                is ProfileViewState.ExportingKeys -> {
+                    val builder = AlertDialog.Builder(binding.root.context)
+                    builder.setTitle("Export Keys")
+                    builder.setMessage(binding.root.context.getString(R.string.profile_keys_copied_clipboard))
+                    builder.setPositiveButton(android.R.string.ok) { _, _ ->
+                        viewModel.copyToClipboard()
+                    }
+
+                    builder.show()
+                }
                 is ProfileViewState.Advanced -> {
                     includeProfileTabsHolder.apply {
                         buttonProfileTabBasic.setBackgroundColor(getColor(R.color.body))
@@ -275,5 +294,9 @@ internal class ProfileFragment: BaseFragment<
             }
 
         }
+    }
+
+    override suspend fun onSideEffectCollect(sideEffect: ProfileSideEffect) {
+        sideEffect.execute(requireActivity())
     }
 }

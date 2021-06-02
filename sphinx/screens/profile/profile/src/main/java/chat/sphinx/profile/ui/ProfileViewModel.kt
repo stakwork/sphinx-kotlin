@@ -1,38 +1,65 @@
 package chat.sphinx.profile.ui
 
+import android.app.AlertDialog
+import android.app.Application
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.util.Log
 import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_background_login.BackgroundLoginHandler
+import chat.sphinx.concept_crypto_rsa.RSA
 import chat.sphinx.concept_relay.RelayDataHandler
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_lightning.LightningRepository
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
+import chat.sphinx.profile.R
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_contact.PrivatePhoto
 import chat.sphinx.wrapper_lightning.NodeBalance
+import chat.sphinx.wrapper_rsa.RsaPublicKey
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.matthewnelson.android_feature_viewmodel.BaseViewModel
+import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
+import io.matthewnelson.android_feature_viewmodel.submitSideEffect
+import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_authentication.coordinator.AuthenticationCoordinator
 import io.matthewnelson.concept_authentication.coordinator.AuthenticationRequest
 import io.matthewnelson.concept_authentication.coordinator.AuthenticationResponse
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
+import io.matthewnelson.crypto_common.annotations.RawPasswordAccess
+import io.matthewnelson.crypto_common.clazzes.UnencryptedString
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
+import okio.base64.encodeBase64
 import javax.inject.Inject
 
 @HiltViewModel
 internal class ProfileViewModel @Inject constructor(
+    private val app: Application,
     dispatchers: CoroutineDispatchers,
     private val authenticationCoordinator: AuthenticationCoordinator,
     private val backgroundLoginHandler: BackgroundLoginHandler,
     private val contactRepository: ContactRepository,
     private val lightningRepository: LightningRepository,
     private val relayDataHandler: RelayDataHandler,
-): BaseViewModel<ProfileViewState>(dispatchers, ProfileViewState.Basic)
+    private val rsa: RSA,
+): SideEffectViewModel<
+        Context,
+        ProfileSideEffect,
+        ProfileViewState>(dispatchers, ProfileViewState.Basic)
 {
+
+    companion object {
+        var exportedKeys: String = ""
+            private set
+    }
 
     private var resetPINJob: Job? = null
     fun resetPIN() {
@@ -79,6 +106,85 @@ internal class ProfileViewModel @Inject constructor(
 
     fun updatePINTimeOutStateFlow(progress: Int) {
         _pinTimeoutStateFlow.value = progress
+    }
+
+    @OptIn(RawPasswordAccess::class)
+    fun backupKeys() {
+        viewModelScope.launch(mainImmediate) {
+            authenticationCoordinator.submitAuthenticationRequest(
+                AuthenticationRequest.ExportKeys()
+            ).firstOrNull().let { response ->
+                @Exhaustive
+                when (response) {
+                    null,
+                    is AuthenticationResponse.Failure -> {
+                        submitSideEffect(ProfileSideEffect.WrongPIN)
+                    }
+                    is AuthenticationResponse.Success.Authenticated -> {
+                        authenticationCoordinator.submitAuthenticationRequest(
+                            AuthenticationRequest.GetEncryptionKey()
+                        ).firstOrNull().let { response ->
+                            @Exhaustive
+                            when (response) {
+                                null,
+                                is AuthenticationResponse.Failure -> {
+                                    submitSideEffect(ProfileSideEffect.BackupKeysFailed)
+                                }
+                                is AuthenticationResponse.Success.Authenticated -> {
+
+                                }
+                                is AuthenticationResponse.Success.Key -> {
+                                    val relayUrl = relayDataHandler.retrieveRelayUrl()?.value
+                                    val authToken = relayDataHandler.retrieveAuthorizationToken()?.value
+                                    val privateKey = response.encryptionKey.privateKey.value
+                                    val publicKey = response.encryptionKey.publicKey.value
+
+                                    val encryptedString = "$privateKey::$publicKey::${relayUrl}::${authToken}"
+
+                                    val response = rsa.encrypt(
+                                        RsaPublicKey(publicKey),
+                                        UnencryptedString(encryptedString),
+                                        formatOutput = false,
+                                        dispatcher = default,
+                                    )
+
+                                    @Exhaustive
+                                    when (response) {
+                                        is Response.Error -> {
+
+                                        }
+                                        is Response.Success -> {
+
+                                            val finalString = "keys::${response.value.value}"
+                                                .toByteArray()
+                                                .encodeBase64()
+
+                                            Log.d("NONE", finalString)
+
+                                            exportedKeys = finalString
+
+                                            updateViewState(ProfileViewState.ExportingKeys)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    is AuthenticationResponse.Success.Key -> { }
+                }
+            }
+        }
+    }
+
+    fun copyToClipboard() {
+        (app.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager)?.let { manager ->
+            val clipData = ClipData.newPlainText("text", exportedKeys)
+            manager.setPrimaryClip(clipData)
+
+            viewModelScope.launch(mainImmediate) {
+                submitSideEffect(ProfileSideEffect.BackupKeysExported)
+            }
+        }
     }
 
     private val _relayUrlStateFlow: MutableStateFlow<String?> by lazy {

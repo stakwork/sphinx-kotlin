@@ -16,7 +16,9 @@ import chat.sphinx.resources.SphinxToastUtils
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.navigation.CloseAppOnBackPress
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
+import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.invisibleIfFalse
+import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.currentViewState
 import io.matthewnelson.feature_authentication_view.ui.AuthenticationViewModelContainer
 import io.matthewnelson.feature_authentication_view.ui.AuthenticationViewState
@@ -109,6 +111,7 @@ internal class AuthenticationFragment: SideEffectFragment<
                 R.string.header_confirm_pin
             }
             is AuthenticationViewState.Idle,
+            is AuthenticationViewState.ExportKeys,
             is AuthenticationViewState.LogIn -> {
                 R.string.header_enter_pin
             }
@@ -120,6 +123,16 @@ internal class AuthenticationFragment: SideEffectFragment<
             }
         }.let { headerTextId ->
             binding.textViewHeader.text = resources.getString(headerTextId)
+        }
+
+        when (viewState) {
+            is AuthenticationViewState.ExportKeys -> {
+                binding.textViewSubHeader.visible
+                binding.textViewSubHeader.text = resources.getString(R.string.enter_pin_encrypt)
+            }
+            else -> {
+                binding.textViewSubHeader.gone
+            }
         }
 
         // Check current view state, not viewState that is being collected here

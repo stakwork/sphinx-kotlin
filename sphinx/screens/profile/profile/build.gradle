@@ -34,6 +34,7 @@ dependencies {
     // KotlinAndroid
     implementation project(path: ':android:features:android-feature-screens')
     implementation project(path: ':kotlin:concepts:authentication:concept-authentication')
+    implementation project(path: ':kotlin:encoders:base64')
 
     // Sphinx
     implementation project(path: ':sphinx:activity:insetter-activity')
@@ -46,5 +47,6 @@ dependencies {
 
     implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt
+    implementation project(path: ':sphinx:application:data:concepts:crypto:concept-crypto-rsa')
     kapt kaptDeps.google.hilt
 }
