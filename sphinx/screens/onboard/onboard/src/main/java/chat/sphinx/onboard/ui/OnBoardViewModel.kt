@@ -50,19 +50,13 @@ internal class OnBoardViewModel @Inject constructor(
                         relayDataHandler.persistAuthorizationToken(authToken)
                         relayDataHandler.persistRelayUrl(relayUrl)
 
-                        goToOnBoardNameScreen()
+                        navigator.toOnBoardNameScreen()
                     }
                     is AuthenticationResponse.Success.Key -> {
                         // will never be returned
                     }
                 }
             }
-        }
-    }
-
-    private fun goToOnBoardNameScreen() {
-        viewModelScope.launch(mainImmediate) {
-            navigator.toOnBoardNameScreen()
         }
     }
 }

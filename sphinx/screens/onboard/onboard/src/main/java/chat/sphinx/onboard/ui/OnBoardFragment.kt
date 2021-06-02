@@ -14,14 +14,16 @@ import chat.sphinx.onboard.databinding.FragmentOnBoardBinding
 import chat.sphinx.resources.SphinxToastUtils
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
+import chat.sphinx.wrapper_relay.toAuthorizationToken
+import chat.sphinx.wrapper_relay.toRelayUrl
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.navigation.CloseAppOnBackPress
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
-import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.annotation.meta.Exhaustive
 
 @AndroidEntryPoint
@@ -33,6 +35,16 @@ internal class OnBoardFragment: SideEffectFragment<
         FragmentOnBoardBinding
         >(R.layout.fragment_on_board)
 {
+    companion object {
+        const val SPHINX_TEMP_PREFS = "sphinx_temp_prefs"
+
+        // Keys
+        const val SPHINX_TEMP_INVITER_NICKNAME = "sphinx_temp_inviter_nickname"
+        const val SPHINX_TEMP_INVITE_MESSAGE = "sphinx_temp_invite_message"
+        const val SPHINX_TEMP_AUTH_TOKEN = "sphinx_temp_auth_token"
+        const val SPHINX_TEMP_IP = "sphinx_temp_ip"
+    }
+
     override val viewModel: OnBoardViewModel by viewModels()
     override val binding: FragmentOnBoardBinding by viewBinding(FragmentOnBoardBinding::bind)
 
@@ -45,9 +57,11 @@ internal class OnBoardFragment: SideEffectFragment<
             .enableDoubleTapToClose(viewLifecycleOwner, SphinxToastUtils())
             .addCallback(viewLifecycleOwner, requireActivity())
 
-        context?.getSharedPreferences("sphinx_temp_prefs", Context.MODE_PRIVATE)?.let { sharedPrefs ->
-            val nickname = sharedPrefs.getString("sphinx_temp_inviter_nickname", "")
-            val message = sharedPrefs.getString("sphinx_temp_invite_message", "")
+        val prefs = binding.root.context.getSharedPreferences(SPHINX_TEMP_PREFS, Context.MODE_PRIVATE)
+
+        lifecycleScope.launch(viewModel.io) {
+            val nickname = prefs.getString(SPHINX_TEMP_INVITER_NICKNAME, "")
+            val message = prefs.getString(SPHINX_TEMP_INVITE_MESSAGE, "")
 
             binding.inviterNameTextView.text = nickname
             binding.inviterMessageTextView.text = message
@@ -56,14 +70,16 @@ internal class OnBoardFragment: SideEffectFragment<
         binding.buttonContinue.setOnClickListener {
             viewModel.updateViewState(OnBoardViewState.Saving)
 
-            context?.getSharedPreferences("sphinx_temp_prefs", Context.MODE_PRIVATE)?.let { sharedPrefs ->
-                val authToken = sharedPrefs.getString("sphinx_temp_auth_token", "")
-                val ip = sharedPrefs.getString("sphinx_temp_ip", "")
+            lifecycleScope.launch(viewModel.mainImmediate) {
+                val authToken: AuthorizationToken? = withContext(viewModel.io) {
+                    prefs.getString(SPHINX_TEMP_AUTH_TOKEN, null)?.toAuthorizationToken()
+                }
+                val ip: RelayUrl? = withContext(viewModel.io) {
+                    prefs.getString(SPHINX_TEMP_IP, null)?.toRelayUrl()
+                }
 
-                authToken?.let {
-                    ip?.let {
-                        viewModel.presentLoginModal(AuthorizationToken(authToken), RelayUrl(ip))
-                    }
+                if (authToken != null && ip != null) {
+                    viewModel.presentLoginModal(authToken, ip)
                 }
             }
         }
@@ -84,18 +100,10 @@ internal class OnBoardFragment: SideEffectFragment<
         when (viewState) {
             is OnBoardViewState.Idle -> {}
             is OnBoardViewState.Saving -> {
-                binding.welcomeGetStartedProgress.goneIfFalse(true)
+                binding.welcomeGetStartedProgress.visible
             }
             is OnBoardViewState.Error -> {
-                binding.welcomeGetStartedProgress.goneIfFalse(false)
-            }
-        }
-    }
-
-    private inner class BackPressHandler(context: Context): CloseAppOnBackPress(context) {
-        override fun handleOnBackPressed() {
-            lifecycleScope.launch {
-                viewModel.navigator.popBackStack()
+                binding.welcomeGetStartedProgress.gone
             }
         }
     }
