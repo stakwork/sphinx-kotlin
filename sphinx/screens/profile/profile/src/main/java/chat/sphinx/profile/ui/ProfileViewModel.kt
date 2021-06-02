@@ -173,6 +173,7 @@ internal class ProfileViewModel @Inject constructor(
             val finalString = "keys::${encryptedString}"
                 .toByteArray()
                 .encodeBase64()
+                .replace("(.{64})".toRegex(), "$1\n")
 
             exportedKeys = finalString
 
