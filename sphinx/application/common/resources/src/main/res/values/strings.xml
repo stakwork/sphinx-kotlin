@@ -12,6 +12,7 @@
     <string name="material_icon_name_call_button">phone</string>
     <string name="material_icon_name_close">close</string>
     <string name="material_icon_name_nav_back">arrow_back</string>
+    <string name="material_icon_name_nav_forward">arrow_forward</string>
     <string name="material_icon_name_file_attachment">insert_drive_file</string>
     <string name="material_icon_name_file_download">file_download</string>
     <string name="material_icon_name_play_button">play_arrow</string>
@@ -24,6 +25,7 @@
     <string name="material_icon_name_message_editor_attachment">add</string>
     <string name="material_icon_name_circled_close_button" tools:ignore="ButtonCase">cancel</string>
     <string name="material_icon_name_help_outline">help_outline</string>
+    <string name="material_icon_name_replay">replay</string>
     <string name="material_icon_name_key">vpn_key</string>
 
     <!--  Message Action Material Icons  -->

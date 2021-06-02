@@ -72,6 +72,29 @@ abstract class NetworkRelayCall: NetworkCall() {
      * @param [requestBodyJsonClass] the class to serialize the request body to json
      * @param [requestBody] the request body to be converted to json
      * @param [mediaType] the media type for the request body, defaults to "application/json"
+     * @param [relayUrl] unauthenticated relay URL
+     * */
+    abstract fun <
+            T: Any,
+            RequestBody: Any,
+            V: RelayResponse<T>
+            > relayUnauthenticatedPost(
+        responseJsonClass: Class<V>,
+        relayEndpoint: String,
+        requestBodyJsonClass: Class<RequestBody>,
+        requestBody: RequestBody,
+        mediaType: String? = "application/json",
+        relayUrl: RelayUrl,
+    ): Flow<LoadResponse<T, ResponseError>>
+
+    /**
+     * POST
+     *
+     * @param [responseJsonClass] the class to serialize the response json into
+     * @param [relayEndpoint] the endpoint to append to the [RelayUrl], ex: /contacts
+     * @param [requestBodyJsonClass] the class to serialize the request body to json
+     * @param [requestBody] the request body to be converted to json
+     * @param [mediaType] the media type for the request body, defaults to "application/json"
      * @param [additionalHeaders] any additional headers to add to the call
      * @param [relayData] if not `null`, will override the auto-fetching of persisted user data
      * */

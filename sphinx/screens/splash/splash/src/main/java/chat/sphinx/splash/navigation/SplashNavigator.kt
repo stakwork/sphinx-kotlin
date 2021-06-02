@@ -13,5 +13,5 @@ abstract class SplashNavigator(
         updateBackgroundLoginTime: Boolean = false,
     )
 
-    abstract suspend fun toOnBoardScreen(input: String)
+    abstract suspend fun toOnBoardScreen()
 }
