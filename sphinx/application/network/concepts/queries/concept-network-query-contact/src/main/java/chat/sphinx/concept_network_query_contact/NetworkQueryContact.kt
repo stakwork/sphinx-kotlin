@@ -1,9 +1,6 @@
 package chat.sphinx.concept_network_query_contact
 
-import chat.sphinx.concept_network_query_contact.model.ContactDto
-import chat.sphinx.concept_network_query_contact.model.GetContactsResponse
-import chat.sphinx.concept_network_query_contact.model.PostContactDto
-import chat.sphinx.concept_network_query_contact.model.PutContactDto
+import chat.sphinx.concept_network_query_contact.model.*
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
@@ -33,9 +30,12 @@ abstract class NetworkQueryContact {
     ////////////
     /// POST ///
     ////////////
-//    app.post('/contacts/tokens', contacts.generateToken)
-//    app.post('/contacts/:id/keys', contacts.exchangeKeys)
-//    app.post('/contacts', contacts.createContact)
+    abstract fun generateToken(
+        relayUrl: RelayUrl,
+        token: AuthorizationToken,
+        password: String?,
+        pubkey: String? = null
+    ): Flow<LoadResponse<GenerateTokenResponse, ResponseError>>
 
     abstract fun createContact(
         postContactDto: PostContactDto,
@@ -49,4 +49,8 @@ abstract class NetworkQueryContact {
         contactId: ContactId,
         relayData: Pair<AuthorizationToken, RelayUrl>? = null,
     ): Response<Any, ResponseError>
+
+
+    //    app.post('/contacts/:id/keys', contacts.exchangeKeys)
+    //    app.post('/contacts', contacts.createContact)
 }

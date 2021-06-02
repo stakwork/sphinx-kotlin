@@ -204,7 +204,7 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideNetworkQueryInviteImpl(
-        networkRelayCall: NetworkRelayCall
+        networkRelayCall: NetworkRelayCall,
     ): NetworkQueryInviteImpl =
         NetworkQueryInviteImpl(networkRelayCall)
 

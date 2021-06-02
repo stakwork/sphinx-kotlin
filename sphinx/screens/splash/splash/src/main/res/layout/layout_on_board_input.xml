@@ -36,6 +36,7 @@
         app:layout_constraintTop_toBottomOf="@+id/text_view_welcome" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/edit_text_code_input_container"
         android:layout_width="match_parent"
         android:layout_height="65dp"
         android:layout_marginTop="@dimen/layout_constraint_code_input_margin_top"
@@ -80,5 +81,19 @@
             app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <ProgressBar
+        android:id="@+id/sign_up_progress_bar"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:indeterminate="true"
+        android:indeterminateTint="@android:color/white"
+        android:visibility="invisible"
+        android:layout_marginTop="20dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/edit_text_code_input_container"
+        tools:visibility="visible" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

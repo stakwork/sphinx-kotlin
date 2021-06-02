@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/lightBG">
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/sign_up_header_nav_back"
+        android:layout_width="@dimen/default_header_navigation_xy"
+        android:layout_height="@dimen/default_header_navigation_xy"
+        android:fontFamily="@font/material_icons_regular"
+        android:gravity="center"
+        android:text="@string/material_icon_name_nav_back"
+        android:textColor="@color/washedOutReceivedText"
+        android:textSize="@dimen/default_text_size_back_arrow"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/name_text_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="Tomas"
+        android:textColor="@color/secondaryText"
+        android:fontFamily="@font/roboto_regular"
+        android:textSize="@dimen/sign_up_picture_text_view_text_size"
+        android:layout_marginTop="60dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraint_select_picture_content"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/sign_up_picture_container_height"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/user_profile_picture"
+            android:layout_width="@dimen/sign_up_picture_xy"
+            android:layout_height="@dimen/sign_up_picture_xy"
+            android:src="@drawable/ic_profile_avatar_circle"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/constraint_select_picture_button_content"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/sign_up_picture_select_image_content_height"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="@+id/user_profile_picture"
+            app:layout_constraintRight_toRightOf="@+id/user_profile_picture"
+            android:layout_marginHorizontal="@dimen/default_half_layout_margin"
+            android:background="@drawable/edit_text_sign_up_bordered_rad_48">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/picture_select_image_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="@string/material_icon_name_replay"
+                android:textColor="@color/secondaryText"
+                android:fontFamily="@font/material_icons_regular"
+                android:textSize="@dimen/sign_up_picture_select_image_icon_text_size"
+                android:layout_marginLeft="20dp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/picture_select_image"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="Select Image"
+                android:textColor="@color/text"
+                android:fontFamily="@font/roboto_regular"
+                android:textSize="@dimen/sign_up_picture_select_image_text_size"
+                android:layout_marginRight="20dp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/select_picture_button"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@android:color/transparent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/picture_upload_progress_text_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="Uploaded: 0%"
+        android:textColor="@color/washedOutReceivedText"
+        android:fontFamily="@font/roboto_regular"
+        android:textSize="@dimen/sign_up_picture_uploaded_text_view"
+        android:layout_marginTop="35dp"
+        app:layout_constraintTop_toBottomOf="@+id/constraint_select_picture_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+<!--    <ProgressBar-->
+<!--        android:id="@+id/sign_up_name_progress_bar"-->
+<!--        android:layout_width="@dimen/sign_up_name_progress_bar_xy"-->
+<!--        android:layout_height="@dimen/sign_up_name_progress_bar_xy"-->
+<!--        style="?android:attr/progressBarStyle"-->
+<!--        android:indeterminateTint="@android:color/white"-->
+<!--        android:indeterminate="true"-->
+<!--        android:layout_marginTop="@dimen/sign_up_name_progress_bar_top_margin"-->
+<!--        app:layout_constraintStart_toStartOf="parent"-->
+<!--        app:layout_constraintEnd_toEndOf="parent"-->
+<!--        app:layout_constraintTop_toBottomOf="@+id/constraint_sign_up_name_edit_text_content" />-->
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/button_next"
+        android:layout_width="@dimen/sign_up_next_button_width"
+        android:layout_height="@dimen/sign_up_next_button_height"
+        android:textAllCaps="true"
+        android:gravity="center"
+        android:fontFamily="@font/montserrat_semi_bold"
+        android:text="@string/sign_up_next_button"
+        android:textSize="@dimen/sign_up_sphinx_ready_button_text_size"
+        android:textColor="@android:color/white"
+        android:background="@drawable/button_background_white_rad_48"
+        android:backgroundTint="@color/primaryBlue"
+        android:layout_marginRight="@dimen/default_double_layout_margin"
+        android:layout_marginBottom="@dimen/sign_up_button_bottom_margin"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

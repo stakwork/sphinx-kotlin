@@ -218,7 +218,7 @@ inline fun TransactionCallbacks.upsertContact(dto: ContactDto, queries: SphinxDa
         dto.route_hint?.toLightningRouteHint(),
         dto.public_key?.toLightningNodePubKey(),
         dto.node_alias?.toLightningNodeAlias(),
-        dto.alias.toContactAlias(),
+        dto.alias?.toContactAlias(),
         photoUrl,
         dto.privatePhotoActual.toPrivatePhoto(),
         dto.status.toContactStatus(),

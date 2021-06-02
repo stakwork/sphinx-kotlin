@@ -1,18 +1,25 @@
 package chat.sphinx.splash.ui
 
+import android.app.Application
 import android.content.Context
 import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_background_login.BackgroundLoginHandler
+import chat.sphinx.concept_network_query_contact.NetworkQueryContact
+import chat.sphinx.concept_network_query_invite.NetworkQueryInvite
+import chat.sphinx.concept_network_query_invite.model.RedeemInviteDto
+import chat.sphinx.concept_network_tor.TorManager
 import chat.sphinx.concept_repository_lightning.LightningRepository
 import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
 import chat.sphinx.key_restore.KeyRestore
 import chat.sphinx.key_restore.KeyRestoreResponse
+import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.scanner_view_model_coordinator.request.ScannerFilter
 import chat.sphinx.scanner_view_model_coordinator.request.ScannerRequest
 import chat.sphinx.scanner_view_model_coordinator.response.ScannerResponse
 import chat.sphinx.splash.navigation.SplashNavigator
+import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -30,10 +37,12 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
+import okhttp3.HttpUrl.Companion.toHttpUrl
 import okio.base64.decodeBase64ToArray
 import org.cryptonode.jncryptor.AES256JNCryptor
 import org.cryptonode.jncryptor.CryptorException
 import javax.inject.Inject
+import kotlin.random.Random
 
 @HiltViewModel
 internal class SplashViewModel @Inject constructor(
@@ -43,7 +52,11 @@ internal class SplashViewModel @Inject constructor(
     private val keyRestore: KeyRestore,
     private val lightningRepository: LightningRepository,
     private val navigator: SplashNavigator,
-    private val scannerCoordinator: ViewModelCoordinator<ScannerRequest, ScannerResponse>
+    private val scannerCoordinator: ViewModelCoordinator<ScannerRequest, ScannerResponse>,
+    private val networkQueryInvite: NetworkQueryInvite,
+    private val networkQueryContact: NetworkQueryContact,
+    private val torManager: TorManager,
+    private val app: Application,
 ): MotionLayoutViewModel<
         Any,
         Context,
@@ -51,6 +64,7 @@ internal class SplashViewModel @Inject constructor(
         SplashViewState
         >(dispatchers, SplashViewState.Start_ShowIcon)
 {
+
     private var screenInit: Boolean = false
     fun screenInit() {
         if (screenInit) {
@@ -58,7 +72,6 @@ internal class SplashViewModel @Inject constructor(
         } else {
             screenInit = true
         }
-
 
         // prime the account balance retrieval from SharePrefs
         viewModelScope.launch(mainImmediate) {
@@ -115,11 +128,8 @@ internal class SplashViewModel @Inject constructor(
                                 ?.split("::")
                                 ?.let { decodedSplit ->
 
-                                    if (decodedSplit.size == 2) {
+                                    if (decodedSplit.size == 3) {
                                         if (decodedSplit[0] == "ip") {
-                                            return Response.Error("Creating a new account is not yet implemented")
-                                        }
-                                        if (decodedSplit[0] == "keys") {
                                             return Response.Success(Any())
                                         }
                                     }
@@ -138,34 +148,42 @@ internal class SplashViewModel @Inject constructor(
         }
     }
 
-    fun processUserInput(input: String?) {
+    private inline val String.isInviteCode: Boolean
+        get() = matches("^[A-F0-9a-f]{40}\$".toRegex())
+
+    fun processConnectionCode(input: String?) {
         if (input.isNullOrEmpty()) {
             viewModelScope.launch(mainImmediate) {
+                updateViewState(SplashViewState.HideLoadingWheel)
                 submitSideEffect(SplashSideEffect.InputNullOrEmpty)
             }
             return
         }
 
+        // Maybe we can have a SignupStyle class to reflect this? Since there's a lot of decoding
+        // going on in different classes
         // Invite Code
-        if (input.length == 40) {
-            // TODO: Implement
+        if (input.isInviteCode) {
             viewModelScope.launch(mainImmediate) {
-                submitSideEffect(SplashSideEffect.NotImplementedYet)
+                redeemInvite(input)
             }
             return
         }
 
         input.decodeBase64ToArray()?.decodeToString()?.split("::")?.let { decodedSplit ->
-            if (decodedSplit.size == 2) {
-
+            if (decodedSplit.size == 3) {
+                //Token coming from Umbrel for example.
                 if (decodedSplit.elementAt(0) == "ip") {
-                    // TODO: Implement
-                    viewModelScope.launch(dispatchers.mainImmediate) {
-                        submitSideEffect(SplashSideEffect.NotImplementedYet)
+                    viewModelScope.launch(mainImmediate) {
+                        storeTemporaryInvite()
+
+                        val ip = decodedSplit.elementAt(1)
+                        val password = decodedSplit.elementAt(2)
+                        generateToken(ip, null, password)
                     }
                     return
                 }
-
+            } else if (decodedSplit.size == 2) {
                 if (decodedSplit.elementAt(0) == "keys") {
                     decodedSplit.elementAt(1).decodeBase64ToArray()?.let { toDecryptByteArray ->
                         updateViewState(
@@ -179,7 +197,148 @@ internal class SplashViewModel @Inject constructor(
         }
 
         viewModelScope.launch(mainImmediate) {
+            updateViewState(SplashViewState.HideLoadingWheel)
             submitSideEffect(SplashSideEffect.InvalidCode)
+        }
+    }
+
+    private fun redeemInvite(input: String) {
+        viewModelScope.launch(mainImmediate) {
+            networkQueryInvite.redeemInvite(input).collect { loadResponse ->
+                @Exhaustive
+                when (loadResponse) {
+                    is LoadResponse.Loading -> {
+                    }
+                    is Response.Error -> {
+                        updateViewState(SplashViewState.HideLoadingWheel)
+                        submitSideEffect(SplashSideEffect.InvalidCode)
+                    }
+                    is Response.Success -> {
+                        val inviteResponse = loadResponse.value.response
+
+                        inviteResponse?.invite?.let { invite ->
+                            storeTemporaryInvite(invite)
+
+                            generateToken(inviteResponse.ip, inviteResponse.pubkey, null)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun generateToken(ip: String, nodePubKey: String? = null, password: String? = null) {
+        viewModelScope.launch(mainImmediate) {
+            val authToken = generateRandomToken()
+            val relayUrl = parseRelayUrl(RelayUrl(ip))
+
+            storeToken(authToken.value, relayUrl.value)
+
+            networkQueryContact.generateToken(relayUrl, authToken, password, nodePubKey).collect { loadResponse ->
+                @Exhaustive
+                when (loadResponse) {
+                    is LoadResponse.Loading -> {
+                    }
+                    is Response.Error -> {
+                        updateViewState(SplashViewState.HideLoadingWheel)
+                        submitSideEffect(SplashSideEffect.GenerateTokenFailed)
+                    }
+                    is Response.Success -> {
+                        viewModelScope.launch(mainImmediate) {
+                            navigator.toOnBoardScreen()
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // I had to copy this from the RelayDataHandlerImpl class, I needed this methods outside
+    // but I wasn't sure where to put them
+    private inline val String.isOnionAddress: Boolean
+        get() = matches("([a-z2-7]{56}).onion.*".toRegex())
+
+    private suspend fun parseRelayUrl(relayUrl: RelayUrl): RelayUrl {
+        return try {
+            val httpUrl = relayUrl.value.toHttpUrl()
+            torManager.setTorRequired(httpUrl.host.isOnionAddress)
+
+            // is a valid url with scheme
+            relayUrl
+        } catch (e: IllegalArgumentException) {
+
+            // does not contain http, https... check if it's an onion address
+            if (relayUrl.value.isOnionAddress) {
+                // only use http if it is an onion address
+                torManager.setTorRequired(true)
+                RelayUrl("http://${relayUrl.value}")
+            } else {
+                torManager.setTorRequired(false)
+                RelayUrl("https://${relayUrl.value}")
+            }
+        }
+    }
+
+    private fun generateRandomToken(): AuthorizationToken {
+        val charPool: List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9')
+        val token = (1..20)
+            .map { Random.nextInt(0, charPool.size) }
+            .map(charPool::get)
+            .joinToString("")
+
+        return AuthorizationToken(token)
+    }
+
+    private fun storeTemporaryInvite(invite: RedeemInviteDto? = null) {
+        // I needed a way to store this to transition between fragments
+        // but I wasn't sure what to use besides this
+        app.getSharedPreferences("sphinx_temp_prefs", Context.MODE_PRIVATE).let {
+                sharedPrefs ->
+            sharedPrefs?.edit()?.let { editor ->
+                invite?.let { invite ->
+                    // Signing up with invite code. Inviter is coming from relay
+                    editor
+                        .putString("sphinx_temp_inviter_nickname", invite.nickname)
+                        .putString("sphinx_temp_inviter_pubkey", invite.pubkey)
+                        .putString("sphinx_temp_inviter_route_hint", invite.route_hint)
+                        .putString("sphinx_temp_invite_message", invite.message)
+                        .putString("sphinx_temp_invite_action", invite.action)
+                        .let { editor ->
+                            if (!editor.commit()) {
+                                editor.apply()
+                            }
+                        }
+                } ?: run {
+                    // Signing up relay connection string. Using default inviter
+                    editor
+                        .putString("sphinx_temp_inviter_nickname", "Sphinx Support")
+                        .putString("sphinx_temp_inviter_pubkey", "023d70f2f76d283c6c4e58109ee3a2816eb9d8feb40b23d62469060a2b2867b77f")
+                        .putString("sphinx_temp_invite_message", "Welcome to Sphinx")
+                        .let { editor ->
+                            if (!editor.commit()) {
+                                editor.apply()
+                            }
+                        }
+                }
+            }
+        }
+    }
+
+    private fun storeToken(token: String, ip: String) {
+        // I needed a way to store this to transition between fragments
+        // but I wasn't sure what to use besides this
+        app.getSharedPreferences("sphinx_temp_prefs", Context.MODE_PRIVATE).let { sharedPrefs ->
+
+            sharedPrefs?.edit()?.let { editor ->
+                editor
+                    .putString("sphinx_temp_ip", ip)
+                    .putString("sphinx_temp_auth_token", token)
+                    .let { editor ->
+                        if (!editor.commit()) {
+                            editor.apply()
+                        }
+                    }
+            }
         }
     }
 
