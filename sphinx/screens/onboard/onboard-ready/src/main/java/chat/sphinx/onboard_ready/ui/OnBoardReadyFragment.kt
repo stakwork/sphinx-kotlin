@@ -4,7 +4,6 @@ import android.content.Context
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.viewModelScope
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
@@ -13,13 +12,10 @@ import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.onboard_ready.R
 import chat.sphinx.onboard_ready.databinding.FragmentOnBoardReadyBinding
-import chat.sphinx.wrapper_chat.isTrue
-import chat.sphinx.wrapper_common.lightning.asFormattedString
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.navigation.CloseAppOnBackPress
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
-import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.android_feature_viewmodel.updateViewState
@@ -97,10 +93,10 @@ internal class OnBoardReadyFragment: SideEffectFragment<
         when (viewState) {
             is OnBoardReadyViewState.Idle -> {}
             is OnBoardReadyViewState.Saving -> {
-                binding.onboardFinishProgress.goneIfFalse(true)
+                binding.onboardFinishProgress.visible
             }
             is OnBoardReadyViewState.Error -> {
-                binding.onboardFinishProgress.goneIfFalse(false)
+                binding.onboardFinishProgress.gone
             }
         }
     }

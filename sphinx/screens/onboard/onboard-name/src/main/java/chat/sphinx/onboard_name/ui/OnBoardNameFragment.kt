@@ -14,7 +14,6 @@ import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.navigation.CloseAppOnBackPress
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
-import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import javax.annotation.meta.Exhaustive
@@ -62,10 +61,10 @@ internal class OnBoardNameFragment: SideEffectFragment<
         when (viewState) {
             is OnBoardNameViewState.Idle -> {}
             is OnBoardNameViewState.Saving -> {
-                binding.signUpNameProgressBar.goneIfFalse(true)
+                binding.signUpNameProgressBar.visible
             }
             is OnBoardNameViewState.Error -> {
-                binding.signUpNameProgressBar.goneIfFalse(false)
+                binding.signUpNameProgressBar.gone
             }
         }
     }
