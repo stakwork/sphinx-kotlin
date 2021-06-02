@@ -5,6 +5,7 @@ import android.content.ContentValues.TAG
 import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import chat.sphinx.chat_common.ui.ChatSideEffect
 import chat.sphinx.chat_common.ui.ChatViewModel
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
@@ -24,7 +25,10 @@ import chat.sphinx.wrapper_common.util.getInitials
 import chat.sphinx.wrapper_message.Message
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
+import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.annotation.meta.Exhaustive
@@ -126,12 +130,28 @@ internal class ChatTribeViewModel @Inject constructor(
         return super.sendMessage(builder)
     }
 
+    private var updateTribeInfoJob: Job? = null
     init {
-        viewModelScope.launch(mainImmediate) {
+
+        updateTribeInfoJob = viewModelScope.launch(mainImmediate) {
             chatRepository.getChatById(args.chatId).firstOrNull()?.let { chat ->
                 chatRepository.updateTribeInfo(chat)
 
                 Log.d(TAG, "Price per message ${chat.pricePerMessage.toString()}")
+            }
+        }
+
+        viewModelScope.launch(mainImmediate) {
+            delay(10L)
+            updateTribeInfoJob?.join()
+            chatRepository.getChatById(args.chatId).firstOrNull()?.let { chat ->
+                val pricePerMessage = chat.pricePerMessage?.value ?: 0
+                val escrowAmount = chat.escrowAmount?.value ?: 0
+                submitSideEffect(
+                    ChatSideEffect.Notify(
+                        "Price per message: $pricePerMessage\n Amount to Stake: $escrowAmount"
+                    )
+                )
             }
         }
     }

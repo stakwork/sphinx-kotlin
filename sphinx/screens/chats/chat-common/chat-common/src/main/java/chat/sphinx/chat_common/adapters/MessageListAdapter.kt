@@ -21,7 +21,7 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-internal class MessageListAdapter<ARGS: NavArgs>(
+internal class MessageListAdapter<ARGS : NavArgs>(
     private val recyclerView: RecyclerView,
     private val layoutManager: LinearLayoutManager,
     private val lifecycleOwner: LifecycleOwner,
@@ -200,19 +200,24 @@ internal class MessageListAdapter<ARGS: NavArgs>(
                 setStatusHeader(viewState.statusHeader)
                 setDeletedMessageLayout(viewState.deletedMessage)
                 setBubbleBackground(viewState, recyclerViewWidth)
+                setGroupActionIndicatorLayout(viewState.groupActionIndicator)
 
-                if (viewState.background !is BubbleBackground.Gone) {
-                    setBubbleMessageLayout(viewState.bubbleMessage)
-                    setBubbleDirectPaymentLayout(viewState.bubbleDirectPayment)
-                    setBubblePaidMessageDetailsLayout(
-                        viewState.bubblePaidMessageDetails,
-                        viewState.background
-                    )
-                    setBubblePaidMessageSentStatusLayout(viewState.bubblePaidMessageSentStatus)
-                    setBubbleReactionBoosts(viewState.bubbleReactionBoosts) { imageView, url ->
-                        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-                            imageLoader.load(imageView, url.value, viewModel.imageLoaderDefaults)
-                                .also { disposables.add(it) }
+                if (viewState.unsupportedMessageType != null) {
+                    setUnsupportedMessageTypeLayout(viewState.unsupportedMessageType)
+                } else {
+                    if (viewState.background !is BubbleBackground.Gone) {
+                        setBubbleMessageLayout(viewState.bubbleMessage)
+                        setBubbleDirectPaymentLayout(viewState.bubbleDirectPayment)
+                        setBubblePaidMessageDetailsLayout(
+                            viewState.bubblePaidMessageDetails,
+                            viewState.background
+                        )
+                        setBubblePaidMessageSentStatusLayout(viewState.bubblePaidMessageSentStatus)
+                        setBubbleReactionBoosts(viewState.bubbleReactionBoosts) { imageView, url ->
+                            onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                                imageLoader.load(imageView, url.value, viewModel.imageLoaderDefaults)
+                                    .also { disposables.add(it) }
+                            }
                         }
                     }
                     setBubbleReplyMessage(viewState.bubbleReplyMessage)

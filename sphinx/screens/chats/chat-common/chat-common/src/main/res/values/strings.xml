@@ -4,8 +4,17 @@
     <string name="chat_muted_waiting_on_network">Waiting on network…</string>
     <string name="chat_tribe_contributions">Contributed:</string>
 
+    <string name="unsupported_message_type_placeholder_text">%1$s: Not supported yet</string>
     <string name="deleted_message_label_text">This message has been deleted</string>
     <string name="join_call_header_label_text">Join call by…</string>
+
+    <!--  Message type placeholder display names  -->
+    <string name="placeholder_display_name_message_type_attachment">Attachment Message</string>
+    <string name="placeholder_display_name_message_type_bot_response">Bot Response Message</string>
+    <string name="placeholder_display_name_message_type_invoice">Invoice Message</string>
+    <string name="placeholder_display_name_message_type_payment">Invoiced Payment Message</string>
+    <string name="placeholder_display_name_message_type_tribe_delete">Tribe Delete Message</string>
+    <string name="placeholder_unsupported_message_type_default">Unsupported Message Type</string>
 
     <!-- Paid Message Details: Status Labels   -->
     <string name="paid_message_details_status_label_pay">Pay</string>
@@ -43,4 +52,13 @@
     <string name="purchase_status_label_paid_message_sent_status_denied">Denied</string>
     <string name="purchase_status_label_paid_message_sent_status_processing">Processing</string>
     <string name="purchase_status_label_paid_message_sent_status_default">Unknown</string>
+
+
+    <!--  Group Action Indicator Labels  -->
+    <string name="group_join_announcement_tribe">%1$s has joined the tribe</string>
+    <string name="group_join_announcement_group">%1$s has joined the group</string>
+    <string name="group_leave_announcement_tribe">%1$s just left the tribe</string>
+    <string name="group_leave_announcement_group">%1$s just left the group</string>
+    <string name="group_kick_announcement_group_user_facing">The admin has removed you from this group</string>
+    <string name="group_kick_announcement_tribe_user_facing">The admin has removed you from this tribe</string>
 </resources>

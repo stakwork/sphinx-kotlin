@@ -3,26 +3,26 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/message_type_leave_or_join_group_holder_height"
+    android:layout_height="wrap_content"
+    android:padding="@dimen/default_layout_margin"
     android:visibility="gone"
     tools:visibility="visible">
 
-    <TextView
-        android:id="@+id/text_view_group_action_label"
-        android:layout_width="wrap_content"
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/text_view_placeholder_message"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:background="@drawable/background_group_action_message"
-        android:ellipsize="end"
-        android:fontFamily="@font/roboto_regular"
-        android:gravity="center"
-        android:paddingHorizontal="@dimen/group_action_message_padding_horizontal"
+        android:fontFamily="@font/roboto_italic"
         android:paddingVertical="@dimen/group_action_message_padding_vertical"
-        android:textAlignment="center"
-        android:textColor="@color/text"
+        android:text="@string/deleted_message_label_text"
+        android:textColor="@color/sphinxOrange"
         android:textSize="@dimen/default_text_size_sub_headline"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:text="CypherPoet just joined the tribe" />
+        tools:text="Bot Response Message: Not supported yet" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
+

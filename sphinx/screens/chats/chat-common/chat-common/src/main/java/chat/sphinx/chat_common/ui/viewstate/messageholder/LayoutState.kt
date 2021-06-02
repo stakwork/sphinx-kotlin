@@ -1,11 +1,18 @@
 package chat.sphinx.chat_common.ui.viewstate.messageholder
 
+import chat.sphinx.wrapper_chat.ChatType
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.lightning.unit
 import chat.sphinx.wrapper_message.MessageType
 
 internal sealed class LayoutState {
+
+    data class UnsupportedMessageType(
+        val messageType: MessageType,
+        val gravityStart: Boolean,
+    ): LayoutState()
+
 
     data class MessageStatusHeader(
         val senderName: String?,
@@ -20,6 +27,15 @@ internal sealed class LayoutState {
         val showReceived: Boolean
             get() = !showSent
     }
+
+
+    data class GroupActionIndicator(
+        val actionType: MessageType.GroupAction,
+        val chatType: ChatType?,
+        val isAdminView: Boolean,
+        val subjectName: String?,
+    ): LayoutState()
+
 
     data class DeletedMessage(
         val gravityStart: Boolean,
