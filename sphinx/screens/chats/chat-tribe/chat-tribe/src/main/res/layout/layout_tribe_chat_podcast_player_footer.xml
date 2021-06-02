@@ -27,6 +27,22 @@
         tools:text="Ocean Ranger" />
 
 
+    <ProgressBar
+        android:id="@+id/progress_bar_audio_loading"
+        android:layout_width="@dimen/default_progress_bar_xy"
+        android:layout_height="@dimen/default_progress_bar_xy"
+        android:layout_marginHorizontal="@dimen/default_layout_margin"
+        style="?android:attr/progressBarStyle"
+        android:indeterminateTint="@android:color/white"
+        app:layout_constraintStart_toEndOf="@id/text_view_episode_title"
+        app:layout_constraintEnd_toStartOf="@id/text_view_boost_podcast_button"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:indeterminate="true"
+        android:visibility="gone"
+        tools:visibility="visible" />
+
+
     <!--  Boost Button  -->
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/text_view_boost_podcast_button"
@@ -40,7 +56,7 @@
         android:foregroundTint="@color/text"
         android:gravity="center"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@id/text_view_episode_title"
+        app:layout_constraintStart_toEndOf="@id/progress_bar_audio_loading"
         app:layout_constraintTop_toTopOf="parent" />
 
 
