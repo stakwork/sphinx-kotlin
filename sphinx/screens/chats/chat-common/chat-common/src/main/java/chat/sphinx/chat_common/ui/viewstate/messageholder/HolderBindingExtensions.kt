@@ -414,17 +414,16 @@ internal inline fun LayoutMessageHolderBinding.setBubblePaidMessageSentStatusLay
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun LayoutMessageHolderBinding.setBubbleGiphy(
-    message: LayoutState.Bubble.ContainerBottom.Giphy?,
-    loadImage: (ImageView, GiphyUrl) -> Unit,
+    giphy: LayoutState.Bubble.Giphy?,
+    loadImage: (ImageView, String) -> Unit,
 ) {
     includeMessageHolderBubble.includeMessageTypeImageAttachment.apply {
-        if ((message?.message?.giphyData?.url?.isNotEmpty() == true)) {
-            message?.giphyUrl?.let { giphyUrl ->
-                imageViewAttachmentImage.visible
-                loadImage(imageViewAttachmentImage, giphyUrl)
-            }
+        if (giphy == null) {
+            root.gone
         } else {
-            imageViewAttachmentImage.gone
+            root.visible
+
+            loadImage(imageViewAttachmentImage, giphy.url)
         }
     }
 }
