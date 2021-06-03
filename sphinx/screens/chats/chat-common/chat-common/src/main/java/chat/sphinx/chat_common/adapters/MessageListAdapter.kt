@@ -16,6 +16,7 @@ import chat.sphinx.chat_common.ui.viewstate.messageholder.*
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.wrapper_view.Px
+import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -203,6 +204,12 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                 setGroupActionIndicatorLayout(viewState.groupActionIndicator)
 
                 if (viewState.background !is BubbleBackground.Gone) {
+                    setBubbleGiphy(viewState.bubbleGiphy) { imageView, url ->
+                        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                            imageLoader.load(imageView, url)
+                                .also { disposables.add(it) }
+                        }
+                    }
                     setUnsupportedMessageTypeLayout(viewState.unsupportedMessageType)
                     setBubbleMessageLayout(viewState.bubbleMessage)
                     setBubbleDirectPaymentLayout(viewState.bubbleDirectPayment)

@@ -4,23 +4,34 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:padding="1dp"
     android:visibility="gone"
     tools:layout_width="300dp"
     tools:visibility="visible">
 
-
-    <!--  Loaded Image  -->
-    <androidx.appcompat.widget.AppCompatImageView
-        android:id="@+id/image_view_attachment_image"
+    <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
-        android:layout_height="@dimen/message_type_image_attachment_height"
-        android:clickable="true"
-        android:focusable="true"
-        android:foreground="?attr/selectableItemBackground"
-        android:scaleType="center"
+        android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:srcCompat="@tools:sample/backgrounds/scenic"
-        tools:viewBindingIgnore="true" />
+        app:cardCornerRadius="@dimen/background_message_holder_default_corner_rad">
+
+        <!--  Loaded Image  -->
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/image_view_attachment_image"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="@dimen/message_type_image_attachment_min_height"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground"
+            android:adjustViewBounds="true"
+            android:scaleType="fitCenter"
+            android:background="@drawable/background_message_bubble_received_last"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:srcCompat="@tools:sample/backgrounds/scenic" />
+
+    </androidx.cardview.widget.CardView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
