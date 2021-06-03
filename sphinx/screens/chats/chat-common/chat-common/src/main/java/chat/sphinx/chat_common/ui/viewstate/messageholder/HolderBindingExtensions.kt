@@ -428,9 +428,9 @@ internal inline fun LayoutMessageHolderBinding.setBubbleGiphy(
 
     includeMessageHolderBubble.includeMessageTypeImageAttachment.apply {
         if ((message?.message?.giphyData?.url?.isNotEmpty() == true)) {
-            message?.giphyUrl?.let {
+            message?.giphyUrl?.let { giphyUrl ->
                 imageViewAttachmentImage.visible
-                loadImage(imageViewAttachmentImage, message.giphyUrl)
+                loadImage(imageViewAttachmentImage, giphyUrl)
             }
         } else {
             imageViewAttachmentImage.gone

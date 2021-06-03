@@ -203,6 +203,7 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                 setBubbleBackground(viewState, recyclerViewWidth)
                 setGroupActionIndicatorLayout(viewState.groupActionIndicator)
                 setUnsupportedMessageTypeLayout(viewState.unsupportedMessageType)
+
                 if (viewState.background !is BubbleBackground.Gone) {
                     setBubbleGiphy(viewState.bubbleGiphy) { imageView, url ->
                         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
