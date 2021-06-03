@@ -206,6 +206,12 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                     setUnsupportedMessageTypeLayout(viewState.unsupportedMessageType)
                 } else {
                     if (viewState.background !is BubbleBackground.Gone) {
+                        setBubbleGiphy(viewState.bubbleGiphy) { imageView, url ->
+                            onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                                imageLoader.load(imageView, url.value)
+                                    .also { disposables.add(it) }
+                            }
+                        }
                         setBubbleMessageLayout(viewState.bubbleMessage)
                         setBubbleDirectPaymentLayout(viewState.bubbleDirectPayment)
                         setBubblePaidMessageDetailsLayout(
@@ -214,12 +220,6 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                         )
                         setBubblePaidMessageSentStatusLayout(viewState.bubblePaidMessageSentStatus)
                         setBubbleReactionBoosts(viewState.bubbleReactionBoosts) { imageView, url ->
-                            onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-                                imageLoader.load(imageView, url.value, viewModel.imageLoaderDefaults)
-                                    .also { disposables.add(it) }
-                            }
-                        }
-                        setBubbleGiphy(viewState.bubbleGiphy) { imageView, url ->
                             onStopSupervisor.scope.launch(viewModel.mainImmediate) {
                                 imageLoader.load(imageView, url.value, viewModel.imageLoaderDefaults)
                                     .also { disposables.add(it) }

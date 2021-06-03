@@ -5,6 +5,7 @@ import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.lightning.unit
 import chat.sphinx.wrapper_message.MessageType
+import chat.sphinx.wrapper_message.Message as WrapperMessage
 
 internal sealed class LayoutState {
 
@@ -103,7 +104,14 @@ internal sealed class LayoutState {
                     }
             }
 
-            class Giphy(val text: String, val pic: GiphyImageHolder?): ContainerBottom()
+            class Giphy(
+                val message: WrapperMessage,
+                val url: GiphyUrl,
+                val text: String?,
+            ): ContainerBottom() {
+                val giphyUrl: GiphyUrl
+                    get() = GiphyUrl(url.value.replace("giphy.gif", "200w.gif"))
+            }
         }
     }
 }

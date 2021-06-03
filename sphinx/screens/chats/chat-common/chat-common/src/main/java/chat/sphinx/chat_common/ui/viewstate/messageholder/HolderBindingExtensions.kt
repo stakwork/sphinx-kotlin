@@ -413,6 +413,31 @@ internal inline fun LayoutMessageHolderBinding.setBubblePaidMessageSentStatusLay
 
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
+internal inline fun LayoutMessageHolderBinding.setBubbleGiphy(
+    message: LayoutState.Bubble.ContainerBottom.Giphy?,
+    loadImage: (ImageView, GiphyUrl) -> Unit,
+) {
+    includeMessageHolderBubble.textViewMessageText.apply {
+        if (message == null || message.message.giphyData?.text.isNullOrEmpty()) {
+            gone
+        } else {
+            visible
+            text = message.message.giphyData?.text
+        }
+    }
+
+    if (!message?.message?.giphyData?.url.isNullOrEmpty()) {
+        message?.giphyUrl?.let {
+            includeMessageHolderBubble.includeMessageTypeImageAttachment.apply {
+                imageViewAttachmentImage.visible
+                loadImage(imageViewAttachmentImage, message.giphyUrl)
+            }
+        }
+    }
+}
+
+@MainThread
+@Suppress("NOTHING_TO_INLINE")
 internal inline fun LayoutMessageHolderBinding.setBubbleReactionBoosts(
     boost: LayoutState.Bubble.ContainerBottom.Boost?,
     loadImage: (ImageView, SenderPhotoUrl) -> Unit,
@@ -680,23 +705,3 @@ internal inline fun LayoutMessageHolderBinding.setBubbleReplyMessage(
     }
 }
 
-@MainThread
-@Suppress("NOTHING_TO_INLINE")
-internal inline fun LayoutMessageHolderBinding.setBubbleGiphy(
-    message: LayoutState.Bubble.ContainerBottom.Giphy?,
-    loadImage: (ImageView, GiphyUrl) -> Unit,
-) {
-    includeMessageHolderBubble.textViewMessageText.apply {
-        if (message == null) {
-            gone
-        } else {
-            visible
-            text = message.text
-        }
-    }
-
-    includeMessageHolderBubble.includeMessageTypeImageAttachment.apply {
-        imageViewAttachmentImage.visible
-        loadImage(imageViewAttachmentImage, (message?.pic as GiphyUrl))
-    }
-}

@@ -88,15 +88,6 @@ internal sealed class MessageHolderViewState(
         }
     }
 
-    val bubbleGiphy: LayoutState.Bubble.ContainerBottom.Giphy? by lazy(LazyThreadSafetyMode.NONE) {
-        val set: MutableSet<GiphyImageHolder> = LinkedHashSet(1)
-
-        LayoutState.Bubble.ContainerBottom.Giphy(
-            text = message?.retrieveTextToShow().toString(),
-            pic = set.first(),
-        )
-    }
-
     val bubblePaidMessageDetails: LayoutState.Bubble.PaidMessageDetails? by lazy(LazyThreadSafetyMode.NONE) {
         if (!message.isPaidMessage) {
             null
@@ -127,6 +118,16 @@ internal sealed class MessageHolderViewState(
                     purchaseType = if (type.isPurchase()) type else null,
                 )
             }
+        }
+    }
+
+    val bubbleGiphy: LayoutState.Bubble.ContainerBottom.Giphy? by lazy(LazyThreadSafetyMode.NONE) {
+        message?.giphyData?.let {
+            LayoutState.Bubble.ContainerBottom.Giphy(
+                message = message,
+                url = GiphyUrl(it.url),
+                text = it.text,
+            )
         }
     }
 
