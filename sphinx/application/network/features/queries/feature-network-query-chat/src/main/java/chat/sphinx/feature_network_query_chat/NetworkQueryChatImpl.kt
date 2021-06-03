@@ -1,11 +1,8 @@
 package chat.sphinx.feature_network_query_chat
 
 import UpdateChatRelayResponse
-import chat.sphinx.concept_network_query_chat.model.ChatDto
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
-import chat.sphinx.concept_network_query_chat.model.JoinTribeRelayResponse
-import chat.sphinx.concept_network_query_chat.model.PutChatDto
-import chat.sphinx.concept_network_query_chat.model.TribeDto
+import chat.sphinx.concept_network_query_chat.model.*
 import chat.sphinx.concept_network_relay_call.NetworkRelayCall
 import chat.sphinx.feature_network_query_chat.model.GetChatsRelayResponse
 import chat.sphinx.kotlin_response.ResponseError
@@ -36,6 +33,7 @@ class NetworkQueryChatImpl(
         private const val ENDPOINT_TRIBE = "/tribe"
 
         private const val GET_TRIBE_INFO_URL = "https://%s/tribes/%s"
+        private const val GET_PODCAST_FEED_URL = "https://%s/podcast?url=%s"
     }
 
     ///////////
@@ -104,6 +102,15 @@ class NetworkQueryChatImpl(
         networkRelayCall.get(
             url = String.format(GET_TRIBE_INFO_URL, host.value, uuid.value),
             responseJsonClass = TribeDto::class.java,
+        )
+
+    override fun getPodcastFeed(
+        host: ChatHost,
+        feedUrl: String
+    ): Flow<LoadResponse<PodcastDto, ResponseError>> =
+        networkRelayCall.get(
+            url = String.format(GET_PODCAST_FEED_URL, host.value, feedUrl),
+            responseJsonClass = PodcastDto::class.java,
         )
 
     override fun joinTribe(

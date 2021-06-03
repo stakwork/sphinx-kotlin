@@ -5,6 +5,7 @@ import chat.sphinx.concept_coredb.CoreDB
 import chat.sphinx.concept_crypto_rsa.RSA
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
 import chat.sphinx.concept_network_query_chat.model.ChatDto
+import chat.sphinx.concept_network_query_chat.model.PodcastDto
 import chat.sphinx.concept_network_query_chat.model.PutChatDto
 import chat.sphinx.concept_network_query_chat.model.TribeDto
 import chat.sphinx.concept_network_query_contact.NetworkQueryContact
@@ -1574,11 +1575,35 @@ abstract class SphinxRepository(
                                     )
                                 ).collect {}
                             }
+
+                            getPodcastFeed(chat, tribeDto)
                         }
                     }
                 }
             }
 
+        }
+    }
+
+    private suspend fun getPodcastFeed(chat: Chat, tribe: TribeDto) {
+        chat.host?.let { chatHost ->
+            tribe.feed_url?.let { feedUrl ->
+                networkQueryChat.getPodcastFeed(chatHost, feedUrl).collect { loadResponse ->
+                    when (loadResponse) {
+
+                        is LoadResponse.Loading -> {}
+                        is Response.Error -> {}
+
+                        is Response.Success -> {
+                            val podcastDto: PodcastDto = loadResponse.value
+
+                            LOG.d(TAG, "PODCAST TITLE: ${podcastDto.title}")
+                            LOG.d(TAG, "PODCAST EPISODES COUNT: ${podcastDto.episodes.count().toString()}")
+                            LOG.d(TAG, "PODCAST ID: ${podcastDto.id}")
+                        }
+                    }
+                }
+            }
         }
     }
 

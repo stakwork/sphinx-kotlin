@@ -4,8 +4,6 @@ import com.squareup.moshi.JsonClass
 
 @JsonClass(generateAdapter = true)
 data class TribeDto(
-    var host: String?,
-    var uuid: String?,
     val name: String,
     val description: String,
     val img: String?,
@@ -22,9 +20,12 @@ data class TribeDto(
     val deleted: Any?,
     val app_url: String?,
     val feed_url: String?,
-    var amount: Long?,
-    var my_alias: String?,
 ) {
+
+    var amount: Long? = null
+    var myAlias: String? = null
+    var host: String? = null
+    var uuid: String? = null
 
     val hourToStake: Long
         get() = (escrow_millis) / 60 / 60 / 1000
