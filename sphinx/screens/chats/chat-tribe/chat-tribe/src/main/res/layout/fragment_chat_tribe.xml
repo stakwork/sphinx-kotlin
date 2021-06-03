@@ -18,7 +18,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:background="@color/body"
-        app:layout_constraintBottom_toTopOf="@+id/include_chat_tribe_footer"
+        app:layout_constraintBottom_toTopOf="@+id/include_tribe_chat_podcast_player_footer"
         app:layout_constraintTop_toBottomOf="@+id/include_chat_tribe_header"
         tools:listitem="@layout/layout_message_holder" />
 
@@ -29,32 +29,14 @@
         android:src="@drawable/bottom_bar_elevation_gradient"
         app:layout_constraintBottom_toTopOf="@+id/include_chat_tribe_footer" />
 
-    <!--
-        Show podcast controls footer above the message entry footer
-        if the tribe is a podcast.
-    -->
     <include
         android:id="@+id/include_tribe_chat_podcast_player_footer"
         layout="@layout/layout_tribe_chat_podcast_player_footer"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="@dimen/chat_footer_height"
         app:layout_constraintBottom_toTopOf="@+id/include_chat_tribe_footer"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
-
-    <!-- Divider for podcast controls footer -->
-    <View
-        android:id="@+id/horizontal_divider_podcast_player_footer"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/replyDividerReceived"
-        android:visibility="gone"
-        app:layout_constraintBottom_toTopOf="@id/include_chat_tribe_footer"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="include_tribe_chat_podcast_player_footer"
-        tools:visibility="visible" />
-
 
     <include
         android:id="@+id/include_chat_tribe_footer"
