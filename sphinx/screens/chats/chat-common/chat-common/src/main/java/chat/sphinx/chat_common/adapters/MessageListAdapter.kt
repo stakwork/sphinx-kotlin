@@ -16,6 +16,7 @@ import chat.sphinx.chat_common.ui.viewstate.messageholder.*
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.wrapper_view.Px
+import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -201,33 +202,29 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                 setDeletedMessageLayout(viewState.deletedMessage)
                 setBubbleBackground(viewState, recyclerViewWidth)
                 setGroupActionIndicatorLayout(viewState.groupActionIndicator)
-
-                if (viewState.unsupportedMessageType != null) {
-                    setUnsupportedMessageTypeLayout(viewState.unsupportedMessageType)
-                } else {
-                    if (viewState.background !is BubbleBackground.Gone) {
-                        setBubbleGiphy(viewState.bubbleGiphy) { imageView, url ->
-                            onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-                                imageLoader.load(imageView, url.value)
-                                    .also { disposables.add(it) }
-                            }
-                        }
-                        setBubbleMessageLayout(viewState.bubbleMessage)
-                        setBubbleDirectPaymentLayout(viewState.bubbleDirectPayment)
-                        setBubblePaidMessageDetailsLayout(
-                            viewState.bubblePaidMessageDetails,
-                            viewState.background
-                        )
-                        setBubblePaidMessageSentStatusLayout(viewState.bubblePaidMessageSentStatus)
-                        setBubbleReactionBoosts(viewState.bubbleReactionBoosts) { imageView, url ->
-                            onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-                                imageLoader.load(imageView, url.value, viewModel.imageLoaderDefaults)
-                                    .also { disposables.add(it) }
-                            }
+                setUnsupportedMessageTypeLayout(viewState.unsupportedMessageType)
+                if (viewState.background !is BubbleBackground.Gone) {
+                    setBubbleGiphy(viewState.bubbleGiphy) { imageView, url ->
+                        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                            imageLoader.load(imageView, url.value)
+                                .also { disposables.add(it) }
                         }
                     }
-                    setBubbleReplyMessage(viewState.bubbleReplyMessage)
+                    setBubbleMessageLayout(viewState.bubbleMessage)
+                    setBubbleDirectPaymentLayout(viewState.bubbleDirectPayment)
+                    setBubblePaidMessageDetailsLayout(
+                        viewState.bubblePaidMessageDetails,
+                        viewState.background
+                    )
+                    setBubblePaidMessageSentStatusLayout(viewState.bubblePaidMessageSentStatus)
+                    setBubbleReactionBoosts(viewState.bubbleReactionBoosts) { imageView, url ->
+                        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                            imageLoader.load(imageView, url.value, viewModel.imageLoaderDefaults)
+                                .also { disposables.add(it) }
+                        }
+                    }
                 }
+                setBubbleReplyMessage(viewState.bubbleReplyMessage)
             }
         }
 

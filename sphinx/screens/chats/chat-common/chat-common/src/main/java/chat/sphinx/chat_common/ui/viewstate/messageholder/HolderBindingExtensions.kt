@@ -29,10 +29,10 @@ import io.matthewnelson.android_feature_screens.util.visible
 internal inline fun LayoutMessageHolderBinding.setUnsupportedMessageTypeLayout(
     messageTypeDetails: LayoutState.UnsupportedMessageType?
 ) {
-    if (messageTypeDetails == null) {
-        root.gone
-    } else {
-        includeMessageHolderBubble.includeUnsupportedMessageTypePlaceholder.apply {
+    includeMessageHolderBubble.includeUnsupportedMessageTypePlaceholder.apply {
+        if (messageTypeDetails == null) {
+            root.gone
+        } else {
             root.visible
 
             val messageTypeDisplayString = when (messageTypeDetails.messageType) {
@@ -92,11 +92,11 @@ internal inline fun LayoutMessageHolderBinding.setUnsupportedMessageTypeLayout(
                 R.string.unsupported_message_type_placeholder_text,
                 messageTypeDisplayString
             )
-
             textViewPlaceholderMessage.gravity = if (messageTypeDetails.gravityStart) Gravity.START else Gravity.END
         }
     }
 }
+
 
 
 @MainThread
@@ -418,20 +418,22 @@ internal inline fun LayoutMessageHolderBinding.setBubbleGiphy(
     loadImage: (ImageView, GiphyUrl) -> Unit,
 ) {
     includeMessageHolderBubble.textViewMessageText.apply {
-        if (message == null || message.message.giphyData?.text.isNullOrEmpty()) {
-            gone
-        } else {
+        if (message?.message?.giphyData?.text?.isNotEmpty() == true) {
             visible
-            text = message.message.giphyData?.text
+            text = message?.message?.giphyData?.text
+        } else {
+            gone
         }
     }
 
-    if (!message?.message?.giphyData?.url.isNullOrEmpty()) {
-        message?.giphyUrl?.let {
-            includeMessageHolderBubble.includeMessageTypeImageAttachment.apply {
+    includeMessageHolderBubble.includeMessageTypeImageAttachment.apply {
+        if ((message?.message?.giphyData?.url?.isNotEmpty() == true)) {
+            message?.giphyUrl?.let {
                 imageViewAttachmentImage.visible
                 loadImage(imageViewAttachmentImage, message.giphyUrl)
             }
+        } else {
+            imageViewAttachmentImage.gone
         }
     }
 }
