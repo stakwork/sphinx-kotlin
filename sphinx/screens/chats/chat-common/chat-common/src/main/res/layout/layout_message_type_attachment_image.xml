@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:padding="1dp"
+    android:visibility="gone"
     tools:layout_width="300dp"
     tools:visibility="visible">
 
@@ -29,8 +30,7 @@
             android:background="@drawable/background_message_bubble_received_last"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            tools:srcCompat="@tools:sample/backgrounds/scenic"
-            tools:viewBindingIgnore="true" />
+            tools:srcCompat="@tools:sample/backgrounds/scenic" />
 
     </androidx.cardview.widget.CardView>
 
