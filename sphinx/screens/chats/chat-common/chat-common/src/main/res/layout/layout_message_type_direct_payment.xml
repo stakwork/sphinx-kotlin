@@ -6,6 +6,7 @@
     android:layout_height="@dimen/message_type_direct_payment_height"
     android:paddingHorizontal="@dimen/default_layout_margin"
     android:paddingTop="@dimen/default_list_row_padding_vertical"
+    android:paddingBottom="@dimen/default_list_row_padding_vertical"
     android:visibility="gone"
     tools:visibility="visible">
 

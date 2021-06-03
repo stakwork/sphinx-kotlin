@@ -29,10 +29,10 @@ import io.matthewnelson.android_feature_screens.util.visible
 internal inline fun LayoutMessageHolderBinding.setUnsupportedMessageTypeLayout(
     messageTypeDetails: LayoutState.UnsupportedMessageType?
 ) {
-    if (messageTypeDetails == null) {
-        root.gone
-    } else {
-        includeMessageHolderBubble.includeUnsupportedMessageTypePlaceholder.apply {
+    includeMessageHolderBubble.includeUnsupportedMessageTypePlaceholder.apply {
+        if (messageTypeDetails == null) {
+            root.gone
+        } else {
             root.visible
 
             val messageTypeDisplayString = when (messageTypeDetails.messageType) {
@@ -93,7 +93,8 @@ internal inline fun LayoutMessageHolderBinding.setUnsupportedMessageTypeLayout(
                 messageTypeDisplayString
             )
 
-            textViewPlaceholderMessage.gravity = if (messageTypeDetails.gravityStart) Gravity.START else Gravity.END
+            textViewPlaceholderMessage.gravity =
+                if (messageTypeDetails.gravityStart) Gravity.START else Gravity.END
         }
     }
 }

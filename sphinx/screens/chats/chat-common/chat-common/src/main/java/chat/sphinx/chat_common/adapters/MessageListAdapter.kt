@@ -201,27 +201,24 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                 setDeletedMessageLayout(viewState.deletedMessage)
                 setBubbleBackground(viewState, recyclerViewWidth)
                 setGroupActionIndicatorLayout(viewState.groupActionIndicator)
+                setUnsupportedMessageTypeLayout(viewState.unsupportedMessageType)
 
-                if (viewState.unsupportedMessageType != null) {
-                    setUnsupportedMessageTypeLayout(viewState.unsupportedMessageType)
-                } else {
-                    if (viewState.background !is BubbleBackground.Gone) {
-                        setBubbleMessageLayout(viewState.bubbleMessage)
-                        setBubbleDirectPaymentLayout(viewState.bubbleDirectPayment)
-                        setBubblePaidMessageDetailsLayout(
-                            viewState.bubblePaidMessageDetails,
-                            viewState.background
-                        )
-                        setBubblePaidMessageSentStatusLayout(viewState.bubblePaidMessageSentStatus)
-                        setBubbleReactionBoosts(viewState.bubbleReactionBoosts) { imageView, url ->
-                            onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-                                imageLoader.load(imageView, url.value, viewModel.imageLoaderDefaults)
-                                    .also { disposables.add(it) }
-                            }
+                if (viewState.background !is BubbleBackground.Gone) {
+                    setBubbleMessageLayout(viewState.bubbleMessage)
+                    setBubbleDirectPaymentLayout(viewState.bubbleDirectPayment)
+                    setBubblePaidMessageDetailsLayout(
+                        viewState.bubblePaidMessageDetails,
+                        viewState.background
+                    )
+                    setBubblePaidMessageSentStatusLayout(viewState.bubblePaidMessageSentStatus)
+                    setBubbleReactionBoosts(viewState.bubbleReactionBoosts) { imageView, url ->
+                        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                            imageLoader.load(imageView, url.value, viewModel.imageLoaderDefaults)
+                                .also { disposables.add(it) }
                         }
                     }
-                    setBubbleReplyMessage(viewState.bubbleReplyMessage)
                 }
+                setBubbleReplyMessage(viewState.bubbleReplyMessage)
             }
         }
 
