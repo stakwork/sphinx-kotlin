@@ -201,9 +201,9 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                 setDeletedMessageLayout(viewState.deletedMessage)
                 setBubbleBackground(viewState, recyclerViewWidth)
                 setGroupActionIndicatorLayout(viewState.groupActionIndicator)
-                setUnsupportedMessageTypeLayout(viewState.unsupportedMessageType)
 
                 if (viewState.background !is BubbleBackground.Gone) {
+                    setUnsupportedMessageTypeLayout(viewState.unsupportedMessageType)
                     setBubbleMessageLayout(viewState.bubbleMessage)
                     setBubbleDirectPaymentLayout(viewState.bubbleDirectPayment)
                     setBubblePaidMessageDetailsLayout(
@@ -217,8 +217,8 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                                 .also { disposables.add(it) }
                         }
                     }
+                    setBubbleReplyMessage(viewState.bubbleReplyMessage)
                 }
-                setBubbleReplyMessage(viewState.bubbleReplyMessage)
             }
         }
 
