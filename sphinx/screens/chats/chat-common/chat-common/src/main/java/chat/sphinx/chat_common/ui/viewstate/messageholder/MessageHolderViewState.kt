@@ -121,12 +121,13 @@ internal sealed class MessageHolderViewState(
         }
     }
 
-    val bubbleGiphy: LayoutState.Bubble.ContainerBottom.Giphy? by lazy(LazyThreadSafetyMode.NONE) {
-        message?.giphyData?.let {
-            LayoutState.Bubble.ContainerBottom.Giphy(
-                message = message,
-                url = GiphyUrl(it.url)
-            )
+    val bubbleGiphy: LayoutState.Bubble.Giphy? by lazy(LazyThreadSafetyMode.NONE) {
+        message.giphyData?.let {
+            if (it.url.isNotEmpty()) {
+                LayoutState.Bubble.Giphy(it.url.replace("giphy.gif", "200w.gif"))
+            } else {
+                null
+            }
         }
     }
 
