@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="side_effect_decryption_failed">Decryption Failed</string>
+    <string name="side_effect_generate_token_failed">Generate token failed</string>
+    <string name="sign_up_get_started_button">Get Started</string>
+    <string name="sign_up_friend_message">A message from your friend…</string>
+    <string name="sign_up_next_button">Next</string>
 </resources>

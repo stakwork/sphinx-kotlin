@@ -8,7 +8,7 @@ import io.matthewnelson.concept_navigation.Navigator
 abstract class OnBoardNavigator(
     navigationDriver: BaseNavigationDriver<NavController>
 ): Navigator<NavController>(navigationDriver) {
-    abstract suspend fun toDashboardScreen()
+    abstract suspend fun toOnBoardNameScreen()
     suspend fun popBackStack() {
         navigationDriver.submitNavigationRequest(PopBackStack())
     }
