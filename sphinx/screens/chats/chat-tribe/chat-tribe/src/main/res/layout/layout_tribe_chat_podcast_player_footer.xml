@@ -18,11 +18,12 @@
         android:textColor="@color/text"
         android:textSize="@dimen/chat_footer_episode_title_text_size"
         android:fontFamily="@font/roboto_regular"
+        android:text=""
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/text_view_boost_podcast_button"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:text="Ocean Ranger" />
+        tools:text="Episode Title"/>
 
     <!--  Boost Button  -->
     <androidx.appcompat.widget.AppCompatTextView
@@ -38,7 +39,7 @@
         android:gravity="center"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@id/text_view_episode_title"
+        app:layout_constraintEnd_toStartOf="@id/text_view_forward_30_button"
         app:layout_constraintTop_toTopOf="parent" />
 
 
@@ -47,12 +48,12 @@
         android:id="@+id/text_view_forward_30_button"
         android:layout_width="@dimen/chat_footer_button_xy"
         android:layout_height="@dimen/chat_footer_button_xy"
-        android:layout_marginHorizontal="@dimen/default_layout_margin"
         android:background="@drawable/ic_forward_30"
         android:backgroundTint="@color/secondaryText"
         android:gravity="center"
+        android:layout_marginHorizontal="@dimen/default_layout_margin"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@id/text_view_boost_podcast_button"
+        app:layout_constraintEnd_toStartOf="@id/text_view_play_button"
         app:layout_constraintTop_toTopOf="parent" />
 
 
@@ -67,10 +68,9 @@
         android:text="@string/material_icon_name_play_button"
         android:textColor="@color/receivedIcon"
         android:textSize="@dimen/chat_footer_button_icon_text_size"
-        android:visibility="gone"
+        android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/text_view_forward_30_button"
         app:layout_constraintTop_toTopOf="parent"
         tools:visibility="visible" />
 
@@ -88,9 +88,7 @@
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/text_view_forward_30_button"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:visibility="gone" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"

@@ -27,7 +27,7 @@
         android:layout_width="match_parent"
         android:layout_height="8dp"
         android:src="@drawable/bottom_bar_elevation_gradient"
-        app:layout_constraintBottom_toTopOf="@+id/include_chat_tribe_footer" />
+        app:layout_constraintBottom_toTopOf="@+id/include_tribe_chat_podcast_player_footer" />
 
     <include
         android:id="@+id/include_tribe_chat_podcast_player_footer"
