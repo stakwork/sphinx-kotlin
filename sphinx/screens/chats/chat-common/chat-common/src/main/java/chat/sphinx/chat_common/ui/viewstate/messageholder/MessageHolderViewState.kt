@@ -38,9 +38,9 @@ internal sealed class MessageHolderViewState(
         }
     }
 
-    val unsupportedMessageType: LayoutState.UnsupportedMessageType? by lazy(LazyThreadSafetyMode.NONE) {
+    val unsupportedMessageType: LayoutState.Bubble.ContainerMiddle.UnsupportedMessageType? by lazy(LazyThreadSafetyMode.NONE) {
         if (unsupportedMessageTypes.contains(message.type)) {
-            LayoutState.UnsupportedMessageType(
+            LayoutState.Bubble.ContainerMiddle.UnsupportedMessageType(
                 messageType = message.type,
                 gravityStart = this is Received,
             )
@@ -74,28 +74,28 @@ internal sealed class MessageHolderViewState(
         }
     }
 
-    val bubbleDirectPayment: LayoutState.Bubble.DirectPayment? by lazy(LazyThreadSafetyMode.NONE) {
+    val bubbleDirectPayment: LayoutState.Bubble.ContainerTop.DirectPayment? by lazy(LazyThreadSafetyMode.NONE) {
         if (message.type.isDirectPayment()) {
-            LayoutState.Bubble.DirectPayment(showSent = this is Sent, amount = message.amount)
+            LayoutState.Bubble.ContainerTop.DirectPayment(showSent = this is Sent, amount = message.amount)
         } else {
             null
         }
     }
 
-    val bubbleMessage: LayoutState.Bubble.Message? by lazy(LazyThreadSafetyMode.NONE) {
+    val bubbleMessage: LayoutState.Bubble.ContainerMiddle.Message? by lazy(LazyThreadSafetyMode.NONE) {
         message.retrieveTextToShow()?.let { text ->
-            LayoutState.Bubble.Message(text = text)
+            LayoutState.Bubble.ContainerMiddle.Message(text = text)
         }
     }
 
-    val bubblePaidMessageDetails: LayoutState.Bubble.PaidMessageDetails? by lazy(LazyThreadSafetyMode.NONE) {
+    val bubblePaidMessageDetails: LayoutState.Bubble.ContainerBottom.PaidMessageDetails? by lazy(LazyThreadSafetyMode.NONE) {
         if (!message.isPaidMessage) {
             null
         } else {
             val isPaymentPending = message.status.isPending()
 
             message.type.let { type ->
-                LayoutState.Bubble.PaidMessageDetails(
+                LayoutState.Bubble.ContainerBottom.PaidMessageDetails(
                     amount = message.amount,
                     purchaseType = if (type.isPurchase()) type else null,
                     isShowingReceivedMessage = this is Received,
@@ -108,12 +108,12 @@ internal sealed class MessageHolderViewState(
         }
     }
 
-    val bubblePaidMessageSentStatus: LayoutState.Bubble.PaidMessageSentStatus? by lazy(LazyThreadSafetyMode.NONE) {
+    val bubblePaidMessageSentStatus: LayoutState.Bubble.ContainerTop.PaidMessageSentStatus? by lazy(LazyThreadSafetyMode.NONE) {
         if (!message.isPaidMessage || this !is Sent) {
             null
         } else {
             message.type.let { type ->
-                LayoutState.Bubble.PaidMessageSentStatus(
+                LayoutState.Bubble.ContainerTop.PaidMessageSentStatus(
                     amount = message.amount,
                     purchaseType = if (type.isPurchase()) type else null,
                 )
@@ -121,10 +121,10 @@ internal sealed class MessageHolderViewState(
         }
     }
 
-    val bubbleGiphy: LayoutState.Bubble.Giphy? by lazy(LazyThreadSafetyMode.NONE) {
+    val bubbleGiphy: LayoutState.Bubble.ContainerTop.Giphy? by lazy(LazyThreadSafetyMode.NONE) {
         message.giphyData?.let {
             if (it.url.isNotEmpty()) {
-                LayoutState.Bubble.Giphy(it.url.replace("giphy.gif", "200w.gif"))
+                LayoutState.Bubble.ContainerTop.Giphy(it.url.replace("giphy.gif", "200w.gif"))
             } else {
                 null
             }
@@ -173,9 +173,9 @@ internal sealed class MessageHolderViewState(
             }
         }
 
-    val bubbleReplyMessage: LayoutState.Bubble.ReplyMessage? by lazy {
+    val bubbleReplyMessage: LayoutState.Bubble.ContainerTop.ReplyMessage? by lazy {
         message.replyMessage?.let { nnMessage ->
-            LayoutState.Bubble.ReplyMessage(
+            LayoutState.Bubble.ContainerTop.ReplyMessage(
                 messageSenderName(nnMessage),
 
                 nnMessage.retrieveTextToShow() ?: "",

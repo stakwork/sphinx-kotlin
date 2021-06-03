@@ -23,19 +23,18 @@ import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.visible
 
-
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun LayoutMessageHolderBinding.setUnsupportedMessageTypeLayout(
-    messageTypeDetails: LayoutState.UnsupportedMessageType?
+    unsupportedMessage: LayoutState.Bubble.ContainerMiddle.UnsupportedMessageType?
 ) {
     includeMessageHolderBubble.includeUnsupportedMessageTypePlaceholder.apply {
-        if (messageTypeDetails == null) {
+        if (unsupportedMessage == null) {
             root.gone
         } else {
             root.visible
 
-            val messageTypeDisplayString = when (messageTypeDetails.messageType) {
+            val messageTypeDisplayString = when (unsupportedMessage.messageType) {
                 MessageType.Delete,
                 MessageType.DirectPayment,
                 MessageType.GroupAction.Join,
@@ -92,17 +91,15 @@ internal inline fun LayoutMessageHolderBinding.setUnsupportedMessageTypeLayout(
                 R.string.unsupported_message_type_placeholder_text,
                 messageTypeDisplayString
             )
-            textViewPlaceholderMessage.gravity = if (messageTypeDetails.gravityStart) Gravity.START else Gravity.END
+            textViewPlaceholderMessage.gravity = if (unsupportedMessage.gravityStart) Gravity.START else Gravity.END
         }
     }
 }
 
-
-
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun LayoutMessageHolderBinding.setBubbleDirectPaymentLayout(
-    directPayment: LayoutState.Bubble.DirectPayment?
+    directPayment: LayoutState.Bubble.ContainerTop.DirectPayment?
 ) {
     includeMessageHolderBubble.includeMessageTypeDirectPayment.apply {
         if (directPayment == null) {
@@ -260,7 +257,6 @@ internal inline fun LayoutMessageHolderBinding.setStatusHeader(
     }
 }
 
-
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun LayoutMessageHolderBinding.setDeletedMessageLayout(
@@ -285,11 +281,10 @@ internal inline fun LayoutMessageHolderBinding.setDeletedMessageLayout(
     }
 }
 
-
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun LayoutMessageHolderBinding.setBubbleMessageLayout(
-    message: LayoutState.Bubble.Message?
+    message: LayoutState.Bubble.ContainerMiddle.Message?
 ) {
     includeMessageHolderBubble.textViewMessageText.apply {
         if (message == null) {
@@ -304,7 +299,7 @@ internal inline fun LayoutMessageHolderBinding.setBubbleMessageLayout(
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun LayoutMessageHolderBinding.setBubblePaidMessageDetailsLayout(
-    paidDetails: LayoutState.Bubble.PaidMessageDetails?,
+    paidDetails: LayoutState.Bubble.ContainerBottom.PaidMessageDetails?,
     bubbleBackground: BubbleBackground
 ) {
     includeMessageHolderBubble.includePaidMessageReceivedDetailsHolder.apply {
@@ -382,7 +377,7 @@ internal inline fun LayoutMessageHolderBinding.setBubblePaidMessageDetailsLayout
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun LayoutMessageHolderBinding.setBubblePaidMessageSentStatusLayout(
-    paidSentStatus: LayoutState.Bubble.PaidMessageSentStatus?
+    paidSentStatus: LayoutState.Bubble.ContainerTop.PaidMessageSentStatus?
 ) {
     includeMessageHolderBubble.includePaidMessageSentStatusDetails.apply {
         if (paidSentStatus == null) {
@@ -414,7 +409,7 @@ internal inline fun LayoutMessageHolderBinding.setBubblePaidMessageSentStatusLay
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun LayoutMessageHolderBinding.setBubbleGiphy(
-    giphy: LayoutState.Bubble.Giphy?,
+    giphy: LayoutState.Bubble.ContainerTop.Giphy?,
     loadImage: (ImageView, String) -> Unit,
 ) {
     includeMessageHolderBubble.includeMessageTypeImageAttachment.apply {
@@ -534,7 +529,6 @@ internal inline fun LayoutMessageHolderBinding.setBubbleReactionBoosts(
     }
 }
 
-
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun LayoutMessageHolderBinding.setGroupActionIndicatorLayout(
@@ -583,7 +577,6 @@ internal inline fun LayoutMessageHolderBinding.setGroupActionIndicatorLayout(
         }
     }
 }
-
 
 /**
  * Announces the result of a group action.
@@ -640,7 +633,6 @@ private inline fun LayoutMessageHolderBinding.setGroupActionJoinRequestAdminLayo
     }
 }
 
-
 /**
  * Tells a member that they've been removed from a group and shows
  * a button that lets them delete the group.
@@ -657,11 +649,10 @@ private inline fun LayoutMessageHolderBinding.setGroupActionMemberRemovalLayout(
     }
 }
 
-
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun LayoutMessageHolderBinding.setBubbleReplyMessage(
-    replyMessage: LayoutState.Bubble.ReplyMessage?
+    replyMessage: LayoutState.Bubble.ContainerTop.ReplyMessage?
 ) {
     includeMessageHolderBubble.includeMessageReply.apply {
         if (replyMessage == null) {
@@ -696,4 +687,3 @@ internal inline fun LayoutMessageHolderBinding.setBubbleReplyMessage(
         }
     }
 }
-
