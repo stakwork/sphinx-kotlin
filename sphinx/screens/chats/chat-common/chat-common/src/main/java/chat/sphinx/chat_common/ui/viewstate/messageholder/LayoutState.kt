@@ -8,12 +8,6 @@ import chat.sphinx.wrapper_message.MessageType
 
 internal sealed class LayoutState {
 
-    data class UnsupportedMessageType(
-        val messageType: MessageType,
-        val gravityStart: Boolean,
-    ): LayoutState()
-
-
     data class MessageStatusHeader(
         val senderName: String?,
         val showSent: Boolean,
@@ -42,49 +36,73 @@ internal sealed class LayoutState {
         val timestamp: String,
     ): LayoutState()
 
+    // TODO: Create ContainerTop and ContainerMiddle sub sealed classes to reflect
+    //  how the layout is structured
     sealed class Bubble: LayoutState() {
 
-        data class Message(val text: String): Bubble()
+        sealed class ContainerTop: Bubble() {
 
-        data class DirectPayment(val showSent: Boolean, val amount: Sat): Bubble() {
-            val showReceived: Boolean
-                get() = !showSent
+            data class PaidMessageSentStatus(
+                val amount: Sat,
+                val purchaseType: MessageType.Purchase?,
+            ): ContainerTop() {
+                val amountText: String
+                    get() = amount.asFormattedString(appendUnit = true)
+            }
 
-            val unitLabel: String
-                get() = amount.unit
-        }
+            data class DirectPayment(
+                val showSent: Boolean,
+                val amount: Sat
+            ): ContainerTop() {
+                val showReceived: Boolean
+                    get() = !showSent
 
-        data class PaidMessageDetails(
-            val amount: Sat,
-            val purchaseType: MessageType.Purchase?,
-            val isShowingReceivedMessage: Boolean,
-            val showPaymentAcceptedIcon: Boolean,
-            val showPaymentProgressWheel: Boolean,
-            val showSendPaymentIcon: Boolean,
-            val showPaymentReceivedIcon: Boolean,
-        ): LayoutState() {
-            val amountText: String
-                get() = amount.asFormattedString(appendUnit = true)
-        }
+                val unitLabel: String
+                    get() = amount.unit
+            }
 
-        data class PaidMessageSentStatus(
-            val amount: Sat,
-            val purchaseType: MessageType.Purchase?,
-        ): LayoutState() {
-            val amountText: String
-                get() = amount.asFormattedString(appendUnit = true)
-        }
+            // TODO: Rename to ImageAttachment as that is the layout
+            //  it uses and create a sealed interface for what
+            //  values can be set here (url, file, etc.)
+            data class Giphy(
+                val url: String,
+            ): ContainerTop()
 
-        data class ReplyMessage(
-            // TODO: Make sealed interface for handling a url or file
+            // FileAttachment
+            // AudioAttachment
+            // VideoAttachment
+
+            data class ReplyMessage(
+                // TODO: Make sealed interface for handling a url or file
 //            val media: String?,
-            val sender: String,
-            val text: String,
-        ): LayoutState()
+                val sender: String,
+                val text: String,
+            ): ContainerTop()
+
+            // CallInvite
+            // Invoice
+        }
+
+        sealed class ContainerMiddle: Bubble() {
+
+            data class UnsupportedMessageType(
+                val messageType: MessageType,
+                val gravityStart: Boolean,
+            ): ContainerMiddle()
+
+            data class Message(
+                val text: String
+            ): ContainerMiddle()
+
+            // MessageLinkPreview
+            // TribeLinkPreview
+            // UrlLinkPreview
+
+        }
 
         sealed class ContainerBottom: Bubble() {
 
-            class Boost(
+            data class Boost(
                 private val totalAmount: Sat,
                 val senderPics: Set<BoostReactionImageHolder>
             ): ContainerBottom() {
@@ -102,11 +120,25 @@ internal sealed class LayoutState {
                         null
                     }
             }
+
+            data class PaidMessageDetails(
+                val amount: Sat,
+                val purchaseType: MessageType.Purchase?,
+                val isShowingReceivedMessage: Boolean,
+                val showPaymentAcceptedIcon: Boolean,
+                val showPaymentProgressWheel: Boolean,
+                val showSendPaymentIcon: Boolean,
+                val showPaymentReceivedIcon: Boolean,
+            ): ContainerBottom() {
+                val amountText: String
+                    get() = amount.asFormattedString(appendUnit = true)
+            }
         }
     }
 }
 
 // TODO: TEMPORARY!!! until Initial holder can be refactored...
+
 @JvmInline
 value class SenderPhotoUrl(val value: String): BoostReactionImageHolder
 
