@@ -5,7 +5,6 @@ import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.lightning.unit
 import chat.sphinx.wrapper_message.MessageType
-import chat.sphinx.wrapper_message.Message as WrapperMessage
 
 internal sealed class LayoutState {
 
@@ -43,6 +42,8 @@ internal sealed class LayoutState {
         val timestamp: String,
     ): LayoutState()
 
+    // TODO: Create ContainerTop and ContainerMiddle sub sealed classes to reflect
+    //  how the layout is structured
     sealed class Bubble: LayoutState() {
 
         data class Message(val text: String): Bubble()
@@ -63,7 +64,7 @@ internal sealed class LayoutState {
             val showPaymentProgressWheel: Boolean,
             val showSendPaymentIcon: Boolean,
             val showPaymentReceivedIcon: Boolean,
-        ): LayoutState() {
+        ): Bubble() {
             val amountText: String
                 get() = amount.asFormattedString(appendUnit = true)
         }
@@ -71,7 +72,7 @@ internal sealed class LayoutState {
         data class PaidMessageSentStatus(
             val amount: Sat,
             val purchaseType: MessageType.Purchase?,
-        ): LayoutState() {
+        ): Bubble() {
             val amountText: String
                 get() = amount.asFormattedString(appendUnit = true)
         }
@@ -81,7 +82,14 @@ internal sealed class LayoutState {
 //            val media: String?,
             val sender: String,
             val text: String,
-        ): LayoutState()
+        ): Bubble()
+
+        // TODO: Rename to Image Attachment as that is the layout
+        //  it uses and create a sealed interface for what
+        //  values can be set here (url, file, etc.)
+        data class Giphy(
+            val url: String,
+        ): Bubble()
 
         sealed class ContainerBottom: Bubble() {
 
@@ -103,23 +111,11 @@ internal sealed class LayoutState {
                         null
                     }
             }
-
-            class Giphy(
-                val message: WrapperMessage,
-                val url: GiphyUrl,
-            ): ContainerBottom() {
-                val giphyUrl: GiphyUrl
-                    get() = GiphyUrl(url.value.replace("giphy.gif", "200w.gif"))
-            }
         }
     }
 }
 
 // TODO: TEMPORARY!!! until Initial holder can be refactored...
-@JvmInline
-value class GiphyUrl(val value: String): GiphyImageHolder
-
-sealed interface GiphyImageHolder
 
 @JvmInline
 value class SenderPhotoUrl(val value: String): BoostReactionImageHolder
