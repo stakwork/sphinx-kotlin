@@ -11,6 +11,7 @@ import chat.sphinx.address_book.navigation.AddressBookNavigator
 import chat.sphinx.chat_contact.navigation.ContactChatNavigator
 import chat.sphinx.chat_group.navigation.GroupChatNavigator
 import chat.sphinx.chat_tribe.navigation.TribeChatNavigator
+import chat.sphinx.chat_tribe.podcast_player.navigation.TribeChatPodcastPlayerNavigator
 import chat.sphinx.create_tribe.navigation.CreateTribeNavigator
 import chat.sphinx.dashboard.navigation.DashboardBottomNavBarNavigator
 import chat.sphinx.dashboard.navigation.DashboardNavDrawerNavigator
@@ -223,6 +224,6 @@ internal object NavigationModule {
     @Provides
     fun provideTribeChatPodcastPlayerNavigator(
         tribeChatPodcastPlayerNavigatorImpl: TribeChatPodcastPlayerNavigatorImpl
-    ): TribeChatPodcastPlayerNavigatorImpl =
+    ): TribeChatPodcastPlayerNavigator =
         tribeChatPodcastPlayerNavigatorImpl
 }

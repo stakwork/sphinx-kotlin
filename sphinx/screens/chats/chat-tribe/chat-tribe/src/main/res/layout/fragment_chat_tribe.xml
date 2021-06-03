@@ -52,7 +52,7 @@
         app:layout_constraintBottom_toTopOf="@id/include_chat_tribe_footer"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="include_tribe_chat_podcast_player_footer"
+        app:layout_constraintTop_toBottomOf="@id/include_tribe_chat_podcast_player_footer"
         tools:visibility="visible" />
 
 
