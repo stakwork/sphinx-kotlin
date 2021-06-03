@@ -125,8 +125,7 @@ internal sealed class MessageHolderViewState(
         message?.giphyData?.let {
             LayoutState.Bubble.ContainerBottom.Giphy(
                 message = message,
-                url = GiphyUrl(it.url),
-                text = it.text,
+                url = GiphyUrl(it.url)
             )
         }
     }

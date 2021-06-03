@@ -107,7 +107,6 @@ internal sealed class LayoutState {
             class Giphy(
                 val message: WrapperMessage,
                 val url: GiphyUrl,
-                val text: String?,
             ): ContainerBottom() {
                 val giphyUrl: GiphyUrl
                     get() = GiphyUrl(url.value.replace("giphy.gif", "200w.gif"))

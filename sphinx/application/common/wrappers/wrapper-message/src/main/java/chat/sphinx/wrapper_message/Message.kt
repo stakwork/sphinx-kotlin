@@ -26,11 +26,11 @@ inline val Message.isPaidMessage: Boolean
 inline fun Message.retrieveTextToShow(): String? =
     messageContentDecrypted?.let { decrypted ->
         // TODO Handle podcast clips `clip::.....`
-         if (giphyData == null) {
-             decrypted.value
-         } else {
-             null
-         }
+        if (giphyData != null) {
+            return giphyData?.text
+        }
+        decrypted.value
+
 //            ?.text
 //            ?: if (podBoost == null) {
 //                decrypted.value

@@ -37,7 +37,7 @@
     <!-- Message type heights  -->
     <dimen name="message_type_boost_height">26dp</dimen>
     <dimen name="message_type_direct_payment_height">46dp</dimen>
-    <dimen name="message_type_image_attachment_height">208dp</dimen>
+    <dimen name="message_type_image_attachment_min_height">100dp</dimen>
     <dimen name="message_type_file_attachment_height">60dp</dimen>
     <dimen name="message_type_audio_attachment_height">62dp</dimen>
     <dimen name="message_type_video_attachment_height">210dp</dimen>

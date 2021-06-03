@@ -417,15 +417,6 @@ internal inline fun LayoutMessageHolderBinding.setBubbleGiphy(
     message: LayoutState.Bubble.ContainerBottom.Giphy?,
     loadImage: (ImageView, GiphyUrl) -> Unit,
 ) {
-    includeMessageHolderBubble.textViewMessageText.apply {
-        if (message?.message?.giphyData?.text?.isNotEmpty() == true) {
-            visible
-            text = message?.message?.giphyData?.text
-        } else {
-            gone
-        }
-    }
-
     includeMessageHolderBubble.includeMessageTypeImageAttachment.apply {
         if ((message?.message?.giphyData?.url?.isNotEmpty() == true)) {
             message?.giphyUrl?.let { giphyUrl ->
