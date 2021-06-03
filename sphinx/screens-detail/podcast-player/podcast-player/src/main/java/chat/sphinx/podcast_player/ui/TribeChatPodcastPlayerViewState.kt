@@ -1,4 +1,4 @@
-package chat.sphinx.chat_tribe.podcast_player.ui
+package chat.sphinx.podcast_player.ui
 
 import io.matthewnelson.concept_views.viewstate.ViewState
 

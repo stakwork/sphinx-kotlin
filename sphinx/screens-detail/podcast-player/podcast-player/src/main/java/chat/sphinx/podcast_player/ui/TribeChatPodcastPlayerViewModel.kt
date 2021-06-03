@@ -1,6 +1,6 @@
-package chat.sphinx.chat_tribe.podcast_player.ui
+package chat.sphinx.podcast_player.ui
 
-import chat.sphinx.chat_tribe.podcast_player.navigation.TribeChatPodcastPlayerNavigator
+import chat.sphinx.podcast_player.navigation.TribeChatPodcastPlayerNavigator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.BaseViewModel
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers

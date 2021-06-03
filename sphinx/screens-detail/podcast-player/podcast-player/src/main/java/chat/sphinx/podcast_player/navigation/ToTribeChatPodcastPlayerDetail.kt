@@ -1,8 +1,8 @@
-package chat.sphinx.chat_tribe.podcast_player.navigation
+package chat.sphinx.podcast_player.navigation
 
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
-import chat.sphinx.chat_tribe.podcast_player.R
+import chat.sphinx.podcast_player.R
 import chat.sphinx.detail_resources.DetailNavOptions
 import io.matthewnelson.concept_navigation.NavigationRequest
 

@@ -1,7 +1,7 @@
 package chat.sphinx.activitymain.navigation.navigators.detail
 
 import chat.sphinx.activitymain.navigation.drivers.DetailNavigationDriver
-import chat.sphinx.chat_tribe.podcast_player.navigation.TribeChatPodcastPlayerNavigator
+import chat.sphinx.podcast_player.navigation.TribeChatPodcastPlayerNavigator
 import javax.inject.Inject
 
 internal class TribeChatPodcastPlayerNavigatorImpl  @Inject constructor (

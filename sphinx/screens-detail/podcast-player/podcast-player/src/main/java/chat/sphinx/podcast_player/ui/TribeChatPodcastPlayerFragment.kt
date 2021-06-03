@@ -1,14 +1,13 @@
-package chat.sphinx.chat_tribe.podcast_player.ui
+package chat.sphinx.podcast_player.ui
 
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.viewModels
 import by.kirich1409.viewbindingdelegate.viewBinding
-import chat.sphinx.chat_tribe.podcast_player.R
-import chat.sphinx.chat_tribe.podcast_player.databinding.FragmentTribeChatPodcastPlayerBinding
+import chat.sphinx.podcast_player.R
+import chat.sphinx.podcast_player.databinding.FragmentTribeChatPodcastPlayerBinding
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.base.BaseFragment
-import kotlinx.coroutines.launch
 
 
 @AndroidEntryPoint

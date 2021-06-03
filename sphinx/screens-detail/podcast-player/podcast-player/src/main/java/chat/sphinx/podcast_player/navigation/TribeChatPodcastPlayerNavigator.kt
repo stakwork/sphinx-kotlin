@@ -1,4 +1,4 @@
-package chat.sphinx.chat_tribe.podcast_player.navigation
+package chat.sphinx.podcast_player.navigation
 
 import androidx.navigation.NavController
 import io.matthewnelson.android_feature_navigation.requests.PopBackStack
