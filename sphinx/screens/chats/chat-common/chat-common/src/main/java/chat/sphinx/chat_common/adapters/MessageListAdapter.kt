@@ -206,7 +206,7 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                 if (viewState.background !is BubbleBackground.Gone) {
                     setBubbleGiphy(viewState.bubbleGiphy) { imageView, url ->
                         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-                            imageLoader.load(imageView, url.value)
+                            imageLoader.load(imageView, url)
                                 .also { disposables.add(it) }
                         }
                     }
