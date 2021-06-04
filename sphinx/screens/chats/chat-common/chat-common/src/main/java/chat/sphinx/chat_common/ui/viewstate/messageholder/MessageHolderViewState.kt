@@ -84,7 +84,11 @@ internal sealed class MessageHolderViewState(
 
     val bubbleMessage: LayoutState.Bubble.ContainerMiddle.Message? by lazy(LazyThreadSafetyMode.NONE) {
         message.retrieveTextToShow()?.let { text ->
-            LayoutState.Bubble.ContainerMiddle.Message(text = text)
+            if (text.isNotEmpty()) {
+                LayoutState.Bubble.ContainerMiddle.Message(text = text)
+            } else {
+                null
+            }
         }
     }
 
