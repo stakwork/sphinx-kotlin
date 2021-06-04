@@ -1,0 +1,42 @@
+plugins {
+    id 'com.android.library'
+    id 'kotlin-android'
+}
+
+android {
+    compileSdkVersion versions.compileSdk
+    buildToolsVersion versions.buildTools
+
+    defaultConfig {
+        minSdkVersion versions.minSdk
+        targetSdkVersion versions.compileSdk
+        versionCode VERSION_CODE.toInteger()
+        versionName VERSION_NAME
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunnerArguments disableAnalytics: 'true'
+        consumerProguardFiles "consumer-rules.pro"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: "libs", include: ["*.jar"])
+
+    // KotlinAndroid
+    api project(path: ':kotlin:common:build-config')
+    api project(path: ':kotlin:concepts:concept-coroutines')
+    api project(path: ':kotlin:concepts:authentication:concept-authentication')
+
+    // Sphinx
+    api project(path: ':sphinx:application:common:logger')
+    api project(path: ':sphinx:application:network:concepts:tor:concept-network-tor')
+
+    implementation deps.matthewNelson.toplService
+    implementation deps.matthewNelson.torBinary
+}

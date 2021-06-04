@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="lock_icon_text_size">21sp</dimen>
+    <dimen name="enter_pin_text_size">17sp</dimen>
+    <dimen name="pin_pad_text_size">27sp</dimen>
+    <dimen name="pin_pad_backspace_text_size">24sp</dimen>
+    <dimen name="pin_pad_padding">16dp</dimen>
+    <dimen name="pin_pad_backspace_padding">20dp</dimen>
+</resources>

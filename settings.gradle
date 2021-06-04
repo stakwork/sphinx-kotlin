@@ -3,14 +3,117 @@ rootProject.name = "Sphinx"
 ////////////////////////////////
 //////////// Sphinx ////////////
 ////////////////////////////////
-include ':sphinx:sphinx'
-include ':sphinx:android:common:resources'
+include ':sphinx:application:sphinx'
 
-// Activities
-include ':sphinx:android:activitymain'
+include ':sphinx:application:common:resources'
+include ':sphinx:application:common:kotlin-response'
+include ':sphinx:application:common:logger'
+
+include ':sphinx:application:common:wrappers:wrapper-chat'
+include ':sphinx:application:common:wrappers:wrapper-common'
+include ':sphinx:application:common:wrappers:wrapper-contact'
+include ':sphinx:application:common:wrappers:wrapper-invite'
+include ':sphinx:application:common:wrappers:wrapper-lightning'
+include ':sphinx:application:common:wrappers:wrapper-message'
+include ':sphinx:application:common:wrappers:wrapper-relay'
+include ':sphinx:application:common:wrappers:wrapper-rsa'
+include ':sphinx:application:common:wrappers:wrapper-subscription'
+include ':sphinx:application:common:wrappers:wrapper-view'
+
+include ':sphinx:application:data:concepts:crypto:concept-crypto-rsa'
+include ':sphinx:application:data:features:crypto:feature-crypto-rsa'
+include ':sphinx:application:data:concepts:concept-background-login'
+include ':sphinx:application:data:features:feature-background-login'
+include ':sphinx:application:data:concepts:concept-coredb'
+include ':sphinx:application:data:features:feature-coredb'
+include ':sphinx:application:data:concepts:concept-image-loader'
+include ':sphinx:application:data:features:image-loader:feature-image-loader-android'
+include ':sphinx:application:data:concepts:concept-paging'
+include ':sphinx:application:data:concepts:concept-relay'
+include ':sphinx:application:data:features:feature-relay'
+
+include ':sphinx:application:data:concepts:repositories:concept-repository-chat'
+include ':sphinx:application:data:concepts:repositories:concept-repository-contact'
+include ':sphinx:application:data:concepts:repositories:concept-repository-dashboard'
+include ':sphinx:application:data:concepts:repositories:concept-repository-dashboard-android'
+include ':sphinx:application:data:concepts:repositories:concept-repository-lightning'
+include ':sphinx:application:data:concepts:repositories:concept-repository-message'
+include ':sphinx:application:data:features:feature-repository'
+include ':sphinx:application:data:features:feature-repository-android'
+
+include ':sphinx:application:network:concepts:clients:concept-network-client'
+include ':sphinx:application:network:concepts:clients:concept-network-client-cache'
+include ':sphinx:application:network:features:feature-network-client'
+include ':sphinx:application:network:concepts:queries:concept-network-query-chat'
+include ':sphinx:application:network:features:queries:feature-network-query-chat'
+include ':sphinx:application:network:concepts:queries:concept-network-query-contact'
+include ':sphinx:application:network:features:queries:feature-network-query-contact'
+include ':sphinx:application:network:concepts:queries:concept-network-query-invite'
+include ':sphinx:application:network:features:queries:feature-network-query-invite'
+include ':sphinx:application:network:concepts:queries:concept-network-query-lightning'
+include ':sphinx:application:network:features:queries:feature-network-query-lightning'
+include ':sphinx:application:network:concepts:queries:concept-network-query-message'
+include ':sphinx:application:network:features:queries:feature-network-query-message'
+include ':sphinx:application:network:concepts:queries:concept-network-query-subscription'
+include ':sphinx:application:network:features:queries:feature-network-query-subscription'
+include ':sphinx:application:network:concepts:calls:concept-network-call'
+include ':sphinx:application:network:concepts:calls:concept-network-relay-call'
+include ':sphinx:application:network:features:feature-network-relay-call'
+include ':sphinx:application:network:concepts:concept-socket-io'
+include ':sphinx:application:network:features:feature-socket-io'
+include ':sphinx:application:network:concepts:tor:concept-network-tor'
+include ':sphinx:application:network:features:tor:feature-network-tor'
+
+// Activity
+include ':sphinx:activity:hilt-qualifiers'
+include ':sphinx:activity:insetter-activity'
+include ':sphinx:activity:main:activitymain'
+include ':sphinx:activity:concepts:concept-view-model-coordinator'
+include ':sphinx:activity:features:feature-view-model-coordinator'
 
 // Screens
+include ':sphinx:screens:add-sats:add-sats'
+include ':sphinx:screens:address-book:address-book'
+include ':sphinx:screens:authentication:authentication'
+include ':sphinx:screens:authentication:authentication-resources'
+include ':sphinx:screens:chats:chat-common:chat-common'
+include ':sphinx:screens:chats:chat-contact:chat-contact'
+include ':sphinx:screens:chats:chat-group:chat-group'
+include ':sphinx:screens:chats:chat-tribe:chat-tribe'
+include ':sphinx:screens:dashboard:dashboard'
+include ':sphinx:screens:onboard:onboard'
+include ':sphinx:screens:onboard:onboard-name'
+include ':sphinx:screens:onboard:onboard-ready'
+include ':sphinx:screens:profile:profile'
+include ':sphinx:screens:splash:splash'
+include ':sphinx:screens:splash:key-restore'
 
+// Screens-Detail
+include ':sphinx:screens-detail:add-friend:add-friend'
+include ':sphinx:screens-detail:common:detail-resources'
+include ':sphinx:screens-detail:create-tribe:create-tribe'
+include ':sphinx:screens-detail:join-tribe:join-tribe'
+include ':sphinx:screens-detail:new-contact:new-contact'
+include ':sphinx:screens-detail:payments:payment-receive:payment-receive'
+include ':sphinx:screens-detail:payments:payment-send:payment-send'
+include ':sphinx:screens-detail:scanner:scanner'
+include ':sphinx:screens-detail:scanner:scanner-view-model-coordinator'
+include ':sphinx:screens-detail:support-ticket:support-ticket'
+include ':sphinx:screens-detail:transactions:transactions'
+include ':sphinx:screens-detail:qr-code:qr-code'
+
+// Service
+include ':sphinx:service:concepts:concept-service-notification'
+include ':sphinx:service:features:notifications:feature-service-notification-empty'
+include ':sphinx:service:features:notifications:feature-service-notification-firebase'
+
+// Testing
+include ':sphinx:test:test-network-query'
+include ':sphinx:test:test-tor-manager'
+
+// SocketIO
+include ':socket-io:client'
+include ':socket-io:engine'
 
 ////////////////////////////////////////
 //////////// Kotlin Android ////////////
@@ -83,12 +186,12 @@ project(':kotlin:concepts:concept-views').projectDir =
 include ':kotlin:crypto:bouncycastle-ktx'
 project(':kotlin:crypto:bouncycastle-ktx').projectDir =
         file(new File(rootDir, 'kotlin-android/kotlin/crypto/bouncycastle-ktx'))
+include ':kotlin:crypto:crypto-common'
+project(':kotlin:crypto:crypto-common').projectDir =
+        file(new File(rootDir, 'kotlin-android/kotlin/crypto/crypto-common'))
 include ':kotlin:crypto:k-openssl'
 project(':kotlin:crypto:k-openssl').projectDir =
         file(new File(rootDir, 'kotlin-android/kotlin/crypto/k-openssl'))
-include ':kotlin:crypto:k-openssl-common'
-project(':kotlin:crypto:k-openssl-common').projectDir =
-        file(new File(rootDir, 'kotlin-android/kotlin/crypto/k-openssl-common'))
 
 ////////////////////////
 /// :kotlin:encoders ///
@@ -122,10 +225,12 @@ project(':kotlin:features:feature-navigation').projectDir =
 include ':kotlin:test:test-concept-coroutines'
 project(':kotlin:test:test-concept-coroutines').projectDir =
         file(new File(rootDir, 'kotlin-android/kotlin/test/test-concept-coroutines'))
+include ':kotlin:test:test-feature-authentication-core'
+project(':kotlin:test:test-feature-authentication-core').projectDir =
+        file(new File(rootDir, 'kotlin-android/kotlin/test/test-feature-authentication-core'))
 include ':kotlin:test:test-k-openssl'
 project(':kotlin:test:test-k-openssl').projectDir =
         file(new File(rootDir, 'kotlin-android/kotlin/test/test-k-openssl'))
-
 
 //include ':sample'
 //project(':sample').projectDir = file(new File(rootDir, 'kotlin-android/sample'))

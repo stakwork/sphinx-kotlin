@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout  xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_constraint_pin_content"
+    android:layout_width="match_parent"
+    android:layout_height="65dp"
+    android:layout_marginTop="20dp"
+    android:alpha=".5"
+    app:layout_constraintTop_toBottomOf="@+id/layout_constraint_profile_basic_container_route_hint_content">
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/new_contact_pin_text_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/group_pin_label"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginTop="15dp"
+        android:textColor="@color/secondaryText"
+        android:fontFamily="@font/roboto_regular"
+        android:textSize="@dimen/default_form_text_view_text_size"
+        android:singleLine="true" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/new_contact_pin_question_mark_text_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="2dp"
+        android:text="@string/material_icon_name_help_outline"
+        android:clickable="true"
+        app:layout_constraintBottom_toBottomOf="@+id/new_contact_pin_text_view"
+        app:layout_constraintTop_toTopOf="@+id/new_contact_pin_text_view"
+        app:layout_constraintStart_toEndOf="@+id/new_contact_pin_text_view"
+        android:textColor="@color/secondaryText"
+        android:fontFamily="@font/material_icons_regular"
+        android:textSize="@dimen/pin_help_text_view_size"
+        android:singleLine="true" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/new_contact_pin_toggle_text_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/new_contact_pin_standard_private_label"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:textColor="@color/text"
+        android:fontFamily="@font/roboto_regular"
+        android:textSize="@dimen/pin_text_view_size"
+        android:singleLine="true" />
+
+    <androidx.appcompat.widget.SwitchCompat
+        android:id="@+id/switch_profile_basic_container_pin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:checked="false"
+        android:enabled="false"
+        android:theme="@style/CustomSwitch"
+        android:thumb="@drawable/switch_thumb_selector"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:track="@drawable/switch_track_selector" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

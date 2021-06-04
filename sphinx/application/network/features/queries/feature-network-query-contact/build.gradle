@@ -1,0 +1,20 @@
+plugins {
+    id 'app.cash.exhaustive'
+    id 'java-library'
+    id 'kotlin'
+    id 'kotlin-kapt'
+}
+
+dependencies {
+    api project(path: ':sphinx:application:network:concepts:queries:concept-network-query-contact')
+    api project(path: ':sphinx:application:network:concepts:calls:concept-network-relay-call')
+
+    implementation deps.kotlin.coroutinesCore
+
+    // needed to override moshi's use of 1.4.31
+    implementation deps.kotlin.reflect
+    implementation deps.square.moshi
+    kapt kaptDeps.square.moshiCodegen
+
+    testImplementation project(path: ':sphinx:test:test-network-query')
+}

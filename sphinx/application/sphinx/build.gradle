@@ -1,0 +1,135 @@
+plugins {
+    id 'app.cash.exhaustive'
+    id 'com.android.application'
+    id 'dagger.hilt.android.plugin'
+    id 'kotlin-android'
+    id 'kotlin-kapt'
+}
+
+android {
+    compileSdkVersion versions.compileSdk
+    buildToolsVersion versions.buildTools
+
+    buildFeatures.viewBinding = true
+    defaultConfig {
+        applicationId "chat.sphinx"
+        minSdkVersion versions.minSdk
+        targetSdkVersion versions.compileSdk
+        versionCode VERSION_CODE.toInteger()
+        versionName VERSION_NAME
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunnerArguments disableAnalytics: 'true'
+    }
+
+    // Gradle 4.0's introduction of Google analytics to Android App Developers.
+    // https://developer.android.com/studio/releases/gradle-plugin
+    dependenciesInfo {
+        // Disables dependency metadata when building APKs.
+        includeInApk = false
+        // Disables dependency metadata when building Android App Bundles.
+        includeInBundle = false
+    }
+
+    packagingOptions {
+        exclude 'META-INF/*.kotlin_module'
+        exclude 'META-INF/*.version'
+        jniLibs.useLegacyPackaging = true
+    }
+
+    buildTypes {
+        release {
+            resValue "string", "app_name", "Sphinx"
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            applicationIdSuffix ".debug"
+            resValue "string", "app_name", "Sphinx Debug"
+            debuggable true
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    // Needed for Tor
+    splits {
+        abi {
+            enable true
+            reset()
+            include "x86", "armeabi-v7a", "arm64-v8a", "x86_64"
+            universalApk true
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: "libs", include: ["*.jar"])
+    // KotlinAndroid
+    implementation project(path: ':android:features:authentication:android-feature-authentication-core')
+    implementation project(path: ':android:features:android-feature-screens')
+
+    // Sphinx
+    implementation project(path: ':sphinx:activity:main:activitymain')
+    implementation project(path: ':sphinx:activity:features:feature-view-model-coordinator')
+
+    implementation project(path: ':sphinx:application:common:logger')
+
+    implementation project(path: ':sphinx:application:data:features:feature-background-login')
+    implementation project(path: ':sphinx:application:data:features:feature-coredb')
+    implementation project(path: ':sphinx:application:data:features:crypto:feature-crypto-rsa')
+    implementation project(path: ':sphinx:application:data:features:image-loader:feature-image-loader-android')
+    implementation project(path: ':sphinx:application:data:features:feature-relay')
+    implementation project(path: ':sphinx:application:data:features:feature-repository-android')
+
+    implementation project(path: ':sphinx:application:network:features:feature-network-client')
+    implementation project(path: ':sphinx:application:network:features:queries:feature-network-query-chat')
+    implementation project(path: ':sphinx:application:network:features:queries:feature-network-query-contact')
+    implementation project(path: ':sphinx:application:network:features:queries:feature-network-query-invite')
+    implementation project(path: ':sphinx:application:network:features:queries:feature-network-query-lightning')
+    implementation project(path: ':sphinx:application:network:features:queries:feature-network-query-message')
+    implementation project(path: ':sphinx:application:network:features:queries:feature-network-query-subscription')
+    implementation project(path: ':sphinx:application:network:features:feature-network-relay-call')
+    implementation project(path: ':sphinx:application:network:features:feature-socket-io')
+    implementation project(path: ':sphinx:application:network:features:tor:feature-network-tor')
+
+    implementation project(path: ':sphinx:screens:splash:key-restore')
+
+    // See `/sphinx/service/features/notifications/README.md`
+    if (findProperty("SPHINX_COMPILE_PUSH_NOTIFICATION_TYPE") == "firebase") {
+        // FirebaseMessaging
+        implementation project(path: ':sphinx:service:features:notifications:feature-service-notification-firebase')
+    } else {
+        implementation project(path: ':sphinx:service:features:notifications:feature-service-notification-empty')
+    }
+
+    implementation deps.google.hilt
+    kapt kaptDeps.google.hilt
+
+    implementation deps.sqlCipher
+    implementation deps.sqlRequery
+    implementation deps.square.sqlDelightAndroid
+
+    testImplementation project(path: ':kotlin:test:test-concept-coroutines')
+    testImplementation project(path: ':sphinx:test:test-tor-manager')
+    testImplementation testDeps.robolectric
+    testImplementation testDeps.androidx.core
+
+    androidTestImplementation testDeps.androidx.core
+    androidTestImplementation testDeps.androidx.espresso
+    androidTestImplementation testDeps.androidx.junit
+}
+
+/**
+ * Requires graphviz to be installed:
+ *  - sudo apt-get install graphviz
+ *
+ * Run:
+ *  - ./gradlew :sphinx:application:sphinx:projectDependencyGraph
+ * */
+apply from: rootProject.file('gradle/projectDependencyGraph.gradle')

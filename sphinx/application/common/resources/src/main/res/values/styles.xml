@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="ActionButtonLabelText">
+        <item name="android:fontFamily">@font/montserrat_regular</item>
+        <item name="android:lines">1</item>
+        <item name="android:textAlignment">center</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:textSize">@dimen/default_text_size_action_button_label</item>
+    </style>
+
+    <style name="ActionButtonLabelIcon">
+        <item name="android:fontFamily">@font/material_icons_regular</item>
+        <item name="android:textColor">@color/text</item>
+        <item name="android:textSize">@dimen/default_text_size_tap_target_material_icon</item>
+    </style>
+
+    <style name="CustomSwitch" parent="Theme.AppCompat.Light">
+        <item name="colorControlActivated">@color/primaryBlue</item>
+        <item name="android:colorForeground">@color/lightDivider</item>
+    </style>
+</resources>

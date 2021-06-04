@@ -1,0 +1,23 @@
+plugins {
+    id 'app.cash.exhaustive'
+    id 'com.squareup.sqldelight'
+    id 'java-library'
+    id 'kotlin'
+}
+
+sqldelight {
+    SphinxDatabase {
+        packageName = "chat.sphinx.concept_coredb"
+        schemaOutputDirectory = file("src/main/sqldelight/chat/sphinx/concept_coredb")
+    }
+    linkSqlite = false
+}
+
+dependencies {
+    implementation fileTree(dir: "libs", include: ["*.jar"])
+    api project(path: ':sphinx:application:common:wrappers:wrapper-chat')
+    api project(path: ':sphinx:application:common:wrappers:wrapper-contact')
+    api project(path: ':sphinx:application:common:wrappers:wrapper-invite')
+    api project(path: ':sphinx:application:common:wrappers:wrapper-message')
+    implementation deps.kotlin.coroutinesCore
+}

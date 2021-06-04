@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="chat_footer_initial_holder_xy">45dp</dimen>
+    <dimen name="chat_footer_button_xy">30dp</dimen>
+    <dimen name="chat_footer_send_button_xy">37dp</dimen>
+    <dimen name="chat_footer_send_button_margin_horizontal">11dp</dimen>
+    <dimen name="chat_header_mute_padding_horizontal">4dp</dimen>
+    <dimen name="chat_message_inner_padding">8dp</dimen>
+    <dimen name="chat_message_rounded_corner_radius">9dp</dimen>
+
+    <dimen name="chat_header_headline_text_size">16sp</dimen>
+    <dimen name="chat_header_phone_text_size">25sp</dimen>
+    <dimen name="chat_message_text_size">17sp</dimen>
+
+    <item name="default_space_width_percent" format="float" type="dimen">.2</item>
+    <dimen name="background_message_holder_default_corner_rad">12dp</dimen>
+    <dimen name="background_message_holder_default_padding">16dp</dimen>
+    <dimen name="background_message_holder_default_padding_top">12dp</dimen>
+    <dimen name="message_holder_in_photo_holder_xy">32dp</dimen>
+    <dimen name="audio_button_play_pause_width">60dp</dimen>
+    <dimen name="video_attachment_play_pause_button_xy">50dp</dimen>
+    <dimen name="image_holder_boost_reaction_xy">26dp</dimen>
+    <dimen name="icon_container_message_payment_direction_xy">26dp</dimen>
+    <dimen name="material_icon_text_size_message_payment_status">20sp</dimen>
+    <dimen name="loading_wheel_message_payment_processing_xy">20dp</dimen>
+
+    <dimen name="status_badge_row_padding">10dp</dimen>
+    <dimen name="group_action_message_padding_horizontal">20dp</dimen>
+    <dimen name="group_action_message_padding_vertical">4dp</dimen>
+
+
+    <!-- message_holder_in_photo_holder_xy + 8dp -->
+    <dimen name="message_holder_space_width_left">44dp</dimen>
+    <dimen name="message_holder_space_width_right">6dp</dimen>
+
+
+    <!-- Message type heights  -->
+    <dimen name="message_type_boost_height">26dp</dimen>
+    <dimen name="message_type_direct_payment_height">46dp</dimen>
+    <dimen name="message_type_image_attachment_min_height">100dp</dimen>
+    <dimen name="message_type_file_attachment_height">60dp</dimen>
+    <dimen name="message_type_audio_attachment_height">62dp</dimen>
+    <dimen name="message_type_video_attachment_height">210dp</dimen>
+    <dimen name="paid_message_details_holder_height">50dp</dimen>
+    <dimen name="unsupported_message_type_placeholder_height">50dp</dimen>
+    <dimen name="paywall_overlay_text_message_received_height">50dp</dimen>
+    <dimen name="paywall_overlay_image_message_received_height">210dp</dimen>
+    <dimen name="paywall_overlay_video_message_received_height">210dp</dimen>
+    <dimen name="message_reply_holder_height">50dp</dimen>
+    <dimen name="new_day_separator_holder_height">40dp</dimen>
+    <dimen name="message_type_leave_or_join_group_holder_height">40dp</dimen>
+    <dimen name="message_type_group_kick_holder_height">65dp</dimen>
+    <dimen name="message_type_group_join_request_holder_height">65dp</dimen>
+    <dimen name="message_type_call_invite_holder_height_large">212dp</dimen>
+    <dimen name="message_type_call_invite_holder_height_small">160dp</dimen>
+
+
+    <!-- Icons -->
+    <dimen name="icon_file_attachment_xy">30dp</dimen>
+    <dimen name="icon_file_attachment_text_size">30sp</dimen>
+    <dimen name="icon_file_download_width">30dp</dimen>
+    <dimen name="icon_file_download_text_size">30sp</dimen>
+    <dimen name="icon_play_pause_button_text_size">25sp</dimen>
+    <dimen name="paywall_overlay_video_icon_text_size">40sp</dimen>
+
+
+    <!-- Link Previews  -->
+    <dimen name="web_link_preview_holder_height">100dp</dimen>
+    <dimen name="contact_link_preview_holder_height">168dp</dimen>
+    <dimen name="web_link_preview_image_xy">80dp</dimen>
+    <dimen name="link_preview_action_button_height">40dp</dimen>
+    <dimen name="contact_link_preview_avatar_image_xy">80dp</dimen>
+
+    <!-- Replies  -->
+    <dimen name="reply_message_media_image_xy">40dp</dimen>
+    <dimen name="reply_message_media_icon_text_size">20sp</dimen>
+
+</resources>

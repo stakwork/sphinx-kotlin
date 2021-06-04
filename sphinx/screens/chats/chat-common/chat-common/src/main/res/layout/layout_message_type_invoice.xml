@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:visibility="gone"
+    tools:background="@color/receivedMsgBG"
+    tools:layout_width="200dp"
+    tools:padding="@dimen/default_layout_margin"
+    tools:visibility="visible">
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraint_layout_top_invoice_section"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+
+        <!--
+            Leading QR Icon
+            (For everything except expired sent invoices)
+
+            Dynamically set the icon source and tint color depending
+            on whether the invoice is
+            is active or expired.
+        -->
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/image_view_qr_icon_leading"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:tint="@color/text"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@id/text_view_invoice_amount_number"
+            android:layout_marginEnd="@dimen/chat_message_inner_padding"
+            app:layout_constraintEnd_toStartOf="@+id/text_view_invoice_amount_number"
+            app:layout_constraintStart_toStartOf="parent"
+            tools:srcCompat="@drawable/ic_qr_code"
+            tools:visibility="visible" />
+
+
+        <!-- Invoice Amount Number -->
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_invoice_amount_number"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/chat_message_inner_padding"
+            android:lines="1"
+            android:textColor="@color/text"
+            app:layout_constraintEnd_toStartOf="@+id/text_view_invoice_amount_unit"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:layout_editor_absoluteY="5dp"
+            tools:text="2000" />
+
+        <!-- Invoice Amount Unit Label -->
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_invoice_amount_unit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/chat_message_inner_padding"
+            android:lines="1"
+            app:layout_constraintBaseline_toBaselineOf="@id/text_view_invoice_amount_number"
+            app:layout_constraintStart_toEndOf="@+id/text_view_invoice_amount_number"
+            tools:layout_editor_absoluteY="5dp"
+            tools:layout_width="wrap_content"
+            tools:text="sat" />
+
+
+        <!-- Trailing QR Icon (For Expired Sent Invoices) -->
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/image_view_invoice_qr_icon_trailing"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginHorizontal="@dimen/chat_message_inner_padding"
+            android:alpha="0.8"
+            android:tint="@color/expiredInvoice"
+            android:tintMode="multiply"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@id/text_view_invoice_amount_unit"
+            app:layout_constraintStart_toEndOf="@+id/text_view_invoice_amount_unit"
+            app:srcCompat="@drawable/qr_code_error"
+            tools:visibility="gone" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+    <!-- Optional Invoice Message -->
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/text_view_invoice_message"
+        style="@style/chat_message_body_text"
+        android:layout_marginVertical="@dimen/default_layout_margin"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/constraint_layout_top_invoice_section"
+        tools:text="Here's an invoice for you."
+        tools:visibility="visible" />
+
+
+    <!-- Pay Button (visible if this is a received invoice) -->
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/button_pay"
+        style="@style/Widget.AppCompat.ImageButton"
+        android:layout_width="0dp"
+        android:layout_height="@dimen/default_tap_target_xy"
+        android:layout_marginTop="@dimen/default_layout_margin"
+        android:backgroundTint="@color/primaryGreen"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/text_view_invoice_message"
+        tools:visibility="visible" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/text_view_pay_button_label"
+        style="@style/ActionButtonLabelText"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:gravity="center"
+        android:text="@string/paid_message_details_status_label_pay"
+        android:textColor="@color/text"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/button_pay"
+        app:layout_constraintEnd_toEndOf="@id/button_pay"
+        app:layout_constraintStart_toStartOf="@id/button_pay"
+        app:layout_constraintTop_toTopOf="@id/button_pay"
+        tools:visibility="visible" />
+
+
+    <!-- Send Payment Icon (visible if this is a received invoice) -->
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/image_view_pay_button_icon"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/chat_message_inner_padding"
+        android:tint="@color/textMessages"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/button_pay"
+        app:layout_constraintEnd_toEndOf="@id/button_pay"
+        app:layout_constraintTop_toTopOf="@id/button_pay"
+        app:srcCompat="@drawable/ic_sent"
+        tools:visibility="visible" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/new_day_separator_holder_height"
+    android:visibility="gone"
+    tools:visibility="visible">
+
+    <View
+        android:id="@+id/view_new_day_separator_divider_leading"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:background="@color/lightDivider"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/text_view_new_day_separator_date"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintHorizontal_chainStyle="spread_inside"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/text_view_new_day_separator_date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/default_layout_margin"
+        android:layout_marginEnd="@dimen/default_layout_margin"
+        android:fontFamily="@font/roboto_regular"
+        android:lines="1"
+        android:textColor="@color/secondaryText"
+        android:textSize="@dimen/default_text_size_body"
+        app:layout_constraintBottom_toBottomOf="@+id/view_new_day_separator_divider_leading"
+        app:layout_constraintEnd_toStartOf="@+id/view_new_day_separator_divider_trailing"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toEndOf="@+id/view_new_day_separator_divider_leading"
+        app:layout_constraintTop_toTopOf="@+id/view_new_day_separator_divider_leading"
+        tools:text="Today" />
+
+    <View
+        android:id="@+id/view_new_day_separator_divider_trailing"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:background="@color/lightDivider"
+        app:layout_constraintBottom_toBottomOf="@+id/text_view_new_day_separator_date"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toEndOf="@+id/text_view_new_day_separator_date"
+        app:layout_constraintTop_toTopOf="@+id/text_view_new_day_separator_date" />
+</androidx.constraintlayout.widget.ConstraintLayout>

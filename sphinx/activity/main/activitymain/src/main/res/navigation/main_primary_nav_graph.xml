@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main_primary_nav_graph"
+    app:startDestination="@+id/navigation_splash_fragment">
+
+    <!-- Screens -->
+    <include app:graph="@navigation/add_sats_nav_graph" />
+    <include app:graph="@navigation/address_book_nav_graph" />
+    <include app:graph="@navigation/chat_contact_nav_graph" />
+    <include app:graph="@navigation/chat_group_nav_graph" />
+    <include app:graph="@navigation/chat_tribe_nav_graph" />
+    <include app:graph="@navigation/dashboard_nav_graph" />
+    <include app:graph="@navigation/on_board_nav_graph" />
+    <include app:graph="@navigation/on_board_name_nav_graph" />
+    <include app:graph="@navigation/on_board_ready_nav_graph" />
+    <include app:graph="@navigation/profile_nav_graph" />
+
+    <fragment
+        android:id="@+id/navigation_splash_fragment"
+        android:name="chat.sphinx.splash.ui.SplashFragment"
+        tools:layout="@layout/fragment_splash" />
+
+</navigation>

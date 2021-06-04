@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_constraint_chat_footer"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/headerBG">
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/text_view_chat_footer_attachment"
+        android:layout_width="@dimen/chat_footer_button_xy"
+        android:layout_height="@dimen/chat_footer_button_xy"
+        android:layout_marginStart="@dimen/default_layout_margin"
+        android:background="@drawable/button_background_white_rad_48"
+        android:fontFamily="@font/material_icons_regular"
+        android:text="@string/material_icon_name_message_editor_attachment"
+        android:textSize="21sp"
+        android:textColor="@android:color/white"
+        android:gravity="center"
+        android:backgroundTint="@color/blueTextAccent"
+        app:layout_constraintBottom_toBottomOf="@+id/scroll_view_chat_edit_text"
+        app:layout_constraintEnd_toStartOf="@+id/scroll_view_chat_edit_text"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/scroll_view_chat_edit_text" />
+
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/scroll_view_chat_edit_text"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_marginHorizontal="@dimen/default_layout_margin"
+        android:background="@drawable/background_message_text"
+        android:backgroundTint="@color/lightDivider"
+        app:layout_constraintEnd_toStartOf="@+id/text_view_chat_footer_send"
+        app:layout_constraintStart_toEndOf="@+id/text_view_chat_footer_attachment">
+
+        <androidx.appcompat.widget.AppCompatEditText
+            android:id="@+id/edit_text_chat_footer"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@null"
+            android:inputType="textMultiLine"
+            android:maxLines="4"
+            android:paddingHorizontal="@dimen/default_layout_margin"
+            android:paddingVertical="16dp"
+            android:textColor="@color/text"
+            android:textCursorDrawable="@drawable/cursor"
+            tools:text="line 1\nline 2\nline 3\nline 4\nline 5" />
+
+    </androidx.core.widget.NestedScrollView>
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/text_view_chat_footer_send"
+        android:layout_width="@dimen/chat_footer_send_button_xy"
+        android:layout_height="@dimen/chat_footer_send_button_xy"
+        android:layout_marginEnd="@dimen/chat_footer_send_button_margin_horizontal"
+        android:background="@drawable/button_background_white_rad_48"
+        android:backgroundTint="@color/blueTextAccent"
+        android:fontFamily="@font/material_icons_regular"
+        android:text="@string/material_icon_name_message_editor_send"
+        android:textSize="19sp"
+        android:textColor="@android:color/white"
+        android:gravity="center"
+        app:layout_constraintBottom_toBottomOf="@+id/scroll_view_chat_edit_text"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/scroll_view_chat_edit_text" />
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/image_view_chat_footer_microphone"
+        android:layout_width="@dimen/chat_footer_button_xy"
+        android:layout_height="@dimen/chat_footer_button_xy"
+        android:layout_marginEnd="@dimen/default_layout_margin"
+        android:src="@drawable/ic_baseline_mic_20"
+        android:tint="@color/textInverted"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="@+id/scroll_view_chat_edit_text"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/scroll_view_chat_edit_text"
+        tools:visibility="visible" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

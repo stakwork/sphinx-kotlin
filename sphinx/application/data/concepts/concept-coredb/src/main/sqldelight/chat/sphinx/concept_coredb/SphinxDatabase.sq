@@ -1,0 +1,655 @@
+import chat.sphinx.wrapper_chat.ChatAlias;
+import chat.sphinx.wrapper_chat.ChatGroupKey;
+import chat.sphinx.wrapper_chat.ChatHost;
+import chat.sphinx.wrapper_chat.ChatMetaData;
+import chat.sphinx.wrapper_chat.ChatMuted;
+import chat.sphinx.wrapper_chat.ChatName;
+import chat.sphinx.wrapper_chat.ChatPrivate;
+import chat.sphinx.wrapper_chat.ChatStatus;
+import chat.sphinx.wrapper_chat.ChatType;
+import chat.sphinx.wrapper_chat.ChatUnlisted;
+import chat.sphinx.wrapper_common.DateTime;
+import chat.sphinx.wrapper_common.PhotoUrl;
+import chat.sphinx.wrapper_common.Seen;
+import chat.sphinx.wrapper_common.chat.ChatUUID;
+import chat.sphinx.wrapper_common.dashboard.ChatId;
+import chat.sphinx.wrapper_common.dashboard.ContactId;
+import chat.sphinx.wrapper_common.dashboard.DashboardItemId;
+import chat.sphinx.wrapper_common.dashboard.InviteId;
+import chat.sphinx.wrapper_common.invite.InviteStatus;
+import chat.sphinx.wrapper_common.lightning.LightningNodeAlias;
+import chat.sphinx.wrapper_common.lightning.LightningNodePubKey;
+import chat.sphinx.wrapper_common.lightning.LightningPaymentHash;
+import chat.sphinx.wrapper_common.lightning.LightningPaymentRequest;
+import chat.sphinx.wrapper_common.lightning.LightningRouteHint;
+import chat.sphinx.wrapper_common.lightning.Sat;
+import chat.sphinx.wrapper_common.message.MessageId;
+import chat.sphinx.wrapper_contact.ContactAlias;
+import chat.sphinx.wrapper_contact.ContactStatus;
+import chat.sphinx.wrapper_contact.DeviceId;
+import chat.sphinx.wrapper_contact.NotificationSound;
+import chat.sphinx.wrapper_contact.Owner;
+import chat.sphinx.wrapper_contact.PrivatePhoto;
+import chat.sphinx.wrapper_invite.InviteString;
+import chat.sphinx.wrapper_message.MessageContent;
+import chat.sphinx.wrapper_message.MessageContentDecrypted;
+import chat.sphinx.wrapper_message.MessageMUID;
+import chat.sphinx.wrapper_message.MessageStatus;
+import chat.sphinx.wrapper_message.MessageType;
+import chat.sphinx.wrapper_message.MessageUUID;
+import chat.sphinx.wrapper_message.ReplyUUID;
+import chat.sphinx.wrapper_message.SenderAlias;
+import chat.sphinx.wrapper_message.media.MediaKey;
+import chat.sphinx.wrapper_message.media.MediaKeyDecrypted;
+import chat.sphinx.wrapper_message.media.MediaToken;
+import chat.sphinx.wrapper_message.media.MediaType;
+import chat.sphinx.wrapper_rsa.RsaPublicKey;
+import kotlin.collections.List;
+
+CREATE TABLE chatDbo(
+    id                          INTEGER         AS ChatId NOT NULL PRIMARY KEY,
+    uuid                        TEXT            AS ChatUUID NOT NULL UNIQUE,
+    name                        TEXT            AS ChatName,
+    photo_url                   TEXT            AS PhotoUrl,
+    type                        INTEGER         AS ChatType NOT NULL,
+    status                      INTEGER         AS ChatStatus NOT NULL,
+    contact_ids                 TEXT            AS List<ContactId> NOT NULL,
+    is_muted                    INTEGER         AS ChatMuted NOT NULL,
+    created_at                  INTEGER         AS DateTime NOT NULL,
+    group_key                   TEXT            AS ChatGroupKey,
+    host                        TEXT            AS ChatHost,
+    price_per_message           INTEGER         AS Sat,
+    escrow_amount               INTEGER         AS Sat,
+    unlisted                    INTEGER         AS ChatUnlisted NOT NULL,
+    private_tribe               INTEGER         AS ChatPrivate NOT NULL,
+    owner_pub_key               TEXT            AS LightningNodePubKey,
+    seen                        INTEGER         AS Seen NOT NULL,
+    meta_data                   TEXT            AS ChatMetaData,
+    my_photo_url                TEXT            AS PhotoUrl,
+    my_alias                    TEXT            AS ChatAlias,
+    pending_contact_ids         TEXT            AS List<ContactId>,
+    latest_message_id           INTEGER         AS MessageId DEFAULT NULL
+);
+
+chatUpdateLatestMessage:
+UPDATE chatDbo
+SET latest_message_id = :latest_message_id
+WHERE id = ?;
+
+chatUpdateMuted:
+UPDATE chatDbo
+SET is_muted = :muted
+WHERE id = ?;
+
+chatGetAll:
+SELECT *
+FROM chatDbo;
+
+chatGetAllIds:
+SELECT id
+FROM chatDbo;
+
+chatGetById:
+SELECT *
+FROM chatDbo
+WHERE id = ?;
+
+chatGetByUUID:
+SELECT *
+FROM chatDbo
+WHERE uuid = ?;
+
+chatGetConversationForContact:
+SELECT *
+FROM chatDbo
+WHERE type = 0 AND contact_ids = ?
+LIMIT 1;
+
+chatUpsert {
+    UPDATE chatDbo
+    SET name = :name,
+        photo_url = :photo_url,
+        status = :status,
+        contact_ids = :contact_ids,
+        is_muted = :is_muted,
+        group_key = :group_key,
+        host = :host,
+--         price_per_message = :price_per_message,
+--         escrow_amount = :escrow_amount,
+        unlisted = :unlisted,
+        private_tribe = :private_tribe,
+        owner_pub_key = :owner_pub_key,
+        seen = :seen,
+        meta_data = :meta_data,
+        my_photo_url = :my_photo_url,
+        my_alias = :my_alias,
+        pending_contact_ids = :pending_contact_ids
+    WHERE id = :id;
+
+    INSERT OR IGNORE INTO chatDbo(
+        id,
+        uuid,
+        name,
+        photo_url,
+        type,
+        status,
+        contact_ids,
+        is_muted,
+        created_at,
+        group_key,
+        host,
+        price_per_message,
+        escrow_amount,
+        unlisted,
+        private_tribe,
+        owner_pub_key,
+        seen,
+        meta_data,
+        my_photo_url,
+        my_alias,
+        pending_contact_ids
+    )
+    VALUES (
+        :id,
+        :uuid,
+        :name,
+        :photo_url,
+        :type,
+        :status,
+        :contact_ids,
+        :is_muted,
+        :created_at,
+        :group_key,
+        :host,
+        :price_per_message,
+        :escrow_amount,
+        :unlisted,
+        :private_tribe,
+        :owner_pub_key,
+        :seen,
+        :meta_data,
+        :my_photo_url,
+        :my_alias,
+        :pending_contact_ids
+    );
+}
+
+chatDeleteById:
+DELETE FROM chatDbo
+WHERE id = ?;
+
+chatUpdateSeen:
+UPDATE chatDbo
+SET seen = :seen
+WHERE id = ?;
+
+chatUpdateTribeData:
+UPDATE chatDbo
+SET price_per_message = :price_per_message,
+    escrow_amount = :escrow_amount,
+    name = :name,
+    photo_url = :photo_url
+WHERE id = ?;
+
+CREATE TABLE contactDbo(
+    id                          INTEGER         AS ContactId NOT NULL PRIMARY KEY,
+    route_hint                  TEXT            AS LightningRouteHint,
+    node_pub_key                TEXT            AS LightningNodePubKey,
+    node_alias                  TEXT            AS LightningNodeAlias,
+    alias                       TEXT            AS ContactAlias,
+    photo_url                   TEXT            AS PhotoUrl,
+    private_photo               INTEGER         AS PrivatePhoto NOT NULL,
+    owner                       INTEGER         AS Owner NOT NULL,
+    status                      INTEGER         AS ContactStatus NOT NULL,
+    public_key                  TEXT            AS RsaPublicKey,
+    device_id                   TEXT            AS DeviceId,
+    created_at                  INTEGER         AS DateTime NOT NULL,
+    updated_at                  INTEGER         AS DateTime NOT NULL,
+    notification_sound          TEXT            AS NotificationSound,
+    tip_amount                  INTEGER         AS Sat,
+    invite_id                   INTEGER         AS InviteId,
+    invite_status               INTEGER         AS InviteStatus
+);
+
+contactGetAllIds:
+SELECT id
+FROM contactDbo;
+
+contactGetAll:
+SELECT *
+FROM contactDbo;
+
+contactGetById:
+SELECT *
+FROM contactDbo
+WHERE id = ?;
+
+contactGetOwner:
+SELECT *
+FROM contactDbo
+WHERE owner = 1
+ORDER BY id
+LIMIT 1;
+
+contactUpsert {
+    UPDATE contactDbo
+    SET route_hint = :route_hint,
+        node_pub_key = :node_pub_key,
+        node_alias = :node_alias,
+        alias = :alias,
+        photo_url = :photo_url,
+        private_photo = :private_photo,
+        status = :status,
+        public_key = :public_key,
+        device_id = :device_id,
+        updated_at = :updated_at,
+        notification_sound = :notification_sound,
+        tip_amount = :tip_amount,
+        invite_id = :invite_id,
+        invite_status = :invite_status
+    WHERE id = :id;
+
+    INSERT OR IGNORE INTO contactDbo(
+        id,
+        route_hint,
+        node_pub_key,
+        node_alias,
+        alias,
+        photo_url,
+        private_photo,
+        owner,
+        status,
+        public_key,
+        device_id,
+        created_at,
+        updated_at,
+        notification_sound,
+        tip_amount,
+        invite_id,
+        invite_status
+    )
+    VALUES (
+        :id,
+        :route_hint,
+        :node_pub_key,
+        :node_alias,
+        :alias,
+        :photo_url,
+        :private_photo,
+        :owner,
+        :status,
+        :public_key,
+        :device_id,
+        :created_at,
+        :updated_at,
+        :notification_sound,
+        :tip_amount,
+        :invite_id,
+        :invite_status
+    );
+}
+
+contactUpdateInviteStatus:
+UPDATE contactDbo
+SET invite_status = :invite_status
+WHERE invite_id = ?;
+
+contactDeleteById:
+DELETE FROM contactDbo
+WHERE id = ?;
+
+CREATE TABLE inviteDbo(
+    id                          INTEGER         AS InviteId NOT NULL PRIMARY KEY,
+    invite_string               TEXT            AS InviteString NOT NULL,
+    invoice                     TEXT            AS LightningPaymentRequest,
+--     welcome_message             TEXT,
+    contact_id                  INTEGER         AS ContactId NOT NULL,
+    status                      INTEGER         AS InviteStatus NOT NULL,
+    price                       INTEGER         AS Sat,
+    created_at                  INTEGER         AS DateTime NOT NULL
+);
+
+inviteGetById:
+SELECT *
+FROM inviteDbo
+WHERE id = ?;
+
+inviteGetByContactId:
+SELECT *
+FROM inviteDbo
+WHERE contact_id = ?;
+
+inviteUpsert {
+    UPDATE inviteDbo
+    SET invite_string = :invite_string,
+        invoice = :invoice,
+        status = :status,
+        price = :price
+    WHERE id = :id;
+
+    INSERT OR IGNORE INTO inviteDbo(
+        id,
+        invite_string,
+        invoice,
+        contact_id,
+        status,
+        price,
+        created_at
+    )
+    VALUES (
+        :id,
+        :invite_string,
+        :invoice,
+        :contact_id,
+        :status,
+        :price,
+        :created_at
+    );
+}
+
+inviteDeleteById:
+DELETE FROM inviteDbo
+WHERE id = ?;
+
+inviteDeleteByContactId:
+DELETE FROM inviteDbo
+WHERE contact_id = ?;
+
+CREATE TABLE dashboardDbo(
+    id                          TEXT            AS DashboardItemId NOT NULL PRIMARY KEY,
+    contact_id                  INTEGER         AS ContactId,
+    date                        INTEGER         AS DateTime NOT NULL,
+    display_name                TEXT,
+    muted                       INTEGER         AS ChatMuted NOT NULL DEFAULT 1,
+    seen                        INTEGER         AS Seen NOT NULL,
+    photo_url                   TEXT            AS PhotoUrl,
+
+--  This is for contacts only. When a Chat of type Conversation comes in, the Contact held
+--  here is updated as `include_in_return=false`
+    include_in_return            INTEGER        AS Boolean DEFAULT 1 NOT NULL,
+
+    latest_message_id           INTEGER         AS MessageId DEFAULT NULL
+);
+
+dashboardCount:
+SELECT COUNT(*)
+FROM dashboardDbo
+WHERE include_in_return = 1;
+
+dashboardPagination:
+SELECT *
+FROM dashboardDbo
+WHERE include_in_return = 1
+ORDER BY
+    SUBSTR(id, 1, 1),
+    date
+LIMIT :limit OFFSET :offset;
+
+dashboardUpdateLatestMessage:
+UPDATE dashboardDbo
+SET date = :date,
+    latest_message_id = :latest_message_id
+WHERE id = ?;
+
+dashboardUpdateIncludeInReturn:
+UPDATE dashboardDbo
+SET include_in_return = :include_in_return
+WHERE id = ?;
+
+dashboardUpdateMuted:
+UPDATE dashboardDbo
+SET muted = :muted
+WHERE id = ?;
+
+dashboardUpdateTribe:
+UPDATE dashboardDbo
+SET display_name = :display_name,
+    photo_url = :photo_url
+WHERE id = ?;
+
+dashboardUpdateConversation:
+UPDATE dashboardDbo
+SET display_name = :display_name,
+    photo_url = :photo_url
+WHERE contact_id = ?;
+
+dashboardUpsert {
+    UPDATE dashboardDbo
+    SET display_name = :display_name,
+        muted = :muted,
+        seen = :seen,
+        photo_url = :photo_url
+    WHERE id = :id;
+
+    INSERT OR IGNORE INTO dashboardDbo(
+        id,
+        contact_id,
+        date,
+        display_name,
+        muted,
+        seen,
+        photo_url
+    )
+    VALUES (
+        :id,
+        :contact_id,
+        :date,
+        :display_name,
+        :muted,
+        :seen,
+        :photo_url
+    );
+}
+
+dashboardDeleteById:
+DELETE FROM dashboardDbo
+WHERE id = ?;
+
+-- Cannot use inline classes if there are 23 or more columns
+-- https://youtrack.jetbrains.com/issue/KT-45084
+-- https://github.com/cashapp/sqldelight/issues/2266
+--
+-- Because of this, the messageMediaDbo table exists as an extension
+-- where the messageID is utilized as the primary key.
+CREATE TABLE messageDbo(
+    id                          INTEGER         AS MessageId NOT NULL PRIMARY KEY,
+    uuid                        TEXT            AS MessageUUID,
+    chat_id                     INTEGER         AS ChatId NOT NULL,
+    type                        INTEGER         AS MessageType NOT NULL,
+    sender                      INTEGER         AS ContactId NOT NULL,
+    receiver                    INTEGER         AS ContactId,
+    amount                      INTEGER         AS Sat NOT NULL,
+    payment_hash                TEXT            AS LightningPaymentHash,
+    payment_request             TEXT            AS LightningPaymentRequest,
+    date                        INTEGER         AS DateTime NOT NULL,
+    expiration_date             INTEGER         AS DateTime,
+    message_content             TEXT            AS MessageContent,
+    message_content_decrypted   TEXT            AS MessageContentDecrypted,
+    status                      INTEGER         AS MessageStatus NOT NULL,
+    seen                        INTEGER         AS Seen NOT NULL,
+    sender_alias                TEXT            AS SenderAlias,
+    sender_pic                  TEXT            AS PhotoUrl,
+    original_muid               TEXT            AS MessageMUID,
+    reply_uuid                  TEXT            AS ReplyUUID
+);
+
+messageGetAllReactionsByUUID:
+SELECT *
+FROM messageDbo
+WHERE chat_id = :chat_id
+AND (type = 29
+    AND reply_uuid IN :reply_uuids
+);
+
+messageGetById:
+SELECT *
+FROM messageDbo
+WHERE id = ?;
+
+messageGetToShowByUUID:
+SELECT *
+FROM messageDbo
+WHERE uuid = ?
+AND type IN(0, 5)
+LIMIT 1;
+
+messageGetLowestProvisionalMessageId:
+SELECT id
+FROM messageDbo
+WHERE id < 0
+ORDER BY id
+LIMIT 1;
+
+messageGetAllToShowByChatId:
+SELECT *
+FROM messageDbo
+WHERE chat_id = ?
+AND type IN(0, 2, 3, 5, 6, 14, 15, 25)
+--     OR type = 2
+--     OR type = 3
+--     OR type = 5
+--     OR type = 6
+--     OR type = 14
+--     OR type = 15
+--     OR type = 25
+--     OR type = 29
+ORDER BY date DESC
+LIMIT 200;
+
+messageGetUnseenIncomingMessageCountByChatId:
+SELECT COUNT(*)
+FROM messageDbo
+WHERE sender != :ownerId
+AND seen = 0
+AND chat_id = ?;
+
+messageUpdateSeenByChatId:
+UPDATE messageDbo
+SET seen = :seen
+WHERE chat_id = ?;
+
+messageUpdateContentDecrypted:
+UPDATE messageDbo
+SET message_content_decrypted = :message_content_decrypted
+WHERE id = ?;
+
+messageUpdateStatus:
+UPDATE messageDbo
+SET status = :status
+WHERE id = ?;
+
+-- If the message exists in the DB, it will update all fields _except_
+-- for message_content_decrypted as to not overwrite it.
+messageUpsert {
+    UPDATE messageDbo
+    SET status = :status,
+        seen = :seen,
+        sender_alias = :sender_alias,
+        sender_pic = :sender_pic,
+        original_muid = :original_muid,
+        reply_uuid = :reply_uuid
+    WHERE id = :id;
+
+    INSERT OR IGNORE INTO messageDbo(
+        id,
+        uuid,
+        chat_id,
+        type,
+        sender,
+        receiver,
+        amount,
+        payment_hash,
+        payment_request,
+        date,
+        expiration_date,
+        message_content,
+        message_content_decrypted,
+        status,
+        seen,
+        sender_alias,
+        sender_pic,
+        original_muid,
+        reply_uuid
+    )
+    VALUES (
+        :id,
+        :uuid,
+        :chat_id,
+        :type,
+        :sender,
+        :receiver,
+        :amount,
+        :payment_hash,
+        :payment_request,
+        :date,
+        :expiration_date,
+        :message_content,
+        :message_content_decrypted,
+        :status,
+        :seen,
+        :sender_alias,
+        :sender_pic,
+        :original_muid,
+        :reply_uuid
+    );
+}
+
+messageDeleteById:
+DELETE FROM messageDbo
+WHERE id = ?;
+
+messageDeleteByChatId:
+DELETE FROM messageDbo
+WHERE chat_id = ?;
+
+CREATE TABLE messageMediaDbo(
+    id                          INTEGER         AS MessageId NOT NULL PRIMARY KEY,
+    chat_id                     INTEGER         AS ChatId NOT NULL,
+    media_key                   TEXT            AS MediaKey,
+    media_key_decrypted         TEXT            AS MediaKeyDecrypted,
+    media_type                  TEXT            AS MediaType NOT NULL,
+    media_token                 TEXT            AS MediaToken NOT NULL
+);
+
+messageMediaGetById:
+SELECT *
+FROM messageMediaDbo
+WHERE id = ?;
+
+messageMediaUpdateMediaKeyDecrypted:
+UPDATE messageMediaDbo
+SET media_key_decrypted = :media_key_decrypted
+WHERE id = ?;
+
+messageMediaUpsert {
+    UPDATE messageMediaDbo
+    SET media_key = :media_key,
+        media_type = :media_type,
+        media_token = :media_token
+    WHERE id = :id;
+
+    INSERT OR IGNORE INTO messageMediaDbo(
+        id,
+        chat_id,
+        media_key,
+        media_key_decrypted,
+        media_type,
+        media_token
+    )
+    VALUES(
+        :id,
+        :chat_id,
+        :media_key,
+        :media_key_decrypted,
+        :media_type,
+        :media_token
+    );
+}
+
+messageMediaDeleteById:
+DELETE FROM messageMediaDbo
+WHERE id = ?;
+
+messageMediaDeleteByChatId:
+DELETE FROM messageMediaDbo
+WHERE chat_id = ?;

@@ -1,0 +1,18 @@
+plugins {
+    id 'java-library'
+    id 'kotlin'
+}
+
+dependencies {
+    // KotlinAndroid
+    api project(path: ':kotlin:crypto:crypto-common')
+    api project(path: ':kotlin:encoders:base64')
+
+    // Sphinx
+    api project(path: ':sphinx:application:common:kotlin-response')
+    api project(path: ':sphinx:application:common:wrappers:wrapper-rsa')
+    
+    implementation deps.kotlin.coroutinesCore
+
+    testImplementation testDeps.junit
+}

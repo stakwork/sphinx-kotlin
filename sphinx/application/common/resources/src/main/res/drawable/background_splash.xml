@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Background layer actually fills the screen while keeping the logo size static -->
+    <item android:gravity="fill">
+        <shape android:shape="rectangle">
+            <gradient
+                android:angle="135"
+                android:centerColor="@color/primaryBlue"
+                android:endColor="@color/lightPurple"
+                android:startColor="@color/primaryBlue"
+                android:type="linear" />
+        </shape>
+    </item>
+</layer-list>

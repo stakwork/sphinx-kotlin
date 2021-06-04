@@ -1,0 +1,22 @@
+plugins {
+    id 'java-library'
+    id 'kotlin'
+}
+
+dependencies {
+    implementation fileTree(dir: "libs", include: ["*.jar"])
+    // KotlinAndroid
+    api project(path: ':kotlin:concepts:authentication:concept-encryption-key')
+
+    // Sphinx
+    api project(path: ':sphinx:application:data:concepts:concept-coredb')
+    
+    implementation deps.kotlin.coroutinesCore
+
+    // needed to override moshi's use of 1.4.31
+    implementation deps.kotlin.reflect
+    implementation deps.square.moshi
+
+    testImplementation deps.square.sqlDelightJvm
+    testImplementation project(path: ':kotlin:test:test-concept-coroutines')
+}

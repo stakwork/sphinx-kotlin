@@ -1,0 +1,20 @@
+plugins {
+    id 'app.cash.exhaustive'
+    id 'java-library'
+    id 'kotlin'
+}
+
+dependencies {
+    // KotlinAndroid
+    api project(path: ':kotlin:concepts:concept-coroutines')
+
+    // Sphinx
+    api project(path: ':sphinx:application:common:logger')
+    api project(path: ':sphinx:application:data:concepts:concept-relay')
+    api project(path: ':sphinx:application:network:concepts:calls:concept-network-relay-call')
+    api project(path: ':sphinx:application:network:concepts:clients:concept-network-client')
+
+    // needed to override moshi's use of 1.4.31
+    api deps.kotlin.reflect
+    api deps.square.moshi
+}

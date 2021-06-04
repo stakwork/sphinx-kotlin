@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/background_detail_screen"
+    tools:context=".ui.AddFriendFragment">
+
+    <include
+        android:id="@+id/include_add_friend_header"
+        layout="@layout/layout_detail_screen_header"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/default_header_height"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/add_friend_buttons_margin_horizontal"
+        android:layout_marginEnd="@dimen/add_friend_buttons_margin_horizontal"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guide_v50"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_percent=".5" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/button_new_to_sphinx"
+            style="@style/AddFriendButton"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/add_friend_buttons_height"
+            android:text="@string/new_to_sphinx_button"
+            android:textSize="@dimen/add_friend_buttons_text_size"
+            android:textColor="@android:color/white"
+            android:background="@drawable/button_background_white_rad_48"
+            android:backgroundTint="@color/primaryGreen"
+            android:layout_marginBottom="@dimen/default_layout_margin"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="@+id/guide_v50"/>
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/button_already_on_sphinx"
+            style="@style/AddFriendButton"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/add_friend_buttons_height"
+            android:text="@string/already_on_sphinx_button"
+            android:textSize="@dimen/add_friend_buttons_text_size"
+            android:textColor="@android:color/white"
+            android:background="@drawable/button_background_white_rad_48"
+            android:backgroundTint="@color/primaryBlue"
+            android:layout_marginTop="@dimen/default_layout_margin"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/guide_v50"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

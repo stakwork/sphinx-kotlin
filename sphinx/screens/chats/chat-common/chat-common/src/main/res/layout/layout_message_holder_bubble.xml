@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    tools:background="@drawable/background_message_bubble_received_last">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_message_bubble_container_top"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <!--   Status Row for Paid Message Sent  -->
+        <include
+            android:id="@+id/include_paid_message_sent_status_details"
+            layout="@layout/layout_paid_message_sent"
+            tools:visibility="gone" />
+
+        <!--   Direct Payment Message  -->
+        <include
+            android:id="@+id/include_message_type_direct_payment"
+            layout="@layout/layout_message_type_direct_payment"
+            tools:visibility="gone" />
+
+        <!--  Image Attachment  -->
+        <include
+            android:id="@+id/include_message_type_image_attachment"
+            layout="@layout/layout_message_type_attachment_image"
+            tools:visibility="gone" />
+
+        <!--  File Attachment  -->
+        <include
+            android:id="@+id/include_message_type_file_attachment"
+            layout="@layout/layout_message_type_attachment_file"
+            tools:visibility="gone" />
+
+        <!--  Audio Attachment  -->
+        <include
+            android:id="@+id/include_message_type_audio_attachment"
+            layout="@layout/layout_message_type_attachment_audio"
+            tools:visibility="gone" />
+
+
+        <!--  Video Attachment  -->
+        <include
+            android:id="@+id/include_message_type_video_attachment"
+            layout="@layout/layout_message_type_attachment_video"
+            tools:visibility="gone" />
+
+
+        <!--  Replies  -->
+        <include
+            android:id="@+id/include_message_reply"
+            layout="@layout/layout_message_reply"
+            tools:visibility="gone" />
+
+
+        <!--  Call Invite  -->
+        <include
+            android:id="@+id/include_message_type_call_invite"
+            layout="@layout/layout_message_type_call_invite"
+            tools:visibility="gone" />
+
+
+        <!--  Invoice Message  -->
+        <include
+            android:id="@+id/include_message_type_invoice"
+            layout="@layout/layout_message_type_invoice"
+            tools:visibility="gone" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_message_bubble_container_middle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toTopOf="@+id/layout_constraint_message_bubble_container_bottom"
+        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_message_bubble_container_top">
+
+        <!-- Placeholder for unsupported Message Types -->
+        <include
+            android:id="@+id/include_unsupported_message_type_placeholder"
+            layout="@layout/layout_unsupported_message_type_placeholder"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="@+id/layout_constraint_message_bubble_container_middle"
+            tools:visibility="visible" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_message_text"
+            style="@style/chat_message_body_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="@dimen/default_layout_margin"
+            android:paddingVertical="@dimen/default_inner_spacing_list_item_title"
+            android:visibility="gone"
+            app:layout_constraintTop_toBottomOf="@+id/include_unsupported_message_type_placeholder"
+            tools:text="Contrary to popular belief, Lorem Ipsum is not simply random text. Latin from 45 BC, making it over 2000 years old."
+            tools:visibility="visible" />
+
+
+        <!-- Contact link preview  -->
+        <include
+            android:id="@+id/include_message_link_preview_contact"
+            layout="@layout/layout_message_link_preview_contact"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@+id/text_view_message_text"
+            tools:visibility="gone" />
+
+
+        <!-- Tribe link preview  -->
+        <include
+            android:id="@+id/include_message_link_preview_tribe"
+            layout="@layout/layout_message_link_preview_tribe"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@+id/text_view_message_text"
+            tools:visibility="gone" />
+
+
+        <!-- Url link preview  -->
+        <include
+            android:id="@+id/include_message_link_preview_url"
+            layout="@layout/layout_message_link_preview_url"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@+id/text_view_message_text"
+            tools:visibility="gone" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_message_bubble_container_bottom"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_message_bubble_container_middle">
+
+
+        <!-- Paid Message Information -->
+        <include
+            android:id="@+id/include_paid_message_received_details_holder"
+            layout="@layout/layout_paid_message_received"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:visibility="gone" />
+
+
+        <!-- Boost Details -->
+        <include
+            android:id="@+id/include_message_type_boost"
+            layout="@layout/layout_message_type_boost"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:visibility="visible" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

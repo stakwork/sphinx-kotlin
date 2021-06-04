@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="wrong_pin">Wrong PIN</string>
+    <string name="wrong_pin_one_more_attempt">1 more attempt before being locked out</string>
+    <string name="wrong_pin_pin_does_not_match">PIN did not match</string>
+    <string name="header_enter_pin">Enter PIN</string>
+    <string name="header_confirm_pin">Confirm PIN</string>
+    <string name="header_reset_step_1">Enter New PIN</string>
+    <string name="header_reset_step_2">Confirm New PIN</string>
+
+    <string name="flow_response_decrypting_key">Validating PIN</string>
+    <string name="flow_response_encrypting_key_with_new_pin">Re-encrypting your key with new PIN</string>
+    <string name="flow_response_generating_encrypting_key">Generating and encrypting your key</string>
+
+    <string name="enter_pin_encrypt">Enter your PIN to encrypt your keys. You will need it when restoring your account on another device</string>
+</resources>

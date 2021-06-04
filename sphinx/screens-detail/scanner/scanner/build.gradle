@@ -1,0 +1,59 @@
+plugins {
+    id 'app.cash.exhaustive'
+    id 'com.android.library'
+    id 'androidx.navigation.safeargs'
+    id 'dagger.hilt.android.plugin'
+    id 'kotlin-android'
+    id 'kotlin-kapt'
+}
+
+android {
+    compileSdkVersion versions.compileSdk
+    buildToolsVersion versions.buildTools
+
+    buildFeatures.viewBinding = true
+    defaultConfig {
+        minSdkVersion versions.minSdk
+        targetSdkVersion versions.compileSdk
+        versionCode VERSION_CODE.toInteger()
+        versionName VERSION_NAME
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunnerArguments disableAnalytics: 'true'
+        consumerProguardFiles "consumer-rules.pro"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: "libs", include: ["*.jar"])
+    // KotlinAndroid
+    implementation project(path: ':android:features:android-feature-screens')
+    
+    // Sphinx
+    implementation project(path: ':sphinx:activity:insetter-activity')
+    implementation project(path: ':sphinx:screens-detail:common:detail-resources')
+
+    implementation project(path: ':sphinx:activity:features:feature-view-model-coordinator')
+    api project(path: ':sphinx:screens-detail:scanner:scanner-view-model-coordinator')
+
+    //ML Kit Barcode Scanning
+    implementation deps.google.mlKitBarcodeScanning
+
+    //CameraX Dependencies
+    implementation deps.androidx.camera.core
+    implementation deps.androidx.camera.camera2
+    implementation deps.androidx.camera.lifecycle
+    implementation deps.androidx.camera.view
+    implementation deps.androidx.camera.extensions
+    implementation deps.google.material
+
+    implementation deps.androidx.lifecycle.hilt
+    implementation deps.google.hilt
+    kapt kaptDeps.google.hilt
+}

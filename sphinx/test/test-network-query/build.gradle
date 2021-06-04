@@ -1,0 +1,29 @@
+plugins {
+    id 'java-library'
+    id 'kotlin'
+}
+
+dependencies {
+    api project(path: ':kotlin:encoders:base64')
+    api project(path: ':kotlin:test:test-concept-coroutines')
+    api project(path: ':kotlin:test:test-feature-authentication-core')
+
+    api project(path: ':sphinx:application:data:features:feature-relay')
+
+    api project(path: ':sphinx:application:network:features:queries:feature-network-query-chat')
+    api project(path: ':sphinx:application:network:features:queries:feature-network-query-contact')
+    api project(path: ':sphinx:application:network:features:queries:feature-network-query-invite')
+    api project(path: ':sphinx:application:network:features:queries:feature-network-query-lightning')
+    api project(path: ':sphinx:application:network:features:queries:feature-network-query-message')
+    api project(path: ':sphinx:application:network:features:queries:feature-network-query-subscription')
+    api project(path: ':sphinx:application:network:features:feature-network-client')
+    api project(path: ':sphinx:application:network:features:feature-network-relay-call')
+
+    api project(path: ':sphinx:test:test-tor-manager')
+
+    // needed to override moshi's use of 1.4.31
+    api deps.kotlin.reflect
+    api deps.square.moshi
+
+    api deps.jncryptor
+}

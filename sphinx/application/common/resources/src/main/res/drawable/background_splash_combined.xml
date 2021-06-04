@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Background layer actually fills the screen while keeping the logo size static -->
+    <item
+        android:drawable="@drawable/background_splash"
+        android:gravity="fill" />
+
+    <item
+        android:drawable="@drawable/sphinx_white_logo"
+        android:gravity="center" />
+</layer-list>
