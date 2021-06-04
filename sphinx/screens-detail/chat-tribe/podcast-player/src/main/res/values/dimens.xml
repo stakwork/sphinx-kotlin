@@ -5,4 +5,10 @@
 
     <dimen name="player_details_small_control_button_xy">32dp</dimen>
     <dimen name="player_details_large_control_button_xy">58dp</dimen>
+
+    <dimen name="episode_list_item_holder_height">64dp</dimen>
+    <dimen name="episode_list_item_divider_margin_x">30dp</dimen>
+    <dimen name="episode_list_item_cover_image_xy">40dp</dimen>
+    <dimen name="episode_list_item_download_button_xy">22dp</dimen>
+
 </resources>
