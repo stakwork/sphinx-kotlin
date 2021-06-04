@@ -287,7 +287,7 @@ internal inline fun LayoutMessageHolderBinding.setBubbleMessageLayout(
     message: LayoutState.Bubble.ContainerMiddle.Message?
 ) {
     includeMessageHolderBubble.textViewMessageText.apply {
-        if (message == null) {
+        if (message == null || message.text.isEmpty()) {
             gone
         } else {
             visible
