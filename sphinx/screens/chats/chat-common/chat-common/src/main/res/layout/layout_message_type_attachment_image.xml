@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="1dp"
+    android:padding="2dp"
     android:visibility="gone"
     tools:layout_width="300dp"
     tools:visibility="visible">
