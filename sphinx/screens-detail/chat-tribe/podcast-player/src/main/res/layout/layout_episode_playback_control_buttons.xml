@@ -8,68 +8,117 @@
     android:paddingVertical="@dimen/default_layout_margin">
 
 
-    <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/text_view_playback_speed_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="TextView" />
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/button_playback_speed"
+        android:layout_width="@dimen/player_details_small_control_button_xy"
+        android:layout_height="@dimen/player_details_small_control_button_xy"
+        android:gravity="center"
+        tools:text="1x"
+        android:fontFamily="@font/roboto_medium"
+        android:textSize="14sp"
+        android:textColor="@color/mainBottomIcons"
+        android:textAlignment="center"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 
-    <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/text_view_share_clip_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="TextView" />
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/button_share_clip"
+        android:layout_width="@dimen/player_details_small_control_button_xy"
+        android:layout_height="@dimen/player_details_small_control_button_xy"
+        android:background="@drawable/ic_podcast_share_clip"
+        android:backgroundTint="@color/mainBottomIcons"
+        android:gravity="center"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/button_replay_15"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/button_playback_speed" />
 
 
-    <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/text_view_replay_15_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="TextView" />
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/button_replay_15"
+        android:layout_width="@dimen/player_details_small_control_button_xy"
+        android:layout_height="@dimen/player_details_small_control_button_xy"
+        android:background="@drawable/ic_podcast_back_15"
+        android:backgroundTint="@color/mainBottomIcons"
+        android:gravity="center"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/button_play"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/button_share_clip"
+        app:layout_constraintTop_toBottomOf="@id/button_playback_speed" />
 
 
     <!--  Play Button (show if paused)  -->
-    <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/text_view_play_button"
-        android:layout_width="58dp"
-        android:layout_height="58dp"
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/button_play"
+        android:layout_width="@dimen/player_details_large_control_button_xy"
+        android:layout_height="@dimen/player_details_large_control_button_xy"
         android:layout_marginHorizontal="@dimen/default_layout_margin"
-        android:fontFamily="@font/material_icons_regular"
         android:gravity="center"
-        android:text="@string/material_icon_name_play_button"
-        android:textColor="@color/receivedIcon"
-        android:textSize="32sp"
         android:visibility="gone"
+        android:background="@drawable/ic_podcast_play_circle"
+        android:backgroundTint="@color/receivedIcon"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/text_view_replay_15_button"
-        app:layout_constraintTop_toBottomOf="@id/text_view_playback_speed_button"
+        app:layout_constraintEnd_toEndOf="@id/guideline_play_pause_button_position"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="@id/guideline_play_pause_button_position"
+        app:layout_constraintTop_toBottomOf="@id/button_playback_speed"
         tools:visibility="visible" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline_play_pause_button_position"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.5" />
+
 
     <!--  Pause Button (show if playing)  -->
-    <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/text_view_pause_button"
-        android:layout_width="58dp"
-        android:layout_height="58dp"
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/button_pause"
+        android:layout_width="@dimen/player_details_large_control_button_xy"
+        android:layout_height="@dimen/player_details_large_control_button_xy"
         android:layout_marginHorizontal="@dimen/default_layout_margin"
-        android:fontFamily="@font/material_icons_regular"
         android:gravity="center"
-        android:text="@string/material_icon_name_pause_button"
-        android:textColor="@color/receivedIcon"
-        android:textSize="32sp"
+        android:background="@drawable/ic_podcast_pause_circle"
+        android:backgroundTint="@color/receivedIcon"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/text_view_replay_15_button"
-        app:layout_constraintTop_toBottomOf="@id/text_view_playback_speed_button"
+        app:layout_constraintEnd_toEndOf="@id/guideline_play_pause_button_position"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="@id/guideline_play_pause_button_position"
+        app:layout_constraintTop_toBottomOf="@id/button_playback_speed"
         tools:visibility="visible" />
 
 
-    <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/text_view_boost_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="TextView" />
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/button_forward_30"
+        android:layout_width="@dimen/player_details_small_control_button_xy"
+        android:layout_height="@dimen/player_details_small_control_button_xy"
+        android:background="@drawable/ic_forward_30"
+        android:backgroundTint="@color/mainBottomIcons"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/button_boost"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/button_pause"
+        app:layout_constraintTop_toBottomOf="@id/button_playback_speed" />
+
+
+    <!-- TODO: Figure out how to properly scale down the icon size within the circular background -->
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/button_boost"
+        android:layout_width="@dimen/player_details_small_control_button_xy"
+        android:layout_height="@dimen/player_details_small_control_button_xy"
+        android:background="@drawable/button_background_white_rad_48"
+        android:backgroundTint="@color/primaryGreen"
+        android:foreground="@drawable/ic_boost"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/button_forward_30"
+        app:layout_constraintTop_toBottomOf="@id/button_playback_speed" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
