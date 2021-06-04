@@ -133,7 +133,7 @@ internal class MessageListAdapter<ARGS : NavArgs>(
             val lastPosition = messages.size - 1
             if (
                 recyclerView.scrollState == RecyclerView.SCROLL_STATE_IDLE &&
-                layoutManager.findLastVisibleItemPosition() == lastPosition
+                lastPosition - layoutManager.findLastVisibleItemPosition() < 3
             ) {
                 recyclerView.scrollToPosition(lastPosition)
             }

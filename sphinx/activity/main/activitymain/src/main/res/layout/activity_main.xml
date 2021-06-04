@@ -5,6 +5,7 @@
     android:id="@+id/layout_motion_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
     app:layoutDescription="@xml/motion_scene_main"
     tools:context=".MainActivity">
 

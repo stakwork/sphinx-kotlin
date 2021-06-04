@@ -80,7 +80,7 @@ internal class MainActivity: MotionLayoutNavigationActivity<
     override fun onCreate(savedInstanceState: Bundle?) {
         setTheme(R_common.style.AppPostLaunchTheme)
         super.onCreate(savedInstanceState)
-        WindowCompat.setDecorFitsSystemWindows(window, false)
+        WindowCompat.setDecorFitsSystemWindows(window, true)
         setTransitionListener(binding.layoutMotionMain)
 
         binding.layoutConstraintMainStatusBar.applyInsetter {
