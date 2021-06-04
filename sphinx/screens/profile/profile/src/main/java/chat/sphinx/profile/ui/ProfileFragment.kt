@@ -124,9 +124,15 @@ internal class ProfileFragment: SideEffectFragment<
                 }
 
                 buttonProfileBasicContainerQrCode.setOnClickListener {
-                    viewModel.accountOwnerStateFlow.value?.nodePubKey?.let { pubKey ->
+                    viewModel.accountOwnerStateFlow.value?.let { owner ->
                         lifecycleScope.launch(viewModel.mainImmediate) {
-                            profileNavigator.toQRCodeDetail(pubKey.value)
+                            owner.nodePubKey?.let { pubKey ->
+                                val key = owner.routeHint?.let { routeHint ->
+                                    "${pubKey.value}:${routeHint.value}"
+                                } ?: pubKey.value
+                                
+                                profileNavigator.toQRCodeDetail(key)
+                            }
                         }
                     }
                 }
