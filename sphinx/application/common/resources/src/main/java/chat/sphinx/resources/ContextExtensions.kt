@@ -2,6 +2,7 @@ package chat.sphinx.resources
 
 import android.content.Context
 import android.content.res.Resources
+import android.graphics.Color
 import android.view.inputmethod.InputMethodManager
 import androidx.annotation.ColorInt
 import androidx.annotation.ColorRes
@@ -17,7 +18,36 @@ inline val Context.inputMethodManager: InputMethodManager?
 @ColorInt
 @Suppress("NOTHING_TO_INLINE")
 inline fun Context.getRandomColor(): Int {
-    val randomColorResource = listOf<@ColorRes Int>(
+    return ContextCompat.getColor(this, getRandomColorRes())
+}
+
+@ColorInt
+@Suppress("NOTHING_TO_INLINE")
+inline fun Context.getColorForKey(colorKey: String): Int {
+
+    this.getSharedPreferences("sphinx_colors", Context.MODE_PRIVATE).let { sharedPrefs ->
+        val colorHexCode = sharedPrefs.getString(colorKey, null)?.let { hexCode ->
+            hexCode
+        } ?: "#" + Integer.toHexString(ContextCompat.getColor(this, this.getRandomColorRes()))
+
+        sharedPrefs?.edit()?.let { editor ->
+            editor.putString(colorKey, colorHexCode).let { editor ->
+                if (!editor.commit()) {
+                    editor.apply()
+                }
+            }
+        }
+
+        return Color.parseColor(colorHexCode)
+    }
+
+    return getRandomColor()
+}
+
+@ColorRes
+@Suppress("NOTHING_TO_INLINE")
+inline fun Context.getRandomColorRes(): Int {
+    return listOf<@ColorRes Int>(
         R.color.randomColor1,
         R.color.randomColor2,
         R.color.randomColor3,
@@ -39,8 +69,6 @@ inline fun Context.getRandomColor(): Int {
         R.color.randomColor19,
         R.color.randomColor20,
     ).shuffled()[0]
-
-    return ContextCompat.getColor(this, randomColorResource)
 }
 
 @Suppress("NOTHING_TO_INLINE")

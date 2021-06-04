@@ -15,9 +15,11 @@ import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.resources.R
 import chat.sphinx.resources.setBackgroundRandomColor
+import chat.sphinx.resources.setInitialsColor
 import chat.sphinx.resources.setTextColorExt
 import chat.sphinx.wrapper_common.util.getInitials
 import chat.sphinx.wrapper_contact.Contact
+import chat.sphinx.wrapper_contact.getColorKey
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_viewmodel.collectViewState
 import io.matthewnelson.android_feature_viewmodel.currentViewState
@@ -183,7 +185,7 @@ internal class AddressBookListAdapter(
                         layoutAddressBookInitialHolder.textViewInitials.text =
                             addressBookContact.alias?.value?.getInitials() ?: ""
                         layoutAddressBookInitialHolder.textViewInitials
-                            .setBackgroundRandomColor(R.drawable.chat_initials_circle)
+                            .setInitialsColor(addressBookContact.getColorKey(), R.drawable.chat_initials_circle)
                     }
 
                 }

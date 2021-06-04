@@ -15,13 +15,16 @@ import chat.sphinx.concept_repository_message.SendMessage
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
+import chat.sphinx.resources.getColorForKey
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.ChatName
+import chat.sphinx.wrapper_chat.getColorKey
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.util.getInitials
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_contact.ContactAlias
+import chat.sphinx.wrapper_contact.getColorKey
 import chat.sphinx.wrapper_message.Message
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
@@ -95,7 +98,7 @@ internal class ChatContactViewModel @Inject constructor(
                     emit(
                         InitialHolderViewState.Initials(
                             alias.value.getInitials(),
-                            headerInitialsTextViewColor
+                            app.getColorForKey(contact.getColorKey())
                         )
                     )
                 } ?: emit(

@@ -23,12 +23,14 @@ import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.kotlin_response.message
+import chat.sphinx.resources.getColorForKey
 import chat.sphinx.resources.getRandomColor
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.ChatName
 import chat.sphinx.wrapper_chat.isConversation
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_message.Message
+import chat.sphinx.wrapper_message.getColorKey
 import chat.sphinx.wrapper_message.isDeleted
 import chat.sphinx.wrapper_message.isGroupAction
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
@@ -62,10 +64,6 @@ abstract class ChatViewModel<ARGS: NavArgs>(
             .placeholderResId(R.drawable.ic_profile_avatar_circle)
             .transformation(Transformation.CircleCrop)
             .build()
-    }
-
-    protected val headerInitialsTextViewColor: Int by lazy {
-        app.getRandomColor()
     }
 
     protected abstract val chatSharedFlow: SharedFlow<Chat?>
@@ -177,6 +175,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                         newList.add(
                             MessageHolderViewState.Sent(
                                 message,
+                                app.getColorForKey(message.getColorKey()),
                                 chat,
                                 background =  when {
                                     message.status.isDeleted() -> {
@@ -212,6 +211,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                         newList.add(
                             MessageHolderViewState.Received(
                                 message,
+                                app.getColorForKey(message.getColorKey()),
                                 chat,
                                 background = when {
                                     isDeleted -> {

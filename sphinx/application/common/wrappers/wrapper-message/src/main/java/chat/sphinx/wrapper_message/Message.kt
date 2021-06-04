@@ -42,6 +42,14 @@ inline fun Message.retrieveTextToShow(): String? =
 //            decrypted.value
     }
 
+@Suppress("NOTHING_TO_INLINE")
+inline fun Message.getColorKey(): String {
+    senderAlias?.let { senderAlias ->
+        return "message-${sender.value}-${senderAlias.value}-color"
+    }
+    return "message-${sender.value}-color"
+}
+
 abstract class Message {
     abstract val id: MessageId
     abstract val uuid: MessageUUID?

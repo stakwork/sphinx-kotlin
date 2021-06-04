@@ -1,12 +1,14 @@
 package chat.sphinx.resources
 
+import android.content.Context
+import android.graphics.Color
 import android.graphics.Typeface
 import android.view.View
 import android.widget.TextView
 import androidx.annotation.ColorInt
 import androidx.annotation.ColorRes
-import androidx.annotation.FontRes
 import androidx.annotation.DrawableRes
+import androidx.annotation.FontRes
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 
@@ -49,4 +51,22 @@ inline fun View.setBackgroundRandomColor(
     } else {
         this.setBackgroundColor(color ?: this.context.getRandomColor())
     }
+}
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun View.setInitialsColor(
+    colorKey: String?,
+    @DrawableRes resId: Int?,
+) {
+        colorKey?.let { colorKey ->
+            this.context.getColorForKey(colorKey)?.let { color ->
+                if (resId != null) {
+                    val drawable = ContextCompat.getDrawable(this.context, resId)
+                    drawable?.setTint(color)
+                    this.background = drawable
+                } else {
+                    this.setBackgroundColor(color ?: this.context.getRandomColor())
+                }
+            }
+        }
 }

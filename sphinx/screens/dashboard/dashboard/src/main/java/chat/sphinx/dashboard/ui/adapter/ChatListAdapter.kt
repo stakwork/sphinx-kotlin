@@ -17,7 +17,7 @@ import chat.sphinx.dashboard.databinding.LayoutDashboardChatHolderBinding
 import chat.sphinx.dashboard.ui.DashboardViewModel
 import chat.sphinx.dashboard.ui.collectChatViewState
 import chat.sphinx.dashboard.ui.currentChatViewState
-import chat.sphinx.resources.setBackgroundRandomColor
+import chat.sphinx.resources.setInitialsColor
 import chat.sphinx.resources.setTextColorExt
 import chat.sphinx.resources.setTextFont
 import chat.sphinx.wrapper_chat.*
@@ -271,7 +271,7 @@ internal class ChatListAdapter(
                         layoutDashboardChatInitialHolder.textViewInitials.text =
                             dashboardChat.chatName?.getInitials() ?: ""
                         layoutDashboardChatInitialHolder.textViewInitials
-                            .setBackgroundRandomColor(R.drawable.chat_initials_circle)
+                            .setInitialsColor(dashboardChat.getColorKey(), R.drawable.chat_initials_circle)
                     }
 
                 }

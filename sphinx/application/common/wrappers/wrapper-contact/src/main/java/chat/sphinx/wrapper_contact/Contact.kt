@@ -11,6 +11,11 @@ import chat.sphinx.wrapper_common.lightning.LightningRouteHint
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_rsa.RsaPublicKey
 
+@Suppress("NOTHING_TO_INLINE")
+inline fun Contact.getColorKey(): String {
+    return "contact-${id}-color"
+}
+
 data class Contact(
     val id: ContactId,
     val routeHint: LightningRouteHint?,

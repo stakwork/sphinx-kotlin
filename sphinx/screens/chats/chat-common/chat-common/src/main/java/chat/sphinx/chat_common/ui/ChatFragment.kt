@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
 import androidx.annotation.LayoutRes
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavArgs
 import androidx.recyclerview.widget.LinearLayoutManager

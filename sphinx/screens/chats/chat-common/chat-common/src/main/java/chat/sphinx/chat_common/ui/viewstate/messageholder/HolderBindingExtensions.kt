@@ -227,7 +227,6 @@ internal inline fun LayoutMessageHolderBinding.setStatusHeader(
                     } else {
                         visible
                         text = name
-
                         /*
                         * TODO: Devise a way to derive random color values for sender aliases
                         *
@@ -237,7 +236,11 @@ internal inline fun LayoutMessageHolderBinding.setStatusHeader(
                         *   context.getRandomColor()
                         *   setBackgroundRandomColor()
                         * */
-                        setTextColorExt(common_R.color.lightPurple)
+                        statusHeader.senderColor?.let { senderColor ->
+                            setTextColor(senderColor)
+                        } ?: run {
+                            setTextColorExt(common_R.color.lightPurple)
+                        }
                     }
                 } ?: gone
             }

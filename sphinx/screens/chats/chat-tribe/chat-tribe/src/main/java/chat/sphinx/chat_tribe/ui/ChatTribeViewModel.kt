@@ -17,12 +17,15 @@ import chat.sphinx.concept_repository_message.SendMessage
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
+import chat.sphinx.resources.getColorForKey
 import chat.sphinx.resources.getRandomColor
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.ChatName
+import chat.sphinx.wrapper_chat.getColorKey
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.util.getInitials
 import chat.sphinx.wrapper_message.Message
+import chat.sphinx.wrapper_message.getColorKey
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
@@ -75,7 +78,7 @@ internal class ChatTribeViewModel @Inject constructor(
                 emit(
                     InitialHolderViewState.Initials(
                         it.value.getInitials(),
-                        headerInitialsTextViewColor
+                        app.getColorForKey(chat.getColorKey())
                     )
                 )
             } ?: emit(
@@ -98,7 +101,7 @@ internal class ChatTribeViewModel @Inject constructor(
         return message.senderPic?.let { url ->
             InitialHolderViewState.Url(url)
         } ?: message.senderAlias?.let { alias ->
-            InitialHolderViewState.Initials(alias.value.getInitials(), app.getRandomColor())
+            InitialHolderViewState.Initials(alias.value.getInitials(), app.getColorForKey(message.getColorKey()))
         } ?: InitialHolderViewState.None
     }
 

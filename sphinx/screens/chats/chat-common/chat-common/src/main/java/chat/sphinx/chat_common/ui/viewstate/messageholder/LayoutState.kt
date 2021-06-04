@@ -1,5 +1,6 @@
 package chat.sphinx.chat_common.ui.viewstate.messageholder
 
+import androidx.annotation.ColorInt
 import chat.sphinx.wrapper_chat.ChatType
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.lightning.asFormattedString
@@ -10,6 +11,7 @@ internal sealed class LayoutState {
 
     data class MessageStatusHeader(
         val senderName: String?,
+        @ColorInt val senderColor: Int?,
         val showSent: Boolean,
 
         // TODO: rework bolt icon when sending messages to be yellow (sending), red (failed), green(sent)
@@ -17,6 +19,7 @@ internal sealed class LayoutState {
 
         val showLockIcon: Boolean,
         val timestamp: String,
+//        @ColorInt val senderColor: Int?,
     ): LayoutState() {
         val showReceived: Boolean
             get() = !showSent

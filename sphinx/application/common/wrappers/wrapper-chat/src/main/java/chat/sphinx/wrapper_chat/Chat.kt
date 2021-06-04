@@ -35,6 +35,11 @@ inline fun Chat.hasPendingContacts(): Boolean =
 inline fun Chat.isTribe(): Boolean =
     type.isTribe()
 
+@Suppress("NOTHING_TO_INLINE")
+inline fun Chat.getColorKey(): String {
+    return "chat-${id}-color"
+}
+
 data class Chat(
     val id: ChatId,
     val uuid: ChatUUID,

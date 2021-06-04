@@ -1,7 +1,10 @@
 package chat.sphinx.chat_common.ui.viewstate.messageholder
 
+import androidx.annotation.ColorInt
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
+import chat.sphinx.resources.getColorForKey
 import chat.sphinx.wrapper_chat.Chat
+import chat.sphinx.wrapper_chat.getColorKey
 import chat.sphinx.wrapper_chat.isConversation
 import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_common.lightning.Sat
@@ -19,6 +22,7 @@ internal val MessageHolderViewState.showSentBubbleArrow: Boolean
 
 internal sealed class MessageHolderViewState(
     val message: Message,
+    @ColorInt val senderColor: Int?,
     chat: Chat,
     val background: BubbleBackground,
     val initialHolder: InitialHolderViewState,
@@ -53,6 +57,7 @@ internal sealed class MessageHolderViewState(
         if (background is BubbleBackground.First) {
             LayoutState.MessageStatusHeader(
                 if (chat.type.isConversation()) null else message.senderAlias?.value,
+                senderColor,
                 this is Sent,
                 this is Sent && (message.status.isReceived() || message.status.isConfirmed()),
                 message.messageContentDecrypted != null,
@@ -210,12 +215,14 @@ internal sealed class MessageHolderViewState(
 
     class Sent(
         message: Message,
+        senderColor: Int?,
         chat: Chat,
         background: BubbleBackground,
         replyMessageSenderName: (Message) -> String,
         accountOwner: () -> Contact,
     ) : MessageHolderViewState(
         message,
+        senderColor,
         chat,
         background,
         InitialHolderViewState.None,
@@ -225,6 +232,7 @@ internal sealed class MessageHolderViewState(
 
     class Received(
         message: Message,
+        senderColor: Int?,
         chat: Chat,
         background: BubbleBackground,
         initialHolder: InitialHolderViewState,
@@ -232,6 +240,7 @@ internal sealed class MessageHolderViewState(
         accountOwner: () -> Contact,
     ) : MessageHolderViewState(
         message,
+        senderColor,
         chat,
         background,
         initialHolder,
