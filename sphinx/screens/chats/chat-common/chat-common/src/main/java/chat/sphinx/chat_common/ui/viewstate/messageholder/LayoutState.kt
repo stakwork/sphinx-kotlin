@@ -79,6 +79,7 @@ internal sealed class LayoutState {
                 // TODO: Make sealed interface for handling a url or file
 //            val media: String?,
                 val sender: String,
+                @ColorInt val senderColor: Int?,
                 val text: String,
             ): ContainerTop()
 

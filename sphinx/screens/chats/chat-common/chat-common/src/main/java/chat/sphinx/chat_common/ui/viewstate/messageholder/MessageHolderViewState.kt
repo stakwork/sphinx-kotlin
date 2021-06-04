@@ -186,7 +186,7 @@ internal sealed class MessageHolderViewState(
         message.replyMessage?.let { nnMessage ->
             LayoutState.Bubble.ContainerTop.ReplyMessage(
                 messageSenderName(nnMessage),
-
+                senderColor,
                 nnMessage.retrieveTextToShow() ?: "",
             )
         }

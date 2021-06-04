@@ -686,7 +686,7 @@ internal inline fun LayoutMessageHolderBinding.setBubbleReplyMessage(
 
             textViewReplyMessageLabel.text = replyMessage.text
             textViewReplySenderLabel.text = replyMessage.sender
-            viewReplyBarLeading.setBackgroundRandomColor(null)
+            viewReplyBarLeading.setBackgroundRandomColor(null, replyMessage.senderColor)
         }
     }
 }
