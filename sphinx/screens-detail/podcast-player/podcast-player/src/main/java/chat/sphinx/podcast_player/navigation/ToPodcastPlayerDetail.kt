@@ -7,7 +7,7 @@ import chat.sphinx.detail_resources.DetailNavOptions
 import io.matthewnelson.concept_navigation.NavigationRequest
 
 
-class ToTribeChatPodcastPlayerDetail(
+class ToPodcastPlayerDetail(
     private val options: NavOptions = DetailNavOptions.defaultBuilt
 ) : NavigationRequest<NavController>() {
     override fun navigate(controller: NavController) {
