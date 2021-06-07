@@ -14,7 +14,7 @@ import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
-import chat.sphinx.concept_user_colors.UserColors
+import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.resources.*
 import chat.sphinx.wrapper_common.util.getInitials
 import chat.sphinx.wrapper_contact.Contact
@@ -25,14 +25,13 @@ import io.matthewnelson.android_feature_viewmodel.currentViewState
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import javax.inject.Inject
 
 internal class AddressBookListAdapter(
     private val imageLoader: ImageLoader<ImageView>,
     private val lifecycleOwner: LifecycleOwner,
     private val onStopSupervisor: OnStopSupervisor,
     private val viewModel: AddressBookViewModel,
-    private val userColors: UserColors
+    private val userColorsHelper: UserColorsHelper
 ): RecyclerView.Adapter<AddressBookListAdapter.AddressBookViewHolder>(), DefaultLifecycleObserver {
 
     private inner class Diff(
@@ -190,7 +189,7 @@ internal class AddressBookListAdapter(
                             layoutAddressBookInitialHolder.textViewInitials
                                 .setInitialsColor(
                                     Color.parseColor(
-                                        userColors.getHexCodeForKey(
+                                        userColorsHelper.getHexCodeForKey(
                                             addressBookContact.getColorKey(),
                                             layoutAddressBookInitialHolder.textViewInitials.context.getRandomHexCode()
                                         )

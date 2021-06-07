@@ -41,7 +41,7 @@ dependencies {
     implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-contact')
     implementation project(path: ':sphinx:application:data:concepts:concept-image-loader')
     api project(path: ':sphinx:application:common:logger')
-    implementation project(path: ':sphinx:application:data:concepts:concept-user-colors')
+    implementation project(path: ':sphinx:application:data:concepts:concept-user-colors-helper')
 
     implementation deps.androidx.recyclerView
 

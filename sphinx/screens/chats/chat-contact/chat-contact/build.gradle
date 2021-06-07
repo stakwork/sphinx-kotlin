@@ -36,7 +36,7 @@ dependencies {
 
     // Sphinx
     api project(path: ':sphinx:screens:chats:chat-common:chat-common')
-    implementation project(path: ':sphinx:application:data:concepts:concept-user-colors')
+    implementation project(path: ':sphinx:application:data:concepts:concept-user-colors-helper')
 
     implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt

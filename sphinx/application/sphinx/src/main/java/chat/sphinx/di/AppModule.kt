@@ -5,10 +5,10 @@ import android.widget.ImageView
 import chat.sphinx.BuildConfig
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_network_client_cache.NetworkClientCache
-import chat.sphinx.concept_user_colors.UserColors
+import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.feature_image_loader_android.ImageLoaderAndroid
 import chat.sphinx.logger.SphinxLogger
-import chat.sphinx.user_colors.UserColorsImpl
+import chat.sphinx.user_colors_helper.UserColorsHelperImpl
 import chat.sphinx.util.SphinxDispatchers
 import chat.sphinx.util.SphinxLoggerImpl
 import com.squareup.moshi.Moshi
@@ -85,12 +85,12 @@ object AppModule {
     fun provideUserColorsImpl(
         @ApplicationContext appContext: Context,
         dispatchers: CoroutineDispatchers
-    ): UserColorsImpl =
-        UserColorsImpl(appContext, dispatchers)
+    ): UserColorsHelperImpl =
+        UserColorsHelperImpl(appContext, dispatchers)
 
     @Provides
     fun provideUserColors(
-        userColorsImpl: UserColorsImpl
-    ): UserColors =
-        userColorsImpl
+        userColorsHelperImpl: UserColorsHelperImpl
+    ): UserColorsHelper =
+        userColorsHelperImpl
 }

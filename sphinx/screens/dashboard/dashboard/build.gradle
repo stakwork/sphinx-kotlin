@@ -43,7 +43,7 @@ dependencies {
     implementation project(path: ':sphinx:application:data:concepts:concept-image-loader')
     implementation project(path: ':sphinx:application:data:concepts:concept-background-login')
     implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-dashboard-android')
-    implementation project(path: ':sphinx:application:data:concepts:concept-user-colors')
+    implementation project(path: ':sphinx:application:data:concepts:concept-user-colors-helper')
 
     implementation project(path: ':sphinx:application:network:concepts:concept-socket-io')
 

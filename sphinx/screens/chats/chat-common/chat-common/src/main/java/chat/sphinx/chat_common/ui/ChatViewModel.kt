@@ -20,7 +20,7 @@ import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.concept_repository_message.SendMessage
-import chat.sphinx.concept_user_colors.UserColors
+import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
@@ -43,7 +43,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import javax.inject.Inject
 
 abstract class ChatViewModel<ARGS: NavArgs>(
     protected val app: Application,
@@ -53,7 +52,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     protected val messageRepository: MessageRepository,
     protected val networkQueryLightning: NetworkQueryLightning,
     protected val savedStateHandle: SavedStateHandle,
-    protected val userColors: UserColors
+    protected val userColorsHelper: UserColorsHelper
 ): SideEffectViewModel<
         Context,
         ChatSideEffect,
@@ -175,7 +174,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
             withContext(default) {
                 for (message in messages) {
                     val messageColor = Color.parseColor(
-                        userColors.getHexCodeForKey(
+                        userColorsHelper.getHexCodeForKey(
                             message.getColorKey(),
                             app.getRandomHexCode()
                         )

@@ -1,15 +1,14 @@
-package chat.sphinx.user_colors
+package chat.sphinx.user_colors_helper
 
 import android.content.Context
-import android.graphics.Color
-import chat.sphinx.concept_user_colors.UserColors
+import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.withContext
 
-class UserColorsImpl(
+class UserColorsHelperImpl(
     context: Context,
     private val dispatchers: CoroutineDispatchers
-) : UserColors(),
+) : UserColorsHelper(),
     CoroutineDispatchers by dispatchers{
 
     private val appContext: Context = context.applicationContext

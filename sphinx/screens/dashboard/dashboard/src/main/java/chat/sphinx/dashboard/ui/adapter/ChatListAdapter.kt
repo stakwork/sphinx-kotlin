@@ -13,7 +13,7 @@ import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
-import chat.sphinx.concept_user_colors.UserColors
+import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.dashboard.R
 import chat.sphinx.dashboard.databinding.LayoutDashboardChatHolderBinding
 import chat.sphinx.dashboard.ui.DashboardViewModel
@@ -26,7 +26,6 @@ import chat.sphinx.resources.setTextFont
 import chat.sphinx.wrapper_chat.*
 import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_common.util.getInitials
-import chat.sphinx.wrapper_contact.getColorKey
 import chat.sphinx.wrapper_message.*
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.invisibleIfFalse
@@ -36,7 +35,6 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.*
-import javax.inject.Inject
 import kotlin.collections.ArrayList
 
 
@@ -47,7 +45,7 @@ internal class ChatListAdapter(
     private val lifecycleOwner: LifecycleOwner,
     private val onStopSupervisor: OnStopSupervisor,
     private val viewModel: DashboardViewModel,
-    private val userColors: UserColors
+    private val userColorsHelper: UserColorsHelper
 ): RecyclerView.Adapter<ChatListAdapter.ChatViewHolder>(), DefaultLifecycleObserver {
 
     private inner class Diff(
@@ -281,7 +279,7 @@ internal class ChatListAdapter(
                             layoutDashboardChatInitialHolder.textViewInitials
                                 .setInitialsColor(
                                     Color.parseColor(
-                                        userColors.getHexCodeForKey(
+                                        userColorsHelper.getHexCodeForKey(
                                             dashboardChat.getColorKey(),
                                             layoutDashboardChatInitialHolder.textViewInitials.context.getRandomHexCode()
                                         )

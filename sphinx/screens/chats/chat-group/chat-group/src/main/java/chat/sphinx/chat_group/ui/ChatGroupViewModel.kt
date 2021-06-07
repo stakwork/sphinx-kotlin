@@ -11,7 +11,7 @@ import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.concept_repository_message.SendMessage
-import chat.sphinx.concept_user_colors.UserColors
+import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
@@ -42,7 +42,7 @@ class ChatGroupViewModel @Inject constructor(
     messageRepository: MessageRepository,
     networkQueryLightning: NetworkQueryLightning,
     savedStateHandle: SavedStateHandle,
-    userColors: UserColors,
+    userColorsHelper: UserColorsHelper,
 ): ChatViewModel<ChatGroupFragmentArgs>(
     app,
     dispatchers,
@@ -51,7 +51,7 @@ class ChatGroupViewModel @Inject constructor(
     messageRepository,
     networkQueryLightning,
     savedStateHandle,
-    userColors,
+    userColorsHelper,
 ) {
     override val args: ChatGroupFragmentArgs by savedStateHandle.navArgs()
 
@@ -71,7 +71,7 @@ class ChatGroupViewModel @Inject constructor(
                 )
             } ?: chat?.name?.let {
                 val chatColor = Color.parseColor(
-                    userColors.getHexCodeForKey(
+                    userColorsHelper.getHexCodeForKey(
                         chat.getColorKey(),
                         app.getRandomHexCode()
                     )
