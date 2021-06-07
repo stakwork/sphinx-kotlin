@@ -4,55 +4,55 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/layout_constraint_podcast_episodes_list"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
-
-
-    <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/text_view_episodes_list_header_title"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/episode_list_item_divider_margin_x"
-        android:layout_marginEnd="@dimen/default_inner_spacing_list_item_title"
-        android:fontFamily="@font/montserrat_regular"
-        android:gravity="start"
-        android:paddingVertical="@dimen/default_layout_margin"
-        android:text="@string/label_text_episodes_list_header"
-        android:textAlignment="textStart"
-        android:textAllCaps="true"
-        android:textColor="@color/secondaryText"
-        android:textSize="@dimen/default_text_size_list_row_headline"
-        app:layout_constraintBottom_toTopOf="@+id/recycler_view_episodes_list"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintHorizontal_chainStyle="spread_inside"
+    android:layout_height="match_parent"
+    android:background="@color/headerBG">
+    
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/episodes_header"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_episodes_list_header_title"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginStart="@dimen/episode_list_item_divider_margin_x"
+            android:layout_marginEnd="@dimen/default_inner_spacing_list_item_title"
+            android:fontFamily="@font/montserrat_regular"
+            android:gravity="start|center"
+            android:text="@string/label_text_episodes_list_header"
+            android:textAlignment="textStart"
+            android:textAllCaps="true"
+            android:textColor="@color/secondaryText"
+            android:textSize="@dimen/default_text_size_list_row_headline"
+            app:layout_constraintStart_toStartOf="parent" />
 
 
-    <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/text_view_episodes_list_header_episode_count"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="@dimen/default_inner_spacing_list_item_title"
-        android:fontFamily="@font/montserrat_regular"
-        android:gravity="start"
-        android:paddingVertical="@dimen/default_layout_margin"
-        android:textAlignment="textStart"
-        android:textColor="@color/receivedIcon"
-        android:textSize="@dimen/default_text_size_list_row_headline"
-        app:layout_constraintBottom_toBottomOf="@+id/text_view_episodes_list_header_title"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toEndOf="@+id/text_view_episodes_list_header_title"
-        app:layout_constraintTop_toTopOf="@id/text_view_episodes_list_header_title"
-        tools:text="37" />
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_episodes_list_header_episode_count"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginHorizontal="@dimen/default_inner_spacing_list_item_title"
+            android:fontFamily="@font/montserrat_regular"
+            android:gravity="start|center"
+            android:textColor="@color/receivedIcon"
+            android:textSize="@dimen/default_text_size_list_row_headline"
+            app:layout_constraintStart_toEndOf="@+id/text_view_episodes_list_header_title"
+            tools:text="37" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_view_episodes_list"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:background="@color/body"
-        app:layout_constraintTop_toBottomOf="@id/text_view_episodes_list_header_title"
+        android:background="@color/headerBG"
+        app:layout_constraintTop_toBottomOf="@id/episodes_header"
+        app:layout_constraintBottom_toBottomOf="parent"
         tools:listitem="@layout/layout_episode_list_item_holder" />
 
 

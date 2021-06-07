@@ -5,7 +5,8 @@
     android:id="@+id/layout_constraint_episode_playback_control_buttons"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingVertical="@dimen/default_layout_margin">
+    android:paddingVertical="@dimen/default_layout_margin"
+    android:background="@color/headerBG">
 
 
     <androidx.appcompat.widget.AppCompatButton
@@ -50,8 +51,16 @@
         app:layout_constraintStart_toEndOf="@+id/button_share_clip"
         app:layout_constraintTop_toBottomOf="@id/button_playback_speed" />
 
+    <androidx.appcompat.widget.AppCompatImageView
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_margin="5dp"
+        app:layout_constraintBottom_toBottomOf="@+id/button_play"
+        app:layout_constraintEnd_toEndOf="@+id/button_play"
+        app:layout_constraintStart_toStartOf="@+id/button_play"
+        app:layout_constraintTop_toTopOf="@+id/button_play"
+        android:background="@drawable/play_pause_button_back"/>
 
-    <!--  Play Button (show if paused)  -->
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/button_play"
         android:layout_width="@dimen/player_details_large_control_button_xy"
@@ -75,8 +84,6 @@
         android:orientation="vertical"
         app:layout_constraintGuide_percent="0.5" />
 
-
-    <!--  Pause Button (show if playing)  -->
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/button_pause"
         android:layout_width="@dimen/player_details_large_control_button_xy"
@@ -91,7 +98,7 @@
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="@id/guideline_play_pause_button_position"
         app:layout_constraintTop_toBottomOf="@id/button_playback_speed"
-        tools:visibility="visible" />
+        tools:visibility="gone" />
 
 
     <androidx.appcompat.widget.AppCompatButton

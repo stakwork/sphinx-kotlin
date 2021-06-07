@@ -3,6 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/layout_constraint_episode_list_item_holder"
+    android:background="@color/headerBG"
     android:layout_width="match_parent"
     android:layout_height="@dimen/episode_list_item_holder_height"
     >
@@ -11,9 +12,8 @@
     <!--  Show a play arrow if the podcast is playing -->
     <TextView
         android:id="@+id/text_view_play_arrow_indicator"
-        android:layout_width="0dp"
+        android:layout_width="30dp"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="@dimen/default_inner_spacing_list_item_title"
         android:fontFamily="@font/material_icons_regular"
         android:text="@string/material_icon_name_play_button"
         android:textColor="@color/receivedIcon"
@@ -57,10 +57,12 @@
 
     <ProgressBar
         android:id="@+id/progress_bar_episode_download"
+        style="?android:attr/progressBarStyle"
         android:layout_width="@dimen/episode_list_item_download_button_xy"
         android:layout_height="@dimen/episode_list_item_download_button_xy"
         android:gravity="center"
         android:visibility="gone"
+        android:indeterminateTint="@android:color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/text_view_episode_title"
@@ -75,6 +77,7 @@
         android:fontFamily="@font/material_icons_regular"
         android:gravity="center"
         android:text="@string/material_icon_name_cloud_download"
+        android:textColor="@color/text"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/text_view_episode_title"

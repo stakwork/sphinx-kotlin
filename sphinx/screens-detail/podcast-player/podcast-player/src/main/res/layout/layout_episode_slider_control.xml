@@ -5,6 +5,7 @@
     android:id="@+id/layout_constraint_episode_slider_control"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:background="@color/headerBG"
     android:paddingVertical="@dimen/default_layout_margin">
 
 
@@ -15,6 +16,9 @@
         android:layout_height="wrap_content"
         android:secondaryProgressTint="@color/receivedIcon"
         android:thumbTint="@color/receivedIcon"
+        android:progressDrawable="@drawable/podcast_player_seek_bar_progress"
+        android:thumb="@drawable/podcast_player_seek_bar_thumb"
+        android:progress="50"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -24,7 +28,7 @@
         android:id="@+id/text_view_current_episode_progress"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/default_inner_spacing_list_item_title"
+        android:layout_marginStart="@dimen/player_time_labels_horizontal_margin"
         android:fontFamily="@font/roboto_regular"
         android:gravity="end"
         android:lines="1"
@@ -41,7 +45,7 @@
         android:layout_height="20dp"
         android:layout_marginHorizontal="10dp"
         android:indeterminate="true"
-        android:indeterminateTint="@android:color/white"
+        android:indeterminateTint="@color/secondaryText"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@+id/text_view_current_episode_progress"
         app:layout_constraintEnd_toStartOf="@id/text_view_current_episode_duration"
@@ -52,9 +56,10 @@
         android:id="@+id/text_view_current_episode_duration"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="@dimen/default_inner_spacing_list_item_title"
+        android:layout_marginEnd="@dimen/player_time_labels_horizontal_margin"
         android:fontFamily="@font/roboto_regular"
         android:lines="1"
+        android:textColor="@color/secondaryText"
         app:layout_constraintBottom_toBottomOf="@+id/progress_bar_audio_loading"
         app:layout_constraintEnd_toEndOf="@id/seek_bar_current_episode_progress"
         app:layout_constraintTop_toTopOf="@+id/progress_bar_audio_loading"
