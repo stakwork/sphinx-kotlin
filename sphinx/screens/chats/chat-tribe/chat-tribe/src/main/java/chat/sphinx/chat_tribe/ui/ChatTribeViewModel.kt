@@ -2,6 +2,7 @@ package chat.sphinx.chat_tribe.ui
 
 import android.app.Application
 import android.content.ContentValues.TAG
+import android.graphics.Color
 import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
@@ -14,11 +15,11 @@ import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.concept_repository_message.SendMessage
+import chat.sphinx.concept_user_colors.UserColors
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
-import chat.sphinx.resources.getColorForKey
-import chat.sphinx.resources.getRandomColor
+import chat.sphinx.resources.getRandomHexCode
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.ChatName
 import chat.sphinx.wrapper_chat.getColorKey
@@ -49,6 +50,7 @@ internal class ChatTribeViewModel @Inject constructor(
     messageRepository: MessageRepository,
     networkQueryLightning: NetworkQueryLightning,
     savedStateHandle: SavedStateHandle,
+    userColors: UserColors,
 ): ChatViewModel<ChatTribeFragmentArgs>(
     app,
     dispatchers,
@@ -57,6 +59,7 @@ internal class ChatTribeViewModel @Inject constructor(
     messageRepository,
     networkQueryLightning,
     savedStateHandle,
+    userColors
 ) {
     override val args: ChatTribeFragmentArgs by savedStateHandle.navArgs()
 
@@ -75,10 +78,17 @@ internal class ChatTribeViewModel @Inject constructor(
                     InitialHolderViewState.Url(it)
                 )
             } ?: chat?.name?.let {
+                val chatColor = Color.parseColor(
+                    userColors.getHexCodeForKey(
+                        chat.getColorKey(),
+                        app.getRandomHexCode()
+                    )
+                )
+
                 emit(
                     InitialHolderViewState.Initials(
                         it.value.getInitials(),
-                        app.getColorForKey(chat.getColorKey())
+                        chatColor
                     )
                 )
             } ?: emit(
@@ -101,7 +111,7 @@ internal class ChatTribeViewModel @Inject constructor(
         return message.senderPic?.let { url ->
             InitialHolderViewState.Url(url)
         } ?: message.senderAlias?.let { alias ->
-            InitialHolderViewState.Initials(alias.value.getInitials(), app.getColorForKey(message.getColorKey()))
+            InitialHolderViewState.Initials(alias.value.getInitials(), Color.parseColor(userColors.getHexCodeForKey(message.getColorKey(), app.getRandomHexCode())))
         } ?: InitialHolderViewState.None
     }
 

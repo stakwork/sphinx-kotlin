@@ -1,6 +1,7 @@
 package chat.sphinx.chat_group.ui
 
 import android.app.Application
+import android.graphics.Color
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.chat_common.ui.ChatViewModel
@@ -10,17 +11,17 @@ import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.concept_repository_message.SendMessage
+import chat.sphinx.concept_user_colors.UserColors
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
-import chat.sphinx.resources.getColorForKey
 import chat.sphinx.resources.getRandomColor
+import chat.sphinx.resources.getRandomHexCode
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.ChatName
 import chat.sphinx.wrapper_chat.getColorKey
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.util.getInitials
-import chat.sphinx.wrapper_contact.getColorKey
 import chat.sphinx.wrapper_message.Message
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
@@ -41,6 +42,7 @@ class ChatGroupViewModel @Inject constructor(
     messageRepository: MessageRepository,
     networkQueryLightning: NetworkQueryLightning,
     savedStateHandle: SavedStateHandle,
+    userColors: UserColors,
 ): ChatViewModel<ChatGroupFragmentArgs>(
     app,
     dispatchers,
@@ -49,6 +51,7 @@ class ChatGroupViewModel @Inject constructor(
     messageRepository,
     networkQueryLightning,
     savedStateHandle,
+    userColors,
 ) {
     override val args: ChatGroupFragmentArgs by savedStateHandle.navArgs()
 
@@ -67,10 +70,17 @@ class ChatGroupViewModel @Inject constructor(
                     InitialHolderViewState.Url(it)
                 )
             } ?: chat?.name?.let {
+                val chatColor = Color.parseColor(
+                    userColors.getHexCodeForKey(
+                        chat.getColorKey(),
+                        app.getRandomHexCode()
+                    )
+                )
+
                 emit(
                     InitialHolderViewState.Initials(
                         it.value.getInitials(),
-                        app.getColorForKey(chat.getColorKey())
+                        chatColor
                     )
                 )
             } ?: emit(

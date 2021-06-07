@@ -2,7 +2,6 @@ package chat.sphinx.chat_common.ui.viewstate.messageholder
 
 import androidx.annotation.ColorInt
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
-import chat.sphinx.resources.getColorForKey
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.getColorKey
 import chat.sphinx.wrapper_chat.isConversation

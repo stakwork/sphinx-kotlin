@@ -2,6 +2,7 @@ package chat.sphinx.chat_common.ui
 
 import android.app.Application
 import android.content.Context
+import android.graphics.Color
 import androidx.annotation.CallSuper
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
@@ -19,12 +20,12 @@ import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.concept_repository_message.SendMessage
+import chat.sphinx.concept_user_colors.UserColors
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.kotlin_response.message
-import chat.sphinx.resources.getColorForKey
-import chat.sphinx.resources.getRandomColor
+import chat.sphinx.resources.getRandomHexCode
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.ChatName
 import chat.sphinx.wrapper_chat.isConversation
@@ -42,6 +43,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
 abstract class ChatViewModel<ARGS: NavArgs>(
     protected val app: Application,
@@ -50,7 +52,8 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     protected val contactRepository: ContactRepository,
     protected val messageRepository: MessageRepository,
     protected val networkQueryLightning: NetworkQueryLightning,
-    protected val savedStateHandle: SavedStateHandle
+    protected val savedStateHandle: SavedStateHandle,
+    protected val userColors: UserColors
 ): SideEffectViewModel<
         Context,
         ChatSideEffect,
@@ -171,11 +174,18 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 
             withContext(default) {
                 for (message in messages) {
+                    val messageColor = Color.parseColor(
+                        userColors.getHexCodeForKey(
+                            message.getColorKey(),
+                            app.getRandomHexCode()
+                        )
+                    )
+
                     if (message.sender == chat.contactIds.firstOrNull()) {
                         newList.add(
                             MessageHolderViewState.Sent(
                                 message,
-                                app.getColorForKey(message.getColorKey()),
+                                messageColor,
                                 chat,
                                 background =  when {
                                     message.status.isDeleted() -> {
@@ -211,7 +221,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                         newList.add(
                             MessageHolderViewState.Received(
                                 message,
-                                app.getColorForKey(message.getColorKey()),
+                                messageColor,
                                 chat,
                                 background = when {
                                     isDeleted -> {

@@ -1,5 +1,6 @@
 package chat.sphinx.address_book.ui.adapter
 
+import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.ImageView
@@ -13,10 +14,8 @@ import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
-import chat.sphinx.resources.R
-import chat.sphinx.resources.setBackgroundRandomColor
-import chat.sphinx.resources.setInitialsColor
-import chat.sphinx.resources.setTextColorExt
+import chat.sphinx.concept_user_colors.UserColors
+import chat.sphinx.resources.*
 import chat.sphinx.wrapper_common.util.getInitials
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_contact.getColorKey
@@ -26,12 +25,14 @@ import io.matthewnelson.android_feature_viewmodel.currentViewState
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
 internal class AddressBookListAdapter(
     private val imageLoader: ImageLoader<ImageView>,
     private val lifecycleOwner: LifecycleOwner,
     private val onStopSupervisor: OnStopSupervisor,
-    private val viewModel: AddressBookViewModel
+    private val viewModel: AddressBookViewModel,
+    private val userColors: UserColors
 ): RecyclerView.Adapter<AddressBookListAdapter.AddressBookViewHolder>(), DefaultLifecycleObserver {
 
     private inner class Diff(
@@ -184,8 +185,19 @@ internal class AddressBookListAdapter(
                     } else {
                         layoutAddressBookInitialHolder.textViewInitials.text =
                             addressBookContact.alias?.value?.getInitials() ?: ""
-                        layoutAddressBookInitialHolder.textViewInitials
-                            .setInitialsColor(addressBookContact.getColorKey(), R.drawable.chat_initials_circle)
+
+                        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                            layoutAddressBookInitialHolder.textViewInitials
+                                .setInitialsColor(
+                                    Color.parseColor(
+                                        userColors.getHexCodeForKey(
+                                            addressBookContact.getColorKey(),
+                                            layoutAddressBookInitialHolder.textViewInitials.context.getRandomHexCode()
+                                        )
+                                    ),
+                                    R.drawable.chat_initials_circle
+                                )
+                        }
                     }
 
                 }

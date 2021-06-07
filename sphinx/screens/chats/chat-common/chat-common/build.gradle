@@ -40,6 +40,9 @@ dependencies {
     api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-message')
     api project(path: ':sphinx:application:network:concepts:queries:concept-network-query-lightning')
     api project(path: ':sphinx:activity:insetter-activity')
+    implementation project(path: ':sphinx:application:data:concepts:concept-user-colors')
 
     api deps.androidx.recyclerView
+    implementation deps.androidx.lifecycle.hilt
+    implementation deps.google.hilt
 }

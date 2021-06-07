@@ -1,16 +1,13 @@
 plugins {
+    id 'app.cash.exhaustive'
     id 'com.android.library'
-    id 'androidx.navigation.safeargs'
-    id 'dagger.hilt.android.plugin'
     id 'kotlin-android'
-    id 'kotlin-kapt'
 }
 
 android {
     compileSdkVersion versions.compileSdk
     buildToolsVersion versions.buildTools
 
-    buildFeatures.viewBinding = true
     defaultConfig {
         minSdkVersion versions.minSdk
         targetSdkVersion versions.compileSdk
@@ -30,15 +27,11 @@ android {
 }
 
 dependencies {
-    implementation fileTree(dir: "libs", include: ["*.jar"])
     // KotlinAndroid
-    implementation project(path: ':android:features:android-feature-screens')
+    api project(path: ':kotlin:concepts:concept-coroutines')
 
     // Sphinx
-    api project(path: ':sphinx:screens:chats:chat-common:chat-common')
-    implementation project(path: ':sphinx:application:data:concepts:concept-user-colors')
+    api project(path: ':sphinx:application:data:concepts:concept-user-colors')
 
-    implementation deps.androidx.lifecycle.hilt
-    implementation deps.google.hilt
-    kapt kaptDeps.google.hilt
+    testImplementation project(path: ':kotlin:test:test-concept-coroutines')
 }

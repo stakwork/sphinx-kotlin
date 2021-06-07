@@ -19,6 +19,7 @@ import chat.sphinx.address_book.navigation.AddressBookNavigator
 import chat.sphinx.address_book.ui.adapter.AddressBookFooterAdapter
 import chat.sphinx.address_book.ui.adapter.SwipeHelper
 import chat.sphinx.concept_image_loader.ImageLoader
+import chat.sphinx.concept_user_colors.UserColors
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addStatusBarPadding
 import dagger.hilt.android.AndroidEntryPoint
@@ -36,6 +37,10 @@ internal class AddressBookFragment: BaseFragment<
     @Inject
     @Suppress("ProtectedInFinal")
     protected lateinit var imageLoader: ImageLoader<ImageView>
+
+    @Inject
+    @Suppress("ProtectedInFinal")
+    protected lateinit var userColors: UserColors
 
     override val viewModel: AddressBookViewModel by viewModels()
     override val binding: FragmentAddressBookBinding by viewBinding(FragmentAddressBookBinding::bind)
@@ -77,7 +82,7 @@ internal class AddressBookFragment: BaseFragment<
     }
 
     private fun setupContacts() {
-        val addressBookListAdapter = AddressBookListAdapter(imageLoader, viewLifecycleOwner, onStopSupervisor, viewModel)
+        val addressBookListAdapter = AddressBookListAdapter(imageLoader, viewLifecycleOwner, onStopSupervisor, viewModel, userColors)
         val addressBookFooterAdapter = AddressBookFooterAdapter(requireActivity() as InsetterActivity)
         binding.recyclerViewContacts.apply {
             this.setHasFixedSize(false)

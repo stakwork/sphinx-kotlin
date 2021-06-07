@@ -55,18 +55,14 @@ inline fun View.setBackgroundRandomColor(
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun View.setInitialsColor(
-    colorKey: String?,
+    @ColorInt color: Int?,
     @DrawableRes resId: Int?,
 ) {
-        colorKey?.let { colorKey ->
-            this.context.getColorForKey(colorKey)?.let { color ->
-                if (resId != null) {
-                    val drawable = ContextCompat.getDrawable(this.context, resId)
-                    drawable?.setTint(color)
-                    this.background = drawable
-                } else {
-                    this.setBackgroundColor(color ?: this.context.getRandomColor())
-                }
-            }
-        }
+    if (resId != null) {
+        val drawable = ContextCompat.getDrawable(this.context, resId)
+        drawable?.setTint(color ?: this.context.getRandomColor())
+        this.background = drawable
+    } else {
+        this.setBackgroundColor(color ?: this.context.getRandomColor())
+    }
 }

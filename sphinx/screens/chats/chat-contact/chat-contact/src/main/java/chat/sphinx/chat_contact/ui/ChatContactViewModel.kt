@@ -1,6 +1,7 @@
 package chat.sphinx.chat_contact.ui
 
 import android.app.Application
+import android.graphics.Color
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.chat_common.ui.ChatViewModel
@@ -12,13 +13,14 @@ import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.concept_repository_message.SendMessage
+import chat.sphinx.concept_user_colors.UserColors
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
-import chat.sphinx.resources.getColorForKey
+import chat.sphinx.resources.getRandomColor
+import chat.sphinx.resources.getRandomHexCode
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.ChatName
-import chat.sphinx.wrapper_chat.getColorKey
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.util.getInitials
@@ -54,6 +56,7 @@ internal class ChatContactViewModel @Inject constructor(
     messageRepository: MessageRepository,
     networkQueryLightning: NetworkQueryLightning,
     savedStateHandle: SavedStateHandle,
+    userColors: UserColors,
 ): ChatViewModel<ChatContactFragmentArgs>(
     app,
     dispatchers,
@@ -62,6 +65,7 @@ internal class ChatContactViewModel @Inject constructor(
     messageRepository,
     networkQueryLightning,
     savedStateHandle,
+    userColors
 ) {
     override val args: ChatContactFragmentArgs by savedStateHandle.navArgs()
     private var chatId: ChatId? = args.chatId
@@ -95,10 +99,17 @@ internal class ChatContactViewModel @Inject constructor(
                         InitialHolderViewState.Url(photoUrl)
                     )
                 } ?: contact.alias?.let { alias ->
+                    val contactColor = Color.parseColor(
+                        userColors.getHexCodeForKey(
+                            contact.getColorKey(),
+                            app.getRandomHexCode()
+                        )
+                    )
+
                     emit(
                         InitialHolderViewState.Initials(
                             alias.value.getInitials(),
-                            app.getColorForKey(contact.getColorKey())
+                            contactColor
                         )
                     )
                 } ?: emit(

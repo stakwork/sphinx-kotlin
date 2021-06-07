@@ -21,25 +21,10 @@ inline fun Context.getRandomColor(): Int {
     return ContextCompat.getColor(this, getRandomColorRes())
 }
 
-@ColorInt
-@Suppress("NOTHING_TO_INLINE")
-inline fun Context.getColorForKey(colorKey: String): Int {
-
-    this.getSharedPreferences("sphinx_colors", Context.MODE_PRIVATE).let { sharedPrefs ->
-        val colorHexCode = sharedPrefs.getString(colorKey, null)?.let { hexCode ->
-            hexCode
-        } ?: "#" + Integer.toHexString(ContextCompat.getColor(this, this.getRandomColorRes()))
-
-        sharedPrefs?.edit()?.let { editor ->
-            editor.putString(colorKey, colorHexCode).let { editor ->
-                editor.apply()
-            }
-        }
-
-        return Color.parseColor(colorHexCode)
-    }
-
-    return getRandomColor()
+inline fun Context.getRandomHexCode(): String {
+    return "#" + Integer.toHexString(
+        getRandomColor()
+    )
 }
 
 @ColorRes
