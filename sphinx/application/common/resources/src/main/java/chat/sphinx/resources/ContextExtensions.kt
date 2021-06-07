@@ -32,9 +32,7 @@ inline fun Context.getColorForKey(colorKey: String): Int {
 
         sharedPrefs?.edit()?.let { editor ->
             editor.putString(colorKey, colorHexCode).let { editor ->
-                if (!editor.commit()) {
-                    editor.apply()
-                }
+                editor.apply()
             }
         }
 
