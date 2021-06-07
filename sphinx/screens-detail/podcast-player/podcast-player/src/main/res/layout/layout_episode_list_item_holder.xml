@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_constraint_episode_list_item_holder"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/episode_list_item_holder_height"
+    >
+
+
+    <!--  Show a play arrow if the podcast is playing -->
+    <TextView
+        android:id="@+id/text_view_play_arrow_indicator"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/default_inner_spacing_list_item_title"
+        android:fontFamily="@font/material_icons_regular"
+        android:text="@string/material_icon_name_play_button"
+        android:textColor="@color/receivedIcon"
+        android:textSize="25sp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:visibility="visible" />
+
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/image_view_episode_cover_art"
+        android:layout_width="@dimen/episode_list_item_cover_image_xy"
+        android:layout_height="@dimen/episode_list_item_cover_image_xy"
+        android:scaleType="centerInside"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@id/text_view_play_arrow_indicator"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:srcCompat="@drawable/sphinx_white_logo" />
+
+    <TextView
+        android:id="@+id/text_view_episode_title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/default_layout_margin"
+        android:ellipsize="end"
+        android:fontFamily="@font/roboto_regular"
+        android:textColor="@color/text"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/button_download_episode"
+        app:layout_constraintStart_toEndOf="@id/image_view_episode_cover_art"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="Who Will Build the Roads?" />
+
+
+    <!--
+        Show an activity indicator if the podcast is downloading. Otherwise,
+        show the download button.
+    -->
+
+    <ProgressBar
+        android:id="@+id/progress_bar_episode_download"
+        android:layout_width="@dimen/episode_list_item_download_button_xy"
+        android:layout_height="@dimen/episode_list_item_download_button_xy"
+        android:gravity="center"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/text_view_episode_title"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:visibility="visible" />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/button_download_episode"
+        android:layout_width="@dimen/episode_list_item_download_button_xy"
+        android:layout_height="@dimen/episode_list_item_download_button_xy"
+        android:layout_marginHorizontal="@dimen/default_inner_spacing_list_item_title"
+        android:fontFamily="@font/material_icons_regular"
+        android:gravity="center"
+        android:text="@string/material_icon_name_cloud_download"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/text_view_episode_title"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:visibility="visible" />
+
+
+    <View
+        android:id="@+id/divider_bottom"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:layout_marginHorizontal="@dimen/episode_list_item_divider_margin_x"
+        android:backgroundTint="@color/receivedMsgBG"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

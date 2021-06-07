@@ -19,6 +19,7 @@
     <dimen name="default_text_size_back_arrow">21sp</dimen>
     <dimen name="default_text_size_tap_target_material_icon">20sp</dimen>
     <dimen name="default_header_text_size">14sp</dimen>
+    <dimen name="default_text_size_large_title_3">22sp</dimen>
     <dimen name="default_text_size_headline">17sp</dimen>
     <dimen name="default_text_size_body">12sp</dimen>
     <dimen name="default_text_size_action_button_label">12sp</dimen>
