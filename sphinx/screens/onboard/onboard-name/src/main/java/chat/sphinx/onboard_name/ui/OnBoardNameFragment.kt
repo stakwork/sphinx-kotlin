@@ -40,12 +40,30 @@ internal class OnBoardNameFragment: SideEffectFragment<
             .enableDoubleTapToClose(viewLifecycleOwner, SphinxToastUtils())
             .addCallback(viewLifecycleOwner, requireActivity())
 
+        deleteAuthAndIP()
+
         binding.buttonNext.setOnClickListener {
             viewModel.updateViewState(OnBoardNameViewState.Saving)
 
             val name = binding.signUpNameEditText.text?.trim().toString()
 
             viewModel.updateOwner(name)
+        }
+    }
+
+    private fun deleteAuthAndIP() {
+        binding.root.context.getSharedPreferences("sphinx_temp_prefs", Context.MODE_PRIVATE).let { sharedPrefs ->
+
+            sharedPrefs?.edit()?.let { editor ->
+                editor
+                    .remove("sphinx_temp_ip")
+                    .remove("sphinx_temp_auth_token")
+                    .let { editor ->
+                        if (!editor.commit()) {
+                            editor.apply()
+                        }
+                    }
+            }
         }
     }
 
