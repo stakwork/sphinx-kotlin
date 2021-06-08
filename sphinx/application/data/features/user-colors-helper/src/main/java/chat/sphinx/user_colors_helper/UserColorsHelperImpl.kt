@@ -13,7 +13,7 @@ class UserColorsHelperImpl(
 
     private val appContext: Context = context.applicationContext
 
-    override suspend fun getHexCodeForKey(colorKey: String?, randomHexCode: String): String {
+    override suspend fun getHexCodeForKey(colorKey: String?, randomHexColorCode: String): String {
         var hexColorCode: String? = null
 
         colorKey?.let { colorKey ->
@@ -22,10 +22,10 @@ class UserColorsHelperImpl(
                     sharedPrefs.getString(colorKey, null)?.let { savedHexCode ->
                         hexColorCode = savedHexCode
                     } ?: run {
-                        hexColorCode = randomHexCode
+                        hexColorCode = randomHexColorCode
 
                         sharedPrefs?.edit()?.let { editor ->
-                            editor.putString(colorKey, randomHexCode).let { editor ->
+                            editor.putString(colorKey, randomHexColorCode).let { editor ->
                                 if (!editor.commit()) {
                                     editor.apply()
                                 }
@@ -35,6 +35,6 @@ class UserColorsHelperImpl(
                 }
             }
         }
-        return hexColorCode ?: randomHexCode
+        return hexColorCode ?: randomHexColorCode
     }
 }
