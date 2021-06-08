@@ -40,7 +40,7 @@ internal class OnBoardNameFragment: SideEffectFragment<
             .enableDoubleTapToClose(viewLifecycleOwner, SphinxToastUtils())
             .addCallback(viewLifecycleOwner, requireActivity())
 
-        deleteAuthAndIP()
+        deleteSharedPreferences()
 
         binding.buttonNext.setOnClickListener {
             viewModel.updateViewState(OnBoardNameViewState.Saving)
@@ -51,7 +51,7 @@ internal class OnBoardNameFragment: SideEffectFragment<
         }
     }
 
-    private fun deleteAuthAndIP() {
+    private fun deleteSharedPreferences() {
         binding.root.context.getSharedPreferences("sphinx_temp_prefs", Context.MODE_PRIVATE).let { sharedPrefs ->
 
             sharedPrefs?.edit()?.let { editor ->
