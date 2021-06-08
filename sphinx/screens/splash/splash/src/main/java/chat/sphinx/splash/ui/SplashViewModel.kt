@@ -19,7 +19,6 @@ import chat.sphinx.scanner_view_model_coordinator.request.ScannerFilter
 import chat.sphinx.scanner_view_model_coordinator.request.ScannerRequest
 import chat.sphinx.scanner_view_model_coordinator.response.ScannerResponse
 import chat.sphinx.splash.navigation.SplashNavigator
-import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -123,6 +122,10 @@ internal class SplashViewModel @Inject constructor(
                 ScannerRequest(
                     filter = object : ScannerFilter() {
                         override suspend fun checkData(data: String): Response<Any, String> {
+                            if (data.isInviteCode) {
+                                return Response.Success(Any())
+                            }
+
                             data.decodeBase64ToArray()
                                 ?.decodeToString()
                                 ?.split("::")
