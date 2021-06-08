@@ -10,6 +10,7 @@ import chat.sphinx.chat_common.ui.ChatViewModel
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_lightning.model.route.isRouteAvailable
+import chat.sphinx.concept_network_query_chat.model.PodcastDto
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_message.MessageRepository
@@ -131,28 +132,37 @@ internal class ChatTribeViewModel @Inject constructor(
     }
 
     private var updateTribeInfoJob: Job? = null
-    init {
+    fun loadTribeAndPodcastData(): Flow<PodcastDto> = flow {
+        var podcast: PodcastDto? = null
 
-        updateTribeInfoJob = viewModelScope.launch(mainImmediate) {
-            chatRepository.getChatById(args.chatId).firstOrNull()?.let { chat ->
-                chatRepository.updateTribeInfo(chat)
+        chatRepository.getChatById(args.chatId).firstOrNull()?.let { chat ->
+            chatRepository.updateTribeInfo(chat).collect { podcastDto ->
+                podcast = podcastDto
 
-                Log.d(TAG, "Price per message ${chat.pricePerMessage.toString()}")
+                delay(10L)
+                updateTribeInfoJob?.join()
+
+                chatRepository.getChatById(args.chatId).firstOrNull()?.let { chat ->
+                    val pricePerMessage = chat.pricePerMessage?.value ?: 0
+                    val escrowAmount = chat.escrowAmount?.value ?: 0
+
+                    submitSideEffect(
+                        ChatSideEffect.Notify(
+                            "Price per message: $pricePerMessage\n Amount to Stake: $escrowAmount"
+                        )
+                    )
+
+                    chat.metaData?.let { metaData ->
+                        podcast?.setMetaData(metaData)
+                    }
+                }
             }
+
+            Log.d(TAG, "Price per message ${chat.pricePerMessage.toString()}")
         }
 
-        viewModelScope.launch(mainImmediate) {
-            delay(10L)
-            updateTribeInfoJob?.join()
-            chatRepository.getChatById(args.chatId).firstOrNull()?.let { chat ->
-                val pricePerMessage = chat.pricePerMessage?.value ?: 0
-                val escrowAmount = chat.escrowAmount?.value ?: 0
-                submitSideEffect(
-                    ChatSideEffect.Notify(
-                        "Price per message: $pricePerMessage\n Amount to Stake: $escrowAmount"
-                    )
-                )
-            }
+        podcast?.let { podcast ->
+            emit(podcast)
         }
     }
 }

@@ -20,6 +20,7 @@ import chat.sphinx.chat_common.navigation.ChatNavigator
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
 import chat.sphinx.chat_common.ui.viewstate.header.ChatHeaderViewState
 import chat.sphinx.concept_image_loader.ImageLoader
+import chat.sphinx.concept_network_query_chat.model.PodcastDto
 import chat.sphinx.concept_repository_message.SendMessage
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
@@ -35,7 +36,6 @@ import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.visible
-import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
@@ -59,7 +59,7 @@ abstract class ChatFragment<
 
     protected abstract val chatNavigator: ChatNavigator
 
-    protected val sendMessageBuilder = SendMessage.Builder()
+    private val sendMessageBuilder = SendMessage.Builder()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -127,6 +127,10 @@ abstract class ChatFragment<
             adapter = messageListAdapter
             itemAnimator = null
         }
+    }
+
+    protected fun scrollToBottom() {
+        (recyclerView.adapter as MessageListAdapter<*>).scrollToBottomIfNeeded()
     }
 
     override fun onStart() {
