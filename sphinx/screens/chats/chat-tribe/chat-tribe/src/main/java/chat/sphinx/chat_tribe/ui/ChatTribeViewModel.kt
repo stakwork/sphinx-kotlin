@@ -18,6 +18,8 @@ import chat.sphinx.concept_repository_message.SendMessage
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
+import chat.sphinx.podcast_player.objects.Podcast
+import chat.sphinx.podcast_player.objects.toPodcast
 import chat.sphinx.resources.getRandomColor
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.ChatName
@@ -132,12 +134,12 @@ internal class ChatTribeViewModel @Inject constructor(
     }
 
     private var updateTribeInfoJob: Job? = null
-    fun loadTribeAndPodcastData(): Flow<PodcastDto> = flow {
-        var podcast: PodcastDto? = null
+    fun loadTribeAndPodcastData(): Flow<Podcast> = flow {
+        var podcast: Podcast? = null
 
         chatRepository.getChatById(args.chatId).firstOrNull()?.let { chat ->
             chatRepository.updateTribeInfo(chat).collect { podcastDto ->
-                podcast = podcastDto
+                podcast = podcastDto.toPodcast()
 
                 delay(10L)
                 updateTribeInfoJob?.join()

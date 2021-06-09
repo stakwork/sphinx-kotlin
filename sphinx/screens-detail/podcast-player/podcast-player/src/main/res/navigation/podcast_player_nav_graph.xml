@@ -2,11 +2,11 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/tribe_chat_podcast_player_nav_graph"
-    app:startDestination="@+id/navigation_tribe_chat_podcast_player_fragment">
+    android:id="@+id/podcast_player_nav_graph"
+    app:startDestination="@+id/navigation_podcast_player_fragment">
 
     <fragment
-        android:id="@+id/navigation_tribe_chat_podcast_player_fragment"
+        android:id="@+id/navigation_podcast_player_fragment"
         android:name="chat.sphinx.podcast_player.ui.PodcastPlayerFragment"
         tools:layout="@layout/fragment_podcast_player" />
 

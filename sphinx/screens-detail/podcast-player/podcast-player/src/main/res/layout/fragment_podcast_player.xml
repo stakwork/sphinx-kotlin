@@ -54,6 +54,7 @@
                 android:gravity="center"
                 android:text="@string/material_icon_name_dismiss_modal_down"
                 android:textSize="44sp"
+                android:textColor="@android:color/white"
                 app:layout_constraintStart_toStartOf="@id/image_view_current_episode_image"
                 app:layout_constraintTop_toTopOf="@id/image_view_current_episode_image" />
 

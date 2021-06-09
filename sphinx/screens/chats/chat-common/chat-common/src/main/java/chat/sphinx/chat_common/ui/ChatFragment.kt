@@ -129,8 +129,8 @@ abstract class ChatFragment<
         }
     }
 
-    protected fun scrollToBottom() {
-        (recyclerView.adapter as MessageListAdapter<*>).scrollToBottomIfNeeded()
+    protected fun scrollToBottom(callback: () -> Unit) {
+        (recyclerView.adapter as MessageListAdapter<*>).scrollToBottomIfNeeded(callback)
     }
 
     override fun onStart() {

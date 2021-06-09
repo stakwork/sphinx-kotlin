@@ -95,36 +95,31 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                             Diff(messages, list)
                         )
                     }.let { result ->
-
-                        val lastVisibleItemPositionBeforeDispatch = layoutManager.findLastVisibleItemPosition()
-                        val listSizeBeforeDispatch = messages.size - 1
-
-                        messages.clear()
-                        messages.addAll(list)
-                        result.dispatchUpdatesTo(this@MessageListAdapter)
-
-                        val listSizeAfterDispatch = messages.size - 1
-
-                        if (
-                                listSizeAfterDispatch > listSizeBeforeDispatch                  &&
-                                recyclerView.scrollState == RecyclerView.SCROLL_STATE_IDLE      &&
-                                lastVisibleItemPositionBeforeDispatch == listSizeBeforeDispatch
-                        ) {
-                            recyclerView.scrollToPosition(listSizeAfterDispatch)
-                        }
+                        scrollToBottomIfNeeded(callback = {
+                            messages.clear()
+                            messages.addAll(list)
+                            result.dispatchUpdatesTo(this@MessageListAdapter)
+                        })
                     }
                 }
             }
         }
     }
 
-    fun scrollToBottomIfNeeded() {
-        val lastPosition = messages.size - 1
+    fun scrollToBottomIfNeeded(callback: () -> Unit) {
+        val lastVisibleItemPositionBeforeDispatch = layoutManager.findLastVisibleItemPosition()
+        val listSizeBeforeDispatch = messages.size - 1
+
+        callback()
+
+        val listSizeAfterDispatch = messages.size - 1
+
         if (
-            recyclerView.scrollState == RecyclerView.SCROLL_STATE_IDLE &&
-            layoutManager.findLastVisibleItemPosition() == lastPosition
+            listSizeAfterDispatch >= listSizeBeforeDispatch                 &&
+            recyclerView.scrollState == RecyclerView.SCROLL_STATE_IDLE      &&
+            lastVisibleItemPositionBeforeDispatch == listSizeBeforeDispatch
         ) {
-            recyclerView.scrollToPosition(lastPosition)
+            recyclerView.scrollToPosition(listSizeAfterDispatch)
         }
     }
 

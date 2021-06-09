@@ -18,6 +18,7 @@ import chat.sphinx.chat_tribe.databinding.LayoutPodcastPlayerFooterBinding
 import chat.sphinx.chat_tribe.navigation.TribeChatNavigator
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_network_query_chat.model.PodcastDto
+import chat.sphinx.podcast_player.objects.Podcast
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import kotlinx.coroutines.flow.collect
@@ -49,9 +50,7 @@ internal class ChatTribeFragment: ChatFragment<
         get() = imageLoaderInj
 
     @Inject
-    protected lateinit var chatNavigatorInj: TribeChatNavigator
-    override val chatNavigator: ChatNavigator
-        get() = chatNavigatorInj
+    override lateinit var chatNavigator: TribeChatNavigator
 
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -64,12 +63,24 @@ internal class ChatTribeFragment: ChatFragment<
         }
     }
 
-    private fun configurePodcastPlayer(podcast: PodcastDto) {
-        podcastPlayerBinding.root.goneIfFalse(true)
+    private fun configurePodcastPlayer(podcast: Podcast) {
+        podcastPlayerBinding.apply {
+            scrollToBottom(callback = {
+                root.goneIfFalse(true)
+            })
 
-        scrollToBottom()
+            val episode = podcast.getCurrentEpisode()
+            textViewEpisodeTitle.text = episode.title
 
-        val episode = podcast.getCurrentEpisode()
-        podcastPlayerBinding.textViewEpisodeTitle.text = episode.title
+            textViewPlayPauseButton.setOnClickListener {
+                //TODO: Start service and send action to Podcast Player Service
+            }
+
+            textViewEpisodeTitle.setOnClickListener {
+                onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                    chatNavigator.toPodcastPlayerScreen()
+                }
+            }
+        }
     }
 }
