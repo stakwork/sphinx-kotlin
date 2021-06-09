@@ -5,13 +5,17 @@ import android.view.View
 import android.widget.ImageView
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.ConcatAdapter
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
-import chat.sphinx.concept_image_loader.Transformation
+import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.podcast_player.R
 import chat.sphinx.podcast_player.databinding.FragmentPodcastPlayerBinding
 import chat.sphinx.podcast_player.objects.Podcast
+import chat.sphinx.podcast_player.ui.adapter.PodcastEpisodesFooterAdapter
+import chat.sphinx.podcast_player.ui.adapter.PodcastEpisodesListAdapter
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.base.BaseFragment
 import kotlinx.coroutines.flow.collect
@@ -37,24 +41,35 @@ internal class PodcastPlayerFragment : BaseFragment<
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.textViewDismissButton.setOnClickListener {
-            lifecycleScope.launch(viewModel.mainImmediate) {
-                viewModel.navigator.closeDetailScreen()
+        binding.apply {
+            textViewDismissButton.setOnClickListener {
+                lifecycleScope.launch(viewModel.mainImmediate) {
+                    viewModel.navigator.closeDetailScreen()
+                }
+            }
+
+            root.post {
+                val fragmentHeight = root.measuredHeight
+
+                includeLayoutPodcastEpisodesList.layoutConstraintPodcastEpisodesList.apply {
+                    kotlin.run {
+                        layoutParams.height = fragmentHeight
+                        requestLayout()
+                    }
+                }
             }
         }
+
+        setupEpisodes()
     }
 
-    override fun onStart() {
-        super.onStart()
-
-        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-            viewModel.podcastSharedFlow.collect { viewState ->
-                @Exhaustive
-                when (viewState) {
-                    is PodcastPlayerViewState.Idle -> {}
-                    is PodcastPlayerViewState.PodcastObject -> {
-                        showPodcastInfo(viewState.podcast)
-                    }
+    override suspend fun onViewStateFlowCollect(viewState: PodcastPlayerViewState) {
+        @Exhaustive
+        when (viewState) {
+            is PodcastPlayerViewState.Idle -> {}
+            is PodcastPlayerViewState.PodcastObject -> {
+                viewState.podcast?.let { podcast ->
+                    showPodcastInfo(podcast)
                 }
             }
         }
@@ -72,11 +87,36 @@ internal class PodcastPlayerFragment : BaseFragment<
                         .placeholderResId(R.drawable.ic_profile_avatar_circle)
                         .build()
                 )
+
+                includeLayoutPodcastEpisodesList.textViewEpisodesListCount.text = podcast.episodesCount.toString()
+
+                includeLayoutEpisodePlaybackControlButtons.apply {
+                    buttonPlayPause.setOnClickListener {
+                        val currentEpisode = podcast.getCurrentEpisode()
+                        viewModel.playPauseEpisode(currentEpisode)
+                    }
+                }
             }
         }
     }
 
-    override suspend fun onViewStateFlowCollect(viewState: PodcastPlayerViewState) {
-//        TODO("Not yet implemented")
+    private fun setupEpisodes() {
+        binding.includeLayoutPodcastEpisodesList.recyclerViewEpisodesList.apply {
+            val linearLayoutManager = LinearLayoutManager(context)
+            val chatListAdapter = PodcastEpisodesListAdapter(
+                this,
+                linearLayoutManager,
+                imageLoader,
+                viewLifecycleOwner,
+                onStopSupervisor,
+                viewModel
+            )
+
+            val episodesListFooterAdapter = PodcastEpisodesFooterAdapter(requireActivity() as InsetterActivity)
+            this.setHasFixedSize(false)
+            layoutManager = linearLayoutManager
+            adapter = ConcatAdapter(chatListAdapter, episodesListFooterAdapter)
+            itemAnimator = null
+        }
     }
 }

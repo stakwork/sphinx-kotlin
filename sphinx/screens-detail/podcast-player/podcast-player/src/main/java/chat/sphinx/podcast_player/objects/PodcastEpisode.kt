@@ -15,6 +15,9 @@ data class PodcastEpisode(
     val link: String,
     val enclosureUrl: String,
 ): Parcelable {
+
+    var playing: Boolean = false
+    var downloaded: Boolean = false
 }
 
 fun PodcastEpisodeDto.toPodcastEpisode(): PodcastEpisode {

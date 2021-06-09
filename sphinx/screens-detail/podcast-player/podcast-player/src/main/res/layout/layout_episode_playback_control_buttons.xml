@@ -5,7 +5,6 @@
     android:id="@+id/layout_constraint_episode_playback_control_buttons"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingTop="@dimen/default_half_layout_margin"
     android:paddingBottom="@dimen/default_layout_margin"
     android:background="@color/headerBG">
 

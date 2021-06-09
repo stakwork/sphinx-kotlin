@@ -3,11 +3,7 @@ package chat.sphinx.podcast_player.objects
 import android.os.Parcelable
 import chat.sphinx.concept_network_query_chat.model.PodcastDto
 import chat.sphinx.wrapper_chat.ChatMetaData
-import chat.sphinx.wrapper_common.ItemId
-import chat.sphinx.wrapper_common.lightning.Sat
-import chat.sphinx.wrapper_common.message.FeedId
 import com.squareup.moshi.JsonClass
-import com.squareup.moshi.Moshi
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
@@ -43,12 +39,11 @@ data class Podcast(
         return episodes[0]
     }
 
-    fun getCurrentTime(): Int {
-        timeSeconds?.let { time ->
-            return time
-        }
-        return 0
-    }
+    val episodesCount: Int
+        get() = episodes.count()
+
+    val currentTime: Int
+        get() = timeSeconds ?: 0
 }
 
 fun PodcastDto.toPodcast(): Podcast {
