@@ -8,6 +8,10 @@
     <fragment
         android:id="@+id/navigation_podcast_player_fragment"
         android:name="chat.sphinx.podcast_player.ui.PodcastPlayerFragment"
-        tools:layout="@layout/fragment_podcast_player" />
+        tools:layout="@layout/fragment_podcast_player">
+        <argument
+            android:name="argPodcast"
+            app:argType="chat.sphinx.podcast_player.objects.Podcast" />
+    </fragment>
 
 </navigation>

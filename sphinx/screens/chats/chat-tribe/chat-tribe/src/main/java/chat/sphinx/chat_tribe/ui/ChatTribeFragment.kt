@@ -78,7 +78,7 @@ internal class ChatTribeFragment: ChatFragment<
 
             textViewEpisodeTitle.setOnClickListener {
                 onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-                    chatNavigator.toPodcastPlayerScreen()
+                    chatNavigator.toPodcastPlayerScreen(podcast)
                 }
             }
         }
