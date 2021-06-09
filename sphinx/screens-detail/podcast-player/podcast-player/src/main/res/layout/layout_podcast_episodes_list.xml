@@ -28,6 +28,7 @@
             android:textAllCaps="true"
             android:textColor="@color/secondaryText"
             android:textSize="@dimen/default_text_size_list_row_headline"
+            android:elevation="8dp"
             app:layout_constraintStart_toStartOf="parent" />
 
 

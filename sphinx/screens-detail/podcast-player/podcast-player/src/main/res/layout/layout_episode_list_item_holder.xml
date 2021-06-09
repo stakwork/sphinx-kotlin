@@ -51,12 +51,6 @@
         app:layout_constraintTop_toTopOf="parent"
         tools:text="Who Will Build the Roads?" />
 
-
-    <!--
-        Show an activity indicator if the podcast is downloading. Otherwise,
-        show the download button.
-    -->
-
     <ProgressBar
         android:id="@+id/progress_bar_episode_download"
         style="?android:attr/progressBarStyle"
@@ -91,7 +85,7 @@
         android:layout_width="0dp"
         android:layout_height="1dp"
         android:layout_marginHorizontal="@dimen/episode_list_item_divider_margin_x"
-        android:backgroundTint="@color/receivedMsgBG"
+        android:background="@color/receivedMsgBG"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
