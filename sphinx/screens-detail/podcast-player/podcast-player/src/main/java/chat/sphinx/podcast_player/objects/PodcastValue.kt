@@ -6,7 +6,6 @@ import com.squareup.moshi.JsonClass
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-@JsonClass(generateAdapter = true)
 data class PodcastValue(
     val model: PodcastModel,
     val destinations: List<PodcastDestination>,

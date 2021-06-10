@@ -2,6 +2,7 @@ package chat.sphinx.podcast_player.ui
 
 import androidx.lifecycle.SavedStateHandle
 import chat.sphinx.podcast_player.navigation.PodcastPlayerNavigator
+import chat.sphinx.podcast_player.objects.Podcast
 import chat.sphinx.podcast_player.objects.PodcastEpisode
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
@@ -21,14 +22,19 @@ internal class PodcastPlayerViewModel @Inject constructor(
 
     init {
         args.argPodcast?.let { podcast ->
-            viewStateContainer.updateViewState(PodcastPlayerViewState.PodcastObject(podcast, podcast.episodes))
+            viewStateContainer.updateViewState(PodcastPlayerViewState.PodcastLoaded(podcast, podcast.episodes))
         }
     }
 
-    fun playPauseEpisode(episode: PodcastEpisode) {
+    fun playPauseEpisode(podcast: Podcast?, episode: PodcastEpisode) {
         if (episode.playing) {
-            //TODO Send pause action to Service
+            //TODO Pause play action to Service
         } else {
+            podcast?.let { podcast ->
+                podcast.willStartPlayingEpisode(episode.id)
+
+                viewStateContainer.updateViewState(PodcastPlayerViewState.EpisodePlayed(podcast, podcast.episodes))
+            }
             //TODO Send play action to Service
         }
     }

@@ -11,7 +11,12 @@ internal sealed class PodcastPlayerViewState: ViewState<PodcastPlayerViewState>(
         override val episodesList: List<PodcastEpisode>,
     ): PodcastPlayerViewState()
 
-    class PodcastObject(
+    class PodcastLoaded(
+        val podcast: Podcast,
+        override val episodesList: List<PodcastEpisode>,
+    ): PodcastPlayerViewState()
+
+    class EpisodePlayed(
         val podcast: Podcast,
         override val episodesList: List<PodcastEpisode>,
     ): PodcastPlayerViewState()

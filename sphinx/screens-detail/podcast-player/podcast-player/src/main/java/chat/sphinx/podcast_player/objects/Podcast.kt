@@ -1,13 +1,15 @@
 package chat.sphinx.podcast_player.objects
 
+import android.media.MediaMetadataRetriever
+import android.net.Uri
 import android.os.Parcelable
 import chat.sphinx.concept_network_query_chat.model.PodcastDto
 import chat.sphinx.wrapper_chat.ChatMetaData
 import com.squareup.moshi.JsonClass
+import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-@JsonClass(generateAdapter = true)
 data class Podcast(
     val id: Long,
     val title: String,
@@ -28,6 +30,11 @@ data class Podcast(
         this.speed = metaData.speed
     }
 
+    fun willStartPlayingEpisode(episodeId: Long) {
+        this.episodeId = episodeId
+        this.timeSeconds = 0
+    }
+
     fun getCurrentEpisode(): PodcastEpisode {
         episodeId?.let { episodeId ->
             for (episode in episodes) {
@@ -37,6 +44,21 @@ data class Podcast(
             }
         }
         return episodes[0]
+    }
+
+    fun getEpisodeDuration(episode: PodcastEpisode? = null): Long {
+        val currentEpisode = episode ?: getCurrentEpisode()
+        val uri = Uri.parse(currentEpisode.enclosureUrl)
+        return uri.getMediaDuration()
+    }
+
+    fun getPlayingProgress(): Int {
+        var currentTime = currentTime.toLong()
+        val currentEpisode = getCurrentEpisode()
+        val uri = Uri.parse(currentEpisode.enclosureUrl)
+        val duration = uri.getMediaDuration()
+        val progress = (currentTime * 100) / duration
+        return progress.toInt()
     }
 
     val episodesCount: Int
@@ -54,4 +76,16 @@ fun PodcastDto.toPodcast(): Podcast {
     }
 
     return Podcast(this.id, this.title,this.description,this.author,this.image, this.value.toPodcastValue(), podcastEpisodes)
+}
+
+fun Uri.getMediaDuration(): Long {
+    val retriever = MediaMetadataRetriever()
+    return try {
+        retriever.setDataSource(this.toString())
+        val duration = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)
+        retriever.release()
+        duration?.toLongOrNull() ?: 0
+    } catch (exception: Exception) {
+        0
+    }
 }

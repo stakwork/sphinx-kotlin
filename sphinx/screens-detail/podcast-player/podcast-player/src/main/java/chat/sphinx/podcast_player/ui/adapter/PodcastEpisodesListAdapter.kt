@@ -13,8 +13,10 @@ import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.podcast_player.R
 import chat.sphinx.podcast_player.databinding.LayoutEpisodeListItemHolderBinding
+import chat.sphinx.podcast_player.objects.Podcast
 import chat.sphinx.podcast_player.objects.PodcastEpisode
 import chat.sphinx.podcast_player.ui.PodcastPlayerViewModel
+import chat.sphinx.podcast_player.ui.PodcastPlayerViewState
 import chat.sphinx.wrapper_chat.*
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_viewmodel.collectViewState
@@ -89,6 +91,7 @@ internal class PodcastEpisodesListAdapter(
 
     }
 
+    private var podcast: Podcast? = null
     private val podcastEpisodes = ArrayList<PodcastEpisode>(viewModel.currentViewState.episodesList)
 
     override fun onStart(owner: LifecycleOwner) {
@@ -96,6 +99,10 @@ internal class PodcastEpisodesListAdapter(
 
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.collectViewState { viewState ->
+
+                if (viewState is PodcastPlayerViewState.PodcastLoaded) {
+                    podcast = viewState.podcast
+                }
 
                 if (podcastEpisodes.isEmpty()) {
                     podcastEpisodes.addAll(viewState.episodesList)
@@ -163,8 +170,10 @@ internal class PodcastEpisodesListAdapter(
 
         init {
             binding.layoutConstraintEpisodeListItemHolder.setOnClickListener {
-                episode?.let { podcastEpisode ->
-                    viewModel.playPauseEpisode(podcastEpisode)
+                podcast?.let { podcast ->
+                    episode?.let { podcastEpisode ->
+                        viewModel.playPauseEpisode(podcast, podcastEpisode)
+                    }
                 }
             }
         }

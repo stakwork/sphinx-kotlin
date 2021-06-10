@@ -78,12 +78,13 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/button_playback_speed" />
 
-    <androidx.appcompat.widget.AppCompatButton
+    <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/button_forward_30"
         android:layout_width="@dimen/player_details_small_control_button_xy"
         android:layout_height="@dimen/player_details_small_control_button_xy"
         android:background="@drawable/ic_forward_30"
         android:backgroundTint="@color/mainBottomIcons"
+        android:clickable="true"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/button_boost"
         app:layout_constraintHorizontal_bias="0.5"

@@ -19,10 +19,12 @@ import chat.sphinx.chat_tribe.navigation.TribeChatNavigator
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_network_query_chat.model.PodcastDto
 import chat.sphinx.podcast_player.objects.Podcast
+import chat.sphinx.wrapper_common.util.getTimeString
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -63,7 +65,7 @@ internal class ChatTribeFragment: ChatFragment<
         }
     }
 
-    private fun configurePodcastPlayer(podcast: Podcast) {
+    private suspend fun configurePodcastPlayer(podcast: Podcast) {
         podcastPlayerBinding.apply {
             scrollToBottom(callback = {
                 root.goneIfFalse(true)
@@ -72,14 +74,26 @@ internal class ChatTribeFragment: ChatFragment<
             val episode = podcast.getCurrentEpisode()
             textViewEpisodeTitle.text = episode.title
 
-            textViewPlayPauseButton.setOnClickListener {
-                //TODO: Start service and send action to Podcast Player Service
-            }
-
             textViewEpisodeTitle.setOnClickListener {
                 onStopSupervisor.scope.launch(viewModel.mainImmediate) {
                     chatNavigator.toPodcastPlayerScreen(podcast)
                 }
+            }
+
+            val progress = podcast.getPlayingProgress()
+            progressBar.layoutParams.width = progressBarContainer.measuredWidth * (progress / 100)
+            progressBar.requestLayout()
+
+            textViewPlayPauseButton.setOnClickListener {
+                //TODO: Start service and send action to Podcast Player Service
+            }
+
+            textViewForward30Button.setOnClickListener {
+                //TODO: Forward 30 seconds
+            }
+
+            textViewBoostPodcastButton.setOnClickListener {
+                //TODO: Boost podcast episode
             }
         }
     }
