@@ -1,18 +1,25 @@
 package chat.sphinx.feature_service_media_player_android
 
+import android.app.Application
 import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
 import android.content.ServiceConnection
 import android.os.IBinder
 import chat.sphinx.concept_service_media.MediaPlayerServiceController
 import chat.sphinx.concept_service_media.MediaPlayerServiceState
 import chat.sphinx.concept_service_media.UserAction
 import chat.sphinx.feature_service_media_player_android.service.MediaPlayerService
+import chat.sphinx.feature_service_media_player_android.service.SphinxMediaPlayerService
+import chat.sphinx.feature_service_media_player_android.util.toIntent
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
 internal class MediaPlayerServiceControllerImpl(
+    private val app: Application,
     dispatchers: CoroutineDispatchers
 ): MediaPlayerServiceController(), CoroutineDispatchers by dispatchers {
 
@@ -86,6 +93,32 @@ internal class MediaPlayerServiceControllerImpl(
     }
 
     private suspend fun startService(play: UserAction.ServiceAction.Play) {
+        try {
+            app.startService(play.toIntent(app))
+            bindService()
 
+            // Hold the lock until the binder callback has been posted to
+            // the ServiceConnection
+            binder.collect {
+                if (it != null) {
+                    throw RuntimeException()
+                }
+            }
+        } catch (e: RuntimeException) {}
+    }
+
+    @JvmSynthetic
+    fun bindService() {
+        app.bindService(
+            Intent(app, SphinxMediaPlayerService::class.java),
+            connection,
+            Context.BIND_AUTO_CREATE,
+        )
+    }
+
+    @JvmSynthetic
+    fun unbindService() {
+        clearBinderReference()
+        app.unbindService(connection)
     }
 }
