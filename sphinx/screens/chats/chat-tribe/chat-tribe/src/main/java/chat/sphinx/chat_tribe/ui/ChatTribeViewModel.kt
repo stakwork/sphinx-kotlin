@@ -14,6 +14,8 @@ import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.concept_repository_message.SendMessage
+import chat.sphinx.concept_service_media.MediaPlayerServiceController
+import chat.sphinx.concept_service_media.MediaPlayerServiceState
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
@@ -46,6 +48,7 @@ internal class ChatTribeViewModel @Inject constructor(
     messageRepository: MessageRepository,
     networkQueryLightning: NetworkQueryLightning,
     savedStateHandle: SavedStateHandle,
+    private val mediaPlayerServiceController: MediaPlayerServiceController
 ): ChatViewModel<ChatTribeFragmentArgs>(
     app,
     dispatchers,
@@ -54,7 +57,8 @@ internal class ChatTribeViewModel @Inject constructor(
     messageRepository,
     networkQueryLightning,
     savedStateHandle,
-) {
+), MediaPlayerServiceController.MediaServiceListener
+{
     override val args: ChatTribeFragmentArgs by savedStateHandle.navArgs()
 
     override val chatSharedFlow: SharedFlow<Chat?> = flow {
@@ -128,6 +132,25 @@ internal class ChatTribeViewModel @Inject constructor(
     override fun sendMessage(builder: SendMessage.Builder): SendMessage? {
         builder.setChatId(args.chatId)
         return super.sendMessage(builder)
+    }
+
+    private val _mediaPlayerServiceStateFlow: MutableStateFlow<MediaPlayerServiceState> by lazy {
+        MutableStateFlow(MediaPlayerServiceState.ServiceInactive)
+    }
+    val mediaPlayerServiceStateFlow: StateFlow<MediaPlayerServiceState>
+        get() = _mediaPlayerServiceStateFlow
+
+    override fun mediaServiceState(serviceState: MediaPlayerServiceState) {
+        _mediaPlayerServiceStateFlow.value = serviceState
+    }
+
+    init {
+        mediaPlayerServiceController.addListener(this)
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        mediaPlayerServiceController.removeListener(this)
     }
 
     private var updateTribeInfoJob: Job? = null
