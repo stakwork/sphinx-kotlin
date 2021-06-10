@@ -1,5 +1,6 @@
 package chat.sphinx.concept_service_media
 
+import chat.sphinx.wrapper_chat.ChatMetaData
 import chat.sphinx.wrapper_common.dashboard.ChatId
 
 // TODO: info - episode id, episode url, start time, speed, general info about episode, chatId
@@ -22,14 +23,13 @@ sealed class UserAction(val chatId: ChatId) {
 
         class Seek(
             chatId: ChatId,
-            val episodeId: Long,
-            val seekTime: Long,
+            val chatMetaData: ChatMetaData,
         ): ServiceAction(chatId)
 
     }
 
     class AdjustSpeed(
         chatId: ChatId,
-        val speed: Double
+        val chatMetaData: ChatMetaData,
     ): UserAction(chatId)
 }
