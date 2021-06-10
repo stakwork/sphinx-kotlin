@@ -24,6 +24,9 @@ data class Podcast(
     var episodeId: Long? = null
 
     @IgnoredOnParcel
+    var episodeDuration: Long? = null
+
+    @IgnoredOnParcel
     var timeSeconds: Int? = null
 
     @IgnoredOnParcel
@@ -33,6 +36,12 @@ data class Podcast(
         this.episodeId = metaData.itemId.value
         this.timeSeconds = metaData.timeSeconds
         this.speed = metaData.speed
+    }
+
+    fun setCurrentEpisode(episode: PodcastEpisode) {
+        this.episodeId = episode.id
+
+        getCurrentEpisodeDuration(true)
     }
 
     fun getCurrentEpisode(): PodcastEpisode {
@@ -46,10 +55,14 @@ data class Podcast(
         return episodes[0]
     }
 
-    fun getEpisodeDuration(episode: PodcastEpisode? = null): Long {
-        val currentEpisode = episode ?: getCurrentEpisode()
-        val uri = Uri.parse(currentEpisode.enclosureUrl)
-        return uri.getMediaDuration()
+    fun getCurrentEpisodeDuration(episodeChanged: Boolean = false): Long {
+        if (episodeDuration == null || episodeChanged) {
+            val currentEpisode = getCurrentEpisode()
+            val uri = Uri.parse(currentEpisode.enclosureUrl)
+            episodeDuration = uri.getMediaDuration()
+        }
+
+        return episodeDuration ?: 1
     }
 
     fun getPlayingProgress(): Int {

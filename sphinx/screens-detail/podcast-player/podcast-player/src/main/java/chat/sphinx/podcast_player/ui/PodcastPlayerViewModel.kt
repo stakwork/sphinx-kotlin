@@ -14,6 +14,7 @@ import io.matthewnelson.android_feature_viewmodel.BaseViewModel
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 internal inline val PodcastPlayerFragmentArgs.chatId: ChatId
@@ -53,7 +54,7 @@ internal class PodcastPlayerViewModel @Inject constructor(
                     podcast?.let { podcast ->
                         episode.playing = true
 
-                        podcast.episodeId = episode.id
+                        podcast.setCurrentEpisode(episode)
                         podcast.timeSeconds = startTime
 
                         viewStateContainer.updateViewState(
@@ -91,6 +92,7 @@ internal class PodcastPlayerViewModel @Inject constructor(
     fun seekTo(podcast: Podcast?, episode: PodcastEpisode, time: Int) {
         viewModelScope.launch(mainImmediate) {
             chatRepository.getChatById(args.chatId).firstOrNull()?.let { chat ->
+
                 chat?.let { chat ->
                     podcast?.let { podcast ->
                         podcast.timeSeconds = time

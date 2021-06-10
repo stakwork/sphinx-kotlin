@@ -109,7 +109,12 @@ internal class PodcastPlayerFragment : BaseFragment<
                     seekBarCurrentEpisodeProgress.setOnSeekBarChangeListener(
                         object : SeekBar.OnSeekBarChangeListener {
 
-                            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {}
+                            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                                if (fromUser) {
+                                    val duration = podcast.getCurrentEpisodeDuration()
+                                    setTimeLabelsAndProgressBarTo(duration, null, progress)
+                                }
+                            }
 
                             override fun onStartTrackingTouch(seekBar: SeekBar?) {}
 
@@ -159,14 +164,13 @@ internal class PodcastPlayerFragment : BaseFragment<
 
     private suspend fun seekTo(podcast: Podcast, progress: Int) {
         val duration = withContext(viewModel.io) {
-            podcast.getEpisodeDuration()
+            podcast.getCurrentEpisodeDuration()
         }
         val seekTime = (duration * (progress / 100)).toInt()
         viewModel.seekTo(podcast, podcast.getCurrentEpisode(), seekTime)
     }
 
     private suspend fun setTimeLabelsAndProgressBar(podcast: Podcast) {
-        //Reset labels until new duration loads
         binding.includeLayoutEpisodeSliderControl.apply {
             textViewCurrentEpisodeDuration.text = 0.toLong().getTimeString()
             textViewCurrentEpisodeProgress.text = 0.toLong().getTimeString()
@@ -175,14 +179,20 @@ internal class PodcastPlayerFragment : BaseFragment<
         var currentTime = podcast.currentTime.toLong()
 
         val duration = withContext(viewModel.io) {
-            podcast.getEpisodeDuration()
+            podcast.getCurrentEpisodeDuration()
         }
 
         val progress = ((currentTime * 100) / duration).toInt()
 
+        setTimeLabelsAndProgressBarTo(duration, currentTime, progress)
+    }
+
+    private fun setTimeLabelsAndProgressBarTo(duration: Long, currentTime: Long? = null, progress: Int) {
         binding.includeLayoutEpisodeSliderControl.apply {
+            val currentT: Double = currentTime?.toDouble() ?: (duration.toDouble() * (progress.toDouble()) / 100)
+
             textViewCurrentEpisodeDuration.text = duration.getTimeString()
-            textViewCurrentEpisodeProgress.text = currentTime.getTimeString()
+            textViewCurrentEpisodeProgress.text = currentT.toLong().getTimeString()
 
             seekBarCurrentEpisodeProgress.progress = progress
         }

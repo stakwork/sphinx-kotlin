@@ -187,7 +187,7 @@ internal class ChatTribeViewModel @Inject constructor(
                     podcast?.let { podcast ->
                         episode.playing = true
 
-                        podcast.episodeId = episode.id
+                        podcast.setCurrentEpisode(episode)
                         podcast.timeSeconds = startTime
 
                         //TODO Send action to Service
