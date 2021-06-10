@@ -48,7 +48,7 @@ internal class PodcastPlayerViewModel @Inject constructor(
 
     fun playEpisode(podcast: Podcast?, episode: PodcastEpisode, startTime: Int) {
         viewModelScope.launch(mainImmediate) {
-            chatSharedFlow.collect { chat ->
+            chatRepository.getChatById(args.chatId).firstOrNull()?.let { chat ->
                 chat?.let { chat ->
                     podcast?.let { podcast ->
                         episode.playing = true
@@ -74,10 +74,11 @@ internal class PodcastPlayerViewModel @Inject constructor(
 
     fun pauseEpisode(podcast: Podcast?, episode: PodcastEpisode) {
         viewModelScope.launch(mainImmediate) {
-            chatSharedFlow.collect { chat ->
+            chatRepository.getChatById(args.chatId).firstOrNull()?.let { chat ->
                 chat?.let { chat ->
                     podcast?.let { podcast ->
                         episode.playing = false
+
                         //TODO Send action to Service
                         //Action Pause
                         //chat.id, episode.id
@@ -89,11 +90,12 @@ internal class PodcastPlayerViewModel @Inject constructor(
 
     fun seekTo(podcast: Podcast?, episode: PodcastEpisode, time: Int) {
         viewModelScope.launch(mainImmediate) {
-            chatSharedFlow.collect { chat ->
+            chatRepository.getChatById(args.chatId).firstOrNull()?.let { chat ->
                 chat?.let { chat ->
                     podcast?.let { podcast ->
                         podcast.timeSeconds = time
 
+                        //TODO Update Chat MetaData
                         //TODO Send action to Service
                         //Action Seek
                         //chat.id, episode.id, seekTime: time
@@ -105,7 +107,8 @@ internal class PodcastPlayerViewModel @Inject constructor(
 
     fun adjustSpeed(speed: Double) {
         viewModelScope.launch(mainImmediate) {
-            chatSharedFlow.collect { chat ->
+            chatRepository.getChatById(args.chatId).firstOrNull()?.let { chat ->
+                //TODO Update Chat MetaData
                 //TODO Send action to Service
                 //Action AdjustSpeed
                 //chat.id, chat.chatMetaData, speed: speed

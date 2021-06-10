@@ -18,7 +18,7 @@
         android:thumbTint="@color/receivedIcon"
         android:progressDrawable="@drawable/podcast_player_seek_bar_progress"
         android:thumb="@drawable/podcast_player_seek_bar_thumb"
-        android:progress="50"
+        android:progress="0"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />

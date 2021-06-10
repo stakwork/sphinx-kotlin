@@ -182,7 +182,7 @@ internal class ChatTribeViewModel @Inject constructor(
 
     fun playEpisode(podcast: Podcast?, episode: PodcastEpisode, startTime: Int) {
         viewModelScope.launch(mainImmediate) {
-            chatSharedFlow.collect { chat ->
+            chatRepository.getChatById(args.chatId).firstOrNull()?.let { chat ->
                 chat?.let { chat ->
                     podcast?.let { podcast ->
                         episode.playing = true
@@ -201,10 +201,12 @@ internal class ChatTribeViewModel @Inject constructor(
 
     fun pauseEpisode(podcast: Podcast?, episode: PodcastEpisode) {
         viewModelScope.launch(mainImmediate) {
-            chatSharedFlow.collect { chat ->
+            chatRepository.getChatById(args.chatId).firstOrNull()?.let { chat ->
                 chat?.let { chat ->
                     podcast?.let { podcast ->
                         episode.playing = false
+
+                        //TODO Update Chat MetaData
                         //TODO Send action to Service
                         //Action Pause
                         //chat.id, episode.id
@@ -216,11 +218,12 @@ internal class ChatTribeViewModel @Inject constructor(
 
     fun seekTo(podcast: Podcast?, episode: PodcastEpisode, time: Int) {
         viewModelScope.launch(mainImmediate) {
-            chatSharedFlow.collect { chat ->
+            chatRepository.getChatById(args.chatId).firstOrNull()?.let { chat ->
                 chat?.let { chat ->
                     podcast?.let { podcast ->
                         podcast.timeSeconds = time
 
+                        //TODO Update Chat MetaData
                         //TODO Send action to Service
                         //Action Seek
                         //chat.id, episode.id, seekTime: time

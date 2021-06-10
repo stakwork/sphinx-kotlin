@@ -7,6 +7,7 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.ImageView
 import android.widget.PopupMenu
+import android.widget.SeekBar
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ConcatAdapter
@@ -104,6 +105,23 @@ internal class PodcastPlayerFragment : BaseFragment<
 
                 includeLayoutPodcastEpisodesList.textViewEpisodesListCount.text = podcast.episodesCount.toString()
 
+                includeLayoutEpisodeSliderControl.apply {
+                    seekBarCurrentEpisodeProgress.setOnSeekBarChangeListener(
+                        object : SeekBar.OnSeekBarChangeListener {
+
+                            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {}
+
+                            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+
+                            override fun onStopTrackingTouch(seekBar: SeekBar?) {
+                                onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                                    seekTo(podcast, seekBar?.progress ?: 0)
+                                }
+                            }
+                        }
+                    )
+                }
+
                 includeLayoutEpisodePlaybackControlButtons.apply {
                     buttonPlaybackSpeed.setOnClickListener {
                         showSpeedPopup()
@@ -137,6 +155,14 @@ internal class PodcastPlayerFragment : BaseFragment<
                 }
             }
         }
+    }
+
+    private suspend fun seekTo(podcast: Podcast, progress: Int) {
+        val duration = withContext(viewModel.io) {
+            podcast.getEpisodeDuration()
+        }
+        val seekTime = (duration * (progress / 100)).toInt()
+        viewModel.seekTo(podcast, podcast.getCurrentEpisode(), seekTime)
     }
 
     private suspend fun setTimeLabelsAndProgressBar(podcast: Podcast) {
