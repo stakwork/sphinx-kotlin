@@ -10,10 +10,14 @@ import chat.sphinx.concept_service_media.MediaPlayerServiceState
 import chat.sphinx.concept_service_media.UserAction
 import chat.sphinx.feature_service_media_player_android.MediaPlayerServiceControllerImpl
 import chat.sphinx.feature_service_media_player_android.util.toServiceActionPlay
+import io.matthewnelson.concept_coroutines.CoroutineDispatchers
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
 
 internal abstract class MediaPlayerService: Service() {
 
     protected abstract val mediaServiceController: MediaPlayerServiceControllerImpl
+    protected abstract val dispatchers: CoroutineDispatchers
 
     inner class MediaPlayerServiceBinder: Binder() {
         fun getCurrentState(): MediaPlayerServiceState.ServiceActive {
@@ -54,6 +58,9 @@ internal abstract class MediaPlayerService: Service() {
         }
     }
 
+    private val supervisor = SupervisorJob()
+    protected val serviceLifecycleScope = CoroutineScope(supervisor)
+
     override fun onCreate() {
         super.onCreate()
     }
@@ -74,7 +81,8 @@ internal abstract class MediaPlayerService: Service() {
 
     override fun onDestroy() {
         super.onDestroy()
-        // TODO: Clear notification
         mediaPlayer?.release()
+        // TODO: Clear notification
+        supervisor.cancel()
     }
 }
