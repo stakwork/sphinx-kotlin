@@ -71,7 +71,7 @@ internal class MediaPlayerServiceControllerImpl(
     }
 
     private val userActionLock = Mutex()
-    override suspend fun processAction(userAction: UserAction) {
+    override suspend fun submitAction(userAction: UserAction) {
         binder.value?.processUserAction(userAction) ?: when (userAction) {
             is UserAction.AdjustSpeed -> {
                 // TODO: Update speed for given chatId

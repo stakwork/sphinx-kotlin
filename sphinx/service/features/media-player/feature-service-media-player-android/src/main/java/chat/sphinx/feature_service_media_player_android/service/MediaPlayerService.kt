@@ -19,10 +19,14 @@ internal abstract class MediaPlayerService: Service() {
     protected abstract val mediaServiceController: MediaPlayerServiceControllerImpl
     protected abstract val dispatchers: CoroutineDispatchers
 
+    @Volatile
+    protected var currentState: MediaPlayerServiceState = MediaPlayerServiceState.ServiceActive.ServiceLoading
+        private set
+
     inner class MediaPlayerServiceBinder: Binder() {
-        fun getCurrentState(): MediaPlayerServiceState.ServiceActive {
+        fun getCurrentState(): MediaPlayerServiceState {
             // TODO: Implement
-            return MediaPlayerServiceState.ServiceActive.ServiceLoading
+            return currentState
         }
 
         fun processUserAction(userAction: UserAction) {
@@ -38,7 +42,8 @@ internal abstract class MediaPlayerService: Service() {
         return binder
     }
 
-    private var mediaPlayer: MediaPlayer? = null
+    protected var mediaPlayer: MediaPlayer? = null
+        private set
 
     private fun processUserAction(userAction: UserAction) {
         @Exhaustive
@@ -63,6 +68,7 @@ internal abstract class MediaPlayerService: Service() {
 
     override fun onCreate() {
         super.onCreate()
+        mediaServiceController.dispatchState(currentState)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -81,7 +87,9 @@ internal abstract class MediaPlayerService: Service() {
 
     override fun onDestroy() {
         super.onDestroy()
+        currentState = MediaPlayerServiceState.ServiceInactive
         mediaPlayer?.release()
+        mediaServiceController.dispatchState(currentState)
         // TODO: Clear notification
         supervisor.cancel()
     }
