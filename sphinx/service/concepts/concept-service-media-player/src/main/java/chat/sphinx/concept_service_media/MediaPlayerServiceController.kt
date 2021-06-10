@@ -56,4 +56,5 @@ abstract class MediaPlayerServiceController {
         fun mediaServiceState(serviceState: MediaPlayerServiceState)
     }
 
+    abstract suspend fun processAction(userAction: UserAction)
 }
