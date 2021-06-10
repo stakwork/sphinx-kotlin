@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 
 internal class MediaPlayerServiceControllerImpl(
     private val app: Application,
@@ -96,14 +97,16 @@ internal class MediaPlayerServiceControllerImpl(
 
     private suspend fun startService(play: UserAction.ServiceAction.Play) {
         try {
-            app.startService(play.toIntent(app))
-            bindService()
+            withContext(main) {
+                app.startService(play.toIntent(app))
+                bindService()
 
-            // Hold the lock until the binder callback has been posted to
-            // the ServiceConnection
-            binder.collect {
-                if (it != null) {
-                    throw RuntimeException()
+                // Hold the lock until the binder callback has been posted to
+                // the ServiceConnection
+                binder.collect {
+                    if (it != null) {
+                        throw RuntimeException()
+                    }
                 }
             }
         } catch (e: RuntimeException) {}
