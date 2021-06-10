@@ -37,6 +37,7 @@ include ':sphinx:application:data:concepts:repositories:concept-repository-conta
 include ':sphinx:application:data:concepts:repositories:concept-repository-dashboard'
 include ':sphinx:application:data:concepts:repositories:concept-repository-dashboard-android'
 include ':sphinx:application:data:concepts:repositories:concept-repository-lightning'
+include ':sphinx:application:data:concepts:repositories:concept-repository-media'
 include ':sphinx:application:data:concepts:repositories:concept-repository-message'
 include ':sphinx:application:data:features:feature-repository'
 include ':sphinx:application:data:features:feature-repository-android'
