@@ -6,47 +6,52 @@ sealed class MediaPlayerServiceState {
 
     object ServiceInactive: MediaPlayerServiceState()
 
-    sealed class ServiceActive(
-        val chatId: ChatId,
-        val episodeId: Long,
-        val currentTime: Long,
+    sealed class ServiceActive: MediaPlayerServiceState() {
 
-//        val duration: Long,
-    ): MediaPlayerServiceState() {
-        class Playing(
-            chatId: ChatId,
-            episodeId: Long,
-            currentTime: Long,
-//            duration: Long,
-        ): ServiceActive(
-            chatId,
-            episodeId,
-            currentTime,
-//            duration,
-        )
+        object ServiceLoading: ServiceActive()
 
-        class Paused(
-            chatId: ChatId,
-            episodeId: Long,
-            currentTime: Long,
-//            duration: Long,
-        ): ServiceActive(
-            chatId,
-            episodeId,
-            currentTime,
-//            duration,
-        )
+        sealed class MediaState(
+            val chatId: ChatId,
+            val episodeId: Long,
+            val currentTime: Long,
+//            val duration: Long,
+        ): ServiceActive() {
 
-        class Ended(
-            chatId: ChatId,
-            episodeId: Long,
-            currentTime: Long,
-//            duration: Long,
-        ): ServiceActive(
-            chatId,
-            episodeId,
-            currentTime,
-//            duration,
-        )
+            class Playing(
+                chatId: ChatId,
+                episodeId: Long,
+                currentTime: Long,
+//                duration: Long,
+            ): MediaState(
+                chatId,
+                episodeId,
+                currentTime,
+//                duration,
+            )
+
+            class Paused(
+                chatId: ChatId,
+                episodeId: Long,
+                currentTime: Long,
+//                duration: Long,
+            ): MediaState(
+                chatId,
+                episodeId,
+                currentTime,
+//                duration,
+            )
+
+            class Ended(
+                chatId: ChatId,
+                episodeId: Long,
+                currentTime: Long,
+//                duration: Long,
+            ): MediaState(
+                chatId,
+                episodeId,
+                currentTime,
+//                duration,
+            )
+        }
     }
 }
