@@ -6,17 +6,19 @@ import chat.sphinx.podcast_player.R
 import chat.sphinx.detail_resources.DetailNavOptions
 import chat.sphinx.podcast_player.objects.Podcast
 import chat.sphinx.podcast_player.ui.PodcastPlayerFragmentArgs
+import chat.sphinx.wrapper_common.dashboard.ChatId
 import io.matthewnelson.concept_navigation.NavigationRequest
 
 
 class ToPodcastPlayerScreen(
+    private val chatId: ChatId,
     private val podcast: Podcast,
     private val options: NavOptions = DetailNavOptions.defaultBuilt
 ) : NavigationRequest<NavController>() {
     override fun navigate(controller: NavController) {
         controller.navigate(
             R.id.podcast_player_nav_graph,
-            PodcastPlayerFragmentArgs.Builder(podcast).build().toBundle(),
+            PodcastPlayerFragmentArgs.Builder(chatId.value, podcast).build().toBundle(),
             options
         )
     }

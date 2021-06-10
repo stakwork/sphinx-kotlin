@@ -20,19 +20,19 @@ data class Podcast(
     val episodes: List<PodcastEpisode>,
 ): Parcelable {
 
+    @IgnoredOnParcel
     var episodeId: Long? = null
+
+    @IgnoredOnParcel
     var timeSeconds: Int? = null
+
+    @IgnoredOnParcel
     var speed: Double? = null
 
     fun setMetaData(metaData: ChatMetaData) {
         this.episodeId = metaData.itemId.value
         this.timeSeconds = metaData.timeSeconds
         this.speed = metaData.speed
-    }
-
-    fun willStartPlayingEpisode(episodeId: Long) {
-        this.episodeId = episodeId
-        this.timeSeconds = 0
     }
 
     fun getCurrentEpisode(): PodcastEpisode {
