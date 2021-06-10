@@ -12,13 +12,19 @@ import chat.sphinx.concept_service_media.UserAction
 import chat.sphinx.feature_service_media_player_android.MediaPlayerServiceControllerImpl
 import chat.sphinx.feature_service_media_player_android.util.toServiceActionPlay
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
+import io.matthewnelson.concept_foreground_state.ForegroundState
+import io.matthewnelson.concept_foreground_state.ForegroundStateManager
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
 internal abstract class MediaPlayerService: Service() {
 
-    protected abstract val mediaServiceController: MediaPlayerServiceControllerImpl
     protected abstract val dispatchers: CoroutineDispatchers
+    protected abstract val foregroundStateManager: ForegroundStateManager
+    protected abstract val mediaServiceController: MediaPlayerServiceControllerImpl
     protected abstract val repositoryMedia: RepositoryMedia
 
     @Volatile
@@ -68,9 +74,25 @@ internal abstract class MediaPlayerService: Service() {
     private val supervisor = SupervisorJob()
     protected val serviceLifecycleScope = CoroutineScope(supervisor)
 
+    private var rebindJob: Job? = null
     override fun onCreate() {
         super.onCreate()
         mediaServiceController.dispatchState(currentState)
+        rebindJob = serviceLifecycleScope.launch(dispatchers.mainImmediate) {
+            foregroundStateManager.foregroundStateFlow.collect { foregroundState ->
+                @Exhaustive
+                when (foregroundState) {
+                    ForegroundState.Background -> {
+                        // AndroidOS automatically unbinds service when
+                        // application is sent to the background, so we
+                        // rebind it here to ensure we maintain a started,
+                        // bound service.
+                        mediaServiceController.bindService()
+                    }
+                    ForegroundState.Foreground -> {}
+                }
+            }
+        }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -83,6 +105,7 @@ internal abstract class MediaPlayerService: Service() {
 
     override fun onTaskRemoved(rootIntent: Intent?) {
         super.onTaskRemoved(rootIntent)
+        rebindJob?.cancel()
         mediaServiceController.unbindService()
         stopSelf()
     }
