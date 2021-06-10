@@ -8,9 +8,9 @@ import androidx.lifecycle.viewModelScope
 import chat.sphinx.chat_common.ui.ChatSideEffect
 import chat.sphinx.chat_common.ui.ChatViewModel
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
+import chat.sphinx.chat_tribe.navigation.TribeChatNavigator
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_lightning.model.route.isRouteAvailable
-import chat.sphinx.concept_network_query_chat.model.PodcastDto
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_message.MessageRepository
@@ -19,6 +19,7 @@ import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.podcast_player.objects.Podcast
+import chat.sphinx.podcast_player.objects.PodcastEpisode
 import chat.sphinx.podcast_player.objects.toPodcast
 import chat.sphinx.resources.getRandomColor
 import chat.sphinx.wrapper_chat.Chat
@@ -67,6 +68,9 @@ internal class ChatTribeViewModel @Inject constructor(
         SharingStarted.WhileSubscribed(2_000),
         replay = 1,
     )
+
+    @Inject
+    lateinit var chatNavigator: TribeChatNavigator
 
     override val headerInitialHolderSharedFlow: SharedFlow<InitialHolderViewState> = flow {
         chatSharedFlow.collect { chat ->
@@ -165,6 +169,64 @@ internal class ChatTribeViewModel @Inject constructor(
 
         podcast?.let { podcast ->
             emit(podcast)
+        }
+    }
+
+    fun goToPodcastPlayerScreen(podcast: Podcast) {
+        viewModelScope.launch(mainImmediate) {
+            chatRepository.getChatById(args.chatId).firstOrNull()?.let { chat ->
+                chatNavigator.toPodcastPlayerScreen(chat.id, podcast)
+            }
+        }
+    }
+
+    fun playEpisode(podcast: Podcast?, episode: PodcastEpisode, startTime: Int) {
+        viewModelScope.launch(mainImmediate) {
+            chatSharedFlow.collect { chat ->
+                chat?.let { chat ->
+                    podcast?.let { podcast ->
+                        episode.playing = true
+
+                        podcast.episodeId = episode.id
+                        podcast.timeSeconds = startTime
+
+                        //TODO Send action to Service
+                        //Action Play
+                        //chat.id, episode.id, time: startTime, episode.enclosureUrl
+                    }
+                }
+            }
+        }
+    }
+
+    fun pauseEpisode(podcast: Podcast?, episode: PodcastEpisode) {
+        viewModelScope.launch(mainImmediate) {
+            chatSharedFlow.collect { chat ->
+                chat?.let { chat ->
+                    podcast?.let { podcast ->
+                        episode.playing = false
+                        //TODO Send action to Service
+                        //Action Pause
+                        //chat.id, episode.id
+                    }
+                }
+            }
+        }
+    }
+
+    fun seekTo(podcast: Podcast?, episode: PodcastEpisode, time: Int) {
+        viewModelScope.launch(mainImmediate) {
+            chatSharedFlow.collect { chat ->
+                chat?.let { chat ->
+                    podcast?.let { podcast ->
+                        podcast.timeSeconds = time
+
+                        //TODO Send action to Service
+                        //Action Seek
+                        //chat.id, episode.id, seekTime: time
+                    }
+                }
+            }
         }
     }
 }

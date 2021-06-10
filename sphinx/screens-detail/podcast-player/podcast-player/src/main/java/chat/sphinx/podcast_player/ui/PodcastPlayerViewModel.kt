@@ -46,34 +46,71 @@ internal class PodcastPlayerViewModel @Inject constructor(
         replay = 1,
     )
 
-    fun playPauseEpisode(podcast: Podcast?, episode: PodcastEpisode) {
+    fun playEpisode(podcast: Podcast?, episode: PodcastEpisode, startTime: Int) {
         viewModelScope.launch(mainImmediate) {
             chatSharedFlow.collect { chat ->
                 chat?.let { chat ->
                     podcast?.let { podcast ->
-                        if (episode.playing) {
-                            updateMetaData(chat, episode, podcast)
-                            //TODO Pause play action to Service
-                        } else {
-                            updateMetaData(chat, episode, podcast)
+                        episode.playing = true
 
-                            viewStateContainer.updateViewState(
-                                PodcastPlayerViewState.EpisodePlayed(
-                                    podcast,
-                                    podcast.episodes
-                                )
+                        podcast.episodeId = episode.id
+                        podcast.timeSeconds = startTime
+
+                        viewStateContainer.updateViewState(
+                            PodcastPlayerViewState.EpisodePlayed(
+                                podcast,
+                                podcast.episodes
                             )
-                            //TODO Send play action to Service
-                        }
+                        )
+
+                        //TODO Send action to Service
+                        //Action Play
+                        //chat.id, episode.id, time: startTime, episode.enclosureUrl
                     }
                 }
             }
         }
     }
 
-    private fun updateMetaData(chat: Chat, episode: PodcastEpisode, podcast: Podcast) {
-        //Update chat MetaData (time: time, episodeId: episode.id, speed: podcast.speed, satsPerMinute: podcast.satsPerMinute)
-        //Set ChatMetaData on Podcast
+    fun pauseEpisode(podcast: Podcast?, episode: PodcastEpisode) {
+        viewModelScope.launch(mainImmediate) {
+            chatSharedFlow.collect { chat ->
+                chat?.let { chat ->
+                    podcast?.let { podcast ->
+                        episode.playing = false
+                        //TODO Send action to Service
+                        //Action Pause
+                        //chat.id, episode.id
+                    }
+                }
+            }
+        }
+    }
+
+    fun seekTo(podcast: Podcast?, episode: PodcastEpisode, time: Int) {
+        viewModelScope.launch(mainImmediate) {
+            chatSharedFlow.collect { chat ->
+                chat?.let { chat ->
+                    podcast?.let { podcast ->
+                        podcast.timeSeconds = time
+
+                        //TODO Send action to Service
+                        //Action Seek
+                        //chat.id, episode.id, seekTime: time
+                    }
+                }
+            }
+        }
+    }
+
+    fun adjustSpeed(speed: Double) {
+        viewModelScope.launch(mainImmediate) {
+            chatSharedFlow.collect { chat ->
+                //TODO Send action to Service
+                //Action AdjustSpeed
+                //chat.id, chat.chatMetaData, speed: speed
+            }
+        }
     }
 
 }

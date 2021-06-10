@@ -47,12 +47,12 @@ internal class ChatTribeFragment: ChatFragment<
     override val viewModel: ChatTribeViewModel by viewModels()
 
     @Inject
+    override lateinit var chatNavigator: TribeChatNavigator
+
+    @Inject
     protected lateinit var imageLoaderInj: ImageLoader<ImageView>
     override val imageLoader: ImageLoader<ImageView>
         get() = imageLoaderInj
-
-    @Inject
-    override lateinit var chatNavigator: TribeChatNavigator
 
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -65,31 +65,34 @@ internal class ChatTribeFragment: ChatFragment<
         }
     }
 
-    private suspend fun configurePodcastPlayer(podcast: Podcast) {
+    private fun configurePodcastPlayer(podcast: Podcast) {
         podcastPlayerBinding.apply {
             scrollToBottom(callback = {
                 root.goneIfFalse(true)
             })
 
-            val episode = podcast.getCurrentEpisode()
-            textViewEpisodeTitle.text = episode.title
+            val currentEpisode = podcast.getCurrentEpisode()
+            textViewEpisodeTitle.text = currentEpisode.title
 
             textViewEpisodeTitle.setOnClickListener {
-                onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-                    chatNavigator.toPodcastPlayerScreen(podcast)
-                }
+                viewModel.goToPodcastPlayerScreen(podcast)
             }
 
             val progress = podcast.getPlayingProgress()
-            progressBar.layoutParams.width = progressBarContainer.measuredWidth * (progress / 100)
+            progressBar.layoutParams.width =
+                progressBarContainer.measuredWidth * (progress / 100)
             progressBar.requestLayout()
 
             textViewPlayPauseButton.setOnClickListener {
-                //TODO: Start service and send action to Podcast Player Service
+                if (currentEpisode.playing) {
+                    viewModel.pauseEpisode(podcast, currentEpisode)
+                } else {
+                    viewModel.playEpisode(podcast, currentEpisode, podcast.currentTime)
+                }
             }
 
             textViewForward30Button.setOnClickListener {
-                //TODO: Forward 30 seconds
+                viewModel.seekTo(podcast, currentEpisode, podcast.currentTime + 30)
             }
 
             textViewBoostPodcastButton.setOnClickListener {
