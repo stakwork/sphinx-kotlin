@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.os.IBinder
+import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.concept_service_media.MediaPlayerServiceController
 import chat.sphinx.concept_service_media.MediaPlayerServiceState
 import chat.sphinx.concept_service_media.UserAction
@@ -20,7 +21,8 @@ import kotlinx.coroutines.sync.withLock
 
 internal class MediaPlayerServiceControllerImpl(
     private val app: Application,
-    dispatchers: CoroutineDispatchers
+    dispatchers: CoroutineDispatchers,
+    private val repositoryMedia: RepositoryMedia,
 ): MediaPlayerServiceController(), CoroutineDispatchers by dispatchers {
 
     private val binder: MutableStateFlow<MediaPlayerService.MediaPlayerServiceBinder?> by lazy {

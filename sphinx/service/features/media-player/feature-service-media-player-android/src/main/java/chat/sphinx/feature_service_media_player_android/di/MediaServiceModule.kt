@@ -1,6 +1,7 @@
 package chat.sphinx.feature_service_media_player_android.di
 
 import android.app.Application
+import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.concept_service_media.MediaPlayerServiceController
 import chat.sphinx.feature_service_media_player_android.MediaPlayerServiceControllerImpl
 import dagger.Module
@@ -19,8 +20,13 @@ internal object MediaServiceModule {
     fun provideMediaServiceControllerImpl(
         app: Application,
         dispatchers: CoroutineDispatchers,
+        repositoryMedia: RepositoryMedia,
     ): MediaPlayerServiceControllerImpl =
-        MediaPlayerServiceControllerImpl(app, dispatchers)
+        MediaPlayerServiceControllerImpl(
+            app,
+            dispatchers,
+            repositoryMedia,
+        )
 
     @Provides
     fun provideMediaServiceController(

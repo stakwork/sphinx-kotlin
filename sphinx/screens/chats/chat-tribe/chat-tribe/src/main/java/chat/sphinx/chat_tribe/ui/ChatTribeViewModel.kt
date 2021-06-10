@@ -16,6 +16,7 @@ import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.concept_repository_message.SendMessage
 import chat.sphinx.concept_service_media.MediaPlayerServiceController
 import chat.sphinx.concept_service_media.MediaPlayerServiceState
+import chat.sphinx.concept_service_media.UserAction
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
@@ -173,6 +174,14 @@ internal class ChatTribeViewModel @Inject constructor(
                 submitSideEffect(
                     ChatSideEffect.Notify(
                         "Price per message: $pricePerMessage\n Amount to Stake: $escrowAmount"
+                    )
+                )
+                mediaPlayerServiceController.submitAction(
+                    UserAction.ServiceAction.Play(
+                        chat.id,
+                        2541203462,
+                        "https://anchor.fm/s/558f520/podcast/play/34682465/https%3A%2F%2Fd3ctxlq1ktw2nl.cloudfront.net%2Fstaging%2F2021-5-2%2F192649643-44100-2-c36483521f93a.m4a",
+                        0L,
                     )
                 )
             }

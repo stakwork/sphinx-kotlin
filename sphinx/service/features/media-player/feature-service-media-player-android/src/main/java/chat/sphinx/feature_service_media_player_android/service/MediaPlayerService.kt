@@ -6,6 +6,7 @@ import android.media.MediaPlayer
 import android.os.Binder
 import android.os.IBinder
 import app.cash.exhaustive.Exhaustive
+import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.concept_service_media.MediaPlayerServiceState
 import chat.sphinx.concept_service_media.UserAction
 import chat.sphinx.feature_service_media_player_android.MediaPlayerServiceControllerImpl
@@ -18,6 +19,7 @@ internal abstract class MediaPlayerService: Service() {
 
     protected abstract val mediaServiceController: MediaPlayerServiceControllerImpl
     protected abstract val dispatchers: CoroutineDispatchers
+    protected abstract val repositoryMedia: RepositoryMedia
 
     @Volatile
     protected var currentState: MediaPlayerServiceState = MediaPlayerServiceState.ServiceActive.ServiceLoading

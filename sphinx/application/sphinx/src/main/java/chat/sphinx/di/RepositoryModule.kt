@@ -11,6 +11,7 @@ import chat.sphinx.concept_network_query_message.NetworkQueryMessage
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_dashboard_android.RepositoryDashboardAndroid
 import chat.sphinx.concept_repository_lightning.LightningRepository
+import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.concept_socket_io.SocketIOManager
 import chat.sphinx.database.SphinxCoreDBImpl
 import chat.sphinx.feature_coredb.CoreDBImpl
@@ -112,4 +113,10 @@ object RepositoryModule {
         sphinxRepositoryAndroid: SphinxRepositoryAndroid
     ): RepositoryDashboardAndroid<Any> =
         sphinxRepositoryAndroid as RepositoryDashboardAndroid<Any>
+
+    @Provides
+    fun provideRepositoryMedia(
+        sphinxRepositoryAndroid: SphinxRepositoryAndroid
+    ): RepositoryMedia =
+        sphinxRepositoryAndroid
 }
