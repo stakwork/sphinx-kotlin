@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import chat.sphinx.chat_common.ui.ChatSideEffect
 import chat.sphinx.chat_common.ui.ChatViewModel
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
+import chat.sphinx.chat_common.ui.viewstate.header.ChatHeaderFooterViewState
 import chat.sphinx.chat_tribe.navigation.TribeChatNavigator
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_lightning.model.route.isRouteAvailable
@@ -244,7 +245,7 @@ internal class ChatTribeViewModel @Inject constructor(
 //        podcast.endEpisodeUpdate(episodeId)
 
         podcast?.let { podcast ->
-//            viewStateContainer.updateViewState(PodcastPlayerViewState.MediaStateUpdate(podcast))
+            viewStateContainer.updateViewState(ChatHeaderFooterViewState.PodcastUpdate(podcast))
         }
     }
 }

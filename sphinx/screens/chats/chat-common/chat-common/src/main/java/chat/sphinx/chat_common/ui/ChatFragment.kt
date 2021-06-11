@@ -18,9 +18,8 @@ import chat.sphinx.chat_common.databinding.LayoutChatFooterBinding
 import chat.sphinx.chat_common.databinding.LayoutChatHeaderBinding
 import chat.sphinx.chat_common.navigation.ChatNavigator
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
-import chat.sphinx.chat_common.ui.viewstate.header.ChatHeaderViewState
+import chat.sphinx.chat_common.ui.viewstate.header.ChatHeaderFooterViewState
 import chat.sphinx.concept_image_loader.ImageLoader
-import chat.sphinx.concept_network_query_chat.model.PodcastDto
 import chat.sphinx.concept_repository_message.SendMessage
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
@@ -46,7 +45,7 @@ abstract class ChatFragment<
         >(@LayoutRes layoutId: Int): SideEffectFragment<
         Context,
         ChatSideEffect,
-        ChatHeaderViewState,
+        ChatHeaderFooterViewState,
         VM,
         VB
         >(layoutId)
@@ -203,11 +202,12 @@ abstract class ChatFragment<
         viewModel.readMessages()
     }
 
-    override suspend fun onViewStateFlowCollect(viewState: ChatHeaderViewState) {
+    override suspend fun onViewStateFlowCollect(viewState: ChatHeaderFooterViewState) {
         @Exhaustive
         when (viewState) {
-            is ChatHeaderViewState.Idle -> {}
-            is ChatHeaderViewState.Initialized -> {
+            is ChatHeaderFooterViewState.Idle -> {}
+            is ChatHeaderFooterViewState.PodcastUpdate -> {}
+            is ChatHeaderFooterViewState.Initialized -> {
                 headerBinding.apply {
 
                     textViewChatHeaderName.text = viewState.chatHeaderName

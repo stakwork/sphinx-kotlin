@@ -1,31 +1,33 @@
 package chat.sphinx.chat_tribe.ui
 
-import android.content.ContentValues
+import android.annotation.SuppressLint
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.ImageView
+import androidx.core.view.isGone
+import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.RecyclerView
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.chat_common.databinding.LayoutChatFooterBinding
 import chat.sphinx.chat_common.databinding.LayoutChatHeaderBinding
-import chat.sphinx.chat_common.navigation.ChatNavigator
 import chat.sphinx.chat_common.ui.ChatFragment
-import chat.sphinx.chat_common.ui.viewstate.header.ChatHeaderViewState
+import chat.sphinx.chat_common.ui.viewstate.header.ChatHeaderFooterViewState
 import chat.sphinx.chat_tribe.R
 import chat.sphinx.chat_tribe.databinding.FragmentChatTribeBinding
 import chat.sphinx.chat_tribe.databinding.LayoutPodcastPlayerFooterBinding
 import chat.sphinx.chat_tribe.navigation.TribeChatNavigator
 import chat.sphinx.concept_image_loader.ImageLoader
-import chat.sphinx.concept_network_query_chat.model.PodcastDto
 import chat.sphinx.podcast_player.objects.Podcast
-import chat.sphinx.wrapper_common.util.getTimeString
+import chat.sphinx.wrapper_chat.isTrue
+import chat.sphinx.wrapper_common.lightning.asFormattedString
+import chat.sphinx.wrapper_common.lightning.unit
 import dagger.hilt.android.AndroidEntryPoint
+import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
+import io.matthewnelson.android_feature_screens.util.visible
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -62,31 +64,44 @@ internal class ChatTribeFragment: ChatFragment<
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.loadTribeAndPodcastData().collect { podcast ->
                 configurePodcastPlayer(podcast)
+                addPodcastOnClickListeners(podcast)
             }
         }
     }
 
-    override suspend fun onViewStateFlowCollect(viewState: ChatHeaderViewState) {
+    override suspend fun onViewStateFlowCollect(viewState: ChatHeaderFooterViewState) {
         super.onViewStateFlowCollect(viewState)
+
+        if (viewState is ChatHeaderFooterViewState.PodcastUpdate) {
+            configurePodcastPlayer(viewState.podcast)
+        }
     }
 
     private fun configurePodcastPlayer(podcast: Podcast) {
         podcastPlayerBinding.apply {
-            scrollToBottom(callback = {
-                root.goneIfFalse(true)
-            })
+            if (root.isGone) {
+                scrollToBottom(callback = {
+                    root.goneIfFalse(true)
+                })
+            }
 
             val currentEpisode = podcast.getCurrentEpisode()
             textViewEpisodeTitle.text = currentEpisode.title
-
-            textViewEpisodeTitle.setOnClickListener {
-                viewModel.goToPodcastPlayerScreen(podcast)
-            }
 
             val progress = podcast.getPlayingProgress()
             progressBar.layoutParams.width =
                 progressBarContainer.measuredWidth * (progress / 100)
             progressBar.requestLayout()
+        }
+    }
+
+    private fun addPodcastOnClickListeners(podcast: Podcast) {
+        podcastPlayerBinding.apply {
+            val currentEpisode = podcast.getCurrentEpisode()
+
+            textViewEpisodeTitle.setOnClickListener {
+                viewModel.goToPodcastPlayerScreen(podcast)
+            }
 
             textViewPlayPauseButton.setOnClickListener {
                 if (currentEpisode.playing) {
