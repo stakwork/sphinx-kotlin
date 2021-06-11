@@ -45,8 +45,8 @@ internal inline fun Intent.toServiceActionPlay(): UserAction.ServiceAction.Play?
         }
     }
 
-    val startTime: Long = getLongExtra("START_TIME", -1L).let {
-        if (it == -1L) {
+    val startTime: Int = getIntExtra("START_TIME", -1).let {
+        if (it == -1) {
             return null
         } else {
             it
