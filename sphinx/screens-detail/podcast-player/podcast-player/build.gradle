@@ -42,6 +42,7 @@ dependencies {
   implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-chat')
   implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-chat')
 
+  api project(path: ':sphinx:service:concepts:concept-service-media-player')
   api project(path: ':sphinx:application:common:wrappers:wrapper-common')
 
   implementation deps.androidx.lifecycle.hilt

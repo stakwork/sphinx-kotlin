@@ -8,6 +8,7 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.PopupMenu
 import android.widget.SeekBar
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ConcatAdapter
@@ -76,14 +77,15 @@ internal class PodcastPlayerFragment : BaseFragment<
         when (viewState) {
             is PodcastPlayerViewState.Idle -> {}
 
-            is PodcastPlayerViewState.LoadingEpisode -> {
-                loadingEpisode(viewState.episode)
-            }
-
             is PodcastPlayerViewState.PodcastLoaded -> {
                 viewState.podcast?.let { podcast ->
                     showPodcastInfo(podcast)
+                    addPodcastOnClickListeners(podcast)
                 }
+            }
+
+            is PodcastPlayerViewState.LoadingEpisode -> {
+                loadingEpisode(viewState.episode)
             }
 
             is PodcastPlayerViewState.EpisodePlayed -> {
@@ -91,6 +93,13 @@ internal class PodcastPlayerFragment : BaseFragment<
                     showPodcastInfo(podcast)
                 }
             }
+
+            is PodcastPlayerViewState.MediaStateUpdate -> {
+                viewState.podcast?.let { podcast ->
+                    showPodcastInfo(podcast)
+                }
+            }
+
         }
     }
 
@@ -112,59 +121,76 @@ internal class PodcastPlayerFragment : BaseFragment<
                 includeLayoutPodcastEpisodesList.textViewEpisodesListCount.text = podcast.episodesCount.toString()
 
                 includeLayoutEpisodeSliderControl.apply {
-                    seekBarCurrentEpisodeProgress.setOnSeekBarChangeListener(
-                        object : SeekBar.OnSeekBarChangeListener {
-
-                            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                                if (fromUser) {
-                                    val duration = podcast.getCurrentEpisodeDuration()
-                                    setTimeLabelsAndProgressBarTo(duration, null, progress)
-                                }
-                            }
-
-                            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
-
-                            override fun onStopTrackingTouch(seekBar: SeekBar?) {
-                                onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-                                    seekTo(podcast, seekBar?.progress ?: 0)
-                                }
-                            }
-                        }
-                    )
-
                     progressBarAudioLoading.goneIfFalse(false)
                 }
 
                 includeLayoutEpisodePlaybackControlButtons.apply {
-                    buttonPlaybackSpeed.setOnClickListener {
-                        showSpeedPopup()
-                    }
+                    buttonPlayPause.background =
+                        ContextCompat.getDrawable(root.context,
+                            if (podcast.isPlaying) R.drawable.ic_podcast_play_circle else R.drawable.ic_podcast_pause_circle
+                        )
+                }
+            }
+        }
+    }
 
-                    buttonShareClip.setOnClickListener {
-                        //TODO share clip feature
-                    }
+    private fun addPodcastOnClickListeners(podcast: Podcast) {
+        binding.apply {
+            includeLayoutEpisodeSliderControl.apply {
+                seekBarCurrentEpisodeProgress.setOnSeekBarChangeListener(
+                    object : SeekBar.OnSeekBarChangeListener {
 
-                    buttonReplay15.setOnClickListener {
-                        viewModel.seekTo(podcast.getCurrentEpisode(), podcast.currentTime - 15)
-                    }
+                        override fun onProgressChanged(
+                            seekBar: SeekBar?,
+                            progress: Int,
+                            fromUser: Boolean
+                        ) {
+                            if (fromUser) {
+                                val duration = podcast.getCurrentEpisodeDuration()
+                                setTimeLabelsAndProgressBarTo(duration, null, progress)
+                            }
+                        }
 
-                    buttonPlayPause.setOnClickListener {
-                        val currentEpisode = podcast.getCurrentEpisode()
+                        override fun onStartTrackingTouch(seekBar: SeekBar?) {}
 
-                        if (currentEpisode.playing) {
-                            viewModel.pauseEpisode(currentEpisode)
-                        } else {
-                            viewModel.playEpisode(currentEpisode, podcast.currentTime)
+                        override fun onStopTrackingTouch(seekBar: SeekBar?) {
+                            onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                                seekTo(podcast, seekBar?.progress ?: 0)
+                            }
                         }
                     }
+                )
+            }
 
-                    buttonForward30.setOnClickListener {
-                        viewModel.seekTo(podcast.getCurrentEpisode(), podcast.currentTime + 30)
-                    }
+            includeLayoutEpisodePlaybackControlButtons.apply {
+                buttonPlaybackSpeed.setOnClickListener {
+                    showSpeedPopup()
+                }
 
-                    buttonBoost.setOnClickListener {
-                        //TODO Boost podcast
+                buttonShareClip.setOnClickListener {
+                    //TODO share clip feature
+                }
+
+                buttonReplay15.setOnClickListener {
+                    viewModel.seekTo(podcast.currentTime - 15)
+                }
+
+                buttonPlayPause.setOnClickListener {
+                    val currentEpisode = podcast.getCurrentEpisode()
+
+                    if (currentEpisode.playing) {
+                        viewModel.pauseEpisode(currentEpisode)
+                    } else {
+                        viewModel.playEpisode(currentEpisode, podcast.currentTime)
                     }
+                }
+
+                buttonForward30.setOnClickListener {
+                    viewModel.seekTo(podcast.currentTime + 30)
+                }
+
+                buttonBoost.setOnClickListener {
+                    //TODO Boost podcast
                 }
             }
         }
@@ -188,7 +214,7 @@ internal class PodcastPlayerFragment : BaseFragment<
             podcast.getCurrentEpisodeDuration()
         }
         val seekTime = (duration * (progress / 100)).toInt()
-        viewModel.seekTo(podcast.getCurrentEpisode(), seekTime)
+        viewModel.seekTo(seekTime)
     }
 
     private suspend fun setTimeLabelsAndProgressBar(podcast: Podcast) {
@@ -269,9 +295,5 @@ internal class PodcastPlayerFragment : BaseFragment<
 
             popup.show()
         }
-    }
-
-    fun mediaStatusReceived() {
-        viewModel.mediaStatusReceived()
     }
 }

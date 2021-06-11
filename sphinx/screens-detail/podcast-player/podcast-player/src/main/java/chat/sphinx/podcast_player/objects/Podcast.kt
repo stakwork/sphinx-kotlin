@@ -46,6 +46,9 @@ data class Podcast(
     val currentTime: Int
         get() = timeSeconds ?: 0
 
+    val isPlaying: Boolean
+        get() = getCurrentEpisode().playing
+
     fun setMetaData(metaData: ChatMetaData) {
         this.episodeId = metaData.itemId.value
         this.timeSeconds = metaData.timeSeconds
@@ -154,7 +157,7 @@ data class Podcast(
 
     fun endEpisodeUpdate(episodeId: Long) {
         getEpisodeWithId(episodeId)?.let { episode ->
-            val nextEpisode = getEpisodeWithId(episodeId)
+            val nextEpisode = getNextEpisode(episodeId)
 
             didEndPlayingEpisode(episode, nextEpisode)
         }

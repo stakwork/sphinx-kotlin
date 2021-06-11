@@ -1,11 +1,9 @@
 package chat.sphinx.chat_tribe.ui
 
-import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
 import androidx.core.view.isGone
-import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.RecyclerView
 import by.kirich1409.viewbindingdelegate.viewBinding
@@ -19,13 +17,8 @@ import chat.sphinx.chat_tribe.databinding.LayoutPodcastPlayerFooterBinding
 import chat.sphinx.chat_tribe.navigation.TribeChatNavigator
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.podcast_player.objects.Podcast
-import chat.sphinx.wrapper_chat.isTrue
-import chat.sphinx.wrapper_common.lightning.asFormattedString
-import chat.sphinx.wrapper_common.lightning.unit
 import dagger.hilt.android.AndroidEntryPoint
-import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
-import io.matthewnelson.android_feature_screens.util.visible
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -72,7 +65,7 @@ internal class ChatTribeFragment: ChatFragment<
     override suspend fun onViewStateFlowCollect(viewState: ChatHeaderFooterViewState) {
         super.onViewStateFlowCollect(viewState)
 
-        if (viewState is ChatHeaderFooterViewState.PodcastUpdate) {
+        if (viewState is ChatHeaderFooterViewState.MediaStateUpdate) {
             configurePodcastPlayer(viewState.podcast)
         }
     }
@@ -84,6 +77,10 @@ internal class ChatTribeFragment: ChatFragment<
                     root.goneIfFalse(true)
                 })
             }
+
+            textViewPlayPauseButton.text = getString(
+                if (podcast.isPlaying) R.string.material_icon_name_play_button else R.string.material_icon_name_pause_button
+            )
 
             val currentEpisode = podcast.getCurrentEpisode()
             textViewEpisodeTitle.text = currentEpisode.title
@@ -112,7 +109,7 @@ internal class ChatTribeFragment: ChatFragment<
             }
 
             textViewForward30Button.setOnClickListener {
-                viewModel.seekTo(currentEpisode, podcast.currentTime + 30)
+                viewModel.seekTo(podcast.currentTime + 30)
             }
 
             textViewBoostPodcastButton.setOnClickListener {

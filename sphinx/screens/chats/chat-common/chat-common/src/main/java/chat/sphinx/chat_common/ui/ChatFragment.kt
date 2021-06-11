@@ -206,7 +206,7 @@ abstract class ChatFragment<
         @Exhaustive
         when (viewState) {
             is ChatHeaderFooterViewState.Idle -> {}
-            is ChatHeaderFooterViewState.PodcastUpdate -> {}
+            is ChatHeaderFooterViewState.MediaStateUpdate -> {}
             is ChatHeaderFooterViewState.Initialized -> {
                 headerBinding.apply {
 

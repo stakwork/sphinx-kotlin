@@ -3,6 +3,9 @@ package chat.sphinx.podcast_player.ui
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_repository_chat.ChatRepository
+import chat.sphinx.concept_service_media.MediaPlayerServiceController
+import chat.sphinx.concept_service_media.MediaPlayerServiceState
+import chat.sphinx.concept_service_media.UserAction
 import chat.sphinx.podcast_player.navigation.PodcastPlayerNavigator
 import chat.sphinx.podcast_player.objects.Podcast
 import chat.sphinx.podcast_player.objects.PodcastEpisode
@@ -29,13 +32,54 @@ internal class PodcastPlayerViewModel @Inject constructor(
     val navigator: PodcastPlayerNavigator,
     private val chatRepository: ChatRepository,
     savedStateHandle: SavedStateHandle,
-) : BaseViewModel<PodcastPlayerViewState>(dispatchers, PodcastPlayerViewState.Idle) {
+    private val mediaPlayerServiceController: MediaPlayerServiceController
+) : BaseViewModel<PodcastPlayerViewState>(
+    dispatchers,
+    PodcastPlayerViewState.Idle
+), MediaPlayerServiceController.MediaServiceListener {
+
+    //    private val chatSharedFlow: SharedFlow<Chat?> = flow {
+    //        emitAll(chatRepository.getChatById(args.chatId))
+    //    }.distinctUntilChanged().shareIn(
+    //        viewModelScope,
+    //        SharingStarted.WhileSubscribed(2_000),
+    //        replay = 1,
+    //    )
 
     private val args: PodcastPlayerFragmentArgs by savedStateHandle.navArgs()
 
     var podcast: Podcast? = null
 
+//    private val _mediaPlayerServiceStateFlow: MutableStateFlow<MediaPlayerServiceState> by lazy {
+//        MutableStateFlow(MediaPlayerServiceState.ServiceInactive)
+//    }
+//    val mediaPlayerServiceStateFlow: StateFlow<MediaPlayerServiceState>
+//        get() = _mediaPlayerServiceStateFlow
+
+    override fun mediaServiceState(serviceState: MediaPlayerServiceState) {
+//        _mediaPlayerServiceStateFlow.value = serviceState
+
+        podcast?.let { podcast ->
+            when (serviceState) {
+                is MediaPlayerServiceState.ServiceActive.MediaState.Playing -> {
+                    podcast.playingEpisodeUpdate(serviceState.episodeId, serviceState.currentTime.toInt())
+                }
+                is MediaPlayerServiceState.ServiceActive.MediaState.Paused -> {
+                    podcast.pauseEpisodeUpdate(serviceState.episodeId)
+                }
+                is MediaPlayerServiceState.ServiceActive.MediaState.Ended -> {
+                    podcast.endEpisodeUpdate(serviceState.episodeId)
+                }
+                is MediaPlayerServiceState.ServiceActive.ServiceLoading -> {}
+                is MediaPlayerServiceState.ServiceInactive -> {}
+            }
+            viewStateContainer.updateViewState(PodcastPlayerViewState.MediaStateUpdate(podcast))
+        }
+    }
+
     init {
+        mediaPlayerServiceController.addListener(this)
+
         args.podcast?.let { argPodcast ->
             podcast = argPodcast
 
@@ -43,13 +87,10 @@ internal class PodcastPlayerViewModel @Inject constructor(
         }
     }
 
-//    private val chatSharedFlow: SharedFlow<Chat?> = flow {
-//        emitAll(chatRepository.getChatById(args.chatId))
-//    }.distinctUntilChanged().shareIn(
-//        viewModelScope,
-//        SharingStarted.WhileSubscribed(2_000),
-//        replay = 1,
-//    )
+    override fun onCleared() {
+        super.onCleared()
+        mediaPlayerServiceController.removeListener(this)
+    }
 
     fun playEpisode(episode: PodcastEpisode, startTime: Int) {
         viewModelScope.launch(mainImmediate) {
@@ -68,9 +109,14 @@ internal class PodcastPlayerViewModel @Inject constructor(
                             )
                         )
 
-                        //TODO Send action to Service
-                        //Action Play
-                        //chat.id, episode.id, time: startTime, episode.enclosureUrl
+                        mediaPlayerServiceController.submitAction(
+                            UserAction.ServiceAction.Play(
+                                chat.id,
+                                episode.id,
+                                episode.enclosureUrl,
+                                startTime.toLong(),
+                            )
+                        )
                     }
                 }
             }
@@ -84,16 +130,19 @@ internal class PodcastPlayerViewModel @Inject constructor(
                     podcast?.let { podcast ->
                         podcast.didStopPlayingEpisode(episode)
 
-                        //TODO Send action to Service
-                        //Action Pause
-                        //chat.id, episode.id
+                        mediaPlayerServiceController.submitAction(
+                            UserAction.ServiceAction.Pause(
+                                chat.id,
+                                episode.id
+                            )
+                        )
                     }
                 }
             }
         }
     }
 
-    fun seekTo(episode: PodcastEpisode, time: Int) {
+    fun seekTo(time: Int) {
         viewModelScope.launch(mainImmediate) {
             chatRepository.getChatById(args.chatId).firstOrNull()?.let { chat ->
                 chat?.let { chat ->
@@ -102,9 +151,12 @@ internal class PodcastPlayerViewModel @Inject constructor(
 
                         val metaData = podcast.getMetaData()
 
-                        //TODO Send action to Service
-                        //Action Seek
-                        //chat.id, episode.id, seekTime: time
+                        mediaPlayerServiceController.submitAction(
+                            UserAction.ServiceAction.Seek(
+                                chat.id,
+                                metaData
+                            )
+                        )
                     }
                 }
             }
@@ -115,29 +167,18 @@ internal class PodcastPlayerViewModel @Inject constructor(
         viewModelScope.launch(mainImmediate) {
             chatRepository.getChatById(args.chatId).firstOrNull()?.let { chat ->
                 podcast?.let { podcast ->
+                    podcast.speed = speed
+
                     val metaData = podcast.getMetaData()
 
-                    //TODO Send action to Service
-                    //Action AdjustSpeed
-                    //chat.id, chat.chatMetaData, speed: speed
+                    mediaPlayerServiceController.submitAction(
+                        UserAction.AdjustSpeed(
+                            chat.id,
+                            metaData
+                        )
+                    )
                 }
             }
         }
     }
-
-    fun mediaStatusReceived() {
-        //TODO PLAY STATE
-//        podcast.playingEpisodeUpdate(episodeId, currentTime)
-
-        //TODO PAUSE STATE
-//        podcast.pauseEpisodeUpdate(episodeId)
-
-        //TODO END STATE
-//        podcast.endEpisodeUpdate(episodeId)
-
-        podcast?.let { podcast ->
-            viewStateContainer.updateViewState(PodcastPlayerViewState.MediaStateUpdate(podcast))
-        }
-    }
-
 }

@@ -146,14 +146,31 @@ internal class ChatTribeViewModel @Inject constructor(
         return super.sendMessage(builder)
     }
 
-    private val _mediaPlayerServiceStateFlow: MutableStateFlow<MediaPlayerServiceState> by lazy {
-        MutableStateFlow(MediaPlayerServiceState.ServiceInactive)
-    }
-    val mediaPlayerServiceStateFlow: StateFlow<MediaPlayerServiceState>
-        get() = _mediaPlayerServiceStateFlow
+//    private val _mediaPlayerServiceStateFlow: MutableStateFlow<MediaPlayerServiceState> by lazy {
+//        MutableStateFlow(MediaPlayerServiceState.ServiceInactive)
+//    }
+//    val mediaPlayerServiceStateFlow: StateFlow<MediaPlayerServiceState>
+//        get() = _mediaPlayerServiceStateFlow
 
     override fun mediaServiceState(serviceState: MediaPlayerServiceState) {
-        _mediaPlayerServiceStateFlow.value = serviceState
+//        _mediaPlayerServiceStateFlow.value = serviceState
+
+        podcast?.let { podcast ->
+            when (serviceState) {
+                is MediaPlayerServiceState.ServiceActive.MediaState.Playing -> {
+                    podcast.playingEpisodeUpdate(serviceState.episodeId, serviceState.currentTime.toInt())
+                }
+                is MediaPlayerServiceState.ServiceActive.MediaState.Paused -> {
+                    podcast.pauseEpisodeUpdate(serviceState.episodeId)
+                }
+                is MediaPlayerServiceState.ServiceActive.MediaState.Ended -> {
+                    podcast.endEpisodeUpdate(serviceState.episodeId)
+                }
+                is MediaPlayerServiceState.ServiceActive.ServiceLoading -> {}
+                is MediaPlayerServiceState.ServiceInactive -> {}
+            }
+            viewStateContainer.updateViewState(ChatHeaderFooterViewState.MediaStateUpdate(podcast))
+        }
     }
 
     init {
@@ -215,9 +232,14 @@ internal class ChatTribeViewModel @Inject constructor(
                             podcast.didStartPlayingEpisode(episode, startTime)
                         }
 
-                        //TODO Send action to Service
-                        //Action Play
-                        //chat.id, episode.id, time: startTime, episode.enclosureUrl
+                        mediaPlayerServiceController.submitAction(
+                            UserAction.ServiceAction.Play(
+                                chat.id,
+                                episode.id,
+                                episode.enclosureUrl,
+                                startTime.toLong(),
+                            )
+                        )
                     }
                 }
             }
@@ -231,17 +253,19 @@ internal class ChatTribeViewModel @Inject constructor(
                     podcast?.let { podcast ->
                         podcast.didStopPlayingEpisode(episode)
 
-                        //TODO Update Chat MetaData
-                        //TODO Send action to Service
-                        //Action Pause
-                        //chat.id, episode.id
+                        mediaPlayerServiceController.submitAction(
+                            UserAction.ServiceAction.Pause(
+                                chat.id,
+                                episode.id
+                            )
+                        )
                     }
                 }
             }
         }
     }
 
-    fun seekTo(episode: PodcastEpisode, time: Int) {
+    fun seekTo(time: Int) {
         viewModelScope.launch(mainImmediate) {
             chatRepository.getChatById(args.chatId).firstOrNull()?.let { chat ->
                 chat?.let { chat ->
@@ -249,36 +273,16 @@ internal class ChatTribeViewModel @Inject constructor(
                         podcast.didSeekTo(time)
 
                         val metaData = podcast.getMetaData()
-                        //TODO Send action to Service
-                        //Action Seek
-                        //chat.id, episode.id, seekTime: time
 
-//                        mediaPlayerServiceController.submitAction(
-//                            UserAction.ServiceAction.Play(
-//                                chat.id,
-//                                2541203462,
-//                                "https://anchor.fm/s/558f520/podcast/play/34682465/https%3A%2F%2Fd3ctxlq1ktw2nl.cloudfront.net%2Fstaging%2F2021-5-2%2F192649643-44100-2-c36483521f93a.m4a",
-//                                0L,
-//                            )
-//                        )
+                        mediaPlayerServiceController.submitAction(
+                            UserAction.ServiceAction.Seek(
+                                chat.id,
+                                metaData
+                            )
+                        )
                     }
                 }
             }
-        }
-    }
-
-    fun mediaStatusReceived() {
-        //TODO PLAY STATE
-//        podcast.playingEpisodeUpdate(episodeId, currentTime)
-
-        //TODO PAUSE STATE
-//        podcast.pauseEpisodeUpdate(episodeId)
-
-        //TODO END STATE
-//        podcast.endEpisodeUpdate(episodeId)
-
-        podcast?.let { podcast ->
-            viewStateContainer.updateViewState(ChatHeaderFooterViewState.PodcastUpdate(podcast))
         }
     }
 }

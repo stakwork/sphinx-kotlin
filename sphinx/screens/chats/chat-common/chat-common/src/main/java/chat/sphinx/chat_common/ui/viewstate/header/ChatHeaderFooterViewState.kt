@@ -16,7 +16,7 @@ sealed class ChatHeaderFooterViewState: ViewState<ChatHeaderFooterViewState>() {
         val isMuted: ChatMuted?,
     ): ChatHeaderFooterViewState()
 
-    data class PodcastUpdate(
+    data class MediaStateUpdate(
         val podcast: Podcast,
     ): ChatHeaderFooterViewState()
 }
