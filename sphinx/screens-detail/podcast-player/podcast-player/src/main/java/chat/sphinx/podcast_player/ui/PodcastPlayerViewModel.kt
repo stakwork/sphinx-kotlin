@@ -59,20 +59,20 @@ internal class PodcastPlayerViewModel @Inject constructor(
     override fun mediaServiceState(serviceState: MediaPlayerServiceState) {
 //        _mediaPlayerServiceStateFlow.value = serviceState
 
-        podcast?.let { podcast ->
-            when (serviceState) {
-                is MediaPlayerServiceState.ServiceActive.MediaState.Playing -> {
-                    podcast.playingEpisodeUpdate(serviceState.episodeId, serviceState.currentTime.toInt())
-                }
-                is MediaPlayerServiceState.ServiceActive.MediaState.Paused -> {
-                    podcast.pauseEpisodeUpdate(serviceState.episodeId)
-                }
-                is MediaPlayerServiceState.ServiceActive.MediaState.Ended -> {
-                    podcast.endEpisodeUpdate(serviceState.episodeId)
-                }
-                is MediaPlayerServiceState.ServiceActive.ServiceLoading -> {}
-                is MediaPlayerServiceState.ServiceInactive -> {}
+        when (serviceState) {
+            is MediaPlayerServiceState.ServiceActive.MediaState.Playing -> {
+                podcast?.playingEpisodeUpdate(serviceState.episodeId, serviceState.currentTime.toInt())
             }
+            is MediaPlayerServiceState.ServiceActive.MediaState.Paused -> {
+                podcast?.pauseEpisodeUpdate(serviceState.episodeId)
+            }
+            is MediaPlayerServiceState.ServiceActive.MediaState.Ended -> {
+                podcast?.endEpisodeUpdate(serviceState.episodeId)
+            }
+            is MediaPlayerServiceState.ServiceActive.ServiceLoading -> {}
+            is MediaPlayerServiceState.ServiceInactive -> {}
+        }
+        podcast?.let { podcast ->
             viewStateContainer.updateViewState(PodcastPlayerViewState.MediaStateUpdate(podcast))
         }
     }
@@ -114,6 +114,7 @@ internal class PodcastPlayerViewModel @Inject constructor(
                                 chat.id,
                                 episode.id,
                                 episode.enclosureUrl,
+                                Sat(0),
                                 startTime,
                             )
                         )
@@ -133,8 +134,7 @@ internal class PodcastPlayerViewModel @Inject constructor(
                         mediaPlayerServiceController.submitAction(
                             UserAction.ServiceAction.Pause(
                                 chat.id,
-                                episode.id,
-                                Sat(0)
+                                episode.id
                             )
                         )
                     }
