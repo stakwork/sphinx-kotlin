@@ -13,6 +13,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
+import app.cash.exhaustive.Exhaustive
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
@@ -29,7 +30,6 @@ import io.matthewnelson.android_feature_screens.ui.base.BaseFragment
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import javax.annotation.meta.Exhaustive
 import javax.inject.Inject
 
 
@@ -98,10 +98,8 @@ internal class PodcastPlayerFragment : BaseFragment<
             is PodcastPlayerViewState.Idle -> {}
 
             is PodcastPlayerViewState.PodcastLoaded -> {
-                viewState.podcast?.let { podcast ->
-                    showPodcastInfo(podcast)
-                    addPodcastOnClickListeners(podcast)
-                }
+                showPodcastInfo(viewState.podcast)
+                addPodcastOnClickListeners(viewState.podcast)
             }
 
             is PodcastPlayerViewState.LoadingEpisode -> {
@@ -109,47 +107,41 @@ internal class PodcastPlayerFragment : BaseFragment<
             }
 
             is PodcastPlayerViewState.EpisodePlayed -> {
-                viewState.podcast?.let { podcast ->
-                    showPodcastInfo(podcast)
-                }
+                showPodcastInfo(viewState.podcast)
             }
 
             is PodcastPlayerViewState.MediaStateUpdate -> {
-                viewState.podcast?.let { podcast ->
-                    showPodcastInfo(podcast)
-                }
+                showPodcastInfo(viewState.podcast)
             }
 
         }
     }
 
-    private fun showPodcastInfo(podcast: Podcast) {
-        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-            binding.apply {
-                textViewEpisodeTitleLabel.text = podcast.getCurrentEpisode().title
+    private suspend fun showPodcastInfo(podcast: Podcast) {
+        binding.apply {
+            textViewEpisodeTitleLabel.text = podcast.getCurrentEpisode().title
 
-                setTimeLabelsAndProgressBar(podcast)
+            setTimeLabelsAndProgressBar(podcast)
 
-                imageLoader.load(
-                    imageViewPodcastImage,
-                    podcast.image,
-                    ImageLoaderOptions.Builder()
-                        .placeholderResId(R.drawable.ic_profile_avatar_circle)
-                        .build()
-                )
+            imageLoader.load(
+                imageViewPodcastImage,
+                podcast.image,
+                ImageLoaderOptions.Builder()
+                    .placeholderResId(R.drawable.ic_profile_avatar_circle)
+                    .build()
+            )
 
-                includeLayoutPodcastEpisodesList.textViewEpisodesListCount.text = podcast.episodesCount.toString()
+            includeLayoutPodcastEpisodesList.textViewEpisodesListCount.text = podcast.episodesCount.toString()
 
-                includeLayoutEpisodeSliderControl.apply {
-                    progressBarAudioLoading.goneIfFalse(false)
-                }
+            includeLayoutEpisodeSliderControl.apply {
+                progressBarAudioLoading.goneIfFalse(false)
+            }
 
-                includeLayoutEpisodePlaybackControlButtons.apply {
-                    buttonPlayPause.background =
-                        ContextCompat.getDrawable(root.context,
-                            if (podcast.isPlaying) R.drawable.ic_podcast_pause_circle else R.drawable.ic_podcast_play_circle
-                        )
-                }
+            includeLayoutEpisodePlaybackControlButtons.apply {
+                buttonPlayPause.background =
+                    ContextCompat.getDrawable(root.context,
+                        if (podcast.isPlaying) R.drawable.ic_podcast_pause_circle else R.drawable.ic_podcast_play_circle
+                    )
             }
         }
     }
@@ -283,7 +275,7 @@ internal class PodcastPlayerFragment : BaseFragment<
                     }
                     R.id.speed1_5 -> {
                         buttonPlaybackSpeed.text = "1.5x"
-                        viewModel.adjustSpeed(1.1)
+                        viewModel.adjustSpeed(1.5)
                     }
                     R.id.speed2 -> {
                         buttonPlaybackSpeed.text = "2x"

@@ -76,7 +76,7 @@ internal class PodcastEpisodesListAdapter(
                 val old = oldList[oldItemPosition]
                 val new = newList[newItemPosition]
 
-                val same: Boolean = old.id == new.id && old.playing == new.playing
+                val same: Boolean = old.playing == new.playing
 
                 if (sameList) {
                     sameList = same
@@ -195,16 +195,12 @@ internal class PodcastEpisodesListAdapter(
                 textViewPlayArrowIndicator.goneIfFalse(podcastEpisode.playing)
 
                 // Image
-                podcastEpisode.image.let { url ->
-                    if (url != null) {
-                        onStopSupervisor.scope.launch(viewModel.dispatchers.mainImmediate) {
-                            imageLoader.load(
-                                imageViewEpisodeImage,
-                                url,
-                                imageLoaderOptions
-                            )
-                        }
-                    }
+                lifecycleOwner.lifecycleScope.launch(viewModel.dispatchers.mainImmediate) {
+                    disposable = imageLoader.load(
+                        imageViewEpisodeImage,
+                        podcastEpisode.image,
+                        imageLoaderOptions
+                    )
                 }
 
                 //Name
@@ -217,10 +213,6 @@ internal class PodcastEpisodesListAdapter(
                     )
                 )
             }
-        }
-
-        init {
-            lifecycleOwner.lifecycle.addObserver(this)
         }
     }
 
