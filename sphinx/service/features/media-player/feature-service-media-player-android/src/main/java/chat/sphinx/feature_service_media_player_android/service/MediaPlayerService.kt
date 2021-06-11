@@ -11,21 +11,18 @@ import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.concept_service_media.MediaPlayerServiceState
 import chat.sphinx.concept_service_media.UserAction
 import chat.sphinx.feature_service_media_player_android.MediaPlayerServiceControllerImpl
+import chat.sphinx.feature_service_media_player_android.model.PodcastDataHolder
 import chat.sphinx.feature_service_media_player_android.util.toServiceActionPlay
 import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.logger.e
 import chat.sphinx.wrapper_chat.ChatMetaData
 import chat.sphinx.wrapper_common.ItemId
 import chat.sphinx.wrapper_common.dashboard.ChatId
-import chat.sphinx.wrapper_common.lightning.Sat
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_foreground_state.ForegroundState
 import io.matthewnelson.concept_foreground_state.ForegroundStateManager
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
 
 internal abstract class MediaPlayerService: Service() {
 
@@ -49,7 +46,7 @@ internal abstract class MediaPlayerService: Service() {
     protected inner class MediaPlayerHolder {
         // chatId, episodeId, mediaPlayer
         @Volatile
-        private var player: Triple<ChatId, Long, MediaPlayer>? = null
+        private var podData: PodcastDataHolder? = null
 
         @Synchronized
         fun processUserAction(userAction: UserAction) {
@@ -57,13 +54,13 @@ internal abstract class MediaPlayerService: Service() {
             when (userAction) {
                 is UserAction.AdjustSpeed -> {
 
-                    player?.let { nnPlayer ->
+                    podData?.let { nnData ->
                         if (
-                            nnPlayer.first == userAction.chatId &&
-                            nnPlayer.second == userAction.chatMetaData.itemId.value
+                            nnData.chatId == userAction.chatId &&
+                            nnData.episodeId == userAction.chatMetaData.itemId.value
                         ) {
                             try {
-                                nnPlayer.third.playbackParams.apply {
+                                nnData.mediaPlayer.playbackParams.apply {
                                     speed = userAction.chatMetaData.speed.toFloat()
                                 }
                             } catch (e: IllegalStateException) {
@@ -78,26 +75,34 @@ internal abstract class MediaPlayerService: Service() {
                 }
                 is UserAction.ServiceAction.Pause -> {
 
-                        player?.let { nnPlayer ->
+                        podData?.let { nnData ->
                             if (
-                                nnPlayer.first == userAction.chatId &&
-                                nnPlayer.second == userAction.episodeId
+                                nnData.chatId == userAction.chatId &&
+                                nnData.episodeId == userAction.episodeId
                             ) {
                                 try {
-                                    nnPlayer.third.pause()
+                                    nnData.mediaPlayer.pause()
+
+                                    stateDispatcherJob?.cancel()
+                                    val currentTime = nnData.mediaPlayer.currentPosition
+
+                                    currentState = MediaPlayerServiceState.ServiceActive.MediaState.Paused(
+                                        nnData.chatId,
+                                        nnData.episodeId,
+                                        currentTime
+                                    )
+                                    mediaServiceController.dispatchState(currentState)
 
                                     repositoryMedia.updateChatMetaData(
                                         userAction.chatId,
                                         ChatMetaData(
-                                            ItemId(nnPlayer.second),
-                                            userAction.satPerMinute,
-                                            nnPlayer.third.currentPosition,
-                                            nnPlayer.third.playbackParams.speed.toDouble(),
+                                            ItemId(nnData.episodeId),
+                                            nnData.satsPerMinute,
+                                            currentTime,
+                                            nnData.mediaPlayer.playbackParams.speed.toDouble(),
                                         )
                                     )
 
-                                    // TODO: Cancel dispatch coroutine
-                                    // TODO: Update and dispatch current state
                                 } catch (e: IllegalStateException) {
                                     LOG.e(TAG, "Failed to pause MediaPlayer", e)
                                     // TODO: Handle Error
@@ -108,16 +113,16 @@ internal abstract class MediaPlayerService: Service() {
                 }
                 is UserAction.ServiceAction.Play -> {
 
-                    player?.let { nnPlayer ->
+                    podData?.let { nnData ->
                         if (
-                            nnPlayer.first == userAction.chatId &&
-                            nnPlayer.second == userAction.episodeId
+                            nnData.chatId == userAction.chatId &&
+                            nnData.episodeId == userAction.episodeId
                         ) {
 
-                            if (!nnPlayer.third.isPlaying) {
+                            if (!nnData.mediaPlayer.isPlaying) {
                                 try {
-                                    nnPlayer.third.seekTo(userAction.startTime)
-                                    nnPlayer.third.start()
+                                    nnData.mediaPlayer.seekTo(userAction.startTime)
+                                    nnData.mediaPlayer.start()
                                 } catch (e: IllegalStateException) {
                                     LOG.e(TAG, "Failed to start MediaPlayer", e)
                                     // TODO: Handle Error
@@ -126,15 +131,42 @@ internal abstract class MediaPlayerService: Service() {
 
                         } else {
 
-                            nnPlayer.third.stop()
-                            nnPlayer.third.setOnPreparedListener { mp ->
+                            val currentTime = nnData.mediaPlayer.currentPosition
+                            val speed = nnData.mediaPlayer.playbackParams.speed.toDouble()
+
+                            stateDispatcherJob?.cancel()
+                            nnData.mediaPlayer.stop()
+                            currentState = MediaPlayerServiceState.ServiceActive.MediaState.Paused(
+                                nnData.chatId,
+                                nnData.episodeId,
+                                currentTime
+                            )
+                            mediaServiceController.dispatchState(currentState)
+
+                            repositoryMedia.updateChatMetaData(
+                                nnData.chatId,
+                                ChatMetaData(
+                                    ItemId(nnData.episodeId),
+                                    nnData.satsPerMinute,
+                                    currentTime,
+                                    speed
+                                )
+                            )
+
+                            nnData.mediaPlayer.setDataSource(userAction.episodeUrl)
+                            nnData.mediaPlayer.setOnPreparedListener { mp ->
                                 mp.setOnPreparedListener(null)
                                 mp.seekTo(userAction.startTime)
                                 mp.start()
-                                // TODO: Start state dispatcher coroutine
+                                startStateDispatcher()
                             }
-                            nnPlayer.third.prepareAsync()
-                            player = Triple(userAction.chatId, userAction.episodeId, nnPlayer.third)
+                            nnData.mediaPlayer.prepareAsync()
+                            podData = PodcastDataHolder(
+                                userAction.chatId,
+                                userAction.episodeId,
+                                userAction.satPerMinute,
+                                nnData.mediaPlayer,
+                            )
 
                         }
                     } ?: MediaPlayer().apply {
@@ -149,22 +181,27 @@ internal abstract class MediaPlayerService: Service() {
                             mp.setOnPreparedListener(null)
                             mp.seekTo(userAction.startTime)
                             mp.start()
-                            // TODO: Start state dispatcher coroutine
+                            startStateDispatcher()
                         }
                     }.let { mp ->
                         mp.prepareAsync()
-                        player = Triple(userAction.chatId, userAction.episodeId, mp)
+                        podData = PodcastDataHolder(
+                            userAction.chatId,
+                            userAction.episodeId,
+                            userAction.satPerMinute,
+                            mp,
+                        )
                     }
 
                 }
                 is UserAction.ServiceAction.Seek -> {
-                    player?.let { nnPlayer ->
+                    podData?.let { nnPlayer ->
                         if (
-                            nnPlayer.first == userAction.chatId &&
-                            nnPlayer.second == userAction.chatMetaData.itemId.value
+                            nnPlayer.chatId == userAction.chatId &&
+                            nnPlayer.episodeId == userAction.chatMetaData.itemId.value
                         ) {
                             try {
-                                nnPlayer.third.seekTo(userAction.chatMetaData.timeSeconds)
+                                nnPlayer.mediaPlayer.seekTo(userAction.chatMetaData.timeSeconds)
                                 // TODO: Dispatch State
                             } catch (e: IllegalStateException) {
                                 LOG.e(
@@ -182,10 +219,68 @@ internal abstract class MediaPlayerService: Service() {
             }
         }
 
+        private var stateDispatcherJob: Job? = null
+        private fun startStateDispatcher() {
+            stateDispatcherJob?.cancel()
+            stateDispatcherJob = serviceLifecycleScope.launch(dispatchers.mainImmediate) {
+                var count = 0
+                while (isActive) {
+                    podData?.let { nnData ->
+
+                        val currentTime = nnData.mediaPlayer.currentPosition
+
+                        if (count >= 60) {
+                            repositoryMedia.updateChatMetaData(
+                                nnData.chatId,
+                                ChatMetaData(
+                                    ItemId(nnData.episodeId),
+                                    nnData.satsPerMinute,
+                                    currentTime,
+                                    nnData.mediaPlayer.playbackParams.speed.toDouble()
+                                )
+                            )
+                            count = 0
+                        } else {
+                            count++
+                        }
+
+                        if (nnData.mediaPlayer.isPlaying) {
+                            currentState = MediaPlayerServiceState.ServiceActive.MediaState.Playing(
+                                nnData.chatId,
+                                nnData.episodeId,
+                                currentTime
+                            )
+                        } else {
+
+                            currentState = if (nnData.mediaPlayer.duration == currentTime) {
+                                MediaPlayerServiceState.ServiceActive.MediaState.Ended(
+                                    nnData.chatId,
+                                    nnData.episodeId,
+                                    currentTime
+                                )
+                            } else {
+                                MediaPlayerServiceState.ServiceActive.MediaState.Paused(
+                                    nnData.chatId,
+                                    nnData.episodeId,
+                                    currentTime
+                                )
+                            }
+
+                            mediaServiceController.dispatchState(currentState)
+                            stateDispatcherJob?.cancel()
+
+                        }
+                    }
+                    mediaServiceController.dispatchState(currentState)
+                    delay(1_000)
+                }
+            }
+        }
+
         @Synchronized
         fun release() {
-            player?.third?.release()
-            player = null
+            podData?.mediaPlayer?.release()
+            podData = null
         }
     }
 

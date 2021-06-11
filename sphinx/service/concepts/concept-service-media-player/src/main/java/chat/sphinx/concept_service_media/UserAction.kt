@@ -13,6 +13,7 @@ sealed class UserAction(val chatId: ChatId) {
             chatId: ChatId,
             val episodeId: Long,
             val episodeUrl: String,
+            val satPerMinute: Sat,
             // TODO: General episode info?
             val startTime: Int,
         ): ServiceAction(chatId)
@@ -20,7 +21,6 @@ sealed class UserAction(val chatId: ChatId) {
         class Pause(
             chatId: ChatId,
             val episodeId: Long,
-            val satPerMinute: Sat,
         ): ServiceAction(chatId)
 
         class Seek(
@@ -29,6 +29,11 @@ sealed class UserAction(val chatId: ChatId) {
         ): ServiceAction(chatId)
 
     }
+
+//    class AdjustSatsPerMinute(
+//        chatId: ChatId,
+//        val chatMetaData: ChatMetaData,
+//    ): UserAction(chatId)
 
     class AdjustSpeed(
         chatId: ChatId,
