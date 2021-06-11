@@ -18,7 +18,7 @@
         android:thumbTint="@color/receivedIcon"
         android:progressDrawable="@drawable/podcast_player_seek_bar_progress"
         android:thumb="@drawable/podcast_player_seek_bar_thumb"
-        android:progress="50"
+        android:progress="0"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -33,9 +33,9 @@
         android:gravity="end"
         android:lines="1"
         android:textColor="@color/receivedIcon"
+        android:text="00:00:00"
         app:layout_constraintStart_toStartOf="@id/seek_bar_current_episode_progress"
-        app:layout_constraintTop_toBottomOf="@id/seek_bar_current_episode_progress"
-        tools:text="00:00:00" />
+        app:layout_constraintTop_toBottomOf="@id/seek_bar_current_episode_progress" />
 
 
     <ProgressBar
@@ -60,10 +60,10 @@
         android:fontFamily="@font/roboto_regular"
         android:lines="1"
         android:textColor="@color/secondaryText"
+        android:text="00:00:00"
         app:layout_constraintBottom_toBottomOf="@+id/progress_bar_audio_loading"
         app:layout_constraintEnd_toEndOf="@id/seek_bar_current_episode_progress"
-        app:layout_constraintTop_toTopOf="@+id/progress_bar_audio_loading"
-        tools:text="10:49:30" />
+        app:layout_constraintTop_toTopOf="@+id/progress_bar_audio_loading" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

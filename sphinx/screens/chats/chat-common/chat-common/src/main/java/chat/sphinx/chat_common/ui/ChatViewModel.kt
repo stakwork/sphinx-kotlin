@@ -9,7 +9,7 @@ import androidx.navigation.NavArgs
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.chat_common.R
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
-import chat.sphinx.chat_common.ui.viewstate.header.ChatHeaderViewState
+import chat.sphinx.chat_common.ui.viewstate.header.ChatHeaderFooterViewState
 import chat.sphinx.chat_common.ui.viewstate.messageholder.BubbleBackground
 import chat.sphinx.chat_common.ui.viewstate.messageholder.MessageHolderViewState
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
@@ -52,8 +52,8 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 ): SideEffectViewModel<
         Context,
         ChatSideEffect,
-        ChatHeaderViewState
-        >(dispatchers, ChatHeaderViewState.Idle)
+        ChatHeaderFooterViewState
+        >(dispatchers, ChatHeaderFooterViewState.Idle)
 {
     abstract val args: ARGS
 
@@ -73,11 +73,11 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 
     protected abstract suspend fun getChatNameIfNull(): ChatName?
 
-    private inner class ChatHeaderViewStateContainer: ViewStateContainer<ChatHeaderViewState>(ChatHeaderViewState.Idle) {
-        override val viewStateFlow: StateFlow<ChatHeaderViewState> = flow<ChatHeaderViewState> {
+    private inner class ChatHeaderViewStateContainer: ViewStateContainer<ChatHeaderFooterViewState>(ChatHeaderFooterViewState.Idle) {
+        override val viewStateFlow: StateFlow<ChatHeaderFooterViewState> = flow<ChatHeaderFooterViewState> {
             chatSharedFlow.collect { chat ->
                 emit(
-                    ChatHeaderViewState.Initialized(
+                    ChatHeaderFooterViewState.Initialized(
                         chatHeaderName = chat?.name?.value ?: getChatNameIfNull()?.value ?: "",
                         showLock = chat != null,
                         contributions = null,
@@ -89,11 +89,11 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         }.stateIn(
             viewModelScope,
             SharingStarted.WhileSubscribed(5_000),
-            ChatHeaderViewState.Idle
+            ChatHeaderFooterViewState.Idle
         )
 
         @Throws(IllegalStateException::class)
-        override fun updateViewState(viewState: ChatHeaderViewState) {
+        override fun updateViewState(viewState: ChatHeaderFooterViewState) {
             throw IllegalStateException(
                 """
                     ChatHeaderViewState updates automatically.
@@ -103,7 +103,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         }
     }
 
-    override val viewStateContainer: ViewStateContainer<ChatHeaderViewState> by lazy {
+    override val viewStateContainer: ViewStateContainer<ChatHeaderFooterViewState> by lazy {
         ChatHeaderViewStateContainer()
     }
 

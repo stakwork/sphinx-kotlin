@@ -79,6 +79,7 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import java.lang.RuntimeException
 import java.text.ParseException
 import kotlin.collections.ArrayList
 import kotlin.math.absoluteValue
@@ -1531,8 +1532,7 @@ abstract class SphinxRepository(
         emit(response ?: Response.Error(ResponseError("")))
     }
 
-    override suspend fun updateTribeInfo(chat: Chat) {
-
+    override fun updateTribeInfo(chat: Chat): Flow<PodcastDto> = flow{
         var owner: Contact? = accountOwner.value
 
         if (owner == null) {
@@ -1547,7 +1547,11 @@ abstract class SphinxRepository(
             delay(25L)
         }
 
-        if (owner?.nodePubKey == chat.ownerPubKey) return
+        if (owner?.nodePubKey == chat.ownerPubKey) {
+            throw RuntimeException("Own Tribe")
+        }
+
+        var podcastDto: PodcastDto? = null
 
         chat.host?.let { chatHost ->
             val chatUUID = chat.uuid
@@ -1569,9 +1573,9 @@ abstract class SphinxRepository(
                             val tribeDto = loadResponse.value
 
                             val didChangeNameOrPhotoUrl = (
-                                tribeDto.name != chat.name?.value ?: "" ||
-                                tribeDto.img != chat.photoUrl?.value ?: ""
-                            )
+                                    tribeDto.name != chat.name?.value ?: "" ||
+                                            tribeDto.img != chat.photoUrl?.value ?: ""
+                                    )
 
                             chatLock.withLock {
                                 queries.transaction {
@@ -1588,16 +1592,22 @@ abstract class SphinxRepository(
                                 ).collect {}
                             }
 
-                            getPodcastFeed(chat, tribeDto)
+                            getPodcastFeed(chat, tribeDto).collect { podcast ->
+                                podcastDto = podcast
+                            }
                         }
                     }
                 }
             }
-
+        }
+        podcastDto?.let { podcastDto ->
+            emit(podcastDto)
         }
     }
 
-    private suspend fun getPodcastFeed(chat: Chat, tribe: TribeDto) {
+    private fun getPodcastFeed(chat: Chat, tribe: TribeDto): Flow<PodcastDto> = flow {
+        var podcastDto: PodcastDto? = null
+
         chat.host?.let { chatHost ->
             tribe.feed_url?.let { feedUrl ->
                 networkQueryChat.getPodcastFeed(chatHost, feedUrl).collect { loadResponse ->
@@ -1607,15 +1617,17 @@ abstract class SphinxRepository(
                         is Response.Error -> {}
 
                         is Response.Success -> {
-                            val podcastDto: PodcastDto = loadResponse.value
-
-                            LOG.d(TAG, "PODCAST TITLE: ${podcastDto.title}")
-                            LOG.d(TAG, "PODCAST EPISODES COUNT: ${podcastDto.episodes.count().toString()}")
-                            LOG.d(TAG, "PODCAST ID: ${podcastDto.id}")
+                            if (loadResponse.value.isValidPodcast()) {
+                                podcastDto = loadResponse.value
+                            }
                         }
                     }
                 }
             }
+        }
+
+        podcastDto?.let { podcastDto ->
+            emit(podcastDto)
         }
     }
 

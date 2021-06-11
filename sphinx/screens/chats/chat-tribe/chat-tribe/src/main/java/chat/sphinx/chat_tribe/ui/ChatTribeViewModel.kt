@@ -8,6 +8,8 @@ import androidx.lifecycle.viewModelScope
 import chat.sphinx.chat_common.ui.ChatSideEffect
 import chat.sphinx.chat_common.ui.ChatViewModel
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
+import chat.sphinx.chat_common.ui.viewstate.header.ChatHeaderFooterViewState
+import chat.sphinx.chat_tribe.navigation.TribeChatNavigator
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_lightning.model.route.isRouteAvailable
 import chat.sphinx.concept_repository_chat.ChatRepository
@@ -20,6 +22,9 @@ import chat.sphinx.concept_service_media.UserAction
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
+import chat.sphinx.podcast_player.objects.Podcast
+import chat.sphinx.podcast_player.objects.PodcastEpisode
+import chat.sphinx.podcast_player.objects.toPodcast
 import chat.sphinx.resources.getRandomColor
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.ChatName
@@ -34,6 +39,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.annotation.meta.Exhaustive
 import javax.inject.Inject
 
@@ -69,6 +75,11 @@ internal class ChatTribeViewModel @Inject constructor(
         SharingStarted.WhileSubscribed(2_000),
         replay = 1,
     )
+
+    var podcast: Podcast? = null
+
+    @Inject
+    lateinit var chatNavigator: TribeChatNavigator
 
     override val headerInitialHolderSharedFlow: SharedFlow<InitialHolderViewState> = flow {
         chatSharedFlow.collect { chat ->
@@ -155,36 +166,119 @@ internal class ChatTribeViewModel @Inject constructor(
     }
 
     private var updateTribeInfoJob: Job? = null
-    init {
+    fun loadTribeAndPodcastData(): Flow<Podcast> = flow {
+        chatRepository.getChatById(args.chatId).firstOrNull()?.let { chat ->
+            chatRepository.updateTribeInfo(chat).collect { podcastDto ->
+                podcast = podcastDto.toPodcast()
 
-        updateTribeInfoJob = viewModelScope.launch(mainImmediate) {
-            chatRepository.getChatById(args.chatId).firstOrNull()?.let { chat ->
-                chatRepository.updateTribeInfo(chat)
+                delay(10L)
+                updateTribeInfoJob?.join()
 
-                Log.d(TAG, "Price per message ${chat.pricePerMessage.toString()}")
+                chatRepository.getChatById(args.chatId).firstOrNull()?.let { chat ->
+                    val pricePerMessage = chat.pricePerMessage?.value ?: 0
+                    val escrowAmount = chat.escrowAmount?.value ?: 0
+
+                    submitSideEffect(
+                        ChatSideEffect.Notify(
+                            "Price per message: $pricePerMessage\n Amount to Stake: $escrowAmount"
+                        )
+                    )
+
+                    chat.metaData?.let { metaData ->
+                        podcast?.setMetaData(metaData)
+                    }
+                }
             }
+
+            Log.d(TAG, "Price per message ${chat.pricePerMessage.toString()}")
         }
 
+        podcast?.let { podcast ->
+            emit(podcast)
+        }
+    }
+
+    fun goToPodcastPlayerScreen(podcast: Podcast) {
         viewModelScope.launch(mainImmediate) {
-            delay(10L)
-            updateTribeInfoJob?.join()
             chatRepository.getChatById(args.chatId).firstOrNull()?.let { chat ->
-                val pricePerMessage = chat.pricePerMessage?.value ?: 0
-                val escrowAmount = chat.escrowAmount?.value ?: 0
-                submitSideEffect(
-                    ChatSideEffect.Notify(
-                        "Price per message: $pricePerMessage\n Amount to Stake: $escrowAmount"
-                    )
-                )
-                mediaPlayerServiceController.submitAction(
-                    UserAction.ServiceAction.Play(
-                        chat.id,
-                        2541203462,
-                        "https://anchor.fm/s/558f520/podcast/play/34682465/https%3A%2F%2Fd3ctxlq1ktw2nl.cloudfront.net%2Fstaging%2F2021-5-2%2F192649643-44100-2-c36483521f93a.m4a",
-                        0L,
-                    )
-                )
+                chatNavigator.toPodcastPlayerScreen(chat.id, podcast)
             }
+        }
+    }
+
+    fun playEpisode(episode: PodcastEpisode, startTime: Int) {
+        viewModelScope.launch(mainImmediate) {
+            chatRepository.getChatById(args.chatId).firstOrNull()?.let { chat ->
+                chat?.let { chat ->
+                    podcast?.let { podcast ->
+                        withContext(io) {
+                            podcast.didStartPlayingEpisode(episode, startTime)
+                        }
+
+                        //TODO Send action to Service
+                        //Action Play
+                        //chat.id, episode.id, time: startTime, episode.enclosureUrl
+                    }
+                }
+            }
+        }
+    }
+
+    fun pauseEpisode(episode: PodcastEpisode) {
+        viewModelScope.launch(mainImmediate) {
+            chatRepository.getChatById(args.chatId).firstOrNull()?.let { chat ->
+                chat?.let { chat ->
+                    podcast?.let { podcast ->
+                        podcast.didStopPlayingEpisode(episode)
+
+                        //TODO Update Chat MetaData
+                        //TODO Send action to Service
+                        //Action Pause
+                        //chat.id, episode.id
+                    }
+                }
+            }
+        }
+    }
+
+    fun seekTo(episode: PodcastEpisode, time: Int) {
+        viewModelScope.launch(mainImmediate) {
+            chatRepository.getChatById(args.chatId).firstOrNull()?.let { chat ->
+                chat?.let { chat ->
+                    podcast?.let { podcast ->
+                        podcast.didSeekTo(time)
+
+                        val metaData = podcast.getMetaData()
+                        //TODO Send action to Service
+                        //Action Seek
+                        //chat.id, episode.id, seekTime: time
+
+//                        mediaPlayerServiceController.submitAction(
+//                            UserAction.ServiceAction.Play(
+//                                chat.id,
+//                                2541203462,
+//                                "https://anchor.fm/s/558f520/podcast/play/34682465/https%3A%2F%2Fd3ctxlq1ktw2nl.cloudfront.net%2Fstaging%2F2021-5-2%2F192649643-44100-2-c36483521f93a.m4a",
+//                                0L,
+//                            )
+//                        )
+                    }
+                }
+            }
+        }
+    }
+
+    fun mediaStatusReceived() {
+        //TODO PLAY STATE
+//        podcast.playingEpisodeUpdate(episodeId, currentTime)
+
+        //TODO PAUSE STATE
+//        podcast.pauseEpisodeUpdate(episodeId)
+
+        //TODO END STATE
+//        podcast.endEpisodeUpdate(episodeId)
+
+        podcast?.let { podcast ->
+            viewStateContainer.updateViewState(ChatHeaderFooterViewState.PodcastUpdate(podcast))
         }
     }
 }

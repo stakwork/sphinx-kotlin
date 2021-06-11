@@ -28,11 +28,12 @@
             android:textAllCaps="true"
             android:textColor="@color/secondaryText"
             android:textSize="@dimen/default_text_size_list_row_headline"
+            android:elevation="8dp"
             app:layout_constraintStart_toStartOf="parent" />
 
 
         <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/text_view_episodes_list_header_episode_count"
+            android:id="@+id/text_view_episodes_list_count"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_marginHorizontal="@dimen/default_inner_spacing_list_item_title"

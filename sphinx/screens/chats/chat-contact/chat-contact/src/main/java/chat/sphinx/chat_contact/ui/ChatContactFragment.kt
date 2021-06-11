@@ -12,6 +12,7 @@ import chat.sphinx.chat_contact.R
 import chat.sphinx.chat_contact.databinding.FragmentChatContactBinding
 import chat.sphinx.chat_contact.navigation.ContactChatNavigator
 import chat.sphinx.concept_image_loader.ImageLoader
+import chat.sphinx.concept_network_query_chat.model.PodcastDto
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 

@@ -15,6 +15,7 @@
     <include app:graph="@navigation/transactions_nav_graph" />
     <include app:graph="@navigation/new_contact_nav_graph" />
     <include app:graph="@navigation/join_tribe_nav_graph" />
+    <include app:graph="@navigation/podcast_player_nav_graph" />
 
     <fragment
         android:id="@+id/navigation_detail_blank_fragment"

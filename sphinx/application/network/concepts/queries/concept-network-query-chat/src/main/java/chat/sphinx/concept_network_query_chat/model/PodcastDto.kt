@@ -11,5 +11,10 @@ data class PodcastDto(
     val image: String,
     val value: PodcastValueDto,
     val episodes: List<PodcastEpisodeDto>,
-){
+) {
+
+    fun isValidPodcast() : Boolean {
+        return episodes.isNotEmpty() && title.isNotEmpty()
+    }
+
 }

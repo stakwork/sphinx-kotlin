@@ -20,7 +20,7 @@
 
             <!--  Primary Image For the current episode  -->
             <androidx.appcompat.widget.AppCompatImageView
-                android:id="@+id/image_view_current_episode_image"
+                android:id="@+id/image_view_podcast_image"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:scaleType="fitCenter"
@@ -38,10 +38,10 @@
                 android:layout_height="0dp"
                 android:scaleY="-1"
                 android:src="@drawable/bottom_bar_elevation_gradient"
-                app:layout_constraintEnd_toEndOf="@id/image_view_current_episode_image"
+                app:layout_constraintEnd_toEndOf="@id/image_view_podcast_image"
                 app:layout_constraintHeight_percent="0.25"
-                app:layout_constraintStart_toStartOf="@id/image_view_current_episode_image"
-                app:layout_constraintTop_toTopOf="@id/image_view_current_episode_image" />
+                app:layout_constraintStart_toStartOf="@id/image_view_podcast_image"
+                app:layout_constraintTop_toTopOf="@id/image_view_podcast_image" />
 
 
             <!--  Overlaid Button for collapsing the detail view  -->
@@ -54,27 +54,28 @@
                 android:gravity="center"
                 android:text="@string/material_icon_name_dismiss_modal_down"
                 android:textSize="44sp"
-                app:layout_constraintStart_toStartOf="@id/image_view_current_episode_image"
-                app:layout_constraintTop_toTopOf="@id/image_view_current_episode_image" />
+                android:textColor="@android:color/white"
+                app:layout_constraintStart_toStartOf="@id/image_view_podcast_image"
+                app:layout_constraintTop_toTopOf="@id/image_view_podcast_image" />
 
 
             <!--  Episode Title  -->
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/text_view_episode_title_label"
                 android:layout_width="0dp"
-                android:layout_height="@dimen/player_details_episode_title_section_height"
+                android:layout_height="wrap_content"
                 android:layout_margin="@dimen/player_details_episode_title_margin"
                 android:breakStrategy="high_quality"
                 android:ellipsize="end"
                 android:fontFamily="@font/roboto_medium"
                 android:gravity="center"
-                android:lines="2"
+                android:lines="3"
                 android:textAlignment="center"
                 android:textSize="@dimen/default_text_size_large_title_3"
                 android:textColor="@color/text"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/image_view_current_episode_image"
+                app:layout_constraintTop_toBottomOf="@id/image_view_podcast_image"
                 tools:text="Episode 21: What is Lorem Ipsum? An Investigation into the World of Sample Text." />
 
 
@@ -84,7 +85,8 @@
                 layout="@layout/layout_episode_slider_control"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_margin="@dimen/player_details_episode_title_margin"
+                android:layout_marginHorizontal="@dimen/player_slider_control_margin"
+                android:layout_marginTop="@dimen/player_details_episode_title_margin"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/text_view_episode_title_label" />
