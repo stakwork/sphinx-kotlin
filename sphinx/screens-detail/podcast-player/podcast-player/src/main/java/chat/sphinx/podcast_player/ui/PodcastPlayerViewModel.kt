@@ -97,7 +97,8 @@ internal class PodcastPlayerViewModel @Inject constructor(
                     podcast?.let { podcast ->
                         podcast.didSeekTo(time)
 
-                        //TODO Update Chat MetaData
+                        val metaData = podcast.getMetaData()
+
                         //TODO Send action to Service
                         //Action Seek
                         //chat.id, episode.id, seekTime: time
@@ -107,11 +108,12 @@ internal class PodcastPlayerViewModel @Inject constructor(
         }
     }
 
-    fun adjustSpeed(speed: Double) {
+    fun adjustSpeed(speed: Double, podcast: Podcast) {
         viewModelScope.launch(mainImmediate) {
             chatRepository.getChatById(args.chatId).firstOrNull()?.let { chat ->
-                //TODO Update Chat MetaData
                 //TODO Send action to Service
+
+                val metaData = podcast.getMetaData()
                 //Action AdjustSpeed
                 //chat.id, chat.chatMetaData, speed: speed
             }

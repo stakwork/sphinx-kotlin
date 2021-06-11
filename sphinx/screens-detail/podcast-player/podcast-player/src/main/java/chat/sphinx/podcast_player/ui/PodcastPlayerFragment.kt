@@ -137,7 +137,7 @@ internal class PodcastPlayerFragment : BaseFragment<
 
                 includeLayoutEpisodePlaybackControlButtons.apply {
                     buttonPlaybackSpeed.setOnClickListener {
-                        showSpeedPopup()
+                        showSpeedPopup(podcast)
                     }
 
                     buttonShareClip.setOnClickListener {
@@ -239,7 +239,7 @@ internal class PodcastPlayerFragment : BaseFragment<
         }
     }
 
-    private fun showSpeedPopup() {
+    private fun showSpeedPopup(podcast: Podcast) {
         binding.includeLayoutEpisodePlaybackControlButtons.apply {
             val wrapper: Context = ContextThemeWrapper(context, R.style.speedMenu)
             val popup = PopupMenu(wrapper, buttonPlaybackSpeed)
@@ -249,19 +249,19 @@ internal class PodcastPlayerFragment : BaseFragment<
                 when (item!!.itemId) {
                     R.id.speed0_5 -> {
                         buttonPlaybackSpeed.text = "0.5x"
-                        viewModel.adjustSpeed(0.5)
+                        viewModel.adjustSpeed(0.5, podcast)
                     }
                     R.id.speed1 -> {
                         buttonPlaybackSpeed.text = "1x"
-                        viewModel.adjustSpeed(1.0)
+                        viewModel.adjustSpeed(1.0, podcast)
                     }
                     R.id.speed1_5 -> {
                         buttonPlaybackSpeed.text = "1.5x"
-                        viewModel.adjustSpeed(1.1)
+                        viewModel.adjustSpeed(1.1, podcast)
                     }
                     R.id.speed2 -> {
                         buttonPlaybackSpeed.text = "2x"
-                        viewModel.adjustSpeed(2.0)
+                        viewModel.adjustSpeed(2.0, podcast)
                     }
                 }
                 true

@@ -223,7 +223,7 @@ internal class ChatTribeViewModel @Inject constructor(
                     podcast?.let { podcast ->
                         podcast.didSeekTo(time)
 
-                        //TODO Update Chat MetaData
+                        val metaData = podcast.getMetaData()
                         //TODO Send action to Service
                         //Action Seek
                         //chat.id, episode.id, seekTime: time
