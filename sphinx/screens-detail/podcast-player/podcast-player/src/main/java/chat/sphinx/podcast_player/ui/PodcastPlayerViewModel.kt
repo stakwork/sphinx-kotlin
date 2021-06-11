@@ -33,21 +33,25 @@ internal class PodcastPlayerViewModel @Inject constructor(
 
     private val args: PodcastPlayerFragmentArgs by savedStateHandle.navArgs()
 
+    var podcast: Podcast? = null
+
     init {
-        args.podcast?.let { podcast ->
-            viewStateContainer.updateViewState(PodcastPlayerViewState.PodcastLoaded(podcast))
+        args.podcast?.let { argPodcast ->
+            podcast = argPodcast
+
+            viewStateContainer.updateViewState(PodcastPlayerViewState.PodcastLoaded(argPodcast))
         }
     }
 
-    private val chatSharedFlow: SharedFlow<Chat?> = flow {
-        emitAll(chatRepository.getChatById(args.chatId))
-    }.distinctUntilChanged().shareIn(
-        viewModelScope,
-        SharingStarted.WhileSubscribed(2_000),
-        replay = 1,
-    )
+//    private val chatSharedFlow: SharedFlow<Chat?> = flow {
+//        emitAll(chatRepository.getChatById(args.chatId))
+//    }.distinctUntilChanged().shareIn(
+//        viewModelScope,
+//        SharingStarted.WhileSubscribed(2_000),
+//        replay = 1,
+//    )
 
-    fun playEpisode(podcast: Podcast?, episode: PodcastEpisode, startTime: Int) {
+    fun playEpisode(episode: PodcastEpisode, startTime: Int) {
         viewModelScope.launch(mainImmediate) {
             chatRepository.getChatById(args.chatId).firstOrNull()?.let { chat ->
                 chat?.let { chat ->
@@ -73,7 +77,7 @@ internal class PodcastPlayerViewModel @Inject constructor(
         }
     }
 
-    fun pauseEpisode(podcast: Podcast?, episode: PodcastEpisode) {
+    fun pauseEpisode(episode: PodcastEpisode) {
         viewModelScope.launch(mainImmediate) {
             chatRepository.getChatById(args.chatId).firstOrNull()?.let { chat ->
                 chat?.let { chat ->
@@ -89,10 +93,9 @@ internal class PodcastPlayerViewModel @Inject constructor(
         }
     }
 
-    fun seekTo(podcast: Podcast?, episode: PodcastEpisode, time: Int) {
+    fun seekTo(episode: PodcastEpisode, time: Int) {
         viewModelScope.launch(mainImmediate) {
             chatRepository.getChatById(args.chatId).firstOrNull()?.let { chat ->
-
                 chat?.let { chat ->
                     podcast?.let { podcast ->
                         podcast.didSeekTo(time)
@@ -108,14 +111,16 @@ internal class PodcastPlayerViewModel @Inject constructor(
         }
     }
 
-    fun adjustSpeed(speed: Double, podcast: Podcast) {
+    fun adjustSpeed(speed: Double) {
         viewModelScope.launch(mainImmediate) {
             chatRepository.getChatById(args.chatId).firstOrNull()?.let { chat ->
-                //TODO Send action to Service
+                podcast?.let { podcast ->
+                    val metaData = podcast.getMetaData()
 
-                val metaData = podcast.getMetaData()
-                //Action AdjustSpeed
-                //chat.id, chat.chatMetaData, speed: speed
+                    //TODO Send action to Service
+                    //Action AdjustSpeed
+                    //chat.id, chat.chatMetaData, speed: speed
+                }
             }
         }
     }

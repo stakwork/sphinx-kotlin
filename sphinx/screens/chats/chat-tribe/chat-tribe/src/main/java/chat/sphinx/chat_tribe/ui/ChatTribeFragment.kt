@@ -85,14 +85,14 @@ internal class ChatTribeFragment: ChatFragment<
 
             textViewPlayPauseButton.setOnClickListener {
                 if (currentEpisode.playing) {
-                    viewModel.pauseEpisode(podcast, currentEpisode)
+                    viewModel.pauseEpisode(currentEpisode)
                 } else {
-                    viewModel.playEpisode(podcast, currentEpisode, podcast.currentTime)
+                    viewModel.playEpisode(currentEpisode, podcast.currentTime)
                 }
             }
 
             textViewForward30Button.setOnClickListener {
-                viewModel.seekTo(podcast, currentEpisode, podcast.currentTime + 30)
+                viewModel.seekTo(currentEpisode, podcast.currentTime + 30)
             }
 
             textViewBoostPodcastButton.setOnClickListener {

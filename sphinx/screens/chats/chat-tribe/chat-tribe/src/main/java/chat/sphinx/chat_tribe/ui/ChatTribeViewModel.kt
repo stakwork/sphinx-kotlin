@@ -70,6 +70,8 @@ internal class ChatTribeViewModel @Inject constructor(
         replay = 1,
     )
 
+    var podcast: Podcast? = null
+
     @Inject
     lateinit var chatNavigator: TribeChatNavigator
 
@@ -140,8 +142,6 @@ internal class ChatTribeViewModel @Inject constructor(
 
     private var updateTribeInfoJob: Job? = null
     fun loadTribeAndPodcastData(): Flow<Podcast> = flow {
-        var podcast: Podcast? = null
-
         chatRepository.getChatById(args.chatId).firstOrNull()?.let { chat ->
             chatRepository.updateTribeInfo(chat).collect { podcastDto ->
                 podcast = podcastDto.toPodcast()
@@ -181,7 +181,7 @@ internal class ChatTribeViewModel @Inject constructor(
         }
     }
 
-    fun playEpisode(podcast: Podcast?, episode: PodcastEpisode, startTime: Int) {
+    fun playEpisode(episode: PodcastEpisode, startTime: Int) {
         viewModelScope.launch(mainImmediate) {
             chatRepository.getChatById(args.chatId).firstOrNull()?.let { chat ->
                 chat?.let { chat ->
@@ -199,7 +199,7 @@ internal class ChatTribeViewModel @Inject constructor(
         }
     }
 
-    fun pauseEpisode(podcast: Podcast?, episode: PodcastEpisode) {
+    fun pauseEpisode(episode: PodcastEpisode) {
         viewModelScope.launch(mainImmediate) {
             chatRepository.getChatById(args.chatId).firstOrNull()?.let { chat ->
                 chat?.let { chat ->
@@ -216,7 +216,7 @@ internal class ChatTribeViewModel @Inject constructor(
         }
     }
 
-    fun seekTo(podcast: Podcast?, episode: PodcastEpisode, time: Int) {
+    fun seekTo(episode: PodcastEpisode, time: Int) {
         viewModelScope.launch(mainImmediate) {
             chatRepository.getChatById(args.chatId).firstOrNull()?.let { chat ->
                 chat?.let { chat ->

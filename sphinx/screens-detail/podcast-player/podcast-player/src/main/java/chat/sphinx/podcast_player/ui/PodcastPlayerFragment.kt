@@ -137,7 +137,7 @@ internal class PodcastPlayerFragment : BaseFragment<
 
                 includeLayoutEpisodePlaybackControlButtons.apply {
                     buttonPlaybackSpeed.setOnClickListener {
-                        showSpeedPopup(podcast)
+                        showSpeedPopup()
                     }
 
                     buttonShareClip.setOnClickListener {
@@ -145,21 +145,21 @@ internal class PodcastPlayerFragment : BaseFragment<
                     }
 
                     buttonReplay15.setOnClickListener {
-                        viewModel.seekTo(podcast, podcast.getCurrentEpisode(), podcast.currentTime - 15)
+                        viewModel.seekTo(podcast.getCurrentEpisode(), podcast.currentTime - 15)
                     }
 
                     buttonPlayPause.setOnClickListener {
                         val currentEpisode = podcast.getCurrentEpisode()
 
                         if (currentEpisode.playing) {
-                            viewModel.pauseEpisode(podcast, currentEpisode)
+                            viewModel.pauseEpisode(currentEpisode)
                         } else {
-                            viewModel.playEpisode(podcast, currentEpisode, podcast.currentTime)
+                            viewModel.playEpisode(currentEpisode, podcast.currentTime)
                         }
                     }
 
                     buttonForward30.setOnClickListener {
-                        viewModel.seekTo(podcast, podcast.getCurrentEpisode(), podcast.currentTime + 30)
+                        viewModel.seekTo(podcast.getCurrentEpisode(), podcast.currentTime + 30)
                     }
 
                     buttonBoost.setOnClickListener {
@@ -188,7 +188,7 @@ internal class PodcastPlayerFragment : BaseFragment<
             podcast.getCurrentEpisodeDuration()
         }
         val seekTime = (duration * (progress / 100)).toInt()
-        viewModel.seekTo(podcast, podcast.getCurrentEpisode(), seekTime)
+        viewModel.seekTo(podcast.getCurrentEpisode(), seekTime)
     }
 
     private suspend fun setTimeLabelsAndProgressBar(podcast: Podcast) {
@@ -239,7 +239,7 @@ internal class PodcastPlayerFragment : BaseFragment<
         }
     }
 
-    private fun showSpeedPopup(podcast: Podcast) {
+    private fun showSpeedPopup() {
         binding.includeLayoutEpisodePlaybackControlButtons.apply {
             val wrapper: Context = ContextThemeWrapper(context, R.style.speedMenu)
             val popup = PopupMenu(wrapper, buttonPlaybackSpeed)
@@ -249,19 +249,19 @@ internal class PodcastPlayerFragment : BaseFragment<
                 when (item!!.itemId) {
                     R.id.speed0_5 -> {
                         buttonPlaybackSpeed.text = "0.5x"
-                        viewModel.adjustSpeed(0.5, podcast)
+                        viewModel.adjustSpeed(0.5)
                     }
                     R.id.speed1 -> {
                         buttonPlaybackSpeed.text = "1x"
-                        viewModel.adjustSpeed(1.0, podcast)
+                        viewModel.adjustSpeed(1.0)
                     }
                     R.id.speed1_5 -> {
                         buttonPlaybackSpeed.text = "1.5x"
-                        viewModel.adjustSpeed(1.1, podcast)
+                        viewModel.adjustSpeed(1.1)
                     }
                     R.id.speed2 -> {
                         buttonPlaybackSpeed.text = "2x"
-                        viewModel.adjustSpeed(2.0, podcast)
+                        viewModel.adjustSpeed(2.0)
                     }
                 }
                 true

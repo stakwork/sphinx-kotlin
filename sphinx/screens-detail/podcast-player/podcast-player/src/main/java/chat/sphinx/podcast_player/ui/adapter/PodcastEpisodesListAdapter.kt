@@ -171,10 +171,8 @@ internal class PodcastEpisodesListAdapter(
 
         init {
             binding.layoutConstraintEpisodeListItemHolder.setOnClickListener {
-                podcast?.let { podcast ->
-                    episode?.let { podcastEpisode ->
-                        viewModel.playEpisode(podcast, podcastEpisode, 0)
-                    }
+                episode?.let { podcastEpisode ->
+                    viewModel.playEpisode(podcastEpisode, 0)
                 }
             }
         }
