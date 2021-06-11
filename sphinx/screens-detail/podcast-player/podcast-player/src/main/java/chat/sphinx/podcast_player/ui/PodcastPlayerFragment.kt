@@ -72,6 +72,26 @@ internal class PodcastPlayerFragment : BaseFragment<
         setupEpisodes()
     }
 
+    private fun setupEpisodes() {
+        binding.includeLayoutPodcastEpisodesList.recyclerViewEpisodesList.apply {
+            val linearLayoutManager = LinearLayoutManager(context)
+            val chatListAdapter = PodcastEpisodesListAdapter(
+                this,
+                linearLayoutManager,
+                imageLoader,
+                viewLifecycleOwner,
+                onStopSupervisor,
+                viewModel
+            )
+
+            val episodesListFooterAdapter = PodcastEpisodesFooterAdapter(requireActivity() as InsetterActivity)
+            this.setHasFixedSize(false)
+            layoutManager = linearLayoutManager
+            adapter = ConcatAdapter(chatListAdapter, episodesListFooterAdapter)
+            itemAnimator = null
+        }
+    }
+
     override suspend fun onViewStateFlowCollect(viewState: PodcastPlayerViewState) {
         @Exhaustive
         when (viewState) {
@@ -242,26 +262,6 @@ internal class PodcastPlayerFragment : BaseFragment<
             textViewCurrentEpisodeProgress.text = currentT.toLong().getTimeString()
 
             seekBarCurrentEpisodeProgress.progress = progress
-        }
-    }
-
-    private fun setupEpisodes() {
-        binding.includeLayoutPodcastEpisodesList.recyclerViewEpisodesList.apply {
-            val linearLayoutManager = LinearLayoutManager(context)
-            val chatListAdapter = PodcastEpisodesListAdapter(
-                this,
-                linearLayoutManager,
-                imageLoader,
-                viewLifecycleOwner,
-                onStopSupervisor,
-                viewModel
-            )
-
-            val episodesListFooterAdapter = PodcastEpisodesFooterAdapter(requireActivity() as InsetterActivity)
-            this.setHasFixedSize(false)
-            layoutManager = linearLayoutManager
-            adapter = ConcatAdapter(chatListAdapter, episodesListFooterAdapter)
-            itemAnimator = null
         }
     }
 

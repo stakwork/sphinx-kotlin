@@ -9,14 +9,13 @@ import chat.sphinx.concept_service_media.UserAction
 import chat.sphinx.podcast_player.navigation.PodcastPlayerNavigator
 import chat.sphinx.podcast_player.objects.Podcast
 import chat.sphinx.podcast_player.objects.PodcastEpisode
-import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.lightning.Sat
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.BaseViewModel
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject

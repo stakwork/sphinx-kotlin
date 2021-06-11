@@ -192,7 +192,7 @@ internal class PodcastEpisodesListAdapter(
                         if (podcastEpisode.playing) R.color.headerBG else R.color.headerBG
                     )
                 )
-//                textViewPlayArrowIndicator.goneIfFalse(podcastEpisode.playing)
+                textViewPlayArrowIndicator.goneIfFalse(podcastEpisode.playing)
 
                 // Image
                 podcastEpisode.image.let { url ->
