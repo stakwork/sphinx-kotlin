@@ -5,6 +5,7 @@ import android.content.Intent
 import chat.sphinx.concept_service_media.UserAction
 import chat.sphinx.feature_service_media_player_android.service.SphinxMediaPlayerService
 import chat.sphinx.wrapper_common.dashboard.ChatId
+import chat.sphinx.wrapper_common.lightning.toSat
 
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun UserAction.ServiceAction.Play.toIntent(
@@ -15,6 +16,7 @@ internal inline fun UserAction.ServiceAction.Play.toIntent(
     intent.putExtra("CHAT_ID", chatId.value)
     intent.putExtra("EPISODE_ID", episodeId)
     intent.putExtra("EPISODE_URL", episodeUrl)
+    intent.putExtra("SAT_PER_MINUTE", satPerMinute.value)
     intent.putExtra("START_TIME", startTime)
     return intent
 }
@@ -57,6 +59,7 @@ internal inline fun Intent.toServiceActionPlay(): UserAction.ServiceAction.Play?
         chatId,
         episodeId,
         getStringExtra("EPISODE_URL") ?: return null,
+        getLongExtra("SAT_PER_MINUTE", -1L).toSat() ?: return null,
         startTime,
     )
 }
