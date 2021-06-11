@@ -1,8 +1,6 @@
 package chat.sphinx.chat_tribe.ui
 
 import android.app.Application
-import android.content.ContentValues.TAG
-import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.chat_common.ui.ChatSideEffect
@@ -29,6 +27,7 @@ import chat.sphinx.resources.getRandomColor
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.ChatName
 import chat.sphinx.wrapper_common.dashboard.ChatId
+import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.util.getInitials
 import chat.sphinx.wrapper_message.Message
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -206,8 +205,6 @@ internal class ChatTribeViewModel @Inject constructor(
                     }
                 }
             }
-
-            Log.d(TAG, "Price per message ${chat.pricePerMessage.toString()}")
         }
 
         podcast?.let { podcast ->
@@ -237,7 +234,7 @@ internal class ChatTribeViewModel @Inject constructor(
                                 chat.id,
                                 episode.id,
                                 episode.enclosureUrl,
-                                startTime.toLong(),
+                                startTime,
                             )
                         )
                     }
@@ -256,7 +253,8 @@ internal class ChatTribeViewModel @Inject constructor(
                         mediaPlayerServiceController.submitAction(
                             UserAction.ServiceAction.Pause(
                                 chat.id,
-                                episode.id
+                                episode.id,
+                                Sat(0)
                             )
                         )
                     }

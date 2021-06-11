@@ -77,10 +77,10 @@ internal class MediaPlayerServiceControllerImpl(
     override suspend fun submitAction(userAction: UserAction) {
         binder.value?.processUserAction(userAction) ?: when (userAction) {
             is UserAction.AdjustSpeed -> {
-                // TODO: Update speed for given chatId
+                repositoryMedia.updateChatMetaData(userAction.chatId, userAction.chatMetaData)
             }
             is UserAction.ServiceAction.Pause -> {
-                // TODO: dispatch state to update the UI
+                listenerHandler.dispatch(getCurrentState())
             }
             is UserAction.ServiceAction.Play -> {
                 userActionLock.withLock {
@@ -88,9 +88,8 @@ internal class MediaPlayerServiceControllerImpl(
                 }
             }
             is UserAction.ServiceAction.Seek -> {
-                // TODO: update the chat's metadata with the info on the
-                //  current episode and new time, then dispatch state as service
-                //  is not available
+                repositoryMedia.updateChatMetaData(userAction.chatId, userAction.chatMetaData)
+                listenerHandler.dispatch(getCurrentState())
             }
         }
     }

@@ -11,6 +11,7 @@ import chat.sphinx.podcast_player.objects.Podcast
 import chat.sphinx.podcast_player.objects.PodcastEpisode
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_common.dashboard.ChatId
+import chat.sphinx.wrapper_common.lightning.Sat
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.BaseViewModel
@@ -114,7 +115,7 @@ internal class PodcastPlayerViewModel @Inject constructor(
                                 chat.id,
                                 episode.id,
                                 episode.enclosureUrl,
-                                startTime.toLong(),
+                                startTime,
                             )
                         )
                     }
@@ -133,7 +134,8 @@ internal class PodcastPlayerViewModel @Inject constructor(
                         mediaPlayerServiceController.submitAction(
                             UserAction.ServiceAction.Pause(
                                 chat.id,
-                                episode.id
+                                episode.id,
+                                Sat(0)
                             )
                         )
                     }
