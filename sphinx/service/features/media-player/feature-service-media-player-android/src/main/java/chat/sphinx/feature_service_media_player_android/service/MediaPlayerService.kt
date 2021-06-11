@@ -33,7 +33,6 @@ internal abstract class MediaPlayerService: Service() {
 
     inner class MediaPlayerServiceBinder: Binder() {
         fun getCurrentState(): MediaPlayerServiceState {
-            // TODO: Implement
             return currentState
         }
 
@@ -42,7 +41,7 @@ internal abstract class MediaPlayerService: Service() {
         }
     }
 
-    private val binder: MediaPlayerServiceBinder by lazy {
+    private val binder: MediaPlayerServiceBinder by lazy(LazyThreadSafetyMode.NONE) {
         MediaPlayerServiceBinder()
     }
 
