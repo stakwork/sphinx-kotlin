@@ -1,5 +1,6 @@
 package chat.sphinx.podcast_player.objects
 
+import android.R.array
 import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Parcelable
@@ -7,9 +8,9 @@ import chat.sphinx.concept_network_query_chat.model.PodcastDto
 import chat.sphinx.wrapper_chat.ChatMetaData
 import chat.sphinx.wrapper_common.ItemId
 import chat.sphinx.wrapper_common.lightning.Sat
-import com.squareup.moshi.JsonClass
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
+
 
 @Parcelize
 data class Podcast(
@@ -39,6 +40,12 @@ data class Podcast(
     @IgnoredOnParcel
     var episodeDuration: Long? = null
 
+    val episodesCount: Int
+        get() = episodes.count()
+
+    val currentTime: Int
+        get() = timeSeconds ?: 0
+
     fun setMetaData(metaData: ChatMetaData) {
         this.episodeId = metaData.itemId.value
         this.timeSeconds = metaData.timeSeconds
@@ -65,6 +72,15 @@ data class Podcast(
         getCurrentEpisodeDuration(didChangeEpisode)
     }
 
+    private fun didEndPlayingEpisode(episode: PodcastEpisode, nextEpisode: PodcastEpisode?) {
+        episode.playing = false
+
+        this.episodeId = nextEpisode?.id ?: episodes[0].id
+        this.timeSeconds = 0
+
+        getCurrentEpisodeDuration(true)
+    }
+
     fun didStopPlayingEpisode(episode: PodcastEpisode) {
         episode.playing = false
     }
@@ -75,13 +91,28 @@ data class Podcast(
 
     fun getCurrentEpisode(): PodcastEpisode {
         episodeId?.let { episodeId ->
-            for (episode in episodes) {
-                if (episode.id == episodeId) {
-                    return episode
-                }
-            }
+            return getEpisodeWithId(episodeId) ?: episodes[0]
+
         }
         return episodes[0]
+    }
+
+    private fun getEpisodeWithId(id: Long): PodcastEpisode? {
+        for (episode in episodes) {
+            if (episode.id == id) {
+                return episode
+            }
+        }
+        return null
+    }
+
+    private fun getNextEpisode(id: Long): PodcastEpisode? {
+        for (i in episodes.indices) {
+            if (episodes[i].id == id) {
+                return episodes[i+1]
+            }
+        }
+        return null
     }
 
     fun getCurrentEpisodeDuration(didChangeEpisode: Boolean = false): Long {
@@ -101,11 +132,33 @@ data class Podcast(
         return progress.toInt()
     }
 
-    val episodesCount: Int
-        get() = episodes.count()
+    //MediaService update
+    fun playingEpisodeUpdate(episodeId: Long, time: Int) {
+        val episode = getEpisodeWithId(episodeId)
 
-    val currentTime: Int
-        get() = timeSeconds ?: 0
+        episode?.let { episode ->
+            episode.playing = true
+
+            this.episodeId = episode.id
+            this.timeSeconds = time
+        }
+    }
+
+    fun pauseEpisodeUpdate(episodeId: Long) {
+        val episode = getEpisodeWithId(episodeId)
+
+        episode?.let { episode ->
+            didStopPlayingEpisode(episode)
+        }
+    }
+
+    fun endEpisodeUpdate(episodeId: Long) {
+        getEpisodeWithId(episodeId)?.let { episode ->
+            val nextEpisode = getEpisodeWithId(episodeId)
+
+            didEndPlayingEpisode(episode, nextEpisode)
+        }
+    }
 }
 
 fun Uri.getMediaDuration(): Long {

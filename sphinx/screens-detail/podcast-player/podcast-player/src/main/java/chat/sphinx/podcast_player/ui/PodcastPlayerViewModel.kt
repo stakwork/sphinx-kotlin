@@ -125,4 +125,19 @@ internal class PodcastPlayerViewModel @Inject constructor(
         }
     }
 
+    fun mediaStatusReceived() {
+        //TODO PLAY STATE
+//        podcast.playingEpisodeUpdate(episodeId, currentTime)
+
+        //TODO PAUSE STATE
+//        podcast.pauseEpisodeUpdate(episodeId)
+
+        //TODO END STATE
+//        podcast.endEpisodeUpdate(episodeId)
+
+        podcast?.let { podcast ->
+            viewStateContainer.updateViewState(PodcastPlayerViewState.MediaStateUpdate(podcast))
+        }
+    }
+
 }

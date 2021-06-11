@@ -270,4 +270,8 @@ internal class PodcastPlayerFragment : BaseFragment<
             popup.show()
         }
     }
+
+    fun mediaStatusReceived() {
+        viewModel.mediaStatusReceived()
+    }
 }

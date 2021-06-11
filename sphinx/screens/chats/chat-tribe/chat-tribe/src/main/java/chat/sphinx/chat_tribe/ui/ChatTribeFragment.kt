@@ -12,6 +12,7 @@ import chat.sphinx.chat_common.databinding.LayoutChatFooterBinding
 import chat.sphinx.chat_common.databinding.LayoutChatHeaderBinding
 import chat.sphinx.chat_common.navigation.ChatNavigator
 import chat.sphinx.chat_common.ui.ChatFragment
+import chat.sphinx.chat_common.ui.viewstate.header.ChatHeaderViewState
 import chat.sphinx.chat_tribe.R
 import chat.sphinx.chat_tribe.databinding.FragmentChatTribeBinding
 import chat.sphinx.chat_tribe.databinding.LayoutPodcastPlayerFooterBinding
@@ -63,6 +64,10 @@ internal class ChatTribeFragment: ChatFragment<
                 configurePodcastPlayer(podcast)
             }
         }
+    }
+
+    override suspend fun onViewStateFlowCollect(viewState: ChatHeaderViewState) {
+        super.onViewStateFlowCollect(viewState)
     }
 
     private fun configurePodcastPlayer(podcast: Podcast) {

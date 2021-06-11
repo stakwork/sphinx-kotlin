@@ -19,4 +19,8 @@ internal sealed class PodcastPlayerViewState: ViewState<PodcastPlayerViewState>(
     data class EpisodePlayed(
         val podcast: Podcast
     ): PodcastPlayerViewState()
+
+    data class MediaStateUpdate(
+        val podcast: Podcast
+    ): PodcastPlayerViewState()
 }
