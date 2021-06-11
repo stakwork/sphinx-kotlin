@@ -21,6 +21,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -79,16 +80,21 @@ internal class ChatTribeFragment: ChatFragment<
             }
 
             textViewPlayPauseButton.text = getString(
-                if (podcast.isPlaying) R.string.material_icon_name_play_button else R.string.material_icon_name_pause_button
+                if (podcast.isPlaying) R.string.material_icon_name_pause_button else R.string.material_icon_name_play_button
             )
 
             val currentEpisode = podcast.getCurrentEpisode()
             textViewEpisodeTitle.text = currentEpisode.title
 
-            val progress = podcast.getPlayingProgress()
-            progressBar.layoutParams.width =
-                progressBarContainer.measuredWidth * (progress / 100)
-            progressBar.requestLayout()
+            onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                val progress = withContext(viewModel.io) {
+                    podcast.getPlayingProgress()
+                }
+
+                progressBar.layoutParams.width =
+                    progressBarContainer.measuredWidth * (progress / 100)
+                progressBar.requestLayout()
+            }
         }
     }
 

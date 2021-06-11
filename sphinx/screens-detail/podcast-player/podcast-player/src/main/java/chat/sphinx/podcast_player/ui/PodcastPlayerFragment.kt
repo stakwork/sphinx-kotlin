@@ -147,7 +147,7 @@ internal class PodcastPlayerFragment : BaseFragment<
                 includeLayoutEpisodePlaybackControlButtons.apply {
                     buttonPlayPause.background =
                         ContextCompat.getDrawable(root.context,
-                            if (podcast.isPlaying) R.drawable.ic_podcast_play_circle else R.drawable.ic_podcast_pause_circle
+                            if (podcast.isPlaying) R.drawable.ic_podcast_pause_circle else R.drawable.ic_podcast_play_circle
                         )
                 }
             }

@@ -139,6 +139,10 @@ data class Podcast(
     fun playingEpisodeUpdate(episodeId: Long, time: Int) {
         val episode = getEpisodeWithId(episodeId)
 
+        if (episodeId != getCurrentEpisode().id) {
+            this.episodeDuration = null
+        }
+
         episode?.let { episode ->
             episode.playing = true
 
