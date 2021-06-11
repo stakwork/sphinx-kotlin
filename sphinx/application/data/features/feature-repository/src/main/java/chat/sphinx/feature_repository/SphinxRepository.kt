@@ -402,6 +402,16 @@ abstract class SphinxRepository(
         }
     }
 
+    override fun updateChatMetaData(chatId: ChatId, metaData: ChatMetaData) {
+        repositoryScope.launch(io) {
+            val queries = coreDB.getSphinxDatabaseQueries()
+            chatLock.withLock {
+                queries.chatUpdateMetaData(metaData, chatId)
+            }
+            // TODO: Network call to update Relay
+        }
+    }
+
 
     ////////////////
     /// Contacts ///

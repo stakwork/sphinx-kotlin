@@ -178,6 +178,11 @@ chatDeleteById:
 DELETE FROM chatDbo
 WHERE id = ?;
 
+chatUpdateMetaData:
+UPDATE chatDbo
+SET meta_data = :meta_data
+WHERE id = ?;
+
 chatUpdateSeen:
 UPDATE chatDbo
 SET seen = :seen
