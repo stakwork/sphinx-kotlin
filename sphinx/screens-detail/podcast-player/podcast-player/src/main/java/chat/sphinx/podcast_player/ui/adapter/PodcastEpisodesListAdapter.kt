@@ -189,7 +189,7 @@ internal class PodcastEpisodesListAdapter(
                 //Playing State
                 layoutConstraintEpisodeListItemHolder.setBackgroundColor(
                     root.context.getColor(
-                        if (podcastEpisode.playing) R.color.headerBG else R.color.headerBG
+                        if (podcastEpisode.playing) R.color.chatListSelected else R.color.headerBG
                     )
                 )
                 textViewPlayArrowIndicator.goneIfFalse(podcastEpisode.playing)

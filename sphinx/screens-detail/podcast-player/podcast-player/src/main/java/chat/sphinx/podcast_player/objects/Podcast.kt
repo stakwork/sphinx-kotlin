@@ -40,6 +40,7 @@ data class Podcast(
     @IgnoredOnParcel
     var episodeDuration: Long? = null
 
+
     val episodesCount: Int
         get() = episodes.count()
 
@@ -63,33 +64,6 @@ data class Podcast(
         val speed = this.speed
 
         return ChatMetaData(episodeId, satsPerMinute, timeSeconds, speed)
-    }
-
-    fun didStartPlayingEpisode(episode: PodcastEpisode, time: Int) {
-        episode.playing = true
-
-        val didChangeEpisode = this.episodeId != episode.id
-        this.episodeId = episode.id
-        this.timeSeconds = time
-
-        getCurrentEpisodeDuration(didChangeEpisode)
-    }
-
-    private fun didEndPlayingEpisode(episode: PodcastEpisode, nextEpisode: PodcastEpisode?) {
-        episode.playing = false
-
-        this.episodeId = nextEpisode?.id ?: episodes[0].id
-        this.timeSeconds = 0
-
-        getCurrentEpisodeDuration(true)
-    }
-
-    fun didStopPlayingEpisode(episode: PodcastEpisode) {
-        episode.playing = false
-    }
-
-    fun didSeekTo(time: Int) {
-        this.timeSeconds = time
     }
 
     fun getCurrentEpisode(): PodcastEpisode {
@@ -135,6 +109,32 @@ data class Podcast(
         return progress.toInt()
     }
 
+    //User actions
+    fun didStartPlayingEpisode(episode: PodcastEpisode, time: Int) {
+        val didChangeEpisode = this.episodeId != episode.id
+        this.episodeId = episode.id
+        this.timeSeconds = time
+
+        getCurrentEpisodeDuration(didChangeEpisode)
+    }
+
+    private fun didEndPlayingEpisode(episode: PodcastEpisode, nextEpisode: PodcastEpisode?) {
+        episode.playing = false
+
+        this.episodeId = nextEpisode?.id ?: episodes[0].id
+        this.timeSeconds = 0
+
+        getCurrentEpisodeDuration(true)
+    }
+
+    fun didPausePlayingEpisode(episode: PodcastEpisode) {
+        episode.playing = false
+    }
+
+    fun didSeekTo(time: Int) {
+        this.timeSeconds = time
+    }
+
     //MediaService update
     fun playingEpisodeUpdate(episodeId: Long, time: Int) {
         val episode = getEpisodeWithId(episodeId)
@@ -155,7 +155,7 @@ data class Podcast(
         val episode = getEpisodeWithId(episodeId)
 
         episode?.let { episode ->
-            didStopPlayingEpisode(episode)
+            didPausePlayingEpisode(episode)
         }
     }
 

@@ -128,7 +128,7 @@ internal class PodcastPlayerViewModel @Inject constructor(
             chatRepository.getChatById(args.chatId).firstOrNull()?.let { chat ->
                 chat?.let { chat ->
                     podcast?.let { podcast ->
-                        podcast.didStopPlayingEpisode(episode)
+                        podcast.didPausePlayingEpisode(episode)
 
                         mediaPlayerServiceController.submitAction(
                             UserAction.ServiceAction.Pause(

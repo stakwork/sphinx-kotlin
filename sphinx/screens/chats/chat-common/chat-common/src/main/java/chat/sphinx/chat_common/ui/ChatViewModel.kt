@@ -91,16 +91,6 @@ abstract class ChatViewModel<ARGS: NavArgs>(
             SharingStarted.WhileSubscribed(5_000),
             ChatHeaderFooterViewState.Idle
         )
-
-        @Throws(IllegalStateException::class)
-        override fun updateViewState(viewState: ChatHeaderFooterViewState) {
-            throw IllegalStateException(
-                """
-                    ChatHeaderViewState updates automatically.
-                    This method does nothing and should not be called.
-                """.trimIndent()
-            )
-        }
     }
 
     override val viewStateContainer: ViewStateContainer<ChatHeaderFooterViewState> by lazy {
