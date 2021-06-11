@@ -34,6 +34,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
+import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
@@ -66,6 +67,10 @@ internal class ChatTribeViewModel @Inject constructor(
 ), MediaPlayerServiceController.MediaServiceListener
 {
     override val args: ChatTribeFragmentArgs by savedStateHandle.navArgs()
+
+    val podcastViewStateContainer: ViewStateContainer<PodcastViewState> by lazy {
+        ViewStateContainer(PodcastViewState.Idle)
+    }
 
     override val chatSharedFlow: SharedFlow<Chat?> = flow {
         emitAll(chatRepository.getChatById(args.chatId))
@@ -168,7 +173,7 @@ internal class ChatTribeViewModel @Inject constructor(
             is MediaPlayerServiceState.ServiceInactive -> {}
         }
         podcast?.let { podcast ->
-            viewStateContainer.updateViewState(ChatHeaderFooterViewState.MediaStateUpdate(podcast))
+            podcastViewStateContainer.updateViewState(PodcastViewState.MediaStateUpdate(podcast))
         }
     }
 

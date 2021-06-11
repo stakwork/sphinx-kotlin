@@ -42,7 +42,5 @@ dependencies {
     api project(path: ':sphinx:application:network:concepts:queries:concept-network-query-chat')
     api project(path: ':sphinx:activity:insetter-activity')
 
-    implementation project(path: ':sphinx:screens-detail:podcast-player:podcast-player')
-
     api deps.androidx.recyclerView
 }

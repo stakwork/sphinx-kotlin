@@ -6,6 +6,7 @@ import android.widget.ImageView
 import androidx.core.view.isGone
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.RecyclerView
+import app.cash.exhaustive.Exhaustive
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.chat_common.databinding.LayoutChatFooterBinding
 import chat.sphinx.chat_common.databinding.LayoutChatHeaderBinding
@@ -19,6 +20,7 @@ import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.podcast_player.objects.Podcast
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
+import io.matthewnelson.concept_views.viewstate.collect
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -60,14 +62,6 @@ internal class ChatTribeFragment: ChatFragment<
                 configurePodcastPlayer(podcast)
                 addPodcastOnClickListeners(podcast)
             }
-        }
-    }
-
-    override suspend fun onViewStateFlowCollect(viewState: ChatHeaderFooterViewState) {
-        super.onViewStateFlowCollect(viewState)
-
-        if (viewState is ChatHeaderFooterViewState.MediaStateUpdate) {
-            configurePodcastPlayer(viewState.podcast)
         }
     }
 
@@ -120,6 +114,21 @@ internal class ChatTribeFragment: ChatFragment<
 
             textViewBoostPodcastButton.setOnClickListener {
                 //TODO: Boost podcast episode
+            }
+        }
+    }
+
+    override fun subscribeToViewStateFlow() {
+        super.subscribeToViewStateFlow()
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.podcastViewStateContainer.collect { viewState ->
+                @Exhaustive
+                when (viewState) {
+                    is PodcastViewState.Idle -> {}
+                    is PodcastViewState.MediaStateUpdate -> {
+                        configurePodcastPlayer(viewState.podcast)
+                    }
+                }
             }
         }
     }
