@@ -5,19 +5,18 @@ import chat.sphinx.podcast_player.objects.PodcastEpisode
 import io.matthewnelson.concept_views.viewstate.ViewState
 
 internal sealed class PodcastPlayerViewState: ViewState<PodcastPlayerViewState>() {
-    abstract val episodesList: List<PodcastEpisode>
 
-    class Idle(
-        override val episodesList: List<PodcastEpisode>,
+    object Idle: PodcastPlayerViewState()
+
+    data class PodcastLoaded(
+        val podcast: Podcast
     ): PodcastPlayerViewState()
 
-    class PodcastLoaded(
-        val podcast: Podcast,
-        override val episodesList: List<PodcastEpisode>,
+    data class LoadingEpisode(
+        val episode: PodcastEpisode
     ): PodcastPlayerViewState()
 
-    class EpisodePlayed(
-        val podcast: Podcast,
-        override val episodesList: List<PodcastEpisode>,
+    data class EpisodePlayed(
+        val podcast: Podcast
     ): PodcastPlayerViewState()
 }

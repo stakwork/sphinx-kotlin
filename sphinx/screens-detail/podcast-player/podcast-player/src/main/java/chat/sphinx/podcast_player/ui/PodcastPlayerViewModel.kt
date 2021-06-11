@@ -29,13 +29,13 @@ internal class PodcastPlayerViewModel @Inject constructor(
     val navigator: PodcastPlayerNavigator,
     private val chatRepository: ChatRepository,
     savedStateHandle: SavedStateHandle,
-) : BaseViewModel<PodcastPlayerViewState>(dispatchers, PodcastPlayerViewState.Idle(listOf())) {
+) : BaseViewModel<PodcastPlayerViewState>(dispatchers, PodcastPlayerViewState.Idle) {
 
     private val args: PodcastPlayerFragmentArgs by savedStateHandle.navArgs()
 
     init {
         args.podcast?.let { podcast ->
-            viewStateContainer.updateViewState(PodcastPlayerViewState.PodcastLoaded(podcast, podcast.episodes))
+            viewStateContainer.updateViewState(PodcastPlayerViewState.PodcastLoaded(podcast))
         }
     }
 
@@ -52,15 +52,15 @@ internal class PodcastPlayerViewModel @Inject constructor(
             chatRepository.getChatById(args.chatId).firstOrNull()?.let { chat ->
                 chat?.let { chat ->
                     podcast?.let { podcast ->
-                        episode.playing = true
+                        viewStateContainer.updateViewState(PodcastPlayerViewState.LoadingEpisode(episode))
 
-                        podcast.setCurrentEpisode(episode)
-                        podcast.timeSeconds = startTime
+                        withContext(io) {
+                            podcast.didStartPlayingEpisode(episode, startTime)
+                        }
 
                         viewStateContainer.updateViewState(
                             PodcastPlayerViewState.EpisodePlayed(
-                                podcast,
-                                podcast.episodes
+                                podcast
                             )
                         )
 
@@ -78,7 +78,7 @@ internal class PodcastPlayerViewModel @Inject constructor(
             chatRepository.getChatById(args.chatId).firstOrNull()?.let { chat ->
                 chat?.let { chat ->
                     podcast?.let { podcast ->
-                        episode.playing = false
+                        podcast.didStopPlayingEpisode(episode)
 
                         //TODO Send action to Service
                         //Action Pause
@@ -95,7 +95,7 @@ internal class PodcastPlayerViewModel @Inject constructor(
 
                 chat?.let { chat ->
                     podcast?.let { podcast ->
-                        podcast.timeSeconds = time
+                        podcast.didSeekTo(time)
 
                         //TODO Update Chat MetaData
                         //TODO Send action to Service

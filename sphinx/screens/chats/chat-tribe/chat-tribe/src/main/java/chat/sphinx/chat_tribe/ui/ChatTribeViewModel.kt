@@ -35,6 +35,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.annotation.meta.Exhaustive
 import javax.inject.Inject
 
@@ -185,10 +186,9 @@ internal class ChatTribeViewModel @Inject constructor(
             chatRepository.getChatById(args.chatId).firstOrNull()?.let { chat ->
                 chat?.let { chat ->
                     podcast?.let { podcast ->
-                        episode.playing = true
-
-                        podcast.setCurrentEpisode(episode)
-                        podcast.timeSeconds = startTime
+                        withContext(io) {
+                            podcast.didStartPlayingEpisode(episode, startTime)
+                        }
 
                         //TODO Send action to Service
                         //Action Play
@@ -204,7 +204,7 @@ internal class ChatTribeViewModel @Inject constructor(
             chatRepository.getChatById(args.chatId).firstOrNull()?.let { chat ->
                 chat?.let { chat ->
                     podcast?.let { podcast ->
-                        episode.playing = false
+                        podcast.didStopPlayingEpisode(episode)
 
                         //TODO Update Chat MetaData
                         //TODO Send action to Service
@@ -221,7 +221,7 @@ internal class ChatTribeViewModel @Inject constructor(
             chatRepository.getChatById(args.chatId).firstOrNull()?.let { chat ->
                 chat?.let { chat ->
                     podcast?.let { podcast ->
-                        podcast.timeSeconds = time
+                        podcast.didSeekTo(time)
 
                         //TODO Update Chat MetaData
                         //TODO Send action to Service

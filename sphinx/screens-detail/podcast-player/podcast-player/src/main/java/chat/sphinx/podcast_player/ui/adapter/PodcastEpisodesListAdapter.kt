@@ -92,7 +92,7 @@ internal class PodcastEpisodesListAdapter(
     }
 
     private var podcast: Podcast? = null
-    private val podcastEpisodes = ArrayList<PodcastEpisode>(viewModel.currentViewState.episodesList)
+    private val podcastEpisodes = ArrayList<PodcastEpisode>()
 
     override fun onStart(owner: LifecycleOwner) {
         super.onStart(owner)
@@ -104,12 +104,14 @@ internal class PodcastEpisodesListAdapter(
                     podcast = viewState.podcast
                 }
 
+                val episodes = podcast?.episodes ?: listOf()
+
                 if (podcastEpisodes.isEmpty()) {
-                    podcastEpisodes.addAll(viewState.episodesList)
+                    podcastEpisodes.addAll(episodes)
                     this@PodcastEpisodesListAdapter.notifyDataSetChanged()
                 } else {
 
-                    val diff = Diff(podcastEpisodes, viewState.episodesList)
+                    val diff = Diff(podcastEpisodes, episodes)
 
                     withContext(viewModel.dispatchers.default) {
                         DiffUtil.calculateDiff(diff)
@@ -119,7 +121,7 @@ internal class PodcastEpisodesListAdapter(
                             val firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition()
 
                             podcastEpisodes.clear()
-                            podcastEpisodes.addAll(viewState.episodesList)
+                            podcastEpisodes.addAll(episodes)
                             result.dispatchUpdatesTo(this@PodcastEpisodesListAdapter)
 
                             if (
@@ -132,7 +134,6 @@ internal class PodcastEpisodesListAdapter(
 
                     }
                 }
-
             }
         }
     }
