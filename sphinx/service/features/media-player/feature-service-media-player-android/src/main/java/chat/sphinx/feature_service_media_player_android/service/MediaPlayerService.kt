@@ -72,9 +72,9 @@ internal abstract class MediaPlayerService: Service() {
                             nnData.episodeId == userAction.chatMetaData.itemId.value
                         ) {
                             try {
-                                nnData.speed = userAction.chatMetaData.speed
-                                nnData.mediaPlayer.playbackParams.apply {
-                                    speed = userAction.chatMetaData.speed.toFloat()
+                                nnData.speed = userAction.chatMetaData.speed.also {
+                                    nnData.mediaPlayer.playbackParams =
+                                        nnData.mediaPlayer.playbackParams.setSpeed(it.toFloat())
                                 }
                             } catch (e: IllegalStateException) {
                                 LOG.e(TAG, "Failed to adjust speed for MediaPlayer", e)
@@ -140,11 +140,11 @@ internal abstract class MediaPlayerService: Service() {
 
                             if (!nnData.mediaPlayer.isPlaying) {
                                 try {
-                                    nnData.speed = userAction.speed
-                                    nnData.mediaPlayer.seekTo(userAction.startTime)
-                                    nnData.mediaPlayer.playbackParams.apply {
-                                        speed = userAction.speed.toFloat()
+                                    nnData.speed = userAction.speed.also {
+                                        nnData.mediaPlayer.playbackParams =
+                                            nnData.mediaPlayer.playbackParams.setSpeed(it.toFloat())
                                     }
+                                    nnData.mediaPlayer.seekTo(userAction.startTime)
                                     nnData.mediaPlayer.start()
                                 } catch (e: IllegalStateException) {
                                     LOG.e(TAG, "Failed to start MediaPlayer", e)
@@ -208,8 +208,8 @@ internal abstract class MediaPlayerService: Service() {
                                 setDataSource(userAction.episodeUrl)
                                 setOnPreparedListener { mp ->
                                     mp.setOnPreparedListener(null)
+                                    mp.playbackParams = mp.playbackParams.setSpeed(userAction.speed.toFloat())
                                     mp.seekTo(userAction.startTime)
-                                    mp.playbackParams.apply { this.speed = userAction.speed.toFloat() }
                                     mp.start()
                                     startStateDispatcher()
                                 }
@@ -240,8 +240,8 @@ internal abstract class MediaPlayerService: Service() {
                         setDataSource(userAction.episodeUrl)
                         setOnPreparedListener { mp ->
                             mp.setOnPreparedListener(null)
+                            mp.playbackParams = mp.playbackParams.setSpeed(userAction.speed.toFloat())
                             mp.seekTo(userAction.startTime)
-                            mp.playbackParams.apply { this.speed = userAction.speed.toFloat() }
                             mp.start()
                             startStateDispatcher()
                         }
