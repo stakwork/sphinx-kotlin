@@ -156,7 +156,7 @@ internal class ChatTribeViewModel @Inject constructor(
                 podcast?.playingEpisodeUpdate(serviceState.episodeId, serviceState.currentTime)
             }
             is MediaPlayerServiceState.ServiceActive.MediaState.Paused -> {
-                podcast?.pauseEpisodeUpdate(serviceState.episodeId)
+                podcast?.pauseEpisodeUpdate()
             }
             is MediaPlayerServiceState.ServiceActive.MediaState.Ended -> {
                 podcast?.endEpisodeUpdate(serviceState.episodeId)
@@ -166,6 +166,7 @@ internal class ChatTribeViewModel @Inject constructor(
                 return
             }
             is MediaPlayerServiceState.ServiceInactive -> {
+                podcast?.pauseEpisodeUpdate()
                 podcastViewStateContainer.updateViewState(PodcastViewState.ServiceInactive)
                 return
             }
@@ -209,13 +210,27 @@ internal class ChatTribeViewModel @Inject constructor(
         return podcast
     }
 
-    fun goToPodcastPlayerScreen(podcast: Podcast) {
-        viewModelScope.launch(mainImmediate) {
-            chatNavigator.toPodcastPlayerScreen(args.chatId, podcast)
+    fun goToPodcastPlayerScreen() {
+        podcast?.let { podcast ->
+            viewModelScope.launch(mainImmediate) {
+                chatNavigator.toPodcastPlayerScreen(args.chatId, podcast)
+            }
         }
     }
 
-    fun playEpisode(episode: PodcastEpisode, startTime: Int) {
+    fun playPausePodcast() {
+        podcast?.let { podcast ->
+            podcast.getCurrentEpisode()?.let { currentEpisode ->
+                if (currentEpisode.playing) {
+                    pauseEpisode(currentEpisode)
+                } else {
+                    playEpisode(currentEpisode, podcast.currentTime)
+                }
+            }
+        }
+    }
+
+    private fun playEpisode(episode: PodcastEpisode, startTime: Int) {
         viewModelScope.launch(mainImmediate) {
             podcast?.let { podcast ->
                 withContext(io) {
@@ -236,7 +251,7 @@ internal class ChatTribeViewModel @Inject constructor(
         }
     }
 
-    fun pauseEpisode(episode: PodcastEpisode) {
+    private fun pauseEpisode(episode: PodcastEpisode) {
         viewModelScope.launch(mainImmediate) {
             podcast?.let { podcast ->
                 podcast.didPausePlayingEpisode(episode)
@@ -254,7 +269,7 @@ internal class ChatTribeViewModel @Inject constructor(
     fun seekTo(time: Int) {
         viewModelScope.launch(mainImmediate) {
             podcast?.let { podcast ->
-                podcast.didSeekTo(time)
+                podcast.didSeekTo(podcast.currentTime + time)
 
                 val metaData = podcast.getMetaData()
 

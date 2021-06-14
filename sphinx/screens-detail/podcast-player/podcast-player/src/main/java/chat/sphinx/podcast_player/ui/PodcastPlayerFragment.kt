@@ -200,6 +200,7 @@ internal class PodcastPlayerFragment : BaseFragment<
 
                 buttonReplay15.setOnClickListener {
                     viewModel.seekTo(podcast.currentTime - 15000)
+                    updateViewAfterSeek(podcast)
                 }
 
                 buttonPlayPause.setOnClickListener {
@@ -208,12 +209,13 @@ internal class PodcastPlayerFragment : BaseFragment<
                     if (currentEpisode.playing) {
                         viewModel.pauseEpisode(currentEpisode)
                     } else {
-                        viewModel.playEpisode(currentEpisode, podcast.currentTime)
+                        viewModel.resumeEpisode(currentEpisode, podcast.currentTime)
                     }
                 }
 
                 buttonForward30.setOnClickListener {
                     viewModel.seekTo(podcast.currentTime + 30000)
+                    updateViewAfterSeek(podcast)
                 }
 
                 buttonBoost.setOnClickListener {
@@ -231,6 +233,8 @@ internal class PodcastPlayerFragment : BaseFragment<
                 textViewCurrentEpisodeDuration.text = 0.toLong().getTimeString()
                 textViewCurrentEpisodeProgress.text = 0.toLong().getTimeString()
 
+                seekBarCurrentEpisodeProgress.progress = 0
+
                 progressBarAudioLoading.goneIfFalse(true)
             }
         }
@@ -242,6 +246,12 @@ internal class PodcastPlayerFragment : BaseFragment<
         }
         val seekTime = (duration * (progress.toDouble() / 100.toDouble())).toInt()
         viewModel.seekTo(seekTime)
+    }
+
+    private fun updateViewAfterSeek(podcast: Podcast) {
+        lifecycleScope.launch(viewModel.mainImmediate) {
+            setTimeLabelsAndProgressBar(podcast)
+        }
     }
 
     private suspend fun setTimeLabelsAndProgressBar(podcast: Podcast) {

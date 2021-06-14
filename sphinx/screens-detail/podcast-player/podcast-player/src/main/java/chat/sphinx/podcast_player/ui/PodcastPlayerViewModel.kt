@@ -50,7 +50,7 @@ internal class PodcastPlayerViewModel @Inject constructor(
                 podcast.playingEpisodeUpdate(serviceState.episodeId, serviceState.currentTime)
             }
             is MediaPlayerServiceState.ServiceActive.MediaState.Paused -> {
-                podcast.pauseEpisodeUpdate(serviceState.episodeId)
+                podcast.pauseEpisodeUpdate()
             }
             is MediaPlayerServiceState.ServiceActive.MediaState.Ended -> {
                 podcast.endEpisodeUpdate(serviceState.episodeId)
@@ -60,6 +60,7 @@ internal class PodcastPlayerViewModel @Inject constructor(
                 return
             }
             is MediaPlayerServiceState.ServiceInactive -> {
+                podcast.pauseEpisodeUpdate()
                 viewStateContainer.updateViewState(PodcastPlayerViewState.ServiceInactive)
                 return
             }
@@ -86,14 +87,16 @@ internal class PodcastPlayerViewModel @Inject constructor(
 
     fun playEpisode(episode: PodcastEpisode, startTime: Int) {
         viewModelScope.launch(mainImmediate) {
-            updateViewState(PodcastPlayerViewState.LoadingEpisode(episode))
+            viewStateContainer.updateViewState(PodcastPlayerViewState.LoadingEpisode(episode))
 
-            withContext(io) {
-                podcast.didStartPlayingEpisode(episode, startTime)
-            }
+            delay(50L)
 
-            viewStateContainer.updateViewState(PodcastPlayerViewState.EpisodePlayed(podcast))
+            resumeEpisode(episode, startTime)
+        }
+    }
 
+    fun resumeEpisode(episode: PodcastEpisode, startTime: Int) {
+        viewModelScope.launch(mainImmediate) {
             mediaPlayerServiceController.submitAction(
                 UserAction.ServiceAction.Play(
                     args.chatId,
@@ -104,6 +107,12 @@ internal class PodcastPlayerViewModel @Inject constructor(
                     startTime,
                 )
             )
+
+            withContext(io) {
+                podcast.didStartPlayingEpisode(episode, startTime)
+            }
+
+            viewStateContainer.updateViewState(PodcastPlayerViewState.EpisodePlayed(podcast))
         }
     }
 

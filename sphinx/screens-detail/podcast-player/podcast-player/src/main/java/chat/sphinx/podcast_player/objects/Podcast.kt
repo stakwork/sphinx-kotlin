@@ -166,6 +166,8 @@ class Podcast(
     //MediaService update
     fun playingEpisodeUpdate(episodeId: Long, time: Int) {
         if (episodeId != playingEpisode?.id) {
+            this.playingEpisode?.playing = false
+
             this.episodeDuration = null
             this.playingEpisode = getEpisodeWithId(episodeId)
         }
@@ -178,26 +180,15 @@ class Podcast(
         }
     }
 
-    fun pauseEpisodeUpdate(episodeId: Long) {
-        if (episodeId != playingEpisode?.id) {
-            this.episodeDuration = null
-            this.playingEpisode = getEpisodeWithId(episodeId)
-        }
-
+    fun pauseEpisodeUpdate() {
         playingEpisode?.let { nnEpisode ->
             didPausePlayingEpisode(nnEpisode)
         }
     }
 
     fun endEpisodeUpdate(episodeId: Long) {
-        if (episodeId != playingEpisode?.id) {
-            this.episodeDuration = null
-            this.playingEpisode = getEpisodeWithId(episodeId)
-        }
-
         playingEpisode?.let { episode ->
             val nextEpisode = getNextEpisode(episodeId)
-
             didEndPlayingEpisode(episode, nextEpisode)
         }
     }

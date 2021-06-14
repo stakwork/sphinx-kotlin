@@ -103,22 +103,16 @@ internal class ChatTribeFragment: ChatFragment<
 
     private fun addPodcastOnClickListeners(podcast: Podcast) {
         podcastPlayerBinding.apply {
-            val currentEpisode = podcast.getCurrentEpisode()
-
             textViewEpisodeTitle.setOnClickListener {
-                viewModel.goToPodcastPlayerScreen(podcast)
+                viewModel.goToPodcastPlayerScreen()
             }
 
             textViewPlayPauseButton.setOnClickListener {
-                if (currentEpisode.playing) {
-                    viewModel.pauseEpisode(currentEpisode)
-                } else {
-                    viewModel.playEpisode(currentEpisode, podcast.currentTime)
-                }
+                viewModel.playPausePodcast()
             }
 
             textViewForward30Button.setOnClickListener {
-                viewModel.seekTo(podcast.currentTime + 30000)
+                viewModel.seekTo(30000)
             }
 
             textViewBoostPodcastButton.setOnClickListener {

@@ -100,7 +100,10 @@ internal class PodcastEpisodesListAdapter(
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.collectViewState { viewState ->
 
-                if (viewState is PodcastPlayerViewState.PodcastLoaded || viewState is PodcastPlayerViewState.EpisodePlayed) {
+                if (viewState is PodcastPlayerViewState.PodcastLoaded ||
+                    viewState is PodcastPlayerViewState.EpisodePlayed ||
+                    viewState is PodcastPlayerViewState.EpisodePlayed
+                ) {
 
                     if (viewState is PodcastPlayerViewState.PodcastLoaded) {
                         podcast = viewState.podcast
@@ -110,7 +113,11 @@ internal class PodcastEpisodesListAdapter(
                         podcast = viewState.podcast
                     }
 
-                    val episodes = podcast?.episodes ?: podcastEpisodes
+                    if (viewState is PodcastPlayerViewState.MediaStateUpdate) {
+                        podcast = viewState.podcast
+                    }
+
+                    val episodes = podcast?.episodes ?: listOf()
 
                     if (podcastEpisodes.isEmpty()) {
                         podcastEpisodes.addAll(episodes)
