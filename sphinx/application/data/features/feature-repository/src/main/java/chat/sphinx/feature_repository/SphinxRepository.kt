@@ -6,14 +6,13 @@ import chat.sphinx.concept_crypto_rsa.RSA
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
 import chat.sphinx.concept_network_query_chat.model.ChatDto
 import chat.sphinx.concept_network_query_chat.model.PodcastDto
-import chat.sphinx.concept_network_query_chat.model.PutChatDto
+import chat.sphinx.concept_network_query_chat.model.PutTribeDto
 import chat.sphinx.concept_network_query_chat.model.TribeDto
 import chat.sphinx.concept_network_query_contact.NetworkQueryContact
 import chat.sphinx.concept_network_query_contact.model.ContactDto
 import chat.sphinx.concept_network_query_contact.model.PostContactDto
 import chat.sphinx.concept_network_query_contact.model.PutContactDto
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
-import chat.sphinx.concept_network_query_lightning.model.balance.BalanceAllDto
 import chat.sphinx.concept_network_query_lightning.model.balance.BalanceDto
 import chat.sphinx.concept_network_query_message.NetworkQueryMessage
 import chat.sphinx.concept_network_query_message.model.MessageDto
@@ -1584,8 +1583,8 @@ abstract class SphinxRepository(
                             }
 
                             if (didChangeNameOrPhotoUrl) {
-                                networkQueryChat.updateChat(chat.id,
-                                    PutChatDto(
+                                networkQueryChat.updateTribe(chat.id,
+                                    PutTribeDto(
                                         tribeDto.name,
                                         tribeDto.img ?: "",
                                     )

@@ -60,18 +60,48 @@ class NetworkQueryChatImpl(
             )
         }
 
-    override fun updateChat(
+    override fun getTribeInfo(
+        host: ChatHost,
+        uuid: ChatUUID
+    ): Flow<LoadResponse<TribeDto, ResponseError>> =
+        networkRelayCall.get(
+            url = String.format(GET_TRIBE_INFO_URL, host.value, uuid.value),
+            responseJsonClass = TribeDto::class.java,
+        )
+
+    override fun getPodcastFeed(
+        host: ChatHost,
+        feedUrl: String
+    ): Flow<LoadResponse<PodcastDto, ResponseError>> =
+        networkRelayCall.get(
+            url = String.format(GET_PODCAST_FEED_URL, host.value, feedUrl),
+            responseJsonClass = PodcastDto::class.java,
+        )
+
+    ///////////
+    /// PUT ///
+    ///////////
+//    app.put('/chats/:id', chats.updateChat)
+//    app.put('/chat/:id', chats.addGroupMembers)
+//    app.put('/kick/:chat_id/:contact_id', chats.kickChatMember)
+//    app.put('/member/:contactId/:status/:messageId', chatTribes.approveOrRejectMember)
+    override fun updateTribe(
         chatId: ChatId,
-        putChatDto: PutChatDto,
+        putTribeDto: PutTribeDto,
         relayData: Pair<AuthorizationToken, RelayUrl>?
     ): Flow<LoadResponse<ChatDto, ResponseError>> =
         networkRelayCall.relayPut(
             responseJsonClass = UpdateChatRelayResponse::class.java,
             relayEndpoint = String.format(ENDPOINT_EDIT_GROUP, chatId.value),
-            requestBodyJsonClass = PutChatDto::class.java,
-            requestBody = putChatDto,
+            requestBodyJsonClass = PutTribeDto::class.java,
+            requestBody = putTribeDto,
             relayData = relayData
         )
+
+    ////////////
+    /// POST ///
+    ////////////
+//    app.post('/group', chats.createGroupChat)
 
     override fun toggleMuteChat(
         chatId: ChatId,
@@ -95,24 +125,6 @@ class NetworkQueryChatImpl(
             relayData = relayData
         )
 
-    override fun getTribeInfo(
-        host: ChatHost,
-        uuid: ChatUUID
-    ): Flow<LoadResponse<TribeDto, ResponseError>> =
-        networkRelayCall.get(
-            url = String.format(GET_TRIBE_INFO_URL, host.value, uuid.value),
-            responseJsonClass = TribeDto::class.java,
-        )
-
-    override fun getPodcastFeed(
-        host: ChatHost,
-        feedUrl: String
-    ): Flow<LoadResponse<PodcastDto, ResponseError>> =
-        networkRelayCall.get(
-            url = String.format(GET_PODCAST_FEED_URL, host.value, feedUrl),
-            responseJsonClass = PodcastDto::class.java,
-        )
-
     override fun joinTribe(
         tribeDto: TribeDto,
         relayData: Pair<AuthorizationToken, RelayUrl>?
@@ -124,22 +136,6 @@ class NetworkQueryChatImpl(
             requestBody = tribeDto,
             relayData = relayData
         )
-
-    ///////////
-    /// PUT ///
-    ///////////
-//    app.put('/chats/:id', chats.updateChat)
-//    app.put('/chat/:id', chats.addGroupMembers)
-//    app.put('/kick/:chat_id/:contact_id', chats.kickChatMember)
-//    app.put('/member/:contactId/:status/:messageId', chatTribes.approveOrRejectMember)
-//    app.put('/group/:id', chatTribes.editTribe)
-
-    ////////////
-    /// POST ///
-    ////////////
-//    app.post('/group', chats.createGroupChat)
-//    app.post('/chats/:chat_id/:mute_unmute', chats.mute)
-//    app.post('/tribe', chatTribes.joinTribe)
 
     //////////////
     /// DELETE ///
