@@ -17,6 +17,7 @@ import chat.sphinx.feature_service_media_player_android.MediaPlayerServiceContro
 import chat.sphinx.feature_service_media_player_android.model.PodcastDataHolder
 import chat.sphinx.feature_service_media_player_android.util.toServiceActionPlay
 import chat.sphinx.logger.SphinxLogger
+import chat.sphinx.logger.d
 import chat.sphinx.logger.e
 import chat.sphinx.wrapper_chat.ChatMetaData
 import chat.sphinx.wrapper_common.ItemId
@@ -112,7 +113,7 @@ internal abstract class MediaPlayerService: Service() {
                                         ItemId(nnData.episodeId),
                                         nnData.satsPerMinute,
                                         currentTime,
-                                        nnData.mediaPlayer.playbackParams.speed.toDouble(),
+                                        nnData.speed,
                                     )
                                 )
 
@@ -177,11 +178,8 @@ internal abstract class MediaPlayerService: Service() {
 
                             stateDispatcherJob?.cancel()
                             nnData.mediaPlayer.release()
-                            currentState = MediaPlayerServiceState.ServiceActive.MediaState.Paused(
-                                nnData.chatId,
-                                nnData.episodeId,
-                                currentTime
-                            )
+
+                            currentState = MediaPlayerServiceState.ServiceActive.ServiceLoading
                             mediaServiceController.dispatchState(currentState)
 
                             repositoryMedia.updateChatMetaData(
@@ -193,9 +191,6 @@ internal abstract class MediaPlayerService: Service() {
                                     speed
                                 )
                             )
-
-                            currentState = MediaPlayerServiceState.ServiceActive.ServiceLoading
-                            mediaServiceController.dispatchState(currentState)
 
                             val newPlayer = MediaPlayer().apply {
                                 setAudioAttributes(
