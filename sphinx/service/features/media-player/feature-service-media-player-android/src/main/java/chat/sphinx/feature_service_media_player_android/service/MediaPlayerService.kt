@@ -290,13 +290,21 @@ internal abstract class MediaPlayerService: Service() {
         private fun startStateDispatcher() {
             stateDispatcherJob?.cancel()
             stateDispatcherJob = serviceLifecycleScope.launch(dispatchers.mainImmediate) {
-                var count = 0
+                var count: Double = 0.0
                 while (isActive) {
+                    var speed: Double = 1.0
                     podData?.let { nnData ->
+                        speed = nnData.speed.let {
+                            if (it >= 0.0) {
+                                it
+                            } else {
+                                1.0
+                            }
+                        }
 
                         val currentTime = nnData.mediaPlayer.currentPosition
 
-                        if (count >= 60) {
+                        if (count >= 60.0 * speed) {
                             repositoryMedia.updateChatMetaData(
                                 nnData.chatId,
                                 ChatMetaData(
@@ -306,9 +314,9 @@ internal abstract class MediaPlayerService: Service() {
                                     nnData.mediaPlayer.playbackParams.speed.toDouble()
                                 )
                             )
-                            count = 0
+                            count = 0.0
                         } else {
-                            count++
+                            count += 1.0
                         }
 
                         if (nnData.mediaPlayer.isPlaying) {
@@ -339,7 +347,8 @@ internal abstract class MediaPlayerService: Service() {
                         }
                     }
                     mediaServiceController.dispatchState(currentState)
-                    delay(1_000)
+
+                    delay(1_000_000 / (speed * 1000).toLong())
                 }
             }
         }
