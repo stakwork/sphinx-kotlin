@@ -1,11 +1,14 @@
 package chat.sphinx.feature_service_media_player_android.service
 
 import android.app.Service
+import android.content.Context
 import android.content.Intent
 import android.media.AudioAttributes
 import android.media.MediaPlayer
+import android.net.wifi.WifiManager
 import android.os.Binder
 import android.os.IBinder
+import android.os.PowerManager
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.concept_service_media.MediaPlayerServiceState
@@ -39,12 +42,17 @@ internal abstract class MediaPlayerService: Service() {
     private val supervisor = SupervisorJob()
     protected val serviceLifecycleScope = CoroutineScope(supervisor)
 
+    @Suppress("DEPRECATION")
+    val wifiLock: WifiManager.WifiLock? by lazy(LazyThreadSafetyMode.NONE) {
+        (getSystemService(Context.WIFI_SERVICE) as? WifiManager)
+            ?.createWifiLock(WifiManager.WIFI_MODE_FULL, this.javaClass.simpleName)
+    }
+
     @Volatile
     protected var currentState: MediaPlayerServiceState = MediaPlayerServiceState.ServiceActive.ServiceLoading
         private set
 
     protected inner class MediaPlayerHolder {
-        // chatId, episodeId, mediaPlayer
         @Volatile
         private var podData: PodcastDataHolder? = null
 
@@ -75,40 +83,42 @@ internal abstract class MediaPlayerService: Service() {
                 }
                 is UserAction.ServiceAction.Pause -> {
 
-                        podData?.let { nnData ->
-                            if (
-                                nnData.chatId == userAction.chatId &&
-                                nnData.episodeId == userAction.episodeId
-                            ) {
-                                try {
-                                    nnData.mediaPlayer.pause()
+                    podData?.let { nnData ->
+                        if (
+                            nnData.chatId == userAction.chatId &&
+                            nnData.episodeId == userAction.episodeId
+                        ) {
+                            try {
+                                nnData.mediaPlayer.pause()
 
-                                    stateDispatcherJob?.cancel()
-                                    val currentTime = nnData.mediaPlayer.currentPosition
+                                stateDispatcherJob?.cancel()
+                                val currentTime = nnData.mediaPlayer.currentPosition
 
-                                    currentState = MediaPlayerServiceState.ServiceActive.MediaState.Paused(
-                                        nnData.chatId,
-                                        nnData.episodeId,
-                                        currentTime
+                                currentState = MediaPlayerServiceState.ServiceActive.MediaState.Paused(
+                                    nnData.chatId,
+                                    nnData.episodeId,
+                                    currentTime
+                                )
+                                mediaServiceController.dispatchState(currentState)
+
+                                repositoryMedia.updateChatMetaData(
+                                    userAction.chatId,
+                                    ChatMetaData(
+                                        ItemId(nnData.episodeId),
+                                        nnData.satsPerMinute,
+                                        currentTime,
+                                        nnData.mediaPlayer.playbackParams.speed.toDouble(),
                                     )
-                                    mediaServiceController.dispatchState(currentState)
+                                )
 
-                                    repositoryMedia.updateChatMetaData(
-                                        userAction.chatId,
-                                        ChatMetaData(
-                                            ItemId(nnData.episodeId),
-                                            nnData.satsPerMinute,
-                                            currentTime,
-                                            nnData.mediaPlayer.playbackParams.speed.toDouble(),
-                                        )
-                                    )
-
-                                } catch (e: IllegalStateException) {
-                                    LOG.e(TAG, "Failed to pause MediaPlayer", e)
-                                    // TODO: Handle Error
-                                }
+                            } catch (e: IllegalStateException) {
+                                LOG.e(TAG, "Failed to pause MediaPlayer", e)
+                                // TODO: Handle Error
                             }
                         }
+                    }
+
+                    wifiLock?.release()
 
                 }
                 is UserAction.ServiceAction.Play -> {
@@ -129,9 +139,17 @@ internal abstract class MediaPlayerService: Service() {
                                 }
                             }
 
-                            if (nnData.mediaPlayer.isPlaying && stateDispatcherJob?.isActive != true) {
-                                startStateDispatcher()
+                            if (nnData.mediaPlayer.isPlaying) {
+                                if (stateDispatcherJob?.isActive != true) {
+                                    startStateDispatcher()
+                                }
+                                wifiLock?.let { lock ->
+                                    if (!lock.isHeld) {
+                                        lock.acquire()
+                                    }
+                                }
                             }
+
 
                         } else {
 
@@ -180,6 +198,7 @@ internal abstract class MediaPlayerService: Service() {
                                 .setUsage(AudioAttributes.USAGE_MEDIA)
                                 .build()
                         )
+                        setWakeMode(applicationContext, PowerManager.PARTIAL_WAKE_LOCK)
                         setDataSource(userAction.episodeUrl)
                         setOnPreparedListener { mp ->
                             mp.setOnPreparedListener(null)
@@ -188,6 +207,12 @@ internal abstract class MediaPlayerService: Service() {
                             startStateDispatcher()
                         }
                     }.let { mp ->
+                        wifiLock?.let { lock ->
+                            if (!lock.isHeld) {
+                                lock.acquire()
+                            }
+                        }
+
                         mp.prepareAsync()
                         podData = PodcastDataHolder(
                             userAction.chatId,
@@ -349,6 +374,7 @@ internal abstract class MediaPlayerService: Service() {
     override fun onDestroy() {
         super.onDestroy()
         currentState = MediaPlayerServiceState.ServiceInactive
+        wifiLock?.release()
         mediaPlayerHolder.release()
         mediaServiceController.dispatchState(currentState)
         // TODO: Clear notification
