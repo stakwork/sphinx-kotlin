@@ -101,24 +101,22 @@ internal class PodcastEpisodesListAdapter(
 
                 if (viewState is PodcastPlayerViewState.PodcastLoaded ||
                     viewState is PodcastPlayerViewState.EpisodePlayed ||
-                    viewState is PodcastPlayerViewState.EpisodePlayed
+                    viewState is PodcastPlayerViewState.MediaStateUpdate
                 ) {
 
-                    var podcast: Podcast? = null
-                    
+                    var episodes = ArrayList<PodcastEpisode>()
+
                     if (viewState is PodcastPlayerViewState.PodcastLoaded) {
-                        podcast = viewState.podcast
+                        episodes = viewState.podcast.getEpisodesListCopy()
                     }
 
                     if (viewState is PodcastPlayerViewState.EpisodePlayed) {
-                        podcast = viewState.podcast
+                        episodes = viewState.podcast.getEpisodesListCopy()
                     }
 
                     if (viewState is PodcastPlayerViewState.MediaStateUpdate) {
-                        podcast = viewState.podcast
+                        episodes = viewState.podcast.getEpisodesListCopy()
                     }
-
-                    val episodes = podcast?.episodes ?: listOf()
 
                     if (podcastEpisodes.isEmpty()) {
                         podcastEpisodes.addAll(episodes)

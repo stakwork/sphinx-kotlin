@@ -61,6 +61,19 @@ class Podcast(
     val isPlaying: Boolean
         get() = playingEpisode?.playing ?: false
 
+    fun getEpisodesListCopy(): ArrayList<PodcastEpisode> {
+        var episodesList = ArrayList<PodcastEpisode>()
+
+        for (episode in this.episodes) {
+            val episodeCopy = episode.copy()
+            episodeCopy.playing = episode.playing
+            episodeCopy.downloaded = episode.downloaded
+
+            episodesList.add(episodeCopy)
+        }
+        return episodesList
+    }
+
     fun setMetaData(metaData: ChatMetaData) {
         episodeId = metaData.itemId.value
         timeSeconds = metaData.timeSeconds
