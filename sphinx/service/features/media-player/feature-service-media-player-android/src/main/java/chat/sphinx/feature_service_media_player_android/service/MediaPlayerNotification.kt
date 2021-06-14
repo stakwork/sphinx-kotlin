@@ -165,13 +165,16 @@ internal class MediaPlayerNotification(
             is MediaPlayerServiceState.ServiceActive.ServiceLoading -> {
                 notify(builder.setContentText("Loading Media"))
             }
-            is MediaPlayerServiceState.ServiceInactive -> {
-                notificationManager?.cancel(NOTIFICATION_ID)
-                try {
-                    mediaPlayerService.serviceContext.unregisterReceiver(this)
-                } catch (e: RuntimeException) {}
-                mediaPlayerService.mediaServiceController.removeListener(this)
-            }
+            is MediaPlayerServiceState.ServiceInactive -> {}
         }
+    }
+
+    @JvmSynthetic
+    fun clear() {
+        notificationManager?.cancel(NOTIFICATION_ID)
+        try {
+            mediaPlayerService.serviceContext.unregisterReceiver(this)
+        } catch (e: RuntimeException) {}
+        mediaPlayerService.mediaServiceController.removeListener(this)
     }
 }

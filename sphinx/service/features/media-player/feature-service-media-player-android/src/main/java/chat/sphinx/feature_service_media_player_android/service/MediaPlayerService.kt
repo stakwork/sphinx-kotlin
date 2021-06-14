@@ -345,6 +345,7 @@ internal abstract class MediaPlayerService: Service() {
             stateDispatcherJob?.cancel()
             currentState = MediaPlayerServiceState.ServiceInactive
             mediaServiceController.dispatchState(currentState)
+            notification.clear()
             podData?.let { data ->
                 repositoryMedia.updateChatMetaData(
                     data.chatId,
