@@ -73,9 +73,13 @@ internal abstract class MediaPlayerService: Service() {
                             nnData.episodeId == userAction.chatMetaData.itemId.value
                         ) {
                             try {
+                                val playing = nnData.mediaPlayer.isPlaying
                                 nnData.speed = userAction.chatMetaData.speed.also {
                                     nnData.mediaPlayer.playbackParams =
                                         nnData.mediaPlayer.playbackParams.setSpeed(it.toFloat())
+                                }
+                                if (!playing) {
+                                    nnData.mediaPlayer.pause()
                                 }
                             } catch (e: IllegalStateException) {
                                 LOG.e(TAG, "Failed to adjust speed for MediaPlayer", e)
