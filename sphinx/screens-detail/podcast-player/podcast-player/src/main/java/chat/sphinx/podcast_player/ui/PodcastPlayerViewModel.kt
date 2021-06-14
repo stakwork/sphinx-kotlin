@@ -17,6 +17,7 @@ import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.BaseViewModel
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -37,14 +38,6 @@ internal class PodcastPlayerViewModel @Inject constructor(
     PodcastPlayerViewState.Idle
 ), MediaPlayerServiceController.MediaServiceListener {
 
-    //    private val chatSharedFlow: SharedFlow<Chat?> = flow {
-    //        emitAll(chatRepository.getChatById(args.chatId))
-    //    }.distinctUntilChanged().shareIn(
-    //        viewModelScope,
-    //        SharingStarted.WhileSubscribed(2_000),
-    //        replay = 1,
-    //    )
-
     private val args: PodcastPlayerFragmentArgs by savedStateHandle.navArgs()
 
     val podcast: Podcast = args.argPodcast
@@ -62,15 +55,28 @@ internal class PodcastPlayerViewModel @Inject constructor(
             is MediaPlayerServiceState.ServiceActive.MediaState.Ended -> {
                 podcast.endEpisodeUpdate(serviceState.episodeId)
             }
-            is MediaPlayerServiceState.ServiceActive.ServiceLoading -> {}
-            is MediaPlayerServiceState.ServiceInactive -> {}
+            is MediaPlayerServiceState.ServiceActive.ServiceLoading -> {
+                viewStateContainer.updateViewState(PodcastPlayerViewState.ServiceLoading)
+                return
+            }
+            is MediaPlayerServiceState.ServiceInactive -> {
+                viewStateContainer.updateViewState(PodcastPlayerViewState.ServiceInactive)
+                return
+            }
         }
         viewStateContainer.updateViewState(PodcastPlayerViewState.MediaStateUpdate(podcast))
     }
 
     init {
-        viewStateContainer.updateViewState(PodcastPlayerViewState.PodcastLoaded(podcast))
         mediaPlayerServiceController.addListener(this)
+        podcastLoaded()
+    }
+
+    private fun podcastLoaded() {
+        viewModelScope.launch(mainImmediate) {
+            delay(100L)
+            viewStateContainer.updateViewState(PodcastPlayerViewState.PodcastLoaded(podcast))
+        }
     }
 
     override fun onCleared() {

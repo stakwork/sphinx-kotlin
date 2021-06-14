@@ -74,9 +74,7 @@ internal class ChatTribeFragment: ChatFragment<
                 })
             }
 
-            textViewPlayPauseButton.text = getString(
-                if (podcast.isPlaying) R.string.material_icon_name_pause_button else R.string.material_icon_name_play_button
-            )
+            togglePlayPauseButton(podcast.isPlaying)
 
             val currentEpisode = podcast.getCurrentEpisode()
             textViewEpisodeTitle.text = currentEpisode.title
@@ -89,9 +87,17 @@ internal class ChatTribeFragment: ChatFragment<
                 }
             }
 
-            progressBar.layoutParams.width =
-                progressBarContainer.measuredWidth * (progress / 100)
+            val progressWith = progressBarContainer.measuredWidth.toDouble() * (progress.toDouble() / 100.0)
+            progressBar.layoutParams.width = progressWith.toInt()
             progressBar.requestLayout()
+        }
+    }
+
+    private fun togglePlayPauseButton(playing: Boolean) {
+        podcastPlayerBinding.apply {
+            textViewPlayPauseButton.text = getString(
+                if (playing) R.string.material_icon_name_pause_button else R.string.material_icon_name_play_button
+            )
         }
     }
 
@@ -112,7 +118,7 @@ internal class ChatTribeFragment: ChatFragment<
             }
 
             textViewForward30Button.setOnClickListener {
-                viewModel.seekTo(podcast.currentTime + 30)
+                viewModel.seekTo(podcast.currentTime + 30000)
             }
 
             textViewBoostPodcastButton.setOnClickListener {
@@ -125,9 +131,20 @@ internal class ChatTribeFragment: ChatFragment<
         super.subscribeToViewStateFlow()
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.podcastViewStateContainer.collect { viewState ->
+                podcastPlayerBinding.progressBarAudioLoading.goneIfFalse(false)
+
                 @Exhaustive
                 when (viewState) {
                     is PodcastViewState.Idle -> {}
+
+                    is PodcastViewState.ServiceInactive -> {
+                        togglePlayPauseButton(false)
+                    }
+
+                    is PodcastViewState.ServiceLoading -> {
+                        podcastPlayerBinding.progressBarAudioLoading.goneIfFalse(true)
+                    }
+
                     is PodcastViewState.MediaStateUpdate -> {
                         configurePodcastPlayer(viewState.podcast)
                     }

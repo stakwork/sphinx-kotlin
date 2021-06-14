@@ -93,9 +93,18 @@ internal class PodcastPlayerFragment : BaseFragment<
     }
 
     override suspend fun onViewStateFlowCollect(viewState: PodcastPlayerViewState) {
+        binding.includeLayoutEpisodeSliderControl.progressBarAudioLoading.goneIfFalse(false)
+
         @Exhaustive
         when (viewState) {
             is PodcastPlayerViewState.Idle -> {}
+
+            is PodcastPlayerViewState.ServiceLoading -> {
+                binding.includeLayoutEpisodeSliderControl.progressBarAudioLoading.goneIfFalse(true)
+            }
+            is PodcastPlayerViewState.ServiceInactive -> {
+                togglePlayPauseButton(false)
+            }
 
             is PodcastPlayerViewState.PodcastLoaded -> {
                 showPodcastInfo(viewState.podcast)
@@ -137,10 +146,16 @@ internal class PodcastPlayerFragment : BaseFragment<
                 progressBarAudioLoading.goneIfFalse(false)
             }
 
+            togglePlayPauseButton(podcast.isPlaying)
+        }
+    }
+
+    private fun togglePlayPauseButton(playing: Boolean) {
+        binding.apply {
             includeLayoutEpisodePlaybackControlButtons.apply {
                 buttonPlayPause.background =
                     ContextCompat.getDrawable(root.context,
-                        if (podcast.isPlaying) R.drawable.ic_podcast_pause_circle else R.drawable.ic_podcast_play_circle
+                        if (playing) R.drawable.ic_podcast_pause_circle else R.drawable.ic_podcast_play_circle
                     )
             }
         }
@@ -184,7 +199,7 @@ internal class PodcastPlayerFragment : BaseFragment<
                 }
 
                 buttonReplay15.setOnClickListener {
-                    viewModel.seekTo(podcast.currentTime - 15)
+                    viewModel.seekTo(podcast.currentTime - 15000)
                 }
 
                 buttonPlayPause.setOnClickListener {
@@ -198,7 +213,7 @@ internal class PodcastPlayerFragment : BaseFragment<
                 }
 
                 buttonForward30.setOnClickListener {
-                    viewModel.seekTo(podcast.currentTime + 30)
+                    viewModel.seekTo(podcast.currentTime + 30000)
                 }
 
                 buttonBoost.setOnClickListener {
@@ -225,17 +240,11 @@ internal class PodcastPlayerFragment : BaseFragment<
         val duration = withContext(viewModel.io) {
             podcast.getCurrentEpisodeDuration()
         }
-        val seekTime = (duration * (progress / 100)).toInt()
+        val seekTime = (duration * (progress.toDouble() / 100.toDouble())).toInt()
         viewModel.seekTo(seekTime)
     }
 
     private suspend fun setTimeLabelsAndProgressBar(podcast: Podcast) {
-        //Reset time labels
-        binding.includeLayoutEpisodeSliderControl.apply {
-            textViewCurrentEpisodeDuration.text = 0.toLong().getTimeString()
-            textViewCurrentEpisodeProgress.text = 0.toLong().getTimeString()
-        }
-
         var currentTime = podcast.currentTime.toLong()
 
         val duration = withContext(viewModel.io) {

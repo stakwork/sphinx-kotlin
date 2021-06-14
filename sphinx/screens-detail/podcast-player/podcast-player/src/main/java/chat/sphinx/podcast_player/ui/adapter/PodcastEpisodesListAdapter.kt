@@ -100,38 +100,45 @@ internal class PodcastEpisodesListAdapter(
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.collectViewState { viewState ->
 
-                if (viewState is PodcastPlayerViewState.PodcastLoaded) {
-                    podcast = viewState.podcast
-                }
+                if (viewState !is PodcastPlayerViewState.LoadingEpisode) {
 
-                val episodes = podcast?.episodes ?: listOf()
+                    if (viewState is PodcastPlayerViewState.PodcastLoaded) {
+                        podcast = viewState.podcast
+                    }
 
-                if (podcastEpisodes.isEmpty()) {
-                    podcastEpisodes.addAll(episodes)
-                    this@PodcastEpisodesListAdapter.notifyDataSetChanged()
-                } else {
+                    if (viewState is PodcastPlayerViewState.EpisodePlayed) {
+                        podcast = viewState.podcast
+                    }
 
-                    val diff = Diff(podcastEpisodes, episodes)
+                    val episodes = podcast?.episodes ?: podcastEpisodes
 
-                    withContext(viewModel.dispatchers.default) {
-                        DiffUtil.calculateDiff(diff)
-                    }.let { result ->
+                    if (podcastEpisodes.isEmpty()) {
+                        podcastEpisodes.addAll(episodes)
+                        this@PodcastEpisodesListAdapter.notifyDataSetChanged()
+                    } else {
 
-                        if (!diff.sameList) {
-                            val firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition()
+                        val diff = Diff(podcastEpisodes, episodes)
 
-                            podcastEpisodes.clear()
-                            podcastEpisodes.addAll(episodes)
-                            result.dispatchUpdatesTo(this@PodcastEpisodesListAdapter)
+                        withContext(viewModel.dispatchers.default) {
+                            DiffUtil.calculateDiff(diff)
+                        }.let { result ->
 
-                            if (
-                                firstVisibleItemPosition == 0                               &&
-                                recyclerView.scrollState == RecyclerView.SCROLL_STATE_IDLE
-                            ) {
-                                recyclerView.scrollToPosition(0)
+                            if (!diff.sameList) {
+                                val firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition()
+
+                                podcastEpisodes.clear()
+                                podcastEpisodes.addAll(episodes)
+                                result.dispatchUpdatesTo(this@PodcastEpisodesListAdapter)
+
+                                if (
+                                    firstVisibleItemPosition == 0                               &&
+                                    recyclerView.scrollState == RecyclerView.SCROLL_STATE_IDLE
+                                ) {
+                                    recyclerView.scrollToPosition(0)
+                                }
                             }
-                        }
 
+                        }
                     }
                 }
             }

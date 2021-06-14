@@ -7,6 +7,8 @@ import io.matthewnelson.concept_views.viewstate.ViewState
 internal sealed class PodcastPlayerViewState: ViewState<PodcastPlayerViewState>() {
 
     object Idle: PodcastPlayerViewState()
+    object ServiceLoading: PodcastPlayerViewState()
+    object ServiceInactive: PodcastPlayerViewState()
 
     class PodcastLoaded(
         val podcast: Podcast

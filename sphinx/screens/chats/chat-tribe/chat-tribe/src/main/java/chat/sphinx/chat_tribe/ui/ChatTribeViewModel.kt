@@ -150,15 +150,7 @@ internal class ChatTribeViewModel @Inject constructor(
         return super.sendMessage(builder)
     }
 
-//    private val _mediaPlayerServiceStateFlow: MutableStateFlow<MediaPlayerServiceState> by lazy {
-//        MutableStateFlow(MediaPlayerServiceState.ServiceInactive)
-//    }
-//    val mediaPlayerServiceStateFlow: StateFlow<MediaPlayerServiceState>
-//        get() = _mediaPlayerServiceStateFlow
-
     override fun mediaServiceState(serviceState: MediaPlayerServiceState) {
-//        _mediaPlayerServiceStateFlow.value = serviceState
-
         when (serviceState) {
             is MediaPlayerServiceState.ServiceActive.MediaState.Playing -> {
                 podcast?.playingEpisodeUpdate(serviceState.episodeId, serviceState.currentTime)
@@ -169,8 +161,14 @@ internal class ChatTribeViewModel @Inject constructor(
             is MediaPlayerServiceState.ServiceActive.MediaState.Ended -> {
                 podcast?.endEpisodeUpdate(serviceState.episodeId)
             }
-            is MediaPlayerServiceState.ServiceActive.ServiceLoading -> {}
-            is MediaPlayerServiceState.ServiceInactive -> {}
+            is MediaPlayerServiceState.ServiceActive.ServiceLoading -> {
+                podcastViewStateContainer.updateViewState(PodcastViewState.ServiceLoading)
+                return
+            }
+            is MediaPlayerServiceState.ServiceInactive -> {
+                podcastViewStateContainer.updateViewState(PodcastViewState.ServiceInactive)
+                return
+            }
         }
         podcast?.let { podcast ->
             podcastViewStateContainer.updateViewState(PodcastViewState.MediaStateUpdate(podcast))
