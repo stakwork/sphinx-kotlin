@@ -11,6 +11,7 @@ import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.lightning.toSat
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
+import kotlin.math.roundToInt
 
 
 @Parcelize
@@ -90,6 +91,13 @@ class Podcast(
             timeSeconds ?: 0,
             speed,
         )
+
+    fun getSpeedString(): String {
+        if (speed.roundToInt().toDouble() == speed) {
+            return "${speed.toInt()}x"
+        }
+        return "${speed}x"
+    }
 
     fun getCurrentEpisode(): PodcastEpisode {
         playingEpisode?.let { episode ->

@@ -6,7 +6,6 @@ import androidx.lifecycle.viewModelScope
 import chat.sphinx.chat_common.ui.ChatSideEffect
 import chat.sphinx.chat_common.ui.ChatViewModel
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
-import chat.sphinx.chat_common.ui.viewstate.header.ChatHeaderFooterViewState
 import chat.sphinx.chat_tribe.navigation.TribeChatNavigator
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_lightning.model.route.isRouteAvailable
@@ -35,8 +34,6 @@ import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -151,6 +148,13 @@ internal class ChatTribeViewModel @Inject constructor(
     }
 
     override fun mediaServiceState(serviceState: MediaPlayerServiceState) {
+        if (serviceState is MediaPlayerServiceState.ServiceActive.MediaState) {
+            if (serviceState.chatId != args.chatId) {
+                return
+            }
+        }
+
+        @Exhaustive
         when (serviceState) {
             is MediaPlayerServiceState.ServiceActive.MediaState.Playing -> {
                 podcast?.playingEpisodeUpdate(serviceState.episodeId, serviceState.currentTime)

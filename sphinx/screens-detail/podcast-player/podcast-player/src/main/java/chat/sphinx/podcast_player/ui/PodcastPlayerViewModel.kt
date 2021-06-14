@@ -15,10 +15,8 @@ import chat.sphinx.wrapper_common.lightning.Sat
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.BaseViewModel
-import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -43,6 +41,11 @@ internal class PodcastPlayerViewModel @Inject constructor(
     val podcast: Podcast = args.argPodcast
 
     override fun mediaServiceState(serviceState: MediaPlayerServiceState) {
+        if (serviceState is MediaPlayerServiceState.ServiceActive.MediaState) {
+            if (serviceState.chatId != args.chatId) {
+                return
+            }
+        }
 
         @Exhaustive
         when (serviceState) {

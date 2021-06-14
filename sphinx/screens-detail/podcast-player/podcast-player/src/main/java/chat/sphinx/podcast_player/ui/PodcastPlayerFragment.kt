@@ -70,6 +70,7 @@ internal class PodcastPlayerFragment : BaseFragment<
         }
 
         setupEpisodes()
+        addPodcastOnClickListeners(viewModel.podcast)
     }
 
     private fun setupEpisodes() {
@@ -106,7 +107,6 @@ internal class PodcastPlayerFragment : BaseFragment<
 
             is PodcastPlayerViewState.PodcastLoaded -> {
                 showPodcastInfo(viewState.podcast)
-                addPodcastOnClickListeners(viewState.podcast)
             }
 
             is PodcastPlayerViewState.LoadingEpisode -> {
@@ -140,6 +140,8 @@ internal class PodcastPlayerFragment : BaseFragment<
             )
 
             includeLayoutPodcastEpisodesList.textViewEpisodesListCount.text = podcast.episodesCount.toString()
+
+            includeLayoutEpisodePlaybackControlButtons.buttonPlaybackSpeed.text = "${podcast.getSpeedString()}"
 
             togglePlayPauseButton(podcast.isPlaying)
         }
