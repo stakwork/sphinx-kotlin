@@ -3,20 +3,52 @@ package chat.sphinx.feature_service_media_player_android.service
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
+import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import chat.sphinx.concept_service_media.MediaPlayerServiceController
 import chat.sphinx.concept_service_media.MediaPlayerServiceState
+import chat.sphinx.feature_service_media_player_android.R
+import java.math.BigInteger
+import java.security.SecureRandom
 
 internal class MediaPlayerNotification(
     private val mediaPlayerService: MediaPlayerService
-): MediaPlayerServiceController.MediaServiceListener {
+) : BroadcastReceiver(),
+    MediaPlayerServiceController.MediaServiceListener
+{
 
     companion object {
         private const val CHANNEL_ID = "SphinxMediaPlayerService"
         private const val CHANNEL_DESCRIPTION = "Plays Media for Sphinx Chat"
         private const val NOTIFICATION_ID = 1984
+
+        private val SERVICE_INTENT_FILTER: String by lazy {
+            BigInteger(130, SecureRandom()).toString(32)
+        }
+
+        private const val ACTION_DELETE = "ACTION_DELETE"
+        private const val ACTION_DELETE_CODE = 1
+    }
+
+    override fun onReceive(context: Context?, intent: Intent?) {
+        if (context != null && intent != null && intent.action == SERVICE_INTENT_FILTER) {
+            when (intent.getStringExtra(SERVICE_INTENT_FILTER)) {
+                ACTION_DELETE -> {
+                    mediaPlayerService.shutDownService()
+                }
+                null -> {}
+            }
+        }
+    }
+
+    init {
+        mediaPlayerService
+            .serviceContext
+            .registerReceiver(this, IntentFilter(SERVICE_INTENT_FILTER))
     }
 
     private inline val notificationManager: NotificationManager?
@@ -57,11 +89,14 @@ internal class MediaPlayerNotification(
             .setContentText("Loading Media")
             .setContentTitle("Sphinx Media Player")
 
+            .setDeleteIntent(getActionPendingIntent(ACTION_DELETE, ACTION_DELETE_CODE))
+
             .setGroup(CHANNEL_ID)
             .setGroupAlertBehavior(NotificationCompat.GROUP_ALERT_SUMMARY)
             .setGroupSummary(false)
-            .setOngoing(true)
+            .setOngoing(false)
             .setOnlyAlertOnce(true)
+            .setSmallIcon(R.drawable.sphinx_white_notification)
             .setSound(null)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setWhen(startTime)
@@ -84,10 +119,30 @@ internal class MediaPlayerNotification(
         return builder
     }
 
+    @Throws(IllegalArgumentException::class)
+    private fun getActionPendingIntent(
+        action: String,
+        requestCode: Int,
+    ): PendingIntent {
+        if (action.isEmpty()) {
+            throw IllegalArgumentException("Intent Action cannot be empty")
+        }
+
+        val intent = Intent(SERVICE_INTENT_FILTER)
+        intent.putExtra(SERVICE_INTENT_FILTER, action)
+        intent.setPackage(mediaPlayerService.serviceContext.packageName)
+
+        return PendingIntent.getBroadcast(
+            mediaPlayerService.serviceContext,
+            requestCode,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT,
+        )
+    }
+
     init {
         setupNotificationChannel()
-
-        notificationManager?.notify(NOTIFICATION_ID, buildNotification().build())
+        notify(builder)
         mediaPlayerService.mediaServiceController.addListener(this)
     }
 
@@ -112,6 +167,9 @@ internal class MediaPlayerNotification(
             }
             is MediaPlayerServiceState.ServiceInactive -> {
                 notificationManager?.cancel(NOTIFICATION_ID)
+                try {
+                    mediaPlayerService.serviceContext.unregisterReceiver(this)
+                } catch (e: RuntimeException) {}
                 mediaPlayerService.mediaServiceController.removeListener(this)
             }
         }
