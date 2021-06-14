@@ -23,6 +23,7 @@ class NetworkQueryChatImpl(
     companion object {
         private const val ENDPOINT_CHAT = "/chat"
         private const val ENDPOINT_CHATS = "/chats"
+        private const val ENDPOINT_EDIT_CHAT = "$ENDPOINT_CHATS/%d"
         private const val ENDPOINT_MUTE_CHAT = "/chats/%d/%s"
         private const val MUTE_CHAT = "mute"
         private const val UN_MUTE_CHAT = "unmute"
@@ -81,7 +82,19 @@ class NetworkQueryChatImpl(
     ///////////
     /// PUT ///
     ///////////
-//    app.put('/chats/:id', chats.updateChat)
+    override fun updateChat(
+        chatId: ChatId,
+        putChatDto: PutChatDto,
+        relayData: Pair<AuthorizationToken, RelayUrl>?
+    ): Flow<LoadResponse<ChatDto, ResponseError>> =
+        networkRelayCall.relayPut(
+            responseJsonClass = UpdateChatRelayResponse::class.java,
+            relayEndpoint = String.format(ENDPOINT_EDIT_CHAT, chatId.value),
+            requestBodyJsonClass = PutChatDto::class.java,
+            requestBody = putChatDto,
+            relayData = relayData
+        )
+
 //    app.put('/chat/:id', chats.addGroupMembers)
 //    app.put('/kick/:chat_id/:contact_id', chats.kickChatMember)
 //    app.put('/member/:contactId/:status/:messageId', chatTribes.approveOrRejectMember)

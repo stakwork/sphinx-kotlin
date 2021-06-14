@@ -1,9 +1,6 @@
 package chat.sphinx.concept_network_query_chat
 
-import chat.sphinx.concept_network_query_chat.model.ChatDto
-import chat.sphinx.concept_network_query_chat.model.PodcastDto
-import chat.sphinx.concept_network_query_chat.model.PutTribeDto
-import chat.sphinx.concept_network_query_chat.model.TribeDto
+import chat.sphinx.concept_network_query_chat.model.*
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.wrapper_chat.ChatHost
@@ -36,7 +33,12 @@ abstract class NetworkQueryChat {
     ///////////
     /// PUT ///
     ///////////
-//    app.put('/chats/:id', chats.updateChat)
+    abstract fun updateChat(
+        chatId: ChatId,
+        putChatDto: PutChatDto,
+        relayData: Pair<AuthorizationToken, RelayUrl>? = null
+    ): Flow<LoadResponse<ChatDto, ResponseError>>
+
 //    app.put('/chat/:id', chats.addGroupMembers)
 //    app.put('/kick/:chat_id/:contact_id', chats.kickChatMember)
 //    app.put('/member/:contactId/:status/:messageId', chatTribes.approveOrRejectMember)

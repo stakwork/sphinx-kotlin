@@ -4,10 +4,7 @@ import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_coredb.CoreDB
 import chat.sphinx.concept_crypto_rsa.RSA
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
-import chat.sphinx.concept_network_query_chat.model.ChatDto
-import chat.sphinx.concept_network_query_chat.model.PodcastDto
-import chat.sphinx.concept_network_query_chat.model.PutTribeDto
-import chat.sphinx.concept_network_query_chat.model.TribeDto
+import chat.sphinx.concept_network_query_chat.model.*
 import chat.sphinx.concept_network_query_contact.NetworkQueryContact
 import chat.sphinx.concept_network_query_contact.model.ContactDto
 import chat.sphinx.concept_network_query_contact.model.PostContactDto
@@ -408,6 +405,13 @@ abstract class SphinxRepository(
             chatLock.withLock {
                 queries.chatUpdateMetaData(metaData, chatId)
             }
+
+            try {
+                networkQueryChat.updateChat(
+                    chatId,
+                    PutChatDto(meta = metaData.toJson(moshi))
+                ).collect {}
+            } catch (e: AssertionError) {}
             // TODO: Network call to update Relay
         }
     }
