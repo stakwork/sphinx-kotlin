@@ -260,6 +260,16 @@ internal abstract class MediaPlayerService: Service() {
                         ).also { it.speed = userAction.speed }
                     }
 
+                    repositoryMedia.updateChatMetaData(
+                        userAction.chatId,
+                        ChatMetaData(
+                            ItemId(userAction.episodeId),
+                            userAction.satPerMinute,
+                            userAction.startTime,
+                            userAction.speed
+                        )
+                    )
+
                 }
                 is UserAction.ServiceAction.Seek -> {
                     podData?.let { nnPlayer ->
