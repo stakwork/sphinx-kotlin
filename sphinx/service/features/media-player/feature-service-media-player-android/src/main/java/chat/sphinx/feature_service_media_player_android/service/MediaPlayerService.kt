@@ -311,7 +311,7 @@ internal abstract class MediaPlayerService: Service() {
                                     ItemId(nnData.episodeId),
                                     nnData.satsPerMinute,
                                     currentTime,
-                                    nnData.mediaPlayer.playbackParams.speed.toDouble()
+                                    speed,
                                 )
                             )
                             count = 0.0
@@ -366,7 +366,7 @@ internal abstract class MediaPlayerService: Service() {
                         ItemId(data.episodeId),
                         data.satsPerMinute,
                         data.mediaPlayer.currentPosition,
-                        data.mediaPlayer.playbackParams.speed.toDouble(),
+                        data.speed,
                     )
                 )
                 data.mediaPlayer.release()
