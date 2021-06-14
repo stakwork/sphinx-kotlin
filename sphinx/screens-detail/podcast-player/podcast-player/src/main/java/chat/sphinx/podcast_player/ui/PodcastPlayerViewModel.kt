@@ -15,6 +15,7 @@ import chat.sphinx.wrapper_common.lightning.Sat
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.BaseViewModel
+import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
@@ -79,74 +80,66 @@ internal class PodcastPlayerViewModel @Inject constructor(
 
     fun playEpisode(episode: PodcastEpisode, startTime: Int) {
         viewModelScope.launch(mainImmediate) {
-            chatRepository.getChatById(args.chatId).firstOrNull()?.let { chat ->
-                viewStateContainer.updateViewState(PodcastPlayerViewState.LoadingEpisode(episode))
+            updateViewState(PodcastPlayerViewState.LoadingEpisode(episode))
 
-                withContext(io) {
-                    podcast.didStartPlayingEpisode(episode, startTime)
-                }
-
-                viewStateContainer.updateViewState(PodcastPlayerViewState.EpisodePlayed(podcast))
-
-                mediaPlayerServiceController.submitAction(
-                    UserAction.ServiceAction.Play(
-                        chat.id,
-                        episode.id,
-                        episode.enclosureUrl,
-                        Sat(0),
-                        startTime,
-                    )
-                )
+            withContext(io) {
+                podcast.didStartPlayingEpisode(episode, startTime)
             }
+
+            viewStateContainer.updateViewState(PodcastPlayerViewState.EpisodePlayed(podcast))
+
+            mediaPlayerServiceController.submitAction(
+                UserAction.ServiceAction.Play(
+                    args.chatId,
+                    episode.id,
+                    episode.enclosureUrl,
+                    Sat(0),
+                    startTime,
+                )
+            )
         }
     }
 
     fun pauseEpisode(episode: PodcastEpisode) {
         viewModelScope.launch(mainImmediate) {
-            chatRepository.getChatById(args.chatId).firstOrNull()?.let { chat ->
-                podcast.didPausePlayingEpisode(episode)
+            podcast.didPausePlayingEpisode(episode)
 
-                mediaPlayerServiceController.submitAction(
-                    UserAction.ServiceAction.Pause(
-                        chat.id,
-                        episode.id
-                    )
+            mediaPlayerServiceController.submitAction(
+                UserAction.ServiceAction.Pause(
+                    args.chatId,
+                    episode.id
                 )
-            }
+            )
         }
     }
 
     fun seekTo(time: Int) {
         viewModelScope.launch(mainImmediate) {
-            chatRepository.getChatById(args.chatId).firstOrNull()?.let { chat ->
-                podcast.didSeekTo(time)
+            podcast.didSeekTo(time)
 
-                val metaData = podcast.getMetaData()
+            val metaData = podcast.getMetaData()
 
-                mediaPlayerServiceController.submitAction(
-                    UserAction.ServiceAction.Seek(
-                        chat.id,
-                        metaData
-                    )
+            mediaPlayerServiceController.submitAction(
+                UserAction.ServiceAction.Seek(
+                    args.chatId,
+                    metaData
                 )
-            }
+            )
         }
     }
 
     fun adjustSpeed(speed: Double) {
         viewModelScope.launch(mainImmediate) {
-            chatRepository.getChatById(args.chatId).firstOrNull()?.let { chat ->
-                podcast.speed = speed
+            podcast.speed = speed
 
-                val metaData = podcast.getMetaData()
+            val metaData = podcast.getMetaData()
 
-                mediaPlayerServiceController.submitAction(
-                    UserAction.AdjustSpeed(
-                        chat.id,
-                        metaData
-                    )
+            mediaPlayerServiceController.submitAction(
+                UserAction.AdjustSpeed(
+                    args.chatId,
+                    metaData
                 )
-            }
+            )
         }
     }
 }

@@ -186,14 +186,10 @@ internal class ChatTribeViewModel @Inject constructor(
         mediaPlayerServiceController.removeListener(this)
     }
 
-    private var updateTribeInfoJob: Job? = null
-    fun loadTribeAndPodcastData(): Flow<Podcast> = flow {
+    suspend fun loadTribeAndPodcastData(): Podcast? {
         chatRepository.getChatById(args.chatId).firstOrNull()?.let { chat ->
             chatRepository.updateTribeInfo(chat).collect { podcastDto ->
                 podcast = podcastDto.toPodcast()
-
-                delay(10L)
-                updateTribeInfoJob?.join()
 
                 chatRepository.getChatById(args.chatId).firstOrNull()?.let { chat ->
                     val pricePerMessage = chat.pricePerMessage?.value ?: 0
@@ -212,73 +208,63 @@ internal class ChatTribeViewModel @Inject constructor(
             }
         }
 
-        podcast?.let { podcast ->
-            emit(podcast)
-        }
+        return podcast
     }
 
     fun goToPodcastPlayerScreen(podcast: Podcast) {
         viewModelScope.launch(mainImmediate) {
-            chatRepository.getChatById(args.chatId).firstOrNull()?.let { chat ->
-                chatNavigator.toPodcastPlayerScreen(chat.id, podcast)
-            }
+            chatNavigator.toPodcastPlayerScreen(args.chatId, podcast)
         }
     }
 
     fun playEpisode(episode: PodcastEpisode, startTime: Int) {
         viewModelScope.launch(mainImmediate) {
-            chatRepository.getChatById(args.chatId).firstOrNull()?.let { chat ->
-                podcast?.let { podcast ->
-                    withContext(io) {
-                        podcast.didStartPlayingEpisode(episode, startTime)
-                    }
-
-                    mediaPlayerServiceController.submitAction(
-                        UserAction.ServiceAction.Play(
-                            chat.id,
-                            episode.id,
-                            episode.enclosureUrl,
-                            Sat(0),
-                            startTime,
-                        )
-                    )
+            podcast?.let { podcast ->
+                withContext(io) {
+                    podcast.didStartPlayingEpisode(episode, startTime)
                 }
+
+                mediaPlayerServiceController.submitAction(
+                    UserAction.ServiceAction.Play(
+                        args.chatId,
+                        episode.id,
+                        episode.enclosureUrl,
+                        Sat(0),
+                        startTime,
+                    )
+                )
             }
         }
     }
 
     fun pauseEpisode(episode: PodcastEpisode) {
         viewModelScope.launch(mainImmediate) {
-            chatRepository.getChatById(args.chatId).firstOrNull()?.let { chat ->
-                podcast?.let { podcast ->
-                    podcast.didPausePlayingEpisode(episode)
+            podcast?.let { podcast ->
+                podcast.didPausePlayingEpisode(episode)
 
-                    mediaPlayerServiceController.submitAction(
-                        UserAction.ServiceAction.Pause(
-                            chat.id,
-                            episode.id,
-                        )
+                mediaPlayerServiceController.submitAction(
+                    UserAction.ServiceAction.Pause(
+                        args.chatId,
+                        episode.id,
                     )
-                }
+                )
             }
         }
     }
 
     fun seekTo(time: Int) {
         viewModelScope.launch(mainImmediate) {
-            chatRepository.getChatById(args.chatId).firstOrNull()?.let { chat ->
-                podcast?.let { podcast ->
-                    podcast.didSeekTo(time)
+            podcast?.let { podcast ->
+                podcast.didSeekTo(time)
 
-                    val metaData = podcast.getMetaData()
+                val metaData = podcast.getMetaData()
 
-                    mediaPlayerServiceController.submitAction(
-                        UserAction.ServiceAction.Seek(
-                            chat.id,
-                            metaData
-                        )
+                mediaPlayerServiceController.submitAction(
+                    UserAction.ServiceAction.Seek(
+                        args.chatId,
+                        metaData
                     )
-                }
+                )
             }
         }
     }

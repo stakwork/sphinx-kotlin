@@ -5,6 +5,7 @@ import android.view.View
 import android.widget.ImageView
 import androidx.core.view.isGone
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import app.cash.exhaustive.Exhaustive
 import by.kirich1409.viewbindingdelegate.viewBinding
@@ -57,8 +58,8 @@ internal class ChatTribeFragment: ChatFragment<
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-            viewModel.loadTribeAndPodcastData().collect { podcast ->
+        lifecycleScope.launch(viewModel.mainImmediate) {
+            viewModel.loadTribeAndPodcastData()?.let { podcast ->
                 configurePodcastPlayer(podcast)
                 addPodcastOnClickListeners(podcast)
             }
