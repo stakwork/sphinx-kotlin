@@ -6,7 +6,7 @@ import io.matthewnelson.concept_views.viewstate.ViewState
 sealed class PodcastViewState: ViewState<PodcastViewState>() {
     object Idle: PodcastViewState()
 
-    data class MediaStateUpdate(
+    class MediaStateUpdate(
         val podcast: Podcast,
     ): PodcastViewState()
 

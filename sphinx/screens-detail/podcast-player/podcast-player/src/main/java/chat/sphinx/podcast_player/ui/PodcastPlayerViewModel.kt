@@ -46,7 +46,7 @@ internal class PodcastPlayerViewModel @Inject constructor(
 
     private val args: PodcastPlayerFragmentArgs by savedStateHandle.navArgs()
 
-    val podcast: Podcast = args.argPodcast.copy()
+    val podcast: Podcast = args.argPodcast
 
     override fun mediaServiceState(serviceState: MediaPlayerServiceState) {
 
@@ -68,7 +68,7 @@ internal class PodcastPlayerViewModel @Inject constructor(
     }
 
     init {
-        viewStateContainer.updateViewState(PodcastPlayerViewState.PodcastLoaded(args.argPodcast))
+        viewStateContainer.updateViewState(PodcastPlayerViewState.PodcastLoaded(podcast))
         mediaPlayerServiceController.addListener(this)
     }
 

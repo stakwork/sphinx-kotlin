@@ -8,19 +8,19 @@ internal sealed class PodcastPlayerViewState: ViewState<PodcastPlayerViewState>(
 
     object Idle: PodcastPlayerViewState()
 
-    data class PodcastLoaded(
+    class PodcastLoaded(
         val podcast: Podcast
     ): PodcastPlayerViewState()
 
-    data class LoadingEpisode(
+    class LoadingEpisode(
         val episode: PodcastEpisode
     ): PodcastPlayerViewState()
 
-    data class EpisodePlayed(
+    class EpisodePlayed(
         val podcast: Podcast
     ): PodcastPlayerViewState()
 
-    data class MediaStateUpdate(
+    class MediaStateUpdate(
         val podcast: Podcast
     ): PodcastPlayerViewState()
 }

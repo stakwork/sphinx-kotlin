@@ -13,7 +13,7 @@ import kotlinx.parcelize.Parcelize
 
 
 @Parcelize
-data class Podcast(
+class Podcast(
     val id: Long,
     val title: String,
     val description: String,
