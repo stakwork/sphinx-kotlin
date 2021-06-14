@@ -241,7 +241,12 @@ internal class PodcastPlayerFragment : BaseFragment<
         val duration = withContext(viewModel.io) {
             podcast.getCurrentEpisodeDuration()
         }
-        val progress = ((currentTime * 100) / duration).toInt()
+        val progress: Int =
+            try {
+                ((currentTime * 100) / duration).toInt()
+            } catch (e: ArithmeticException) {
+                0
+            }
 
         setTimeLabelsAndProgressBarTo(duration, currentTime, progress)
     }

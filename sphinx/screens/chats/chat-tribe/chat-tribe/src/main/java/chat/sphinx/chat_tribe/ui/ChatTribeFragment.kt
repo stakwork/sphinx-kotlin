@@ -65,7 +65,7 @@ internal class ChatTribeFragment: ChatFragment<
         }
     }
 
-    private fun configurePodcastPlayer(podcast: Podcast) {
+    private suspend fun configurePodcastPlayer(podcast: Podcast) {
         podcastPlayerBinding.apply {
             if (root.isGone) {
                 scrollToBottom(callback = {
@@ -80,15 +80,17 @@ internal class ChatTribeFragment: ChatFragment<
             val currentEpisode = podcast.getCurrentEpisode()
             textViewEpisodeTitle.text = currentEpisode.title
 
-            onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-                val progress = withContext(viewModel.io) {
+            val progress: Int = withContext(viewModel.io) {
+                try {
                     podcast.getPlayingProgress()
+                } catch (e: ArithmeticException) {
+                    0
                 }
-
-                progressBar.layoutParams.width =
-                    progressBarContainer.measuredWidth * (progress / 100)
-                progressBar.requestLayout()
             }
+
+            progressBar.layoutParams.width =
+                progressBarContainer.measuredWidth * (progress / 100)
+            progressBar.requestLayout()
         }
     }
 

@@ -102,6 +102,7 @@ data class Podcast(
         return episodeDuration ?: 1
     }
 
+    @Throws(ArithmeticException::class)
     fun getPlayingProgress(): Int {
         var currentTime = currentTime.toLong()
         val duration = getCurrentEpisodeDuration()
