@@ -1,5 +1,6 @@
 package chat.sphinx.feature_service_media_player_android.service
 
+import android.content.Context
 import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.feature_service_media_player_android.MediaPlayerServiceControllerImpl
 import chat.sphinx.logger.SphinxLogger
@@ -10,6 +11,9 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 internal class SphinxMediaPlayerService: MediaPlayerService() {
+
+    override val serviceContext: Context
+        get() = this
 
     @Inject
     @Suppress("PropertyName", "ProtectedInFinal")

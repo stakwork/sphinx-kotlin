@@ -32,10 +32,11 @@ internal abstract class MediaPlayerService: Service() {
         const val TAG = "MediaPlayerService"
     }
 
+    abstract val serviceContext: Context
     protected abstract val dispatchers: CoroutineDispatchers
     protected abstract val foregroundStateManager: ForegroundStateManager
     protected abstract val LOG: SphinxLogger
-    protected abstract val mediaServiceController: MediaPlayerServiceControllerImpl
+    abstract val mediaServiceController: MediaPlayerServiceControllerImpl
     protected abstract val repositoryMedia: RepositoryMedia
 
     private val supervisor = SupervisorJob()
@@ -45,10 +46,9 @@ internal abstract class MediaPlayerService: Service() {
     protected var currentState: MediaPlayerServiceState = MediaPlayerServiceState.ServiceActive.ServiceLoading
         private set
 
-    protected inner class MediaPlayerHolder {
+    inner class MediaPlayerHolder {
         @Volatile
         private var podData: PodcastDataHolder? = null
-
 
         @Suppress("DEPRECATION")
         private val wifiLock: WifiManager.WifiLock? by lazy {
@@ -206,7 +206,7 @@ internal abstract class MediaPlayerService: Service() {
                                 .setUsage(AudioAttributes.USAGE_MEDIA)
                                 .build()
                         )
-                        setWakeMode(applicationContext, PowerManager.PARTIAL_WAKE_LOCK)
+                        setWakeMode(serviceContext.applicationContext, PowerManager.PARTIAL_WAKE_LOCK)
                         setDataSource(userAction.episodeUrl)
                         setOnPreparedListener { mp ->
                             mp.setOnPreparedListener(null)
@@ -317,8 +317,8 @@ internal abstract class MediaPlayerService: Service() {
         @Synchronized
         fun clear() {
             stateDispatcherJob?.cancel()
-            currentState = MediaPlayerServiceState.ServiceInactive
             wifiLock?.release()
+            currentState = MediaPlayerServiceState.ServiceInactive
             mediaServiceController.dispatchState(currentState)
             podData?.let { data ->
                 repositoryMedia.updateChatMetaData(
@@ -336,7 +336,7 @@ internal abstract class MediaPlayerService: Service() {
         }
     }
 
-    protected val mediaPlayerHolder: MediaPlayerHolder by lazy {
+    val mediaPlayerHolder: MediaPlayerHolder by lazy {
         MediaPlayerHolder()
     }
 
@@ -358,10 +358,15 @@ internal abstract class MediaPlayerService: Service() {
         return binder
     }
 
+    private val notification: MediaPlayerNotification by lazy {
+        MediaPlayerNotification(this)
+    }
+
     private var rebindJob: Job? = null
     override fun onCreate() {
         super.onCreate()
         mediaServiceController.dispatchState(currentState)
+        notification
         rebindJob = serviceLifecycleScope.launch(dispatchers.mainImmediate) {
             foregroundStateManager.foregroundStateFlow.collect { foregroundState ->
                 @Exhaustive
@@ -392,7 +397,8 @@ internal abstract class MediaPlayerService: Service() {
         shutDownService()
     }
 
-    protected fun shutDownService() {
+    @JvmSynthetic
+    fun shutDownService() {
         rebindJob?.cancel()
         mediaServiceController.unbindService()
         stopSelf()
