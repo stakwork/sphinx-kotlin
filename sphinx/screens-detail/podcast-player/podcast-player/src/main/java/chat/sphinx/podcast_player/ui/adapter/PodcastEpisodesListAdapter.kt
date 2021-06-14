@@ -91,7 +91,6 @@ internal class PodcastEpisodesListAdapter(
 
     }
 
-    private var podcast: Podcast? = null
     private val podcastEpisodes = ArrayList<PodcastEpisode>()
 
     override fun onStart(owner: LifecycleOwner) {
@@ -105,6 +104,8 @@ internal class PodcastEpisodesListAdapter(
                     viewState is PodcastPlayerViewState.EpisodePlayed
                 ) {
 
+                    var podcast: Podcast? = null
+                    
                     if (viewState is PodcastPlayerViewState.PodcastLoaded) {
                         podcast = viewState.podcast
                     }
