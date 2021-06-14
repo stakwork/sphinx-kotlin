@@ -1531,7 +1531,7 @@ abstract class SphinxRepository(
         emit(response ?: Response.Error(ResponseError("")))
     }
 
-    override fun updateTribeInfo(chat: Chat): Flow<PodcastDto> = flow{
+    override suspend fun updateTribeInfo(chat: Chat): PodcastDto? {
         var owner: Contact? = accountOwner.value
 
         if (owner == null) {
@@ -1544,10 +1544,6 @@ abstract class SphinxRepository(
                 }
             } catch (e: Exception) {}
             delay(25L)
-        }
-
-        if (owner?.nodePubKey == chat.ownerPubKey) {
-            throw RuntimeException("Own Tribe")
         }
 
         var podcastDto: PodcastDto? = null
@@ -1571,40 +1567,41 @@ abstract class SphinxRepository(
                         is Response.Success -> {
                             val tribeDto = loadResponse.value
 
-                            val didChangeNameOrPhotoUrl = (
-                                    tribeDto.name != chat.name?.value ?: "" ||
-                                            tribeDto.img != chat.photoUrl?.value ?: ""
-                                    )
+                            if (owner?.nodePubKey != chat.ownerPubKey) {
+                                val didChangeNameOrPhotoUrl = (
+                                        tribeDto.name != chat.name?.value ?: "" ||
+                                                tribeDto.img != chat.photoUrl?.value ?: ""
+                                        )
 
-                            chatLock.withLock {
-                                queries.transaction {
-                                    updateChatTribeData(tribeDto, chat.id, queries)
+                                chatLock.withLock {
+                                    queries.transaction {
+                                        updateChatTribeData(tribeDto, chat.id, queries)
+                                    }
                                 }
+
+                                if (didChangeNameOrPhotoUrl) {
+                                    networkQueryChat.updateTribe(
+                                        chat.id,
+                                        PutTribeDto(
+                                            tribeDto.name,
+                                            tribeDto.img ?: "",
+                                        )
+                                    ).collect {}
+                                }
+
                             }
 
-                            if (didChangeNameOrPhotoUrl) {
-                                networkQueryChat.updateTribe(chat.id,
-                                    PutTribeDto(
-                                        tribeDto.name,
-                                        tribeDto.img ?: "",
-                                    )
-                                ).collect {}
-                            }
-
-                            getPodcastFeed(chat, tribeDto).collect { podcast ->
-                                podcastDto = podcast
-                            }
+                            podcastDto = getPodcastFeed(chat, tribeDto)
                         }
                     }
                 }
             }
         }
-        podcastDto?.let { podcastDto ->
-            emit(podcastDto)
-        }
+
+        return podcastDto
     }
 
-    private fun getPodcastFeed(chat: Chat, tribe: TribeDto): Flow<PodcastDto> = flow {
+    private suspend fun getPodcastFeed(chat: Chat, tribe: TribeDto): PodcastDto? {
         var podcastDto: PodcastDto? = null
 
         chat.host?.let { chatHost ->
@@ -1625,9 +1622,7 @@ abstract class SphinxRepository(
             }
         }
 
-        podcastDto?.let { podcastDto ->
-            emit(podcastDto)
-        }
+        return podcastDto
     }
 
     /*

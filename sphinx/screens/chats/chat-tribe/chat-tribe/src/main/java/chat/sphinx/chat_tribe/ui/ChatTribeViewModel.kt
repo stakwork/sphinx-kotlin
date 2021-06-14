@@ -188,7 +188,7 @@ internal class ChatTribeViewModel @Inject constructor(
 
     suspend fun loadTribeAndPodcastData(): Podcast? {
         chatRepository.getChatById(args.chatId).firstOrNull()?.let { chat ->
-            chatRepository.updateTribeInfo(chat).collect { podcastDto ->
+            chatRepository.updateTribeInfo(chat)?.let { podcastDto ->
                 podcast = podcastDto.toPodcast()
 
                 chatRepository.getChatById(args.chatId).firstOrNull()?.let { chat ->

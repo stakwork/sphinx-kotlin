@@ -49,7 +49,5 @@ interface ChatRepository {
         tribeDto: TribeDto,
     ): Flow<LoadResponse<Any, ResponseError>>
 
-    fun updateTribeInfo(
-        chat: Chat
-    ): Flow<PodcastDto>
+    suspend fun updateTribeInfo(chat: Chat): PodcastDto?
 }
