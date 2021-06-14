@@ -20,7 +20,6 @@ import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.logger.e
 import chat.sphinx.wrapper_chat.ChatMetaData
 import chat.sphinx.wrapper_common.ItemId
-import chat.sphinx.wrapper_common.dashboard.ChatId
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_foreground_state.ForegroundState
 import io.matthewnelson.concept_foreground_state.ForegroundStateManager
@@ -42,12 +41,6 @@ internal abstract class MediaPlayerService: Service() {
     private val supervisor = SupervisorJob()
     protected val serviceLifecycleScope = CoroutineScope(supervisor)
 
-    @Suppress("DEPRECATION")
-    val wifiLock: WifiManager.WifiLock? by lazy(LazyThreadSafetyMode.NONE) {
-        (getSystemService(Context.WIFI_SERVICE) as? WifiManager)
-            ?.createWifiLock(WifiManager.WIFI_MODE_FULL, this.javaClass.simpleName)
-    }
-
     @Volatile
     protected var currentState: MediaPlayerServiceState = MediaPlayerServiceState.ServiceActive.ServiceLoading
         private set
@@ -55,6 +48,13 @@ internal abstract class MediaPlayerService: Service() {
     protected inner class MediaPlayerHolder {
         @Volatile
         private var podData: PodcastDataHolder? = null
+
+
+        @Suppress("DEPRECATION")
+        private val wifiLock: WifiManager.WifiLock? by lazy {
+            (getSystemService(Context.WIFI_SERVICE) as? WifiManager)
+                ?.createWifiLock(WifiManager.WIFI_MODE_FULL, this.javaClass.simpleName)
+        }
 
         @Synchronized
         fun processUserAction(userAction: UserAction) {
@@ -148,6 +148,8 @@ internal abstract class MediaPlayerService: Service() {
                                         lock.acquire()
                                     }
                                 }
+                            } else {
+                                wifiLock?.release()
                             }
 
 
@@ -189,6 +191,12 @@ internal abstract class MediaPlayerService: Service() {
                                 userAction.satPerMinute,
                                 nnData.mediaPlayer,
                             )
+
+                            wifiLock?.let { lock ->
+                                if (!lock.isHeld) {
+                                    lock.acquire()
+                                }
+                            }
 
                         }
                     } ?: MediaPlayer().apply {
@@ -296,7 +304,7 @@ internal abstract class MediaPlayerService: Service() {
                             }
 
                             mediaServiceController.dispatchState(currentState)
-                            stateDispatcherJob?.cancel()
+                            stateDispatcherJob?.cancelAndJoin()
 
                         }
                     }
@@ -307,9 +315,24 @@ internal abstract class MediaPlayerService: Service() {
         }
 
         @Synchronized
-        fun release() {
-            podData?.mediaPlayer?.release()
-            podData = null
+        fun clear() {
+            stateDispatcherJob?.cancel()
+            currentState = MediaPlayerServiceState.ServiceInactive
+            wifiLock?.release()
+            mediaServiceController.dispatchState(currentState)
+            podData?.let { data ->
+                repositoryMedia.updateChatMetaData(
+                    data.chatId,
+                    ChatMetaData(
+                        ItemId(data.episodeId),
+                        data.satsPerMinute,
+                        data.mediaPlayer.currentPosition,
+                        data.mediaPlayer.playbackParams.speed.toDouble(),
+                    )
+                )
+                data.mediaPlayer.release()
+                podData = null
+            }
         }
     }
 
@@ -373,10 +396,7 @@ internal abstract class MediaPlayerService: Service() {
 
     override fun onDestroy() {
         super.onDestroy()
-        currentState = MediaPlayerServiceState.ServiceInactive
-        wifiLock?.release()
-        mediaPlayerHolder.release()
-        mediaServiceController.dispatchState(currentState)
+        mediaPlayerHolder.clear()
         // TODO: Clear notification
         supervisor.cancel()
     }
