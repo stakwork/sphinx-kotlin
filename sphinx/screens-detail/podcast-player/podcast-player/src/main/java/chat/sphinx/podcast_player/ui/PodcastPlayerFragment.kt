@@ -294,17 +294,25 @@ internal class PodcastPlayerFragment : BaseFragment<
                         buttonPlaybackSpeed.text = "0.5x"
                         viewModel.adjustSpeed(0.5)
                     }
+                    R.id.speed0_8 -> {
+                        buttonPlaybackSpeed.text = "0.8x"
+                        viewModel.adjustSpeed(0.8)
+                    }
                     R.id.speed1 -> {
                         buttonPlaybackSpeed.text = "1x"
                         viewModel.adjustSpeed(1.0)
+                    }
+                    R.id.speed1_2 -> {
+                        buttonPlaybackSpeed.text = "1.2x"
+                        viewModel.adjustSpeed(1.2)
                     }
                     R.id.speed1_5 -> {
                         buttonPlaybackSpeed.text = "1.5x"
                         viewModel.adjustSpeed(1.5)
                     }
-                    R.id.speed2 -> {
-                        buttonPlaybackSpeed.text = "2x"
-                        viewModel.adjustSpeed(2.0)
+                    R.id.speed2_1 -> {
+                        buttonPlaybackSpeed.text = "2.1x"
+                        viewModel.adjustSpeed(2.1)
                     }
                 }
                 true
