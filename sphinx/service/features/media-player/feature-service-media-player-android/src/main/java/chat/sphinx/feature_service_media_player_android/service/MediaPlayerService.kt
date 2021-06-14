@@ -189,6 +189,9 @@ internal abstract class MediaPlayerService: Service() {
                                 )
                             )
 
+                            currentState = MediaPlayerServiceState.ServiceActive.ServiceLoading
+                            mediaServiceController.dispatchState(currentState)
+
                             nnData.mediaPlayer.setDataSource(userAction.episodeUrl)
                             nnData.mediaPlayer.setOnPreparedListener { mp ->
                                 mp.setOnPreparedListener(null)
