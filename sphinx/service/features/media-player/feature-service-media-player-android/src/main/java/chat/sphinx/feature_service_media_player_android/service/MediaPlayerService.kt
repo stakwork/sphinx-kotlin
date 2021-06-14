@@ -129,6 +129,10 @@ internal abstract class MediaPlayerService: Service() {
                                 }
                             }
 
+                            if (nnData.mediaPlayer.isPlaying && stateDispatcherJob?.isActive != true) {
+                                startStateDispatcher()
+                            }
+
                         } else {
 
                             val currentTime = nnData.mediaPlayer.currentPosition
