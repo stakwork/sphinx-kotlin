@@ -9,4 +9,6 @@ internal class PodcastDataHolder(
     val episodeId: Long,
     val satsPerMinute: Sat,
     val mediaPlayer: MediaPlayer,
-)
+) {
+    var speed: Double = 1.0
+}

@@ -72,6 +72,7 @@ internal abstract class MediaPlayerService: Service() {
                             nnData.episodeId == userAction.chatMetaData.itemId.value
                         ) {
                             try {
+                                nnData.speed = userAction.chatMetaData.speed
                                 nnData.mediaPlayer.playbackParams.apply {
                                     speed = userAction.chatMetaData.speed.toFloat()
                                 }
@@ -139,7 +140,11 @@ internal abstract class MediaPlayerService: Service() {
 
                             if (!nnData.mediaPlayer.isPlaying) {
                                 try {
+                                    nnData.speed = userAction.speed
                                     nnData.mediaPlayer.seekTo(userAction.startTime)
+                                    nnData.mediaPlayer.playbackParams.apply {
+                                        speed = userAction.speed.toFloat()
+                                    }
                                     nnData.mediaPlayer.start()
                                 } catch (e: IllegalStateException) {
                                     LOG.e(TAG, "Failed to start MediaPlayer", e)
@@ -171,7 +176,7 @@ internal abstract class MediaPlayerService: Service() {
                             val speed = nnData.mediaPlayer.playbackParams.speed.toDouble()
 
                             stateDispatcherJob?.cancel()
-                            nnData.mediaPlayer.stop()
+                            nnData.mediaPlayer.release()
                             currentState = MediaPlayerServiceState.ServiceActive.MediaState.Paused(
                                 nnData.chatId,
                                 nnData.episodeId,
@@ -192,20 +197,30 @@ internal abstract class MediaPlayerService: Service() {
                             currentState = MediaPlayerServiceState.ServiceActive.ServiceLoading
                             mediaServiceController.dispatchState(currentState)
 
-                            nnData.mediaPlayer.setDataSource(userAction.episodeUrl)
-                            nnData.mediaPlayer.setOnPreparedListener { mp ->
-                                mp.setOnPreparedListener(null)
-                                mp.seekTo(userAction.startTime)
-                                mp.start()
-                                startStateDispatcher()
+                            val newPlayer = MediaPlayer().apply {
+                                setAudioAttributes(
+                                    AudioAttributes.Builder()
+                                        .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                                        .setUsage(AudioAttributes.USAGE_MEDIA)
+                                        .build()
+                                )
+                                setWakeMode(serviceContext.applicationContext, PowerManager.PARTIAL_WAKE_LOCK)
+                                setDataSource(userAction.episodeUrl)
+                                setOnPreparedListener { mp ->
+                                    mp.setOnPreparedListener(null)
+                                    mp.seekTo(userAction.startTime)
+                                    mp.playbackParams.apply { this.speed = userAction.speed.toFloat() }
+                                    mp.start()
+                                    startStateDispatcher()
+                                }
                             }
-                            nnData.mediaPlayer.prepareAsync()
+                            newPlayer.prepareAsync()
                             podData = PodcastDataHolder(
                                 userAction.chatId,
                                 userAction.episodeId,
                                 userAction.satPerMinute,
-                                nnData.mediaPlayer,
-                            )
+                                newPlayer,
+                            ).also { it.speed = userAction.speed }
 
                             wifiLock?.let { lock ->
                                 if (!lock.isHeld) {
@@ -226,6 +241,7 @@ internal abstract class MediaPlayerService: Service() {
                         setOnPreparedListener { mp ->
                             mp.setOnPreparedListener(null)
                             mp.seekTo(userAction.startTime)
+                            mp.playbackParams.apply { this.speed = userAction.speed.toFloat() }
                             mp.start()
                             startStateDispatcher()
                         }
@@ -242,7 +258,7 @@ internal abstract class MediaPlayerService: Service() {
                             userAction.episodeId,
                             userAction.satPerMinute,
                             mp,
-                        )
+                        ).also { it.speed = userAction.speed }
                     }
 
                 }
