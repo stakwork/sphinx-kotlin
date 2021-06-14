@@ -42,6 +42,16 @@ internal abstract class MediaPlayerService: Service() {
     private val supervisor = SupervisorJob()
     protected val serviceLifecycleScope = CoroutineScope(supervisor)
 
+    @Suppress("DEPRECATION")
+    private val wifiLock: WifiManager.WifiLock? by lazy {
+        (getSystemService(Context.WIFI_SERVICE) as? WifiManager)
+            ?.createWifiLock(WifiManager.WIFI_MODE_FULL, this.javaClass.simpleName)
+    }
+
+    private val notification: MediaPlayerNotification by lazy {
+        MediaPlayerNotification(this)
+    }
+
     @Volatile
     protected var currentState: MediaPlayerServiceState = MediaPlayerServiceState.ServiceActive.ServiceLoading
         private set
@@ -49,12 +59,6 @@ internal abstract class MediaPlayerService: Service() {
     inner class MediaPlayerHolder {
         @Volatile
         private var podData: PodcastDataHolder? = null
-
-        @Suppress("DEPRECATION")
-        private val wifiLock: WifiManager.WifiLock? by lazy {
-            (getSystemService(Context.WIFI_SERVICE) as? WifiManager)
-                ?.createWifiLock(WifiManager.WIFI_MODE_FULL, this.javaClass.simpleName)
-        }
 
         @Synchronized
         fun processUserAction(userAction: UserAction) {
@@ -118,7 +122,11 @@ internal abstract class MediaPlayerService: Service() {
                         }
                     }
 
-                    wifiLock?.release()
+                    wifiLock?.let { lock ->
+                        if (lock.isHeld) {
+                            lock.release()
+                        }
+                    }
 
                 }
                 is UserAction.ServiceAction.Play -> {
@@ -149,7 +157,11 @@ internal abstract class MediaPlayerService: Service() {
                                     }
                                 }
                             } else {
-                                wifiLock?.release()
+                                wifiLock?.let { lock ->
+                                    if (lock.isHeld) {
+                                        lock.release()
+                                    }
+                                }
                             }
 
 
@@ -317,7 +329,6 @@ internal abstract class MediaPlayerService: Service() {
         @Synchronized
         fun clear() {
             stateDispatcherJob?.cancel()
-            wifiLock?.release()
             currentState = MediaPlayerServiceState.ServiceInactive
             mediaServiceController.dispatchState(currentState)
             podData?.let { data ->
@@ -358,10 +369,6 @@ internal abstract class MediaPlayerService: Service() {
         return binder
     }
 
-    private val notification: MediaPlayerNotification by lazy {
-        MediaPlayerNotification(this)
-    }
-
     private var rebindJob: Job? = null
     override fun onCreate() {
         super.onCreate()
@@ -400,6 +407,11 @@ internal abstract class MediaPlayerService: Service() {
     @JvmSynthetic
     fun shutDownService() {
         rebindJob?.cancel()
+        wifiLock?.let { lock ->
+            if (lock.isHeld) {
+                lock.release()
+            }
+        }
         mediaServiceController.unbindService()
         stopSelf()
     }
@@ -407,7 +419,6 @@ internal abstract class MediaPlayerService: Service() {
     override fun onDestroy() {
         super.onDestroy()
         mediaPlayerHolder.clear()
-        // TODO: Clear notification
         supervisor.cancel()
     }
 }
