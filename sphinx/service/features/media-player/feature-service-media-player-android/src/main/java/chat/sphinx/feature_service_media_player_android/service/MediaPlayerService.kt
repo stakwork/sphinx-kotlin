@@ -389,6 +389,10 @@ internal abstract class MediaPlayerService: Service() {
 
     override fun onTaskRemoved(rootIntent: Intent?) {
         super.onTaskRemoved(rootIntent)
+        shutDownService()
+    }
+
+    protected fun shutDownService() {
         rebindJob?.cancel()
         mediaServiceController.unbindService()
         stopSelf()
