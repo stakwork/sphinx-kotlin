@@ -305,7 +305,7 @@ internal abstract class MediaPlayerService: Service() {
                     var speed: Double = 1.0
                     podData?.let { nnData ->
                         speed = nnData.speed.let {
-                            if (it >= 0.0) {
+                            if (it > 0.0) {
                                 it
                             } else {
                                 1.0
