@@ -8,6 +8,7 @@ import chat.sphinx.concept_network_query_chat.model.PodcastDto
 import chat.sphinx.wrapper_chat.ChatMetaData
 import chat.sphinx.wrapper_common.ItemId
 import chat.sphinx.wrapper_common.lightning.Sat
+import chat.sphinx.wrapper_common.lightning.toSat
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 
@@ -24,19 +25,24 @@ class Podcast(
 ): Parcelable {
 
     //MetaData
+    @Volatile
     @IgnoredOnParcel
     var episodeId: Long? = null
 
+    @Volatile
     @IgnoredOnParcel
     var timeSeconds: Int? = null
 
+    @Volatile
     @IgnoredOnParcel
     var speed: Double = 1.0
 
+    @Volatile
     @IgnoredOnParcel
-    var satsPerMinute: Long? = null
+    var satsPerMinute: Long = 0
 
     //Duration
+    @Volatile
     @IgnoredOnParcel
     var episodeDuration: Long? = null
 
@@ -51,20 +57,19 @@ class Podcast(
         get() = getCurrentEpisode().playing
 
     fun setMetaData(metaData: ChatMetaData) {
-        this.episodeId = metaData.itemId.value
-        this.timeSeconds = metaData.timeSeconds
-        this.speed = metaData.speed
-        this.satsPerMinute = metaData.satsPerMinute.value
+        episodeId = metaData.itemId.value
+        timeSeconds = metaData.timeSeconds
+        speed = metaData.speed
+        satsPerMinute = metaData.satsPerMinute.value
     }
 
-    fun getMetaData(): ChatMetaData {
-        val episodeId = ItemId(this.episodeId ?: 0)
-        val satsPerMinute = Sat(this.satsPerMinute ?: 0)
-        val timeSeconds = this.timeSeconds ?: 0
-        val speed = this.speed
-
-        return ChatMetaData(episodeId, satsPerMinute, timeSeconds, speed)
-    }
+    fun getMetaData(): ChatMetaData =
+        ChatMetaData(
+            ItemId(episodeId ?: 0),
+            satsPerMinute.toSat() ?: Sat(0),
+            timeSeconds ?: 0,
+            speed,
+        )
 
     fun getCurrentEpisode(): PodcastEpisode {
         episodeId?.let { episodeId ->
@@ -104,9 +109,7 @@ class Podcast(
 
     @Throws(ArithmeticException::class)
     fun getPlayingProgress(): Int {
-        var currentTime = currentTime.toLong()
-        val duration = getCurrentEpisodeDuration()
-        val progress = (currentTime * 100) / duration
+        val progress = (currentTime.toLong() * 100) / getCurrentEpisodeDuration()
         return progress.toInt()
     }
 
@@ -144,10 +147,10 @@ class Podcast(
             this.episodeDuration = null
         }
 
-        episode?.let { episode ->
-            episode.playing = true
+        episode?.let { nnEpisode ->
+            nnEpisode.playing = true
 
-            this.episodeId = episode.id
+            this.episodeId = nnEpisode.id
             this.timeSeconds = time
         }
     }
@@ -155,8 +158,8 @@ class Podcast(
     fun pauseEpisodeUpdate(episodeId: Long) {
         val episode = getEpisodeWithId(episodeId)
 
-        episode?.let { episode ->
-            didPausePlayingEpisode(episode)
+        episode?.let { nnEpisode ->
+            didPausePlayingEpisode(nnEpisode)
         }
     }
 
@@ -182,11 +185,11 @@ fun Uri.getMediaDuration(): Long {
 }
 
 fun PodcastDto.toPodcast(): Podcast {
-    val podcastEpisodes = mutableListOf<PodcastEpisode>()
+    val podcastEpisodes: MutableList<PodcastEpisode> = ArrayList(episodes.size)
 
-    for (episode in this.episodes) {
+    for (episode in episodes) {
         podcastEpisodes.add(episode.toPodcastEpisode())
     }
 
-    return Podcast(this.id, this.title,this.description,this.author,this.image, this.value.toPodcastValue(), podcastEpisodes)
+    return Podcast(id, title, description, author, image, value.toPodcastValue(), podcastEpisodes)
 }

@@ -132,12 +132,10 @@ internal class PodcastPlayerViewModel @Inject constructor(
         viewModelScope.launch(mainImmediate) {
             podcast.speed = speed
 
-            val metaData = podcast.getMetaData()
-
             mediaPlayerServiceController.submitAction(
                 UserAction.AdjustSpeed(
                     args.chatId,
-                    metaData
+                    podcast.getMetaData()
                 )
             )
         }
