@@ -85,17 +85,17 @@ internal class PodcastPlayerViewModel @Inject constructor(
         mediaPlayerServiceController.removeListener(this)
     }
 
-    fun playEpisode(episode: PodcastEpisode, startTime: Int) {
+    fun playEpisodeFromList(episode: PodcastEpisode, startTime: Int) {
         viewModelScope.launch(mainImmediate) {
             viewStateContainer.updateViewState(PodcastPlayerViewState.LoadingEpisode(episode))
 
             delay(50L)
 
-            resumeEpisode(episode, startTime)
+            playEpisode(episode, startTime)
         }
     }
 
-    fun resumeEpisode(episode: PodcastEpisode, startTime: Int) {
+    fun playEpisode(episode: PodcastEpisode, startTime: Int) {
         viewModelScope.launch(mainImmediate) {
             mediaPlayerServiceController.submitAction(
                 UserAction.ServiceAction.Play(

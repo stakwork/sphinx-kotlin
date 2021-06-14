@@ -43,17 +43,16 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <!--  Boost Button  -->
-    <androidx.appcompat.widget.AppCompatTextView
+    <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/text_view_boost_podcast_button"
         android:layout_width="@dimen/chat_footer_button_xy"
         android:layout_height="@dimen/chat_footer_button_xy"
         android:layout_marginHorizontal="@dimen/default_layout_margin"
+        android:padding="4dp"
         android:background="@drawable/button_background_white_rad_48"
         android:backgroundTint="@color/primaryGreen"
-        android:fontFamily="@font/material_icons_regular"
-        android:foreground="@drawable/ic_boost"
-        android:foregroundTint="@color/text"
-        android:gravity="center"
+        android:src="@drawable/ic_boost"
+        android:alpha="0.3"
         android:clickable="true"
         android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"

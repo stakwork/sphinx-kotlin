@@ -93,14 +93,12 @@ internal class PodcastPlayerFragment : BaseFragment<
     }
 
     override suspend fun onViewStateFlowCollect(viewState: PodcastPlayerViewState) {
-        binding.includeLayoutEpisodeSliderControl.progressBarAudioLoading.goneIfFalse(false)
-
         @Exhaustive
         when (viewState) {
             is PodcastPlayerViewState.Idle -> {}
 
             is PodcastPlayerViewState.ServiceLoading -> {
-                binding.includeLayoutEpisodeSliderControl.progressBarAudioLoading.goneIfFalse(true)
+                toggleLoadingWheel(true)
             }
             is PodcastPlayerViewState.ServiceInactive -> {
                 togglePlayPauseButton(false)
@@ -120,6 +118,7 @@ internal class PodcastPlayerFragment : BaseFragment<
             }
 
             is PodcastPlayerViewState.MediaStateUpdate -> {
+                toggleLoadingWheel(false)
                 showPodcastInfo(viewState.podcast)
             }
 
@@ -142,11 +141,13 @@ internal class PodcastPlayerFragment : BaseFragment<
 
             includeLayoutPodcastEpisodesList.textViewEpisodesListCount.text = podcast.episodesCount.toString()
 
-            includeLayoutEpisodeSliderControl.apply {
-                progressBarAudioLoading.goneIfFalse(false)
-            }
-
             togglePlayPauseButton(podcast.isPlaying)
+        }
+    }
+
+    private fun toggleLoadingWheel(show: Boolean) {
+        binding.includeLayoutEpisodeSliderControl.apply {
+            progressBarAudioLoading.goneIfFalse(show)
         }
     }
 
@@ -209,7 +210,7 @@ internal class PodcastPlayerFragment : BaseFragment<
                     if (currentEpisode.playing) {
                         viewModel.pauseEpisode(currentEpisode)
                     } else {
-                        viewModel.resumeEpisode(currentEpisode, podcast.currentTime)
+                        viewModel.playEpisode(currentEpisode, podcast.currentTime)
                     }
                 }
 
@@ -235,7 +236,7 @@ internal class PodcastPlayerFragment : BaseFragment<
 
                 seekBarCurrentEpisodeProgress.progress = 0
 
-                progressBarAudioLoading.goneIfFalse(true)
+                toggleLoadingWheel(true)
             }
         }
     }

@@ -93,6 +93,12 @@ internal class ChatTribeFragment: ChatFragment<
         }
     }
 
+    private fun toggleLoadingWheel(show: Boolean) {
+        podcastPlayerBinding.apply {
+            progressBarAudioLoading.goneIfFalse(show)
+        }
+    }
+
     private fun togglePlayPauseButton(playing: Boolean) {
         podcastPlayerBinding.apply {
             textViewPlayPauseButton.text = getString(
@@ -125,8 +131,6 @@ internal class ChatTribeFragment: ChatFragment<
         super.subscribeToViewStateFlow()
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.podcastViewStateContainer.collect { viewState ->
-                podcastPlayerBinding.progressBarAudioLoading.goneIfFalse(false)
-
                 @Exhaustive
                 when (viewState) {
                     is PodcastViewState.Idle -> {}
@@ -136,10 +140,11 @@ internal class ChatTribeFragment: ChatFragment<
                     }
 
                     is PodcastViewState.ServiceLoading -> {
-                        podcastPlayerBinding.progressBarAudioLoading.goneIfFalse(true)
+                        toggleLoadingWheel(true)
                     }
 
                     is PodcastViewState.MediaStateUpdate -> {
+                        toggleLoadingWheel(false)
                         configurePodcastPlayer(viewState.podcast)
                     }
                 }
