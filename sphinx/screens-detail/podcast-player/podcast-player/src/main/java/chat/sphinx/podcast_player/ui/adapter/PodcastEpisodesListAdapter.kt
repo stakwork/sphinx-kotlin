@@ -100,7 +100,7 @@ internal class PodcastEpisodesListAdapter(
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.collectViewState { viewState ->
 
-                if (viewState !is PodcastPlayerViewState.LoadingEpisode) {
+                if (viewState is PodcastPlayerViewState.PodcastLoaded || viewState is PodcastPlayerViewState.EpisodePlayed) {
 
                     if (viewState is PodcastPlayerViewState.PodcastLoaded) {
                         podcast = viewState.podcast

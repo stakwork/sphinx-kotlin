@@ -100,6 +100,7 @@ internal class PodcastPlayerViewModel @Inject constructor(
                     episode.id,
                     episode.enclosureUrl,
                     Sat(0),
+                    podcast.speed,
                     startTime,
                 )
             )

@@ -228,6 +228,7 @@ internal class ChatTribeViewModel @Inject constructor(
                         episode.id,
                         episode.enclosureUrl,
                         Sat(0),
+                        podcast.speed,
                         startTime,
                     )
                 )

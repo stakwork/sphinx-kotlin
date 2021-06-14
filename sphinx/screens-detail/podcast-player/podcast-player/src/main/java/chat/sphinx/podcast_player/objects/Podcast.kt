@@ -131,7 +131,11 @@ class Podcast(
         val didChangeEpisode = this.episodeId != episode.id
 
         if (didChangeEpisode) {
+            this.playingEpisode?.playing = false
+
             this.playingEpisode = getEpisodeWithId(episode.id)
+            this.playingEpisode?.playing = true
+
             this.episodeId = episode.id
         }
         this.timeSeconds = time
