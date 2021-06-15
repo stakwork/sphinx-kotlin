@@ -93,6 +93,7 @@ internal class PodcastPlayerFragment : BaseFragment<
         }
     }
 
+    private var dragging: Boolean = false
     private fun addPodcastOnClickListeners(podcast: Podcast) {
         binding.apply {
             includeLayoutEpisodeSliderControl.apply {
@@ -110,12 +111,15 @@ internal class PodcastPlayerFragment : BaseFragment<
                             }
                         }
 
-                        override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+                        override fun onStartTrackingTouch(seekBar: SeekBar?) {
+                            dragging = true
+                        }
 
                         override fun onStopTrackingTouch(seekBar: SeekBar?) {
                             onStopSupervisor.scope.launch(viewModel.mainImmediate) {
                                 seekTo(podcast, seekBar?.progress ?: 0)
                             }
+                            dragging = false
                         }
                     }
                 )
@@ -193,7 +197,7 @@ internal class PodcastPlayerFragment : BaseFragment<
         binding.apply {
             textViewEpisodeTitleLabel.text = podcast.getCurrentEpisode().title
 
-            setTimeLabelsAndProgressBar(podcast)
+            if (!dragging) setTimeLabelsAndProgressBar(podcast)
 
             imageLoader.load(
                 imageViewPodcastImage,
