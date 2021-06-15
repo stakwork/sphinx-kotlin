@@ -51,24 +51,24 @@ internal class PodcastPlayerViewModel @Inject constructor(
         when (serviceState) {
             is MediaPlayerServiceState.ServiceActive.MediaState.Playing -> {
                 podcast.playingEpisodeUpdate(serviceState.episodeId, serviceState.currentTime)
+                viewStateContainer.updateViewState(PodcastPlayerViewState.MediaStateUpdate(podcast, serviceState))
             }
             is MediaPlayerServiceState.ServiceActive.MediaState.Paused -> {
                 podcast.pauseEpisodeUpdate()
+                viewStateContainer.updateViewState(PodcastPlayerViewState.MediaStateUpdate(podcast, serviceState))
             }
             is MediaPlayerServiceState.ServiceActive.MediaState.Ended -> {
                 podcast.endEpisodeUpdate(serviceState.episodeId)
+                viewStateContainer.updateViewState(PodcastPlayerViewState.MediaStateUpdate(podcast, serviceState))
             }
             is MediaPlayerServiceState.ServiceActive.ServiceLoading -> {
                 viewStateContainer.updateViewState(PodcastPlayerViewState.ServiceLoading)
-                return
             }
             is MediaPlayerServiceState.ServiceInactive -> {
                 podcast.pauseEpisodeUpdate()
                 viewStateContainer.updateViewState(PodcastPlayerViewState.ServiceInactive)
-                return
             }
         }
-        viewStateContainer.updateViewState(PodcastPlayerViewState.MediaStateUpdate(podcast))
     }
 
     init {

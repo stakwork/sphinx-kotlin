@@ -147,44 +147,25 @@ class Podcast(
         return progress.toInt()
     }
 
-    //User actions
     fun didStartPlayingEpisode(episode: PodcastEpisode, time: Int) {
         val didChangeEpisode = this.episodeId != episode.id
 
         if (didChangeEpisode) {
             this.playingEpisode?.playing = false
-
             this.playingEpisode = getEpisodeWithId(episode.id)
-            this.playingEpisode?.playing = true
-
-            this.episodeId = episode.id
         }
+
+        this.playingEpisode?.playing = true
+        this.episodeId = episode.id
         this.timeSeconds = time
 
         getCurrentEpisodeDuration(didChangeEpisode)
-    }
-
-    private fun didEndPlayingEpisode(episode: PodcastEpisode, nextEpisode: PodcastEpisode?) {
-        episode.playing = false
-
-        val nextEpisodeId = nextEpisode?.id ?: episodes[0].id
-        this.playingEpisode = getEpisodeWithId(nextEpisodeId)
-        this.episodeId = nextEpisodeId
-
-        this.timeSeconds = 0
-
-        getCurrentEpisodeDuration(true)
-    }
-
-    fun didPausePlayingEpisode(episode: PodcastEpisode) {
-        episode.playing = false
     }
 
     fun didSeekTo(time: Int) {
         this.timeSeconds = time
     }
 
-    //MediaService update
     fun playingEpisodeUpdate(episodeId: Long, time: Int) {
         if (episodeId != playingEpisode?.id) {
             this.playingEpisode?.playing = false
@@ -212,6 +193,22 @@ class Podcast(
             val nextEpisode = getNextEpisode(episodeId)
             didEndPlayingEpisode(episode, nextEpisode)
         }
+    }
+
+    private fun didEndPlayingEpisode(episode: PodcastEpisode, nextEpisode: PodcastEpisode?) {
+        episode.playing = false
+
+        val nextEpisodeId = nextEpisode?.id ?: episodes[0].id
+        this.playingEpisode = getEpisodeWithId(nextEpisodeId)
+        this.episodeId = nextEpisodeId
+
+        this.timeSeconds = 0
+
+        getCurrentEpisodeDuration(true)
+    }
+
+    fun didPausePlayingEpisode(episode: PodcastEpisode) {
+        episode.playing = false
     }
 }
 

@@ -154,29 +154,29 @@ internal class ChatTribeViewModel @Inject constructor(
             }
         }
 
-        @Exhaustive
-        when (serviceState) {
-            is MediaPlayerServiceState.ServiceActive.MediaState.Playing -> {
-                podcast?.playingEpisodeUpdate(serviceState.episodeId, serviceState.currentTime)
-            }
-            is MediaPlayerServiceState.ServiceActive.MediaState.Paused -> {
-                podcast?.pauseEpisodeUpdate()
-            }
-            is MediaPlayerServiceState.ServiceActive.MediaState.Ended -> {
-                podcast?.endEpisodeUpdate(serviceState.episodeId)
-            }
-            is MediaPlayerServiceState.ServiceActive.ServiceLoading -> {
-                podcastViewStateContainer.updateViewState(PodcastViewState.ServiceLoading)
-                return
-            }
-            is MediaPlayerServiceState.ServiceInactive -> {
-                podcast?.pauseEpisodeUpdate()
-                podcastViewStateContainer.updateViewState(PodcastViewState.ServiceInactive)
-                return
-            }
-        }
         podcast?.let { podcast ->
-            podcastViewStateContainer.updateViewState(PodcastViewState.MediaStateUpdate(podcast))
+            @Exhaustive
+            when (serviceState) {
+                is MediaPlayerServiceState.ServiceActive.MediaState.Playing -> {
+                    podcast.playingEpisodeUpdate(serviceState.episodeId, serviceState.currentTime)
+                    podcastViewStateContainer.updateViewState(PodcastViewState.MediaStateUpdate(podcast))
+                }
+                is MediaPlayerServiceState.ServiceActive.MediaState.Paused -> {
+                    podcast.pauseEpisodeUpdate()
+                    podcastViewStateContainer.updateViewState(PodcastViewState.MediaStateUpdate(podcast))
+                }
+                is MediaPlayerServiceState.ServiceActive.MediaState.Ended -> {
+                    podcast.endEpisodeUpdate(serviceState.episodeId)
+                    podcastViewStateContainer.updateViewState(PodcastViewState.MediaStateUpdate(podcast))
+                }
+                is MediaPlayerServiceState.ServiceActive.ServiceLoading -> {
+                    podcastViewStateContainer.updateViewState(PodcastViewState.ServiceLoading)
+                }
+                is MediaPlayerServiceState.ServiceInactive -> {
+                    podcast.pauseEpisodeUpdate()
+                    podcastViewStateContainer.updateViewState(PodcastViewState.ServiceInactive)
+                }
+            }
         }
     }
 

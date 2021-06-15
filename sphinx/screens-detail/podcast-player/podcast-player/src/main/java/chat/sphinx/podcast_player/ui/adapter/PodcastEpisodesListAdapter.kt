@@ -11,6 +11,7 @@ import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
+import chat.sphinx.concept_service_media.MediaPlayerServiceState
 import chat.sphinx.podcast_player.R
 import chat.sphinx.podcast_player.databinding.LayoutEpisodeListItemHolderBinding
 import chat.sphinx.podcast_player.objects.Podcast
@@ -99,25 +100,25 @@ internal class PodcastEpisodesListAdapter(
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.collectViewState { viewState ->
 
-                if (viewState is PodcastPlayerViewState.PodcastLoaded ||
-                    viewState is PodcastPlayerViewState.EpisodePlayed ||
-                    viewState is PodcastPlayerViewState.MediaStateUpdate
-                ) {
+                var episodes = ArrayList<PodcastEpisode>()
 
-                    var episodes = ArrayList<PodcastEpisode>()
+                if (viewState is PodcastPlayerViewState.PodcastLoaded) {
+                    episodes = viewState.podcast.getEpisodesListCopy()
+                }
 
-                    if (viewState is PodcastPlayerViewState.PodcastLoaded) {
+                if (viewState is PodcastPlayerViewState.EpisodePlayed) {
+                    episodes = viewState.podcast.getEpisodesListCopy()
+                }
+
+                if (viewState is PodcastPlayerViewState.MediaStateUpdate) {
+                    if (viewState.state is MediaPlayerServiceState.ServiceActive.MediaState.Paused ||
+                        viewState.state is MediaPlayerServiceState.ServiceActive.MediaState.Ended)
+                    {
                         episodes = viewState.podcast.getEpisodesListCopy()
                     }
+                }
 
-                    if (viewState is PodcastPlayerViewState.EpisodePlayed) {
-                        episodes = viewState.podcast.getEpisodesListCopy()
-                    }
-
-                    if (viewState is PodcastPlayerViewState.MediaStateUpdate) {
-                        episodes = viewState.podcast.getEpisodesListCopy()
-                    }
-
+                if (episodes.isNotEmpty()) {
                     if (podcastEpisodes.isEmpty()) {
                         podcastEpisodes.addAll(episodes)
                         this@PodcastEpisodesListAdapter.notifyDataSetChanged()
