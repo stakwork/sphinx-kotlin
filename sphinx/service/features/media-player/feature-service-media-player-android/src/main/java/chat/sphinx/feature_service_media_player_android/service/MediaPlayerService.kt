@@ -213,12 +213,13 @@ internal abstract class MediaPlayerService: Service() {
                                 }
                             }
                             newPlayer.prepareAsync()
-                            podData = PodcastDataHolder(
+                            podData = PodcastDataHolder.instantiate(
                                 userAction.chatId,
                                 userAction.episodeId,
                                 userAction.satPerMinute,
                                 newPlayer,
-                            ).also { it.setSpeed(userAction.speed) }
+                                userAction.speed
+                            )
 
                             wifiLock?.let { lock ->
                                 if (!lock.isHeld) {
@@ -251,12 +252,13 @@ internal abstract class MediaPlayerService: Service() {
                         }
 
                         mp.prepareAsync()
-                        podData = PodcastDataHolder(
+                        podData = PodcastDataHolder.instantiate(
                             userAction.chatId,
                             userAction.episodeId,
                             userAction.satPerMinute,
                             mp,
-                        ).also { it.setSpeed(userAction.speed) }
+                            userAction.speed
+                        )
                     }
 
                     repositoryMedia.updateChatMetaData(
@@ -301,10 +303,8 @@ internal abstract class MediaPlayerService: Service() {
             stateDispatcherJob = serviceLifecycleScope.launch(dispatchers.mainImmediate) {
                 var count: Double = 0.0
                 while (isActive) {
-                    var speed: Double = 1.0
+                    val speed: Double = podData?.speed ?: 1.0
                     podData?.let { nnData ->
-                        speed = nnData.speed
-
                         val currentTime = nnData.mediaPlayer.currentPosition
 
                         if (count >= 60.0 * speed) {

@@ -4,12 +4,29 @@ import android.media.MediaPlayer
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.lightning.Sat
 
-internal class PodcastDataHolder(
+internal class PodcastDataHolder private constructor(
     val chatId: ChatId,
     val episodeId: Long,
     val satsPerMinute: Sat,
     val mediaPlayer: MediaPlayer,
 ) {
+    companion object {
+        @JvmSynthetic
+        fun instantiate(
+            chatId: ChatId,
+            episodeId: Long,
+            satsPerMinute: Sat,
+            mediaPlayer: MediaPlayer,
+            speed: Double,
+        ): PodcastDataHolder =
+            PodcastDataHolder(
+                chatId,
+                episodeId,
+                satsPerMinute,
+                mediaPlayer
+            ).also { it.setSpeed(speed) }
+    }
+
     var speed: Double = 1.0
         private set
 
