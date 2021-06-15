@@ -113,16 +113,16 @@ class Podcast(
                 return episode
             }
         }
-        return null
+        return episodes[0]
     }
 
-    private fun getNextEpisode(id: Long): PodcastEpisode? {
+    private fun getNextEpisode(id: Long): PodcastEpisode {
         for (i in episodes.indices) {
-            if (episodes[i].id == id) {
-                return episodes[i+1]
+            if (episodes[i].id == id && i-1 >= 0) {
+                return episodes[i-1]
             }
         }
-        return null
+        return episodes[0]
     }
 
     fun getCurrentEpisodeDuration(): Long {
@@ -196,12 +196,11 @@ class Podcast(
         }
     }
 
-    private fun didEndPlayingEpisode(episode: PodcastEpisode, nextEpisode: PodcastEpisode?) {
+    private fun didEndPlayingEpisode(episode: PodcastEpisode, nextEpisode: PodcastEpisode) {
         episode.playing = false
 
-        val nextEpisodeId = nextEpisode?.id ?: episodes[0].id
-        this.playingEpisode = getEpisodeWithId(nextEpisodeId)
-        this.episodeId = nextEpisodeId
+        this.playingEpisode = nextEpisode
+        this.episodeId = nextEpisode.id
         this.episodeDuration = null
 
         this.timeSeconds = 0
