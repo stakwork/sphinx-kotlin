@@ -171,10 +171,10 @@ internal class MediaPlayerNotification(
 
     @JvmSynthetic
     fun clear() {
-        notificationManager?.cancel(NOTIFICATION_ID)
+        mediaPlayerService.mediaServiceController.removeListener(this)
         try {
             mediaPlayerService.serviceContext.unregisterReceiver(this)
         } catch (e: RuntimeException) {}
-        mediaPlayerService.mediaServiceController.removeListener(this)
+        notificationManager?.cancel(NOTIFICATION_ID)
     }
 }
