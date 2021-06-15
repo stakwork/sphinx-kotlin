@@ -1,11 +1,8 @@
 package chat.sphinx.feature_network_query_chat
 
 import UpdateChatRelayResponse
-import chat.sphinx.concept_network_query_chat.model.ChatDto
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
-import chat.sphinx.concept_network_query_chat.model.JoinTribeRelayResponse
-import chat.sphinx.concept_network_query_chat.model.PutChatDto
-import chat.sphinx.concept_network_query_chat.model.TribeDto
+import chat.sphinx.concept_network_query_chat.model.*
 import chat.sphinx.concept_network_relay_call.NetworkRelayCall
 import chat.sphinx.feature_network_query_chat.model.GetChatsRelayResponse
 import chat.sphinx.kotlin_response.ResponseError
@@ -26,6 +23,7 @@ class NetworkQueryChatImpl(
     companion object {
         private const val ENDPOINT_CHAT = "/chat"
         private const val ENDPOINT_CHATS = "/chats"
+        private const val ENDPOINT_EDIT_CHAT = "$ENDPOINT_CHATS/%d"
         private const val ENDPOINT_MUTE_CHAT = "/chats/%d/%s"
         private const val MUTE_CHAT = "mute"
         private const val UN_MUTE_CHAT = "unmute"
@@ -36,6 +34,7 @@ class NetworkQueryChatImpl(
         private const val ENDPOINT_TRIBE = "/tribe"
 
         private const val GET_TRIBE_INFO_URL = "https://%s/tribes/%s"
+        private const val GET_PODCAST_FEED_URL = "https://%s/podcast?url=%s"
     }
 
     ///////////
@@ -62,6 +61,27 @@ class NetworkQueryChatImpl(
             )
         }
 
+    override fun getTribeInfo(
+        host: ChatHost,
+        uuid: ChatUUID
+    ): Flow<LoadResponse<TribeDto, ResponseError>> =
+        networkRelayCall.get(
+            url = String.format(GET_TRIBE_INFO_URL, host.value, uuid.value),
+            responseJsonClass = TribeDto::class.java,
+        )
+
+    override fun getPodcastFeed(
+        host: ChatHost,
+        feedUrl: String
+    ): Flow<LoadResponse<PodcastDto, ResponseError>> =
+        networkRelayCall.get(
+            url = String.format(GET_PODCAST_FEED_URL, host.value, feedUrl),
+            responseJsonClass = PodcastDto::class.java,
+        )
+
+    ///////////
+    /// PUT ///
+    ///////////
     override fun updateChat(
         chatId: ChatId,
         putChatDto: PutChatDto,
@@ -69,11 +89,32 @@ class NetworkQueryChatImpl(
     ): Flow<LoadResponse<ChatDto, ResponseError>> =
         networkRelayCall.relayPut(
             responseJsonClass = UpdateChatRelayResponse::class.java,
-            relayEndpoint = String.format(ENDPOINT_EDIT_GROUP, chatId.value),
+            relayEndpoint = String.format(ENDPOINT_EDIT_CHAT, chatId.value),
             requestBodyJsonClass = PutChatDto::class.java,
             requestBody = putChatDto,
             relayData = relayData
         )
+
+//    app.put('/chat/:id', chats.addGroupMembers)
+//    app.put('/kick/:chat_id/:contact_id', chats.kickChatMember)
+//    app.put('/member/:contactId/:status/:messageId', chatTribes.approveOrRejectMember)
+    override fun updateTribe(
+        chatId: ChatId,
+        putTribeDto: PutTribeDto,
+        relayData: Pair<AuthorizationToken, RelayUrl>?
+    ): Flow<LoadResponse<ChatDto, ResponseError>> =
+        networkRelayCall.relayPut(
+            responseJsonClass = UpdateChatRelayResponse::class.java,
+            relayEndpoint = String.format(ENDPOINT_EDIT_GROUP, chatId.value),
+            requestBodyJsonClass = PutTribeDto::class.java,
+            requestBody = putTribeDto,
+            relayData = relayData
+        )
+
+    ////////////
+    /// POST ///
+    ////////////
+//    app.post('/group', chats.createGroupChat)
 
     override fun toggleMuteChat(
         chatId: ChatId,
@@ -97,15 +138,6 @@ class NetworkQueryChatImpl(
             relayData = relayData
         )
 
-    override fun getTribeInfo(
-        host: ChatHost,
-        uuid: ChatUUID
-    ): Flow<LoadResponse<TribeDto, ResponseError>> =
-        networkRelayCall.get(
-            url = String.format(GET_TRIBE_INFO_URL, host.value, uuid.value),
-            responseJsonClass = TribeDto::class.java,
-        )
-
     override fun joinTribe(
         tribeDto: TribeDto,
         relayData: Pair<AuthorizationToken, RelayUrl>?
@@ -117,22 +149,6 @@ class NetworkQueryChatImpl(
             requestBody = tribeDto,
             relayData = relayData
         )
-
-    ///////////
-    /// PUT ///
-    ///////////
-//    app.put('/chats/:id', chats.updateChat)
-//    app.put('/chat/:id', chats.addGroupMembers)
-//    app.put('/kick/:chat_id/:contact_id', chats.kickChatMember)
-//    app.put('/member/:contactId/:status/:messageId', chatTribes.approveOrRejectMember)
-//    app.put('/group/:id', chatTribes.editTribe)
-
-    ////////////
-    /// POST ///
-    ////////////
-//    app.post('/group', chats.createGroupChat)
-//    app.post('/chats/:chat_id/:mute_unmute', chats.mute)
-//    app.post('/tribe', chatTribes.joinTribe)
 
     //////////////
     /// DELETE ///

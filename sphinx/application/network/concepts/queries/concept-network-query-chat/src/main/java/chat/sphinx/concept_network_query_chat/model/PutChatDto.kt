@@ -4,6 +4,7 @@ import com.squareup.moshi.JsonClass
 
 @JsonClass(generateAdapter = true)
 data class PutChatDto(
-    val name: String,
-    val img: String = ""
+    val my_alias: String? = null,
+    val my_photo_url: String? = null,
+    val meta: String? = null,
 )

@@ -15,6 +15,7 @@
     <string name="material_icon_name_nav_forward">arrow_forward</string>
     <string name="material_icon_name_file_attachment">insert_drive_file</string>
     <string name="material_icon_name_file_download">file_download</string>
+    <string name="material_icon_name_cloud_download">cloud_download</string>
     <string name="material_icon_name_play_button">play_arrow</string>
     <string name="material_icon_name_pause_button">pause</string>
     <string name="material_icon_name_videocam">videocam</string>
@@ -27,6 +28,7 @@
     <string name="material_icon_name_help_outline">help_outline</string>
     <string name="material_icon_name_replay">replay</string>
     <string name="material_icon_name_key">vpn_key</string>
+    <string name="material_icon_name_dismiss_modal_down">keyboard_arrow_down</string>
 
     <!--  Message Action Material Icons  -->
     <string name="material_icon_name_message_action_delete">delete</string>

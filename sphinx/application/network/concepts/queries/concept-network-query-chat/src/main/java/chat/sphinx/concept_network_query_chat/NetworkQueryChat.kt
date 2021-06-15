@@ -1,15 +1,12 @@
 package chat.sphinx.concept_network_query_chat
 
-import chat.sphinx.concept_network_query_chat.model.ChatDto
-import chat.sphinx.concept_network_query_chat.model.PutChatDto
-import chat.sphinx.concept_network_query_chat.model.TribeDto
+import chat.sphinx.concept_network_query_chat.model.*
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.wrapper_chat.ChatHost
 import chat.sphinx.wrapper_chat.ChatMuted
 import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.dashboard.ChatId
-import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
 import kotlinx.coroutines.flow.Flow
@@ -23,11 +20,39 @@ abstract class NetworkQueryChat {
         relayData: Pair<AuthorizationToken, RelayUrl>? = null
     ): Flow<LoadResponse<List<ChatDto>, ResponseError>>
 
+    abstract fun getTribeInfo(
+        host: ChatHost,
+        uuid: ChatUUID
+    ): Flow<LoadResponse<TribeDto, ResponseError>>
+
+    abstract fun getPodcastFeed(
+        host: ChatHost,
+        feedUrl: String
+    ): Flow<LoadResponse<PodcastDto, ResponseError>>
+
+    ///////////
+    /// PUT ///
+    ///////////
     abstract fun updateChat(
         chatId: ChatId,
         putChatDto: PutChatDto,
         relayData: Pair<AuthorizationToken, RelayUrl>? = null
     ): Flow<LoadResponse<ChatDto, ResponseError>>
+
+//    app.put('/chat/:id', chats.addGroupMembers)
+//    app.put('/kick/:chat_id/:contact_id', chats.kickChatMember)
+//    app.put('/member/:contactId/:status/:messageId', chatTribes.approveOrRejectMember)
+
+    abstract fun updateTribe(
+        chatId: ChatId,
+        putTribeDto: PutTribeDto,
+        relayData: Pair<AuthorizationToken, RelayUrl>? = null
+    ): Flow<LoadResponse<ChatDto, ResponseError>>
+
+    ////////////
+    /// POST ///
+    ////////////
+//    app.post('/group', chats.createGroupChat)\
 
     abstract fun toggleMuteChat(
         chatId: ChatId,
@@ -35,31 +60,10 @@ abstract class NetworkQueryChat {
         relayData: Pair<AuthorizationToken, RelayUrl>? = null
     ): Flow<LoadResponse<ChatDto, ResponseError>>
 
-    abstract fun getTribeInfo(
-        host: ChatHost,
-        uuid: ChatUUID
-    ): Flow<LoadResponse<TribeDto, ResponseError>>
-
     abstract fun joinTribe(
         tribeDto: TribeDto,
         relayData: Pair<AuthorizationToken, RelayUrl>? = null
     ): Flow<LoadResponse<ChatDto, ResponseError>>
-
-    ///////////
-    /// PUT ///
-    ///////////
-//    app.put('/chats/:id', chats.updateChat)
-//    app.put('/chat/:id', chats.addGroupMembers)
-//    app.put('/kick/:chat_id/:contact_id', chats.kickChatMember)
-//    app.put('/member/:contactId/:status/:messageId', chatTribes.approveOrRejectMember)
-//    app.put('/group/:id', chatTribes.editTribe)
-
-    ////////////
-    /// POST ///
-    ////////////
-//    app.post('/group', chats.createGroupChat)
-//    app.post('/chats/:chat_id/:mute_unmute', chats.mute)
-//    app.post('/tribe', chatTribes.joinTribe)
 
     //////////////
     /// DELETE ///

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/speed0.5"
+        android:title="0.5x" />
+    <item
+        android:id="@+id/speed0.8"
+        android:title="0.8x" />
+    <item
+        android:id="@+id/speed1"
+        android:title="1x" />
+    <item
+        android:id="@+id/speed1.2"
+        android:title="1.2x" />
+    <item
+        android:id="@+id/speed1.5"
+        android:title="1.5x" />
+    <item
+        android:id="@+id/speed2.1"
+        android:title="2.1x" />
+
+</menu>

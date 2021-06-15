@@ -100,7 +100,7 @@ internal class JoinTribeViewModel @Inject constructor(
                 submitSideEffect(JoinTribeSideEffect.Notify.InvalidTribe)
                 return@launch
             }
-            tribeInfo.my_alias = myAlias.value
+            tribeInfo.myAlias = myAlias.value
             tribeInfo.amount = tribeInfo.price_to_join
 
             chatRepository.joinTribe(tribeInfo).collect { loadResponse ->

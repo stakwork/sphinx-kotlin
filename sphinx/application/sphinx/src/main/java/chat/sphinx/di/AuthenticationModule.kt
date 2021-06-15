@@ -23,6 +23,7 @@ import io.matthewnelson.concept_authentication.data.AuthenticationStorage
 import io.matthewnelson.concept_authentication.state.AuthenticationStateManager
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_encryption_key.EncryptionKeyHandler
+import io.matthewnelson.concept_foreground_state.ForegroundStateManager
 import io.matthewnelson.feature_authentication_core.AuthenticationCoreManager
 import javax.inject.Singleton
 
@@ -45,6 +46,12 @@ object AuthenticationModule {
     fun provideAuthenticationStateManager(
         sphinxAuthenticationCoreManager: SphinxAuthenticationCoreManager
     ): AuthenticationStateManager =
+        sphinxAuthenticationCoreManager
+
+    @Provides
+    fun provideForegroundStateManager(
+        sphinxAuthenticationCoreManager: SphinxAuthenticationCoreManager
+    ): ForegroundStateManager =
         sphinxAuthenticationCoreManager
 
     @Provides

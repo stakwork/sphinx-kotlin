@@ -39,6 +39,7 @@ dependencies {
     api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-contact')
     api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-message')
     api project(path: ':sphinx:application:network:concepts:queries:concept-network-query-lightning')
+    api project(path: ':sphinx:application:network:concepts:queries:concept-network-query-chat')
     api project(path: ':sphinx:activity:insetter-activity')
 
     api deps.androidx.recyclerView

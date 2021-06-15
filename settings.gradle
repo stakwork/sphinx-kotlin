@@ -37,6 +37,7 @@ include ':sphinx:application:data:concepts:repositories:concept-repository-conta
 include ':sphinx:application:data:concepts:repositories:concept-repository-dashboard'
 include ':sphinx:application:data:concepts:repositories:concept-repository-dashboard-android'
 include ':sphinx:application:data:concepts:repositories:concept-repository-lightning'
+include ':sphinx:application:data:concepts:repositories:concept-repository-media'
 include ':sphinx:application:data:concepts:repositories:concept-repository-message'
 include ':sphinx:application:data:features:feature-repository'
 include ':sphinx:application:data:features:feature-repository-android'
@@ -90,6 +91,7 @@ include ':sphinx:screens:splash:key-restore'
 
 // Screens-Detail
 include ':sphinx:screens-detail:add-friend:add-friend'
+include ':sphinx:screens-detail:podcast-player:podcast-player'
 include ':sphinx:screens-detail:common:detail-resources'
 include ':sphinx:screens-detail:create-tribe:create-tribe'
 include ':sphinx:screens-detail:join-tribe:join-tribe'
@@ -103,6 +105,8 @@ include ':sphinx:screens-detail:transactions:transactions'
 include ':sphinx:screens-detail:qr-code:qr-code'
 
 // Service
+include ':sphinx:service:concepts:concept-service-media-player'
+include ':sphinx:service:features:media-player:feature-service-media-player-android'
 include ':sphinx:service:concepts:concept-service-notification'
 include ':sphinx:service:features:notifications:feature-service-notification-empty'
 include ':sphinx:service:features:notifications:feature-service-notification-firebase'

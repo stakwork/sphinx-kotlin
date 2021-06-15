@@ -18,7 +18,7 @@ import chat.sphinx.chat_common.databinding.LayoutChatFooterBinding
 import chat.sphinx.chat_common.databinding.LayoutChatHeaderBinding
 import chat.sphinx.chat_common.navigation.ChatNavigator
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
-import chat.sphinx.chat_common.ui.viewstate.header.ChatHeaderViewState
+import chat.sphinx.chat_common.ui.viewstate.header.ChatHeaderFooterViewState
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_repository_message.SendMessage
 import chat.sphinx.insetter_activity.InsetterActivity
@@ -35,7 +35,6 @@ import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.visible
-import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
@@ -46,7 +45,7 @@ abstract class ChatFragment<
         >(@LayoutRes layoutId: Int): SideEffectFragment<
         Context,
         ChatSideEffect,
-        ChatHeaderViewState,
+        ChatHeaderFooterViewState,
         VM,
         VB
         >(layoutId)
@@ -59,7 +58,7 @@ abstract class ChatFragment<
 
     protected abstract val chatNavigator: ChatNavigator
 
-    protected val sendMessageBuilder = SendMessage.Builder()
+    private val sendMessageBuilder = SendMessage.Builder()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -127,6 +126,10 @@ abstract class ChatFragment<
             adapter = messageListAdapter
             itemAnimator = null
         }
+    }
+
+    protected fun scrollToBottom(callback: () -> Unit) {
+        (recyclerView.adapter as MessageListAdapter<*>).scrollToBottomIfNeeded(callback)
     }
 
     override fun onStart() {
@@ -199,11 +202,11 @@ abstract class ChatFragment<
         viewModel.readMessages()
     }
 
-    override suspend fun onViewStateFlowCollect(viewState: ChatHeaderViewState) {
+    override suspend fun onViewStateFlowCollect(viewState: ChatHeaderFooterViewState) {
         @Exhaustive
         when (viewState) {
-            is ChatHeaderViewState.Idle -> {}
-            is ChatHeaderViewState.Initialized -> {
+            is ChatHeaderFooterViewState.Idle -> {}
+            is ChatHeaderFooterViewState.Initialized -> {
                 headerBinding.apply {
 
                     textViewChatHeaderName.text = viewState.chatHeaderName

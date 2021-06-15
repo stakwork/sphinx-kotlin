@@ -4,15 +4,12 @@ import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_coredb.CoreDB
 import chat.sphinx.concept_crypto_rsa.RSA
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
-import chat.sphinx.concept_network_query_chat.model.ChatDto
-import chat.sphinx.concept_network_query_chat.model.PutChatDto
-import chat.sphinx.concept_network_query_chat.model.TribeDto
+import chat.sphinx.concept_network_query_chat.model.*
 import chat.sphinx.concept_network_query_contact.NetworkQueryContact
 import chat.sphinx.concept_network_query_contact.model.ContactDto
 import chat.sphinx.concept_network_query_contact.model.PostContactDto
 import chat.sphinx.concept_network_query_contact.model.PutContactDto
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
-import chat.sphinx.concept_network_query_lightning.model.balance.BalanceAllDto
 import chat.sphinx.concept_network_query_lightning.model.balance.BalanceDto
 import chat.sphinx.concept_network_query_message.NetworkQueryMessage
 import chat.sphinx.concept_network_query_message.model.MessageDto
@@ -21,6 +18,7 @@ import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_dashboard.RepositoryDashboard
 import chat.sphinx.concept_repository_lightning.LightningRepository
+import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.concept_repository_message.SendMessage
 import chat.sphinx.concept_socket_io.SocketIOManager
@@ -77,6 +75,7 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import java.lang.RuntimeException
 import java.text.ParseException
 import kotlin.collections.ArrayList
 import kotlin.math.absoluteValue
@@ -99,6 +98,7 @@ abstract class SphinxRepository(
     LightningRepository,
     MessageRepository,
     RepositoryDashboard,
+    RepositoryMedia,
     CoroutineDispatchers by dispatchers,
     SphinxSocketIOMessageListener
 {
@@ -396,6 +396,23 @@ abstract class SphinxRepository(
             val msg = "Failed to convert date/time from Relay while processing Chats"
             LOG.e(TAG, msg, e)
             return Response.Error(ResponseError(msg, e))
+        }
+    }
+
+    override fun updateChatMetaData(chatId: ChatId, metaData: ChatMetaData) {
+        repositoryScope.launch(io) {
+            val queries = coreDB.getSphinxDatabaseQueries()
+            chatLock.withLock {
+                queries.chatUpdateMetaData(metaData, chatId)
+            }
+
+            try {
+                networkQueryChat.updateChat(
+                    chatId,
+                    PutChatDto(meta = metaData.toJson(moshi))
+                ).collect {}
+            } catch (e: AssertionError) {}
+            // TODO: Network call to update Relay
         }
     }
 
@@ -1518,8 +1535,7 @@ abstract class SphinxRepository(
         emit(response ?: Response.Error(ResponseError("")))
     }
 
-    override suspend fun updateTribeInfo(chat: Chat) {
-
+    override suspend fun updateTribeInfo(chat: Chat): PodcastDto? {
         var owner: Contact? = accountOwner.value
 
         if (owner == null) {
@@ -1534,7 +1550,7 @@ abstract class SphinxRepository(
             delay(25L)
         }
 
-        if (owner?.nodePubKey == chat.ownerPubKey) return
+        var podcastDto: PodcastDto? = null
 
         chat.host?.let { chatHost ->
             val chatUUID = chat.uuid
@@ -1555,31 +1571,62 @@ abstract class SphinxRepository(
                         is Response.Success -> {
                             val tribeDto = loadResponse.value
 
-                            val didChangeNameOrPhotoUrl = (
-                                tribeDto.name != chat.name?.value ?: "" ||
-                                tribeDto.img != chat.photoUrl?.value ?: ""
-                            )
+                            if (owner?.nodePubKey != chat.ownerPubKey) {
+                                val didChangeNameOrPhotoUrl = (
+                                        tribeDto.name != chat.name?.value ?: "" ||
+                                                tribeDto.img != chat.photoUrl?.value ?: ""
+                                        )
 
-                            chatLock.withLock {
-                                queries.transaction {
-                                    updateChatTribeData(tribeDto, chat.id, queries)
+                                chatLock.withLock {
+                                    queries.transaction {
+                                        updateChatTribeData(tribeDto, chat.id, queries)
+                                    }
                                 }
+
+                                if (didChangeNameOrPhotoUrl) {
+                                    networkQueryChat.updateTribe(
+                                        chat.id,
+                                        PutTribeDto(
+                                            tribeDto.name,
+                                            tribeDto.img ?: "",
+                                        )
+                                    ).collect {}
+                                }
+
                             }
 
-                            if (didChangeNameOrPhotoUrl) {
-                                networkQueryChat.updateChat(chat.id,
-                                    PutChatDto(
-                                        tribeDto.name,
-                                        tribeDto.img ?: "",
-                                    )
-                                ).collect {}
+                            podcastDto = getPodcastFeed(chat, tribeDto)
+                        }
+                    }
+                }
+            }
+        }
+
+        return podcastDto
+    }
+
+    private suspend fun getPodcastFeed(chat: Chat, tribe: TribeDto): PodcastDto? {
+        var podcastDto: PodcastDto? = null
+
+        chat.host?.let { chatHost ->
+            tribe.feed_url?.let { feedUrl ->
+                networkQueryChat.getPodcastFeed(chatHost, feedUrl).collect { loadResponse ->
+                    when (loadResponse) {
+
+                        is LoadResponse.Loading -> {}
+                        is Response.Error -> {}
+
+                        is Response.Success -> {
+                            if (loadResponse.value.isValidPodcast()) {
+                                podcastDto = loadResponse.value
                             }
                         }
                     }
                 }
             }
-
         }
+
+        return podcastDto
     }
 
     /*
