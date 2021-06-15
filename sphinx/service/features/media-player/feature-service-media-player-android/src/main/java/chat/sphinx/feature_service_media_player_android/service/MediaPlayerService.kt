@@ -177,10 +177,7 @@ internal abstract class MediaPlayerService: Service() {
 
                         } else {
 
-                            val currentTime = nnData.mediaPlayer.currentPosition
-
                             stateDispatcherJob?.cancel()
-                            nnData.mediaPlayer.reset()
 
                             currentState = MediaPlayerServiceState.ServiceActive.ServiceLoading
                             mediaServiceController.dispatchState(currentState)
@@ -190,76 +187,15 @@ internal abstract class MediaPlayerService: Service() {
                                 ChatMetaData(
                                     ItemId(nnData.episodeId),
                                     nnData.satsPerMinute,
-                                    currentTime,
+                                    nnData.mediaPlayer.currentPosition,
                                     nnData.speed
                                 )
                             )
 
-                            nnData.mediaPlayer.apply {
-                                setAudioAttributes(
-                                    AudioAttributes.Builder()
-                                        .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                                        .setUsage(AudioAttributes.USAGE_MEDIA)
-                                        .build()
-                                )
-                                setWakeMode(serviceContext.applicationContext, PowerManager.PARTIAL_WAKE_LOCK)
-                                setDataSource(userAction.episodeUrl)
-                                setOnPreparedListener { mp ->
-                                    mp.setOnPreparedListener(null)
-                                    mp.playbackParams = mp.playbackParams.setSpeed(userAction.speed.toFloat())
-                                    mp.seekTo(userAction.startTime)
-                                    mp.start()
-                                    startStateDispatcher()
-                                }
-                            }
-                            nnData.mediaPlayer.prepareAsync()
-                            podData = PodcastDataHolder.instantiate(
-                                userAction.chatId,
-                                userAction.episodeId,
-                                userAction.satPerMinute,
-                                nnData.mediaPlayer,
-                                userAction.speed
-                            )
-
-                            wifiLock?.let { lock ->
-                                if (!lock.isHeld) {
-                                    lock.acquire()
-                                }
-                            }
+                            createMediaPlayer(userAction, nnData.mediaPlayer)
 
                         }
-                    } ?: MediaPlayer().apply {
-                        setAudioAttributes(
-                            AudioAttributes.Builder()
-                                .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                                .setUsage(AudioAttributes.USAGE_MEDIA)
-                                .build()
-                        )
-                        setWakeMode(serviceContext.applicationContext, PowerManager.PARTIAL_WAKE_LOCK)
-                        setDataSource(userAction.episodeUrl)
-                        setOnPreparedListener { mp ->
-                            mp.setOnPreparedListener(null)
-                            mp.playbackParams = mp.playbackParams.setSpeed(userAction.speed.toFloat())
-                            mp.seekTo(userAction.startTime)
-                            mp.start()
-                            startStateDispatcher()
-                        }
-                    }.let { mp ->
-                        wifiLock?.let { lock ->
-                            if (!lock.isHeld) {
-                                lock.acquire()
-                            }
-                        }
-
-                        mp.prepareAsync()
-                        podData = PodcastDataHolder.instantiate(
-                            userAction.chatId,
-                            userAction.episodeId,
-                            userAction.satPerMinute,
-                            mp,
-                            userAction.speed
-                        )
-                    }
+                    } ?: createMediaPlayer(userAction, null)
 
                     repositoryMedia.updateChatMetaData(
                         userAction.chatId,
@@ -294,6 +230,46 @@ internal abstract class MediaPlayerService: Service() {
 
                     repositoryMedia.updateChatMetaData(userAction.chatId, userAction.chatMetaData)
                 }
+            }
+        }
+
+        private fun createMediaPlayer(
+            userAction: UserAction.ServiceAction.Play,
+            mediaPlayer: MediaPlayer?,
+        ) {
+            val player: MediaPlayer = mediaPlayer.also { it?.reset() } ?: MediaPlayer()
+
+            player.apply {
+                setAudioAttributes(
+                    AudioAttributes.Builder()
+                        .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                        .setUsage(AudioAttributes.USAGE_MEDIA)
+                        .build()
+                )
+                setWakeMode(serviceContext.applicationContext, PowerManager.PARTIAL_WAKE_LOCK)
+                setDataSource(userAction.episodeUrl)
+                setOnPreparedListener { mp ->
+                    mp.setOnPreparedListener(null)
+                    mp.playbackParams = mp.playbackParams.setSpeed(userAction.speed.toFloat())
+                    mp.seekTo(userAction.startTime)
+                    mp.start()
+                    startStateDispatcher()
+                }
+            }.let { mp ->
+                wifiLock?.let { lock ->
+                    if (!lock.isHeld) {
+                        lock.acquire()
+                    }
+                }
+
+                mp.prepareAsync()
+                podData = PodcastDataHolder.instantiate(
+                    userAction.chatId,
+                    userAction.episodeId,
+                    userAction.satPerMinute,
+                    mp,
+                    userAction.speed
+                )
             }
         }
 
