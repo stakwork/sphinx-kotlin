@@ -306,7 +306,7 @@ internal abstract class MediaPlayerService: Service() {
                             )
                         } else {
 
-                            currentState = if (nnData.mediaPlayer.duration == currentTime) {
+                            currentState = if (nnData.mediaPlayer.duration <= currentTime) {
                                 MediaPlayerServiceState.ServiceActive.MediaState.Ended(
                                     nnData.chatId,
                                     nnData.episodeId,
