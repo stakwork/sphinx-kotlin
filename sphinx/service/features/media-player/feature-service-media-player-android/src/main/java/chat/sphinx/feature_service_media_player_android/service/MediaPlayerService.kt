@@ -180,7 +180,7 @@ internal abstract class MediaPlayerService: Service() {
                             val currentTime = nnData.mediaPlayer.currentPosition
 
                             stateDispatcherJob?.cancel()
-                            nnData.mediaPlayer.release()
+                            nnData.mediaPlayer.reset()
 
                             currentState = MediaPlayerServiceState.ServiceActive.ServiceLoading
                             mediaServiceController.dispatchState(currentState)
@@ -195,7 +195,7 @@ internal abstract class MediaPlayerService: Service() {
                                 )
                             )
 
-                            val newPlayer = MediaPlayer().apply {
+                            nnData.mediaPlayer.apply {
                                 setAudioAttributes(
                                     AudioAttributes.Builder()
                                         .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
@@ -212,12 +212,12 @@ internal abstract class MediaPlayerService: Service() {
                                     startStateDispatcher()
                                 }
                             }
-                            newPlayer.prepareAsync()
+                            nnData.mediaPlayer.prepareAsync()
                             podData = PodcastDataHolder.instantiate(
                                 userAction.chatId,
                                 userAction.episodeId,
                                 userAction.satPerMinute,
-                                newPlayer,
+                                nnData.mediaPlayer,
                                 userAction.speed
                             )
 
