@@ -306,7 +306,7 @@ internal abstract class MediaPlayerService: Service() {
                             )
                         } else {
 
-                            currentState = if (nnData.mediaPlayer.duration <= currentTime) {
+                            val state = if (nnData.mediaPlayer.duration <= currentTime) {
                                 MediaPlayerServiceState.ServiceActive.MediaState.Ended(
                                     nnData.chatId,
                                     nnData.episodeId,
@@ -320,9 +320,14 @@ internal abstract class MediaPlayerService: Service() {
                                 )
                             }
 
-                            mediaServiceController.dispatchState(currentState)
-                            stateDispatcherJob?.cancelAndJoin()
+                            currentState = state
+                            mediaServiceController.dispatchState(state)
 
+                            if (state is MediaPlayerServiceState.ServiceActive.MediaState.Ended) {
+                                shutDownService()
+                            }
+
+                            stateDispatcherJob?.cancelAndJoin()
                         }
                     }
                     mediaServiceController.dispatchState(currentState)
