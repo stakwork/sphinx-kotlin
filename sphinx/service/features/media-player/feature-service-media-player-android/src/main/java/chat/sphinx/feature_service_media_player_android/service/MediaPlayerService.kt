@@ -74,7 +74,7 @@ internal abstract class MediaPlayerService: Service() {
                         ) {
                             try {
                                 val playing = nnData.mediaPlayer.isPlaying
-                                nnData.speed = userAction.chatMetaData.speed.also {
+                                nnData.setSpeed(userAction.chatMetaData.speed).also {
                                     nnData.mediaPlayer.playbackParams =
                                         nnData.mediaPlayer.playbackParams.setSpeed(it.toFloat())
                                 }
@@ -145,7 +145,7 @@ internal abstract class MediaPlayerService: Service() {
 
                             if (!nnData.mediaPlayer.isPlaying) {
                                 try {
-                                    nnData.speed = userAction.speed.also {
+                                    nnData.setSpeed(userAction.speed).also {
                                         nnData.mediaPlayer.playbackParams =
                                             nnData.mediaPlayer.playbackParams.setSpeed(it.toFloat())
                                     }
@@ -178,7 +178,6 @@ internal abstract class MediaPlayerService: Service() {
                         } else {
 
                             val currentTime = nnData.mediaPlayer.currentPosition
-                            val speed = nnData.mediaPlayer.playbackParams.speed.toDouble()
 
                             stateDispatcherJob?.cancel()
                             nnData.mediaPlayer.release()
@@ -192,7 +191,7 @@ internal abstract class MediaPlayerService: Service() {
                                     ItemId(nnData.episodeId),
                                     nnData.satsPerMinute,
                                     currentTime,
-                                    speed
+                                    nnData.speed
                                 )
                             )
 
@@ -219,7 +218,7 @@ internal abstract class MediaPlayerService: Service() {
                                 userAction.episodeId,
                                 userAction.satPerMinute,
                                 newPlayer,
-                            ).also { it.speed = userAction.speed }
+                            ).also { it.setSpeed(userAction.speed) }
 
                             wifiLock?.let { lock ->
                                 if (!lock.isHeld) {
@@ -257,7 +256,7 @@ internal abstract class MediaPlayerService: Service() {
                             userAction.episodeId,
                             userAction.satPerMinute,
                             mp,
-                        ).also { it.speed = userAction.speed }
+                        ).also { it.setSpeed(userAction.speed) }
                     }
 
                     repositoryMedia.updateChatMetaData(
@@ -304,13 +303,7 @@ internal abstract class MediaPlayerService: Service() {
                 while (isActive) {
                     var speed: Double = 1.0
                     podData?.let { nnData ->
-                        speed = nnData.speed.let {
-                            if (it > 0.0) {
-                                it
-                            } else {
-                                1.0
-                            }
-                        }
+                        speed = nnData.speed
 
                         val currentTime = nnData.mediaPlayer.currentPosition
 

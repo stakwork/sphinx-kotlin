@@ -11,4 +11,14 @@ internal class PodcastDataHolder(
     val mediaPlayer: MediaPlayer,
 ) {
     var speed: Double = 1.0
+        private set
+
+    fun setSpeed(speed: Double): Double {
+        this.speed = if (speed in 0.5..2.1) {
+            speed
+        } else {
+            1.0
+        }
+        return this.speed
+    }
 }
