@@ -26,6 +26,7 @@ import chat.sphinx.onboard_ready.navigation.OnBoardReadyNavigator
 import chat.sphinx.profile.navigation.ProfileNavigator
 import chat.sphinx.payment_receive.navigation.PaymentReceiveNavigator
 import chat.sphinx.payment_send.navigation.PaymentSendNavigator
+import chat.sphinx.podcast_player.navigation.PodcastPlayerNavigator
 import chat.sphinx.qr_code.navigation.QRCodeNavigator
 import chat.sphinx.scanner.navigation.ScannerNavigator
 import chat.sphinx.splash.navigation.SplashNavigator
@@ -218,4 +219,11 @@ internal object NavigationModule {
         joinTribeNavigatorImpl: JoinTribeNavigatorImpl
     ): JoinTribeNavigator =
         joinTribeNavigatorImpl
+
+
+    @Provides
+    fun provideTribeChatPodcastPlayerNavigator(
+        tribeChatPodcastPlayerNavigatorImpl: PodcastPlayerNavigatorImpl
+    ): PodcastPlayerNavigator =
+        tribeChatPodcastPlayerNavigatorImpl
 }

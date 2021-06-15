@@ -19,6 +19,7 @@ dependencies {
     api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-contact')
     api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-dashboard')
     api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-lightning')
+    api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-media')
     api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-message')
 
     api project(path: ':sphinx:application:network:concepts:queries:concept-network-query-chat')

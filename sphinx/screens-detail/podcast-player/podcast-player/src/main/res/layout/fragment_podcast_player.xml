@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/headerBG"
+    tools:context=".ui.PodcastPlayerFragment">
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/constraint_layout_scroll_view_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <!--  Primary Image For the current episode  -->
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/image_view_podcast_image"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:scaleType="centerCrop"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHeight_percent="0.6"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintDimensionRatio="1:1"
+                tools:src="@drawable/sphinx_white_logo" />
+
+            <!--  Primary Image shadow overlay  -->
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/image_view_current_episode_image_shadow_overlay"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:scaleY="-1"
+                android:src="@drawable/bottom_bar_elevation_gradient"
+                app:layout_constraintEnd_toEndOf="@id/image_view_podcast_image"
+                app:layout_constraintHeight_percent="0.25"
+                app:layout_constraintStart_toStartOf="@id/image_view_podcast_image"
+                app:layout_constraintTop_toTopOf="@id/image_view_podcast_image" />
+
+
+            <!--  Overlaid Button for collapsing the detail view  -->
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_view_dismiss_button"
+                android:layout_width="@dimen/default_tap_target_xy"
+                android:layout_height="@dimen/default_tap_target_xy"
+                android:layout_margin="22dp"
+                android:fontFamily="@font/material_icons_regular"
+                android:gravity="center"
+                android:text="@string/material_icon_name_dismiss_modal_down"
+                android:textSize="44sp"
+                android:textColor="@android:color/white"
+                app:layout_constraintStart_toStartOf="@id/image_view_podcast_image"
+                app:layout_constraintTop_toTopOf="@id/image_view_podcast_image" />
+
+
+            <!--  Episode Title  -->
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_view_episode_title_label"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/player_details_episode_title_margin"
+                android:breakStrategy="high_quality"
+                android:ellipsize="end"
+                android:fontFamily="@font/roboto_medium"
+                android:gravity="center"
+                android:lines="3"
+                android:textAlignment="center"
+                android:textSize="@dimen/default_text_size_large_title_3"
+                android:textColor="@color/text"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/image_view_podcast_image"
+                tools:text="Episode 21: What is Lorem Ipsum? An Investigation into the World of Sample Text." />
+
+
+            <!-- Playback Slider layout -->
+            <include
+                android:id="@+id/include_layout_episode_slider_control"
+                layout="@layout/layout_episode_slider_control"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/player_slider_control_margin"
+                android:layout_marginTop="@dimen/default_layout_margin"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/text_view_episode_title_label" />
+
+
+            <!-- Control Buttons Layout -->
+            <include
+                android:id="@+id/include_layout_episode_playback_control_buttons"
+                layout="@layout/layout_episode_playback_control_buttons"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/include_layout_episode_slider_control" />
+
+
+            <!-- Episodes List Layout -->
+            <include
+                android:id="@+id/include_layout_podcast_episodes_list"
+                layout="@layout/layout_podcast_episodes_list"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/include_layout_episode_playback_control_buttons" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.core.widget.NestedScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -10,7 +10,7 @@
     <color name="lightBG">#1A242E</color>
     <color name="profileBG">#1A242E</color>
 
-    <color name="mainBottomIcons">#ffffff</color>
+    <color name="mainBottomIcons">#909BAA</color>
     <color name="chatListSelected">#151E27</color>
 
     <color name="dashboardHeader">#1A242E</color>
@@ -59,6 +59,7 @@
     <color name="washedOutGreen">#2F7460</color>
     <color name="washedOutReceivedText">#556171</color>
     <color name="washedOutSentText">#829CB9</color>
+    <color name="semiTransparentWashedOutSentText">#4D829CB9</color>
 
     <color name="sentBubbleBorder">#3E6189</color>
     <color name="receivedBubbleBorder">#222E3A</color>

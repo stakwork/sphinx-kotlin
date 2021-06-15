@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_constraint_podcast_player_footer"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/chat_footer_height"
+    android:background="@color/headerBG"
+    android:visibility="gone"
+    tools:visibility="visible">
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/text_view_episode_title"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_marginHorizontal="@dimen/default_layout_margin"
+        android:ellipsize="end"
+        android:textColor="@color/text"
+        android:textSize="@dimen/chat_footer_episode_title_text_size"
+        android:fontFamily="@font/roboto_regular"
+        android:text=""
+        android:gravity="center|start"
+        android:maxLines="3"
+        android:clickable="true"
+        android:background="@android:color/transparent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/progress_bar_audio_loading"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="Episode Title"/>
+
+    <ProgressBar
+        android:id="@+id/progress_bar_audio_loading"
+        style="?android:attr/progressBarStyle"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_marginHorizontal="@dimen/default_layout_margin"
+        android:indeterminate="true"
+        android:indeterminateTint="@color/secondaryText"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/text_view_boost_podcast_button"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!--  Boost Button  -->
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/text_view_boost_podcast_button"
+        android:layout_width="@dimen/chat_footer_button_xy"
+        android:layout_height="@dimen/chat_footer_button_xy"
+        android:layout_marginHorizontal="@dimen/default_layout_margin"
+        android:padding="4dp"
+        android:background="@drawable/button_background_white_rad_48"
+        android:backgroundTint="@color/primaryGreen"
+        android:src="@drawable/ic_boost"
+        android:alpha="0.3"
+        android:enabled="false"
+        android:clickable="true"
+        android:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/text_view_forward_30_button"
+        app:layout_constraintTop_toTopOf="parent" />
+
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/text_view_forward_30_button"
+        android:layout_width="@dimen/chat_footer_button_xy"
+        android:layout_height="@dimen/chat_footer_button_xy"
+        android:background="@drawable/ic_forward_30"
+        android:backgroundTint="@color/secondaryText"
+        android:gravity="center"
+        android:layout_marginHorizontal="@dimen/default_layout_margin"
+        android:clickable="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/text_view_play_pause_button"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/text_view_play_pause_button"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_marginHorizontal="@dimen/default_layout_margin"
+        android:fontFamily="@font/material_icons_regular"
+        android:gravity="center"
+        android:text="@string/material_icon_name_play_button"
+        android:background="@android:color/transparent"
+        android:textColor="@color/receivedIcon"
+        android:textSize="@dimen/chat_footer_button_icon_text_size"
+        android:clickable="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:visibility="visible" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/progress_bar_container"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/chat_footer_progress_line_height"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:background="@color/washedOutReceivedText">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/progress_bar"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:background="@color/receivedIcon">
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
