@@ -62,7 +62,7 @@ internal class PodcastPlayerFragment : BaseFragment<
 
                 includeLayoutPodcastEpisodesList.layoutConstraintPodcastEpisodesList.apply {
                     kotlin.run {
-                        layoutParams.height = fragmentHeight
+                        layoutParams.height = (fragmentHeight.toDouble() * 0.975).toInt()
                         requestLayout()
                     }
                 }

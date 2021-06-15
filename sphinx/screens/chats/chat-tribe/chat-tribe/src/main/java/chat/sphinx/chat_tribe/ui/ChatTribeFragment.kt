@@ -66,7 +66,7 @@ internal class ChatTribeFragment: ChatFragment<
         }
     }
 
-    private suspend fun configurePodcastPlayer(podcast: Podcast) {
+    private fun configurePodcastPlayer(podcast: Podcast) {
         podcastPlayerBinding.apply {
             if (root.isGone) {
                 scrollToBottom(callback = {
@@ -79,6 +79,12 @@ internal class ChatTribeFragment: ChatFragment<
             val currentEpisode = podcast.getCurrentEpisode()
             textViewEpisodeTitle.text = currentEpisode.title
 
+            setProgressBar(podcast)
+        }
+    }
+
+    private fun setProgressBar(podcast: Podcast) {
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             val progress: Int = withContext(viewModel.io) {
                 try {
                     podcast.getPlayingProgress()
@@ -87,9 +93,12 @@ internal class ChatTribeFragment: ChatFragment<
                 }
             }
 
-            val progressWith = progressBarContainer.measuredWidth.toDouble() * (progress.toDouble() / 100.0)
-            progressBar.layoutParams.width = progressWith.toInt()
-            progressBar.requestLayout()
+            podcastPlayerBinding.apply {
+                val progressWith =
+                    progressBarContainer.measuredWidth.toDouble() * (progress.toDouble() / 100.0)
+                progressBar.layoutParams.width = progressWith.toInt()
+                progressBar.requestLayout()
+            }
         }
     }
 
@@ -119,6 +128,7 @@ internal class ChatTribeFragment: ChatFragment<
 
             textViewForward30Button.setOnClickListener {
                 viewModel.seekTo(30000)
+                setProgressBar(podcast)
             }
 
             textViewBoostPodcastButton.setOnClickListener {

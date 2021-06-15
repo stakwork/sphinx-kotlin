@@ -86,7 +86,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/player_slider_control_margin"
-                android:layout_marginTop="@dimen/player_details_episode_title_margin"
+                android:layout_marginTop="@dimen/default_layout_margin"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/text_view_episode_title_label" />
