@@ -3,6 +3,8 @@ package chat.sphinx.feature_service_media_player_android.service
 import android.content.Context
 import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.feature_service_media_player_android.MediaPlayerServiceControllerImpl
+import chat.sphinx.feature_service_media_player_android.service.components.AudioManagerHandler
+import chat.sphinx.feature_service_media_player_android.service.components.SphinxAudioManagerHandler
 import chat.sphinx.logger.SphinxLogger
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
@@ -21,6 +23,10 @@ internal class SphinxMediaPlayerService: MediaPlayerService() {
 
     override val dispatchers: CoroutineDispatchers
         get() = _dispatchers
+
+    override val audioManagerHandler: AudioManagerHandler by lazy {
+        SphinxAudioManagerHandler(this)
+    }
 
     @Inject
     @Suppress("PropertyName", "ProtectedInFinal")

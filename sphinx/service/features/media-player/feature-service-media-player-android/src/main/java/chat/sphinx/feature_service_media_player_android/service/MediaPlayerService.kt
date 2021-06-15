@@ -15,12 +15,13 @@ import chat.sphinx.concept_service_media.MediaPlayerServiceState
 import chat.sphinx.concept_service_media.UserAction
 import chat.sphinx.feature_service_media_player_android.MediaPlayerServiceControllerImpl
 import chat.sphinx.feature_service_media_player_android.model.PodcastDataHolder
+import chat.sphinx.feature_service_media_player_android.service.components.AudioManagerHandler
 import chat.sphinx.feature_service_media_player_android.util.toServiceActionPlay
 import chat.sphinx.logger.SphinxLogger
-import chat.sphinx.logger.d
 import chat.sphinx.logger.e
 import chat.sphinx.wrapper_chat.ChatMetaData
 import chat.sphinx.wrapper_common.ItemId
+import chat.sphinx.wrapper_common.dashboard.ChatId
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_foreground_state.ForegroundState
 import io.matthewnelson.concept_foreground_state.ForegroundStateManager
@@ -34,7 +35,9 @@ internal abstract class MediaPlayerService: Service() {
     }
 
     abstract val serviceContext: Context
+
     protected abstract val dispatchers: CoroutineDispatchers
+    protected abstract val audioManagerHandler: AudioManagerHandler
     protected abstract val foregroundStateManager: ForegroundStateManager
     protected abstract val LOG: SphinxLogger
     abstract val mediaServiceController: MediaPlayerServiceControllerImpl
@@ -60,6 +63,57 @@ internal abstract class MediaPlayerService: Service() {
     inner class MediaPlayerHolder {
         @Volatile
         private var podData: PodcastDataHolder? = null
+
+        private val audioAttributes: AudioAttributes by lazy {
+            AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_MEDIA)
+                .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
+                .build()
+        }
+
+        @Synchronized
+        fun audioFocusLost() {
+            podData?.let { nnData ->
+                if (nnData.mediaPlayer.isPlaying) {
+                    pausePlayer(
+                        chatId = nnData.chatId,
+                        episodeId = nnData.episodeId,
+                        abandonAudioFocus = false
+                    )
+                }
+            }
+        }
+
+        @Synchronized
+        fun audioFocusGained() {
+            podData?.let { nnData ->
+                if (!nnData.mediaPlayer.isPlaying) {
+                    try {
+                        nnData.mediaPlayer.start()
+                    } catch (e: IllegalStateException) {
+                        LOG.e(TAG, "AudioFocusGained failed to start MediaPlayer", e)
+                        // TODO: Handle Exception
+                    }
+
+                    if (nnData.mediaPlayer.isPlaying) {
+                        if (stateDispatcherJob?.isActive != true) {
+                            startStateDispatcher()
+                        }
+                        wifiLock?.let { lock ->
+                            if (!lock.isHeld) {
+                                lock.acquire()
+                            }
+                        }
+                    } else {
+                        wifiLock?.let { lock ->
+                            if (lock.isHeld) {
+                                lock.release()
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
         @Synchronized
         fun processUserAction(userAction: UserAction) {
@@ -93,46 +147,11 @@ internal abstract class MediaPlayerService: Service() {
                 }
                 is UserAction.ServiceAction.Pause -> {
 
-                    podData?.let { nnData ->
-                        if (
-                            nnData.chatId == userAction.chatId &&
-                            nnData.episodeId == userAction.episodeId
-                        ) {
-                            try {
-                                nnData.mediaPlayer.pause()
-
-                                stateDispatcherJob?.cancel()
-                                val currentTime = nnData.mediaPlayer.currentPosition
-
-                                currentState = MediaPlayerServiceState.ServiceActive.MediaState.Paused(
-                                    nnData.chatId,
-                                    nnData.episodeId,
-                                    currentTime
-                                )
-                                mediaServiceController.dispatchState(currentState)
-
-                                repositoryMedia.updateChatMetaData(
-                                    userAction.chatId,
-                                    ChatMetaData(
-                                        ItemId(nnData.episodeId),
-                                        nnData.satsPerMinute,
-                                        currentTime,
-                                        nnData.speed,
-                                    )
-                                )
-
-                            } catch (e: IllegalStateException) {
-                                LOG.e(TAG, "Failed to pause MediaPlayer", e)
-                                // TODO: Handle Error
-                            }
-                        }
-                    }
-
-                    wifiLock?.let { lock ->
-                        if (lock.isHeld) {
-                            lock.release()
-                        }
-                    }
+                    pausePlayer(
+                        chatId = userAction.chatId,
+                        episodeId = userAction.episodeId,
+                        abandonAudioFocus = true
+                    )
 
                 }
                 is UserAction.ServiceAction.Play -> {
@@ -145,12 +164,14 @@ internal abstract class MediaPlayerService: Service() {
 
                             if (!nnData.mediaPlayer.isPlaying) {
                                 try {
-                                    nnData.setSpeed(userAction.speed).also {
-                                        nnData.mediaPlayer.playbackParams =
-                                            nnData.mediaPlayer.playbackParams.setSpeed(it.toFloat())
-                                    }
                                     nnData.mediaPlayer.seekTo(userAction.startTime)
-                                    nnData.mediaPlayer.start()
+                                    nnData.setSpeed(userAction.speed)
+
+                                    if (audioManagerHandler.requestAudioFocus()) {
+                                        nnData.mediaPlayer.playbackParams =
+                                            nnData.mediaPlayer.playbackParams.setSpeed(userAction.speed.toFloat())
+                                        nnData.mediaPlayer.start()
+                                    }
                                 } catch (e: IllegalStateException) {
                                     LOG.e(TAG, "Failed to start MediaPlayer", e)
                                     // TODO: Handle Error
@@ -233,6 +254,57 @@ internal abstract class MediaPlayerService: Service() {
             }
         }
 
+        private fun pausePlayer(
+            chatId: ChatId,
+            episodeId: Long,
+            abandonAudioFocus: Boolean = false
+        ) {
+            podData?.let { nnData ->
+                if (
+                    nnData.chatId == chatId &&
+                    nnData.episodeId == episodeId
+                ) {
+                    try {
+                        nnData.mediaPlayer.pause()
+
+                        wifiLock?.let { lock ->
+                            if (lock.isHeld) {
+                                lock.release()
+                            }
+                        }
+
+                        if (abandonAudioFocus) {
+                            audioManagerHandler.abandonAudioFocus()
+                        }
+
+                        stateDispatcherJob?.cancel()
+                        val currentTime = nnData.mediaPlayer.currentPosition
+
+                        currentState = MediaPlayerServiceState.ServiceActive.MediaState.Paused(
+                            nnData.chatId,
+                            nnData.episodeId,
+                            currentTime
+                        )
+                        mediaServiceController.dispatchState(currentState)
+
+                        repositoryMedia.updateChatMetaData(
+                            chatId,
+                            ChatMetaData(
+                                ItemId(nnData.episodeId),
+                                nnData.satsPerMinute,
+                                currentTime,
+                                nnData.speed,
+                            )
+                        )
+
+                    } catch (e: IllegalStateException) {
+                        LOG.e(TAG, "Failed to pause MediaPlayer", e)
+                        // TODO: Handle Error
+                    }
+                }
+            }
+        }
+
         private fun createMediaPlayer(
             userAction: UserAction.ServiceAction.Play,
             mediaPlayer: MediaPlayer?,
@@ -240,19 +312,20 @@ internal abstract class MediaPlayerService: Service() {
             val player: MediaPlayer = mediaPlayer.also { it?.reset() } ?: MediaPlayer()
 
             player.apply {
-                setAudioAttributes(
-                    AudioAttributes.Builder()
-                        .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                        .setUsage(AudioAttributes.USAGE_MEDIA)
-                        .build()
-                )
+                setAudioAttributes(audioAttributes)
                 setWakeMode(serviceContext.applicationContext, PowerManager.PARTIAL_WAKE_LOCK)
                 setDataSource(userAction.episodeUrl)
                 setOnPreparedListener { mp ->
                     mp.setOnPreparedListener(null)
-                    mp.playbackParams = mp.playbackParams.setSpeed(userAction.speed.toFloat())
                     mp.seekTo(userAction.startTime)
-                    mp.start()
+                    mp.playbackParams = mp.playbackParams.setSpeed(userAction.speed.toFloat())
+
+                    if (audioManagerHandler.requestAudioFocus()) {
+                        mp.start()
+                    } else {
+                        mp.pause()
+                    }
+
                     startStateDispatcher()
                 }
             }.let { mp ->
@@ -343,6 +416,7 @@ internal abstract class MediaPlayerService: Service() {
             currentState = MediaPlayerServiceState.ServiceInactive
             mediaServiceController.dispatchState(currentState)
             notification.clear()
+            audioManagerHandler.abandonAudioFocus()
             podData?.let { data ->
                 repositoryMedia.updateChatMetaData(
                     data.chatId,
