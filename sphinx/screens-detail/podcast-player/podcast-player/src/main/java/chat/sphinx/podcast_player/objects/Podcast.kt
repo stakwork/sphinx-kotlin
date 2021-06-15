@@ -1,8 +1,8 @@
 package chat.sphinx.podcast_player.objects
 
-import android.R.array
 import android.media.MediaMetadataRetriever
 import android.net.Uri
+import android.os.Build
 import android.os.Parcelable
 import chat.sphinx.concept_network_query_chat.model.PodcastDto
 import chat.sphinx.wrapper_chat.ChatMetaData
@@ -125,8 +125,8 @@ class Podcast(
         return null
     }
 
-    fun getCurrentEpisodeDuration(didChangeEpisode: Boolean = false): Long {
-        if (episodeDuration == null || didChangeEpisode) {
+    fun getCurrentEpisodeDuration(): Long {
+        if (episodeDuration == null) {
 
             if (playingEpisode == null) {
                 playingEpisode = getCurrentEpisode()
@@ -138,7 +138,7 @@ class Podcast(
             }
         }
 
-        return episodeDuration ?: 1
+        return episodeDuration ?: 0
     }
 
     @Throws(ArithmeticException::class)
@@ -151,6 +151,7 @@ class Podcast(
         val didChangeEpisode = this.episodeId != episode.id
 
         if (didChangeEpisode) {
+            this.episodeDuration = null
             this.playingEpisode?.playing = false
             this.playingEpisode = getEpisodeWithId(episode.id)
         }
@@ -159,7 +160,7 @@ class Podcast(
         this.episodeId = episode.id
         this.timeSeconds = time
 
-        getCurrentEpisodeDuration(didChangeEpisode)
+        getCurrentEpisodeDuration()
     }
 
     fun didSeekTo(time: Int) {
@@ -201,10 +202,11 @@ class Podcast(
         val nextEpisodeId = nextEpisode?.id ?: episodes[0].id
         this.playingEpisode = getEpisodeWithId(nextEpisodeId)
         this.episodeId = nextEpisodeId
+        this.episodeDuration = null
 
         this.timeSeconds = 0
 
-        getCurrentEpisodeDuration(true)
+        getCurrentEpisodeDuration()
     }
 
     fun didPausePlayingEpisode(episode: PodcastEpisode) {
@@ -215,7 +217,11 @@ class Podcast(
 fun Uri.getMediaDuration(): Long {
     val retriever = MediaMetadataRetriever()
     return try {
-        retriever.setDataSource(this.toString())
+        if (Build.VERSION.SDK_INT >= 14) {
+            retriever.setDataSource(this.toString(), HashMap<String, String>())
+        } else {
+            retriever.setDataSource(this.toString())
+        }
         val duration = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)
         retriever.release()
         duration?.toLongOrNull() ?: 0
