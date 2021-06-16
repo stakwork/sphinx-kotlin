@@ -2,6 +2,7 @@ package chat.sphinx.di
 
 import android.content.Context
 import chat.sphinx.concept_crypto_rsa.RSA
+import chat.sphinx.concept_network_query_attachment.NetworkQueryAttachment
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
@@ -64,6 +65,7 @@ object RepositoryModule {
         networkQueryContact: NetworkQueryContact,
         networkQueryLightning: NetworkQueryLightning,
         networkQueryMessage: NetworkQueryMessage,
+        networkQueryAttachment: NetworkQueryAttachment,
         socketIOManager: SocketIOManager,
         rsa: RSA,
         sphinxLogger: SphinxLogger,
@@ -78,6 +80,7 @@ object RepositoryModule {
             networkQueryContact,
             networkQueryLightning,
             networkQueryMessage,
+            networkQueryAttachment,
             rsa,
             socketIOManager,
             sphinxLogger,

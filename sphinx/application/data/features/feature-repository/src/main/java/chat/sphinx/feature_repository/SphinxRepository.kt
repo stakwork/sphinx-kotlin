@@ -3,6 +3,7 @@ package chat.sphinx.feature_repository
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_coredb.CoreDB
 import chat.sphinx.concept_crypto_rsa.RSA
+import chat.sphinx.concept_network_query_attachment.NetworkQueryAttachment
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
 import chat.sphinx.concept_network_query_chat.model.*
 import chat.sphinx.concept_network_query_contact.NetworkQueryContact
@@ -42,6 +43,7 @@ import chat.sphinx.logger.e
 import chat.sphinx.logger.w
 import chat.sphinx.wrapper_chat.*
 import chat.sphinx.wrapper_common.*
+import chat.sphinx.wrapper_common.attachment_authentication.*
 import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
@@ -75,7 +77,6 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import java.lang.RuntimeException
 import java.text.ParseException
 import kotlin.collections.ArrayList
 import kotlin.math.absoluteValue
@@ -90,6 +91,7 @@ abstract class SphinxRepository(
     private val networkQueryContact: NetworkQueryContact,
     private val networkQueryLightning: NetworkQueryLightning,
     private val networkQueryMessage: NetworkQueryMessage,
+    private val networkQueryAttachment: NetworkQueryAttachment,
     private val rsa: RSA,
     private val socketIOManager: SocketIOManager,
     protected val LOG: SphinxLogger,
@@ -569,7 +571,6 @@ abstract class SphinxRepository(
 
     override suspend fun deleteContactById(contactId: ContactId): Response<Any, ResponseError> {
         val queries = coreDB.getSphinxDatabaseQueries()
-
 
         var owner: Contact? = accountOwner.value
 
@@ -1911,4 +1912,71 @@ abstract class SphinxRepository(
                 null
             }
         }
+
+    override suspend fun authenticateForAttachments(): AuthenticationToken? {
+        var token: AuthenticationToken? = null
+
+        var owner: Contact? = accountOwner.value
+
+        if (owner == null) {
+            try {
+                accountOwner.collect {
+                    if (it != null) {
+                        owner = it
+                        throw Exception()
+                    }
+                }
+            } catch (e: Exception) {}
+            delay(25L)
+        }
+
+        owner?.nodePubKey?.let { nodePubKey ->
+            networkQueryAttachment.askAuthentication().collect { loadResponse ->
+                @Exhaustive
+                when (loadResponse) {
+                    is LoadResponse.Loading -> {}
+                    is Response.Error -> {}
+
+                    is Response.Success -> {
+                        val id = loadResponse.value.id.toAuthenticationId()
+                        val challenge = loadResponse.value.challenge.toAuthenticationChallenge()
+
+                        id?.let { id ->
+                            challenge?.let { challenge ->
+                                networkQueryAttachment.signChallenge(challenge).collect { loadResponse ->
+                                    @Exhaustive
+                                    when (loadResponse) {
+                                        is LoadResponse.Loading -> {}
+                                        is Response.Error -> {}
+
+                                        is Response.Success -> {
+                                            val sig = loadResponse.value.sig.toAuthenticationSig()
+
+                                            sig?.let { sig ->
+                                                networkQueryAttachment.verifyAuthentication(id, sig, nodePubKey).collect { loadResponse ->
+                                                    @Exhaustive
+                                                    when (loadResponse) {
+                                                        is LoadResponse.Loading -> {}
+                                                        is Response.Error -> {
+                                                            LOG.d(TAG, loadResponse.cause.message)
+                                                        }
+
+                                                        is Response.Success -> {
+                                                            token = loadResponse.value.token.toAuthenticationToken()
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return token
+    }
 }
