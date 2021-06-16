@@ -1,4 +1,4 @@
-package chat.sphinx.feature_service_media_player_android.service
+package chat.sphinx.feature_service_media_player_android.service.components
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -12,6 +12,7 @@ import androidx.core.app.NotificationCompat
 import chat.sphinx.concept_service_media.MediaPlayerServiceController
 import chat.sphinx.concept_service_media.MediaPlayerServiceState
 import chat.sphinx.feature_service_media_player_android.R
+import chat.sphinx.feature_service_media_player_android.service.MediaPlayerService
 import java.math.BigInteger
 import java.security.SecureRandom
 
