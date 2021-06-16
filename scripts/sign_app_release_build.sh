@@ -29,8 +29,9 @@ BUILD_TOOLS_VERSION=$(cat $FILE | grep 'buildTools' | sed 's/ //g' | cut -d '"' 
 #echo "'$BUILD_TOOLS_VERSION'"
 
 # Get Min/Max SDK Version
-MIN_SDK_VERSION=$(cat $FILE | grep 'minSdk' | grep -o '[[:digit:]]*')
-MAX_SDK_VERSION=$(cat $FILE | grep 'compileSdk' | grep -o '[[:digit:]]*')
+MIN_SDK_VERSION=$(cat $FILE | grep 'minSdk' | sed 's/ //g' | cut -d ':' -f 2 | cut -d ',' -f 1)
+MAX_SDK_VERSION=$(cat $FILE | grep 'compileSdk' | sed 's/ //g' | cut -d ':' -f 2 | cut -d ',' -f 1)
+
 #echo "'$MIN_SDK_VERSION'"
 #echo "'$MAX_SDK_VERSION'"
 
