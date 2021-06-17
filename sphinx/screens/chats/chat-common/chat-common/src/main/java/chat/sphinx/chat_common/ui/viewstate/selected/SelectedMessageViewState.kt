@@ -42,6 +42,10 @@ internal sealed class SelectedMessageViewState: ViewState<SelectedMessageViewSta
                     return null
                 }
 
+                if (messageHolderViewState.selectionMenuItems.isNullOrEmpty()) {
+                    return null
+                }
+
                 // TODO: if messageHolderViewState has no menu options available, return null
 
                 val spaceTop = holderYPosTop.add(headerHeight)

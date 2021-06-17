@@ -1,6 +1,7 @@
 package chat.sphinx.chat_common.ui.viewstate.messageholder
 
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
+import chat.sphinx.chat_common.ui.viewstate.selected.MenuItemState
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.isConversation
 import chat.sphinx.wrapper_common.DateTime
@@ -207,6 +208,24 @@ internal sealed class MessageHolderViewState(
         }
     }
 
+    val selectionMenuItems: List<MenuItemState>? by lazy(LazyThreadSafetyMode.NONE) {
+        if (background is BubbleBackground.Gone || message.podBoost != null) {
+            null
+        } else {
+            val list = ArrayList<MenuItemState>(4)
+
+            if (this is Received) {
+                list.add(MenuItemState.Boost)
+            }
+
+            if (list.isEmpty()) {
+                null
+            } else {
+                list.sortBy { it.sortPriority }
+                list
+            }
+        }
+    }
 
     class Sent(
         message: Message,
