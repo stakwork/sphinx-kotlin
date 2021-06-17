@@ -10,13 +10,13 @@ import androidx.navigation.NavArgs
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import chat.sphinx.chat_common.databinding.LayoutChatHeaderBinding
 import chat.sphinx.chat_common.databinding.LayoutMessageHolderBinding
 import chat.sphinx.chat_common.ui.ChatViewModel
 import chat.sphinx.chat_common.ui.viewstate.messageholder.*
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.wrapper_view.Px
-import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -24,6 +24,7 @@ import kotlinx.coroutines.withContext
 
 internal class MessageListAdapter<ARGS : NavArgs>(
     private val recyclerView: RecyclerView,
+    private val headerBinding: LayoutChatHeaderBinding,
     private val layoutManager: LinearLayoutManager,
     private val lifecycleOwner: LifecycleOwner,
     private val onStopSupervisor: OnStopSupervisor,
@@ -176,15 +177,34 @@ internal class MessageListAdapter<ARGS : NavArgs>(
     private val recyclerViewWidth: Px by lazy(LazyThreadSafetyMode.NONE) {
         Px(recyclerView.measuredWidth.toFloat())
     }
+    private val headerHeight: Px by lazy(LazyThreadSafetyMode.NONE) {
+        Px(headerBinding.root.measuredHeight.toFloat())
+    }
 
     inner class MessageViewHolder(
         private val binding: LayoutMessageHolderBinding
     ): RecyclerView.ViewHolder(binding.root) {
 
         private val disposables: ArrayList<Disposable> = ArrayList(1)
+        private var currentViewState: MessageHolderViewState? = null
+
+        init {
+            binding.includeMessageHolderBubble.apply {
+                root.setOnLongClickListener {
+                    SelectedMessageViewState.SelectedMessage.instantiate(
+                        currentViewState,
+                        Px(binding.root.y),
+                        Px(binding.root.measuredHeight.toFloat()),
+                        headerHeight,
+                        Px(recyclerView.rootView.measuredHeight.toFloat())
+                    )
+                    true
+                }
+            }
+        }
 
         fun bind(position: Int) {
-            val viewState = messages.elementAtOrNull(position) ?: return
+            val viewState = messages.elementAtOrNull(position).also { currentViewState = it } ?: return
             disposables.forEach {
                 it.dispose()
             }

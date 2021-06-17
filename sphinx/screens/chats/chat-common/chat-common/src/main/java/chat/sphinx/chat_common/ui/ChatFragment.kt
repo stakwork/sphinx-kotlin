@@ -114,6 +114,7 @@ abstract class ChatFragment<
         val linearLayoutManager = LinearLayoutManager(binding.root.context)
         val messageListAdapter = MessageListAdapter(
             recyclerView,
+            headerBinding,
             linearLayoutManager,
             viewLifecycleOwner,
             onStopSupervisor,
