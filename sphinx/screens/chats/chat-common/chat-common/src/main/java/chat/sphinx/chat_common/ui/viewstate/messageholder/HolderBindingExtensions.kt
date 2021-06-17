@@ -44,7 +44,7 @@ internal inline fun LayoutMessageHolderBinding.setView(
         it.dispose()
     }
     disposables.clear()
-    
+
     apply {
         onStopSupervisor.scope.launch(dispatchers.mainImmediate) {
             viewState.initialHolder.setInitialHolder(

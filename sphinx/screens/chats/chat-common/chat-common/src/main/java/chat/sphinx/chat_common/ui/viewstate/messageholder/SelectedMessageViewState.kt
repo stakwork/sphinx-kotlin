@@ -15,7 +15,8 @@ internal sealed class SelectedMessageViewState: ViewState<SelectedMessageViewSta
 
         /* The y position of the holder for the screen, not for the recycler view */
         val holderYPos: Px,
-        
+
+        val recyclerViewWidth: Px,
         val showMenuTop: Boolean,
     ): SelectedMessageViewState() {
 
@@ -29,6 +30,7 @@ internal sealed class SelectedMessageViewState: ViewState<SelectedMessageViewSta
 
                 holderHeight: Px,
                 headerHeight: Px,
+                recyclerViewWidth: Px,
                 screenHeight: Px,
             ): SelectedMessage? {
                 if (messageHolderViewState == null) {
@@ -43,6 +45,7 @@ internal sealed class SelectedMessageViewState: ViewState<SelectedMessageViewSta
                 return SelectedMessage(
                     messageHolderViewState,
                     spaceTop,
+                    recyclerViewWidth,
                     spaceTop.isGreaterThanOrEqualTo(spaceBottom),
                 )
             }

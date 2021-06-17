@@ -180,6 +180,9 @@ internal class MessageListAdapter<ARGS : NavArgs>(
     private val headerHeight: Px by lazy(LazyThreadSafetyMode.NONE) {
         Px(headerBinding.root.measuredHeight.toFloat())
     }
+    private val screenHeight: Px by lazy(LazyThreadSafetyMode.NONE) {
+        Px(recyclerView.rootView.measuredHeight.toFloat())
+    }
 
     inner class MessageViewHolder(
         private val binding: LayoutMessageHolderBinding
@@ -196,7 +199,8 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                         Px(binding.root.y),
                         Px(binding.root.measuredHeight.toFloat()),
                         headerHeight,
-                        Px(recyclerView.rootView.measuredHeight.toFloat())
+                        recyclerViewWidth,
+                        screenHeight,
                     )
                     true
                 }
