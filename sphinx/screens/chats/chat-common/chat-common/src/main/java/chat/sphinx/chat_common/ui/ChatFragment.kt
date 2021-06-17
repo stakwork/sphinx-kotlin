@@ -33,9 +33,11 @@ import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.resources.setBackgroundRandomColor
 import chat.sphinx.resources.setTextColorExt
+import chat.sphinx.resources.toPx
 import chat.sphinx.wrapper_chat.isTrue
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.lightning.unit
+import chat.sphinx.wrapper_view.Dp
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
@@ -235,7 +237,7 @@ abstract class ChatFragment<
                     }
                     is SelectedMessageViewState.SelectedMessage -> {
                         selectedMessageHolderBinding.apply {
-                            root.y = viewState.holderYPos.value
+                            root.y = viewState.holderYPos.value + viewState.statusHeaderHeight.value
                             setView(
                                 lifecycleScope,
                                 disposables,
@@ -245,11 +247,30 @@ abstract class ChatFragment<
                                 viewState.recyclerViewWidth,
                                 viewState.messageHolderViewState
                             )
+                            includeMessageStatusHeader.root.gone
+                            includeMessageHolderChatImageInitialHolder.root.gone
                         }
 
-                        selectedMessageBinding.apply {
-                            root.visible
-                            // TODO: Top/Bottom menu show
+                        selectedMessageBinding.apply message@ {
+                            this@message.includeLayoutSelectedMessageMenu.root.apply menu@ {
+                                this@menu.y = if (viewState.showMenuTop) {
+                                    viewState.holderYPos.value -
+
+                                    // TODO: Use menuItems.size when implemented instead of 4
+                                    (resources.getDimension(R.dimen.selected_message_menu_item_height) * 4) +
+
+                                    viewState.statusHeaderHeight.value -
+                                    Dp(4F).toPx(context).value
+                                } else {
+                                    viewState.holderYPos.value          +
+                                    viewState.bubbleHeight.value        +
+                                    viewState.statusHeaderHeight.value  +
+                                    Dp(4F).toPx(context).value
+                                }
+                                // TODO: Set background color
+                                // TODO: Set X position
+                            }
+                            this@message.root.visible
                         }
                     }
                 }

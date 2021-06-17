@@ -202,8 +202,10 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                     SelectedMessageViewState.SelectedMessage.instantiate(
                         currentViewState,
                         Px(binding.root.y),
+                        Px(it.measuredHeight.toFloat()),
                         Px(binding.root.measuredHeight.toFloat()),
                         headerHeight,
+                        Px(binding.includeMessageStatusHeader.root.measuredHeight.toFloat()),
                         recyclerViewWidth,
                         screenHeight,
                     ).let { vs ->
