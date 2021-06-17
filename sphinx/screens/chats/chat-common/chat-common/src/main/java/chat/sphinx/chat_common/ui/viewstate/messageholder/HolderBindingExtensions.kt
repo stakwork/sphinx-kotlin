@@ -25,14 +25,14 @@ import chat.sphinx.wrapper_view.Px
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.visible
-import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun LayoutMessageHolderBinding.setView(
-    onStopSupervisor: OnStopSupervisor,
+    lifecycleScope: CoroutineScope,
     disposables: ArrayList<Disposable>,
     dispatchers: CoroutineDispatchers,
     imageLoader: ImageLoader<ImageView>,
@@ -46,7 +46,7 @@ internal inline fun LayoutMessageHolderBinding.setView(
     disposables.clear()
 
     apply {
-        onStopSupervisor.scope.launch(dispatchers.mainImmediate) {
+        lifecycleScope.launch(dispatchers.mainImmediate) {
             viewState.initialHolder.setInitialHolder(
                 includeMessageHolderChatImageInitialHolder.textViewInitials,
                 includeMessageHolderChatImageInitialHolder.imageViewChatPicture,
@@ -64,7 +64,7 @@ internal inline fun LayoutMessageHolderBinding.setView(
 
         if (viewState.background !is BubbleBackground.Gone) {
             setBubbleGiphy(viewState.bubbleGiphy) { imageView, url ->
-                onStopSupervisor.scope.launch(dispatchers.mainImmediate) {
+                lifecycleScope.launch(dispatchers.mainImmediate) {
                     imageLoader.load(imageView, url)
                         .also { disposables.add(it) }
                 }
@@ -78,7 +78,7 @@ internal inline fun LayoutMessageHolderBinding.setView(
             )
             setBubblePaidMessageSentStatusLayout(viewState.bubblePaidMessageSentStatus)
             setBubbleReactionBoosts(viewState.bubbleReactionBoosts) { imageView, url ->
-                onStopSupervisor.scope.launch(dispatchers.mainImmediate) {
+                lifecycleScope.launch(dispatchers.mainImmediate) {
                     imageLoader.load(imageView, url.value, imageLoaderDefaults)
                         .also { disposables.add(it) }
                 }

@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavArgs
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -211,7 +212,7 @@ internal class MessageListAdapter<ARGS : NavArgs>(
             val viewState = messages.elementAtOrNull(position).also { currentViewState = it } ?: return
 
             binding.setView(
-                onStopSupervisor,
+                lifecycleOwner.lifecycleScope,
                 disposables,
                 viewModel.dispatchers,
                 imageLoader,
