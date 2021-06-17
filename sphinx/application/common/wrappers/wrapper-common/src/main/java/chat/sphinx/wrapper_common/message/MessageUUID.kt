@@ -1,4 +1,4 @@
-package chat.sphinx.wrapper_message
+package chat.sphinx.wrapper_common.message
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun String.toMessageUUID(): MessageUUID? =
