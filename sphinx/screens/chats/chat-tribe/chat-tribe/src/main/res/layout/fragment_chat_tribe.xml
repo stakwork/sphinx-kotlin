@@ -47,4 +47,9 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
+    <include
+        android:id="@+id/include_chat_tribe_selected_message"
+        layout="@layout/layout_selected_message"
+        tools:visibility="gone" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

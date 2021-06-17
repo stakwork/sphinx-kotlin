@@ -36,4 +36,9 @@
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent" />
 
+    <include
+        android:id="@+id/include_chat_contact_selected_message"
+        layout="@layout/layout_selected_message"
+        tools:visibility="gone" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
