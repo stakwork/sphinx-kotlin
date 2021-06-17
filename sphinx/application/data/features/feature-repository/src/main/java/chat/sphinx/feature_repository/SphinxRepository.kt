@@ -52,6 +52,8 @@ import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.lightning.toSat
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessagePagination
+import chat.sphinx.wrapper_common.message.MessageUUID
+import chat.sphinx.wrapper_common.message.toMessageUUID
 import chat.sphinx.wrapper_contact.*
 import chat.sphinx.wrapper_invite.Invite
 import chat.sphinx.wrapper_lightning.NodeBalance
@@ -75,7 +77,6 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import java.lang.RuntimeException
 import java.text.ParseException
 import kotlin.collections.ArrayList
 import kotlin.math.absoluteValue
@@ -1459,6 +1460,73 @@ abstract class SphinxRepository(
                         }
                     }
 
+                }
+            }
+        }
+    }
+
+    override fun boostMessage(
+        chatId: ChatId,
+        pricePerMessage: Sat,
+        escrowAmount: Sat,
+        messageUUID: MessageUUID,
+    ) {
+        repositoryScope.launch(mainImmediate) {
+            val owner: Contact = accountOwner.value.let {
+                if (it != null) {
+                    it
+                } else {
+                    var owner: Contact? = null
+                    try {
+                        accountOwner.collect { contact ->
+                            if (contact != null) {
+                                owner = contact
+                                throw Exception()
+                            }
+                        }
+                    } catch (e: Exception) {}
+                    delay(20L)
+
+                    owner ?: return@launch
+                }
+            }
+
+            networkQueryMessage.boostMessage(
+                chatId,
+                pricePerMessage,
+                escrowAmount,
+                owner.tipAmount ?: Sat(20L),
+                messageUUID,
+            ).collect { loadResponse ->
+                @Exhaustive
+                when (loadResponse) {
+                    is LoadResponse.Loading -> {}
+                    is Response.Error -> {
+                        LOG.e(TAG, loadResponse.message, loadResponse.exception)
+                    }
+                    is Response.Success -> {
+                        decryptMessageDtoContentIfAvailable(
+                            loadResponse.value,
+                            coroutineScope { this },
+                        )
+                        val queries = coreDB.getSphinxDatabaseQueries()
+                        chatLock.withLock {
+                            messageLock.withLock {
+                                queries.transaction {
+                                    upsertMessage(loadResponse.value, queries)
+
+                                    if (loadResponse.value.updateChatDboLatestMessage) {
+                                        updateChatDboLatestMessage(
+                                            loadResponse.value,
+                                            chatId,
+                                            latestMessageUpdatedTimeMap,
+                                            queries
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
