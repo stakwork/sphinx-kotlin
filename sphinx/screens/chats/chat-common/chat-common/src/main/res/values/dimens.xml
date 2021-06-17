@@ -83,5 +83,8 @@
     <!-- Selected Message -->
     <!-- Default Elevation + 2dp -->
     <dimen name="selected_message_elevation">10dp</dimen>
+    <dimen name="selected_message_menu_width">120dp</dimen>
+    <dimen name="selected_message_menu_item_height">24dp</dimen>
+    <dimen name="selected_message_menu_item_text_size">10sp</dimen>
 
 </resources>

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="@dimen/selected_message_menu_width"
+    android:layout_height="wrap_content"
+    android:background="@color/lightDivider">
+
+    <include
+        android:id="@+id/include_layout_selected_message_menu_item_1"
+        layout="@layout/layout_selected_message_menu_item"
+        android:layout_width="@dimen/selected_message_menu_width"
+        android:layout_height="@dimen/selected_message_menu_item_height"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <include
+        android:id="@+id/include_layout_selected_message_menu_item_2"
+        layout="@layout/layout_selected_message_menu_item"
+        android:layout_width="@dimen/selected_message_menu_width"
+        android:layout_height="@dimen/selected_message_menu_item_height"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/include_layout_selected_message_menu_item_1" />
+
+    <include
+        android:id="@+id/include_layout_selected_message_menu_item_3"
+        layout="@layout/layout_selected_message_menu_item"
+        android:layout_width="@dimen/selected_message_menu_width"
+        android:layout_height="@dimen/selected_message_menu_item_height"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/include_layout_selected_message_menu_item_2" />
+
+    <include
+        android:id="@+id/include_layout_selected_message_menu_item_4"
+        layout="@layout/layout_selected_message_menu_item"
+        android:layout_width="@dimen/selected_message_menu_width"
+        android:layout_height="@dimen/selected_message_menu_item_height"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/include_layout_selected_message_menu_item_3" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

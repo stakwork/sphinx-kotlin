@@ -19,4 +19,8 @@
         android:id="@+id/include_layout_message_holder_selected_message"
         layout="@layout/layout_message_holder" />
 
+    <include
+        android:id="@+id/include_layout_selected_message_menu"
+        layout="@layout/layout_selected_message_menu" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
