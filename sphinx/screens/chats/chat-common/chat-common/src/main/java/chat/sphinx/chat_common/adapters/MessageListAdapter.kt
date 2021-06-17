@@ -205,53 +205,17 @@ internal class MessageListAdapter<ARGS : NavArgs>(
 
         fun bind(position: Int) {
             val viewState = messages.elementAtOrNull(position).also { currentViewState = it } ?: return
-            disposables.forEach {
-                it.dispose()
-            }
-            disposables.clear()
 
-            binding.apply {
+            binding.setView(
+                onStopSupervisor,
+                disposables,
+                viewModel.dispatchers,
+                imageLoader,
+                viewModel.imageLoaderDefaults,
+                recyclerViewWidth,
+                viewState,
+            )
 
-                onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-                    viewState.initialHolder.setInitialHolder(
-                        includeMessageHolderChatImageInitialHolder.textViewInitials,
-                        includeMessageHolderChatImageInitialHolder.imageViewChatPicture,
-                        includeMessageStatusHeader,
-                        imageLoader
-                    )?.also {
-                        disposables.add(it)
-                    }
-                }
-
-                setStatusHeader(viewState.statusHeader)
-                setDeletedMessageLayout(viewState.deletedMessage)
-                setBubbleBackground(viewState, recyclerViewWidth)
-                setGroupActionIndicatorLayout(viewState.groupActionIndicator)
-
-                if (viewState.background !is BubbleBackground.Gone) {
-                    setBubbleGiphy(viewState.bubbleGiphy) { imageView, url ->
-                        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-                            imageLoader.load(imageView, url)
-                                .also { disposables.add(it) }
-                        }
-                    }
-                    setUnsupportedMessageTypeLayout(viewState.unsupportedMessageType)
-                    setBubbleMessageLayout(viewState.bubbleMessage)
-                    setBubbleDirectPaymentLayout(viewState.bubbleDirectPayment)
-                    setBubblePaidMessageDetailsLayout(
-                        viewState.bubblePaidMessageDetails,
-                        viewState.background
-                    )
-                    setBubblePaidMessageSentStatusLayout(viewState.bubblePaidMessageSentStatus)
-                    setBubbleReactionBoosts(viewState.bubbleReactionBoosts) { imageView, url ->
-                        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-                            imageLoader.load(imageView, url.value, viewModel.imageLoaderDefaults)
-                                .also { disposables.add(it) }
-                        }
-                    }
-                    setBubbleReplyMessage(viewState.bubbleReplyMessage)
-                }
-            }
         }
 
     }
