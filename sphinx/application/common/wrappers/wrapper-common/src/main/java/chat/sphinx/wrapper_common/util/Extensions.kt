@@ -16,6 +16,32 @@ inline fun String.getInitials(charLimit: Int = 2): String {
 }
 
 @Suppress("NOTHING_TO_INLINE")
+inline fun String.getHostFromMediaToken(): String? {
+    this.getMediaTokenElementWithIndex(0)?.let { mediaToken ->
+        return mediaToken
+    }
+    return null
+}
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun String.getMUIDFromMediaToken(): String? {
+    this.getMediaTokenElementWithIndex(1)?.let { muid ->
+        return muid
+    }
+    return null
+}
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun String.getMediaTokenElementWithIndex(index: Int): String? {
+    this.split(".").filter { it.isNotBlank() }.let { splits ->
+        if (splits.size > index) {
+            return splits[index]
+        }
+    }
+    return null
+}
+
+@Suppress("NOTHING_TO_INLINE")
 inline fun Long.getTimeString(): String {
     val hours: Int
     val minutes: Int

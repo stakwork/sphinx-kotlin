@@ -9,6 +9,8 @@ import chat.sphinx.wrapper_common.lightning.LightningPaymentHash
 import chat.sphinx.wrapper_common.lightning.LightningPaymentRequest
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.MessageId
+import chat.sphinx.wrapper_common.util.getHostFromMediaToken
+import chat.sphinx.wrapper_common.util.getMUIDFromMediaToken
 import chat.sphinx.wrapper_message.media.MessageMedia
 
 /**
@@ -41,6 +43,29 @@ inline fun Message.retrieveTextToShow(): String? =
 //            ?:
 //            decrypted.value
     }
+
+inline val Message.mediaUrl: String? 
+    get() {
+        this.messageMedia?.mediaToken?.value.let { mediaToken ->
+            mediaToken?.getHostFromMediaToken()?.let { host ->
+                return "https://$host/file/$mediaToken"
+            }
+        }
+        return null
+    }
+
+inline val Message.mediaUID: String? 
+    get() {
+        this.messageMedia?.mediaToken?.value.let { mediaToken ->
+            mediaToken?.getMUIDFromMediaToken()?.let { muid ->
+                return muid
+            }
+        }
+        return null    
+    }
+
+inline val Message.mediaKey: String? 
+    get() = this.messageMedia?.mediaKey?.value
 
 abstract class Message {
     abstract val id: MessageId
