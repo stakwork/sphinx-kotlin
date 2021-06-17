@@ -16,5 +16,13 @@ inline fun Px.multiplyBy(px: Px): Px =
 inline fun Px.divideBy(px: Px): Px =
     Px(value / px.value)
 
+@Suppress("NOTHING_TO_INLINE")
+inline fun Px.isGreaterThanOrEqualTo(px: Px): Boolean =
+    value >= px.value
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun Px.isLessThanOrEqualTo(px: Px): Boolean =
+    value <= px.value
+
 @JvmInline
 value class Px(val value: Float)
