@@ -5,7 +5,10 @@ import android.content.Context
 import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
+import androidx.activity.OnBackPressedCallback
 import androidx.annotation.LayoutRes
+import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavArgs
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -82,13 +85,38 @@ abstract class ChatFragment<
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // TODO: OnBackPress listener for if message item is selected, switch state to NONE
+        SelectedMessageStateBackPressHandler(viewLifecycleOwner, requireActivity())
 
         val insetterActivity = (requireActivity() as InsetterActivity)
         setupFooter(insetterActivity)
         setupHeader(insetterActivity)
         setupSelectedMessage()
         setupRecyclerView()
+    }
+
+    private inner class SelectedMessageStateBackPressHandler(
+        owner: LifecycleOwner,
+        activity: FragmentActivity,
+    ): OnBackPressedCallback(true) {
+
+        init {
+            activity.apply {
+                onBackPressedDispatcher.addCallback(
+                    owner,
+                    this@SelectedMessageStateBackPressHandler
+                )
+            }
+        }
+
+        override fun handleOnBackPressed() {
+            if (viewModel.getSelectedMessageViewStateFlow().value is SelectedMessageViewState.SelectedMessage) {
+                viewModel.updateSelectedMessageViewState(SelectedMessageViewState.None)
+            } else {
+                lifecycleScope.launch(viewModel.mainImmediate) {
+                    chatNavigator.popBackStack()
+                }
+            }
+        }
     }
 
     private fun setupFooter(insetterActivity: InsetterActivity) {
