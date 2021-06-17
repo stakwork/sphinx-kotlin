@@ -29,10 +29,10 @@ import chat.sphinx.resources.getRandomColor
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.ChatName
 import chat.sphinx.wrapper_chat.isConversation
+import chat.sphinx.wrapper_common.lightning.Sat
+import chat.sphinx.wrapper_common.message.MessageUUID
 import chat.sphinx.wrapper_contact.Contact
-import chat.sphinx.wrapper_message.Message
-import chat.sphinx.wrapper_message.isDeleted
-import chat.sphinx.wrapper_message.isGroupAction
+import chat.sphinx.wrapper_message.*
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
@@ -364,5 +364,19 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         if (selectedMessageViewState == null) return
 
         selectedMessageContainer.updateViewState(selectedMessageViewState)
+    }
+
+    fun boostMessage(messageUUID: MessageUUID?) {
+        if (messageUUID == null) return
+
+        viewModelScope.launch(mainImmediate) {
+            val chat = getChat()
+            messageRepository.boostMessage(
+                chat.id,
+                chat.pricePerMessage ?: Sat(0),
+                chat.escrowAmount ?: Sat(0),
+                messageUUID,
+            )
+        }
     }
 }

@@ -43,6 +43,7 @@ import chat.sphinx.resources.toPx
 import chat.sphinx.wrapper_chat.isTrue
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.lightning.unit
+import chat.sphinx.wrapper_message.ReplyUUID
 import chat.sphinx.wrapper_view.Dp
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
@@ -190,7 +191,7 @@ abstract class ChatFragment<
                     holderState.selectionMenuItems?.elementAtOrNull(index)?.let { item ->
                         when (item) {
                             is MenuItemState.Boost -> {
-                                // TODO: Implement
+                                viewModel.boostMessage(holderState.message.uuid)
                             }
                             is MenuItemState.CopyCallLink -> {
                                 // TODO: Implement
