@@ -17,19 +17,20 @@
         android:id="@+id/image_view_selected_message_menu_item_icon"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        app:layout_constraintStart_toStartOf="parent"
-        android:src="@drawable/ic_boost_green" />
+        android:src="@drawable/ic_boost_green"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/text_view_selected_message_menu_item"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_marginStart="32dp"
-        android:textSize="@dimen/selected_message_menu_item_text_size"
         android:ellipsize="end"
         android:gravity="center_vertical"
         android:singleLine="true"
         android:textColor="@color/text"
+        android:textSize="@dimen/selected_message_menu_item_text_size"
         app:layout_constraintStart_toStartOf="parent"
-        android:text="Boost" />
+        tools:text="Boost" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

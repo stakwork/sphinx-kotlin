@@ -23,6 +23,8 @@ import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
 import chat.sphinx.chat_common.ui.viewstate.header.ChatHeaderFooterViewState
 import chat.sphinx.chat_common.ui.viewstate.selected.SelectedMessageViewState
 import chat.sphinx.chat_common.ui.viewstate.messageholder.setView
+import chat.sphinx.chat_common.ui.viewstate.selected.setMenuColor
+import chat.sphinx.chat_common.ui.viewstate.selected.setMenuItems
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_repository_message.SendMessage
@@ -236,6 +238,11 @@ abstract class ChatFragment<
                         selectedMessageBinding.root.gone
                     }
                     is SelectedMessageViewState.SelectedMessage -> {
+                        if (viewState.messageHolderViewState.selectionMenuItems.isNullOrEmpty()) {
+                            viewModel.updateSelectedMessageViewState(SelectedMessageViewState.None)
+                            return@collect
+                        }
+
                         selectedMessageHolderBinding.apply {
                             root.y = viewState.holderYPos.value + viewState.statusHeaderHeight.value
                             setView(
@@ -255,9 +262,7 @@ abstract class ChatFragment<
                             this@message.includeLayoutSelectedMessageMenu.root.apply menu@ {
                                 this@menu.y = if (viewState.showMenuTop) {
                                     viewState.holderYPos.value -
-
-                                    // TODO: Use menuItems.size when implemented instead of 4
-                                    (resources.getDimension(R.dimen.selected_message_menu_item_height) * 4) +
+                                    (resources.getDimension(R.dimen.selected_message_menu_item_height) * (viewState.messageHolderViewState.selectionMenuItems?.size ?: 0)) +
 
                                     viewState.statusHeaderHeight.value -
                                     Dp(4F).toPx(context).value
@@ -267,9 +272,10 @@ abstract class ChatFragment<
                                     viewState.statusHeaderHeight.value  +
                                     Dp(4F).toPx(context).value
                                 }
-                                // TODO: Set background color
                                 // TODO: Set X position
                             }
+                            this@message.setMenuColor(viewState.messageHolderViewState)
+                            this@message.setMenuItems(viewState.messageHolderViewState.selectionMenuItems)
                             this@message.root.visible
                         }
                     }

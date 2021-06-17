@@ -61,4 +61,14 @@
     <string name="group_leave_announcement_group">%1$s just left the group</string>
     <string name="group_kick_announcement_group_user_facing">The admin has removed you from this group</string>
     <string name="group_kick_announcement_tribe_user_facing">The admin has removed you from this tribe</string>
+
+    <!-- Selected Item Menu Labels -->
+    <string name="selected_message_menu_item_boost">Boost</string>
+    <string name="selected_message_menu_item_copy_text">Copy Text</string>
+    <string name="selected_message_menu_item_copy_call_link">Copy Call Link</string>
+    <string name="selected_message_menu_item_copy_link">Copy Link</string>
+    <string name="selected_message_menu_item_delete">Delete Message</string>
+    <string name="selected_message_menu_item_reply">Reply</string>
+    <string name="selected_message_menu_item_save_file">Save File</string>
+
 </resources>
