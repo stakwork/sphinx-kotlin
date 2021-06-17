@@ -12,6 +12,7 @@ import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
 import chat.sphinx.chat_common.ui.viewstate.header.ChatHeaderFooterViewState
 import chat.sphinx.chat_common.ui.viewstate.messageholder.BubbleBackground
 import chat.sphinx.chat_common.ui.viewstate.messageholder.MessageHolderViewState
+import chat.sphinx.chat_common.ui.viewstate.messageholder.SelectedMessageViewState
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
@@ -41,6 +42,11 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+
+@JvmSynthetic
+@Suppress("NOTHING_TO_INLINE")
+internal inline fun <ARGS: NavArgs> ChatViewModel<ARGS>.isMessageSelected(): Boolean =
+    getSelectedMessageViewStateFlow().value is SelectedMessageViewState.SelectedMessage
 
 abstract class ChatViewModel<ARGS: NavArgs>(
     protected val app: Application,
@@ -339,5 +345,24 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                 }
             }
         }
+    }
+
+    private inner class SelectedMessageViewStateContainer: ViewStateContainer<SelectedMessageViewState>(
+        SelectedMessageViewState.None
+    )
+
+    private val selectedMessageContainer by lazy {
+        SelectedMessageViewStateContainer()
+    }
+
+    @JvmSynthetic
+    internal fun getSelectedMessageViewStateFlow(): StateFlow<SelectedMessageViewState> =
+        selectedMessageContainer.viewStateFlow
+
+    @JvmSynthetic
+    internal fun updateSelectedMessageViewState(selectedMessageViewState: SelectedMessageViewState?) {
+        if (selectedMessageViewState == null) return
+
+        selectedMessageContainer.updateViewState(selectedMessageViewState)
     }
 }

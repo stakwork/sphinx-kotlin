@@ -202,7 +202,9 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                         headerHeight,
                         recyclerViewWidth,
                         screenHeight,
-                    )
+                    ).let { vs ->
+                        viewModel.updateSelectedMessageViewState(vs)
+                    }
                     true
                 }
             }
