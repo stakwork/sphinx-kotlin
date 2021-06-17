@@ -209,9 +209,14 @@ internal sealed class MessageHolderViewState(
     }
 
     val selectionMenuItems: List<MenuItemState>? by lazy(LazyThreadSafetyMode.NONE) {
-        if (background is BubbleBackground.Gone || message.podBoost != null) {
+        if (
+            background is BubbleBackground.Gone         ||
+            message.podBoost != null
+        ) {
             null
         } else {
+            // TODO: check message status
+
             val list = ArrayList<MenuItemState>(4)
 
             if (this is Received) {
