@@ -11,18 +11,8 @@ import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.util.getHostFromMediaToken
 import chat.sphinx.wrapper_common.util.getMUIDFromMediaToken
+import chat.sphinx.wrapper_common.util.getMediaAttributeWithName
 import chat.sphinx.wrapper_message.media.MessageMedia
-
-/**
- * Messages are consider "paid" if they have a type equalling `ATTACHMENT`,
- * and if the price that can be extracted from the mediaToken is greater than 0.
- */
-inline val Message.isPaidMessage: Boolean
-    get() {
-        // TODO: Implement logic at the repository level for extracting a price from the media token.
-//        return type.isAttachment() && (messageMedia?.priceFromToken ?: 0) > 0
-        return false
-    }
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun Message.retrieveTextToShow(): String? =
@@ -44,24 +34,50 @@ inline fun Message.retrieveTextToShow(): String? =
 //            decrypted.value
     }
 
+//Paid types
+inline val Message.isPaidMessage: Boolean
+    get() {
+        return type.isAttachment() && mediaPrice > 0
+    }
+
+//Attachment types
+inline val Message.isImage: Boolean
+    get() {
+        this.messageMedia?.mediaType?.value?.let { mediaType ->
+            return mediaType.contains("image")
+        }
+        return false
+    }
+
+//Media attributes
 inline val Message.mediaUrl: String? 
     get() {
-        this.messageMedia?.mediaToken?.value.let { mediaToken ->
-            mediaToken?.getHostFromMediaToken()?.let { host ->
+        this.messageMedia?.mediaToken?.value?.let { mediaToken ->
+            mediaToken.getHostFromMediaToken()?.let { host ->
                 return "https://$host/file/$mediaToken"
             }
         }
         return null
     }
 
-inline val Message.mediaUID: String? 
+inline val Message.mediaUniqueID: String?
     get() {
-        this.messageMedia?.mediaToken?.value.let { mediaToken ->
-            mediaToken?.getMUIDFromMediaToken()?.let { muid ->
+        this.messageMedia?.mediaToken?.value?.let { mediaToken ->
+            mediaToken.getMUIDFromMediaToken()?.let { muid ->
                 return muid
             }
         }
         return null    
+    }
+
+inline val Message.mediaPrice: Int
+    get() {
+        this.messageMedia?.mediaToken?.value?.let { mediaToken ->
+            mediaToken.getMediaAttributeWithName("amt")?.let { mediaPrice ->
+                return mediaPrice.toInt()
+            }
+        }
+        return 0
     }
 
 inline val Message.mediaKey: String? 

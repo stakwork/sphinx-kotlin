@@ -68,6 +68,11 @@ internal sealed class LayoutState {
                 val url: String,
             ): ContainerTop()
 
+            data class ImageAttachment(
+                val url: String,
+                val mediaKey: String,
+            ): ContainerTop()
+
             // FileAttachment
             // AudioAttachment
             // VideoAttachment

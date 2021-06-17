@@ -39,7 +39,7 @@ internal sealed class MessageHolderViewState(
     }
 
     val unsupportedMessageType: LayoutState.Bubble.ContainerMiddle.UnsupportedMessageType? by lazy(LazyThreadSafetyMode.NONE) {
-        if (unsupportedMessageTypes.contains(message.type)) {
+        if (unsupportedMessageTypes.contains(message.type) && !message.isImage) {
             LayoutState.Bubble.ContainerMiddle.UnsupportedMessageType(
                 messageType = message.type,
                 gravityStart = this is Received,
@@ -129,6 +129,16 @@ internal sealed class MessageHolderViewState(
         message.giphyData?.let {
             if (it.url.isNotEmpty()) {
                 LayoutState.Bubble.ContainerTop.Giphy(it.url.replace("giphy.gif", "200w.gif"))
+            } else {
+                null
+            }
+        }
+    }
+
+    val bubbleImageAttachment: LayoutState.Bubble.ContainerTop.ImageAttachment? by lazy(LazyThreadSafetyMode.NONE) {
+        message.mediaUrl?.let { mediaUrl ->
+            if (message.isImage && !message.isPaidMessage) {
+                LayoutState.Bubble.ContainerTop.ImageAttachment(mediaUrl, message.mediaKey ?: "")
             } else {
                 null
             }

@@ -408,17 +408,23 @@ internal inline fun LayoutMessageHolderBinding.setBubblePaidMessageSentStatusLay
 
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
-internal inline fun LayoutMessageHolderBinding.setBubbleGiphy(
+internal inline fun LayoutMessageHolderBinding.setBubbleImageAttachment(
     giphy: LayoutState.Bubble.ContainerTop.Giphy?,
-    loadImage: (ImageView, String) -> Unit,
+    imageAttachment: LayoutState.Bubble.ContainerTop.ImageAttachment?,
+    loadImage: (ImageView, String, String?) -> Unit,
 ) {
     includeMessageHolderBubble.includeMessageTypeImageAttachment.apply {
-        if (giphy == null) {
+        if (giphy == null && imageAttachment == null) {
             root.gone
         } else {
             root.visible
 
-            loadImage(imageViewAttachmentImage, giphy.url)
+            if (giphy != null) {
+                loadImage(imageViewAttachmentImage, giphy.url, null)
+                loadingImageProgressContainer.gone
+            } else if (imageAttachment != null) {
+//                loadImage(imageViewAttachmentImage, imageAttachment.url, imageAttachment.mediaKey)
+            }
         }
     }
 }
