@@ -1,5 +1,6 @@
-package chat.sphinx.chat_common.ui.viewstate.messageholder
+package chat.sphinx.chat_common.ui.viewstate.selected
 
+import chat.sphinx.chat_common.ui.viewstate.messageholder.MessageHolderViewState
 import chat.sphinx.wrapper_view.Px
 import chat.sphinx.wrapper_view.add
 import chat.sphinx.wrapper_view.isGreaterThanOrEqualTo
