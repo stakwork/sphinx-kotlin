@@ -200,14 +200,17 @@ internal class MessageListAdapter<ARGS : NavArgs>(
             binding.includeMessageHolderBubble.apply {
                 root.setOnLongClickListener {
                     SelectedMessageViewState.SelectedMessage.instantiate(
-                        currentViewState,
-                        Px(binding.root.y),
-                        Px(it.measuredHeight.toFloat()),
-                        Px(binding.root.measuredHeight.toFloat()),
-                        headerHeight,
-                        Px(binding.includeMessageStatusHeader.root.measuredHeight.toFloat()),
-                        recyclerViewWidth,
-                        screenHeight,
+                        messageHolderViewState = currentViewState,
+                        holderYPosTop = Px(binding.root.y),
+                        holderHeight = Px(binding.root.measuredHeight.toFloat()),
+                        holderWidth = Px(binding.root.measuredWidth.toFloat()),
+                        bubbleXPosStart = Px(it.x),
+                        bubbleWidth = Px(it.measuredWidth.toFloat()),
+                        bubbleHeight = Px(it.measuredHeight.toFloat()),
+                        headerHeight = headerHeight,
+                        statusHeaderHeight = Px(binding.includeMessageStatusHeader.root.measuredHeight.toFloat()),
+                        recyclerViewWidth = recyclerViewWidth,
+                        screenHeight = screenHeight,
                     ).let { vs ->
                         viewModel.updateSelectedMessageViewState(vs)
                     }

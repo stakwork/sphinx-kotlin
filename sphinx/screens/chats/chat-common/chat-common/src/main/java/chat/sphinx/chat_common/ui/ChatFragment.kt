@@ -323,7 +323,10 @@ abstract class ChatFragment<
                                     viewState.statusHeaderHeight.value  +
                                     Dp(4F).toPx(context).value
                                 }
-                                // TODO: Set X position
+                                val menuWidth = resources.getDimension(R.dimen.selected_message_menu_width)
+
+                                // TODO: Handle small bubbles better
+                                this@menu.x = viewState.bubbleCenterXPos.value - (menuWidth / 2F)
                             }
                             this@message.setMenuColor(viewState.messageHolderViewState)
                             this@message.setMenuItems(viewState.messageHolderViewState.selectionMenuItems)
