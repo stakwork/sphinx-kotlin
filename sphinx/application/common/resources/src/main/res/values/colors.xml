@@ -34,6 +34,7 @@
 
     <color name="shadow">#000000</color>
     <color name="bubbleShadow">#FFFFFF</color>
+    <color name="selectedMessageBackground">#B3FFFFFF</color>
     <color name="divider">#151E27</color>
     <color name="lightDivider">#3B4755</color>
     <color name="expiredInvoice">#FFFFFF</color>
