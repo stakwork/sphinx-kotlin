@@ -23,6 +23,7 @@ import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
 import chat.sphinx.chat_common.ui.viewstate.header.ChatHeaderFooterViewState
 import chat.sphinx.chat_common.ui.viewstate.selected.SelectedMessageViewState
 import chat.sphinx.chat_common.ui.viewstate.messageholder.setView
+import chat.sphinx.chat_common.ui.viewstate.selected.MenuItemState
 import chat.sphinx.chat_common.ui.viewstate.selected.setMenuColor
 import chat.sphinx.chat_common.ui.viewstate.selected.setMenuItems
 import chat.sphinx.concept_image_loader.Disposable
@@ -134,9 +135,59 @@ abstract class ChatFragment<
                     viewModel.updateSelectedMessageViewState(SelectedMessageViewState.None)
                 }
             }
+            includeLayoutSelectedMessageMenu.apply {
+                includeLayoutSelectedMessageMenuItem1.root.setOnClickListener {
+                    onSelectedMessageMenuItemClick(0)
+                }
+                includeLayoutSelectedMessageMenuItem2.root.setOnClickListener {
+                    onSelectedMessageMenuItemClick(1)
+                }
+                includeLayoutSelectedMessageMenuItem3.root.setOnClickListener {
+                    onSelectedMessageMenuItemClick(2)
+                }
+                includeLayoutSelectedMessageMenuItem4.root.setOnClickListener {
+                    onSelectedMessageMenuItemClick(3)
+                }
+            }
         }
         selectedMessageHolderBinding.includeMessageHolderBubble.root.setOnClickListener {
             viewModel
+        }
+    }
+
+    private fun onSelectedMessageMenuItemClick(index: Int) {
+        viewModel.getSelectedMessageViewStateFlow().value.let { state ->
+            if (state is SelectedMessageViewState.SelectedMessage) {
+                state.messageHolderViewState.let { holderState ->
+                    holderState.selectionMenuItems?.elementAtOrNull(index)?.let { item ->
+                        when (item) {
+                            is MenuItemState.Boost -> {
+                                // TODO: Implement
+                            }
+                            is MenuItemState.CopyCallLink -> {
+                                // TODO: Implement
+                            }
+                            is MenuItemState.CopyLink -> {
+                                // TODO: Implement
+                            }
+                            is MenuItemState.CopyText -> {
+                                // TODO: Implement
+                            }
+                            is MenuItemState.Delete -> {
+                                // TODO: Implement
+                            }
+                            is MenuItemState.Reply -> {
+                                // TODO: Implement
+                            }
+                            is MenuItemState.SaveFile -> {
+                                // TODO: Implement
+                            }
+                        }
+                    }
+                }
+
+                viewModel.updateSelectedMessageViewState(SelectedMessageViewState.None)
+            }
         }
     }
 
