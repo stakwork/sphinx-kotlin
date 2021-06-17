@@ -23,6 +23,7 @@ import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.kotlin_response.message
+import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.resources.getRandomColor
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.ChatName
@@ -48,7 +49,8 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     protected val contactRepository: ContactRepository,
     protected val messageRepository: MessageRepository,
     protected val networkQueryLightning: NetworkQueryLightning,
-    protected val savedStateHandle: SavedStateHandle
+    protected val savedStateHandle: SavedStateHandle,
+    protected val LOG: SphinxLogger,
 ): SideEffectViewModel<
         Context,
         ChatSideEffect,

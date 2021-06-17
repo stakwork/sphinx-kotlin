@@ -15,6 +15,7 @@ import chat.sphinx.concept_repository_message.SendMessage
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
+import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.ChatName
 import chat.sphinx.wrapper_common.dashboard.ChatId
@@ -51,6 +52,7 @@ internal class ChatContactViewModel @Inject constructor(
     messageRepository: MessageRepository,
     networkQueryLightning: NetworkQueryLightning,
     savedStateHandle: SavedStateHandle,
+    LOG: SphinxLogger,
 ): ChatViewModel<ChatContactFragmentArgs>(
     app,
     dispatchers,
@@ -59,6 +61,7 @@ internal class ChatContactViewModel @Inject constructor(
     messageRepository,
     networkQueryLightning,
     savedStateHandle,
+    LOG,
 ) {
     override val args: ChatContactFragmentArgs by savedStateHandle.navArgs()
     private var chatId: ChatId? = args.chatId
