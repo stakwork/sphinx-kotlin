@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView
 import chat.sphinx.chat_common.databinding.LayoutChatHeaderBinding
 import chat.sphinx.chat_common.databinding.LayoutMessageHolderBinding
 import chat.sphinx.chat_common.ui.ChatViewModel
+import chat.sphinx.chat_common.ui.isMessageSelected
 import chat.sphinx.chat_common.ui.viewstate.messageholder.*
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
@@ -117,6 +118,7 @@ internal class MessageListAdapter<ARGS : NavArgs>(
         val listSizeAfterDispatch = messages.size - 1
 
         if (
+            !viewModel.isMessageSelected()                                  &&
             listSizeAfterDispatch >= listSizeBeforeDispatch                 &&
             recyclerView.scrollState == RecyclerView.SCROLL_STATE_IDLE      &&
             lastVisibleItemPositionBeforeDispatch == listSizeBeforeDispatch
@@ -139,7 +141,8 @@ internal class MessageListAdapter<ARGS : NavArgs>(
         if (bottom != oldBottom) {
             val lastPosition = messages.size - 1
             if (
-                recyclerView.scrollState == RecyclerView.SCROLL_STATE_IDLE &&
+                !viewModel.isMessageSelected()                              &&
+                recyclerView.scrollState == RecyclerView.SCROLL_STATE_IDLE  &&
                 layoutManager.findLastVisibleItemPosition() == lastPosition
             ) {
                 recyclerView.scrollToPosition(lastPosition)
