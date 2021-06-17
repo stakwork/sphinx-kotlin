@@ -16,9 +16,14 @@ import chat.sphinx.chat_common.R
 import chat.sphinx.chat_common.adapters.MessageListAdapter
 import chat.sphinx.chat_common.databinding.LayoutChatFooterBinding
 import chat.sphinx.chat_common.databinding.LayoutChatHeaderBinding
+import chat.sphinx.chat_common.databinding.LayoutMessageHolderBinding
+import chat.sphinx.chat_common.databinding.LayoutSelectedMessageBinding
 import chat.sphinx.chat_common.navigation.ChatNavigator
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
 import chat.sphinx.chat_common.ui.viewstate.header.ChatHeaderFooterViewState
+import chat.sphinx.chat_common.ui.viewstate.messageholder.SelectedMessageViewState
+import chat.sphinx.chat_common.ui.viewstate.messageholder.setView
+import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_repository_message.SendMessage
 import chat.sphinx.insetter_activity.InsetterActivity
@@ -52,6 +57,8 @@ abstract class ChatFragment<
 {
     protected abstract val footerBinding: LayoutChatFooterBinding
     protected abstract val headerBinding: LayoutChatHeaderBinding
+    protected abstract val selectedMessageBinding: LayoutSelectedMessageBinding
+    protected abstract val selectedMessageHolderBinding: LayoutMessageHolderBinding
     protected abstract val recyclerView: RecyclerView
 
     protected abstract val imageLoader: ImageLoader<ImageView>
@@ -60,6 +67,8 @@ abstract class ChatFragment<
 
     private val sendMessageBuilder = SendMessage.Builder()
 
+    private val disposables: ArrayList<Disposable> = ArrayList(1)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         viewModel.init()
@@ -67,9 +76,13 @@ abstract class ChatFragment<
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        // TODO: OnBackPress listener for if message item is selected, switch state to NONE
+
         val insetterActivity = (requireActivity() as InsetterActivity)
         setupFooter(insetterActivity)
         setupHeader(insetterActivity)
+        setupSelectedMessage()
         setupRecyclerView()
     }
 
@@ -107,6 +120,19 @@ abstract class ChatFragment<
                     chatNavigator.popBackStack()
                 }
             }
+        }
+    }
+
+    private fun setupSelectedMessage() {
+        selectedMessageBinding.apply {
+            imageViewSelectedMessage.apply {
+                setOnClickListener {
+                    viewModel.updateSelectedMessageViewState(SelectedMessageViewState.None)
+                }
+            }
+        }
+        selectedMessageHolderBinding.includeMessageHolderBubble.root.setOnClickListener {
+            viewModel
         }
     }
 
@@ -194,6 +220,36 @@ abstract class ChatFragment<
                             }
 
                             setTextColorExt(colorRes)
+                        }
+                    }
+                }
+            }
+        }
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.getSelectedMessageViewStateFlow().collect { viewState ->
+                @Exhaustive
+                when (viewState) {
+                    is SelectedMessageViewState.None -> {
+                        selectedMessageBinding.root.gone
+                    }
+                    is SelectedMessageViewState.SelectedMessage -> {
+                        selectedMessageHolderBinding.apply {
+                            root.y = viewState.holderYPos.value
+                            setView(
+                                lifecycleScope,
+                                disposables,
+                                viewModel.dispatchers,
+                                imageLoader,
+                                viewModel.imageLoaderDefaults,
+                                viewState.recyclerViewWidth,
+                                viewState.messageHolderViewState
+                            )
+                        }
+
+                        selectedMessageBinding.apply {
+                            root.visible
+                            // TODO: Top/Bottom menu show
                         }
                     }
                 }
