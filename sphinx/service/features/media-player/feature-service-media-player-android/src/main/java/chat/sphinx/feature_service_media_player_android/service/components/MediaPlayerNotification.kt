@@ -1,4 +1,4 @@
-package chat.sphinx.feature_service_media_player_android.service
+package chat.sphinx.feature_service_media_player_android.service.components
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -12,6 +12,7 @@ import androidx.core.app.NotificationCompat
 import chat.sphinx.concept_service_media.MediaPlayerServiceController
 import chat.sphinx.concept_service_media.MediaPlayerServiceState
 import chat.sphinx.feature_service_media_player_android.R
+import chat.sphinx.feature_service_media_player_android.service.MediaPlayerService
 import java.math.BigInteger
 import java.security.SecureRandom
 
@@ -89,8 +90,6 @@ internal class MediaPlayerNotification(
             .setContentText("Loading Media")
             .setContentTitle("Sphinx Media Player")
 
-            .setDeleteIntent(getActionPendingIntent(ACTION_DELETE, ACTION_DELETE_CODE))
-
             .setGroup(CHANNEL_ID)
             .setGroupAlertBehavior(NotificationCompat.GROUP_ALERT_SUMMARY)
             .setGroupSummary(false)
@@ -114,6 +113,13 @@ internal class MediaPlayerNotification(
                     )
                 )
             }
+
+
+        builder.addAction(
+            0,
+            "Stop",
+            getActionPendingIntent(ACTION_DELETE, ACTION_DELETE_CODE)
+        )
 
         this.builder = builder
         return builder
@@ -140,15 +146,15 @@ internal class MediaPlayerNotification(
         )
     }
 
-    init {
-        setupNotificationChannel()
-        notify(builder)
-        mediaPlayerService.mediaServiceController.addListener(this)
-    }
-
     private fun notify(builder: NotificationCompat.Builder) {
         this.builder = builder
         notificationManager?.notify(NOTIFICATION_ID, builder.build())
+    }
+
+    init {
+        setupNotificationChannel()
+        mediaPlayerService.startForeground(NOTIFICATION_ID, builder.build())
+        mediaPlayerService.mediaServiceController.addListener(this)
     }
 
     override fun mediaServiceState(serviceState: MediaPlayerServiceState) {
