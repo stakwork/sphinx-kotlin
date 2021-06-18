@@ -64,6 +64,7 @@ abstract class NetworkRelayCall: NetworkCall() {
         relayData: Pair<AuthorizationToken, RelayUrl>? = null,
     ): Flow<LoadResponse<T, ResponseError>>
 
+    // TODO: Remove and replace all uses with post (DO NOT USE THIS METHOD FOR NEW CODE)
     /**
      * POST
      *
