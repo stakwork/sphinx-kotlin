@@ -1465,29 +1465,42 @@ abstract class SphinxRepository(
         }
     }
 
-    override fun boostMessage(
+    override suspend fun boostMessage(
         chatId: ChatId,
         pricePerMessage: Sat,
         escrowAmount: Sat,
         messageUUID: MessageUUID,
-    ) {
+    ): Response<Any, ResponseError> {
+
+        var response: Response<Any, ResponseError> = Response.Success(true)
+
         repositoryScope.launch(mainImmediate) {
             val owner: Contact = accountOwner.value.let {
                 if (it != null) {
                     it
                 } else {
                     var owner: Contact? = null
-                    try {
-                        accountOwner.collect { contact ->
-                            if (contact != null) {
-                                owner = contact
-                                throw Exception()
+                    val retrieveOwnerJob = repositoryScope.launch(mainImmediate) {
+                        try {
+                            accountOwner.collect { contact ->
+                                if (contact != null) {
+                                    owner = contact
+                                    throw Exception()
+                                }
                             }
-                        }
-                    } catch (e: Exception) {}
-                    delay(20L)
+                        } catch (e: Exception) {}
+                        delay(20L)
+                    }
 
-                    owner ?: return@launch
+                    delay(200L)
+                    retrieveOwnerJob.cancelAndJoin()
+
+                    owner ?: let {
+                        response = Response.Error(
+                            ResponseError("Owner Contact returned null")
+                        )
+                        return@launch
+                    }
                 }
             }
 
@@ -1503,6 +1516,7 @@ abstract class SphinxRepository(
                     is LoadResponse.Loading -> {}
                     is Response.Error -> {
                         LOG.e(TAG, loadResponse.message, loadResponse.exception)
+                        response = loadResponse
                     }
                     is Response.Success -> {
                         decryptMessageDtoContentIfAvailable(
@@ -1512,24 +1526,30 @@ abstract class SphinxRepository(
                         val queries = coreDB.getSphinxDatabaseQueries()
                         chatLock.withLock {
                             messageLock.withLock {
-                                queries.transaction {
-                                    upsertMessage(loadResponse.value, queries)
+                                withContext(io) {
 
-                                    if (loadResponse.value.updateChatDboLatestMessage) {
-                                        updateChatDboLatestMessage(
-                                            loadResponse.value,
-                                            chatId,
-                                            latestMessageUpdatedTimeMap,
-                                            queries
-                                        )
+                                    queries.transaction {
+                                        upsertMessage(loadResponse.value, queries)
+
+                                        if (loadResponse.value.updateChatDboLatestMessage) {
+                                            updateChatDboLatestMessage(
+                                                loadResponse.value,
+                                                chatId,
+                                                latestMessageUpdatedTimeMap,
+                                                queries
+                                            )
+                                        }
                                     }
+
                                 }
                             }
                         }
                     }
                 }
             }
-        }
+        }.join()
+
+        return response
     }
 
     override suspend fun toggleChatMuted(chat: Chat): Response<Boolean, ResponseError> {
