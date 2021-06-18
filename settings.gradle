@@ -45,6 +45,9 @@ include ':sphinx:application:data:features:feature-repository-android'
 include ':sphinx:application:network:concepts:clients:concept-network-client'
 include ':sphinx:application:network:concepts:clients:concept-network-client-cache'
 include ':sphinx:application:network:features:feature-network-client'
+
+include ':sphinx:application:network:concepts:queries:concept-network-query-attachment'
+include ':sphinx:application:network:features:queries:feature-network-query-attachment'
 include ':sphinx:application:network:concepts:queries:concept-network-query-chat'
 include ':sphinx:application:network:features:queries:feature-network-query-chat'
 include ':sphinx:application:network:concepts:queries:concept-network-query-contact'
@@ -238,6 +241,3 @@ project(':kotlin:test:test-k-openssl').projectDir =
 
 //include ':sample'
 //project(':sample').projectDir = file(new File(rootDir, 'kotlin-android/sample'))
-include ':sphinx:application:network:concepts:queries:concept-network-query-attachment'
-include ':sphinx:application:network:features:queries:feature-network-query-attachment'
-include ':sphinx:application:network:features:queries:feature-network-query-attachment'
