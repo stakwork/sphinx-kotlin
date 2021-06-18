@@ -71,4 +71,7 @@
     <string name="selected_message_menu_item_reply">Reply</string>
     <string name="selected_message_menu_item_save_file">Save File</string>
 
+    <!-- Notify -->
+    <string name="notify_boost_failure">Boost payment failed</string>
+
 </resources>

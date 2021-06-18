@@ -371,12 +371,22 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 
         viewModelScope.launch(mainImmediate) {
             val chat = getChat()
-            messageRepository.boostMessage(
+            val response = messageRepository.boostMessage(
                 chat.id,
                 chat.pricePerMessage ?: Sat(0),
                 chat.escrowAmount ?: Sat(0),
                 messageUUID,
             )
+
+            @Exhaustive
+            when (response) {
+                is Response.Error -> {
+                    submitSideEffect(
+                        ChatSideEffect.Notify(app.getString(R.string.notify_boost_failure))
+                    )
+                }
+                is Response.Success -> {}
+            }
         }
     }
 }
