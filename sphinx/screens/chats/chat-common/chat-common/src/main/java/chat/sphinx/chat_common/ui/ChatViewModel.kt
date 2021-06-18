@@ -12,6 +12,7 @@ import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
 import chat.sphinx.chat_common.ui.viewstate.header.ChatHeaderFooterViewState
 import chat.sphinx.chat_common.ui.viewstate.messageholder.BubbleBackground
 import chat.sphinx.chat_common.ui.viewstate.messageholder.MessageHolderViewState
+import chat.sphinx.chat_common.ui.viewstate.selected.SelectedMessageViewState
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
@@ -23,14 +24,15 @@ import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.kotlin_response.message
+import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.resources.getRandomColor
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.ChatName
 import chat.sphinx.wrapper_chat.isConversation
+import chat.sphinx.wrapper_common.lightning.Sat
+import chat.sphinx.wrapper_common.message.MessageUUID
 import chat.sphinx.wrapper_contact.Contact
-import chat.sphinx.wrapper_message.Message
-import chat.sphinx.wrapper_message.isDeleted
-import chat.sphinx.wrapper_message.isGroupAction
+import chat.sphinx.wrapper_message.*
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
@@ -41,6 +43,11 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+@JvmSynthetic
+@Suppress("NOTHING_TO_INLINE")
+internal inline fun <ARGS: NavArgs> ChatViewModel<ARGS>.isMessageSelected(): Boolean =
+    getSelectedMessageViewStateFlow().value is SelectedMessageViewState.SelectedMessage
+
 abstract class ChatViewModel<ARGS: NavArgs>(
     protected val app: Application,
     dispatchers: CoroutineDispatchers,
@@ -48,7 +55,8 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     protected val contactRepository: ContactRepository,
     protected val messageRepository: MessageRepository,
     protected val networkQueryLightning: NetworkQueryLightning,
-    protected val savedStateHandle: SavedStateHandle
+    protected val savedStateHandle: SavedStateHandle,
+    protected val LOG: SphinxLogger,
 ): SideEffectViewModel<
         Context,
         ChatSideEffect,
@@ -335,6 +343,49 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                         }
                     }
                 }
+            }
+        }
+    }
+
+    private inner class SelectedMessageViewStateContainer: ViewStateContainer<SelectedMessageViewState>(
+        SelectedMessageViewState.None
+    )
+
+    private val selectedMessageContainer by lazy {
+        SelectedMessageViewStateContainer()
+    }
+
+    @JvmSynthetic
+    internal fun getSelectedMessageViewStateFlow(): StateFlow<SelectedMessageViewState> =
+        selectedMessageContainer.viewStateFlow
+
+    @JvmSynthetic
+    internal fun updateSelectedMessageViewState(selectedMessageViewState: SelectedMessageViewState?) {
+        if (selectedMessageViewState == null) return
+
+        selectedMessageContainer.updateViewState(selectedMessageViewState)
+    }
+
+    fun boostMessage(messageUUID: MessageUUID?) {
+        if (messageUUID == null) return
+
+        viewModelScope.launch(mainImmediate) {
+            val chat = getChat()
+            val response = messageRepository.boostMessage(
+                chat.id,
+                chat.pricePerMessage ?: Sat(0),
+                chat.escrowAmount ?: Sat(0),
+                messageUUID,
+            )
+
+            @Exhaustive
+            when (response) {
+                is Response.Error -> {
+                    submitSideEffect(
+                        ChatSideEffect.Notify(app.getString(R.string.notify_boost_failure))
+                    )
+                }
+                is Response.Success -> {}
             }
         }
     }

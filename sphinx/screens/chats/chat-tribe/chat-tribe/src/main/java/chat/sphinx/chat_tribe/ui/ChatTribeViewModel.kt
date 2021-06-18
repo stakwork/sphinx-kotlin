@@ -19,6 +19,7 @@ import chat.sphinx.concept_service_media.UserAction
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
+import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.podcast_player.objects.Podcast
 import chat.sphinx.podcast_player.objects.PodcastEpisode
 import chat.sphinx.podcast_player.objects.toPodcast
@@ -52,6 +53,7 @@ internal class ChatTribeViewModel @Inject constructor(
     messageRepository: MessageRepository,
     networkQueryLightning: NetworkQueryLightning,
     savedStateHandle: SavedStateHandle,
+    LOG: SphinxLogger,
     private val mediaPlayerServiceController: MediaPlayerServiceController
 ): ChatViewModel<ChatTribeFragmentArgs>(
     app,
@@ -61,6 +63,7 @@ internal class ChatTribeViewModel @Inject constructor(
     messageRepository,
     networkQueryLightning,
     savedStateHandle,
+    LOG,
 ), MediaPlayerServiceController.MediaServiceListener
 {
     override val args: ChatTribeFragmentArgs by savedStateHandle.navArgs()

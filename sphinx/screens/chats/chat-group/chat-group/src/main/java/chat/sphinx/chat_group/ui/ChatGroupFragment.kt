@@ -6,6 +6,8 @@ import androidx.recyclerview.widget.RecyclerView
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.chat_common.databinding.LayoutChatFooterBinding
 import chat.sphinx.chat_common.databinding.LayoutChatHeaderBinding
+import chat.sphinx.chat_common.databinding.LayoutMessageHolderBinding
+import chat.sphinx.chat_common.databinding.LayoutSelectedMessageBinding
 import chat.sphinx.chat_common.ui.ChatFragment
 import chat.sphinx.chat_common.navigation.ChatNavigator
 import chat.sphinx.chat_group.R
@@ -24,8 +26,18 @@ internal class ChatGroupFragment: ChatFragment<
         >(R.layout.fragment_chat_group)
 {
     override val binding: FragmentChatGroupBinding by viewBinding(FragmentChatGroupBinding::bind)
-    override val footerBinding: LayoutChatFooterBinding by viewBinding(LayoutChatFooterBinding::bind, R.id.include_chat_group_footer)
-    override val headerBinding: LayoutChatHeaderBinding by viewBinding(LayoutChatHeaderBinding::bind, R.id.include_chat_group_header)
+    override val footerBinding: LayoutChatFooterBinding by viewBinding(
+        LayoutChatFooterBinding::bind, R.id.include_chat_group_footer
+    )
+    override val headerBinding: LayoutChatHeaderBinding by viewBinding(
+        LayoutChatHeaderBinding::bind, R.id.include_chat_group_header
+    )
+    override val selectedMessageBinding: LayoutSelectedMessageBinding by viewBinding(
+        LayoutSelectedMessageBinding::bind, R.id.include_chat_group_selected_message
+    )
+    override val selectedMessageHolderBinding: LayoutMessageHolderBinding by viewBinding(
+        LayoutMessageHolderBinding::bind, R.id.include_layout_message_holder_selected_message
+    )
     override val recyclerView: RecyclerView
         get() = binding.recyclerViewMessages
 

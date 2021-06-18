@@ -11,6 +11,8 @@ import app.cash.exhaustive.Exhaustive
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.chat_common.databinding.LayoutChatFooterBinding
 import chat.sphinx.chat_common.databinding.LayoutChatHeaderBinding
+import chat.sphinx.chat_common.databinding.LayoutMessageHolderBinding
+import chat.sphinx.chat_common.databinding.LayoutSelectedMessageBinding
 import chat.sphinx.chat_common.ui.ChatFragment
 import chat.sphinx.chat_common.ui.viewstate.header.ChatHeaderFooterViewState
 import chat.sphinx.chat_tribe.R
@@ -38,8 +40,18 @@ internal class ChatTribeFragment: ChatFragment<
 
     override val binding: FragmentChatTribeBinding by viewBinding(FragmentChatTribeBinding::bind)
 
-    override val footerBinding: LayoutChatFooterBinding by viewBinding(LayoutChatFooterBinding::bind, R.id.include_chat_tribe_footer)
-    override val headerBinding: LayoutChatHeaderBinding by viewBinding(LayoutChatHeaderBinding::bind, R.id.include_chat_tribe_header)
+    override val footerBinding: LayoutChatFooterBinding by viewBinding(
+        LayoutChatFooterBinding::bind, R.id.include_chat_tribe_footer
+    )
+    override val headerBinding: LayoutChatHeaderBinding by viewBinding(
+        LayoutChatHeaderBinding::bind, R.id.include_chat_tribe_header
+    )
+    override val selectedMessageBinding: LayoutSelectedMessageBinding by viewBinding(
+        LayoutSelectedMessageBinding::bind, R.id.include_chat_tribe_selected_message
+    )
+    override val selectedMessageHolderBinding: LayoutMessageHolderBinding by viewBinding(
+        LayoutMessageHolderBinding::bind, R.id.include_layout_message_holder_selected_message
+    )
 
     override val recyclerView: RecyclerView
         get() = binding.recyclerViewMessages

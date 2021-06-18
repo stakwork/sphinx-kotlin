@@ -17,6 +17,7 @@ import chat.sphinx.wrapper_common.invite.InviteStatus
 import chat.sphinx.wrapper_common.invite.toInviteStatus
 import chat.sphinx.wrapper_common.lightning.*
 import chat.sphinx.wrapper_common.message.MessageId
+import chat.sphinx.wrapper_common.message.toMessageUUID
 import chat.sphinx.wrapper_contact.*
 import chat.sphinx.wrapper_invite.InviteString
 import chat.sphinx.wrapper_lightning.NodeBalance
