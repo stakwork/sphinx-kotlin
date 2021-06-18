@@ -2,14 +2,7 @@ package chat.sphinx.chat_common.ui
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.Canvas
-import android.graphics.Color
 import android.os.Bundle
-import android.renderscript.Allocation
-import android.renderscript.Element
-import android.renderscript.RenderScript
-import android.renderscript.ScriptIntrinsicBlur
 import android.view.View
 import android.widget.ImageView
 import androidx.activity.OnBackPressedCallback
@@ -22,7 +15,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
 import app.cash.exhaustive.Exhaustive
-import by.kirich1409.viewbindingdelegate.internal.findRootView
 import chat.sphinx.chat_common.R
 import chat.sphinx.chat_common.adapters.MessageListAdapter
 import chat.sphinx.chat_common.databinding.LayoutChatFooterBinding
@@ -168,11 +160,10 @@ abstract class ChatFragment<
 
     private fun setupSelectedMessage() {
         selectedMessageBinding.apply {
-            imageViewSelectedMessage.apply {
-                setOnClickListener {
-                    viewModel.updateSelectedMessageViewState(SelectedMessageViewState.None)
-                }
+            imageViewSelectedMessage.setOnClickListener {
+                viewModel.updateSelectedMessageViewState(SelectedMessageViewState.None)
             }
+
             includeLayoutSelectedMessageMenu.apply {
                 includeLayoutSelectedMessageMenuItem1.root.setOnClickListener {
                     onSelectedMessageMenuItemClick(0)
@@ -349,7 +340,7 @@ abstract class ChatFragment<
 
                         selectedMessageBinding.apply message@ {
 
-                            val screenshot = findRootView(requireActivity()).takeScreenshot()
+                            val screenshot = binding.root.takeScreenshot()
                             imageViewSelectedMessageBlur.setImageBitmap(screenshot.blur(root.context, 25.0f))
 
                             this@message.includeLayoutSelectedMessageMenu.apply {
