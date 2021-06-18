@@ -37,13 +37,14 @@ import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.insetter_activity.addStatusBarPadding
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
+import chat.sphinx.resources.takeScreenshot
+import chat.sphinx.resources.blur
 import chat.sphinx.resources.setBackgroundRandomColor
 import chat.sphinx.resources.setTextColorExt
 import chat.sphinx.resources.toPx
 import chat.sphinx.wrapper_chat.isTrue
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.lightning.unit
-import chat.sphinx.wrapper_message.ReplyUUID
 import chat.sphinx.wrapper_view.Dp
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
@@ -159,11 +160,10 @@ abstract class ChatFragment<
 
     private fun setupSelectedMessage() {
         selectedMessageBinding.apply {
-            imageViewSelectedMessage.apply {
-                setOnClickListener {
-                    viewModel.updateSelectedMessageViewState(SelectedMessageViewState.None)
-                }
+            imageViewSelectedMessage.setOnClickListener {
+                viewModel.updateSelectedMessageViewState(SelectedMessageViewState.None)
             }
+
             includeLayoutSelectedMessageMenu.apply {
                 includeLayoutSelectedMessageMenuItem1.root.setOnClickListener {
                     onSelectedMessageMenuItemClick(0)
@@ -339,18 +339,30 @@ abstract class ChatFragment<
                         }
 
                         selectedMessageBinding.apply message@ {
+
+                            val screenshot = binding.root.takeScreenshot()
+                            imageViewSelectedMessageBlur.setImageBitmap(screenshot.blur(root.context, 25.0f))
+
+                            this@message.includeLayoutSelectedMessageMenu.apply {
+                                spaceSelectedMessageMenuArrowTop.goneIfFalse(!viewState.showMenuTop)
+                                imageViewSelectedMessageMenuArrowTop.goneIfFalse(!viewState.showMenuTop)
+
+                                spaceSelectedMessageMenuArrowBottom.goneIfFalse(viewState.showMenuTop)
+                                imageViewSelectedMessageMenuArrowBottom.goneIfFalse(viewState.showMenuTop)
+                            }
+
                             this@message.includeLayoutSelectedMessageMenu.root.apply menu@ {
+
                                 this@menu.y = if (viewState.showMenuTop) {
                                     viewState.holderYPos.value -
                                     (resources.getDimension(R.dimen.selected_message_menu_item_height) * (viewState.messageHolderViewState.selectionMenuItems?.size ?: 0)) +
-
                                     viewState.statusHeaderHeight.value -
-                                    Dp(4F).toPx(context).value
+                                    Dp(10F).toPx(context).value
                                 } else {
                                     viewState.holderYPos.value          +
                                     viewState.bubbleHeight.value        +
                                     viewState.statusHeaderHeight.value  +
-                                    Dp(4F).toPx(context).value
+                                    Dp(10F).toPx(context).value
                                 }
                                 val menuWidth = resources.getDimension(R.dimen.selected_message_menu_width)
 

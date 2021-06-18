@@ -1,6 +1,7 @@
 package chat.sphinx.chat_common.ui.viewstate.selected
 
 import androidx.annotation.MainThread
+import androidx.core.content.ContextCompat
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.chat_common.R
 import chat.sphinx.chat_common.databinding.LayoutSelectedMessageBinding
@@ -18,14 +19,24 @@ import io.matthewnelson.android_feature_screens.util.visible
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun LayoutSelectedMessageBinding.setMenuColor(viewState: MessageHolderViewState) {
-    includeLayoutSelectedMessageMenu.root.apply {
+    includeLayoutSelectedMessageMenu.apply {
         @Exhaustive
         when (viewState) {
             is MessageHolderViewState.Received -> {
-                setBackgroundColor(getColor(R.color.lightDivider))
+                layoutConstraintSelectedMessageMenuItemContainer
+                    .setBackgroundResource(R.drawable.background_selected_received_message_menu)
+                imageViewSelectedMessageMenuArrowTop
+                    .setBackgroundResource(R.drawable.selected_received_message_top_arrow)
+                imageViewSelectedMessageMenuArrowBottom
+                    .setBackgroundResource(R.drawable.selected_received_message_bottom_arrow)
             }
             is MessageHolderViewState.Sent -> {
-                setBackgroundColor(getColor(R.color.primaryBlue))
+                layoutConstraintSelectedMessageMenuItemContainer
+                    .setBackgroundResource(R.drawable.background_selected_sent_message_menu)
+                imageViewSelectedMessageMenuArrowTop
+                    .setBackgroundResource(R.drawable.selected_sent_message_top_arrow)
+                imageViewSelectedMessageMenuArrowBottom
+                    .setBackgroundResource(R.drawable.selected_sent_message_bottom_arrow)
             }
         }
     }
@@ -35,20 +46,23 @@ internal inline fun LayoutSelectedMessageBinding.setMenuColor(viewState: Message
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun LayoutSelectedMessageBinding.setMenuItems(items: List<MenuItemState>?) {
     includeLayoutSelectedMessageMenu.apply {
-        includeLayoutSelectedMessageMenuItem1.setMenuItem(items?.elementAtOrNull(0))
-        includeLayoutSelectedMessageMenuItem2.setMenuItem(items?.elementAtOrNull(1))
-        includeLayoutSelectedMessageMenuItem3.setMenuItem(items?.elementAtOrNull(2))
-        includeLayoutSelectedMessageMenuItem4.setMenuItem(items?.elementAtOrNull(3))
+        val itemsSize = items?.size ?: 0
+        includeLayoutSelectedMessageMenuItem1.setMenuItem(items?.elementAtOrNull(0), itemsSize == 1)
+        includeLayoutSelectedMessageMenuItem2.setMenuItem(items?.elementAtOrNull(1), itemsSize == 2)
+        includeLayoutSelectedMessageMenuItem3.setMenuItem(items?.elementAtOrNull(2), itemsSize == 3)
+        includeLayoutSelectedMessageMenuItem4.setMenuItem(items?.elementAtOrNull(3), itemsSize == 4)
     }
 }
 
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
-internal inline fun LayoutSelectedMessageMenuItemBinding.setMenuItem(item: MenuItemState?) {
+internal inline fun LayoutSelectedMessageMenuItemBinding.setMenuItem(item: MenuItemState?, isLastItem: Boolean) {
     if (item == null) {
         root.gone
     } else {
         root.visible
+
+        imageViewSelectedMessageMenuItemDivider.goneIfFalse(!isLastItem)
 
         textViewSelectedMessageMenuItemIcon.goneIfFalse(item.showTextIcon)
         imageViewSelectedMessageMenuItemIcon.goneIfFalse(item.showImageIcon)
@@ -59,7 +73,9 @@ internal inline fun LayoutSelectedMessageMenuItemBinding.setMenuItem(item: MenuI
         // TODO: Fix Material Icon setting (something's amiss with how they show up on screen)
         when (item) {
             is MenuItemState.Boost -> {
-                imageViewSelectedMessageMenuItemIcon.setBackgroundResource(R.drawable.ic_boost_green)
+                imageViewSelectedMessageMenuItemIcon.setImageDrawable(
+                    ContextCompat.getDrawable(root.context, R.drawable.ic_circular_boost_green)
+                )
                 textViewSelectedMessageMenuItem.text =
                     getString(R.string.selected_message_menu_item_boost)
             }

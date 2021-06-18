@@ -6,31 +6,47 @@
     android:layout_height="@dimen/selected_message_menu_item_height"
     tools:visibility="visible">
 
-    <TextView
-        android:id="@+id/text_view_selected_message_menu_item_icon"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_selected_message_menu_item_icon_container"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:textSize="@dimen/default_text_size_tap_target_material_icon"
-        app:layout_constraintStart_toStartOf="parent" />
+        android:layout_marginStart="6dp"
+        app:layout_constraintStart_toStartOf="parent">
 
-    <androidx.appcompat.widget.AppCompatImageView
-        android:id="@+id/image_view_selected_message_menu_item_icon"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:src="@drawable/ic_boost_green"
-        app:layout_constraintStart_toStartOf="parent" />
+        <TextView
+            android:id="@+id/text_view_selected_message_menu_item_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:textSize="@dimen/default_text_size_tap_target_material_icon"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/image_view_selected_message_menu_item_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/text_view_selected_message_menu_item"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:layout_marginStart="32dp"
         android:ellipsize="end"
         android:gravity="center_vertical"
         android:singleLine="true"
         android:textColor="@color/text"
+        android:fontFamily="@font/roboto_regular"
+        android:layout_marginLeft="6dp"
         android:textSize="@dimen/selected_message_menu_item_text_size"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/layout_constraint_selected_message_menu_item_icon_container"
         tools:text="Boost" />
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/image_view_selected_message_menu_item_divider"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/messageOptionDivider"
+        app:layout_constraintBottom_toBottomOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
