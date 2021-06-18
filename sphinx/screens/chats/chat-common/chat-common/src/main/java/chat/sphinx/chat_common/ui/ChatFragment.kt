@@ -344,11 +344,11 @@ abstract class ChatFragment<
                             imageViewSelectedMessageBlur.setImageBitmap(screenshot.blur(root.context, 25.0f))
 
                             this@message.includeLayoutSelectedMessageMenu.apply {
-                                arrowTopSpace.goneIfFalse(!viewState.showMenuTop)
-                                arrowTop.goneIfFalse(!viewState.showMenuTop)
+                                spaceSelectedMessageMenuArrowTop.goneIfFalse(!viewState.showMenuTop)
+                                imageViewSelectedMessageMenuArrowTop.goneIfFalse(!viewState.showMenuTop)
 
-                                arrowBottomSpace.goneIfFalse(viewState.showMenuTop)
-                                arrowBottom.goneIfFalse(viewState.showMenuTop)
+                                spaceSelectedMessageMenuArrowBottom.goneIfFalse(viewState.showMenuTop)
+                                imageViewSelectedMessageMenuArrowBottom.goneIfFalse(viewState.showMenuTop)
                             }
 
                             this@message.includeLayoutSelectedMessageMenu.root.apply menu@ {

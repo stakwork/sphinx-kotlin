@@ -1,6 +1,7 @@
 package chat.sphinx.chat_common.ui.viewstate.selected
 
 import androidx.annotation.MainThread
+import androidx.core.content.ContextCompat
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.chat_common.R
 import chat.sphinx.chat_common.databinding.LayoutSelectedMessageBinding
@@ -22,14 +23,20 @@ internal inline fun LayoutSelectedMessageBinding.setMenuColor(viewState: Message
         @Exhaustive
         when (viewState) {
             is MessageHolderViewState.Received -> {
-                menuItemsContainer.setBackgroundResource(R.drawable.background_selected_received_message_menu)
-                arrowTop.setBackgroundResource(R.drawable.selected_received_message_top_arrow)
-                arrowBottom.setBackgroundResource(R.drawable.selected_received_message_bottom_arrow)
+                layoutConstraintSelectedMessageMenuItemContainer
+                    .setBackgroundResource(R.drawable.background_selected_received_message_menu)
+                imageViewSelectedMessageMenuArrowTop
+                    .setBackgroundResource(R.drawable.selected_received_message_top_arrow)
+                imageViewSelectedMessageMenuArrowBottom
+                    .setBackgroundResource(R.drawable.selected_received_message_bottom_arrow)
             }
             is MessageHolderViewState.Sent -> {
-                menuItemsContainer.setBackgroundResource(R.drawable.background_selected_sent_message_menu)
-                arrowTop.setBackgroundResource(R.drawable.selected_sent_message_top_arrow)
-                arrowBottom.setBackgroundResource(R.drawable.selected_sent_message_bottom_arrow)
+                layoutConstraintSelectedMessageMenuItemContainer
+                    .setBackgroundResource(R.drawable.background_selected_sent_message_menu)
+                imageViewSelectedMessageMenuArrowTop
+                    .setBackgroundResource(R.drawable.selected_sent_message_top_arrow)
+                imageViewSelectedMessageMenuArrowBottom
+                    .setBackgroundResource(R.drawable.selected_sent_message_bottom_arrow)
             }
         }
     }
@@ -55,7 +62,7 @@ internal inline fun LayoutSelectedMessageMenuItemBinding.setMenuItem(item: MenuI
     } else {
         root.visible
 
-        imageViewOptionDivider.goneIfFalse(!isLastItem)
+        imageViewSelectedMessageMenuItemDivider.goneIfFalse(!isLastItem)
 
         textViewSelectedMessageMenuItemIcon.goneIfFalse(item.showTextIcon)
         imageViewSelectedMessageMenuItemIcon.goneIfFalse(item.showImageIcon)
@@ -66,7 +73,9 @@ internal inline fun LayoutSelectedMessageMenuItemBinding.setMenuItem(item: MenuI
         // TODO: Fix Material Icon setting (something's amiss with how they show up on screen)
         when (item) {
             is MenuItemState.Boost -> {
-                imageViewSelectedMessageMenuItemIcon.setImageDrawable(root.context.getDrawable(R.drawable.ic_circular_boost_green))
+                imageViewSelectedMessageMenuItemIcon.setImageDrawable(
+                    ContextCompat.getDrawable(root.context, R.drawable.ic_circular_boost_green)
+                )
                 textViewSelectedMessageMenuItem.text =
                     getString(R.string.selected_message_menu_item_boost)
             }
