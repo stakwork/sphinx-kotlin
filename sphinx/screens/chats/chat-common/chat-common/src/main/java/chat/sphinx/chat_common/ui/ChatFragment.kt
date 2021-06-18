@@ -347,10 +347,6 @@ abstract class ChatFragment<
                             includeMessageHolderChatImageInitialHolder.root.gone
                         }
 
-                        selectedMessageBinding.apply {
-
-                        }
-
                         selectedMessageBinding.apply message@ {
 
                             val screenshot = findRootView(requireActivity()).takeScreenshot()

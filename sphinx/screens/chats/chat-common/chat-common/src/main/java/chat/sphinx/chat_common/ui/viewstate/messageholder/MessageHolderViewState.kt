@@ -219,7 +219,9 @@ internal sealed class MessageHolderViewState(
 
             val list = ArrayList<MenuItemState>(4)
 
-            list.add(MenuItemState.Boost)
+            if (this is Received) {
+                list.add(MenuItemState.Boost)
+            }
 
             if (list.isEmpty()) {
                 null
