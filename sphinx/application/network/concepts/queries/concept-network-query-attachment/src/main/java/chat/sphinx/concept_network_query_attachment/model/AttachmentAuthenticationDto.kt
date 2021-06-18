@@ -6,4 +6,4 @@ import com.squareup.moshi.JsonClass
 data class AttachmentAuthenticationDto(
     val id: String,
     val challenge: String,
-) {}
+)

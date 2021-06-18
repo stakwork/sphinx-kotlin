@@ -5,4 +5,4 @@ import com.squareup.moshi.JsonClass
 @JsonClass(generateAdapter = true)
 data class AttachmentAuthenticationTokenDto(
     val token: String,
-) {}
+)

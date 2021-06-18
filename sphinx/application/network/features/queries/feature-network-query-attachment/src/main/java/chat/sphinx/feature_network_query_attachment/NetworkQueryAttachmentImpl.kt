@@ -53,5 +53,4 @@ class NetworkQueryAttachmentImpl(
             requestBodyJsonClass = Map::class.java,
             requestBody = mapOf(Pair("", "")),
         )
-
 }
