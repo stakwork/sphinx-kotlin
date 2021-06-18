@@ -34,12 +34,12 @@
 
     <color name="shadow">#000000</color>
     <color name="bubbleShadow">#FFFFFF</color>
-    <color name="selectedMessageBackground">#B3FFFFFF</color>
+    <color name="selectedMessageBackground">#8C000000</color>
     <color name="divider">#151E27</color>
     <color name="lightDivider">#3B4755</color>
     <color name="expiredInvoice">#FFFFFF</color>
     <color name="addressBookHeader">#222E3A</color>
-    <color name="messageOptionDivider">#FFFFFF</color>
+    <color name="messageOptionDivider">#CCFFFFFF</color>
     <color name="replyDividerReceived">#556171</color>
     <color name="replyDividerSent">#829CB9</color>
     <color name="receivedIcon">#82B4FF</color>
