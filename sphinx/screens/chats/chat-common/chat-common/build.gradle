@@ -33,6 +33,7 @@ dependencies {
     api project(path: ':android:features:android-feature-screens')
 
     // Sphinx
+    api project(path: ':sphinx:application:common:logger')
     api project(path: ':sphinx:application:common:resources')
     api project(path: ':sphinx:application:data:concepts:concept-image-loader')
     api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-chat')

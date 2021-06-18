@@ -80,4 +80,11 @@
     <dimen name="reply_message_media_image_xy">40dp</dimen>
     <dimen name="reply_message_media_icon_text_size">20sp</dimen>
 
+    <!-- Selected Message -->
+    <!-- Default Elevation + 2dp -->
+    <dimen name="selected_message_elevation">10dp</dimen>
+    <dimen name="selected_message_menu_width">140dp</dimen>
+    <dimen name="selected_message_menu_item_height">40dp</dimen>
+    <dimen name="selected_message_menu_item_text_size">12sp</dimen>
+
 </resources>

@@ -1,6 +1,14 @@
 package chat.sphinx.resources
 
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Color
 import android.graphics.Typeface
+import android.renderscript.Allocation
+import android.renderscript.Element
+import android.renderscript.RenderScript
+import android.renderscript.ScriptIntrinsicBlur
 import android.view.View
 import android.widget.TextView
 import androidx.annotation.ColorInt
@@ -49,4 +57,39 @@ inline fun View.setBackgroundRandomColor(
     } else {
         this.setBackgroundColor(color ?: this.context.getRandomColor())
     }
+}
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun Bitmap.blur(context: Context, radius:Float = 10F): Bitmap?{
+    val bitmap = copy(config,true)
+
+    RenderScript.create(context).apply {
+        val input = Allocation.createFromBitmap(this,this@blur)
+        val output = Allocation.createFromBitmap(this,this@blur)
+
+        ScriptIntrinsicBlur.create(this, Element.U8_4(this)).apply {
+            setInput(input)
+
+            setRadius(radius)
+            forEach(output)
+
+            output.copyTo(bitmap)
+            destroy()
+        }
+    }
+    return bitmap
+}
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun View.takeScreenshot(): Bitmap {
+    val bitmap = Bitmap.createBitmap(this.measuredWidth, this.measuredHeight, Bitmap.Config.ARGB_8888)
+    val canvas = Canvas(bitmap)
+    val bgDrawable = this.background
+    if (bgDrawable != null) {
+        bgDrawable.draw(canvas)
+    } else {
+        canvas.drawColor(Color.WHITE)
+    }
+    this.draw(canvas)
+    return bitmap
 }
