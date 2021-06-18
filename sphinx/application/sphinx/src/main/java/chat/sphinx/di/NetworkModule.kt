@@ -263,7 +263,7 @@ object NetworkModule {
         NetworkQueryAttachmentImpl(networkRelayCall)
 
     @Provides
-    fun provideNetworkQueryAttachmentNetworkQuerySubscription(
+    fun provideNetworkQueryAttachment(
         networkQueryAttachmentImpl: NetworkQueryAttachmentImpl
     ): NetworkQueryAttachment =
         networkQueryAttachmentImpl
