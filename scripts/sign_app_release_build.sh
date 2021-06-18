@@ -70,8 +70,8 @@ for FILE in $UNSIGNED_APK_DIR_FILE_LIST; do
     "$ANDROID_SDK"/build-tools/"$BUILD_TOOLS_VERSION"/apksigner sign \
     --ks NONE \
     --ks-pass "pass:$YUBI_PIN" \
-    --min-sdk-version "$MIN_SDK_VERSION" \
-    --max-sdk-version "$MAX_SDK_VERSION" \
+    --min-sdk-version $MIN_SDK_VERSION \
+    --max-sdk-version $MAX_SDK_VERSION \
     --provider-class sun.security.pkcs11.SunPKCS11 \
     --provider-arg "$PKCS11_CFG" \
     --ks-type PKCS11 \
