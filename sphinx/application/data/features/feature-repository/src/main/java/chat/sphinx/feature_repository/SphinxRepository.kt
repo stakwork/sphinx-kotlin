@@ -41,9 +41,9 @@ import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.logger.d
 import chat.sphinx.logger.e
 import chat.sphinx.logger.w
+import chat.sphinx.wrapper_attachment.*
 import chat.sphinx.wrapper_chat.*
 import chat.sphinx.wrapper_common.*
-import chat.sphinx.wrapper_common.attachment_authentication.*
 import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
@@ -1383,7 +1383,7 @@ abstract class SphinxRepository(
                             PostMessageDto(
                                 sendMessage.chatId?.value,
                                 sendMessage.contactId?.value,
-                                messagePrice?.value ?: 0,
+                                messagePrice.value,
                                 sendMessage.replyUUID?.value,
                                 selfEncrypted.value,
                                 map,
@@ -1941,7 +1941,7 @@ abstract class SphinxRepository(
                         val id = loadResponse.value.id.toAuthenticationId()
                         val challenge = loadResponse.value.challenge.toAuthenticationChallenge()
 
-                        id?.let { id ->
+                        id?.let { nnId ->
                             challenge?.let { challenge ->
                                 networkQueryAttachment.signChallenge(challenge).collect { loadResponse ->
                                     @Exhaustive
@@ -1952,8 +1952,8 @@ abstract class SphinxRepository(
                                         is Response.Success -> {
                                             val sig = loadResponse.value.sig.toAuthenticationSig()
 
-                                            sig?.let { sig ->
-                                                networkQueryAttachment.verifyAuthentication(id, sig, nodePubKey).collect { loadResponse ->
+                                            sig?.let { nnSig ->
+                                                networkQueryAttachment.verifyAuthentication(nnId, nnSig, nodePubKey).collect { loadResponse ->
                                                     @Exhaustive
                                                     when (loadResponse) {
                                                         is LoadResponse.Loading -> {}

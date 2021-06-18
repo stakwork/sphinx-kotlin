@@ -1,6 +1,4 @@
-package chat.sphinx.wrapper_common.attachment_authentication
-
-import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
+package chat.sphinx.wrapper_attachment
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun String.toAuthenticationChallenge(): AuthenticationChallenge? =
