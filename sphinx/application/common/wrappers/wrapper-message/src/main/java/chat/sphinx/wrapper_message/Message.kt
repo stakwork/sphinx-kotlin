@@ -9,10 +9,10 @@ import chat.sphinx.wrapper_common.lightning.LightningPaymentHash
 import chat.sphinx.wrapper_common.lightning.LightningPaymentRequest
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.MessageId
-import chat.sphinx.wrapper_common.util.getHostFromMediaToken
-import chat.sphinx.wrapper_common.util.getMUIDFromMediaToken
-import chat.sphinx.wrapper_common.util.getMediaAttributeWithName
 import chat.sphinx.wrapper_message.media.MessageMedia
+import chat.sphinx.wrapper_message.media.getHostFromMediaToken
+import chat.sphinx.wrapper_message.media.getMUIDFromMediaToken
+import chat.sphinx.wrapper_message.media.getMediaAttributeWithName
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun Message.retrieveTextToShow(): String? =
@@ -36,52 +36,38 @@ inline fun Message.retrieveTextToShow(): String? =
 
 //Paid types
 inline val Message.isPaidMessage: Boolean
-    get() {
-        return type.isAttachment() && mediaPrice > 0
-    }
+    get() = type.isAttachment() && mediaPrice > 0
 
 //Attachment types
 inline val Message.isImage: Boolean
-    get() {
-        this.messageMedia?.mediaType?.value?.let { mediaType ->
-            return mediaType.contains("image")
-        }
-        return false
-    }
+    get() = messageMedia?.mediaType?.value?.contains("image") == true
 
 //Media attributes
 inline val Message.mediaUrl: String? 
-    get() {
-        this.messageMedia?.mediaToken?.value?.let { mediaToken ->
-            mediaToken.getHostFromMediaToken()?.let { host ->
-                return "https://$host/file/$mediaToken"
-            }
+    get() = messageMedia
+        ?.mediaToken
+        ?.let { mediaToken ->
+            mediaToken
+                .getHostFromMediaToken()
+                ?.let { host ->
+                    "https://$host/file/${mediaToken.value}"
+                }
         }
-        return null
-    }
 
 inline val Message.mediaUniqueID: String?
-    get() {
-        this.messageMedia?.mediaToken?.value?.let { mediaToken ->
-            mediaToken.getMUIDFromMediaToken()?.let { muid ->
-                return muid
-            }
-        }
-        return null    
-    }
+    get() = messageMedia
+        ?.mediaToken
+        ?.getMUIDFromMediaToken()
 
 inline val Message.mediaPrice: Int
-    get() {
-        this.messageMedia?.mediaToken?.value?.let { mediaToken ->
-            mediaToken.getMediaAttributeWithName("amt")?.let { mediaPrice ->
-                return mediaPrice.toInt()
-            }
-        }
-        return 0
-    }
+    get() = messageMedia
+        ?.mediaToken
+        ?.getMediaAttributeWithName("amt")
+        ?.toIntOrNull()
+        ?: 0
 
 inline val Message.mediaKey: String? 
-    get() = this.messageMedia?.mediaKey?.value
+    get() = messageMedia?.mediaKey?.value
 
 abstract class Message {
     abstract val id: MessageId

@@ -5,6 +5,10 @@ plugins {
 }
 
 dependencies {
+    // KotlinAndroid
+    implementation project(path: ':kotlin:encoders:base64')
+
+    // Sphinx
     api project(path: ':sphinx:application:common:wrappers:wrapper-common')
 
     // needed to override moshi's use of 1.4.31

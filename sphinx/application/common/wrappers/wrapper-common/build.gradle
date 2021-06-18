@@ -5,6 +5,4 @@ plugins {
 
 dependencies {
     testImplementation testDeps.junit
-
-    implementation project(path: ':kotlin:encoders:base64')
 }
