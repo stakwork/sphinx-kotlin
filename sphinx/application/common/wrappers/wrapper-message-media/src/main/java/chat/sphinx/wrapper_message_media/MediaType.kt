@@ -1,4 +1,4 @@
-package chat.sphinx.wrapper_message.media
+package chat.sphinx.wrapper_message_media
 
 inline val MediaType.isSphinxText: Boolean
     get() = this is MediaType.SphinxText

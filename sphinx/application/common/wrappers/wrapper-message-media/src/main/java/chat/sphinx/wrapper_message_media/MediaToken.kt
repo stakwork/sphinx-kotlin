@@ -1,4 +1,4 @@
-package chat.sphinx.wrapper_message.media
+package chat.sphinx.wrapper_message_media
 
 import okio.base64.decodeBase64ToArray
 

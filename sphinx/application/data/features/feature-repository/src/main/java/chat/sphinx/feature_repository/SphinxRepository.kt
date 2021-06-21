@@ -61,8 +61,8 @@ import chat.sphinx.wrapper_invite.Invite
 import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_lightning.NodeBalanceAll
 import chat.sphinx.wrapper_message.*
-import chat.sphinx.wrapper_message.media.MessageMedia
-import chat.sphinx.wrapper_message.media.toMediaKeyDecrypted
+import chat.sphinx.wrapper_message_media.MessageMedia
+import chat.sphinx.wrapper_message_media.toMediaKeyDecrypted
 import chat.sphinx.wrapper_rsa.RsaPrivateKey
 import chat.sphinx.wrapper_rsa.RsaPublicKey
 import com.squareup.moshi.Moshi
@@ -2001,6 +2001,33 @@ abstract class SphinxRepository(
                 null
             }
         }
+
+//    suspend fun authenticateForAttachments() {
+//        withContext(io) {
+//            app.getSharedPreferences("sphinx_temp_prefs", Context.MODE_PRIVATE).let { sharedPrefs ->
+//                var token = sharedPrefs.getString("sphinx_attachments_token", null)
+//                var tokenExpiration = sharedPrefs.getLong("sphinx_attachments_token_expiration", 0)
+//
+//                if (token == null || System.currentTimeMillis() > tokenExpiration) {
+//                    val nowPlus7Days = System.currentTimeMillis() + (7 * 24 * 60 * 60 * 1000)
+//
+//                    repositoryDashboard.authenticateForAttachments()?.let { newToken ->
+//                        sharedPrefs?.edit()?.let { editor ->
+//                            editor
+//                                .putString("sphinx_attachments_token", newToken.value)
+//                                .putLong("sphinx_attachments_token_expiration", nowPlus7Days)
+//                                .let { editor ->
+//                                    if (!editor.commit()) {
+//                                        editor.apply()
+//                                    }
+//                                }
+//                        }
+//                    }
+//
+//                }
+//            }
+//        }
+//    }
 
     override suspend fun authenticateForAttachments(): AuthenticationToken? {
         var token: AuthenticationToken? = null

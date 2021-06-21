@@ -6,7 +6,7 @@ import chat.sphinx.wrapper_common.*
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_message.*
-import chat.sphinx.wrapper_message.media.MediaType
+import chat.sphinx.wrapper_message_media.MediaType
 import kotlinx.coroutines.flow.Flow
 
 /**

@@ -1,6 +1,6 @@
 package chat.sphinx.feature_coredb.adapters.media
 
-import chat.sphinx.wrapper_message.media.*
+import chat.sphinx.wrapper_message_media.*
 import com.squareup.sqldelight.ColumnAdapter
 
 internal class MediaKeyAdapter: ColumnAdapter<MediaKey, String> {

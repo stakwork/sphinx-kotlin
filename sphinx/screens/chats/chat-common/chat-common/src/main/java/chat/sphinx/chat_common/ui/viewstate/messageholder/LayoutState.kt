@@ -5,7 +5,7 @@ import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.lightning.unit
 import chat.sphinx.wrapper_message.MessageType
-import chat.sphinx.wrapper_message.media.MediaKey
+import chat.sphinx.wrapper_message_media.MediaKey
 
 internal sealed class LayoutState {
 

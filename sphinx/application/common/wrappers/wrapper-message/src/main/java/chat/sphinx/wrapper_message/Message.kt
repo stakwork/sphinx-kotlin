@@ -11,7 +11,7 @@ import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.lightning.toSat
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessageUUID
-import chat.sphinx.wrapper_message.media.*
+import chat.sphinx.wrapper_message_media.*
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun Message.retrieveTextToShow(): String? =
@@ -135,34 +135,41 @@ abstract class Message {
                 other.replyMessage                  == replyMessage
     }
 
+    companion object {
+        @Suppress("ObjectPropertyName")
+        private const val _17 = 17
+        @Suppress("ObjectPropertyName")
+        private const val _31 = 31
+    }
+
     override fun hashCode(): Int {
-        var result = 17
-        result = 31 * result + id.hashCode()
-        result = 31 * result + uuid.hashCode()
-        result = 31 * result + chatId.hashCode()
-        result = 31 * result + type.hashCode()
-        result = 31 * result + sender.hashCode()
-        result = 31 * result + receiver.hashCode()
-        result = 31 * result + amount.hashCode()
-        result = 31 * result + paymentHash.hashCode()
-        result = 31 * result + paymentRequest.hashCode()
-        result = 31 * result + date.hashCode()
-        result = 31 * result + expirationDate.hashCode()
-        result = 31 * result + messageContent.hashCode()
-        result = 31 * result + status.hashCode()
-        result = 31 * result + seen.hashCode()
-        result = 31 * result + senderAlias.hashCode()
-        result = 31 * result + senderPic.hashCode()
-        result = 31 * result + originalMUID.hashCode()
-        result = 31 * result + replyUUID.hashCode()
-        result = 31 * result + messageContentDecrypted.hashCode()
-        result = 31 * result + messageDecryptionError.hashCode()
-        result = 31 * result + messageDecryptionException.hashCode()
-        result = 31 * result + messageMedia.hashCode()
-        result = 31 * result + podBoost.hashCode()
-        result = 31 * result + giphyData.hashCode()
-        reactions?.forEach { result = 31 * result + it.hashCode() }
-        result = 31 * result + replyMessage.hashCode()
+        var result = _17
+        result = _31 * result + id.hashCode()
+        result = _31 * result + uuid.hashCode()
+        result = _31 * result + chatId.hashCode()
+        result = _31 * result + type.hashCode()
+        result = _31 * result + sender.hashCode()
+        result = _31 * result + receiver.hashCode()
+        result = _31 * result + amount.hashCode()
+        result = _31 * result + paymentHash.hashCode()
+        result = _31 * result + paymentRequest.hashCode()
+        result = _31 * result + date.hashCode()
+        result = _31 * result + expirationDate.hashCode()
+        result = _31 * result + messageContent.hashCode()
+        result = _31 * result + status.hashCode()
+        result = _31 * result + seen.hashCode()
+        result = _31 * result + senderAlias.hashCode()
+        result = _31 * result + senderPic.hashCode()
+        result = _31 * result + originalMUID.hashCode()
+        result = _31 * result + replyUUID.hashCode()
+        result = _31 * result + messageContentDecrypted.hashCode()
+        result = _31 * result + messageDecryptionError.hashCode()
+        result = _31 * result + messageDecryptionException.hashCode()
+        result = _31 * result + messageMedia.hashCode()
+        result = _31 * result + podBoost.hashCode()
+        result = _31 * result + giphyData.hashCode()
+        reactions?.forEach { result = _31 * result + it.hashCode() }
+        result = _31 * result + replyMessage.hashCode()
         return result
     }
 

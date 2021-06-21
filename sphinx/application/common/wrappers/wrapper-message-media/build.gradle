@@ -1,0 +1,9 @@
+plugins {
+    id 'java-library'
+    id 'kotlin'
+}
+
+dependencies {
+    // KotlinAndroid
+    implementation project(path: ':kotlin:encoders:base64')
+}
