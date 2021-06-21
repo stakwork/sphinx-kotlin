@@ -136,15 +136,15 @@ internal sealed class MessageHolderViewState(
         }
     }
 
-    val bubbleImageAttachment: LayoutState.Bubble.ContainerTop.ImageAttachment? by lazy(LazyThreadSafetyMode.NONE) {
-        message.mediaUrl?.let { mediaUrl ->
-            if (message.isImage && !message.isPaidMessage) {
-                LayoutState.Bubble.ContainerTop.ImageAttachment(mediaUrl, message.mediaKey ?: "")
-            } else {
-                null
-            }
-        }
-    }
+//    val bubbleImageAttachment: LayoutState.Bubble.ContainerTop.ImageAttachment? by lazy(LazyThreadSafetyMode.NONE) {
+//        message.mediaUrl?.let { mediaUrl ->
+//            if (message.isImage && !message.isPaidMessage) {
+//                LayoutState.Bubble.ContainerTop.ImageAttachment(mediaUrl, message.mediaKey ?: "")
+//            } else {
+//                null
+//            }
+//        }
+//    }
 
     // don't use by lazy as this uses a for loop and needs to be initialized on a background
     // thread (so, while the MHVS is being created)

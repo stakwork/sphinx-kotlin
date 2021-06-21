@@ -36,8 +36,6 @@ internal sealed class LayoutState {
         val timestamp: String,
     ): LayoutState()
 
-    // TODO: Create ContainerTop and ContainerMiddle sub sealed classes to reflect
-    //  how the layout is structured
     sealed class Bubble: LayoutState() {
 
         sealed class ContainerTop: Bubble() {
@@ -68,10 +66,10 @@ internal sealed class LayoutState {
                 val url: String,
             ): ContainerTop()
 
-            data class ImageAttachment(
-                val url: String,
-                val mediaKey: String,
-            ): ContainerTop()
+//            data class ImageAttachment(
+//                val url: String,
+//                val mediaKey: String,
+//            ): ContainerTop()
 
             // FileAttachment
             // AudioAttachment

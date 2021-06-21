@@ -65,8 +65,7 @@ internal inline fun LayoutMessageHolderBinding.setView(
         if (viewState.background !is BubbleBackground.Gone) {
             setBubbleImageAttachment(
                 viewState.bubbleGiphy,
-                viewState.bubbleImageAttachment,
-            ) { imageView, url, _ ->
+            ) { imageView, url ->
                 lifecycleScope.launch(dispatchers.mainImmediate) {
                     imageLoader.load(imageView, url)
                         .also { disposables.add(it) }
@@ -478,24 +477,41 @@ internal inline fun LayoutMessageHolderBinding.setBubblePaidMessageSentStatusLay
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun LayoutMessageHolderBinding.setBubbleImageAttachment(
     giphy: LayoutState.Bubble.ContainerTop.Giphy?,
-    imageAttachment: LayoutState.Bubble.ContainerTop.ImageAttachment?,
-    loadImage: (ImageView, String, String?) -> Unit,
+    loadImage: (ImageView, String) -> Unit,
 ) {
     includeMessageHolderBubble.includeMessageTypeImageAttachment.apply {
-        if (giphy == null && imageAttachment == null) {
+        if (giphy == null) {
             root.gone
         } else {
             root.visible
 
-            if (giphy != null) {
-                loadImage(imageViewAttachmentImage, giphy.url, null)
-                loadingImageProgressContainer.gone
-            } else if (imageAttachment != null) {
-//                loadImage(imageViewAttachmentImage, imageAttachment.url, imageAttachment.mediaKey)
-            }
+            loadImage(imageViewAttachmentImage, giphy.url)
         }
     }
 }
+
+//@MainThread
+//@Suppress("NOTHING_TO_INLINE")
+//internal inline fun LayoutMessageHolderBinding.setBubbleImageAttachment(
+//    giphy: LayoutState.Bubble.ContainerTop.Giphy?,
+//    imageAttachment: LayoutState.Bubble.ContainerTop.ImageAttachment?,
+//    loadImage: (ImageView, String, String?) -> Unit,
+//) {
+//    includeMessageHolderBubble.includeMessageTypeImageAttachment.apply {
+//        if (giphy == null && imageAttachment == null) {
+//            root.gone
+//        } else {
+//            root.visible
+//
+//            if (giphy != null) {
+//                loadImage(imageViewAttachmentImage, giphy.url, null)
+//                loadingImageProgressContainer.gone
+//            } else if (imageAttachment != null) {
+////                loadImage(imageViewAttachmentImage, imageAttachment.url, imageAttachment.mediaKey)
+//            }
+//        }
+//    }
+//}
 
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
