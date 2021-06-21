@@ -28,7 +28,7 @@ abstract class NetworkQueryAttachment {
     abstract fun verifyAuthentication(
         id: AuthenticationId,
         sig: AuthenticationSig,
-        pubKey: LightningNodePubKey,
+        ownerPubKey: LightningNodePubKey,
         memeServerHost: MediaHost = MediaHost.DEFAULT,
     ): Flow<LoadResponse<AttachmentAuthenticationTokenDto, ResponseError>>
 }

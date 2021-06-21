@@ -4,6 +4,7 @@ import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_coredb.CoreDB
 import chat.sphinx.concept_crypto_rsa.RSA
 import chat.sphinx.concept_network_query_attachment.NetworkQueryAttachment
+import chat.sphinx.concept_network_query_attachment.model.AttachmentChallengeSigDto
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
 import chat.sphinx.concept_network_query_chat.model.*
 import chat.sphinx.concept_network_query_contact.NetworkQueryContact
@@ -2045,47 +2046,63 @@ abstract class SphinxRepository(
         }
 
         owner?.nodePubKey?.let { nodePubKey ->
-            networkQueryAttachment.askAuthentication().collect { loadResponse ->
+            var id: AuthenticationId? = null
+            var challenge: AuthenticationChallenge? = null
+
+            networkQueryAttachment.askAuthentication(
+                // memeServerHost,
+            ).collect { loadResponse ->
                 @Exhaustive
                 when (loadResponse) {
                     is LoadResponse.Loading -> {}
-                    is Response.Error -> {}
-
+                    is Response.Error -> {
+                        LOG.e(TAG, loadResponse.message, loadResponse.exception)
+                    }
                     is Response.Success -> {
-                        val id = loadResponse.value.id.toAuthenticationId()
-                        val challenge = loadResponse.value.challenge.toAuthenticationChallenge()
+                        id = loadResponse.value.id.toAuthenticationId()
+                        challenge = loadResponse.value.challenge.toAuthenticationChallenge()
+                    }
+                }
+            }
 
-                        id?.let { nnId ->
-                            challenge?.let { challenge ->
-                                networkQueryAttachment.signChallenge(challenge).collect { loadResponse ->
-                                    @Exhaustive
-                                    when (loadResponse) {
-                                        is LoadResponse.Loading -> {}
-                                        is Response.Error -> {}
+            id?.let { nnId ->
+                challenge?.let { nnChallenge ->
 
-                                        is Response.Success -> {
-                                            val sig = loadResponse.value.sig.toAuthenticationSig()
+                    var sig: AuthenticationSig? = null
 
-                                            sig?.let { nnSig ->
-                                                networkQueryAttachment.verifyAuthentication(nnId, nnSig, nodePubKey).collect { loadResponse ->
-                                                    @Exhaustive
-                                                    when (loadResponse) {
-                                                        is LoadResponse.Loading -> {}
-                                                        is Response.Error -> {
-                                                            LOG.d(TAG, loadResponse.cause.message)
-                                                        }
+                    networkQueryAttachment.signChallenge(nnChallenge).collect { loadResponse ->
+                        @Exhaustive
+                        when (loadResponse) {
+                            is LoadResponse.Loading -> {}
+                            is Response.Error -> {
+                                LOG.e(TAG, loadResponse.message, loadResponse.exception)
+                            }
+                            is Response.Success -> {
+                                sig = loadResponse.value.sig.toAuthenticationSig()
+                            }
+                        }
+                    }
 
-                                                        is Response.Success -> {
-                                                            token = loadResponse.value.token.toAuthenticationToken()
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
+                    sig?.let { nnSig ->
+
+                        networkQueryAttachment.verifyAuthentication(
+                            nnId,
+                            nnSig,
+                            nodePubKey,
+                            // memeServerHost,
+                        ).collect { loadResponse ->
+                            @Exhaustive
+                            when (loadResponse) {
+                                is LoadResponse.Loading -> {}
+                                is Response.Error -> {
+                                    LOG.e(TAG, loadResponse.message, loadResponse.exception)
+                                }
+                                is Response.Success -> {
+                                    token = loadResponse.value.token.toAuthenticationToken()
                                 }
                             }
                         }
+
                     }
                 }
             }

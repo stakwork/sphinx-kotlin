@@ -50,7 +50,7 @@ class NetworkQueryAttachmentImpl(
     override fun verifyAuthentication(
         id: AuthenticationId,
         sig: AuthenticationSig,
-        pubKey: LightningNodePubKey,
+        ownerPubKey: LightningNodePubKey,
         memeServerHost: MediaHost,
     ): Flow<LoadResponse<AttachmentAuthenticationTokenDto, ResponseError>> =
         networkRelayCall.post(
@@ -59,7 +59,7 @@ class NetworkQueryAttachmentImpl(
                 memeServerHost.value,
                 id.value,
                 sig.value,
-                pubKey.value
+                ownerPubKey.value
             ),
             responseJsonClass = AttachmentAuthenticationTokenDto::class.java,
             requestBodyJsonClass = Map::class.java,
