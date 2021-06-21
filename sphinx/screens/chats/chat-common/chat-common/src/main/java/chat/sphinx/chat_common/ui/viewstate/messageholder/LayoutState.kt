@@ -5,6 +5,7 @@ import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.lightning.unit
 import chat.sphinx.wrapper_message.MessageType
+import chat.sphinx.wrapper_message.media.MediaKey
 
 internal sealed class LayoutState {
 
@@ -59,17 +60,10 @@ internal sealed class LayoutState {
                     get() = amount.unit
             }
 
-            // TODO: Rename to ImageAttachment as that is the layout
-            //  it uses and create a sealed interface for what
-            //  values can be set here (url, file, etc.)
-            data class Giphy(
+            data class ImageAttachment(
                 val url: String,
+                val mediaKey: MediaKey?,
             ): ContainerTop()
-
-//            data class ImageAttachment(
-//                val url: String,
-//                val mediaKey: String,
-//            ): ContainerTop()
 
             // FileAttachment
             // AudioAttachment

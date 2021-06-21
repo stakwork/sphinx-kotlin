@@ -63,9 +63,7 @@ internal inline fun LayoutMessageHolderBinding.setView(
         setGroupActionIndicatorLayout(viewState.groupActionIndicator)
 
         if (viewState.background !is BubbleBackground.Gone) {
-            setBubbleImageAttachment(
-                viewState.bubbleGiphy,
-            ) { imageView, url ->
+            setBubbleImageAttachment(viewState.bubbleImageAttachment,) { imageView, url ->
                 lifecycleScope.launch(dispatchers.mainImmediate) {
                     imageLoader.load(imageView, url)
                         .also { disposables.add(it) }
@@ -476,16 +474,16 @@ internal inline fun LayoutMessageHolderBinding.setBubblePaidMessageSentStatusLay
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun LayoutMessageHolderBinding.setBubbleImageAttachment(
-    giphy: LayoutState.Bubble.ContainerTop.Giphy?,
+    imageAttachment: LayoutState.Bubble.ContainerTop.ImageAttachment?,
     loadImage: (ImageView, String) -> Unit,
 ) {
     includeMessageHolderBubble.includeMessageTypeImageAttachment.apply {
-        if (giphy == null) {
+        if (imageAttachment == null) {
             root.gone
         } else {
             root.visible
 
-            loadImage(imageViewAttachmentImage, giphy.url)
+            loadImage(imageViewAttachmentImage, imageAttachment.url)
         }
     }
 }

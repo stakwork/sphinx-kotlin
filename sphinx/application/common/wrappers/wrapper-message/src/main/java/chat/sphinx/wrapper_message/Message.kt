@@ -8,12 +8,10 @@ import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.LightningPaymentHash
 import chat.sphinx.wrapper_common.lightning.LightningPaymentRequest
 import chat.sphinx.wrapper_common.lightning.Sat
+import chat.sphinx.wrapper_common.lightning.toSat
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessageUUID
-import chat.sphinx.wrapper_message.media.MessageMedia
-import chat.sphinx.wrapper_message.media.getHostFromMediaToken
-import chat.sphinx.wrapper_message.media.getMUIDFromMediaToken
-import chat.sphinx.wrapper_message.media.getMediaAttributeWithName
+import chat.sphinx.wrapper_message.media.*
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun Message.retrieveTextToShow(): String? =
@@ -37,7 +35,7 @@ inline fun Message.retrieveTextToShow(): String? =
 
 //Paid types
 inline val Message.isPaidMessage: Boolean
-    get() = type.isAttachment() && mediaPrice > 0
+    get() = type.isAttachment() && mediaPrice.value > 0L
 
 //Attachment types
 inline val Message.isImage: Boolean
@@ -60,15 +58,16 @@ inline val Message.mediaUniqueID: String?
         ?.mediaToken
         ?.getMUIDFromMediaToken()
 
-inline val Message.mediaPrice: Int
+inline val Message.mediaPrice: Sat
     get() = messageMedia
         ?.mediaToken
         ?.getMediaAttributeWithName("amt")
-        ?.toIntOrNull()
-        ?: 0
+        ?.toLongOrNull()
+        ?.toSat()
+        ?: Sat(0)
 
-inline val Message.mediaKey: String? 
-    get() = messageMedia?.mediaKey?.value
+inline val Message.mediaKey: MediaKey?
+    get() = messageMedia?.mediaKey
 
 abstract class Message {
     abstract val id: MessageId
