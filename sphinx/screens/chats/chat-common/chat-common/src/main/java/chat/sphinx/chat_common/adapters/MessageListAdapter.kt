@@ -21,6 +21,7 @@ import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.wrapper_view.Px
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -193,7 +194,8 @@ internal class MessageListAdapter<ARGS : NavArgs>(
         private val binding: LayoutMessageHolderBinding
     ): RecyclerView.ViewHolder(binding.root) {
 
-        private val disposables: ArrayList<Disposable> = ArrayList(1)
+        private val holderJobs: ArrayList<Job> = ArrayList(3)
+        private val disposables: ArrayList<Disposable> = ArrayList(3)
         private var currentViewState: MessageHolderViewState? = null
 
         init {
@@ -224,6 +226,7 @@ internal class MessageListAdapter<ARGS : NavArgs>(
 
             binding.setView(
                 lifecycleOwner.lifecycleScope,
+                holderJobs,
                 disposables,
                 viewModel.dispatchers,
                 imageLoader,

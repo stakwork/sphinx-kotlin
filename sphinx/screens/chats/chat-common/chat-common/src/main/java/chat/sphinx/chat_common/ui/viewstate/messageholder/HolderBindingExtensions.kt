@@ -27,12 +27,15 @@ import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun LayoutMessageHolderBinding.setView(
     lifecycleScope: CoroutineScope,
+    holderJobs: ArrayList<Job>,
     disposables: ArrayList<Disposable>,
     dispatchers: CoroutineDispatchers,
     imageLoader: ImageLoader<ImageView>,
@@ -40,8 +43,13 @@ internal inline fun LayoutMessageHolderBinding.setView(
     recyclerViewWidth: Px,
     viewState: MessageHolderViewState,
 ) {
-    disposables.forEach {
-        it.dispose()
+    for (job in holderJobs) {
+        job.cancel()
+    }
+    holderJobs.clear()
+
+    for (disposable in disposables) {
+        disposable.dispose()
     }
     disposables.clear()
 
@@ -55,6 +63,8 @@ internal inline fun LayoutMessageHolderBinding.setView(
             )?.also {
                 disposables.add(it)
             }
+        }.let { job ->
+            holderJobs.add(job)
         }
 
         setStatusHeader(viewState.statusHeader)
@@ -63,10 +73,22 @@ internal inline fun LayoutMessageHolderBinding.setView(
         setGroupActionIndicatorLayout(viewState.groupActionIndicator)
 
         if (viewState.background !is BubbleBackground.Gone) {
-            setBubbleImageAttachment(viewState.bubbleImageAttachment,) { imageView, url ->
+            setBubbleImageAttachment(viewState.bubbleImageAttachment) { imageView, url ->
                 lifecycleScope.launch(dispatchers.mainImmediate) {
                     imageLoader.load(imageView, url)
-                        .also { disposables.add(it) }
+                        .also { disposable ->
+                            disposables.add(disposable)
+                            disposable.await()
+                        }
+                }.let { job ->
+                    holderJobs.add(job)
+                    job.invokeOnCompletion {
+                        if (!job.isCancelled) {
+                            includeMessageHolderBubble.includeMessageTypeImageAttachment.apply {
+                                loadingImageProgressContainer.gone
+                            }
+                        }
+                    }
                 }
             }
             setUnsupportedMessageTypeLayout(viewState.unsupportedMessageType)
@@ -81,6 +103,8 @@ internal inline fun LayoutMessageHolderBinding.setView(
                 lifecycleScope.launch(dispatchers.mainImmediate) {
                     imageLoader.load(imageView, url.value, imageLoaderDefaults)
                         .also { disposables.add(it) }
+                }.let { job ->
+                    holderJobs.add(job)
                 }
             }
             setBubbleReplyMessage(viewState.bubbleReplyMessage)
@@ -482,6 +506,7 @@ internal inline fun LayoutMessageHolderBinding.setBubbleImageAttachment(
             root.gone
         } else {
             root.visible
+            loadingImageProgressContainer.visible
 
             loadImage(imageViewAttachmentImage, imageAttachment.url)
         }

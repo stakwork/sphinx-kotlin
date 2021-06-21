@@ -50,6 +50,7 @@ import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.visible
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
@@ -77,7 +78,8 @@ abstract class ChatFragment<
 
     private val sendMessageBuilder = SendMessage.Builder()
 
-    private val disposables: ArrayList<Disposable> = ArrayList(1)
+    private val holderJobs: ArrayList<Job> = ArrayList(3)
+    private val disposables: ArrayList<Disposable> = ArrayList(3)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -327,6 +329,7 @@ abstract class ChatFragment<
                             root.y = viewState.holderYPos.value + viewState.statusHeaderHeight.value
                             setView(
                                 lifecycleScope,
+                                holderJobs,
                                 disposables,
                                 viewModel.dispatchers,
                                 imageLoader,
