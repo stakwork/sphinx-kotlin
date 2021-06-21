@@ -3,8 +3,6 @@ package chat.sphinx.feature_repository
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_coredb.CoreDB
 import chat.sphinx.concept_crypto_rsa.RSA
-import chat.sphinx.concept_network_query_attachment.NetworkQueryAttachment
-import chat.sphinx.concept_network_query_attachment.model.AttachmentChallengeSigDto
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
 import chat.sphinx.concept_network_query_chat.model.*
 import chat.sphinx.concept_network_query_contact.NetworkQueryContact
@@ -42,7 +40,6 @@ import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.logger.d
 import chat.sphinx.logger.e
 import chat.sphinx.logger.w
-import chat.sphinx.wrapper_attachment.*
 import chat.sphinx.wrapper_chat.*
 import chat.sphinx.wrapper_common.*
 import chat.sphinx.wrapper_common.chat.ChatUUID
@@ -96,7 +93,6 @@ abstract class SphinxRepository(
     private val networkQueryContact: NetworkQueryContact,
     private val networkQueryLightning: NetworkQueryLightning,
     private val networkQueryMessage: NetworkQueryMessage,
-    private val networkQueryAttachment: NetworkQueryAttachment,
     private val rsa: RSA,
     private val socketIOManager: SocketIOManager,
     protected val LOG: SphinxLogger,
@@ -1988,114 +1984,4 @@ abstract class SphinxRepository(
                 null
             }
         }
-
-//    suspend fun authenticateForAttachments() {
-//        withContext(io) {
-//            app.getSharedPreferences("sphinx_temp_prefs", Context.MODE_PRIVATE).let { sharedPrefs ->
-//                var token = sharedPrefs.getString("sphinx_attachments_token", null)
-//                var tokenExpiration = sharedPrefs.getLong("sphinx_attachments_token_expiration", 0)
-//
-//                if (token == null || System.currentTimeMillis() > tokenExpiration) {
-//                    val nowPlus7Days = System.currentTimeMillis() + (7 * 24 * 60 * 60 * 1000)
-//
-//                    repositoryDashboard.authenticateForAttachments()?.let { newToken ->
-//                        sharedPrefs?.edit()?.let { editor ->
-//                            editor
-//                                .putString("sphinx_attachments_token", newToken.value)
-//                                .putLong("sphinx_attachments_token_expiration", nowPlus7Days)
-//                                .let { editor ->
-//                                    if (!editor.commit()) {
-//                                        editor.apply()
-//                                    }
-//                                }
-//                        }
-//                    }
-//
-//                }
-//            }
-//        }
-//    }
-
-    override suspend fun authenticateForAttachments(): AuthenticationToken? {
-        var token: AuthenticationToken? = null
-
-        var owner: Contact? = accountOwner.value
-
-        if (owner == null) {
-            try {
-                accountOwner.collect {
-                    if (it != null) {
-                        owner = it
-                        throw Exception()
-                    }
-                }
-            } catch (e: Exception) {}
-            delay(25L)
-        }
-
-        owner?.nodePubKey?.let { nodePubKey ->
-            var id: AuthenticationId? = null
-            var challenge: AuthenticationChallenge? = null
-
-            networkQueryAttachment.askAuthentication(
-                // memeServerHost,
-            ).collect { loadResponse ->
-                @Exhaustive
-                when (loadResponse) {
-                    is LoadResponse.Loading -> {}
-                    is Response.Error -> {
-                        LOG.e(TAG, loadResponse.message, loadResponse.exception)
-                    }
-                    is Response.Success -> {
-                        id = loadResponse.value.id.toAuthenticationId()
-                        challenge = loadResponse.value.challenge.toAuthenticationChallenge()
-                    }
-                }
-            }
-
-            id?.let { nnId ->
-                challenge?.let { nnChallenge ->
-
-                    var sig: AuthenticationSig? = null
-
-                    networkQueryAttachment.signChallenge(nnChallenge).collect { loadResponse ->
-                        @Exhaustive
-                        when (loadResponse) {
-                            is LoadResponse.Loading -> {}
-                            is Response.Error -> {
-                                LOG.e(TAG, loadResponse.message, loadResponse.exception)
-                            }
-                            is Response.Success -> {
-                                sig = loadResponse.value.sig.toAuthenticationSig()
-                            }
-                        }
-                    }
-
-                    sig?.let { nnSig ->
-
-                        networkQueryAttachment.verifyAuthentication(
-                            nnId,
-                            nnSig,
-                            nodePubKey,
-                            // memeServerHost,
-                        ).collect { loadResponse ->
-                            @Exhaustive
-                            when (loadResponse) {
-                                is LoadResponse.Loading -> {}
-                                is Response.Error -> {
-                                    LOG.e(TAG, loadResponse.message, loadResponse.exception)
-                                }
-                                is Response.Success -> {
-                                    token = loadResponse.value.token.toAuthenticationToken()
-                                }
-                            }
-                        }
-
-                    }
-                }
-            }
-        }
-
-        return token
-    }
 }

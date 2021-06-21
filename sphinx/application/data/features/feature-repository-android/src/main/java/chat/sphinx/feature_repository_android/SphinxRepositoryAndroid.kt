@@ -4,7 +4,6 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingSource
 import chat.sphinx.concept_coredb.CoreDB
 import chat.sphinx.concept_crypto_rsa.RSA
-import chat.sphinx.concept_network_query_attachment.NetworkQueryAttachment
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
 import chat.sphinx.concept_network_query_contact.NetworkQueryContact
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
@@ -41,7 +40,6 @@ class SphinxRepositoryAndroid(
     networkQueryContact: NetworkQueryContact,
     networkQueryLightning: NetworkQueryLightning,
     networkQueryMessage: NetworkQueryMessage,
-    networkQueryAttachment: NetworkQueryAttachment,
     rsa: RSA,
     socketIOManager: SocketIOManager,
     LOG: SphinxLogger,
@@ -57,7 +55,6 @@ class SphinxRepositoryAndroid(
     networkQueryContact,
     networkQueryLightning,
     networkQueryMessage,
-    networkQueryAttachment,
     rsa,
     socketIOManager,
     LOG,

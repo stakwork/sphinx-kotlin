@@ -3,6 +3,7 @@ package chat.sphinx.di
 import android.content.Context
 import chat.sphinx.concept_coredb.CoreDB
 import chat.sphinx.concept_crypto_rsa.RSA
+import chat.sphinx.concept_meme_server.MemeServerTokenHandler
 import chat.sphinx.concept_network_query_attachment.NetworkQueryAttachment
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_message.MessageRepository
@@ -17,6 +18,7 @@ import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.concept_socket_io.SocketIOManager
 import chat.sphinx.database.SphinxCoreDBImpl
 import chat.sphinx.feature_coredb.CoreDBImpl
+import chat.sphinx.feature_meme_server.MemeServerTokenHandlerImpl
 import chat.sphinx.feature_repository.mappers.contact.toContact
 import chat.sphinx.feature_repository_android.SphinxRepositoryAndroid
 import chat.sphinx.logger.SphinxLogger
@@ -81,6 +83,31 @@ object RepositoryModule {
 
     @Provides
     @Singleton
+    fun provideMemeServerTokenHandlerImpl(
+        accountOwner: StateFlow<Contact?>,
+        applicationScope: CoroutineScope,
+        authenticationStorage: AuthenticationStorage,
+        dispatchers: CoroutineDispatchers,
+        networkQueryAttachment: NetworkQueryAttachment,
+        LOG: SphinxLogger,
+    ): MemeServerTokenHandlerImpl =
+        MemeServerTokenHandlerImpl(
+            accountOwner,
+            applicationScope,
+            authenticationStorage,
+            dispatchers,
+            networkQueryAttachment,
+            LOG,
+        )
+
+    @Provides
+    fun provideMemeServerTokenHandler(
+        memeServerTokenHandlerImpl: MemeServerTokenHandlerImpl
+    ): MemeServerTokenHandler =
+        memeServerTokenHandlerImpl
+
+    @Provides
+    @Singleton
     fun provideSphinxRepositoryAndroid(
         accountOwner: StateFlow<Contact?>,
         applicationScope: CoroutineScope,
@@ -93,7 +120,6 @@ object RepositoryModule {
         networkQueryContact: NetworkQueryContact,
         networkQueryLightning: NetworkQueryLightning,
         networkQueryMessage: NetworkQueryMessage,
-        networkQueryAttachment: NetworkQueryAttachment,
         socketIOManager: SocketIOManager,
         rsa: RSA,
         sphinxLogger: SphinxLogger,
@@ -110,7 +136,6 @@ object RepositoryModule {
             networkQueryContact,
             networkQueryLightning,
             networkQueryMessage,
-            networkQueryAttachment,
             rsa,
             socketIOManager,
             sphinxLogger,

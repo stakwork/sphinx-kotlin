@@ -2,7 +2,6 @@ package chat.sphinx.concept_repository_dashboard
 
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.ResponseError
-import chat.sphinx.wrapper_attachment.AuthenticationToken
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
@@ -14,8 +13,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 
 interface RepositoryDashboard {
-    suspend fun authenticateForAttachments(): AuthenticationToken?
-
     suspend fun getAccountBalance(): StateFlow<NodeBalance?>
 
     val getAllChats: Flow<List<Chat>>

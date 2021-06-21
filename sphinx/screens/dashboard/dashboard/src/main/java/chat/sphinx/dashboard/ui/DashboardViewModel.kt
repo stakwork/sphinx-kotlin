@@ -1,7 +1,5 @@
 package chat.sphinx.dashboard.ui
 
-import android.app.Application
-import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
@@ -26,7 +24,6 @@ import chat.sphinx.scanner_view_model_coordinator.request.ScannerFilter
 import chat.sphinx.scanner_view_model_coordinator.request.ScannerRequest
 import chat.sphinx.scanner_view_model_coordinator.response.ScannerResponse
 import chat.sphinx.wrapper_chat.isConversation
-import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.tribe.TribeJoinLink
 import chat.sphinx.wrapper_common.tribe.isValidTribeJoinLink
@@ -81,7 +78,6 @@ internal class DashboardViewModel @Inject constructor(
 
     private val scannerCoordinator: ViewModelCoordinator<ScannerRequest, ScannerResponse>,
     private val socketIOManager: SocketIOManager,
-    private val app: Application,
 ): MotionLayoutViewModel<
         Any,
         Nothing,
@@ -344,8 +340,6 @@ internal class DashboardViewModel @Inject constructor(
 
     init {
         viewModelScope.launch(mainImmediate) {
-            authenticateForAttachments()
-
             socketIOManager.socketIOStateFlow.collect { state ->
                 if (state is SocketIOState.Uninitialized) {
                     socketIOManager.connect()
@@ -411,33 +405,6 @@ internal class DashboardViewModel @Inject constructor(
 
             repositoryDashboard.networkRefreshMessages.collect { response ->
                 _networkStateFlow.value = response
-            }
-        }
-    }
-
-    suspend fun authenticateForAttachments() {
-        withContext(io) {
-            app.getSharedPreferences("sphinx_temp_prefs", Context.MODE_PRIVATE).let { sharedPrefs ->
-                var token = sharedPrefs.getString("sphinx_attachments_token", null)
-                var tokenExpiration = sharedPrefs.getLong("sphinx_attachments_token_expiration", 0)
-
-                if (token == null || System.currentTimeMillis() > tokenExpiration) {
-                    val nowPlus7Days = System.currentTimeMillis() + (7 * 24 * 60 * 60 * 1000)
-
-                    repositoryDashboard.authenticateForAttachments()?.let { newToken ->
-                        sharedPrefs?.edit()?.let { editor ->
-                            editor
-                                .putString("sphinx_attachments_token", newToken.value)
-                                .putLong("sphinx_attachments_token_expiration", nowPlus7Days)
-                                .let { editor ->
-                                    if (!editor.commit()) {
-                                        editor.apply()
-                                    }
-                                }
-                        }
-                    }
-
-                }
             }
         }
     }
