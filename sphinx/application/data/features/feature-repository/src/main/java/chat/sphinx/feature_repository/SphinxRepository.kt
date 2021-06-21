@@ -54,6 +54,8 @@ import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.lightning.toSat
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessagePagination
+import chat.sphinx.wrapper_common.message.MessageUUID
+import chat.sphinx.wrapper_common.message.toMessageUUID
 import chat.sphinx.wrapper_contact.*
 import chat.sphinx.wrapper_invite.Invite
 import chat.sphinx.wrapper_lightning.NodeBalance
@@ -1463,6 +1465,93 @@ abstract class SphinxRepository(
                 }
             }
         }
+    }
+
+    override suspend fun boostMessage(
+        chatId: ChatId,
+        pricePerMessage: Sat,
+        escrowAmount: Sat,
+        messageUUID: MessageUUID,
+    ): Response<Any, ResponseError> {
+
+        var response: Response<Any, ResponseError> = Response.Success(true)
+
+        repositoryScope.launch(mainImmediate) {
+            val owner: Contact = accountOwner.value.let {
+                if (it != null) {
+                    it
+                } else {
+                    var owner: Contact? = null
+                    val retrieveOwnerJob = repositoryScope.launch(mainImmediate) {
+                        try {
+                            accountOwner.collect { contact ->
+                                if (contact != null) {
+                                    owner = contact
+                                    throw Exception()
+                                }
+                            }
+                        } catch (e: Exception) {}
+                        delay(20L)
+                    }
+
+                    delay(200L)
+                    retrieveOwnerJob.cancelAndJoin()
+
+                    owner ?: let {
+                        response = Response.Error(
+                            ResponseError("Owner Contact returned null")
+                        )
+                        return@launch
+                    }
+                }
+            }
+
+            networkQueryMessage.boostMessage(
+                chatId,
+                pricePerMessage,
+                escrowAmount,
+                owner.tipAmount ?: Sat(20L),
+                messageUUID,
+            ).collect { loadResponse ->
+                @Exhaustive
+                when (loadResponse) {
+                    is LoadResponse.Loading -> {}
+                    is Response.Error -> {
+                        LOG.e(TAG, loadResponse.message, loadResponse.exception)
+                        response = loadResponse
+                    }
+                    is Response.Success -> {
+                        decryptMessageDtoContentIfAvailable(
+                            loadResponse.value,
+                            coroutineScope { this },
+                        )
+                        val queries = coreDB.getSphinxDatabaseQueries()
+                        chatLock.withLock {
+                            messageLock.withLock {
+                                withContext(io) {
+
+                                    queries.transaction {
+                                        upsertMessage(loadResponse.value, queries)
+
+                                        if (loadResponse.value.updateChatDboLatestMessage) {
+                                            updateChatDboLatestMessage(
+                                                loadResponse.value,
+                                                chatId,
+                                                latestMessageUpdatedTimeMap,
+                                                queries
+                                            )
+                                        }
+                                    }
+
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }.join()
+
+        return response
     }
 
     override suspend fun toggleChatMuted(chat: Chat): Response<Boolean, ResponseError> {

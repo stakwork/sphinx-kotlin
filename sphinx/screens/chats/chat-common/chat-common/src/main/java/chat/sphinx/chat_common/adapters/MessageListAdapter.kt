@@ -6,17 +6,20 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavArgs
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import chat.sphinx.chat_common.databinding.LayoutChatHeaderBinding
 import chat.sphinx.chat_common.databinding.LayoutMessageHolderBinding
 import chat.sphinx.chat_common.ui.ChatViewModel
+import chat.sphinx.chat_common.ui.isMessageSelected
 import chat.sphinx.chat_common.ui.viewstate.messageholder.*
+import chat.sphinx.chat_common.ui.viewstate.selected.SelectedMessageViewState
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.wrapper_view.Px
-import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -24,6 +27,7 @@ import kotlinx.coroutines.withContext
 
 internal class MessageListAdapter<ARGS : NavArgs>(
     private val recyclerView: RecyclerView,
+    private val headerBinding: LayoutChatHeaderBinding,
     private val layoutManager: LinearLayoutManager,
     private val lifecycleOwner: LifecycleOwner,
     private val onStopSupervisor: OnStopSupervisor,
@@ -115,6 +119,7 @@ internal class MessageListAdapter<ARGS : NavArgs>(
         val listSizeAfterDispatch = messages.size - 1
 
         if (
+            !viewModel.isMessageSelected()                                  &&
             listSizeAfterDispatch >= listSizeBeforeDispatch                 &&
             recyclerView.scrollState == RecyclerView.SCROLL_STATE_IDLE      &&
             lastVisibleItemPositionBeforeDispatch == listSizeBeforeDispatch
@@ -137,7 +142,8 @@ internal class MessageListAdapter<ARGS : NavArgs>(
         if (bottom != oldBottom) {
             val lastPosition = messages.size - 1
             if (
-                recyclerView.scrollState == RecyclerView.SCROLL_STATE_IDLE &&
+                !viewModel.isMessageSelected()                              &&
+                recyclerView.scrollState == RecyclerView.SCROLL_STATE_IDLE  &&
                 layoutManager.findLastVisibleItemPosition() == lastPosition
             ) {
                 recyclerView.scrollToPosition(lastPosition)
@@ -176,68 +182,56 @@ internal class MessageListAdapter<ARGS : NavArgs>(
     private val recyclerViewWidth: Px by lazy(LazyThreadSafetyMode.NONE) {
         Px(recyclerView.measuredWidth.toFloat())
     }
+    private val headerHeight: Px by lazy(LazyThreadSafetyMode.NONE) {
+        Px(headerBinding.root.measuredHeight.toFloat())
+    }
+    private val screenHeight: Px by lazy(LazyThreadSafetyMode.NONE) {
+        Px(recyclerView.rootView.measuredHeight.toFloat())
+    }
 
     inner class MessageViewHolder(
         private val binding: LayoutMessageHolderBinding
     ): RecyclerView.ViewHolder(binding.root) {
 
         private val disposables: ArrayList<Disposable> = ArrayList(1)
+        private var currentViewState: MessageHolderViewState? = null
+
+        init {
+            binding.includeMessageHolderBubble.apply {
+                root.setOnLongClickListener {
+                    SelectedMessageViewState.SelectedMessage.instantiate(
+                        messageHolderViewState = currentViewState,
+                        holderYPosTop = Px(binding.root.y),
+                        holderHeight = Px(binding.root.measuredHeight.toFloat()),
+                        holderWidth = Px(binding.root.measuredWidth.toFloat()),
+                        bubbleXPosStart = Px(it.x),
+                        bubbleWidth = Px(it.measuredWidth.toFloat()),
+                        bubbleHeight = Px(it.measuredHeight.toFloat()),
+                        headerHeight = headerHeight,
+                        statusHeaderHeight = Px(binding.includeMessageStatusHeader.root.measuredHeight.toFloat()),
+                        recyclerViewWidth = recyclerViewWidth,
+                        screenHeight = screenHeight,
+                    ).let { vs ->
+                        viewModel.updateSelectedMessageViewState(vs)
+                    }
+                    true
+                }
+            }
+        }
 
         fun bind(position: Int) {
-            val viewState = messages.elementAtOrNull(position) ?: return
-            disposables.forEach {
-                it.dispose()
-            }
-            disposables.clear()
+            val viewState = messages.elementAtOrNull(position).also { currentViewState = it } ?: return
 
-            binding.apply {
+            binding.setView(
+                lifecycleOwner.lifecycleScope,
+                disposables,
+                viewModel.dispatchers,
+                imageLoader,
+                viewModel.imageLoaderDefaults,
+                recyclerViewWidth,
+                viewState,
+            )
 
-                onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-                    viewState.initialHolder.setInitialHolder(
-                        includeMessageHolderChatImageInitialHolder.textViewInitials,
-                        includeMessageHolderChatImageInitialHolder.imageViewChatPicture,
-                        includeMessageStatusHeader,
-                        imageLoader
-                    )?.also {
-                        disposables.add(it)
-                    }
-                }
-
-                setStatusHeader(viewState.statusHeader)
-                setDeletedMessageLayout(viewState.deletedMessage)
-                setBubbleBackground(viewState, recyclerViewWidth)
-                setGroupActionIndicatorLayout(viewState.groupActionIndicator)
-
-                if (viewState.background !is BubbleBackground.Gone) {
-                    setBubbleImageAttachment(
-                        viewState.bubbleGiphy,
-                        viewState.bubbleImageAttachment
-                    ) { imageView, url, _ ->
-                        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-                            imageLoader.load(imageView, url)
-                                .also {
-                                    disposables.add(it)
-
-                                }
-                        }
-                    }
-                    setUnsupportedMessageTypeLayout(viewState.unsupportedMessageType)
-                    setBubbleMessageLayout(viewState.bubbleMessage)
-                    setBubbleDirectPaymentLayout(viewState.bubbleDirectPayment)
-                    setBubblePaidMessageDetailsLayout(
-                        viewState.bubblePaidMessageDetails,
-                        viewState.background
-                    )
-                    setBubblePaidMessageSentStatusLayout(viewState.bubblePaidMessageSentStatus)
-                    setBubbleReactionBoosts(viewState.bubbleReactionBoosts) { imageView, url ->
-                        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-                            imageLoader.load(imageView, url.value, viewModel.imageLoaderDefaults)
-                                .also { disposables.add(it) }
-                        }
-                    }
-                    setBubbleReplyMessage(viewState.bubbleReplyMessage)
-                }
-            }
         }
 
     }

@@ -5,7 +5,10 @@ import android.content.Context
 import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
+import androidx.activity.OnBackPressedCallback
 import androidx.annotation.LayoutRes
+import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavArgs
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -16,9 +19,17 @@ import chat.sphinx.chat_common.R
 import chat.sphinx.chat_common.adapters.MessageListAdapter
 import chat.sphinx.chat_common.databinding.LayoutChatFooterBinding
 import chat.sphinx.chat_common.databinding.LayoutChatHeaderBinding
+import chat.sphinx.chat_common.databinding.LayoutMessageHolderBinding
+import chat.sphinx.chat_common.databinding.LayoutSelectedMessageBinding
 import chat.sphinx.chat_common.navigation.ChatNavigator
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
 import chat.sphinx.chat_common.ui.viewstate.header.ChatHeaderFooterViewState
+import chat.sphinx.chat_common.ui.viewstate.selected.SelectedMessageViewState
+import chat.sphinx.chat_common.ui.viewstate.messageholder.setView
+import chat.sphinx.chat_common.ui.viewstate.selected.MenuItemState
+import chat.sphinx.chat_common.ui.viewstate.selected.setMenuColor
+import chat.sphinx.chat_common.ui.viewstate.selected.setMenuItems
+import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_repository_message.SendMessage
 import chat.sphinx.insetter_activity.InsetterActivity
@@ -26,11 +37,15 @@ import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.insetter_activity.addStatusBarPadding
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
+import chat.sphinx.resources.takeScreenshot
+import chat.sphinx.resources.blur
 import chat.sphinx.resources.setBackgroundRandomColor
 import chat.sphinx.resources.setTextColorExt
+import chat.sphinx.resources.toPx
 import chat.sphinx.wrapper_chat.isTrue
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.lightning.unit
+import chat.sphinx.wrapper_view.Dp
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
@@ -52,6 +67,8 @@ abstract class ChatFragment<
 {
     protected abstract val footerBinding: LayoutChatFooterBinding
     protected abstract val headerBinding: LayoutChatHeaderBinding
+    protected abstract val selectedMessageBinding: LayoutSelectedMessageBinding
+    protected abstract val selectedMessageHolderBinding: LayoutMessageHolderBinding
     protected abstract val recyclerView: RecyclerView
 
     protected abstract val imageLoader: ImageLoader<ImageView>
@@ -60,6 +77,8 @@ abstract class ChatFragment<
 
     private val sendMessageBuilder = SendMessage.Builder()
 
+    private val disposables: ArrayList<Disposable> = ArrayList(1)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         viewModel.init()
@@ -67,10 +86,39 @@ abstract class ChatFragment<
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        SelectedMessageStateBackPressHandler(viewLifecycleOwner, requireActivity())
+
         val insetterActivity = (requireActivity() as InsetterActivity)
         setupFooter(insetterActivity)
         setupHeader(insetterActivity)
+        setupSelectedMessage()
         setupRecyclerView()
+    }
+
+    private inner class SelectedMessageStateBackPressHandler(
+        owner: LifecycleOwner,
+        activity: FragmentActivity,
+    ): OnBackPressedCallback(true) {
+
+        init {
+            activity.apply {
+                onBackPressedDispatcher.addCallback(
+                    owner,
+                    this@SelectedMessageStateBackPressHandler
+                )
+            }
+        }
+
+        override fun handleOnBackPressed() {
+            if (viewModel.getSelectedMessageViewStateFlow().value is SelectedMessageViewState.SelectedMessage) {
+                viewModel.updateSelectedMessageViewState(SelectedMessageViewState.None)
+            } else {
+                lifecycleScope.launch(viewModel.mainImmediate) {
+                    chatNavigator.popBackStack()
+                }
+            }
+        }
     }
 
     private fun setupFooter(insetterActivity: InsetterActivity) {
@@ -110,10 +158,73 @@ abstract class ChatFragment<
         }
     }
 
+    private fun setupSelectedMessage() {
+        selectedMessageBinding.apply {
+            imageViewSelectedMessage.setOnClickListener {
+                viewModel.updateSelectedMessageViewState(SelectedMessageViewState.None)
+            }
+
+            includeLayoutSelectedMessageMenu.apply {
+                includeLayoutSelectedMessageMenuItem1.root.setOnClickListener {
+                    onSelectedMessageMenuItemClick(0)
+                }
+                includeLayoutSelectedMessageMenuItem2.root.setOnClickListener {
+                    onSelectedMessageMenuItemClick(1)
+                }
+                includeLayoutSelectedMessageMenuItem3.root.setOnClickListener {
+                    onSelectedMessageMenuItemClick(2)
+                }
+                includeLayoutSelectedMessageMenuItem4.root.setOnClickListener {
+                    onSelectedMessageMenuItemClick(3)
+                }
+            }
+        }
+        selectedMessageHolderBinding.includeMessageHolderBubble.root.setOnClickListener {
+            viewModel
+        }
+    }
+
+    private fun onSelectedMessageMenuItemClick(index: Int) {
+        viewModel.getSelectedMessageViewStateFlow().value.let { state ->
+            if (state is SelectedMessageViewState.SelectedMessage) {
+                state.messageHolderViewState.let { holderState ->
+                    holderState.selectionMenuItems?.elementAtOrNull(index)?.let { item ->
+                        when (item) {
+                            is MenuItemState.Boost -> {
+                                viewModel.boostMessage(holderState.message.uuid)
+                            }
+                            is MenuItemState.CopyCallLink -> {
+                                // TODO: Implement
+                            }
+                            is MenuItemState.CopyLink -> {
+                                // TODO: Implement
+                            }
+                            is MenuItemState.CopyText -> {
+                                // TODO: Implement
+                            }
+                            is MenuItemState.Delete -> {
+                                // TODO: Implement
+                            }
+                            is MenuItemState.Reply -> {
+                                // TODO: Implement
+                            }
+                            is MenuItemState.SaveFile -> {
+                                // TODO: Implement
+                            }
+                        }
+                    }
+                }
+
+                viewModel.updateSelectedMessageViewState(SelectedMessageViewState.None)
+            }
+        }
+    }
+
     private fun setupRecyclerView() {
         val linearLayoutManager = LinearLayoutManager(binding.root.context)
         val messageListAdapter = MessageListAdapter(
             recyclerView,
+            headerBinding,
             linearLayoutManager,
             viewLifecycleOwner,
             onStopSupervisor,
@@ -193,6 +304,74 @@ abstract class ChatFragment<
                             }
 
                             setTextColorExt(colorRes)
+                        }
+                    }
+                }
+            }
+        }
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.getSelectedMessageViewStateFlow().collect { viewState ->
+                @Exhaustive
+                when (viewState) {
+                    is SelectedMessageViewState.None -> {
+                        selectedMessageBinding.root.gone
+                    }
+                    is SelectedMessageViewState.SelectedMessage -> {
+                        if (viewState.messageHolderViewState.selectionMenuItems.isNullOrEmpty()) {
+                            viewModel.updateSelectedMessageViewState(SelectedMessageViewState.None)
+                            return@collect
+                        }
+
+                        selectedMessageHolderBinding.apply {
+                            root.y = viewState.holderYPos.value + viewState.statusHeaderHeight.value
+                            setView(
+                                lifecycleScope,
+                                disposables,
+                                viewModel.dispatchers,
+                                imageLoader,
+                                viewModel.imageLoaderDefaults,
+                                viewState.recyclerViewWidth,
+                                viewState.messageHolderViewState
+                            )
+                            includeMessageStatusHeader.root.gone
+                            includeMessageHolderChatImageInitialHolder.root.gone
+                        }
+
+                        selectedMessageBinding.apply message@ {
+
+                            val screenshot = binding.root.takeScreenshot()
+                            imageViewSelectedMessageBlur.setImageBitmap(screenshot.blur(root.context, 25.0f))
+
+                            this@message.includeLayoutSelectedMessageMenu.apply {
+                                spaceSelectedMessageMenuArrowTop.goneIfFalse(!viewState.showMenuTop)
+                                imageViewSelectedMessageMenuArrowTop.goneIfFalse(!viewState.showMenuTop)
+
+                                spaceSelectedMessageMenuArrowBottom.goneIfFalse(viewState.showMenuTop)
+                                imageViewSelectedMessageMenuArrowBottom.goneIfFalse(viewState.showMenuTop)
+                            }
+
+                            this@message.includeLayoutSelectedMessageMenu.root.apply menu@ {
+
+                                this@menu.y = if (viewState.showMenuTop) {
+                                    viewState.holderYPos.value -
+                                    (resources.getDimension(R.dimen.selected_message_menu_item_height) * (viewState.messageHolderViewState.selectionMenuItems?.size ?: 0)) +
+                                    viewState.statusHeaderHeight.value -
+                                    Dp(10F).toPx(context).value
+                                } else {
+                                    viewState.holderYPos.value          +
+                                    viewState.bubbleHeight.value        +
+                                    viewState.statusHeaderHeight.value  +
+                                    Dp(10F).toPx(context).value
+                                }
+                                val menuWidth = resources.getDimension(R.dimen.selected_message_menu_width)
+
+                                // TODO: Handle small bubbles better
+                                this@menu.x = viewState.bubbleCenterXPos.value - (menuWidth / 2F)
+                            }
+                            this@message.setMenuColor(viewState.messageHolderViewState)
+                            this@message.setMenuItems(viewState.messageHolderViewState.selectionMenuItems)
+                            this@message.root.visible
                         }
                     }
                 }

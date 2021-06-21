@@ -13,6 +13,7 @@ import chat.sphinx.concept_repository_message.SendMessage
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
+import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.resources.getRandomColor
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.ChatName
@@ -38,6 +39,7 @@ class ChatGroupViewModel @Inject constructor(
     messageRepository: MessageRepository,
     networkQueryLightning: NetworkQueryLightning,
     savedStateHandle: SavedStateHandle,
+    LOG: SphinxLogger,
 ): ChatViewModel<ChatGroupFragmentArgs>(
     app,
     dispatchers,
@@ -46,6 +48,7 @@ class ChatGroupViewModel @Inject constructor(
     messageRepository,
     networkQueryLightning,
     savedStateHandle,
+    LOG,
 ) {
     override val args: ChatGroupFragmentArgs by savedStateHandle.navArgs()
 

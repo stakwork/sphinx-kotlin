@@ -9,6 +9,7 @@ import chat.sphinx.wrapper_common.lightning.LightningPaymentHash
 import chat.sphinx.wrapper_common.lightning.LightningPaymentRequest
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.MessageId
+import chat.sphinx.wrapper_common.message.MessageUUID
 import chat.sphinx.wrapper_message.media.MessageMedia
 import chat.sphinx.wrapper_message.media.getHostFromMediaToken
 import chat.sphinx.wrapper_message.media.getMUIDFromMediaToken

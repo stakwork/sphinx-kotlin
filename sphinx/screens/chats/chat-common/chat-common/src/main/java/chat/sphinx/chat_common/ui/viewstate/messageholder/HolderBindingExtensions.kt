@@ -12,6 +12,9 @@ import app.cash.exhaustive.Exhaustive
 import chat.sphinx.chat_common.R
 import chat.sphinx.resources.R as common_R
 import chat.sphinx.chat_common.databinding.LayoutMessageHolderBinding
+import chat.sphinx.concept_image_loader.Disposable
+import chat.sphinx.concept_image_loader.ImageLoader
+import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.resources.getString
 import chat.sphinx.resources.setBackgroundRandomColor
 import chat.sphinx.resources.setTextColorExt
@@ -22,6 +25,71 @@ import chat.sphinx.wrapper_view.Px
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.visible
+import io.matthewnelson.concept_coroutines.CoroutineDispatchers
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
+
+@MainThread
+@Suppress("NOTHING_TO_INLINE")
+internal inline fun LayoutMessageHolderBinding.setView(
+    lifecycleScope: CoroutineScope,
+    disposables: ArrayList<Disposable>,
+    dispatchers: CoroutineDispatchers,
+    imageLoader: ImageLoader<ImageView>,
+    imageLoaderDefaults: ImageLoaderOptions,
+    recyclerViewWidth: Px,
+    viewState: MessageHolderViewState,
+) {
+    disposables.forEach {
+        it.dispose()
+    }
+    disposables.clear()
+
+    apply {
+        lifecycleScope.launch(dispatchers.mainImmediate) {
+            viewState.initialHolder.setInitialHolder(
+                includeMessageHolderChatImageInitialHolder.textViewInitials,
+                includeMessageHolderChatImageInitialHolder.imageViewChatPicture,
+                includeMessageStatusHeader,
+                imageLoader
+            )?.also {
+                disposables.add(it)
+            }
+        }
+
+        setStatusHeader(viewState.statusHeader)
+        setDeletedMessageLayout(viewState.deletedMessage)
+        setBubbleBackground(viewState, recyclerViewWidth)
+        setGroupActionIndicatorLayout(viewState.groupActionIndicator)
+
+        if (viewState.background !is BubbleBackground.Gone) {
+            setBubbleImageAttachment(
+                viewState.bubbleGiphy,
+                viewState.bubbleImageAttachment,
+            ) { imageView, url, _ ->
+                lifecycleScope.launch(dispatchers.mainImmediate) {
+                    imageLoader.load(imageView, url)
+                        .also { disposables.add(it) }
+                }
+            }
+            setUnsupportedMessageTypeLayout(viewState.unsupportedMessageType)
+            setBubbleMessageLayout(viewState.bubbleMessage)
+            setBubbleDirectPaymentLayout(viewState.bubbleDirectPayment)
+            setBubblePaidMessageDetailsLayout(
+                viewState.bubblePaidMessageDetails,
+                viewState.background
+            )
+            setBubblePaidMessageSentStatusLayout(viewState.bubblePaidMessageSentStatus)
+            setBubbleReactionBoosts(viewState.bubbleReactionBoosts) { imageView, url ->
+                lifecycleScope.launch(dispatchers.mainImmediate) {
+                    imageLoader.load(imageView, url.value, imageLoaderDefaults)
+                        .also { disposables.add(it) }
+                }
+            }
+            setBubbleReplyMessage(viewState.bubbleReplyMessage)
+        }
+    }
+}
 
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
