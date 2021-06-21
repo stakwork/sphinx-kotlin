@@ -6,19 +6,19 @@ inline fun String.toMediaType(): MediaType =
         this == MediaType.SPHINX_TEXT -> {
             MediaType.SphinxText
         }
-        this.contains(MediaType.AUDIO, ignoreCase = true) -> {
+        contains(MediaType.AUDIO, ignoreCase = true) -> {
             MediaType.Audio(this)
         }
-        this.contains(MediaType.GIF, ignoreCase = true) -> {
+        contains(MediaType.GIF, ignoreCase = true) -> {
             MediaType.Gif(this)
         }
-        this.contains(MediaType.IMAGE, ignoreCase = true) -> {
+        contains(MediaType.IMAGE, ignoreCase = true) -> {
             MediaType.Image(this)
         }
-        this.contains(MediaType.PDF, ignoreCase = true) -> {
+        contains(MediaType.PDF, ignoreCase = true) -> {
             MediaType.Pdf(this)
         }
-        this.contains(MediaType.VIDEO, ignoreCase = true) -> {
+        contains(MediaType.VIDEO, ignoreCase = true) -> {
             MediaType.Video(this)
         }
         else -> {
@@ -44,15 +44,15 @@ sealed class MediaType {
             get() = SPHINX_TEXT
     }
 
-    class Audio(override val value: String): MediaType()
+    data class Audio(override val value: String): MediaType()
 
-    class Gif(override val value: String): MediaType()
+    data class Gif(override val value: String): MediaType()
 
-    class Image(override val value: String): MediaType()
+    data class Image(override val value: String): MediaType()
 
-    class Pdf(override val value: String): MediaType()
+    data class Pdf(override val value: String): MediaType()
 
-    class Video(override val value: String): MediaType()
+    data class Video(override val value: String): MediaType()
 
-    class Unknown(override val value: String): MediaType()
+    data class Unknown(override val value: String): MediaType()
 }
