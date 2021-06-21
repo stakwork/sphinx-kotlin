@@ -85,6 +85,7 @@ import kotlin.collections.ArrayList
 import kotlin.math.absoluteValue
 
 abstract class SphinxRepository(
+    override val accountOwner: StateFlow<Contact?>,
     private val applicationScope: CoroutineScope,
     private val authenticationCoreManager: AuthenticationCoreManager,
     private val authenticationStorage: AuthenticationStorage,
@@ -430,19 +431,6 @@ abstract class SphinxRepository(
     private val inviteDboPresenterMapper: InviteDboPresenterMapper by lazy {
         InviteDboPresenterMapper(dispatchers)
     }
-
-    override val accountOwner: StateFlow<Contact?> = flow {
-        emitAll(
-            coreDB.getSphinxDatabaseQueries().contactGetOwner()
-                .asFlow()
-                .mapToOneOrNull(io)
-                .map { it?.let { contactDboPresenterMapper.mapFrom(it) } }
-        )
-    }.stateIn(
-        applicationScope,
-        SharingStarted.WhileSubscribed(5_000),
-        null
-    )
 
     override val getAllContacts: Flow<List<Contact>> by lazy {
         flow {
