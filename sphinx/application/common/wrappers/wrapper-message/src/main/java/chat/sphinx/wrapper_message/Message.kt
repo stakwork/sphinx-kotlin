@@ -39,7 +39,7 @@ inline val Message.isPaidMessage: Boolean
 
 //Attachment types
 inline val Message.isImage: Boolean
-    get() = messageMedia?.mediaType?.value?.contains("image") == true
+    get() = messageMedia?.mediaType?.isImage == true
 
 //Media attributes
 inline val Message.mediaUrl: String? 

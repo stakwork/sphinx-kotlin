@@ -1,5 +1,26 @@
 package chat.sphinx.wrapper_message.media
 
+inline val MediaType.isSphinxText: Boolean
+    get() = this is MediaType.SphinxText
+
+inline val MediaType.isAudio: Boolean
+    get() = this is MediaType.Audio
+
+inline val MediaType.isGif: Boolean
+    get() = this is MediaType.Gif
+
+inline val MediaType.isImage: Boolean
+    get() = this is MediaType.Image
+
+inline val MediaType.isPdf: Boolean
+    get() = this is MediaType.Pdf
+
+inline val MediaType.isVideo: Boolean
+    get() = this is MediaType.Video
+
+inline val MediaType.isUnknown: Boolean
+    get() = this is MediaType.Unknown
+
 @Suppress("NOTHING_TO_INLINE")
 inline fun String.toMediaType(): MediaType =
     when {
