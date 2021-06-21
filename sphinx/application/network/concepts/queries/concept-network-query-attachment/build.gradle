@@ -7,6 +7,8 @@ plugins {
 dependencies {
     api project(path: ':sphinx:application:common:kotlin-response')
     api project(path: ':sphinx:application:common:wrappers:wrapper-attachment')
+    api project(path: ':sphinx:application:common:wrappers:wrapper-message-media')
+    api project(path: ':sphinx:application:common:wrappers:wrapper-relay')
     implementation deps.kotlin.coroutinesCore
 
     // needed to override moshi's use of 1.4.31

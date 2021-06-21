@@ -16,9 +16,17 @@ inline fun MediaHost.toMediaUrl(mediaToken: MediaToken): MediaUrl =
 
 @JvmInline
 value class MediaHost(val value: String) {
+
+    companion object {
+        val DEFAULT = MediaHost("memes.sphinx.chat")
+    }
+
     init {
         require(value.isNotEmpty()) {
             "MediaHost cannot be empty"
+        }
+        require(!value.startsWith("http")) {
+            "MediaHost cannot contain a scheme (http/https)"
         }
     }
 }
