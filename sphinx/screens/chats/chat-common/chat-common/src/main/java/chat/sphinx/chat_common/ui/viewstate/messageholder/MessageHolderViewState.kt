@@ -8,6 +8,7 @@ import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_message.*
+import chat.sphinx.wrapper_message_media.isImage
 
 internal inline val MessageHolderViewState.isReceived: Boolean
     get() = this is MessageHolderViewState.Received
@@ -40,7 +41,7 @@ internal sealed class MessageHolderViewState(
     }
 
     val unsupportedMessageType: LayoutState.Bubble.ContainerMiddle.UnsupportedMessageType? by lazy(LazyThreadSafetyMode.NONE) {
-        if (unsupportedMessageTypes.contains(message.type) && !message.isImage) {
+        if (unsupportedMessageTypes.contains(message.type) && message.messageMedia?.mediaType?.isImage != true) {
             LayoutState.Bubble.ContainerMiddle.UnsupportedMessageType(
                 messageType = message.type,
                 gravityStart = this is Received,
@@ -136,14 +137,16 @@ internal sealed class MessageHolderViewState(
             } else {
                 null
             }
-        } ?: message.mediaUrl?.let { mediaUrl ->
-            if (message.isImage && !message.isPaidMessage) {
-                LayoutState.Bubble.ContainerTop.ImageAttachment(
-                    mediaUrl,
-                    message.mediaKey
-                )
-            } else {
-                null
+        } ?: message.messageMedia?.let { media ->
+            media.url?.let { mediaUrl ->
+                if (media.mediaType.isImage && !message.isPaidMessage) {
+                    LayoutState.Bubble.ContainerTop.ImageAttachment(
+                        mediaUrl.value,
+                        media.mediaKey
+                    )
+                } else {
+                    null
+                }
             }
         }
     }

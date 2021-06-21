@@ -1,5 +1,9 @@
 package chat.sphinx.wrapper_message_media
 
+import chat.sphinx.wrapper_message_media.token.MediaHost
+import chat.sphinx.wrapper_message_media.token.MediaMUID
+import chat.sphinx.wrapper_message_media.token.toMediaHostOrNull
+import chat.sphinx.wrapper_message_media.token.toMediaMUIDOrNull
 import okio.base64.decodeBase64ToArray
 
 @Suppress("NOTHING_TO_INLINE")
@@ -12,12 +16,12 @@ inline fun String.toMediaToken(): MediaToken? =
 
 //Media
 @Suppress("NOTHING_TO_INLINE")
-inline fun MediaToken.getHostFromMediaToken(): String? =
-    getMediaTokenElementWithIndex(0)
+inline fun MediaToken.getHostFromMediaToken(): MediaHost? =
+    getMediaTokenElementWithIndex(0)?.toMediaHostOrNull()
 
 @Suppress("NOTHING_TO_INLINE")
-inline fun MediaToken.getMUIDFromMediaToken(): String? =
-    getMediaTokenElementWithIndex(1)
+inline fun MediaToken.getMUIDFromMediaToken(): MediaMUID? =
+    getMediaTokenElementWithIndex(1)?.toMediaMUIDOrNull()
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun MediaToken.getMediaAttributeWithName(name: String): String? {
