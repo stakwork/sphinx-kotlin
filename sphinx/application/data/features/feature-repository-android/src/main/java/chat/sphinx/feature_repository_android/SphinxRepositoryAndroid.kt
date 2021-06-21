@@ -25,8 +25,10 @@ import com.squareup.sqldelight.android.paging3.QueryPagingSource
 import io.matthewnelson.concept_authentication.data.AuthenticationStorage
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.feature_authentication_core.AuthenticationCoreManager
+import kotlinx.coroutines.CoroutineScope
 
 class SphinxRepositoryAndroid(
+    applicationScope: CoroutineScope,
     authenticationCoreManager: AuthenticationCoreManager,
     authenticationStorage: AuthenticationStorage,
     coreDB: CoreDB,
@@ -41,6 +43,7 @@ class SphinxRepositoryAndroid(
     socketIOManager: SocketIOManager,
     LOG: SphinxLogger,
 ): SphinxRepository(
+    applicationScope,
     authenticationCoreManager,
     authenticationStorage,
     coreDB,

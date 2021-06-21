@@ -28,6 +28,7 @@ import io.matthewnelson.build_config.BuildConfigDebug
 import io.matthewnelson.concept_authentication.data.AuthenticationStorage
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.feature_authentication_core.AuthenticationCoreManager
+import kotlinx.coroutines.CoroutineScope
 import javax.inject.Singleton
 
 @Module
@@ -56,6 +57,7 @@ object RepositoryModule {
     @Provides
     @Singleton
     fun provideSphinxRepositoryAndroid(
+        applicationScope: CoroutineScope,
         authenticationCoreManager: AuthenticationCoreManager,
         authenticationStorage: AuthenticationStorage,
         coreDBImpl: CoreDBImpl,
@@ -71,6 +73,7 @@ object RepositoryModule {
         sphinxLogger: SphinxLogger,
     ): SphinxRepositoryAndroid =
         SphinxRepositoryAndroid(
+            applicationScope,
             authenticationCoreManager,
             authenticationStorage,
             coreDBImpl,
