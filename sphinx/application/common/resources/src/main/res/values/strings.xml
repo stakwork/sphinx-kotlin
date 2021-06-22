@@ -29,6 +29,7 @@
     <string name="material_icon_name_replay">replay</string>
     <string name="material_icon_name_key">vpn_key</string>
     <string name="material_icon_name_dismiss_modal_down">keyboard_arrow_down</string>
+    <string name="material_icon_name_gif">gif</string>
 
     <!--  Message Action Material Icons  -->
     <string name="material_icon_name_message_action_delete">delete</string>

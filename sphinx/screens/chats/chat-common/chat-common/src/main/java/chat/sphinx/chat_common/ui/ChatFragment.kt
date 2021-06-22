@@ -37,11 +37,7 @@ import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.insetter_activity.addStatusBarPadding
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
-import chat.sphinx.resources.takeScreenshot
-import chat.sphinx.resources.blur
-import chat.sphinx.resources.setBackgroundRandomColor
-import chat.sphinx.resources.setTextColorExt
-import chat.sphinx.resources.toPx
+import chat.sphinx.resources.*
 import chat.sphinx.wrapper_chat.isTrue
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.lightning.unit
@@ -50,6 +46,7 @@ import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.visible
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
@@ -133,6 +130,20 @@ abstract class ChatFragment<
                     // if it did not return null that means it was valid
                     sendMessageBuilder.clear()
                     editTextChatFooter.setText("")
+                }
+            }
+
+            textViewChatFooterAttachment.setOnClickListener {
+                lifecycleScope.launch {
+                    editTextChatFooter.let { editText ->
+                        binding.root.context.inputMethodManager?.let { imm ->
+                            if (imm.isActive(editText)) {
+                                imm.hideSoftInputFromWindow(editText.windowToken, 0)
+                                delay(250L)
+                            }
+                        }
+                        chatNavigator.toSendAttachmentDetail()
+                    }
                 }
             }
         }

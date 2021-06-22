@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavArgs
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.chat_common.R
+import chat.sphinx.chat_common.databinding.LayoutChatFooterBinding
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
 import chat.sphinx.chat_common.ui.viewstate.header.ChatHeaderFooterViewState
 import chat.sphinx.chat_common.ui.viewstate.messageholder.BubbleBackground
@@ -300,7 +301,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     }
 
     private var toggleChatMutedJob: Job? = null
-    protected var notifyJob: Job? = null
+    private var notifyJob: Job? = null
     fun toggleChatMuted() {
         if (toggleChatMutedJob?.isActive == true) {
             if (notifyJob?.isActive == true) {

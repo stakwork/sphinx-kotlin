@@ -19,6 +19,7 @@
         android:textColor="@android:color/white"
         android:gravity="center"
         android:backgroundTint="@color/blueTextAccent"
+        android:clickable="true"
         app:layout_constraintBottom_toBottomOf="@+id/scroll_view_chat_edit_text"
         app:layout_constraintEnd_toStartOf="@+id/scroll_view_chat_edit_text"
         app:layout_constraintStart_toStartOf="parent"

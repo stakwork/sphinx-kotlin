@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="attachments_menu_cancel">CANCEL</string>
+
+    <string name="camera_attachment_option">Camera</string>
+    <string name="library_attachment_option">Library</string>
+    <string name="gif_attachment_option">Gif</string>
+    <string name="file_attachment_option">File</string>
+    <string name="paid_message_attachment_option">Paid Message</string>
+    <string name="request_attachment_option">Request</string>
+    <string name="send_attachment_option">Send</string>
+</resources>

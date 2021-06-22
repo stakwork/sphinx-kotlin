@@ -103,6 +103,8 @@ include ':sphinx:screens-detail:scanner:scanner-view-model-coordinator'
 include ':sphinx:screens-detail:support-ticket:support-ticket'
 include ':sphinx:screens-detail:transactions:transactions'
 include ':sphinx:screens-detail:qr-code:qr-code'
+include ':sphinx:screens-detail:podcast-player:podcast-player'
+include ':sphinx:screens-detail:send-attachment:send-attachment'
 
 // Service
 include ':sphinx:service:concepts:concept-service-media-player'
