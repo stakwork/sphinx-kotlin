@@ -231,6 +231,7 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                 viewModel.dispatchers,
                 imageLoader,
                 viewModel.imageLoaderDefaults,
+                viewModel.memeServerTokenHandler,
                 recyclerViewWidth,
                 viewState,
             )

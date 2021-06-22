@@ -6,6 +6,7 @@ import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.lightning.unit
 import chat.sphinx.wrapper_message.MessageType
 import chat.sphinx.wrapper_message_media.MediaKey
+import chat.sphinx.wrapper_message_media.MessageMedia
 
 internal sealed class LayoutState {
 
@@ -62,7 +63,7 @@ internal sealed class LayoutState {
 
             data class ImageAttachment(
                 val url: String,
-                val mediaKey: MediaKey?,
+                val media: MessageMedia?,
             ): ContainerTop()
 
             // FileAttachment

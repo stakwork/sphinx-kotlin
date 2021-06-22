@@ -142,7 +142,7 @@ internal sealed class MessageHolderViewState(
                 if (media.mediaType.isImage && !message.isPaidMessage) {
                     LayoutState.Bubble.ContainerTop.ImageAttachment(
                         mediaUrl.value,
-                        media.mediaKey
+                        media
                     )
                 } else {
                     null

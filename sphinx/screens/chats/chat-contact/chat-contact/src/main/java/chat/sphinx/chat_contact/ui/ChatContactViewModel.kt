@@ -5,6 +5,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.chat_common.ui.ChatViewModel
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
+import chat.sphinx.concept_meme_server.MemeServerTokenHandler
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_lightning.model.route.RouteSuccessProbabilityDto
 import chat.sphinx.concept_network_query_lightning.model.route.isRouteAvailable
@@ -47,6 +48,7 @@ internal inline val ChatContactFragmentArgs.contactId: ContactId
 internal class ChatContactViewModel @Inject constructor(
     app: Application,
     dispatchers: CoroutineDispatchers,
+    memeServerTokenHandler: MemeServerTokenHandler,
     chatRepository: ChatRepository,
     contactRepository: ContactRepository,
     messageRepository: MessageRepository,
@@ -56,6 +58,7 @@ internal class ChatContactViewModel @Inject constructor(
 ): ChatViewModel<ChatContactFragmentArgs>(
     app,
     dispatchers,
+    memeServerTokenHandler,
     chatRepository,
     contactRepository,
     messageRepository,

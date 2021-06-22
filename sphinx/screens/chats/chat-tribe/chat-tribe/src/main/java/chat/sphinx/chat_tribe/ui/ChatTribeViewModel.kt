@@ -7,6 +7,7 @@ import chat.sphinx.chat_common.ui.ChatSideEffect
 import chat.sphinx.chat_common.ui.ChatViewModel
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
 import chat.sphinx.chat_tribe.navigation.TribeChatNavigator
+import chat.sphinx.concept_meme_server.MemeServerTokenHandler
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_lightning.model.route.isRouteAvailable
 import chat.sphinx.concept_repository_chat.ChatRepository
@@ -48,6 +49,7 @@ internal inline val ChatTribeFragmentArgs.chatId: ChatId
 internal class ChatTribeViewModel @Inject constructor(
     app: Application,
     dispatchers: CoroutineDispatchers,
+    memeServerTokenHandler: MemeServerTokenHandler,
     chatRepository: ChatRepository,
     contactRepository: ContactRepository,
     messageRepository: MessageRepository,
@@ -58,6 +60,7 @@ internal class ChatTribeViewModel @Inject constructor(
 ): ChatViewModel<ChatTribeFragmentArgs>(
     app,
     dispatchers,
+    memeServerTokenHandler,
     chatRepository,
     contactRepository,
     messageRepository,

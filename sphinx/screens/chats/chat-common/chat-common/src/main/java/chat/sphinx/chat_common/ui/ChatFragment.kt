@@ -334,6 +334,7 @@ abstract class ChatFragment<
                                 viewModel.dispatchers,
                                 imageLoader,
                                 viewModel.imageLoaderDefaults,
+                                viewModel.memeServerTokenHandler,
                                 viewState.recyclerViewWidth,
                                 viewState.messageHolderViewState
                             )
