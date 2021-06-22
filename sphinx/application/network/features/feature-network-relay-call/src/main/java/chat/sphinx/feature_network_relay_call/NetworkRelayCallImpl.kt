@@ -277,6 +277,7 @@ class NetworkRelayCallImpl(
             .execute()
 
         if (!networkResponse.isSuccessful) {
+            networkResponse.body?.close()
             throw IOException(networkResponse.toString())
         }
 
