@@ -29,6 +29,7 @@ import chat.sphinx.feature_network_tor.TorManagerAndroid
 import chat.sphinx.feature_relay.RelayDataHandlerImpl
 import chat.sphinx.feature_socket_io.SocketIOManagerImpl
 import chat.sphinx.logger.SphinxLogger
+import chat.sphinx.wrapper_relay.AuthorizationToken
 import coil.util.CoilUtils
 import com.squareup.moshi.Moshi
 import dagger.Module
@@ -109,6 +110,11 @@ object NetworkModule {
             buildConfigDebug,
             CoilUtils.createDefaultCache(appContext),
             dispatchers,
+            NetworkClientImpl.RedactedLoggingHeaders(
+                listOf(
+                    AuthorizationToken.AUTHORIZATION_HEADER,
+                )
+            ),
             torManager,
             LOG,
         )
