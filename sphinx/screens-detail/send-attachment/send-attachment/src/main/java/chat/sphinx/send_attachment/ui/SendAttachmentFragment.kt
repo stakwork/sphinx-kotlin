@@ -9,6 +9,7 @@ import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.send_attachment.R
 import chat.sphinx.send_attachment.databinding.FragmentSendAttachmentBinding
+import chat.sphinx.send_attachment_view_model_coordinator.response.SendAttachmentResponse
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.base.BaseFragment
 import kotlinx.coroutines.launch
@@ -29,7 +30,7 @@ internal class SendAttachmentFragment: BaseFragment<
         setupFooter()
 
         binding.textViewCancelButton.setOnClickListener {
-            lifecycleScope.launch { viewModel.navigator.closeDetailScreen() }
+            viewModel.processResponse(SendAttachmentResponse(0))
         }
     }
 

@@ -142,7 +142,7 @@ abstract class ChatFragment<
                                 delay(250L)
                             }
                         }
-                        chatNavigator.toSendAttachmentDetail()
+                        viewModel.toSendAttachment()
                     }
                 }
             }

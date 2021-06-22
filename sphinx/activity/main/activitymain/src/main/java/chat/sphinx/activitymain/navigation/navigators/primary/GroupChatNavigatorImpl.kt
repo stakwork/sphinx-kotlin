@@ -7,11 +7,7 @@ import chat.sphinx.send_attachment.navigation.ToSendAttachmentDetail
 import javax.inject.Inject
 
 internal class GroupChatNavigatorImpl @Inject constructor(
-    navigationDriver: PrimaryNavigationDriver,
-    private val detailDriver: DetailNavigationDriver,
+    navigationDriver: PrimaryNavigationDriver
 ): GroupChatNavigator(navigationDriver)
 {
-    override suspend fun toSendAttachmentDetail() {
-        detailDriver.submitNavigationRequest(ToSendAttachmentDetail())
-    }
 }

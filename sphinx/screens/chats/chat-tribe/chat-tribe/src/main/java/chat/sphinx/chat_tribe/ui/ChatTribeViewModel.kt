@@ -16,6 +16,7 @@ import chat.sphinx.concept_repository_message.SendMessage
 import chat.sphinx.concept_service_media.MediaPlayerServiceController
 import chat.sphinx.concept_service_media.MediaPlayerServiceState
 import chat.sphinx.concept_service_media.UserAction
+import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
@@ -24,6 +25,8 @@ import chat.sphinx.podcast_player.objects.Podcast
 import chat.sphinx.podcast_player.objects.PodcastEpisode
 import chat.sphinx.podcast_player.objects.toPodcast
 import chat.sphinx.resources.getRandomColor
+import chat.sphinx.send_attachment_view_model_coordinator.request.SendAttachmentRequest
+import chat.sphinx.send_attachment_view_model_coordinator.response.SendAttachmentResponse
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.ChatName
 import chat.sphinx.wrapper_common.dashboard.ChatId
@@ -53,6 +56,7 @@ internal class ChatTribeViewModel @Inject constructor(
     messageRepository: MessageRepository,
     networkQueryLightning: NetworkQueryLightning,
     savedStateHandle: SavedStateHandle,
+    sendAttachmentViewModelCoordinator: ViewModelCoordinator<SendAttachmentRequest, SendAttachmentResponse>,
     LOG: SphinxLogger,
     private val mediaPlayerServiceController: MediaPlayerServiceController
 ): ChatViewModel<ChatTribeFragmentArgs>(
@@ -63,6 +67,7 @@ internal class ChatTribeViewModel @Inject constructor(
     messageRepository,
     networkQueryLightning,
     savedStateHandle,
+    sendAttachmentViewModelCoordinator,
     LOG,
 ), MediaPlayerServiceController.MediaServiceListener
 {

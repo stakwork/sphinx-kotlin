@@ -14,9 +14,6 @@ internal class TribeChatNavigatorImpl @Inject constructor(
     private val detailDriver: DetailNavigationDriver,
     ): TribeChatNavigator(navigationDriver)
 {
-    override suspend fun toSendAttachmentDetail() {
-        detailDriver.submitNavigationRequest(ToSendAttachmentDetail())
-    }
 
     override suspend fun toPodcastPlayerScreen(chatId: ChatId, podcast: Podcast) {
         detailDriver.submitNavigationRequest(ToPodcastPlayerScreen(chatId, podcast))

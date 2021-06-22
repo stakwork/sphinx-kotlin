@@ -6,6 +6,7 @@ buildscript {
         versions.kotlin = '1.5.10'
         versions.kotlin = '1.5.10'
         versions.kotlin = '1.5.10'
+        versions.kotlin = '1.5.10'
     }
 
     repositories {

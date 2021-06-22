@@ -9,8 +9,6 @@ abstract class ChatNavigator(
     navigationDriver: BaseNavigationDriver<NavController>
 ): Navigator<NavController>(navigationDriver)
 {
-    abstract suspend fun toSendAttachmentDetail()
-
     suspend fun popBackStack() {
         navigationDriver.submitNavigationRequest(
             PopBackStack()

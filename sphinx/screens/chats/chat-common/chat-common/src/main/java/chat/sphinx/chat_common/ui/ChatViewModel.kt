@@ -21,17 +21,23 @@ import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.concept_repository_message.SendMessage
+import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.kotlin_response.message
 import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.resources.getRandomColor
+import chat.sphinx.send_attachment_view_model_coordinator.request.SendAttachmentRequest
+import chat.sphinx.send_attachment_view_model_coordinator.response.SendAttachmentResponse
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.ChatName
 import chat.sphinx.wrapper_chat.isConversation
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.MessageUUID
+import chat.sphinx.wrapper_common.tribe.TribeJoinLink
+import chat.sphinx.wrapper_common.tribe.isValidTribeJoinLink
+import chat.sphinx.wrapper_common.tribe.toTribeJoinLink
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_message.*
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
@@ -57,6 +63,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     protected val messageRepository: MessageRepository,
     protected val networkQueryLightning: NetworkQueryLightning,
     protected val savedStateHandle: SavedStateHandle,
+    protected val sendAttachmentCoordinator: ViewModelCoordinator<SendAttachmentRequest, SendAttachmentResponse>,
     protected val LOG: SphinxLogger,
 ): SideEffectViewModel<
         Context,
@@ -387,6 +394,19 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                     )
                 }
                 is Response.Success -> {}
+            }
+        }
+    }
+
+    fun toSendAttachment() {
+        viewModelScope.launch(mainImmediate) {
+            val response = sendAttachmentCoordinator.submitRequest(
+                SendAttachmentRequest()
+            )
+            if (response is Response.Success) {
+
+                val code = response.value.value
+                //TODO go to specific chat attachment view
             }
         }
     }

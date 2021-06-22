@@ -8,7 +8,14 @@ import io.matthewnelson.concept_navigation.Navigator
 abstract class SendAttachmentNavigator(
     detailNavigationDriver: BaseNavigationDriver<NavController>
 ): Navigator<NavController>(detailNavigationDriver) {
+
+    @JvmSynthetic
+    internal suspend fun toSendAttachmentScreen() {
+        navigationDriver.submitNavigationRequest(ToSendAttachmentDetail())
+    }
+
     abstract suspend fun closeDetailScreen()
+
     suspend fun popBackStack() {
         navigationDriver.submitNavigationRequest(PopBackStack())
     }
