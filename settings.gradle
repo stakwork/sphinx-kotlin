@@ -48,6 +48,7 @@ include ':sphinx:application:data:features:feature-repository-android'
 
 include ':sphinx:application:network:concepts:clients:concept-network-client'
 include ':sphinx:application:network:concepts:clients:concept-network-client-cache'
+include ':sphinx:application:network:concepts:clients:concept-network-client-crypto'
 include ':sphinx:application:network:features:feature-network-client'
 
 include ':sphinx:application:network:concepts:queries:concept-network-query-attachment'
