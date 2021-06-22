@@ -77,9 +77,10 @@ object AppModule {
     fun provideImageLoaderAndroid(
         @ApplicationContext appContext: Context,
         dispatchers: CoroutineDispatchers,
-        networkClientCache: NetworkClientCache
+        networkClientCache: NetworkClientCache,
+        LOG: SphinxLogger,
     ): ImageLoaderAndroid =
-        ImageLoaderAndroid(appContext, dispatchers, networkClientCache)
+        ImageLoaderAndroid(appContext, dispatchers, networkClientCache, LOG)
 
     @Provides
     fun provideImageLoader(

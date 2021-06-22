@@ -8,6 +8,8 @@ import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_image_loader.*
 import chat.sphinx.concept_network_client.NetworkClientClearedListener
 import chat.sphinx.concept_network_client_cache.NetworkClientCache
+import chat.sphinx.logger.SphinxLogger
+import chat.sphinx.logger.e
 import coil.annotation.ExperimentalCoilApi
 import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
@@ -27,11 +29,16 @@ import okhttp3.OkHttpClient
 class ImageLoaderAndroid(
     context: Context,
     private val dispatchers: CoroutineDispatchers,
-    private val networkClientCache: NetworkClientCache
+    private val networkClientCache: NetworkClientCache,
+    private val LOG: SphinxLogger,
 ) : ImageLoader<ImageView>(),
     NetworkClientClearedListener,
     CoroutineDispatchers by dispatchers
 {
+
+    companion object {
+        const val TAG = "ImageLoaderAndroid"
+    }
 
     private val appContext: Context = context.applicationContext
 
@@ -133,6 +140,14 @@ class ImageLoaderAndroid(
                                 coil.transition.Transition.NONE
                             )
                         }
+                    }
+                }
+
+                for (entry in it.additionalHeaders.entries) {
+                    try {
+                        request.addHeader(entry.key, entry.value)
+                    } catch (e: Exception) {
+                        LOG.e(TAG, "Failed to add header to request", e)
                     }
                 }
             }
