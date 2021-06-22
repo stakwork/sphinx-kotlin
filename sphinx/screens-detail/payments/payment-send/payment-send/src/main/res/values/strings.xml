@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="payment_send_header_name">SEND PAYMENT</string>
+
+    <string name="add_message_hint">Add Message</string>
+    <string name="confirm_button">CONFIRM</string>
 </resources>

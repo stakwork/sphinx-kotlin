@@ -1,8 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="to">To</string>
+    <string name="from">From</string>
+
+    <string name="sat">sat</string>
     <string name="sats">sats</string>
     <string name="new_contact">New Contact</string>
     <string name="default_sats_amount">…</string>
+
+    <!--  Number Pad   -->
+    <string name="_1">1</string>
+    <string name="_2">2</string>
+    <string name="_3">3</string>
+    <string name="_4">4</string>
+    <string name="_5">5</string>
+    <string name="_6">6</string>
+    <string name="_7">7</string>
+    <string name="_8">8</string>
+    <string name="_9">9</string>
+    <string name="_0">0</string>
 
     <!--  Material Icons   -->
     <string name="material_icon_name_lock_outline">lock_outline</string>

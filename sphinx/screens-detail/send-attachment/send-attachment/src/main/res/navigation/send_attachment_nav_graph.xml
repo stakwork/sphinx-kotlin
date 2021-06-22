@@ -8,6 +8,10 @@
     <fragment
         android:id="@+id/navigation_send_attachment_fragment"
         android:name="chat.sphinx.send_attachment.ui.SendAttachmentFragment"
-        tools:layout="@layout/fragment_send_attachment" />
+        tools:layout="@layout/fragment_send_attachment">
+        <argument
+            android:name="argIsConversation"
+            app:argType="boolean" />
+    </fragment>
 
 </navigation>

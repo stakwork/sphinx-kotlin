@@ -10,8 +10,8 @@ abstract class SendAttachmentNavigator(
 ): Navigator<NavController>(detailNavigationDriver) {
 
     @JvmSynthetic
-    internal suspend fun toSendAttachmentScreen() {
-        navigationDriver.submitNavigationRequest(ToSendAttachmentDetail())
+    internal suspend fun toSendAttachmentScreen(isConversation: Boolean) {
+        navigationDriver.submitNavigationRequest(ToSendAttachmentDetail(isConversation))
     }
 
     abstract suspend fun closeDetailScreen()

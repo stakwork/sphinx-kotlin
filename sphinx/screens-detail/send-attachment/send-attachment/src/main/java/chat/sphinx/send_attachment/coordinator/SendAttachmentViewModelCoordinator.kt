@@ -29,7 +29,7 @@ internal class SendAttachmentViewModelCoordinator(
     }
 
     override suspend fun navigateToScreen(request: RequestHolder<SendAttachmentRequest>) {
-        sendAttachmentNavigator.toSendAttachmentScreen()
+        sendAttachmentNavigator.toSendAttachmentScreen(request.request.isConversation)
     }
 
     override suspend fun checkRequest(request: SendAttachmentRequest): SendAttachmentResponse? {

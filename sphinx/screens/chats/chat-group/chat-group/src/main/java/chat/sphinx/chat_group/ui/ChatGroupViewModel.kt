@@ -3,8 +3,10 @@ package chat.sphinx.chat_group.ui
 import android.app.Application
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import chat.sphinx.chat_common.navigation.ChatNavigator
 import chat.sphinx.chat_common.ui.ChatViewModel
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
+import chat.sphinx.chat_group.navigation.GroupChatNavigator
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
@@ -56,6 +58,11 @@ class ChatGroupViewModel @Inject constructor(
     LOG,
 ) {
     override val args: ChatGroupFragmentArgs by savedStateHandle.navArgs()
+
+    @Inject
+    protected lateinit var chatGroupNavigator: GroupChatNavigator
+    override val chatNavigator: ChatNavigator
+        get() = chatGroupNavigator
 
     override val chatSharedFlow: SharedFlow<Chat?> = flow {
         emitAll(chatRepository.getChatById(args.chatId))
@@ -115,5 +122,9 @@ class ChatGroupViewModel @Inject constructor(
     override fun sendMessage(builder: SendMessage.Builder): SendMessage? {
         builder.setChatId(args.chatId)
         return super.sendMessage(builder)
+    }
+
+    override fun shouldShowSendAttachmentMenu() {
+        showSendAttachmentMenu(false)
     }
 }

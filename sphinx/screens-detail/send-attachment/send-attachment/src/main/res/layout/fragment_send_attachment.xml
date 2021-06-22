@@ -21,6 +21,7 @@
             android:id="@+id/layout_constraint_camera_option_container"
             android:layout_width="match_parent"
             android:layout_height="@dimen/options_menu_option_height"
+            android:clickable="true"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent">
@@ -57,6 +58,7 @@
             android:id="@+id/layout_constraint_library_option_container"
             android:layout_width="match_parent"
             android:layout_height="@dimen/options_menu_option_height"
+            android:clickable="true"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/layout_constraint_camera_option_container">
@@ -93,6 +95,7 @@
             android:id="@+id/layout_constraint_gif_option_container"
             android:layout_width="match_parent"
             android:layout_height="@dimen/options_menu_option_height"
+            android:clickable="true"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/layout_constraint_library_option_container">
@@ -130,6 +133,7 @@
             android:id="@+id/layout_constraint_file_option_container"
             android:layout_width="match_parent"
             android:layout_height="@dimen/options_menu_option_height"
+            android:clickable="true"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/layout_constraint_gif_option_container">
@@ -167,6 +171,7 @@
             android:id="@+id/layout_constraint_paid_message_option_container"
             android:layout_width="match_parent"
             android:layout_height="@dimen/options_menu_option_height"
+            android:clickable="true"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/layout_constraint_file_option_container">
@@ -203,6 +208,7 @@
             android:id="@+id/layout_constraint_request_option_container"
             android:layout_width="match_parent"
             android:layout_height="@dimen/options_menu_option_height"
+            android:clickable="true"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/layout_constraint_paid_message_option_container">
@@ -239,6 +245,7 @@
             android:id="@+id/layout_constraint_send_option_container"
             android:layout_width="match_parent"
             android:layout_height="@dimen/options_menu_option_height"
+            android:clickable="true"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/layout_constraint_request_option_container">

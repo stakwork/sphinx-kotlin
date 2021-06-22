@@ -3,8 +3,10 @@ package chat.sphinx.chat_contact.ui
 import android.app.Application
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import chat.sphinx.chat_common.navigation.ChatNavigator
 import chat.sphinx.chat_common.ui.ChatViewModel
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
+import chat.sphinx.chat_contact.navigation.ContactChatNavigator
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_lightning.model.route.RouteSuccessProbabilityDto
 import chat.sphinx.concept_network_query_lightning.model.route.isRouteAvailable
@@ -70,6 +72,11 @@ internal class ChatContactViewModel @Inject constructor(
 ) {
     override val args: ChatContactFragmentArgs by savedStateHandle.navArgs()
     private var chatId: ChatId? = args.chatId
+
+    @Inject
+    protected lateinit var chatContactNavigator: ContactChatNavigator
+    override val chatNavigator: ChatNavigator
+        get() = chatContactNavigator
 
     private val contactSharedFlow: SharedFlow<Contact?> = flow {
         emitAll(contactRepository.getContactById(args.contactId))
@@ -232,5 +239,9 @@ internal class ChatContactViewModel @Inject constructor(
         builder.setContactId(args.contactId)
         builder.setChatId(chatId)
         return super.sendMessage(builder)
+    }
+
+    override fun shouldShowSendAttachmentMenu() {
+        showSendAttachmentMenu(true, args.contactId)
     }
 }

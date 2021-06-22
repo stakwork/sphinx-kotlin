@@ -3,6 +3,7 @@ package chat.sphinx.chat_tribe.ui
 import android.app.Application
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import chat.sphinx.chat_common.navigation.ChatNavigator
 import chat.sphinx.chat_common.ui.ChatSideEffect
 import chat.sphinx.chat_common.ui.ChatViewModel
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
@@ -88,7 +89,9 @@ internal class ChatTribeViewModel @Inject constructor(
     var podcast: Podcast? = null
 
     @Inject
-    lateinit var chatNavigator: TribeChatNavigator
+    protected lateinit var chatTribeNavigator: TribeChatNavigator
+    override val chatNavigator: ChatNavigator
+        get() = chatTribeNavigator
 
     override val headerInitialHolderSharedFlow: SharedFlow<InitialHolderViewState> = flow {
         chatSharedFlow.collect { chat ->
@@ -225,7 +228,7 @@ internal class ChatTribeViewModel @Inject constructor(
     fun goToPodcastPlayerScreen() {
         podcast?.let { podcast ->
             viewModelScope.launch(mainImmediate) {
-                chatNavigator.toPodcastPlayerScreen(args.chatId, podcast)
+                chatTribeNavigator.toPodcastPlayerScreen(args.chatId, podcast)
             }
         }
     }
@@ -293,5 +296,9 @@ internal class ChatTribeViewModel @Inject constructor(
                 )
             }
         }
+    }
+
+    override fun shouldShowSendAttachmentMenu() {
+        showSendAttachmentMenu(false)
     }
 }

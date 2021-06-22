@@ -1,5 +1,7 @@
 package chat.sphinx.send_attachment.ui
 
+import android.content.Context
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_view_model_coordinator.ResponseHolder
 import chat.sphinx.feature_view_model_coordinator.RequestCatcher
@@ -9,8 +11,11 @@ import chat.sphinx.send_attachment.navigation.BackType
 import chat.sphinx.send_attachment.navigation.SendAttachmentNavigator
 import chat.sphinx.send_attachment_view_model_coordinator.response.SendAttachmentResponse
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.BaseViewModel
+import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
+import io.matthewnelson.concept_views.sideeffect.SideEffect
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -19,8 +24,19 @@ import javax.inject.Inject
 internal class SendAttachmentViewModel @Inject constructor(
     dispatchers: CoroutineDispatchers,
     private val sendAttachmentViewModelCoordinator: SendAttachmentViewModelCoordinator,
-    val navigator: SendAttachmentNavigator
-): BaseViewModel<SendAttachmentViewState>(dispatchers, SendAttachmentViewState.Idle)
+    private val handle: SavedStateHandle,
+): SideEffectViewModel<
+        Context,
+        SideEffect<Context>,
+        SendAttachmentViewState
+        >(
+    dispatchers,
+    handle.navArgs<SendAttachmentFragmentArgs>().let {
+        SendAttachmentViewState.LayoutVisibility(
+            it.value.argIsConversation,
+        )
+    },
+)
 {
 
     private val requestCatcher = RequestCatcher(

@@ -5,4 +5,5 @@ plugins {
 
 dependencies {
     api project(path: ':sphinx:activity:concepts:concept-view-model-coordinator')
+    api project(path: ':sphinx:application:common:wrappers:wrapper-chat')
 }

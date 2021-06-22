@@ -4,8 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/layout_constraint_pin_pad"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/deepNight">
+    android:layout_height="match_parent">
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guide_v33"
@@ -46,7 +45,7 @@
 
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/button_1"
-        style="@style/PinPadButton"
+        style="@style/AmountPadButton"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:text="@string/_1"
@@ -57,7 +56,7 @@
 
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/button_2"
-        style="@style/PinPadButton"
+        style="@style/AmountPadButton"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:text="@string/_2"
@@ -68,7 +67,7 @@
 
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/button_3"
-        style="@style/PinPadButton"
+        style="@style/AmountPadButton"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:text="@string/_3"
@@ -81,7 +80,7 @@
 
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/button_4"
-        style="@style/PinPadButton"
+        style="@style/AmountPadButton"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:text="@string/_4"
@@ -92,7 +91,7 @@
 
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/button_5"
-        style="@style/PinPadButton"
+        style="@style/AmountPadButton"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:text="@string/_5"
@@ -103,7 +102,7 @@
 
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/button_6"
-        style="@style/PinPadButton"
+        style="@style/AmountPadButton"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:text="@string/_6"
@@ -116,7 +115,7 @@
 
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/button_7"
-        style="@style/PinPadButton"
+        style="@style/AmountPadButton"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:text="@string/_7"
@@ -127,7 +126,7 @@
 
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/button_8"
-        style="@style/PinPadButton"
+        style="@style/AmountPadButton"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:text="@string/_8"
@@ -138,7 +137,7 @@
 
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/button_9"
-        style="@style/PinPadButton"
+        style="@style/AmountPadButton"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:text="@string/_9"
@@ -152,7 +151,7 @@
 
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/button_null"
-        style="@style/PinPadButton"
+        style="@style/AmountPadButton"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:enabled="false"
@@ -163,7 +162,7 @@
 
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/button_0"
-        style="@style/PinPadButton"
+        style="@style/AmountPadButton"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:text="@string/_0"
@@ -178,7 +177,7 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:text="@string/material_icon_name_backspace_button"
-        style="@style/PinPadButton"
+        style="@style/AmountPadButton"
         android:fontFamily="@font/material_icons_regular"
         android:textSize="@dimen/pin_pad_backspace_text_size"
         app:layout_constraintEnd_toEndOf="parent"

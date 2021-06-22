@@ -10,9 +10,12 @@ import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.send_attachment.R
 import chat.sphinx.send_attachment.databinding.FragmentSendAttachmentBinding
 import chat.sphinx.send_attachment_view_model_coordinator.response.SendAttachmentResponse
+import chat.sphinx.wrapper_chat.ChatActionType
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.base.BaseFragment
+import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import kotlinx.coroutines.launch
+import javax.annotation.meta.Exhaustive
 
 @AndroidEntryPoint
 internal class SendAttachmentFragment: BaseFragment<
@@ -28,10 +31,7 @@ internal class SendAttachmentFragment: BaseFragment<
         super.onViewCreated(view, savedInstanceState)
 
         setupFooter()
-
-        binding.textViewCancelButton.setOnClickListener {
-            viewModel.processResponse(SendAttachmentResponse(0))
-        }
+        setOnClickListeners()
     }
 
     private fun setupFooter() {
@@ -39,7 +39,54 @@ internal class SendAttachmentFragment: BaseFragment<
         insetterActivity.addNavigationBarPadding(binding.layoutConstraintMenuContainer)
     }
 
+    private fun setOnClickListeners() {
+        binding.apply {
+            textViewCancelButton.setOnClickListener {
+                viewModel.processResponse(SendAttachmentResponse(ChatActionType.CancelAction))
+            }
+
+            layoutConstraintCameraOptionContainer.setOnClickListener {
+                viewModel.processResponse(SendAttachmentResponse(ChatActionType.OpenCamera))
+            }
+
+            layoutConstraintLibraryOptionContainer.setOnClickListener {
+                viewModel.processResponse(SendAttachmentResponse(ChatActionType.OpenPhotoLibrary))
+            }
+
+            layoutConstraintGifOptionContainer.setOnClickListener {
+                viewModel.processResponse(SendAttachmentResponse(ChatActionType.OpenGifSearch))
+            }
+
+            layoutConstraintFileOptionContainer.setOnClickListener {
+                viewModel.processResponse(SendAttachmentResponse(ChatActionType.OpenFileLibrary))
+            }
+
+            layoutConstraintPaidMessageOptionContainer.setOnClickListener {
+                viewModel.processResponse(SendAttachmentResponse(ChatActionType.OpenPaidMessageScreen))
+            }
+
+            layoutConstraintRequestOptionContainer.setOnClickListener {
+                viewModel.processResponse(SendAttachmentResponse(ChatActionType.RequestAmount))
+            }
+
+            layoutConstraintSendOptionContainer.setOnClickListener {
+                viewModel.processResponse(SendAttachmentResponse(ChatActionType.SendPayment))
+            }
+        }
+    }
+
     override suspend fun onViewStateFlowCollect(viewState: SendAttachmentViewState) {
-//        TODO("Not yet implemented")
+        binding.apply {
+            @Exhaustive
+            when (viewState) {
+                is SendAttachmentViewState.LayoutVisibility -> {
+                    layoutConstraintRequestOptionContainer.alpha = if (viewState.paymentAndInvoiceEnabled) 1.0f else 0.4f
+                    layoutConstraintRequestOptionContainer.isEnabled = viewState.paymentAndInvoiceEnabled
+
+                    layoutConstraintSendOptionContainer.alpha = if (viewState.paymentAndInvoiceEnabled) 1.0f else 0.4f
+                    layoutConstraintSendOptionContainer.isEnabled = viewState.paymentAndInvoiceEnabled
+                }
+            }
+        }
     }
 }

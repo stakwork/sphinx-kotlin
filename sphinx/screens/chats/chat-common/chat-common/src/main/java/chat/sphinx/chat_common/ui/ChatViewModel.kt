@@ -8,7 +8,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavArgs
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.chat_common.R
-import chat.sphinx.chat_common.databinding.LayoutChatFooterBinding
+import chat.sphinx.chat_common.navigation.ChatNavigator
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
 import chat.sphinx.chat_common.ui.viewstate.header.ChatHeaderFooterViewState
 import chat.sphinx.chat_common.ui.viewstate.messageholder.BubbleBackground
@@ -31,15 +31,16 @@ import chat.sphinx.resources.getRandomColor
 import chat.sphinx.send_attachment_view_model_coordinator.request.SendAttachmentRequest
 import chat.sphinx.send_attachment_view_model_coordinator.response.SendAttachmentResponse
 import chat.sphinx.wrapper_chat.Chat
+import chat.sphinx.wrapper_chat.ChatActionType
 import chat.sphinx.wrapper_chat.ChatName
 import chat.sphinx.wrapper_chat.isConversation
+import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.MessageUUID
-import chat.sphinx.wrapper_common.tribe.TribeJoinLink
-import chat.sphinx.wrapper_common.tribe.isValidTribeJoinLink
-import chat.sphinx.wrapper_common.tribe.toTribeJoinLink
 import chat.sphinx.wrapper_contact.Contact
-import chat.sphinx.wrapper_message.*
+import chat.sphinx.wrapper_message.Message
+import chat.sphinx.wrapper_message.isDeleted
+import chat.sphinx.wrapper_message.isGroupAction
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
@@ -49,6 +50,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
 @JvmSynthetic
 @Suppress("NOTHING_TO_INLINE")
@@ -73,6 +75,8 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 {
     abstract val args: ARGS
 
+    protected abstract val chatNavigator: ChatNavigator
+
     val imageLoaderDefaults by lazy {
         ImageLoaderOptions.Builder()
             .placeholderResId(R.drawable.ic_profile_avatar_circle)
@@ -85,6 +89,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     }
 
     protected abstract val chatSharedFlow: SharedFlow<Chat?>
+
     abstract val headerInitialHolderSharedFlow: SharedFlow<InitialHolderViewState>
 
     protected abstract suspend fun getChatNameIfNull(): ChatName?
@@ -398,15 +403,56 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         }
     }
 
-    fun toSendAttachment() {
+    abstract fun shouldShowSendAttachmentMenu()
+
+    fun showSendAttachmentMenu(isConversation: Boolean = false, contactId: ContactId? = null) {
         viewModelScope.launch(mainImmediate) {
             val response = sendAttachmentCoordinator.submitRequest(
-                SendAttachmentRequest()
+                SendAttachmentRequest(isConversation)
             )
             if (response is Response.Success) {
+                when (response.value.actionType) {
+                    is ChatActionType.CancelAction -> {
+                        //Menu dismissed. Nothing to do
+                    }
+                    is ChatActionType.OpenCamera -> {
+                        submitSideEffect(
+                            ChatSideEffect.Notify("Camera not implemented yet")
+                        )
+                    }
+                    is ChatActionType.OpenPhotoLibrary -> {
+                        submitSideEffect(
+                            ChatSideEffect.Notify("Photo library not implemented yet")
+                        )
+                    }
+                    is ChatActionType.OpenGifSearch -> {
+                        submitSideEffect(
+                            ChatSideEffect.Notify("Giphy search not implemented yet")
+                        )
+                    }
+                    is ChatActionType.OpenFileLibrary -> {
+                        submitSideEffect(
+                            ChatSideEffect.Notify("File library not implemented yet")
+                        )
+                    }
+                    is ChatActionType.OpenPaidMessageScreen -> {
+                        submitSideEffect(
+                            ChatSideEffect.Notify("Paid message editor not implemented yet")
+                        )
+                    }
+                    is ChatActionType.RequestAmount -> {
+                        submitSideEffect(
+                            ChatSideEffect.Notify("Request amount not implemented yet")
+                        )
+                    }
 
-                val code = response.value.value
-                //TODO go to specific chat attachment view
+                    is ChatActionType.SendPayment -> {
+                        contactId?.let { contactId ->
+                            delay(250L)
+                            chatNavigator.toPaymentSendDetail(contactId)
+                        }
+                    }
+                }
             }
         }
     }
