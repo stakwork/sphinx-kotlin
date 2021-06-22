@@ -115,6 +115,10 @@ class NetworkClientImpl(
     private val clientLock = Mutex()
     private var currentClientSocksProxyAddress: SocksProxyAddress? = null
 
+    private val cryptoInterceptor: CryptoInterceptor by lazy {
+        CryptoInterceptor()
+    }
+
     private val loggingInterceptor: HttpLoggingInterceptor? by lazy {
         if (debug.value) {
             HttpLoggingInterceptor().let { interceptor ->
@@ -240,6 +244,9 @@ class NetworkClientImpl(
                     proxy(null)
                 }
 
+                if (!networkInterceptors().contains(cryptoInterceptor)) {
+                    addInterceptor(cryptoInterceptor)
+                }
 
                 loggingInterceptor?.let { nnInterceptor ->
                     if (!networkInterceptors().contains(nnInterceptor)) {
