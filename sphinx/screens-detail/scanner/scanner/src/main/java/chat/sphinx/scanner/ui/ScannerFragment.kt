@@ -115,6 +115,13 @@ internal class ScannerFragment: SideEffectFragment<
                 is ScannerViewState.LayoutVisibility -> {
                     includeScannerHeader.textViewDetailScreenHeaderNavBack.goneIfFalse(viewState.showBackButton)
                     editTextScannerInputContent.goneIfFalse(viewState.showBottomView)
+
+                    val codeLabel = if (viewState.codeTypeLabel.isEmpty()) {
+                        getString(R.string.scanner_edit_text_hint)
+                    } else {
+                        viewState.codeTypeLabel
+                    }
+                    codeEditText.hint = codeLabel
                 }
             }
         }

@@ -7,7 +7,11 @@ import chat.sphinx.scanner.ui.ScannerFragmentArgs
 import io.matthewnelson.android_feature_navigation.R as nav_R
 import io.matthewnelson.concept_navigation.NavigationRequest
 
-internal class ToScannerDetail(private val showBottomView: Boolean = false): NavigationRequest<NavController>() {
+internal class ToScannerDetail(
+    private val showBottomView: Boolean = false,
+    private val codeTypeLabel: String = "",
+): NavigationRequest<NavController>() {
+
     override fun navigate(controller: NavController) {
         try {
             // Only navigate to the scanner detail screen if it is
@@ -20,7 +24,7 @@ internal class ToScannerDetail(private val showBottomView: Boolean = false): Nav
         controller.navigate(
             R.id.scanner_nav_graph,
 
-            ScannerFragmentArgs.Builder(controller.previousBackStackEntry != null, showBottomView)
+            ScannerFragmentArgs.Builder(controller.previousBackStackEntry != null, showBottomView, codeTypeLabel)
                 .build()
                 .toBundle(),
 

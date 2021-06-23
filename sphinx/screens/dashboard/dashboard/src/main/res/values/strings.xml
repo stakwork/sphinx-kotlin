@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="add_icon"></string>
+    <string name="join_tribe_link">Join Tribe Link</string>
     <string name="add_friend">Add Friend</string>
     <string name="create_tribe">Create Tribe</string>
     <string name="contacts">Contacts</string>
@@ -8,4 +9,6 @@
     <string name="support">Support</string>
     <string name="add_sats">ADD SATS</string>
     <string name="search">Search</string>
+
+    <string name="not_valid_tribe_link">QR code is not a Join Tribe link</string>
 </resources>

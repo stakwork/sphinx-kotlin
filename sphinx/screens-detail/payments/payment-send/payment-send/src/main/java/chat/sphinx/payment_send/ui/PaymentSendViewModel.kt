@@ -22,7 +22,14 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import chat.sphinx.concept_repository_message.SendPayment
+import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
+import chat.sphinx.kotlin_response.Response
+import chat.sphinx.scanner_view_model_coordinator.request.ScannerFilter
+import chat.sphinx.scanner_view_model_coordinator.request.ScannerRequest
+import chat.sphinx.scanner_view_model_coordinator.response.ScannerResponse
 import chat.sphinx.wrapper_common.dashboard.ChatId
+import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
+import chat.sphinx.wrapper_common.lightning.toLightningNodePubKey
 
 internal inline val PaymentSendFragmentArgs.chatId: ChatId?
     get() = if (argChatId == ChatId.NULL_CHAT_ID.toLong()) {
@@ -47,6 +54,7 @@ internal class PaymentSendViewModel @Inject constructor(
     private val messageRepository: MessageRepository,
     private val contactRepository: ContactRepository,
     private val repositoryDashboard: RepositoryDashboardAndroid<Any>,
+    private val scannerCoordinator: ViewModelCoordinator<ScannerRequest, ScannerResponse>
 ): SideEffectViewModel<
         FragmentActivity,
         PaymentSendSideEffect,
@@ -72,7 +80,7 @@ internal class PaymentSendViewModel @Inject constructor(
         replay = 1,
     )
 
-    suspend fun getAccountBalance(): StateFlow<NodeBalance?> =
+    private suspend fun getAccountBalance(): StateFlow<NodeBalance?> =
         repositoryDashboard.getAccountBalance()
 
     init {
@@ -117,8 +125,28 @@ internal class PaymentSendViewModel @Inject constructor(
         }
     }
 
-    private fun goToScanner() {
-
+    private fun requestScanner() {
+        viewModelScope.launch(mainImmediate) {
+            val response = scannerCoordinator.submitRequest(
+                ScannerRequest(
+                    filter = object : ScannerFilter() {
+                        override suspend fun checkData(data: String): Response<Any, String> {
+                            if (data.toLightningNodePubKey() != null) {
+                                return Response.Success(Any())
+                            }
+                            return Response.Error("QR code is not a Lightning Node Public Key")
+                        }
+                    },
+                    showBottomView = true,
+                    codeTypeLabel = app.getString(R.string.destination_key)
+                )
+            )
+            if (response is Response.Success) {
+                response.value.value.toLightningNodePubKey()?.let { destinationKey ->
+                    sendDirectPayment(destinationKey)
+                }
+            }
+        }
     }
 
     fun sendChatPayment(message: String? = null) {
@@ -129,11 +157,11 @@ internal class PaymentSendViewModel @Inject constructor(
 
             messageRepository.sendPayment(sendPaymentBuilder.build())
         } else {
-            goToScanner()
+            requestScanner()
         }
     }
 
-    private fun sendDirectPayment(destinationKey: String) {
+    private fun sendDirectPayment(destinationKey: LightningNodePubKey) {
         sendPaymentBuilder.setDestinationKey(destinationKey)
 
         messageRepository.sendPayment(sendPaymentBuilder.build())

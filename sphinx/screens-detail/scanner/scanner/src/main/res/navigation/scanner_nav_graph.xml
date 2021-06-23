@@ -15,6 +15,9 @@
         <argument
             android:name="argShowBottomView"
             app:argType="boolean" />
+        <argument
+            android:name="argCodeTypeLabel"
+            app:argType="string" />
     </fragment>
 
 </navigation>

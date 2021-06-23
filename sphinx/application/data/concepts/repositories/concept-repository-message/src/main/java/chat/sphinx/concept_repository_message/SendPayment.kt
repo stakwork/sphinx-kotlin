@@ -2,6 +2,7 @@ package chat.sphinx.concept_repository_message
 
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
+import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_message.ReplyUUID
 import java.io.File
 
@@ -9,7 +10,7 @@ class SendPayment private constructor(
     val chatId: ChatId?,
     val contactId: ContactId?,
     val text: String?,
-    val destinationKey: String?,
+    val destinationKey: LightningNodePubKey?,
     val amount: Long?,
 ) {
 
@@ -17,7 +18,7 @@ class SendPayment private constructor(
         private var chatId: ChatId?         = null
         private var contactId: ContactId?   = null
         private var text: String?           = null
-        private var destinationKey: String? = null
+        private var destinationKey: LightningNodePubKey? = null
         private var amount: Long            = 0
 
         @Synchronized
@@ -52,7 +53,7 @@ class SendPayment private constructor(
         }
 
         @Synchronized
-        fun setDestinationKey(destinationKey: String?): Builder {
+        fun setDestinationKey(destinationKey: LightningNodePubKey?): Builder {
             this.destinationKey = destinationKey
             return this
         }

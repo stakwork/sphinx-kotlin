@@ -5,6 +5,7 @@ import io.matthewnelson.concept_views.viewstate.ViewState
 internal sealed class ScannerViewState: ViewState<ScannerViewState>() {
     data class LayoutVisibility(
         val showBackButton: Boolean,
-        val showBottomView: Boolean
+        val showBottomView: Boolean,
+        val codeTypeLabel: String
     ): ScannerViewState()
 }

@@ -1,5 +1,6 @@
 package chat.sphinx.dashboard.ui
 
+import android.app.Application
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
@@ -9,6 +10,7 @@ import chat.sphinx.concept_service_notification.PushNotificationRegistrar
 import chat.sphinx.concept_socket_io.SocketIOManager
 import chat.sphinx.concept_socket_io.SocketIOState
 import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
+import chat.sphinx.dashboard.R
 import chat.sphinx.dashboard.navigation.DashboardBottomNavBarNavigator
 import chat.sphinx.dashboard.navigation.DashboardNavDrawerNavigator
 import chat.sphinx.dashboard.navigation.DashboardNavigator
@@ -63,6 +65,7 @@ internal suspend inline fun DashboardViewModel.updateChatListFilter(filter: Chat
 
 @HiltViewModel
 internal class DashboardViewModel @Inject constructor(
+    private val app: Application,
     private val backgroundLoginHandler: BackgroundLoginHandler,
     handler: SavedStateHandle,
 
@@ -103,10 +106,11 @@ internal class DashboardViewModel @Inject constructor(
                                 return Response.Success(Any())
                             }
 
-                            return Response.Error("QR code is not a Join Tribe link")
+                            return Response.Error(app.getString(R.string.not_valid_tribe_link))
                         }
                     },
-                    showBottomView = true
+                    showBottomView = true,
+                    codeTypeLabel = app.getString(R.string.join_tribe_link)
                 )
             )
             if (response is Response.Success) {
