@@ -12,9 +12,10 @@ package chat.sphinx.concept_network_client_crypto
 inline fun String.retrieveCryptoScheme(): CryptoScheme? {
     if (isCryptoHeader) {
         val splits = split(CryptoScheme.DELIMITER)
+        val encOrDec = splits[1]
         val name = splits[2]
 
-        if (splits[1] == CryptoScheme.Decrypt.DEC) {
+        if (encOrDec == CryptoScheme.Decrypt.DEC) {
             return when (name) {
                 CryptoScheme.Decrypt.JNCryptor.name -> {
                     CryptoScheme.Decrypt.JNCryptor
@@ -31,7 +32,7 @@ inline fun String.retrieveCryptoScheme(): CryptoScheme? {
             }
         }
 
-        if (splits[1] == CryptoScheme.Encrypt.ENC) {
+        if (encOrDec == CryptoScheme.Encrypt.ENC) {
             return when (name) {
                 CryptoScheme.Encrypt.JNCryptor.name -> {
                     CryptoScheme.Encrypt.JNCryptor
