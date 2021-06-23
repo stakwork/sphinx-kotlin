@@ -31,6 +31,7 @@ dependencies {
     api project(path: ':kotlin:concepts:concept-coroutines')
 
     // Sphinx
+    api project(path: ':sphinx:application:common:logger')
     api project(path: ':sphinx:application:data:concepts:concept-image-loader')
     implementation project(path: ':sphinx:application:network:concepts:clients:concept-network-client-cache')
 

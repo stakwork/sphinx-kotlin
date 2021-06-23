@@ -1,7 +1,9 @@
 package chat.sphinx.wrapper_message
 
 import com.squareup.moshi.JsonClass
+import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.Moshi
+import okio.EOFException
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun String.toGiphyDataOrNull(moshi: Moshi): GiphyData? =
@@ -11,13 +13,16 @@ inline fun String.toGiphyDataOrNull(moshi: Moshi): GiphyData? =
         null
     }
 
-fun String.toGiphyData(moshi: Moshi): GiphyData =
+@Suppress("NOTHING_TO_INLINE")
+@Throws(IllegalArgumentException::class, JsonDataException::class)
+inline fun String.toGiphyData(moshi: Moshi): GiphyData =
     moshi.adapter(GiphyData::class.java)
         .fromJson(this)
         ?: throw IllegalArgumentException("Provided Json was invalid")
 
-@Throws(AssertionError::class)
-fun GiphyData.toJson(moshi: Moshi): String =
+@Suppress("NOTHING_TO_INLINE")
+@Throws(AssertionError::class, EOFException::class)
+inline fun GiphyData.toJson(moshi: Moshi): String =
     moshi.adapter(GiphyData::class.java)
         .toJson(this)
 

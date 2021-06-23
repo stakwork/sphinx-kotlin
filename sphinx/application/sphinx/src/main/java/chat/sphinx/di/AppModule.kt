@@ -18,6 +18,8 @@ import dagger.hilt.components.SingletonComponent
 import io.matthewnelson.build_config.BuildConfigDebug
 import io.matthewnelson.build_config.BuildConfigVersionCode
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
 import javax.inject.Singleton
 
 @Module
@@ -34,6 +36,13 @@ object AppModule {
         sphinxDispatchers: SphinxDispatchers
     ): CoroutineDispatchers =
         sphinxDispatchers
+
+    @Provides
+    @Singleton
+    fun provideApplicationScope(
+        dispatchers: CoroutineDispatchers
+    ): CoroutineScope =
+        CoroutineScope(SupervisorJob() + dispatchers.default)
 
     @Provides
     @Singleton
@@ -68,9 +77,10 @@ object AppModule {
     fun provideImageLoaderAndroid(
         @ApplicationContext appContext: Context,
         dispatchers: CoroutineDispatchers,
-        networkClientCache: NetworkClientCache
+        networkClientCache: NetworkClientCache,
+        LOG: SphinxLogger,
     ): ImageLoaderAndroid =
-        ImageLoaderAndroid(appContext, dispatchers, networkClientCache)
+        ImageLoaderAndroid(appContext, dispatchers, networkClientCache, LOG)
 
     @Provides
     fun provideImageLoader(

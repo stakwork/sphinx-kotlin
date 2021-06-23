@@ -5,6 +5,7 @@ import android.content.Context
 import chat.sphinx.concept_network_call.NetworkCall
 import chat.sphinx.concept_network_client.NetworkClient
 import chat.sphinx.concept_network_client_cache.NetworkClientCache
+import chat.sphinx.concept_network_query_attachment.NetworkQueryAttachment
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
 import chat.sphinx.concept_network_query_contact.NetworkQueryContact
 import chat.sphinx.concept_network_query_invite.NetworkQueryInvite
@@ -16,6 +17,7 @@ import chat.sphinx.concept_network_tor.TorManager
 import chat.sphinx.concept_relay.RelayDataHandler
 import chat.sphinx.concept_socket_io.SocketIOManager
 import chat.sphinx.feature_network_client.NetworkClientImpl
+import chat.sphinx.feature_network_query_attachment.NetworkQueryAttachmentImpl
 import chat.sphinx.feature_network_query_chat.NetworkQueryChatImpl
 import chat.sphinx.feature_network_query_contact.NetworkQueryContactImpl
 import chat.sphinx.feature_network_query_invite.NetworkQueryInviteImpl
@@ -27,6 +29,8 @@ import chat.sphinx.feature_network_tor.TorManagerAndroid
 import chat.sphinx.feature_relay.RelayDataHandlerImpl
 import chat.sphinx.feature_socket_io.SocketIOManagerImpl
 import chat.sphinx.logger.SphinxLogger
+import chat.sphinx.wrapper_attachment.AuthenticationToken
+import chat.sphinx.wrapper_relay.AuthorizationToken
 import coil.util.CoilUtils
 import com.squareup.moshi.Moshi
 import dagger.Module
@@ -107,6 +111,12 @@ object NetworkModule {
             buildConfigDebug,
             CoilUtils.createDefaultCache(appContext),
             dispatchers,
+            NetworkClientImpl.RedactedLoggingHeaders(
+                listOf(
+                    AuthorizationToken.AUTHORIZATION_HEADER,
+                    AuthenticationToken.HEADER_KEY
+                )
+            ),
             torManager,
             LOG,
         )
@@ -252,4 +262,17 @@ object NetworkModule {
         networkQuerySubscriptionImpl: NetworkQuerySubscriptionImpl
     ): NetworkQuerySubscription =
         networkQuerySubscriptionImpl
+
+    @Provides
+    @Singleton
+    fun provideNetworkQueryAttachmentImpl(
+        networkRelayCall: NetworkRelayCall
+    ): NetworkQueryAttachmentImpl =
+        NetworkQueryAttachmentImpl(networkRelayCall)
+
+    @Provides
+    fun provideNetworkQueryAttachment(
+        networkQueryAttachmentImpl: NetworkQueryAttachmentImpl
+    ): NetworkQueryAttachment =
+        networkQueryAttachmentImpl
 }

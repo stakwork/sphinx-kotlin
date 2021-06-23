@@ -49,6 +49,7 @@ dependencies {
     implementation deps.google.hilt
     implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-contact')
     implementation project(path: ':sphinx:application:network:concepts:tor:concept-network-tor')
+    implementation project(path: ':sphinx:application:data:concepts:concept-meme-server')
     implementation project(path: ':sphinx:application:data:concepts:concept-relay')
     implementation project(path: ':sphinx:application:network:concepts:tor:concept-network-tor')
     kapt kaptDeps.google.hilt

@@ -170,6 +170,7 @@ abstract class NetworkQueryTestHelper: AuthenticationCoreDefaultsTestHelper() {
             BuildConfigDebug(useLoggingInterceptors),
             okHttpCache,
             dispatchers,
+            null,
             testTorManager,
             testLogger,
         )

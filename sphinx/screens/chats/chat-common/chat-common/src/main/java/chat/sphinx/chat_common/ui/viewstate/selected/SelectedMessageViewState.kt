@@ -8,7 +8,8 @@ internal sealed class SelectedMessageViewState: ViewState<SelectedMessageViewSta
 
     object None: SelectedMessageViewState()
 
-    class SelectedMessage private constructor(
+    @Suppress("DataClassPrivateConstructor")
+    data class SelectedMessage private constructor(
         val messageHolderViewState: MessageHolderViewState,
 
         /* The y position of the holder for the screen, not for the recycler view */

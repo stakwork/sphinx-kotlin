@@ -64,6 +64,10 @@ ext.deps = [
         viewBinding: "androidx.databinding:viewbinding:${versions.androidGradle}",
     ],
 //    bouncyCastle: "org.bouncycastle:bcprov-jdk15on:1.65",
+    chrisbanes: [
+        insetter: "dev.chrisbanes.insetter:insetter:${versions.insetter}",
+        insetterWidgets: "dev.chrisbanes.insetter:insetter-widgets:${versions.insetter}"
+    ],
     google: [
         hilt: "com.google.dagger:hilt-android:${versions.hilt}",
         material: "com.google.android.material:material:1.4.0-beta01",
@@ -72,10 +76,6 @@ ext.deps = [
     ],
     guardianProject: [
         jtorctl: "info.guardianproject:jtorctl:0.4",
-    ],
-    chrisbanes: [
-        insetter: "dev.chrisbanes.insetter:insetter:${versions.insetter}",
-        insetterWidgets: "dev.chrisbanes.insetter:insetter-widgets:${versions.insetter}"
     ],
     instacart: [
         coil: "io.coil-kt:coil:${versions.coil}",
