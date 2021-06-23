@@ -147,7 +147,7 @@ internal inline fun LayoutMessageHolderBinding.setView(
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun LayoutMessageHolderBinding.setUnsupportedMessageTypeLayout(
-    unsupportedMessage: LayoutState.Bubble.ContainerMiddle.UnsupportedMessageType?
+    unsupportedMessage: LayoutState.Bubble.ContainerThird.UnsupportedMessageType?
 ) {
     includeMessageHolderBubble.includeUnsupportedMessageTypePlaceholder.apply {
         if (unsupportedMessage == null) {
@@ -220,7 +220,7 @@ internal inline fun LayoutMessageHolderBinding.setUnsupportedMessageTypeLayout(
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun LayoutMessageHolderBinding.setBubbleDirectPaymentLayout(
-    directPayment: LayoutState.Bubble.ContainerTop.DirectPayment?
+    directPayment: LayoutState.Bubble.ContainerSecond.DirectPayment?
 ) {
     includeMessageHolderBubble.includeMessageTypeDirectPayment.apply {
         if (directPayment == null) {
@@ -405,7 +405,7 @@ internal inline fun LayoutMessageHolderBinding.setDeletedMessageLayout(
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun LayoutMessageHolderBinding.setBubbleMessageLayout(
-    message: LayoutState.Bubble.ContainerMiddle.Message?
+    message: LayoutState.Bubble.ContainerThird.Message?
 ) {
     includeMessageHolderBubble.textViewMessageText.apply {
         if (message == null) {
@@ -420,7 +420,7 @@ internal inline fun LayoutMessageHolderBinding.setBubbleMessageLayout(
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun LayoutMessageHolderBinding.setBubblePaidMessageDetailsLayout(
-    paidDetails: LayoutState.Bubble.ContainerBottom.PaidMessageDetails?,
+    paidDetails: LayoutState.Bubble.ContainerFourth.PaidMessageDetails?,
     bubbleBackground: BubbleBackground
 ) {
     includeMessageHolderBubble.includePaidMessageReceivedDetailsHolder.apply {
@@ -498,7 +498,7 @@ internal inline fun LayoutMessageHolderBinding.setBubblePaidMessageDetailsLayout
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun LayoutMessageHolderBinding.setBubblePaidMessageSentStatusLayout(
-    paidSentStatus: LayoutState.Bubble.ContainerTop.PaidMessageSentStatus?
+    paidSentStatus: LayoutState.Bubble.ContainerSecond.PaidMessageSentStatus?
 ) {
     includeMessageHolderBubble.includePaidMessageSentStatusDetails.apply {
         if (paidSentStatus == null) {
@@ -530,7 +530,7 @@ internal inline fun LayoutMessageHolderBinding.setBubblePaidMessageSentStatusLay
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun LayoutMessageHolderBinding.setBubbleImageAttachment(
-    imageAttachment: LayoutState.Bubble.ContainerTop.ImageAttachment?,
+    imageAttachment: LayoutState.Bubble.ContainerSecond.ImageAttachment?,
     loadImage: (ImageView, String, MessageMedia?) -> Unit,
 ) {
     includeMessageHolderBubble.includeMessageTypeImageAttachment.apply {
@@ -571,7 +571,7 @@ internal inline fun LayoutMessageHolderBinding.setBubbleImageAttachment(
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun LayoutMessageHolderBinding.setBubbleReactionBoosts(
-    boost: LayoutState.Bubble.ContainerBottom.Boost?,
+    boost: LayoutState.Bubble.ContainerFourth.Boost?,
     loadImage: (ImageView, SenderPhotoUrl) -> Unit,
 ) {
     includeMessageHolderBubble.includeMessageTypeBoost.apply {
@@ -797,7 +797,7 @@ private inline fun LayoutMessageHolderBinding.setGroupActionMemberRemovalLayout(
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun LayoutMessageHolderBinding.setBubbleReplyMessage(
-    replyMessage: LayoutState.Bubble.ContainerTop.ReplyMessage?
+    replyMessage: LayoutState.Bubble.ContainerFirst.ReplyMessage?
 ) {
     includeMessageHolderBubble.includeMessageReply.apply {
         if (replyMessage == null) {
