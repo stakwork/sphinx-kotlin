@@ -50,6 +50,7 @@ import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.visible
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
@@ -77,7 +78,8 @@ abstract class ChatFragment<
 
     private val sendMessageBuilder = SendMessage.Builder()
 
-    private val disposables: ArrayList<Disposable> = ArrayList(1)
+    private val holderJobs: ArrayList<Job> = ArrayList(3)
+    private val disposables: ArrayList<Disposable> = ArrayList(3)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -315,7 +317,10 @@ abstract class ChatFragment<
                 @Exhaustive
                 when (viewState) {
                     is SelectedMessageViewState.None -> {
-                        selectedMessageBinding.root.gone
+                        selectedMessageBinding.apply {
+                            root.gone
+                            imageViewSelectedMessageBlur.setImageBitmap(null)
+                        }
                     }
                     is SelectedMessageViewState.SelectedMessage -> {
                         if (viewState.messageHolderViewState.selectionMenuItems.isNullOrEmpty()) {
@@ -327,10 +332,12 @@ abstract class ChatFragment<
                             root.y = viewState.holderYPos.value + viewState.statusHeaderHeight.value
                             setView(
                                 lifecycleScope,
+                                holderJobs,
                                 disposables,
                                 viewModel.dispatchers,
                                 imageLoader,
                                 viewModel.imageLoaderDefaults,
+                                viewModel.memeServerTokenHandler,
                                 viewState.recyclerViewWidth,
                                 viewState.messageHolderViewState
                             )
@@ -340,8 +347,17 @@ abstract class ChatFragment<
 
                         selectedMessageBinding.apply message@ {
 
-                            val screenshot = binding.root.takeScreenshot()
-                            imageViewSelectedMessageBlur.setImageBitmap(screenshot.blur(root.context, 25.0f))
+                            binding.root.takeScreenshot(
+                                requireActivity().window,
+                                bitmapCallback = { bitmap ->
+                                    if (viewModel.getSelectedMessageViewStateFlow().value == viewState) {
+                                        selectedMessageBinding
+                                            .imageViewSelectedMessageBlur
+                                            .setImageBitmap(bitmap.blur(root.context, 25.0F))
+                                    }
+                                },
+                                errorCallback = {}
+                            )
 
                             this@message.includeLayoutSelectedMessageMenu.apply {
                                 spaceSelectedMessageMenuArrowTop.goneIfFalse(!viewState.showMenuTop)

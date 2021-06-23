@@ -5,7 +5,8 @@ plugins {
 }
 
 dependencies {
-    api project(path: ':sphinx:application:common:wrappers:wrapper-common')
+    // Sphinx
+    api project(path: ':sphinx:application:common:wrappers:wrapper-message-media')
 
     // needed to override moshi's use of 1.4.31
     implementation deps.kotlin.reflect

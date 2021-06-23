@@ -39,10 +39,10 @@ import chat.sphinx.wrapper_message.MessageStatus;
 import chat.sphinx.wrapper_message.MessageType;
 import chat.sphinx.wrapper_message.ReplyUUID;
 import chat.sphinx.wrapper_message.SenderAlias;
-import chat.sphinx.wrapper_message.media.MediaKey;
-import chat.sphinx.wrapper_message.media.MediaKeyDecrypted;
-import chat.sphinx.wrapper_message.media.MediaToken;
-import chat.sphinx.wrapper_message.media.MediaType;
+import chat.sphinx.wrapper_message_media.MediaKey;
+import chat.sphinx.wrapper_message_media.MediaKeyDecrypted;
+import chat.sphinx.wrapper_message_media.MediaToken;
+import chat.sphinx.wrapper_message_media.MediaType;
 import chat.sphinx.wrapper_rsa.RsaPublicKey;
 import kotlin.collections.List;
 

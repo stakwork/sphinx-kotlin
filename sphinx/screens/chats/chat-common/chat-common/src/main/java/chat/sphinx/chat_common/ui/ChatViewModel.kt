@@ -15,6 +15,7 @@ import chat.sphinx.chat_common.ui.viewstate.messageholder.MessageHolderViewState
 import chat.sphinx.chat_common.ui.viewstate.selected.SelectedMessageViewState
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
+import chat.sphinx.concept_meme_server.MemeServerTokenHandler
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
@@ -51,6 +52,7 @@ internal inline fun <ARGS: NavArgs> ChatViewModel<ARGS>.isMessageSelected(): Boo
 abstract class ChatViewModel<ARGS: NavArgs>(
     protected val app: Application,
     dispatchers: CoroutineDispatchers,
+    val memeServerTokenHandler: MemeServerTokenHandler,
     protected val chatRepository: ChatRepository,
     protected val contactRepository: ContactRepository,
     protected val messageRepository: MessageRepository,

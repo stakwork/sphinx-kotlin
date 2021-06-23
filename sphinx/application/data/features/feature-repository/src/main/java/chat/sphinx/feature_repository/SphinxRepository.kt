@@ -59,8 +59,8 @@ import chat.sphinx.wrapper_invite.Invite
 import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_lightning.NodeBalanceAll
 import chat.sphinx.wrapper_message.*
-import chat.sphinx.wrapper_message.media.MessageMedia
-import chat.sphinx.wrapper_message.media.toMediaKeyDecrypted
+import chat.sphinx.wrapper_message_media.MessageMedia
+import chat.sphinx.wrapper_message_media.toMediaKeyDecrypted
 import chat.sphinx.wrapper_rsa.RsaPrivateKey
 import chat.sphinx.wrapper_rsa.RsaPublicKey
 import com.squareup.moshi.Moshi
@@ -82,6 +82,8 @@ import kotlin.collections.ArrayList
 import kotlin.math.absoluteValue
 
 abstract class SphinxRepository(
+    override val accountOwner: StateFlow<Contact?>,
+    private val applicationScope: CoroutineScope,
     private val authenticationCoreManager: AuthenticationCoreManager,
     private val authenticationStorage: AuthenticationStorage,
     protected val coreDB: CoreDB,
@@ -116,9 +118,6 @@ abstract class SphinxRepository(
         const val MESSAGE_PAGINATION_LIMIT = 200
         const val DATE_NIXON_SHOCK = "1971-08-15T00:00:00.000Z"
     }
-
-    private val supervisor = SupervisorJob()
-    private val repositoryScope = CoroutineScope(supervisor)
 
     ////////////////
     /// SocketIO ///
@@ -345,7 +344,7 @@ abstract class SphinxRepository(
                 error = throwable
             }
 
-            repositoryScope.launch(io + handler) {
+            applicationScope.launch(io + handler) {
                 chatLock.withLock {
 
                     val chatIdsToRemove = queries.chatGetAllIds()
@@ -401,7 +400,7 @@ abstract class SphinxRepository(
     }
 
     override fun updateChatMetaData(chatId: ChatId, metaData: ChatMetaData) {
-        repositoryScope.launch(io) {
+        applicationScope.launch(io) {
             val queries = coreDB.getSphinxDatabaseQueries()
             chatLock.withLock {
                 queries.chatUpdateMetaData(metaData, chatId)
@@ -428,19 +427,6 @@ abstract class SphinxRepository(
     private val inviteDboPresenterMapper: InviteDboPresenterMapper by lazy {
         InviteDboPresenterMapper(dispatchers)
     }
-
-    override val accountOwner: StateFlow<Contact?> = flow {
-        emitAll(
-            coreDB.getSphinxDatabaseQueries().contactGetOwner()
-                .asFlow()
-                .mapToOneOrNull(io)
-                .map { it?.let { contactDboPresenterMapper.mapFrom(it) } }
-        )
-    }.stateIn(
-        repositoryScope,
-        SharingStarted.WhileSubscribed(5_000),
-        null
-    )
 
     override val getAllContacts: Flow<List<Contact>> by lazy {
         flow {
@@ -504,7 +490,7 @@ abstract class SphinxRepository(
 
                             var processChatsResponse: Response<Boolean, ResponseError> = Response.Success(true)
 
-                            repositoryScope.launch(io + handler) {
+                            applicationScope.launch(io + handler) {
 
                                 val contactMap: MutableMap<ContactId, ContactDto> =
                                     LinkedHashMap(loadResponse.value.contacts.size)
@@ -571,7 +557,6 @@ abstract class SphinxRepository(
     override suspend fun deleteContactById(contactId: ContactId): Response<Any, ResponseError> {
         val queries = coreDB.getSphinxDatabaseQueries()
 
-
         var owner: Contact? = accountOwner.value
 
         if (owner == null) {
@@ -594,7 +579,7 @@ abstract class SphinxRepository(
 
         var deleteContactResponse: Response<Any, ResponseError> = Response.Success(Any())
 
-        repositoryScope.launch(mainImmediate) {
+        applicationScope.launch(mainImmediate) {
             val response = networkQueryContact.deleteContact(contactId)
             deleteContactResponse = response
 
@@ -639,7 +624,7 @@ abstract class SphinxRepository(
         val sharedFlow: MutableSharedFlow<Response<Boolean, ResponseError>> =
             MutableSharedFlow(1, 0)
 
-        repositoryScope.launch(mainImmediate) {
+        applicationScope.launch(mainImmediate) {
 
             networkQueryContact.createContact(postContactDto).collect { loadResponse ->
                 @Exhaustive
@@ -1231,7 +1216,7 @@ abstract class SphinxRepository(
     override fun sendMessage(sendMessage: SendMessage?) {
         if (sendMessage == null) return
 
-        repositoryScope.launch(mainImmediate) {
+        applicationScope.launch(mainImmediate) {
             val queries = coreDB.getSphinxDatabaseQueries()
 
             // TODO: Update SendMessage to accept a Chat && Contact instead of just IDs
@@ -1383,7 +1368,7 @@ abstract class SphinxRepository(
                             PostMessageDto(
                                 sendMessage.chatId?.value,
                                 sendMessage.contactId?.value,
-                                messagePrice?.value ?: 0,
+                                messagePrice.value,
                                 sendMessage.replyUUID?.value,
                                 selfEncrypted.value,
                                 map,
@@ -1474,13 +1459,13 @@ abstract class SphinxRepository(
 
         var response: Response<Any, ResponseError> = Response.Success(true)
 
-        repositoryScope.launch(mainImmediate) {
+        applicationScope.launch(mainImmediate) {
             val owner: Contact = accountOwner.value.let {
                 if (it != null) {
                     it
                 } else {
                     var owner: Contact? = null
-                    val retrieveOwnerJob = repositoryScope.launch(mainImmediate) {
+                    val retrieveOwnerJob = applicationScope.launch(mainImmediate) {
                         try {
                             accountOwner.collect { contact ->
                                 if (contact != null) {
@@ -1555,7 +1540,7 @@ abstract class SphinxRepository(
     override suspend fun toggleChatMuted(chat: Chat): Response<Boolean, ResponseError> {
         var response: Response<Boolean, ResponseError> = Response.Success(!chat.isMuted.isTrue())
 
-        repositoryScope.launch(mainImmediate) {
+        applicationScope.launch(mainImmediate) {
             networkQueryChat.toggleMuteChat(chat.id, chat.isMuted).collect { loadResponse ->
                 when (loadResponse) {
                     is LoadResponse.Loading -> {}
@@ -1594,7 +1579,7 @@ abstract class SphinxRepository(
 
         emit(LoadResponse.Loading)
 
-        repositoryScope.launch(mainImmediate) {
+        applicationScope.launch(mainImmediate) {
 
             networkQueryChat.joinTribe(tribeDto).collect { loadResponse ->
                 @Exhaustive
@@ -1802,7 +1787,7 @@ abstract class SphinxRepository(
                                     count++
                                 }
 
-                                repositoryScope.launch(io) {
+                                applicationScope.launch(io) {
 
                                     chatLock.withLock {
                                         messageLock.withLock {
@@ -1892,7 +1877,7 @@ abstract class SphinxRepository(
 
                 emit(responseError)
 
-            } ?: repositoryScope.launch(mainImmediate) {
+            } ?: applicationScope.launch(mainImmediate) {
 
                 authenticationStorage.putString(
                     REPOSITORY_LAST_SEEN_MESSAGE_DATE,

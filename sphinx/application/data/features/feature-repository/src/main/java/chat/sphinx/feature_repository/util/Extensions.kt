@@ -13,7 +13,6 @@ import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.dashboard.InviteId
-import chat.sphinx.wrapper_common.invite.InviteStatus
 import chat.sphinx.wrapper_common.invite.toInviteStatus
 import chat.sphinx.wrapper_common.lightning.*
 import chat.sphinx.wrapper_common.message.MessageId
@@ -22,10 +21,10 @@ import chat.sphinx.wrapper_contact.*
 import chat.sphinx.wrapper_invite.InviteString
 import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_message.*
-import chat.sphinx.wrapper_message.media.MediaToken
-import chat.sphinx.wrapper_message.media.toMediaKey
-import chat.sphinx.wrapper_message.media.toMediaKeyDecrypted
-import chat.sphinx.wrapper_message.media.toMediaType
+import chat.sphinx.wrapper_message_media.MediaToken
+import chat.sphinx.wrapper_message_media.toMediaKey
+import chat.sphinx.wrapper_message_media.toMediaKeyDecrypted
+import chat.sphinx.wrapper_message_media.toMediaType
 import chat.sphinx.wrapper_rsa.RsaPublicKey
 import com.squareup.moshi.Moshi
 import com.squareup.sqldelight.TransactionCallbacks

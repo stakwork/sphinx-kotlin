@@ -1,10 +1,11 @@
 package chat.sphinx.feature_network_query_chat
 
-import UpdateChatRelayResponse
+import chat.sphinx.feature_network_query_chat.model.UpdateChatRelayResponse
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
 import chat.sphinx.concept_network_query_chat.model.*
 import chat.sphinx.concept_network_relay_call.NetworkRelayCall
 import chat.sphinx.feature_network_query_chat.model.GetChatsRelayResponse
+import chat.sphinx.feature_network_query_chat.model.JoinTribeRelayResponse
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.wrapper_chat.ChatHost

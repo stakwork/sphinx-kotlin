@@ -8,6 +8,7 @@ import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_message.*
+import chat.sphinx.wrapper_message_media.isImage
 
 internal inline val MessageHolderViewState.isReceived: Boolean
     get() = this is MessageHolderViewState.Received
@@ -40,7 +41,7 @@ internal sealed class MessageHolderViewState(
     }
 
     val unsupportedMessageType: LayoutState.Bubble.ContainerMiddle.UnsupportedMessageType? by lazy(LazyThreadSafetyMode.NONE) {
-        if (unsupportedMessageTypes.contains(message.type)) {
+        if (unsupportedMessageTypes.contains(message.type) && message.messageMedia?.mediaType?.isImage != true) {
             LayoutState.Bubble.ContainerMiddle.UnsupportedMessageType(
                 messageType = message.type,
                 gravityStart = this is Received,
@@ -126,12 +127,26 @@ internal sealed class MessageHolderViewState(
         }
     }
 
-    val bubbleGiphy: LayoutState.Bubble.ContainerTop.Giphy? by lazy(LazyThreadSafetyMode.NONE) {
-        message.giphyData?.let {
-            if (it.url.isNotEmpty()) {
-                LayoutState.Bubble.ContainerTop.Giphy(it.url.replace("giphy.gif", "200w.gif"))
+    val bubbleImageAttachment: LayoutState.Bubble.ContainerTop.ImageAttachment? by lazy(LazyThreadSafetyMode.NONE) {
+        message.giphyData?.let { giphyData ->
+            if (giphyData.url.isNotEmpty()) {
+                LayoutState.Bubble.ContainerTop.ImageAttachment(
+                    giphyData.url.replace("giphy.gif", "200w.gif"),
+                    null
+                )
             } else {
                 null
+            }
+        } ?: message.messageMedia?.let { media ->
+            media.url?.let { mediaUrl ->
+                if (media.mediaType.isImage && !message.isPaidMessage) {
+                    LayoutState.Bubble.ContainerTop.ImageAttachment(
+                        mediaUrl.value,
+                        media
+                    )
+                } else {
+                    null
+                }
             }
         }
     }

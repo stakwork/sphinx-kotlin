@@ -1,7 +1,10 @@
 package chat.sphinx.di
 
 import android.content.Context
+import chat.sphinx.concept_coredb.CoreDB
 import chat.sphinx.concept_crypto_rsa.RSA
+import chat.sphinx.concept_meme_server.MemeServerTokenHandler
+import chat.sphinx.concept_network_query_attachment.NetworkQueryAttachment
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
@@ -15,9 +18,14 @@ import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.concept_socket_io.SocketIOManager
 import chat.sphinx.database.SphinxCoreDBImpl
 import chat.sphinx.feature_coredb.CoreDBImpl
+import chat.sphinx.feature_meme_server.MemeServerTokenHandlerImpl
+import chat.sphinx.feature_repository.mappers.contact.toContact
 import chat.sphinx.feature_repository_android.SphinxRepositoryAndroid
 import chat.sphinx.logger.SphinxLogger
+import chat.sphinx.wrapper_contact.Contact
 import com.squareup.moshi.Moshi
+import com.squareup.sqldelight.runtime.coroutines.asFlow
+import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -27,6 +35,8 @@ import io.matthewnelson.build_config.BuildConfigDebug
 import io.matthewnelson.concept_authentication.data.AuthenticationStorage
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.feature_authentication_core.AuthenticationCoreManager
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.*
 import javax.inject.Singleton
 
 @Module
@@ -54,7 +64,53 @@ object RepositoryModule {
 
     @Provides
     @Singleton
+    fun provideAccountOwnerFlow(
+        applicationScope: CoroutineScope,
+        coreDBImpl: CoreDBImpl,
+        dispatchers: CoroutineDispatchers,
+    ): StateFlow<Contact?> = flow {
+        emitAll(
+            coreDBImpl.getSphinxDatabaseQueries().contactGetOwner()
+                .asFlow()
+                .mapToOneOrNull(dispatchers.io)
+                .map { it?.toContact() }
+        )
+    }.stateIn(
+        applicationScope,
+        SharingStarted.WhileSubscribed(5_000),
+        null
+    )
+
+    @Provides
+    @Singleton
+    fun provideMemeServerTokenHandlerImpl(
+        accountOwner: StateFlow<Contact?>,
+        applicationScope: CoroutineScope,
+        authenticationStorage: AuthenticationStorage,
+        dispatchers: CoroutineDispatchers,
+        networkQueryAttachment: NetworkQueryAttachment,
+        LOG: SphinxLogger,
+    ): MemeServerTokenHandlerImpl =
+        MemeServerTokenHandlerImpl(
+            accountOwner,
+            applicationScope,
+            authenticationStorage,
+            dispatchers,
+            networkQueryAttachment,
+            LOG,
+        )
+
+    @Provides
+    fun provideMemeServerTokenHandler(
+        memeServerTokenHandlerImpl: MemeServerTokenHandlerImpl
+    ): MemeServerTokenHandler =
+        memeServerTokenHandlerImpl
+
+    @Provides
+    @Singleton
     fun provideSphinxRepositoryAndroid(
+        accountOwner: StateFlow<Contact?>,
+        applicationScope: CoroutineScope,
         authenticationCoreManager: AuthenticationCoreManager,
         authenticationStorage: AuthenticationStorage,
         coreDBImpl: CoreDBImpl,
@@ -69,6 +125,8 @@ object RepositoryModule {
         sphinxLogger: SphinxLogger,
     ): SphinxRepositoryAndroid =
         SphinxRepositoryAndroid(
+            accountOwner,
+            applicationScope,
             authenticationCoreManager,
             authenticationStorage,
             coreDBImpl,
