@@ -11,6 +11,7 @@
     tools:visibility="visible">
 
     <androidx.cardview.widget.CardView
+        android:id="@+id/card_view_image_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -27,7 +28,6 @@
             android:foreground="?attr/selectableItemBackground"
             android:adjustViewBounds="true"
             android:scaleType="fitCenter"
-            android:background="@drawable/background_message_bubble_received_middle"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 

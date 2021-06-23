@@ -351,8 +351,8 @@ internal class DashboardViewModel @Inject constructor(
     val networkStateFlow: StateFlow<LoadResponse<Boolean, ResponseError>>
         get() = _networkStateFlow.asStateFlow()
 
-    private var pushNotificationRegistrationUpdated: Boolean = false
     private var jobNetworkRefresh: Job? = null
+    private var jobPushNotificationRegistration: Job? = null
     fun networkRefresh() {
         if (jobNetworkRefresh?.isActive == true) {
             return
@@ -389,15 +389,18 @@ internal class DashboardViewModel @Inject constructor(
                 jobNetworkRefresh?.cancel()
             }
 
-            if (!pushNotificationRegistrationUpdated) {
-                pushNotificationRegistrar.register().let { response ->
-                    @Exhaustive
-                    when (response) {
-                        is Response.Error -> {
-                            // TODO: Handle on the UI
-                        }
-                        is Response.Success -> {
-                            pushNotificationRegistrationUpdated = true
+            // must occur after contacts have been retrieved such that
+            // an account owner is available, otherwise it just suspends
+            // until it is.
+            if (jobPushNotificationRegistration == null) {
+                jobPushNotificationRegistration = launch(mainImmediate) {
+                    pushNotificationRegistrar.register().let { response ->
+                        @Exhaustive
+                        when (response) {
+                            is Response.Error -> {
+                                // TODO: Handle on the UI
+                            }
+                            is Response.Success -> {}
                         }
                     }
                 }

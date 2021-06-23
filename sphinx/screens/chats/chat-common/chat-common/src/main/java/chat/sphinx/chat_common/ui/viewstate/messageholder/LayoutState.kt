@@ -5,10 +5,9 @@ import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.lightning.unit
 import chat.sphinx.wrapper_message.MessageType
-import chat.sphinx.wrapper_message_media.MediaKey
 import chat.sphinx.wrapper_message_media.MessageMedia
 
-internal sealed class LayoutState {
+internal sealed class LayoutState private constructor() {
 
     data class MessageStatusHeader(
         val senderName: String?,
@@ -38,14 +37,25 @@ internal sealed class LayoutState {
         val timestamp: String,
     ): LayoutState()
 
-    sealed class Bubble: LayoutState() {
+    sealed class Bubble private constructor(): LayoutState() {
 
-        sealed class ContainerTop: Bubble() {
+        sealed class ContainerFirst private constructor(): Bubble() {
+
+            data class ReplyMessage(
+                // TODO: Make sealed interface for handling a url or file
+//            val media: String?,
+                val sender: String,
+                val text: String,
+            ): ContainerFirst()
+
+        }
+
+        sealed class ContainerSecond private constructor(): Bubble() {
 
             data class PaidMessageSentStatus(
                 val amount: Sat,
                 val purchaseType: MessageType.Purchase?,
-            ): ContainerTop() {
+            ): ContainerSecond() {
                 val amountText: String
                     get() = amount.asFormattedString(appendUnit = true)
             }
@@ -53,7 +63,7 @@ internal sealed class LayoutState {
             data class DirectPayment(
                 val showSent: Boolean,
                 val amount: Sat
-            ): ContainerTop() {
+            ): ContainerSecond() {
                 val showReceived: Boolean
                     get() = !showSent
 
@@ -64,33 +74,26 @@ internal sealed class LayoutState {
             data class ImageAttachment(
                 val url: String,
                 val media: MessageMedia?,
-            ): ContainerTop()
+            ): ContainerSecond()
 
             // FileAttachment
             // AudioAttachment
             // VideoAttachment
 
-            data class ReplyMessage(
-                // TODO: Make sealed interface for handling a url or file
-//            val media: String?,
-                val sender: String,
-                val text: String,
-            ): ContainerTop()
-
             // CallInvite
             // Invoice
         }
 
-        sealed class ContainerMiddle: Bubble() {
+        sealed class ContainerThird private constructor(): Bubble() {
 
             data class UnsupportedMessageType(
                 val messageType: MessageType,
                 val gravityStart: Boolean,
-            ): ContainerMiddle()
+            ): ContainerThird()
 
             data class Message(
                 val text: String
-            ): ContainerMiddle()
+            ): ContainerThird()
 
             // MessageLinkPreview
             // TribeLinkPreview
@@ -98,12 +101,12 @@ internal sealed class LayoutState {
 
         }
 
-        sealed class ContainerBottom: Bubble() {
+        sealed class ContainerFourth private constructor(): Bubble() {
 
             data class Boost(
                 private val totalAmount: Sat,
                 val senderPics: Set<BoostReactionImageHolder>
-            ): ContainerBottom() {
+            ): ContainerFourth() {
                 val amountText: String
                     get() = totalAmount.asFormattedString()
 
@@ -127,7 +130,7 @@ internal sealed class LayoutState {
                 val showPaymentProgressWheel: Boolean,
                 val showSendPaymentIcon: Boolean,
                 val showPaymentReceivedIcon: Boolean,
-            ): ContainerBottom() {
+            ): ContainerFourth() {
                 val amountText: String
                     get() = amount.asFormattedString(appendUnit = true)
             }
