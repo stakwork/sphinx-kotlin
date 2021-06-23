@@ -26,6 +26,14 @@ private inline fun CryptoInterceptor.buildInvalidResponse(
         .body(failureMessage.toResponseBody(null))
         .build()
 
+/**
+ * Intercepts a network request where a [chat.sphinx.concept_network_client_crypto.CryptoHeader]
+ * is present, and utilizes the provided header value to encrypt/decrypt the
+ * [RequestBody]/[ResponseBody] for the declared [CryptoScheme] within the header key.
+ *
+ * The headers (if present) are stripped from the request prior to execution as to not leak
+ * sensitive data.
+ * */
 class CryptoInterceptor: Interceptor {
 
     override fun intercept(chain: Interceptor.Chain): Response {
