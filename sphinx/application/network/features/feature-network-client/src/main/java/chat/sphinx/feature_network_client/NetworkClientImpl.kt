@@ -244,7 +244,7 @@ class NetworkClientImpl(
                     proxy(null)
                 }
 
-                if (!networkInterceptors().contains(cryptoInterceptor)) {
+                if (!interceptors().contains(cryptoInterceptor)) {
                     addInterceptor(cryptoInterceptor)
                 }
 
