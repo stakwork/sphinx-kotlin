@@ -144,7 +144,7 @@ abstract class ChatFragment<
                                 delay(250L)
                             }
                         }
-                        viewModel.shouldShowSendAttachmentMenu()
+                        viewModel.shouldShowActionsMenu()
                     }
                 }
             }

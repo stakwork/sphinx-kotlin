@@ -244,7 +244,7 @@ internal class ChatContactViewModel @Inject constructor(
         return super.sendMessage(builder)
     }
 
-    override fun shouldShowSendAttachmentMenu() {
-        showSendAttachmentMenu(true, args.contactId)
+    override fun shouldShowActionsMenu() {
+        showAactionsMenu(true, args.contactId)
     }
 }

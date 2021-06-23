@@ -301,7 +301,7 @@ internal class ChatTribeViewModel @Inject constructor(
         }
     }
 
-    override fun shouldShowSendAttachmentMenu() {
-        showSendAttachmentMenu(false)
+    override fun shouldShowActionsMenu() {
+        showAactionsMenu(false)
     }
 }

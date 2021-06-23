@@ -127,7 +127,7 @@ class ChatGroupViewModel @Inject constructor(
         return super.sendMessage(builder)
     }
 
-    override fun shouldShowSendAttachmentMenu() {
-        showSendAttachmentMenu(false)
+    override fun shouldShowActionsMenu() {
+        showAactionsMenu(false)
     }
 }
