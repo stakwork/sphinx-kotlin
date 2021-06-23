@@ -1212,6 +1212,7 @@ abstract class SphinxRepository(
     private val provisionalMessageLock = Mutex()
 
     // TODO: Rework to handle different message types
+
     @OptIn(RawPasswordAccess::class)
     override fun sendMessage(sendMessage: SendMessage?) {
         if (sendMessage == null) return

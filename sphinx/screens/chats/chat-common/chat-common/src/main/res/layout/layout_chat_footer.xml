@@ -46,7 +46,7 @@
             android:paddingVertical="16dp"
             android:textColor="@color/text"
             android:textCursorDrawable="@drawable/cursor"
-            tools:text="line 1\nline 2\nline 3\nline 4\nline 5" />
+            tools:text="" />
 
     </androidx.core.widget.NestedScrollView>
 

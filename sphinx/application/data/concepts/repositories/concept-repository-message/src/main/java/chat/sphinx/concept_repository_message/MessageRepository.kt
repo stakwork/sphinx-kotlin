@@ -18,6 +18,7 @@ interface MessageRepository {
 
     suspend fun readMessages(chatId: ChatId)
     fun sendMessage(sendMessage: SendMessage?)
+
     suspend fun boostMessage(
         chatId: ChatId,
         pricePerMessage: Sat,

@@ -6,7 +6,9 @@ import chat.sphinx.wrapper_contact.Contact
 internal sealed class PaymentSendViewState: ViewState<PaymentSendViewState>() {
     object Idle: PaymentSendViewState()
 
-    class SendingChatPayment(
+    object KeySendPayment: PaymentSendViewState()
+
+    class ChatPayment(
         val contact: Contact
     ): PaymentSendViewState()
 }

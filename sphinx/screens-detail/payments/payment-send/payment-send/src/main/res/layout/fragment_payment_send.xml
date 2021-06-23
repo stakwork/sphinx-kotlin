@@ -20,6 +20,7 @@
         android:layout_width="wrap_content"
         android:layout_height="@dimen/from_to_contact_height"
         android:layout_marginTop="@dimen/default_layout_margin"
+        android:visibility="invisible"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/include_payment_send_header">
@@ -67,19 +68,17 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/layout_constraint_from_contact">
 
-        <androidx.appcompat.widget.AppCompatEditText
-            android:id="@+id/edit_text_amount"
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_amount"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:hint="0"
-            android:inputType="text"
             android:singleLine="true"
             android:textColor="@color/primaryText"
             android:textColorHint="@color/placeholderTextInverted"
             android:textSize="@dimen/amount_edit_text_text_size"
             android:fontFamily="@font/roboto_regular"
             android:backgroundTint="@android:color/transparent"
-            android:textCursorDrawable="@drawable/cursor"
             android:layout_marginHorizontal="70dp"
             android:gravity="center"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -96,7 +95,7 @@
             android:text="@string/sat"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/edit_text_amount"/>
+            app:layout_constraintStart_toEndOf="@+id/text_view_amount"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -105,35 +104,60 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/message_edit_text_container_height"
         android:paddingHorizontal="@dimen/container_horizontal_padding"
+        android:visibility="visible"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/layout_constraint_amount">
 
-        <androidx.appcompat.widget.AppCompatEditText
-            android:id="@+id/edit_text_message"
-            android:layout_width="0dp"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/add_message_hint"
-            android:inputType="text"
-            android:singleLine="true"
-            android:textColor="@color/primaryText"
-            android:textColorHint="@color/placeholderTextInverted"
-            android:textSize="@dimen/message_edit_text_text_size"
-            android:fontFamily="@font/roboto_regular"
-            android:backgroundTint="@android:color/transparent"
-            android:textCursorDrawable="@drawable/cursor"
-            android:gravity="center"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintStart_toStartOf="parent">
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@color/placeholderTextInverted"
-            android:layout_marginTop="@dimen/message_edit_text_divider_top_margin"
-            app:layout_constraintTop_toBottomOf="@+id/edit_text_message"></View>
+            <androidx.core.widget.NestedScrollView
+                android:id="@+id/scroll_view_edit_text"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent">
+
+                <androidx.appcompat.widget.AppCompatEditText
+                    android:id="@+id/edit_text_message"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@null"
+                    android:inputType="textMultiLine"
+                    android:hint="@string/add_message_hint"
+                    android:singleLine="true"
+                    android:textColor="@color/primaryText"
+                    android:textColorHint="@color/placeholderTextInverted"
+                    android:textSize="@dimen/message_edit_text_text_size"
+                    android:fontFamily="@font/roboto_regular"
+                    android:backgroundTint="@android:color/transparent"
+                    android:textCursorDrawable="@drawable/cursor"
+                    android:gravity="center"
+                    android:maxLength="200"
+                    android:maxLines="4"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent" />
+
+            </androidx.core.widget.NestedScrollView>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/placeholderTextInverted"
+                android:layout_marginTop="@dimen/message_edit_text_divider_top_margin"
+                app:layout_constraintTop_toBottomOf="@+id/scroll_view_edit_text"></View>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -167,6 +191,7 @@
             android:background="@drawable/button_background_white_rad_48"
             android:backgroundTint="@color/primaryBlue"
             android:gravity="center"
+            android:visibility="gone"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -179,7 +204,7 @@
             android:layout_marginLeft="@dimen/default_half_layout_margin"
             style="?android:attr/progressBarStyle"
             android:indeterminateTint="@color/mainBottomIcons"
-            app:layout_constraintStart_toEndOf="@+id/button_already_on_sphinx"
+            app:layout_constraintStart_toEndOf="@+id/button_confirm"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             android:indeterminate="true"
