@@ -35,7 +35,7 @@ internal class ScannerViewModel @Inject constructor(
                 ScannerViewState.LayoutVisibility(
                     it.value.argShowBackArrow,
                     it.value.argShowBottomView,
-                    it.value.argCodeTypeLabel
+                    it.value.argScannerModeLabel
                 )
             },
         )

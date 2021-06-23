@@ -110,7 +110,7 @@ internal class DashboardViewModel @Inject constructor(
                         }
                     },
                     showBottomView = true,
-                    codeTypeLabel = app.getString(R.string.join_tribe_link)
+                    scannerModeLabel = app.getString(R.string.join_tribe_link)
                 )
             )
             if (response is Response.Success) {

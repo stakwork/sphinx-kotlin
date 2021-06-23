@@ -138,7 +138,7 @@ internal class PaymentSendViewModel @Inject constructor(
                         }
                     },
                     showBottomView = true,
-                    codeTypeLabel = app.getString(R.string.destination_key)
+                    scannerModeLabel = app.getString(R.string.destination_key)
                 )
             )
             if (response is Response.Success) {
@@ -155,7 +155,7 @@ internal class PaymentSendViewModel @Inject constructor(
             sendPaymentBuilder.setContactId(args.contactId)
             sendPaymentBuilder.setText(message)
 
-            messageRepository.sendPayment(sendPaymentBuilder.build())
+            sendPayment()
         } else {
             requestScanner()
         }
@@ -164,6 +164,11 @@ internal class PaymentSendViewModel @Inject constructor(
     private fun sendDirectPayment(destinationKey: LightningNodePubKey) {
         sendPaymentBuilder.setDestinationKey(destinationKey)
 
+        sendPayment()
+    }
+
+    private fun sendPayment() {
+        viewStateContainer.updateViewState(PaymentSendViewState.ProcessingPayment)
         messageRepository.sendPayment(sendPaymentBuilder.build())
     }
 

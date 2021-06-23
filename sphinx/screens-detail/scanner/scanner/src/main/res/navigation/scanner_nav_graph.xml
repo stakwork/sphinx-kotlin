@@ -16,7 +16,7 @@
             android:name="argShowBottomView"
             app:argType="boolean" />
         <argument
-            android:name="argCodeTypeLabel"
+            android:name="argScannerModeLabel"
             app:argType="string" />
     </fragment>
 

@@ -9,7 +9,7 @@ import io.matthewnelson.concept_navigation.NavigationRequest
 
 internal class ToScannerDetail(
     private val showBottomView: Boolean = false,
-    private val codeTypeLabel: String = "",
+    private val scannerModeLabel: String = "",
 ): NavigationRequest<NavController>() {
 
     override fun navigate(controller: NavController) {
@@ -24,7 +24,7 @@ internal class ToScannerDetail(
         controller.navigate(
             R.id.scanner_nav_graph,
 
-            ScannerFragmentArgs.Builder(controller.previousBackStackEntry != null, showBottomView, codeTypeLabel)
+            ScannerFragmentArgs.Builder(controller.previousBackStackEntry != null, showBottomView, scannerModeLabel)
                 .build()
                 .toBundle(),
 

@@ -6,6 +6,6 @@ internal sealed class ScannerViewState: ViewState<ScannerViewState>() {
     data class LayoutVisibility(
         val showBackButton: Boolean,
         val showBottomView: Boolean,
-        val codeTypeLabel: String
+        val scannerModeLabel: String
     ): ScannerViewState()
 }

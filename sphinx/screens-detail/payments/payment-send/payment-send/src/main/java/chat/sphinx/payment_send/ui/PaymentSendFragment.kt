@@ -149,6 +149,11 @@ internal class PaymentSendFragment: SideEffectFragment<
 
                 setupDestination(viewState.contact)
             }
+
+            is PaymentSendViewState.ProcessingPayment -> {
+                binding.buttonConfirm.isEnabled = false
+                binding.confirmProgress.visible
+            }
         }
     }
 

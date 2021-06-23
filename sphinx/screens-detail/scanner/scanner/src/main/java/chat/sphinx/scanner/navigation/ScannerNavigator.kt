@@ -12,9 +12,9 @@ abstract class ScannerNavigator(
     @JvmSynthetic
     internal suspend fun toScannerScreen(
         showBottomView: Boolean = false,
-        codeTypeLabel: String = ""
+        scannerModeLabel: String = ""
     ) {
-        navigationDriver.submitNavigationRequest(ToScannerDetail(showBottomView, codeTypeLabel))
+        navigationDriver.submitNavigationRequest(ToScannerDetail(showBottomView, scannerModeLabel))
     }
 
     @JvmSynthetic

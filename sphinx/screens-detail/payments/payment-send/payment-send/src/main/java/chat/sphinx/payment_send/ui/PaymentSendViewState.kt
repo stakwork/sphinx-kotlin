@@ -11,4 +11,6 @@ internal sealed class PaymentSendViewState: ViewState<PaymentSendViewState>() {
     class ChatPayment(
         val contact: Contact
     ): PaymentSendViewState()
+
+    object ProcessingPayment: PaymentSendViewState()
 }
