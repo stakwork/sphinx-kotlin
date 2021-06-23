@@ -5,6 +5,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.chat_common.ui.ChatViewModel
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
+import chat.sphinx.concept_meme_server.MemeServerTokenHandler
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
@@ -34,6 +35,7 @@ internal inline val ChatGroupFragmentArgs.chatId: ChatId
 class ChatGroupViewModel @Inject constructor(
     app: Application,
     dispatchers: CoroutineDispatchers,
+    memeServerTokenHandler: MemeServerTokenHandler,
     chatRepository: ChatRepository,
     contactRepository: ContactRepository,
     messageRepository: MessageRepository,
@@ -43,6 +45,7 @@ class ChatGroupViewModel @Inject constructor(
 ): ChatViewModel<ChatGroupFragmentArgs>(
     app,
     dispatchers,
+    memeServerTokenHandler,
     chatRepository,
     contactRepository,
     messageRepository,

@@ -15,12 +15,18 @@ import chat.sphinx.chat_common.databinding.LayoutMessageHolderBinding
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
+import chat.sphinx.concept_meme_server.MemeServerTokenHandler
+import chat.sphinx.concept_network_client_crypto.CryptoHeader
+import chat.sphinx.concept_network_client_crypto.CryptoScheme
 import chat.sphinx.resources.getString
 import chat.sphinx.resources.setBackgroundRandomColor
 import chat.sphinx.resources.setTextColorExt
+import chat.sphinx.wrapper_attachment.headerKey
+import chat.sphinx.wrapper_attachment.headerValue
 import chat.sphinx.wrapper_chat.ChatType
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_message.MessageType
+import chat.sphinx.wrapper_message_media.MessageMedia
 import chat.sphinx.wrapper_view.Px
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
@@ -28,7 +34,6 @@ import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @MainThread
@@ -40,6 +45,7 @@ internal inline fun LayoutMessageHolderBinding.setView(
     dispatchers: CoroutineDispatchers,
     imageLoader: ImageLoader<ImageView>,
     imageLoaderDefaults: ImageLoaderOptions,
+    memeServerTokenHandler: MemeServerTokenHandler,
     recyclerViewWidth: Px,
     viewState: MessageHolderViewState,
 ) {
@@ -73,9 +79,35 @@ internal inline fun LayoutMessageHolderBinding.setView(
         setGroupActionIndicatorLayout(viewState.groupActionIndicator)
 
         if (viewState.background !is BubbleBackground.Gone) {
-            setBubbleImageAttachment(viewState.bubbleImageAttachment) { imageView, url ->
+            setBubbleImageAttachment(viewState.bubbleImageAttachment) { imageView, url, media ->
                 lifecycleScope.launch(dispatchers.mainImmediate) {
-                    imageLoader.load(imageView, url)
+                    val options: ImageLoaderOptions? = if (media != null) {
+                        val builder = ImageLoaderOptions.Builder()
+
+                        // TODO: Add error resource drawable
+//                        builder.errorResId()
+
+                        media.host?.let { host ->
+                            memeServerTokenHandler.retrieveAuthenticationToken(host)?.let { token ->
+                                builder.addHeader(token.headerKey, token.headerValue)
+
+                                media.mediaKeyDecrypted?.value?.let { key ->
+                                    val header = CryptoHeader.Decrypt.Builder()
+                                        .setScheme(CryptoScheme.Decrypt.JNCryptor)
+                                        .setPassword(key)
+                                        .build()
+
+                                    builder.addHeader(header.key, header.value)
+                                }
+                            }
+                        }
+
+                        builder.build()
+                    } else {
+                        null
+                    }
+
+                    imageLoader.load(imageView, url, options)
                         .also { disposable ->
                             disposables.add(disposable)
                             disposable.await()
@@ -499,7 +531,7 @@ internal inline fun LayoutMessageHolderBinding.setBubblePaidMessageSentStatusLay
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun LayoutMessageHolderBinding.setBubbleImageAttachment(
     imageAttachment: LayoutState.Bubble.ContainerTop.ImageAttachment?,
-    loadImage: (ImageView, String) -> Unit,
+    loadImage: (ImageView, String, MessageMedia?) -> Unit,
 ) {
     includeMessageHolderBubble.includeMessageTypeImageAttachment.apply {
         if (imageAttachment == null) {
@@ -508,7 +540,7 @@ internal inline fun LayoutMessageHolderBinding.setBubbleImageAttachment(
             root.visible
             loadingImageProgressContainer.visible
 
-            loadImage(imageViewAttachmentImage, imageAttachment.url)
+            loadImage(imageViewAttachmentImage, imageAttachment.url, imageAttachment.media)
         }
     }
 }

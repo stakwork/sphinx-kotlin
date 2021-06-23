@@ -317,7 +317,10 @@ abstract class ChatFragment<
                 @Exhaustive
                 when (viewState) {
                     is SelectedMessageViewState.None -> {
-                        selectedMessageBinding.root.gone
+                        selectedMessageBinding.apply {
+                            root.gone
+                            imageViewSelectedMessageBlur.setImageBitmap(null)
+                        }
                     }
                     is SelectedMessageViewState.SelectedMessage -> {
                         if (viewState.messageHolderViewState.selectionMenuItems.isNullOrEmpty()) {
@@ -334,6 +337,7 @@ abstract class ChatFragment<
                                 viewModel.dispatchers,
                                 imageLoader,
                                 viewModel.imageLoaderDefaults,
+                                viewModel.memeServerTokenHandler,
                                 viewState.recyclerViewWidth,
                                 viewState.messageHolderViewState
                             )
@@ -343,8 +347,17 @@ abstract class ChatFragment<
 
                         selectedMessageBinding.apply message@ {
 
-                            val screenshot = binding.root.takeScreenshot()
-                            imageViewSelectedMessageBlur.setImageBitmap(screenshot.blur(root.context, 25.0f))
+                            binding.root.takeScreenshot(
+                                requireActivity().window,
+                                bitmapCallback = { bitmap ->
+                                    if (viewModel.getSelectedMessageViewStateFlow().value == viewState) {
+                                        selectedMessageBinding
+                                            .imageViewSelectedMessageBlur
+                                            .setImageBitmap(bitmap.blur(root.context, 25.0F))
+                                    }
+                                },
+                                errorCallback = {}
+                            )
 
                             this@message.includeLayoutSelectedMessageMenu.apply {
                                 spaceSelectedMessageMenuArrowTop.goneIfFalse(!viewState.showMenuTop)
