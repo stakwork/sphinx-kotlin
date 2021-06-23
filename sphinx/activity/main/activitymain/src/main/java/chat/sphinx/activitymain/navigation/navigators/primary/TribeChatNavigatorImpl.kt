@@ -17,8 +17,8 @@ internal class TribeChatNavigatorImpl @Inject constructor(
     ): TribeChatNavigator(navigationDriver)
 {
 
-    override suspend fun toPaymentSendDetail(contactId: ContactId) {
-        detailDriver.submitNavigationRequest(ToPaymentSendDetail(contactId))
+    override suspend fun toPaymentSendDetail(contactId: ContactId, chatId: ChatId?) {
+        detailDriver.submitNavigationRequest(ToPaymentSendDetail(contactId, chatId))
     }
 
     override suspend fun toPodcastPlayerScreen(chatId: ChatId, podcast: Podcast) {

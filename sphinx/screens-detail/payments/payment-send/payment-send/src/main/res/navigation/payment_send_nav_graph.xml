@@ -12,6 +12,9 @@
         <argument
             android:name="argContactId"
             app:argType="long" />
+        <argument
+            android:name="argChatId"
+            app:argType="long" />
     </fragment>
 
 </navigation>

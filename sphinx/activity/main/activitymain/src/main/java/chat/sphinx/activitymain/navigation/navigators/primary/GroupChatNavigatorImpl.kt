@@ -4,7 +4,7 @@ import chat.sphinx.activitymain.navigation.drivers.DetailNavigationDriver
 import chat.sphinx.activitymain.navigation.drivers.PrimaryNavigationDriver
 import chat.sphinx.chat_group.navigation.GroupChatNavigator
 import chat.sphinx.payment_send.navigation.ToPaymentSendDetail
-import chat.sphinx.send_attachment.navigation.ToSendAttachmentDetail
+import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import javax.inject.Inject
 
@@ -13,8 +13,8 @@ internal class GroupChatNavigatorImpl @Inject constructor(
     private val detailDriver: DetailNavigationDriver,
 ): GroupChatNavigator(navigationDriver)
 {
-    override suspend fun toPaymentSendDetail(contactId: ContactId) {
-        detailDriver.submitNavigationRequest(ToPaymentSendDetail(contactId))
+    override suspend fun toPaymentSendDetail(contactId: ContactId, chatId: ChatId?) {
+        detailDriver.submitNavigationRequest(ToPaymentSendDetail(contactId, chatId))
     }
 
 }

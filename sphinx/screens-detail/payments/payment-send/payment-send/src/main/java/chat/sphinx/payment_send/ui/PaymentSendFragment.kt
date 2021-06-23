@@ -18,6 +18,8 @@ import chat.sphinx.payment_send.databinding.FragmentPaymentSendBinding
 import chat.sphinx.wrapper_contact.Contact
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
+import io.matthewnelson.android_feature_screens.util.gone
+import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.invisible
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.concept_views.viewstate.collect
@@ -45,12 +47,18 @@ internal class PaymentSendFragment: SideEffectFragment<
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.includePaymentSendHeader.apply {
-            textViewDetailScreenHeaderName.text = getString(R.string.payment_send_header_name)
-            textViewDetailScreenClose.setOnClickListener {
-                lifecycleScope.launch(viewModel.mainImmediate) {
-                    viewModel.navigator.closeDetailScreen()
+        binding.apply {
+            includePaymentSendHeader.apply {
+                textViewDetailScreenHeaderName.text = getString(R.string.payment_send_header_name)
+                textViewDetailScreenClose.setOnClickListener {
+                    lifecycleScope.launch(viewModel.mainImmediate) {
+                        viewModel.navigator.closeDetailScreen()
+                    }
                 }
+            }
+
+            binding.buttonConfirm.setOnClickListener {
+                viewModel.sendChatPayment(textViewContactName?.text?.toString())
             }
         }
 
@@ -111,7 +119,7 @@ internal class PaymentSendFragment: SideEffectFragment<
     private fun removeLastCharacter() {
         binding.textViewAmount.text?.let { amountString ->
             amountString.toString().dropLast(1)?.let { updatedAmountString ->
-                updateAmountString(updatedAmountString)
+                viewModel.updateAmount(updatedAmountString)
             }
         }
     }
@@ -120,17 +128,7 @@ internal class PaymentSendFragment: SideEffectFragment<
         binding.apply {
             textViewAmount.text?.let { amountString ->
                 val updatedAmountString = "$amountString$c"
-                updateAmountString(updatedAmountString)
-            }
-        }
-    }
-
-    private fun updateAmountString(amountString: String) {
-        if (amountString.isEmpty()) {
-            binding.textViewAmount.text = ""
-        } else {
-            amountString.toInt()?.let { updatedAmount ->
-                viewModel.updateAmount(updatedAmount)
+                viewModel.updateAmount(updatedAmountString)
             }
         }
     }
@@ -165,6 +163,7 @@ internal class PaymentSendFragment: SideEffectFragment<
 
                     is AmountViewState.AmountUpdated -> {
                         binding.textViewAmount.text = viewState.amountString
+                        binding.buttonConfirm.goneIfFalse(viewState.amountString.isNotEmpty())
                     }
                 }
             }

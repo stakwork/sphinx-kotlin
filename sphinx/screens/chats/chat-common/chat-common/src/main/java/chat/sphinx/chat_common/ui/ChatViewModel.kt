@@ -35,6 +35,7 @@ import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.ChatActionType
 import chat.sphinx.wrapper_chat.ChatName
 import chat.sphinx.wrapper_chat.isConversation
+import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.MessageUUID
@@ -407,11 +408,15 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 
     abstract fun shouldShowActionsMenu()
 
-    fun showActionsMenu(isConversation: Boolean = false, contactId: ContactId? = null) {
+    fun showActionsMenu(
+        contactId: ContactId? = null,
+        chatId: ChatId? = null)
+    {
+
         viewModelScope.launch(mainImmediate) {
             val response = sendAttachmentCoordinator.submitRequest(
                 //If it's group or tribe last 2 options will be disabled
-                SendAttachmentRequest(isConversation)
+                SendAttachmentRequest(contactId != null)
             )
             if (response is Response.Success) {
                 when (response.value.actionType) {
@@ -452,7 +457,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                     is ChatActionType.SendPayment -> {
                         contactId?.let { contactId ->
                             delay(250L)
-                            chatNavigator.toPaymentSendDetail(contactId)
+                            chatNavigator.toPaymentSendDetail(contactId, chatId)
                         }
                     }
                 }

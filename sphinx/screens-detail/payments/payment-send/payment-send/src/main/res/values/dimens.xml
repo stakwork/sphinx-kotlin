@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="from_to_contact_height">35dp</dimen>
+    <dimen name="from_to_contact_height">40dp</dimen>
     <dimen name="from_to_contact_image_xy">35dp</dimen>
 
     <dimen name="amount_edit_text_container_height">105dp</dimen>

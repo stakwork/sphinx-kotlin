@@ -17,7 +17,10 @@ interface MessageRepository {
     val networkRefreshMessages: Flow<LoadResponse<Boolean, ResponseError>>
 
     suspend fun readMessages(chatId: ChatId)
+
     fun sendMessage(sendMessage: SendMessage?)
+
+    fun sendPayment(sendPayment: SendPayment?)
 
     suspend fun boostMessage(
         chatId: ChatId,
