@@ -82,25 +82,27 @@ internal inline fun LayoutMessageHolderBinding.setView(
             setBubbleImageAttachment(viewState.bubbleImageAttachment) { imageView, url, media ->
                 lifecycleScope.launch(dispatchers.mainImmediate) {
                     val options: ImageLoaderOptions? = if (media != null) {
+                        val builder = ImageLoaderOptions.Builder()
+
+                        // TODO: Add error resource drawable
+//                        builder.errorResId()
+
                         media.host?.let { host ->
                             memeServerTokenHandler.retrieveAuthenticationToken(host)?.let { token ->
-                                val builder = ImageLoaderOptions.Builder()
-                                    .addHeader(token.headerKey, token.headerValue)
+                                builder.addHeader(token.headerKey, token.headerValue)
 
                                 media.mediaKeyDecrypted?.value?.let { key ->
-                                    try {
-                                        val header = CryptoHeader.Decrypt.Builder()
-                                            .setScheme(CryptoScheme.Decrypt.JNCryptor)
-                                            .setPassword(key)
-                                            .build()
+                                    val header = CryptoHeader.Decrypt.Builder()
+                                        .setScheme(CryptoScheme.Decrypt.JNCryptor)
+                                        .setPassword(key)
+                                        .build()
 
-                                        builder.addHeader(header.key, header.value)
-                                    } catch (e: IllegalArgumentException) {}
+                                    builder.addHeader(header.key, header.value)
                                 }
-
-                                builder.build()
                             }
                         }
+
+                        builder.build()
                     } else {
                         null
                     }
