@@ -128,6 +128,6 @@ class ChatGroupViewModel @Inject constructor(
     }
 
     override fun shouldShowActionsMenu() {
-        showAactionsMenu(false)
+        showActionsMenu(false)
     }
 }

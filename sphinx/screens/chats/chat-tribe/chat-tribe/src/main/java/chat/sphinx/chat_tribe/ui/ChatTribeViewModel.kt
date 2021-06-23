@@ -302,6 +302,6 @@ internal class ChatTribeViewModel @Inject constructor(
     }
 
     override fun shouldShowActionsMenu() {
-        showAactionsMenu(false)
+        showActionsMenu(false)
     }
 }

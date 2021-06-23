@@ -407,7 +407,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 
     abstract fun shouldShowActionsMenu()
 
-    fun showAactionsMenu(isConversation: Boolean = false, contactId: ContactId? = null) {
+    fun showActionsMenu(isConversation: Boolean = false, contactId: ContactId? = null) {
         viewModelScope.launch(mainImmediate) {
             val response = sendAttachmentCoordinator.submitRequest(
                 //If it's group or tribe last 2 options will be disabled
