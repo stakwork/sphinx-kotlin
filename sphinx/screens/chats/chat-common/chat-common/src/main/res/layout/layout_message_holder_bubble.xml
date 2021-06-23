@@ -7,10 +7,24 @@
     tools:background="@drawable/background_message_bubble_received_last">
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/layout_constraint_message_bubble_container_top"
+        android:id="@+id/layout_constraint_message_bubble_container_first"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="parent">
+
+        <!--  Replies  -->
+        <include
+            android:id="@+id/include_message_reply"
+            layout="@layout/layout_message_reply"
+            tools:visibility="gone" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_message_bubble_container_second"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_message_bubble_container_first">
 
         <!--   Status Row for Paid Message Sent  -->
         <include
@@ -50,13 +64,6 @@
             tools:visibility="gone" />
 
 
-        <!--  Replies  -->
-        <include
-            android:id="@+id/include_message_reply"
-            layout="@layout/layout_message_reply"
-            tools:visibility="gone" />
-
-
         <!--  Call Invite  -->
         <include
             android:id="@+id/include_message_type_call_invite"
@@ -74,11 +81,10 @@
 
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/layout_constraint_message_bubble_container_middle"
+        android:id="@+id/layout_constraint_message_bubble_container_third"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintBottom_toTopOf="@+id/layout_constraint_message_bubble_container_bottom"
-        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_message_bubble_container_top">
+        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_message_bubble_container_second">
 
         <!-- Placeholder for unsupported Message Types -->
         <include
@@ -86,7 +92,7 @@
             layout="@layout/layout_unsupported_message_type_placeholder"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:layout_constraintTop_toTopOf="@+id/layout_constraint_message_bubble_container_middle"
+            app:layout_constraintTop_toTopOf="parent"
             tools:visibility="visible" />
 
         <androidx.appcompat.widget.AppCompatTextView
@@ -98,7 +104,7 @@
             android:paddingVertical="@dimen/default_inner_spacing_list_item_title"
             android:visibility="gone"
             app:layout_constraintTop_toBottomOf="@+id/include_unsupported_message_type_placeholder"
-            tools:text="Contrary to popular belief, Lorem Ipsum is not simply random text. Latin from 45 BC, making it over 2000 years old."
+            tools:text="Contrary to popular belief"
             tools:visibility="visible" />
 
 
@@ -135,11 +141,10 @@
 
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/layout_constraint_message_bubble_container_bottom"
+        android:id="@+id/layout_constraint_message_bubble_container_forth"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_message_bubble_container_middle">
-
+        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_message_bubble_container_third">
 
         <!-- Paid Message Information -->
         <include
