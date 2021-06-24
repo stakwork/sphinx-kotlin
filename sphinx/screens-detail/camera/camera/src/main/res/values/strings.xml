@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="camera_permissions_required">Camera Permissions are required to use this feature, please enable them in Settings.</string>
+</resources>
