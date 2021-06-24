@@ -20,7 +20,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
-    
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/layout_constraint_direct_payment_received_amount_labels"
         android:layout_width="wrap_content"
