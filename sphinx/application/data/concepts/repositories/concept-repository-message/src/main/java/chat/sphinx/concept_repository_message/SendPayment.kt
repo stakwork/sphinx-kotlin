@@ -11,9 +11,8 @@ class SendPayment private constructor(
     val contactId: ContactId?,
     val text: String?,
     val destinationKey: LightningNodePubKey?,
-    val amount: Long?,
+    val amount: Long,
 ) {
-
     class Builder {
         private var chatId: ChatId?         = null
         private var contactId: ContactId?   = null
@@ -37,8 +36,31 @@ class SendPayment private constructor(
                     )                                                           &&
                     (
                         chatId != null                                          ||
+                        contactId != null                                       ||
+                        destinationKey != null
+                    )
+
+        @get:Synchronized
+        val isContactPayment: Boolean
+            get() = (
+                        amount > 0
+                    )                                                           &&
+                    (
                         contactId != null
                     )
+
+        @get:Synchronized
+        val isKeySendPayment: Boolean
+            get() = (
+                        amount > 0
+                    )                                                           &&
+                    (
+                        destinationKey != null
+                    )
+
+        @get:Synchronized
+        val paymentAmount: Long
+            get() = amount
 
         @Synchronized
         fun setChatId(chatId: ChatId?): Builder {

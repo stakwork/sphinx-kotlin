@@ -58,7 +58,7 @@ internal class PaymentSendFragment: SideEffectFragment<
             }
 
             binding.buttonConfirm.setOnClickListener {
-                viewModel.sendChatPayment(textViewContactName?.text?.toString())
+                viewModel.sendContactPayment(editTextMessage?.text?.toString())
             }
         }
 
@@ -138,21 +138,28 @@ internal class PaymentSendFragment: SideEffectFragment<
         when (viewState) {
             is PaymentSendViewState.Idle -> {}
 
-            is PaymentSendViewState.KeySendPayment -> {
-                binding.layoutConstraintFromContact.invisible
-                binding.layoutConstraintMessage.invisible
-            }
-
             is PaymentSendViewState.ChatPayment -> {
                 binding.layoutConstraintFromContact.visible
                 binding.layoutConstraintMessage.visible
+                binding.buttonConfirm.text = getString(R.string.confirm_button)
 
                 setupDestination(viewState.contact)
+            }
+
+            is PaymentSendViewState.KeySendPayment -> {
+                binding.layoutConstraintFromContact.invisible
+                binding.layoutConstraintMessage.invisible
+                binding.buttonConfirm.text = getString(R.string.continue_button)
             }
 
             is PaymentSendViewState.ProcessingPayment -> {
                 binding.buttonConfirm.isEnabled = false
                 binding.confirmProgress.visible
+            }
+
+            is PaymentSendViewState.PaymentFailed -> {
+                binding.buttonConfirm.isEnabled = true
+                binding.confirmProgress.gone
             }
         }
     }

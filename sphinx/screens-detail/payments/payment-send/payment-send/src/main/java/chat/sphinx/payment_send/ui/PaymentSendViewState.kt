@@ -13,4 +13,5 @@ internal sealed class PaymentSendViewState: ViewState<PaymentSendViewState>() {
     ): PaymentSendViewState()
 
     object ProcessingPayment: PaymentSendViewState()
+    object PaymentFailed: PaymentSendViewState()
 }

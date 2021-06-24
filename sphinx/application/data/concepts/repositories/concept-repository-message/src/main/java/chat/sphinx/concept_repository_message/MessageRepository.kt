@@ -20,7 +20,9 @@ interface MessageRepository {
 
     fun sendMessage(sendMessage: SendMessage?)
 
-    fun sendPayment(sendPayment: SendPayment?)
+    suspend fun sendPayment(
+        sendPayment: SendPayment?
+    ): Response<Any, ResponseError>
 
     suspend fun boostMessage(
         chatId: ChatId,

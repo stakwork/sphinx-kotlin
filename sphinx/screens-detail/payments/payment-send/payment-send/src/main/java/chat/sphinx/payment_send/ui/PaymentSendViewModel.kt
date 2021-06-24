@@ -7,9 +7,18 @@ import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_dashboard_android.RepositoryDashboardAndroid
 import chat.sphinx.concept_repository_message.MessageRepository
+import chat.sphinx.concept_repository_message.SendPayment
+import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
+import chat.sphinx.kotlin_response.Response
 import chat.sphinx.payment_send.R
 import chat.sphinx.payment_send.navigation.PaymentSendNavigator
+import chat.sphinx.scanner_view_model_coordinator.request.ScannerFilter
+import chat.sphinx.scanner_view_model_coordinator.request.ScannerRequest
+import chat.sphinx.scanner_view_model_coordinator.response.ScannerResponse
+import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
+import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
+import chat.sphinx.wrapper_common.lightning.toLightningNodePubKey
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_lightning.NodeBalance
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -21,15 +30,6 @@ import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import chat.sphinx.concept_repository_message.SendPayment
-import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
-import chat.sphinx.kotlin_response.Response
-import chat.sphinx.scanner_view_model_coordinator.request.ScannerFilter
-import chat.sphinx.scanner_view_model_coordinator.request.ScannerRequest
-import chat.sphinx.scanner_view_model_coordinator.response.ScannerResponse
-import chat.sphinx.wrapper_common.dashboard.ChatId
-import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
-import chat.sphinx.wrapper_common.lightning.toLightningNodePubKey
 
 internal inline val PaymentSendFragmentArgs.chatId: ChatId?
     get() = if (argChatId == ChatId.NULL_CHAT_ID.toLong()) {
@@ -143,18 +143,22 @@ internal class PaymentSendViewModel @Inject constructor(
             )
             if (response is Response.Success) {
                 response.value.value.toLightningNodePubKey()?.let { destinationKey ->
-                    sendDirectPayment(destinationKey)
+                    submitSideEffect(
+                        PaymentSendSideEffect.AlertConfirmPaymentSend(sendPaymentBuilder.paymentAmount, destinationKey.value) {
+                            sendDirectPayment(destinationKey)
+                        }
+                    )
                 }
             }
         }
     }
 
-    fun sendChatPayment(message: String? = null) {
-        if (args.contactId != null) {
-            sendPaymentBuilder.setChatId(args.chatId)
-            sendPaymentBuilder.setContactId(args.contactId)
-            sendPaymentBuilder.setText(message)
+    fun sendContactPayment(message: String? = null) {
+        sendPaymentBuilder.setChatId(args.chatId)
+        sendPaymentBuilder.setContactId(args.contactId)
+        sendPaymentBuilder.setText(message)
 
+        if (sendPaymentBuilder.isContactPayment) {
             sendPayment()
         } else {
             requestScanner()
@@ -169,7 +173,29 @@ internal class PaymentSendViewModel @Inject constructor(
 
     private fun sendPayment() {
         viewStateContainer.updateViewState(PaymentSendViewState.ProcessingPayment)
-        messageRepository.sendPayment(sendPaymentBuilder.build())
+
+        viewModelScope.launch(mainImmediate) {
+            val sendPayment = sendPaymentBuilder.build()
+
+            when (messageRepository.sendPayment(sendPayment)) {
+                is Response.Error -> {
+                    submitSideEffect(
+                        PaymentSendSideEffect.Notify(app.getString(R.string.error_processing_payment))
+                    )
+                    viewStateContainer.updateViewState(PaymentSendViewState.PaymentFailed)
+                }
+                is Response.Success -> {
+                    if (sendPaymentBuilder.isKeySendPayment) {
+                        val successMessage = String.format(app.getString(R.string.payment_sent), sendPayment?.amount ?: 0, sendPayment?.destinationKey?.value ?: "Unknown")
+
+                        submitSideEffect(
+                            PaymentSendSideEffect.Notify(successMessage)
+                        )
+                    }
+                    navigator.closeDetailScreen()
+                }
+            }
+        }
     }
 
 }
