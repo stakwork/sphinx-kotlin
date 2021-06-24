@@ -3,6 +3,8 @@ package chat.sphinx.chat_contact.ui
 import android.app.Application
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import chat.sphinx.camera_view_model_coordinator.request.CameraRequest
+import chat.sphinx.camera_view_model_coordinator.response.CameraResponse
 import chat.sphinx.chat_common.navigation.ChatNavigator
 import chat.sphinx.chat_common.ui.ChatViewModel
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
@@ -59,6 +61,7 @@ internal class ChatContactViewModel @Inject constructor(
     messageRepository: MessageRepository,
     networkQueryLightning: NetworkQueryLightning,
     savedStateHandle: SavedStateHandle,
+    cameraViewModelCoordinator: ViewModelCoordinator<CameraRequest, CameraResponse>,
     sendAttachmentViewModelCoordinator: ViewModelCoordinator<SendAttachmentRequest, SendAttachmentResponse>,
     LOG: SphinxLogger,
 ): ChatViewModel<ChatContactFragmentArgs>(
@@ -70,6 +73,7 @@ internal class ChatContactViewModel @Inject constructor(
     messageRepository,
     networkQueryLightning,
     savedStateHandle,
+    cameraViewModelCoordinator,
     sendAttachmentViewModelCoordinator,
     LOG,
 ) {
@@ -244,7 +248,7 @@ internal class ChatContactViewModel @Inject constructor(
         return super.sendMessage(builder)
     }
 
-    override fun shouldShowActionsMenu() {
-        showActionsMenu(true, args.contactId)
+    override fun showActionsMenu() {
+        showActionsMenuImpl(true, args.contactId)
     }
 }

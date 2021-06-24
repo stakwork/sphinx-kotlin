@@ -7,6 +7,8 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavArgs
 import app.cash.exhaustive.Exhaustive
+import chat.sphinx.camera_view_model_coordinator.request.CameraRequest
+import chat.sphinx.camera_view_model_coordinator.response.CameraResponse
 import chat.sphinx.chat_common.R
 import chat.sphinx.chat_common.navigation.ChatNavigator
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
@@ -67,6 +69,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     protected val messageRepository: MessageRepository,
     protected val networkQueryLightning: NetworkQueryLightning,
     protected val savedStateHandle: SavedStateHandle,
+    protected val cameraCoordinator: ViewModelCoordinator<CameraRequest, CameraResponse>,
     protected val sendAttachmentCoordinator: ViewModelCoordinator<SendAttachmentRequest, SendAttachmentResponse>,
     protected val LOG: SphinxLogger,
 ): SideEffectViewModel<
@@ -405,9 +408,9 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         }
     }
 
-    abstract fun shouldShowActionsMenu()
+    abstract fun showActionsMenu()
 
-    fun showActionsMenu(isConversation: Boolean = false, contactId: ContactId? = null) {
+    protected fun showActionsMenuImpl(isConversation: Boolean = false, contactId: ContactId? = null) {
         viewModelScope.launch(mainImmediate) {
             val response = sendAttachmentCoordinator.submitRequest(
                 //If it's group or tribe last 2 options will be disabled
@@ -419,9 +422,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                         //Menu dismissed. Nothing to do
                     }
                     is ChatActionType.OpenCamera -> {
-                        submitSideEffect(
-                            ChatSideEffect.Notify("Camera not implemented yet")
-                        )
+                        openCamera()
                     }
                     is ChatActionType.OpenPhotoLibrary -> {
                         submitSideEffect(
@@ -455,6 +456,19 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                             chatNavigator.toPaymentSendDetail(contactId)
                         }
                     }
+                }
+            }
+        }
+    }
+
+    private fun openCamera() {
+        viewModelScope.launch(mainImmediate) {
+            val response = cameraCoordinator.submitRequest(CameraRequest)
+            @Exhaustive
+            when (response) {
+                is Response.Error -> {}
+                is Response.Success -> {
+                    // TODO: update view state
                 }
             }
         }

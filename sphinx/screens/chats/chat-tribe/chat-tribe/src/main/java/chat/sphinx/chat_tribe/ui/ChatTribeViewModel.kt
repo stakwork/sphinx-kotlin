@@ -3,6 +3,8 @@ package chat.sphinx.chat_tribe.ui
 import android.app.Application
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import chat.sphinx.camera_view_model_coordinator.request.CameraRequest
+import chat.sphinx.camera_view_model_coordinator.response.CameraResponse
 import chat.sphinx.chat_common.navigation.ChatNavigator
 import chat.sphinx.chat_common.ui.ChatSideEffect
 import chat.sphinx.chat_common.ui.ChatViewModel
@@ -59,6 +61,7 @@ internal class ChatTribeViewModel @Inject constructor(
     messageRepository: MessageRepository,
     networkQueryLightning: NetworkQueryLightning,
     savedStateHandle: SavedStateHandle,
+    cameraViewModelCoordinator: ViewModelCoordinator<CameraRequest, CameraResponse>,
     sendAttachmentViewModelCoordinator: ViewModelCoordinator<SendAttachmentRequest, SendAttachmentResponse>,
     LOG: SphinxLogger,
     private val mediaPlayerServiceController: MediaPlayerServiceController
@@ -71,6 +74,7 @@ internal class ChatTribeViewModel @Inject constructor(
     messageRepository,
     networkQueryLightning,
     savedStateHandle,
+    cameraViewModelCoordinator,
     sendAttachmentViewModelCoordinator,
     LOG,
 ), MediaPlayerServiceController.MediaServiceListener
@@ -301,7 +305,7 @@ internal class ChatTribeViewModel @Inject constructor(
         }
     }
 
-    override fun shouldShowActionsMenu() {
-        showActionsMenu(false)
+    override fun showActionsMenu() {
+        showActionsMenuImpl(false)
     }
 }
