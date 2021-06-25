@@ -25,6 +25,7 @@ class NetworkClientImpl(
     private val debug: BuildConfigDebug,
     private val cache: Cache,
     private val dispatchers: CoroutineDispatchers,
+    redactedLoggingHeaders: RedactedLoggingHeaders?,
     private val torManager: TorManager,
     private val LOG: SphinxLogger,
 ) : NetworkClientCache(),
@@ -104,6 +105,8 @@ class NetworkClientImpl(
     ///////////////
     /// Clients ///
     ///////////////
+    class RedactedLoggingHeaders(val headers: List<String>)
+
     @Volatile
     private var client: OkHttpClient? = null
     @Volatile
@@ -111,6 +114,28 @@ class NetworkClientImpl(
 
     private val clientLock = Mutex()
     private var currentClientSocksProxyAddress: SocksProxyAddress? = null
+
+    private val cryptoInterceptor: CryptoInterceptor by lazy {
+        CryptoInterceptor()
+    }
+
+    private val loggingInterceptor: HttpLoggingInterceptor? by lazy {
+        if (debug.value) {
+            HttpLoggingInterceptor().let { interceptor ->
+                interceptor.level = HttpLoggingInterceptor.Level.BODY
+                redactedLoggingHeaders?.headers?.let { list ->
+                    for (header in list) {
+                        if (header.isNotEmpty()) {
+                            interceptor.redactHeader(header)
+                        }
+                    }
+                }
+                interceptor
+            }
+        } else {
+            null
+        }
+    }
 
     override suspend fun getClient(): OkHttpClient =
         clientLock.withLock {
@@ -219,11 +244,13 @@ class NetworkClientImpl(
                     proxy(null)
                 }
 
+                if (!interceptors().contains(cryptoInterceptor)) {
+                    addInterceptor(cryptoInterceptor)
+                }
 
-                if (debug.value) {
-                    HttpLoggingInterceptor().let { interceptor ->
-                        interceptor.level = HttpLoggingInterceptor.Level.BODY
-                        addNetworkInterceptor(interceptor)
+                loggingInterceptor?.let { nnInterceptor ->
+                    if (!networkInterceptors().contains(nnInterceptor)) {
+                        addNetworkInterceptor(nnInterceptor)
                     }
                 }
 

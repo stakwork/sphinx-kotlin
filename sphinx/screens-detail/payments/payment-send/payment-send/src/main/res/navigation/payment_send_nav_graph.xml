@@ -8,6 +8,13 @@
     <fragment
         android:id="@+id/navigation_payment_send_fragment"
         android:name="chat.sphinx.payment_send.ui.PaymentSendFragment"
-        tools:layout="@layout/fragment_payment_send" />
+        tools:layout="@layout/fragment_payment_send">
+        <argument
+            android:name="argContactId"
+            app:argType="long" />
+        <argument
+            android:name="argChatId"
+            app:argType="long" />
+    </fragment>
 
 </navigation>

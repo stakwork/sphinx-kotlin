@@ -4,19 +4,20 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:minHeight="@dimen/message_type_image_attachment_min_height"
     android:padding="2dp"
     android:visibility="gone"
     tools:layout_width="300dp"
     tools:visibility="visible">
 
     <androidx.cardview.widget.CardView
+        android:id="@+id/card_view_image_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:cardCornerRadius="@dimen/background_message_holder_default_corner_rad">
 
-        <!--  Loaded Image  -->
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/image_view_attachment_image"
             android:layout_width="match_parent"
@@ -27,11 +28,46 @@
             android:foreground="?attr/selectableItemBackground"
             android:adjustViewBounds="true"
             android:scaleType="fitCenter"
-            android:background="@drawable/background_message_bubble_received_last"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:srcCompat="@tools:sample/backgrounds/scenic" />
+            app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.cardview.widget.CardView>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/loading_image_progress_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:elevation="100dp">
+
+        <ProgressBar
+            android:id="@+id/loading_image_progress"
+            android:layout_width="@dimen/loading_image_progress_xy"
+            android:layout_height="@dimen/loading_image_progress_xy"
+            style="?android:attr/progressBarStyle"
+            android:indeterminateTint="@color/secondaryText"
+            android:indeterminate="true"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/loading_image_progress"
+            android:fontFamily="@font/roboto_regular"
+            android:textSize="@dimen/loading_image_label_text_size"
+            android:textColor="@color/secondaryText"
+            android:layout_marginTop="@dimen/default_small_layout_margin"
+            android:text="Loading/Decrypting...">
+
+        </androidx.appcompat.widget.AppCompatTextView>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -8,9 +8,13 @@ import io.matthewnelson.concept_navigation.Navigator
 abstract class ScannerNavigator(
     navigationDriver: BaseNavigationDriver<NavController>
 ): Navigator<NavController>(navigationDriver) {
+
     @JvmSynthetic
-    internal suspend fun toScannerScreen(showBottomView: Boolean = false) {
-        navigationDriver.submitNavigationRequest(ToScannerDetail(showBottomView))
+    internal suspend fun toScannerScreen(
+        showBottomView: Boolean = false,
+        scannerModeLabel: String = ""
+    ) {
+        navigationDriver.submitNavigationRequest(ToScannerDetail(showBottomView, scannerModeLabel))
     }
 
     @JvmSynthetic

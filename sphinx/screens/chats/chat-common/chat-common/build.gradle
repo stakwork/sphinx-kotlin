@@ -35,13 +35,21 @@ dependencies {
     // Sphinx
     api project(path: ':sphinx:application:common:logger')
     api project(path: ':sphinx:application:common:resources')
+
     api project(path: ':sphinx:application:data:concepts:concept-image-loader')
+    api project(path: ':sphinx:application:data:concepts:concept-meme-server')
     api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-chat')
     api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-contact')
     api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-message')
+
+    implementation project(path: ':sphinx:application:network:concepts:clients:concept-network-client-crypto')
     api project(path: ':sphinx:application:network:concepts:queries:concept-network-query-lightning')
     api project(path: ':sphinx:application:network:concepts:queries:concept-network-query-chat')
     api project(path: ':sphinx:activity:insetter-activity')
 
+    implementation project(path: ':sphinx:screens-detail:send-attachment:send-attachment-view-model-coordinator')
+
     api deps.androidx.recyclerView
+
+    implementation deps.androidx.lifecycle.hilt
 }

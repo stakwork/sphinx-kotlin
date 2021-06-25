@@ -151,6 +151,7 @@ internal class ChatTribeFragment: ChatFragment<
 
     override fun subscribeToViewStateFlow() {
         super.subscribeToViewStateFlow()
+
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.podcastViewStateContainer.collect { viewState ->
                 @Exhaustive

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <dimen name="default_small_layout_margin">4dp</dimen>
     <dimen name="default_half_layout_margin">8dp</dimen>
     <dimen name="default_layout_margin">16dp</dimen>
     <dimen name="default_double_layout_margin">32dp</dimen>
@@ -59,6 +60,9 @@
     <dimen name="default_progress_bar_xy">25dp</dimen>
     <dimen name="default_progress_bar_margin_left">10dp</dimen>
 
+    <dimen name="amount_pad_text_size">25sp</dimen>
+    <dimen name="pin_pad_text_size">27sp</dimen>
+    <dimen name="pin_pad_backspace_text_size">24sp</dimen>
     <dimen name="pin_help_text_view_size">15sp</dimen>
     <dimen name="pin_text_view_size">17sp</dimen>
 </resources>

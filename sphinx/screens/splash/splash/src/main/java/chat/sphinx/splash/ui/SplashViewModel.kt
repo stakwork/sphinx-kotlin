@@ -5,6 +5,7 @@ import android.content.Context
 import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_background_login.BackgroundLoginHandler
+import chat.sphinx.concept_meme_server.MemeServerTokenHandler
 import chat.sphinx.concept_network_query_contact.NetworkQueryContact
 import chat.sphinx.concept_network_query_invite.NetworkQueryInvite
 import chat.sphinx.concept_network_query_invite.model.RedeemInviteDto
@@ -50,6 +51,7 @@ internal class SplashViewModel @Inject constructor(
     dispatchers: CoroutineDispatchers,
     private val keyRestore: KeyRestore,
     private val lightningRepository: LightningRepository,
+    private val memeServerTokenHandler: MemeServerTokenHandler,
     private val navigator: SplashNavigator,
     private val scannerCoordinator: ViewModelCoordinator<ScannerRequest, ScannerResponse>,
     private val networkQueryInvite: NetworkQueryInvite,

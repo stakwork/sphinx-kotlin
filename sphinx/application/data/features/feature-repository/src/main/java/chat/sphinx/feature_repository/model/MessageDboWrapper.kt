@@ -12,7 +12,7 @@ import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessageUUID
 import chat.sphinx.wrapper_message.*
-import chat.sphinx.wrapper_message.media.MessageMedia
+import chat.sphinx.wrapper_message_media.MessageMedia
 
 class MessageDboWrapper(val messageDbo: MessageDbo): Message() {
     override val id: MessageId

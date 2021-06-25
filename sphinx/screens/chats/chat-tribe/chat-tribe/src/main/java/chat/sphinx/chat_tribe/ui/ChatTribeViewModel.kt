@@ -3,10 +3,12 @@ package chat.sphinx.chat_tribe.ui
 import android.app.Application
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import chat.sphinx.chat_common.navigation.ChatNavigator
 import chat.sphinx.chat_common.ui.ChatSideEffect
 import chat.sphinx.chat_common.ui.ChatViewModel
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
 import chat.sphinx.chat_tribe.navigation.TribeChatNavigator
+import chat.sphinx.concept_meme_server.MemeServerTokenHandler
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_lightning.model.route.isRouteAvailable
 import chat.sphinx.concept_repository_chat.ChatRepository
@@ -16,6 +18,7 @@ import chat.sphinx.concept_repository_message.SendMessage
 import chat.sphinx.concept_service_media.MediaPlayerServiceController
 import chat.sphinx.concept_service_media.MediaPlayerServiceState
 import chat.sphinx.concept_service_media.UserAction
+import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
@@ -24,6 +27,8 @@ import chat.sphinx.podcast_player.objects.Podcast
 import chat.sphinx.podcast_player.objects.PodcastEpisode
 import chat.sphinx.podcast_player.objects.toPodcast
 import chat.sphinx.resources.getRandomColor
+import chat.sphinx.send_attachment_view_model_coordinator.request.SendAttachmentRequest
+import chat.sphinx.send_attachment_view_model_coordinator.response.SendAttachmentResponse
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.ChatName
 import chat.sphinx.wrapper_common.dashboard.ChatId
@@ -48,21 +53,25 @@ internal inline val ChatTribeFragmentArgs.chatId: ChatId
 internal class ChatTribeViewModel @Inject constructor(
     app: Application,
     dispatchers: CoroutineDispatchers,
+    memeServerTokenHandler: MemeServerTokenHandler,
     chatRepository: ChatRepository,
     contactRepository: ContactRepository,
     messageRepository: MessageRepository,
     networkQueryLightning: NetworkQueryLightning,
     savedStateHandle: SavedStateHandle,
+    sendAttachmentViewModelCoordinator: ViewModelCoordinator<SendAttachmentRequest, SendAttachmentResponse>,
     LOG: SphinxLogger,
     private val mediaPlayerServiceController: MediaPlayerServiceController
 ): ChatViewModel<ChatTribeFragmentArgs>(
     app,
     dispatchers,
+    memeServerTokenHandler,
     chatRepository,
     contactRepository,
     messageRepository,
     networkQueryLightning,
     savedStateHandle,
+    sendAttachmentViewModelCoordinator,
     LOG,
 ), MediaPlayerServiceController.MediaServiceListener
 {
@@ -83,7 +92,9 @@ internal class ChatTribeViewModel @Inject constructor(
     var podcast: Podcast? = null
 
     @Inject
-    lateinit var chatNavigator: TribeChatNavigator
+    protected lateinit var chatTribeNavigator: TribeChatNavigator
+    override val chatNavigator: ChatNavigator
+        get() = chatTribeNavigator
 
     override val headerInitialHolderSharedFlow: SharedFlow<InitialHolderViewState> = flow {
         chatSharedFlow.collect { chat ->
@@ -220,7 +231,7 @@ internal class ChatTribeViewModel @Inject constructor(
     fun goToPodcastPlayerScreen() {
         podcast?.let { podcast ->
             viewModelScope.launch(mainImmediate) {
-                chatNavigator.toPodcastPlayerScreen(args.chatId, podcast)
+                chatTribeNavigator.toPodcastPlayerScreen(args.chatId, podcast)
             }
         }
     }
@@ -288,5 +299,9 @@ internal class ChatTribeViewModel @Inject constructor(
                 )
             }
         }
+    }
+
+    override fun shouldShowActionsMenu() {
+        showActionsMenu(chatId = args.chatId)
     }
 }

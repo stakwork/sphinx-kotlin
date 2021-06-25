@@ -14,6 +14,7 @@ import chat.sphinx.concept_network_query_lightning.model.balance.BalanceDto
 import chat.sphinx.concept_network_query_message.NetworkQueryMessage
 import chat.sphinx.concept_network_query_message.model.MessageDto
 import chat.sphinx.concept_network_query_message.model.PostMessageDto
+import chat.sphinx.concept_network_query_message.model.PostPaymentDto
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_dashboard.RepositoryDashboard
@@ -21,6 +22,7 @@ import chat.sphinx.concept_repository_lightning.LightningRepository
 import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.concept_repository_message.SendMessage
+import chat.sphinx.concept_repository_message.SendPayment
 import chat.sphinx.concept_socket_io.SocketIOManager
 import chat.sphinx.concept_socket_io.SphinxSocketIOMessageListener
 import chat.sphinx.concept_socket_io.SphinxSocketIOMessage
@@ -46,6 +48,7 @@ import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.dashboard.InviteId
+import chat.sphinx.wrapper_common.dashboard.toChatId
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.LightningRouteHint
 import chat.sphinx.wrapper_common.lightning.Sat
@@ -59,8 +62,8 @@ import chat.sphinx.wrapper_invite.Invite
 import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_lightning.NodeBalanceAll
 import chat.sphinx.wrapper_message.*
-import chat.sphinx.wrapper_message.media.MessageMedia
-import chat.sphinx.wrapper_message.media.toMediaKeyDecrypted
+import chat.sphinx.wrapper_message_media.MessageMedia
+import chat.sphinx.wrapper_message_media.toMediaKeyDecrypted
 import chat.sphinx.wrapper_rsa.RsaPrivateKey
 import chat.sphinx.wrapper_rsa.RsaPublicKey
 import com.squareup.moshi.Moshi
@@ -82,6 +85,8 @@ import kotlin.collections.ArrayList
 import kotlin.math.absoluteValue
 
 abstract class SphinxRepository(
+    override val accountOwner: StateFlow<Contact?>,
+    private val applicationScope: CoroutineScope,
     private val authenticationCoreManager: AuthenticationCoreManager,
     private val authenticationStorage: AuthenticationStorage,
     protected val coreDB: CoreDB,
@@ -116,9 +121,6 @@ abstract class SphinxRepository(
         const val MESSAGE_PAGINATION_LIMIT = 200
         const val DATE_NIXON_SHOCK = "1971-08-15T00:00:00.000Z"
     }
-
-    private val supervisor = SupervisorJob()
-    private val repositoryScope = CoroutineScope(supervisor)
 
     ////////////////
     /// SocketIO ///
@@ -345,7 +347,7 @@ abstract class SphinxRepository(
                 error = throwable
             }
 
-            repositoryScope.launch(io + handler) {
+            applicationScope.launch(io + handler) {
                 chatLock.withLock {
 
                     val chatIdsToRemove = queries.chatGetAllIds()
@@ -401,7 +403,7 @@ abstract class SphinxRepository(
     }
 
     override fun updateChatMetaData(chatId: ChatId, metaData: ChatMetaData) {
-        repositoryScope.launch(io) {
+        applicationScope.launch(io) {
             val queries = coreDB.getSphinxDatabaseQueries()
             chatLock.withLock {
                 queries.chatUpdateMetaData(metaData, chatId)
@@ -428,19 +430,6 @@ abstract class SphinxRepository(
     private val inviteDboPresenterMapper: InviteDboPresenterMapper by lazy {
         InviteDboPresenterMapper(dispatchers)
     }
-
-    override val accountOwner: StateFlow<Contact?> = flow {
-        emitAll(
-            coreDB.getSphinxDatabaseQueries().contactGetOwner()
-                .asFlow()
-                .mapToOneOrNull(io)
-                .map { it?.let { contactDboPresenterMapper.mapFrom(it) } }
-        )
-    }.stateIn(
-        repositoryScope,
-        SharingStarted.WhileSubscribed(5_000),
-        null
-    )
 
     override val getAllContacts: Flow<List<Contact>> by lazy {
         flow {
@@ -504,7 +493,7 @@ abstract class SphinxRepository(
 
                             var processChatsResponse: Response<Boolean, ResponseError> = Response.Success(true)
 
-                            repositoryScope.launch(io + handler) {
+                            applicationScope.launch(io + handler) {
 
                                 val contactMap: MutableMap<ContactId, ContactDto> =
                                     LinkedHashMap(loadResponse.value.contacts.size)
@@ -571,7 +560,6 @@ abstract class SphinxRepository(
     override suspend fun deleteContactById(contactId: ContactId): Response<Any, ResponseError> {
         val queries = coreDB.getSphinxDatabaseQueries()
 
-
         var owner: Contact? = accountOwner.value
 
         if (owner == null) {
@@ -594,7 +582,7 @@ abstract class SphinxRepository(
 
         var deleteContactResponse: Response<Any, ResponseError> = Response.Success(Any())
 
-        repositoryScope.launch(mainImmediate) {
+        applicationScope.launch(mainImmediate) {
             val response = networkQueryContact.deleteContact(contactId)
             deleteContactResponse = response
 
@@ -639,7 +627,7 @@ abstract class SphinxRepository(
         val sharedFlow: MutableSharedFlow<Response<Boolean, ResponseError>> =
             MutableSharedFlow(1, 0)
 
-        repositoryScope.launch(mainImmediate) {
+        applicationScope.launch(mainImmediate) {
 
             networkQueryContact.createContact(postContactDto).collect { loadResponse ->
                 @Exhaustive
@@ -1227,11 +1215,12 @@ abstract class SphinxRepository(
     private val provisionalMessageLock = Mutex()
 
     // TODO: Rework to handle different message types
+
     @OptIn(RawPasswordAccess::class)
     override fun sendMessage(sendMessage: SendMessage?) {
         if (sendMessage == null) return
 
-        repositoryScope.launch(mainImmediate) {
+        applicationScope.launch(mainImmediate) {
             val queries = coreDB.getSphinxDatabaseQueries()
 
             // TODO: Update SendMessage to accept a Chat && Contact instead of just IDs
@@ -1383,7 +1372,7 @@ abstract class SphinxRepository(
                             PostMessageDto(
                                 sendMessage.chatId?.value,
                                 sendMessage.contactId?.value,
-                                messagePrice?.value ?: 0,
+                                messagePrice.value,
                                 sendMessage.replyUUID?.value,
                                 selfEncrypted.value,
                                 map,
@@ -1465,6 +1454,186 @@ abstract class SphinxRepository(
         }
     }
 
+    override suspend fun sendPayment(
+        sendPayment: SendPayment?
+    ): Response<Any, ResponseError> {
+
+        var response: Response<Any, ResponseError> = Response.Success(true)
+
+        if (sendPayment == null) {
+            response = Response.Error(
+                ResponseError("Payment params cannot be null")
+            )
+            return response
+        }
+
+        applicationScope.launch(mainImmediate) {
+            val queries = coreDB.getSphinxDatabaseQueries()
+
+            val contact: ContactDbo? = sendPayment.contactId?.let {
+                withContext(io) {
+                    queries.contactGetById(it).executeAsOneOrNull()
+                }
+            }
+
+            val owner: Contact? = accountOwner.value
+                ?: let {
+                    // TODO: Handle this better...
+                    var owner: Contact? = null
+                    try {
+                        accountOwner.collect {
+                            if (it != null) {
+                                owner = it
+                                throw Exception()
+                            }
+                        }
+                    } catch (e: Exception) {}
+                    delay(25L)
+                    owner
+                }
+
+            if (owner == null) {
+                response = Response.Error(
+                    ResponseError("Owner cannot be null")
+                )
+                return@launch
+            }
+
+            var encryptedText: MessageContent? = null
+            var encryptedRemoteText: MessageContent? = null
+
+            sendPayment.text?.let { msgText ->
+                encryptedText = owner
+                    .rsaPublicKey
+                    ?.let { pubKey ->
+                        val encResponse = rsa.encrypt(
+                            pubKey,
+                            UnencryptedString(msgText),
+                            formatOutput = false,
+                            dispatcher = default,
+                        )
+
+                        @Exhaustive
+                        when (encResponse) {
+                            is Response.Error -> {
+                                LOG.e(TAG, encResponse.message, encResponse.exception)
+                                null
+                            }
+                            is Response.Success -> {
+                                MessageContent(encResponse.value.value)
+                            }
+                        }
+                    }
+
+                contact?.let { contact ->
+                    encryptedRemoteText = contact
+                        .public_key
+                        ?.let { pubKey ->
+                            val encResponse = rsa.encrypt(
+                                pubKey,
+                                UnencryptedString(msgText),
+                                formatOutput = false,
+                                dispatcher = default,
+                            )
+
+                            @Exhaustive
+                            when (encResponse) {
+                                is Response.Error -> {
+                                    LOG.e(TAG, encResponse.message, encResponse.exception)
+                                    null
+                                }
+                                is Response.Success -> {
+                                    MessageContent(encResponse.value.value)
+                                }
+                            }
+                        }
+                }
+            }
+
+            val postPaymentDto: PostPaymentDto = try {
+                PostPaymentDto(
+                    chat_id = sendPayment.chatId?.value,
+                    contact_id = sendPayment.contactId?.value,
+                    amount = sendPayment.amount,
+                    text = encryptedText?.value,
+                    remote_text = encryptedRemoteText?.value,
+                    destination_key = sendPayment.destinationKey?.value,
+
+                )
+            } catch (e: IllegalArgumentException) {
+                response = Response.Error(
+                    ResponseError("Failed to create PostPaymentDto")
+                )
+                return@launch
+            }
+
+            if (postPaymentDto.isKeySendPayment) {
+                networkQueryMessage.sendKeySendPayment(
+                    postPaymentDto,
+                ).collect { loadResponse ->
+                    @Exhaustive
+                    when (loadResponse) {
+                        is LoadResponse.Loading -> {}
+                        is Response.Error -> {
+                            LOG.e(TAG, loadResponse.message, loadResponse.exception)
+                            response = loadResponse
+                        }
+                        is Response.Success -> {
+                            response = loadResponse
+                        }
+                    }
+                }
+            } else {
+                networkQueryMessage.sendPayment(
+                    postPaymentDto,
+                ).collect { loadResponse ->
+                    @Exhaustive
+                    when (loadResponse) {
+                        is LoadResponse.Loading -> {}
+                        is Response.Error -> {
+                            LOG.e(TAG, loadResponse.message, loadResponse.exception)
+                            response = loadResponse
+                        }
+                        is Response.Success -> {
+                            val message = loadResponse.value
+
+                            decryptMessageDtoContentIfAvailable(
+                                message,
+                                coroutineScope { this },
+                            )
+
+                            chatLock.withLock {
+                                messageLock.withLock {
+                                    withContext(io) {
+
+                                        queries.transaction {
+                                            upsertMessage(message, queries)
+
+                                            if (message.updateChatDboLatestMessage) {
+                                                message.chat_id?.toChatId()?.let { chatId ->
+                                                    updateChatDboLatestMessage(
+                                                        message,
+                                                        chatId,
+                                                        latestMessageUpdatedTimeMap,
+                                                        queries
+                                                    )
+                                                }
+                                            }
+                                        }
+
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+        }.join()
+
+        return response
+    }
+
     override suspend fun boostMessage(
         chatId: ChatId,
         pricePerMessage: Sat,
@@ -1474,13 +1643,13 @@ abstract class SphinxRepository(
 
         var response: Response<Any, ResponseError> = Response.Success(true)
 
-        repositoryScope.launch(mainImmediate) {
+        applicationScope.launch(mainImmediate) {
             val owner: Contact = accountOwner.value.let {
                 if (it != null) {
                     it
                 } else {
                     var owner: Contact? = null
-                    val retrieveOwnerJob = repositoryScope.launch(mainImmediate) {
+                    val retrieveOwnerJob = applicationScope.launch(mainImmediate) {
                         try {
                             accountOwner.collect { contact ->
                                 if (contact != null) {
@@ -1555,7 +1724,7 @@ abstract class SphinxRepository(
     override suspend fun toggleChatMuted(chat: Chat): Response<Boolean, ResponseError> {
         var response: Response<Boolean, ResponseError> = Response.Success(!chat.isMuted.isTrue())
 
-        repositoryScope.launch(mainImmediate) {
+        applicationScope.launch(mainImmediate) {
             networkQueryChat.toggleMuteChat(chat.id, chat.isMuted).collect { loadResponse ->
                 when (loadResponse) {
                     is LoadResponse.Loading -> {}
@@ -1594,7 +1763,7 @@ abstract class SphinxRepository(
 
         emit(LoadResponse.Loading)
 
-        repositoryScope.launch(mainImmediate) {
+        applicationScope.launch(mainImmediate) {
 
             networkQueryChat.joinTribe(tribeDto).collect { loadResponse ->
                 @Exhaustive
@@ -1802,7 +1971,7 @@ abstract class SphinxRepository(
                                     count++
                                 }
 
-                                repositoryScope.launch(io) {
+                                applicationScope.launch(io) {
 
                                     chatLock.withLock {
                                         messageLock.withLock {
@@ -1892,7 +2061,7 @@ abstract class SphinxRepository(
 
                 emit(responseError)
 
-            } ?: repositoryScope.launch(mainImmediate) {
+            } ?: applicationScope.launch(mainImmediate) {
 
                 authenticationStorage.putString(
                     REPOSITORY_LAST_SEEN_MESSAGE_DATE,

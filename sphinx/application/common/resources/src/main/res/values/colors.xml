@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="lightPurple">#A986F9</color>
-    <color name="deepNight">#1E2934</color>
 
     <color name="body">#151E27</color>
     <color name="bodyInverted">#ffffff</color>

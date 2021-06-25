@@ -277,6 +277,7 @@ class NetworkRelayCallImpl(
             .execute()
 
         if (!networkResponse.isSuccessful) {
+            networkResponse.body?.close()
             throw IOException(networkResponse.toString())
         }
 
@@ -363,6 +364,7 @@ class NetworkRelayCallImpl(
 
     }.flowOn(io)
 
+    // TODO: Remove and replace all uses with post (DO NOT USE THIS METHOD FOR NEW CODE)
     override fun <T: Any, RequestBody: Any, V: RelayResponse<T>> relayUnauthenticatedPost(
         responseJsonClass: Class<V>,
         relayEndpoint: String,

@@ -8,6 +8,7 @@ import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_message.*
+import chat.sphinx.wrapper_message_media.isImage
 
 internal inline val MessageHolderViewState.isReceived: Boolean
     get() = this is MessageHolderViewState.Received
@@ -39,9 +40,9 @@ internal sealed class MessageHolderViewState(
         }
     }
 
-    val unsupportedMessageType: LayoutState.Bubble.ContainerMiddle.UnsupportedMessageType? by lazy(LazyThreadSafetyMode.NONE) {
-        if (unsupportedMessageTypes.contains(message.type)) {
-            LayoutState.Bubble.ContainerMiddle.UnsupportedMessageType(
+    val unsupportedMessageType: LayoutState.Bubble.ContainerThird.UnsupportedMessageType? by lazy(LazyThreadSafetyMode.NONE) {
+        if (unsupportedMessageTypes.contains(message.type) && message.messageMedia?.mediaType?.isImage != true) {
+            LayoutState.Bubble.ContainerThird.UnsupportedMessageType(
                 messageType = message.type,
                 gravityStart = this is Received,
             )
@@ -75,32 +76,32 @@ internal sealed class MessageHolderViewState(
         }
     }
 
-    val bubbleDirectPayment: LayoutState.Bubble.ContainerTop.DirectPayment? by lazy(LazyThreadSafetyMode.NONE) {
+    val bubbleDirectPayment: LayoutState.Bubble.ContainerSecond.DirectPayment? by lazy(LazyThreadSafetyMode.NONE) {
         if (message.type.isDirectPayment()) {
-            LayoutState.Bubble.ContainerTop.DirectPayment(showSent = this is Sent, amount = message.amount)
+            LayoutState.Bubble.ContainerSecond.DirectPayment(showSent = this is Sent, amount = message.amount)
         } else {
             null
         }
     }
 
-    val bubbleMessage: LayoutState.Bubble.ContainerMiddle.Message? by lazy(LazyThreadSafetyMode.NONE) {
+    val bubbleMessage: LayoutState.Bubble.ContainerThird.Message? by lazy(LazyThreadSafetyMode.NONE) {
         message.retrieveTextToShow()?.let { text ->
             if (text.isNotEmpty()) {
-                LayoutState.Bubble.ContainerMiddle.Message(text = text)
+                LayoutState.Bubble.ContainerThird.Message(text = text)
             } else {
                 null
             }
         }
     }
 
-    val bubblePaidMessageDetails: LayoutState.Bubble.ContainerBottom.PaidMessageDetails? by lazy(LazyThreadSafetyMode.NONE) {
+    val bubblePaidMessageDetails: LayoutState.Bubble.ContainerFourth.PaidMessageDetails? by lazy(LazyThreadSafetyMode.NONE) {
         if (!message.isPaidMessage) {
             null
         } else {
             val isPaymentPending = message.status.isPending()
 
             message.type.let { type ->
-                LayoutState.Bubble.ContainerBottom.PaidMessageDetails(
+                LayoutState.Bubble.ContainerFourth.PaidMessageDetails(
                     amount = message.amount,
                     purchaseType = if (type.isPurchase()) type else null,
                     isShowingReceivedMessage = this is Received,
@@ -113,12 +114,12 @@ internal sealed class MessageHolderViewState(
         }
     }
 
-    val bubblePaidMessageSentStatus: LayoutState.Bubble.ContainerTop.PaidMessageSentStatus? by lazy(LazyThreadSafetyMode.NONE) {
+    val bubblePaidMessageSentStatus: LayoutState.Bubble.ContainerSecond.PaidMessageSentStatus? by lazy(LazyThreadSafetyMode.NONE) {
         if (!message.isPaidMessage || this !is Sent) {
             null
         } else {
             message.type.let { type ->
-                LayoutState.Bubble.ContainerTop.PaidMessageSentStatus(
+                LayoutState.Bubble.ContainerSecond.PaidMessageSentStatus(
                     amount = message.amount,
                     purchaseType = if (type.isPurchase()) type else null,
                 )
@@ -126,19 +127,33 @@ internal sealed class MessageHolderViewState(
         }
     }
 
-    val bubbleGiphy: LayoutState.Bubble.ContainerTop.Giphy? by lazy(LazyThreadSafetyMode.NONE) {
-        message.giphyData?.let {
-            if (it.url.isNotEmpty()) {
-                LayoutState.Bubble.ContainerTop.Giphy(it.url.replace("giphy.gif", "200w.gif"))
+    val bubbleImageAttachment: LayoutState.Bubble.ContainerSecond.ImageAttachment? by lazy(LazyThreadSafetyMode.NONE) {
+        message.giphyData?.let { giphyData ->
+            if (giphyData.url.isNotEmpty()) {
+                LayoutState.Bubble.ContainerSecond.ImageAttachment(
+                    giphyData.url.replace("giphy.gif", "200w.gif"),
+                    null
+                )
             } else {
                 null
+            }
+        } ?: message.messageMedia?.let { media ->
+            media.url?.let { mediaUrl ->
+                if (media.mediaType.isImage && !message.isPaidMessage) {
+                    LayoutState.Bubble.ContainerSecond.ImageAttachment(
+                        mediaUrl.value,
+                        media
+                    )
+                } else {
+                    null
+                }
             }
         }
     }
 
     // don't use by lazy as this uses a for loop and needs to be initialized on a background
     // thread (so, while the MHVS is being created)
-    val bubbleReactionBoosts: LayoutState.Bubble.ContainerBottom.Boost? =
+    val bubbleReactionBoosts: LayoutState.Bubble.ContainerFourth.Boost? =
         message.reactions?.let { nnReactions ->
             if (nnReactions.isEmpty()) {
                 null
@@ -171,16 +186,16 @@ internal sealed class MessageHolderViewState(
 //                    }
 //                }
 
-                LayoutState.Bubble.ContainerBottom.Boost(
+                LayoutState.Bubble.ContainerFourth.Boost(
                     totalAmount = Sat(total),
                     senderPics = set,
                 )
             }
         }
 
-    val bubbleReplyMessage: LayoutState.Bubble.ContainerTop.ReplyMessage? by lazy {
+    val bubbleReplyMessage: LayoutState.Bubble.ContainerFirst.ReplyMessage? by lazy {
         message.replyMessage?.let { nnMessage ->
-            LayoutState.Bubble.ContainerTop.ReplyMessage(
+            LayoutState.Bubble.ContainerFirst.ReplyMessage(
                 messageSenderName(nnMessage),
 
                 nnMessage.retrieveTextToShow() ?: "",

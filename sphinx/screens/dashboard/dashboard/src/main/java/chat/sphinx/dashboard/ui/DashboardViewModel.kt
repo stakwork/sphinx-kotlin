@@ -1,5 +1,6 @@
 package chat.sphinx.dashboard.ui
 
+import android.app.Application
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
@@ -9,6 +10,7 @@ import chat.sphinx.concept_service_notification.PushNotificationRegistrar
 import chat.sphinx.concept_socket_io.SocketIOManager
 import chat.sphinx.concept_socket_io.SocketIOState
 import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
+import chat.sphinx.dashboard.R
 import chat.sphinx.dashboard.navigation.DashboardBottomNavBarNavigator
 import chat.sphinx.dashboard.navigation.DashboardNavDrawerNavigator
 import chat.sphinx.dashboard.navigation.DashboardNavigator
@@ -24,10 +26,10 @@ import chat.sphinx.scanner_view_model_coordinator.request.ScannerFilter
 import chat.sphinx.scanner_view_model_coordinator.request.ScannerRequest
 import chat.sphinx.scanner_view_model_coordinator.response.ScannerResponse
 import chat.sphinx.wrapper_chat.isConversation
-import chat.sphinx.wrapper_common.tribe.TribeJoinLink
-import chat.sphinx.wrapper_common.tribe.toTribeJoinLink
-import chat.sphinx.wrapper_common.tribe.isValidTribeJoinLink
 import chat.sphinx.wrapper_common.dashboard.ContactId
+import chat.sphinx.wrapper_common.tribe.TribeJoinLink
+import chat.sphinx.wrapper_common.tribe.isValidTribeJoinLink
+import chat.sphinx.wrapper_common.tribe.toTribeJoinLink
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_contact.isConfirmed
 import chat.sphinx.wrapper_contact.isTrue
@@ -36,7 +38,6 @@ import chat.sphinx.wrapper_message.Message
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.MotionLayoutViewModel
-import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.sideeffect.SideEffect
 import io.matthewnelson.concept_views.viewstate.collect
@@ -48,6 +49,7 @@ import kotlinx.coroutines.sync.withLock
 import java.util.*
 import javax.inject.Inject
 import kotlin.collections.ArrayList
+
 
 internal suspend inline fun DashboardViewModel.collectChatViewState(
     crossinline action: suspend (value: ChatViewState) -> Unit
@@ -63,6 +65,7 @@ internal suspend inline fun DashboardViewModel.updateChatListFilter(filter: Chat
 
 @HiltViewModel
 internal class DashboardViewModel @Inject constructor(
+    private val app: Application,
     private val backgroundLoginHandler: BackgroundLoginHandler,
     handler: SavedStateHandle,
 
@@ -103,10 +106,11 @@ internal class DashboardViewModel @Inject constructor(
                                 return Response.Success(Any())
                             }
 
-                            return Response.Error("QR code is not a Join Tribe link")
+                            return Response.Error(app.getString(R.string.not_valid_tribe_link))
                         }
                     },
-                    showBottomView = true
+                    showBottomView = true,
+                    scannerModeLabel = app.getString(R.string.join_tribe_link)
                 )
             )
             if (response is Response.Success) {
@@ -351,8 +355,8 @@ internal class DashboardViewModel @Inject constructor(
     val networkStateFlow: StateFlow<LoadResponse<Boolean, ResponseError>>
         get() = _networkStateFlow.asStateFlow()
 
-    private var pushNotificationRegistrationUpdated: Boolean = false
     private var jobNetworkRefresh: Job? = null
+    private var jobPushNotificationRegistration: Job? = null
     fun networkRefresh() {
         if (jobNetworkRefresh?.isActive == true) {
             return
@@ -389,15 +393,18 @@ internal class DashboardViewModel @Inject constructor(
                 jobNetworkRefresh?.cancel()
             }
 
-            if (!pushNotificationRegistrationUpdated) {
-                pushNotificationRegistrar.register().let { response ->
-                    @Exhaustive
-                    when (response) {
-                        is Response.Error -> {
-                            // TODO: Handle on the UI
-                        }
-                        is Response.Success -> {
-                            pushNotificationRegistrationUpdated = true
+            // must occur after contacts have been retrieved such that
+            // an account owner is available, otherwise it just suspends
+            // until it is.
+            if (jobPushNotificationRegistration == null) {
+                jobPushNotificationRegistration = launch(mainImmediate) {
+                    pushNotificationRegistrar.register().let { response ->
+                        @Exhaustive
+                        when (response) {
+                            is Response.Error -> {
+                                // TODO: Handle on the UI
+                            }
+                            is Response.Success -> {}
                         }
                     }
                 }

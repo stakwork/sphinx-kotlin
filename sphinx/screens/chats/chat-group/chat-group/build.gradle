@@ -33,6 +33,8 @@ dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
     api project(path: ':sphinx:screens:chats:chat-common:chat-common')
 
+    implementation project(path: ':sphinx:screens-detail:send-attachment:send-attachment-view-model-coordinator')
+
     implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt
     kapt kaptDeps.google.hilt
