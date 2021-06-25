@@ -1506,7 +1506,7 @@ abstract class SphinxRepository(
                 encryptedText = owner
                     .rsaPublicKey
                     ?.let { pubKey ->
-                        val response = rsa.encrypt(
+                        val encResponse = rsa.encrypt(
                             pubKey,
                             UnencryptedString(msgText),
                             formatOutput = false,
@@ -1514,13 +1514,13 @@ abstract class SphinxRepository(
                         )
 
                         @Exhaustive
-                        when (response) {
+                        when (encResponse) {
                             is Response.Error -> {
-                                LOG.e(TAG, response.message, response.exception)
+                                LOG.e(TAG, encResponse.message, encResponse.exception)
                                 null
                             }
                             is Response.Success -> {
-                                MessageContent(response.value.value)
+                                MessageContent(encResponse.value.value)
                             }
                         }
                     }
@@ -1529,7 +1529,7 @@ abstract class SphinxRepository(
                     encryptedRemoteText = contact
                         .public_key
                         ?.let { pubKey ->
-                            val response = rsa.encrypt(
+                            val encResponse = rsa.encrypt(
                                 pubKey,
                                 UnencryptedString(msgText),
                                 formatOutput = false,
@@ -1537,20 +1537,20 @@ abstract class SphinxRepository(
                             )
 
                             @Exhaustive
-                            when (response) {
+                            when (encResponse) {
                                 is Response.Error -> {
-                                    LOG.e(TAG, response.message, response.exception)
+                                    LOG.e(TAG, encResponse.message, encResponse.exception)
                                     null
                                 }
                                 is Response.Success -> {
-                                    MessageContent(response.value.value)
+                                    MessageContent(encResponse.value.value)
                                 }
                             }
                         }
                 }
             }
 
-            val postPaymentDto: PostPaymentDto? = try {
+            val postPaymentDto: PostPaymentDto = try {
                 PostPaymentDto(
                     chat_id = sendPayment.chatId?.value,
                     contact_id = sendPayment.contactId?.value,
@@ -1567,62 +1567,60 @@ abstract class SphinxRepository(
                 return@launch
             }
 
-            postPaymentDto?.let { postPaymentDto ->
-                if (postPaymentDto.isKeySendPayment) {
-                    networkQueryMessage.sendKeySendPayment(
-                        postPaymentDto,
-                    ).collect { loadResponse ->
-                        @Exhaustive
-                        when (loadResponse) {
-                            is LoadResponse.Loading -> {}
-                            is Response.Error -> {
-                                LOG.e(TAG, loadResponse.message, loadResponse.exception)
-                                response = loadResponse
-                            }
-                            is Response.Success -> {
-                                response = loadResponse
-                            }
+            if (postPaymentDto.isKeySendPayment) {
+                networkQueryMessage.sendKeySendPayment(
+                    postPaymentDto,
+                ).collect { loadResponse ->
+                    @Exhaustive
+                    when (loadResponse) {
+                        is LoadResponse.Loading -> {}
+                        is Response.Error -> {
+                            LOG.e(TAG, loadResponse.message, loadResponse.exception)
+                            response = loadResponse
+                        }
+                        is Response.Success -> {
+                            response = loadResponse
                         }
                     }
-                } else {
-                    networkQueryMessage.sendPayment(
-                        postPaymentDto,
-                    ).collect { loadResponse ->
-                        @Exhaustive
-                        when (loadResponse) {
-                            is LoadResponse.Loading -> {}
-                            is Response.Error -> {
-                                LOG.e(TAG, loadResponse.message, loadResponse.exception)
-                                response = loadResponse
-                            }
-                            is Response.Success -> {
-                                loadResponse.value?.let { message ->
-                                    decryptMessageDtoContentIfAvailable(
-                                        message,
-                                        coroutineScope { this },
-                                    )
-                                    val queries = coreDB.getSphinxDatabaseQueries()
-                                    chatLock.withLock {
-                                        messageLock.withLock {
-                                            withContext(io) {
+                }
+            } else {
+                networkQueryMessage.sendPayment(
+                    postPaymentDto,
+                ).collect { loadResponse ->
+                    @Exhaustive
+                    when (loadResponse) {
+                        is LoadResponse.Loading -> {}
+                        is Response.Error -> {
+                            LOG.e(TAG, loadResponse.message, loadResponse.exception)
+                            response = loadResponse
+                        }
+                        is Response.Success -> {
+                            val message = loadResponse.value
 
-                                                queries.transaction {
-                                                    upsertMessage(message, queries)
+                            decryptMessageDtoContentIfAvailable(
+                                message,
+                                coroutineScope { this },
+                            )
 
-                                                    if (message.updateChatDboLatestMessage) {
-                                                        message.chat_id?.toChatId()?.let { chatId ->
-                                                            updateChatDboLatestMessage(
-                                                                message,
-                                                                chatId,
-                                                                latestMessageUpdatedTimeMap,
-                                                                queries
-                                                            )
-                                                        }
-                                                    }
+                            chatLock.withLock {
+                                messageLock.withLock {
+                                    withContext(io) {
+
+                                        queries.transaction {
+                                            upsertMessage(message, queries)
+
+                                            if (message.updateChatDboLatestMessage) {
+                                                message.chat_id?.toChatId()?.let { chatId ->
+                                                    updateChatDboLatestMessage(
+                                                        message,
+                                                        chatId,
+                                                        latestMessageUpdatedTimeMap,
+                                                        queries
+                                                    )
                                                 }
-
                                             }
                                         }
+
                                     }
                                 }
                             }
