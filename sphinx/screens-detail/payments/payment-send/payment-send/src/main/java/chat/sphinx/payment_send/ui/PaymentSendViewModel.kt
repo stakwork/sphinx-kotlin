@@ -5,7 +5,7 @@ import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_repository_contact.ContactRepository
-import chat.sphinx.concept_repository_dashboard_android.RepositoryDashboardAndroid
+import chat.sphinx.concept_repository_dashboard.RepositoryDashboard
 import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.concept_repository_message.SendPayment
 import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
@@ -54,7 +54,7 @@ internal class PaymentSendViewModel @Inject constructor(
     private val app: Application,
     private val messageRepository: MessageRepository,
     private val contactRepository: ContactRepository,
-    private val repositoryDashboard: RepositoryDashboardAndroid<Any>,
+    private val repositoryDashboard: RepositoryDashboard,
     private val scannerCoordinator: ViewModelCoordinator<ScannerRequest, ScannerResponse>
 ): SideEffectViewModel<
         FragmentActivity,
@@ -87,11 +87,13 @@ internal class PaymentSendViewModel @Inject constructor(
     init {
         viewModelScope.launch(mainImmediate) {
             contactSharedFlow.collect { contact ->
-                contact?.let { contact ->
-                    viewStateContainer.updateViewState(PaymentSendViewState.ChatPayment(contact))
-                } ?: run {
-                    viewStateContainer.updateViewState(PaymentSendViewState.KeySendPayment)
-                }
+                viewStateContainer.updateViewState(
+                    if (contact != null) {
+                        PaymentSendViewState.ChatPayment(contact)
+                    } else {
+                        PaymentSendViewState.KeySendPayment
+                    }
+                )
             }
         }
     }
@@ -101,7 +103,7 @@ internal class PaymentSendViewModel @Inject constructor(
             submitSideEffect(PaymentSendSideEffect.ProduceHapticFeedback)
 
             getAccountBalance().firstOrNull()?.let { balance ->
-                var updatedAmount: Int? = try {
+                val updatedAmount: Int? = try {
                     amountString.toInt()
                 } catch (e: NumberFormatException) {
                     null
@@ -187,7 +189,11 @@ internal class PaymentSendViewModel @Inject constructor(
                 }
                 is Response.Success -> {
                     if (sendPaymentBuilder.isKeySendPayment) {
-                        val successMessage = String.format(app.getString(R.string.payment_sent), sendPayment?.amount ?: 0, sendPayment?.destinationKey?.value ?: "Unknown")
+                        val successMessage = String.format(
+                            app.getString(R.string.payment_sent),
+                            sendPayment?.amount ?: 0,
+                            sendPayment?.destinationKey?.value ?: "Unknown"
+                        )
 
                         submitSideEffect(
                             PaymentSendSideEffect.Notify(successMessage)

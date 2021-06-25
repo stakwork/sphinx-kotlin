@@ -37,7 +37,7 @@ dependencies {
     implementation project(path: ':sphinx:screens-detail:common:detail-resources')
     implementation project(path: ':sphinx:application:data:concepts:concept-image-loader')
     implementation project(path: ':sphinx:screens-detail:scanner:scanner-view-model-coordinator')
-    implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-dashboard-android')
+    implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-dashboard')
     implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-contact')
     implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-message')
 

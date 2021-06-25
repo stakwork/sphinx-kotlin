@@ -58,7 +58,7 @@ internal class PaymentSendFragment: SideEffectFragment<
             }
 
             binding.buttonConfirm.setOnClickListener {
-                viewModel.sendContactPayment(editTextMessage?.text?.toString())
+                viewModel.sendContactPayment(editTextMessage.text?.toString())
             }
         }
 
@@ -77,7 +77,7 @@ internal class PaymentSendFragment: SideEffectFragment<
                 textViewContactName.text = alias
             }
 
-            onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            lifecycleScope.launch(viewModel.mainImmediate) {
                 contact.photoUrl?.value?.let { img ->
                     if (img.isNotEmpty()) {
                         imageLoader.load(
@@ -118,7 +118,7 @@ internal class PaymentSendFragment: SideEffectFragment<
 
     private fun removeLastCharacter() {
         binding.textViewAmount.text?.let { amountString ->
-            amountString.toString().dropLast(1)?.let { updatedAmountString ->
+            amountString.toString().dropLast(1).let { updatedAmountString ->
                 viewModel.updateAmount(updatedAmountString)
             }
         }
