@@ -3,12 +3,17 @@ package chat.sphinx.camera.ui
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
+import android.hardware.camera2.CameraManager
 import android.os.Bundle
+import android.os.Handler
+import android.os.HandlerThread
 import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.camera.R
@@ -20,11 +25,6 @@ import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import kotlinx.coroutines.launch
 
-private val PERMISSIONS_REQUIRED = arrayOf(
-    Manifest.permission.CAMERA,
-    Manifest.permission.RECORD_AUDIO,
-)
-
 @AndroidEntryPoint
 internal class CameraFragment: SideEffectFragment<
         FragmentActivity,
@@ -34,6 +34,17 @@ internal class CameraFragment: SideEffectFragment<
         FragmentCameraBinding,
         >(R.layout.fragment_camera)
 {
+    companion object {
+        const val ANIMATION_FAST_MILLIS = 50L
+        const val ANIMATION_SLOW_MILLIS = 100L
+    }
+
+    @Suppress("PrivatePropertyName")
+    private val PERMISSIONS_REQUIRED = arrayOf(
+        Manifest.permission.CAMERA,
+        Manifest.permission.RECORD_AUDIO,
+    )
+
     override val binding: FragmentCameraBinding by viewBinding(FragmentCameraBinding::bind)
     override val viewModel: CameraViewModel by viewModels()
 
@@ -59,6 +70,51 @@ internal class CameraFragment: SideEffectFragment<
             }
         }
     }
+
+    private val cameraManager: CameraManager by lazy {
+        requireActivity().applicationContext
+            .getSystemService(Context.CAMERA_SERVICE) as CameraManager
+    }
+
+    private inner class ThreadHolder: DefaultLifecycleObserver {
+
+        @Volatile
+        private var cameraThread: HandlerThread? = null
+        private val threadLock = Object()
+
+        @Volatile
+        private var cameraHandler: Handler? = null
+        private val handlerLock = Object()
+
+        fun getCameraThread(): HandlerThread =
+            cameraThread ?: synchronized(threadLock) {
+                cameraThread ?: HandlerThread("CameraThread").apply { start() }
+                    .also {
+                        cameraThread = it
+                        viewLifecycleOwner.lifecycle.addObserver(this)
+                    }
+            }
+
+        fun getCameraHandler(): Handler =
+            cameraHandler ?: synchronized(handlerLock) {
+                cameraHandler ?: Handler(getCameraThread().looper)
+                    .also { cameraHandler = it }
+            }
+
+        override fun onDestroy(owner: LifecycleOwner) {
+            super.onDestroy(owner)
+            synchronized(handlerLock) {
+                synchronized(threadLock) {
+                    val thread = cameraThread
+                    cameraHandler = null
+                    cameraThread = null
+                    thread?.quitSafely()
+                }
+            }
+        }
+    }
+
+    private val threadHolder = ThreadHolder()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
