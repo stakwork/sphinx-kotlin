@@ -12,6 +12,7 @@ import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.payment_send.R
 import chat.sphinx.payment_send.navigation.PaymentSendNavigator
+import chat.sphinx.payment_send.navigation.ToPaymentSendDetail
 import chat.sphinx.scanner_view_model_coordinator.request.ScannerFilter
 import chat.sphinx.scanner_view_model_coordinator.request.ScannerRequest
 import chat.sphinx.scanner_view_model_coordinator.response.ScannerResponse
@@ -39,7 +40,7 @@ internal inline val PaymentSendFragmentArgs.chatId: ChatId?
     }
 
 internal inline val PaymentSendFragmentArgs.contactId: ContactId?
-    get() = if (argContactId == ContactId.NULL_CONTACT_ID.toLong()) {
+    get() = if (argContactId == ToPaymentSendDetail.NULL_CONTACT_ID) {
         null
     } else {
         ContactId(argContactId)
