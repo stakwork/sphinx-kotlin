@@ -403,6 +403,8 @@ abstract class ChatFragment<
                     }
                 }
             }
+        }.invokeOnCompletion {
+            viewModel.updateSelectedMessageViewState(SelectedMessageViewState.None)
         }
 
         viewModel.readMessages()
