@@ -40,6 +40,8 @@ dependencies {
     implementation project(path: ':sphinx:screens-detail:common:detail-resources')
 
     implementation project(path: ':sphinx:activity:features:feature-view-model-coordinator')
+
+    implementation project(path: ':sphinx:screens-detail:camera:camera-utils')
     api project(path: ':sphinx:screens-detail:camera:camera-view-model-coordinator')
 
     //CameraX Dependencies
