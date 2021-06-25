@@ -1,0 +1,286 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/layout_constraint_chat_actions_menu"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingHorizontal="@dimen/chat_menu_options_menu_horizontal_padding"
+    android:elevation="@dimen/default_elevation"
+    android:background="@color/headerBG">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_camera_option_container"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/chat_menu_options_menu_option_height"
+        android:clickable="true"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/image_view_camera_icon"
+            android:layout_width="@dimen/chat_menu_option_icon_width"
+            android:layout_height="match_parent"
+            android:paddingRight="@dimen/chat_menu_option_icon_right_padding"
+            android:paddingLeft="@dimen/chat_menu_option_icon_left_padding"
+            android:src="@drawable/ic_camera"
+            android:tint="@color/mainBottomIcons"
+            app:layout_constraintStart_toStartOf="parent"/>
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:fontFamily="@font/roboto_regular"
+            android:textSize="@dimen/chat_menu_option_title_text_size"
+            android:textColor="@color/primaryText"
+            android:text="@string/chat_menu_camera_attachment_option"
+            android:gravity="center"
+            app:layout_constraintStart_toEndOf="@+id/image_view_camera_icon"/>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/chat_menu_options_menu_option_divider_height"
+            android:background="@color/divider"
+            app:layout_constraintBottom_toBottomOf="parent"></View>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_library_option_container"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/chat_menu_options_menu_option_height"
+        android:clickable="true"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_camera_option_container">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/image_view_media_library_icon"
+            android:layout_width="@dimen/chat_menu_option_icon_width"
+            android:layout_height="match_parent"
+            android:paddingRight="@dimen/chat_menu_option_icon_right_padding"
+            android:paddingLeft="@dimen/chat_menu_option_icon_left_padding"
+            android:src="@drawable/ic_media_library"
+            android:tint="@color/mainBottomIcons"
+            app:layout_constraintStart_toStartOf="parent"/>
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:fontFamily="@font/roboto_regular"
+            android:textSize="@dimen/chat_menu_option_title_text_size"
+            android:textColor="@color/primaryText"
+            android:text="@string/chat_menu_library_attachment_option"
+            android:gravity="center"
+            app:layout_constraintStart_toEndOf="@+id/image_view_media_library_icon"/>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/chat_menu_options_menu_option_divider_height"
+            android:background="@color/divider"
+            app:layout_constraintBottom_toBottomOf="parent"></View>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_gif_option_container"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/chat_menu_options_menu_option_height"
+        android:clickable="true"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_library_option_container">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_gif_icon"
+            android:layout_width="@dimen/chat_menu_option_icon_width"
+            android:layout_height="match_parent"
+            app:layout_constraintStart_toStartOf="parent"
+            android:fontFamily="@font/material_icons_regular"
+            android:textSize="29sp"
+            android:textColor="@color/mainBottomIcons"
+            android:text="@string/material_icon_name_gif"
+            android:gravity="start|center"></androidx.appcompat.widget.AppCompatTextView>
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:fontFamily="@font/roboto_regular"
+            android:textSize="@dimen/chat_menu_option_title_text_size"
+            android:textColor="@color/primaryText"
+            android:text="@string/chat_menu_gif_attachment_option"
+            android:gravity="center"
+            app:layout_constraintStart_toEndOf="@+id/text_view_gif_icon"/>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/chat_menu_options_menu_option_divider_height"
+            android:background="@color/divider"
+            app:layout_constraintBottom_toBottomOf="parent"></View>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_file_option_container"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/chat_menu_options_menu_option_height"
+        android:clickable="true"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_gif_option_container">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_file_icon"
+            android:layout_width="@dimen/chat_menu_option_icon_width"
+            android:layout_height="match_parent"
+            app:layout_constraintStart_toStartOf="parent"
+            android:fontFamily="@font/material_icons_regular"
+            android:textSize="28sp"
+            android:textColor="@color/mainBottomIcons"
+            android:text="@string/material_icon_name_file_attachment"
+            android:gravity="start|center"></androidx.appcompat.widget.AppCompatTextView>
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:fontFamily="@font/roboto_regular"
+            android:textSize="@dimen/chat_menu_option_title_text_size"
+            android:textColor="@color/primaryText"
+            android:text="@string/chat_menu_file_attachment_option"
+            android:gravity="center"
+            app:layout_constraintStart_toEndOf="@+id/text_view_file_icon"/>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/chat_menu_options_menu_option_divider_height"
+            android:background="@color/divider"
+            app:layout_constraintBottom_toBottomOf="parent"></View>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_paid_message_option_container"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/chat_menu_options_menu_option_height"
+        android:clickable="true"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_file_option_container">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/image_view_paid_message_icon"
+            android:layout_width="@dimen/chat_menu_option_icon_width"
+            android:layout_height="match_parent"
+            android:paddingRight="@dimen/chat_menu_option_icon_right_padding"
+            android:paddingLeft="@dimen/chat_menu_option_icon_left_padding"
+            android:src="@drawable/ic_paid_message"
+            android:tint="@color/mainBottomIcons"
+            app:layout_constraintStart_toStartOf="parent"/>
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:fontFamily="@font/roboto_regular"
+            android:textSize="@dimen/chat_menu_option_title_text_size"
+            android:textColor="@color/primaryText"
+            android:text="@string/chat_menu_paid_message_attachment_option"
+            android:gravity="center"
+            app:layout_constraintStart_toEndOf="@+id/image_view_paid_message_icon"/>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/chat_menu_options_menu_option_divider_height"
+            android:background="@color/divider"
+            app:layout_constraintBottom_toBottomOf="parent"></View>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_request_option_container"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/chat_menu_options_menu_option_height"
+        android:clickable="true"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_paid_message_option_container">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/image_view_request_icon"
+            android:layout_width="@dimen/chat_menu_option_icon_width"
+            android:layout_height="match_parent"
+            android:paddingRight="@dimen/chat_menu_option_icon_right_padding"
+            android:paddingLeft="@dimen/chat_menu_option_icon_left_padding"
+            android:src="@drawable/ic_request"
+            android:tint="@color/mainBottomIcons"
+            app:layout_constraintStart_toStartOf="parent"/>
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:fontFamily="@font/roboto_regular"
+            android:textSize="@dimen/chat_menu_option_title_text_size"
+            android:textColor="@color/primaryText"
+            android:text="@string/chat_menu_request_attachment_option"
+            android:gravity="center"
+            app:layout_constraintStart_toEndOf="@+id/image_view_request_icon"/>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/chat_menu_options_menu_option_divider_height"
+            android:background="@color/divider"
+            app:layout_constraintBottom_toBottomOf="parent"></View>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_send_option_container"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/chat_menu_options_menu_option_height"
+        android:clickable="true"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_request_option_container">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/image_view_send_icon"
+            android:layout_width="@dimen/chat_menu_option_icon_width"
+            android:layout_height="match_parent"
+            android:paddingRight="@dimen/chat_menu_option_icon_right_padding"
+            android:paddingLeft="@dimen/chat_menu_option_icon_left_padding"
+            android:src="@drawable/ic_send"
+            android:tint="@color/mainBottomIcons"
+            app:layout_constraintStart_toStartOf="parent"/>
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:fontFamily="@font/roboto_regular"
+            android:textSize="@dimen/chat_menu_option_title_text_size"
+            android:textColor="@color/primaryText"
+            android:text="@string/chat_menu_send_attachment_option"
+            android:gravity="center"
+            app:layout_constraintStart_toEndOf="@+id/image_view_send_icon"/>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/chat_menu_options_menu_option_divider_height"
+            android:background="@color/divider"
+            app:layout_constraintBottom_toBottomOf="parent"></View>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/text_view_cancel_button"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/chat_menu_options_menu_cancel_button_height"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_send_option_container"
+        android:fontFamily="@font/montserrat_regular"
+        android:textSize="@dimen/chat_menu_option_cancel_title_text_size"
+        android:textColor="@color/primaryRed"
+        android:gravity="center"
+        android:text="@string/chat_menu_attachments_menu_cancel"
+        android:clickable="true"></androidx.appcompat.widget.AppCompatTextView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

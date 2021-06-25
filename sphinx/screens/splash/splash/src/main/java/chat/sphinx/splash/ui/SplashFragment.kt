@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.view.HapticFeedbackConstants
 import android.view.View
 import android.view.inputmethod.EditorInfo
-import android.view.inputmethod.InputMethodManager
 import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope

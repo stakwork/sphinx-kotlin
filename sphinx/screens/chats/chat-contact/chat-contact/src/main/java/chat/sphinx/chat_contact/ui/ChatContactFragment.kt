@@ -1,39 +1,46 @@
 package chat.sphinx.chat_contact.ui
 
+import android.os.Bundle
+import android.view.View
 import android.widget.ImageView
+import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.RecyclerView
 import by.kirich1409.viewbindingdelegate.viewBinding
-import chat.sphinx.chat_common.databinding.LayoutChatFooterBinding
-import chat.sphinx.chat_common.databinding.LayoutChatHeaderBinding
-import chat.sphinx.chat_common.databinding.LayoutMessageHolderBinding
-import chat.sphinx.chat_common.databinding.LayoutSelectedMessageBinding
+import chat.sphinx.chat_common.databinding.*
 import chat.sphinx.chat_common.ui.ChatFragment
 import chat.sphinx.chat_common.navigation.ChatNavigator
 import chat.sphinx.chat_contact.R
 import chat.sphinx.chat_contact.databinding.FragmentChatContactBinding
 import chat.sphinx.chat_contact.navigation.ContactChatNavigator
+import chat.sphinx.chat_contact.ui.viewstate.ChatContactActionsMenuViewState
 import chat.sphinx.concept_image_loader.ImageLoader
-import chat.sphinx.concept_network_query_chat.model.PodcastDto
+import chat.sphinx.insetter_activity.InsetterActivity
 import dagger.hilt.android.AndroidEntryPoint
+import io.matthewnelson.android_feature_viewmodel.updateViewState
+import javax.annotation.meta.Exhaustive
 import javax.inject.Inject
 
 @AndroidEntryPoint
 internal class ChatContactFragment: ChatFragment<
         FragmentChatContactBinding,
+        ChatContactActionsMenuViewState,
         ChatContactFragmentArgs,
         ChatContactViewModel,
         >(R.layout.fragment_chat_contact)
 {
     override val binding: FragmentChatContactBinding by viewBinding(FragmentChatContactBinding::bind)
     override val footerBinding: LayoutChatFooterBinding by viewBinding(
-        LayoutChatFooterBinding::bind, R.id.include_chat_contact_footer
+        LayoutChatFooterBinding::bind, R.id.include_chat_footer
     )
     override val headerBinding: LayoutChatHeaderBinding by viewBinding(
-        LayoutChatHeaderBinding::bind, R.id.include_chat_contact_header
+        LayoutChatHeaderBinding::bind, R.id.include_chat_header
+    )
+    override val menuBinding: LayoutChatActionsMenuBinding by viewBinding(
+        LayoutChatActionsMenuBinding::bind, R.id.include_chat_actions_menu
     )
     override val selectedMessageBinding: LayoutSelectedMessageBinding by viewBinding(
-        LayoutSelectedMessageBinding::bind, R.id.include_chat_contact_selected_message
+        LayoutSelectedMessageBinding::bind, R.id.include_chat_selected_message
     )
     override val selectedMessageHolderBinding: LayoutMessageHolderBinding by viewBinding(
         LayoutMessageHolderBinding::bind, R.id.include_layout_message_holder_selected_message
@@ -52,4 +59,52 @@ internal class ChatContactFragment: ChatFragment<
     protected lateinit var chatNavigatorInj: ContactChatNavigator
     override val chatNavigator: ChatNavigator
         get() = chatNavigatorInj
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        setupHeader()
+    }
+
+    private fun setupHeader() {
+        val insetterActivity = (requireActivity() as InsetterActivity)
+
+        binding.layoutMotionChat.getConstraintSet(R.id.motion_scene_chat_menu_closed)?.let { constraintSet ->
+            val height = constraintSet.getConstraint(R.id.include_chat_header).layout.mHeight
+            constraintSet.constrainHeight(R.id.include_chat_header, height + insetterActivity.statusBarInsetHeight.top)
+        }
+
+        binding.layoutMotionChat.getConstraintSet(R.id.motion_scene_chat_menu_open)?.let { constraintSet ->
+            val height = constraintSet.getConstraint(R.id.include_chat_header).layout.mHeight
+            constraintSet.constrainHeight(R.id.include_chat_header, height + insetterActivity.statusBarInsetHeight.top)
+        }
+    }
+
+    override suspend fun onViewStateFlowCollect(viewState: ChatContactActionsMenuViewState) {
+        @Exhaustive
+        when (viewState) {
+            ChatContactActionsMenuViewState.Closed -> {
+                binding.layoutMotionChat.setTransitionDuration(150)
+            }
+            ChatContactActionsMenuViewState.Open -> {
+                binding.layoutMotionChat.setTransitionDuration(300)
+            }
+        }
+        viewState.transitionToEndSet(binding.layoutMotionChat)
+    }
+
+    override fun getMotionLayouts(): Array<MotionLayout> {
+        return arrayOf(binding.layoutMotionChat)
+    }
+
+    override fun onViewCreatedRestoreMotionScene(
+        viewState: ChatContactActionsMenuViewState,
+        binding: FragmentChatContactBinding
+    ) {
+        viewState.restoreMotionScene(binding.layoutMotionChat)
+    }
+
+    override fun openActionsMenu() {
+        viewModel.updateViewState(ChatContactActionsMenuViewState.Open)
+    }
 }

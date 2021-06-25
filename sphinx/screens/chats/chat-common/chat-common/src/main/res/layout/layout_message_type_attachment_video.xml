@@ -8,39 +8,39 @@
     tools:layout_width="300dp"
     tools:visibility="visible">
 
-    <VideoView
-        android:id="@+id/video_view_attachment_video"
-        android:layout_width="0dp"
-        android:layout_height="@dimen/message_type_video_attachment_height"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+<!--    <VideoView-->
+<!--        android:id="@+id/video_view_attachment_video"-->
+<!--        android:layout_width="0dp"-->
+<!--        android:layout_height="@dimen/message_type_video_attachment_height"-->
+<!--        app:layout_constraintBottom_toBottomOf="parent"-->
+<!--        app:layout_constraintEnd_toEndOf="parent"-->
+<!--        app:layout_constraintStart_toStartOf="parent"-->
+<!--        app:layout_constraintTop_toTopOf="parent" />-->
 
 
-    <!--  TODO: Create and apply drawable for Circular Play Button  -->
-    <androidx.appcompat.widget.AppCompatImageButton
-        android:id="@+id/button_attachment_video_play"
-        android:layout_width="@dimen/video_attachment_play_pause_button_xy"
-        android:layout_height="@dimen/video_attachment_play_pause_button_xy"
-        android:src="@drawable/sphinx_white_logo"
-        app:layout_constraintBottom_toBottomOf="@id/video_view_attachment_video"
-        app:layout_constraintEnd_toEndOf="@id/video_view_attachment_video"
-        app:layout_constraintStart_toStartOf="@id/video_view_attachment_video"
-        app:layout_constraintTop_toTopOf="@id/video_view_attachment_video" />
+<!--    &lt;!&ndash;  TODO: Create and apply drawable for Circular Play Button  &ndash;&gt;-->
+<!--    <androidx.appcompat.widget.AppCompatImageButton-->
+<!--        android:id="@+id/button_attachment_video_play"-->
+<!--        android:layout_width="@dimen/video_attachment_play_pause_button_xy"-->
+<!--        android:layout_height="@dimen/video_attachment_play_pause_button_xy"-->
+<!--        android:src="@drawable/sphinx_white_logo"-->
+<!--        app:layout_constraintBottom_toBottomOf="@id/video_view_attachment_video"-->
+<!--        app:layout_constraintEnd_toEndOf="@id/video_view_attachment_video"-->
+<!--        app:layout_constraintStart_toStartOf="@id/video_view_attachment_video"-->
+<!--        app:layout_constraintTop_toTopOf="@id/video_view_attachment_video" />-->
 
 
-    <!--  TODO: Create and apply drawable for Circular Pause Button  -->
-    <androidx.appcompat.widget.AppCompatImageButton
-        android:id="@+id/button_attachment_video_pause"
-        android:layout_width="@dimen/video_attachment_play_pause_button_xy"
-        android:layout_height="@dimen/video_attachment_play_pause_button_xy"
-        android:src="@drawable/sphinx_white_logo"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="@id/video_view_attachment_video"
-        app:layout_constraintEnd_toEndOf="@id/video_view_attachment_video"
-        app:layout_constraintStart_toStartOf="@id/video_view_attachment_video"
-        app:layout_constraintTop_toTopOf="@id/video_view_attachment_video"
-        tools:visibility="gone" />
+<!--    &lt;!&ndash;  TODO: Create and apply drawable for Circular Pause Button  &ndash;&gt;-->
+<!--    <androidx.appcompat.widget.AppCompatImageButton-->
+<!--        android:id="@+id/button_attachment_video_pause"-->
+<!--        android:layout_width="@dimen/video_attachment_play_pause_button_xy"-->
+<!--        android:layout_height="@dimen/video_attachment_play_pause_button_xy"-->
+<!--        android:src="@drawable/sphinx_white_logo"-->
+<!--        android:visibility="gone"-->
+<!--        app:layout_constraintBottom_toBottomOf="@id/video_view_attachment_video"-->
+<!--        app:layout_constraintEnd_toEndOf="@id/video_view_attachment_video"-->
+<!--        app:layout_constraintStart_toStartOf="@id/video_view_attachment_video"-->
+<!--        app:layout_constraintTop_toTopOf="@id/video_view_attachment_video"-->
+<!--        tools:visibility="gone" />-->
 
 </androidx.constraintlayout.widget.ConstraintLayout>

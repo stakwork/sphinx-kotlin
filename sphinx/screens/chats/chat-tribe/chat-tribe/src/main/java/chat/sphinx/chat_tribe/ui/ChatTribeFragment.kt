@@ -3,28 +3,30 @@ package chat.sphinx.chat_tribe.ui
 import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
+import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.core.view.isGone
+import androidx.core.view.isInvisible
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import app.cash.exhaustive.Exhaustive
 import by.kirich1409.viewbindingdelegate.viewBinding
-import chat.sphinx.chat_common.databinding.LayoutChatFooterBinding
-import chat.sphinx.chat_common.databinding.LayoutChatHeaderBinding
-import chat.sphinx.chat_common.databinding.LayoutMessageHolderBinding
-import chat.sphinx.chat_common.databinding.LayoutSelectedMessageBinding
+import chat.sphinx.chat_common.databinding.*
 import chat.sphinx.chat_common.ui.ChatFragment
-import chat.sphinx.chat_common.ui.viewstate.header.ChatHeaderFooterViewState
+import chat.sphinx.chat_common.ui.viewstate.ActionsMenuViewState
 import chat.sphinx.chat_tribe.R
 import chat.sphinx.chat_tribe.databinding.FragmentChatTribeBinding
-import chat.sphinx.chat_tribe.databinding.LayoutPodcastPlayerFooterBinding
+import chat.sphinx.chat_common.databinding.LayoutPodcastPlayerFooterBinding
 import chat.sphinx.chat_tribe.navigation.TribeChatNavigator
+import chat.sphinx.chat_tribe.ui.viewstate.ChatTribeActionsMenuViewState
 import chat.sphinx.concept_image_loader.ImageLoader
+import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.podcast_player.objects.Podcast
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
+import io.matthewnelson.android_feature_screens.util.visible
+import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_views.viewstate.collect
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -32,6 +34,7 @@ import javax.inject.Inject
 @AndroidEntryPoint
 internal class ChatTribeFragment: ChatFragment<
         FragmentChatTribeBinding,
+        ChatTribeActionsMenuViewState,
         ChatTribeFragmentArgs,
         ChatTribeViewModel,
         >(R.layout.fragment_chat_tribe)
@@ -41,13 +44,16 @@ internal class ChatTribeFragment: ChatFragment<
     override val binding: FragmentChatTribeBinding by viewBinding(FragmentChatTribeBinding::bind)
 
     override val footerBinding: LayoutChatFooterBinding by viewBinding(
-        LayoutChatFooterBinding::bind, R.id.include_chat_tribe_footer
+        LayoutChatFooterBinding::bind, R.id.include_chat_footer
     )
     override val headerBinding: LayoutChatHeaderBinding by viewBinding(
-        LayoutChatHeaderBinding::bind, R.id.include_chat_tribe_header
+        LayoutChatHeaderBinding::bind, R.id.include_chat_header
+    )
+    override val menuBinding: LayoutChatActionsMenuBinding by viewBinding(
+        LayoutChatActionsMenuBinding::bind, R.id.include_chat_actions_menu
     )
     override val selectedMessageBinding: LayoutSelectedMessageBinding by viewBinding(
-        LayoutSelectedMessageBinding::bind, R.id.include_chat_tribe_selected_message
+        LayoutSelectedMessageBinding::bind, R.id.include_chat_selected_message
     )
     override val selectedMessageHolderBinding: LayoutMessageHolderBinding by viewBinding(
         LayoutMessageHolderBinding::bind, R.id.include_layout_message_holder_selected_message
@@ -76,13 +82,29 @@ internal class ChatTribeFragment: ChatFragment<
                 addPodcastOnClickListeners(podcast)
             }
         }
+
+        setupHeader()
+    }
+
+    private fun setupHeader() {
+        val insetterActivity = (requireActivity() as InsetterActivity)
+
+        binding.layoutMotionChat.getConstraintSet(R.id.motion_scene_chat_menu_closed)?.let { constraintSet ->
+            val height = constraintSet.getConstraint(R.id.include_chat_header).layout.mHeight
+            constraintSet.constrainHeight(R.id.include_chat_header, height + insetterActivity.statusBarInsetHeight.top)
+        }
+
+        binding.layoutMotionChat.getConstraintSet(R.id.motion_scene_chat_menu_open)?.let { constraintSet ->
+            val height = constraintSet.getConstraint(R.id.include_chat_header).layout.mHeight
+            constraintSet.constrainHeight(R.id.include_chat_header, height + insetterActivity.statusBarInsetHeight.top)
+        }
     }
 
     private fun configurePodcastPlayer(podcast: Podcast) {
         podcastPlayerBinding.apply {
             if (root.isGone) {
                 scrollToBottom(callback = {
-                    root.goneIfFalse(true)
+                    root.visible
                 })
             }
 
@@ -173,5 +195,33 @@ internal class ChatTribeFragment: ChatFragment<
                 }
             }
         }
+    }
+
+    override suspend fun onViewStateFlowCollect(viewState: ChatTribeActionsMenuViewState) {
+        @Exhaustive
+        when (viewState) {
+            ChatTribeActionsMenuViewState.Closed -> {
+                binding.layoutMotionChat.setTransitionDuration(150)
+            }
+            ChatTribeActionsMenuViewState.Open -> {
+                binding.layoutMotionChat.setTransitionDuration(300)
+            }
+        }
+        viewState.transitionToEndSet(binding.layoutMotionChat)
+    }
+
+    override fun getMotionLayouts(): Array<MotionLayout> {
+        return arrayOf(binding.layoutMotionChat)
+    }
+
+    override fun onViewCreatedRestoreMotionScene(
+        viewState: ChatTribeActionsMenuViewState,
+        binding: FragmentChatTribeBinding
+    ) {
+        viewState.restoreMotionScene(binding.layoutMotionChat)
+    }
+
+    override fun openActionsMenu() {
+        viewModel.updateViewState(ChatTribeActionsMenuViewState.Open)
     }
 }

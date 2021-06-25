@@ -10,6 +10,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
+import androidx.navigation.Navigation.findNavController
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import app.cash.exhaustive.Exhaustive
@@ -72,7 +73,7 @@ internal class DashboardFragment : MotionLayoutFragment<
 
         viewModel.networkRefresh()
 
-//        findNavController().addOnDestinationChangedListener(CloseDrawerOnDestinationChange())
+        findNavController(binding.root).addOnDestinationChangedListener(CloseDrawerOnDestinationChange())
 
         setupChats()
         setupDashboardHeader()

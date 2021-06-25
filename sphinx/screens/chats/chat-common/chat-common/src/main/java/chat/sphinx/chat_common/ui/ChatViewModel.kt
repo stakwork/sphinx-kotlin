@@ -9,8 +9,9 @@ import androidx.navigation.NavArgs
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.chat_common.R
 import chat.sphinx.chat_common.navigation.ChatNavigator
+import chat.sphinx.chat_common.ui.viewstate.ActionsMenuViewState
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
-import chat.sphinx.chat_common.ui.viewstate.header.ChatHeaderFooterViewState
+import chat.sphinx.chat_common.ui.viewstate.header.ChatHeaderViewState
 import chat.sphinx.chat_common.ui.viewstate.messageholder.BubbleBackground
 import chat.sphinx.chat_common.ui.viewstate.messageholder.MessageHolderViewState
 import chat.sphinx.chat_common.ui.viewstate.selected.SelectedMessageViewState
@@ -43,7 +44,8 @@ import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_message.Message
 import chat.sphinx.wrapper_message.isDeleted
 import chat.sphinx.wrapper_message.isGroupAction
-import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
+import io.matthewnelson.android_concept_views.MotionLayoutViewState
+import io.matthewnelson.android_feature_viewmodel.MotionLayoutViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
@@ -52,16 +54,19 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import javax.inject.Inject
 
 @JvmSynthetic
 @Suppress("NOTHING_TO_INLINE")
-internal inline fun <ARGS: NavArgs> ChatViewModel<ARGS>.isMessageSelected(): Boolean =
+internal inline fun <ARGS: NavArgs, VS: MotionLayoutViewState<VS>> ChatViewModel<ARGS, VS>.isMessageSelected(): Boolean =
     getSelectedMessageViewStateFlow().value is SelectedMessageViewState.SelectedMessage
 
-abstract class ChatViewModel<ARGS: NavArgs>(
+abstract class ChatViewModel<
+        ARGS: NavArgs,
+        VS: MotionLayoutViewState<VS>
+        >(
     protected val app: Application,
     dispatchers: CoroutineDispatchers,
+    initialViewState: VS,
     val memeServerTokenHandler: MemeServerTokenHandler,
     protected val chatRepository: ChatRepository,
     protected val contactRepository: ContactRepository,
@@ -70,11 +75,12 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     protected val savedStateHandle: SavedStateHandle,
     protected val sendAttachmentCoordinator: ViewModelCoordinator<SendAttachmentRequest, SendAttachmentResponse>,
     protected val LOG: SphinxLogger,
-): SideEffectViewModel<
+): MotionLayoutViewModel<
+        Any,
         Context,
         ChatSideEffect,
-        ChatHeaderFooterViewState
-        >(dispatchers, ChatHeaderFooterViewState.Idle)
+        VS
+        >(dispatchers, initialViewState)
 {
     abstract val args: ARGS
 
@@ -87,6 +93,10 @@ abstract class ChatViewModel<ARGS: NavArgs>(
             .build()
     }
 
+    val headerViewStateContainer: ViewStateContainer<ChatHeaderViewState> by lazy {
+        ChatHeaderViewStateContainer()
+    }
+
     protected val headerInitialsTextViewColor: Int by lazy {
         app.getRandomColor()
     }
@@ -97,11 +107,11 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 
     protected abstract suspend fun getChatNameIfNull(): ChatName?
 
-    private inner class ChatHeaderViewStateContainer: ViewStateContainer<ChatHeaderFooterViewState>(ChatHeaderFooterViewState.Idle) {
-        override val viewStateFlow: StateFlow<ChatHeaderFooterViewState> = flow<ChatHeaderFooterViewState> {
+    private inner class ChatHeaderViewStateContainer: ViewStateContainer<ChatHeaderViewState>(ChatHeaderViewState.Idle) {
+        override val viewStateFlow: StateFlow<ChatHeaderViewState> = flow<ChatHeaderViewState> {
             chatSharedFlow.collect { chat ->
                 emit(
-                    ChatHeaderFooterViewState.Initialized(
+                    ChatHeaderViewState.Initialized(
                         chatHeaderName = chat?.name?.value ?: getChatNameIfNull()?.value ?: "",
                         showLock = chat != null,
                         contributions = null,
@@ -113,13 +123,13 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         }.stateIn(
             viewModelScope,
             SharingStarted.WhileSubscribed(5_000),
-            ChatHeaderFooterViewState.Idle
+            ChatHeaderViewState.Idle
         )
     }
 
-    override val viewStateContainer: ViewStateContainer<ChatHeaderFooterViewState> by lazy {
-        ChatHeaderViewStateContainer()
-    }
+//    override val viewStateContainer: ViewStateContainer<ChatHeaderViewState> by lazy {
+//        ChatHeaderViewStateContainer()
+//    }
 
     private suspend fun getChat(): Chat {
         chatSharedFlow.replayCache.firstOrNull()?.let { chat ->
@@ -286,7 +296,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
             headerInitialHolderSharedFlow.firstOrNull()
         }
         val setupViewStateContainerJob = viewModelScope.launch(mainImmediate) {
-            viewStateContainer.viewStateFlow.firstOrNull()
+            headerViewStateContainer.viewStateFlow.firstOrNull()
         }
         viewModelScope.launch(mainImmediate) {
             delay(500)
@@ -463,5 +473,9 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                 }
             }
         }
+    }
+
+    override suspend fun onMotionSceneCompletion(value: Any) {
+        // Unused
     }
 }

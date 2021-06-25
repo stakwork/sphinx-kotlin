@@ -17,13 +17,11 @@ import androidx.viewbinding.ViewBinding
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.chat_common.R
 import chat.sphinx.chat_common.adapters.MessageListAdapter
-import chat.sphinx.chat_common.databinding.LayoutChatFooterBinding
-import chat.sphinx.chat_common.databinding.LayoutChatHeaderBinding
-import chat.sphinx.chat_common.databinding.LayoutMessageHolderBinding
-import chat.sphinx.chat_common.databinding.LayoutSelectedMessageBinding
+import chat.sphinx.chat_common.databinding.*
 import chat.sphinx.chat_common.navigation.ChatNavigator
+import chat.sphinx.chat_common.ui.viewstate.ActionsMenuViewState
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
-import chat.sphinx.chat_common.ui.viewstate.header.ChatHeaderFooterViewState
+import chat.sphinx.chat_common.ui.viewstate.header.ChatHeaderViewState
 import chat.sphinx.chat_common.ui.viewstate.messageholder.setView
 import chat.sphinx.chat_common.ui.viewstate.selected.MenuItemState
 import chat.sphinx.chat_common.ui.viewstate.selected.SelectedMessageViewState
@@ -42,10 +40,14 @@ import chat.sphinx.wrapper_chat.isTrue
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.lightning.unit
 import chat.sphinx.wrapper_view.Dp
-import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
+import io.matthewnelson.android_concept_views.MotionLayoutViewState
+import io.matthewnelson.android_feature_screens.ui.motionlayout.MotionLayoutFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.visible
+import io.matthewnelson.android_feature_viewmodel.currentViewState
+import io.matthewnelson.android_feature_viewmodel.updateViewState
+import io.matthewnelson.concept_views.viewstate.collect
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
@@ -53,18 +55,21 @@ import kotlinx.coroutines.launch
 
 abstract class ChatFragment<
         VB: ViewBinding,
+        VS: MotionLayoutViewState<VS>,
         ARGS: NavArgs,
-        VM: ChatViewModel<ARGS>,
-        >(@LayoutRes layoutId: Int): SideEffectFragment<
+        VM: ChatViewModel<ARGS, VS>,
+        >(@LayoutRes layoutId: Int, ): MotionLayoutFragment<
+        Any,
         Context,
         ChatSideEffect,
-        ChatHeaderFooterViewState,
+        VS,
         VM,
         VB
         >(layoutId)
 {
     protected abstract val footerBinding: LayoutChatFooterBinding
     protected abstract val headerBinding: LayoutChatHeaderBinding
+    protected abstract val menuBinding: LayoutChatActionsMenuBinding
     protected abstract val selectedMessageBinding: LayoutSelectedMessageBinding
     protected abstract val selectedMessageHolderBinding: LayoutMessageHolderBinding
     protected abstract val recyclerView: RecyclerView
@@ -91,6 +96,7 @@ abstract class ChatFragment<
         val insetterActivity = (requireActivity() as InsetterActivity)
         setupFooter(insetterActivity)
         setupHeader(insetterActivity)
+        setupActionsMenu(insetterActivity)
         setupSelectedMessage()
         setupRecyclerView()
     }
@@ -144,12 +150,15 @@ abstract class ChatFragment<
                                 delay(250L)
                             }
                         }
-                        viewModel.shouldShowActionsMenu()
+                        openActionsMenu()
+//                        viewModel.shouldShowActionsMenu()
                     }
                 }
             }
         }
     }
+
+    protected open fun openActionsMenu() {}
 
     private fun setupHeader(insetterActivity: InsetterActivity) {
         headerBinding.apply {
@@ -168,6 +177,14 @@ abstract class ChatFragment<
                     chatNavigator.popBackStack()
                 }
             }
+        }
+    }
+
+    private fun setupActionsMenu(insetterActivity: InsetterActivity) {
+        menuBinding.apply {
+            layoutConstraintChatActionsMenu.setOnClickListener { viewModel }
+
+            insetterActivity.addNavigationBarPadding(root)
         }
     }
 
@@ -253,7 +270,7 @@ abstract class ChatFragment<
     }
 
     protected fun scrollToBottom(callback: () -> Unit) {
-        (recyclerView.adapter as MessageListAdapter<*>).scrollToBottomIfNeeded(callback)
+        (recyclerView.adapter as MessageListAdapter<*, *>).scrollToBottomIfNeeded(callback)
     }
 
     override fun onStart() {
@@ -408,42 +425,48 @@ abstract class ChatFragment<
         viewModel.readMessages()
     }
 
-    override suspend fun onViewStateFlowCollect(viewState: ChatHeaderFooterViewState) {
-        @Exhaustive
-        when (viewState) {
-            is ChatHeaderFooterViewState.Idle -> {}
-            is ChatHeaderFooterViewState.Initialized -> {
-                headerBinding.apply {
+    override fun subscribeToViewStateFlow() {
+        super.subscribeToViewStateFlow()
 
-                    textViewChatHeaderName.text = viewState.chatHeaderName
-                    textViewChatHeaderLock.goneIfFalse(viewState.showLock)
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.headerViewStateContainer.collect { viewState ->
+                @Exhaustive
+                when (viewState) {
+                    is ChatHeaderViewState.Idle -> {}
+                    is ChatHeaderViewState.Initialized -> {
+                        headerBinding.apply {
 
-                    viewState.contributions?.let {
-                        imageViewChatHeaderContributions.visible
-                        textViewChatHeaderContributions.apply {
-                            visible
-                            @SuppressLint("SetTextI18n")
-                            text = getString(R.string.chat_tribe_contributions) + " ${it.asFormattedString()} ${it.unit}"
-                        }
-                    } ?: let {
-                        imageViewChatHeaderContributions.gone
-                        textViewChatHeaderContributions.gone
-                    }
+                            textViewChatHeaderName.text = viewState.chatHeaderName
+                            textViewChatHeaderLock.goneIfFalse(viewState.showLock)
 
-                    imageViewChatHeaderMuted.apply {
-                        viewState.isMuted?.let { muted ->
-                            if (muted.isTrue()) {
-                                imageLoader.load(
-                                    headerBinding.imageViewChatHeaderMuted,
-                                    R.drawable.ic_baseline_notifications_off_24
-                                )
-                            } else {
-                                imageLoader.load(
-                                    headerBinding.imageViewChatHeaderMuted,
-                                    R.drawable.ic_baseline_notifications_24
-                                )
+                            viewState.contributions?.let {
+                                imageViewChatHeaderContributions.visible
+                                textViewChatHeaderContributions.apply {
+                                    visible
+                                    @SuppressLint("SetTextI18n")
+                                    text = getString(R.string.chat_tribe_contributions) + " ${it.asFormattedString()} ${it.unit}"
+                                }
+                            } ?: let {
+                                imageViewChatHeaderContributions.gone
+                                textViewChatHeaderContributions.gone
                             }
-                        } ?: gone
+
+                            imageViewChatHeaderMuted.apply {
+                                viewState.isMuted?.let { muted ->
+                                    if (muted.isTrue()) {
+                                        imageLoader.load(
+                                            headerBinding.imageViewChatHeaderMuted,
+                                            R.drawable.ic_baseline_notifications_off_24
+                                        )
+                                    } else {
+                                        imageLoader.load(
+                                            headerBinding.imageViewChatHeaderMuted,
+                                            R.drawable.ic_baseline_notifications_24
+                                        )
+                                    }
+                                } ?: gone
+                            }
+                        }
                     }
                 }
             }

@@ -20,21 +20,22 @@ import chat.sphinx.chat_common.ui.viewstate.selected.SelectedMessageViewState
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.wrapper_view.Px
+import io.matthewnelson.android_concept_views.MotionLayoutViewState
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-internal class MessageListAdapter<ARGS : NavArgs>(
+internal class MessageListAdapter<ARGS : NavArgs, VS: MotionLayoutViewState<VS>>(
     private val recyclerView: RecyclerView,
     private val headerBinding: LayoutChatHeaderBinding,
     private val layoutManager: LinearLayoutManager,
     private val lifecycleOwner: LifecycleOwner,
     private val onStopSupervisor: OnStopSupervisor,
-    private val viewModel: ChatViewModel<ARGS>,
+    private val viewModel: ChatViewModel<ARGS, VS>,
     private val imageLoader: ImageLoader<ImageView>,
-) : RecyclerView.Adapter<MessageListAdapter<ARGS>.MessageViewHolder>(),
+) : RecyclerView.Adapter<MessageListAdapter<ARGS, VS>.MessageViewHolder>(),
     DefaultLifecycleObserver,
     View.OnLayoutChangeListener
 {

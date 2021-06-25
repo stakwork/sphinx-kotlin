@@ -4,6 +4,16 @@
     <string name="chat_muted_waiting_on_network">Waiting on network…</string>
     <string name="chat_tribe_contributions">Contributed:</string>
 
+    <string name="chat_menu_attachments_menu_cancel">CANCEL</string>
+
+    <string name="chat_menu_camera_attachment_option">Camera</string>
+    <string name="chat_menu_library_attachment_option">Library</string>
+    <string name="chat_menu_gif_attachment_option">Gif</string>
+    <string name="chat_menu_file_attachment_option">File</string>
+    <string name="chat_menu_paid_message_attachment_option">Paid Message</string>
+    <string name="chat_menu_request_attachment_option">Request</string>
+    <string name="chat_menu_send_attachment_option">Send</string>
+
     <string name="unsupported_message_type_placeholder_text">%1$s: Not supported yet</string>
     <string name="deleted_message_label_text">This message has been deleted</string>
     <string name="join_call_header_label_text">Join call by…</string>

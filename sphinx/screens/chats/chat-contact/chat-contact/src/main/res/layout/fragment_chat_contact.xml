@@ -1,25 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.motion.widget.MotionLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_motion_chat"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/body"
+    app:layoutDescription="@xml/motion_scene_chat"
     tools:context=".ui.ChatContactFragment">
 
     <include
-        android:id="@+id/include_chat_contact_header"
+        android:id="@+id/include_chat_header"
         layout="@layout/layout_chat_header"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/default_header_height" />
+        android:layout_height="@dimen/default_header_height"
+        app:layout_constraintTop_toTopOf="parent"/>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_view_messages"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:background="@color/body"
-        app:layout_constraintBottom_toTopOf="@+id/include_chat_contact_footer"
-        app:layout_constraintTop_toBottomOf="@+id/include_chat_contact_header"
+        app:layout_constraintBottom_toTopOf="@+id/include_podcast_player_footer"
+        app:layout_constraintTop_toBottomOf="@+id/include_chat_header"
         tools:listitem="@layout/layout_message_holder" />
 
     <androidx.appcompat.widget.AppCompatImageView
@@ -27,18 +30,40 @@
         android:layout_width="match_parent"
         android:layout_height="8dp"
         android:src="@drawable/bottom_bar_elevation_gradient"
-        app:layout_constraintBottom_toTopOf="@+id/include_chat_contact_footer" />
+        app:layout_constraintBottom_toTopOf="@+id/include_chat_footer" />
 
     <include
-        android:id="@+id/include_chat_contact_footer"
+        android:id="@+id/include_podcast_player_footer"
+        layout="@layout/layout_podcast_player_footer"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/chat_footer_height"
+        app:layout_constraintBottom_toTopOf="@+id/include_chat_footer"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <include
+        android:id="@+id/include_chat_footer"
         layout="@layout/layout_chat_footer"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent" />
 
     <include
-        android:id="@+id/include_chat_contact_selected_message"
+        android:id="@+id/include_chat_selected_message"
         layout="@layout/layout_selected_message"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         tools:visibility="gone" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <include
+        android:id="@+id/include_chat_actions_menu"
+        layout="@layout/layout_chat_actions_menu"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:elevation="@dimen/default_elevation"
+        app:layout_constraintTop_toBottomOf="parent"
+        tools:visibility="visible" />
+
+</androidx.constraintlayout.motion.widget.MotionLayout>
