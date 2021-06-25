@@ -55,17 +55,16 @@ dependencies {
 
     api project(path: ':sphinx:screens-detail:add-friend:add-friend')
     api project(path: ':sphinx:screens-detail:create-tribe:create-tribe')
+    api project(path: ':sphinx:screens-detail:join-tribe:join-tribe')
     api project(path: ':sphinx:screens-detail:new-contact:new-contact')
     api project(path: ':sphinx:screens-detail:payments:payment-receive:payment-receive')
     api project(path: ':sphinx:screens-detail:payments:payment-send:payment-send')
-    api project(path: ':sphinx:screens-detail:scanner:scanner')
+    api project(path: ':sphinx:screens-detail:podcast-player:podcast-player')
     api project(path: ':sphinx:screens-detail:qr-code:qr-code')
+    api project(path: ':sphinx:screens-detail:scanner:scanner')
+    api project(path: ':sphinx:screens-detail:send-attachment:send-attachment')
     api project(path: ':sphinx:screens-detail:support-ticket:support-ticket')
     api project(path: ':sphinx:screens-detail:transactions:transactions')
-    api project(path: ':sphinx:screens-detail:join-tribe:join-tribe')
-    api project(path: ':sphinx:screens-detail:podcast-player:podcast-player')
-    api project(path: ':sphinx:screens-detail:send-attachment:send-attachment')
-//    api project(path: )
 
     implementation deps.chrisbanes.insetter
 
