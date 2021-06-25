@@ -6,9 +6,4 @@ import javax.inject.Inject
 
 internal class SendAttachmentNavigatorImpl @Inject constructor(
     detailDriver: DetailNavigationDriver,
-): SendAttachmentNavigator(detailDriver) {
-
-    override suspend fun closeDetailScreen() {
-        (navigationDriver as DetailNavigationDriver).closeDetailScreen()
-    }
-}
+): SendAttachmentNavigator(detailDriver)

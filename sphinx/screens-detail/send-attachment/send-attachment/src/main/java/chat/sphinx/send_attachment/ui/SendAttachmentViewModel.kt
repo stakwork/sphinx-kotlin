@@ -7,12 +7,9 @@ import chat.sphinx.concept_view_model_coordinator.ResponseHolder
 import chat.sphinx.feature_view_model_coordinator.RequestCatcher
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.send_attachment.coordinator.SendAttachmentViewModelCoordinator
-import chat.sphinx.send_attachment.navigation.BackType
-import chat.sphinx.send_attachment.navigation.SendAttachmentNavigator
 import chat.sphinx.send_attachment_view_model_coordinator.response.SendAttachmentResponse
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
-import io.matthewnelson.android_feature_viewmodel.BaseViewModel
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.sideeffect.SideEffect
@@ -50,13 +47,13 @@ internal class SendAttachmentViewModel @Inject constructor(
             requestCatcher.getCaughtRequestStateFlow().collect { list ->
                 list.firstOrNull()?.let { requestHolder ->
                     sendAttachmentViewModelCoordinator.submitResponse(
-                        response = Response.Success(
+                        Response.Success(
                             ResponseHolder(
                                 requestHolder,
                                 sendAttachmentResponse
                             )
                         ),
-                        navigateBack = BackType.PopBackStack
+                        Any()
                     )
                 }
             }

@@ -14,9 +14,8 @@ abstract class SendAttachmentNavigator(
         navigationDriver.submitNavigationRequest(ToSendAttachmentDetail(isConversation))
     }
 
-    abstract suspend fun closeDetailScreen()
-
-    suspend fun popBackStack() {
+    @JvmSynthetic
+    internal suspend fun popBackStack() {
         navigationDriver.submitNavigationRequest(PopBackStack())
     }
 }
