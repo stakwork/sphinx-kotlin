@@ -3,8 +3,10 @@ package chat.sphinx.chat_contact.ui
 import android.app.Application
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import chat.sphinx.chat_common.navigation.ChatNavigator
 import chat.sphinx.chat_common.ui.ChatViewModel
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
+import chat.sphinx.chat_contact.navigation.ContactChatNavigator
 import chat.sphinx.concept_meme_server.MemeServerTokenHandler
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_lightning.model.route.RouteSuccessProbabilityDto
@@ -13,10 +15,13 @@ import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.concept_repository_message.SendMessage
+import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.logger.SphinxLogger
+import chat.sphinx.send_attachment_view_model_coordinator.request.SendAttachmentRequest
+import chat.sphinx.send_attachment_view_model_coordinator.response.SendAttachmentResponse
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.ChatName
 import chat.sphinx.wrapper_common.dashboard.ChatId
@@ -54,6 +59,7 @@ internal class ChatContactViewModel @Inject constructor(
     messageRepository: MessageRepository,
     networkQueryLightning: NetworkQueryLightning,
     savedStateHandle: SavedStateHandle,
+    sendAttachmentViewModelCoordinator: ViewModelCoordinator<SendAttachmentRequest, SendAttachmentResponse>,
     LOG: SphinxLogger,
 ): ChatViewModel<ChatContactFragmentArgs>(
     app,
@@ -64,10 +70,16 @@ internal class ChatContactViewModel @Inject constructor(
     messageRepository,
     networkQueryLightning,
     savedStateHandle,
+    sendAttachmentViewModelCoordinator,
     LOG,
 ) {
     override val args: ChatContactFragmentArgs by savedStateHandle.navArgs()
     private var chatId: ChatId? = args.chatId
+
+    @Inject
+    protected lateinit var chatContactNavigator: ContactChatNavigator
+    override val chatNavigator: ChatNavigator
+        get() = chatContactNavigator
 
     private val contactSharedFlow: SharedFlow<Contact?> = flow {
         emitAll(contactRepository.getContactById(args.contactId))
@@ -230,5 +242,9 @@ internal class ChatContactViewModel @Inject constructor(
         builder.setContactId(args.contactId)
         builder.setChatId(chatId)
         return super.sendMessage(builder)
+    }
+
+    override fun shouldShowActionsMenu() {
+        showActionsMenu(args.contactId, args.chatId)
     }
 }

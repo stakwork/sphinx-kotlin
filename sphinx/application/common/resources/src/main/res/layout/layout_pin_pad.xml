@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_constraint_pin_pad"
+    android:background="@color/body"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guide_v33"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent=".333333333" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guide_v66"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent=".666666666" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guide_v25"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent=".25" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guide_v50"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent=".5" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guide_v75"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent=".75" />
+
+    <!-- Row 1 -->
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/button_1"
+        style="@style/PinPadButton"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:text="@string/_1"
+        app:layout_constraintEnd_toEndOf="@+id/guide_v33"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="@+id/guide_v25"/>
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/button_2"
+        style="@style/PinPadButton"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:text="@string/_2"
+        app:layout_constraintEnd_toEndOf="@+id/guide_v66"
+        app:layout_constraintStart_toStartOf="@+id/guide_v33"
+        app:layout_constraintTop_toTopOf="@+id/button_1"
+        app:layout_constraintBottom_toBottomOf="@+id/guide_v25"/>
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/button_3"
+        style="@style/PinPadButton"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:text="@string/_3"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/guide_v66"
+        app:layout_constraintTop_toTopOf="@+id/button_1"
+        app:layout_constraintBottom_toBottomOf="@+id/guide_v25"/>
+
+    <!-- Row 2 -->
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/button_4"
+        style="@style/PinPadButton"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:text="@string/_4"
+        app:layout_constraintEnd_toEndOf="@+id/guide_v33"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/button_1"
+        app:layout_constraintBottom_toBottomOf="@+id/guide_v50"/>
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/button_5"
+        style="@style/PinPadButton"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:text="@string/_5"
+        app:layout_constraintEnd_toEndOf="@+id/guide_v66"
+        app:layout_constraintStart_toStartOf="@+id/guide_v33"
+        app:layout_constraintTop_toTopOf="@+id/button_4"
+        app:layout_constraintBottom_toBottomOf="@+id/guide_v50"/>
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/button_6"
+        style="@style/PinPadButton"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:text="@string/_6"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/guide_v66"
+        app:layout_constraintTop_toTopOf="@+id/button_4"
+        app:layout_constraintBottom_toBottomOf="@+id/guide_v50"/>
+
+    <!-- Row 3 -->
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/button_7"
+        style="@style/PinPadButton"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:text="@string/_7"
+        app:layout_constraintEnd_toEndOf="@+id/guide_v33"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/button_4"
+        app:layout_constraintBottom_toBottomOf="@+id/guide_v75"/>
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/button_8"
+        style="@style/PinPadButton"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:text="@string/_8"
+        app:layout_constraintEnd_toEndOf="@+id/guide_v66"
+        app:layout_constraintStart_toStartOf="@+id/guide_v33"
+        app:layout_constraintTop_toTopOf="@+id/button_7"
+        app:layout_constraintBottom_toBottomOf="@+id/guide_v75"/>
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/button_9"
+        style="@style/PinPadButton"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:text="@string/_9"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/guide_v66"
+        app:layout_constraintTop_toTopOf="@+id/button_7"
+        app:layout_constraintBottom_toBottomOf="@+id/guide_v75"/>
+
+
+    <!-- Row 4 -->
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/button_null"
+        style="@style/PinPadButton"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:enabled="false"
+        app:layout_constraintEnd_toEndOf="@+id/guide_v33"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/guide_v75"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/button_0"
+        style="@style/PinPadButton"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:text="@string/_0"
+        app:layout_constraintEnd_toEndOf="@+id/guide_v66"
+        app:layout_constraintStart_toStartOf="@+id/guide_v33"
+        app:layout_constraintTop_toTopOf="@+id/button_null"
+        app:layout_constraintTop_toBottomOf="@+id/guide_v75"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/button_backspace"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:text="@string/material_icon_name_backspace_button"
+        style="@style/PinPadButton"
+        android:fontFamily="@font/material_icons_regular"
+        android:textSize="@dimen/pin_pad_backspace_text_size"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/guide_v66"
+        app:layout_constraintTop_toTopOf="@+id/button_null"
+        app:layout_constraintTop_toBottomOf="@+id/guide_v75"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

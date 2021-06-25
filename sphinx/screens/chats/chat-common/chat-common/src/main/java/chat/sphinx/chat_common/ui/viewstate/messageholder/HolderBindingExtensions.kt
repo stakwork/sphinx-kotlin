@@ -227,12 +227,18 @@ internal inline fun LayoutMessageHolderBinding.setBubbleDirectPaymentLayout(
             root.gone
         } else {
             root.visible
+
             imageViewDirectPaymentSent.goneIfFalse(directPayment.showSent)
+            layoutConstraintDirectPaymentSentAmountLabels.goneIfFalse(directPayment.showSent)
+
             imageViewDirectPaymentReceived.goneIfFalse(directPayment.showReceived)
-            includeDirectPaymentAmountTextGroup.apply {
-                textViewSatsAmount.text = directPayment.amount.asFormattedString()
-                textViewSatsUnitLabel.text = directPayment.unitLabel
-            }
+            layoutConstraintDirectPaymentReceivedAmountLabels.goneIfFalse(directPayment.showReceived)
+
+            textViewSatsAmountReceived.text = directPayment.amount.asFormattedString()
+            textViewSatsUnitLabelReceived.text = directPayment.unitLabel
+
+            textViewSatsAmountSent.text = directPayment.amount.asFormattedString()
+            textViewSatsUnitLabelSent.text = directPayment.unitLabel
         }
     }
 }

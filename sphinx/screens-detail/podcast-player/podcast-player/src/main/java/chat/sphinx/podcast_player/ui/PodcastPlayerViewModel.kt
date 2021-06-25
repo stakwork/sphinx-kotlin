@@ -3,7 +3,6 @@ package chat.sphinx.podcast_player.ui
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
-import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_service_media.MediaPlayerServiceController
 import chat.sphinx.concept_service_media.MediaPlayerServiceState
 import chat.sphinx.concept_service_media.UserAction
@@ -28,7 +27,6 @@ internal inline val PodcastPlayerFragmentArgs.chatId: ChatId
 internal class PodcastPlayerViewModel @Inject constructor(
     dispatchers: CoroutineDispatchers,
     val navigator: PodcastPlayerNavigator,
-    private val chatRepository: ChatRepository,
     savedStateHandle: SavedStateHandle,
     private val mediaPlayerServiceController: MediaPlayerServiceController
 ) : BaseViewModel<PodcastPlayerViewState>(

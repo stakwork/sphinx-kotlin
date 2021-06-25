@@ -224,7 +224,7 @@
     <!--        android:layout_width="match_parent"-->
     <!--        android:layout_height="wrap_content"-->
     <!--        android:layout_margin="16dp"-->
-    <!--        android:background="@color/deepNight"-->
+    <!--        android:background="@color/body"-->
     <!--        android:text="LOGOUT"-->
     <!--        android:textColor="@android:color/white"-->
     <!--        app:layout_constraintBottom_toBottomOf="parent"-->

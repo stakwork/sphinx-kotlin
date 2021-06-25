@@ -19,4 +19,20 @@
         <item name="colorControlActivated">@color/primaryBlue</item>
         <item name="android:colorForeground">@color/lightDivider</item>
     </style>
+
+    <style name="PinPadButton" parent="BaseButton">
+        <item name="android:background">@drawable/background_button_pin_pad</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textSize">@dimen/pin_pad_text_size</item>
+        <item name="android:fontFamily">@font/montserrat_bold</item>
+    </style>
+
+    <style name="AmountPadButton" parent="BaseButton">
+        <item name="android:gravity">center</item>
+        <item name="android:background">@color/body</item>
+        <item name="android:textColor">@color/mainBottomIcons</item>
+        <item name="android:textSize">@dimen/pin_pad_text_size</item>
+        <item name="android:fontFamily">@font/roboto_regular</item>
+    </style>
 </resources>

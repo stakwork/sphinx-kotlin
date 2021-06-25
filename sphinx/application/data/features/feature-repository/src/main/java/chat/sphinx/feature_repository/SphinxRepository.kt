@@ -14,6 +14,7 @@ import chat.sphinx.concept_network_query_lightning.model.balance.BalanceDto
 import chat.sphinx.concept_network_query_message.NetworkQueryMessage
 import chat.sphinx.concept_network_query_message.model.MessageDto
 import chat.sphinx.concept_network_query_message.model.PostMessageDto
+import chat.sphinx.concept_network_query_message.model.PostPaymentDto
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_dashboard.RepositoryDashboard
@@ -21,6 +22,7 @@ import chat.sphinx.concept_repository_lightning.LightningRepository
 import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.concept_repository_message.SendMessage
+import chat.sphinx.concept_repository_message.SendPayment
 import chat.sphinx.concept_socket_io.SocketIOManager
 import chat.sphinx.concept_socket_io.SphinxSocketIOMessageListener
 import chat.sphinx.concept_socket_io.SphinxSocketIOMessage
@@ -46,6 +48,7 @@ import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.dashboard.InviteId
+import chat.sphinx.wrapper_common.dashboard.toChatId
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.LightningRouteHint
 import chat.sphinx.wrapper_common.lightning.Sat
@@ -1212,6 +1215,7 @@ abstract class SphinxRepository(
     private val provisionalMessageLock = Mutex()
 
     // TODO: Rework to handle different message types
+
     @OptIn(RawPasswordAccess::class)
     override fun sendMessage(sendMessage: SendMessage?) {
         if (sendMessage == null) return
@@ -1448,6 +1452,186 @@ abstract class SphinxRepository(
                 }
             }
         }
+    }
+
+    override suspend fun sendPayment(
+        sendPayment: SendPayment?
+    ): Response<Any, ResponseError> {
+
+        var response: Response<Any, ResponseError> = Response.Success(true)
+
+        if (sendPayment == null) {
+            response = Response.Error(
+                ResponseError("Payment params cannot be null")
+            )
+            return response
+        }
+
+        applicationScope.launch(mainImmediate) {
+            val queries = coreDB.getSphinxDatabaseQueries()
+
+            val contact: ContactDbo? = sendPayment.contactId?.let {
+                withContext(io) {
+                    queries.contactGetById(it).executeAsOneOrNull()
+                }
+            }
+
+            val owner: Contact? = accountOwner.value
+                ?: let {
+                    // TODO: Handle this better...
+                    var owner: Contact? = null
+                    try {
+                        accountOwner.collect {
+                            if (it != null) {
+                                owner = it
+                                throw Exception()
+                            }
+                        }
+                    } catch (e: Exception) {}
+                    delay(25L)
+                    owner
+                }
+
+            if (owner == null) {
+                response = Response.Error(
+                    ResponseError("Owner cannot be null")
+                )
+                return@launch
+            }
+
+            var encryptedText: MessageContent? = null
+            var encryptedRemoteText: MessageContent? = null
+
+            sendPayment.text?.let { msgText ->
+                encryptedText = owner
+                    .rsaPublicKey
+                    ?.let { pubKey ->
+                        val encResponse = rsa.encrypt(
+                            pubKey,
+                            UnencryptedString(msgText),
+                            formatOutput = false,
+                            dispatcher = default,
+                        )
+
+                        @Exhaustive
+                        when (encResponse) {
+                            is Response.Error -> {
+                                LOG.e(TAG, encResponse.message, encResponse.exception)
+                                null
+                            }
+                            is Response.Success -> {
+                                MessageContent(encResponse.value.value)
+                            }
+                        }
+                    }
+
+                contact?.let { contact ->
+                    encryptedRemoteText = contact
+                        .public_key
+                        ?.let { pubKey ->
+                            val encResponse = rsa.encrypt(
+                                pubKey,
+                                UnencryptedString(msgText),
+                                formatOutput = false,
+                                dispatcher = default,
+                            )
+
+                            @Exhaustive
+                            when (encResponse) {
+                                is Response.Error -> {
+                                    LOG.e(TAG, encResponse.message, encResponse.exception)
+                                    null
+                                }
+                                is Response.Success -> {
+                                    MessageContent(encResponse.value.value)
+                                }
+                            }
+                        }
+                }
+            }
+
+            val postPaymentDto: PostPaymentDto = try {
+                PostPaymentDto(
+                    chat_id = sendPayment.chatId?.value,
+                    contact_id = sendPayment.contactId?.value,
+                    amount = sendPayment.amount,
+                    text = encryptedText?.value,
+                    remote_text = encryptedRemoteText?.value,
+                    destination_key = sendPayment.destinationKey?.value,
+
+                )
+            } catch (e: IllegalArgumentException) {
+                response = Response.Error(
+                    ResponseError("Failed to create PostPaymentDto")
+                )
+                return@launch
+            }
+
+            if (postPaymentDto.isKeySendPayment) {
+                networkQueryMessage.sendKeySendPayment(
+                    postPaymentDto,
+                ).collect { loadResponse ->
+                    @Exhaustive
+                    when (loadResponse) {
+                        is LoadResponse.Loading -> {}
+                        is Response.Error -> {
+                            LOG.e(TAG, loadResponse.message, loadResponse.exception)
+                            response = loadResponse
+                        }
+                        is Response.Success -> {
+                            response = loadResponse
+                        }
+                    }
+                }
+            } else {
+                networkQueryMessage.sendPayment(
+                    postPaymentDto,
+                ).collect { loadResponse ->
+                    @Exhaustive
+                    when (loadResponse) {
+                        is LoadResponse.Loading -> {}
+                        is Response.Error -> {
+                            LOG.e(TAG, loadResponse.message, loadResponse.exception)
+                            response = loadResponse
+                        }
+                        is Response.Success -> {
+                            val message = loadResponse.value
+
+                            decryptMessageDtoContentIfAvailable(
+                                message,
+                                coroutineScope { this },
+                            )
+
+                            chatLock.withLock {
+                                messageLock.withLock {
+                                    withContext(io) {
+
+                                        queries.transaction {
+                                            upsertMessage(message, queries)
+
+                                            if (message.updateChatDboLatestMessage) {
+                                                message.chat_id?.toChatId()?.let { chatId ->
+                                                    updateChatDboLatestMessage(
+                                                        message,
+                                                        chatId,
+                                                        latestMessageUpdatedTimeMap,
+                                                        queries
+                                                    )
+                                                }
+                                            }
+                                        }
+
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+        }.join()
+
+        return response
     }
 
     override suspend fun boostMessage(
