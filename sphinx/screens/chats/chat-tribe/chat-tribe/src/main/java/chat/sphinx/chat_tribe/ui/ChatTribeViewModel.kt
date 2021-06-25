@@ -8,7 +8,6 @@ import chat.sphinx.chat_common.ui.ChatSideEffect
 import chat.sphinx.chat_common.ui.ChatViewModel
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
 import chat.sphinx.chat_tribe.navigation.TribeChatNavigator
-import chat.sphinx.chat_tribe.ui.viewstate.ChatTribeActionsMenuViewState
 import chat.sphinx.concept_meme_server.MemeServerTokenHandler
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_lightning.model.route.isRouteAvailable
@@ -63,10 +62,9 @@ internal class ChatTribeViewModel @Inject constructor(
     sendAttachmentViewModelCoordinator: ViewModelCoordinator<SendAttachmentRequest, SendAttachmentResponse>,
     LOG: SphinxLogger,
     private val mediaPlayerServiceController: MediaPlayerServiceController
-): ChatViewModel<ChatTribeFragmentArgs, ChatTribeActionsMenuViewState>(
+): ChatViewModel<ChatTribeFragmentArgs>(
     app,
     dispatchers,
-    ChatTribeActionsMenuViewState.Closed,
     memeServerTokenHandler,
     chatRepository,
     contactRepository,
@@ -301,9 +299,5 @@ internal class ChatTribeViewModel @Inject constructor(
                 )
             }
         }
-    }
-
-    override fun shouldShowActionsMenu() {
-        showActionsMenu(chatId = args.chatId)
     }
 }

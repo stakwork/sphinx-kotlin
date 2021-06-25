@@ -9,22 +9,22 @@ sealed class ActionsMenuViewState: MotionLayoutViewState<ActionsMenuViewState>()
 
     object Closed: ActionsMenuViewState() {
         override val startSetId: Int
-            get() = -1
+            get() = R.id.motion_scene_chat_menu_open
         override val endSetId: Int
-            get() = -1
+            get() = R.id.motion_scene_chat_menu_closed
 
         override fun restoreMotionScene(motionLayout: MotionLayout) {}
     }
 
     object Open: ActionsMenuViewState() {
         override val startSetId: Int
-            get() = -1
+            get() = R.id.motion_scene_chat_menu_closed
         override val endSetId: Int
-            get() = -1
+            get() = R.id.motion_scene_chat_menu_open
 
         override fun restoreMotionScene(motionLayout: MotionLayout) {
-//            motionLayout.setTransition(R.id.transition_chat_menu_closed_to_open)
-//            motionLayout.setProgress(1F, 1F)
+            motionLayout.setTransition(R.id.transition_chat_menu_closed_to_open)
+            motionLayout.setProgress(1F, 1F)
         }
     }
 }

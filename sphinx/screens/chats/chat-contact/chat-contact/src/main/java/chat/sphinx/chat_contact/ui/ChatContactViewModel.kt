@@ -1,14 +1,12 @@
 package chat.sphinx.chat_contact.ui
 
 import android.app.Application
-import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.chat_common.navigation.ChatNavigator
 import chat.sphinx.chat_common.ui.ChatViewModel
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
 import chat.sphinx.chat_contact.navigation.ContactChatNavigator
-import chat.sphinx.chat_contact.ui.viewstate.ChatContactActionsMenuViewState
 import chat.sphinx.concept_meme_server.MemeServerTokenHandler
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_lightning.model.route.RouteSuccessProbabilityDto
@@ -33,7 +31,6 @@ import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_contact.ContactAlias
 import chat.sphinx.wrapper_message.Message
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.matthewnelson.android_concept_views.MotionLayoutViewState
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.delay
@@ -64,10 +61,9 @@ internal class ChatContactViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     sendAttachmentViewModelCoordinator: ViewModelCoordinator<SendAttachmentRequest, SendAttachmentResponse>,
     LOG: SphinxLogger,
-): ChatViewModel<ChatContactFragmentArgs, ChatContactActionsMenuViewState>(
+): ChatViewModel<ChatContactFragmentArgs>(
     app,
     dispatchers,
-    ChatContactActionsMenuViewState.Closed,
     memeServerTokenHandler,
     chatRepository,
     contactRepository,
@@ -248,7 +244,9 @@ internal class ChatContactViewModel @Inject constructor(
         return super.sendMessage(builder)
     }
 
-    override fun shouldShowActionsMenu() {
-        showActionsMenu(args.contactId, args.chatId)
+    fun goToPaymentSendScreen() {
+        viewModelScope.launch(mainImmediate) {
+            chatNavigator.toPaymentSendDetail(args.contactId, args.chatId)
+        }
     }
 }

@@ -14,9 +14,7 @@ import chat.sphinx.chat_common.ui.viewstate.ActionsMenuViewState
 import chat.sphinx.chat_group.R
 import chat.sphinx.chat_group.databinding.FragmentChatGroupBinding
 import chat.sphinx.chat_group.navigation.GroupChatNavigator
-import chat.sphinx.chat_group.ui.viewstate.ChatGroupActionsMenuViewState
 import chat.sphinx.concept_image_loader.ImageLoader
-import chat.sphinx.concept_network_query_chat.model.PodcastDto
 import chat.sphinx.insetter_activity.InsetterActivity
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_viewmodel.updateViewState
@@ -26,7 +24,6 @@ import javax.inject.Inject
 @AndroidEntryPoint
 internal class ChatGroupFragment: ChatFragment<
         FragmentChatGroupBinding,
-        ChatGroupActionsMenuViewState,
         ChatGroupFragmentArgs,
         ChatGroupViewModel,
         >(R.layout.fragment_chat_group)
@@ -82,13 +79,15 @@ internal class ChatGroupFragment: ChatFragment<
         }
     }
 
-    override suspend fun onViewStateFlowCollect(viewState: ChatGroupActionsMenuViewState) {
+    override fun goToPaymentSendScreen() {}
+
+    override suspend fun onViewStateFlowCollect(viewState: ActionsMenuViewState) {
         @Exhaustive
         when (viewState) {
-            ChatGroupActionsMenuViewState.Closed -> {
+            ActionsMenuViewState.Closed -> {
                 binding.layoutMotionChat.setTransitionDuration(150)
             }
-            ChatGroupActionsMenuViewState.Open -> {
+            ActionsMenuViewState.Open -> {
                 binding.layoutMotionChat.setTransitionDuration(300)
             }
         }
@@ -100,13 +99,9 @@ internal class ChatGroupFragment: ChatFragment<
     }
 
     override fun onViewCreatedRestoreMotionScene(
-        viewState: ChatGroupActionsMenuViewState,
+        viewState: ActionsMenuViewState,
         binding: FragmentChatGroupBinding
     ) {
         viewState.restoreMotionScene(binding.layoutMotionChat)
-    }
-
-    override fun openActionsMenu() {
-        viewModel.updateViewState(ChatGroupActionsMenuViewState.Open)
     }
 }

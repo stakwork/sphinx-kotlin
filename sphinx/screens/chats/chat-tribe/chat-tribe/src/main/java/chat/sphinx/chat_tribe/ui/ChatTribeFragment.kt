@@ -5,7 +5,6 @@ import android.view.View
 import android.widget.ImageView
 import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.core.view.isGone
-import androidx.core.view.isInvisible
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
@@ -13,19 +12,17 @@ import app.cash.exhaustive.Exhaustive
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.chat_common.databinding.*
 import chat.sphinx.chat_common.ui.ChatFragment
-import chat.sphinx.chat_common.ui.viewstate.ActionsMenuViewState
 import chat.sphinx.chat_tribe.R
 import chat.sphinx.chat_tribe.databinding.FragmentChatTribeBinding
 import chat.sphinx.chat_common.databinding.LayoutPodcastPlayerFooterBinding
+import chat.sphinx.chat_common.ui.viewstate.ActionsMenuViewState
 import chat.sphinx.chat_tribe.navigation.TribeChatNavigator
-import chat.sphinx.chat_tribe.ui.viewstate.ChatTribeActionsMenuViewState
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.podcast_player.objects.Podcast
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.visible
-import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_views.viewstate.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -34,7 +31,6 @@ import javax.inject.Inject
 @AndroidEntryPoint
 internal class ChatTribeFragment: ChatFragment<
         FragmentChatTribeBinding,
-        ChatTribeActionsMenuViewState,
         ChatTribeFragmentArgs,
         ChatTribeViewModel,
         >(R.layout.fragment_chat_tribe)
@@ -99,6 +95,8 @@ internal class ChatTribeFragment: ChatFragment<
             constraintSet.constrainHeight(R.id.include_chat_header, height + insetterActivity.statusBarInsetHeight.top)
         }
     }
+
+    override fun goToPaymentSendScreen() {}
 
     private fun configurePodcastPlayer(podcast: Podcast) {
         podcastPlayerBinding.apply {
@@ -197,13 +195,13 @@ internal class ChatTribeFragment: ChatFragment<
         }
     }
 
-    override suspend fun onViewStateFlowCollect(viewState: ChatTribeActionsMenuViewState) {
+    override suspend fun onViewStateFlowCollect(viewState: ActionsMenuViewState) {
         @Exhaustive
         when (viewState) {
-            ChatTribeActionsMenuViewState.Closed -> {
+            ActionsMenuViewState.Closed -> {
                 binding.layoutMotionChat.setTransitionDuration(150)
             }
-            ChatTribeActionsMenuViewState.Open -> {
+            ActionsMenuViewState.Open -> {
                 binding.layoutMotionChat.setTransitionDuration(300)
             }
         }
@@ -215,13 +213,9 @@ internal class ChatTribeFragment: ChatFragment<
     }
 
     override fun onViewCreatedRestoreMotionScene(
-        viewState: ChatTribeActionsMenuViewState,
+        viewState: ActionsMenuViewState,
         binding: FragmentChatTribeBinding
     ) {
         viewState.restoreMotionScene(binding.layoutMotionChat)
-    }
-
-    override fun openActionsMenu() {
-        viewModel.updateViewState(ChatTribeActionsMenuViewState.Open)
     }
 }

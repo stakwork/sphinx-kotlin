@@ -57,16 +57,12 @@ import kotlinx.coroutines.withContext
 
 @JvmSynthetic
 @Suppress("NOTHING_TO_INLINE")
-internal inline fun <ARGS: NavArgs, VS: MotionLayoutViewState<VS>> ChatViewModel<ARGS, VS>.isMessageSelected(): Boolean =
+internal inline fun <ARGS: NavArgs> ChatViewModel<ARGS>.isMessageSelected(): Boolean =
     getSelectedMessageViewStateFlow().value is SelectedMessageViewState.SelectedMessage
 
-abstract class ChatViewModel<
-        ARGS: NavArgs,
-        VS: MotionLayoutViewState<VS>
-        >(
+abstract class ChatViewModel<ARGS: NavArgs>(
     protected val app: Application,
     dispatchers: CoroutineDispatchers,
-    initialViewState: VS,
     val memeServerTokenHandler: MemeServerTokenHandler,
     protected val chatRepository: ChatRepository,
     protected val contactRepository: ContactRepository,
@@ -79,8 +75,8 @@ abstract class ChatViewModel<
         Any,
         Context,
         ChatSideEffect,
-        VS
-        >(dispatchers, initialViewState)
+        ActionsMenuViewState
+        >(dispatchers, ActionsMenuViewState.Closed)
 {
     abstract val args: ARGS
 
@@ -126,10 +122,6 @@ abstract class ChatViewModel<
             ChatHeaderViewState.Idle
         )
     }
-
-//    override val viewStateContainer: ViewStateContainer<ChatHeaderViewState> by lazy {
-//        ChatHeaderViewStateContainer()
-//    }
 
     private suspend fun getChat(): Chat {
         chatSharedFlow.replayCache.firstOrNull()?.let { chat ->
@@ -412,65 +404,6 @@ abstract class ChatViewModel<
                     )
                 }
                 is Response.Success -> {}
-            }
-        }
-    }
-
-    abstract fun shouldShowActionsMenu()
-
-    fun showActionsMenu(
-        contactId: ContactId? = null,
-        chatId: ChatId? = null)
-    {
-
-        viewModelScope.launch(mainImmediate) {
-            val response = sendAttachmentCoordinator.submitRequest(
-                //If it's group or tribe last 2 options will be disabled
-                SendAttachmentRequest(contactId != null)
-            )
-            if (response is Response.Success) {
-                when (response.value.actionType) {
-                    is ChatActionType.CancelAction -> {
-                        //Menu dismissed. Nothing to do
-                    }
-                    is ChatActionType.OpenCamera -> {
-                        submitSideEffect(
-                            ChatSideEffect.Notify("Camera not implemented yet")
-                        )
-                    }
-                    is ChatActionType.OpenPhotoLibrary -> {
-                        submitSideEffect(
-                            ChatSideEffect.Notify("Photo library not implemented yet")
-                        )
-                    }
-                    is ChatActionType.OpenGifSearch -> {
-                        submitSideEffect(
-                            ChatSideEffect.Notify("Giphy search not implemented yet")
-                        )
-                    }
-                    is ChatActionType.OpenFileLibrary -> {
-                        submitSideEffect(
-                            ChatSideEffect.Notify("File library not implemented yet")
-                        )
-                    }
-                    is ChatActionType.OpenPaidMessageScreen -> {
-                        submitSideEffect(
-                            ChatSideEffect.Notify("Paid message editor not implemented yet")
-                        )
-                    }
-                    is ChatActionType.RequestAmount -> {
-                        submitSideEffect(
-                            ChatSideEffect.Notify("Request amount not implemented yet")
-                        )
-                    }
-
-                    is ChatActionType.SendPayment -> {
-                        contactId?.let { contactId ->
-                            delay(250L)
-                            chatNavigator.toPaymentSendDetail(contactId, chatId)
-                        }
-                    }
-                }
             }
         }
     }

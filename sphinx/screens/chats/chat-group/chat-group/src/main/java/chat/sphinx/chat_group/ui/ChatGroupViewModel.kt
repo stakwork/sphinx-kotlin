@@ -7,7 +7,6 @@ import chat.sphinx.chat_common.navigation.ChatNavigator
 import chat.sphinx.chat_common.ui.ChatViewModel
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
 import chat.sphinx.chat_group.navigation.GroupChatNavigator
-import chat.sphinx.chat_group.ui.viewstate.ChatGroupActionsMenuViewState
 import chat.sphinx.concept_meme_server.MemeServerTokenHandler
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_repository_chat.ChatRepository
@@ -49,10 +48,9 @@ class ChatGroupViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     sendAttachmentViewModelCoordinator: ViewModelCoordinator<SendAttachmentRequest, SendAttachmentResponse>,
     LOG: SphinxLogger,
-): ChatViewModel<ChatGroupFragmentArgs, ChatGroupActionsMenuViewState>(
+): ChatViewModel<ChatGroupFragmentArgs>(
     app,
     dispatchers,
-    ChatGroupActionsMenuViewState.Closed,
     memeServerTokenHandler,
     chatRepository,
     contactRepository,
@@ -127,9 +125,5 @@ class ChatGroupViewModel @Inject constructor(
     override fun sendMessage(builder: SendMessage.Builder): SendMessage? {
         builder.setChatId(args.chatId)
         return super.sendMessage(builder)
-    }
-
-    override fun shouldShowActionsMenu() {
-        showActionsMenu(chatId = args.chatId)
     }
 }

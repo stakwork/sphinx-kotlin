@@ -1,6 +1,7 @@
 package chat.sphinx.chat_common.ui
 
 import android.annotation.SuppressLint
+import android.app.Notification
 import android.content.Context
 import android.os.Bundle
 import android.view.View
@@ -36,6 +37,8 @@ import chat.sphinx.insetter_activity.addStatusBarPadding
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.resources.*
+import chat.sphinx.send_attachment_view_model_coordinator.response.SendAttachmentResponse
+import chat.sphinx.wrapper_chat.ChatActionType
 import chat.sphinx.wrapper_chat.isTrue
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.lightning.unit
@@ -46,6 +49,7 @@ import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.currentViewState
+import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_views.viewstate.collect
 import kotlinx.coroutines.Job
@@ -55,14 +59,13 @@ import kotlinx.coroutines.launch
 
 abstract class ChatFragment<
         VB: ViewBinding,
-        VS: MotionLayoutViewState<VS>,
         ARGS: NavArgs,
-        VM: ChatViewModel<ARGS, VS>,
+        VM: ChatViewModel<ARGS>,
         >(@LayoutRes layoutId: Int, ): MotionLayoutFragment<
         Any,
         Context,
         ChatSideEffect,
-        VS,
+        ActionsMenuViewState,
         VM,
         VB
         >(layoutId)
@@ -118,6 +121,8 @@ abstract class ChatFragment<
         override fun handleOnBackPressed() {
             if (viewModel.getSelectedMessageViewStateFlow().value is SelectedMessageViewState.SelectedMessage) {
                 viewModel.updateSelectedMessageViewState(SelectedMessageViewState.None)
+            } else if (viewModel.currentViewState is ActionsMenuViewState.Open) {
+                viewModel.updateViewState(ActionsMenuViewState.Closed)
             } else {
                 lifecycleScope.launch(viewModel.mainImmediate) {
                     chatNavigator.popBackStack()
@@ -150,15 +155,12 @@ abstract class ChatFragment<
                                 delay(250L)
                             }
                         }
-                        openActionsMenu()
-//                        viewModel.shouldShowActionsMenu()
+                        viewModel.updateViewState(ActionsMenuViewState.Open)
                     }
                 }
             }
         }
     }
-
-    protected open fun openActionsMenu() {}
 
     private fun setupHeader(insetterActivity: InsetterActivity) {
         headerBinding.apply {
@@ -182,11 +184,69 @@ abstract class ChatFragment<
 
     private fun setupActionsMenu(insetterActivity: InsetterActivity) {
         menuBinding.apply {
-            layoutConstraintChatActionsMenu.setOnClickListener { viewModel }
-
             insetterActivity.addNavigationBarPadding(root)
+
+            textViewCancelButton.setOnClickListener {
+                viewModel.updateViewState(ActionsMenuViewState.Closed)
+            }
+
+            layoutConstraintCameraOptionContainer.setOnClickListener {
+                lifecycleScope.launch(viewModel.mainImmediate) {
+                    viewModel.submitSideEffect(
+                        ChatSideEffect.Notify("Camera not implemented yet")
+                    )
+                }
+            }
+
+            layoutConstraintLibraryOptionContainer.setOnClickListener {
+                lifecycleScope.launch(viewModel.mainImmediate) {
+                    viewModel.submitSideEffect(
+                        ChatSideEffect.Notify("Photo Library not implemented yet")
+                    )
+                }
+            }
+
+            layoutConstraintGifOptionContainer.setOnClickListener {
+                lifecycleScope.launch(viewModel.mainImmediate) {
+                    viewModel.submitSideEffect(
+                        ChatSideEffect.Notify("Giphy search not implemented yet")
+                    )
+                }
+            }
+
+            layoutConstraintFileOptionContainer.setOnClickListener {
+                lifecycleScope.launch(viewModel.mainImmediate) {
+                    viewModel.submitSideEffect(
+                        ChatSideEffect.Notify("File attachments not implemented yet")
+                    )
+                }
+            }
+
+            layoutConstraintPaidMessageOptionContainer.setOnClickListener {
+                lifecycleScope.launch(viewModel.mainImmediate) {
+                    viewModel.submitSideEffect(
+                        ChatSideEffect.Notify("Paid messages not implemented yet")
+                    )
+                }
+            }
+
+            layoutConstraintRequestOptionContainer.setOnClickListener {
+                lifecycleScope.launch(viewModel.mainImmediate) {
+                    viewModel.submitSideEffect(
+                        ChatSideEffect.Notify("Request amount not implemented yet")
+                    )
+                }
+            }
+
+            layoutConstraintSendOptionContainer.setOnClickListener {
+                viewModel.updateViewState(ActionsMenuViewState.Closed)
+
+                goToPaymentSendScreen()
+            }
         }
     }
+
+    abstract fun goToPaymentSendScreen()
 
     private fun setupSelectedMessage() {
         selectedMessageBinding.apply {
@@ -270,7 +330,7 @@ abstract class ChatFragment<
     }
 
     protected fun scrollToBottom(callback: () -> Unit) {
-        (recyclerView.adapter as MessageListAdapter<*, *>).scrollToBottomIfNeeded(callback)
+        (recyclerView.adapter as MessageListAdapter<*>).scrollToBottomIfNeeded(callback)
     }
 
     override fun onStart() {

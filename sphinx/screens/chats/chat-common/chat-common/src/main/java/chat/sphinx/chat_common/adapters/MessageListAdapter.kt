@@ -27,15 +27,15 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-internal class MessageListAdapter<ARGS : NavArgs, VS: MotionLayoutViewState<VS>>(
+internal class MessageListAdapter<ARGS : NavArgs>(
     private val recyclerView: RecyclerView,
     private val headerBinding: LayoutChatHeaderBinding,
     private val layoutManager: LinearLayoutManager,
     private val lifecycleOwner: LifecycleOwner,
     private val onStopSupervisor: OnStopSupervisor,
-    private val viewModel: ChatViewModel<ARGS, VS>,
+    private val viewModel: ChatViewModel<ARGS>,
     private val imageLoader: ImageLoader<ImageView>,
-) : RecyclerView.Adapter<MessageListAdapter<ARGS, VS>.MessageViewHolder>(),
+) : RecyclerView.Adapter<MessageListAdapter<ARGS>.MessageViewHolder>(),
     DefaultLifecycleObserver,
     View.OnLayoutChangeListener
 {
