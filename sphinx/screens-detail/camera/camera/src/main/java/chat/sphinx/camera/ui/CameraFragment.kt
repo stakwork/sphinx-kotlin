@@ -124,7 +124,8 @@ internal class CameraFragment: SideEffectFragment<
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        (requireActivity() as InsetterActivity).addNavigationBarPadding(binding.root)
+        (requireActivity() as InsetterActivity)
+            .addNavigationBarPadding(binding.includeCameraFooter.root)
 
         if (hasPermissions(requireContext())) {
             startCamera()

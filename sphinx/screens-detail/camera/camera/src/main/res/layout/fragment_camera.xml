@@ -4,7 +4,31 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/background_detail_screen"
     tools:context=".ui.CameraFragment">
+
+    <com.example.android.camera.utils.AutoFitSurfaceView
+        android:id="@+id/auto_fit_surface_view_camera"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@+id/include_camera_footer"
+        app:layout_constraintTop_toBottomOf="@+id/include_camera_header" />
+
+    <View
+        android:id="@+id/view_camera_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="@+id/auto_fit_surface_view_camera"
+        app:layout_constraintTop_toTopOf="@+id/auto_fit_surface_view_camera" />
+
+    <include
+        android:id="@+id/include_camera_header"
+        layout="@layout/layout_camera_header" />
+
+    <include
+        android:id="@+id/include_camera_footer"
+        layout="@layout/layout_camera_footer"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/camera_footer_height"
+        app:layout_constraintBottom_toBottomOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
