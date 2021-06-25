@@ -158,7 +158,7 @@ internal class ScannerFragment: SideEffectFragment<
                 // Unbind any bound use cases before rebinding
                 cameraProvider.unbindAll()
                 // Bind use cases to lifecycleOwner
-                cameraProvider.bindToLifecycle(this, cameraSelector, preview, imageAnalysis)
+                cameraProvider.bindToLifecycle(viewLifecycleOwner, cameraSelector, preview, imageAnalysis)
             } catch (e: Exception) {
 //                Log.e("PreviewUseCase", "Binding failed! :(", e)
             }
