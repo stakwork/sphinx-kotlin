@@ -13,8 +13,8 @@
     <!-- Boost Icon -->
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/image_view_boost_message_icon"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="@dimen/icon_message_boost_xy"
+        android:layout_height="@dimen/icon_message_boost_xy"
         android:src="@drawable/ic_boost_green"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
