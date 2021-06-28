@@ -17,20 +17,21 @@ import androidx.viewbinding.ViewBinding
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.chat_common.R
 import chat.sphinx.chat_common.adapters.MessageListAdapter
-import chat.sphinx.chat_common.databinding.LayoutChatFooterBinding
-import chat.sphinx.chat_common.databinding.LayoutChatHeaderBinding
-import chat.sphinx.chat_common.databinding.LayoutMessageHolderBinding
-import chat.sphinx.chat_common.databinding.LayoutSelectedMessageBinding
+import chat.sphinx.chat_common.databinding.*
 import chat.sphinx.chat_common.navigation.ChatNavigator
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
 import chat.sphinx.chat_common.ui.viewstate.header.ChatHeaderFooterViewState
 import chat.sphinx.chat_common.ui.viewstate.messageholder.setView
+import chat.sphinx.chat_common.ui.viewstate.messagereply.MessageReplyViewState
 import chat.sphinx.chat_common.ui.viewstate.selected.MenuItemState
 import chat.sphinx.chat_common.ui.viewstate.selected.SelectedMessageViewState
 import chat.sphinx.chat_common.ui.viewstate.selected.setMenuColor
 import chat.sphinx.chat_common.ui.viewstate.selected.setMenuItems
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
+import chat.sphinx.concept_image_loader.ImageLoaderOptions
+import chat.sphinx.concept_network_client_crypto.CryptoHeader
+import chat.sphinx.concept_network_client_crypto.CryptoScheme
 import chat.sphinx.concept_repository_message.SendMessage
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
@@ -38,14 +39,20 @@ import chat.sphinx.insetter_activity.addStatusBarPadding
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.resources.*
+import chat.sphinx.wrapper_attachment.headerKey
+import chat.sphinx.wrapper_attachment.headerValue
 import chat.sphinx.wrapper_chat.isTrue
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.lightning.unit
+import chat.sphinx.wrapper_message.retrieveImageUrlAndMessageMedia
+import chat.sphinx.wrapper_message.retrieveTextToShow
+import chat.sphinx.wrapper_message.toReplyUUID
 import chat.sphinx.wrapper_view.Dp
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.visible
+import io.matthewnelson.concept_views.viewstate.collect
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
@@ -65,6 +72,7 @@ abstract class ChatFragment<
 {
     protected abstract val footerBinding: LayoutChatFooterBinding
     protected abstract val headerBinding: LayoutChatHeaderBinding
+    protected abstract val replyingMessageBinding: LayoutMessageReplyBinding
     protected abstract val selectedMessageBinding: LayoutSelectedMessageBinding
     protected abstract val selectedMessageHolderBinding: LayoutMessageHolderBinding
     protected abstract val recyclerView: RecyclerView
@@ -149,6 +157,15 @@ abstract class ChatFragment<
                 }
             }
         }
+
+        replyingMessageBinding.apply {
+            textViewReplyClose.visible
+            textViewReplyClose.setOnClickListener {
+                viewModel.replyToMessage(null)
+            }
+
+            root.setBackgroundColor(getColor(R.color.headerBG))
+        }
     }
 
     private fun setupHeader(insetterActivity: InsetterActivity) {
@@ -219,7 +236,7 @@ abstract class ChatFragment<
                                 // TODO: Implement
                             }
                             is MenuItemState.Reply -> {
-                                // TODO: Implement
+                                viewModel.replyToMessage(holderState.message)
                             }
                             is MenuItemState.SaveFile -> {
                                 // TODO: Implement
@@ -252,8 +269,11 @@ abstract class ChatFragment<
         }
     }
 
-    protected fun scrollToBottom(callback: () -> Unit) {
-        (recyclerView.adapter as MessageListAdapter<*>).scrollToBottomIfNeeded(callback)
+    protected fun scrollToBottom(
+        callback: () -> Unit,
+        replyingToMessage: Boolean = false
+    ) {
+        (recyclerView.adapter as MessageListAdapter<*>).scrollToBottomIfNeeded(callback, replyingToMessage)
     }
 
     override fun onStart() {
@@ -447,6 +467,86 @@ abstract class ChatFragment<
                                 )
                             }
                         } ?: gone
+                    }
+                }
+            }
+        }
+    }
+
+    override fun subscribeToViewStateFlow() {
+        super.subscribeToViewStateFlow()
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.messageReplyViewStateContainer.collect { viewState ->
+                @Exhaustive
+                when (viewState) {
+                    is MessageReplyViewState.ReplyingDismissed -> {
+                        sendMessageBuilder.setReplyUUID(null)
+
+                        replyingMessageBinding.root.gone
+                    }
+
+                    is MessageReplyViewState.ReplyingToMessage -> {
+                        val message = viewState.message
+
+                        message.uuid?.value?.toReplyUUID().let { uuid ->
+                            sendMessageBuilder.setReplyUUID(uuid)
+
+                            replyingMessageBinding.apply {
+
+                                textViewReplyMessageLabel.apply {
+                                    textViewReplyMessageLabel.goneIfFalse(false)
+
+                                    message.retrieveTextToShow()?.let { messageText ->
+                                        textViewReplyMessageLabel.text = messageText
+                                        textViewReplyMessageLabel.goneIfFalse(messageText.isNotEmpty())
+                                    }
+                                }
+
+                                textViewReplySenderLabel.text = viewState.senderAlias
+
+                                viewReplyBarLeading.setBackgroundColor(getColor(R.color.lightPurple))
+
+                                message.retrieveImageUrlAndMessageMedia()?.let { mediaData ->
+                                    val options: ImageLoaderOptions? = if (mediaData.second != null) {
+                                        val builder = ImageLoaderOptions.Builder()
+
+                                        mediaData.second?.host?.let { host ->
+                                            viewModel.memeServerTokenHandler.retrieveAuthenticationToken(host)?.let { token ->
+                                                builder.addHeader(token.headerKey, token.headerValue)
+
+                                                mediaData.second?.mediaKeyDecrypted?.value?.let { key ->
+                                                    val header = CryptoHeader.Decrypt.Builder()
+                                                        .setScheme(CryptoScheme.Decrypt.JNCryptor)
+                                                        .setPassword(key)
+                                                        .build()
+
+                                                    builder.addHeader(header.key, header.value)
+                                                }
+                                            }
+                                        }
+
+                                        builder.build()
+                                    } else {
+                                        null
+                                    }
+
+                                    imageLoader.load(
+                                        imageViewReplyMediaImage,
+                                        mediaData.first,
+                                        options
+                                    )
+
+                                    imageViewReplyMediaImage.visible
+                                } ?: run {
+                                    imageViewReplyMediaImage.gone
+                                }
+
+                                scrollToBottom(callback = {
+                                    root.visible
+                                }, true)
+                            }
+                        }
                     }
                 }
             }

@@ -13,6 +13,7 @@ import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
 import chat.sphinx.chat_common.ui.viewstate.header.ChatHeaderFooterViewState
 import chat.sphinx.chat_common.ui.viewstate.messageholder.BubbleBackground
 import chat.sphinx.chat_common.ui.viewstate.messageholder.MessageHolderViewState
+import chat.sphinx.chat_common.ui.viewstate.messagereply.MessageReplyViewState
 import chat.sphinx.chat_common.ui.viewstate.selected.SelectedMessageViewState
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
@@ -40,10 +41,7 @@ import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.MessageUUID
 import chat.sphinx.wrapper_contact.Contact
-import chat.sphinx.wrapper_message.Message
-import chat.sphinx.wrapper_message.isDeleted
-import chat.sphinx.wrapper_message.isGroupAction
-import chat.sphinx.wrapper_message.retrieveTextToShow
+import chat.sphinx.wrapper_message.*
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
@@ -86,6 +84,10 @@ abstract class ChatViewModel<ARGS: NavArgs>(
             .placeholderResId(R.drawable.ic_profile_avatar_circle)
             .transformation(Transformation.CircleCrop)
             .build()
+    }
+
+    val messageReplyViewStateContainer: ViewStateContainer<MessageReplyViewState> by lazy {
+        ViewStateContainer(MessageReplyViewState.ReplyingDismissed)
     }
 
     protected val headerInitialsTextViewColor: Int by lazy {
@@ -417,8 +419,33 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         }
     }
 
-    fun replyToMessage(message: Message) {
+    fun replyToMessage(message: Message?) {
+        if (message != null) {
+            viewModelScope.launch(mainImmediate) {
+                val chat = getChat()
 
+                val senderAlias = when {
+                    message.sender == chat.contactIds.firstOrNull() -> {
+                        contactRepository.accountOwner.value?.alias?.value ?: ""
+                    }
+                    chat.type.isConversation() -> {
+                        getChatNameIfNull()?.value ?: ""
+                    }
+                    else -> {
+                        message.senderAlias?.value ?: ""
+                    }
+                }
+
+                messageReplyViewStateContainer.updateViewState(
+                    MessageReplyViewState.ReplyingToMessage(
+                        message,
+                        senderAlias
+                    )
+                )
+            }
+        } else {
+            messageReplyViewStateContainer.updateViewState(MessageReplyViewState.ReplyingDismissed)
+        }
     }
 
     abstract fun shouldShowActionsMenu()

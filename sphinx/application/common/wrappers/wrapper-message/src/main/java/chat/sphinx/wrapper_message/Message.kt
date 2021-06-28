@@ -32,6 +32,28 @@ inline fun Message.retrieveTextToShow(): String? =
 //            decrypted.value
     }
 
+inline fun Message.retrieveImageUrlAndMessageMedia(): Pair<String, MessageMedia?>? {
+    var mediaData: Pair<String, MessageMedia?>? = null
+
+    giphyData?.let { giphyData ->
+        mediaData = if (giphyData.url.isNotEmpty()) {
+            Pair(giphyData.url.replace("giphy.gif", "200w.gif"), null)
+        } else {
+            null
+        }
+    } ?: messageMedia?.let { media ->
+        media.url?.let { mediaUrl ->
+            mediaData = if (media.mediaType.isImage && !isPaidMessage) {
+                Pair(mediaUrl.value, media)
+            } else {
+                null
+            }
+        }
+    }
+    return mediaData
+}
+
+
 //Message Actions
 inline val Message.isBoostAllowed: Boolean
     get() = status.isReceived() &&
