@@ -32,6 +32,20 @@ inline fun Message.retrieveTextToShow(): String? =
 //            decrypted.value
     }
 
+//Message Actions
+inline val Message.isBoostAllowed: Boolean
+    get() = status.isReceived() &&
+            !type.isInvoice() &&
+            !type.isDirectPayment() &&
+            (uuid?.value ?: "").isNotEmpty()
+
+inline val Message.isCopyAllowed: Boolean
+    get() = (this.retrieveTextToShow() ?: "").isNotEmpty()
+
+inline val Message.isReplyAllowed: Boolean
+    get() = (type.isAttachment() || type.isMessage()) &&
+            (uuid?.value ?: "").isNotEmpty()
+
 //Paid types
 inline val Message.isPaidMessage: Boolean
     get() = type.isAttachment() && (messageMedia?.price?.value ?: 0L) > 0L

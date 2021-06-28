@@ -43,6 +43,7 @@ import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_message.Message
 import chat.sphinx.wrapper_message.isDeleted
 import chat.sphinx.wrapper_message.isGroupAction
+import chat.sphinx.wrapper_message.retrieveTextToShow
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
@@ -404,6 +405,20 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                 is Response.Success -> {}
             }
         }
+    }
+
+    fun copyMessageText(message: Message) {
+        viewModelScope.launch(mainImmediate) {
+            message.retrieveTextToShow()?.let { text ->
+                submitSideEffect(
+                    ChatSideEffect.CopyTextToClipboard(text)
+                )
+            }
+        }
+    }
+
+    fun replyToMessage(message: Message) {
+
     }
 
     abstract fun shouldShowActionsMenu()

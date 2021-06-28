@@ -234,8 +234,16 @@ internal sealed class MessageHolderViewState(
 
             val list = ArrayList<MenuItemState>(4)
 
-            if (this is Received) {
+            if (this is Received && message.isBoostAllowed) {
                 list.add(MenuItemState.Boost)
+            }
+
+            if (message.isCopyAllowed) {
+                list.add(MenuItemState.CopyText)
+            }
+
+            if (message.isReplyAllowed) {
+                list.add(MenuItemState.Reply)
             }
 
             if (list.isEmpty()) {

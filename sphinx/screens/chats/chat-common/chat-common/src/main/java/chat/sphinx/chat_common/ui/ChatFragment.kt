@@ -213,7 +213,7 @@ abstract class ChatFragment<
                                 // TODO: Implement
                             }
                             is MenuItemState.CopyText -> {
-                                // TODO: Implement
+                                viewModel.copyMessageText(holderState.message)
                             }
                             is MenuItemState.Delete -> {
                                 // TODO: Implement
@@ -365,6 +365,8 @@ abstract class ChatFragment<
                                         selectedMessageBinding
                                             .imageViewSelectedMessageBlur
                                             .setImageBitmap(bitmap.blur(root.context, 25.0F))
+
+                                        this@message.root.visible
                                     }
                                 },
                                 errorCallback = {}
@@ -398,7 +400,6 @@ abstract class ChatFragment<
                             }
                             this@message.setMenuColor(viewState.messageHolderViewState)
                             this@message.setMenuItems(viewState.messageHolderViewState.selectionMenuItems)
-                            this@message.root.visible
                         }
                     }
                 }
