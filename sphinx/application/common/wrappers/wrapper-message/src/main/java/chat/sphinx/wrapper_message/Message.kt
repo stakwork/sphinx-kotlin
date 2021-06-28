@@ -32,6 +32,7 @@ inline fun Message.retrieveTextToShow(): String? =
 //            decrypted.value
     }
 
+@Suppress("NOTHING_TO_INLINE")
 inline fun Message.retrieveImageUrlAndMessageMedia(): Pair<String, MessageMedia?>? {
     var mediaData: Pair<String, MessageMedia?>? = null
 
