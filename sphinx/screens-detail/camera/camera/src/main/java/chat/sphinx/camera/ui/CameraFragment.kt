@@ -18,6 +18,7 @@ import android.view.Surface
 import android.view.SurfaceHolder
 import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.camera.view.CameraView
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toDrawable
 import androidx.fragment.app.FragmentActivity
@@ -26,6 +27,7 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
+import app.cash.exhaustive.Exhaustive
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.camera.R
 import chat.sphinx.camera.databinding.FragmentCameraBinding
@@ -36,7 +38,12 @@ import com.example.android.camera.utils.computeExifOrientation
 import com.example.android.camera.utils.getPreviewOutputSize
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
+import io.matthewnelson.android_feature_viewmodel.collectViewState
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
+import io.matthewnelson.android_feature_viewmodel.updateViewState
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import java.io.Closeable
@@ -89,7 +96,11 @@ internal class CameraFragment: SideEffectFragment<
                     }
                 }
 
-                startCamera()
+                if (currentViewState !is CameraViewState.Active) {
+                    viewModel.updateViewState(
+                        CameraViewState.Active.BackCamera(viewModel.getBackCamera())
+                    )
+                }
             } catch (e: Exception) {
                 lifecycleScope.launch(viewModel.mainImmediate) {
                     viewModel.submitSideEffect(
@@ -156,7 +167,11 @@ internal class CameraFragment: SideEffectFragment<
         viewModel
     }
 
+    @Volatile
     private var orientationLiveData: OrientationLiveData? = null
+    private val surfaceHolderState: MutableStateFlow<SurfaceHolder?> by lazy {
+        MutableStateFlow(null)
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -164,42 +179,31 @@ internal class CameraFragment: SideEffectFragment<
         (requireActivity() as InsetterActivity)
             .addNavigationBarPadding(binding.includeCameraFooter.root)
 
-        backCamera?.let { cameraItem ->
-            binding.autoFitSurfaceViewCamera.holder.addCallback(object : SurfaceHolder.Callback {
-                override fun surfaceDestroyed(holder: SurfaceHolder) {}
-                override fun surfaceChanged(
-                    holder: SurfaceHolder,
-                    format: Int,
-                    width: Int,
-                    height: Int
-                ) {}
-
-                override fun surfaceCreated(holder: SurfaceHolder) {
-                    val previewSize = getPreviewOutputSize(
-                        binding.autoFitSurfaceViewCamera.display,
-                        cameraItem.characteristics,
-                        SurfaceHolder::class.java,
-                    )
-
-                    binding.autoFitSurfaceViewCamera.setAspectRatio(previewSize.width, previewSize.height)
-
-                    view.post() {
-                        if (hasPermissions(requireContext())) {
-                            startCamera()
-                        }
-                    }
-                }
-            })
-
-            orientationLiveData = OrientationLiveData(binding.root.context, cameraItem.characteristics).apply {
-                observe(viewLifecycleOwner, Observer { orientation ->
-
-                })
+        binding.autoFitSurfaceViewCamera.holder.addCallback(object : SurfaceHolder.Callback {
+            override fun surfaceDestroyed(holder: SurfaceHolder) {
+                surfaceHolderState.value = null
             }
-        }
+
+            override fun surfaceChanged(
+                holder: SurfaceHolder,
+                format: Int,
+                width: Int,
+                height: Int
+            ) {}
+
+            override fun surfaceCreated(holder: SurfaceHolder) {
+                surfaceHolderState.value = holder
+            }
+        })
 
         if (!hasPermissions(requireContext())) {
             requestPermissionLauncher.launch(PERMISSIONS_REQUIRED)
+        } else {
+            if (currentViewState !is CameraViewState.Active) {
+                viewModel.updateViewState(
+                    CameraViewState.Active.BackCamera(viewModel.getBackCamera())
+                )
+            }
         }
     }
 
@@ -207,6 +211,7 @@ internal class CameraFragment: SideEffectFragment<
         super.onStop()
         try {
             camera?.close()
+            camera = null
         } catch (e: Throwable) {}
     }
 
@@ -214,72 +219,70 @@ internal class CameraFragment: SideEffectFragment<
         ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
     }
 
+    @Volatile
     private var camera: CameraDevice? = null
-    private var imageReader: ImageReader? = null
-    private var session: CameraCaptureSession? = null
 
     @Suppress("BlockingMethodInNonBlockingContext")
-    private fun startCamera() {
-        backCamera?.let { cameraItem ->
-            lifecycleScope.launch(viewModel.main) {
-                val camera = openCamera(
-                    viewModel.cameraManager,
-                    cameraItem.cameraId,
-                    cameraThreadHolder.getHandler(),
-                ).also { camera = it }
+    private fun startCamera(cameraItem: CameraViewModel.CameraListItem) {
+        lifecycleScope.launch(viewModel.main) {
+            val camera = openCamera(
+                viewModel.cameraManager,
+                cameraItem.cameraId,
+                cameraThreadHolder.getHandler(),
+            ).also {
+                camera?.close()
+                camera = it
+            }
 
-                val size = cameraItem.configMap.getOutputSizes(ImageFormat.JPEG)
-                    .maxByOrNull { it.height * it.width }!!
+            // TOOD: add Image Format to CameraListItem
+            val size = cameraItem.configMap.getOutputSizes(ImageFormat.JPEG)
+                .maxByOrNull { it.height * it.width }!!
 
-                val imageReader = ImageReader.newInstance(
-                    size.width, size.height, ImageFormat.JPEG, IMAGE_BUFFER_SIZE
-                ).also { imageReader = it }
+            val imageReader = ImageReader.newInstance(
+                size.width, size.height, ImageFormat.JPEG, IMAGE_BUFFER_SIZE
+            )
 
-                val targets = listOf(binding.autoFitSurfaceViewCamera.holder.surface, imageReader.surface)
+            val targets = listOf(binding.autoFitSurfaceViewCamera.holder.surface, imageReader.surface)
 
-                val session = createCaptureSession(
-                    camera,
-                    targets,
-                    cameraThreadHolder.getHandler()
-                ).also { session = it }
+            val session = createCaptureSession(
+                camera,
+                targets,
+                cameraThreadHolder.getHandler()
+            )
 
-                val captureRequest = camera.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW).apply {
-                    addTarget(binding.autoFitSurfaceViewCamera.holder.surface)
-                }
+            val captureRequest = camera.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW).apply {
+                addTarget(binding.autoFitSurfaceViewCamera.holder.surface)
+            }
 
-                session.setRepeatingRequest(captureRequest.build(), null, cameraThreadHolder.getHandler())
+            session.setRepeatingRequest(captureRequest.build(), null, cameraThreadHolder.getHandler())
 
-                binding.includeCameraFooter.imageViewCameraFooterShutter.setOnClickListener {
+            binding.includeCameraFooter.imageViewCameraFooterShutter.setOnClickListener { view ->
 
-                    it.isEnabled = false
+                view.isEnabled = false
 
-                    lifecycleScope.launch(viewModel.io) {
-                        takePhoto(
-                            cameraItem,
-                            imageReader,
-                            session,
-                        ).use { result ->
+                lifecycleScope.launch(viewModel.io) {
+                    takePhoto(
+                        cameraItem,
+                        imageReader,
+                        session,
+                    ).use { result ->
 
-                            val output = saveResult(cameraItem, result)
+                        val output = saveResult(cameraItem, result)
 
-                            // If the result is a JPEG file, update EXIF metadata with orientation info
-                            if (output.extension == "jpg") {
-                                val exif = ExifInterface(output.absolutePath)
-                                exif.setAttribute(
-                                    ExifInterface.TAG_ORIENTATION,
-                                    result.orientation.toString()
-                                )
-                                exif.saveAttributes()
-                            }
-
-                            // TODO: Display photo to user
-//                            lifecycleScope.launch(viewModel.main) {
-//
-//                            }
+                        // If the result is a JPEG file, update EXIF metadata with orientation info
+                        if (output.extension == "jpg") {
+                            val exif = ExifInterface(output.absolutePath)
+                            exif.setAttribute(
+                                ExifInterface.TAG_ORIENTATION,
+                                result.orientation.toString()
+                            )
+                            exif.saveAttributes()
                         }
 
-                        it.post { it.isEnabled = true }
+                        // TODO: Display photo to user
                     }
+
+                    view.post { view.isEnabled = true }
                 }
             }
         }
@@ -510,7 +513,55 @@ internal class CameraFragment: SideEffectFragment<
         sideEffect.execute(requireActivity())
     }
 
+    private val orientationObserver = Observer<Int> { orientation ->
+
+    }
+
     override suspend fun onViewStateFlowCollect(viewState: CameraViewState) {
-//        TODO("Not yet implemented")
+        @Exhaustive
+        when (viewState) {
+            is CameraViewState.Idle -> {}
+            is CameraViewState.Active -> {
+                viewState.cameraListItem?.let { item ->
+                    try {
+                        surfaceHolderState.collect { holder ->
+                            if (holder != null) {
+                                val previewSize = getPreviewOutputSize(
+                                    binding.autoFitSurfaceViewCamera.display,
+                                    item.characteristics,
+                                    SurfaceHolder::class.java,
+                                )
+
+                                binding.autoFitSurfaceViewCamera.setAspectRatio(
+                                    previewSize.width,
+                                    previewSize.height
+                                )
+
+                                orientationLiveData?.removeObserver(orientationObserver)
+                                orientationLiveData = OrientationLiveData(binding.root.context, item.characteristics).apply {
+                                    observe(viewLifecycleOwner, orientationObserver)
+                                }
+
+                                startCamera(item)
+
+                                throw Exception()
+                            }
+                        }
+                    } catch (e: Exception) {}
+                } // TODO: handle null case with no camera available view
+            }
+        }
+    }
+
+    // have to override here to always push
+    // results to onViewStateFlowCollect w/o
+    // comparing to currentViewState
+    override fun subscribeToViewStateFlow() {
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.collectViewState { viewState ->
+                currentViewState = viewState
+                onViewStateFlowCollect(viewState)
+            }
+        }
     }
 }
