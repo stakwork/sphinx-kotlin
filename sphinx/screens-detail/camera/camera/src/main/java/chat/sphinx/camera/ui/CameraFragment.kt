@@ -516,7 +516,7 @@ internal class CameraFragment: SideEffectFragment<
                 val bytes = ByteArray(buffer.remaining()).apply { buffer.get(this) }
 
                 try {
-                    val output = createFile("jpg")
+                    val output = viewModel.createFile("jpg", image = true)
                     FileOutputStream(output).use { it.write(bytes) }
                     cont.resume(output)
                 } catch (e: IOException) {
@@ -528,7 +528,7 @@ internal class CameraFragment: SideEffectFragment<
                 val dngCreator = DngCreator(cameraItem.characteristics, result.metadata)
 
                 try {
-                    val output = createFile("dng")
+                    val output = viewModel.createFile("dng", image = true)
                     FileOutputStream(output).use { dngCreator.writeImage(it, result.image) }
                 } catch (e: IOException) {
                     cont.resumeWithException(e)
@@ -539,11 +539,6 @@ internal class CameraFragment: SideEffectFragment<
                 cont.resumeWithException(RuntimeException("Unknown image format: ${result.image.format}"))
             }
         }
-    }
-
-    private fun createFile(extension: String): File {
-        val sdf = SimpleDateFormat("yyy_MM_dd_HH_mm_ss_SSS", Locale.US)
-        return File(binding.root.context.filesDir, "IMG_${sdf.format(Date())}.$extension")
     }
 
     data class CombinedCaptureResult(

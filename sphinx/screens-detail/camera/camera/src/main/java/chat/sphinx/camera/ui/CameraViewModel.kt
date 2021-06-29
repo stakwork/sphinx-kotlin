@@ -25,7 +25,10 @@ import io.matthewnelson.concept_views.viewstate.collect
 import io.matthewnelson.concept_views.viewstate.value
 import kotlinx.coroutines.launch
 import java.io.File
+import java.text.SimpleDateFormat
+import java.util.*
 import javax.inject.Inject
+import kotlin.collections.ArrayList
 
 internal suspend inline fun CameraViewModel.collectImagePreviewViewState(
     crossinline action: suspend (value: ImagePreviewViewState) -> Unit
@@ -133,5 +136,14 @@ internal class CameraViewModel @Inject constructor(
                 image.delete()
             }
         }
+    }
+
+    private val cameraDir = File(app.cacheDir, "camera_cache").also {
+        it.mkdirs()
+    }
+
+    fun createFile(extension: String, image: Boolean): File {
+        val sdf = SimpleDateFormat("yyy_MM_dd_HH_mm_ss_SSS", Locale.US)
+        return File(cameraDir, "${if (image) "IMG" else "VID"}_${sdf.format(Date())}.$extension")
     }
 }
