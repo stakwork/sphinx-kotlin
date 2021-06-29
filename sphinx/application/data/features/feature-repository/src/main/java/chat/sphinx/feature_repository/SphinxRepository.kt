@@ -1216,6 +1216,11 @@ abstract class SphinxRepository(
     override fun sendMessage(sendMessage: SendMessage?) {
         if (sendMessage == null) return
 
+        // TODO: Handle messages that contain files
+        sendMessage.file?.let { nnFile ->
+            return
+        }
+
         applicationScope.launch(mainImmediate) {
             val queries = coreDB.getSphinxDatabaseQueries()
 

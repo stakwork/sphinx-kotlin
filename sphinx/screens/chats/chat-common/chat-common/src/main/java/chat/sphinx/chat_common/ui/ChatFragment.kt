@@ -139,8 +139,25 @@ abstract class ChatFragment<
 
                 sendMessageBuilder.setText(editTextChatFooter.text?.toString())
 
+                val attachmentViewState = viewModel.getAttachmentSendViewStateFlow().value
+
+                @Exhaustive
+                when (attachmentViewState) {
+                    is AttachmentSendViewState.Idle -> {
+                        sendMessageBuilder.setFile(null)
+                    }
+                    is AttachmentSendViewState.Preview.LocalFile -> {
+                        sendMessageBuilder.setFile(attachmentViewState.cameraResponse.value)
+                    }
+                }
+
                 viewModel.sendMessage(sendMessageBuilder)?.let {
                     // if it did not return null that means it was valid
+                    if (attachmentViewState !is AttachmentSendViewState.Idle) {
+                        viewModel.updateAttachmentSendViewState(AttachmentSendViewState.Idle)
+                        viewModel.updateFooterViewState(FooterViewState.Default)
+                    }
+
                     sendMessageBuilder.clear()
                     editTextChatFooter.setText("")
                 }
