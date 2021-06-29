@@ -14,6 +14,7 @@ import chat.sphinx.camera.model.LensFacing
 import chat.sphinx.camera.ui.viewstate.CameraViewState
 import chat.sphinx.camera.ui.viewstate.CapturePreviewViewState
 import chat.sphinx.camera_view_model_coordinator.response.CameraResponse
+import chat.sphinx.concept_view_model_coordinator.RequestCancelled
 import chat.sphinx.concept_view_model_coordinator.ResponseHolder
 import chat.sphinx.feature_view_model_coordinator.RequestCatcher
 import chat.sphinx.kotlin_response.Response
@@ -70,13 +71,13 @@ internal class CameraViewModel @Inject constructor(
         mainImmediate,
     )
 
-    private var responseJob: Job? = null
-    fun processResponse(viewState: CapturePreviewViewState.Preview) {
-        if (responseJob?.isActive == true) {
+    private var successResponseJob: Job? = null
+    fun processSuccessfulResponse(viewState: CapturePreviewViewState.Preview) {
+        if (successResponseJob?.isActive == true || cancellationResponseJob?.isActive == true) {
             return
         }
 
-        responseJob = viewModelScope.launch(mainImmediate) {
+        successResponseJob = viewModelScope.launch(mainImmediate) {
 
             try {
                 requestCatcher.getCaughtRequestStateFlow().collect { list ->
@@ -88,6 +89,27 @@ internal class CameraViewModel @Inject constructor(
                                     CameraResponse(viewState.value)
                                 )
                             ),
+                            navigateBack = Any(),
+                        )
+                    }
+                }
+            } catch (e: Exception) {}
+        }
+    }
+
+    private var cancellationResponseJob: Job? = null
+    fun processCancellationResponse() {
+        if (cancellationResponseJob?.isActive == true || successResponseJob?.isActive == true) {
+            return
+        }
+
+        cancellationResponseJob = viewModelScope.launch(mainImmediate) {
+
+            try {
+                requestCatcher.getCaughtRequestStateFlow().collect { list ->
+                    list.firstOrNull()?.let { requestHolder ->
+                        cameraCoordinator.submitResponse(
+                            response = Response.Error(RequestCancelled(requestHolder)),
                             navigateBack = Any(),
                         )
                     }
@@ -183,7 +205,7 @@ internal class CameraViewModel @Inject constructor(
 
     override fun onCleared() {
         super.onCleared()
-        if (responseJob == null) {
+        if (successResponseJob == null) {
             @Exhaustive
             when (val vs = currentCapturePreviewViewState) {
                 is CapturePreviewViewState.None -> {}

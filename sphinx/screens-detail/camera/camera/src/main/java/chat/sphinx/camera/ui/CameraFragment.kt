@@ -243,10 +243,14 @@ internal class CameraFragment: SideEffectFragment<
                     is CapturePreviewViewState.None -> {}
                     is CapturePreviewViewState.Preview -> {
                         textViewCameraImagePreviewRetake.isEnabled = false
-                        viewModel.processResponse(vs)
+                        viewModel.processSuccessfulResponse(vs)
                     }
                 }
             }
+        }
+
+        binding.includeCameraFooter.textViewCameraFooterCancel.setOnClickListener {
+            viewModel.processCancellationResponse()
         }
     }
 
