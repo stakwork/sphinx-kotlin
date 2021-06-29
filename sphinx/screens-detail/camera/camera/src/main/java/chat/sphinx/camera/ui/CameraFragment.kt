@@ -47,6 +47,7 @@ import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.collectViewState
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.android_feature_viewmodel.updateViewState
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -330,6 +331,7 @@ internal class CameraFragment: SideEffectFragment<
                         )
                     }
 
+                    delay(200L)
                     view.post { view.isEnabled = true }
                 }
             }
