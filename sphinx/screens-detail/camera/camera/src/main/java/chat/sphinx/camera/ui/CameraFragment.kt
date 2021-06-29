@@ -46,6 +46,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withContext
 import java.io.Closeable
 import java.io.File
 import java.io.FileOutputStream
@@ -154,14 +155,6 @@ internal class CameraFragment: SideEffectFragment<
     private val cameraThreadHolder = ThreadHolder()
     private val imageReaderThreadHolder = ThreadHolder()
 
-    private val frontCamera: CameraViewModel.CameraListItem? by lazy {
-        viewModel.getFrontCamera()
-    }
-
-    private val backCamera: CameraViewModel.CameraListItem? by lazy {
-        viewModel.getBackCamera()
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         viewModel
@@ -203,6 +196,24 @@ internal class CameraFragment: SideEffectFragment<
                 viewModel.updateViewState(
                     CameraViewState.Active.BackCamera(viewModel.getBackCamera())
                 )
+            }
+        }
+
+        binding.includeCameraFooter.imageViewCameraFooterBackFront.setOnClickListener {
+            @Exhaustive
+            when (currentViewState) {
+                is CameraViewState.Active.BackCamera -> {
+                    viewModel.updateViewState(
+                        CameraViewState.Active.FrontCamera(viewModel.getFrontCamera())
+                    )
+                }
+                null,
+                is CameraViewState.Idle,
+                is CameraViewState.Active.FrontCamera -> {
+                    viewModel.updateViewState(
+                        CameraViewState.Active.BackCamera(viewModel.getBackCamera())
+                    )
+                }
             }
         }
     }
@@ -458,6 +469,7 @@ internal class CameraFragment: SideEffectFragment<
             )
     }
 
+    @Suppress("BlockingMethodInNonBlockingContext")
     private suspend fun saveResult(
         cameraItem: CameraViewModel.CameraListItem,
         result: CombinedCaptureResult,
@@ -496,7 +508,7 @@ internal class CameraFragment: SideEffectFragment<
     }
 
     private fun createFile(extension: String): File {
-        val sdf = SimpleDateFormat("yyy_MM_dd_HH_mm_ss_SSS", Locale.getDefault())
+        val sdf = SimpleDateFormat("yyy_MM_dd_HH_mm_ss_SSS", Locale.US)
         return File(binding.root.context.filesDir, "IMG_${sdf.format(Date())}.$extension")
     }
 
@@ -518,6 +530,9 @@ internal class CameraFragment: SideEffectFragment<
     }
 
     override suspend fun onViewStateFlowCollect(viewState: CameraViewState) {
+
+        binding.includeCameraFooter.imageViewCameraFooterShutter.setOnClickListener(null)
+
         @Exhaustive
         when (viewState) {
             is CameraViewState.Idle -> {}
