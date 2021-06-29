@@ -175,6 +175,9 @@ internal class CameraViewModel @Inject constructor(
 
     fun createFile(extension: String, image: Boolean): File {
         val sdf = SimpleDateFormat("yyy_MM_dd_HH_mm_ss_SSS", Locale.US)
+        if (!cameraDir.exists()) {
+            cameraDir.mkdirs()
+        }
         return File(cameraDir, "${if (image) "IMG" else "VID"}_${sdf.format(Date())}.$extension")
     }
 
