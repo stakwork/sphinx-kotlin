@@ -5,27 +5,26 @@ import android.content.Context
 import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraManager
 import android.hardware.camera2.CameraMetadata
-import android.hardware.camera2.params.StreamConfigurationMap
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.viewModelScope
+import app.cash.exhaustive.Exhaustive
 import chat.sphinx.camera.coordinator.CameraViewModelCoordinator
 import chat.sphinx.camera.model.CameraItem
 import chat.sphinx.camera.model.LensFacing
 import chat.sphinx.camera.ui.viewstate.CameraViewState
-import chat.sphinx.camera.ui.viewstate.ImagePreviewViewState
+import chat.sphinx.camera.ui.viewstate.CapturePreviewViewState
 import chat.sphinx.camera_view_model_coordinator.response.CameraResponse
 import chat.sphinx.concept_view_model_coordinator.ResponseHolder
 import chat.sphinx.feature_view_model_coordinator.RequestCatcher
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.logger.SphinxLogger
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.matthewnelson.android_feature_viewmodel.BaseViewModel
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
-import io.matthewnelson.concept_views.viewstate.ViewState
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import io.matthewnelson.concept_views.viewstate.collect
 import io.matthewnelson.concept_views.viewstate.value
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -36,20 +35,21 @@ import javax.inject.Inject
 import kotlin.collections.ArrayList
 
 internal suspend inline fun CameraViewModel.collectImagePreviewViewState(
-    crossinline action: suspend (value: ImagePreviewViewState) -> Unit
+    crossinline action: suspend (value: CapturePreviewViewState) -> Unit
 ): Unit =
-    imagePreviewViewStateContainer.collect { action(it) }
+    cameraPreviewViewStateContainer.collect { action(it) }
 
-internal inline val CameraViewModel.currentImagePreviewViewState: ImagePreviewViewState
-    get() = imagePreviewViewStateContainer.value
+internal inline val CameraViewModel.currentCapturePreviewViewState: CapturePreviewViewState
+    get() = cameraPreviewViewStateContainer.value
 
 @Suppress("NOTHING_TO_INLINE")
-internal inline fun CameraViewModel.updateImagePreviewViewState(viewState: ImagePreviewViewState) =
-    imagePreviewViewStateContainer.updateViewState(viewState)
+internal inline fun CameraViewModel.updateImagePreviewViewState(viewState: CapturePreviewViewState) =
+    cameraPreviewViewStateContainer.updateViewState(viewState)
 
 @HiltViewModel
 internal class CameraViewModel @Inject constructor(
     private val app: Application,
+    private val applicationScope: CoroutineScope,
     dispatchers: CoroutineDispatchers,
     private val cameraCoordinator: CameraViewModelCoordinator,
     private val LOG: SphinxLogger,
@@ -71,7 +71,7 @@ internal class CameraViewModel @Inject constructor(
     )
 
     private var responseJob: Job? = null
-    fun processResponse(viewState: ImagePreviewViewState.ImagePreview) {
+    fun processResponse(viewState: CapturePreviewViewState.Preview) {
         if (responseJob?.isActive == true) {
             return
         }
@@ -85,7 +85,7 @@ internal class CameraViewModel @Inject constructor(
                             response = Response.Success(
                                 ResponseHolder(
                                     requestHolder,
-                                    CameraResponse(viewState.image)
+                                    CameraResponse(viewState.value)
                                 )
                             ),
                             navigateBack = Any(),
@@ -157,8 +157,8 @@ internal class CameraViewModel @Inject constructor(
         return cameras.lastOrNull { it.lensFacing == LensFacing.Back }
     }
 
-    val imagePreviewViewStateContainer: ViewStateContainer<ImagePreviewViewState> by lazy {
-        ViewStateContainer(ImagePreviewViewState.None)
+    val cameraPreviewViewStateContainer: ViewStateContainer<CapturePreviewViewState> by lazy {
+        ViewStateContainer(CapturePreviewViewState.None)
     }
 
     fun deleteImage(image: File) {
@@ -176,5 +176,23 @@ internal class CameraViewModel @Inject constructor(
     fun createFile(extension: String, image: Boolean): File {
         val sdf = SimpleDateFormat("yyy_MM_dd_HH_mm_ss_SSS", Locale.US)
         return File(cameraDir, "${if (image) "IMG" else "VID"}_${sdf.format(Date())}.$extension")
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        if (responseJob == null) {
+            @Exhaustive
+            when (val vs = currentCapturePreviewViewState) {
+                is CapturePreviewViewState.None -> {}
+                is CapturePreviewViewState.Preview -> {
+                    // user hit back button, so no file was returned
+                    applicationScope.launch(dispatchers.io) {
+                        try {
+                            vs.value.delete()
+                        } catch (e: Exception) {}
+                    }
+                }
+            }
+        }
     }
 }

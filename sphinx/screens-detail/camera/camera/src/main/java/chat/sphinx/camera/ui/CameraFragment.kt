@@ -33,7 +33,7 @@ import chat.sphinx.camera.R
 import chat.sphinx.camera.databinding.FragmentCameraBinding
 import chat.sphinx.camera.model.CameraItem
 import chat.sphinx.camera.ui.viewstate.CameraViewState
-import chat.sphinx.camera.ui.viewstate.ImagePreviewViewState
+import chat.sphinx.camera.ui.viewstate.CapturePreviewViewState
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
@@ -55,7 +55,6 @@ import java.io.Closeable
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
-import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.TimeoutException
@@ -230,19 +229,19 @@ internal class CameraFragment: SideEffectFragment<
         binding.includeCameraImagePreview.apply {
             textViewCameraImagePreviewRetake.setOnClickListener {
                 @Exhaustive
-                when (val vs = viewModel.currentImagePreviewViewState) {
-                    is ImagePreviewViewState.None -> {}
-                    is ImagePreviewViewState.ImagePreview -> {
-                        viewModel.deleteImage(vs.image)
-                        viewModel.updateImagePreviewViewState(ImagePreviewViewState.None)
+                when (val vs = viewModel.currentCapturePreviewViewState) {
+                    is CapturePreviewViewState.None -> {}
+                    is CapturePreviewViewState.Preview -> {
+                        viewModel.deleteImage(vs.value)
+                        viewModel.updateImagePreviewViewState(CapturePreviewViewState.None)
                     }
                 }
             }
             textViewCameraImagePreviewUse.setOnClickListener {
                 @Exhaustive
-                when (val vs = viewModel.currentImagePreviewViewState) {
-                    is ImagePreviewViewState.None -> {}
-                    is ImagePreviewViewState.ImagePreview -> {
+                when (val vs = viewModel.currentCapturePreviewViewState) {
+                    is CapturePreviewViewState.None -> {}
+                    is CapturePreviewViewState.Preview -> {
                         textViewCameraImagePreviewRetake.isEnabled = false
                         viewModel.processResponse(vs)
                     }
@@ -324,7 +323,7 @@ internal class CameraFragment: SideEffectFragment<
                         }
 
                         viewModel.updateImagePreviewViewState(
-                            ImagePreviewViewState.ImagePreview(output)
+                            CapturePreviewViewState.Preview.ImagePreview(output)
                         )
                     }
 
@@ -613,15 +612,15 @@ internal class CameraFragment: SideEffectFragment<
                 binding.includeCameraImagePreview.apply {
                     @Exhaustive
                     when (viewState) {
-                        is ImagePreviewViewState.ImagePreview -> {
-                            if (viewState.image.exists()) {
+                        is CapturePreviewViewState.Preview.ImagePreview -> {
+                            if (viewState.value.exists()) {
                                 root.visible
-                                imageLoader.load(imageViewCameraImagePreview, viewState.image)
+                                imageLoader.load(imageViewCameraImagePreview, viewState.value)
                             } else {
-                                viewModel.updateImagePreviewViewState(ImagePreviewViewState.None)
+                                viewModel.updateImagePreviewViewState(CapturePreviewViewState.None)
                             }
                         }
-                        is ImagePreviewViewState.None -> {
+                        is CapturePreviewViewState.None -> {
                             root.gone
                             imageViewCameraImagePreview.setImageDrawable(null)
                         }
