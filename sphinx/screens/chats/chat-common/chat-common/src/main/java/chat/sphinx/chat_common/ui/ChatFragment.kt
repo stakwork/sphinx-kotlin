@@ -15,14 +15,13 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
 import app.cash.exhaustive.Exhaustive
+import chat.sphinx.camera_view_model_coordinator.response.CameraResponse
 import chat.sphinx.chat_common.R
 import chat.sphinx.chat_common.adapters.MessageListAdapter
-import chat.sphinx.chat_common.databinding.LayoutChatFooterBinding
-import chat.sphinx.chat_common.databinding.LayoutChatHeaderBinding
-import chat.sphinx.chat_common.databinding.LayoutMessageHolderBinding
-import chat.sphinx.chat_common.databinding.LayoutSelectedMessageBinding
+import chat.sphinx.chat_common.databinding.*
 import chat.sphinx.chat_common.navigation.ChatNavigator
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
+import chat.sphinx.chat_common.ui.viewstate.attachment.AttachmentSendViewState
 import chat.sphinx.chat_common.ui.viewstate.footer.FooterViewState
 import chat.sphinx.chat_common.ui.viewstate.header.ChatHeaderFooterViewState
 import chat.sphinx.chat_common.ui.viewstate.messageholder.setView
@@ -68,6 +67,7 @@ abstract class ChatFragment<
     protected abstract val headerBinding: LayoutChatHeaderBinding
     protected abstract val selectedMessageBinding: LayoutSelectedMessageBinding
     protected abstract val selectedMessageHolderBinding: LayoutMessageHolderBinding
+    protected abstract val attachmentSendBinding: LayoutAttachmentSendPreviewBinding
     protected abstract val recyclerView: RecyclerView
 
     protected abstract val imageLoader: ImageLoader<ImageView>
@@ -93,6 +93,7 @@ abstract class ChatFragment<
         setupFooter(insetterActivity)
         setupHeader(insetterActivity)
         setupSelectedMessage()
+        setupAttachmentSendPreview(insetterActivity)
         setupRecyclerView()
     }
 
@@ -111,11 +112,20 @@ abstract class ChatFragment<
         }
 
         override fun handleOnBackPressed() {
-            if (viewModel.getSelectedMessageViewStateFlow().value is SelectedMessageViewState.SelectedMessage) {
-                viewModel.updateSelectedMessageViewState(SelectedMessageViewState.None)
-            } else {
-                lifecycleScope.launch(viewModel.mainImmediate) {
-                    chatNavigator.popBackStack()
+            val attachmentViewState = viewModel.getAttachmentSendViewStateFlow().value
+            when {
+                attachmentViewState is AttachmentSendViewState.Preview -> {
+                    viewModel.deleteFileIfLocal(attachmentViewState)
+                    viewModel.updateAttachmentSendViewState(AttachmentSendViewState.Idle)
+                    viewModel.updateFooterViewState(FooterViewState.Default)
+                }
+                viewModel.getSelectedMessageViewStateFlow().value is SelectedMessageViewState.SelectedMessage -> {
+                    viewModel.updateSelectedMessageViewState(SelectedMessageViewState.None)
+                }
+                else -> {
+                    lifecycleScope.launch(viewModel.mainImmediate) {
+                        chatNavigator.popBackStack()
+                    }
                 }
             }
         }
@@ -195,6 +205,28 @@ abstract class ChatFragment<
         }
         selectedMessageHolderBinding.includeMessageHolderBubble.root.setOnClickListener {
             viewModel
+        }
+    }
+
+    private fun setupAttachmentSendPreview(insetterActivity: InsetterActivity) {
+        attachmentSendBinding.apply {
+
+            root.setOnClickListener { viewModel }
+
+            layoutConstraintChatAttachmentSendHeader.apply {
+                insetterActivity.addStatusBarPadding(this)
+                this.layoutParams.height = this.layoutParams.height + insetterActivity.statusBarInsetHeight.top
+                this.requestLayout()
+            }
+
+            textViewAttachmentSendHeaderClose.setOnClickListener {
+                val vs = viewModel.getAttachmentSendViewStateFlow().value
+                if (vs is AttachmentSendViewState.Preview) {
+                    viewModel.deleteFileIfLocal(vs)
+                    viewModel.updateFooterViewState(FooterViewState.Default)
+                    viewModel.updateAttachmentSendViewState(AttachmentSendViewState.Idle)
+                }
+            }
         }
     }
 
@@ -413,6 +445,40 @@ abstract class ChatFragment<
                     imageViewChatFooterMicrophone.goneIfFalse(viewState.showRecordAudioIcon)
                     textViewChatFooterSend.goneIfFalse(viewState.showSendIcon)
                     textViewChatFooterAttachment.goneIfFalse(viewState.showMenuIcon)
+                }
+            }
+        }
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.getAttachmentSendViewStateFlow().collect { viewState ->
+                attachmentSendBinding.apply {
+                    @Exhaustive
+                    when (viewState) {
+                        is AttachmentSendViewState.Idle -> {
+                            root.gone
+                            imageViewAttachmentSendPreview.setImageDrawable(null)
+                        }
+                        is AttachmentSendViewState.Preview.LocalFile -> {
+
+                            textViewAttachmentSendHeaderName.apply {
+                                @Exhaustive
+                                when (viewState.cameraResponse) {
+                                    is CameraResponse.Image -> {
+                                        text = getString(R.string.attachment_send_header_image)
+                                    }
+//                                    is CameraResponse.Video -> {
+//                                        text = getString(R.string.attachment_send_header_video)
+//                                    }
+                                }
+                            }
+
+                            root.visible
+
+                            // will load almost immediately b/c it's a file, so
+                            // no need to launch separate coroutine.
+                            imageLoader.load(imageViewAttachmentSendPreview, viewState.cameraResponse.value)
+                        }
+                    }
                 }
             }
         }

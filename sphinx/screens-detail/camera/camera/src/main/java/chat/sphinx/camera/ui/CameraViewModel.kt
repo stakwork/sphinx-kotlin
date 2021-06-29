@@ -86,7 +86,14 @@ internal class CameraViewModel @Inject constructor(
                             response = Response.Success(
                                 ResponseHolder(
                                     requestHolder,
-                                    CameraResponse(viewState.value)
+                                    when (viewState) {
+                                        is CapturePreviewViewState.Preview.ImagePreview -> {
+                                            CameraResponse.Image(viewState.value)
+                                        }
+//                                        is CapturePreviewViewState.Preview.VideoPreview -> {
+//                                            CameraResponse.Video(viewState.value)
+//                                        }
+                                    }
                                 )
                             ),
                             navigateBack = Any(),

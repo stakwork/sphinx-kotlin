@@ -12,6 +12,7 @@ import chat.sphinx.camera_view_model_coordinator.response.CameraResponse
 import chat.sphinx.chat_common.R
 import chat.sphinx.chat_common.navigation.ChatNavigator
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
+import chat.sphinx.chat_common.ui.viewstate.attachment.AttachmentSendViewState
 import chat.sphinx.chat_common.ui.viewstate.footer.FooterViewState
 import chat.sphinx.chat_common.ui.viewstate.header.ChatHeaderFooterViewState
 import chat.sphinx.chat_common.ui.viewstate.messageholder.BubbleBackground
@@ -393,6 +394,31 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         footerViewStateContainer.updateViewState(viewState)
     }
 
+    private val attachmentSendStateContainer: ViewStateContainer<AttachmentSendViewState> by lazy {
+        ViewStateContainer(AttachmentSendViewState.Idle)
+    }
+
+    @JvmSynthetic
+    internal fun getAttachmentSendViewStateFlow(): StateFlow<AttachmentSendViewState> =
+        attachmentSendStateContainer.viewStateFlow
+
+    @JvmSynthetic
+    internal fun updateAttachmentSendViewState(viewState: AttachmentSendViewState) {
+        attachmentSendStateContainer.updateViewState(viewState)
+    }
+
+    @JvmSynthetic
+    internal fun deleteFileIfLocal(viewState: AttachmentSendViewState.Preview) {
+        if (viewState is AttachmentSendViewState.Preview.LocalFile) {
+            viewModelScope.launch(io) {
+                try {
+                    viewState.cameraResponse.value.delete()
+                } catch (e: Exception) {
+                }
+            }
+        }
+    }
+
     fun boostMessage(messageUUID: MessageUUID?) {
         if (messageUUID == null) return
 
@@ -477,8 +503,10 @@ abstract class ChatViewModel<ARGS: NavArgs>(
             when (response) {
                 is Response.Error -> {}
                 is Response.Success -> {
-                    val imageFile = response.value.value
-                    // TODO: update view state
+                    updateAttachmentSendViewState(
+                        AttachmentSendViewState.Preview.LocalFile(response.value)
+                    )
+                    updateFooterViewState(FooterViewState.Attachment)
                 }
             }
         }
