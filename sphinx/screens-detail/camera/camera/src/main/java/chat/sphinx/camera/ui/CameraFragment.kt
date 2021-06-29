@@ -258,8 +258,8 @@ internal class CameraFragment: SideEffectFragment<
         super.onStop()
         try {
             camera?.close()
-            camera = null
         } catch (e: Throwable) {}
+        camera = null
     }
 
     private fun hasPermissions(context: Context) = PERMISSIONS_REQUIRED.all {
@@ -277,7 +277,9 @@ internal class CameraFragment: SideEffectFragment<
                 cameraItem.cameraId,
                 cameraThreadHolder.getHandler(),
             ).also {
-                camera?.close()
+                try {
+                    camera?.close()
+                } catch (e: Exception) {}
                 camera = it
             }
 
@@ -334,6 +336,9 @@ internal class CameraFragment: SideEffectFragment<
                     view.post { view.isEnabled = true }
                 }
             }
+
+            // re-enable button to switch between back/front camera
+            binding.includeCameraFooter.imageViewCameraFooterBackFront.isEnabled = true
         }
     }
 
@@ -571,6 +576,10 @@ internal class CameraFragment: SideEffectFragment<
             is CameraViewState.Idle -> {}
             is CameraViewState.Active -> {
                 viewState.cameraItem?.let { item ->
+
+                    // disable button to switch between back/front camera
+                    binding.includeCameraFooter.imageViewCameraFooterBackFront.isEnabled = false
+
                     try {
                         surfaceHolderState.collect { holder ->
                             if (holder != null) {
