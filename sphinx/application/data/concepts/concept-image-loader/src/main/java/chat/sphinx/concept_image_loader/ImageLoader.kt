@@ -1,5 +1,7 @@
 package chat.sphinx.concept_image_loader
 
+import java.io.File
+
 abstract class ImageLoader<ImageView> {
 
     abstract suspend fun load(
@@ -11,6 +13,12 @@ abstract class ImageLoader<ImageView> {
     abstract suspend fun load(
         imageView: ImageView,
         drawableResId: Int,
+        options: ImageLoaderOptions? = null
+    ): Disposable
+
+    abstract suspend fun load(
+        imageView: ImageView,
+        file: File,
         options: ImageLoaderOptions? = null
     ): Disposable
 

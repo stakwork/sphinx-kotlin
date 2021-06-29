@@ -17,6 +17,7 @@ import android.os.HandlerThread
 import android.view.Surface
 import android.view.SurfaceHolder
 import android.view.View
+import android.widget.ImageView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toDrawable
@@ -32,6 +33,8 @@ import chat.sphinx.camera.R
 import chat.sphinx.camera.databinding.FragmentCameraBinding
 import chat.sphinx.camera.model.CameraItem
 import chat.sphinx.camera.ui.viewstate.CameraViewState
+import chat.sphinx.camera.ui.viewstate.ImagePreviewViewState
+import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import com.example.android.camera.utils.OrientationLiveData
@@ -39,6 +42,8 @@ import com.example.android.camera.utils.computeExifOrientation
 import com.example.android.camera.utils.getPreviewOutputSize
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
+import io.matthewnelson.android_feature_screens.util.gone
+import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.collectViewState
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.android_feature_viewmodel.updateViewState
@@ -54,6 +59,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.TimeoutException
+import javax.inject.Inject
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
@@ -83,6 +89,10 @@ internal class CameraFragment: SideEffectFragment<
 
     override val binding: FragmentCameraBinding by viewBinding(FragmentCameraBinding::bind)
     override val viewModel: CameraViewModel by viewModels()
+
+    @Inject
+    @Suppress("ProtectedInFinal")
+    protected lateinit var imageLoader: ImageLoader<ImageView>
 
     private val requestPermissionLauncher by lazy(LazyThreadSafetyMode.NONE) {
         registerForActivityResult(
@@ -170,6 +180,7 @@ internal class CameraFragment: SideEffectFragment<
 
         (requireActivity() as InsetterActivity)
             .addNavigationBarPadding(binding.includeCameraFooter.root)
+            .addNavigationBarPadding(binding.includeCameraImagePreview.layoutConstraintCameraImagePreviewFooter)
 
         binding.autoFitSurfaceViewCamera.holder.addCallback(object : SurfaceHolder.Callback {
             override fun surfaceDestroyed(holder: SurfaceHolder) {
@@ -212,6 +223,28 @@ internal class CameraFragment: SideEffectFragment<
                     viewModel.updateViewState(
                         CameraViewState.Active.BackCamera(viewModel.getBackCamera())
                     )
+                }
+            }
+        }
+
+        binding.includeCameraImagePreview.apply {
+            textViewCameraImagePreviewRetake.setOnClickListener {
+                @Exhaustive
+                when (val vs = viewModel.currentImagePreviewViewState) {
+                    is ImagePreviewViewState.None -> {}
+                    is ImagePreviewViewState.ImagePreview -> {
+                        viewModel.deleteImage(vs.image)
+                        viewModel.updateImagePreviewViewState(ImagePreviewViewState.None)
+                    }
+                }
+            }
+            textViewCameraImagePreviewUse.setOnClickListener {
+                @Exhaustive
+                when (val vs = viewModel.currentImagePreviewViewState) {
+                    is ImagePreviewViewState.None -> {}
+                    is ImagePreviewViewState.ImagePreview -> {
+                        // TODO: Implement returning of file to chat
+                    }
                 }
             }
         }
@@ -289,7 +322,9 @@ internal class CameraFragment: SideEffectFragment<
                             exif.saveAttributes()
                         }
 
-                        // TODO: Display photo to user
+                        viewModel.updateImagePreviewViewState(
+                            ImagePreviewViewState.ImagePreview(output)
+                        )
                     }
 
                     view.post { view.isEnabled = true }
@@ -575,6 +610,27 @@ internal class CameraFragment: SideEffectFragment<
             viewModel.collectViewState { viewState ->
                 currentViewState = viewState
                 onViewStateFlowCollect(viewState)
+            }
+        }
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.collectImagePreviewViewState { viewState ->
+                binding.includeCameraImagePreview.apply {
+                    @Exhaustive
+                    when (viewState) {
+                        is ImagePreviewViewState.ImagePreview -> {
+                            if (viewState.image.exists()) {
+                                root.visible
+                                imageLoader.load(imageViewCameraImagePreview, viewState.image)
+                            } else {
+                                viewModel.updateImagePreviewViewState(ImagePreviewViewState.None)
+                            }
+                        }
+                        is ImagePreviewViewState.None -> {
+                            root.gone
+                            imageViewCameraImagePreview.setImageDrawable(null)
+                        }
+                    }
+                }
             }
         }
     }

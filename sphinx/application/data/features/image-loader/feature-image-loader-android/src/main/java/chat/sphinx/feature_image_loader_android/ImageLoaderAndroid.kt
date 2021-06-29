@@ -25,6 +25,7 @@ import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import okhttp3.OkHttpClient
+import java.io.File
 
 class ImageLoaderAndroid(
     context: Context,
@@ -68,6 +69,14 @@ class ImageLoaderAndroid(
         options: ImageLoaderOptions?
     ): Disposable {
         return loadImpl(imageView, drawableResId, options)
+    }
+
+    override suspend fun load(
+        imageView: ImageView,
+        file: File,
+        options: ImageLoaderOptions?
+    ): Disposable {
+        return loadImpl(imageView, file, options)
     }
 
     @OptIn(ExperimentalCoilApi::class)

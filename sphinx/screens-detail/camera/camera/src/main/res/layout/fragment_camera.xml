@@ -31,4 +31,9 @@
         android:layout_height="@dimen/camera_footer_height"
         app:layout_constraintBottom_toBottomOf="parent" />
 
+    <include
+        android:id="@+id/include_camera_image_preview"
+        layout="@layout/layout_camera_image_preview"
+        tools:visibility="gone" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
