@@ -13,7 +13,10 @@ import chat.sphinx.camera.model.CameraItem
 import chat.sphinx.camera.model.LensFacing
 import chat.sphinx.camera.ui.viewstate.CameraViewState
 import chat.sphinx.camera.ui.viewstate.ImagePreviewViewState
+import chat.sphinx.camera_view_model_coordinator.response.CameraResponse
+import chat.sphinx.concept_view_model_coordinator.ResponseHolder
 import chat.sphinx.feature_view_model_coordinator.RequestCatcher
+import chat.sphinx.kotlin_response.Response
 import chat.sphinx.logger.SphinxLogger
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.BaseViewModel
@@ -23,6 +26,8 @@ import io.matthewnelson.concept_views.viewstate.ViewState
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import io.matthewnelson.concept_views.viewstate.collect
 import io.matthewnelson.concept_views.viewstate.value
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import java.io.File
 import java.text.SimpleDateFormat
@@ -64,6 +69,32 @@ internal class CameraViewModel @Inject constructor(
         cameraCoordinator,
         mainImmediate,
     )
+
+    private var responseJob: Job? = null
+    fun processResponse(viewState: ImagePreviewViewState.ImagePreview) {
+        if (responseJob?.isActive == true) {
+            return
+        }
+
+        responseJob = viewModelScope.launch(mainImmediate) {
+
+            try {
+                requestCatcher.getCaughtRequestStateFlow().collect { list ->
+                    list.firstOrNull()?.let { requestHolder ->
+                        cameraCoordinator.submitResponse(
+                            response = Response.Success(
+                                ResponseHolder(
+                                    requestHolder,
+                                    CameraResponse(viewState.image)
+                                )
+                            ),
+                            navigateBack = Any(),
+                        )
+                    }
+                }
+            } catch (e: Exception) {}
+        }
+    }
 
     val cameraManager: CameraManager by lazy {
         app.getSystemService(Context.CAMERA_SERVICE) as CameraManager

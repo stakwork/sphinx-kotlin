@@ -243,7 +243,8 @@ internal class CameraFragment: SideEffectFragment<
                 when (val vs = viewModel.currentImagePreviewViewState) {
                     is ImagePreviewViewState.None -> {}
                     is ImagePreviewViewState.ImagePreview -> {
-                        // TODO: Implement returning of file to chat
+                        textViewCameraImagePreviewRetake.isEnabled = false
+                        viewModel.processResponse(vs)
                     }
                 }
             }

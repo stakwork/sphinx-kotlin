@@ -53,7 +53,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import javax.inject.Inject
 
 @JvmSynthetic
 @Suppress("NOTHING_TO_INLINE")
@@ -468,6 +467,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
             when (response) {
                 is Response.Error -> {}
                 is Response.Success -> {
+                    val imageFile = response.value.value
                     // TODO: update view state
                 }
             }
