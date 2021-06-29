@@ -23,6 +23,7 @@ import chat.sphinx.chat_common.databinding.LayoutMessageHolderBinding
 import chat.sphinx.chat_common.databinding.LayoutSelectedMessageBinding
 import chat.sphinx.chat_common.navigation.ChatNavigator
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
+import chat.sphinx.chat_common.ui.viewstate.footer.FooterViewState
 import chat.sphinx.chat_common.ui.viewstate.header.ChatHeaderFooterViewState
 import chat.sphinx.chat_common.ui.viewstate.messageholder.setView
 import chat.sphinx.chat_common.ui.viewstate.selected.MenuItemState
@@ -136,7 +137,7 @@ abstract class ChatFragment<
             }
 
             textViewChatFooterAttachment.setOnClickListener {
-                lifecycleScope.launch {
+                lifecycleScope.launch(viewModel.mainImmediate) {
                     editTextChatFooter.let { editText ->
                         binding.root.context.inputMethodManager?.let { imm ->
                             if (imm.isActive(editText)) {
@@ -401,6 +402,17 @@ abstract class ChatFragment<
                             this@message.root.visible
                         }
                     }
+                }
+            }
+        }
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.getFooterViewStateFlow().collect { viewState ->
+                footerBinding.apply {
+                    editTextChatFooter.hint = viewState.hintText
+                    imageViewChatFooterMicrophone.goneIfFalse(viewState.showRecordAudioIcon)
+                    textViewChatFooterSend.goneIfFalse(viewState.showSendIcon)
+                    textViewChatFooterAttachment.goneIfFalse(viewState.showMenuIcon)
                 }
             }
         }

@@ -12,6 +12,7 @@ import chat.sphinx.camera_view_model_coordinator.response.CameraResponse
 import chat.sphinx.chat_common.R
 import chat.sphinx.chat_common.navigation.ChatNavigator
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
+import chat.sphinx.chat_common.ui.viewstate.footer.FooterViewState
 import chat.sphinx.chat_common.ui.viewstate.header.ChatHeaderFooterViewState
 import chat.sphinx.chat_common.ui.viewstate.messageholder.BubbleBackground
 import chat.sphinx.chat_common.ui.viewstate.messageholder.MessageHolderViewState
@@ -364,12 +365,8 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         }
     }
 
-    private inner class SelectedMessageViewStateContainer: ViewStateContainer<SelectedMessageViewState>(
-        SelectedMessageViewState.None
-    )
-
-    private val selectedMessageContainer by lazy {
-        SelectedMessageViewStateContainer()
+    private val selectedMessageContainer: ViewStateContainer<SelectedMessageViewState> by lazy {
+        ViewStateContainer(SelectedMessageViewState.None)
     }
 
     @JvmSynthetic
@@ -381,6 +378,19 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         if (selectedMessageViewState == null) return
 
         selectedMessageContainer.updateViewState(selectedMessageViewState)
+    }
+
+    private val footerViewStateContainer: ViewStateContainer<FooterViewState> by lazy {
+        ViewStateContainer(FooterViewState.Default)
+    }
+
+    @JvmSynthetic
+    internal fun getFooterViewStateFlow(): StateFlow<FooterViewState> =
+        footerViewStateContainer.viewStateFlow
+
+    @JvmSynthetic
+    internal fun updateFooterViewState(viewState: FooterViewState) {
+        footerViewStateContainer.updateViewState(viewState)
     }
 
     fun boostMessage(messageUUID: MessageUUID?) {
