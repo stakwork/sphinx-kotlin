@@ -140,6 +140,8 @@ abstract class ChatFragment<
                     // if it did not return null that means it was valid
                     sendMessageBuilder.clear()
                     editTextChatFooter.setText("")
+
+                    viewModel.messageReplyViewStateContainer.updateViewState(MessageReplyViewState.ReplyingDismissed)
                 }
             }
 
@@ -482,7 +484,6 @@ abstract class ChatFragment<
                 when (viewState) {
                     is MessageReplyViewState.ReplyingDismissed -> {
                         sendMessageBuilder.setReplyUUID(null)
-
                         replyingMessageBinding.root.gone
                     }
 
