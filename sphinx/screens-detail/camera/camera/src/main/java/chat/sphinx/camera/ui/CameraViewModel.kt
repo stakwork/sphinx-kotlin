@@ -9,9 +9,9 @@ import android.hardware.camera2.params.StreamConfigurationMap
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.camera.coordinator.CameraViewModelCoordinator
+import chat.sphinx.camera.ui.viewstate.CameraViewState
 import chat.sphinx.feature_view_model_coordinator.RequestCatcher
 import chat.sphinx.logger.SphinxLogger
-import com.example.android.camera.utils.OrientationLiveData
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers

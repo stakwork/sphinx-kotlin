@@ -1,5 +1,6 @@
-package chat.sphinx.camera.ui
+package chat.sphinx.camera.ui.viewstate
 
+import chat.sphinx.camera.ui.CameraViewModel
 import io.matthewnelson.concept_views.viewstate.ViewState
 
 internal sealed class CameraViewState: ViewState<CameraViewState>() {
