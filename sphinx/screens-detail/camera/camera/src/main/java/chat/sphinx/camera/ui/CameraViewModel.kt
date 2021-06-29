@@ -9,6 +9,8 @@ import android.hardware.camera2.params.StreamConfigurationMap
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.camera.coordinator.CameraViewModelCoordinator
+import chat.sphinx.camera.model.CameraItem
+import chat.sphinx.camera.model.LensFacing
 import chat.sphinx.camera.ui.viewstate.CameraViewState
 import chat.sphinx.feature_view_model_coordinator.RequestCatcher
 import chat.sphinx.logger.SphinxLogger
@@ -44,29 +46,14 @@ internal class CameraViewModel @Inject constructor(
         app.getSystemService(Context.CAMERA_SERVICE) as CameraManager
     }
 
-    sealed class LensFacing {
-        object Front: LensFacing()
-        object Back: LensFacing()
-    }
-
-    data class CameraListItem(
-        val cameraId: String,
-        val lensFacing: LensFacing,
-        val characteristics: CameraCharacteristics,
-        val capabilities: IntArray,
-        val configMap: StreamConfigurationMap,
-        val outputFormats: IntArray,
-        // TODO: List video output data
-    )
-
-    private fun enumerateCameras(): List<CameraListItem> {
+    private fun enumerateCameras(): List<CameraItem> {
         val ids = cameraManager.cameraIdList.filter {
             val characteristics = cameraManager.getCameraCharacteristics(it)
             val capabilities = characteristics.get(CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES)
             capabilities?.contains(CameraMetadata.REQUEST_AVAILABLE_CAPABILITIES_BACKWARD_COMPATIBLE) ?: false
         }
 
-        val cameras: MutableList<CameraListItem> = ArrayList(ids.size)
+        val cameras: MutableList<CameraItem> = ArrayList(ids.size)
 
         ids.forEach { id ->
             val characteristics = cameraManager.getCameraCharacteristics(id)
@@ -91,7 +78,7 @@ internal class CameraViewModel @Inject constructor(
                 // TODO: get video support capabilities and add as a parameter to CameraListItem
 
                 cameras.add(
-                    CameraListItem(
+                    CameraItem(
                         id,
                         nnOrientation,
                         characteristics,
@@ -108,11 +95,11 @@ internal class CameraViewModel @Inject constructor(
 
     private val cameras = enumerateCameras()
 
-    fun getFrontCamera(): CameraListItem? {
+    fun getFrontCamera(): CameraItem? {
         return cameras.lastOrNull { it.lensFacing == LensFacing.Front }
     }
 
-    fun getBackCamera(): CameraListItem? {
+    fun getBackCamera(): CameraItem? {
         return cameras.lastOrNull { it.lensFacing == LensFacing.Back }
     }
 }

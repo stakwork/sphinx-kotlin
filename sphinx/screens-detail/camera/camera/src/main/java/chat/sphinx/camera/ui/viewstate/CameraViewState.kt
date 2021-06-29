@@ -1,6 +1,6 @@
 package chat.sphinx.camera.ui.viewstate
 
-import chat.sphinx.camera.ui.CameraViewModel
+import chat.sphinx.camera.model.CameraItem
 import io.matthewnelson.concept_views.viewstate.ViewState
 
 internal sealed class CameraViewState: ViewState<CameraViewState>() {
@@ -8,14 +8,14 @@ internal sealed class CameraViewState: ViewState<CameraViewState>() {
 
     sealed class Active: CameraViewState() {
 
-        abstract val cameraListItem: CameraViewModel.CameraListItem?
+        abstract val cameraItem: CameraItem?
 
         data class BackCamera(
-            override val cameraListItem: CameraViewModel.CameraListItem?
+            override val cameraItem: CameraItem?
         ): Active()
 
         data class FrontCamera(
-            override val cameraListItem: CameraViewModel.CameraListItem?
+            override val cameraItem: CameraItem?
         ): Active()
     }
 

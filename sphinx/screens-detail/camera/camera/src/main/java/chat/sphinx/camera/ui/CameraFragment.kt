@@ -30,6 +30,7 @@ import app.cash.exhaustive.Exhaustive
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.camera.R
 import chat.sphinx.camera.databinding.FragmentCameraBinding
+import chat.sphinx.camera.model.CameraItem
 import chat.sphinx.camera.ui.viewstate.CameraViewState
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
@@ -232,7 +233,7 @@ internal class CameraFragment: SideEffectFragment<
     private var camera: CameraDevice? = null
 
     @Suppress("BlockingMethodInNonBlockingContext")
-    private fun startCamera(cameraItem: CameraViewModel.CameraListItem) {
+    private fun startCamera(cameraItem: CameraItem) {
         lifecycleScope.launch(viewModel.main) {
             val camera = openCamera(
                 viewModel.cameraManager,
@@ -365,7 +366,7 @@ internal class CameraFragment: SideEffectFragment<
     }
 
     private suspend fun takePhoto(
-        cameraListItem: CameraViewModel.CameraListItem,
+        cameraListItem: CameraItem,
         imageReader: ImageReader,
         session: CameraCaptureSession
     ): CombinedCaptureResult =
@@ -469,7 +470,7 @@ internal class CameraFragment: SideEffectFragment<
 
     @Suppress("BlockingMethodInNonBlockingContext")
     private suspend fun saveResult(
-        cameraItem: CameraViewModel.CameraListItem,
+        cameraItem: CameraItem,
         result: CombinedCaptureResult,
     ): File = suspendCoroutine { cont ->
         when (result.format) {
@@ -535,7 +536,7 @@ internal class CameraFragment: SideEffectFragment<
         when (viewState) {
             is CameraViewState.Idle -> {}
             is CameraViewState.Active -> {
-                viewState.cameraListItem?.let { item ->
+                viewState.cameraItem?.let { item ->
                     try {
                         surfaceHolderState.collect { holder ->
                             if (holder != null) {
