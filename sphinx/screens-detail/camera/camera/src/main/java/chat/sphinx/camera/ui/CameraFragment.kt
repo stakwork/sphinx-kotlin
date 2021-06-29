@@ -277,9 +277,6 @@ internal class CameraFragment: SideEffectFragment<
                 cameraItem.cameraId,
                 cameraThreadHolder.getHandler(),
             ).also {
-                try {
-                    camera?.close()
-                } catch (e: Exception) {}
                 camera = it
             }
 
@@ -348,6 +345,10 @@ internal class CameraFragment: SideEffectFragment<
         cameraId: String,
         handler: Handler? = null
     ): CameraDevice = suspendCancellableCoroutine { cont ->
+        try {
+            camera?.close()
+            camera = null
+        } catch (e: Exception) {}
         manager.openCamera(
             cameraId,
             object : CameraDevice.StateCallback() {
