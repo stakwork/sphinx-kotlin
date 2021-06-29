@@ -1218,6 +1218,12 @@ abstract class SphinxRepository(
 
         // TODO: Handle messages that contain files
         sendMessage.file?.let { nnFile ->
+            try {
+                // temporary to delete the file instead of sending the message
+                // as we know it's from the camera and is within data/data/chat.sphinx/cache
+                // and don't need to hold it for the time being until sending gets implemented
+                nnFile.delete()
+            } catch (e: Exception) {}
             return
         }
 
