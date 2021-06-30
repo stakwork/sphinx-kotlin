@@ -327,7 +327,8 @@ fun TransactionCallbacks.upsertMessage(dto: MessageDto, queries: SphinxDatabaseQ
                 MediaToken(mediaToken),
                 MessageId(dto.id),
                 chatId,
-                dto.mediaKeyDecrypted?.toMediaKeyDecrypted()
+                dto.mediaKeyDecrypted?.toMediaKeyDecrypted(),
+                dto.mediaLocalFile,
             )
 
         }
