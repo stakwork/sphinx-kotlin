@@ -19,10 +19,11 @@
         android:id="@+id/text_view_camera_footer_cancel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/default_layout_margin"
+        android:layout_marginStart="@dimen/default_double_layout_margin"
         android:text="Cancel"
         android:textColor="@color/text"
-        android:textSize="24sp"
+        android:textSize="17sp"
+        android:fontFamily="@font/roboto_regular"
         app:layout_constraintBottom_toBottomOf="@+id/image_view_camera_footer_shutter"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/image_view_camera_footer_shutter" />
@@ -30,10 +31,10 @@
     <!-- TODO: import drawable resource -->
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/image_view_camera_footer_back_front"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
-        android:layout_marginEnd="@dimen/default_layout_margin"
-        android:src="@drawable/sphinx_white_logo"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:layout_marginEnd="@dimen/default_double_layout_margin"
+        android:src="@drawable/ic_flip_camera"
         app:layout_constraintBottom_toBottomOf="@+id/image_view_camera_footer_shutter"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/image_view_camera_footer_shutter" />

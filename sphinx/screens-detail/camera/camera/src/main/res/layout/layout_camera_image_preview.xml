@@ -32,24 +32,26 @@
             android:id="@+id/text_view_camera_image_preview_retake"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/default_layout_margin"
-            android:layout_marginBottom="@dimen/default_layout_margin"
+            android:layout_marginStart="@dimen/default_double_layout_margin"
             android:text="Retake"
             android:textColor="@color/text"
-            android:textSize="32sp"
+            android:textSize="17sp"
+            android:fontFamily="@font/roboto_regular"
             app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/text_view_camera_image_preview_use"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="@dimen/default_layout_margin"
-            android:layout_marginBottom="@dimen/default_layout_margin"
+            android:layout_marginEnd="@dimen/default_double_layout_margin"
             android:text="Use Photo"
             android:textColor="@color/text"
-            android:textSize="32sp"
+            android:textSize="17sp"
+            android:fontFamily="@font/roboto_regular"
             app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
