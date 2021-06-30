@@ -24,16 +24,14 @@ import chat.sphinx.concept_repository_message.SendMessage
 import chat.sphinx.concept_socket_io.SocketIOManager
 import chat.sphinx.concept_socket_io.SphinxSocketIOMessageListener
 import chat.sphinx.concept_socket_io.SphinxSocketIOMessage
-import chat.sphinx.conceptcoredb.ChatDbo
-import chat.sphinx.conceptcoredb.ContactDbo
-import chat.sphinx.conceptcoredb.MessageDbo
-import chat.sphinx.conceptcoredb.SphinxDatabaseQueries
+import chat.sphinx.conceptcoredb.*
 import chat.sphinx.feature_repository.mappers.chat.ChatDboPresenterMapper
 import chat.sphinx.feature_repository.mappers.contact.ContactDboPresenterMapper
 import chat.sphinx.feature_repository.mappers.invite.InviteDboPresenterMapper
 import chat.sphinx.feature_repository.mappers.mapListFrom
 import chat.sphinx.feature_repository.mappers.message.MessageDboPresenterMapper
 import chat.sphinx.feature_repository.model.MessageDboWrapper
+import chat.sphinx.feature_repository.model.MessageMediaDboWrapper
 import chat.sphinx.feature_repository.util.*
 import chat.sphinx.kotlin_response.*
 import chat.sphinx.logger.SphinxLogger
@@ -59,7 +57,6 @@ import chat.sphinx.wrapper_invite.Invite
 import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_lightning.NodeBalanceAll
 import chat.sphinx.wrapper_message.*
-import chat.sphinx.wrapper_message_media.MessageMedia
 import chat.sphinx.wrapper_message_media.toMediaKeyDecrypted
 import chat.sphinx.wrapper_rsa.RsaPrivateKey
 import chat.sphinx.wrapper_rsa.RsaPublicKey
@@ -1018,13 +1015,10 @@ abstract class SphinxRepository(
                             @Exhaustive
                             when (response) {
                                 is Response.Error -> {
-                                    MessageMedia(
-                                        mediaDbo.media_key,
-                                        null,
-                                        mediaDbo.media_type,
-                                        mediaDbo.media_token
-                                    ).also {
-                                        it.setDecryptionError(response.exception)
+                                    MessageMediaDboWrapper(mediaDbo).also {
+                                        it._mediaKeyDecrypted = null
+                                        it._mediaKeyDecryptionError = true
+                                        it._mediaKeyDecryptionException = response.exception
                                         message._messageMedia = it
                                     }
                                 }
@@ -1036,18 +1030,12 @@ abstract class SphinxRepository(
                                         .toMediaKeyDecrypted()
                                         .let { decryptedKey ->
 
-                                            message._messageMedia =
-                                                MessageMedia(
-                                                    mediaDbo.media_key,
-                                                    decryptedKey,
-                                                    mediaDbo.media_type,
-                                                    mediaDbo.media_token
-                                                ).also {
+                                            message._messageMedia = MessageMediaDboWrapper(mediaDbo)
+                                                .also {
+                                                    it._mediaKeyDecrypted = decryptedKey
 
                                                     if (decryptedKey == null) {
-
-                                                        it.setDecryptionError(null)
-
+                                                        it._mediaKeyDecryptionError = true
                                                     } else {
 
                                                         messageLock.withLock {
@@ -1067,25 +1055,13 @@ abstract class SphinxRepository(
                                 }
                             }
                         } else {
-                            message._messageMedia =
-                                MessageMedia(
-                                    mediaDbo.media_key,
-                                    decrypted,
-                                    mediaDbo.media_type,
-                                    mediaDbo.media_token
-                                )
+                            message._messageMedia = MessageMediaDboWrapper(mediaDbo)
                         }
 
                     }
 
                 } ?: message.also {
-                    it._messageMedia =
-                        MessageMedia(
-                            mediaDbo.media_key,
-                            mediaDbo.media_key_decrypted,
-                            mediaDbo.media_type,
-                            mediaDbo.media_token
-                        )
+                    it._messageMedia = MessageMediaDboWrapper(mediaDbo)
                 }
 
             } // else do nothing
