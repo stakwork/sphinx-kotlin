@@ -10,6 +10,7 @@ import chat.sphinx.wrapper_common.lightning.LightningPaymentRequest
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.MessageId
 import com.squareup.sqldelight.ColumnAdapter
+import java.io.File
 
 internal class ChatIdAdapter private constructor(): ColumnAdapter<ChatId, Long> {
 
@@ -106,6 +107,27 @@ internal class DateTimeAdapter private constructor(): ColumnAdapter<DateTime, Lo
 
     override fun encode(value: DateTime): Long {
         return value.time
+    }
+}
+
+internal class FileAdapter private constructor(): ColumnAdapter<File, String> {
+
+    companion object {
+        @Volatile
+        private var instance: FileAdapter? = null
+        fun getInstance(): FileAdapter =
+            instance ?: synchronized(this) {
+                instance ?: FileAdapter()
+                    .also { instance = it }
+            }
+    }
+
+    override fun decode(databaseValue: String): File {
+        return File(databaseValue)
+    }
+
+    override fun encode(value: File): String {
+        return value.absolutePath
     }
 }
 
