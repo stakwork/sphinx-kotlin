@@ -1,4 +1,4 @@
-package chat.sphinx.concept_repository_message
+package chat.sphinx.concept_repository_message.model
 
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
