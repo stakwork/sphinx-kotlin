@@ -35,6 +35,7 @@ import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import java.io.File
 
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
@@ -81,24 +82,30 @@ internal inline fun LayoutMessageHolderBinding.setView(
         if (viewState.background !is BubbleBackground.Gone) {
             setBubbleImageAttachment(viewState.bubbleImageAttachment) { imageView, url, media ->
                 lifecycleScope.launch(dispatchers.mainImmediate) {
+
+                    val file: File? = media?.localFile
+
                     val options: ImageLoaderOptions? = if (media != null) {
                         val builder = ImageLoaderOptions.Builder()
 
                         // TODO: Add error resource drawable
 //                        builder.errorResId()
 
-                        media.host?.let { host ->
-                            memeServerTokenHandler.retrieveAuthenticationToken(host)?.let { token ->
-                                builder.addHeader(token.headerKey, token.headerValue)
+                        if (file == null) {
+                            media.host?.let { host ->
+                                memeServerTokenHandler.retrieveAuthenticationToken(host)
+                                    ?.let { token ->
+                                        builder.addHeader(token.headerKey, token.headerValue)
 
-                                media.mediaKeyDecrypted?.value?.let { key ->
-                                    val header = CryptoHeader.Decrypt.Builder()
-                                        .setScheme(CryptoScheme.Decrypt.JNCryptor)
-                                        .setPassword(key)
-                                        .build()
+                                        media.mediaKeyDecrypted?.value?.let { key ->
+                                            val header = CryptoHeader.Decrypt.Builder()
+                                                .setScheme(CryptoScheme.Decrypt.JNCryptor)
+                                                .setPassword(key)
+                                                .build()
 
-                                    builder.addHeader(header.key, header.value)
-                                }
+                                            builder.addHeader(header.key, header.value)
+                                        }
+                                    }
                             }
                         }
 
@@ -107,11 +114,14 @@ internal inline fun LayoutMessageHolderBinding.setView(
                         null
                     }
 
-                    imageLoader.load(imageView, url, options)
-                        .also { disposable ->
-                            disposables.add(disposable)
-                            disposable.await()
-                        }
+                    val disposable: Disposable = if (file != null) {
+                        imageLoader.load(imageView, file, options)
+                    } else {
+                        imageLoader.load(imageView, url, options)
+                    }
+
+                    disposables.add(disposable)
+                    disposable.await()
                 }.let { job ->
                     holderJobs.add(job)
                     job.invokeOnCompletion {

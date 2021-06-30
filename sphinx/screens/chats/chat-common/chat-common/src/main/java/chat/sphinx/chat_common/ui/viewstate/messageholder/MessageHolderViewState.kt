@@ -137,16 +137,26 @@ internal sealed class MessageHolderViewState(
             } else {
                 null
             }
+
+        // TODO: make less horrible using sealed interface to differentiate
+        //  between file and url.
         } ?: message.messageMedia?.let { media ->
-            media.url?.let { mediaUrl ->
-                if (media.mediaType.isImage && !message.isPaidMessage) {
+            if (media.mediaType.isImage && !message.isPaidMessage) {
+                if (media.localFile != null) {
                     LayoutState.Bubble.ContainerSecond.ImageAttachment(
-                        mediaUrl.value,
-                        media
+                        url = "http://127.0.0.1",
+                        media = media,
                     )
                 } else {
-                    null
+                    media.url?.let { url ->
+                        LayoutState.Bubble.ContainerSecond.ImageAttachment(
+                            url = url.value,
+                            media = media,
+                        )
+                    }
                 }
+            } else {
+                null
             }
         }
     }
