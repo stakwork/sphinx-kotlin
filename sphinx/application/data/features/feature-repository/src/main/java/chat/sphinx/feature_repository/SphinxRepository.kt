@@ -1280,7 +1280,7 @@ abstract class SphinxRepository(
 
                 val response = rsa.encrypt(
                     ownerPubKey,
-                    UnencryptedString(password.value.joinToString()),
+                    UnencryptedString(password.value.joinToString("")),
                     formatOutput = false,
                     dispatcher = default,
                 )
