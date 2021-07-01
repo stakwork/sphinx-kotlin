@@ -1410,6 +1410,10 @@ abstract class SphinxRepository(
             }
 
             val mediaKeyMap: Map<String, String>? = if (media != null) {
+                val map: MutableMap<String, String> = LinkedHashMap(2)
+
+                map[owner.id.value.toString()] = media.second.value
+
                 sendMessage.contactId?.let { nnContactId ->
                     // we know it's a conversation as the contactId is always sent
                     contact?.public_key?.let { pubKey ->
@@ -1425,10 +1429,9 @@ abstract class SphinxRepository(
                         when (response) {
                             is Response.Error -> {
                                 LOG.e(TAG, response.message, response.exception)
-                                null
                             }
                             is Response.Success -> {
-                                mapOf(Pair(nnContactId.value.toString(), response.value.value))
+                                map[nnContactId.value.toString()] = response.value.value
                             }
                         }
                     }
@@ -1445,13 +1448,14 @@ abstract class SphinxRepository(
                     when (response) {
                         is Response.Error -> {
                             LOG.e(TAG, response.message, response.exception)
-                            null
                         }
                         is Response.Success -> {
-                            mapOf(Pair("chat", response.value.value))
+                            map["chat"] = response.value.value
                         }
                     }
                 }
+
+                map
             } else {
                 null
             }
