@@ -39,7 +39,7 @@ import java.io.File
 
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
-internal inline fun LayoutMessageHolderBinding.setView(
+internal fun LayoutMessageHolderBinding.setView(
     lifecycleScope: CoroutineScope,
     holderJobs: ArrayList<Job>,
     disposables: ArrayList<Disposable>,

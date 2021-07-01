@@ -144,7 +144,7 @@ internal sealed class MessageHolderViewState(
             if (media.mediaType.isImage && !message.isPaidMessage) {
                 if (media.localFile != null) {
                     LayoutState.Bubble.ContainerSecond.ImageAttachment(
-                        url = "http://127.0.0.1",
+                        url = media.url?.value?.let { if (it.isEmpty()) null else it } ?: "http://127.0.0.1",
                         media = media,
                     )
                 } else {
