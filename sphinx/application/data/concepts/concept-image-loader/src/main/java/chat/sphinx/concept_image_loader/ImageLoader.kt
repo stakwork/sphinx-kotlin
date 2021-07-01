@@ -22,6 +22,12 @@ abstract class ImageLoader<ImageView> {
         options: ImageLoaderOptions? = null
     ): Disposable
 
+//    abstract suspend fun loadImmediate(
+//        imageView: ImageView,
+//        file: File,
+//        options: ImageLoaderOptions? = null
+//    )
+
 }
 
 /**
