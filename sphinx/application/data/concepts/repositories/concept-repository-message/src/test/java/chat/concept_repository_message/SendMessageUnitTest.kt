@@ -81,7 +81,7 @@ class SendMessageUnitTest {
         builder.setAttachmentInfo(
             AttachmentInfo(
                 File(path.dropLast(3)),
-                MediaType.SphinxText,
+                MediaType.Text,
                 isLocalFile = false,
             )
         )
@@ -96,7 +96,7 @@ class SendMessageUnitTest {
         builder.setAttachmentInfo(
             AttachmentInfo(
                 File(path),
-                MediaType.SphinxText,
+                MediaType.Text,
                 isLocalFile = true,
             )
         )

@@ -157,7 +157,7 @@ abstract class ChatFragment<
                                 MediaType.Image(MediaType.IMAGE + if (extension.isNotEmpty()) {
                                     "/$extension"
                                 } else {
-                                    ""
+                                    "/jpg"
                                 })
                             }
                         }

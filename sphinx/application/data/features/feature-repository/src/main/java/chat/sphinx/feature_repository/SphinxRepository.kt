@@ -3,6 +3,8 @@ package chat.sphinx.feature_repository
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_coredb.CoreDB
 import chat.sphinx.concept_crypto_rsa.RSA
+import chat.sphinx.concept_meme_server.MemeServerTokenHandler
+import chat.sphinx.concept_network_query_attachment.NetworkQueryAttachment
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
 import chat.sphinx.concept_network_query_chat.model.*
 import chat.sphinx.concept_network_query_contact.NetworkQueryContact
@@ -32,6 +34,7 @@ import chat.sphinx.feature_repository.mappers.mapListFrom
 import chat.sphinx.feature_repository.mappers.message.MessageDboPresenterMapper
 import chat.sphinx.feature_repository.model.MessageDboWrapper
 import chat.sphinx.feature_repository.model.MessageMediaDboWrapper
+import chat.sphinx.feature_repository.model.PasswordGenerator
 import chat.sphinx.feature_repository.util.*
 import chat.sphinx.kotlin_response.*
 import chat.sphinx.logger.SphinxLogger
@@ -58,6 +61,7 @@ import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_lightning.NodeBalanceAll
 import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message_media.toMediaKeyDecrypted
+import chat.sphinx.wrapper_message_media.token.MediaHost
 import chat.sphinx.wrapper_rsa.RsaPrivateKey
 import chat.sphinx.wrapper_rsa.RsaPublicKey
 import com.squareup.moshi.Moshi
@@ -86,6 +90,8 @@ abstract class SphinxRepository(
     protected val coreDB: CoreDB,
     private val dispatchers: CoroutineDispatchers,
     private val moshi: Moshi,
+    private val memeServerTokenHandler: MemeServerTokenHandler,
+    private val networkQueryAttachment: NetworkQueryAttachment,
     private val networkQueryChat: NetworkQueryChat,
     private val networkQueryContact: NetworkQueryContact,
     private val networkQueryLightning: NetworkQueryLightning,
@@ -1192,18 +1198,43 @@ abstract class SphinxRepository(
     override fun sendMessage(sendMessage: SendMessage?) {
         if (sendMessage == null) return
 
-        // TODO: Handle messages that contain files
-        sendMessage.attachmentInfo?.file?.let { nnFile ->
-            try {
-                // temporary to delete the file instead of sending the message
-                // as we know it's from the camera and is within data/data/chat.sphinx/cache
-                // and don't need to hold it for the time being until sending gets implemented
-                nnFile.delete()
-            } catch (e: Exception) {}
-            return
-        }
-
         applicationScope.launch(mainImmediate) {
+
+            // TODO: Handle messages that contain files
+            sendMessage.attachmentInfo?.let { nnInfo ->
+
+                val password = PasswordGenerator(32).password
+                val token = memeServerTokenHandler.retrieveAuthenticationToken(MediaHost.DEFAULT)
+                    ?: return@launch
+
+                val response = networkQueryAttachment.uploadAttachment(
+                    token,
+                    nnInfo.mediaType,
+                    nnInfo.file,
+                    password,
+                    MediaHost.DEFAULT
+                )
+
+                @Exhaustive
+                when (response) {
+                    is Response.Error -> {
+                        LOG.e(TAG, response.message, response.exception)
+                    }
+                    is Response.Success -> {
+                        LOG.d(TAG, response.toString())
+                    }
+                }
+
+                try {
+                    // temporary to delete the file instead of sending the message
+                    // as we know it's from the camera and is within data/data/chat.sphinx/cache
+                    // and don't need to hold it for the time being until sending gets implemented
+                    nnInfo.file.delete()
+                } catch (e: Exception) {}
+
+                return@launch
+            }
+
             val queries = coreDB.getSphinxDatabaseQueries()
 
             // TODO: Update SendMessage to accept a Chat && Contact instead of just IDs
