@@ -25,6 +25,8 @@ class NetworkQueryMessageImpl(
 ): NetworkQueryMessage() {
 
     companion object {
+        private const val ENDPOINT_ATTACHMENT = "/attachment"
+
         private const val ENDPOINT_MSGS = "/msgs"
         private const val ENDPOINT_MESSAGE = "/message"
         private const val ENDPOINT_MESSAGES_READ = "/messages/%d/read"
@@ -80,7 +82,11 @@ class NetworkQueryMessageImpl(
     ): Flow<LoadResponse<MessageDto, ResponseError>> =
         networkRelayCall.relayPost(
             responseJsonClass = MessageRelayResponse::class.java,
-            relayEndpoint = ENDPOINT_MESSAGES,
+            relayEndpoint = if (postMessageDto.media_key_map != null) {
+                ENDPOINT_ATTACHMENT
+            } else {
+                ENDPOINT_MESSAGES
+            },
             requestBodyJsonClass = PostMessageDto::class.java,
             requestBody = postMessageDto,
             relayData = relayData
