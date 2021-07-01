@@ -20,11 +20,10 @@ import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import okhttp3.Request
+import kotlinx.coroutines.withContext
+import okhttp3.*
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.OkHttpClient
-import okhttp3.RequestBody
 import okhttp3.internal.EMPTY_REQUEST
 import java.io.IOException
 import java.util.concurrent.TimeUnit
@@ -94,15 +93,16 @@ private suspend inline fun RelayDataHandler.retrieveRelayData(): Pair<Authorizat
 
 @Suppress("NOTHING_TO_INLINE")
 @Throws(AssertionError::class, NullPointerException::class)
-private inline fun<RequestBody: Any> Moshi.requestBodyToJson(
+private suspend inline fun<RequestBody: Any> Moshi.requestBodyToJson(
+    dispatchers: CoroutineDispatchers,
     requestBodyJsonAdapter: Class<RequestBody>,
     requestBody: RequestBody
 ): String =
-    adapter(requestBodyJsonAdapter)
-        .toJson(requestBody)
-        ?: throw NullPointerException(
-            "Failed to convert RequestBody ${requestBodyJsonAdapter.simpleName} to Json"
-        )
+    withContext(dispatchers.default) {
+        adapter(requestBodyJsonAdapter).toJson(requestBody)
+    } ?: throw NullPointerException(
+        "Failed to convert RequestBody ${requestBodyJsonAdapter.simpleName} to Json"
+    )
 
 @Suppress("BlockingMethodInNonBlockingContext")
 class NetworkRelayCallImpl(
@@ -147,7 +147,7 @@ class NetworkRelayCallImpl(
             emit(handleException(LOG, GET, url, e))
         }
 
-    }.flowOn(io)
+    }
 
     override fun <T: Any, V: Any> put(
         url: String,
@@ -164,7 +164,7 @@ class NetworkRelayCallImpl(
             val requestBuilder = buildRequest(url, headers)
 
             val requestBodyJson: String = moshi
-                .requestBodyToJson(requestBodyJsonClass, requestBody)
+                .requestBodyToJson(dispatchers, requestBodyJsonClass, requestBody)
 
             val reqBody = requestBodyJson.toRequestBody(mediaType?.toMediaType())
 
@@ -175,7 +175,7 @@ class NetworkRelayCallImpl(
             emit(handleException(LOG, PUT, url, e))
         }
 
-    }.flowOn(io)
+    }
 
     override fun <T: Any, V: Any> post(
         url: String,
@@ -192,7 +192,7 @@ class NetworkRelayCallImpl(
             val requestBuilder = buildRequest(url, headers)
 
             val requestBodyJson: String = moshi
-                .requestBodyToJson(requestBodyJsonClass, requestBody)
+                .requestBodyToJson(dispatchers, requestBodyJsonClass, requestBody)
 
             val reqBody = requestBodyJson.toRequestBody(mediaType?.toMediaType())
 
@@ -203,7 +203,7 @@ class NetworkRelayCallImpl(
             emit(handleException(LOG, POST, url, e))
         }
 
-    }.flowOn(io)
+    }
 
     override fun <T: Any, V: Any> delete(
         url: String,
@@ -223,7 +223,7 @@ class NetworkRelayCallImpl(
                 if (requestBody == null || requestBodyJsonClass == null) {
                     null
                 } else {
-                    moshi.requestBodyToJson(requestBodyJsonClass, requestBody)
+                    moshi.requestBodyToJson(dispatchers, requestBodyJsonClass, requestBody)
                 }
 
             val reqBody: RequestBody? = requestBodyJson?.toRequestBody(mediaType?.toMediaType())
@@ -235,7 +235,7 @@ class NetworkRelayCallImpl(
             emit(handleException(LOG, DELETE, url, e))
         }
 
-    }.flowOn(io)
+    }
 
     @Volatile
     private var extendedNetworkCallClient: OkHttpClient? = null
@@ -250,10 +250,10 @@ class NetworkRelayCallImpl(
     }
 
     @Throws(NullPointerException::class, IOException::class)
-    private suspend fun <T: Any> call(
-        jsonAdapter: Class<T>,
+    override suspend fun <T: Any> call(
+        responseJsonClass: Class<T>,
         request: Request,
-        useExtendedNetworkCallClient: Boolean = false
+        useExtendedNetworkCallClient: Boolean
     ): T {
 
         // TODO: Make less horrible. Needed for the `/contacts` endpoint for users who
@@ -272,9 +272,9 @@ class NetworkRelayCallImpl(
             networkClient.getClient()
         }
 
-        val networkResponse = client
-            .newCall(request)
-            .execute()
+        val networkResponse = withContext(io) {
+            client.newCall(request).execute()
+        }
 
         if (!networkResponse.isSuccessful) {
             networkResponse.body?.close()
@@ -288,15 +288,14 @@ class NetworkRelayCallImpl(
             """.trimIndent()
         )
 
-        return moshi
-            .adapter(jsonAdapter)
-            .fromJson(body.source())
-            ?: throw IOException(
-                """
-                    Failed to convert Json to ${jsonAdapter.simpleName}
-                    NetworkResponse: $networkResponse
-                """.trimIndent()
-            )
+        return withContext(default) {
+            moshi.adapter(responseJsonClass).fromJson(body.source())
+        } ?: throw IOException(
+            """
+                Failed to convert Json to ${responseJsonClass.simpleName}
+                NetworkResponse: $networkResponse
+            """.trimIndent()
+        )
     }
 
     ////////////////////////
@@ -329,7 +328,7 @@ class NetworkRelayCallImpl(
             emitAll(validateRelayResponse(it, GET, relayEndpoint))
         }
 
-    }.flowOn(io)
+    }
 
     override fun <T: Any, RequestBody: Any, V: RelayResponse<T>> relayPut(
         responseJsonClass: Class<V>,
@@ -362,7 +361,7 @@ class NetworkRelayCallImpl(
             emitAll(validateRelayResponse(it, PUT, relayEndpoint))
         }
 
-    }.flowOn(io)
+    }
 
     // TODO: Remove and replace all uses with post (DO NOT USE THIS METHOD FOR NEW CODE)
     override fun <T: Any, RequestBody: Any, V: RelayResponse<T>> relayUnauthenticatedPost(
@@ -391,7 +390,7 @@ class NetworkRelayCallImpl(
             emitAll(validateRelayResponse(it, POST, relayEndpoint))
         }
 
-    }.flowOn(io)
+    }
 
     override fun <T: Any, RequestBody: Any, V: RelayResponse<T>> relayPost(
         responseJsonClass: Class<V>,
@@ -424,7 +423,7 @@ class NetworkRelayCallImpl(
             emitAll(validateRelayResponse(it, POST, relayEndpoint))
         }
 
-    }.flowOn(io)
+    }
 
     override fun <T: Any, RequestBody: Any, V: RelayResponse<T>> relayDelete(
         responseJsonClass: Class<V>,
@@ -457,7 +456,7 @@ class NetworkRelayCallImpl(
             emitAll(validateRelayResponse(it, DELETE, relayEndpoint))
         }
 
-    }.flowOn(io)
+    }
 
     @Throws(NullPointerException::class, AssertionError::class)
     private fun <T: Any, V: RelayResponse<T>> validateRelayResponse(
