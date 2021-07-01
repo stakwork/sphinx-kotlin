@@ -1328,7 +1328,11 @@ abstract class SphinxRepository(
                                 provisionalId,
                                 null,
                                 chatDbo.id,
-                                MessageType.Message,
+                                if (media != null) {
+                                    MessageType.Attachment
+                                } else {
+                                    MessageType.Message
+                                },
                                 owner.id,
                                 sendMessage.contactId,
                                 messagePrice,
