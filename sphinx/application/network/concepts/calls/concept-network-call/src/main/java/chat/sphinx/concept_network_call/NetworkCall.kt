@@ -6,6 +6,25 @@ import kotlinx.coroutines.flow.Flow
 import okhttp3.Request
 import java.io.IOException
 
+@Suppress("NOTHING_TO_INLINE")
+@Throws(IllegalArgumentException::class)
+inline fun NetworkCall.buildRequest(
+    url: String,
+    headers: Map<String, String>?
+): Request.Builder {
+    val builder = Request.Builder()
+
+    builder.url(url)
+
+    headers?.let {
+        for (header in it) {
+            builder.addHeader(header.key, header.value)
+        }
+    }
+
+    return builder
+}
+
 /**
  * Methods for GET/PUT/POST/DELETE for general, non-Relay specific network queries.
  * */

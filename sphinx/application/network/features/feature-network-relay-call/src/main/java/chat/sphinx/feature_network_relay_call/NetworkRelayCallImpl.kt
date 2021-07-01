@@ -1,6 +1,7 @@
 package chat.sphinx.feature_network_relay_call
 
 import app.cash.exhaustive.Exhaustive
+import chat.sphinx.concept_network_call.buildRequest
 import chat.sphinx.concept_network_client.NetworkClient
 import chat.sphinx.concept_network_client.NetworkClientClearedListener
 import chat.sphinx.concept_network_relay_call.NetworkRelayCall
@@ -29,25 +30,6 @@ import java.io.IOException
 import java.util.concurrent.TimeUnit
 
 @Suppress("NOTHING_TO_INLINE")
-@Throws(IllegalArgumentException::class)
-private inline fun NetworkRelayCallImpl.buildRequest(
-    url: String,
-    headers: Map<String, String>?
-): Request.Builder {
-    val builder = Request.Builder()
-
-    builder.url(url)
-
-    headers?.let {
-        for (header in it) {
-            builder.addHeader(header.key, header.value)
-        }
-    }
-
-    return builder
-}
-
-@Suppress("NOTHING_TO_INLINE")
 private inline fun NetworkRelayCallImpl.mapRelayHeaders(
     relayData: Pair<AuthorizationToken, RelayUrl>,
     additionalHeaders: Map<String, String>?
@@ -62,7 +44,6 @@ private inline fun NetworkRelayCallImpl.mapRelayHeaders(
 
     return map
 }
-
 
 @Suppress("NOTHING_TO_INLINE")
 private inline fun NetworkRelayCallImpl.handleException(
