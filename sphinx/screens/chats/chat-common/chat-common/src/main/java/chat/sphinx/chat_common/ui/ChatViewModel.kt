@@ -486,9 +486,9 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         }
     }
 
-    abstract fun shouldShowActionsMenu()
+    abstract fun showActionsMenu()
 
-    protected fun showActionsMenu(
+    protected fun showActionsMenuImpl(
         contactId: ContactId?,
         chatId: ChatId?,
     ) {
