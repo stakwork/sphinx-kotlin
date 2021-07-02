@@ -131,7 +131,7 @@ class ChatGroupViewModel @Inject constructor(
         return super.sendMessage(builder)
     }
 
-    override fun showActionsMenu() {
-        showActionsMenuImpl(false)
+    override fun shouldShowActionsMenu() {
+        showActionsMenu(null, args.chatId)
     }
 }

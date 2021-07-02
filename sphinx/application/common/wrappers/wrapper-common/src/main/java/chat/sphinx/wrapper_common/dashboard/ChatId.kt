@@ -1,5 +1,13 @@
 package chat.sphinx.wrapper_common.dashboard
 
+@Suppress("NOTHING_TO_INLINE")
+inline fun Long.toChatId(): ChatId? =
+    try {
+        ChatId(this)
+    } catch (e: IllegalArgumentException) {
+        null
+    }
+
 @JvmInline
 value class ChatId(override val value: Long): DashboardItemId {
 

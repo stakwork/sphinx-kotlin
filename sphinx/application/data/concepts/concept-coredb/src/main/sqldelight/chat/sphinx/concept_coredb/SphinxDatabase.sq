@@ -496,7 +496,7 @@ messageGetToShowByUUID:
 SELECT *
 FROM messageDbo
 WHERE uuid = ?
-AND type IN(0, 5)
+AND type IN(0, 6)
 LIMIT 1;
 
 messageGetLowestProvisionalMessageId:

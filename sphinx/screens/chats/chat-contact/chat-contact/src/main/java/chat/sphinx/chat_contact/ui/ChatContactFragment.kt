@@ -29,6 +29,9 @@ internal class ChatContactFragment: ChatFragment<
     override val headerBinding: LayoutChatHeaderBinding by viewBinding(
         LayoutChatHeaderBinding::bind, R.id.include_chat_contact_header
     )
+    override val replyingMessageBinding: LayoutMessageReplyBinding by viewBinding(
+        LayoutMessageReplyBinding::bind, R.id.include_chat_contact_message_reply
+    )
     override val selectedMessageBinding: LayoutSelectedMessageBinding by viewBinding(
         LayoutSelectedMessageBinding::bind, R.id.include_chat_contact_selected_message
     )

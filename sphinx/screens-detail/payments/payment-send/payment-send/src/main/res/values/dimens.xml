@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="from_to_contact_height">35dp</dimen>
+    <dimen name="from_to_contact_height">40dp</dimen>
     <dimen name="from_to_contact_image_xy">35dp</dimen>
 
     <dimen name="amount_edit_text_container_height">105dp</dimen>
@@ -11,7 +11,7 @@
 
     <dimen name="confirm_button_container_height">75dp</dimen>
     <dimen name="confirm_button_width">150dp</dimen>
-    <dimen name="confirm_button_height">37dp</dimen>
+    <dimen name="confirm_button_height">40dp</dimen>
     <dimen name="confirm_button_progress_bar_xy">25dp</dimen>
 
     <dimen name="from_to_contact_text_size">12sp</dimen>

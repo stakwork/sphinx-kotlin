@@ -17,6 +17,7 @@ import chat.sphinx.chat_common.ui.viewstate.footer.FooterViewState
 import chat.sphinx.chat_common.ui.viewstate.header.ChatHeaderFooterViewState
 import chat.sphinx.chat_common.ui.viewstate.messageholder.BubbleBackground
 import chat.sphinx.chat_common.ui.viewstate.messageholder.MessageHolderViewState
+import chat.sphinx.chat_common.ui.viewstate.messagereply.MessageReplyViewState
 import chat.sphinx.chat_common.ui.viewstate.selected.SelectedMessageViewState
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
@@ -39,13 +40,12 @@ import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.ChatActionType
 import chat.sphinx.wrapper_chat.ChatName
 import chat.sphinx.wrapper_chat.isConversation
+import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.MessageUUID
 import chat.sphinx.wrapper_contact.Contact
-import chat.sphinx.wrapper_message.Message
-import chat.sphinx.wrapper_message.isDeleted
-import chat.sphinx.wrapper_message.isGroupAction
+import chat.sphinx.wrapper_message.*
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
@@ -88,6 +88,10 @@ abstract class ChatViewModel<ARGS: NavArgs>(
             .placeholderResId(R.drawable.ic_profile_avatar_circle)
             .transformation(Transformation.CircleCrop)
             .build()
+    }
+
+    val messageReplyViewStateContainer: ViewStateContainer<MessageReplyViewState> by lazy {
+        ViewStateContainer(MessageReplyViewState.ReplyingDismissed)
     }
 
     protected val headerInitialsTextViewColor: Int by lazy {
@@ -443,13 +447,56 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         }
     }
 
-    abstract fun showActionsMenu()
+    fun copyMessageText(message: Message) {
+        viewModelScope.launch(mainImmediate) {
+            message.retrieveTextToShow()?.let { text ->
+                submitSideEffect(
+                    ChatSideEffect.CopyTextToClipboard(text)
+                )
+            }
+        }
+    }
 
-    protected fun showActionsMenuImpl(isConversation: Boolean = false, contactId: ContactId? = null) {
+    fun replyToMessage(message: Message?) {
+        if (message != null) {
+            viewModelScope.launch(mainImmediate) {
+                val chat = getChat()
+
+                val senderAlias = when {
+                    message.sender == chat.contactIds.firstOrNull() -> {
+                        contactRepository.accountOwner.value?.alias?.value ?: ""
+                    }
+                    chat.type.isConversation() -> {
+                        getChatNameIfNull()?.value ?: ""
+                    }
+                    else -> {
+                        message.senderAlias?.value ?: ""
+                    }
+                }
+
+                messageReplyViewStateContainer.updateViewState(
+                    MessageReplyViewState.ReplyingToMessage(
+                        message,
+                        senderAlias
+                    )
+                )
+            }
+        } else {
+            messageReplyViewStateContainer.updateViewState(MessageReplyViewState.ReplyingDismissed)
+        }
+    }
+
+    abstract fun shouldShowActionsMenu()
+
+    protected fun showActionsMenu(
+        contactId: ContactId?,
+        chatId: ChatId?,
+    ) {
+
         viewModelScope.launch(mainImmediate) {
             val response = sendAttachmentCoordinator.submitRequest(
                 //If it's group or tribe last 2 options will be disabled
-                SendAttachmentRequest(isConversation)
+                SendAttachmentRequest(contactId != null)
             )
             if (response is Response.Success) {
                 when (response.value.actionType) {
@@ -488,7 +535,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                     is ChatActionType.SendPayment -> {
                         contactId?.let { contactId ->
                             delay(250L)
-                            chatNavigator.toPaymentSendDetail(contactId)
+                            chatNavigator.toPaymentSendDetail(contactId, chatId)
                         }
                     }
                 }

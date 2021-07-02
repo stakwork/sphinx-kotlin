@@ -80,10 +80,11 @@ internal class SendAttachmentFragment: BaseFragment<
             @Exhaustive
             when (viewState) {
                 is SendAttachmentViewState.LayoutVisibility -> {
-                    layoutConstraintRequestOptionContainer.alpha = if (viewState.paymentAndInvoiceEnabled) 1.0f else 0.4f
+                    val alpha = if(viewState.paymentAndInvoiceEnabled) 1.0F else 0.4F
+                    layoutConstraintRequestOptionContainer.alpha = alpha
                     layoutConstraintRequestOptionContainer.isEnabled = viewState.paymentAndInvoiceEnabled
 
-                    layoutConstraintSendOptionContainer.alpha = if (viewState.paymentAndInvoiceEnabled) 1.0f else 0.4f
+                    layoutConstraintSendOptionContainer.alpha = alpha
                     layoutConstraintSendOptionContainer.isEnabled = viewState.paymentAndInvoiceEnabled
                 }
             }

@@ -43,6 +43,9 @@ internal class ChatTribeFragment: ChatFragment<
     override val headerBinding: LayoutChatHeaderBinding by viewBinding(
         LayoutChatHeaderBinding::bind, R.id.include_chat_tribe_header
     )
+    override val replyingMessageBinding: LayoutMessageReplyBinding by viewBinding(
+        LayoutMessageReplyBinding::bind, R.id.include_chat_tribe_message_reply
+    )
     override val selectedMessageBinding: LayoutSelectedMessageBinding by viewBinding(
         LayoutSelectedMessageBinding::bind, R.id.include_chat_tribe_selected_message
     )
@@ -151,6 +154,7 @@ internal class ChatTribeFragment: ChatFragment<
 
     override fun subscribeToViewStateFlow() {
         super.subscribeToViewStateFlow()
+
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.podcastViewStateContainer.collect { viewState ->
                 @Exhaustive

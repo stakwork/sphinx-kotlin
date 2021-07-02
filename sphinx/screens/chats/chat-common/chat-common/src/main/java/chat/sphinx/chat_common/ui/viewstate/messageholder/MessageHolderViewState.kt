@@ -8,6 +8,7 @@ import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_message.*
+import chat.sphinx.wrapper_message_media.MessageMedia
 import chat.sphinx.wrapper_message_media.isImage
 
 internal inline val MessageHolderViewState.isReceived: Boolean
@@ -128,36 +129,11 @@ internal sealed class MessageHolderViewState(
     }
 
     val bubbleImageAttachment: LayoutState.Bubble.ContainerSecond.ImageAttachment? by lazy(LazyThreadSafetyMode.NONE) {
-        message.giphyData?.let { giphyData ->
-            if (giphyData.url.isNotEmpty()) {
-                LayoutState.Bubble.ContainerSecond.ImageAttachment(
-                    giphyData.url.replace("giphy.gif", "200w.gif"),
-                    null
-                )
-            } else {
-                null
-            }
-
-        // TODO: make less horrible using sealed interface to differentiate
-        //  between file and url.
-        } ?: message.messageMedia?.let { media ->
-            if (media.mediaType.isImage && !message.isPaidMessage) {
-                if (media.localFile != null) {
-                    LayoutState.Bubble.ContainerSecond.ImageAttachment(
-                        url = media.url?.value?.let { if (it.isEmpty()) null else it } ?: "http://127.0.0.1",
-                        media = media,
-                    )
-                } else {
-                    media.url?.let { url ->
-                        LayoutState.Bubble.ContainerSecond.ImageAttachment(
-                            url = url.value,
-                            media = media,
-                        )
-                    }
-                }
-            } else {
-                null
-            }
+        message.retrieveImageUrlAndMessageMedia()?.let { mediaData ->
+            LayoutState.Bubble.ContainerSecond.ImageAttachment(
+                mediaData.first,
+                mediaData.second
+            )
         }
     }
 
@@ -205,10 +181,20 @@ internal sealed class MessageHolderViewState(
 
     val bubbleReplyMessage: LayoutState.Bubble.ContainerFirst.ReplyMessage? by lazy {
         message.replyMessage?.let { nnMessage ->
-            LayoutState.Bubble.ContainerFirst.ReplyMessage(
-                messageSenderName(nnMessage),
+            var mediaUrl: String? = null
+            var messageMedia: MessageMedia? = null
 
+            nnMessage.retrieveImageUrlAndMessageMedia()?.let { mediaData ->
+                mediaUrl = mediaData.first
+                messageMedia = mediaData.second
+            }
+
+            LayoutState.Bubble.ContainerFirst.ReplyMessage(
+                showSent = this is Sent,
+                messageSenderName(nnMessage),
                 nnMessage.retrieveTextToShow() ?: "",
+                mediaUrl,
+                messageMedia
             )
         }
     }
@@ -244,8 +230,16 @@ internal sealed class MessageHolderViewState(
 
             val list = ArrayList<MenuItemState>(4)
 
-            if (this is Received) {
+            if (this is Received && message.isBoostAllowed) {
                 list.add(MenuItemState.Boost)
+            }
+
+            if (message.isCopyAllowed) {
+                list.add(MenuItemState.CopyText)
+            }
+
+            if (message.isReplyAllowed) {
+                list.add(MenuItemState.Reply)
             }
 
             if (list.isEmpty()) {

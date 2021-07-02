@@ -1,6 +1,7 @@
 package chat.sphinx.concept_repository_message
 
 import chat.sphinx.concept_repository_message.model.SendMessage
+import chat.sphinx.concept_repository_message.model.SendPayment
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
@@ -18,7 +19,13 @@ interface MessageRepository {
     val networkRefreshMessages: Flow<LoadResponse<Boolean, ResponseError>>
 
     suspend fun readMessages(chatId: ChatId)
+
     fun sendMessage(sendMessage: SendMessage?)
+
+    suspend fun sendPayment(
+        sendPayment: SendPayment?
+    ): Response<Any, ResponseError>
+
     suspend fun boostMessage(
         chatId: ChatId,
         pricePerMessage: Sat,

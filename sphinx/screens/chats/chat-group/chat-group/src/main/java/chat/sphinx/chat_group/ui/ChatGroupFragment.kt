@@ -29,6 +29,9 @@ internal class ChatGroupFragment: ChatFragment<
     override val headerBinding: LayoutChatHeaderBinding by viewBinding(
         LayoutChatHeaderBinding::bind, R.id.include_chat_group_header
     )
+    override val replyingMessageBinding: LayoutMessageReplyBinding by viewBinding(
+        LayoutMessageReplyBinding::bind, R.id.include_chat_group_message_reply
+    )
     override val selectedMessageBinding: LayoutSelectedMessageBinding by viewBinding(
         LayoutSelectedMessageBinding::bind, R.id.include_chat_group_selected_message
     )

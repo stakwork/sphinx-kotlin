@@ -100,6 +100,7 @@ include ':sphinx:screens:splash:key-restore'
 // Screens-Detail
 include ':sphinx:screens-detail:add-friend:add-friend'
 include ':sphinx:screens-detail:camera:camera'
+include ':sphinx:screens-detail:camera:camera-utils'
 include ':sphinx:screens-detail:camera:camera-view-model-coordinator'
 include ':sphinx:screens-detail:common:detail-resources'
 include ':sphinx:screens-detail:create-tribe:create-tribe'
@@ -250,4 +251,3 @@ project(':kotlin:test:test-k-openssl').projectDir =
 
 //include ':sample'
 //project(':sample').projectDir = file(new File(rootDir, 'kotlin-android/sample'))
-include ':sphinx:screens-detail:camera:camera-utils'

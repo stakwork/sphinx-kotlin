@@ -2,9 +2,7 @@ package chat.sphinx.feature_network_query_message
 
 import chat.sphinx.wrapper_common.message.MessagePagination
 import chat.sphinx.concept_network_query_message.NetworkQueryMessage
-import chat.sphinx.concept_network_query_message.model.GetMessagesResponse
-import chat.sphinx.concept_network_query_message.model.MessageDto
-import chat.sphinx.concept_network_query_message.model.PostMessageDto
+import chat.sphinx.concept_network_query_message.model.*
 import chat.sphinx.concept_network_relay_call.NetworkRelayCall
 import chat.sphinx.feature_network_query_message.model.*
 import chat.sphinx.feature_network_query_message.model.GetMessagesRelayResponse
@@ -17,6 +15,7 @@ import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.MessageUUID
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
+import com.sun.net.httpserver.Authenticator
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 
@@ -35,9 +34,6 @@ class NetworkQueryMessageImpl(
         private const val ENDPOINT_PAYMENTS = "${ENDPOINT_PAYMENT}s"
     }
 
-    ///////////
-    /// GET ///
-    ///////////
     override fun getMessages(
         messagePagination: MessagePagination?,
         relayData: Pair<AuthorizationToken, RelayUrl>?
@@ -69,13 +65,6 @@ class NetworkQueryMessageImpl(
             )
         }
 
-    ///////////
-    /// PUT ///
-    ///////////
-
-    ////////////
-    /// POST ///
-    ////////////
     override fun sendMessage(
         postMessageDto: PostMessageDto,
         relayData: Pair<AuthorizationToken, RelayUrl>?
@@ -89,6 +78,30 @@ class NetworkQueryMessageImpl(
             },
             requestBodyJsonClass = PostMessageDto::class.java,
             requestBody = postMessageDto,
+            relayData = relayData
+        )
+
+    override fun sendPayment(
+        postPaymentDto: PostPaymentDto,
+        relayData: Pair<AuthorizationToken, RelayUrl>?
+    ): Flow<LoadResponse<MessageDto, ResponseError>> =
+        networkRelayCall.relayPost(
+            responseJsonClass = MessageRelayResponse::class.java,
+            relayEndpoint = ENDPOINT_PAYMENT,
+            requestBodyJsonClass = PostPaymentDto::class.java,
+            requestBody = postPaymentDto,
+            relayData = relayData
+        )
+
+    override fun sendKeySendPayment(
+        postPaymentDto: PostPaymentDto,
+        relayData: Pair<AuthorizationToken, RelayUrl>?
+    ): Flow<LoadResponse<KeySendPaymentDto, ResponseError>> =
+        networkRelayCall.relayPost(
+            responseJsonClass = KeySendPaymentRelayResponse::class.java,
+            relayEndpoint = ENDPOINT_PAYMENT,
+            requestBodyJsonClass = PostPaymentDto::class.java,
+            requestBody = postPaymentDto,
             relayData = relayData
         )
 
@@ -120,7 +133,6 @@ class NetworkQueryMessageImpl(
         )
     }
 
-//    app.post('/messages/:chat_id/read', messages.readMessages)
     override fun readMessages(
     chatId: ChatId,
     relayData: Pair<AuthorizationToken, RelayUrl>?
@@ -134,7 +146,6 @@ class NetworkQueryMessageImpl(
         )
 
 //    app.post('/messages/clear', messages.clearMessages)
-//    app.post('/payment', payments.sendPayment)
 
     //////////////
     /// DELETE ///
