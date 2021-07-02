@@ -6,11 +6,15 @@
     android:background="@drawable/background_detail_screen">
 
     <!-- TODO: Import drawable resource files -->
-    <androidx.appcompat.widget.AppCompatImageView
-        android:id="@+id/image_view_camera_header_flash_icon"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
-        android:layout_margin="@dimen/default_layout_margin"
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/text_view_camera_header_flash_icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/default_double_layout_margin"
+        android:fontFamily="@font/material_icons_regular"
+        android:textColor="@color/text"
+        android:textSize="25dp"
+        android:text="flash_on"
         android:src="@drawable/sphinx_white_notification"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
