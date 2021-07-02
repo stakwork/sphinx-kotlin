@@ -15,4 +15,6 @@
     <dimen name="invite_friend_create_invitation_button_text_size">17sp</dimen>
     <dimen name="invite_friend_estimated_cost_text_view_text_size">10sp</dimen>
     <dimen name="invite_friend_estimated_cost_amount_text_view_text_size">20sp</dimen>
+
+    <dimen name="invite_friend_progress_bar_xy">25dp</dimen>
 </resources>

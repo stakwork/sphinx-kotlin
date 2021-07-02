@@ -52,7 +52,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import javax.inject.Inject
 
 @JvmSynthetic
 @Suppress("NOTHING_TO_INLINE")

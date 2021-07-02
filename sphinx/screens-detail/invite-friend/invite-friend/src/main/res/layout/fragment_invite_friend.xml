@@ -143,16 +143,29 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"/>
 
+        <ProgressBar
+            android:id="@+id/create_invite_progress_bar"
+            android:layout_width="@dimen/invite_friend_progress_bar_xy"
+            android:layout_height="@dimen/invite_friend_progress_bar_xy"
+            style="?android:attr/progressBarStyle"
+            android:indeterminateTint="@android:color/white"
+            android:indeterminate="true"
+            android:visibility="gone"
+            android:layout_marginEnd="@dimen/default_half_layout_margin"
+            app:layout_constraintEnd_toStartOf="@+id/button_create_invitation"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/layout_constraint_estimated_cost"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="@dimen/default_layout_margin"
+            android:layout_marginEnd="@dimen/default_half_layout_margin"
             android:visibility="gone"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/button_create_invitation"
+            app:layout_constraintEnd_toStartOf="@+id/create_invite_progress_bar"
             tools:visibility="visible">
 
             <androidx.appcompat.widget.AppCompatTextView

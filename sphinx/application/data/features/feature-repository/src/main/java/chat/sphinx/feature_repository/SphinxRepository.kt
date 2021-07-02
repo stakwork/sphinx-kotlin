@@ -2168,4 +2168,36 @@ abstract class SphinxRepository(
                 null
             }
         }
+
+    override fun createNewInvite(
+        nickname: String,
+        welcomeMessage: String
+    ): Flow<LoadResponse<Any, ResponseError>> = flow {
+
+        applicationScope.launch(mainImmediate) {
+            networkQueryContact.createNewInvite(nickname, welcomeMessage).collect { loadResponse ->
+                @Exhaustive
+                when (loadResponse) {
+                    is LoadResponse.Loading -> {
+                        emit(loadResponse)
+                    }
+
+                    is Response.Error -> {
+                        emit(loadResponse)
+                    }
+
+                    is Response.Success -> {
+                        coreDB.getSphinxDatabaseQueriesOrNull()?.let { queries ->
+                            contactLock.withLock {
+                                queries.transaction {
+                                    upsertContact(loadResponse.value, queries)
+                                }
+                            }
+                        }
+                        emit(loadResponse)
+                    }
+                }
+            }
+        }
+    }
 }

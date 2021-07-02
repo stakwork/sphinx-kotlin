@@ -1,5 +1,6 @@
 package chat.sphinx.concept_network_query_invite
 
+import chat.sphinx.concept_network_query_invite.model.HubLowestNodePriceResponse
 import chat.sphinx.concept_network_query_invite.model.HubRedeemInviteResponse
 import chat.sphinx.concept_network_query_invite.model.RedeemInviteResponseDto
 import chat.sphinx.kotlin_response.LoadResponse
@@ -23,6 +24,8 @@ abstract class NetworkQueryInvite {
 //    app.post('/invites', invites.createInvite)
 //    app.post('/invites/:invite_string/pay', invites.payInvite)
 //    app.post('/invites/finish', invites.finishInvite)
+
+    abstract fun getLowestNodePrice(): Flow<LoadResponse<HubLowestNodePriceResponse, ResponseError>>
 
     // TODO: Return RedeemInviteResponse
     abstract fun redeemInvite(

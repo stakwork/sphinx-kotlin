@@ -24,6 +24,9 @@ class NetworkQueryContactImpl(
         private const val ENDPOINT_CONTACTS = "/contacts"
         private const val ENDPOINT_DELETE_CONTACT = "/contacts/%d"
         private const val ENDPOINT_GENERATE_TOKEN = "/contacts/tokens"
+
+        private const val ENDPOINT_CREATE_INVITE = "/invites"
+        private const val HUB_URL = "https://hub.sphinx.chat"
     }
 
     ///////////
@@ -127,4 +130,20 @@ class NetworkQueryContactImpl(
 
         return response
     }
+
+    override fun createNewInvite(
+        nickname: String,
+        welcomeMessage: String,
+        relayData: Pair<AuthorizationToken, RelayUrl>?
+    ): Flow<LoadResponse<ContactDto, ResponseError>> =
+        networkRelayCall.relayPost(
+            responseJsonClass = ContactRelayResponse::class.java,
+            relayEndpoint = HUB_URL + ENDPOINT_CREATE_INVITE,
+            requestBodyJsonClass = Map::class.java,
+            requestBody = mapOf(
+                Pair("nickname", nickname),
+                Pair("welcome_message", welcomeMessage),
+            ),
+            relayData = relayData
+        )
 }

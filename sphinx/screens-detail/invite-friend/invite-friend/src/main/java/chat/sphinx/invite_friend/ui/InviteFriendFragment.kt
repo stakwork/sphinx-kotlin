@@ -14,8 +14,11 @@ import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.invite_friend.R
 import chat.sphinx.invite_friend.databinding.FragmentInviteFriendBinding
+import chat.sphinx.wrapper_common.lightning.asFormattedString
+import chat.sphinx.wrapper_common.lightning.unit
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
+import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.visible
 import kotlinx.coroutines.launch
 
@@ -36,28 +39,63 @@ internal class InviteFriendFragment : SideEffectFragment<
         @Exhaustive
         when (viewState) {
             is InviteFriendViewState.Idle -> {}
+
+            is InviteFriendViewState.InviteFriendLowestPrice -> {
+                binding.apply {
+                    textViewEstimatedCostAmount.text = viewState.price.asFormattedString()
+
+                    layoutConstraintEstimatedCost.alpha = 0.0f
+                    layoutConstraintEstimatedCost.visible
+
+                    layoutConstraintEstimatedCost.animate()
+                        .alpha(1.0f)
+                }
+            }
+
+            is InviteFriendViewState.InviteCreationLoading -> {
+                binding.createInviteProgressBar.visible
+            }
+            is InviteFriendViewState.InviteCreationFailed -> {
+                binding.createInviteProgressBar.gone
+            }
+            is InviteFriendViewState.InviteCreationSucceed -> {
+                binding.createInviteProgressBar.gone
+
+                viewModel.navigator.closeDetailScreen()
+            }
         }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.includeInviteFriendHeader.apply {
 
-            textViewDetailScreenHeaderName.text = getString(R.string.invite_friend_header_name)
+        binding.apply {
+            includeInviteFriendHeader.apply {
 
-            textViewDetailScreenHeaderNavBack.apply {
-                visible
-                setOnClickListener {
+                textViewDetailScreenHeaderName.text = getString(R.string.invite_friend_header_name)
+
+                textViewDetailScreenHeaderNavBack.apply {
+                    visible
+                    setOnClickListener {
+                        lifecycleScope.launch(viewModel.mainImmediate) {
+                            viewModel.navigator.popBackStack()
+                        }
+                    }
+                }
+
+                textViewDetailScreenClose.setOnClickListener {
                     lifecycleScope.launch(viewModel.mainImmediate) {
-                        viewModel.navigator.popBackStack()
+                        viewModel.navigator.closeDetailScreen()
                     }
                 }
             }
 
-            textViewDetailScreenClose.setOnClickListener {
-                lifecycleScope.launch(viewModel.mainImmediate) {
-                    viewModel.navigator.closeDetailScreen()
-                }
+            buttonCreateInvitation.setOnClickListener {
+                val nickname = editTextNicknameInput.text.toString()
+                val welcomeMessage = editTextMessageInput.text.toString()
+
+                viewModel.createNewInvite(nickname, welcomeMessage)
+
             }
         }
 

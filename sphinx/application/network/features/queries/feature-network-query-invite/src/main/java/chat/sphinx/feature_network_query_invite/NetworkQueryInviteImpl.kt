@@ -1,6 +1,7 @@
 package chat.sphinx.feature_network_query_invite
 
 import chat.sphinx.concept_network_query_invite.NetworkQueryInvite
+import chat.sphinx.concept_network_query_invite.model.HubLowestNodePriceResponse
 import chat.sphinx.concept_network_query_invite.model.HubRedeemInviteResponse
 import chat.sphinx.concept_network_query_invite.model.RedeemInviteResponseDto
 import chat.sphinx.concept_network_relay_call.NetworkRelayCall
@@ -18,8 +19,18 @@ class NetworkQueryInviteImpl(
         private const val ENDPOINT_INVITES = "/invites"
         private const val ENDPOINT_SIGNUP = "/api/v1/signup"
         private const val ENDPOINT_SIGNUP_FINISH = "/invites/finish"
+        private const val ENDPOINT_LOWEST_PRICE = "/api/v1/nodes/pricing"
+
         private const val HUB_URL = "https://hub.sphinx.chat"
     }
+
+    override fun getLowestNodePrice(): Flow<LoadResponse<HubLowestNodePriceResponse, ResponseError>> {
+        return networkRelayCall.get(
+            url = HUB_URL + ENDPOINT_LOWEST_PRICE,
+            responseJsonClass = HubLowestNodePriceResponse::class.java,
+        )
+    }
+
 
     override fun redeemInvite(
         inviteString: String
