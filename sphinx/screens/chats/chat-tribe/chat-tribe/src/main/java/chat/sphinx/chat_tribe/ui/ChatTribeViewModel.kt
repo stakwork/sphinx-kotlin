@@ -16,7 +16,7 @@ import chat.sphinx.concept_network_query_lightning.model.route.isRouteAvailable
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_message.MessageRepository
-import chat.sphinx.concept_repository_message.SendMessage
+import chat.sphinx.concept_repository_message.model.SendMessage
 import chat.sphinx.concept_service_media.MediaPlayerServiceController
 import chat.sphinx.concept_service_media.MediaPlayerServiceState
 import chat.sphinx.concept_service_media.UserAction

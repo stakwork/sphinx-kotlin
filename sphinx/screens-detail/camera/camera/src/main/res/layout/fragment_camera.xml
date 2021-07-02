@@ -6,18 +6,42 @@
     android:layout_height="match_parent"
     tools:context=".ui.CameraFragment">
 
+    <View
+        android:id="@+id/view_camera_space_start"
+        android:layout_width="1dp"
+        android:layout_height="0dp"
+        android:background="@color/body"
+        app:layout_constraintBottom_toTopOf="@+id/include_camera_footer"
+        app:layout_constraintEnd_toStartOf="@+id/auto_fit_surface_view_camera"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/include_camera_header" />
+
+    <View
+        android:id="@+id/view_camera_space_end"
+        android:layout_width="1dp"
+        android:layout_height="0dp"
+        android:background="@color/body"
+        app:layout_constraintBottom_toTopOf="@+id/include_camera_footer"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/auto_fit_surface_view_camera"
+        app:layout_constraintTop_toBottomOf="@+id/include_camera_header" />
+
     <com.example.android.camera.utils.AutoFitSurfaceView
         android:id="@+id/auto_fit_surface_view_camera"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintBottom_toTopOf="@+id/include_camera_footer"
+        app:layout_constraintEnd_toStartOf="@+id/view_camera_space_end"
+        app:layout_constraintStart_toEndOf="@+id/view_camera_space_start"
         app:layout_constraintTop_toBottomOf="@+id/include_camera_header" />
 
     <View
         android:id="@+id/view_camera_overlay"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="@+id/auto_fit_surface_view_camera"
+        app:layout_constraintEnd_toEndOf="@+id/auto_fit_surface_view_camera"
+        app:layout_constraintStart_toStartOf="@+id/auto_fit_surface_view_camera"
         app:layout_constraintTop_toTopOf="@+id/auto_fit_surface_view_camera" />
 
     <include

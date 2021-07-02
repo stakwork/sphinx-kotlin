@@ -25,7 +25,7 @@ import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_message.MessageRepository
-import chat.sphinx.concept_repository_message.SendMessage
+import chat.sphinx.concept_repository_message.model.SendMessage
 import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response

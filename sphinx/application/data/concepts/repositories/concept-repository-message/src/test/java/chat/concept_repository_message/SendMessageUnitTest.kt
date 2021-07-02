@@ -1,8 +1,10 @@
 package chat.concept_repository_message
 
-import chat.sphinx.concept_repository_message.SendMessage
+import chat.sphinx.concept_repository_message.model.AttachmentInfo
+import chat.sphinx.concept_repository_message.model.SendMessage
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
+import chat.sphinx.wrapper_message_media.MediaType
 import org.junit.After
 import org.junit.Assert
 import org.junit.Test
@@ -17,6 +19,19 @@ class SendMessageUnitTest {
     private val assertTrue
         get() = Assert.assertTrue(builder.isValid)
 
+    private val path: String
+        get() = System.getProperty("user.dir").let { dir ->
+            val d: String = if (dir.contains(":\\")) {
+                "\\"
+            } else {
+                "/"
+            }
+
+            // return this file
+            "$dir${d}src${d}test${d}java${d}chat${d}concept_repository_message${d}" +
+                    "${this.javaClass.simpleName}.kt"
+        }
+
     @After
     fun tearDown() {
         builder.clear()
@@ -27,7 +42,13 @@ class SendMessageUnitTest {
         builder.setText("some text")
         assertFalse
 
-        builder.setFile(File(System.getProperty("user.dir")))
+        val info = AttachmentInfo(
+            File(path),
+            MediaType.Image("image"),
+            isLocalFile = true
+        )
+
+        builder.setAttachmentInfo(info)
         assertFalse
     }
 
@@ -53,9 +74,17 @@ class SendMessageUnitTest {
 
     @Test
     fun `file DNE fails`() {
-        val path = System.getProperty("user.dir")
+        val path = path
+
+        println(path)
         // invalid file path
-        builder.setFile(File(path.dropLast(3)))
+        builder.setAttachmentInfo(
+            AttachmentInfo(
+                File(path.dropLast(3)),
+                MediaType.Text,
+                isLocalFile = false,
+            )
+        )
         builder.setContactId(ContactId(1))
         assertFalse
 
@@ -64,7 +93,13 @@ class SendMessageUnitTest {
         assertFalse
 
         // file exists
-        builder.setFile(File(path))
+        builder.setAttachmentInfo(
+            AttachmentInfo(
+                File(path),
+                MediaType.Text,
+                isLocalFile = true,
+            )
+        )
         assertTrue
     }
 

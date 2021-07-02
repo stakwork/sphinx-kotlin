@@ -1,13 +1,10 @@
 package chat.sphinx.wrapper_message_media
 
 inline val MediaType.isSphinxText: Boolean
-    get() = this is MediaType.SphinxText
+    get() = this is MediaType.Text
 
 inline val MediaType.isAudio: Boolean
     get() = this is MediaType.Audio
-
-inline val MediaType.isGif: Boolean
-    get() = this is MediaType.Gif
 
 inline val MediaType.isImage: Boolean
     get() = this is MediaType.Image
@@ -25,13 +22,10 @@ inline val MediaType.isUnknown: Boolean
 inline fun String.toMediaType(): MediaType =
     when {
         this == MediaType.SPHINX_TEXT -> {
-            MediaType.SphinxText
+            MediaType.Text
         }
         contains(MediaType.AUDIO, ignoreCase = true) -> {
             MediaType.Audio(this)
-        }
-        contains(MediaType.GIF, ignoreCase = true) -> {
-            MediaType.Gif(this)
         }
         contains(MediaType.IMAGE, ignoreCase = true) -> {
             MediaType.Image(this)
@@ -50,28 +44,28 @@ inline fun String.toMediaType(): MediaType =
 sealed class MediaType {
 
     companion object {
-        const val SPHINX_TEXT = "sphinx/text"
         const val AUDIO = "audio"
-        const val GIF = "image/gif"
         const val IMAGE = "image"
         const val PDF = "pdf"
+        const val SPHINX_TEXT = "sphinx/text"
         const val VIDEO = "video"
     }
 
     abstract val value: String
 
-    object SphinxText: MediaType() {
+    data class Audio(override val value: String): MediaType()
+
+    data class Image(override val value: String): MediaType() {
+        val isGif: Boolean
+            get() = value.contains("gif", ignoreCase = true)
+    }
+
+    data class Pdf(override val value: String): MediaType()
+
+    object Text: MediaType() {
         override val value: String
             get() = SPHINX_TEXT
     }
-
-    data class Audio(override val value: String): MediaType()
-
-    data class Gif(override val value: String): MediaType()
-
-    data class Image(override val value: String): MediaType()
-
-    data class Pdf(override val value: String): MediaType()
 
     data class Video(override val value: String): MediaType()
 

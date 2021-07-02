@@ -2,6 +2,7 @@ package chat.sphinx.camera.ui
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.ActionBar
 import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.Color
@@ -14,13 +15,17 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.HandlerThread
-import android.view.Surface
-import android.view.SurfaceHolder
-import android.view.View
+import android.util.TypedValue
+import android.view.*
 import android.widget.ImageView
+import android.widget.RelativeLayout
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toDrawable
+import androidx.core.view.marginLeft
+import androidx.core.view.marginStart
+import androidx.core.view.updateLayoutParams
+import androidx.core.widget.ImageViewCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.DefaultLifecycleObserver
@@ -37,6 +42,9 @@ import chat.sphinx.camera.ui.viewstate.CapturePreviewViewState
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
+import chat.sphinx.resources.toPx
+import chat.sphinx.wrapper_view.Dp
+import chat.sphinx.wrapper_view.Px
 import com.example.android.camera.utils.OrientationLiveData
 import com.example.android.camera.utils.computeExifOrientation
 import com.example.android.camera.utils.getPreviewOutputSize
@@ -52,6 +60,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import java.io.Closeable
 import java.io.File
 import java.io.FileOutputStream
@@ -174,6 +185,82 @@ internal class CameraFragment: SideEffectFragment<
     private val surfaceHolderState: MutableStateFlow<SurfaceHolder?> by lazy {
         MutableStateFlow(null)
     }
+
+    private inner class SpaceWidthSetter: DefaultLifecycleObserver {
+        private var width: Px? = null
+        private val lock = Mutex()
+
+        // if width is null, it will set them after the view is setup
+        // otherwise it does nothing (b/c they're already set
+        suspend fun setCameraSpacessIfNeeded() {
+            width ?: lock.withLock {
+                width ?: setSpaces()
+                    .also { width = it }
+            }
+        }
+
+        override fun onDestroy(owner: LifecycleOwner) {
+            super.onDestroy(owner)
+            width = null
+        }
+
+        private suspend fun setSpaces(): Px {
+            try {
+                // wait for the screen to be created
+                surfaceHolderState.value ?: surfaceHolderState.collect { holder ->
+                    if (holder != null) {
+                        throw Exception()
+                    }
+                }
+            } catch (e: Exception) {}
+
+            return withContext(viewModel.main) {
+
+                viewLifecycleOwner.lifecycle.addObserver(this@SpaceWidthSetter)
+
+                val spaceDetailPct = TypedValue()
+
+                // get space resource percentage height for detail screen
+                binding.root.context.resources.getValue(
+                    R.dimen.space_detail_host_height,
+                    spaceDetailPct,
+                    true
+                )
+
+                val detailFragmentHeight = binding.root.measuredHeight.toFloat()
+
+                // calculate the primary window's screen height
+                val primaryWindowHeight =
+                    (detailFragmentHeight / (1F - spaceDetailPct.float)) +
+                    (requireActivity() as InsetterActivity).statusBarInsetHeight.top
+
+                val spaceTop = primaryWindowHeight * spaceDetailPct.float
+
+                val viewWidth = (spaceTop / 2) + 1 + Dp(4F).toPx(binding.root.context).value
+
+                binding.viewCameraSpaceEnd.apply {
+                    layoutParams.width = viewWidth.toInt()
+                }
+
+                binding.viewCameraSpaceStart.apply {
+                    layoutParams.width = viewWidth.toInt()
+                }
+
+                binding.includeCameraImagePreview.apply {
+                    spaceCameraImagePreviewEnd.apply space@ {
+                        this@space.layoutParams.width = viewWidth.toInt()
+                    }
+                    spaceCameraImagePreviewStart.apply space@ {
+                        this@space.layoutParams.width = viewWidth.toInt()
+                    }
+                }
+
+                Px(viewWidth)
+            }
+        }
+    }
+
+    private val spaceWidthSetter = SpaceWidthSetter()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -586,6 +673,8 @@ internal class CameraFragment: SideEffectFragment<
                     try {
                         surfaceHolderState.collect { holder ->
                             if (holder != null) {
+                                spaceWidthSetter.setCameraSpacessIfNeeded()
+
                                 val previewSize = getPreviewOutputSize(
                                     binding.autoFitSurfaceViewCamera.display,
                                     item.characteristics,

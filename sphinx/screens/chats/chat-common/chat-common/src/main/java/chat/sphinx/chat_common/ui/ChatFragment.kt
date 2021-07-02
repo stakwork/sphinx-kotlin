@@ -31,7 +31,8 @@ import chat.sphinx.chat_common.ui.viewstate.selected.setMenuColor
 import chat.sphinx.chat_common.ui.viewstate.selected.setMenuItems
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
-import chat.sphinx.concept_repository_message.SendMessage
+import chat.sphinx.concept_repository_message.model.AttachmentInfo
+import chat.sphinx.concept_repository_message.model.SendMessage
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.insetter_activity.addStatusBarPadding
@@ -41,6 +42,7 @@ import chat.sphinx.resources.*
 import chat.sphinx.wrapper_chat.isTrue
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.lightning.unit
+import chat.sphinx.wrapper_message_media.MediaType
 import chat.sphinx.wrapper_view.Dp
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
@@ -144,10 +146,29 @@ abstract class ChatFragment<
                 @Exhaustive
                 when (attachmentViewState) {
                     is AttachmentSendViewState.Idle -> {
-                        sendMessageBuilder.setFile(null)
+                        sendMessageBuilder.setAttachmentInfo(null)
                     }
                     is AttachmentSendViewState.Preview.LocalFile -> {
-                        sendMessageBuilder.setFile(attachmentViewState.cameraResponse.value)
+                        val response = attachmentViewState.cameraResponse
+                        val extension = response.value.extension
+
+                        val mediaType = when (response) {
+                            is CameraResponse.Image -> {
+                                MediaType.Image(MediaType.IMAGE + if (extension.isNotEmpty()) {
+                                    "/$extension"
+                                } else {
+                                    "/jpg"
+                                })
+                            }
+                        }
+
+                        sendMessageBuilder.setAttachmentInfo(
+                            AttachmentInfo(
+                                file = response.value,
+                                mediaType = mediaType,
+                                isLocalFile = true
+                            )
+                        )
                     }
                 }
 

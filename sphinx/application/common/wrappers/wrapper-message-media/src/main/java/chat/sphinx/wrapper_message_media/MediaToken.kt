@@ -50,6 +50,11 @@ inline fun MediaToken.getMediaTokenElementWithIndex(index: Int): String? {
 
 @JvmInline
 value class MediaToken(val value: String) {
+
+    companion object {
+        val PROVISIONAL_TOKEN = MediaToken("ProvisionalMediaToken")
+    }
+
     init {
         require(value.isNotEmpty()) {
             "MediaToken cannot be empty"

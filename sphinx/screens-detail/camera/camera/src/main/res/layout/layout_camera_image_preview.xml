@@ -15,11 +15,27 @@
         android:layout_height="@dimen/camera_header_height"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <Space
+        android:id="@+id/space_camera_image_preview_start"
+        android:layout_width="1dp"
+        android:layout_height="match_parent"
+        app:layout_constraintEnd_toStartOf="@+id/image_view_camera_image_preview"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Space
+        android:id="@+id/space_camera_image_preview_end"
+        android:layout_width="1dp"
+        android:layout_height="match_parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/image_view_camera_image_preview" />
+
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/image_view_camera_image_preview"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintBottom_toTopOf="@+id/layout_constraint_camera_image_preview_footer"
+        app:layout_constraintEnd_toStartOf="@+id/space_camera_image_preview_end"
+        app:layout_constraintStart_toEndOf="@+id/space_camera_image_preview_start"
         app:layout_constraintTop_toBottomOf="@+id/space_camera_image_preview_header" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -32,24 +48,26 @@
             android:id="@+id/text_view_camera_image_preview_retake"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/default_layout_margin"
-            android:layout_marginBottom="@dimen/default_layout_margin"
+            android:layout_marginStart="@dimen/default_double_layout_margin"
             android:text="Retake"
             android:textColor="@color/text"
-            android:textSize="32sp"
+            android:textSize="17sp"
+            android:fontFamily="@font/roboto_regular"
             app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/text_view_camera_image_preview_use"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="@dimen/default_layout_margin"
-            android:layout_marginBottom="@dimen/default_layout_margin"
+            android:layout_marginEnd="@dimen/default_double_layout_margin"
             android:text="Use Photo"
             android:textColor="@color/text"
-            android:textSize="32sp"
+            android:textSize="17sp"
+            android:fontFamily="@font/roboto_regular"
             app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

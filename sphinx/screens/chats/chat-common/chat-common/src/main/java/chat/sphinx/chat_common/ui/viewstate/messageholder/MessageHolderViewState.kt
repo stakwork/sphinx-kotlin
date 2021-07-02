@@ -57,7 +57,7 @@ internal sealed class MessageHolderViewState(
                 if (chat.type.isConversation()) null else message.senderAlias?.value,
                 this is Sent,
                 this is Sent && (message.status.isReceived() || message.status.isConfirmed()),
-                message.messageContentDecrypted != null,
+                message.messageContentDecrypted != null || message.messageMedia?.mediaKeyDecrypted != null,
                 DateTime.getFormathmma().format(message.date.value),
             )
         } else {
@@ -137,16 +137,26 @@ internal sealed class MessageHolderViewState(
             } else {
                 null
             }
+
+        // TODO: make less horrible using sealed interface to differentiate
+        //  between file and url.
         } ?: message.messageMedia?.let { media ->
-            media.url?.let { mediaUrl ->
-                if (media.mediaType.isImage && !message.isPaidMessage) {
+            if (media.mediaType.isImage && !message.isPaidMessage) {
+                if (media.localFile != null) {
                     LayoutState.Bubble.ContainerSecond.ImageAttachment(
-                        mediaUrl.value,
-                        media
+                        url = media.url?.value?.let { if (it.isEmpty()) null else it } ?: "http://127.0.0.1",
+                        media = media,
                     )
                 } else {
-                    null
+                    media.url?.let { url ->
+                        LayoutState.Bubble.ContainerSecond.ImageAttachment(
+                            url = url.value,
+                            media = media,
+                        )
+                    }
                 }
+            } else {
+                null
             }
         }
     }
