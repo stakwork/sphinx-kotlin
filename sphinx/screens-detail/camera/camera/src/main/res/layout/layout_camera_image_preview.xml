@@ -15,11 +15,27 @@
         android:layout_height="@dimen/camera_header_height"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <Space
+        android:id="@+id/space_camera_image_preview_start"
+        android:layout_width="1dp"
+        android:layout_height="match_parent"
+        app:layout_constraintEnd_toStartOf="@+id/image_view_camera_image_preview"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Space
+        android:id="@+id/space_camera_image_preview_end"
+        android:layout_width="1dp"
+        android:layout_height="match_parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/image_view_camera_image_preview" />
+
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/image_view_camera_image_preview"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintBottom_toTopOf="@+id/layout_constraint_camera_image_preview_footer"
+        app:layout_constraintEnd_toStartOf="@+id/space_camera_image_preview_end"
+        app:layout_constraintStart_toEndOf="@+id/space_camera_image_preview_start"
         app:layout_constraintTop_toBottomOf="@+id/space_camera_image_preview_header" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
