@@ -139,7 +139,40 @@ internal inline fun LayoutMessageHolderBinding.setView(
                     holderJobs.add(job)
                 }
             }
-            setBubbleReplyMessage(viewState.bubbleReplyMessage)
+            setBubbleReplyMessage(viewState.bubbleReplyMessage) { imageView, url, media ->
+                lifecycleScope.launch(dispatchers.mainImmediate) {
+                    val options: ImageLoaderOptions? = if (media != null) {
+                        val builder = ImageLoaderOptions.Builder()
+
+                        media.host?.let { host ->
+                            memeServerTokenHandler.retrieveAuthenticationToken(host)?.let { token ->
+                                builder.addHeader(token.headerKey, token.headerValue)
+
+                                media.mediaKeyDecrypted?.value?.let { key ->
+                                    val header = CryptoHeader.Decrypt.Builder()
+                                        .setScheme(CryptoScheme.Decrypt.JNCryptor)
+                                        .setPassword(key)
+                                        .build()
+
+                                    builder.addHeader(header.key, header.value)
+                                }
+                            }
+                        }
+
+                        builder.build()
+                    } else {
+                        null
+                    }
+
+                    imageLoader.load(imageView, url, options)
+                        .also { disposable ->
+                            disposables.add(disposable)
+                            disposable.await()
+                        }
+                }.let { job ->
+                    holderJobs.add(job)
+                }
+            }
         }
     }
 }
@@ -803,7 +836,8 @@ private inline fun LayoutMessageHolderBinding.setGroupActionMemberRemovalLayout(
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun LayoutMessageHolderBinding.setBubbleReplyMessage(
-    replyMessage: LayoutState.Bubble.ContainerFirst.ReplyMessage?
+    replyMessage: LayoutState.Bubble.ContainerFirst.ReplyMessage?,
+    loadImage: (ImageView, String, MessageMedia?) -> Unit
 ) {
     includeMessageHolderBubble.includeMessageReply.apply {
         if (replyMessage == null) {
@@ -812,29 +846,41 @@ internal inline fun LayoutMessageHolderBinding.setBubbleReplyMessage(
             root.visible
 
             imageViewReplyMediaImage.apply {
-//                @Exhaustive
-//                when (replyMessage.media) {
-//                    is MediaUrl -> {
-//                        visible
-//                    }
-//                    is MediaFile -> {
-//                        visible
-//                    }
-//                    null -> {
-//                        gone
-//                    }
-//                }
-                // TODO: handle attachment types and make visible
-                gone
+                if (replyMessage.url != null) {
+                    visible
+
+                    loadImage(this, replyMessage.url, replyMessage.media)
+                } else {
+                    gone
+                }
             }
             imageViewReplyTextOverlay.gone
 
             // Only used in the footer when replying to a message
             textViewReplyClose.gone
 
-            textViewReplyMessageLabel.text = replyMessage.text
+            viewReplyBarLeading.setBackgroundColor(root.context.getColor(R.color.lightPurple))
+
+            layoutConstraintMessageReplyDividerBottom.setBackgroundColor(root.context.getColor(
+                if (replyMessage.showReceived) {
+                    R.color.replyDividerReceived
+                } else {
+                    R.color.replyDividerSent
+                }
+            ))
+
+            textViewReplyMessageLabel.setTextColor(root.context.getColor(
+                if (replyMessage.showReceived) {
+                    R.color.washedOutReceivedText
+                } else {
+                    R.color.washedOutSentText
+                }
+            ))
+
             textViewReplySenderLabel.text = replyMessage.sender
-            viewReplyBarLeading.setBackgroundRandomColor(null)
+
+            textViewReplyMessageLabel.text = replyMessage.text
+            textViewReplyMessageLabel.goneIfFalse(replyMessage.text.isNotEmpty())
         }
     }
 }

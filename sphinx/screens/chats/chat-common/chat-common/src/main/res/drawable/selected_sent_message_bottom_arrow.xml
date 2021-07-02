@@ -5,7 +5,7 @@
     android:viewportWidth="800"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <path android:fillColor="@color/primaryBlue"
+    <path android:fillColor="@color/oldSentMsgBG"
         android:pathData="M100,0 L400,375 L700,0 L0,0z" />
 
     <path android:fillColor="@color/messageOptionDivider"

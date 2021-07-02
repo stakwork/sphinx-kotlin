@@ -128,7 +128,7 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="@dimen/default_layout_margin"
         android:gravity="end"
-        android:text="@string/message_action_label_copy_link"
+        android:text="@string/selected_message_menu_item_copy_link"
         android:textColor="@color/text"
         app:layout_constraintBottom_toBottomOf="@id/button_call_invite_copy_link"
         app:layout_constraintEnd_toStartOf="@id/text_view_call_invite_copy_link_icon"

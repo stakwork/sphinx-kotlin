@@ -73,5 +73,6 @@
 
     <!-- Notify -->
     <string name="notify_boost_failure">Boost payment failed</string>
+    <string name="side_effect_text_copied">Text copied to clipboard</string>
 
 </resources>

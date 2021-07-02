@@ -18,7 +18,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:background="@color/body"
-        app:layout_constraintBottom_toTopOf="@+id/include_podcast_player_footer"
+        app:layout_constraintBottom_toTopOf="@+id/include_chat_tribe_message_reply"
         app:layout_constraintTop_toBottomOf="@+id/include_chat_tribe_header"
         tools:listitem="@layout/layout_message_holder" />
 
@@ -27,6 +27,14 @@
         android:layout_width="match_parent"
         android:layout_height="8dp"
         android:src="@drawable/bottom_bar_elevation_gradient"
+        app:layout_constraintBottom_toTopOf="@+id/include_chat_tribe_message_reply" />
+
+    <include
+        android:id="@+id/include_chat_tribe_message_reply"
+        layout="@layout/layout_message_reply"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/message_reply_holder_height"
+        android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@+id/include_podcast_player_footer" />
 
     <include

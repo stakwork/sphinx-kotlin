@@ -1304,7 +1304,7 @@ abstract class SphinxRepository(
                                     chatDbo.my_alias?.value?.toSenderAlias(),
                                     chatDbo.my_photo_url,
                                     null,
-                                    null,
+                                    sendMessage.replyUUID,
                                     provisionalId,
                                     null,
                                     chatDbo.id,

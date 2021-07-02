@@ -71,6 +71,7 @@
     <dimen name="icon_file_download_text_size">30sp</dimen>
     <dimen name="icon_play_pause_button_text_size">25sp</dimen>
     <dimen name="paywall_overlay_video_icon_text_size">40sp</dimen>
+    <dimen name="icon_message_boost_xy">20dp</dimen>
 
 
     <!-- Link Previews  -->
@@ -88,6 +89,8 @@
     <!-- Default Elevation + 2dp -->
     <dimen name="selected_message_elevation">10dp</dimen>
     <dimen name="selected_message_menu_width">140dp</dimen>
+    <dimen name="selected_message_menu_icon_width">40dp</dimen>
+    <dimen name="selected_message_menu_icon_padding">8dp</dimen>
     <dimen name="selected_message_menu_item_height">40dp</dimen>
     <dimen name="selected_message_menu_item_text_size">12sp</dimen>
 
