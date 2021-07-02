@@ -246,15 +246,6 @@ internal class CameraFragment: SideEffectFragment<
                     layoutParams.width = viewWidth.toInt()
                 }
 
-                binding.includeCameraImagePreview.apply {
-                    spaceCameraImagePreviewEnd.apply space@ {
-                        this@space.layoutParams.width = viewWidth.toInt()
-                    }
-                    spaceCameraImagePreviewStart.apply space@ {
-                        this@space.layoutParams.width = viewWidth.toInt()
-                    }
-                }
-
                 Px(viewWidth)
             }
         }

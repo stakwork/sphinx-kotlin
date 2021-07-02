@@ -7,3 +7,4 @@ internal sealed class SendAttachmentViewState: ViewState<SendAttachmentViewState
         val paymentAndInvoiceEnabled: Boolean,
     ): SendAttachmentViewState()
 }
+

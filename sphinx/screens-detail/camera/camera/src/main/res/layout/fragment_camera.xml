@@ -28,8 +28,8 @@
 
     <com.example.android.camera.utils.AutoFitSurfaceView
         android:id="@+id/auto_fit_surface_view_camera"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         app:layout_constraintBottom_toTopOf="@+id/include_camera_footer"
         app:layout_constraintEnd_toStartOf="@+id/view_camera_space_end"
         app:layout_constraintStart_toEndOf="@+id/view_camera_space_start"
@@ -46,7 +46,8 @@
 
     <include
         android:id="@+id/include_camera_header"
-        layout="@layout/layout_camera_header" />
+        layout="@layout/layout_camera_header"
+        android:visibility="gone" />
 
     <include
         android:id="@+id/include_camera_footer"

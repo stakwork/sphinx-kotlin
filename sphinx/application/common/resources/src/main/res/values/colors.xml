@@ -3,6 +3,7 @@
     <color name="lightPurple">#A986F9</color>
 
     <color name="body">#151E27</color>
+    <color name="bodyTransparent">#40151E27</color>
     <color name="bodyInverted">#ffffff</color>
     <color name="headerBG">#1A242E</color>
     <color name="listBG">#141E27</color>
