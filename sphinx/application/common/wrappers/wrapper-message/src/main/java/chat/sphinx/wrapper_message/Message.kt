@@ -37,18 +37,29 @@ inline fun Message.retrieveImageUrlAndMessageMedia(): Pair<String, MessageMedia?
     var mediaData: Pair<String, MessageMedia?>? = null
 
     giphyData?.let { giphyData ->
+
         mediaData = if (giphyData.url.isNotEmpty()) {
             Pair(giphyData.url.replace("giphy.gif", "200w.gif"), null)
         } else {
             null
         }
+
     } ?: messageMedia?.let { media ->
-        media.url?.let { mediaUrl ->
-            mediaData = if (media.mediaType.isImage && !isPaidMessage) {
-                Pair(mediaUrl.value, media)
+
+        if (media.mediaType.isImage && !isPaidMessage) {
+
+            // always prefer loading a file if it exists over loading a url
+            if (media.localFile != null) {
+                mediaData = Pair(
+                    media.url?.value?.let { if (it.isEmpty()) null else it } ?: "http://127.0.0.1",
+                    media,
+                )
             } else {
-                null
+                media.url?.let { mediaUrl ->
+                    mediaData = Pair(mediaUrl.value, media)
+                }
             }
+
         }
     }
     return mediaData

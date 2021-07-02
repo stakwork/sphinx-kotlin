@@ -3,6 +3,27 @@ package chat.sphinx.concept_network_call
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.ResponseError
 import kotlinx.coroutines.flow.Flow
+import okhttp3.Request
+import java.io.IOException
+
+@Suppress("NOTHING_TO_INLINE")
+@Throws(IllegalArgumentException::class)
+inline fun NetworkCall.buildRequest(
+    url: String,
+    headers: Map<String, String>?
+): Request.Builder {
+    val builder = Request.Builder()
+
+    builder.url(url)
+
+    headers?.let {
+        for (header in it) {
+            builder.addHeader(header.key, header.value)
+        }
+    }
+
+    return builder
+}
 
 /**
  * Methods for GET/PUT/POST/DELETE for general, non-Relay specific network queries.
@@ -79,5 +100,12 @@ abstract class NetworkCall {
         mediaType: String? = null,
         headers: Map<String, String>? = null,
     ): Flow<LoadResponse<T, ResponseError>>
+
+    @Throws(NullPointerException::class, IOException::class)
+    abstract suspend fun <T: Any> call(
+        responseJsonClass: Class<T>,
+        request: Request,
+        useExtendedNetworkCallClient: Boolean = false
+    ): T
 
 }

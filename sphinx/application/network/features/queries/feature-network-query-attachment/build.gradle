@@ -6,10 +6,16 @@ plugins {
 }
 
 dependencies {
+    // KotlinAndroid
+    api project(path: ':kotlin:concepts:concept-coroutines')
+
+    // Sphinx
     api project(path: ':sphinx:application:network:concepts:queries:concept-network-query-attachment')
     api project(path: ':sphinx:application:network:concepts:calls:concept-network-relay-call')
 
     implementation deps.kotlin.coroutinesCore
+    implementation deps.jncryptor
+    implementation deps.square.okhttp
 
     // needed to override moshi's use of 1.4.31
     implementation deps.kotlin.reflect

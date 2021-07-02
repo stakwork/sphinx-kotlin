@@ -72,7 +72,7 @@ class MessageDboWrapper(val messageDbo: MessageDbo): Message() {
 
     @Volatile
     @Suppress("PropertyName")
-    var _messageMedia: MessageMedia? = null
+    var _messageMedia: MessageMediaDboWrapper? = null
     override val messageMedia: MessageMedia?
         get() = _messageMedia
 

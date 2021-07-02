@@ -15,11 +15,14 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
 import app.cash.exhaustive.Exhaustive
+import chat.sphinx.camera_view_model_coordinator.response.CameraResponse
 import chat.sphinx.chat_common.R
 import chat.sphinx.chat_common.adapters.MessageListAdapter
 import chat.sphinx.chat_common.databinding.*
 import chat.sphinx.chat_common.navigation.ChatNavigator
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
+import chat.sphinx.chat_common.ui.viewstate.attachment.AttachmentSendViewState
+import chat.sphinx.chat_common.ui.viewstate.footer.FooterViewState
 import chat.sphinx.chat_common.ui.viewstate.header.ChatHeaderFooterViewState
 import chat.sphinx.chat_common.ui.viewstate.messageholder.setView
 import chat.sphinx.chat_common.ui.viewstate.messagereply.MessageReplyViewState
@@ -29,10 +32,11 @@ import chat.sphinx.chat_common.ui.viewstate.selected.setMenuColor
 import chat.sphinx.chat_common.ui.viewstate.selected.setMenuItems
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
+import chat.sphinx.concept_repository_message.model.AttachmentInfo
+import chat.sphinx.concept_repository_message.model.SendMessage
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_network_client_crypto.CryptoHeader
 import chat.sphinx.concept_network_client_crypto.CryptoScheme
-import chat.sphinx.concept_repository_message.SendMessage
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.insetter_activity.addStatusBarPadding
@@ -44,6 +48,7 @@ import chat.sphinx.wrapper_attachment.headerValue
 import chat.sphinx.wrapper_chat.isTrue
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.lightning.unit
+import chat.sphinx.wrapper_message_media.MediaType
 import chat.sphinx.wrapper_message.retrieveImageUrlAndMessageMedia
 import chat.sphinx.wrapper_message.retrieveTextToShow
 import chat.sphinx.wrapper_message.toReplyUUID
@@ -75,6 +80,7 @@ abstract class ChatFragment<
     protected abstract val replyingMessageBinding: LayoutMessageReplyBinding
     protected abstract val selectedMessageBinding: LayoutSelectedMessageBinding
     protected abstract val selectedMessageHolderBinding: LayoutMessageHolderBinding
+    protected abstract val attachmentSendBinding: LayoutAttachmentSendPreviewBinding
     protected abstract val recyclerView: RecyclerView
 
     protected abstract val imageLoader: ImageLoader<ImageView>
@@ -100,6 +106,7 @@ abstract class ChatFragment<
         setupFooter(insetterActivity)
         setupHeader(insetterActivity)
         setupSelectedMessage()
+        setupAttachmentSendPreview(insetterActivity)
         setupRecyclerView()
     }
 
@@ -118,11 +125,20 @@ abstract class ChatFragment<
         }
 
         override fun handleOnBackPressed() {
-            if (viewModel.getSelectedMessageViewStateFlow().value is SelectedMessageViewState.SelectedMessage) {
-                viewModel.updateSelectedMessageViewState(SelectedMessageViewState.None)
-            } else {
-                lifecycleScope.launch(viewModel.mainImmediate) {
-                    chatNavigator.popBackStack()
+            val attachmentViewState = viewModel.getAttachmentSendViewStateFlow().value
+            when {
+                attachmentViewState is AttachmentSendViewState.Preview -> {
+                    viewModel.deleteFileIfLocal(attachmentViewState)
+                    viewModel.updateAttachmentSendViewState(AttachmentSendViewState.Idle)
+                    viewModel.updateFooterViewState(FooterViewState.Default)
+                }
+                viewModel.getSelectedMessageViewStateFlow().value is SelectedMessageViewState.SelectedMessage -> {
+                    viewModel.updateSelectedMessageViewState(SelectedMessageViewState.None)
+                }
+                else -> {
+                    lifecycleScope.launch(viewModel.mainImmediate) {
+                        chatNavigator.popBackStack()
+                    }
                 }
             }
         }
@@ -136,8 +152,44 @@ abstract class ChatFragment<
 
                 sendMessageBuilder.setText(editTextChatFooter.text?.toString())
 
+                val attachmentViewState = viewModel.getAttachmentSendViewStateFlow().value
+
+                @Exhaustive
+                when (attachmentViewState) {
+                    is AttachmentSendViewState.Idle -> {
+                        sendMessageBuilder.setAttachmentInfo(null)
+                    }
+                    is AttachmentSendViewState.Preview.LocalFile -> {
+                        val response = attachmentViewState.cameraResponse
+                        val extension = response.value.extension
+
+                        val mediaType = when (response) {
+                            is CameraResponse.Image -> {
+                                MediaType.Image(MediaType.IMAGE + if (extension.isNotEmpty()) {
+                                    "/$extension"
+                                } else {
+                                    "/jpg"
+                                })
+                            }
+                        }
+
+                        sendMessageBuilder.setAttachmentInfo(
+                            AttachmentInfo(
+                                file = response.value,
+                                mediaType = mediaType,
+                                isLocalFile = true
+                            )
+                        )
+                    }
+                }
+
                 viewModel.sendMessage(sendMessageBuilder)?.let {
                     // if it did not return null that means it was valid
+                    if (attachmentViewState !is AttachmentSendViewState.Idle) {
+                        viewModel.updateAttachmentSendViewState(AttachmentSendViewState.Idle)
+                        viewModel.updateFooterViewState(FooterViewState.Default)
+                    }
+
                     sendMessageBuilder.clear()
                     editTextChatFooter.setText("")
 
@@ -146,7 +198,7 @@ abstract class ChatFragment<
             }
 
             textViewChatFooterAttachment.setOnClickListener {
-                lifecycleScope.launch {
+                lifecycleScope.launch(viewModel.mainImmediate) {
                     editTextChatFooter.let { editText ->
                         binding.root.context.inputMethodManager?.let { imm ->
                             if (imm.isActive(editText)) {
@@ -154,7 +206,7 @@ abstract class ChatFragment<
                                 delay(250L)
                             }
                         }
-                        viewModel.shouldShowActionsMenu()
+                        viewModel.showActionsMenu()
                     }
                 }
             }
@@ -213,6 +265,28 @@ abstract class ChatFragment<
         }
         selectedMessageHolderBinding.includeMessageHolderBubble.root.setOnClickListener {
             viewModel
+        }
+    }
+
+    private fun setupAttachmentSendPreview(insetterActivity: InsetterActivity) {
+        attachmentSendBinding.apply {
+
+            root.setOnClickListener { viewModel }
+
+            layoutConstraintChatAttachmentSendHeader.apply {
+                insetterActivity.addStatusBarPadding(this)
+                this.layoutParams.height = this.layoutParams.height + insetterActivity.statusBarInsetHeight.top
+                this.requestLayout()
+            }
+
+            textViewAttachmentSendHeaderClose.setOnClickListener {
+                val vs = viewModel.getAttachmentSendViewStateFlow().value
+                if (vs is AttachmentSendViewState.Preview) {
+                    viewModel.deleteFileIfLocal(vs)
+                    viewModel.updateFooterViewState(FooterViewState.Default)
+                    viewModel.updateAttachmentSendViewState(AttachmentSendViewState.Idle)
+                }
+            }
         }
     }
 
@@ -428,6 +502,51 @@ abstract class ChatFragment<
             }
         }.invokeOnCompletion {
             viewModel.updateSelectedMessageViewState(SelectedMessageViewState.None)
+        }
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.getFooterViewStateFlow().collect { viewState ->
+                footerBinding.apply {
+                    editTextChatFooter.hint = viewState.hintText
+                    imageViewChatFooterMicrophone.goneIfFalse(viewState.showRecordAudioIcon)
+                    textViewChatFooterSend.goneIfFalse(viewState.showSendIcon)
+                    textViewChatFooterAttachment.goneIfFalse(viewState.showMenuIcon)
+                }
+            }
+        }
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.getAttachmentSendViewStateFlow().collect { viewState ->
+                attachmentSendBinding.apply {
+                    @Exhaustive
+                    when (viewState) {
+                        is AttachmentSendViewState.Idle -> {
+                            root.gone
+                            imageViewAttachmentSendPreview.setImageDrawable(null)
+                        }
+                        is AttachmentSendViewState.Preview.LocalFile -> {
+
+                            textViewAttachmentSendHeaderName.apply {
+                                @Exhaustive
+                                when (viewState.cameraResponse) {
+                                    is CameraResponse.Image -> {
+                                        text = getString(R.string.attachment_send_header_image)
+                                    }
+//                                    is CameraResponse.Video -> {
+//                                        text = getString(R.string.attachment_send_header_video)
+//                                    }
+                                }
+                            }
+
+                            root.visible
+
+                            // will load almost immediately b/c it's a file, so
+                            // no need to launch separate coroutine.
+                            imageLoader.load(imageViewAttachmentSendPreview, viewState.cameraResponse.value)
+                        }
+                    }
+                }
+            }
         }
 
         viewModel.readMessages()

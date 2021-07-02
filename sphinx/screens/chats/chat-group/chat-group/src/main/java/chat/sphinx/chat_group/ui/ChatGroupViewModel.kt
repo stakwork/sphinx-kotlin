@@ -3,6 +3,8 @@ package chat.sphinx.chat_group.ui
 import android.app.Application
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import chat.sphinx.camera_view_model_coordinator.request.CameraRequest
+import chat.sphinx.camera_view_model_coordinator.response.CameraResponse
 import chat.sphinx.chat_common.navigation.ChatNavigator
 import chat.sphinx.chat_common.ui.ChatViewModel
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
@@ -12,7 +14,7 @@ import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_message.MessageRepository
-import chat.sphinx.concept_repository_message.SendMessage
+import chat.sphinx.concept_repository_message.model.SendMessage
 import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
@@ -46,6 +48,7 @@ class ChatGroupViewModel @Inject constructor(
     messageRepository: MessageRepository,
     networkQueryLightning: NetworkQueryLightning,
     savedStateHandle: SavedStateHandle,
+    cameraViewModelCoordinator: ViewModelCoordinator<CameraRequest, CameraResponse>,
     sendAttachmentViewModelCoordinator: ViewModelCoordinator<SendAttachmentRequest, SendAttachmentResponse>,
     LOG: SphinxLogger,
 ): ChatViewModel<ChatGroupFragmentArgs>(
@@ -57,6 +60,7 @@ class ChatGroupViewModel @Inject constructor(
     messageRepository,
     networkQueryLightning,
     savedStateHandle,
+    cameraViewModelCoordinator,
     sendAttachmentViewModelCoordinator,
     LOG,
 ) {
@@ -127,7 +131,7 @@ class ChatGroupViewModel @Inject constructor(
         return super.sendMessage(builder)
     }
 
-    override fun shouldShowActionsMenu() {
-        showActionsMenu(chatId = args.chatId)
+    override fun showActionsMenu() {
+        showActionsMenuImpl(null, args.chatId)
     }
 }

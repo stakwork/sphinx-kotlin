@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/selectedMessageBackground"
+    android:elevation="@dimen/selected_message_elevation"
+    android:visibility="gone"
+    tools:visibility="visible">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_chat_attachment_send_header"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/default_header_height"
+        android:background="@color/headerBG"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_attachment_send_header_close"
+            android:layout_width="@dimen/default_header_navigation_xy"
+            android:layout_height="@dimen/default_header_navigation_xy"
+            android:fontFamily="@font/material_icons_regular"
+            android:gravity="center"
+            android:text="@string/material_icon_name_close"
+            android:textColor="@color/primaryRed"
+            android:textSize="@dimen/default_text_size_back_arrow"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_attachment_send_header_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/default_header_headline_margin_horizontal"
+            android:fontFamily="@font/montserrat_bold"
+            android:paddingEnd="4dp"
+            android:singleLine="true"
+            android:textAllCaps="true"
+            android:textColor="@color/primaryText"
+            android:textSize="@dimen/default_header_text_size"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="@string/attachment_send_header_image" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/image_view_attachment_send_preview"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginVertical="64dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_chat_attachment_send_header" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

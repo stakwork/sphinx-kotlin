@@ -3,6 +3,7 @@ package chat.sphinx.concept_network_query_message.model
 import chat.sphinx.concept_network_query_chat.model.ChatDto
 import chat.sphinx.concept_network_query_contact.model.ContactDto
 import com.squareup.moshi.JsonClass
+import java.io.File
 
 @JsonClass(generateAdapter = true)
 data class MessageDto(
@@ -70,5 +71,22 @@ data class MessageDto(
     fun setMediaKeyDecrypted(value: String) {
         if (value.isEmpty()) return
         mediaKeyDecrypted = value
+    }
+
+    @Transient
+    @Volatile
+    var mediaLocalFile: File? = null
+        private set
+
+    fun setMediaLocalFile(file: File) {
+        mediaLocalFile = try {
+            if (file.exists() && file.isFile) {
+                file
+            } else {
+                null
+            }
+        } catch (e: Exception) {
+            null
+        }
     }
 }

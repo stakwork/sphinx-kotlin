@@ -58,7 +58,7 @@ internal sealed class MessageHolderViewState(
                 if (chat.type.isConversation()) null else message.senderAlias?.value,
                 this is Sent,
                 this is Sent && (message.status.isReceived() || message.status.isConfirmed()),
-                message.messageContentDecrypted != null,
+                message.messageContentDecrypted != null || message.messageMedia?.mediaKeyDecrypted != null,
                 DateTime.getFormathmma().format(message.date.value),
             )
         } else {
