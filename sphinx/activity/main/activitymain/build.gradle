@@ -65,6 +65,7 @@ dependencies {
     api project(path: ':sphinx:screens-detail:send-attachment:send-attachment')
     api project(path: ':sphinx:screens-detail:support-ticket:support-ticket')
     api project(path: ':sphinx:screens-detail:transactions:transactions')
+    api project(path: ':sphinx:screens-detail:invite-friend:invite-friend')
 
     implementation deps.chrisbanes.insetter
 

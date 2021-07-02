@@ -29,9 +29,9 @@ internal class AddFriendFragment: BaseFragment<
                 lifecycleScope.launch { viewModel.navigator.closeDetailScreen() }
             }
         }
-//        binding.buttonNewToSphinx.setOnClickListener {
-//            lifecycleScope.launch { viewModel.navigator.toCreateInvitationDetail() }
-//        }
+        binding.buttonNewToSphinx.setOnClickListener {
+            lifecycleScope.launch { viewModel.navigator.toInviteFriendDetail() }
+        }
         binding.buttonAlreadyOnSphinx.setOnClickListener {
             lifecycleScope.launch { viewModel.navigator.toAddContactDetail() }
         }

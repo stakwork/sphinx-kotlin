@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="invite_friend_header_name">INVITE FRIEND</string>
+
+    <string name="invite_friend_nickname_label">NICKNAME</string>
+    <string name="invite_friend_message_label">INCLUDE A MESSAGE...</string>
+    <string name="invite_friend_message_hint">Welcome to Sphinx!</string>
+    <string name="invite_friend_create_invitation_button">Create Invitation</string>
+    <string name="invite_friend_estimated_cost_text_view">ESTIMATED COST</string>
+</resources>

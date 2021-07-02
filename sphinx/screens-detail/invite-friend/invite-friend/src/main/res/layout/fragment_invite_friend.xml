@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_constraint_invite_friend"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/background_detail_screen"
+    tools:context=".ui.InviteFriendFragment">
+
+    <include
+        android:id="@+id/include_invite_friend_header"
+        layout="@layout/layout_detail_screen_header"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/default_header_height"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_nickname_container"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/invite_friend_nickname_edit_text_container_height"
+        android:paddingHorizontal="@dimen/default_layout_margin"
+        android:layout_marginTop="@dimen/default_double_layout_margin"
+        app:layout_constraintTop_toBottomOf="@+id/include_invite_friend_header">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/default_layout_margin"
+            android:textColor="@color/text"
+            android:fontFamily="@font/montserrat_bold"
+            android:textSize="@dimen/invite_friend_nickname_label_text_size"
+            android:text="@string/invite_friend_nickname_label"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+        </androidx.appcompat.widget.AppCompatTextView>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/edit_text_nickname_container"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/invite_friend_nickname_edit_text_height"
+            android:background="@drawable/invite_friend_edit_text_background"
+            android:paddingStart="@dimen/default_layout_margin"
+            android:paddingEnd="@dimen/default_layout_margin"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent">
+
+            <androidx.appcompat.widget.AppCompatEditText
+                android:id="@+id/edit_text_nickname_input"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:inputType="text"
+                android:singleLine="true"
+                android:textColor="@color/text"
+                android:textSize="@dimen/invite_friend_nickname_edit_text_text_size"
+                android:fontFamily="@font/roboto_regular"
+                android:backgroundTint="@android:color/transparent"
+                android:textCursorDrawable="@drawable/cursor"
+                android:gravity="center"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_message_container"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/invite_friend_message_edit_text_container_height"
+        android:paddingHorizontal="@dimen/default_layout_margin"
+        android:layout_marginTop="@dimen/default_layout_margin"
+        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_nickname_container">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/default_layout_margin"
+            android:textColor="@color/text"
+            android:fontFamily="@font/montserrat_bold"
+            android:textSize="@dimen/invite_friend_nickname_label_text_size"
+            android:text="@string/invite_friend_message_label"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/edit_text_message_container"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/invite_friend_message_edit_text_height"
+            android:background="@drawable/invite_friend_edit_text_background"
+            android:paddingHorizontal="@dimen/default_layout_margin"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent">
+
+            <androidx.appcompat.widget.AppCompatEditText
+                android:id="@+id/edit_text_message_input"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:textColor="@color/text"
+                android:textSize="@dimen/invite_friend_nickname_edit_text_text_size"
+                android:fontFamily="@font/roboto_regular"
+                android:backgroundTint="@android:color/transparent"
+                android:textCursorDrawable="@drawable/cursor"
+                android:hint="@string/invite_friend_message_hint"
+                android:textColorHint="@color/placeholderTextInverted"
+                android:gravity="center|top"
+                android:inputType="textMultiLine"
+                android:maxLines="4"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_confirm_container"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/invite_friend_confirm_container_height"
+        android:paddingHorizontal="@dimen/default_layout_margin"
+        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_message_container">
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/button_create_invitation"
+            style="@style/CreateInvitationButton"
+            android:layout_width="@dimen/invite_friend_create_invitation_button_width"
+            android:layout_height="@dimen/invite_friend_create_invitation_button_height"
+            android:text="@string/invite_friend_create_invitation_button"
+            android:textSize="@dimen/invite_friend_create_invitation_button_text_size"
+            android:textColor="@android:color/white"
+            android:background="@drawable/button_background_white_rad_48"
+            android:backgroundTint="@color/primaryGreen"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layout_constraint_estimated_cost"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/default_layout_margin"
+            android:visibility="gone"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/button_create_invitation"
+            tools:visibility="visible">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_view_estimated_cost"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/secondaryText"
+                android:fontFamily="@font/montserrat_regular"
+                android:textSize="@dimen/invite_friend_estimated_cost_text_view_text_size"
+                android:text="@string/invite_friend_estimated_cost_text_view"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_view_estimated_cost_amount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/text"
+                android:fontFamily="@font/roboto_bold"
+                android:textSize="@dimen/invite_friend_estimated_cost_amount_text_view_text_size"
+                android:text="2 000"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/text_view_estimated_cost"/>
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_view_estimated_cost_unit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/secondaryText"
+                android:fontFamily="@font/roboto_regular"
+                android:textSize="@dimen/invite_friend_estimated_cost_amount_text_view_text_size"
+                android:text="@string/sat"
+                android:layout_marginStart="5dp"
+                app:layout_constraintStart_toEndOf="@+id/text_view_estimated_cost_amount"
+                app:layout_constraintTop_toBottomOf="@+id/text_view_estimated_cost"/>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

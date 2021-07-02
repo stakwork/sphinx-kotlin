@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/invite_friend_nav_graph"
+    app:startDestination="@+id/navigation_invite_friend_fragment">
+
+    <fragment
+        android:id="@+id/navigation_invite_friend_fragment"
+        android:name="chat.sphinx.invite_friend.ui.InviteFriendFragment"
+        tools:layout="@layout/fragment_invite_friend" />
+
+</navigation>

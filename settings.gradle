@@ -113,6 +113,7 @@ include ':sphinx:screens-detail:send-attachment:send-attachment'
 include ':sphinx:screens-detail:send-attachment:send-attachment-view-model-coordinator'
 include ':sphinx:screens-detail:support-ticket:support-ticket'
 include ':sphinx:screens-detail:transactions:transactions'
+include ':sphinx:screens-detail:invite-friend:invite-friend'
 
 // Service
 include ':sphinx:service:concepts:concept-service-media-player'
@@ -248,3 +249,4 @@ project(':kotlin:test:test-k-openssl').projectDir =
 
 //include ':sample'
 //project(':sample').projectDir = file(new File(rootDir, 'kotlin-android/sample'))
+include ':sphinx:screens-detail:invite-friend:invite-friend'
