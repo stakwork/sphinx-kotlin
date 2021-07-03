@@ -8,6 +8,7 @@ import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_message.*
+import chat.sphinx.wrapper_message_media.MessageMedia
 import chat.sphinx.wrapper_message_media.isImage
 
 internal inline val MessageHolderViewState.isReceived: Boolean
@@ -57,7 +58,7 @@ internal sealed class MessageHolderViewState(
                 if (chat.type.isConversation()) null else message.senderAlias?.value,
                 this is Sent,
                 this is Sent && (message.status.isReceived() || message.status.isConfirmed()),
-                message.messageContentDecrypted != null,
+                message.messageContentDecrypted != null || message.messageMedia?.mediaKeyDecrypted != null,
                 DateTime.getFormathmma().format(message.date.value),
             )
         } else {
@@ -128,26 +129,11 @@ internal sealed class MessageHolderViewState(
     }
 
     val bubbleImageAttachment: LayoutState.Bubble.ContainerSecond.ImageAttachment? by lazy(LazyThreadSafetyMode.NONE) {
-        message.giphyData?.let { giphyData ->
-            if (giphyData.url.isNotEmpty()) {
-                LayoutState.Bubble.ContainerSecond.ImageAttachment(
-                    giphyData.url.replace("giphy.gif", "200w.gif"),
-                    null
-                )
-            } else {
-                null
-            }
-        } ?: message.messageMedia?.let { media ->
-            media.url?.let { mediaUrl ->
-                if (media.mediaType.isImage && !message.isPaidMessage) {
-                    LayoutState.Bubble.ContainerSecond.ImageAttachment(
-                        mediaUrl.value,
-                        media
-                    )
-                } else {
-                    null
-                }
-            }
+        message.retrieveImageUrlAndMessageMedia()?.let { mediaData ->
+            LayoutState.Bubble.ContainerSecond.ImageAttachment(
+                mediaData.first,
+                mediaData.second
+            )
         }
     }
 
@@ -195,10 +181,20 @@ internal sealed class MessageHolderViewState(
 
     val bubbleReplyMessage: LayoutState.Bubble.ContainerFirst.ReplyMessage? by lazy {
         message.replyMessage?.let { nnMessage ->
-            LayoutState.Bubble.ContainerFirst.ReplyMessage(
-                messageSenderName(nnMessage),
+            var mediaUrl: String? = null
+            var messageMedia: MessageMedia? = null
 
+            nnMessage.retrieveImageUrlAndMessageMedia()?.let { mediaData ->
+                mediaUrl = mediaData.first
+                messageMedia = mediaData.second
+            }
+
+            LayoutState.Bubble.ContainerFirst.ReplyMessage(
+                showSent = this is Sent,
+                messageSenderName(nnMessage),
                 nnMessage.retrieveTextToShow() ?: "",
+                mediaUrl,
+                messageMedia
             )
         }
     }
@@ -234,8 +230,16 @@ internal sealed class MessageHolderViewState(
 
             val list = ArrayList<MenuItemState>(4)
 
-            if (this is Received) {
+            if (this is Received && message.isBoostAllowed) {
                 list.add(MenuItemState.Boost)
+            }
+
+            if (message.isCopyAllowed) {
+                list.add(MenuItemState.CopyText)
+            }
+
+            if (message.isReplyAllowed) {
+                list.add(MenuItemState.Reply)
             }
 
             if (list.isEmpty()) {

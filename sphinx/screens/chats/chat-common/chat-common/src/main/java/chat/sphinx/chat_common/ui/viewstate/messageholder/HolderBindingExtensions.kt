@@ -35,10 +35,11 @@ import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import java.io.File
 
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
-internal inline fun LayoutMessageHolderBinding.setView(
+internal fun LayoutMessageHolderBinding.setView(
     lifecycleScope: CoroutineScope,
     holderJobs: ArrayList<Job>,
     disposables: ArrayList<Disposable>,
@@ -81,24 +82,30 @@ internal inline fun LayoutMessageHolderBinding.setView(
         if (viewState.background !is BubbleBackground.Gone) {
             setBubbleImageAttachment(viewState.bubbleImageAttachment) { imageView, url, media ->
                 lifecycleScope.launch(dispatchers.mainImmediate) {
+
+                    val file: File? = media?.localFile
+
                     val options: ImageLoaderOptions? = if (media != null) {
                         val builder = ImageLoaderOptions.Builder()
 
                         // TODO: Add error resource drawable
 //                        builder.errorResId()
 
-                        media.host?.let { host ->
-                            memeServerTokenHandler.retrieveAuthenticationToken(host)?.let { token ->
-                                builder.addHeader(token.headerKey, token.headerValue)
+                        if (file == null) {
+                            media.host?.let { host ->
+                                memeServerTokenHandler.retrieveAuthenticationToken(host)
+                                    ?.let { token ->
+                                        builder.addHeader(token.headerKey, token.headerValue)
 
-                                media.mediaKeyDecrypted?.value?.let { key ->
-                                    val header = CryptoHeader.Decrypt.Builder()
-                                        .setScheme(CryptoScheme.Decrypt.JNCryptor)
-                                        .setPassword(key)
-                                        .build()
+                                        media.mediaKeyDecrypted?.value?.let { key ->
+                                            val header = CryptoHeader.Decrypt.Builder()
+                                                .setScheme(CryptoScheme.Decrypt.JNCryptor)
+                                                .setPassword(key)
+                                                .build()
 
-                                    builder.addHeader(header.key, header.value)
-                                }
+                                            builder.addHeader(header.key, header.value)
+                                        }
+                                    }
                             }
                         }
 
@@ -107,11 +114,14 @@ internal inline fun LayoutMessageHolderBinding.setView(
                         null
                     }
 
-                    imageLoader.load(imageView, url, options)
-                        .also { disposable ->
-                            disposables.add(disposable)
-                            disposable.await()
-                        }
+                    val disposable: Disposable = if (file != null) {
+                        imageLoader.load(imageView, file, options)
+                    } else {
+                        imageLoader.load(imageView, url, options)
+                    }
+
+                    disposables.add(disposable)
+                    disposable.await()
                 }.let { job ->
                     holderJobs.add(job)
                     job.invokeOnCompletion {
@@ -139,7 +149,52 @@ internal inline fun LayoutMessageHolderBinding.setView(
                     holderJobs.add(job)
                 }
             }
-            setBubbleReplyMessage(viewState.bubbleReplyMessage)
+            setBubbleReplyMessage(viewState.bubbleReplyMessage) { imageView, url, media ->
+                lifecycleScope.launch(dispatchers.mainImmediate) {
+
+                    val file: File? = media?.localFile
+
+                    val options: ImageLoaderOptions? = if (media != null) {
+                        val builder = ImageLoaderOptions.Builder()
+
+                        // TODO: Add error resource drawable
+//                        builder.errorResId()
+
+                        if (file == null) {
+                            media.host?.let { host ->
+                                memeServerTokenHandler.retrieveAuthenticationToken(host)
+                                    ?.let { token ->
+                                        builder.addHeader(token.headerKey, token.headerValue)
+
+                                        media.mediaKeyDecrypted?.value?.let { key ->
+                                            val header = CryptoHeader.Decrypt.Builder()
+                                                .setScheme(CryptoScheme.Decrypt.JNCryptor)
+                                                .setPassword(key)
+                                                .build()
+
+                                            builder.addHeader(header.key, header.value)
+                                        }
+                                    }
+                            }
+                        }
+
+                        builder.build()
+                    } else {
+                        null
+                    }
+
+                    val disposable: Disposable = if (file != null) {
+                        imageLoader.load(imageView, file, options)
+                    } else {
+                        imageLoader.load(imageView, url, options)
+                    }
+
+                    disposables.add(disposable)
+                    disposable.await()
+                }.let { job ->
+                    holderJobs.add(job)
+                }
+            }
         }
     }
 }
@@ -803,7 +858,8 @@ private inline fun LayoutMessageHolderBinding.setGroupActionMemberRemovalLayout(
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun LayoutMessageHolderBinding.setBubbleReplyMessage(
-    replyMessage: LayoutState.Bubble.ContainerFirst.ReplyMessage?
+    replyMessage: LayoutState.Bubble.ContainerFirst.ReplyMessage?,
+    loadImage: (ImageView, String, MessageMedia?) -> Unit
 ) {
     includeMessageHolderBubble.includeMessageReply.apply {
         if (replyMessage == null) {
@@ -812,29 +868,41 @@ internal inline fun LayoutMessageHolderBinding.setBubbleReplyMessage(
             root.visible
 
             imageViewReplyMediaImage.apply {
-//                @Exhaustive
-//                when (replyMessage.media) {
-//                    is MediaUrl -> {
-//                        visible
-//                    }
-//                    is MediaFile -> {
-//                        visible
-//                    }
-//                    null -> {
-//                        gone
-//                    }
-//                }
-                // TODO: handle attachment types and make visible
-                gone
+                if (replyMessage.url != null) {
+                    visible
+
+                    loadImage(this, replyMessage.url, replyMessage.media)
+                } else {
+                    gone
+                }
             }
             imageViewReplyTextOverlay.gone
 
             // Only used in the footer when replying to a message
             textViewReplyClose.gone
 
-            textViewReplyMessageLabel.text = replyMessage.text
+            viewReplyBarLeading.setBackgroundColor(root.context.getColor(R.color.lightPurple))
+
+            layoutConstraintMessageReplyDividerBottom.setBackgroundColor(root.context.getColor(
+                if (replyMessage.showReceived) {
+                    R.color.replyDividerReceived
+                } else {
+                    R.color.replyDividerSent
+                }
+            ))
+
+            textViewReplyMessageLabel.setTextColor(root.context.getColor(
+                if (replyMessage.showReceived) {
+                    R.color.washedOutReceivedText
+                } else {
+                    R.color.washedOutSentText
+                }
+            ))
+
             textViewReplySenderLabel.text = replyMessage.sender
-            viewReplyBarLeading.setBackgroundRandomColor(null)
+
+            textViewReplyMessageLabel.text = replyMessage.text
+            textViewReplyMessageLabel.goneIfFalse(replyMessage.text.isNotEmpty())
         }
     }
 }

@@ -32,6 +32,54 @@ inline fun Message.retrieveTextToShow(): String? =
 //            decrypted.value
     }
 
+@Suppress("NOTHING_TO_INLINE")
+inline fun Message.retrieveImageUrlAndMessageMedia(): Pair<String, MessageMedia?>? {
+    var mediaData: Pair<String, MessageMedia?>? = null
+
+    giphyData?.let { giphyData ->
+
+        mediaData = if (giphyData.url.isNotEmpty()) {
+            Pair(giphyData.url.replace("giphy.gif", "200w.gif"), null)
+        } else {
+            null
+        }
+
+    } ?: messageMedia?.let { media ->
+
+        if (media.mediaType.isImage && !isPaidMessage) {
+
+            // always prefer loading a file if it exists over loading a url
+            if (media.localFile != null) {
+                mediaData = Pair(
+                    media.url?.value?.let { if (it.isEmpty()) null else it } ?: "http://127.0.0.1",
+                    media,
+                )
+            } else {
+                media.url?.let { mediaUrl ->
+                    mediaData = Pair(mediaUrl.value, media)
+                }
+            }
+
+        }
+    }
+    return mediaData
+}
+
+
+//Message Actions
+inline val Message.isBoostAllowed: Boolean
+    get() = status.isReceived() &&
+            !type.isInvoice() &&
+            !type.isDirectPayment() &&
+            (uuid?.value ?: "").isNotEmpty()
+
+inline val Message.isCopyAllowed: Boolean
+    get() = (this.retrieveTextToShow() ?: "").isNotEmpty()
+
+inline val Message.isReplyAllowed: Boolean
+    get() = (type.isAttachment() || type.isMessage()) &&
+            (uuid?.value ?: "").isNotEmpty()
+
 //Paid types
 inline val Message.isPaidMessage: Boolean
     get() = type.isAttachment() && (messageMedia?.price?.value ?: 0L) > 0L

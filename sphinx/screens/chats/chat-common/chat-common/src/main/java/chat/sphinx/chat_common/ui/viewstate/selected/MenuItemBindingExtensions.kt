@@ -89,13 +89,13 @@ internal inline fun LayoutSelectedMessageMenuItemBinding.setMenuItem(item: MenuI
                 textViewSelectedMessageMenuItemIcon.text =
                     getString(R.string.material_icon_name_message_action_copy_link)
                 textViewSelectedMessageMenuItem.text =
-                    getString(R.string.selected_message_menu_item_copy_call_link)
+                    getString(R.string.selected_message_menu_item_copy_link)
             }
             is MenuItemState.CopyText -> {
                 textViewSelectedMessageMenuItemIcon.text =
                     getString(R.string.material_icon_name_message_action_copy_text)
                 textViewSelectedMessageMenuItem.text =
-                    getString(R.string.selected_message_menu_item_copy_call_link)
+                    getString(R.string.selected_message_menu_item_copy_text)
             }
             is MenuItemState.Delete -> {
                 textViewSelectedMessageMenuItemIcon.apply {
@@ -103,7 +103,7 @@ internal inline fun LayoutSelectedMessageMenuItemBinding.setMenuItem(item: MenuI
                     setTextColorExt(R.color.primaryRed)
                 }
                 textViewSelectedMessageMenuItem.apply {
-                    text = getString(R.string.selected_message_menu_item_copy_call_link)
+                    text = getString(R.string.selected_message_menu_item_delete)
                     setTextColorExt(R.color.primaryRed)
                 }
             }
@@ -111,13 +111,13 @@ internal inline fun LayoutSelectedMessageMenuItemBinding.setMenuItem(item: MenuI
                 textViewSelectedMessageMenuItemIcon.text =
                     getString(R.string.material_icon_name_message_action_reply)
                 textViewSelectedMessageMenuItem.text =
-                    getString(R.string.selected_message_menu_item_copy_call_link)
+                    getString(R.string.selected_message_menu_item_reply)
             }
             is MenuItemState.SaveFile -> {
                 textViewSelectedMessageMenuItemIcon.text =
                     getString(R.string.material_icon_name_message_action_save_file)
                 textViewSelectedMessageMenuItem.text =
-                    getString(R.string.selected_message_menu_item_copy_call_link)
+                    getString(R.string.selected_message_menu_item_save_file)
             }
         }
     }

@@ -142,6 +142,7 @@ abstract class CoreDBImpl(private val moshi: Moshi): CoreDB() {
                     media_key_decryptedAdapter = MediaKeyDecryptedAdapter(),
                     media_typeAdapter = MediaTypeAdapter(),
                     media_tokenAdapter = MediaTokenAdapter(),
+                    local_fileAdapter = FileAdapter.getInstance(),
                 ),
             ).sphinxDatabaseQueries
         }

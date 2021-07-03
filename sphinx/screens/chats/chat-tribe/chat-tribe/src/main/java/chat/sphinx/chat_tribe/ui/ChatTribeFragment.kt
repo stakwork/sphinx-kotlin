@@ -9,10 +9,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import app.cash.exhaustive.Exhaustive
 import by.kirich1409.viewbindingdelegate.viewBinding
-import chat.sphinx.chat_common.databinding.LayoutChatFooterBinding
-import chat.sphinx.chat_common.databinding.LayoutChatHeaderBinding
-import chat.sphinx.chat_common.databinding.LayoutMessageHolderBinding
-import chat.sphinx.chat_common.databinding.LayoutSelectedMessageBinding
+import chat.sphinx.chat_common.databinding.*
 import chat.sphinx.chat_common.ui.ChatFragment
 import chat.sphinx.chat_common.ui.viewstate.header.ChatHeaderFooterViewState
 import chat.sphinx.chat_tribe.R
@@ -46,11 +43,17 @@ internal class ChatTribeFragment: ChatFragment<
     override val headerBinding: LayoutChatHeaderBinding by viewBinding(
         LayoutChatHeaderBinding::bind, R.id.include_chat_tribe_header
     )
+    override val replyingMessageBinding: LayoutMessageReplyBinding by viewBinding(
+        LayoutMessageReplyBinding::bind, R.id.include_chat_tribe_message_reply
+    )
     override val selectedMessageBinding: LayoutSelectedMessageBinding by viewBinding(
         LayoutSelectedMessageBinding::bind, R.id.include_chat_tribe_selected_message
     )
     override val selectedMessageHolderBinding: LayoutMessageHolderBinding by viewBinding(
         LayoutMessageHolderBinding::bind, R.id.include_layout_message_holder_selected_message
+    )
+    override val attachmentSendBinding: LayoutAttachmentSendPreviewBinding by viewBinding(
+        LayoutAttachmentSendPreviewBinding::bind, R.id.include_chat_tribe_attachment_send_preview
     )
 
     override val recyclerView: RecyclerView
