@@ -36,4 +36,19 @@ sealed class DashboardSideEffect: SideEffect<Context>() {
         }
     }
 
+    class AlertConfirmDeleteInvite(
+        private val callback: () -> Unit
+    ): DashboardSideEffect() {
+        override suspend fun execute(value: Context) {
+            val builder = AlertDialog.Builder(value)
+            builder.setTitle(value.getString(R.string.alert_confirm_delete_invite_title))
+            builder.setMessage(value.getString(R.string.alert_confirm_delete_invite_message))
+            builder.setNegativeButton(android.R.string.cancel) { _,_ -> }
+            builder.setPositiveButton(android.R.string.ok) { _, _ ->
+                callback()
+            }
+            builder.show()
+        }
+    }
+
 }

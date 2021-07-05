@@ -2355,10 +2355,9 @@ abstract class SphinxRepository(
 
                     is Response.Success -> {
                         contactLock.withLock {
-                            withContext(io) {
-                                queries.transaction {
-                                    upsertContact(loadResponse.value, queries)
-                                }
+                            queries.transaction {
+                                updatedContactIds.add(ContactId(loadResponse.value.id))
+                                upsertContact(loadResponse.value, queries)
                             }
                         }
                         response = Response.Success(true)
@@ -2375,10 +2374,8 @@ abstract class SphinxRepository(
         var response: Response<Any, ResponseError>? = null
 
         contactLock.withLock {
-            withContext(io) {
-                updatedContactIds.add(invite.contactId)
-                queries.updateInviteStatus(invite.id, InviteStatus.PROCESSING_PAYMENT.toInviteStatus())
-            }
+            updatedContactIds.add(invite.contactId)
+            queries.updateInviteStatus(invite.id, InviteStatus.PROCESSING_PAYMENT.toInviteStatus())
         }
 
         networkQueryInvite.payInvite(invite.inviteString.value).collect { loadResponse ->
@@ -2388,10 +2385,8 @@ abstract class SphinxRepository(
 
                 is Response.Error -> {
                     contactLock.withLock {
-                        withContext(io) {
-                            updatedContactIds.add(invite.contactId)
-                            queries.updateInviteStatus(invite.id, InviteStatus.PAYMENT_PENDING.toInviteStatus())
-                        }
+                        updatedContactIds.add(invite.contactId)
+                        queries.updateInviteStatus(invite.id, InviteStatus.PAYMENT_PENDING.toInviteStatus())
                     }
                     response = loadResponse
                 }
@@ -2403,5 +2398,22 @@ abstract class SphinxRepository(
         }
 
         return response ?: Response.Error(ResponseError(""))
+    }
+
+    override suspend fun deleteInvite(invite: Invite): Response<Any, ResponseError> {
+        val queries = coreDB.getSphinxDatabaseQueries()
+
+        val response = networkQueryContact.deleteContact(invite.contactId)
+
+        if (response is Response.Success) {
+            contactLock.withLock {
+                queries.transaction {
+                    updatedContactIds.add(invite.contactId)
+                    deleteContactById(invite.contactId, queries)
+                }
+
+            }
+        }
+        return response
     }
 }

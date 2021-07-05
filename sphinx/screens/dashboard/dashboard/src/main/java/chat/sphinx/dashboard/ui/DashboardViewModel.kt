@@ -180,106 +180,7 @@ internal class DashboardViewModel @Inject constructor(
     init {
         viewModelScope.launch(mainImmediate) {
             repositoryDashboard.getAllContacts.distinctUntilChanged().collect { contacts ->
-                repositoryDashboard.getAllInvites.distinctUntilChanged().collect {
-                    collectionLock.withLock {
-                        contactsCollectionInitialized = true
-
-                        if (contacts.isEmpty()) {
-                            return@withLock
-                        }
-
-                        val newList = ArrayList<Contact>(contacts.size)
-                        val contactIds = ArrayList<ContactId>(contacts.size)
-
-                        withContext(default) {
-                            for (contact in contacts) {
-                                if (contact.isOwner.isTrue()) {
-                                    _accountOwnerStateFlow.value = contact
-                                    continue
-                                }
-
-                                contactIds.add(contact.id)
-                                newList.add(contact)
-                            }
-                        }
-
-                        _contactsStateFlow.value = newList.toList()
-
-                        // Don't push update to chat view state, let it's collection do it.
-                        if (!chatsCollectionInitialized) {
-                            return@withLock
-                        }
-
-                        withContext(default) {
-                            val currentChats = currentChatViewState.list.toMutableList()
-                            val chatContactIds = mutableListOf<ContactId>()
-
-                            var updateChatViewState = false
-                            for (chat in currentChatViewState.list) {
-
-                                val contact: Contact? = when (chat) {
-                                    is DashboardChat.Active.Conversation -> {
-                                        chat.contact
-                                    }
-                                    is DashboardChat.Active.GroupOrTribe -> {
-                                        null
-                                    }
-                                    is DashboardChat.Inactive.Conversation -> {
-                                        chat.contact
-                                    }
-                                    is DashboardChat.Inactive.Invite -> {
-                                        chat.contact
-                                    }
-                                }
-
-                                contact?.let {
-                                    chatContactIds.add(it.id)
-                                    // if the id of the currently displayed chat is not contained
-                                    // in the list collected here, it's either a new contact w/o
-                                    // a chat, or a contact that was deleted which we need to remove
-                                    // from the list of chats.
-
-                                    if (!contactIds.contains(it.id)) {
-                                        //Contact deleted
-                                        updateChatViewState = true
-                                        currentChats.remove(chat)
-                                        chatContactIds.remove(it.id)
-                                    }
-
-                                    if (repositoryDashboard.updatedContactIds.contains(it.id)) {
-                                        //Contact updated
-                                        currentChats.remove(chat)
-                                        chatContactIds.remove(it.id)
-                                    }
-                                }
-                            }
-
-                            for (contact in _contactsStateFlow.value) {
-                                if (!chatContactIds.contains(contact.id)) {
-                                    updateChatViewState = true
-
-                                    if (contact.isInviteContact()) {
-                                        val invite: Invite? = contact.inviteId?.let {
-                                            repositoryDashboard.getInviteById(it).firstOrNull()
-                                        }
-                                        currentChats.add(
-                                            DashboardChat.Inactive.Invite(contact, invite)
-                                        )
-                                    } else {
-                                        currentChats.add(
-                                            DashboardChat.Inactive.Conversation(contact)
-                                        )
-                                    }
-                                }
-                            }
-
-                            if (updateChatViewState) {
-                                chatViewStateContainer.updateDashboardChats(currentChats.toList())
-                                repositoryDashboard.updatedContactIds = mutableListOf()
-                            }
-                        }
-                    }
-                }
+                updateChatListContacts(contacts)
             }
         }
 
@@ -353,6 +254,13 @@ internal class DashboardViewModel @Inject constructor(
             }
         }
 
+        viewModelScope.launch(mainImmediate) {
+            delay(50L)
+            repositoryDashboard.getAllInvites.distinctUntilChanged().collect {
+                updateChatListContacts(_contactsStateFlow.value)
+            }
+        }
+
         // Prime it...
         viewModelScope.launch(mainImmediate) {
             try {
@@ -362,6 +270,107 @@ internal class DashboardViewModel @Inject constructor(
                     }
                 }
             } catch (e: Exception) {}
+        }
+    }
+
+    private suspend fun updateChatListContacts(contacts: List<Contact>) {
+        collectionLock.withLock {
+            contactsCollectionInitialized = true
+
+            if (contacts.isEmpty()) {
+                return@withLock
+            }
+
+            val newList = ArrayList<Contact>(contacts.size)
+            val contactIds = ArrayList<ContactId>(contacts.size)
+
+            withContext(default) {
+                for (contact in contacts) {
+                    if (contact.isOwner.isTrue()) {
+                        _accountOwnerStateFlow.value = contact
+                        continue
+                    }
+
+                    contactIds.add(contact.id)
+                    newList.add(contact)
+                }
+            }
+
+            _contactsStateFlow.value = newList.toList()
+
+            // Don't push update to chat view state, let it's collection do it.
+            if (!chatsCollectionInitialized) {
+                return@withLock
+            }
+
+            withContext(default) {
+                val currentChats = currentChatViewState.list.toMutableList()
+                val chatContactIds = mutableListOf<ContactId>()
+
+                var updateChatViewState = false
+                for (chat in currentChatViewState.list) {
+
+                    val contact: Contact? = when (chat) {
+                        is DashboardChat.Active.Conversation -> {
+                            chat.contact
+                        }
+                        is DashboardChat.Active.GroupOrTribe -> {
+                            null
+                        }
+                        is DashboardChat.Inactive.Conversation -> {
+                            chat.contact
+                        }
+                        is DashboardChat.Inactive.Invite -> {
+                            chat.contact
+                        }
+                    }
+
+                    contact?.let {
+                        chatContactIds.add(it.id)
+                        // if the id of the currently displayed chat is not contained
+                        // in the list collected here, it's either a new contact w/o
+                        // a chat, or a contact that was deleted which we need to remove
+                        // from the list of chats.
+
+                        if (!contactIds.contains(it.id)) {
+                            //Contact deleted
+                            updateChatViewState = true
+                            currentChats.remove(chat)
+                            chatContactIds.remove(it.id)
+                        }
+
+                        if (repositoryDashboard.updatedContactIds.contains(it.id)) {
+                            //Contact updated
+                            currentChats.remove(chat)
+                            chatContactIds.remove(it.id)
+                        }
+                    }
+                }
+
+                for (contact in _contactsStateFlow.value) {
+                    if (!chatContactIds.contains(contact.id)) {
+                        updateChatViewState = true
+
+                        if (contact.isInviteContact()) {
+                            val invite: Invite? = contact.inviteId?.let {
+                                repositoryDashboard.getInviteById(it).firstOrNull()
+                            }
+                            currentChats.add(
+                                DashboardChat.Inactive.Invite(contact, invite)
+                            )
+                        } else {
+                            currentChats.add(
+                                DashboardChat.Inactive.Conversation(contact)
+                            )
+                        }
+                    }
+                }
+
+                if (updateChatViewState) {
+                    chatViewStateContainer.updateDashboardChats(currentChats.toList())
+                    repositoryDashboard.updatedContactIds = mutableListOf()
+                }
+            }
         }
     }
 
@@ -448,6 +457,16 @@ internal class DashboardViewModel @Inject constructor(
             DashboardSideEffect.AlertConfirmPayInvite(invite.price?.value ?: 0) {
                 viewModelScope.launch(mainImmediate) {
                     repositoryDashboard.payForInvite(invite)
+                }
+            }
+        )
+    }
+
+    suspend fun deleteInvite(invite: Invite) {
+        submitSideEffect(
+            DashboardSideEffect.AlertConfirmDeleteInvite() {
+                viewModelScope.launch(mainImmediate) {
+                    repositoryDashboard.deleteInvite(invite)
                 }
             }
         )

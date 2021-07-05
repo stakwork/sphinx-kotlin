@@ -20,10 +20,7 @@ import chat.sphinx.dashboard.ui.currentChatViewState
 import chat.sphinx.resources.*
 import chat.sphinx.wrapper_chat.*
 import chat.sphinx.wrapper_common.DateTime
-import chat.sphinx.wrapper_common.invite.InviteStatus
-import chat.sphinx.wrapper_common.invite.isDelivered
-import chat.sphinx.wrapper_common.invite.isPaymentPending
-import chat.sphinx.wrapper_common.invite.isReady
+import chat.sphinx.wrapper_common.invite.*
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.util.getInitials
 import chat.sphinx.wrapper_message.*
@@ -251,6 +248,8 @@ internal class ChatListAdapter(
                                         )
                                     } else if (invite.status.isPaymentPending()) {
                                         viewModel.payForInvite(invite)
+                                    } else if (invite.status.isExpired()) {
+                                        viewModel.deleteInvite(invite)
                                     }
                                 }
                             }
@@ -362,6 +361,7 @@ internal class ChatListAdapter(
 
                     if (nnDashboardChat is DashboardChat.Inactive.Invite) {
                         textViewChatHolderMessage.setTextFont(R.font.roboto_bold)
+                        textViewChatHolderMessage.setTextColorExt(R.color.text)
 
                         layoutDashboardChatContactHolder.gone
                         layoutDashboardInviteHolder.visible
