@@ -82,7 +82,7 @@ internal class QRCodeViewModel @Inject constructor(
 
             viewModelScope.launch(mainImmediate) {
                 submitSideEffect(
-                    NotifySideEffect(app.getString(R.string.qr_code_notify_copied))
+                    NotifySideEffect(String.format(app.getString(R.string.qr_code_notify_copied), args.viewTitle))
                 )
             }
         }
