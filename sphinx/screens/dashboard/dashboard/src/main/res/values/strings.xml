@@ -12,4 +12,8 @@
 
     <string name="not_valid_tribe_link">QR code is not a Join Tribe link</string>
     <string name="invite_name">Invite: %s</string>
+    <string name="invite_qr_code_header_name">INVITE CODE</string>
+
+    <string name="alert_confirm_pay_invite_title">Pay Invite</string>
+    <string name="alert_confirm_pay_invite_message">Are you sure you want to pay %d sat for this invite?</string>
 </resources>

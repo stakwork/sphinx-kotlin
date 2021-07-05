@@ -63,6 +63,9 @@ inline fun Int.toInviteStatus(): InviteStatus =
         InviteStatus.PAYMENT_PENDING -> {
             InviteStatus.PaymentPending
         }
+        InviteStatus.PROCESSING_PAYMENT -> {
+            InviteStatus.ProcessingPayment
+        }
         else -> {
             InviteStatus.Unknown(this)
         }

@@ -51,8 +51,8 @@ private inline fun FragmentDashboardBinding.searchBarClearFocus() {
 @AndroidEntryPoint
 internal class DashboardFragment : MotionLayoutFragment<
         Any,
-        Nothing,
-        SideEffect<Nothing>,
+        Context,
+        DashboardSideEffect,
         NavDrawerViewState,
         DashboardViewModel,
         FragmentDashboardBinding
@@ -213,6 +213,7 @@ internal class DashboardFragment : MotionLayoutFragment<
 
     override fun onStart() {
         super.onStart()
+
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.getAccountBalance().collect { nodeBalance ->
                 if (nodeBalance == null) return@collect
@@ -323,6 +324,7 @@ internal class DashboardFragment : MotionLayoutFragment<
         return arrayOf(binding.layoutMotionDashboard)
     }
 
-    override suspend fun onSideEffectCollect(sideEffect: SideEffect<Nothing>) {}
-    override fun subscribeToSideEffectSharedFlow() {}
+    override suspend fun onSideEffectCollect(sideEffect: DashboardSideEffect) {
+        sideEffect.execute(requireActivity())
+    }
 }

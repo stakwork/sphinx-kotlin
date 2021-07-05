@@ -296,6 +296,13 @@ inline fun TransactionCallbacks.upsertInvite(dto: InviteDto, queries: SphinxData
 //        )
 }
 
+@Suppress("NOTHING_TO_INLINE")
+inline fun SphinxDatabaseQueries.updateInviteStatus(inviteId: InviteId, inviteStatus: InviteStatus) {
+    transaction {
+        inviteUpdateStatus(inviteStatus, inviteId)
+    }
+}
+
 @Suppress("SpellCheckingInspection")
 fun TransactionCallbacks.upsertMessage(dto: MessageDto, queries: SphinxDatabaseQueries) {
 

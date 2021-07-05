@@ -7,9 +7,6 @@ import com.squareup.moshi.JsonClass
 @JsonClass(generateAdapter = true)
 data class PayInviteResponse(
     override val success: Boolean,
-
-    @Json(name = "invite")
-    override val response: InviteDto,
-
+    override val response: PayInviteDto,
     override val error: String? = null
-): RelayResponse<InviteDto>()
+): RelayResponse<PayInviteDto>()

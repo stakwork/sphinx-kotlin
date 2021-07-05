@@ -1,6 +1,7 @@
 package chat.sphinx.dashboard.ui
 
 import android.app.Application
+import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
@@ -40,6 +41,7 @@ import chat.sphinx.wrapper_message.Message
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.MotionLayoutViewModel
+import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.sideeffect.SideEffect
 import io.matthewnelson.concept_views.viewstate.collect
@@ -85,8 +87,8 @@ internal class DashboardViewModel @Inject constructor(
     private val socketIOManager: SocketIOManager,
 ): MotionLayoutViewModel<
         Any,
-        Nothing,
-        SideEffect<Nothing>,
+        Context,
+        DashboardSideEffect,
         NavDrawerViewState
         >(dispatchers, NavDrawerViewState.Closed)
 {
@@ -178,101 +180,103 @@ internal class DashboardViewModel @Inject constructor(
     init {
         viewModelScope.launch(mainImmediate) {
             repositoryDashboard.getAllContacts.distinctUntilChanged().collect { contacts ->
-                collectionLock.withLock {
-                    contactsCollectionInitialized = true
+                repositoryDashboard.getAllInvites.distinctUntilChanged().collect {
+                    collectionLock.withLock {
+                        contactsCollectionInitialized = true
 
-                    if (contacts.isEmpty()) {
-                        return@withLock
-                    }
-
-                    val newList = ArrayList<Contact>(contacts.size)
-                    val contactIds = ArrayList<ContactId>(contacts.size)
-
-                    withContext(default) {
-                        for (contact in contacts) {
-                            if (contact.isOwner.isTrue()) {
-                                _accountOwnerStateFlow.value = contact
-                                continue
-                            }
-
-                            contactIds.add(contact.id)
-                            newList.add(contact)
+                        if (contacts.isEmpty()) {
+                            return@withLock
                         }
-                    }
 
-                    _contactsStateFlow.value = newList.toList()
+                        val newList = ArrayList<Contact>(contacts.size)
+                        val contactIds = ArrayList<ContactId>(contacts.size)
 
-                    // Don't push update to chat view state, let it's collection do it.
-                    if (!chatsCollectionInitialized) {
-                        return@withLock
-                    }
-
-                    withContext(default) {
-                        val currentChats = currentChatViewState.list.toMutableList()
-                        val chatContactIds = mutableListOf<ContactId>()
-
-                        var updateChatViewState = false
-                        for (chat in currentChatViewState.list) {
-
-                            val contact: Contact? = when (chat) {
-                                is DashboardChat.Active.Conversation -> {
-                                    chat.contact
-                                }
-                                is DashboardChat.Active.GroupOrTribe -> {
-                                    null
-                                }
-                                is DashboardChat.Inactive.Conversation -> {
-                                    chat.contact
-                                }
-                                is DashboardChat.Inactive.Invite -> {
-                                    chat.contact
-                                }
-                            }
-
-                            contact?.let {
-                                chatContactIds.add(it.id)
-                                // if the id of the currently displayed chat is not contained
-                                // in the list collected here, it's either a new contact w/o
-                                // a chat, or a contact that was deleted which we need to remove
-                                // from the list of chats.
-
-                                if (!contactIds.contains(it.id)) {
-                                    //Contact deleted
-                                    updateChatViewState = true
-                                    currentChats.remove(chat)
-                                    chatContactIds.remove(it.id)
+                        withContext(default) {
+                            for (contact in contacts) {
+                                if (contact.isOwner.isTrue()) {
+                                    _accountOwnerStateFlow.value = contact
+                                    continue
                                 }
 
-                                if (repositoryDashboard.updatedContactIds.contains(it.id)) {
-                                    //Contact updated
-                                    currentChats.remove(chat)
-                                    chatContactIds.remove(it.id)
-                                }
+                                contactIds.add(contact.id)
+                                newList.add(contact)
                             }
                         }
 
-                        for (contact in _contactsStateFlow.value) {
-                            if (!chatContactIds.contains(contact.id)) {
-                                updateChatViewState = true
+                        _contactsStateFlow.value = newList.toList()
 
-                                if (contact.isInviteContact()) {
-                                    val invite: Invite? = contact.inviteId?.let {
-                                        repositoryDashboard.getInviteById(it).firstOrNull()
+                        // Don't push update to chat view state, let it's collection do it.
+                        if (!chatsCollectionInitialized) {
+                            return@withLock
+                        }
+
+                        withContext(default) {
+                            val currentChats = currentChatViewState.list.toMutableList()
+                            val chatContactIds = mutableListOf<ContactId>()
+
+                            var updateChatViewState = false
+                            for (chat in currentChatViewState.list) {
+
+                                val contact: Contact? = when (chat) {
+                                    is DashboardChat.Active.Conversation -> {
+                                        chat.contact
                                     }
-                                    currentChats.add(
-                                        DashboardChat.Inactive.Invite(contact, invite)
-                                    )
-                                } else {
-                                    currentChats.add(
-                                        DashboardChat.Inactive.Conversation(contact)
-                                    )
+                                    is DashboardChat.Active.GroupOrTribe -> {
+                                        null
+                                    }
+                                    is DashboardChat.Inactive.Conversation -> {
+                                        chat.contact
+                                    }
+                                    is DashboardChat.Inactive.Invite -> {
+                                        chat.contact
+                                    }
+                                }
+
+                                contact?.let {
+                                    chatContactIds.add(it.id)
+                                    // if the id of the currently displayed chat is not contained
+                                    // in the list collected here, it's either a new contact w/o
+                                    // a chat, or a contact that was deleted which we need to remove
+                                    // from the list of chats.
+
+                                    if (!contactIds.contains(it.id)) {
+                                        //Contact deleted
+                                        updateChatViewState = true
+                                        currentChats.remove(chat)
+                                        chatContactIds.remove(it.id)
+                                    }
+
+                                    if (repositoryDashboard.updatedContactIds.contains(it.id)) {
+                                        //Contact updated
+                                        currentChats.remove(chat)
+                                        chatContactIds.remove(it.id)
+                                    }
                                 }
                             }
-                        }
 
-                        if (updateChatViewState) {
-                            chatViewStateContainer.updateDashboardChats(currentChats.toList())
-                            repositoryDashboard.updatedContactIds = mutableListOf()
+                            for (contact in _contactsStateFlow.value) {
+                                if (!chatContactIds.contains(contact.id)) {
+                                    updateChatViewState = true
+
+                                    if (contact.isInviteContact()) {
+                                        val invite: Invite? = contact.inviteId?.let {
+                                            repositoryDashboard.getInviteById(it).firstOrNull()
+                                        }
+                                        currentChats.add(
+                                            DashboardChat.Inactive.Invite(contact, invite)
+                                        )
+                                    } else {
+                                        currentChats.add(
+                                            DashboardChat.Inactive.Conversation(contact)
+                                        )
+                                    }
+                                }
+                            }
+
+                            if (updateChatViewState) {
+                                chatViewStateContainer.updateDashboardChats(currentChats.toList())
+                                repositoryDashboard.updatedContactIds = mutableListOf()
+                            }
                         }
                     }
                 }
@@ -325,10 +329,19 @@ internal class DashboardViewModel @Inject constructor(
                         withContext(default) {
                             for (contact in _contactsStateFlow.value) {
 
-                                if (contact.status.isConfirmed() && !contactsAdded.contains(contact.id)) {
-                                    newList.add(
-                                        DashboardChat.Inactive.Conversation(contact)
-                                    )
+                                if (!contactsAdded.contains(contact.id)) {
+                                    if (contact.isInviteContact()) {
+                                        val invite: Invite? = contact.inviteId?.let {
+                                            repositoryDashboard.getInviteById(it).firstOrNull()
+                                        }
+                                        newList.add(
+                                            DashboardChat.Inactive.Invite(contact, invite)
+                                        )
+                                    } else {
+                                        newList.add(
+                                            DashboardChat.Inactive.Conversation(contact)
+                                        )
+                                    }
                                 }
 
                             }
@@ -428,6 +441,16 @@ internal class DashboardViewModel @Inject constructor(
                 _networkStateFlow.value = response
             }
         }
+    }
+
+    suspend fun payForInvite(invite: Invite) {
+        submitSideEffect(
+            DashboardSideEffect.AlertConfirmPayInvite(invite.price?.value ?: 0) {
+                viewModelScope.launch(mainImmediate) {
+                    repositoryDashboard.payForInvite(invite)
+                }
+            }
+        )
     }
 
     override suspend fun onMotionSceneCompletion(value: Any) {

@@ -1,6 +1,7 @@
 package chat.sphinx.concept_repository_dashboard
 
 import chat.sphinx.kotlin_response.LoadResponse
+import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_common.dashboard.ChatId
@@ -22,11 +23,14 @@ interface RepositoryDashboard {
 
     val accountOwner: StateFlow<Contact?>
     val getAllContacts: Flow<List<Contact>>
+    val getAllInvites: Flow<List<Invite>>
     fun getContactById(contactId: ContactId): Flow<Contact?>
     var updatedContactIds: MutableList<ContactId>
 
     fun getMessageById(messageId: MessageId): Flow<Message?>
     fun getInviteById(inviteId: InviteId): Flow<Invite?>
+
+    suspend fun payForInvite(invite: Invite): Response<Any, ResponseError>
 
     val networkRefreshBalance: Flow<LoadResponse<Boolean, ResponseError>>
     val networkRefreshContacts: Flow<LoadResponse<Boolean, ResponseError>>

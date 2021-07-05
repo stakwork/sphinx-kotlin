@@ -20,11 +20,12 @@ import chat.sphinx.dashboard.ui.currentChatViewState
 import chat.sphinx.resources.*
 import chat.sphinx.wrapper_chat.*
 import chat.sphinx.wrapper_common.DateTime
+import chat.sphinx.wrapper_common.invite.InviteStatus
+import chat.sphinx.wrapper_common.invite.isDelivered
 import chat.sphinx.wrapper_common.invite.isPaymentPending
+import chat.sphinx.wrapper_common.invite.isReady
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.util.getInitials
-import chat.sphinx.wrapper_contact.isInviteContact
-import chat.sphinx.wrapper_contact.isPending
 import chat.sphinx.wrapper_message.*
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
@@ -105,6 +106,9 @@ internal class ChatListAdapter(
                         old.chat.isMuted            == new.chat.isMuted             &&
                         old.chat.seen               == new.chat.seen                &&
                         old.chat.photoUrl           == new.chat.photoUrl
+                    }
+                    old is DashboardChat.Inactive.Invite && new is DashboardChat.Inactive.Invite -> {
+                        old.invite?.status == new.invite?.status
                     }
                     old is DashboardChat.Inactive && new is DashboardChat.Inactive -> {
                         old.chatName == new.chatName
@@ -235,7 +239,22 @@ internal class ChatListAdapter(
                                     )
                                 }
                         }
-                        is DashboardChat.Inactive.Invite -> {}
+                        is DashboardChat.Inactive.Invite -> {
+                            dashboardChat.invite?.let { invite ->
+                                lifecycleOwner.lifecycleScope.launch {
+                                    if (invite.status.isReady() || invite.status.isDelivered()) {
+                                        viewModel.dashboardNavigator.toQRCodeDetail(
+                                            invite.inviteString.value,
+                                            binding.root.context.getString(
+                                                R.string.invite_qr_code_header_name
+                                            )
+                                        )
+                                    } else if (invite.status.isPaymentPending()) {
+                                        viewModel.payForInvite(invite)
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }

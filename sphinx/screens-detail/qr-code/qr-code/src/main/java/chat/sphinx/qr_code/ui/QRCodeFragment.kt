@@ -39,8 +39,6 @@ internal class QRCodeFragment: SideEffectFragment<
             .addNavigationBarPadding(binding.layoutConstraintQrCodeFragment)
 
         binding.includeQrCodeHeader.apply {
-            textViewDetailScreenHeaderName.text = getString(R.string.qr_code_header_name)
-
             textViewDetailScreenClose.setOnClickListener {
                 lifecycleScope.launch(viewModel.mainImmediate) {
                     viewModel.navigator.closeDetailScreen()
@@ -60,10 +58,19 @@ internal class QRCodeFragment: SideEffectFragment<
     }
 
     override suspend fun onViewStateFlowCollect(viewState: QRCodeViewState) {
-        binding.includeQrCodeHeader.textViewDetailScreenHeaderNavBack
-            .goneIfFalse(viewState.showBackButton)
-        binding.qrCodeLabel.text = viewState.qrText
-        viewState.qrBitmap?.let { binding.qrCode.setImageBitmap(it) }
+        binding.apply {
+            includeQrCodeHeader.apply {
+                textViewDetailScreenHeaderNavBack
+                    .goneIfFalse(viewState.showBackButton)
+                textViewDetailScreenHeaderName.text = viewState.viewTitle
+            }
+
+            qrCodeLabel.text = viewState.qrText
+
+            viewState.qrBitmap?.let {
+                qrCode.setImageBitmap(it)
+            }
+        }
     }
 
     override suspend fun onSideEffectCollect(sideEffect: NotifySideEffect) {

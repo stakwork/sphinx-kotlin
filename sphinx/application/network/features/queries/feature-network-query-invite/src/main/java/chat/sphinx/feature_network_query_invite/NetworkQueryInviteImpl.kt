@@ -60,7 +60,7 @@ class NetworkQueryInviteImpl(
 
     override fun payInvite(
         inviteString: String
-    ): Flow<LoadResponse<InviteDto, ResponseError>> {
+    ): Flow<LoadResponse<PayInviteDto, ResponseError>> {
         return networkRelayCall.relayPost(
             responseJsonClass = PayInviteResponse::class.java,
             relayEndpoint = String.format(ENDPOINT_INVITE_PAY, inviteString),

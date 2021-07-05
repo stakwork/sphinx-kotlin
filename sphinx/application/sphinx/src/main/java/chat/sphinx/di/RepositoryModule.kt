@@ -9,6 +9,7 @@ import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
 import chat.sphinx.concept_network_query_contact.NetworkQueryContact
+import chat.sphinx.concept_network_query_invite.NetworkQueryInvite
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_message.NetworkQueryMessage
 import chat.sphinx.concept_repository_contact.ContactRepository
@@ -123,6 +124,7 @@ object RepositoryModule {
         networkQueryContact: NetworkQueryContact,
         networkQueryLightning: NetworkQueryLightning,
         networkQueryMessage: NetworkQueryMessage,
+        networkQueryInvite: NetworkQueryInvite,
         socketIOManager: SocketIOManager,
         rsa: RSA,
         sphinxLogger: SphinxLogger,
@@ -141,6 +143,7 @@ object RepositoryModule {
             networkQueryContact,
             networkQueryLightning,
             networkQueryMessage,
+            networkQueryInvite,
             rsa,
             socketIOManager,
             sphinxLogger,

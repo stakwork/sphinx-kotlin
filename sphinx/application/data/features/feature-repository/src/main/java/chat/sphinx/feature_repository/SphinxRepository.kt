@@ -12,6 +12,7 @@ import chat.sphinx.concept_network_query_contact.NetworkQueryContact
 import chat.sphinx.concept_network_query_contact.model.ContactDto
 import chat.sphinx.concept_network_query_contact.model.PostContactDto
 import chat.sphinx.concept_network_query_contact.model.PutContactDto
+import chat.sphinx.concept_network_query_invite.NetworkQueryInvite
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_lightning.model.balance.BalanceDto
 import chat.sphinx.concept_network_query_message.NetworkQueryMessage
@@ -52,6 +53,8 @@ import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.dashboard.InviteId
 import chat.sphinx.wrapper_common.dashboard.toChatId
+import chat.sphinx.wrapper_common.invite.InviteStatus
+import chat.sphinx.wrapper_common.invite.toInviteStatus
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.LightningRouteHint
 import chat.sphinx.wrapper_common.lightning.Sat
@@ -104,6 +107,7 @@ abstract class SphinxRepository(
     private val networkQueryContact: NetworkQueryContact,
     private val networkQueryLightning: NetworkQueryLightning,
     private val networkQueryMessage: NetworkQueryMessage,
+    private val networkQueryInvite: NetworkQueryInvite,
     private val rsa: RSA,
     private val socketIOManager: SocketIOManager,
     protected val LOG: SphinxLogger,
@@ -169,8 +173,12 @@ abstract class SphinxRepository(
                     // TODO: Implement
                 }
                 is SphinxSocketIOMessage.Type.Invite -> {
-                    // TODO: Implement
-//                    queries.upsertInvite(msg.dto)
+                    contactLock.withLock {
+                        queries.transaction {
+                            updatedContactIds.add(ContactId(msg.dto.contact_id))
+                            upsertInvite(msg.dto, queries)
+                        }
+                    }
                 }
                 is SphinxSocketIOMessage.Type.InvoicePayment -> {
                     // TODO: Implement
@@ -447,6 +455,17 @@ abstract class SphinxRepository(
                     .asFlow()
                     .mapToList(io)
                     .map { contactDboPresenterMapper.mapListFrom(it) }
+            )
+        }
+    }
+
+    override val getAllInvites: Flow<List<Invite>> by lazy {
+        flow {
+            emitAll(
+                coreDB.getSphinxDatabaseQueries().inviteGetAll()
+                    .asFlow()
+                    .mapToList(io)
+                    .map { inviteDboPresenterMapper.mapListFrom(it) }
             )
         }
     }
@@ -2349,5 +2368,40 @@ abstract class SphinxRepository(
         }.join()
 
         emit(response ?: Response.Error(ResponseError("")))
+    }
+
+    override suspend fun payForInvite(invite: Invite): Response<Any, ResponseError> {
+        val queries = coreDB.getSphinxDatabaseQueries()
+        var response: Response<Any, ResponseError>? = null
+
+        contactLock.withLock {
+            withContext(io) {
+                updatedContactIds.add(invite.contactId)
+                queries.updateInviteStatus(invite.id, InviteStatus.PROCESSING_PAYMENT.toInviteStatus())
+            }
+        }
+
+        networkQueryInvite.payInvite(invite.inviteString.value).collect { loadResponse ->
+            @Exhaustive
+            when (loadResponse) {
+                is LoadResponse.Loading -> {}
+
+                is Response.Error -> {
+                    contactLock.withLock {
+                        withContext(io) {
+                            updatedContactIds.add(invite.contactId)
+                            queries.updateInviteStatus(invite.id, InviteStatus.PAYMENT_PENDING.toInviteStatus())
+                        }
+                    }
+                    response = loadResponse
+                }
+
+                is Response.Success -> {
+                    response = Response.Success(true)
+                }
+            }
+        }
+
+        return response ?: Response.Error(ResponseError(""))
     }
 }
