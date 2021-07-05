@@ -18,7 +18,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/layout_constraint_nickname_container"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/invite_friend_nickname_edit_text_container_height"
+        android:layout_height="wrap_content"
         android:paddingHorizontal="@dimen/default_layout_margin"
         android:layout_marginTop="@dimen/default_double_layout_margin"
         app:layout_constraintTop_toBottomOf="@+id/include_invite_friend_header">
@@ -31,19 +31,20 @@
             android:fontFamily="@font/montserrat_bold"
             android:textSize="@dimen/invite_friend_nickname_label_text_size"
             android:text="@string/invite_friend_nickname_label"
+            android:layout_marginBottom="@dimen/default_layout_margin"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/edit_text_nickname_container">
 
         </androidx.appcompat.widget.AppCompatTextView>
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/edit_text_nickname_container"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/invite_friend_nickname_edit_text_height"
+            android:layout_height="wrap_content"
             android:background="@drawable/invite_friend_edit_text_background"
-            android:paddingStart="@dimen/default_layout_margin"
-            android:paddingEnd="@dimen/default_layout_margin"
+            android:paddingHorizontal="@dimen/default_layout_margin"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintBottom_toBottomOf="parent">
@@ -52,7 +53,7 @@
                 android:id="@+id/edit_text_nickname_input"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:inputType="text"
+                android:inputType="textPersonName|textCapWords"
                 android:singleLine="true"
                 android:textColor="@color/text"
                 android:textSize="@dimen/invite_friend_nickname_edit_text_text_size"
@@ -72,7 +73,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/layout_constraint_message_container"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/invite_friend_message_edit_text_container_height"
+        android:layout_height="wrap_content"
         android:paddingHorizontal="@dimen/default_layout_margin"
         android:layout_marginTop="@dimen/default_layout_margin"
         app:layout_constraintTop_toBottomOf="@+id/layout_constraint_nickname_container">
@@ -85,9 +86,11 @@
             android:fontFamily="@font/montserrat_bold"
             android:textSize="@dimen/invite_friend_nickname_label_text_size"
             android:text="@string/invite_friend_message_label"
+            android:layout_marginBottom="@dimen/default_layout_margin"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"/>
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/edit_text_message_container"/>
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/edit_text_message_container"
@@ -111,7 +114,7 @@
                 android:hint="@string/invite_friend_message_hint"
                 android:textColorHint="@color/placeholderTextInverted"
                 android:gravity="center|top"
-                android:inputType="textMultiLine"
+                android:inputType="textMultiLine|textCapSentences"
                 android:maxLines="4"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintTop_toTopOf="parent"

@@ -81,6 +81,7 @@ internal class InviteFriendViewModel @Inject constructor(
                     }
 
                     is Response.Error -> {
+                        submitSideEffect(InviteFriendSideEffect.InviteFailed)
                         updateViewState(InviteFriendViewState.InviteCreationFailed)
                     }
 

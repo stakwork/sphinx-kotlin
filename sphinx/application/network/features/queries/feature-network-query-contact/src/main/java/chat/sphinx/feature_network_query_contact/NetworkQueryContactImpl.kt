@@ -3,9 +3,7 @@ package chat.sphinx.feature_network_query_contact
 import chat.sphinx.concept_network_query_contact.NetworkQueryContact
 import chat.sphinx.concept_network_query_contact.model.*
 import chat.sphinx.concept_network_relay_call.NetworkRelayCall
-import chat.sphinx.feature_network_query_contact.model.ContactRelayResponse
-import chat.sphinx.feature_network_query_contact.model.DeleteContactRelayResponse
-import chat.sphinx.feature_network_query_contact.model.GenerateTokenRelayResponse
+import chat.sphinx.feature_network_query_contact.model.*
 import chat.sphinx.feature_network_query_contact.model.GetContactsRelayResponse
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.kotlin_response.LoadResponse
@@ -137,8 +135,8 @@ class NetworkQueryContactImpl(
         relayData: Pair<AuthorizationToken, RelayUrl>?
     ): Flow<LoadResponse<ContactDto, ResponseError>> =
         networkRelayCall.relayPost(
-            responseJsonClass = ContactRelayResponse::class.java,
-            relayEndpoint = HUB_URL + ENDPOINT_CREATE_INVITE,
+            responseJsonClass = CreateInviteRelayResponse::class.java,
+            relayEndpoint = ENDPOINT_CREATE_INVITE,
             requestBodyJsonClass = Map::class.java,
             requestBody = mapOf(
                 Pair("nickname", nickname),

@@ -10,6 +10,7 @@
     <dimen name="default_header_navigation_padding">16dp</dimen>
     <dimen name="default_header_navigation_margin_start">8dp</dimen>
     <dimen name="default_chat_initial_image_xy">46dp</dimen>
+    <dimen name="default_invite_qr_image_xy">60dp</dimen>
     <dimen name="default_message_action_image_xy">28dp</dimen>
     <dimen name="default_header_margin_horizontal">24dp</dimen>
     <dimen name="default_header_headline_margin_horizontal">12dp</dimen>

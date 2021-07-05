@@ -56,6 +56,15 @@
     <string name="material_icon_name_message_action_reply">reply</string>
     <string name="material_icon_name_message_action_save_file">file_download</string>
 
+    <!--  Invite Status Material Icons  -->
+    <string name="material_icon_name_invite_pending">error</string>
+    <string name="material_icon_name_invite_payment_pending">payment</string>
+    <string name="material_icon_name_invite_payment_sent">sync</string>
+    <string name="material_icon_name_invite_ready">done</string>
+    <string name="material_icon_name_invite_in_progress">sync</string>
+    <string name="material_icon_name_invite_expired">error</string>
+    <string name="material_icon_name_invite_complete">done</string>
+
     <!--  Group Action Material Icons  -->
     <string name="material_icon_name_group_action_accept_join_request">done</string>
     <string name="material_icon_name_group_action_reject_join_request">close</string>

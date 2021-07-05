@@ -10,6 +10,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
+import androidx.navigation.findNavController
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import app.cash.exhaustive.Exhaustive
@@ -64,6 +65,10 @@ internal class DashboardFragment : MotionLayoutFragment<
     override val viewModel: DashboardViewModel by viewModels()
     override val binding: FragmentDashboardBinding by viewBinding(FragmentDashboardBinding::bind)
 
+    val navController: NavController by lazy(LazyThreadSafetyMode.NONE) {
+        binding.root.findNavController()
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         BackPressHandler(binding.root.context)
@@ -72,7 +77,7 @@ internal class DashboardFragment : MotionLayoutFragment<
 
         viewModel.networkRefresh()
 
-//        findNavController().addOnDestinationChangedListener(CloseDrawerOnDestinationChange())
+        navController.addOnDestinationChangedListener(CloseDrawerOnDestinationChange())
 
         setupChats()
         setupDashboardHeader()

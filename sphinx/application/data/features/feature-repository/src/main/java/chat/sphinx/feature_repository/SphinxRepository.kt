@@ -2318,30 +2318,36 @@ abstract class SphinxRepository(
         welcomeMessage: String
     ): Flow<LoadResponse<Any, ResponseError>> = flow {
 
+        val queries = coreDB.getSphinxDatabaseQueries()
+
+        var response: Response<Any, ResponseError>? = null
+
+        emit(LoadResponse.Loading)
+
         applicationScope.launch(mainImmediate) {
             networkQueryContact.createNewInvite(nickname, welcomeMessage).collect { loadResponse ->
                 @Exhaustive
                 when (loadResponse) {
-                    is LoadResponse.Loading -> {
-                        emit(loadResponse)
-                    }
+                    is LoadResponse.Loading -> {}
 
                     is Response.Error -> {
-                        emit(loadResponse)
+                        response = loadResponse
                     }
 
                     is Response.Success -> {
-                        coreDB.getSphinxDatabaseQueriesOrNull()?.let { queries ->
-                            contactLock.withLock {
+                        contactLock.withLock {
+                            withContext(io) {
                                 queries.transaction {
                                     upsertContact(loadResponse.value, queries)
                                 }
                             }
                         }
-                        emit(loadResponse)
+                        response = Response.Success(true)
                     }
                 }
             }
-        }
+        }.join()
+
+        emit(response ?: Response.Error(ResponseError("")))
     }
 }

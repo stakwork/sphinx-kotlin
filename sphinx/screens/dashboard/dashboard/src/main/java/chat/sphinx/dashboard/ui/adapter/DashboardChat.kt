@@ -1,13 +1,18 @@
 package chat.sphinx.dashboard.ui.adapter
 
+import chat.sphinx.dashboard.R
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.isConversation
 import chat.sphinx.wrapper_common.*
 import chat.sphinx.wrapper_common.dashboard.ContactId
+import chat.sphinx.wrapper_common.invite.InviteStatus
+import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_contact.Contact
+import chat.sphinx.wrapper_invite.Invite as InviteWrapper
 import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message_media.MediaType
 import kotlinx.coroutines.flow.Flow
+import java.util.*
 
 /**
  * [DashboardChat]s are separated into 2 categories:
@@ -266,6 +271,91 @@ sealed class DashboardChat {
                 return !(contact.rsaPublicKey?.value?.isEmpty() ?: true)
             }
 
+        }
+
+        class Invite(
+            val contact: Contact,
+            val invite: InviteWrapper?
+        ): Inactive() {
+
+            override val chatName: String?
+                get() =  "Invite: ${contact.alias?.value}"
+
+            override val photoUrl: PhotoUrl?
+                get() = contact.photoUrl
+
+            //Invites should always appear at the top of the dashboard list
+            override val sortBy: Long
+                get() = Date().time
+
+            override val unseenMessageFlow: Flow<Long?>?
+                get() = null
+
+            override fun getMessageText(): String {
+                when (invite?.status) {
+                    is InviteStatus.Pending -> {
+                        return "Looking for an available node for $chatName."
+                    }
+                    is InviteStatus.Ready, InviteStatus.Delivered -> {
+                        return "Ready! Tap to share. Expires in 24 hrs."
+                    }
+                    is InviteStatus.InProgress -> {
+                        return "$chatName is signing on."
+                    }
+                    is InviteStatus.Complete -> {
+                        return "Signup complete."
+                    }
+                    is InviteStatus.PaymentPending -> {
+                        return "Tap to pay and activate the invite."
+                    }
+                    is InviteStatus.Expired -> {
+                        return "Expired"
+                    }
+                    is InviteStatus.Unknown -> {
+                        return ""
+                    }
+                }
+                return ""
+            }
+
+            fun getInviteIconAndColor(): Pair<Int, Int>? {
+                when (invite?.status) {
+                    is InviteStatus.Pending -> {
+                        return Pair(R.string.material_icon_name_invite_pending, R.color.sphinxOrange)
+                    }
+                    is InviteStatus.Ready, InviteStatus.Delivered -> {
+                        return Pair(R.string.material_icon_name_invite_ready, R.color.primaryGreen)
+                    }
+                    is InviteStatus.InProgress -> {
+                        return Pair(R.string.material_icon_name_invite_in_progress, R.color.primaryBlue)
+                    }
+                    is InviteStatus.Complete -> {
+                        return Pair(R.string.material_icon_name_invite_complete, R.color.primaryGreen)
+                    }
+                    is InviteStatus.PaymentPending -> {
+                        return Pair(R.string.material_icon_name_invite_payment_pending, R.color.secondaryText)
+                    }
+                    is InviteStatus.Expired -> {
+                        return Pair(R.string.material_icon_name_invite_expired, R.color.primaryRed)
+                    }
+                    is InviteStatus.Unknown -> {
+                        return null
+                    }
+                }
+                return null
+            }
+
+            fun getInvitePrice(): Sat? {
+                return invite?.price
+            }
+
+            override fun hasUnseenMessages(): Boolean {
+                return false
+            }
+
+            override fun isEncrypted(): Boolean {
+                return false
+            }
         }
     }
 }

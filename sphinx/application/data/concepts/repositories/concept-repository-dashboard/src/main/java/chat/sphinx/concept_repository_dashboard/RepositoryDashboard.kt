@@ -5,8 +5,10 @@ import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
+import chat.sphinx.wrapper_common.dashboard.InviteId
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_contact.Contact
+import chat.sphinx.wrapper_invite.Invite
 import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_message.Message
 import kotlinx.coroutines.flow.Flow
@@ -24,6 +26,7 @@ interface RepositoryDashboard {
     var updatedContactIds: MutableList<ContactId>
 
     fun getMessageById(messageId: MessageId): Flow<Message?>
+    fun getInviteById(inviteId: InviteId): Flow<Invite?>
 
     val networkRefreshBalance: Flow<LoadResponse<Boolean, ResponseError>>
     val networkRefreshContacts: Flow<LoadResponse<Boolean, ResponseError>>

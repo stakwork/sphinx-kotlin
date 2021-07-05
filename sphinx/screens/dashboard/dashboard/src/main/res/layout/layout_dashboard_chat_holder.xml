@@ -17,38 +17,67 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <include
-            android:id="@+id/layout_dashboard_chat_initial_holder"
-            layout="@layout/layout_chat_image_initial_holder"
-            android:layout_width="@dimen/default_chat_initial_image_xy"
-            android:layout_height="@dimen/default_chat_initial_image_xy"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layout_dashboard_chat_contact_holder"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <include
+                android:id="@+id/layout_dashboard_chat_initial_holder"
+                layout="@layout/layout_chat_image_initial_holder"
+                android:layout_width="@dimen/default_chat_initial_image_xy"
+                android:layout_height="@dimen/default_chat_initial_image_xy"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/layout_constraint_badge_count_container"
+                android:layout_width="52dp"
+                android:layout_height="52dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/text_view_badge_count"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingLeft="4dp"
+                    android:paddingRight="4dp"
+                    android:fontFamily="@font/roboto_medium"
+                    android:textSize="10sp"
+                    android:textColor="@android:color/white"
+                    tools:text="990"
+                    android:background="@drawable/chat_initials_circle"
+                    android:backgroundTint="@color/badgeRed"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"/>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="52dp"
-            android:layout_height="52dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+            android:id="@+id/layout_dashboard_invite_holder"
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            tools:visibility="visible">
 
-            <androidx.appcompat.widget.AppCompatTextView
-                android:id="@+id/text_view_badge_count"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingLeft="4dp"
-                android:paddingRight="4dp"
-                android:fontFamily="@font/roboto_medium"
-                android:textSize="10sp"
-                android:textColor="@android:color/white"
-                tools:text="990"
-                android:background="@drawable/chat_initials_circle"
-                android:backgroundTint="@color/badgeRed"
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/image_view_chat_picture"
+                android:layout_width="@dimen/default_invite_qr_image_xy"
+                android:layout_height="@dimen/default_invite_qr_image_xy"
+                android:layout_centerInParent="true"
+                android:src="@drawable/ic_qr_code"
+                android:tint="@color/textMessages"
+                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"/>
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -99,8 +128,27 @@
                 app:layout_constraintStart_toEndOf="@id/text_view_chat_holder_name" />
 
             <TextView
+                android:id="@+id/text_view_chat_holder_message_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:ellipsize="end"
+                android:fontFamily="@font/material_icons_regular"
+                android:gravity="center_vertical"
+                android:paddingBottom="15dp"
+                android:singleLine="true"
+                android:textColor="@color/primaryGreen"
+                android:textSize="17sp"
+                android:paddingEnd="3dp"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/text_view_chat_holder_name"
+                app:layout_constraintStart_toStartOf="parent"
+                tools:text="done"
+                tools:visibility="visible"/>
+
+            <TextView
                 android:id="@+id/text_view_chat_holder_message"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="0dp"
                 android:ellipsize="end"
                 android:fontFamily="@font/roboto_regular"
@@ -111,6 +159,8 @@
                 android:textSize="14sp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/text_view_chat_holder_name"
+                app:layout_constraintStart_toEndOf="@+id/text_view_chat_holder_message_icon"
+                app:layout_constraintEnd_toEndOf="parent"
                 tools:text="This is a test message" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
@@ -153,7 +203,7 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/layout_constraint_chat_holder_details"
-        android:layout_width="72dp"
+        android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:paddingEnd="16dp"
         app:layout_constraintEnd_toEndOf="parent">
@@ -183,6 +233,34 @@
             app:layout_constraintTop_toBottomOf="@+id/image_view_chat_holder_notification"
             tools:ignore="SmallSp"
             tools:text="12:21 PM" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layout_constraint_invite_price_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/background_invite_price_text"
+            android:visibility="gone"
+            app:layout_constraintBottom_toTopOf="@+id/text_view_chat_holder_time"
+            app:layout_constraintEnd_toEndOf="parent"
+            tools:visibility="visible">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_view_invite_price"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="7dp"
+                android:fontFamily="@font/roboto_medium"
+                android:gravity="center"
+                android:textColor="@android:color/white"
+                android:textSize="12sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                tools:ignore="SmallSp"
+                tools:text="2 000" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

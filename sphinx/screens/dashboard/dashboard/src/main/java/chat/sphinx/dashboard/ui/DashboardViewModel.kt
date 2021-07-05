@@ -32,7 +32,9 @@ import chat.sphinx.wrapper_common.tribe.isValidTribeJoinLink
 import chat.sphinx.wrapper_common.tribe.toTribeJoinLink
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_contact.isConfirmed
+import chat.sphinx.wrapper_contact.isInviteContact
 import chat.sphinx.wrapper_contact.isTrue
+import chat.sphinx.wrapper_invite.Invite
 import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_message.Message
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -222,6 +224,9 @@ internal class DashboardViewModel @Inject constructor(
                                 is DashboardChat.Inactive.Conversation -> {
                                     chat.contact
                                 }
+                                is DashboardChat.Inactive.Invite -> {
+                                    chat.contact
+                                }
                             }
 
                             contact?.let {
@@ -247,12 +252,21 @@ internal class DashboardViewModel @Inject constructor(
                         }
 
                         for (contact in _contactsStateFlow.value) {
-                            if (contact.status.isConfirmed() && !chatContactIds.contains(contact.id)) {
+                            if (!chatContactIds.contains(contact.id)) {
                                 updateChatViewState = true
 
-                                currentChats.add(
-                                    DashboardChat.Inactive.Conversation(contact)
-                                )
+                                if (contact.isInviteContact()) {
+                                    val invite: Invite? = contact.inviteId?.let {
+                                        repositoryDashboard.getInviteById(it).firstOrNull()
+                                    }
+                                    currentChats.add(
+                                        DashboardChat.Inactive.Invite(contact, invite)
+                                    )
+                                } else {
+                                    currentChats.add(
+                                        DashboardChat.Inactive.Conversation(contact)
+                                    )
+                                }
                             }
                         }
 

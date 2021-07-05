@@ -36,4 +36,13 @@ internal sealed class InviteFriendSideEffect: SideEffect<Context>() {
         override val toastLengthLong: Boolean
             get() = true
     }
+
+    object InviteFailed : Notify() {
+        override val stringRes: Int
+            get() = R.string.invite_failed
+        override val showIcon: Boolean
+            get() = false
+        override val toastLengthLong: Boolean
+            get() = true
+    }
 }

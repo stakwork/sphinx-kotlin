@@ -11,4 +11,5 @@
     <string name="search">Search</string>
 
     <string name="not_valid_tribe_link">QR code is not a Join Tribe link</string>
+    <string name="invite_name">Invite: %s</string>
 </resources>
