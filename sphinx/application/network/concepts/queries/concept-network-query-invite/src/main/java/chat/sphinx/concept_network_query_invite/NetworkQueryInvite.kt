@@ -2,6 +2,7 @@ package chat.sphinx.concept_network_query_invite
 
 import chat.sphinx.concept_network_query_invite.model.HubLowestNodePriceResponse
 import chat.sphinx.concept_network_query_invite.model.HubRedeemInviteResponse
+import chat.sphinx.concept_network_query_invite.model.InviteDto
 import chat.sphinx.concept_network_query_invite.model.RedeemInviteResponseDto
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.ResponseError
@@ -33,9 +34,12 @@ abstract class NetworkQueryInvite {
     ): Flow<LoadResponse<HubRedeemInviteResponse, ResponseError>>
 
     abstract fun finishInvite(
-        relayUrl: RelayUrl,
         inviteString: String
     ): Flow<LoadResponse<RedeemInviteResponseDto, ResponseError>>
+
+    abstract fun payInvite(
+        inviteString: String
+    ): Flow<LoadResponse<InviteDto, ResponseError>>
 
     //////////////
     /// DELETE ///

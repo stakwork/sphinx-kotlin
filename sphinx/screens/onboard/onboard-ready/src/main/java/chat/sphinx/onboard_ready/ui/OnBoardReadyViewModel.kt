@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
 import chat.sphinx.concept_network_query_chat.model.TribeDto
+import chat.sphinx.concept_network_query_invite.NetworkQueryInvite
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_lightning.LightningRepository
@@ -36,13 +37,18 @@ internal class OnBoardReadyViewModel @Inject constructor(
     private val lightningRepository: LightningRepository,
     private val chatRepository: ChatRepository,
     private val networkQueryChat: NetworkQueryChat,
+    private val networkQueryInvite: NetworkQueryInvite,
 ): SideEffectViewModel<
         Context,
         OnBoardReadySideEffect,
         OnBoardReadyViewState
         >(dispatchers, OnBoardReadyViewState.Idle)
 {
-    fun saveInviterAndFinish(nickname: String, pubkey: String, routeHint: String?) {
+    fun saveInviterAndFinish(nickname: String,
+                             pubkey: String,
+                             routeHint: String?,
+                             inviteString: String? = null) {
+
         viewModelScope.launch(mainImmediate) {
             val alias = ContactAlias(nickname)
             val pubKey = LightningNodePubKey(pubkey)
@@ -61,6 +67,27 @@ internal class OnBoardReadyViewModel @Inject constructor(
                         viewStateContainer.updateViewState(OnBoardReadyViewState.Error)
 
                         submitSideEffect(OnBoardReadySideEffect.CreateInviterFailed)
+                    }
+                    is Response.Success -> {
+                        if (inviteString != null && inviteString.isNotEmpty()) {
+                            finishInvite(inviteString)
+                        } else {
+                            loadAndJoinDefaultTribeData()
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    fun finishInvite(inviteString: String) {
+        viewModelScope.launch(mainImmediate) {
+            networkQueryInvite.finishInvite(inviteString).collect { loadResponse ->
+                when (loadResponse) {
+                    is LoadResponse.Loading -> {}
+
+                    is Response.Error -> {
+                        loadAndJoinDefaultTribeData()
                     }
                     is Response.Success -> {
                         loadAndJoinDefaultTribeData()

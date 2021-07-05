@@ -308,6 +308,7 @@ internal class SplashViewModel @Inject constructor(
                         .putString("sphinx_temp_inviter_route_hint", invite.route_hint)
                         .putString("sphinx_temp_invite_message", invite.message)
                         .putString("sphinx_temp_invite_action", invite.action)
+                        .putString("sphinx_temp_invite_string", invite.pin)
                         .let { editor ->
                             if (!editor.commit()) {
                                 editor.apply()

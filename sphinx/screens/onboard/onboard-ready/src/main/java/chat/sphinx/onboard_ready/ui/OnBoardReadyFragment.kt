@@ -71,9 +71,12 @@ internal class OnBoardReadyFragment: SideEffectFragment<
                 val nickname = sharedPrefs.getString("sphinx_temp_inviter_nickname", null)
                 val pubkey = sharedPrefs.getString("sphinx_temp_inviter_pubkey", null)
                 val routeHint = sharedPrefs.getString("sphinx_temp_inviter_route_hint", null)
+                val inviteString = sharedPrefs.getString("sphinx_temp_invite_string", null)
 
                 if (nickname != null && pubkey != null) {
-                    viewModel.saveInviterAndFinish(nickname, pubkey, routeHint)
+                    viewModel.saveInviterAndFinish(nickname, pubkey, routeHint, inviteString)
+                } else if (inviteString != null){
+                    viewModel.finishInvite(inviteString)
                 } else {
                     viewModel.loadAndJoinDefaultTribeData()
                 }
