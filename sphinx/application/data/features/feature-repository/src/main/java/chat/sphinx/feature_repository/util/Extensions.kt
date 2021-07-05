@@ -13,6 +13,9 @@ import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.dashboard.InviteId
+import chat.sphinx.wrapper_common.invite.InviteStatus
+import chat.sphinx.wrapper_common.invite.isPaymentPending
+import chat.sphinx.wrapper_common.invite.isProcessingPayment
 import chat.sphinx.wrapper_common.invite.toInviteStatus
 import chat.sphinx.wrapper_common.lightning.*
 import chat.sphinx.wrapper_common.message.MessageId
@@ -258,10 +261,18 @@ inline fun TransactionCallbacks.upsertContact(dto: ContactDto, queries: SphinxDa
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun TransactionCallbacks.upsertInvite(dto: InviteDto, queries: SphinxDatabaseQueries) {
+    val invite = queries.inviteGetById(InviteId(dto.id)).executeAsOneOrNull()
+
+    val newInviteStatus = if ((invite?.status?.isProcessingPayment() == true) && (dto.status.toInviteStatus().isPaymentPending())) {
+        InviteStatus.PROCESSING_PAYMENT.toInviteStatus()
+    } else {
+        dto.status.toInviteStatus()
+    }
+
     queries.inviteUpsert(
         InviteString(dto.invite_string),
         dto.invoice?.toLightningPaymentRequest(),
-        dto.status.toInviteStatus(),
+        newInviteStatus,
         dto.price?.toSat(),
         InviteId(dto.id),
         ContactId(dto.contact_id),

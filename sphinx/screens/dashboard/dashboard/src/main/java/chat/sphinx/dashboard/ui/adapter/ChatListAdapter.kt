@@ -20,6 +20,7 @@ import chat.sphinx.dashboard.ui.currentChatViewState
 import chat.sphinx.resources.*
 import chat.sphinx.wrapper_chat.*
 import chat.sphinx.wrapper_common.DateTime
+import chat.sphinx.wrapper_common.invite.isPaymentPending
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.util.getInitials
 import chat.sphinx.wrapper_contact.isInviteContact
@@ -341,6 +342,8 @@ internal class ChatListAdapter(
                     layoutConstraintInvitePriceContainer.gone
 
                     if (nnDashboardChat is DashboardChat.Inactive.Invite) {
+                        textViewChatHolderMessage.setTextFont(R.font.roboto_bold)
+
                         layoutDashboardChatContactHolder.gone
                         layoutDashboardInviteHolder.visible
 
@@ -351,7 +354,8 @@ internal class ChatListAdapter(
                         }
 
                         nnDashboardChat.getInvitePrice()?.let { price ->
-                            layoutConstraintInvitePriceContainer.visible
+                            val paymentPending = nnDashboardChat.invite?.status?.isPaymentPending() == true
+                            layoutConstraintInvitePriceContainer.goneIfFalse(paymentPending)
                             textViewInvitePrice.text = price.asFormattedString()
                         }
                     }

@@ -29,6 +29,10 @@ inline fun InviteStatus.isPaymentPending(): Boolean =
     this is InviteStatus.PaymentPending
 
 @Suppress("NOTHING_TO_INLINE")
+inline fun InviteStatus.isProcessingPayment(): Boolean =
+    this is InviteStatus.ProcessingPayment
+
+@Suppress("NOTHING_TO_INLINE")
 inline fun InviteStatus.isUnknown(): Boolean =
     this is InviteStatus.Unknown
 

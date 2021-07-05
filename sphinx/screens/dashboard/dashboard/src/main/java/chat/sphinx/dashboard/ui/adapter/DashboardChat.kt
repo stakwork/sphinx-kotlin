@@ -294,7 +294,7 @@ sealed class DashboardChat {
             override fun getMessageText(): String {
                 when (invite?.status) {
                     is InviteStatus.Pending -> {
-                        return "Looking for an available node for $chatName."
+                        return "Looking for an available node for ${contact.alias?.value ?: "Unknown"}."
                     }
                     is InviteStatus.Ready, InviteStatus.Delivered -> {
                         return "Ready! Tap to share. Expires in 24 hrs."
@@ -302,14 +302,14 @@ sealed class DashboardChat {
                     is InviteStatus.InProgress -> {
                         return "$chatName is signing on."
                     }
-                    is InviteStatus.Complete -> {
-                        return "Signup complete."
-                    }
                     is InviteStatus.PaymentPending -> {
                         return "Tap to pay and activate the invite."
                     }
                     is InviteStatus.ProcessingPayment -> {
                         return "Payment sent. Waiting confirmation."
+                    }
+                    is InviteStatus.Complete -> {
+                        return "Signup complete."
                     }
                     is InviteStatus.Expired -> {
                         return "Expired"
@@ -332,14 +332,14 @@ sealed class DashboardChat {
                     is InviteStatus.InProgress -> {
                         return Pair(R.string.material_icon_name_invite_in_progress, R.color.primaryBlue)
                     }
-                    is InviteStatus.Complete -> {
-                        return Pair(R.string.material_icon_name_invite_complete, R.color.primaryGreen)
-                    }
                     is InviteStatus.PaymentPending -> {
                         return Pair(R.string.material_icon_name_invite_payment_pending, R.color.secondaryText)
                     }
                     is InviteStatus.ProcessingPayment -> {
                         return Pair(R.string.material_icon_name_invite_payment_sent, R.color.secondaryText)
+                    }
+                    is InviteStatus.Complete -> {
+                        return Pair(R.string.material_icon_name_invite_complete, R.color.primaryGreen)
                     }
                     is InviteStatus.Expired -> {
                         return Pair(R.string.material_icon_name_invite_expired, R.color.primaryRed)
