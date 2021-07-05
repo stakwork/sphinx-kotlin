@@ -308,6 +308,9 @@ sealed class DashboardChat {
                     is InviteStatus.PaymentPending -> {
                         return "Tap to pay and activate the invite."
                     }
+                    is InviteStatus.ProcessingPayment -> {
+                        return "Payment sent. Waiting confirmation."
+                    }
                     is InviteStatus.Expired -> {
                         return "Expired"
                     }
@@ -334,6 +337,9 @@ sealed class DashboardChat {
                     }
                     is InviteStatus.PaymentPending -> {
                         return Pair(R.string.material_icon_name_invite_payment_pending, R.color.secondaryText)
+                    }
+                    is InviteStatus.ProcessingPayment -> {
+                        return Pair(R.string.material_icon_name_invite_payment_sent, R.color.secondaryText)
                     }
                     is InviteStatus.Expired -> {
                         return Pair(R.string.material_icon_name_invite_expired, R.color.primaryRed)
