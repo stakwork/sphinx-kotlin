@@ -42,11 +42,15 @@ internal sealed class LayoutState private constructor() {
         sealed class ContainerFirst private constructor(): Bubble() {
 
             data class ReplyMessage(
-                // TODO: Make sealed interface for handling a url or file
-//            val media: String?,
+                val showSent: Boolean,
                 val sender: String,
                 val text: String,
-            ): ContainerFirst()
+                val url: String?,
+                val media: MessageMedia?,
+            ): ContainerFirst() {
+                val showReceived: Boolean
+                    get() = !showSent
+            }
 
         }
 

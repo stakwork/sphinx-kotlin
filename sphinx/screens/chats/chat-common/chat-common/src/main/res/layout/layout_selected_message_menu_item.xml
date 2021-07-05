@@ -8,23 +8,26 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/layout_constraint_selected_message_menu_item_icon_container"
-        android:layout_width="wrap_content"
+        android:layout_width="@dimen/selected_message_menu_icon_width"
         android:layout_height="match_parent"
-        android:layout_marginStart="6dp"
         app:layout_constraintStart_toStartOf="parent">
 
         <TextView
             android:id="@+id/text_view_selected_message_menu_item_icon"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:textSize="@dimen/default_text_size_tap_target_material_icon"
+            android:gravity="center"
+            android:fontFamily="@font/material_icons_regular"
             app:layout_constraintStart_toStartOf="parent" />
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/image_view_selected_message_menu_item_icon"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:layout_constraintStart_toStartOf="parent" />
+            android:padding="@dimen/selected_message_menu_icon_padding"
+            app:layout_constraintStart_toStartOf="parent"
+            tools:src="@drawable/ic_circular_boost_green"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -37,7 +40,6 @@
         android:singleLine="true"
         android:textColor="@color/text"
         android:fontFamily="@font/roboto_regular"
-        android:layout_marginLeft="6dp"
         android:textSize="@dimen/selected_message_menu_item_text_size"
         app:layout_constraintStart_toEndOf="@+id/layout_constraint_selected_message_menu_item_icon_container"
         tools:text="Boost" />

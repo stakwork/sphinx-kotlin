@@ -122,20 +122,21 @@ sealed class DashboardChat {
                 }
                 message.type.isAttachment() -> {
                     message.messageMedia?.let { media ->
-                        when (media.mediaType) {
+                        when (val type = media.mediaType) {
                             is MediaType.Audio -> {
                                 "an Audio clip"
                             }
-                            is MediaType.Gif -> {
-                                "a GIF"
-                            }
                             is MediaType.Image -> {
-                                "an Image"
+                                if (type.isGif) {
+                                    "a GIF"
+                                } else {
+                                    "an Image"
+                                }
                             }
                             is MediaType.Pdf -> {
                                 "a PDF"
                             }
-                            is MediaType.SphinxText -> {
+                            is MediaType.Text -> {
                                 "a Paid Message"
                             }
                             is MediaType.Unknown -> {

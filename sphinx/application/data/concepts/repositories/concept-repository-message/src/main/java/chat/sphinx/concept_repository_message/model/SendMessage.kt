@@ -1,4 +1,4 @@
-package chat.sphinx.concept_repository_message
+package chat.sphinx.concept_repository_message.model
 
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
@@ -6,25 +6,25 @@ import chat.sphinx.wrapper_message.ReplyUUID
 import java.io.File
 
 class SendMessage private constructor(
+    val attachmentInfo: AttachmentInfo?,
     val chatId: ChatId?,
     val contactId: ContactId?,
-    val file: File?,
     val replyUUID: ReplyUUID?,
     val text: String?,
 ) {
 
     class Builder {
-        private var chatId: ChatId?         = null
-        private var contactId: ContactId?   = null
-        private var file: File?             = null
-        private var replyUUID: ReplyUUID?   = null
-        private var text: String?           = null
+        private var chatId: ChatId?                 = null
+        private var contactId: ContactId?           = null
+        private var attachmentInfo: AttachmentInfo? = null
+        private var replyUUID: ReplyUUID?           = null
+        private var text: String?                   = null
 
         @Synchronized
         fun clear() {
+            attachmentInfo = null
             chatId = null
             contactId = null
-            file = null
             replyUUID = null
             text = null
         }
@@ -32,13 +32,29 @@ class SendMessage private constructor(
         @get:Synchronized
         val isValid: Boolean
             get() = (
-                        file?.let { if (!it.exists()) return false } != null    ||
+                        attachmentInfo?.file?.let {
+                            try {
+                                if (!it.exists() || !it.isFile) {
+                                    return false
+                                }
+
+                                it
+                            } catch (e: Exception) {
+                                return false
+                            }
+                        }                                   != null     ||
                         !text.isNullOrEmpty()
-                    )                                                           &&
+                    )                                                   &&
                     (
-                        chatId != null                                          ||
-                        contactId != null
+                        chatId                              != null     ||
+                        contactId                           != null
                     )
+
+        @Synchronized
+        fun setAttachmentInfo(attachmentInfo: AttachmentInfo?): Builder {
+            this.attachmentInfo = attachmentInfo
+            return this
+        }
 
         @Synchronized
         fun setChatId(chatId: ChatId?): Builder {
@@ -49,12 +65,6 @@ class SendMessage private constructor(
         @Synchronized
         fun setContactId(contactId: ContactId?): Builder {
             this.contactId = contactId
-            return this
-        }
-
-        @Synchronized
-        fun setFile(file: File?): Builder {
-            this.file = file
             return this
         }
 
@@ -80,9 +90,9 @@ class SendMessage private constructor(
                 null
             } else {
                 SendMessage(
+                    attachmentInfo,
                     chatId,
                     contactId,
-                    file,
                     replyUUID,
                     text,
                 )

@@ -99,6 +99,9 @@ include ':sphinx:screens:splash:key-restore'
 
 // Screens-Detail
 include ':sphinx:screens-detail:add-friend:add-friend'
+include ':sphinx:screens-detail:camera:camera'
+include ':sphinx:screens-detail:camera:camera-utils'
+include ':sphinx:screens-detail:camera:camera-view-model-coordinator'
 include ':sphinx:screens-detail:common:detail-resources'
 include ':sphinx:screens-detail:create-tribe:create-tribe'
 include ':sphinx:screens-detail:join-tribe:join-tribe'

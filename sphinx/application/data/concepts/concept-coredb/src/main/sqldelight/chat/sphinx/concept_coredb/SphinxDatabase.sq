@@ -44,6 +44,7 @@ import chat.sphinx.wrapper_message_media.MediaKeyDecrypted;
 import chat.sphinx.wrapper_message_media.MediaToken;
 import chat.sphinx.wrapper_message_media.MediaType;
 import chat.sphinx.wrapper_rsa.RsaPublicKey;
+import java.io.File;
 import kotlin.collections.List;
 
 CREATE TABLE chatDbo(
@@ -495,7 +496,7 @@ messageGetToShowByUUID:
 SELECT *
 FROM messageDbo
 WHERE uuid = ?
-AND type IN(0, 5)
+AND type IN(0, 6)
 LIMIT 1;
 
 messageGetLowestProvisionalMessageId:
@@ -613,7 +614,8 @@ CREATE TABLE messageMediaDbo(
     media_key                   TEXT            AS MediaKey,
     media_key_decrypted         TEXT            AS MediaKeyDecrypted,
     media_type                  TEXT            AS MediaType NOT NULL,
-    media_token                 TEXT            AS MediaToken NOT NULL
+    media_token                 TEXT            AS MediaToken NOT NULL,
+    local_file                  TEXT            AS File
 );
 
 messageMediaGetById:
@@ -624,6 +626,11 @@ WHERE id = ?;
 messageMediaUpdateMediaKeyDecrypted:
 UPDATE messageMediaDbo
 SET media_key_decrypted = :media_key_decrypted
+WHERE id = ?;
+
+messageMediaUpdateFile:
+UPDATE messageMediaDbo
+SET local_file = :local_file
 WHERE id = ?;
 
 messageMediaUpsert {
@@ -639,7 +646,8 @@ messageMediaUpsert {
         media_key,
         media_key_decrypted,
         media_type,
-        media_token
+        media_token,
+        local_file
     )
     VALUES(
         :id,
@@ -647,7 +655,8 @@ messageMediaUpsert {
         :media_key,
         :media_key_decrypted,
         :media_type,
-        :media_token
+        :media_token,
+        :local_file
     );
 }
 

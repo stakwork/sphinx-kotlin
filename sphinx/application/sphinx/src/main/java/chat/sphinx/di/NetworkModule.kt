@@ -266,9 +266,10 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideNetworkQueryAttachmentImpl(
-        networkRelayCall: NetworkRelayCall
+        dispatchers: CoroutineDispatchers,
+        networkRelayCall: NetworkRelayCall,
     ): NetworkQueryAttachmentImpl =
-        NetworkQueryAttachmentImpl(networkRelayCall)
+        NetworkQueryAttachmentImpl(dispatchers, networkRelayCall)
 
     @Provides
     fun provideNetworkQueryAttachment(

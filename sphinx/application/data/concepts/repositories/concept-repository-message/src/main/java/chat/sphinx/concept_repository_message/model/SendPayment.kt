@@ -1,10 +1,8 @@
-package chat.sphinx.concept_repository_message
+package chat.sphinx.concept_repository_message.model
 
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
-import chat.sphinx.wrapper_message.ReplyUUID
-import java.io.File
 
 class SendPayment private constructor(
     val chatId: ChatId?,
