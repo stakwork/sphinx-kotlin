@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/background_detail_screen"
+    android:background="@android:color/black"
+    android:elevation="@dimen/default_elevation"
     android:visibility="gone"
     tools:context=".ui.CameraFragment"
     tools:visibility="visible">
@@ -13,7 +14,7 @@
         android:id="@+id/image_view_camera_image_preview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:scaleType="centerCrop" />
+        android:scaleType="fitXY" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/layout_constraint_camera_image_preview_footer"
@@ -27,26 +28,26 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/default_double_layout_margin"
-            android:text="Retake"
+            android:fontFamily="@font/roboto_regular"
+            android:text="@string/camera_retake"
             android:textColor="@color/text"
             android:textSize="17sp"
-            android:fontFamily="@font/roboto_regular"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/text_view_camera_image_preview_use"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="@dimen/default_double_layout_margin"
-            android:text="Use Photo"
+            android:fontFamily="@font/roboto_regular"
+            android:text="@string/camera_use_photo"
             android:textColor="@color/text"
             android:textSize="17sp"
-            android:fontFamily="@font/roboto_regular"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

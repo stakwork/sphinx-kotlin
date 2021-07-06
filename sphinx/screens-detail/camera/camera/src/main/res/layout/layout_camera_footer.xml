@@ -20,7 +20,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/default_double_layout_margin"
-        android:text="Cancel"
+        android:text="@string/camera_cancel"
         android:textColor="@color/text"
         android:textSize="17sp"
         android:fontFamily="@font/roboto_regular"
