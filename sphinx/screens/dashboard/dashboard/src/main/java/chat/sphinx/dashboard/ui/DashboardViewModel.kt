@@ -232,17 +232,23 @@ internal class DashboardViewModel @Inject constructor(
 
                                 if (!contactsAdded.contains(contact.id)) {
                                     if (contact.isInviteContact()) {
-                                        val invite: Invite? = contact.inviteId?.let {
-                                            repositoryDashboard.getInviteById(it).firstOrNull()
+                                        var contactInvite: Invite? = null
+
+                                        contact.inviteId?.let { inviteId ->
+                                            contactInvite = withContext(io) {
+                                                repositoryDashboard.getInviteById(inviteId).firstOrNull()
+                                            }
                                         }
-                                        newList.add(
-                                            DashboardChat.Inactive.Invite(contact, invite)
-                                        )
-                                    } else {
-                                        newList.add(
-                                            DashboardChat.Inactive.Conversation(contact)
-                                        )
+                                        if (contactInvite != null) {
+                                            newList.add(
+                                                DashboardChat.Inactive.Invite(contact, contactInvite)
+                                            )
+                                            continue
+                                        }
                                     }
+                                    newList.add(
+                                        DashboardChat.Inactive.Conversation(contact)
+                                    )
                                 }
 
                             }
@@ -352,17 +358,23 @@ internal class DashboardViewModel @Inject constructor(
                         updateChatViewState = true
 
                         if (contact.isInviteContact()) {
-                            val invite: Invite? = contact.inviteId?.let {
-                                repositoryDashboard.getInviteById(it).firstOrNull()
+                            var contactInvite: Invite? = null
+
+                            contact.inviteId?.let { inviteId ->
+                                contactInvite = withContext(io) {
+                                    repositoryDashboard.getInviteById(inviteId).firstOrNull()
+                                }
                             }
-                            currentChats.add(
-                                DashboardChat.Inactive.Invite(contact, invite)
-                            )
-                        } else {
-                            currentChats.add(
-                                DashboardChat.Inactive.Conversation(contact)
-                            )
+                            if (contactInvite != null) {
+                                currentChats.add(
+                                    DashboardChat.Inactive.Invite(contact, contactInvite)
+                                )
+                                continue
+                            }
                         }
+                        currentChats.add(
+                            DashboardChat.Inactive.Conversation(contact)
+                        )
                     }
                 }
 

@@ -263,16 +263,10 @@ inline fun TransactionCallbacks.upsertContact(dto: ContactDto, queries: SphinxDa
 inline fun TransactionCallbacks.upsertInvite(dto: InviteDto, queries: SphinxDatabaseQueries) {
     val invite = queries.inviteGetById(InviteId(dto.id)).executeAsOneOrNull()
 
-    val newInviteStatus = if ((invite?.status?.isProcessingPayment() == true) && (dto.status.toInviteStatus().isPaymentPending())) {
-        InviteStatus.PROCESSING_PAYMENT.toInviteStatus()
-    } else {
-        dto.status.toInviteStatus()
-    }
-
     queries.inviteUpsert(
         InviteString(dto.invite_string),
         dto.invoice?.toLightningPaymentRequest(),
-        newInviteStatus,
+        dto.getInviteStatus(invite?.status),
         dto.price?.toSat(),
         InviteId(dto.id),
         ContactId(dto.contact_id),

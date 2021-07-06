@@ -30,7 +30,7 @@ interface RepositoryDashboard {
     fun getMessageById(messageId: MessageId): Flow<Message?>
     fun getInviteById(inviteId: InviteId): Flow<Invite?>
 
-    suspend fun payForInvite(invite: Invite): Response<Any, ResponseError>
+    suspend fun payForInvite(invite: Invite)
     suspend fun deleteInvite(invite: Invite): Response<Any, ResponseError>
 
     val networkRefreshBalance: Flow<LoadResponse<Boolean, ResponseError>>

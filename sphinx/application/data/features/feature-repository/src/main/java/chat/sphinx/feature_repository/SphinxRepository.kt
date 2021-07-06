@@ -2369,15 +2369,15 @@ abstract class SphinxRepository(
         emit(response ?: Response.Error(ResponseError("")))
     }
 
-    override suspend fun payForInvite(invite: Invite): Response<Any, ResponseError> {
+    override suspend fun payForInvite(invite: Invite) {
         val queries = coreDB.getSphinxDatabaseQueries()
-        var response: Response<Any, ResponseError>? = null
 
         contactLock.withLock {
             updatedContactIds.add(invite.contactId)
             queries.updateInviteStatus(invite.id, InviteStatus.PROCESSING_PAYMENT.toInviteStatus())
         }
 
+        delay(25L)
         networkQueryInvite.payInvite(invite.inviteString.value).collect { loadResponse ->
             @Exhaustive
             when (loadResponse) {
@@ -2388,16 +2388,11 @@ abstract class SphinxRepository(
                         updatedContactIds.add(invite.contactId)
                         queries.updateInviteStatus(invite.id, InviteStatus.PAYMENT_PENDING.toInviteStatus())
                     }
-                    response = loadResponse
                 }
 
-                is Response.Success -> {
-                    response = Response.Success(true)
-                }
+                is Response.Success -> {}
             }
         }
-
-        return response ?: Response.Error(ResponseError(""))
     }
 
     override suspend fun deleteInvite(invite: Invite): Response<Any, ResponseError> {
