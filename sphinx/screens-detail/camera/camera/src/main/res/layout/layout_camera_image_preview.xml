@@ -14,7 +14,7 @@
         android:id="@+id/image_view_camera_image_preview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:scaleType="fitXY" />
+        android:scaleType="centerCrop" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/layout_constraint_camera_image_preview_footer"

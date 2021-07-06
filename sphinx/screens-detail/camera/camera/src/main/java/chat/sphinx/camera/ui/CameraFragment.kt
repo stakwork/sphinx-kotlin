@@ -186,6 +186,71 @@ internal class CameraFragment: SideEffectFragment<
         MutableStateFlow(null)
     }
 
+    private inner class SpaceWidthSetter: DefaultLifecycleObserver {
+        private var width: Px? = null
+        private val lock = Mutex()
+
+        // if width is null, it will set them after the view is setup
+        // otherwise it does nothing (b/c they're already set
+        suspend fun setCameraSpacessIfNeeded() {
+            width ?: lock.withLock {
+                width ?: setSpaces()
+                    .also { width = it }
+            }
+        }
+
+        override fun onDestroy(owner: LifecycleOwner) {
+            super.onDestroy(owner)
+            width = null
+        }
+
+        private suspend fun setSpaces(): Px {
+            try {
+                // wait for the screen to be created
+                surfaceHolderState.value ?: surfaceHolderState.collect { holder ->
+                    if (holder != null) {
+                        throw Exception()
+                    }
+                }
+            } catch (e: Exception) {}
+
+            return withContext(viewModel.main) {
+
+                viewLifecycleOwner.lifecycle.addObserver(this@SpaceWidthSetter)
+
+                val spaceDetailPct = TypedValue()
+
+                // get space resource percentage height for detail screen
+                binding.root.context.resources.getValue(
+                    R.dimen.space_detail_host_height,
+                    spaceDetailPct,
+                    true
+                )
+
+                val detailFragmentHeight = binding.root.measuredHeight.toFloat()
+                val detailFragmentWidth = binding.root.measuredWidth.toFloat()
+
+                // calculate the primary window's screen height
+                val primaryWindowHeight =
+                    (detailFragmentHeight / (1F - spaceDetailPct.float)) +
+                            (requireActivity() as InsetterActivity).statusBarInsetHeight.top
+
+                val spaceTop = primaryWindowHeight * spaceDetailPct.float
+
+                val viewWidth = (spaceTop / 2) + 1 + Dp(4F).toPx(binding.root.context).value
+
+                binding.autoFitSurfaceViewCamera.apply {
+                    layoutParams.width = (detailFragmentWidth + (viewWidth * 2)).toInt()
+                }
+
+                Px(primaryWindowHeight)
+            }
+        }
+    }
+
+    private val spaceWidthSetter = SpaceWidthSetter()
+
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -600,6 +665,8 @@ internal class CameraFragment: SideEffectFragment<
                     try {
                         surfaceHolderState.collect { holder ->
                             if (holder != null) {
+                                spaceWidthSetter.setCameraSpacessIfNeeded()
+
                                 val previewSize = getPreviewOutputSize(
                                     binding.autoFitSurfaceViewCamera.display,
                                     item.characteristics,
