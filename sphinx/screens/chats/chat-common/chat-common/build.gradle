@@ -48,7 +48,6 @@ dependencies {
     api project(path: ':sphinx:application:network:concepts:queries:concept-network-query-chat')
     api project(path: ':sphinx:activity:insetter-activity')
 
-    implementation project(path: ':sphinx:screens-detail:send-attachment:send-attachment-view-model-coordinator')
     api project(path: ':sphinx:screens-detail:camera:camera-view-model-coordinator')
 
     api deps.androidx.recyclerView
