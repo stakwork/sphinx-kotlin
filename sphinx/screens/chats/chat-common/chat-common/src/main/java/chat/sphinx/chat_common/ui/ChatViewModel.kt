@@ -4,7 +4,6 @@ import android.app.Application
 import android.net.Uri
 import android.webkit.MimeTypeMap
 import androidx.annotation.CallSuper
-import androidx.core.net.toFile
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavArgs
@@ -16,7 +15,7 @@ import chat.sphinx.chat_common.navigation.ChatNavigator
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
 import chat.sphinx.chat_common.ui.viewstate.attachment.AttachmentSendViewState
 import chat.sphinx.chat_common.ui.viewstate.footer.FooterViewState
-import chat.sphinx.chat_common.ui.viewstate.header.ChatHeaderFooterViewState
+import chat.sphinx.chat_common.ui.viewstate.header.ChatHeaderViewState
 import chat.sphinx.chat_common.ui.viewstate.messageholder.BubbleBackground
 import chat.sphinx.chat_common.ui.viewstate.messageholder.MessageHolderViewState
 import chat.sphinx.chat_common.ui.viewstate.messagereply.MessageReplyViewState
@@ -35,7 +34,6 @@ import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.kotlin_response.message
 import chat.sphinx.logger.SphinxLogger
-import chat.sphinx.logger.d
 import chat.sphinx.logger.e
 import chat.sphinx.resources.getRandomColor
 import chat.sphinx.send_attachment_view_model_coordinator.request.SendAttachmentRequest
@@ -86,8 +84,8 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 ): SideEffectViewModel<
         ChatSideEffectFragment,
         ChatSideEffect,
-        ChatHeaderFooterViewState
-        >(dispatchers, ChatHeaderFooterViewState.Idle)
+        ChatHeaderViewState
+        >(dispatchers, ChatHeaderViewState.Idle)
 {
     companion object {
         const val TAG = "ChatViewModel"
@@ -118,11 +116,11 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 
     protected abstract suspend fun getChatNameIfNull(): ChatName?
 
-    private inner class ChatHeaderViewStateContainer: ViewStateContainer<ChatHeaderFooterViewState>(ChatHeaderFooterViewState.Idle) {
-        override val viewStateFlow: StateFlow<ChatHeaderFooterViewState> = flow<ChatHeaderFooterViewState> {
+    private inner class ChatHeaderViewStateContainer: ViewStateContainer<ChatHeaderViewState>(ChatHeaderViewState.Idle) {
+        override val viewStateFlow: StateFlow<ChatHeaderViewState> = flow<ChatHeaderViewState> {
             chatSharedFlow.collect { chat ->
                 emit(
-                    ChatHeaderFooterViewState.Initialized(
+                    ChatHeaderViewState.Initialized(
                         chatHeaderName = chat?.name?.value ?: getChatNameIfNull()?.value ?: "",
                         showLock = chat != null,
                         contributions = null,
@@ -134,11 +132,11 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         }.stateIn(
             viewModelScope,
             SharingStarted.WhileSubscribed(5_000),
-            ChatHeaderFooterViewState.Idle
+            ChatHeaderViewState.Idle
         )
     }
 
-    override val viewStateContainer: ViewStateContainer<ChatHeaderFooterViewState> by lazy {
+    val chatHeaderViewStateContainer: ViewStateContainer<ChatHeaderViewState> by lazy {
         ChatHeaderViewStateContainer()
     }
 

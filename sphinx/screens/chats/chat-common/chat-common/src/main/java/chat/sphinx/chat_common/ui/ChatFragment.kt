@@ -24,7 +24,7 @@ import chat.sphinx.chat_common.navigation.ChatNavigator
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
 import chat.sphinx.chat_common.ui.viewstate.attachment.AttachmentSendViewState
 import chat.sphinx.chat_common.ui.viewstate.footer.FooterViewState
-import chat.sphinx.chat_common.ui.viewstate.header.ChatHeaderFooterViewState
+import chat.sphinx.chat_common.ui.viewstate.header.ChatHeaderViewState
 import chat.sphinx.chat_common.ui.viewstate.messageholder.setView
 import chat.sphinx.chat_common.ui.viewstate.messagereply.MessageReplyViewState
 import chat.sphinx.chat_common.ui.viewstate.selected.MenuItemState
@@ -71,7 +71,7 @@ abstract class ChatFragment<
         >(@LayoutRes layoutId: Int): SideEffectFragment<
         ChatSideEffectFragment,
         ChatSideEffect,
-        ChatHeaderFooterViewState,
+        ChatHeaderViewState,
         VM,
         VB
         >(layoutId), ChatSideEffectFragment
@@ -556,50 +556,55 @@ abstract class ChatFragment<
         viewModel.readMessages()
     }
 
-    override suspend fun onViewStateFlowCollect(viewState: ChatHeaderFooterViewState) {
-        @Exhaustive
-        when (viewState) {
-            is ChatHeaderFooterViewState.Idle -> {}
-            is ChatHeaderFooterViewState.Initialized -> {
-                headerBinding.apply {
+    override suspend fun onViewStateFlowCollect(viewState: ChatHeaderViewState) {}
 
-                    textViewChatHeaderName.text = viewState.chatHeaderName
-                    textViewChatHeaderLock.goneIfFalse(viewState.showLock)
+    override fun subscribeToViewStateFlow() {
+//        super.subscribeToViewStateFlow()
 
-                    viewState.contributions?.let {
-                        imageViewChatHeaderContributions.visible
-                        textViewChatHeaderContributions.apply {
-                            visible
-                            @SuppressLint("SetTextI18n")
-                            text = getString(R.string.chat_tribe_contributions) + " ${it.asFormattedString()} ${it.unit}"
-                        }
-                    } ?: let {
-                        imageViewChatHeaderContributions.gone
-                        textViewChatHeaderContributions.gone
-                    }
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.chatHeaderViewStateContainer.collect { viewState ->
 
-                    imageViewChatHeaderMuted.apply {
-                        viewState.isMuted?.let { muted ->
-                            if (muted.isTrue()) {
-                                imageLoader.load(
-                                    headerBinding.imageViewChatHeaderMuted,
-                                    R.drawable.ic_baseline_notifications_off_24
-                                )
-                            } else {
-                                imageLoader.load(
-                                    headerBinding.imageViewChatHeaderMuted,
-                                    R.drawable.ic_baseline_notifications_24
-                                )
+                @Exhaustive
+                when (viewState) {
+                    is ChatHeaderViewState.Idle -> {}
+                    is ChatHeaderViewState.Initialized -> {
+                        headerBinding.apply {
+
+                            textViewChatHeaderName.text = viewState.chatHeaderName
+                            textViewChatHeaderLock.goneIfFalse(viewState.showLock)
+
+                            viewState.contributions?.let {
+                                imageViewChatHeaderContributions.visible
+                                textViewChatHeaderContributions.apply {
+                                    visible
+                                    @SuppressLint("SetTextI18n")
+                                    text = getString(R.string.chat_tribe_contributions) + " ${it.asFormattedString()} ${it.unit}"
+                                }
+                            } ?: let {
+                                imageViewChatHeaderContributions.gone
+                                textViewChatHeaderContributions.gone
                             }
-                        } ?: gone
+
+                            imageViewChatHeaderMuted.apply {
+                                viewState.isMuted?.let { muted ->
+                                    if (muted.isTrue()) {
+                                        imageLoader.load(
+                                            headerBinding.imageViewChatHeaderMuted,
+                                            R.drawable.ic_baseline_notifications_off_24
+                                        )
+                                    } else {
+                                        imageLoader.load(
+                                            headerBinding.imageViewChatHeaderMuted,
+                                            R.drawable.ic_baseline_notifications_24
+                                        )
+                                    }
+                                } ?: gone
+                            }
+                        }
                     }
                 }
             }
         }
-    }
-
-    override fun subscribeToViewStateFlow() {
-        super.subscribeToViewStateFlow()
 
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.messageReplyViewStateContainer.collect { viewState ->
