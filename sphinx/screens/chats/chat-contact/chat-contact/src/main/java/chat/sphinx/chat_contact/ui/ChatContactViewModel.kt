@@ -5,7 +5,6 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.camera_view_model_coordinator.request.CameraRequest
 import chat.sphinx.camera_view_model_coordinator.response.CameraResponse
-import chat.sphinx.chat_common.navigation.ChatNavigator
 import chat.sphinx.chat_common.ui.ChatViewModel
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
 import chat.sphinx.chat_contact.navigation.ContactChatNavigator
@@ -249,9 +248,5 @@ internal class ChatContactViewModel @Inject constructor(
         builder.setContactId(contactId)
         builder.setChatId(chatId)
         return super.sendMessage(builder)
-    }
-
-    override fun showActionsMenu() {
-        showActionsMenuImpl(contactId, chatId)
     }
 }

@@ -164,11 +164,57 @@ abstract class ChatFragment<
     }
 
     private fun setupMenu(insetterActivity: InsetterActivity) {
-        menuBinding.includeLayoutChatMenuOptions.apply {
+        menuBinding.includeLayoutChatMenuOptions.apply options@ {
             insetterActivity.addNavigationBarPadding(root)
+
+            textViewMenuOptionCancel.setOnClickListener {
+                viewModel.updateViewState(ChatMenuViewState.Closed)
+            }
+
+            this@options.root.setOnClickListener { viewModel }
+
+            layoutConstraintMenuOptionCamera.setOnClickListener {
+                viewModel.chatMenuOptionCamera()
+            }
+
+            layoutConstraintMenuOptionMediaLibrary.setOnClickListener {
+                viewModel.chatMenuOptionMediaLibrary()
+            }
+
+            layoutConstraintMenuOptionGif.setOnClickListener {
+                viewModel.chatMenuOptionGif()
+            }
+
+            layoutConstraintMenuOptionFile.setOnClickListener {
+                viewModel.chatMenuOptionFileLibrary()
+            }
+
+            layoutConstraintMenuOptionPaidMessage.setOnClickListener {
+                viewModel.chatMenuOptionPaidMessage()
+            }
+
+            val alpha = if (menuEnablePayments) 1.0F else 0.4F
+            layoutConstraintMenuOptionPaymentRequest.apply request@ {
+                this@request.isEnabled = menuEnablePayments
+                this@request.alpha = alpha
+                this@request.setOnClickListener {
+                    viewModel.chatMenuOptionPaymentRequest()
+                }
+            }
+
+            layoutConstraintMenuOptionPaymentSend.apply send@ {
+                this@send.isEnabled = menuEnablePayments
+                this@send.alpha = alpha
+                this@send.setOnClickListener {
+                    viewModel.chatMenuOptionPaymentSend()
+                }
+            }
         }
-        // TODO: set click listeners
-        // TODO: Disable payment options
+
+        menuBinding.viewChatMenuInputLock.setOnClickListener {
+            viewModel.updateViewState(ChatMenuViewState.Closed)
+//            viewModel
+        }
     }
 
     private fun setupFooter(insetterActivity: InsetterActivity) {
