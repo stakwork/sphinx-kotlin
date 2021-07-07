@@ -1,0 +1,10 @@
+plugins {
+    id 'java-library'
+    id 'kotlin'
+}
+
+dependencies {
+    api project(path: ':sphinx:application:data:concepts:concept-media-cache')
+    api project(path: ':kotlin:concepts:concept-coroutines')
+    implementation deps.square.okio
+}
