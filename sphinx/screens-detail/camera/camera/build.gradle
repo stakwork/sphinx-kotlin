@@ -38,6 +38,7 @@ dependencies {
     // Sphinx
     implementation project(path: ':sphinx:application:common:logger')
     implementation project(path: ':sphinx:application:data:concepts:concept-image-loader')
+    implementation project(path: ':sphinx:application:data:concepts:concept-media-cache')
 
     implementation project(path: ':sphinx:activity:insetter-activity')
     implementation project(path: ':sphinx:activity:features:feature-view-model-coordinator')
