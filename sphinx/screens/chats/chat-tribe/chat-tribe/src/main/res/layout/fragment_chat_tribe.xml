@@ -65,7 +65,7 @@
         layout="@layout/layout_attachment_send_preview"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@+id/include_podcast_player_footer"
+        app:layout_constraintBottom_toTopOf="@+id/include_chat_tribe_footer"
         app:layout_constraintTop_toTopOf="parent"
         tools:visibility="gone" />
 
