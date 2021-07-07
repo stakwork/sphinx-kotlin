@@ -9,7 +9,7 @@
     android:paddingHorizontal="@dimen/options_menu_horizontal_padding">
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/layout_constraint_camera_option_container"
+        android:id="@+id/layout_constraint_menu_option_camera"
         android:layout_width="match_parent"
         android:layout_height="@dimen/options_menu_option_height"
         android:clickable="true"
@@ -18,7 +18,7 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/image_view_camera_icon"
+            android:id="@+id/image_view_menu_option_camera_icon"
             android:layout_width="@dimen/option_icon_width"
             android:layout_height="match_parent"
             android:paddingStart="@dimen/option_icon_left_padding"
@@ -35,7 +35,7 @@
             android:text="@string/camera_attachment_option"
             android:textColor="@color/primaryText"
             android:textSize="@dimen/option_title_text_size"
-            app:layout_constraintStart_toEndOf="@+id/image_view_camera_icon" />
+            app:layout_constraintStart_toEndOf="@+id/image_view_menu_option_camera_icon" />
 
         <View
             android:layout_width="match_parent"
@@ -46,16 +46,16 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/layout_constraint_library_option_container"
+        android:id="@+id/layout_constraint_menu_option_media_library"
         android:layout_width="match_parent"
         android:layout_height="@dimen/options_menu_option_height"
         android:clickable="true"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_camera_option_container">
+        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_menu_option_camera">
 
         <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/image_view_media_library_icon"
+            android:id="@+id/image_view_menu_option_media_library_icon"
             android:layout_width="@dimen/option_icon_width"
             android:layout_height="match_parent"
             android:paddingLeft="@dimen/option_icon_left_padding"
@@ -72,7 +72,7 @@
             android:text="@string/library_attachment_option"
             android:textColor="@color/primaryText"
             android:textSize="@dimen/option_title_text_size"
-            app:layout_constraintStart_toEndOf="@+id/image_view_media_library_icon" />
+            app:layout_constraintStart_toEndOf="@+id/image_view_menu_option_media_library_icon" />
 
         <View
             android:layout_width="match_parent"
@@ -83,16 +83,16 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/layout_constraint_gif_option_container"
+        android:id="@+id/layout_constraint_menu_option_gif"
         android:layout_width="match_parent"
         android:layout_height="@dimen/options_menu_option_height"
         android:clickable="true"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_library_option_container">
+        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_menu_option_media_library">
 
         <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/text_view_gif_icon"
+            android:id="@+id/text_view_menu_option_gif_icon"
             android:layout_width="@dimen/option_icon_width"
             android:layout_height="match_parent"
             android:fontFamily="@font/material_icons_regular"
@@ -110,7 +110,7 @@
             android:text="@string/gif_attachment_option"
             android:textColor="@color/primaryText"
             android:textSize="@dimen/option_title_text_size"
-            app:layout_constraintStart_toEndOf="@+id/text_view_gif_icon" />
+            app:layout_constraintStart_toEndOf="@+id/text_view_menu_option_gif_icon" />
 
         <View
             android:layout_width="match_parent"
@@ -121,16 +121,16 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/layout_constraint_file_option_container"
+        android:id="@+id/layout_constraint_menu_option_file"
         android:layout_width="match_parent"
         android:layout_height="@dimen/options_menu_option_height"
         android:clickable="true"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_gif_option_container">
+        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_menu_option_gif">
 
         <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/text_view_file_icon"
+            android:id="@+id/text_view_menu_option_file_icon"
             android:layout_width="@dimen/option_icon_width"
             android:layout_height="match_parent"
             android:fontFamily="@font/material_icons_regular"
@@ -148,7 +148,7 @@
             android:text="@string/file_attachment_option"
             android:textColor="@color/primaryText"
             android:textSize="@dimen/option_title_text_size"
-            app:layout_constraintStart_toEndOf="@+id/text_view_file_icon" />
+            app:layout_constraintStart_toEndOf="@+id/text_view_menu_option_file_icon" />
 
         <View
             android:layout_width="match_parent"
@@ -159,16 +159,16 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/layout_constraint_paid_message_option_container"
+        android:id="@+id/layout_constraint_menu_option_paid_message"
         android:layout_width="match_parent"
         android:layout_height="@dimen/options_menu_option_height"
         android:clickable="true"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_file_option_container">
+        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_menu_option_file">
 
         <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/image_view_paid_message_icon"
+            android:id="@+id/image_view_menu_option_paid_message_icon"
             android:layout_width="@dimen/option_icon_width"
             android:layout_height="match_parent"
             android:paddingLeft="@dimen/option_icon_left_padding"
@@ -185,7 +185,7 @@
             android:text="@string/paid_message_attachment_option"
             android:textColor="@color/primaryText"
             android:textSize="@dimen/option_title_text_size"
-            app:layout_constraintStart_toEndOf="@+id/image_view_paid_message_icon" />
+            app:layout_constraintStart_toEndOf="@+id/image_view_menu_option_paid_message_icon" />
 
         <View
             android:layout_width="match_parent"
@@ -196,16 +196,16 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/layout_constraint_request_option_container"
+        android:id="@+id/layout_constraint_menu_option_payment_request"
         android:layout_width="match_parent"
         android:layout_height="@dimen/options_menu_option_height"
         android:clickable="true"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_paid_message_option_container">
+        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_menu_option_paid_message">
 
         <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/image_view_request_icon"
+            android:id="@+id/image_view_menu_option_payment_request_icon"
             android:layout_width="@dimen/option_icon_width"
             android:layout_height="match_parent"
             android:paddingLeft="@dimen/option_icon_left_padding"
@@ -222,7 +222,7 @@
             android:text="@string/request_attachment_option"
             android:textColor="@color/primaryText"
             android:textSize="@dimen/option_title_text_size"
-            app:layout_constraintStart_toEndOf="@+id/image_view_request_icon" />
+            app:layout_constraintStart_toEndOf="@+id/image_view_menu_option_payment_request_icon" />
 
         <View
             android:layout_width="match_parent"
@@ -233,16 +233,16 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/layout_constraint_send_option_container"
+        android:id="@+id/layout_constraint_menu_option_payment_send"
         android:layout_width="match_parent"
         android:layout_height="@dimen/options_menu_option_height"
         android:clickable="true"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_request_option_container">
+        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_menu_option_payment_request">
 
         <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/image_view_send_icon"
+            android:id="@+id/image_view_menu_option_payment_send_icon"
             android:layout_width="@dimen/option_icon_width"
             android:layout_height="match_parent"
             android:paddingLeft="@dimen/option_icon_left_padding"
@@ -259,7 +259,7 @@
             android:text="@string/send_attachment_option"
             android:textColor="@color/primaryText"
             android:textSize="@dimen/option_title_text_size"
-            app:layout_constraintStart_toEndOf="@+id/image_view_send_icon" />
+            app:layout_constraintStart_toEndOf="@+id/image_view_menu_option_payment_send_icon" />
 
         <View
             android:layout_width="match_parent"
@@ -270,7 +270,7 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/text_view_cancel_button"
+        android:id="@+id/text_view_menu_option_cancel"
         android:layout_width="match_parent"
         android:layout_height="@dimen/options_menu_cancel_button_height"
         android:clickable="true"
@@ -281,6 +281,6 @@
         android:textSize="@dimen/cancel_title_text_size"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_send_option_container" />
+        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_menu_option_payment_send" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
