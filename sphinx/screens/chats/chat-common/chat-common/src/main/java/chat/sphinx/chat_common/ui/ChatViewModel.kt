@@ -36,6 +36,7 @@ import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.kotlin_response.message
 import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.logger.d
+import chat.sphinx.logger.e
 import chat.sphinx.resources.getRandomColor
 import chat.sphinx.send_attachment_view_model_coordinator.request.SendAttachmentRequest
 import chat.sphinx.send_attachment_view_model_coordinator.response.SendAttachmentResponse
@@ -88,6 +89,10 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         ChatHeaderFooterViewState
         >(dispatchers, ChatHeaderFooterViewState.Idle)
 {
+    companion object {
+        const val TAG = "ChatViewModel"
+    }
+
     abstract val args: ARGS
 
     protected abstract val chatNavigator: ChatNavigator
@@ -407,8 +412,30 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         footerViewStateContainer.updateViewState(viewState)
     }
 
+    private inner class AttachmentSendStateContainer: ViewStateContainer<AttachmentSendViewState>(AttachmentSendViewState.Idle) {
+        override fun updateViewState(viewState: AttachmentSendViewState) {
+            if (viewState is AttachmentSendViewState.Preview) {
+
+                // Only delete the previous file in the event that a new pic is choosen
+                // to send when one is currently being previewed.
+                val current = viewStateFlow.value
+                if (current is AttachmentSendViewState.Preview) {
+                    if (current.file.path != viewState.file.path) {
+                        try {
+                            current.file.delete()
+                        } catch (e: Exception) {
+
+                        }
+                    }
+                }
+            }
+
+            super.updateViewState(viewState)
+        }
+    }
+
     private val attachmentSendStateContainer: ViewStateContainer<AttachmentSendViewState> by lazy {
-        ViewStateContainer(AttachmentSendViewState.Idle)
+        AttachmentSendStateContainer()
     }
 
     @JvmSynthetic
@@ -421,14 +448,11 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     }
 
     @JvmSynthetic
-    internal fun deleteFileIfLocal(viewState: AttachmentSendViewState.Preview) {
-        if (viewState is AttachmentSendViewState.Preview.LocalFile) {
-            viewModelScope.launch(io) {
-                try {
-                    viewState.cameraResponse.value.delete()
-                } catch (e: Exception) {
-                }
-            }
+    internal fun deleteUnsentAttachment(viewState: AttachmentSendViewState.Preview) {
+        viewModelScope.launch(io) {
+            try {
+                viewState.file.delete()
+            } catch (e: Exception) {}
         }
     }
 
@@ -560,9 +584,19 @@ abstract class ChatViewModel<ARGS: NavArgs>(
             when (response) {
                 is Response.Error -> {}
                 is Response.Success -> {
+
+                    val ext = response.value.value.extension
+
+                    val mediaType: MediaType = when (response.value) {
+                        is CameraResponse.Image -> {
+                            MediaType.Image("${MediaType.IMAGE}/$ext")
+                        }
+                    }
+
                     updateAttachmentSendViewState(
-                        AttachmentSendViewState.Preview.LocalFile(response.value)
+                        AttachmentSendViewState.Preview(response.value.value, mediaType)
                     )
+
                     updateFooterViewState(FooterViewState.Attachment)
                 }
             }
@@ -578,7 +612,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 
         cr.getType(uri)?.let { crType ->
 
-            MimeTypeMap.getSingleton().getExtensionFromMimeType(crType)?.let { extension ->
+            MimeTypeMap.getSingleton().getExtensionFromMimeType(crType)?.let { ext ->
 
                 val stream: InputStream = try {
                     cr.openInputStream(uri) ?: return
@@ -594,14 +628,22 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                         }
                         is MediaType.Image -> {
                             viewModelScope.launch(mainImmediate) {
-                                val newFile: File = mediaCacheHandler.createImageFile(extension)
-                                mediaCacheHandler.copyTo(stream, newFile)
-                                attachmentSendStateContainer.updateViewState(
-                                    // TODO: update AttachmentSendViewState to include media type
-                                    AttachmentSendViewState.Preview.LocalFile(CameraResponse.Image(newFile))
-                                )
+                                val newFile: File = mediaCacheHandler.createImageFile(ext)
+
+                                try {
+                                    mediaCacheHandler.copyTo(stream, newFile)
+                                    attachmentSendStateContainer.updateViewState(
+                                        AttachmentSendViewState.Preview(newFile, mType)
+                                    )
+                                } catch (e: Exception) {
+                                    newFile.delete()
+                                    LOG.e(
+                                        TAG,
+                                        "Failed to copy content to new file: ${newFile.path}",
+                                        e
+                                    )
+                                }
                             }
-                            // TODO: Implement
                         }
                         is MediaType.Pdf -> {
                             // TODO: Implement

@@ -17,7 +17,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
 import app.cash.exhaustive.Exhaustive
-import chat.sphinx.camera_view_model_coordinator.response.CameraResponse
 import chat.sphinx.chat_common.R
 import chat.sphinx.chat_common.adapters.MessageListAdapter
 import chat.sphinx.chat_common.databinding.*
@@ -138,9 +137,9 @@ abstract class ChatFragment<
             val attachmentViewState = viewModel.getAttachmentSendViewStateFlow().value
             when {
                 attachmentViewState is AttachmentSendViewState.Preview -> {
-                    viewModel.deleteFileIfLocal(attachmentViewState)
                     viewModel.updateAttachmentSendViewState(AttachmentSendViewState.Idle)
                     viewModel.updateFooterViewState(FooterViewState.Default)
+                    viewModel.deleteUnsentAttachment(attachmentViewState)
                 }
                 viewModel.getSelectedMessageViewStateFlow().value is SelectedMessageViewState.SelectedMessage -> {
                     viewModel.updateSelectedMessageViewState(SelectedMessageViewState.None)
@@ -169,25 +168,12 @@ abstract class ChatFragment<
                     is AttachmentSendViewState.Idle -> {
                         sendMessageBuilder.setAttachmentInfo(null)
                     }
-                    is AttachmentSendViewState.Preview.LocalFile -> {
-                        val response = attachmentViewState.cameraResponse
-                        val extension = response.value.extension
-
-                        val mediaType = when (response) {
-                            is CameraResponse.Image -> {
-                                MediaType.Image(MediaType.IMAGE + if (extension.isNotEmpty()) {
-                                    "/$extension"
-                                } else {
-                                    "/jpg"
-                                })
-                            }
-                        }
-
+                    is AttachmentSendViewState.Preview -> {
                         sendMessageBuilder.setAttachmentInfo(
                             AttachmentInfo(
-                                file = response.value,
-                                mediaType = mediaType,
-                                isLocalFile = true
+                                file = attachmentViewState.file,
+                                mediaType = attachmentViewState.type,
+                                isLocalFile = true,
                             )
                         )
                     }
@@ -292,7 +278,7 @@ abstract class ChatFragment<
             textViewAttachmentSendHeaderClose.setOnClickListener {
                 val vs = viewModel.getAttachmentSendViewStateFlow().value
                 if (vs is AttachmentSendViewState.Preview) {
-                    viewModel.deleteFileIfLocal(vs)
+                    viewModel.deleteUnsentAttachment(vs)
                     viewModel.updateFooterViewState(FooterViewState.Default)
                     viewModel.updateAttachmentSendViewState(AttachmentSendViewState.Idle)
                 }
@@ -534,17 +520,25 @@ abstract class ChatFragment<
                             root.gone
                             imageViewAttachmentSendPreview.setImageDrawable(null)
                         }
-                        is AttachmentSendViewState.Preview.LocalFile -> {
+                        is AttachmentSendViewState.Preview -> {
 
                             textViewAttachmentSendHeaderName.apply {
                                 @Exhaustive
-                                when (viewState.cameraResponse) {
-                                    is CameraResponse.Image -> {
+                                when (viewState.type) {
+                                    is MediaType.Image -> {
                                         text = getString(R.string.attachment_send_header_image)
                                     }
-//                                    is CameraResponse.Video -> {
-//                                        text = getString(R.string.attachment_send_header_video)
-//                                    }
+                                    is MediaType.Audio -> {
+                                        // TODO: Implement
+                                    }
+                                    is MediaType.Pdf -> {
+                                        // TODO: Implement
+                                    }
+                                    is MediaType.Video -> {
+                                        text = getString(R.string.attachment_send_header_video)
+                                    }
+                                    is MediaType.Text,
+                                    is MediaType.Unknown -> {}
                                 }
                             }
 
@@ -552,7 +546,7 @@ abstract class ChatFragment<
 
                             // will load almost immediately b/c it's a file, so
                             // no need to launch separate coroutine.
-                            imageLoader.load(imageViewAttachmentSendPreview, viewState.cameraResponse.value)
+                            imageLoader.load(imageViewAttachmentSendPreview, viewState.file)
                         }
                     }
                 }
