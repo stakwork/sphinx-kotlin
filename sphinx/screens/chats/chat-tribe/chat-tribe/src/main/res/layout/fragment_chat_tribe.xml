@@ -69,4 +69,8 @@
         app:layout_constraintTop_toTopOf="parent"
         tools:visibility="gone" />
 
+    <include
+        android:id="@+id/include_chat_tribe_menu"
+        layout="@layout/layout_chat_menu" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -40,7 +40,9 @@
         app:deriveConstraintsFrom="@+id/motion_scene_chat_menu_closed">
 
         <Constraint android:id="@+id/view_chat_menu_input_lock">
-            <PropertySet android:visibility="visible" />
+            <PropertySet
+                android:alpha="@dimen/options_menu_input_lock_alpha"
+                android:visibility="visible" />
         </Constraint>
 
         <Constraint android:id="@+id/include_layout_chat_menu_options">

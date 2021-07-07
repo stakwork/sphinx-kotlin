@@ -16,6 +16,7 @@ import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
 import chat.sphinx.chat_common.ui.viewstate.attachment.AttachmentSendViewState
 import chat.sphinx.chat_common.ui.viewstate.footer.FooterViewState
 import chat.sphinx.chat_common.ui.viewstate.header.ChatHeaderViewState
+import chat.sphinx.chat_common.ui.viewstate.menu.ChatMenuViewState
 import chat.sphinx.chat_common.ui.viewstate.messageholder.BubbleBackground
 import chat.sphinx.chat_common.ui.viewstate.messageholder.MessageHolderViewState
 import chat.sphinx.chat_common.ui.viewstate.messagereply.MessageReplyViewState
@@ -50,6 +51,7 @@ import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message_media.MediaType
 import chat.sphinx.wrapper_message_media.toMediaType
+import io.matthewnelson.android_feature_viewmodel.MotionLayoutViewModel
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
@@ -81,11 +83,12 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     protected val cameraCoordinator: ViewModelCoordinator<CameraRequest, CameraResponse>,
     protected val sendAttachmentCoordinator: ViewModelCoordinator<SendAttachmentRequest, SendAttachmentResponse>,
     protected val LOG: SphinxLogger,
-): SideEffectViewModel<
+): MotionLayoutViewModel<
+        Nothing,
         ChatSideEffectFragment,
         ChatSideEffect,
-        ChatHeaderViewState
-        >(dispatchers, ChatHeaderViewState.Idle)
+        ChatMenuViewState,
+        >(dispatchers, ChatMenuViewState.Closed)
 {
     companion object {
         const val TAG = "ChatViewModel"
@@ -658,5 +661,9 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                 }
             }
         }
+    }
+
+    override suspend fun onMotionSceneCompletion(value: Nothing) {
+        // unused
     }
 }

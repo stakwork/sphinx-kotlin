@@ -41,6 +41,11 @@ internal class ChatContactFragment: ChatFragment<
     override val attachmentSendBinding: LayoutAttachmentSendPreviewBinding by viewBinding(
         LayoutAttachmentSendPreviewBinding::bind, R.id.include_chat_contact_attachment_send_preview
     )
+    override val menuBinding: LayoutChatMenuBinding by viewBinding(
+        LayoutChatMenuBinding::bind, R.id.include_chat_contact_menu
+    )
+    override val menuEnablePayments: Boolean
+        get() = true
 
     override val recyclerView: RecyclerView
         get() = binding.recyclerViewMessages

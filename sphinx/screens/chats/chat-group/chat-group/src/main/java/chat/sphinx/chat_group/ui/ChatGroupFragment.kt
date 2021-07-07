@@ -41,6 +41,11 @@ internal class ChatGroupFragment: ChatFragment<
     override val attachmentSendBinding: LayoutAttachmentSendPreviewBinding by viewBinding(
         LayoutAttachmentSendPreviewBinding::bind, R.id.include_chat_group_attachment_send_preview
     )
+    override val menuBinding: LayoutChatMenuBinding by viewBinding(
+        LayoutChatMenuBinding::bind, R.id.include_chat_group_menu
+    )
+    override val menuEnablePayments: Boolean
+        get() = false
 
     override val recyclerView: RecyclerView
         get() = binding.recyclerViewMessages

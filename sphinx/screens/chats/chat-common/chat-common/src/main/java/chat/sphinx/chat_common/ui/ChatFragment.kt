@@ -9,6 +9,7 @@ import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.LayoutRes
+import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
@@ -25,6 +26,7 @@ import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
 import chat.sphinx.chat_common.ui.viewstate.attachment.AttachmentSendViewState
 import chat.sphinx.chat_common.ui.viewstate.footer.FooterViewState
 import chat.sphinx.chat_common.ui.viewstate.header.ChatHeaderViewState
+import chat.sphinx.chat_common.ui.viewstate.menu.ChatMenuViewState
 import chat.sphinx.chat_common.ui.viewstate.messageholder.setView
 import chat.sphinx.chat_common.ui.viewstate.messagereply.MessageReplyViewState
 import chat.sphinx.chat_common.ui.viewstate.selected.MenuItemState
@@ -54,10 +56,12 @@ import chat.sphinx.wrapper_message.retrieveImageUrlAndMessageMedia
 import chat.sphinx.wrapper_message.retrieveTextToShow
 import chat.sphinx.wrapper_message.toReplyUUID
 import chat.sphinx.wrapper_view.Dp
-import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
+import io.matthewnelson.android_feature_screens.ui.motionlayout.MotionLayoutFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.visible
+import io.matthewnelson.android_feature_viewmodel.currentViewState
+import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_views.viewstate.collect
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -68,10 +72,11 @@ abstract class ChatFragment<
         VB: ViewBinding,
         ARGS: NavArgs,
         VM: ChatViewModel<ARGS>,
-        >(@LayoutRes layoutId: Int): SideEffectFragment<
+        >(@LayoutRes layoutId: Int): MotionLayoutFragment<
+        Nothing,
         ChatSideEffectFragment,
         ChatSideEffect,
-        ChatHeaderViewState,
+        ChatMenuViewState,
         VM,
         VB
         >(layoutId), ChatSideEffectFragment
@@ -82,7 +87,10 @@ abstract class ChatFragment<
     protected abstract val selectedMessageBinding: LayoutSelectedMessageBinding
     protected abstract val selectedMessageHolderBinding: LayoutMessageHolderBinding
     protected abstract val attachmentSendBinding: LayoutAttachmentSendPreviewBinding
+    protected abstract val menuBinding: LayoutChatMenuBinding
     protected abstract val recyclerView: RecyclerView
+
+    protected abstract val menuEnablePayments: Boolean
 
     protected abstract val imageLoader: ImageLoader<ImageView>
 
@@ -112,6 +120,7 @@ abstract class ChatFragment<
         SelectedMessageStateBackPressHandler(viewLifecycleOwner, requireActivity())
 
         val insetterActivity = (requireActivity() as InsetterActivity)
+        setupMenu(insetterActivity)
         setupFooter(insetterActivity)
         setupHeader(insetterActivity)
         setupSelectedMessage()
@@ -135,7 +144,11 @@ abstract class ChatFragment<
 
         override fun handleOnBackPressed() {
             val attachmentViewState = viewModel.getAttachmentSendViewStateFlow().value
+
             when {
+                viewModel.currentViewState is ChatMenuViewState.Open -> {
+                    viewModel.updateViewState(ChatMenuViewState.Closed)
+                }
                 attachmentViewState is AttachmentSendViewState.Preview -> {
                     viewModel.updateAttachmentSendViewState(AttachmentSendViewState.Idle)
                     viewModel.updateFooterViewState(FooterViewState.Default)
@@ -151,6 +164,14 @@ abstract class ChatFragment<
                 }
             }
         }
+    }
+
+    private fun setupMenu(insetterActivity: InsetterActivity) {
+        menuBinding.includeLayoutChatMenuOptions.apply {
+            insetterActivity.addNavigationBarPadding(root)
+        }
+        // TODO: set click listeners
+        // TODO: Disable payment options
     }
 
     private fun setupFooter(insetterActivity: InsetterActivity) {
@@ -202,7 +223,8 @@ abstract class ChatFragment<
                                 delay(250L)
                             }
                         }
-                        viewModel.showActionsMenu()
+
+                        viewModel.updateViewState(ChatMenuViewState.Open)
                     }
                 }
             }
@@ -556,10 +578,30 @@ abstract class ChatFragment<
         viewModel.readMessages()
     }
 
-    override suspend fun onViewStateFlowCollect(viewState: ChatHeaderViewState) {}
+    override suspend fun onViewStateFlowCollect(viewState: ChatMenuViewState) {
+        @Exhaustive
+        when (viewState) {
+            is ChatMenuViewState.Closed -> {
+                menuBinding.root.setTransitionDuration(250)
+            }
+            is ChatMenuViewState.Open -> {
+                menuBinding.root.setTransitionDuration(400)
+            }
+        }
+
+        viewState.transitionToEndSet(menuBinding.root)
+    }
+
+    override fun getMotionLayouts(): Array<MotionLayout> {
+        return arrayOf(menuBinding.root)
+    }
+
+    override fun onViewCreatedRestoreMotionScene(viewState: ChatMenuViewState, binding: VB) {
+        viewState.restoreMotionScene(menuBinding.root)
+    }
 
     override fun subscribeToViewStateFlow() {
-//        super.subscribeToViewStateFlow()
+        super.subscribeToViewStateFlow()
 
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.chatHeaderViewStateContainer.collect { viewState ->
