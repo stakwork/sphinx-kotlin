@@ -6,6 +6,8 @@ import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
 import androidx.activity.OnBackPressedCallback
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.LayoutRes
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.LifecycleOwner
@@ -68,12 +70,12 @@ abstract class ChatFragment<
         ARGS: NavArgs,
         VM: ChatViewModel<ARGS>,
         >(@LayoutRes layoutId: Int): SideEffectFragment<
-        Context,
+        ChatSideEffectFragment,
         ChatSideEffect,
         ChatHeaderFooterViewState,
         VM,
         VB
-        >(layoutId)
+        >(layoutId), ChatSideEffectFragment
 {
     protected abstract val footerBinding: LayoutChatFooterBinding
     protected abstract val headerBinding: LayoutChatHeaderBinding
@@ -91,6 +93,14 @@ abstract class ChatFragment<
 
     private val holderJobs: ArrayList<Job> = ArrayList(3)
     private val disposables: ArrayList<Disposable> = ArrayList(3)
+
+    override val chatFragmentContext: Context
+        get() = binding.root.context
+
+    override val contentChooserContract: ActivityResultLauncher<String> =
+        registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+            viewModel.handleActivityResultUri(uri)
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -679,6 +689,6 @@ abstract class ChatFragment<
     }
 
     override suspend fun onSideEffectCollect(sideEffect: ChatSideEffect) {
-        sideEffect.execute(binding.root.context)
+        sideEffect.execute(this)
     }
 }
