@@ -10,11 +10,6 @@ dependencies {
     api project(path: ':sphinx:application:common:wrappers:wrapper-common')
     implementation deps.kotlin.coroutinesCore
 
-    // TODO: This is _incorrect_ and should never need to be exposed from the
-    //  concept module and needs to be refactored out.
-    //  do _not_ copy this to new network query concept modules
-    api project(path: ':sphinx:application:network:concepts:calls:concept-network-relay-call')
-
     // needed to override moshi's use of 1.4.31
     implementation deps.kotlin.reflect
     implementation deps.square.moshi

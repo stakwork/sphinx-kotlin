@@ -3,10 +3,10 @@ package chat.sphinx.feature_network_query_invite
 import chat.sphinx.concept_network_query_invite.NetworkQueryInvite
 import chat.sphinx.concept_network_query_invite.model.*
 import chat.sphinx.concept_network_relay_call.NetworkRelayCall
+import chat.sphinx.feature_network_query_invite.model.PayInviteResponse
 import chat.sphinx.feature_network_query_invite.model.RedeemInviteRelayResponse
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.ResponseError
-import chat.sphinx.wrapper_relay.RelayUrl
 import kotlinx.coroutines.flow.Flow
 
 class NetworkQueryInviteImpl(
