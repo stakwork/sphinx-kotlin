@@ -26,6 +26,7 @@ import chat.sphinx.send_attachment_view_model_coordinator.response.SendAttachmen
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.ChatName
 import chat.sphinx.wrapper_common.dashboard.ChatId
+import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.util.getInitials
 import chat.sphinx.wrapper_message.Message
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -44,6 +45,7 @@ class ChatGroupViewModel @Inject constructor(
     app: Application,
     dispatchers: CoroutineDispatchers,
     memeServerTokenHandler: MemeServerTokenHandler,
+    chatNavigator: GroupChatNavigator,
     chatRepository: ChatRepository,
     contactRepository: ContactRepository,
     messageRepository: MessageRepository,
@@ -57,6 +59,7 @@ class ChatGroupViewModel @Inject constructor(
     app,
     dispatchers,
     memeServerTokenHandler,
+    chatNavigator,
     chatRepository,
     contactRepository,
     messageRepository,
@@ -68,11 +71,9 @@ class ChatGroupViewModel @Inject constructor(
     LOG,
 ) {
     override val args: ChatGroupFragmentArgs by savedStateHandle.navArgs()
-
-    @Inject
-    protected lateinit var chatGroupNavigator: GroupChatNavigator
-    override val chatNavigator: ChatNavigator
-        get() = chatGroupNavigator
+    override var chatId: ChatId = args.chatId
+    override val contactId: ContactId?
+        get() = null
 
     override val chatSharedFlow: SharedFlow<Chat?> = flow {
         emitAll(chatRepository.getChatById(args.chatId))

@@ -21,7 +21,6 @@ import app.cash.exhaustive.Exhaustive
 import chat.sphinx.chat_common.R
 import chat.sphinx.chat_common.adapters.MessageListAdapter
 import chat.sphinx.chat_common.databinding.*
-import chat.sphinx.chat_common.navigation.ChatNavigator
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
 import chat.sphinx.chat_common.ui.viewstate.attachment.AttachmentSendViewState
 import chat.sphinx.chat_common.ui.viewstate.footer.FooterViewState
@@ -94,8 +93,6 @@ abstract class ChatFragment<
 
     protected abstract val imageLoader: ImageLoader<ImageView>
 
-    protected abstract val chatNavigator: ChatNavigator
-
     private val sendMessageBuilder = SendMessage.Builder()
 
     private val holderJobs: ArrayList<Job> = ArrayList(3)
@@ -159,7 +156,7 @@ abstract class ChatFragment<
                 }
                 else -> {
                     lifecycleScope.launch(viewModel.mainImmediate) {
-                        chatNavigator.popBackStack()
+                        viewModel.chatNavigator.popBackStack()
                     }
                 }
             }
@@ -254,7 +251,7 @@ abstract class ChatFragment<
 
             textViewChatHeaderNavBack.setOnClickListener {
                 lifecycleScope.launch {
-                    chatNavigator.popBackStack()
+                    viewModel.chatNavigator.popBackStack()
                 }
             }
         }

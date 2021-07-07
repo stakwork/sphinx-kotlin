@@ -56,9 +56,4 @@ internal class ChatGroupFragment: ChatFragment<
     protected lateinit var imageLoaderInj: ImageLoader<ImageView>
     override val imageLoader: ImageLoader<ImageView>
         get() = imageLoaderInj
-
-    @Inject
-    protected lateinit var chatNavigatorInj: GroupChatNavigator
-    override val chatNavigator: ChatNavigator
-        get() = chatNavigatorInj
 }

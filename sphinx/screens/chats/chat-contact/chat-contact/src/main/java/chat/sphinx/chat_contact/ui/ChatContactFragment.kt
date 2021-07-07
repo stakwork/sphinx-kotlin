@@ -56,9 +56,4 @@ internal class ChatContactFragment: ChatFragment<
     protected lateinit var imageLoaderInj: ImageLoader<ImageView>
     override val imageLoader: ImageLoader<ImageView>
         get() = imageLoaderInj
-
-    @Inject
-    protected lateinit var chatNavigatorInj: ContactChatNavigator
-    override val chatNavigator: ChatNavigator
-        get() = chatNavigatorInj
 }

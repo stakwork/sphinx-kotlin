@@ -74,6 +74,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     protected val app: Application,
     dispatchers: CoroutineDispatchers,
     val memeServerTokenHandler: MemeServerTokenHandler,
+    val chatNavigator: ChatNavigator,
     protected val chatRepository: ChatRepository,
     protected val contactRepository: ContactRepository,
     protected val messageRepository: MessageRepository,
@@ -94,9 +95,9 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         const val TAG = "ChatViewModel"
     }
 
-    abstract val args: ARGS
-
-    protected abstract val chatNavigator: ChatNavigator
+    protected abstract val args: ARGS
+    protected abstract val chatId: ChatId?
+    protected abstract val contactId: ContactId?
 
     val imageLoaderDefaults by lazy {
         ImageLoaderOptions.Builder()

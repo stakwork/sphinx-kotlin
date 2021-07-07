@@ -57,6 +57,7 @@ internal class ChatContactViewModel @Inject constructor(
     app: Application,
     dispatchers: CoroutineDispatchers,
     memeServerTokenHandler: MemeServerTokenHandler,
+    chatNavigator: ContactChatNavigator,
     chatRepository: ChatRepository,
     contactRepository: ContactRepository,
     messageRepository: MessageRepository,
@@ -70,6 +71,7 @@ internal class ChatContactViewModel @Inject constructor(
     app,
     dispatchers,
     memeServerTokenHandler,
+    chatNavigator,
     chatRepository,
     contactRepository,
     messageRepository,
@@ -81,15 +83,13 @@ internal class ChatContactViewModel @Inject constructor(
     LOG,
 ) {
     override val args: ChatContactFragmentArgs by savedStateHandle.navArgs()
-    private var chatId: ChatId? = args.chatId
-
-    @Inject
-    protected lateinit var chatContactNavigator: ContactChatNavigator
-    override val chatNavigator: ChatNavigator
-        get() = chatContactNavigator
+    private var _chatId: ChatId? = args.chatId
+    override val chatId: ChatId?
+        get() = _chatId
+    override val contactId: ContactId = args.contactId
 
     private val contactSharedFlow: SharedFlow<Contact?> = flow {
-        emitAll(contactRepository.getContactById(args.contactId))
+        emitAll(contactRepository.getContactById(contactId))
     }.distinctUntilChanged().shareIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(2_000),
@@ -99,8 +99,8 @@ internal class ChatContactViewModel @Inject constructor(
     override val chatSharedFlow: SharedFlow<Chat?> = flow {
         chatId?.let { chatId ->
             emitAll(chatRepository.getChatById(chatId))
-        } ?: chatRepository.getConversationByContactId(args.contactId).collect { chat ->
-            chatId = chat?.id
+        } ?: chatRepository.getConversationByContactId(contactId).collect { chat ->
+            _chatId = chat?.id
             emit(chat)
         }
     }.distinctUntilChanged().shareIn(
@@ -237,7 +237,7 @@ internal class ChatContactViewModel @Inject constructor(
     }
 
     override fun readMessages() {
-        val idResolved: ChatId? = args.chatId ?: chatSharedFlow.replayCache.firstOrNull()?.id
+        val idResolved: ChatId? = chatId ?: chatSharedFlow.replayCache.firstOrNull()?.id
         if (idResolved != null) {
             viewModelScope.launch(mainImmediate) {
                 messageRepository.readMessages(idResolved)
@@ -246,12 +246,12 @@ internal class ChatContactViewModel @Inject constructor(
     }
 
     override fun sendMessage(builder: SendMessage.Builder): SendMessage? {
-        builder.setContactId(args.contactId)
+        builder.setContactId(contactId)
         builder.setChatId(chatId)
         return super.sendMessage(builder)
     }
 
     override fun showActionsMenu() {
-        showActionsMenuImpl(args.contactId, args.chatId)
+        showActionsMenuImpl(contactId, chatId)
     }
 }

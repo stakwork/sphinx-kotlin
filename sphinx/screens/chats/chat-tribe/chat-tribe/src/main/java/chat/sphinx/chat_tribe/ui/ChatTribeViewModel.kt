@@ -34,6 +34,7 @@ import chat.sphinx.send_attachment_view_model_coordinator.response.SendAttachmen
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.ChatName
 import chat.sphinx.wrapper_common.dashboard.ChatId
+import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.util.getInitials
 import chat.sphinx.wrapper_message.Message
@@ -57,6 +58,7 @@ internal class ChatTribeViewModel @Inject constructor(
     app: Application,
     dispatchers: CoroutineDispatchers,
     memeServerTokenHandler: MemeServerTokenHandler,
+    chatNavigator: TribeChatNavigator,
     chatRepository: ChatRepository,
     contactRepository: ContactRepository,
     messageRepository: MessageRepository,
@@ -71,6 +73,7 @@ internal class ChatTribeViewModel @Inject constructor(
     app,
     dispatchers,
     memeServerTokenHandler,
+    chatNavigator,
     chatRepository,
     contactRepository,
     messageRepository,
@@ -83,13 +86,16 @@ internal class ChatTribeViewModel @Inject constructor(
 ), MediaPlayerServiceController.MediaServiceListener
 {
     override val args: ChatTribeFragmentArgs by savedStateHandle.navArgs()
+    override val chatId: ChatId = args.chatId
+    override val contactId: ContactId?
+        get() = null
 
     val podcastViewStateContainer: ViewStateContainer<PodcastViewState> by lazy {
         ViewStateContainer(PodcastViewState.Idle)
     }
 
     override val chatSharedFlow: SharedFlow<Chat?> = flow {
-        emitAll(chatRepository.getChatById(args.chatId))
+        emitAll(chatRepository.getChatById(chatId))
     }.distinctUntilChanged().shareIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(2_000),
@@ -97,11 +103,6 @@ internal class ChatTribeViewModel @Inject constructor(
     )
 
     var podcast: Podcast? = null
-
-    @Inject
-    protected lateinit var chatTribeNavigator: TribeChatNavigator
-    override val chatNavigator: ChatNavigator
-        get() = chatTribeNavigator
 
     override val headerInitialHolderSharedFlow: SharedFlow<InitialHolderViewState> = flow {
         chatSharedFlow.collect { chat ->
@@ -141,7 +142,7 @@ internal class ChatTribeViewModel @Inject constructor(
     }
 
     override val checkRoute: Flow<LoadResponse<Boolean, ResponseError>> = flow {
-        networkQueryLightning.checkRoute(args.chatId).collect { response ->
+        networkQueryLightning.checkRoute(chatId).collect { response ->
             @Exhaustive
             when (response) {
                 is LoadResponse.Loading -> {
@@ -159,18 +160,18 @@ internal class ChatTribeViewModel @Inject constructor(
 
     override fun readMessages() {
         viewModelScope.launch(mainImmediate) {
-            messageRepository.readMessages(args.chatId)
+            messageRepository.readMessages(chatId)
         }
     }
 
     override fun sendMessage(builder: SendMessage.Builder): SendMessage? {
-        builder.setChatId(args.chatId)
+        builder.setChatId(chatId)
         return super.sendMessage(builder)
     }
 
     override fun mediaServiceState(serviceState: MediaPlayerServiceState) {
         if (serviceState is MediaPlayerServiceState.ServiceActive.MediaState) {
-            if (serviceState.chatId != args.chatId) {
+            if (serviceState.chatId != chatId) {
                 return
             }
         }
@@ -211,11 +212,11 @@ internal class ChatTribeViewModel @Inject constructor(
     }
 
     suspend fun loadTribeAndPodcastData(): Podcast? {
-        chatRepository.getChatById(args.chatId).firstOrNull()?.let { chat ->
+        chatRepository.getChatById(chatId).firstOrNull()?.let { chat ->
             chatRepository.updateTribeInfo(chat)?.let { podcastDto ->
                 podcast = podcastDto.toPodcast()
 
-                chatRepository.getChatById(args.chatId).firstOrNull()?.let { chat ->
+                chatRepository.getChatById(chatId).firstOrNull()?.let { chat ->
                     val pricePerMessage = chat.pricePerMessage?.value ?: 0
                     val escrowAmount = chat.escrowAmount?.value ?: 0
 
@@ -238,7 +239,7 @@ internal class ChatTribeViewModel @Inject constructor(
     fun goToPodcastPlayerScreen() {
         podcast?.let { podcast ->
             viewModelScope.launch(mainImmediate) {
-                chatTribeNavigator.toPodcastPlayerScreen(args.chatId, podcast)
+                (chatNavigator as TribeChatNavigator).toPodcastPlayerScreen(chatId, podcast)
             }
         }
     }
@@ -264,7 +265,7 @@ internal class ChatTribeViewModel @Inject constructor(
 
                 mediaPlayerServiceController.submitAction(
                     UserAction.ServiceAction.Play(
-                        args.chatId,
+                        chatId,
                         episode.id,
                         episode.enclosureUrl,
                         Sat(0),
@@ -282,10 +283,7 @@ internal class ChatTribeViewModel @Inject constructor(
                 podcast.didPausePlayingEpisode(episode)
 
                 mediaPlayerServiceController.submitAction(
-                    UserAction.ServiceAction.Pause(
-                        args.chatId,
-                        episode.id,
-                    )
+                    UserAction.ServiceAction.Pause(chatId, episode.id)
                 )
             }
         }
@@ -299,16 +297,13 @@ internal class ChatTribeViewModel @Inject constructor(
                 val metaData = podcast.getMetaData()
 
                 mediaPlayerServiceController.submitAction(
-                    UserAction.ServiceAction.Seek(
-                        args.chatId,
-                        metaData
-                    )
+                    UserAction.ServiceAction.Seek(chatId, metaData)
                 )
             }
         }
     }
 
     override fun showActionsMenu() {
-        showActionsMenuImpl(null, args.chatId)
+        showActionsMenuImpl(null, chatId)
     }
 }

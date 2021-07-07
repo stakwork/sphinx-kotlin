@@ -65,9 +65,6 @@ internal class ChatTribeFragment: ChatFragment<
     override val viewModel: ChatTribeViewModel by viewModels()
 
     @Inject
-    override lateinit var chatNavigator: TribeChatNavigator
-
-    @Inject
     protected lateinit var imageLoaderInj: ImageLoader<ImageView>
     override val imageLoader: ImageLoader<ImageView>
         get() = imageLoaderInj
