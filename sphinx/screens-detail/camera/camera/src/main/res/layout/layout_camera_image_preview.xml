@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/black"
+    android:background="@color/body"
     android:elevation="@dimen/default_elevation"
     android:visibility="gone"
     tools:context=".ui.CameraFragment"
@@ -13,14 +13,16 @@
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/image_view_camera_image_preview"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:scaleType="centerCrop" />
+        android:layout_height="0dp"
+        android:scaleType="centerInside"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/layout_constraint_camera_image_preview_footer" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/layout_constraint_camera_image_preview_footer"
         android:layout_width="match_parent"
         android:layout_height="@dimen/camera_footer_height"
-        android:background="@color/bodyTransparent"
+        android:background="@color/body"
         app:layout_constraintBottom_toBottomOf="parent">
 
         <androidx.appcompat.widget.AppCompatTextView
