@@ -1,8 +1,10 @@
 package chat.sphinx.chat_common.ui
 
 import android.app.Application
-import android.content.Context
+import android.net.Uri
+import android.webkit.MimeTypeMap
 import androidx.annotation.CallSuper
+import androidx.core.net.toFile
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavArgs
@@ -33,6 +35,8 @@ import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.kotlin_response.message
 import chat.sphinx.logger.SphinxLogger
+import chat.sphinx.logger.d
+import chat.sphinx.logger.e
 import chat.sphinx.resources.getRandomColor
 import chat.sphinx.send_attachment_view_model_coordinator.request.SendAttachmentRequest
 import chat.sphinx.send_attachment_view_model_coordinator.response.SendAttachmentResponse
@@ -46,15 +50,20 @@ import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.MessageUUID
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_message.*
+import chat.sphinx.wrapper_message_media.MediaType
+import chat.sphinx.wrapper_message_media.toMediaType
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
+import io.matthewnelson.concept_media_cache.MediaCacheHandler
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.File
+import java.io.InputStream
 
 @JvmSynthetic
 @Suppress("NOTHING_TO_INLINE")
@@ -69,16 +78,21 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     protected val contactRepository: ContactRepository,
     protected val messageRepository: MessageRepository,
     protected val networkQueryLightning: NetworkQueryLightning,
+    protected val mediaCacheHandler: MediaCacheHandler,
     protected val savedStateHandle: SavedStateHandle,
     protected val cameraCoordinator: ViewModelCoordinator<CameraRequest, CameraResponse>,
     protected val sendAttachmentCoordinator: ViewModelCoordinator<SendAttachmentRequest, SendAttachmentResponse>,
     protected val LOG: SphinxLogger,
 ): SideEffectViewModel<
-        Context,
+        ChatSideEffectFragment,
         ChatSideEffect,
         ChatHeaderFooterViewState
         >(dispatchers, ChatHeaderFooterViewState.Idle)
 {
+    companion object {
+        const val TAG = "ChatViewModel"
+    }
+
     abstract val args: ARGS
 
     protected abstract val chatNavigator: ChatNavigator
@@ -398,8 +412,30 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         footerViewStateContainer.updateViewState(viewState)
     }
 
+    private inner class AttachmentSendStateContainer: ViewStateContainer<AttachmentSendViewState>(AttachmentSendViewState.Idle) {
+        override fun updateViewState(viewState: AttachmentSendViewState) {
+            if (viewState is AttachmentSendViewState.Preview) {
+
+                // Only delete the previous file in the event that a new pic is choosen
+                // to send when one is currently being previewed.
+                val current = viewStateFlow.value
+                if (current is AttachmentSendViewState.Preview) {
+                    if (current.file.path != viewState.file.path) {
+                        try {
+                            current.file.delete()
+                        } catch (e: Exception) {
+
+                        }
+                    }
+                }
+            }
+
+            super.updateViewState(viewState)
+        }
+    }
+
     private val attachmentSendStateContainer: ViewStateContainer<AttachmentSendViewState> by lazy {
-        ViewStateContainer(AttachmentSendViewState.Idle)
+        AttachmentSendStateContainer()
     }
 
     @JvmSynthetic
@@ -412,14 +448,11 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     }
 
     @JvmSynthetic
-    internal fun deleteFileIfLocal(viewState: AttachmentSendViewState.Preview) {
-        if (viewState is AttachmentSendViewState.Preview.LocalFile) {
-            viewModelScope.launch(io) {
-                try {
-                    viewState.cameraResponse.value.delete()
-                } catch (e: Exception) {
-                }
-            }
+    internal fun deleteUnsentAttachment(viewState: AttachmentSendViewState.Preview) {
+        viewModelScope.launch(io) {
+            try {
+                viewState.file.delete()
+            } catch (e: Exception) {}
         }
     }
 
@@ -508,7 +541,8 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                     }
                     is ChatActionType.OpenPhotoLibrary -> {
                         submitSideEffect(
-                            ChatSideEffect.Notify("Photo library not implemented yet")
+//                            ChatSideEffect.Notify("Photo library not implemented yet")
+                            ChatSideEffect.RetrieveImage
                         )
                     }
                     is ChatActionType.OpenGifSearch -> {
@@ -550,10 +584,79 @@ abstract class ChatViewModel<ARGS: NavArgs>(
             when (response) {
                 is Response.Error -> {}
                 is Response.Success -> {
+
+                    val ext = response.value.value.extension
+
+                    val mediaType: MediaType = when (response.value) {
+                        is CameraResponse.Image -> {
+                            MediaType.Image("${MediaType.IMAGE}/$ext")
+                        }
+                    }
+
                     updateAttachmentSendViewState(
-                        AttachmentSendViewState.Preview.LocalFile(response.value)
+                        AttachmentSendViewState.Preview(response.value.value, mediaType)
                     )
+
                     updateFooterViewState(FooterViewState.Attachment)
+                }
+            }
+        }
+    }
+
+    fun handleActivityResultUri(uri: Uri?) {
+        if (uri == null) {
+            return
+        }
+
+        val cr = app.contentResolver
+
+        cr.getType(uri)?.let { crType ->
+
+            MimeTypeMap.getSingleton().getExtensionFromMimeType(crType)?.let { ext ->
+
+                val stream: InputStream = try {
+                    cr.openInputStream(uri) ?: return
+                } catch (e: Exception) {
+                    return
+                }
+
+                crType.toMediaType().let { mType ->
+                    @Exhaustive
+                    when (mType) {
+                        is MediaType.Audio -> {
+                            // TODO: Implement
+                        }
+                        is MediaType.Image -> {
+                            viewModelScope.launch(mainImmediate) {
+                                val newFile: File = mediaCacheHandler.createImageFile(ext)
+
+                                try {
+                                    mediaCacheHandler.copyTo(stream, newFile)
+                                    attachmentSendStateContainer.updateViewState(
+                                        AttachmentSendViewState.Preview(newFile, mType)
+                                    )
+                                } catch (e: Exception) {
+                                    newFile.delete()
+                                    LOG.e(
+                                        TAG,
+                                        "Failed to copy content to new file: ${newFile.path}",
+                                        e
+                                    )
+                                }
+                            }
+                        }
+                        is MediaType.Pdf -> {
+                            // TODO: Implement
+                        }
+                        is MediaType.Video -> {
+                            // TODO: Implement
+                        }
+
+                        is MediaType.Text,
+                        is MediaType.Unknown -> {
+                            // do nothing
+                        }
+                    }
                 }
             }
         }
