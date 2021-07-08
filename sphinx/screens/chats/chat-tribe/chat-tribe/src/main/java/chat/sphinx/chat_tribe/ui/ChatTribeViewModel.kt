@@ -8,7 +8,6 @@ import chat.sphinx.camera_view_model_coordinator.response.CameraResponse
 import chat.sphinx.chat_common.ui.ChatSideEffect
 import chat.sphinx.chat_common.ui.ChatViewModel
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
-import chat.sphinx.chat_tribe.R
 import chat.sphinx.chat_tribe.navigation.TribeChatNavigator
 import chat.sphinx.concept_meme_server.MemeServerTokenHandler
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
@@ -35,7 +34,6 @@ import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.util.getInitials
-import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_message.Message
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
@@ -44,7 +42,6 @@ import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_media_cache.MediaCacheHandler
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -321,51 +318,39 @@ internal class ChatTribeViewModel @Inject constructor(
 
         exitTribeJob = viewModelScope.launch(mainImmediate) {
 
-            val chat: Chat = chatRepository.getChatById(chatId).firstOrNull() ?: return@launch
+            try {
+                chatSharedFlow.collect { chat ->
+                    if (chat != null) {
 
-            val owner: Contact = contactRepository.accountOwner.value.let { contact ->
-                if (contact != null) {
-                    contact
-                } else {
-                    var resolvedOwner: Contact? = null
-                    try {
-                        contactRepository.accountOwner.collect { ownerContact ->
-                            if (ownerContact != null) {
-                                resolvedOwner = ownerContact
-                                throw Exception()
+                        val response = chatRepository.exitTribe(chat)
+
+                        @Exhaustive
+                        when (response) {
+                            is Response.Error -> {
+
+                                submitSideEffect(
+                                    ChatSideEffect.Notify(
+                                        if (response.exception == null) {
+                                            response.message
+                                        } else {
+                                            "Failed to leave tribe"
+                                        }
+                                    )
+                                )
+
+                                LOG.d(TAG, "Failed to leave tribe")
+                                LOG.e(TAG, response.message, response.exception)
+                            }
+                            is Response.Success -> {
+                                chatNavigator.popBackStack()
                             }
                         }
-                    } catch (e: Exception) {
-                    }
-                    delay(25L)
 
-                    resolvedOwner!!
-                }
-            }
-
-            if (owner.nodePubKey == chat.ownerPubKey) {
-                val errorMessage = app.getString(R.string.delete_own_tribe_not_supported)
-
-                submitSideEffect(ChatSideEffect.Notify(errorMessage))
-            } else {
-                val response = chatRepository.exitTribe(chat)
-
-                @Exhaustive
-                when (response) {
-                    is Response.Error -> {
-
-                        submitSideEffect(
-                            ChatSideEffect.Notify("Failed to leave tribe")
-                        )
-
-                        LOG.d(TAG, "Failed to leave tribe")
-                        LOG.e(TAG, response.message, response.exception)
-                    }
-                    is Response.Success -> {
-                        chatNavigator.popBackStack()
+                        throw Exception()
                     }
                 }
-            }
+            } catch (e: Exception) {}
+
         }
     }
 }

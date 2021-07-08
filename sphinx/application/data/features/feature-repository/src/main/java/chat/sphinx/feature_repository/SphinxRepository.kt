@@ -2424,7 +2424,32 @@ abstract class SphinxRepository(
     }
 
     override suspend fun exitTribe(chat: Chat): Response<Boolean, ResponseError> {
-        var response: Response<Boolean, ResponseError> = Response.Success(true)
+        var response: Response<Boolean, ResponseError>? = null
+
+        val owner: Contact = accountOwner.value.let { contact ->
+            if (contact != null) {
+                contact
+            } else {
+                var resolvedOwner: Contact? = null
+                try {
+                    accountOwner.collect { ownerContact ->
+                        if (ownerContact != null) {
+                            resolvedOwner = ownerContact
+                            throw Exception()
+                        }
+                    }
+                } catch (e: Exception) {}
+                delay(25L)
+
+                resolvedOwner ?: return Response.Error(
+                    ResponseError("Could not resolve account owner")
+                )
+            }
+        }
+
+        if (owner.nodePubKey == chat.ownerPubKey) {
+            return Response.Error(ResponseError("Delete own tribe is not supported yet"))
+        }
 
         applicationScope.launch(mainImmediate) {
             networkQueryChat.deleteChat(chat.id).collect { loadResponse ->
@@ -2436,6 +2461,7 @@ abstract class SphinxRepository(
                     }
 
                     is Response.Success -> {
+                        response = Response.Success(true)
                         val queries = coreDB.getSphinxDatabaseQueries()
 
                         chatLock.withLock {
@@ -2456,6 +2482,6 @@ abstract class SphinxRepository(
             }
         }.join()
 
-        return response
+        return response ?: Response.Error(ResponseError(("Failed to exit tribe")))
     }
 }
