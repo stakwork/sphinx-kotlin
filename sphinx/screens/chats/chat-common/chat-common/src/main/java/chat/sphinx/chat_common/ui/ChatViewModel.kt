@@ -645,7 +645,8 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 
                 crType.toMediaType().let { mType ->
 
-                    // Note: depending on what is returned from the Uri retriever, close the menu.
+                    // Note: depending on what is returned from the Uri retriever, close
+                    // the menu and update the footer view state
 
                     @Exhaustive
                     when (mType) {
@@ -659,6 +660,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                                 try {
                                     mediaCacheHandler.copyTo(stream, newFile)
                                     updateViewState(ChatMenuViewState.Closed)
+                                    updateFooterViewState(FooterViewState.Attachment)
                                     attachmentSendStateContainer.updateViewState(
                                         AttachmentSendViewState.Preview(newFile, mType)
                                     )
