@@ -7,6 +7,6 @@ import com.squareup.moshi.JsonClass
 @JsonClass(generateAdapter = true)
 data class DeleteChatRelayResponse(
     override val success: Boolean,
-    override val response: DeleteChatResponseDto,
+    override val response: DeleteChatResponseDto?,
     override val error: String?
 ): RelayResponse<DeleteChatResponseDto>()
