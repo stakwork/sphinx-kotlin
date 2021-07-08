@@ -6,9 +6,7 @@ import io.matthewnelson.concept_views.viewstate.ViewState
 internal sealed class InviteFriendViewState: ViewState<InviteFriendViewState>() {
     object Idle: InviteFriendViewState()
 
-    class InviteFriendLowestPrice(
-        val price: Sat
-    ): InviteFriendViewState()
+    data class InviteFriendLowestPrice(val price: Sat): InviteFriendViewState()
 
     object InviteCreationLoading: InviteFriendViewState()
     object InviteCreationFailed: InviteFriendViewState()
