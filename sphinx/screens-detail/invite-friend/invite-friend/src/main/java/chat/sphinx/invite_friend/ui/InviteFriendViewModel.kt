@@ -16,6 +16,7 @@ import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -35,10 +36,6 @@ internal class InviteFriendViewModel @Inject constructor(
 {
 
     init {
-        getLowestNodePrice()
-    }
-
-    private fun getLowestNodePrice() {
         viewModelScope.launch(mainImmediate) {
             networkQueryInvite.getLowestNodePrice().collect { loadResponse ->
                 @Exhaustive
@@ -59,11 +56,16 @@ internal class InviteFriendViewModel @Inject constructor(
         }
     }
 
+    private var createInviteJob: Job? = null
     fun createNewInvite(
         nickname: String?,
         welcomeMessage: String?
     ) {
-        viewModelScope.launch(mainImmediate) {
+        if (createInviteJob?.isActive == true) {
+            return
+        }
+
+        createInviteJob = viewModelScope.launch(mainImmediate) {
 
             if (nickname == null || nickname.isEmpty()) {
                 submitSideEffect(InviteFriendSideEffect.EmptyNickname)
