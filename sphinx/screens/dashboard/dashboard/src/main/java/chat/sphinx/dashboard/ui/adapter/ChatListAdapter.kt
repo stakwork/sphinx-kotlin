@@ -36,7 +36,6 @@ import kotlinx.coroutines.withContext
 import java.util.*
 import kotlin.collections.ArrayList
 
-
 internal class ChatListAdapter(
     private val recyclerView: RecyclerView,
     private val layoutManager: LinearLayoutManager,
@@ -271,29 +270,31 @@ internal class ChatListAdapter(
 
                 // Set Defaults
                 layoutConstraintChatHolderBorder.goneIfFalse(position != dashboardChats.lastIndex)
-                textViewChatHolderName.setTextColorExt(android.R.color.white)
+                textViewDashboardChatHolderName.setTextColorExt(android.R.color.white)
                 textViewChatHolderMessage.setTextColorExt(R.color.placeholderText)
                 textViewChatHolderMessage.setTextFont(R.font.roboto_regular)
-                textViewBadgeCount.invisibleIfFalse(false)
+                textViewDashboardChatHolderBadgeCount.invisibleIfFalse(false)
 
                 // Image
                 dashboardChat.photoUrl.let { url ->
 
-                    layoutDashboardChatInitialHolder.imageViewChatPicture.goneIfFalse(url != null)
-                    layoutDashboardChatInitialHolder.textViewInitials.goneIfFalse(url == null)
+                    includeDashboardChatHolderInitial.apply {
+                        imageViewChatPicture.goneIfFalse(url != null)
+                        textViewInitials.goneIfFalse(url == null)
+                    }
 
                     if (url != null) {
                         onStopSupervisor.scope.launch(viewModel.dispatchers.mainImmediate) {
                             imageLoader.load(
-                                layoutDashboardChatInitialHolder.imageViewChatPicture,
+                                includeDashboardChatHolderInitial.imageViewChatPicture,
                                 url.value,
                                 imageLoaderOptions
                             )
                         }
                     } else {
-                        layoutDashboardChatInitialHolder.textViewInitials.text =
+                        includeDashboardChatHolderInitial.textViewInitials.text =
                             dashboardChat.chatName?.getInitials() ?: ""
-                        layoutDashboardChatInitialHolder.textViewInitials
+                        includeDashboardChatHolderInitial.textViewInitials
                             .setBackgroundRandomColor(R.drawable.chat_initials_circle)
                     }
 
@@ -304,12 +305,12 @@ internal class ChatListAdapter(
                     dashboardChat.chatName
                 } else {
                     // Should never make it here, but just in case...
-                    textViewChatHolderName.setTextColorExt(R.color.primaryRed)
+                    textViewDashboardChatHolderName.setTextColorExt(R.color.primaryRed)
                     textViewChatHolderCenteredName.setTextColorExt(R.color.primaryRed)
                     "ERROR: NULL NAME"
                 }
 
-                textViewChatHolderName.text = chatName
+                textViewDashboardChatHolderName.text = chatName
                 textViewChatHolderCenteredName.text = chatName
 
                 // Lock
@@ -318,7 +319,7 @@ internal class ChatListAdapter(
                 imageViewChatHolderCenteredLock.invisibleIfFalse(encryptedChat)
 
                 val activeChatOrInvite = (dashboardChat is DashboardChat.Active || dashboardChat is DashboardChat.Inactive.Invite)
-                layoutConstraintDashboardChatMessageHolder.invisibleIfFalse(activeChatOrInvite)
+                layoutConstraintDashboardChatHolderMessage.invisibleIfFalse(activeChatOrInvite)
                 layoutConstraintDashboardChatNoMessageHolder.invisibleIfFalse(!activeChatOrInvite)
 
                 // Time
@@ -355,16 +356,16 @@ internal class ChatListAdapter(
             dChat?.let { nnDashboardChat ->
                 binding.apply {
                     textViewChatHolderMessageIcon.gone
-                    layoutDashboardChatContactHolder.visible
-                    layoutDashboardInviteHolder.gone
-                    layoutConstraintInvitePriceContainer.gone
+                    layoutConstraintDashboardChatHolderContact.visible
+                    layoutConstraintDashboardChatHolderInvite.gone
+                    layoutConstraintDashboardChatHolderInvitePrice.gone
 
                     if (nnDashboardChat is DashboardChat.Inactive.Invite) {
                         textViewChatHolderMessage.setTextFont(R.font.roboto_bold)
                         textViewChatHolderMessage.setTextColorExt(R.color.text)
 
-                        layoutDashboardChatContactHolder.gone
-                        layoutDashboardInviteHolder.visible
+                        layoutConstraintDashboardChatHolderContact.gone
+                        layoutConstraintDashboardChatHolderInvite.visible
 
                         nnDashboardChat.getInviteIconAndColor()?.let { iconAndColor ->
                             textViewChatHolderMessageIcon.visible
@@ -374,8 +375,8 @@ internal class ChatListAdapter(
 
                         nnDashboardChat.getInvitePrice()?.let { price ->
                             val paymentPending = nnDashboardChat.invite?.status?.isPaymentPending() == true
-                            layoutConstraintInvitePriceContainer.goneIfFalse(paymentPending)
-                            textViewInvitePrice.text = price.asFormattedString()
+                            layoutConstraintDashboardChatHolderInvitePrice.goneIfFalse(paymentPending)
+                            textViewDashboardChatHolderInvitePrice.text = price.asFormattedString()
                         }
                     }
                 }
@@ -386,7 +387,7 @@ internal class ChatListAdapter(
             dChat?.let { nnDashboardChat ->
                 badgeJob = onStopSupervisor.scope.launch(viewModel.mainImmediate) {
                     nnDashboardChat.unseenMessageFlow?.collect { unseen ->
-                        binding.textViewBadgeCount.apply {
+                        binding.textViewDashboardChatHolderBadgeCount.apply {
                             if (unseen != null && unseen > 0) {
                                 text = unseen.toString()
                             }
