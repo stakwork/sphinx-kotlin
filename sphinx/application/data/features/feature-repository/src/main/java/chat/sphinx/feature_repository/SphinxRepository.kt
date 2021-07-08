@@ -2450,7 +2450,7 @@ abstract class SphinxRepository(
                     }
                 }
             }
-        }
+        }.join()
 
         return response
     }
