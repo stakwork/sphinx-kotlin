@@ -20,10 +20,10 @@ import chat.sphinx.concept_service_media.MediaPlayerServiceController
 import chat.sphinx.concept_service_media.MediaPlayerServiceState
 import chat.sphinx.concept_service_media.UserAction
 import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
-import chat.sphinx.kotlin_response.LoadResponse
-import chat.sphinx.kotlin_response.Response
-import chat.sphinx.kotlin_response.ResponseError
+import chat.sphinx.kotlin_response.*
 import chat.sphinx.logger.SphinxLogger
+import chat.sphinx.logger.d
+import chat.sphinx.logger.e
 import chat.sphinx.podcast_player.objects.Podcast
 import chat.sphinx.podcast_player.objects.PodcastEpisode
 import chat.sphinx.podcast_player.objects.toPodcast
@@ -41,6 +41,7 @@ import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_media_cache.MediaCacheHandler
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -212,14 +213,14 @@ internal class ChatTribeViewModel @Inject constructor(
                 podcast = podcastDto.toPodcast()
 
                 chatRepository.getChatById(chatId).firstOrNull()?.let { chat ->
-                    val pricePerMessage = chat.pricePerMessage?.value ?: 0
-                    val escrowAmount = chat.escrowAmount?.value ?: 0
-
-                    submitSideEffect(
-                        ChatSideEffect.Notify(
-                            "Price per message: $pricePerMessage\n Amount to Stake: $escrowAmount"
-                        )
-                    )
+//                    val pricePerMessage = chat.pricePerMessage?.value ?: 0
+//                    val escrowAmount = chat.escrowAmount?.value ?: 0
+//
+//                    submitSideEffect(
+//                        ChatSideEffect.Notify(
+//                            "Price per message: $pricePerMessage\n Amount to Stake: $escrowAmount"
+//                        )
+//                    )
 
                     chat.metaData?.let { metaData ->
                         podcast?.setMetaData(metaData)
@@ -295,6 +296,61 @@ internal class ChatTribeViewModel @Inject constructor(
                     UserAction.ServiceAction.Seek(chatId, metaData)
                 )
             }
+        }
+    }
+
+
+    fun exitTribeGetUserConfirmation() {
+        viewModelScope.launch(mainImmediate) {
+            submitSideEffect(
+                ChatSideEffect.AlertConfirmExitTribe {
+                    exitTribeUserConfirmed()
+                }
+            )
+        }
+    }
+
+    private var exitTribeJob: Job? = null
+    private fun exitTribeUserConfirmed() {
+        if (exitTribeJob?.isActive == true) {
+            return
+        }
+
+        exitTribeJob = viewModelScope.launch(mainImmediate) {
+
+            try {
+                chatSharedFlow.collect { chat ->
+                    if (chat != null) {
+
+                        val response = chatRepository.exitTribe(chat)
+
+                        @Exhaustive
+                        when (response) {
+                            is Response.Error -> {
+
+                                submitSideEffect(
+                                    ChatSideEffect.Notify(
+                                        if (response.exception == null) {
+                                            response.message
+                                        } else {
+                                            "Failed to leave tribe"
+                                        }
+                                    )
+                                )
+
+                                LOG.d(TAG, "Failed to leave tribe")
+                                LOG.e(TAG, response.message, response.exception)
+                            }
+                            is Response.Success -> {
+                                chatNavigator.popBackStack()
+                            }
+                        }
+
+                        throw Exception()
+                    }
+                }
+            } catch (e: Exception) {}
+
         }
     }
 }

@@ -9,6 +9,7 @@
     <dimen name="chat_footer_send_button_margin_horizontal">11dp</dimen>
     <dimen name="chat_footer_progress_line_height">2dp</dimen>
 
+    <dimen name="chat_header_exit_tribe_width">28sp</dimen>
     <dimen name="chat_header_mute_padding_horizontal">4dp</dimen>
     <dimen name="chat_message_inner_padding">8dp</dimen>
     <dimen name="chat_message_rounded_corner_radius">9dp</dimen>

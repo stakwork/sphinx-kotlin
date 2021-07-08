@@ -37,6 +37,7 @@ import chat.sphinx.kotlin_response.message
 import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.logger.e
 import chat.sphinx.resources.getRandomColor
+import chat.sphinx.wrapper_chat.*
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.ChatName
 import chat.sphinx.wrapper_chat.isConversation
@@ -123,6 +124,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                     ChatHeaderViewState.Initialized(
                         chatHeaderName = chat?.name?.value ?: getChatNameIfNull()?.value ?: "",
                         showLock = chat != null,
+                        showExitTribe = chat?.isTribe() ?: false,
                         contributions = null,
                         chat?.isMuted,
                     )
