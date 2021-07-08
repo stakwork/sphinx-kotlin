@@ -40,10 +40,7 @@ import chat.sphinx.logger.e
 import chat.sphinx.resources.getRandomColor
 import chat.sphinx.send_attachment_view_model_coordinator.request.SendAttachmentRequest
 import chat.sphinx.send_attachment_view_model_coordinator.response.SendAttachmentResponse
-import chat.sphinx.wrapper_chat.Chat
-import chat.sphinx.wrapper_chat.ChatActionType
-import chat.sphinx.wrapper_chat.ChatName
-import chat.sphinx.wrapper_chat.isConversation
+import chat.sphinx.wrapper_chat.*
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.Sat
@@ -125,6 +122,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                     ChatHeaderFooterViewState.Initialized(
                         chatHeaderName = chat?.name?.value ?: getChatNameIfNull()?.value ?: "",
                         showLock = chat != null,
+                        showExitTribe = chat?.isTribe() ?: false,
                         contributions = null,
                         chat?.isMuted,
                     )

@@ -79,4 +79,9 @@
     <string name="attachment_send_header_image">SEND IMAGE</string>
     <string name="attachment_send_header_video">SEND VIDEO</string>
 
+    <!-- Exit Tribe -->
+    <string name="delete_own_tribe_not_supported">Delete own tribe is not supported yet</string>
+    <string name="alert_confirm_exit_tribe_title">Exit Tribe</string>
+    <string name="alert_confirm_exit_tribe_message">Are you sure you exit and delete this tribe?</string>
+
 </resources>

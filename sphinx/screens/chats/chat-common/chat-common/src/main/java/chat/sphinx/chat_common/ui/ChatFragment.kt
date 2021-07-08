@@ -566,6 +566,8 @@ abstract class ChatFragment<
                     textViewChatHeaderName.text = viewState.chatHeaderName
                     textViewChatHeaderLock.goneIfFalse(viewState.showLock)
 
+                    imageViewChatHeaderExitTribe.goneIfFalse(viewState.showExitTribe)
+
                     viewState.contributions?.let {
                         imageViewChatHeaderContributions.visible
                         textViewChatHeaderContributions.apply {

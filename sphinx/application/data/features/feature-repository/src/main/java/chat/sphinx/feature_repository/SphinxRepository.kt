@@ -2422,4 +2422,36 @@ abstract class SphinxRepository(
         }
         return response
     }
+
+    override suspend fun exitTribe(chat: Chat): Response<Boolean, ResponseError> {
+        var response: Response<Boolean, ResponseError> = Response.Success(true)
+
+        applicationScope.launch(mainImmediate) {
+            networkQueryChat.deleteChat(chat.id).collect { loadResponse ->
+                when (loadResponse) {
+                    is LoadResponse.Loading -> {}
+
+                    is Response.Error -> {
+                        response = loadResponse
+                    }
+
+                    is Response.Success -> {
+                        val queries = coreDB.getSphinxDatabaseQueries()
+
+                        chatLock.withLock {
+                            messageLock.withLock {
+                                withContext(io) {
+                                    queries.transaction {
+                                        deleteChatById(loadResponse.value.chatId.toChatId(), queries, latestMessageUpdatedTimeMap)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return response
+    }
 }

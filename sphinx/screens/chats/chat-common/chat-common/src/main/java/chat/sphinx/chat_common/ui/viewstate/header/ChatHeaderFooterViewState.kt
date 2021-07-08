@@ -11,6 +11,7 @@ sealed class ChatHeaderFooterViewState: ViewState<ChatHeaderFooterViewState>() {
     data class Initialized(
         val chatHeaderName: String,
         val showLock: Boolean,
+        val showExitTribe: Boolean,
         val contributions: Sat?,
         val isMuted: ChatMuted?,
     ): ChatHeaderFooterViewState()

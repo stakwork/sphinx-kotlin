@@ -9,6 +9,7 @@ import chat.sphinx.chat_common.navigation.ChatNavigator
 import chat.sphinx.chat_common.ui.ChatSideEffect
 import chat.sphinx.chat_common.ui.ChatViewModel
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
+import chat.sphinx.chat_tribe.R
 import chat.sphinx.chat_tribe.navigation.TribeChatNavigator
 import chat.sphinx.concept_meme_server.MemeServerTokenHandler
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
@@ -36,6 +37,7 @@ import chat.sphinx.wrapper_chat.ChatName
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.util.getInitials
+import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_message.Message
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
@@ -43,6 +45,7 @@ import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_media_cache.MediaCacheHandler
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -216,14 +219,14 @@ internal class ChatTribeViewModel @Inject constructor(
                 podcast = podcastDto.toPodcast()
 
                 chatRepository.getChatById(args.chatId).firstOrNull()?.let { chat ->
-                    val pricePerMessage = chat.pricePerMessage?.value ?: 0
-                    val escrowAmount = chat.escrowAmount?.value ?: 0
-
-                    submitSideEffect(
-                        ChatSideEffect.Notify(
-                            "Price per message: $pricePerMessage\n Amount to Stake: $escrowAmount"
-                        )
-                    )
+//                    val pricePerMessage = chat.pricePerMessage?.value ?: 0
+//                    val escrowAmount = chat.escrowAmount?.value ?: 0
+//
+//                    submitSideEffect(
+//                        ChatSideEffect.Notify(
+//                            "Price per message: $pricePerMessage\n Amount to Stake: $escrowAmount"
+//                        )
+//                    )
 
                     chat.metaData?.let { metaData ->
                         podcast?.setMetaData(metaData)
@@ -310,5 +313,45 @@ internal class ChatTribeViewModel @Inject constructor(
 
     override fun showActionsMenu() {
         showActionsMenuImpl(null, args.chatId)
+    }
+
+    suspend fun exitTribe(): Response<Boolean, ResponseError> {
+        var response: Response<Boolean, ResponseError> = Response.Success(true)
+
+        chatRepository.getChatById(args.chatId).firstOrNull()?.let { chat ->
+
+            val owner: Contact = contactRepository.accountOwner.value.let { contact ->
+                if (contact != null) {
+                    contact
+                } else {
+                    var resolvedOwner: Contact? = null
+                    try {
+                        contactRepository.accountOwner.collect { ownerContact ->
+                            if (ownerContact != null) {
+                                resolvedOwner = ownerContact
+                                throw Exception()
+                            }
+                        }
+                    } catch (e: Exception) {}
+                    delay(25L)
+
+                    resolvedOwner!!
+                }
+            }
+
+            if (owner.nodePubKey == chat.ownerPubKey) {
+                val errorMessage = app.getString(R.string.delete_own_tribe_not_supported)
+
+                submitSideEffect(ChatSideEffect.Notify(errorMessage))
+
+                response = Response.Error(
+                    ResponseError(errorMessage, null)
+                )
+            }
+
+            response = chatRepository.exitTribe(chat)
+        }
+
+        return response
     }
 }

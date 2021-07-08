@@ -2,6 +2,7 @@ package chat.sphinx.concept_network_query_chat
 
 import chat.sphinx.concept_network_query_chat.model.*
 import chat.sphinx.kotlin_response.LoadResponse
+import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.wrapper_chat.ChatHost
 import chat.sphinx.wrapper_chat.ChatMuted
@@ -65,8 +66,8 @@ abstract class NetworkQueryChat {
         relayData: Pair<AuthorizationToken, RelayUrl>? = null
     ): Flow<LoadResponse<ChatDto, ResponseError>>
 
-    //////////////
-    /// DELETE ///
-    //////////////
-//    app.delete('/chat/:id', chats.deleteChat)
+    abstract suspend fun deleteChat(
+        chatId: ChatId,
+        relayData: Pair<AuthorizationToken, RelayUrl>? = null
+    ): Flow<LoadResponse<DeleteChatResponseDto, ResponseError>>
 }
