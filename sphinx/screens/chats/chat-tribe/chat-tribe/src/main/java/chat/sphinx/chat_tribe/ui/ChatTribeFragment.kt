@@ -16,7 +16,6 @@ import chat.sphinx.chat_common.ui.ChatSideEffect
 import chat.sphinx.chat_tribe.R
 import chat.sphinx.chat_tribe.databinding.FragmentChatTribeBinding
 import chat.sphinx.chat_tribe.databinding.LayoutPodcastPlayerFooterBinding
-import chat.sphinx.chat_tribe.navigation.TribeChatNavigator
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.podcast_player.objects.Podcast
@@ -57,14 +56,16 @@ internal class ChatTribeFragment: ChatFragment<
     override val attachmentSendBinding: LayoutAttachmentSendPreviewBinding by viewBinding(
         LayoutAttachmentSendPreviewBinding::bind, R.id.include_chat_tribe_attachment_send_preview
     )
+    override val menuBinding: LayoutChatMenuBinding by viewBinding(
+        LayoutChatMenuBinding::bind, R.id.include_chat_tribe_menu
+    )
+    override val menuEnablePayments: Boolean
+        get() = false
 
     override val recyclerView: RecyclerView
         get() = binding.recyclerViewMessages
 
     override val viewModel: ChatTribeViewModel by viewModels()
-
-    @Inject
-    override lateinit var chatNavigator: TribeChatNavigator
 
     @Inject
     protected lateinit var imageLoaderInj: ImageLoader<ImageView>
@@ -96,7 +97,7 @@ internal class ChatTribeFragment: ChatFragment<
                     lifecycleScope.launch(viewModel.mainImmediate) {
                         when (viewModel.exitTribe()) {
                             is Response.Success -> {
-                                chatNavigator.popBackStack()
+                                viewModel.chatNavigator.popBackStack()
                             }
                             is Response.Error -> {
                                 Log.d("EXITING TRIBE", "Failed")

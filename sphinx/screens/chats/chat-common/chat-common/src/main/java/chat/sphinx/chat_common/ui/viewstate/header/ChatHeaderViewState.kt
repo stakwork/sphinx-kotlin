@@ -4,9 +4,9 @@ import chat.sphinx.wrapper_chat.ChatMuted
 import chat.sphinx.wrapper_common.lightning.Sat
 import io.matthewnelson.concept_views.viewstate.ViewState
 
-sealed class ChatHeaderFooterViewState: ViewState<ChatHeaderFooterViewState>() {
+sealed class ChatHeaderViewState: ViewState<ChatHeaderViewState>() {
 
-    object Idle: ChatHeaderFooterViewState()
+    object Idle: ChatHeaderViewState()
 
     data class Initialized(
         val chatHeaderName: String,
@@ -14,5 +14,5 @@ sealed class ChatHeaderFooterViewState: ViewState<ChatHeaderFooterViewState>() {
         val showExitTribe: Boolean,
         val contributions: Sat?,
         val isMuted: ChatMuted?,
-    ): ChatHeaderFooterViewState()
+    ): ChatHeaderViewState()
 }

@@ -174,12 +174,6 @@ object RepositoryModule {
         sphinxRepositoryAndroid
 
     @Provides
-    fun provideRepositoryDashboard(
-        sphinxRepositoryAndroid: SphinxRepositoryAndroid
-    ): RepositoryDashboard =
-        sphinxRepositoryAndroid
-
-    @Provides
     @Suppress("UNCHECKED_CAST")
     fun provideRepositoryDashboardAndroid(
         sphinxRepositoryAndroid: SphinxRepositoryAndroid
