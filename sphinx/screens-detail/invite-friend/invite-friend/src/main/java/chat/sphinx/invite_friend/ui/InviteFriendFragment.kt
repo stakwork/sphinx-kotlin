@@ -1,10 +1,7 @@
 package chat.sphinx.invite_friend.ui
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
 import android.view.View
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -15,7 +12,6 @@ import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.invite_friend.R
 import chat.sphinx.invite_friend.databinding.FragmentInviteFriendBinding
 import chat.sphinx.wrapper_common.lightning.asFormattedString
-import chat.sphinx.wrapper_common.lightning.unit
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
@@ -69,30 +65,30 @@ internal class InviteFriendFragment : SideEffectFragment<
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.apply {
-            includeInviteFriendHeader.apply {
+        binding.includeInviteFriendHeader.apply {
 
-                textViewDetailScreenHeaderName.text = getString(R.string.invite_friend_header_name)
+            textViewDetailScreenHeaderName.text = getString(R.string.invite_friend_header_name)
 
-                textViewDetailScreenHeaderNavBack.apply {
-                    visible
-                    setOnClickListener {
-                        lifecycleScope.launch(viewModel.mainImmediate) {
-                            viewModel.navigator.popBackStack()
-                        }
-                    }
-                }
-
-                textViewDetailScreenClose.setOnClickListener {
+            textViewDetailScreenHeaderNavBack.apply navBack@ {
+                this@navBack.visible
+                this@navBack.setOnClickListener {
                     lifecycleScope.launch(viewModel.mainImmediate) {
-                        viewModel.navigator.closeDetailScreen()
+                        viewModel.navigator.popBackStack()
                     }
                 }
             }
 
+            textViewDetailScreenClose.setOnClickListener {
+                lifecycleScope.launch(viewModel.mainImmediate) {
+                    viewModel.navigator.closeDetailScreen()
+                }
+            }
+        }
+
+        binding.apply {
             buttonCreateInvitation.setOnClickListener {
-                val nickname = editTextNicknameInput.text.toString()
-                val welcomeMessage = editTextMessageInput.text.toString()
+                val nickname = editTextNicknameInput.text?.toString()
+                val welcomeMessage = editTextMessageInput.text?.toString()
 
                 viewModel.createNewInvite(nickname, welcomeMessage)
 
