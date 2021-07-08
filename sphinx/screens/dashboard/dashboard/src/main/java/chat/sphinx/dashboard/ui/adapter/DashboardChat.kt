@@ -12,7 +12,6 @@ import chat.sphinx.wrapper_invite.Invite as InviteWrapper
 import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message_media.MediaType
 import kotlinx.coroutines.flow.Flow
-import java.util.*
 
 /**
  * [DashboardChat]s are separated into 2 categories:
@@ -279,14 +278,14 @@ sealed class DashboardChat {
         ): Inactive() {
 
             override val chatName: String?
-                get() =  "Invite: ${contact.alias?.value}"
+                get() =  "Invite: ${contact.alias?.value ?: "Unknown"}"
 
             override val photoUrl: PhotoUrl?
                 get() = contact.photoUrl
 
-            //Invites should always appear at the top of the dashboard list
+            // Invites should always appear at the top of the dashboard list
             override val sortBy: Long
-                get() = Date().time
+                get() = Long.MAX_VALUE
 
             override val unseenMessageFlow: Flow<Long?>?
                 get() = null
