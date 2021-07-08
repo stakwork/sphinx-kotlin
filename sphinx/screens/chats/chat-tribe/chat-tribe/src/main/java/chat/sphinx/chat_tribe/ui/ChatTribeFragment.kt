@@ -85,27 +85,8 @@ internal class ChatTribeFragment: ChatFragment<
 
         headerBinding.apply {
             imageViewChatHeaderExitTribe.setOnClickListener {
-                exitTribe()
+                viewModel.exitTribeGetUserConfirmation()
             }
-        }
-    }
-
-    private fun exitTribe() {
-        lifecycleScope.launch(viewModel.mainImmediate) {
-            viewModel.submitSideEffect(
-                ChatSideEffect.AlertConfirmExitTribe {
-                    lifecycleScope.launch(viewModel.mainImmediate) {
-                        when (viewModel.exitTribe()) {
-                            is Response.Success -> {
-                                viewModel.chatNavigator.popBackStack()
-                            }
-                            is Response.Error -> {
-                                Log.d("EXITING TRIBE", "Failed")
-                            }
-                        }
-                    }
-                }
-            )
         }
     }
 

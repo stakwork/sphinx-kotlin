@@ -21,10 +21,10 @@ import chat.sphinx.concept_service_media.MediaPlayerServiceController
 import chat.sphinx.concept_service_media.MediaPlayerServiceState
 import chat.sphinx.concept_service_media.UserAction
 import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
-import chat.sphinx.kotlin_response.LoadResponse
-import chat.sphinx.kotlin_response.Response
-import chat.sphinx.kotlin_response.ResponseError
+import chat.sphinx.kotlin_response.*
 import chat.sphinx.logger.SphinxLogger
+import chat.sphinx.logger.d
+import chat.sphinx.logger.e
 import chat.sphinx.podcast_player.objects.Podcast
 import chat.sphinx.podcast_player.objects.PodcastEpisode
 import chat.sphinx.podcast_player.objects.toPodcast
@@ -43,6 +43,7 @@ import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_media_cache.MediaCacheHandler
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -214,7 +215,7 @@ internal class ChatTribeViewModel @Inject constructor(
             chatRepository.updateTribeInfo(chat)?.let { podcastDto ->
                 podcast = podcastDto.toPodcast()
 
-                chatRepository.getChatById(args.chatId).firstOrNull()?.let { chat ->
+                chatRepository.getChatById(chatId).firstOrNull()?.let { chat ->
 //                    val pricePerMessage = chat.pricePerMessage?.value ?: 0
 //                    val escrowAmount = chat.escrowAmount?.value ?: 0
 //
@@ -301,10 +302,26 @@ internal class ChatTribeViewModel @Inject constructor(
         }
     }
 
-    suspend fun exitTribe(): Response<Boolean, ResponseError> {
-        var response: Response<Boolean, ResponseError> = Response.Success(true)
 
-        chatRepository.getChatById(args.chatId).firstOrNull()?.let { chat ->
+    fun exitTribeGetUserConfirmation() {
+        viewModelScope.launch(mainImmediate) {
+            submitSideEffect(
+                ChatSideEffect.AlertConfirmExitTribe {
+                    exitTribeUserConfirmed()
+                }
+            )
+        }
+    }
+
+    private var exitTribeJob: Job? = null
+    private fun exitTribeUserConfirmed() {
+        if (exitTribeJob?.isActive == true) {
+            return
+        }
+
+        exitTribeJob = viewModelScope.launch(mainImmediate) {
+
+            val chat: Chat = chatRepository.getChatById(chatId).firstOrNull() ?: return@launch
 
             val owner: Contact = contactRepository.accountOwner.value.let { contact ->
                 if (contact != null) {
@@ -318,7 +335,8 @@ internal class ChatTribeViewModel @Inject constructor(
                                 throw Exception()
                             }
                         }
-                    } catch (e: Exception) {}
+                    } catch (e: Exception) {
+                    }
                     delay(25L)
 
                     resolvedOwner!!
@@ -329,15 +347,25 @@ internal class ChatTribeViewModel @Inject constructor(
                 val errorMessage = app.getString(R.string.delete_own_tribe_not_supported)
 
                 submitSideEffect(ChatSideEffect.Notify(errorMessage))
+            } else {
+                val response = chatRepository.exitTribe(chat)
 
-                response = Response.Error(
-                    ResponseError(errorMessage, null)
-                )
+                @Exhaustive
+                when (response) {
+                    is Response.Error -> {
+
+                        submitSideEffect(
+                            ChatSideEffect.Notify("Failed to leave tribe")
+                        )
+
+                        LOG.d(TAG, "Failed to leave tribe")
+                        LOG.e(TAG, response.message, response.exception)
+                    }
+                    is Response.Success -> {
+                        chatNavigator.popBackStack()
+                    }
+                }
             }
-
-            response = chatRepository.exitTribe(chat)
         }
-
-        return response
     }
 }
