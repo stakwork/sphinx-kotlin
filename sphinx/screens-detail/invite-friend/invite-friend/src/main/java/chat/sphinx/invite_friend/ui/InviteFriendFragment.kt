@@ -54,17 +54,16 @@ internal class InviteFriendFragment : SideEffectFragment<
             }
         }
 
-        binding.apply {
-            buttonCreateInvitation.setOnClickListener {
-                val nickname = editTextNicknameInput.text?.toString()
-                val welcomeMessage = editTextMessageInput.text?.toString()
 
-                viewModel.createNewInvite(nickname, welcomeMessage)
+        binding.buttonInviteFriendCreate.setOnClickListener {
+            val nickname = binding.editTextInviteFriendNickname.text?.toString()
+            val welcomeMessage = binding.editTextInviteFriendMessage.text?.toString()
 
-            }
+            viewModel.createNewInvite(nickname, welcomeMessage)
+
         }
 
-        (requireActivity() as InsetterActivity).addNavigationBarPadding(binding.layoutConstraintInviteFriend)
+        (requireActivity() as InsetterActivity).addNavigationBarPadding(binding.root)
     }
 
     override suspend fun onViewStateFlowCollect(viewState: InviteFriendViewState) {
@@ -73,25 +72,24 @@ internal class InviteFriendFragment : SideEffectFragment<
             is InviteFriendViewState.Idle -> {}
 
             is InviteFriendViewState.InviteFriendLowestPrice -> {
-                binding.apply {
-                    textViewEstimatedCostAmount.text = viewState.price.asFormattedString()
+                binding.textViewInviteFriendEstimatedCostAmount.text = viewState.price.asFormattedString()
 
-                    layoutConstraintEstimatedCost.alpha = 0.0f
-                    layoutConstraintEstimatedCost.visible
+                binding.layoutConstraintInviteFriendEstimatedCost.apply {
+                    alpha = 0.0F
+                    visible
+                    animate().alpha(1.0F)
 
-                    layoutConstraintEstimatedCost.animate()
-                        .alpha(1.0f)
                 }
             }
 
             is InviteFriendViewState.InviteCreationLoading -> {
-                binding.createInviteProgressBar.visible
+                binding.progressBarInviteFriendCreate.visible
             }
             is InviteFriendViewState.InviteCreationFailed -> {
-                binding.createInviteProgressBar.gone
+                binding.progressBarInviteFriendCreate.gone
             }
             is InviteFriendViewState.InviteCreationSucceed -> {
-                binding.createInviteProgressBar.gone
+                binding.progressBarInviteFriendCreate.gone
 
                 viewModel.navigator.closeDetailScreen()
             }
