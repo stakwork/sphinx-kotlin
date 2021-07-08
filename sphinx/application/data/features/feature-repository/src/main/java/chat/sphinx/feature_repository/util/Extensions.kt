@@ -261,20 +261,36 @@ inline fun TransactionCallbacks.upsertContact(dto: ContactDto, queries: SphinxDa
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun TransactionCallbacks.upsertInvite(dto: InviteDto, queries: SphinxDatabaseQueries) {
-    val invite = queries.inviteGetById(InviteId(dto.id)).executeAsOneOrNull()
+
+    val inviteStatus = dto.status.toInviteStatus().let { dtoStatus ->
+        if (dtoStatus.isPaymentPending()) {
+
+            val invite = queries.inviteGetById(InviteId(dto.id)).executeAsOneOrNull()
+
+            if (invite?.status?.isProcessingPayment() == true) {
+                InviteStatus.ProcessingPayment
+            } else {
+                dtoStatus
+            }
+
+        } else {
+            dtoStatus
+        }
+    }
 
     queries.inviteUpsert(
         InviteString(dto.invite_string),
         dto.invoice?.toLightningPaymentRequest(),
-        dto.getInviteStatus(invite?.status),
+        inviteStatus,
         dto.price?.toSat(),
         InviteId(dto.id),
         ContactId(dto.contact_id),
         dto.created_at.toDateTime(),
     )
 
-    // TODO: Work out what status needs to be included to be shown on the dashboard
-//        when (it.status.toInviteStatus()) {
+// TODO: Work out what status needs to be included to be shown on the dashboard
+
+//        when (inviteStatus) {
 //            is InviteStatus.Complete -> TODO()
 //            is InviteStatus.Delivered -> TODO()
 //            is InviteStatus.Expired -> TODO()
@@ -291,10 +307,12 @@ inline fun TransactionCallbacks.upsertInvite(dto: InviteDto, queries: SphinxData
 }
 
 @Suppress("NOTHING_TO_INLINE")
-inline fun SphinxDatabaseQueries.updateInviteStatus(inviteId: InviteId, inviteStatus: InviteStatus) {
-    transaction {
-        inviteUpdateStatus(inviteStatus, inviteId)
-    }
+inline fun TransactionCallbacks.updateInviteStatus(
+    inviteId: InviteId,
+    inviteStatus: InviteStatus,
+    queries: SphinxDatabaseQueries,
+) {
+    queries.inviteUpdateStatus(inviteStatus, inviteId)
 }
 
 @Suppress("SpellCheckingInspection")

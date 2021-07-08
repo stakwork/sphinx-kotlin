@@ -2354,9 +2354,11 @@ abstract class SphinxRepository(
 
                     is Response.Success -> {
                         contactLock.withLock {
-                            queries.transaction {
-                                updatedContactIds.add(ContactId(loadResponse.value.id))
-                                upsertContact(loadResponse.value, queries)
+                            withContext(io) {
+                                queries.transaction {
+                                    updatedContactIds.add(ContactId(loadResponse.value.id))
+                                    upsertContact(loadResponse.value, queries)
+                                }
                             }
                         }
                         response = Response.Success(true)
@@ -2372,8 +2374,12 @@ abstract class SphinxRepository(
         val queries = coreDB.getSphinxDatabaseQueries()
 
         contactLock.withLock {
-            updatedContactIds.add(invite.contactId)
-            queries.updateInviteStatus(invite.id, InviteStatus.PROCESSING_PAYMENT.toInviteStatus())
+            withContext(io) {
+                queries.transaction {
+                    updatedContactIds.add(invite.contactId)
+                    updateInviteStatus(invite.id, InviteStatus.ProcessingPayment, queries)
+                }
+            }
         }
 
         delay(25L)
@@ -2384,8 +2390,12 @@ abstract class SphinxRepository(
 
                 is Response.Error -> {
                     contactLock.withLock {
-                        updatedContactIds.add(invite.contactId)
-                        queries.updateInviteStatus(invite.id, InviteStatus.PAYMENT_PENDING.toInviteStatus())
+                        withContext(io) {
+                            queries.transaction {
+                                updatedContactIds.add(invite.contactId)
+                                updateInviteStatus(invite.id, InviteStatus.PaymentPending, queries)
+                            }
+                        }
                     }
                 }
 
@@ -2401,9 +2411,11 @@ abstract class SphinxRepository(
 
         if (response is Response.Success) {
             contactLock.withLock {
-                queries.transaction {
-                    updatedContactIds.add(invite.contactId)
-                    deleteContactById(invite.contactId, queries)
+                withContext(io) {
+                    queries.transaction {
+                        updatedContactIds.add(invite.contactId)
+                        deleteContactById(invite.contactId, queries)
+                    }
                 }
 
             }
