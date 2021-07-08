@@ -69,6 +69,8 @@ android {
 }
 
 dependencies {
+    final def googleServicesJson = file(new File(rootDir, 'sphinx/service/features/notifications/feature-service-notification-firebase/google-services.json'))
+
     implementation fileTree(dir: "libs", include: ["*.jar"])
     // KotlinAndroid
     implementation project(path: ':android:features:authentication:android-feature-authentication-core')
@@ -105,7 +107,7 @@ dependencies {
     implementation project(path: ':sphinx:service:features:media-player:feature-service-media-player-android')
 
     // See `/sphinx/service/features/notifications/README.md`
-    if (findProperty("SPHINX_COMPILE_PUSH_NOTIFICATION_TYPE") == "firebase") {
+    if (googleServicesJson.exists() && findProperty("SPHINX_COMPILE_PUSH_NOTIFICATION_TYPE") == "firebase") {
         // FirebaseMessaging
         implementation project(path: ':sphinx:service:features:notifications:feature-service-notification-firebase')
     } else {

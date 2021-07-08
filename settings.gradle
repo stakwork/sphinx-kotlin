@@ -122,7 +122,10 @@ include ':sphinx:service:concepts:concept-service-media-player'
 include ':sphinx:service:features:media-player:feature-service-media-player-android'
 include ':sphinx:service:concepts:concept-service-notification'
 include ':sphinx:service:features:notifications:feature-service-notification-empty'
-include ':sphinx:service:features:notifications:feature-service-notification-firebase'
+final def googleServicesJson = file(new File(rootDir, 'sphinx/service/features/notifications/feature-service-notification-firebase/google-services.json'))
+if (googleServicesJson.exists()) {
+    include ':sphinx:service:features:notifications:feature-service-notification-firebase'
+}
 
 // Testing
 include ':sphinx:test:test-network-query'
