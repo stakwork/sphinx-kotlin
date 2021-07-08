@@ -291,63 +291,68 @@ sealed class DashboardChat {
                 get() = null
 
             override fun getMessageText(): String {
-                when (invite?.status) {
+
+//                @Exhaustive
+                return when (invite?.status) {
                     is InviteStatus.Pending -> {
-                        return "Looking for an available node for ${contact.alias?.value ?: "Unknown"}."
+                        "Looking for an available node for ${contact.alias?.value ?: "Unknown"}."
                     }
                     is InviteStatus.Ready, InviteStatus.Delivered -> {
-                        return "Ready! Tap to share. Expires in 24 hrs."
+                        "Ready! Tap to share. Expires in 24 hrs."
                     }
                     is InviteStatus.InProgress -> {
-                        return "$chatName is signing on."
+                        "$chatName is signing on."
                     }
                     is InviteStatus.PaymentPending -> {
-                        return "Tap to pay and activate the invite."
+                        "Tap to pay and activate the invite."
                     }
                     is InviteStatus.ProcessingPayment -> {
-                        return "Payment sent. Waiting confirmation."
+                        "Payment sent. Waiting confirmation."
                     }
                     is InviteStatus.Complete -> {
-                        return "Signup complete."
+                        "Signup complete."
                     }
                     is InviteStatus.Expired -> {
-                        return "Expired"
+                        "Expired"
                     }
+
+                    null,
                     is InviteStatus.Unknown -> {
-                        return ""
+                        ""
                     }
                 }
-                return ""
             }
 
             fun getInviteIconAndColor(): Pair<Int, Int>? {
-                when (invite?.status) {
+
+                return when (invite?.status) {
                     is InviteStatus.Pending -> {
-                        return Pair(R.string.material_icon_name_invite_pending, R.color.sphinxOrange)
+                        Pair(R.string.material_icon_name_invite_pending, R.color.sphinxOrange)
                     }
                     is InviteStatus.Ready, InviteStatus.Delivered -> {
-                        return Pair(R.string.material_icon_name_invite_ready, R.color.primaryGreen)
+                        Pair(R.string.material_icon_name_invite_ready, R.color.primaryGreen)
                     }
                     is InviteStatus.InProgress -> {
-                        return Pair(R.string.material_icon_name_invite_in_progress, R.color.primaryBlue)
+                        Pair(R.string.material_icon_name_invite_in_progress, R.color.primaryBlue)
                     }
                     is InviteStatus.PaymentPending -> {
-                        return Pair(R.string.material_icon_name_invite_payment_pending, R.color.secondaryText)
+                        Pair(R.string.material_icon_name_invite_payment_pending, R.color.secondaryText)
                     }
                     is InviteStatus.ProcessingPayment -> {
-                        return Pair(R.string.material_icon_name_invite_payment_sent, R.color.secondaryText)
+                        Pair(R.string.material_icon_name_invite_payment_sent, R.color.secondaryText)
                     }
                     is InviteStatus.Complete -> {
-                        return Pair(R.string.material_icon_name_invite_complete, R.color.primaryGreen)
+                        Pair(R.string.material_icon_name_invite_complete, R.color.primaryGreen)
                     }
                     is InviteStatus.Expired -> {
-                        return Pair(R.string.material_icon_name_invite_expired, R.color.primaryRed)
+                        Pair(R.string.material_icon_name_invite_expired, R.color.primaryRed)
                     }
+
+                    null,
                     is InviteStatus.Unknown -> {
-                        return null
+                        null
                     }
                 }
-                return null
             }
 
             fun getInvitePrice(): Sat? {
