@@ -159,8 +159,9 @@ class NetworkQueryChatImpl(
         relayData: Pair<AuthorizationToken, RelayUrl>?
     ): Flow<LoadResponse<DeleteChatResponseDto, ResponseError>> =
         networkRelayCall.relayDelete(
-            DeleteChatRelayResponse::class.java,
-            String.format(ENDPOINT_DELETE_CHAT, chatId.value),
-            requestBody = null
+            responseJsonClass = DeleteChatRelayResponse::class.java,
+            relayEndpoint = String.format(ENDPOINT_DELETE_CHAT, chatId.value),
+            requestBody = null,
+            relayData = relayData,
         )
 }
