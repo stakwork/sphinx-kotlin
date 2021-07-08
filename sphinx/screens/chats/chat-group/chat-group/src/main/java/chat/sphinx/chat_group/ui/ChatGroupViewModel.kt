@@ -5,7 +5,6 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.camera_view_model_coordinator.request.CameraRequest
 import chat.sphinx.camera_view_model_coordinator.response.CameraResponse
-import chat.sphinx.chat_common.navigation.ChatNavigator
 import chat.sphinx.chat_common.ui.ChatViewModel
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
 import chat.sphinx.chat_group.navigation.GroupChatNavigator
@@ -21,11 +20,10 @@ import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.resources.getRandomColor
-import chat.sphinx.send_attachment_view_model_coordinator.request.SendAttachmentRequest
-import chat.sphinx.send_attachment_view_model_coordinator.response.SendAttachmentResponse
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.ChatName
 import chat.sphinx.wrapper_common.dashboard.ChatId
+import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.util.getInitials
 import chat.sphinx.wrapper_message.Message
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -44,6 +42,7 @@ class ChatGroupViewModel @Inject constructor(
     app: Application,
     dispatchers: CoroutineDispatchers,
     memeServerTokenHandler: MemeServerTokenHandler,
+    chatNavigator: GroupChatNavigator,
     chatRepository: ChatRepository,
     contactRepository: ContactRepository,
     messageRepository: MessageRepository,
@@ -51,12 +50,12 @@ class ChatGroupViewModel @Inject constructor(
     mediaCacheHandler: MediaCacheHandler,
     savedStateHandle: SavedStateHandle,
     cameraViewModelCoordinator: ViewModelCoordinator<CameraRequest, CameraResponse>,
-    sendAttachmentViewModelCoordinator: ViewModelCoordinator<SendAttachmentRequest, SendAttachmentResponse>,
     LOG: SphinxLogger,
 ): ChatViewModel<ChatGroupFragmentArgs>(
     app,
     dispatchers,
     memeServerTokenHandler,
+    chatNavigator,
     chatRepository,
     contactRepository,
     messageRepository,
@@ -64,15 +63,12 @@ class ChatGroupViewModel @Inject constructor(
     mediaCacheHandler,
     savedStateHandle,
     cameraViewModelCoordinator,
-    sendAttachmentViewModelCoordinator,
     LOG,
 ) {
     override val args: ChatGroupFragmentArgs by savedStateHandle.navArgs()
-
-    @Inject
-    protected lateinit var chatGroupNavigator: GroupChatNavigator
-    override val chatNavigator: ChatNavigator
-        get() = chatGroupNavigator
+    override var chatId: ChatId = args.chatId
+    override val contactId: ContactId?
+        get() = null
 
     override val chatSharedFlow: SharedFlow<Chat?> = flow {
         emitAll(chatRepository.getChatById(args.chatId))
@@ -132,9 +128,5 @@ class ChatGroupViewModel @Inject constructor(
     override fun sendMessage(builder: SendMessage.Builder): SendMessage? {
         builder.setChatId(args.chatId)
         return super.sendMessage(builder)
-    }
-
-    override fun showActionsMenu() {
-        showActionsMenuImpl(null, args.chatId)
     }
 }

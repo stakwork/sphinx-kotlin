@@ -5,7 +5,6 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.camera_view_model_coordinator.request.CameraRequest
 import chat.sphinx.camera_view_model_coordinator.response.CameraResponse
-import chat.sphinx.chat_common.navigation.ChatNavigator
 import chat.sphinx.chat_common.ui.ChatViewModel
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
 import chat.sphinx.chat_contact.navigation.ContactChatNavigator
@@ -22,8 +21,6 @@ import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.logger.SphinxLogger
-import chat.sphinx.send_attachment_view_model_coordinator.request.SendAttachmentRequest
-import chat.sphinx.send_attachment_view_model_coordinator.response.SendAttachmentResponse
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.ChatName
 import chat.sphinx.wrapper_common.dashboard.ChatId
@@ -57,6 +54,7 @@ internal class ChatContactViewModel @Inject constructor(
     app: Application,
     dispatchers: CoroutineDispatchers,
     memeServerTokenHandler: MemeServerTokenHandler,
+    chatNavigator: ContactChatNavigator,
     chatRepository: ChatRepository,
     contactRepository: ContactRepository,
     messageRepository: MessageRepository,
@@ -64,12 +62,12 @@ internal class ChatContactViewModel @Inject constructor(
     mediaCacheHandler: MediaCacheHandler,
     savedStateHandle: SavedStateHandle,
     cameraViewModelCoordinator: ViewModelCoordinator<CameraRequest, CameraResponse>,
-    sendAttachmentViewModelCoordinator: ViewModelCoordinator<SendAttachmentRequest, SendAttachmentResponse>,
     LOG: SphinxLogger,
 ): ChatViewModel<ChatContactFragmentArgs>(
     app,
     dispatchers,
     memeServerTokenHandler,
+    chatNavigator,
     chatRepository,
     contactRepository,
     messageRepository,
@@ -77,19 +75,16 @@ internal class ChatContactViewModel @Inject constructor(
     mediaCacheHandler,
     savedStateHandle,
     cameraViewModelCoordinator,
-    sendAttachmentViewModelCoordinator,
     LOG,
 ) {
     override val args: ChatContactFragmentArgs by savedStateHandle.navArgs()
-    private var chatId: ChatId? = args.chatId
-
-    @Inject
-    protected lateinit var chatContactNavigator: ContactChatNavigator
-    override val chatNavigator: ChatNavigator
-        get() = chatContactNavigator
+    private var _chatId: ChatId? = args.chatId
+    override val chatId: ChatId?
+        get() = _chatId
+    override val contactId: ContactId = args.contactId
 
     private val contactSharedFlow: SharedFlow<Contact?> = flow {
-        emitAll(contactRepository.getContactById(args.contactId))
+        emitAll(contactRepository.getContactById(contactId))
     }.distinctUntilChanged().shareIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(2_000),
@@ -99,8 +94,8 @@ internal class ChatContactViewModel @Inject constructor(
     override val chatSharedFlow: SharedFlow<Chat?> = flow {
         chatId?.let { chatId ->
             emitAll(chatRepository.getChatById(chatId))
-        } ?: chatRepository.getConversationByContactId(args.contactId).collect { chat ->
-            chatId = chat?.id
+        } ?: chatRepository.getConversationByContactId(contactId).collect { chat ->
+            _chatId = chat?.id
             emit(chat)
         }
     }.distinctUntilChanged().shareIn(
@@ -237,7 +232,7 @@ internal class ChatContactViewModel @Inject constructor(
     }
 
     override fun readMessages() {
-        val idResolved: ChatId? = args.chatId ?: chatSharedFlow.replayCache.firstOrNull()?.id
+        val idResolved: ChatId? = chatId ?: chatSharedFlow.replayCache.firstOrNull()?.id
         if (idResolved != null) {
             viewModelScope.launch(mainImmediate) {
                 messageRepository.readMessages(idResolved)
@@ -246,12 +241,8 @@ internal class ChatContactViewModel @Inject constructor(
     }
 
     override fun sendMessage(builder: SendMessage.Builder): SendMessage? {
-        builder.setContactId(args.contactId)
+        builder.setContactId(contactId)
         builder.setChatId(chatId)
         return super.sendMessage(builder)
-    }
-
-    override fun showActionsMenu() {
-        showActionsMenuImpl(args.contactId, args.chatId)
     }
 }
