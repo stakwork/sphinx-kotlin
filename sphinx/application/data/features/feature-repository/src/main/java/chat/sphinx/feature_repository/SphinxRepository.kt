@@ -713,7 +713,6 @@ abstract class SphinxRepository(
                             is LoadResponse.Loading -> {}
                             is Response.Error -> {
                                 response = loadResponse
-                                throw Exception()
                             }
                             is Response.Success -> {
                                 contactLock.withLock {
@@ -722,11 +721,11 @@ abstract class SphinxRepository(
                                     }
                                 }
                                 LOG.d(TAG, "Owner has been successfully updated")
-
-                                throw Exception()
                             }
                         }
                     }
+
+                    throw Exception()
                 }
 
             }
