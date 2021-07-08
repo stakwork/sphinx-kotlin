@@ -59,10 +59,10 @@ internal class QRCodeFragment: SideEffectFragment<
 
     override suspend fun onViewStateFlowCollect(viewState: QRCodeViewState) {
         binding.apply {
-            includeQrCodeHeader.apply {
-                textViewDetailScreenHeaderNavBack
+            includeQrCodeHeader.apply header@ {
+                this@header.textViewDetailScreenHeaderNavBack
                     .goneIfFalse(viewState.showBackButton)
-                textViewDetailScreenHeaderName.text = viewState.viewTitle
+                this@header.textViewDetailScreenHeaderName.text = viewState.viewTitle
             }
 
             qrCodeLabel.text = viewState.qrText
