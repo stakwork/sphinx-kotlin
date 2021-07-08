@@ -1,5 +1,12 @@
 # ChangeLog
 
+## Version 1.0.0-alpha07 (2021-07-08)
+ - Adds ability to invite a new user
+ - Adds ability to send images from device gallery
+ - Adds ability to exit a tribe
+ - Refactors the chat menu out of a detail screen, and moves functionality into the chat screen
+ - Camera improvements
+
 ## Version 1.0.0-alpha06 (2021-07-02)
  - Adds sending payments:
      - From a Chat with a Contact via the footer menu options
