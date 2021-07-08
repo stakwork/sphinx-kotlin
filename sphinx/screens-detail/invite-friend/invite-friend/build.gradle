@@ -41,7 +41,6 @@ dependencies {
     implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-invite')
 
     api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-contact')
-    api project(path: ':sphinx:application:common:wrappers:wrapper-common')
 
     implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt
