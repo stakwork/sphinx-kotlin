@@ -31,37 +31,6 @@ internal class InviteFriendFragment : SideEffectFragment<
     override val viewModel: InviteFriendViewModel by viewModels()
     override val binding: FragmentInviteFriendBinding by viewBinding(FragmentInviteFriendBinding::bind)
 
-    override suspend fun onViewStateFlowCollect(viewState: InviteFriendViewState) {
-        @Exhaustive
-        when (viewState) {
-            is InviteFriendViewState.Idle -> {}
-
-            is InviteFriendViewState.InviteFriendLowestPrice -> {
-                binding.apply {
-                    textViewEstimatedCostAmount.text = viewState.price.asFormattedString()
-
-                    layoutConstraintEstimatedCost.alpha = 0.0f
-                    layoutConstraintEstimatedCost.visible
-
-                    layoutConstraintEstimatedCost.animate()
-                        .alpha(1.0f)
-                }
-            }
-
-            is InviteFriendViewState.InviteCreationLoading -> {
-                binding.createInviteProgressBar.visible
-            }
-            is InviteFriendViewState.InviteCreationFailed -> {
-                binding.createInviteProgressBar.gone
-            }
-            is InviteFriendViewState.InviteCreationSucceed -> {
-                binding.createInviteProgressBar.gone
-
-                viewModel.navigator.closeDetailScreen()
-            }
-        }
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -96,6 +65,37 @@ internal class InviteFriendFragment : SideEffectFragment<
         }
 
         (requireActivity() as InsetterActivity).addNavigationBarPadding(binding.layoutConstraintInviteFriend)
+    }
+
+    override suspend fun onViewStateFlowCollect(viewState: InviteFriendViewState) {
+        @Exhaustive
+        when (viewState) {
+            is InviteFriendViewState.Idle -> {}
+
+            is InviteFriendViewState.InviteFriendLowestPrice -> {
+                binding.apply {
+                    textViewEstimatedCostAmount.text = viewState.price.asFormattedString()
+
+                    layoutConstraintEstimatedCost.alpha = 0.0f
+                    layoutConstraintEstimatedCost.visible
+
+                    layoutConstraintEstimatedCost.animate()
+                        .alpha(1.0f)
+                }
+            }
+
+            is InviteFriendViewState.InviteCreationLoading -> {
+                binding.createInviteProgressBar.visible
+            }
+            is InviteFriendViewState.InviteCreationFailed -> {
+                binding.createInviteProgressBar.gone
+            }
+            is InviteFriendViewState.InviteCreationSucceed -> {
+                binding.createInviteProgressBar.gone
+
+                viewModel.navigator.closeDetailScreen()
+            }
+        }
     }
 
     override suspend fun onSideEffectCollect(sideEffect: InviteFriendSideEffect) {
