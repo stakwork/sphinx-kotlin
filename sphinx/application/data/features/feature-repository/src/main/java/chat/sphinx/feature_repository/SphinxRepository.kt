@@ -2442,7 +2442,11 @@ abstract class SphinxRepository(
                             messageLock.withLock {
                                 withContext(io) {
                                     queries.transaction {
-                                        deleteChatById(loadResponse.value.chatId.toChatId(), queries, latestMessageUpdatedTimeMap)
+                                        deleteChatById(
+                                            loadResponse.value["chat_id"]?.toChatId() ?: chat.id,
+                                            queries,
+                                            latestMessageUpdatedTimeMap
+                                        )
                                     }
                                 }
                             }

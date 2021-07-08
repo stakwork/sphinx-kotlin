@@ -157,7 +157,7 @@ class NetworkQueryChatImpl(
     override suspend fun deleteChat(
         chatId: ChatId,
         relayData: Pair<AuthorizationToken, RelayUrl>?
-    ): Flow<LoadResponse<DeleteChatResponseDto, ResponseError>> =
+    ): Flow<LoadResponse<Map<String, Long>, ResponseError>> =
         networkRelayCall.relayDelete(
             responseJsonClass = DeleteChatRelayResponse::class.java,
             relayEndpoint = String.format(ENDPOINT_DELETE_CHAT, chatId.value),
