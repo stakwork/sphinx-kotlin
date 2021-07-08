@@ -320,6 +320,6 @@ internal class DashboardFragment : MotionLayoutFragment<
     }
 
     override suspend fun onSideEffectCollect(sideEffect: DashboardSideEffect) {
-        sideEffect.execute(requireActivity())
+        sideEffect.execute(binding.root.context)
     }
 }
