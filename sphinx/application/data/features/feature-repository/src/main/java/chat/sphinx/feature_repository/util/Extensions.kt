@@ -13,6 +13,9 @@ import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.dashboard.InviteId
+import chat.sphinx.wrapper_common.invite.InviteStatus
+import chat.sphinx.wrapper_common.invite.isPaymentPending
+import chat.sphinx.wrapper_common.invite.isProcessingPayment
 import chat.sphinx.wrapper_common.invite.toInviteStatus
 import chat.sphinx.wrapper_common.lightning.*
 import chat.sphinx.wrapper_common.message.MessageId
@@ -258,18 +261,36 @@ inline fun TransactionCallbacks.upsertContact(dto: ContactDto, queries: SphinxDa
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun TransactionCallbacks.upsertInvite(dto: InviteDto, queries: SphinxDatabaseQueries) {
+
+    val inviteStatus = dto.status.toInviteStatus().let { dtoStatus ->
+        if (dtoStatus.isPaymentPending()) {
+
+            val invite = queries.inviteGetById(InviteId(dto.id)).executeAsOneOrNull()
+
+            if (invite?.status?.isProcessingPayment() == true) {
+                InviteStatus.ProcessingPayment
+            } else {
+                dtoStatus
+            }
+
+        } else {
+            dtoStatus
+        }
+    }
+
     queries.inviteUpsert(
         InviteString(dto.invite_string),
         dto.invoice?.toLightningPaymentRequest(),
-        dto.status.toInviteStatus(),
+        inviteStatus,
         dto.price?.toSat(),
         InviteId(dto.id),
         ContactId(dto.contact_id),
         dto.created_at.toDateTime(),
     )
 
-    // TODO: Work out what status needs to be included to be shown on the dashboard
-//        when (it.status.toInviteStatus()) {
+// TODO: Work out what status needs to be included to be shown on the dashboard
+
+//        when (inviteStatus) {
 //            is InviteStatus.Complete -> TODO()
 //            is InviteStatus.Delivered -> TODO()
 //            is InviteStatus.Expired -> TODO()
@@ -283,6 +304,15 @@ inline fun TransactionCallbacks.upsertInvite(dto: InviteDto, queries: SphinxData
 //            InviteId(it.id),
 //            DateTime.nowUTC().toDateTime(),
 //        )
+}
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun TransactionCallbacks.updateInviteStatus(
+    inviteId: InviteId,
+    inviteStatus: InviteStatus,
+    queries: SphinxDatabaseQueries,
+) {
+    queries.inviteUpdateStatus(inviteStatus, inviteId)
 }
 
 @Suppress("SpellCheckingInspection")

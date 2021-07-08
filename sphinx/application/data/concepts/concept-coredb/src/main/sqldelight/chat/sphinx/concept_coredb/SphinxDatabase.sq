@@ -315,6 +315,10 @@ CREATE TABLE inviteDbo(
     created_at                  INTEGER         AS DateTime NOT NULL
 );
 
+inviteGetAll:
+SELECT *
+FROM inviteDbo;
+
 inviteGetById:
 SELECT *
 FROM inviteDbo
@@ -324,6 +328,11 @@ inviteGetByContactId:
 SELECT *
 FROM inviteDbo
 WHERE contact_id = ?;
+
+inviteUpdateStatus:
+UPDATE inviteDbo
+SET status = :status
+WHERE id = ?;
 
 inviteUpsert {
     UPDATE inviteDbo

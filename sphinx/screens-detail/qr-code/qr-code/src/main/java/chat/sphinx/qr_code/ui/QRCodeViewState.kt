@@ -5,6 +5,7 @@ import io.matthewnelson.concept_views.viewstate.ViewState
 
 internal data class QRCodeViewState(
     val showBackButton: Boolean,
+    val viewTitle: String,
     val qrText: String,
     val qrBitmap: Bitmap?,
 ): ViewState<QRCodeViewState>()

@@ -7,6 +7,7 @@ import chat.sphinx.chat_group.navigation.ToChatGroupScreen
 import chat.sphinx.chat_tribe.navigation.ToChatTribeScreen
 import chat.sphinx.dashboard.navigation.DashboardNavigator
 import chat.sphinx.join_tribe.navigation.ToJoinTribeDetail
+import chat.sphinx.qr_code.navigation.ToQRCodeDetail
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.tribe.TribeJoinLink
@@ -37,5 +38,9 @@ internal class DashboardNavigatorImpl @Inject constructor(
 
     override suspend fun toJoinTribeDetail(tribeLink: TribeJoinLink) {
         detailDriver.submitNavigationRequest(ToJoinTribeDetail(tribeLink))
+    }
+
+    override suspend fun toQRCodeDetail(qrText: String, viewTitle: String) {
+        detailDriver.submitNavigationRequest(ToQRCodeDetail(qrText, viewTitle))
     }
 }

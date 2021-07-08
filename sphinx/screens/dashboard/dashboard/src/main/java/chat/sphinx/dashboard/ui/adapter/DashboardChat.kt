@@ -1,10 +1,14 @@
 package chat.sphinx.dashboard.ui.adapter
 
+import chat.sphinx.dashboard.R
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.isConversation
 import chat.sphinx.wrapper_common.*
 import chat.sphinx.wrapper_common.dashboard.ContactId
+import chat.sphinx.wrapper_common.invite.InviteStatus
+import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_contact.Contact
+import chat.sphinx.wrapper_invite.Invite as InviteWrapper
 import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message_media.MediaType
 import kotlinx.coroutines.flow.Flow
@@ -266,6 +270,102 @@ sealed class DashboardChat {
                 return !(contact.rsaPublicKey?.value?.isEmpty() ?: true)
             }
 
+        }
+
+        class Invite(
+            val contact: Contact,
+            val invite: InviteWrapper?
+        ): Inactive() {
+
+            override val chatName: String?
+                get() =  "Invite: ${contact.alias?.value ?: "Unknown"}"
+
+            override val photoUrl: PhotoUrl?
+                get() = contact.photoUrl
+
+            // Invites should always appear at the top of the dashboard list
+            override val sortBy: Long
+                get() = Long.MAX_VALUE
+
+            override val unseenMessageFlow: Flow<Long?>?
+                get() = null
+
+            override fun getMessageText(): String {
+
+//                @Exhaustive
+                return when (invite?.status) {
+                    is InviteStatus.Pending -> {
+                        "Looking for an available node for ${contact.alias?.value ?: "Unknown"}."
+                    }
+                    is InviteStatus.Ready, InviteStatus.Delivered -> {
+                        "Ready! Tap to share. Expires in 24 hrs."
+                    }
+                    is InviteStatus.InProgress -> {
+                        "$chatName is signing on."
+                    }
+                    is InviteStatus.PaymentPending -> {
+                        "Tap to pay and activate the invite."
+                    }
+                    is InviteStatus.ProcessingPayment -> {
+                        "Payment sent. Waiting confirmation."
+                    }
+                    is InviteStatus.Complete -> {
+                        "Signup complete."
+                    }
+                    is InviteStatus.Expired -> {
+                        "Expired"
+                    }
+
+                    null,
+                    is InviteStatus.Unknown -> {
+                        ""
+                    }
+                }
+            }
+
+            fun getInviteIconAndColor(): Pair<Int, Int>? {
+
+                return when (invite?.status) {
+                    is InviteStatus.Pending -> {
+                        Pair(R.string.material_icon_name_invite_pending, R.color.sphinxOrange)
+                    }
+                    is InviteStatus.Ready, InviteStatus.Delivered -> {
+                        Pair(R.string.material_icon_name_invite_ready, R.color.primaryGreen)
+                    }
+                    is InviteStatus.InProgress -> {
+                        Pair(R.string.material_icon_name_invite_in_progress, R.color.primaryBlue)
+                    }
+                    is InviteStatus.PaymentPending -> {
+                        Pair(R.string.material_icon_name_invite_payment_pending, R.color.secondaryText)
+                    }
+                    is InviteStatus.ProcessingPayment -> {
+                        Pair(R.string.material_icon_name_invite_payment_sent, R.color.secondaryText)
+                    }
+                    is InviteStatus.Complete -> {
+                        Pair(R.string.material_icon_name_invite_complete, R.color.primaryGreen)
+                    }
+                    is InviteStatus.Expired -> {
+                        Pair(R.string.material_icon_name_invite_expired, R.color.primaryRed)
+                    }
+
+                    null,
+                    is InviteStatus.Unknown -> {
+                        null
+                    }
+                }
+            }
+
+            fun getInvitePrice(): Sat? {
+                return invite?.price
+            }
+
+            override fun hasUnseenMessages(): Boolean {
+                return false
+            }
+
+            override fun isEncrypted(): Boolean {
+                return false
+            }
         }
     }
 }

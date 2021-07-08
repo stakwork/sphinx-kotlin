@@ -131,7 +131,7 @@ internal class ProfileFragment: SideEffectFragment<
                                     "${pubKey.value}:${routeHint.value}"
                                 } ?: pubKey.value
                                 
-                                profileNavigator.toQRCodeDetail(key)
+                                profileNavigator.toQRCodeDetail(key, getString(R.string.profile_qr_code_header_name))
                             }
                         }
                     }
