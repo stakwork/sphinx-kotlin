@@ -8,6 +8,7 @@ import chat.sphinx.concept_meme_server.MemeServerTokenHandler
 import chat.sphinx.concept_network_query_attachment.NetworkQueryAttachment
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
 import chat.sphinx.concept_network_query_contact.NetworkQueryContact
+import chat.sphinx.concept_network_query_invite.NetworkQueryInvite
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_message.NetworkQueryMessage
 import chat.sphinx.concept_paging.PageSourceWrapper
@@ -44,6 +45,7 @@ class SphinxRepositoryAndroid(
     networkQueryContact: NetworkQueryContact,
     networkQueryLightning: NetworkQueryLightning,
     networkQueryMessage: NetworkQueryMessage,
+    networkQueryInvite: NetworkQueryInvite,
     rsa: RSA,
     socketIOManager: SocketIOManager,
     LOG: SphinxLogger,
@@ -61,6 +63,7 @@ class SphinxRepositoryAndroid(
     networkQueryContact,
     networkQueryLightning,
     networkQueryMessage,
+    networkQueryInvite,
     rsa,
     socketIOManager,
     LOG,

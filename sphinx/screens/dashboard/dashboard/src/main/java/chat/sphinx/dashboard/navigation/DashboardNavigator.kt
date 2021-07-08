@@ -14,4 +14,5 @@ abstract class DashboardNavigator(
     abstract suspend fun toChatGroup(chatId: ChatId)
     abstract suspend fun toChatTribe(chatId: ChatId)
     abstract suspend fun toJoinTribeDetail(tribeLink: TribeJoinLink)
+    abstract suspend fun toQRCodeDetail(qrText: String, viewTitle: String)
 }

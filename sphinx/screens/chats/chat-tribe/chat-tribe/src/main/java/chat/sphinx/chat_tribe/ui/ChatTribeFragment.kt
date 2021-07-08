@@ -11,17 +11,14 @@ import app.cash.exhaustive.Exhaustive
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.chat_common.databinding.*
 import chat.sphinx.chat_common.ui.ChatFragment
-import chat.sphinx.chat_common.ui.viewstate.header.ChatHeaderFooterViewState
 import chat.sphinx.chat_tribe.R
 import chat.sphinx.chat_tribe.databinding.FragmentChatTribeBinding
 import chat.sphinx.chat_tribe.databinding.LayoutPodcastPlayerFooterBinding
-import chat.sphinx.chat_tribe.navigation.TribeChatNavigator
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.podcast_player.objects.Podcast
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.concept_views.viewstate.collect
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -55,14 +52,16 @@ internal class ChatTribeFragment: ChatFragment<
     override val attachmentSendBinding: LayoutAttachmentSendPreviewBinding by viewBinding(
         LayoutAttachmentSendPreviewBinding::bind, R.id.include_chat_tribe_attachment_send_preview
     )
+    override val menuBinding: LayoutChatMenuBinding by viewBinding(
+        LayoutChatMenuBinding::bind, R.id.include_chat_tribe_menu
+    )
+    override val menuEnablePayments: Boolean
+        get() = false
 
     override val recyclerView: RecyclerView
         get() = binding.recyclerViewMessages
 
     override val viewModel: ChatTribeViewModel by viewModels()
-
-    @Inject
-    override lateinit var chatNavigator: TribeChatNavigator
 
     @Inject
     protected lateinit var imageLoaderInj: ImageLoader<ImageView>
@@ -77,6 +76,12 @@ internal class ChatTribeFragment: ChatFragment<
             viewModel.loadTribeAndPodcastData()?.let { podcast ->
                 configurePodcastPlayer(podcast)
                 addPodcastOnClickListeners(podcast)
+            }
+        }
+
+        headerBinding.apply {
+            imageViewChatHeaderExitTribe.setOnClickListener {
+                viewModel.exitTribeGetUserConfirmation()
             }
         }
     }

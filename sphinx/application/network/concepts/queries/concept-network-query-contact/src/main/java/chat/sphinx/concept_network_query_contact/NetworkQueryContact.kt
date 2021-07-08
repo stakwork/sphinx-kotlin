@@ -50,6 +50,11 @@ abstract class NetworkQueryContact {
         relayData: Pair<AuthorizationToken, RelayUrl>? = null,
     ): Response<Any, ResponseError>
 
+    abstract fun createNewInvite(
+        nickname: String,
+        welcomeMessage: String,
+        relayData: Pair<AuthorizationToken, RelayUrl>? = null
+    ): Flow<LoadResponse<ContactDto, ResponseError>>
 
     //    app.post('/contacts/:id/keys', contacts.exchangeKeys)
     //    app.post('/contacts', contacts.createContact)

@@ -4,10 +4,12 @@ import chat.sphinx.feature_network_query_chat.model.UpdateChatRelayResponse
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
 import chat.sphinx.concept_network_query_chat.model.*
 import chat.sphinx.concept_network_relay_call.NetworkRelayCall
+import chat.sphinx.feature_network_query_chat.model.DeleteChatRelayResponse
 import chat.sphinx.feature_network_query_chat.model.GetChatsRelayResponse
 import chat.sphinx.feature_network_query_chat.model.JoinTribeRelayResponse
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.kotlin_response.LoadResponse
+import chat.sphinx.kotlin_response.Response
 import chat.sphinx.wrapper_chat.ChatHost
 import chat.sphinx.wrapper_chat.ChatMuted
 import chat.sphinx.wrapper_chat.isTrue
@@ -25,6 +27,7 @@ class NetworkQueryChatImpl(
         private const val ENDPOINT_CHAT = "/chat"
         private const val ENDPOINT_CHATS = "/chats"
         private const val ENDPOINT_EDIT_CHAT = "$ENDPOINT_CHATS/%d"
+        private const val ENDPOINT_DELETE_CHAT = "$ENDPOINT_CHAT/%d"
         private const val ENDPOINT_MUTE_CHAT = "/chats/%d/%s"
         private const val MUTE_CHAT = "mute"
         private const val UN_MUTE_CHAT = "unmute"
@@ -151,8 +154,14 @@ class NetworkQueryChatImpl(
             relayData = relayData
         )
 
-    //////////////
-    /// DELETE ///
-    //////////////
-//    app.delete('/chat/:id', chats.deleteChat)
+    override suspend fun deleteChat(
+        chatId: ChatId,
+        relayData: Pair<AuthorizationToken, RelayUrl>?
+    ): Flow<LoadResponse<Map<String, Long>, ResponseError>> =
+        networkRelayCall.relayDelete(
+            responseJsonClass = DeleteChatRelayResponse::class.java,
+            relayEndpoint = String.format(ENDPOINT_DELETE_CHAT, chatId.value),
+            requestBody = null,
+            relayData = relayData,
+        )
 }

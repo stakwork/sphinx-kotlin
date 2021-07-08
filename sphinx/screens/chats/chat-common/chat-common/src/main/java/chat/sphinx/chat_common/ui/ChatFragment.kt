@@ -6,7 +6,10 @@ import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
 import androidx.activity.OnBackPressedCallback
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.LayoutRes
+import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
@@ -15,15 +18,14 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
 import app.cash.exhaustive.Exhaustive
-import chat.sphinx.camera_view_model_coordinator.response.CameraResponse
 import chat.sphinx.chat_common.R
 import chat.sphinx.chat_common.adapters.MessageListAdapter
 import chat.sphinx.chat_common.databinding.*
-import chat.sphinx.chat_common.navigation.ChatNavigator
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
 import chat.sphinx.chat_common.ui.viewstate.attachment.AttachmentSendViewState
 import chat.sphinx.chat_common.ui.viewstate.footer.FooterViewState
-import chat.sphinx.chat_common.ui.viewstate.header.ChatHeaderFooterViewState
+import chat.sphinx.chat_common.ui.viewstate.header.ChatHeaderViewState
+import chat.sphinx.chat_common.ui.viewstate.menu.ChatMenuViewState
 import chat.sphinx.chat_common.ui.viewstate.messageholder.setView
 import chat.sphinx.chat_common.ui.viewstate.messagereply.MessageReplyViewState
 import chat.sphinx.chat_common.ui.viewstate.selected.MenuItemState
@@ -53,10 +55,12 @@ import chat.sphinx.wrapper_message.retrieveImageUrlAndMessageMedia
 import chat.sphinx.wrapper_message.retrieveTextToShow
 import chat.sphinx.wrapper_message.toReplyUUID
 import chat.sphinx.wrapper_view.Dp
-import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
+import io.matthewnelson.android_feature_screens.ui.motionlayout.MotionLayoutFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.visible
+import io.matthewnelson.android_feature_viewmodel.currentViewState
+import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_views.viewstate.collect
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -67,13 +71,14 @@ abstract class ChatFragment<
         VB: ViewBinding,
         ARGS: NavArgs,
         VM: ChatViewModel<ARGS>,
-        >(@LayoutRes layoutId: Int): SideEffectFragment<
-        Context,
+        >(@LayoutRes layoutId: Int): MotionLayoutFragment<
+        Nothing,
+        ChatSideEffectFragment,
         ChatSideEffect,
-        ChatHeaderFooterViewState,
+        ChatMenuViewState,
         VM,
         VB
-        >(layoutId)
+        >(layoutId), ChatSideEffectFragment
 {
     protected abstract val footerBinding: LayoutChatFooterBinding
     protected abstract val headerBinding: LayoutChatHeaderBinding
@@ -81,16 +86,25 @@ abstract class ChatFragment<
     protected abstract val selectedMessageBinding: LayoutSelectedMessageBinding
     protected abstract val selectedMessageHolderBinding: LayoutMessageHolderBinding
     protected abstract val attachmentSendBinding: LayoutAttachmentSendPreviewBinding
+    protected abstract val menuBinding: LayoutChatMenuBinding
     protected abstract val recyclerView: RecyclerView
 
-    protected abstract val imageLoader: ImageLoader<ImageView>
+    protected abstract val menuEnablePayments: Boolean
 
-    protected abstract val chatNavigator: ChatNavigator
+    protected abstract val imageLoader: ImageLoader<ImageView>
 
     private val sendMessageBuilder = SendMessage.Builder()
 
     private val holderJobs: ArrayList<Job> = ArrayList(3)
     private val disposables: ArrayList<Disposable> = ArrayList(3)
+
+    override val chatFragmentContext: Context
+        get() = binding.root.context
+
+    override val contentChooserContract: ActivityResultLauncher<String> =
+        registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+            viewModel.handleActivityResultUri(uri)
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -103,6 +117,7 @@ abstract class ChatFragment<
         SelectedMessageStateBackPressHandler(viewLifecycleOwner, requireActivity())
 
         val insetterActivity = (requireActivity() as InsetterActivity)
+        setupMenu(insetterActivity)
         setupFooter(insetterActivity)
         setupHeader(insetterActivity)
         setupSelectedMessage()
@@ -126,21 +141,79 @@ abstract class ChatFragment<
 
         override fun handleOnBackPressed() {
             val attachmentViewState = viewModel.getAttachmentSendViewStateFlow().value
+
             when {
+                viewModel.currentViewState is ChatMenuViewState.Open -> {
+                    viewModel.updateViewState(ChatMenuViewState.Closed)
+                }
                 attachmentViewState is AttachmentSendViewState.Preview -> {
-                    viewModel.deleteFileIfLocal(attachmentViewState)
                     viewModel.updateAttachmentSendViewState(AttachmentSendViewState.Idle)
                     viewModel.updateFooterViewState(FooterViewState.Default)
+                    viewModel.deleteUnsentAttachment(attachmentViewState)
                 }
                 viewModel.getSelectedMessageViewStateFlow().value is SelectedMessageViewState.SelectedMessage -> {
                     viewModel.updateSelectedMessageViewState(SelectedMessageViewState.None)
                 }
                 else -> {
                     lifecycleScope.launch(viewModel.mainImmediate) {
-                        chatNavigator.popBackStack()
+                        viewModel.chatNavigator.popBackStack()
                     }
                 }
             }
+        }
+    }
+
+    private fun setupMenu(insetterActivity: InsetterActivity) {
+        menuBinding.includeLayoutChatMenuOptions.apply options@ {
+            insetterActivity.addNavigationBarPadding(root)
+
+            textViewMenuOptionCancel.setOnClickListener {
+                viewModel.updateViewState(ChatMenuViewState.Closed)
+            }
+
+            this@options.root.setOnClickListener { viewModel }
+
+            layoutConstraintMenuOptionCamera.setOnClickListener {
+                viewModel.chatMenuOptionCamera()
+            }
+
+            layoutConstraintMenuOptionMediaLibrary.setOnClickListener {
+                viewModel.chatMenuOptionMediaLibrary()
+            }
+
+            layoutConstraintMenuOptionGif.setOnClickListener {
+                viewModel.chatMenuOptionGif()
+            }
+
+            layoutConstraintMenuOptionFile.setOnClickListener {
+                viewModel.chatMenuOptionFileLibrary()
+            }
+
+            layoutConstraintMenuOptionPaidMessage.setOnClickListener {
+                viewModel.chatMenuOptionPaidMessage()
+            }
+
+            val alpha = if (menuEnablePayments) 1.0F else 0.4F
+            layoutConstraintMenuOptionPaymentRequest.apply request@ {
+                this@request.isEnabled = menuEnablePayments
+                this@request.alpha = alpha
+                this@request.setOnClickListener {
+                    viewModel.chatMenuOptionPaymentRequest()
+                }
+            }
+
+            layoutConstraintMenuOptionPaymentSend.apply send@ {
+                this@send.isEnabled = menuEnablePayments
+                this@send.alpha = alpha
+                this@send.setOnClickListener {
+                    viewModel.chatMenuOptionPaymentSend()
+                }
+            }
+        }
+
+        menuBinding.viewChatMenuInputLock.setOnClickListener {
+            viewModel.updateViewState(ChatMenuViewState.Closed)
+//            viewModel
         }
     }
 
@@ -159,25 +232,12 @@ abstract class ChatFragment<
                     is AttachmentSendViewState.Idle -> {
                         sendMessageBuilder.setAttachmentInfo(null)
                     }
-                    is AttachmentSendViewState.Preview.LocalFile -> {
-                        val response = attachmentViewState.cameraResponse
-                        val extension = response.value.extension
-
-                        val mediaType = when (response) {
-                            is CameraResponse.Image -> {
-                                MediaType.Image(MediaType.IMAGE + if (extension.isNotEmpty()) {
-                                    "/$extension"
-                                } else {
-                                    "/jpg"
-                                })
-                            }
-                        }
-
+                    is AttachmentSendViewState.Preview -> {
                         sendMessageBuilder.setAttachmentInfo(
                             AttachmentInfo(
-                                file = response.value,
-                                mediaType = mediaType,
-                                isLocalFile = true
+                                file = attachmentViewState.file,
+                                mediaType = attachmentViewState.type,
+                                isLocalFile = true,
                             )
                         )
                     }
@@ -206,7 +266,8 @@ abstract class ChatFragment<
                                 delay(250L)
                             }
                         }
-                        viewModel.showActionsMenu()
+
+                        viewModel.updateViewState(ChatMenuViewState.Open)
                     }
                 }
             }
@@ -236,7 +297,7 @@ abstract class ChatFragment<
 
             textViewChatHeaderNavBack.setOnClickListener {
                 lifecycleScope.launch {
-                    chatNavigator.popBackStack()
+                    viewModel.chatNavigator.popBackStack()
                 }
             }
         }
@@ -282,7 +343,7 @@ abstract class ChatFragment<
             textViewAttachmentSendHeaderClose.setOnClickListener {
                 val vs = viewModel.getAttachmentSendViewStateFlow().value
                 if (vs is AttachmentSendViewState.Preview) {
-                    viewModel.deleteFileIfLocal(vs)
+                    viewModel.deleteUnsentAttachment(vs)
                     viewModel.updateFooterViewState(FooterViewState.Default)
                     viewModel.updateAttachmentSendViewState(AttachmentSendViewState.Idle)
                 }
@@ -524,17 +585,25 @@ abstract class ChatFragment<
                             root.gone
                             imageViewAttachmentSendPreview.setImageDrawable(null)
                         }
-                        is AttachmentSendViewState.Preview.LocalFile -> {
+                        is AttachmentSendViewState.Preview -> {
 
                             textViewAttachmentSendHeaderName.apply {
                                 @Exhaustive
-                                when (viewState.cameraResponse) {
-                                    is CameraResponse.Image -> {
+                                when (viewState.type) {
+                                    is MediaType.Image -> {
                                         text = getString(R.string.attachment_send_header_image)
                                     }
-//                                    is CameraResponse.Video -> {
-//                                        text = getString(R.string.attachment_send_header_video)
-//                                    }
+                                    is MediaType.Audio -> {
+                                        // TODO: Implement
+                                    }
+                                    is MediaType.Pdf -> {
+                                        // TODO: Implement
+                                    }
+                                    is MediaType.Video -> {
+                                        text = getString(R.string.attachment_send_header_video)
+                                    }
+                                    is MediaType.Text,
+                                    is MediaType.Unknown -> {}
                                 }
                             }
 
@@ -542,7 +611,7 @@ abstract class ChatFragment<
 
                             // will load almost immediately b/c it's a file, so
                             // no need to launch separate coroutine.
-                            imageLoader.load(imageViewAttachmentSendPreview, viewState.cameraResponse.value)
+                            imageLoader.load(imageViewAttachmentSendPreview, viewState.file)
                         }
                     }
                 }
@@ -552,50 +621,77 @@ abstract class ChatFragment<
         viewModel.readMessages()
     }
 
-    override suspend fun onViewStateFlowCollect(viewState: ChatHeaderFooterViewState) {
+    override suspend fun onViewStateFlowCollect(viewState: ChatMenuViewState) {
         @Exhaustive
         when (viewState) {
-            is ChatHeaderFooterViewState.Idle -> {}
-            is ChatHeaderFooterViewState.Initialized -> {
-                headerBinding.apply {
-
-                    textViewChatHeaderName.text = viewState.chatHeaderName
-                    textViewChatHeaderLock.goneIfFalse(viewState.showLock)
-
-                    viewState.contributions?.let {
-                        imageViewChatHeaderContributions.visible
-                        textViewChatHeaderContributions.apply {
-                            visible
-                            @SuppressLint("SetTextI18n")
-                            text = getString(R.string.chat_tribe_contributions) + " ${it.asFormattedString()} ${it.unit}"
-                        }
-                    } ?: let {
-                        imageViewChatHeaderContributions.gone
-                        textViewChatHeaderContributions.gone
-                    }
-
-                    imageViewChatHeaderMuted.apply {
-                        viewState.isMuted?.let { muted ->
-                            if (muted.isTrue()) {
-                                imageLoader.load(
-                                    headerBinding.imageViewChatHeaderMuted,
-                                    R.drawable.ic_baseline_notifications_off_24
-                                )
-                            } else {
-                                imageLoader.load(
-                                    headerBinding.imageViewChatHeaderMuted,
-                                    R.drawable.ic_baseline_notifications_24
-                                )
-                            }
-                        } ?: gone
-                    }
-                }
+            is ChatMenuViewState.Closed -> {
+                menuBinding.root.setTransitionDuration(250)
+            }
+            is ChatMenuViewState.Open -> {
+                menuBinding.root.setTransitionDuration(400)
             }
         }
+
+        viewState.transitionToEndSet(menuBinding.root)
+    }
+
+    override fun getMotionLayouts(): Array<MotionLayout> {
+        return arrayOf(menuBinding.root)
+    }
+
+    override fun onViewCreatedRestoreMotionScene(viewState: ChatMenuViewState, binding: VB) {
+        viewState.restoreMotionScene(menuBinding.root)
     }
 
     override fun subscribeToViewStateFlow() {
         super.subscribeToViewStateFlow()
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.chatHeaderViewStateContainer.collect { viewState ->
+
+                @Exhaustive
+                when (viewState) {
+                    is ChatHeaderViewState.Idle -> {}
+                    is ChatHeaderViewState.Initialized -> {
+                        headerBinding.apply {
+
+                            textViewChatHeaderName.text = viewState.chatHeaderName
+                            textViewChatHeaderLock.goneIfFalse(viewState.showLock)
+
+                            imageViewChatHeaderExitTribe.goneIfFalse(viewState.showExitTribe)
+
+                            viewState.contributions?.let {
+                                imageViewChatHeaderContributions.visible
+                                textViewChatHeaderContributions.apply {
+                                    visible
+                                    @SuppressLint("SetTextI18n")
+                                    text = getString(R.string.chat_tribe_contributions) + " ${it.asFormattedString()} ${it.unit}"
+                                }
+                            } ?: let {
+                                imageViewChatHeaderContributions.gone
+                                textViewChatHeaderContributions.gone
+                            }
+
+                            imageViewChatHeaderMuted.apply {
+                                viewState.isMuted?.let { muted ->
+                                    if (muted.isTrue()) {
+                                        imageLoader.load(
+                                            headerBinding.imageViewChatHeaderMuted,
+                                            R.drawable.ic_baseline_notifications_off_24
+                                        )
+                                    } else {
+                                        imageLoader.load(
+                                            headerBinding.imageViewChatHeaderMuted,
+                                            R.drawable.ic_baseline_notifications_24
+                                        )
+                                    }
+                                } ?: gone
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.messageReplyViewStateContainer.collect { viewState ->
@@ -679,6 +775,6 @@ abstract class ChatFragment<
     }
 
     override suspend fun onSideEffectCollect(sideEffect: ChatSideEffect) {
-        sideEffect.execute(binding.root.context)
+        sideEffect.execute(this)
     }
 }

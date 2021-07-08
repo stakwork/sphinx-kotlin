@@ -1,5 +1,6 @@
 package chat.sphinx.di
 
+import android.app.Application
 import android.content.Context
 import android.widget.ImageView
 import chat.sphinx.BuildConfig
@@ -18,6 +19,8 @@ import dagger.hilt.components.SingletonComponent
 import io.matthewnelson.build_config.BuildConfigDebug
 import io.matthewnelson.build_config.BuildConfigVersionCode
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
+import io.matthewnelson.concept_media_cache.MediaCacheHandler
+import io.matthewnelson.feature_media_cache.MediaCacheHandlerImpl
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import javax.inject.Singleton
@@ -87,4 +90,16 @@ object AppModule {
         imageLoaderAndroid: ImageLoaderAndroid
     ): ImageLoader<ImageView> =
         imageLoaderAndroid
+
+    @Provides
+    fun provideMediaCacheHandler(
+        applicationScope: CoroutineScope,
+        application: Application,
+        dispatchers: CoroutineDispatchers,
+    ): MediaCacheHandler =
+        MediaCacheHandlerImpl(
+            applicationScope,
+            application.cacheDir,
+            dispatchers,
+        )
 }

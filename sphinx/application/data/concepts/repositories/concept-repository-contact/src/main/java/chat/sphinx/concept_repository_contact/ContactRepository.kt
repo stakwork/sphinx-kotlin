@@ -16,6 +16,7 @@ import chat.sphinx.wrapper_invite.Invite
 import io.matthewnelson.crypto_common.clazzes.Password
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.flow
 
 /**
  * All [Contact]s are cached to the DB such that a network refresh will update
@@ -35,6 +36,8 @@ interface ContactRepository {
 
     fun getInviteByContactId(contactId: ContactId): Flow<Invite?>
     fun getInviteById(inviteId: InviteId): Flow<Invite?>
+
+    fun createNewInvite(nickname: String, welcomeMessage: String): Flow<LoadResponse<Any, ResponseError>>
 
     val networkRefreshContacts: Flow<LoadResponse<Boolean, ResponseError>>
     var updatedContactIds: MutableList<ContactId>

@@ -10,7 +10,7 @@ internal class ProfileNavigatorImpl @Inject constructor(
     navigationDriver: PrimaryNavigationDriver,
     val detailDriver: DetailNavigationDriver,
 ): ProfileNavigator(navigationDriver) {
-    override suspend fun toQRCodeDetail(qrText: String) {
-        detailDriver.submitNavigationRequest(ToQRCodeDetail(qrText))
+    override suspend fun toQRCodeDetail(qrText: String, viewTitle: String) {
+        detailDriver.submitNavigationRequest(ToQRCodeDetail(qrText, viewTitle))
     }
 }

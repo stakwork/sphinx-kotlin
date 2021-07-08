@@ -5,6 +5,7 @@
     android:id="@+id/layout_constraint_chat_header"
     android:layout_width="match_parent"
     android:layout_height="@dimen/default_header_height"
+    android:paddingEnd="@dimen/default_half_layout_margin"
     android:background="@color/headerBG"
     android:elevation="@dimen/default_elevation">
 
@@ -128,6 +129,20 @@
         android:text="@string/material_icon_name_call_button"
         android:textColor="@color/washedOutReceivedText"
         android:gravity="center"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/image_view_chat_header_exit_tribe"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/image_view_chat_header_exit_tribe"
+        android:layout_width="@dimen/chat_header_exit_tribe_width"
+        android:layout_height="match_parent"
+        android:tint="@color/washedOutReceivedText"
+        android:src="@drawable/ic_exit_tribe"
+        android:gravity="center"
+        android:padding="@dimen/default_small_layout_margin"
+        android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />

@@ -75,6 +75,7 @@ abstract class NetworkRelayCall: NetworkCall() {
      * @param [mediaType] the media type for the request body, defaults to "application/json"
      * @param [relayUrl] unauthenticated relay URL
      * */
+    @Deprecated(message = "do not use")
     abstract fun <
             T: Any,
             RequestBody: Any,

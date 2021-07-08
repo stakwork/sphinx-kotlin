@@ -22,6 +22,7 @@ import chat.sphinx.logger.SphinxLogger
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
+import io.matthewnelson.concept_media_cache.MediaCacheHandler
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import io.matthewnelson.concept_views.viewstate.collect
 import io.matthewnelson.concept_views.viewstate.value
@@ -30,8 +31,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import java.io.File
-import java.text.SimpleDateFormat
-import java.util.*
 import javax.inject.Inject
 import kotlin.collections.ArrayList
 
@@ -53,6 +52,7 @@ internal class CameraViewModel @Inject constructor(
     private val applicationScope: CoroutineScope,
     dispatchers: CoroutineDispatchers,
     private val cameraCoordinator: CameraViewModelCoordinator,
+    private val mediaCacheHandler: MediaCacheHandler,
     private val LOG: SphinxLogger,
 ): SideEffectViewModel<
         FragmentActivity,
@@ -198,16 +198,12 @@ internal class CameraViewModel @Inject constructor(
         }
     }
 
-    private val cameraDir = File(app.cacheDir, "camera_cache").also {
-        it.mkdirs()
-    }
-
     fun createFile(extension: String, image: Boolean): File {
-        val sdf = SimpleDateFormat("yyy_MM_dd_HH_mm_ss_SSS", Locale.US)
-        if (!cameraDir.exists()) {
-            cameraDir.mkdirs()
+        return if (image) {
+            mediaCacheHandler.createImageFile(extension)
+        } else {
+            mediaCacheHandler.createVideoFile(extension)
         }
-        return File(cameraDir, "${if (image) "IMG" else "VID"}_${sdf.format(Date())}.$extension")
     }
 
     override fun onCleared() {
@@ -218,7 +214,7 @@ internal class CameraViewModel @Inject constructor(
                 is CapturePreviewViewState.None -> {}
                 is CapturePreviewViewState.Preview -> {
                     // user hit back button, so no file was returned
-                    applicationScope.launch(dispatchers.io) {
+                    applicationScope.launch(io) {
                         try {
                             vs.value.delete()
                         } catch (e: Exception) {}

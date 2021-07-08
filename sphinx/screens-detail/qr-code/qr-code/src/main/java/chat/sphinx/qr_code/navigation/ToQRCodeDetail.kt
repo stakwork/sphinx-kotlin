@@ -8,13 +8,15 @@ import io.matthewnelson.android_feature_navigation.R as nav_R
 import io.matthewnelson.concept_navigation.NavigationRequest
 
 class ToQRCodeDetail(
-    private val qrText: String
+    private val qrText: String,
+    private val viewTitle: String
 ): NavigationRequest<NavController>() {
     override fun navigate(controller: NavController) {
         controller.navigate(
             R.id.qr_code_nav_graph,
             QRCodeFragmentArgs.Builder(
                 qrText,
+                viewTitle,
                 controller.previousBackStackEntry != null).build().toBundle(),
             if (controller.previousBackStackEntry == null) {
                 DetailNavOptions.defaultBuilt

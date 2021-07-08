@@ -1,7 +1,8 @@
 package chat.sphinx.chat_common.ui
 
 import android.app.Application
-import android.content.Context
+import android.net.Uri
+import android.webkit.MimeTypeMap
 import androidx.annotation.CallSuper
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
@@ -14,7 +15,8 @@ import chat.sphinx.chat_common.navigation.ChatNavigator
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
 import chat.sphinx.chat_common.ui.viewstate.attachment.AttachmentSendViewState
 import chat.sphinx.chat_common.ui.viewstate.footer.FooterViewState
-import chat.sphinx.chat_common.ui.viewstate.header.ChatHeaderFooterViewState
+import chat.sphinx.chat_common.ui.viewstate.header.ChatHeaderViewState
+import chat.sphinx.chat_common.ui.viewstate.menu.ChatMenuViewState
 import chat.sphinx.chat_common.ui.viewstate.messageholder.BubbleBackground
 import chat.sphinx.chat_common.ui.viewstate.messageholder.MessageHolderViewState
 import chat.sphinx.chat_common.ui.viewstate.messagereply.MessageReplyViewState
@@ -33,11 +35,10 @@ import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.kotlin_response.message
 import chat.sphinx.logger.SphinxLogger
+import chat.sphinx.logger.e
 import chat.sphinx.resources.getRandomColor
-import chat.sphinx.send_attachment_view_model_coordinator.request.SendAttachmentRequest
-import chat.sphinx.send_attachment_view_model_coordinator.response.SendAttachmentResponse
+import chat.sphinx.wrapper_chat.*
 import chat.sphinx.wrapper_chat.Chat
-import chat.sphinx.wrapper_chat.ChatActionType
 import chat.sphinx.wrapper_chat.ChatName
 import chat.sphinx.wrapper_chat.isConversation
 import chat.sphinx.wrapper_common.dashboard.ChatId
@@ -46,15 +47,21 @@ import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.MessageUUID
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_message.*
-import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
+import chat.sphinx.wrapper_message_media.MediaType
+import chat.sphinx.wrapper_message_media.toMediaType
+import io.matthewnelson.android_feature_viewmodel.MotionLayoutViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
+import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
+import io.matthewnelson.concept_media_cache.MediaCacheHandler
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.File
+import java.io.InputStream
 
 @JvmSynthetic
 @Suppress("NOTHING_TO_INLINE")
@@ -65,23 +72,29 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     protected val app: Application,
     dispatchers: CoroutineDispatchers,
     val memeServerTokenHandler: MemeServerTokenHandler,
+    val chatNavigator: ChatNavigator,
     protected val chatRepository: ChatRepository,
     protected val contactRepository: ContactRepository,
     protected val messageRepository: MessageRepository,
     protected val networkQueryLightning: NetworkQueryLightning,
+    protected val mediaCacheHandler: MediaCacheHandler,
     protected val savedStateHandle: SavedStateHandle,
     protected val cameraCoordinator: ViewModelCoordinator<CameraRequest, CameraResponse>,
-    protected val sendAttachmentCoordinator: ViewModelCoordinator<SendAttachmentRequest, SendAttachmentResponse>,
     protected val LOG: SphinxLogger,
-): SideEffectViewModel<
-        Context,
+): MotionLayoutViewModel<
+        Nothing,
+        ChatSideEffectFragment,
         ChatSideEffect,
-        ChatHeaderFooterViewState
-        >(dispatchers, ChatHeaderFooterViewState.Idle)
+        ChatMenuViewState,
+        >(dispatchers, ChatMenuViewState.Closed)
 {
-    abstract val args: ARGS
+    companion object {
+        const val TAG = "ChatViewModel"
+    }
 
-    protected abstract val chatNavigator: ChatNavigator
+    protected abstract val args: ARGS
+    protected abstract val chatId: ChatId?
+    protected abstract val contactId: ContactId?
 
     val imageLoaderDefaults by lazy {
         ImageLoaderOptions.Builder()
@@ -104,13 +117,14 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 
     protected abstract suspend fun getChatNameIfNull(): ChatName?
 
-    private inner class ChatHeaderViewStateContainer: ViewStateContainer<ChatHeaderFooterViewState>(ChatHeaderFooterViewState.Idle) {
-        override val viewStateFlow: StateFlow<ChatHeaderFooterViewState> = flow<ChatHeaderFooterViewState> {
+    private inner class ChatHeaderViewStateContainer: ViewStateContainer<ChatHeaderViewState>(ChatHeaderViewState.Idle) {
+        override val viewStateFlow: StateFlow<ChatHeaderViewState> = flow<ChatHeaderViewState> {
             chatSharedFlow.collect { chat ->
                 emit(
-                    ChatHeaderFooterViewState.Initialized(
+                    ChatHeaderViewState.Initialized(
                         chatHeaderName = chat?.name?.value ?: getChatNameIfNull()?.value ?: "",
                         showLock = chat != null,
+                        showExitTribe = chat?.isTribe() ?: false,
                         contributions = null,
                         chat?.isMuted,
                     )
@@ -120,11 +134,11 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         }.stateIn(
             viewModelScope,
             SharingStarted.WhileSubscribed(5_000),
-            ChatHeaderFooterViewState.Idle
+            ChatHeaderViewState.Idle
         )
     }
 
-    override val viewStateContainer: ViewStateContainer<ChatHeaderFooterViewState> by lazy {
+    val chatHeaderViewStateContainer: ViewStateContainer<ChatHeaderViewState> by lazy {
         ChatHeaderViewStateContainer()
     }
 
@@ -398,8 +412,30 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         footerViewStateContainer.updateViewState(viewState)
     }
 
+    private inner class AttachmentSendStateContainer: ViewStateContainer<AttachmentSendViewState>(AttachmentSendViewState.Idle) {
+        override fun updateViewState(viewState: AttachmentSendViewState) {
+            if (viewState is AttachmentSendViewState.Preview) {
+
+                // Only delete the previous file in the event that a new pic is choosen
+                // to send when one is currently being previewed.
+                val current = viewStateFlow.value
+                if (current is AttachmentSendViewState.Preview) {
+                    if (current.file.path != viewState.file.path) {
+                        try {
+                            current.file.delete()
+                        } catch (e: Exception) {
+
+                        }
+                    }
+                }
+            }
+
+            super.updateViewState(viewState)
+        }
+    }
+
     private val attachmentSendStateContainer: ViewStateContainer<AttachmentSendViewState> by lazy {
-        ViewStateContainer(AttachmentSendViewState.Idle)
+        AttachmentSendStateContainer()
     }
 
     @JvmSynthetic
@@ -412,14 +448,11 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     }
 
     @JvmSynthetic
-    internal fun deleteFileIfLocal(viewState: AttachmentSendViewState.Preview) {
-        if (viewState is AttachmentSendViewState.Preview.LocalFile) {
-            viewModelScope.launch(io) {
-                try {
-                    viewState.cameraResponse.value.delete()
-                } catch (e: Exception) {
-                }
-            }
+    internal fun deleteUnsentAttachment(viewState: AttachmentSendViewState.Preview) {
+        viewModelScope.launch(io) {
+            try {
+                viewState.file.delete()
+            } catch (e: Exception) {}
         }
     }
 
@@ -486,59 +519,83 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         }
     }
 
-    abstract fun showActionsMenu()
-
-    protected fun showActionsMenuImpl(
-        contactId: ContactId?,
-        chatId: ChatId?,
-    ) {
-
+    @JvmSynthetic
+    internal fun chatMenuOptionCamera() {
         viewModelScope.launch(mainImmediate) {
-            val response = sendAttachmentCoordinator.submitRequest(
-                //If it's group or tribe last 2 options will be disabled
-                SendAttachmentRequest(contactId != null)
-            )
-            if (response is Response.Success) {
-                when (response.value.actionType) {
-                    is ChatActionType.CancelAction -> {
-                        //Menu dismissed. Nothing to do
-                    }
-                    is ChatActionType.OpenCamera -> {
-                        openCamera()
-                    }
-                    is ChatActionType.OpenPhotoLibrary -> {
-                        submitSideEffect(
-                            ChatSideEffect.Notify("Photo library not implemented yet")
-                        )
-                    }
-                    is ChatActionType.OpenGifSearch -> {
-                        submitSideEffect(
-                            ChatSideEffect.Notify("Giphy search not implemented yet")
-                        )
-                    }
-                    is ChatActionType.OpenFileLibrary -> {
-                        submitSideEffect(
-                            ChatSideEffect.Notify("File library not implemented yet")
-                        )
-                    }
-                    is ChatActionType.OpenPaidMessageScreen -> {
-                        submitSideEffect(
-                            ChatSideEffect.Notify("Paid message editor not implemented yet")
-                        )
-                    }
-                    is ChatActionType.RequestAmount -> {
-                        submitSideEffect(
-                            ChatSideEffect.Notify("Request amount not implemented yet")
-                        )
-                    }
+            val response = cameraCoordinator.submitRequest(CameraRequest)
+            @Exhaustive
+            when (response) {
+                is Response.Error -> {}
+                is Response.Success -> {
 
-                    is ChatActionType.SendPayment -> {
-                        contactId?.let { contactId ->
-                            delay(250L)
-                            chatNavigator.toPaymentSendDetail(contactId, chatId)
+                    val ext = response.value.value.extension
+
+                    val mediaType: MediaType = when (response.value) {
+                        is CameraResponse.Image -> {
+                            MediaType.Image("${MediaType.IMAGE}/$ext")
                         }
                     }
+
+                    updateViewState(ChatMenuViewState.Closed)
+
+                    updateAttachmentSendViewState(
+                        AttachmentSendViewState.Preview(response.value.value, mediaType)
+                    )
+
+                    updateFooterViewState(FooterViewState.Attachment)
                 }
+            }
+        }
+    }
+
+    @JvmSynthetic
+    internal fun chatMenuOptionMediaLibrary() {
+        viewModelScope.launch(mainImmediate) {
+            submitSideEffect(ChatSideEffect.RetrieveImage)
+        }
+    }
+
+    @JvmSynthetic
+    internal fun chatMenuOptionGif() {
+        viewModelScope.launch(mainImmediate) {
+            submitSideEffect(
+                ChatSideEffect.Notify("Giphy search not implemented yet")
+            )
+        }
+    }
+
+    @JvmSynthetic
+    internal fun chatMenuOptionFileLibrary() {
+        viewModelScope.launch(mainImmediate) {
+            submitSideEffect(
+                ChatSideEffect.Notify("File library not implemented yet")
+            )
+        }
+    }
+
+    @JvmSynthetic
+    internal fun chatMenuOptionPaidMessage() {
+        viewModelScope.launch(mainImmediate) {
+            submitSideEffect(
+                ChatSideEffect.Notify("Paid message editor not implemented yet")
+            )
+        }
+    }
+
+    @JvmSynthetic
+    internal fun chatMenuOptionPaymentRequest() {
+        viewModelScope.launch(mainImmediate) {
+            submitSideEffect(
+                ChatSideEffect.Notify("Request amount not implemented yet")
+            )
+        }
+    }
+
+    @JvmSynthetic
+    internal fun chatMenuOptionPaymentSend() {
+        contactId?.let { id ->
+            viewModelScope.launch(mainImmediate) {
+                chatNavigator.toPaymentSendDetail(id, chatId)
             }
         }
     }
@@ -550,12 +607,89 @@ abstract class ChatViewModel<ARGS: NavArgs>(
             when (response) {
                 is Response.Error -> {}
                 is Response.Success -> {
+
+                    val ext = response.value.value.extension
+
+                    val mediaType: MediaType = when (response.value) {
+                        is CameraResponse.Image -> {
+                            MediaType.Image("${MediaType.IMAGE}/$ext")
+                        }
+                    }
+
                     updateAttachmentSendViewState(
-                        AttachmentSendViewState.Preview.LocalFile(response.value)
+                        AttachmentSendViewState.Preview(response.value.value, mediaType)
                     )
+
                     updateFooterViewState(FooterViewState.Attachment)
                 }
             }
         }
+    }
+
+    fun handleActivityResultUri(uri: Uri?) {
+        if (uri == null) {
+            return
+        }
+
+        val cr = app.contentResolver
+
+        cr.getType(uri)?.let { crType ->
+
+            MimeTypeMap.getSingleton().getExtensionFromMimeType(crType)?.let { ext ->
+
+                val stream: InputStream = try {
+                    cr.openInputStream(uri) ?: return
+                } catch (e: Exception) {
+                    return
+                }
+
+                crType.toMediaType().let { mType ->
+
+                    // Note: depending on what is returned from the Uri retriever, close the menu.
+
+                    @Exhaustive
+                    when (mType) {
+                        is MediaType.Audio -> {
+                            // TODO: Implement
+                        }
+                        is MediaType.Image -> {
+                            viewModelScope.launch(mainImmediate) {
+                                val newFile: File = mediaCacheHandler.createImageFile(ext)
+
+                                try {
+                                    mediaCacheHandler.copyTo(stream, newFile)
+                                    updateViewState(ChatMenuViewState.Closed)
+                                    attachmentSendStateContainer.updateViewState(
+                                        AttachmentSendViewState.Preview(newFile, mType)
+                                    )
+                                } catch (e: Exception) {
+                                    newFile.delete()
+                                    LOG.e(
+                                        TAG,
+                                        "Failed to copy content to new file: ${newFile.path}",
+                                        e
+                                    )
+                                }
+                            }
+                        }
+                        is MediaType.Pdf -> {
+                            // TODO: Implement
+                        }
+                        is MediaType.Video -> {
+                            // TODO: Implement
+                        }
+
+                        is MediaType.Text,
+                        is MediaType.Unknown -> {
+                            // do nothing
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    override suspend fun onMotionSceneCompletion(value: Nothing) {
+        // unused
     }
 }

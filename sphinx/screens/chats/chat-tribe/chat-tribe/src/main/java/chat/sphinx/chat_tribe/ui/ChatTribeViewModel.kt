@@ -5,7 +5,6 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.camera_view_model_coordinator.request.CameraRequest
 import chat.sphinx.camera_view_model_coordinator.response.CameraResponse
-import chat.sphinx.chat_common.navigation.ChatNavigator
 import chat.sphinx.chat_common.ui.ChatSideEffect
 import chat.sphinx.chat_common.ui.ChatViewModel
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
@@ -21,19 +20,18 @@ import chat.sphinx.concept_service_media.MediaPlayerServiceController
 import chat.sphinx.concept_service_media.MediaPlayerServiceState
 import chat.sphinx.concept_service_media.UserAction
 import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
-import chat.sphinx.kotlin_response.LoadResponse
-import chat.sphinx.kotlin_response.Response
-import chat.sphinx.kotlin_response.ResponseError
+import chat.sphinx.kotlin_response.*
 import chat.sphinx.logger.SphinxLogger
+import chat.sphinx.logger.d
+import chat.sphinx.logger.e
 import chat.sphinx.podcast_player.objects.Podcast
 import chat.sphinx.podcast_player.objects.PodcastEpisode
 import chat.sphinx.podcast_player.objects.toPodcast
 import chat.sphinx.resources.getRandomColor
-import chat.sphinx.send_attachment_view_model_coordinator.request.SendAttachmentRequest
-import chat.sphinx.send_attachment_view_model_coordinator.response.SendAttachmentResponse
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.ChatName
 import chat.sphinx.wrapper_common.dashboard.ChatId
+import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.util.getInitials
 import chat.sphinx.wrapper_message.Message
@@ -41,7 +39,9 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
+import io.matthewnelson.concept_media_cache.MediaCacheHandler
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -56,37 +56,42 @@ internal class ChatTribeViewModel @Inject constructor(
     app: Application,
     dispatchers: CoroutineDispatchers,
     memeServerTokenHandler: MemeServerTokenHandler,
+    chatNavigator: TribeChatNavigator,
     chatRepository: ChatRepository,
     contactRepository: ContactRepository,
     messageRepository: MessageRepository,
     networkQueryLightning: NetworkQueryLightning,
+    mediaCacheHandler: MediaCacheHandler,
     savedStateHandle: SavedStateHandle,
     cameraViewModelCoordinator: ViewModelCoordinator<CameraRequest, CameraResponse>,
-    sendAttachmentViewModelCoordinator: ViewModelCoordinator<SendAttachmentRequest, SendAttachmentResponse>,
     LOG: SphinxLogger,
     private val mediaPlayerServiceController: MediaPlayerServiceController
 ): ChatViewModel<ChatTribeFragmentArgs>(
     app,
     dispatchers,
     memeServerTokenHandler,
+    chatNavigator,
     chatRepository,
     contactRepository,
     messageRepository,
     networkQueryLightning,
+    mediaCacheHandler,
     savedStateHandle,
     cameraViewModelCoordinator,
-    sendAttachmentViewModelCoordinator,
     LOG,
 ), MediaPlayerServiceController.MediaServiceListener
 {
     override val args: ChatTribeFragmentArgs by savedStateHandle.navArgs()
+    override val chatId: ChatId = args.chatId
+    override val contactId: ContactId?
+        get() = null
 
     val podcastViewStateContainer: ViewStateContainer<PodcastViewState> by lazy {
         ViewStateContainer(PodcastViewState.Idle)
     }
 
     override val chatSharedFlow: SharedFlow<Chat?> = flow {
-        emitAll(chatRepository.getChatById(args.chatId))
+        emitAll(chatRepository.getChatById(chatId))
     }.distinctUntilChanged().shareIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(2_000),
@@ -94,11 +99,6 @@ internal class ChatTribeViewModel @Inject constructor(
     )
 
     var podcast: Podcast? = null
-
-    @Inject
-    protected lateinit var chatTribeNavigator: TribeChatNavigator
-    override val chatNavigator: ChatNavigator
-        get() = chatTribeNavigator
 
     override val headerInitialHolderSharedFlow: SharedFlow<InitialHolderViewState> = flow {
         chatSharedFlow.collect { chat ->
@@ -138,7 +138,7 @@ internal class ChatTribeViewModel @Inject constructor(
     }
 
     override val checkRoute: Flow<LoadResponse<Boolean, ResponseError>> = flow {
-        networkQueryLightning.checkRoute(args.chatId).collect { response ->
+        networkQueryLightning.checkRoute(chatId).collect { response ->
             @Exhaustive
             when (response) {
                 is LoadResponse.Loading -> {
@@ -156,18 +156,18 @@ internal class ChatTribeViewModel @Inject constructor(
 
     override fun readMessages() {
         viewModelScope.launch(mainImmediate) {
-            messageRepository.readMessages(args.chatId)
+            messageRepository.readMessages(chatId)
         }
     }
 
     override fun sendMessage(builder: SendMessage.Builder): SendMessage? {
-        builder.setChatId(args.chatId)
+        builder.setChatId(chatId)
         return super.sendMessage(builder)
     }
 
     override fun mediaServiceState(serviceState: MediaPlayerServiceState) {
         if (serviceState is MediaPlayerServiceState.ServiceActive.MediaState) {
-            if (serviceState.chatId != args.chatId) {
+            if (serviceState.chatId != chatId) {
                 return
             }
         }
@@ -208,19 +208,19 @@ internal class ChatTribeViewModel @Inject constructor(
     }
 
     suspend fun loadTribeAndPodcastData(): Podcast? {
-        chatRepository.getChatById(args.chatId).firstOrNull()?.let { chat ->
+        chatRepository.getChatById(chatId).firstOrNull()?.let { chat ->
             chatRepository.updateTribeInfo(chat)?.let { podcastDto ->
                 podcast = podcastDto.toPodcast()
 
-                chatRepository.getChatById(args.chatId).firstOrNull()?.let { chat ->
-                    val pricePerMessage = chat.pricePerMessage?.value ?: 0
-                    val escrowAmount = chat.escrowAmount?.value ?: 0
-
-                    submitSideEffect(
-                        ChatSideEffect.Notify(
-                            "Price per message: $pricePerMessage\n Amount to Stake: $escrowAmount"
-                        )
-                    )
+                chatRepository.getChatById(chatId).firstOrNull()?.let { chat ->
+//                    val pricePerMessage = chat.pricePerMessage?.value ?: 0
+//                    val escrowAmount = chat.escrowAmount?.value ?: 0
+//
+//                    submitSideEffect(
+//                        ChatSideEffect.Notify(
+//                            "Price per message: $pricePerMessage\n Amount to Stake: $escrowAmount"
+//                        )
+//                    )
 
                     chat.metaData?.let { metaData ->
                         podcast?.setMetaData(metaData)
@@ -235,7 +235,7 @@ internal class ChatTribeViewModel @Inject constructor(
     fun goToPodcastPlayerScreen() {
         podcast?.let { podcast ->
             viewModelScope.launch(mainImmediate) {
-                chatTribeNavigator.toPodcastPlayerScreen(args.chatId, podcast)
+                (chatNavigator as TribeChatNavigator).toPodcastPlayerScreen(chatId, podcast)
             }
         }
     }
@@ -261,7 +261,7 @@ internal class ChatTribeViewModel @Inject constructor(
 
                 mediaPlayerServiceController.submitAction(
                     UserAction.ServiceAction.Play(
-                        args.chatId,
+                        chatId,
                         episode.id,
                         episode.enclosureUrl,
                         Sat(0),
@@ -279,10 +279,7 @@ internal class ChatTribeViewModel @Inject constructor(
                 podcast.didPausePlayingEpisode(episode)
 
                 mediaPlayerServiceController.submitAction(
-                    UserAction.ServiceAction.Pause(
-                        args.chatId,
-                        episode.id,
-                    )
+                    UserAction.ServiceAction.Pause(chatId, episode.id)
                 )
             }
         }
@@ -296,16 +293,64 @@ internal class ChatTribeViewModel @Inject constructor(
                 val metaData = podcast.getMetaData()
 
                 mediaPlayerServiceController.submitAction(
-                    UserAction.ServiceAction.Seek(
-                        args.chatId,
-                        metaData
-                    )
+                    UserAction.ServiceAction.Seek(chatId, metaData)
                 )
             }
         }
     }
 
-    override fun showActionsMenu() {
-        showActionsMenuImpl(null, args.chatId)
+
+    fun exitTribeGetUserConfirmation() {
+        viewModelScope.launch(mainImmediate) {
+            submitSideEffect(
+                ChatSideEffect.AlertConfirmExitTribe {
+                    exitTribeUserConfirmed()
+                }
+            )
+        }
+    }
+
+    private var exitTribeJob: Job? = null
+    private fun exitTribeUserConfirmed() {
+        if (exitTribeJob?.isActive == true) {
+            return
+        }
+
+        exitTribeJob = viewModelScope.launch(mainImmediate) {
+
+            try {
+                chatSharedFlow.collect { chat ->
+                    if (chat != null) {
+
+                        val response = chatRepository.exitTribe(chat)
+
+                        @Exhaustive
+                        when (response) {
+                            is Response.Error -> {
+
+                                submitSideEffect(
+                                    ChatSideEffect.Notify(
+                                        if (response.exception == null) {
+                                            response.message
+                                        } else {
+                                            "Failed to leave tribe"
+                                        }
+                                    )
+                                )
+
+                                LOG.d(TAG, "Failed to leave tribe")
+                                LOG.e(TAG, response.message, response.exception)
+                            }
+                            is Response.Success -> {
+                                chatNavigator.popBackStack()
+                            }
+                        }
+
+                        throw Exception()
+                    }
+                }
+            } catch (e: Exception) {}
+
+        }
     }
 }
