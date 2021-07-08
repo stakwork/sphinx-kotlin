@@ -37,6 +37,7 @@ internal class QRCodeViewModel @Inject constructor(
             handle.navArgs<QRCodeFragmentArgs>().let {
                 QRCodeViewState(
                     it.value.argShowBackArrow,
+                    it.value.viewTitle,
                     it.value.qrText,
                     null
                 )
@@ -66,6 +67,7 @@ internal class QRCodeViewModel @Inject constructor(
             updateViewState(
                 QRCodeViewState(
                     currentViewState.showBackButton,
+                    currentViewState.viewTitle,
                     currentViewState.qrText,
                     bitmap
                 )
@@ -80,7 +82,7 @@ internal class QRCodeViewModel @Inject constructor(
 
             viewModelScope.launch(mainImmediate) {
                 submitSideEffect(
-                    NotifySideEffect(app.getString(R.string.qr_code_notify_copied))
+                    NotifySideEffect(String.format(app.getString(R.string.qr_code_notify_copied), args.viewTitle))
                 )
             }
         }

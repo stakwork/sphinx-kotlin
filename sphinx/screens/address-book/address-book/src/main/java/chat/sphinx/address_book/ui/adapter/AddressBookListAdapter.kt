@@ -168,8 +168,10 @@ internal class AddressBookListAdapter(
                 // Image
                 addressBookContact.photoUrl.let { url ->
 
-                    layoutAddressBookInitialHolder.imageViewChatPicture.goneIfFalse(url != null)
-                    layoutAddressBookInitialHolder.textViewInitials.goneIfFalse(url == null)
+                    layoutAddressBookInitialHolder.apply {
+                        imageViewChatPicture.goneIfFalse(url != null)
+                        textViewInitials.goneIfFalse(url == null)
+                    }
 
                     if (url != null) {
                         onStopSupervisor.scope.launch(viewModel.mainImmediate) {

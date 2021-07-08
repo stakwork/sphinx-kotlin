@@ -29,6 +29,10 @@ inline fun InviteStatus.isPaymentPending(): Boolean =
     this is InviteStatus.PaymentPending
 
 @Suppress("NOTHING_TO_INLINE")
+inline fun InviteStatus.isProcessingPayment(): Boolean =
+    this is InviteStatus.ProcessingPayment
+
+@Suppress("NOTHING_TO_INLINE")
 inline fun InviteStatus.isUnknown(): Boolean =
     this is InviteStatus.Unknown
 
@@ -59,6 +63,9 @@ inline fun Int.toInviteStatus(): InviteStatus =
         InviteStatus.PAYMENT_PENDING -> {
             InviteStatus.PaymentPending
         }
+        InviteStatus.PROCESSING_PAYMENT -> {
+            InviteStatus.ProcessingPayment
+        }
         else -> {
             InviteStatus.Unknown(this)
         }
@@ -86,6 +93,7 @@ sealed class InviteStatus {
         const val COMPLETE = 4
         const val EXPIRED = 5
         const val PAYMENT_PENDING = 6
+        const val PROCESSING_PAYMENT = 100
     }
 
     abstract val value: Int
@@ -123,6 +131,11 @@ sealed class InviteStatus {
     object PaymentPending: InviteStatus() {
         override val value: Int
             get() = PAYMENT_PENDING
+    }
+
+    object ProcessingPayment: InviteStatus() {
+        override val value: Int
+            get() = PROCESSING_PAYMENT
     }
 
     data class Unknown(override val value: Int): InviteStatus()

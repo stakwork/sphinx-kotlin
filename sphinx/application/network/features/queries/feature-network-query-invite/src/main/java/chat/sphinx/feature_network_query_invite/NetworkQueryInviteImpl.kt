@@ -1,13 +1,12 @@
 package chat.sphinx.feature_network_query_invite
 
 import chat.sphinx.concept_network_query_invite.NetworkQueryInvite
-import chat.sphinx.concept_network_query_invite.model.HubRedeemInviteResponse
-import chat.sphinx.concept_network_query_invite.model.RedeemInviteResponseDto
+import chat.sphinx.concept_network_query_invite.model.*
 import chat.sphinx.concept_network_relay_call.NetworkRelayCall
+import chat.sphinx.feature_network_query_invite.model.PayInviteResponse
 import chat.sphinx.feature_network_query_invite.model.RedeemInviteRelayResponse
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.ResponseError
-import chat.sphinx.wrapper_relay.RelayUrl
 import kotlinx.coroutines.flow.Flow
 
 class NetworkQueryInviteImpl(
@@ -18,8 +17,19 @@ class NetworkQueryInviteImpl(
         private const val ENDPOINT_INVITES = "/invites"
         private const val ENDPOINT_SIGNUP = "/api/v1/signup"
         private const val ENDPOINT_SIGNUP_FINISH = "/invites/finish"
+        private const val ENDPOINT_LOWEST_PRICE = "/api/v1/nodes/pricing"
+        private const val ENDPOINT_INVITE_PAY = "/invites/%s/pay"
+
         private const val HUB_URL = "https://hub.sphinx.chat"
     }
+
+    override fun getLowestNodePrice(): Flow<LoadResponse<HubLowestNodePriceResponse, ResponseError>> {
+        return networkRelayCall.get(
+            url = HUB_URL + ENDPOINT_LOWEST_PRICE,
+            responseJsonClass = HubLowestNodePriceResponse::class.java,
+        )
+    }
+
 
     override fun redeemInvite(
         inviteString: String
@@ -36,17 +46,26 @@ class NetworkQueryInviteImpl(
 
     // TODO: Refactor to use post instead of relayUnauthenticatedPost
     override fun finishInvite(
-        relayUrl: RelayUrl,
         inviteString: String
     ): Flow<LoadResponse<RedeemInviteResponseDto, ResponseError>> {
-        return networkRelayCall.relayUnauthenticatedPost(
+        return networkRelayCall.relayPost(
             responseJsonClass = RedeemInviteRelayResponse::class.java,
             relayEndpoint = ENDPOINT_SIGNUP_FINISH,
             requestBodyJsonClass = Map::class.java,
             requestBody = mapOf(
                 Pair("invite_string", inviteString),
-            ),
-            relayUrl = relayUrl
+            )
+        )
+    }
+
+    override fun payInvite(
+        inviteString: String
+    ): Flow<LoadResponse<PayInviteDto, ResponseError>> {
+        return networkRelayCall.relayPost(
+            responseJsonClass = PayInviteResponse::class.java,
+            relayEndpoint = String.format(ENDPOINT_INVITE_PAY, inviteString),
+            requestBodyJsonClass = Map::class.java,
+            requestBody = mapOf(Pair("", ""))
         )
     }
 

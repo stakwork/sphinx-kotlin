@@ -2,6 +2,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_constraint_chat_image_initial_holder"
     android:layout_width="@dimen/default_chat_initial_image_xy"
     android:layout_height="@dimen/default_chat_initial_image_xy">
 

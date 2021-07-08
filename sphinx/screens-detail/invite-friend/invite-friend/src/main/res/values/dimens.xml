@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="invite_friend_nickname_edit_text_container_height">90dp</dimen>
+    <dimen name="invite_friend_message_edit_text_container_height">160dp</dimen>
+    <dimen name="invite_friend_confirm_container_height">100dp</dimen>
+
+    <dimen name="invite_friend_nickname_edit_text_height">40dp</dimen>
+    <dimen name="invite_friend_message_edit_text_height">110dp</dimen>
+
+    <dimen name="invite_friend_create_invitation_button_width">175dp</dimen>
+    <dimen name="invite_friend_create_invitation_button_height">50dp</dimen>
+
+    <dimen name="invite_friend_nickname_label_text_size">10sp</dimen>
+    <dimen name="invite_friend_nickname_edit_text_text_size">17sp</dimen>
+    <dimen name="invite_friend_create_invitation_button_text_size">17sp</dimen>
+    <dimen name="invite_friend_estimated_cost_text_view_text_size">10sp</dimen>
+    <dimen name="invite_friend_estimated_cost_amount_text_view_text_size">20sp</dimen>
+
+    <dimen name="invite_friend_progress_bar_xy">25dp</dimen>
+</resources>
