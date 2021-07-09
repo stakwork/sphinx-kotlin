@@ -336,6 +336,13 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         return msg
     }
 
+    /**
+     * Remotely and locally Deletes a [Message] through the [MessageRepository]
+     */
+    open fun deleteMessage(message: Message) {
+        messageRepository.deleteMessage(message)
+    }
+
     private var toggleChatMutedJob: Job? = null
     private var notifyJob: Job? = null
     fun toggleChatMuted() {

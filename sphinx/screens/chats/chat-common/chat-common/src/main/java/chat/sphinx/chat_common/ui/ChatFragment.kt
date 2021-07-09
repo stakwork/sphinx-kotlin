@@ -370,7 +370,7 @@ abstract class ChatFragment<
                                 viewModel.copyMessageText(holderState.message)
                             }
                             is MenuItemState.Delete -> {
-                                // TODO: Implement
+                                viewModel.deleteMessage(holderState.message)
                             }
                             is MenuItemState.Reply -> {
                                 viewModel.replyToMessage(holderState.message)

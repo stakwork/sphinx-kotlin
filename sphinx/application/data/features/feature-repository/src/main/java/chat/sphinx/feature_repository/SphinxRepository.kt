@@ -61,6 +61,7 @@ import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessagePagination
 import chat.sphinx.wrapper_common.message.MessageUUID
 import chat.sphinx.wrapper_common.message.toMessageUUID
+import chat.sphinx.wrapper_common.message.isProvisionalMessage
 import chat.sphinx.wrapper_contact.*
 import chat.sphinx.wrapper_invite.Invite
 import chat.sphinx.wrapper_lightning.NodeBalance
@@ -1614,6 +1615,40 @@ abstract class SphinxRepository(
         }
     }
 
+    override fun deleteMessage(message: Message) {
+        applicationScope.launch(mainImmediate) {
+            val queries = coreDB.getSphinxDatabaseQueries()
+
+            if (message.id.isProvisionalMessage) {
+                messageLock.withLock {
+                    withContext(io) {
+                        queries.messageDeleteById(message.id)
+                    }
+                }
+            } else {
+                networkQueryMessage.deleteMessage(message.id).collect { loadResponse ->
+                    @Exhaustive
+                    when (loadResponse) {
+                        is LoadResponse.Loading -> {}
+                        is Response.Error -> {
+                            LOG.e(TAG, loadResponse.message, loadResponse.exception)
+                            // TODO: Give user some information about failure maybe?
+                        }
+                        is Response.Success -> {
+                            messageLock.withLock {
+                                withContext(io) {
+                                    queries.transaction {
+                                        upsertMessage(loadResponse.value, queries)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+    }
     override suspend fun sendPayment(
         sendPayment: SendPayment?
     ): Response<Any, ResponseError> {

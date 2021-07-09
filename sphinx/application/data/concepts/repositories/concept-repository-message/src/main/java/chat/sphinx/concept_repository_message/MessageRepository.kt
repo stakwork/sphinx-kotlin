@@ -22,6 +22,8 @@ interface MessageRepository {
 
     fun sendMessage(sendMessage: SendMessage?)
 
+    fun deleteMessage(message: Message)
+
     suspend fun sendPayment(
         sendPayment: SendPayment?
     ): Response<Any, ResponseError>
