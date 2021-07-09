@@ -1617,7 +1617,9 @@ abstract class SphinxRepository(
         }
     }
 
-    override fun deleteMessage(message: Message) {
+    override suspend fun deleteMessage(message: Message) : Response<Any, ResponseError> {
+        var response: Response<Any, ResponseError> = Response.Success(true)
+
         applicationScope.launch(mainImmediate) {
             val queries = coreDB.getSphinxDatabaseQueries()
 
@@ -1633,8 +1635,9 @@ abstract class SphinxRepository(
                     when (loadResponse) {
                         is LoadResponse.Loading -> {}
                         is Response.Error -> {
-                            LOG.e(TAG, loadResponse.message, loadResponse.exception)
-                            // TODO: Give user some information about failure maybe?
+                            response = Response.Error(
+                                ResponseError(loadResponse.message, loadResponse.exception)
+                            )
                         }
                         is Response.Success -> {
                             messageLock.withLock {
@@ -1648,8 +1651,9 @@ abstract class SphinxRepository(
                     }
                 }
             }
-        }
+        }.join()
 
+        return response
     }
     override suspend fun sendPayment(
         sendPayment: SendPayment?

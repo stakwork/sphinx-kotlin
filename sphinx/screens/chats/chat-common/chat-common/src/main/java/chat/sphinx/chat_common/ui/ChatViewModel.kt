@@ -339,8 +339,13 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     /**
      * Remotely and locally Deletes a [Message] through the [MessageRepository]
      */
-    open fun deleteMessage(message: Message) {
-        messageRepository.deleteMessage(message)
+    open suspend fun deleteMessage(message: Message) {
+        when (messageRepository.deleteMessage(message)) {
+            is Response.Error -> {
+                submitSideEffect(ChatSideEffect.Notify("Failed to delete Message"))
+            }
+            is Response.Success -> {}
+        }
     }
 
     private var toggleChatMutedJob: Job? = null
