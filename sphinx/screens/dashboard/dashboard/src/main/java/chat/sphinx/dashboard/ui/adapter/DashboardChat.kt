@@ -79,23 +79,27 @@ sealed class DashboardChat {
                     DECRYPTION_ERROR
                 }
                 message.type.isMessage() -> {
-                    message.messageContentDecrypted?.value?.let { decrypted ->
-
-                        when {
-                            message.giphyData != null -> {
-                                "${getMessageSender(message)}GIF shared"
-                            }
-                            message.podBoost != null -> {
-                                val amount: Long = message.podBoost?.amount?.value ?: message.amount.value
-                                "${getMessageSender(message)}Boost $amount " + if (amount > 1) "sats" else "sat"
-                            }
-                            // TODO: check for clip::
-                            else -> {
-                                "${getMessageSender(message)}$decrypted"
-                            }
+                    when {
+                        message.status.isDeleted() -> {
+                            "message deleted"
+                        } else -> {
+                            message.messageContentDecrypted?.value?.let { decrypted ->
+                                when {
+                                    message.giphyData != null -> {
+                                        "${getMessageSender(message)}GIF shared"
+                                    }
+                                    message.podBoost != null -> {
+                                        val amount: Long = message.podBoost?.amount?.value ?: message.amount.value
+                                        "${getMessageSender(message)}Boost $amount " + if (amount > 1) "sats" else "sat"
+                                    }
+                                    // TODO: check for clip::
+                                    else -> {
+                                        "${getMessageSender(message)}$decrypted"
+                                    }
+                                }
+                            } ?: "${getMessageSender(message)}..."
                         }
-
-                    } ?: "${getMessageSender(message)}..."
+                    }
                 }
                 message.type.isInvoice() -> {
                     val amount: String = if (message.amount.value > 1) {
