@@ -37,6 +37,7 @@ dependencies {
     api project(path: ':sphinx:application:common:resources')
 
     api project(path: ':sphinx:application:data:concepts:concept-image-loader')
+    api project(path: ':sphinx:application:data:concepts:concept-media-cache')
     api project(path: ':sphinx:application:data:concepts:concept-meme-server')
     api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-chat')
     api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-contact')
@@ -47,10 +48,11 @@ dependencies {
     api project(path: ':sphinx:application:network:concepts:queries:concept-network-query-chat')
     api project(path: ':sphinx:activity:insetter-activity')
 
-    implementation project(path: ':sphinx:screens-detail:send-attachment:send-attachment-view-model-coordinator')
     api project(path: ':sphinx:screens-detail:camera:camera-view-model-coordinator')
 
     api deps.androidx.recyclerView
 
     implementation deps.androidx.lifecycle.hilt
+
+    implementation deps.square.okio
 }

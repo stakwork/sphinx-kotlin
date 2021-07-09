@@ -5,7 +5,7 @@ import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_repository_contact.ContactRepository
-import chat.sphinx.concept_repository_dashboard.RepositoryDashboard
+import chat.sphinx.concept_repository_lightning.LightningRepository
 import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.concept_repository_message.model.SendPayment
 import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
@@ -52,9 +52,9 @@ internal class PaymentSendViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     val navigator: PaymentSendNavigator,
     private val app: Application,
-    private val messageRepository: MessageRepository,
     private val contactRepository: ContactRepository,
-    private val repositoryDashboard: RepositoryDashboard,
+    private val lightningRepository: LightningRepository,
+    private val messageRepository: MessageRepository,
     private val scannerCoordinator: ViewModelCoordinator<ScannerRequest, ScannerResponse>
 ): SideEffectViewModel<
         FragmentActivity,
@@ -82,7 +82,7 @@ internal class PaymentSendViewModel @Inject constructor(
     )
 
     private suspend fun getAccountBalance(): StateFlow<NodeBalance?> =
-        repositoryDashboard.getAccountBalance()
+        lightningRepository.getAccountBalance()
 
     init {
         viewModelScope.launch(mainImmediate) {

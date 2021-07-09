@@ -19,6 +19,7 @@ import chat.sphinx.dashboard.navigation.DashboardNavigator
 import chat.sphinx.hilt_qualifiers.AuthenticationDriver
 import chat.sphinx.hilt_qualifiers.DetailDriver
 import chat.sphinx.hilt_qualifiers.PrimaryDriver
+import chat.sphinx.invite_friend.navigation.InviteFriendNavigator
 import chat.sphinx.join_tribe.navigation.JoinTribeNavigator
 import chat.sphinx.new_contact.navigation.NewContactNavigator
 import chat.sphinx.onboard.navigation.OnBoardNavigator
@@ -30,7 +31,6 @@ import chat.sphinx.payment_send.navigation.PaymentSendNavigator
 import chat.sphinx.podcast_player.navigation.PodcastPlayerNavigator
 import chat.sphinx.qr_code.navigation.QRCodeNavigator
 import chat.sphinx.scanner.navigation.ScannerNavigator
-import chat.sphinx.send_attachment.navigation.SendAttachmentNavigator
 import chat.sphinx.splash.navigation.SplashNavigator
 import chat.sphinx.support_ticket.navigation.SupportTicketNavigator
 import chat.sphinx.transactions.navigation.TransactionsNavigator
@@ -235,8 +235,9 @@ internal object NavigationModule {
         tribeChatPodcastPlayerNavigatorImpl
 
     @Provides
-    fun provideSendAttachmentNavigator(
-        sendAttachmentNavigatorImpl: SendAttachmentNavigatorImpl
-    ): SendAttachmentNavigator =
-        sendAttachmentNavigatorImpl
+    fun provideInviteFriendNavigator(
+        inviteFriendNavigatorImpl: InviteFriendNavigatorImpl
+    ): InviteFriendNavigator =
+        inviteFriendNavigatorImpl
+
 }

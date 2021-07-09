@@ -13,6 +13,9 @@
             android:name="qrText"
             app:argType="string" />
         <argument
+            android:name="viewTitle"
+            app:argType="string" />
+        <argument
             android:name="argShowBackArrow"
             app:argType="boolean" />
     </fragment>

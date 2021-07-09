@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="qr_code_header_name">PUBLIC KEY</string>
     <string name="share">Share</string>
     <string name="copy">Copy</string>
-    <string name="qr_code_notify_copied">Public Key copied to clipboard</string>
+    <string name="qr_code_notify_copied">%s copied to clipboard</string>
 </resources>

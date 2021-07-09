@@ -50,4 +50,6 @@ interface ChatRepository {
     ): Flow<LoadResponse<Any, ResponseError>>
 
     suspend fun updateTribeInfo(chat: Chat): PodcastDto?
+
+    suspend fun exitTribe(chat: Chat): Response<Boolean, ResponseError>
 }

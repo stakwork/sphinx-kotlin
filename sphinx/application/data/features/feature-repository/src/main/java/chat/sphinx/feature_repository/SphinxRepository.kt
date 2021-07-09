@@ -12,6 +12,7 @@ import chat.sphinx.concept_network_query_contact.NetworkQueryContact
 import chat.sphinx.concept_network_query_contact.model.ContactDto
 import chat.sphinx.concept_network_query_contact.model.PostContactDto
 import chat.sphinx.concept_network_query_contact.model.PutContactDto
+import chat.sphinx.concept_network_query_invite.NetworkQueryInvite
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_lightning.model.balance.BalanceDto
 import chat.sphinx.concept_network_query_message.NetworkQueryMessage
@@ -52,6 +53,8 @@ import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.dashboard.InviteId
 import chat.sphinx.wrapper_common.dashboard.toChatId
+import chat.sphinx.wrapper_common.invite.InviteStatus
+import chat.sphinx.wrapper_common.invite.toInviteStatus
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.LightningRouteHint
 import chat.sphinx.wrapper_common.lightning.Sat
@@ -105,6 +108,7 @@ abstract class SphinxRepository(
     private val networkQueryContact: NetworkQueryContact,
     private val networkQueryLightning: NetworkQueryLightning,
     private val networkQueryMessage: NetworkQueryMessage,
+    private val networkQueryInvite: NetworkQueryInvite,
     private val rsa: RSA,
     private val socketIOManager: SocketIOManager,
     protected val LOG: SphinxLogger,
@@ -170,8 +174,12 @@ abstract class SphinxRepository(
                     // TODO: Implement
                 }
                 is SphinxSocketIOMessage.Type.Invite -> {
-                    // TODO: Implement
-//                    queries.upsertInvite(msg.dto)
+                    contactLock.withLock {
+                        queries.transaction {
+                            updatedContactIds.add(ContactId(msg.dto.contact_id))
+                            upsertInvite(msg.dto, queries)
+                        }
+                    }
                 }
                 is SphinxSocketIOMessage.Type.InvoicePayment -> {
                     // TODO: Implement
@@ -452,6 +460,17 @@ abstract class SphinxRepository(
         }
     }
 
+    override val getAllInvites: Flow<List<Invite>> by lazy {
+        flow {
+            emitAll(
+                coreDB.getSphinxDatabaseQueries().inviteGetAll()
+                    .asFlow()
+                    .mapToList(io)
+                    .map { inviteDboPresenterMapper.mapListFrom(it) }
+            )
+        }
+    }
+
     override fun getContactById(contactId: ContactId): Flow<Contact?> = flow {
         emitAll(
             coreDB.getSphinxDatabaseQueries().contactGetById(contactId)
@@ -695,7 +714,6 @@ abstract class SphinxRepository(
                             is LoadResponse.Loading -> {}
                             is Response.Error -> {
                                 response = loadResponse
-                                throw Exception()
                             }
                             is Response.Success -> {
                                 contactLock.withLock {
@@ -704,11 +722,11 @@ abstract class SphinxRepository(
                                     }
                                 }
                                 LOG.d(TAG, "Owner has been successfully updated")
-
-                                throw Exception()
                             }
                         }
                     }
+
+                    throw Exception()
                 }
 
             }
@@ -2347,4 +2365,158 @@ abstract class SphinxRepository(
                 null
             }
         }
+
+    override fun createNewInvite(
+        nickname: String,
+        welcomeMessage: String
+    ): Flow<LoadResponse<Any, ResponseError>> = flow {
+
+        val queries = coreDB.getSphinxDatabaseQueries()
+
+        var response: Response<Any, ResponseError>? = null
+
+        emit(LoadResponse.Loading)
+
+        applicationScope.launch(mainImmediate) {
+            networkQueryContact.createNewInvite(nickname, welcomeMessage).collect { loadResponse ->
+                @Exhaustive
+                when (loadResponse) {
+                    is LoadResponse.Loading -> {}
+
+                    is Response.Error -> {
+                        response = loadResponse
+                    }
+
+                    is Response.Success -> {
+                        contactLock.withLock {
+                            withContext(io) {
+                                queries.transaction {
+                                    updatedContactIds.add(ContactId(loadResponse.value.id))
+                                    upsertContact(loadResponse.value, queries)
+                                }
+                            }
+                        }
+                        response = Response.Success(true)
+                    }
+                }
+            }
+        }.join()
+
+        emit(response ?: Response.Error(ResponseError("")))
+    }
+
+    override suspend fun payForInvite(invite: Invite) {
+        val queries = coreDB.getSphinxDatabaseQueries()
+
+        contactLock.withLock {
+            withContext(io) {
+                queries.transaction {
+                    updatedContactIds.add(invite.contactId)
+                    updateInviteStatus(invite.id, InviteStatus.ProcessingPayment, queries)
+                }
+            }
+        }
+
+        delay(25L)
+        networkQueryInvite.payInvite(invite.inviteString.value).collect { loadResponse ->
+            @Exhaustive
+            when (loadResponse) {
+                is LoadResponse.Loading -> {}
+
+                is Response.Error -> {
+                    contactLock.withLock {
+                        withContext(io) {
+                            queries.transaction {
+                                updatedContactIds.add(invite.contactId)
+                                updateInviteStatus(invite.id, InviteStatus.PaymentPending, queries)
+                            }
+                        }
+                    }
+                }
+
+                is Response.Success -> {}
+            }
+        }
+    }
+
+    override suspend fun deleteInvite(invite: Invite): Response<Any, ResponseError> {
+        val queries = coreDB.getSphinxDatabaseQueries()
+
+        val response = networkQueryContact.deleteContact(invite.contactId)
+
+        if (response is Response.Success) {
+            contactLock.withLock {
+                withContext(io) {
+                    queries.transaction {
+                        updatedContactIds.add(invite.contactId)
+                        deleteContactById(invite.contactId, queries)
+                    }
+                }
+
+            }
+        }
+        return response
+    }
+
+    override suspend fun exitTribe(chat: Chat): Response<Boolean, ResponseError> {
+        var response: Response<Boolean, ResponseError>? = null
+
+        val owner: Contact = accountOwner.value.let { contact ->
+            if (contact != null) {
+                contact
+            } else {
+                var resolvedOwner: Contact? = null
+                try {
+                    accountOwner.collect { ownerContact ->
+                        if (ownerContact != null) {
+                            resolvedOwner = ownerContact
+                            throw Exception()
+                        }
+                    }
+                } catch (e: Exception) {}
+                delay(25L)
+
+                resolvedOwner ?: return Response.Error(
+                    ResponseError("Could not resolve account owner")
+                )
+            }
+        }
+
+        if (owner.nodePubKey == chat.ownerPubKey) {
+            return Response.Error(ResponseError("Delete own tribe is not supported yet"))
+        }
+
+        applicationScope.launch(mainImmediate) {
+            networkQueryChat.deleteChat(chat.id).collect { loadResponse ->
+                when (loadResponse) {
+                    is LoadResponse.Loading -> {}
+
+                    is Response.Error -> {
+                        response = loadResponse
+                    }
+
+                    is Response.Success -> {
+                        response = Response.Success(true)
+                        val queries = coreDB.getSphinxDatabaseQueries()
+
+                        chatLock.withLock {
+                            messageLock.withLock {
+                                withContext(io) {
+                                    queries.transaction {
+                                        deleteChatById(
+                                            loadResponse.value["chat_id"]?.toChatId() ?: chat.id,
+                                            queries,
+                                            latestMessageUpdatedTimeMap
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }.join()
+
+        return response ?: Response.Error(ResponseError(("Failed to exit tribe")))
+    }
 }

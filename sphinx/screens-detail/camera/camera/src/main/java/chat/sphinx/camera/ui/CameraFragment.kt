@@ -228,39 +228,28 @@ internal class CameraFragment: SideEffectFragment<
                 )
 
                 val detailFragmentHeight = binding.root.measuredHeight.toFloat()
+                val detailFragmentWidth = binding.root.measuredWidth.toFloat()
 
                 // calculate the primary window's screen height
                 val primaryWindowHeight =
                     (detailFragmentHeight / (1F - spaceDetailPct.float)) +
-                    (requireActivity() as InsetterActivity).statusBarInsetHeight.top
+                            (requireActivity() as InsetterActivity).statusBarInsetHeight.top
 
                 val spaceTop = primaryWindowHeight * spaceDetailPct.float
 
                 val viewWidth = (spaceTop / 2) + 1 + Dp(4F).toPx(binding.root.context).value
 
-                binding.viewCameraSpaceEnd.apply {
-                    layoutParams.width = viewWidth.toInt()
+                binding.autoFitSurfaceViewCamera.apply {
+                    layoutParams.width = (detailFragmentWidth + (viewWidth * 2)).toInt()
                 }
 
-                binding.viewCameraSpaceStart.apply {
-                    layoutParams.width = viewWidth.toInt()
-                }
-
-                binding.includeCameraImagePreview.apply {
-                    spaceCameraImagePreviewEnd.apply space@ {
-                        this@space.layoutParams.width = viewWidth.toInt()
-                    }
-                    spaceCameraImagePreviewStart.apply space@ {
-                        this@space.layoutParams.width = viewWidth.toInt()
-                    }
-                }
-
-                Px(viewWidth)
+                Px(primaryWindowHeight)
             }
         }
     }
 
     private val spaceWidthSetter = SpaceWidthSetter()
+
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -315,6 +304,9 @@ internal class CameraFragment: SideEffectFragment<
         }
 
         binding.includeCameraImagePreview.apply {
+            imageViewCameraImagePreview.setOnClickListener {
+                viewModel
+            }
             textViewCameraImagePreviewRetake.setOnClickListener {
                 @Exhaustive
                 when (val vs = viewModel.currentCapturePreviewViewState) {
