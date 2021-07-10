@@ -30,7 +30,9 @@ import io.matthewnelson.concept_authentication.coordinator.AuthenticationCoordin
 import io.matthewnelson.concept_authentication.coordinator.AuthenticationRequest
 import io.matthewnelson.concept_authentication.coordinator.AuthenticationResponse
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
+import io.matthewnelson.crypto_common.annotations.RawPasswordAccess
 import io.matthewnelson.crypto_common.clazzes.Password
+import io.matthewnelson.crypto_common.clazzes.PasswordGenerator
 import io.matthewnelson.crypto_common.extensions.decodeToString
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -42,7 +44,6 @@ import okio.base64.decodeBase64ToArray
 import org.cryptonode.jncryptor.AES256JNCryptor
 import org.cryptonode.jncryptor.CryptorException
 import javax.inject.Inject
-import kotlin.random.Random
 
 @HiltViewModel
 internal class SplashViewModel @Inject constructor(
@@ -234,7 +235,10 @@ internal class SplashViewModel @Inject constructor(
 
     private fun generateToken(ip: String, nodePubKey: String? = null, password: String? = null) {
         viewModelScope.launch(mainImmediate) {
-            val authToken = generateRandomToken()
+            @OptIn(RawPasswordAccess::class)
+            val authToken = AuthorizationToken(
+                PasswordGenerator(passwordLength = 20).password.value.joinToString("")
+            )
             val relayUrl = parseRelayUrl(RelayUrl(ip))
 
             storeToken(authToken.value, relayUrl.value)
@@ -282,16 +286,6 @@ internal class SplashViewModel @Inject constructor(
                 RelayUrl("https://${relayUrl.value}")
             }
         }
-    }
-
-    private fun generateRandomToken(): AuthorizationToken {
-        val charPool: List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9')
-        val token = (1..20)
-            .map { Random.nextInt(0, charPool.size) }
-            .map(charPool::get)
-            .joinToString("")
-
-        return AuthorizationToken(token)
     }
 
     private fun storeTemporaryInvite(invite: RedeemInviteDto? = null) {
