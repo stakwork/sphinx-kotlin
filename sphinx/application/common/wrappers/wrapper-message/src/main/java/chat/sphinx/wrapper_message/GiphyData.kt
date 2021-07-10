@@ -1,5 +1,6 @@
 package chat.sphinx.wrapper_message
 
+import chat.sphinx.wrapper_message_media.MessageMedia
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.Moshi
@@ -26,6 +27,14 @@ inline fun GiphyData.toJson(moshi: Moshi): String =
     moshi.adapter(GiphyData::class.java)
         .toJson(this)
 
+@Suppress("NOTHING_TO_INLINE")
+inline fun GiphyData.retrieveImageUrlAndMessageMedia(): Pair<String, MessageMedia?>? {
+    return if (url.isNotEmpty()) {
+        Pair(url.replace("giphy.gif", "200w.gif"), null)
+    } else {
+        null
+    }
+}
 // {"text": null,"url":"https://media3.giphy.com/media/StuemRSudGjTuu5QmY/giphy.gif?cid=d7a0fde9f4pgso0ojwyp6utwh63iiu9biqicdby6kv210sz5&rid=giphy.gif", "id":"StuemRSudGjTuu5QmY","aspect_ratio":"1.3259668508287292"}
 @JsonClass(generateAdapter = true)
 data class GiphyData(

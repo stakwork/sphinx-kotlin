@@ -10,7 +10,8 @@ import chat.sphinx.wrapper_common.lightning.LightningPaymentRequest
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessageUUID
-import chat.sphinx.wrapper_message_media.*
+import chat.sphinx.wrapper_message_media.MessageMedia
+import chat.sphinx.wrapper_message_media.isImage
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun Message.retrieveTextToShow(): String? =
@@ -37,13 +38,7 @@ inline fun Message.retrieveImageUrlAndMessageMedia(): Pair<String, MessageMedia?
     var mediaData: Pair<String, MessageMedia?>? = null
 
     giphyData?.let { giphyData ->
-
-        mediaData = if (giphyData.url.isNotEmpty()) {
-            Pair(giphyData.url.replace("giphy.gif", "200w.gif"), null)
-        } else {
-            null
-        }
-
+        mediaData = giphyData.retrieveImageUrlAndMessageMedia()
     } ?: messageMedia?.let { media ->
 
         if (media.mediaType.isImage && !isPaidMessage) {

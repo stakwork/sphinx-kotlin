@@ -4,6 +4,7 @@ import android.app.Application
 import android.net.Uri
 import android.webkit.MimeTypeMap
 import androidx.annotation.CallSuper
+import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavArgs
@@ -37,10 +38,10 @@ import chat.sphinx.kotlin_response.message
 import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.logger.e
 import chat.sphinx.resources.getRandomColor
-import chat.sphinx.wrapper_chat.*
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.ChatName
 import chat.sphinx.wrapper_chat.isConversation
+import chat.sphinx.wrapper_chat.isTribe
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.Sat
@@ -49,6 +50,13 @@ import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message_media.MediaType
 import chat.sphinx.wrapper_message_media.toMediaType
+import com.giphy.sdk.core.models.Media
+import com.giphy.sdk.ui.GPHContentType
+import com.giphy.sdk.ui.GPHSettings
+import com.giphy.sdk.ui.themes.GPHTheme
+import com.giphy.sdk.ui.themes.GridType
+import com.giphy.sdk.ui.utils.aspectRatio
+import com.giphy.sdk.ui.views.GiphyDialogFragment
 import io.matthewnelson.android_feature_viewmodel.MotionLayoutViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.android_feature_viewmodel.updateViewState
@@ -90,6 +98,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 {
     companion object {
         const val TAG = "ChatViewModel"
+        const val GIPHY_API_KEY = "TODO_GET_GIPHY_API_KEY_AS_PROPERTY"
     }
 
     protected abstract val args: ARGS
@@ -428,6 +437,18 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                         }
                     }
                 }
+            } else if (viewState is AttachmentSendViewState.PreviewGiphy) {
+
+                // Only delete the previous file in the event that a new pic is choosen
+                // to send when one is currently being previewed.
+                val current = viewStateFlow.value
+                if (current is AttachmentSendViewState.Preview) {
+                    try {
+                        current.file.delete()
+                    } catch (e: Exception) {
+
+                    }
+                }
             }
 
             super.updateViewState(viewState)
@@ -556,12 +577,33 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     }
 
     @JvmSynthetic
-    internal fun chatMenuOptionGif() {
-        viewModelScope.launch(mainImmediate) {
-            submitSideEffect(
-                ChatSideEffect.Notify("Giphy search not implemented yet")
-            )
+    internal fun chatMenuOptionGif(parentFramentManager: FragmentManager) {
+        val settings = GPHSettings(GridType.waterfall, GPHTheme.Dark)
+        settings.mediaTypeConfig = arrayOf(GPHContentType.gif, GPHContentType.sticker, GPHContentType.recents)
+
+        val giphyDialogFragment = GiphyDialogFragment.newInstance(settings, GIPHY_API_KEY)
+
+        giphyDialogFragment.gifSelectionListener = object: GiphyDialogFragment.GifSelectionListener {
+            override fun didSearchTerm(term: String) { }
+
+            override fun onDismissed(selectedContentType: GPHContentType) {}
+
+            override fun onGifSelected(
+                media: Media,
+                searchTerm: String?,
+                selectedContentType: GPHContentType
+            ) {
+                updateViewState(ChatMenuViewState.Closed)
+                val giphyData = GiphyData(media.id, "https://media.giphy.com/media/${media.id}/giphy.gif", media.aspectRatio.toDouble(), null)
+
+                updateAttachmentSendViewState(
+                    AttachmentSendViewState.PreviewGiphy(giphyData)
+                )
+
+                updateFooterViewState(FooterViewState.Attachment)
+            }
         }
+        giphyDialogFragment.show(parentFramentManager, "giphy_search")
     }
 
     @JvmSynthetic
