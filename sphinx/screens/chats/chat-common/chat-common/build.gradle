@@ -55,4 +55,6 @@ dependencies {
     implementation deps.androidx.lifecycle.hilt
 
     implementation deps.square.okio
+
+    implementation deps.giphy.sdk
 }
