@@ -1,5 +1,8 @@
 # ChangeLog
 
+## Version 1.0.0-alpha08 (2021-07-10)
+ - Fixes generation of Relay token
+
 ## Version 1.0.0-alpha07 (2021-07-08)
  - Adds ability to invite a new user
  - Adds ability to send images from device gallery
