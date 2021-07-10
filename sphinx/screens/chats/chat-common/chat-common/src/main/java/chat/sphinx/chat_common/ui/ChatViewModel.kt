@@ -11,6 +11,7 @@ import androidx.navigation.NavArgs
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.camera_view_model_coordinator.request.CameraRequest
 import chat.sphinx.camera_view_model_coordinator.response.CameraResponse
+import chat.sphinx.chat_common.BuildConfig
 import chat.sphinx.chat_common.R
 import chat.sphinx.chat_common.navigation.ChatNavigator
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
@@ -98,7 +99,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 {
     companion object {
         const val TAG = "ChatViewModel"
-        const val GIPHY_API_KEY = "TODO_GET_GIPHY_API_KEY_AS_PROPERTY"
+        const val CONFIG_PLACE_HOLDER = "PLACE_HOLDER"
     }
 
     protected abstract val args: ARGS
@@ -577,33 +578,42 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     }
 
     @JvmSynthetic
-    internal fun chatMenuOptionGif(parentFramentManager: FragmentManager) {
-        val settings = GPHSettings(GridType.waterfall, GPHTheme.Dark)
-        settings.mediaTypeConfig = arrayOf(GPHContentType.gif, GPHContentType.sticker, GPHContentType.recents)
+    internal fun chatMenuOptionGif(parentFragmentManager: FragmentManager) {
+        if (BuildConfig.GIPHY_API_KEY != CONFIG_PLACE_HOLDER) {
+            val settings = GPHSettings(GridType.waterfall, GPHTheme.Dark)
+            settings.mediaTypeConfig = arrayOf(GPHContentType.gif, GPHContentType.sticker, GPHContentType.recents)
 
-        val giphyDialogFragment = GiphyDialogFragment.newInstance(settings, GIPHY_API_KEY)
+            val giphyDialogFragment = GiphyDialogFragment.newInstance(settings, BuildConfig.GIPHY_API_KEY)
 
-        giphyDialogFragment.gifSelectionListener = object: GiphyDialogFragment.GifSelectionListener {
-            override fun didSearchTerm(term: String) { }
+            giphyDialogFragment.gifSelectionListener = object: GiphyDialogFragment.GifSelectionListener {
+                override fun didSearchTerm(term: String) { }
 
-            override fun onDismissed(selectedContentType: GPHContentType) {}
+                override fun onDismissed(selectedContentType: GPHContentType) {}
 
-            override fun onGifSelected(
-                media: Media,
-                searchTerm: String?,
-                selectedContentType: GPHContentType
-            ) {
-                updateViewState(ChatMenuViewState.Closed)
-                val giphyData = GiphyData(media.id, "https://media.giphy.com/media/${media.id}/giphy.gif", media.aspectRatio.toDouble(), null)
+                override fun onGifSelected(
+                    media: Media,
+                    searchTerm: String?,
+                    selectedContentType: GPHContentType
+                ) {
+                    updateViewState(ChatMenuViewState.Closed)
+                    val giphyData = GiphyData(media.id, "https://media.giphy.com/media/${media.id}/giphy.gif", media.aspectRatio.toDouble(), null)
 
-                updateAttachmentSendViewState(
-                    AttachmentSendViewState.PreviewGiphy(giphyData)
+                    updateAttachmentSendViewState(
+                        AttachmentSendViewState.PreviewGiphy(giphyData)
+                    )
+
+                    updateFooterViewState(FooterViewState.Attachment)
+                }
+            }
+            giphyDialogFragment.show(parentFragmentManager, "giphy_search")
+        } else {
+            viewModelScope.launch(mainImmediate) {
+                submitSideEffect(
+                    ChatSideEffect.Notify("Giphy search not available")
                 )
-
-                updateFooterViewState(FooterViewState.Attachment)
             }
         }
-        giphyDialogFragment.show(parentFramentManager, "giphy_search")
+
     }
 
     @JvmSynthetic
