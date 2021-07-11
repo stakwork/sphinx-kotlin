@@ -1,5 +1,45 @@
 # Releasing
 
+## Preparing Repository For A Release
+ - Checkout branch `develop`
+ ```bash
+ $ git checkout develop
+ $ git pull --recurse-submodule
+ ```
+ - Update the following variables in the root project's `gradle.properties` file:
+   - `VERSION_NAME`
+   - `VERSION_CODE`
+   - `KA_VERSION_NAME`
+   - `KA_VERSION_CODE`
+ - Update `docs/CHANGELOG.md` with features/fixes
+ - Build the app to ensure no errors exist
+ ```bash
+ $ ./gradlew clean
+ $ ./gradlew :sphinx:application:sphinx:build
+ ```
+ - Commit changes via (replace `<version name>` with actual name, ex: `1.0.0-alpha01`)
+     - `$ git add --all`
+     - `$ git commit --message "Prepare release <version name>"`
+         - Optionally, if you sign commits with GPG keys, add the `-S` flag
+ - Create a tag for the new version (replace `<version name>` with actual name)
+     - `$ git tag <version name> -m "Release v<version name>"`
+         - Optionally, if you sign commits with GPG keys, add the `-s` flag
+ - Push
+ ```bash
+ $ git push origin <version name>
+ $ git push develop
+ ```
+ - Merge to branch `master`
+     - `$ git checkout master`
+     - `$ git pull`
+     - `$ git merge --no-ff develop`
+         - Optionally, if you sign commits with GPG keys, add the `-S` flag
+ - Push
+ ```bash
+ $ git push
+ ```
+
+## Building A Release
  - Checkout the newly created tag
  ```bash
  $ git fetch
