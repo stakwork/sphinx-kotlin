@@ -1,8 +1,13 @@
 # Releasing
 
+ - Checkout the newly created tag
+ ```bash
+ $ git fetch
+ $ git checkout <tag>
+ $ git pull --recurse-submodule
+ ```
  - Ensure notification settings are as desired (with or without FirebaseMessaging)
-     - See [HERE](./NOTIFICATIONS.md) for more info
-       about Notifications
+     - See [HERE](./NOTIFICATIONS.md) for more info about Notifications
  - Perform a clean release build
  ```bash
  $ ./gradlew clean
