@@ -279,6 +279,8 @@ abstract class ChatFragment<
                     }
                 }
             }
+
+            editTextChatFooter.onCommitContentListener = viewModel.onIMEContent
         }
 
         replyingMessageBinding.apply {

@@ -2,8 +2,11 @@ package chat.sphinx.chat_common.ui
 
 import android.app.Application
 import android.net.Uri
+import android.os.Build
+import android.util.Log
 import android.webkit.MimeTypeMap
 import androidx.annotation.CallSuper
+import androidx.core.view.inputmethod.InputConnectionCompat
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
@@ -614,6 +617,29 @@ abstract class ChatViewModel<ARGS: NavArgs>(
             }
         }
 
+    }
+
+    @JvmSynthetic
+    internal val onIMEContent = InputConnectionCompat.OnCommitContentListener { inputContentInfo, flags, opts ->
+        val lacksPermission = (flags and InputConnectionCompat.INPUT_CONTENT_GRANT_READ_URI_PERMISSION) != 0
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1 && lacksPermission) {
+            try {
+                inputContentInfo.requestPermission()
+            } catch (e: java.lang.Exception) {
+                Log.e(TAG, "Failed to get content from IME", e)
+
+                viewModelScope.launch(mainImmediate) {
+                    submitSideEffect(
+                        ChatSideEffect.Notify("Require permission for this content")
+                    )
+                }
+                return@OnCommitContentListener false
+            }
+        }
+        handleActivityResultUri(inputContentInfo.contentUri)
+        inputContentInfo.releasePermission()
+        true
     }
 
     @JvmSynthetic
