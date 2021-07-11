@@ -13,6 +13,8 @@
    - `KA_VERSION_NAME`
    - `KA_VERSION_CODE`
  - Update `docs/CHANGELOG.md` with features/fixes
+ - Ensure notification settings are as desired (with or without FirebaseMessaging)
+     - See [HERE](./NOTIFICATIONS.md) for more info about Notifications
  - Build the app to ensure no errors exist
  ```bash
  $ ./gradlew clean
