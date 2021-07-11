@@ -1,12 +1,12 @@
 # Releasing
 
  - Ensure notification settings are as desired (with or without FirebaseMessaging)
-     - See [HERE](../sphinx/service/features/notifications/README.md) for more info
+     - See [HERE](./NOTIFICATIONS.md) for more info
        about Notifications
  - Perform a clean release build
  ```bash
  $ ./gradlew clean
- $ ./gradlew build
+ $ ./gradlew :sphinx:application:sphinx:build
  ```
  - Ensure that OpenSC is installed on your machine
      - Linux:

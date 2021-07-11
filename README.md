@@ -25,5 +25,4 @@ git submodule update --remote
 ```
 
 ## Notifications
-See [this](./sphinx/service/features/notifications/README.md) to enable building Sphinx
-with FirebaseMessaging
+See [this](./docs/NOTIFICATIONS.md) to enable building Sphinx with FirebaseMessaging
