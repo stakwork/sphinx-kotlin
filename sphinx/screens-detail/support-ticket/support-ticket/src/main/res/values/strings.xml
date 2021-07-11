@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="support_ticket_header_name">SUPPORT</string>
+    <string name="send_message">SEND MESSAGE</string>
+    <string name="copy_logs">Copy Logs</string>
+    <string name="describe_your_problem_here">Describe your problem here…</string>
+    <string name="message_required">message required</string>
 </resources>
