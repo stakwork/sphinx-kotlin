@@ -1,5 +1,6 @@
 # Releasing
 
+
 ## Preparing Repository For A Release
  - Checkout branch `develop`
  ```bash
@@ -39,7 +40,10 @@
  $ git push
  ```
 
+
 ## Building A Release
+ - If you already built the release apks in the above section, you can skip down to the 
+ `Signing A Release Build` section.
  - Checkout the newly created tag
  ```bash
  $ git fetch
@@ -53,6 +57,10 @@
  $ ./gradlew clean
  $ ./gradlew :sphinx:application:sphinx:build
  ```
+ - **Un**signed release apks will be located in `sphinx/application/sphinx/build/outputs/apk/release`
+
+
+## Signing A Release Build
  - Ensure that OpenSC is installed on your machine
      - Linux:
          - `sudo apt-get update && sudo apt-get install opensc-pkcs11 -y`
