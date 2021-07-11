@@ -13,7 +13,6 @@ git pull
 git submodule update --init
 ```
 
-## Git Pull
 In order to keep the submodules updated when pulling the latest code, run:
 ```
 git pull --recurse-submodules
@@ -26,3 +25,8 @@ git submodule update --remote
 
 ## Notifications
 See [this](./docs/NOTIFICATIONS.md) to enable building Sphinx with FirebaseMessaging
+
+## Building The App
+The App module to build is located at `sphinx/application/sphinx`. To Build, you can either:
+ - Use Android Studio
+ - From CommandLine via: `./gradlew :sphinx:application:sphinx:build`
