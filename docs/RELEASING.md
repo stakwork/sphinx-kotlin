@@ -24,10 +24,10 @@
  - Create a tag for the new version (replace `<version name>` with actual name)
      - `$ git tag <version name> -m "Release v<version name>"`
          - Optionally, if you sign commits with GPG keys, add the `-s` flag
- - Push
+ - Push (replace `<version name>` with actual name)
  ```bash
  $ git push origin <version name>
- $ git push develop
+ $ git push
  ```
  - Merge to branch `master`
      - `$ git checkout master`
