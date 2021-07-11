@@ -76,3 +76,4 @@
  - Create a release on GitHub for the given tag used when building the app.
  - Add to the release description a link to the ChangeLog by copy/pasting the following:
      - `See [ChangeLog](./docs/CHANGELOG.md)`
+ - Upload release apks
