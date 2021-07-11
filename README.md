@@ -23,10 +23,17 @@ To update only the submodules, run:
 git submodule update
 ```
 
-## Notifications
-See [this](./docs/NOTIFICATIONS.md) to enable building Sphinx with FirebaseMessaging
-
 ## Building The App
-The App module to build is located at `sphinx/application/sphinx`. To Build, you can either:
+See [HERE](./docs/NOTIFICATIONS.md) to enable building Sphinx with FirebaseMessaging  
+  
+Checkout branch `master`:
+```bash
+git checkout master
+git pull --recurse-submodule
+```  
+
+The Application module to build is located at `sphinx/application/sphinx`. To Build, you can either:
  - Use Android Studio
- - From CommandLine via: `./gradlew :sphinx:application:sphinx:build`
+ - From command line via: `./gradlew :sphinx:application:sphinx:build`
+
+For more detailed instructions, see [HERE](./docs/RELEASING.md#building-a-release)
