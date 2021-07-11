@@ -20,7 +20,7 @@ git pull --recurse-submodules
 
 To update only the submodules, run:
 ```
-git submodule update --remote
+git submodule update
 ```
 
 ## Notifications
