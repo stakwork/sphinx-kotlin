@@ -31,7 +31,8 @@
  ```bash
  $ scripts/sign_app_release_build.sh
  ```
- - Generated, signed apks for each CPU architecture will be located in
- ```
- sphinx/application/sphinx/build/outputs/apk/release
- ```
+ - Signed apks for each CPU architecture will be located in `sphinx/application/sphinx/build/outputs/apk/release`
+     - Signed apks will contain `signed` in their names.
+ - Create a release on GitHub for the given tag used when building the app.
+ - Add to the release description a link to the ChangeLog by copy/pasting the following:
+     - `See [ChangeLog](./docs/CHANGELOG.md)`
