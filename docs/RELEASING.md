@@ -44,7 +44,7 @@
  ```bash
  $ git fetch
  $ git checkout <tag>
- $ git pull --recurse-submodule
+ $ git submodule update
  ```
  - Ensure notification settings are as desired (with or without FirebaseMessaging)
      - See [HERE](./NOTIFICATIONS.md) for more info about Notifications
