@@ -5,8 +5,11 @@ import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
 import android.widget.SeekBar
+import androidx.activity.OnBackPressedCallback
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import app.cash.exhaustive.Exhaustive
 import by.kirich1409.viewbindingdelegate.viewBinding
@@ -32,6 +35,7 @@ import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.updateViewState
+import io.matthewnelson.concept_views.viewstate.value
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -67,6 +71,8 @@ internal class ProfileFragment: SideEffectFragment<
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        BackPressHandler(viewLifecycleOwner, requireActivity())
+
         setupProfileHeader()
         setupProfileTabs()
         setupProfile()
@@ -92,6 +98,31 @@ internal class ProfileFragment: SideEffectFragment<
                 )
             )
             .build()
+    }
+
+    private inner class BackPressHandler(
+        owner: LifecycleOwner,
+        activity: FragmentActivity,
+    ): OnBackPressedCallback(true) {
+
+        init {
+            activity.apply {
+                onBackPressedDispatcher.addCallback(
+                    owner,
+                    this@BackPressHandler,
+                )
+            }
+        }
+
+        override fun handleOnBackPressed() {
+            if (viewModel.profileMenuViewStateContainer.value is MenuBottomViewState.Open) {
+                viewModel.profileMenuViewStateContainer.updateViewState(MenuBottomViewState.Closed)
+            } else {
+                lifecycleScope.launch(viewModel.mainImmediate) {
+                    profileNavigator.popBackStack()
+                }
+            }
+        }
     }
 
     private fun setupProfileHeader() {
