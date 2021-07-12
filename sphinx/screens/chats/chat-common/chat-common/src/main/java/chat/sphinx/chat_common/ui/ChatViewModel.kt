@@ -170,7 +170,6 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         message: Message
     ): InitialHolderViewState
 
-    private var notify200Limit: Boolean = false
     internal val messageHolderViewStateFlow: StateFlow<List<MessageHolderViewState>> = flow {
         val chat = getChat()
         val chatName = getChatNameIfNull()
@@ -195,16 +194,6 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 
         messageRepository.getAllMessagesToShowByChatId(chat.id).distinctUntilChanged().collect { messages ->
             val newList = ArrayList<MessageHolderViewState>(messages.size)
-
-            if (messages.size > 199 && !notify200Limit) {
-                viewModelScope.launch(mainImmediate) {
-                    notify200Limit = true
-                    delay(2_000)
-                    submitSideEffect(ChatSideEffect.Notify(
-                        "Messages are temporarily limited to 200 for this chat"
-                    ))
-                }
-            }
 
             withContext(default) {
                 for (message in messages) {
