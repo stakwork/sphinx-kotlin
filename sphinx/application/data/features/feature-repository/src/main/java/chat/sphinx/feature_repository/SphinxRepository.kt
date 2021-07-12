@@ -1218,9 +1218,17 @@ abstract class SphinxRepository(
     private val provisionalMessageLock = Mutex()
 
     private fun messageText(sendMessage: SendMessage, moshi: Moshi): String? {
-        return sendMessage.giphyData?.let{
-            "giphy::${it.toJson(moshi).toByteArray().encodeBase64()}"
-        } ?: sendMessage.text
+        try {
+            if (sendMessage.giphyData != null) {
+                return sendMessage.giphyData?.let {
+                    "giphy::${it.toJson(moshi).toByteArray().encodeBase64()}"
+                }
+            }
+        } catch (e: Exception) {
+            LOG.e(TAG, "GiphyData toJson failed: ", e)
+        }
+
+        return sendMessage.text
     }
 
     // TODO: Rework to handle different message types
