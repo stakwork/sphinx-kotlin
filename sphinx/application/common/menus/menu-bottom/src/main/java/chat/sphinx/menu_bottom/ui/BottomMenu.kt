@@ -25,21 +25,18 @@ class BottomMenu(
 
     class Builder private constructor(
         private val binding: LayoutMenuBottomBinding,
-        private val lifecycleOwner: LifecycleOwner,
         private val viewStateContainer: ViewStateContainer<MenuBottomViewState>,
-        private val build: (LayoutMenuBottomBinding) -> Unit,
+        private val build: () -> Unit,
     ) {
 
         companion object {
-            const val MAX_OPTIONS = 4
-
+            @JvmSynthetic
             internal operator fun invoke(
                 binding: LayoutMenuBottomBinding,
-                lifecycleOwner: LifecycleOwner,
                 viewStateContainer: ViewStateContainer<MenuBottomViewState>,
-                build: (LayoutMenuBottomBinding) -> Unit
+                build: () -> Unit
             ): Builder =
-                Builder(binding, lifecycleOwner, viewStateContainer, build)
+                Builder(binding, viewStateContainer, build)
         }
 
 
@@ -79,9 +76,6 @@ class BottomMenu(
 
             require(options != null && options.isNotEmpty()) {
                 "setOptions must not be called"
-            }
-            require(options.size <= 4) {
-                "Options must be less than or equal to $MAX_OPTIONS"
             }
 
             binding.includeLayoutMenuBottomOptions.apply {
@@ -127,7 +121,7 @@ class BottomMenu(
                     viewStateContainer.updateViewState(MenuBottomViewState.Closed)
                 }
 
-                build.invoke(binding)
+                build.invoke()
             }
         }
 
@@ -159,8 +153,8 @@ class BottomMenu(
         binding: LayoutMenuBottomBinding,
         lifecycleOwner: LifecycleOwner,
     ): Builder =
-        Builder(binding, lifecycleOwner, viewStateContainer) {
-            this.binding = it
+        Builder(binding, viewStateContainer) {
+            this.binding = binding
             lifecycleOwner.lifecycle.addObserver(this)
         }
 
@@ -172,10 +166,10 @@ class BottomMenu(
 
                     when (viewState) {
                         MenuBottomViewState.Closed -> {
-                            nnBinding.root.setTransitionDuration(250)
+                            nnBinding.root.setTransitionDuration(150)
                         }
                         MenuBottomViewState.Open -> {
-                            nnBinding.root.setTransitionDuration(400)
+                            nnBinding.root.setTransitionDuration(250)
                         }
                     }
 
