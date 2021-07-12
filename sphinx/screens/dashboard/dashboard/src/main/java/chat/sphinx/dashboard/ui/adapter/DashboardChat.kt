@@ -1,6 +1,8 @@
 package chat.sphinx.dashboard.ui.adapter
 
 import chat.sphinx.dashboard.R
+import chat.sphinx.dashboard.ui.adapter.DashboardChat.Active
+import chat.sphinx.dashboard.ui.adapter.DashboardChat.Inactive
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.isConversation
 import chat.sphinx.wrapper_common.*
@@ -8,10 +10,10 @@ import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.invite.InviteStatus
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_contact.Contact
-import chat.sphinx.wrapper_invite.Invite as InviteWrapper
 import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message_media.MediaType
 import kotlinx.coroutines.flow.Flow
+import chat.sphinx.wrapper_invite.Invite as InviteWrapper
 
 /**
  * [DashboardChat]s are separated into 2 categories:
@@ -39,6 +41,7 @@ sealed class DashboardChat {
         companion object {
             const val YOU = "You"
             const val DECRYPTION_ERROR = "DECRYPTION ERROR..."
+            const val MESSAGE_DELETED = "Message deleted"
         }
 
         abstract val chat: Chat
@@ -78,28 +81,25 @@ sealed class DashboardChat {
                 message.messageDecryptionError -> {
                     DECRYPTION_ERROR
                 }
+                message.status.isDeleted() -> {
+                    MESSAGE_DELETED
+                }
                 message.type.isMessage() -> {
-                    when {
-                        message.status.isDeleted() -> {
-                            "message deleted"
-                        } else -> {
-                            message.messageContentDecrypted?.value?.let { decrypted ->
-                                when {
-                                    message.giphyData != null -> {
-                                        "${getMessageSender(message)}GIF shared"
-                                    }
-                                    message.podBoost != null -> {
-                                        val amount: Long = message.podBoost?.amount?.value ?: message.amount.value
-                                        "${getMessageSender(message)}Boost $amount " + if (amount > 1) "sats" else "sat"
-                                    }
-                                    // TODO: check for clip::
-                                    else -> {
-                                        "${getMessageSender(message)}$decrypted"
-                                    }
-                                }
-                            } ?: "${getMessageSender(message)}..."
+                    message.messageContentDecrypted?.value?.let { decrypted ->
+                        when {
+                            message.giphyData != null -> {
+                                "${getMessageSender(message)}GIF shared"
+                            }
+                            message.podBoost != null -> {
+                                val amount: Long = message.podBoost?.amount?.value ?: message.amount.value
+                                "${getMessageSender(message)}Boost $amount " + if (amount > 1) "sats" else "sat"
+                            }
+                            // TODO: check for clip::
+                            else -> {
+                                "${getMessageSender(message)}$decrypted"
+                            }
                         }
-                    }
+                    } ?: "${getMessageSender(message)}..."
                 }
                 message.type.isInvoice() -> {
                     val amount: String = if (message.amount.value > 1) {
