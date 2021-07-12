@@ -161,8 +161,15 @@ class NetworkQueryLightningImpl(
             relayData = relayData
         )
 
+    override fun getLogs(
+        relayData: Pair<AuthorizationToken, RelayUrl>?
+    ): Flow<LoadResponse<String, ResponseError>> =
+        networkRelayCall.relayGet(
+            responseJsonClass = GetLogsRelayResponse::class.java,
+            relayEndpoint = ENDPOINT_LOGS,
+            relayData = null
+        )
 //    app.get('/getinfo', details.getInfo)
-//    app.get('/logs', details.getLogsSince)
 //    app.get('/info', details.getNodeInfo)
 //    app.get('/route', details.checkRoute)
 //    app.get('/query/onchain_address/:app', queries.queryOnchainAddress)

@@ -35,6 +35,7 @@ dependencies {
     // Sphinx
     implementation project(path: ':sphinx:activity:insetter-activity')
     implementation project(path: ':sphinx:screens-detail:common:detail-resources')
+    api project(path: ':sphinx:application:network:concepts:queries:concept-network-query-lightning')
 
     implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt
