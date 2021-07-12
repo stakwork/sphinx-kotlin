@@ -9,6 +9,7 @@ import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_lightning.LightningRepository
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
+import chat.sphinx.menu_bottom.ui.MenuBottomViewState
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_contact.PrivatePhoto
@@ -22,6 +23,7 @@ import io.matthewnelson.concept_authentication.coordinator.AuthenticationRespons
 import io.matthewnelson.concept_authentication.coordinator.ConfirmedPinListener
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_encryption_key.EncryptionKey
+import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import io.matthewnelson.crypto_common.annotations.RawPasswordAccess
 import io.matthewnelson.crypto_common.clazzes.*
 import kotlinx.coroutines.Job
@@ -48,6 +50,11 @@ internal class ProfileViewModel @Inject constructor(
         ProfileSideEffect,
         ProfileViewState>(dispatchers, ProfileViewState.Basic)
 {
+
+    val profileMenuViewStateContainer: ViewStateContainer<MenuBottomViewState> by lazy {
+        ViewStateContainer(MenuBottomViewState.Closed)
+    }
+
     private var resetPINJob: Job? = null
     fun resetPIN() {
         if (resetPINJob?.isActive == true) return

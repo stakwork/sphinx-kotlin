@@ -16,6 +16,9 @@ import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.insetter_activity.addStatusBarPadding
+import chat.sphinx.menu_bottom.model.MenuBottomOption
+import chat.sphinx.menu_bottom.ui.BottomMenu
+import chat.sphinx.menu_bottom.ui.MenuBottomViewState
 import chat.sphinx.profile.R
 import chat.sphinx.profile.databinding.FragmentProfileBinding
 import chat.sphinx.profile.navigation.ProfileNavigator
@@ -53,12 +56,42 @@ internal class ProfileFragment: SideEffectFragment<
     @Suppress("ProtectedInFinal")
     protected lateinit var profileNavigator: ProfileNavigator
 
+    private val bottomMenu: BottomMenu by lazy(LazyThreadSafetyMode.NONE) {
+        BottomMenu(
+            viewModel.dispatchers,
+            onStopSupervisor,
+            viewModel.profileMenuViewStateContainer,
+        )
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         setupProfileHeader()
         setupProfileTabs()
         setupProfile()
+
+        bottomMenu.newBuilder(binding.includeLayoutMenuBottomProfilePic, viewLifecycleOwner)
+            .setHeaderText(R.string.profile_menu_header_text)
+            .setOptions(
+                setOf(
+                    MenuBottomOption(
+                        text = R.string.profile_menu_option_camera,
+                        textColor = R.color.primaryBlueFontColor,
+                        onClick = {
+                            // TODO: Implement
+                        }
+                    ),
+                    MenuBottomOption(
+                        text = R.string.profile_menu_option_photo_library,
+                        textColor = R.color.primaryBlueFontColor,
+                        onClick = {
+                            // TODO: Implement
+                        }
+                    )
+                )
+            )
+            .build()
     }
 
     private fun setupProfileHeader() {
@@ -74,6 +107,13 @@ internal class ProfileFragment: SideEffectFragment<
                     includeProfileAdvancedContainerHolder
                         .layoutConstraintProfileAdvancedContainerScrollViewContent
                 )
+                .addNavigationBarPadding(
+                    includeLayoutMenuBottomProfilePic.includeLayoutMenuBottomOptions.root
+                )
+
+            includeProfileNamePictureHolder.imageViewProfilePicture.setOnClickListener {
+                viewModel.profileMenuViewStateContainer.updateViewState(MenuBottomViewState.Open)
+            }
 
             includeProfileHeader.apply {
                 root.layoutParams.height = root.layoutParams.height + activity.statusBarInsetHeight.top

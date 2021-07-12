@@ -27,4 +27,6 @@
 
     <!-- Menu -->
     <string name="profile_menu_header_text">Profile Picture</string>
+    <string name="profile_menu_option_camera">Camera</string>
+    <string name="profile_menu_option_photo_library">Photo Library</string>
 </resources>
