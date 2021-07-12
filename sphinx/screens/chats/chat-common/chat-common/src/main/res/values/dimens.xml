@@ -95,7 +95,6 @@
     <dimen name="selected_message_menu_item_text_size">12sp</dimen>
 
     <!-- Menu -->
-    <item name="options_menu_input_lock_alpha" type="dimen" format="float">.5</item>
     <dimen name="options_menu_option_height">50dp</dimen>
     <dimen name="options_menu_cancel_button_height">60dp</dimen>
     <dimen name="options_menu_option_divider_height">1dp</dimen>

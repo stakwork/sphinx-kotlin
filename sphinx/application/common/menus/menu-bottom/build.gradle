@@ -30,4 +30,7 @@ dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
     // KotlinAndroid
     api project(path: ':android:features:android-feature-viewmodel')
+
+    // Sphinx
+    api project(path: ':sphinx:application:common:resources')
 }
