@@ -8,6 +8,7 @@ include ':sphinx:application:sphinx'
 include ':sphinx:application:common:resources'
 include ':sphinx:application:common:kotlin-response'
 include ':sphinx:application:common:logger'
+include ':sphinx:application:common:menus:menu-bottom'
 
 include ':sphinx:application:common:wrappers:wrapper-attachment'
 include ':sphinx:application:common:wrappers:wrapper-chat'
