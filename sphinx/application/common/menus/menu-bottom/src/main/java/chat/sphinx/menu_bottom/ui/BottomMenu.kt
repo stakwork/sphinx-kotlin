@@ -16,10 +16,10 @@ import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import io.matthewnelson.concept_views.viewstate.collect
 import kotlinx.coroutines.launch
 
-class BottomMenu(
+open class BottomMenu(
     dispatchers: CoroutineDispatchers,
-    private val onStopSupervisor: OnStopSupervisor,
-    private val viewStateContainer: ViewStateContainer<MenuBottomViewState>,
+    protected val onStopSupervisor: OnStopSupervisor,
+    protected val viewStateContainer: ViewStateContainer<MenuBottomViewState>,
 ) : DefaultLifecycleObserver,
     CoroutineDispatchers by dispatchers {
 
@@ -153,7 +153,7 @@ class BottomMenu(
     private var binding: LayoutMenuBottomBinding? = null
     private var hasBeenRestored = false
 
-    fun newBuilder(
+    open fun newBuilder(
         binding: LayoutMenuBottomBinding,
         lifecycleOwner: LifecycleOwner,
     ): Builder =
