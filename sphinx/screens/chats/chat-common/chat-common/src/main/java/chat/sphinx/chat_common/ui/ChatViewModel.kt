@@ -37,16 +37,19 @@ import chat.sphinx.kotlin_response.message
 import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.logger.e
 import chat.sphinx.resources.getRandomColor
-import chat.sphinx.wrapper_chat.*
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.ChatName
 import chat.sphinx.wrapper_chat.isConversation
+import chat.sphinx.wrapper_chat.isTribe
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.MessageUUID
 import chat.sphinx.wrapper_contact.Contact
-import chat.sphinx.wrapper_message.*
+import chat.sphinx.wrapper_message.Message
+import chat.sphinx.wrapper_message.isDeleted
+import chat.sphinx.wrapper_message.isGroupAction
+import chat.sphinx.wrapper_message.retrieveTextToShow
 import chat.sphinx.wrapper_message_media.MediaType
 import chat.sphinx.wrapper_message_media.toMediaType
 import io.matthewnelson.android_feature_viewmodel.MotionLayoutViewModel
@@ -339,12 +342,14 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     /**
      * Remotely and locally Deletes a [Message] through the [MessageRepository]
      */
-    open suspend fun deleteMessage(message: Message) {
-        when (messageRepository.deleteMessage(message)) {
-            is Response.Error -> {
-                submitSideEffect(ChatSideEffect.Notify("Failed to delete Message"))
+    open fun deleteMessage(message: Message) {
+        viewModelScope.launch(mainImmediate) {
+            when (messageRepository.deleteMessage(message)) {
+                is Response.Error -> {
+                    submitSideEffect(ChatSideEffect.Notify("Failed to delete Message"))
+                }
+                is Response.Success -> {}
             }
-            is Response.Success -> {}
         }
     }
 
