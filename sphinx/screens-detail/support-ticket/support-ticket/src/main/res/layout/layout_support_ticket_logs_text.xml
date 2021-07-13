@@ -2,23 +2,24 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/layout_constraint_logs_text"
-    android:layout_margin="@dimen/default_layout_margin"
-    android:layout_gravity="top"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    >
+    android:layout_gravity="top"
+    android:layout_margin="@dimen/default_layout_margin"
+    android:paddingHorizontal="@dimen/default_half_layout_margin">
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
-         android:layout_height="match_parent"
-        app:layout_constraintTop_toTopOf="parent"
-        >
+        android:layout_height="match_parent"
+        app:layout_constraintTop_toTopOf="parent">
+
         <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/logs_text_view"
+            android:id="@+id/text_view_support_ticket_logs"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:padding="@dimen/default_layout_margin"
+            android:fontFamily="serif-monospace"
+            android:textColor="@color/text"
+            android:textSize="@dimen/support_logs_text_view_text_size"
             tools:text="2021-07-12 22:24:54.326 10193-14374/? D/SocketIOManagerImpl: CONNECT_TIMEOUT: 20000
 2021-07-12 22:24:57.088 10193-14378/? D/SocketIOManagerImpl: RECONNECTING: 2
 2021-07-12 22:25:17.148 10193-14387/? E/SocketIOManagerImpl: CONNECT_ERROR:
@@ -39,9 +40,8 @@
 2021-07-12 22:27:10.684 10193-14433/? D/SocketIOManagerImpl: RECONNECTING: 6
 2021-07-12 22:27:40.690 10193-14443/? E/SocketIOManagerImpl: CONNECT_ERROR:
 2021-07-12 22:27:40.711 10193-14443/? E/SocketIOManagerImpl: RECONNECT_ERROR:
-2021-07-12 22:27:40.712 10193-14443/? D/SocketIOManagerImpl: CONNECT_TIMEOUT: 20000">
+2021-07-12 22:27:40.712 10193-14443/? D/SocketIOManagerImpl: CONNECT_TIMEOUT: 20000" />
 
-        </androidx.appcompat.widget.AppCompatTextView>
     </androidx.core.widget.NestedScrollView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

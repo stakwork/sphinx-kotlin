@@ -48,7 +48,7 @@ internal class SupportTicketFragment: SideEffectFragment<
 
     private fun setupFragmentLayout() {
         (requireActivity() as InsetterActivity).addNavigationBarPadding(
-            binding.includeSupportTicketLayout.layoutConstraintSupportTicket
+            binding.includeSupportTicketLayout.root
         )
     }
 
@@ -67,7 +67,7 @@ internal class SupportTicketFragment: SideEffectFragment<
             }
 
             includeButtonSendMessage.root.setOnClickListener {
-                viewModel.onSendMessage(supportTicketMessageText.text)?.let {
+                viewModel.onSendMessage(textViewSupportTicketMessage.text)?.let {
                     startActivity(it)
                 }
             }
@@ -81,15 +81,15 @@ internal class SupportTicketFragment: SideEffectFragment<
             @Exhaustive
             when(viewState) {
                 is SupportTicketViewState.Empty -> {
-                    includeLogText.logsTextView.text = ""
-                    progressBarLoadingLogs.gone
+                    includeSupportTicketLogText.textViewSupportTicketLogs.text = ""
+                    progressBarSupportTicketLogs.gone
                 }
                 is SupportTicketViewState.Fetched -> {
-                    includeLogText.logsTextView.text = viewState.logs
-                    progressBarLoadingLogs.gone
+                    includeSupportTicketLogText.textViewSupportTicketLogs.text = viewState.logs
+                    progressBarSupportTicketLogs.gone
                 }
                 SupportTicketViewState.LoadingLogs -> {
-                    progressBarLoadingLogs.visible
+                    progressBarSupportTicketLogs.visible
                 }
             }
         }
