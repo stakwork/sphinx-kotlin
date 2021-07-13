@@ -167,7 +167,7 @@ class NetworkQueryLightningImpl(
         networkRelayCall.relayGet(
             responseJsonClass = GetLogsRelayResponse::class.java,
             relayEndpoint = ENDPOINT_LOGS,
-            relayData = null
+            relayData = relayData,
         )
 //    app.get('/getinfo', details.getInfo)
 //    app.get('/info', details.getNodeInfo)
