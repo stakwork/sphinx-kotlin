@@ -89,7 +89,7 @@ internal class SupportTicketViewModel @Inject constructor(
                         text
                     }
                     is LogsViewState.Fetched -> {
-                        "$text\n\n${logsViewState.logs}"
+                        "$text\n\n\n${logsViewState.logs}"
                     }
                 }
 
