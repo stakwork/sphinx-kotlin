@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="support_progress_bar_xy">25dp</dimen>
+    <dimen name="support_layout_constraint_buttons_height">50dp</dimen>
+
+    <dimen name="support_message_edit_text_text_size">16sp</dimen>
+    <dimen name="support_logs_text_view_text_size">12sp</dimen>
+    <dimen name="support_buttons_text_size">13sp</dimen>
+</resources>

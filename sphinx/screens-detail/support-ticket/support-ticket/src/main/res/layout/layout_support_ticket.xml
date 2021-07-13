@@ -4,75 +4,84 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/layout_constraint_support_ticket"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    >
+    android:layout_height="match_parent">
 
     <androidx.appcompat.widget.AppCompatEditText
         android:id="@+id/support_ticket_message_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/background_message_text"
-        android:backgroundTint="@color/lightDivider"
+        android:background="@drawable/background_support_message_text"
         android:gravity="top"
         android:maxLines="6"
         android:lines="4"
-        android:padding="@dimen/default_layout_margin"
+        android:paddingHorizontal="@dimen/default_layout_margin"
+        android:paddingVertical="@dimen/default_half_layout_margin"
         android:layout_margin="@dimen/default_layout_margin"
         android:textColor="@color/text"
         android:textCursorDrawable="@drawable/cursor"
+        android:fontFamily="@font/roboto_regular"
+        android:textSize="@dimen/support_message_edit_text_text_size"
+        android:textColorHint="@color/placeholderText"
+        android:inputType="textMultiLine|textCapSentences"
         app:layout_constraintTop_toTopOf="parent"
         android:hint="@string/describe_your_problem_here"
-        tools:text="I have been having issues with this and that and thought I should let the devs know"
-        />
+        tools:text="I have been having issues with this and that and thought I should let the devs know"/>
 
     <include
         android:id="@+id/include_log_text"
         layout="@layout/layout_logs_text"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_margin="@dimen/default_layout_margin"
+        android:layout_marginHorizontal="@dimen/default_layout_margin"
+        android:layout_marginTop="@dimen/default_layout_margin"
+        android:layout_marginBottom="@dimen/default_double_layout_margin"
         app:layout_constraintTop_toBottomOf="@+id/support_ticket_message_text"
-        app:layout_constraintBottom_toTopOf="@+id/include_button_send_message"
+        app:layout_constraintBottom_toTopOf="@+id/layout_constraint_button_container"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        />
+        app:layout_constraintStart_toStartOf="parent"/>
 
     <ProgressBar
         android:id="@+id/progress_bar_loading_logs"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
+        android:layout_width="@dimen/support_progress_bar_xy"
+        android:layout_height="@dimen/support_progress_bar_xy"
         style="?android:attr/progressBarStyle"
         android:indeterminateTint="@android:color/white"
         android:indeterminate="true"
         android:visibility="gone"
-        android:layout_marginEnd="@dimen/default_half_layout_margin"
-        app:layout_constraintTop_toBottomOf="@+id/support_ticket_message_text"
-        app:layout_constraintBottom_toTopOf="@+id/include_button_send_message"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        tools:visibility="visible"
-        />
+        app:layout_constraintTop_toTopOf="@+id/include_log_text"
+        app:layout_constraintBottom_toBottomOf="@+id/include_log_text"
+        app:layout_constraintEnd_toEndOf="@+id/include_log_text"
+        app:layout_constraintStart_toStartOf="@+id/include_log_text"
+        tools:visibility="visible"/>
 
-    <include
-        android:id="@+id/include_button_send_message"
-        layout="@layout/layout_button_send_message"
-        android:layout_width="0dp"
-        android:layout_height="@dimen/add_buttons_height"
-        android:layout_margin="@dimen/default_layout_margin"
-        app:layout_constraintEnd_toStartOf="@+id/include_button_copy_logs"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        />
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_button_container"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/support_layout_constraint_buttons_height"
+        android:layout_marginHorizontal="@dimen/default_double_layout_margin"
+        android:layout_marginBottom="@dimen/default_layout_margin"
+        app:layout_constraintBottom_toBottomOf="parent">
 
-    <include
-        android:id="@+id/include_button_copy_logs"
-        layout="@layout/layout_button_copy_logs"
-        android:layout_width="0dp"
-        android:layout_height="@dimen/add_buttons_height"
-        android:layout_margin="@dimen/default_layout_margin"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/include_button_send_message"
-        app:layout_constraintBottom_toBottomOf="parent"
-        />
+        <include
+            android:id="@+id/include_button_send_message"
+            layout="@layout/layout_button_send_message"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/add_buttons_height"
+            android:layout_marginEnd="@dimen/default_layout_margin"
+            app:layout_constraintEnd_toStartOf="@+id/include_button_copy_logs"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"/>
+
+        <include
+            android:id="@+id/include_button_copy_logs"
+            layout="@layout/layout_button_copy_logs"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/add_buttons_height"
+            android:layout_marginStart="@dimen/default_layout_margin"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/include_button_send_message"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
