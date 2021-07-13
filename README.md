@@ -13,7 +13,6 @@ git pull
 git submodule update --init
 ```
 
-## Git Pull
 In order to keep the submodules updated when pulling the latest code, run:
 ```
 git pull --recurse-submodules
@@ -21,9 +20,21 @@ git pull --recurse-submodules
 
 To update only the submodules, run:
 ```
-git submodule update --remote
+git submodule update
 ```
 
-## Notifications
-See [this](./sphinx/service/features/notifications/README.md) to enable building Sphinx
-with FirebaseMessaging
+## Building The App
+See [HERE](./docs/NOTIFICATIONS.md) to enable building Sphinx with FirebaseMessaging  
+See [HERE](./docs/GIPHY.md) to enable building Sphinx with the Giphy SDK
+  
+Checkout branch `master`:
+```bash
+git checkout master
+git pull --recurse-submodule
+```  
+
+The Application module to build is located at `sphinx/application/sphinx`. To Build, you can either:
+ - Use Android Studio
+ - From command line via: `./gradlew :sphinx:application:sphinx:build`
+
+For more detailed instructions, see [HERE](./docs/RELEASING.md#building-a-release)

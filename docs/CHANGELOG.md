@@ -1,5 +1,12 @@
 # ChangeLog
 
+## Version 1.0.0-alpha09 (2021-07-13)
+ - Adds Giphy integration to chats
+ - Adds Support Ticket detail screen
+ - Documentation updates
+ - Removes notification of 200 message limit for large chats
+     - Note: Chats are still limited to 200 messages
+
 ## Version 1.0.0-alpha08 (2021-07-10)
  - Fixes generation of Relay token
 
