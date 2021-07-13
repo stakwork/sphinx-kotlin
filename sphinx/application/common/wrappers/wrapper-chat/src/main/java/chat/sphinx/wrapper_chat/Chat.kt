@@ -35,6 +35,9 @@ inline fun Chat.hasPendingContacts(): Boolean =
 inline fun Chat.isTribe(): Boolean =
     type.isTribe()
 
+inline fun Chat.isTribeOwnedByAccount(accountOwnerNodePubKey: LightningNodePubKey?): Boolean =
+    type.isTribe() && ownerPubKey == accountOwnerNodePubKey
+
 data class Chat(
     val id: ChatId,
     val uuid: ChatUUID,

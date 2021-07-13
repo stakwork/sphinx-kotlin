@@ -34,11 +34,11 @@ import chat.sphinx.chat_common.ui.viewstate.selected.setMenuColor
 import chat.sphinx.chat_common.ui.viewstate.selected.setMenuItems
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
-import chat.sphinx.concept_repository_message.model.AttachmentInfo
-import chat.sphinx.concept_repository_message.model.SendMessage
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_network_client_crypto.CryptoHeader
 import chat.sphinx.concept_network_client_crypto.CryptoScheme
+import chat.sphinx.concept_repository_message.model.AttachmentInfo
+import chat.sphinx.concept_repository_message.model.SendMessage
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.insetter_activity.addStatusBarPadding
@@ -50,10 +50,10 @@ import chat.sphinx.wrapper_attachment.headerValue
 import chat.sphinx.wrapper_chat.isTrue
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.lightning.unit
-import chat.sphinx.wrapper_message_media.MediaType
 import chat.sphinx.wrapper_message.retrieveImageUrlAndMessageMedia
 import chat.sphinx.wrapper_message.retrieveTextToShow
 import chat.sphinx.wrapper_message.toReplyUUID
+import chat.sphinx.wrapper_message_media.MediaType
 import chat.sphinx.wrapper_view.Dp
 import io.matthewnelson.android_feature_screens.ui.motionlayout.MotionLayoutFragment
 import io.matthewnelson.android_feature_screens.util.gone
@@ -370,7 +370,7 @@ abstract class ChatFragment<
                                 viewModel.copyMessageText(holderState.message)
                             }
                             is MenuItemState.Delete -> {
-                                // TODO: Implement
+                                viewModel.deleteMessage(holderState.message)
                             }
                             is MenuItemState.Reply -> {
                                 viewModel.replyToMessage(holderState.message)
