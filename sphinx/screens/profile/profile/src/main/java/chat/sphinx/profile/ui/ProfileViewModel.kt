@@ -261,10 +261,6 @@ internal class ProfileViewModel @Inject constructor(
         }
     }
 
-    fun bottomMenuProfilePicPhotoLibrary() {
-        // TODO: Implement
-    }
-
     @Suppress("BlockingMethodInNonBlockingContext")
     fun handleActivityResultUri(uri: Uri?) {
         if (uri == null) {

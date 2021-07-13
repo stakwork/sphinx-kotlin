@@ -6,6 +6,8 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.SeekBar
 import androidx.activity.OnBackPressedCallback
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.viewModels
@@ -60,6 +62,11 @@ internal class ProfileFragment: SideEffectFragment<
     @Suppress("ProtectedInFinal")
     protected lateinit var profileNavigator: ProfileNavigator
 
+    private val contentChooserContract: ActivityResultLauncher<String> =
+        registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+            viewModel.handleActivityResultUri(uri)
+        }
+
     private val bottomMenu: BottomMenu by lazy(LazyThreadSafetyMode.NONE) {
         BottomMenu(
             viewModel.dispatchers,
@@ -92,7 +99,7 @@ internal class ProfileFragment: SideEffectFragment<
                         text = R.string.profile_menu_option_photo_library,
                         textColor = R.color.primaryBlueFontColor,
                         onClick = {
-                            viewModel.bottomMenuProfilePicPhotoLibrary()
+                            contentChooserContract.launch("image/*")
                         }
                     )
                 )
