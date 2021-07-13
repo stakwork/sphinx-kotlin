@@ -11,11 +11,10 @@ import chat.sphinx.kotlin_response.Response
 import chat.sphinx.support_ticket.navigation.SupportTicketNavigator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
+import io.matthewnelson.android_feature_viewmodel.currentViewState
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
+import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
-import io.matthewnelson.concept_views.viewstate.ViewStateContainer
-import io.matthewnelson.concept_views.viewstate.value
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.annotation.meta.Exhaustive
@@ -31,34 +30,21 @@ internal class SupportTicketViewModel @Inject constructor(
         SupportTicketSideEffect,
         SupportTicketViewState>(dispatchers, SupportTicketViewState.Empty)
 {
-    private inner class LogsStateContainer: ViewStateContainer<SupportTicketViewState>(SupportTicketViewState.Empty)
-
-    private val logsStateContainer: ViewStateContainer<SupportTicketViewState> by lazy {
-        LogsStateContainer()
-    }
-
-    @JvmSynthetic
-    internal fun getLogsViewStateFlow(): StateFlow<SupportTicketViewState> =
-        logsStateContainer.viewStateFlow
-
-    @JvmSynthetic
-    internal fun updateLogsSendViewState(viewState: SupportTicketViewState) {
-        logsStateContainer.updateViewState(viewState)
-    }
 
     fun loadLogs() {
-        updateLogsSendViewState(SupportTicketViewState.LoadingLogs)
         viewModelScope.launch(mainImmediate) {
             networkQueryLightning.getLogs().collect { loadedResponse ->
                 @Exhaustive
                 when (loadedResponse) {
-                    is LoadResponse.Loading -> {}
+                    is LoadResponse.Loading -> {
+                        updateViewState(SupportTicketViewState.LoadingLogs)
+                    }
                     is Response.Error -> {
                         submitSideEffect(SupportTicketSideEffect.FailedToFetchLogs)
-                        updateLogsSendViewState(SupportTicketViewState.Empty)
+                        updateViewState(SupportTicketViewState.Empty)
                     }
                     is Response.Success -> {
-                        updateLogsSendViewState(SupportTicketViewState.Fetched(loadedResponse.value))
+                        updateViewState(SupportTicketViewState.Fetched(loadedResponse.value))
                     }
                 }
             }
@@ -72,7 +58,7 @@ internal class SupportTicketViewModel @Inject constructor(
     }
 
     fun loadedLogs(): String? {
-        logsStateContainer.value.let { logsViewState ->
+        currentViewState.let { logsViewState ->
             return when (logsViewState) {
                 is SupportTicketViewState.Empty -> {
                     viewModelScope.launch(mainImmediate) {
@@ -91,7 +77,7 @@ internal class SupportTicketViewModel @Inject constructor(
     }
 
     fun onSendMessage(text: Editable?): Intent?  {
-        logsStateContainer.value.let { logsViewState ->
+        currentViewState.let { logsViewState ->
             return if (!text.isNullOrEmpty()) {
                 val body = when(logsViewState) {
                     is SupportTicketViewState.Empty -> {
