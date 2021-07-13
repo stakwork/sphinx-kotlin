@@ -12,10 +12,10 @@ import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.lightning.Sat
+import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessageUUID
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
-import com.sun.net.httpserver.Authenticator
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 
@@ -28,6 +28,7 @@ class NetworkQueryMessageImpl(
 
         private const val ENDPOINT_MSGS = "/msgs"
         private const val ENDPOINT_MESSAGE = "/message"
+        private const val ENDPOINT_DELETE_MESSAGE = "/message/%d"
         private const val ENDPOINT_MESSAGES_READ = "/messages/%d/read"
         private const val ENDPOINT_MESSAGES = "${ENDPOINT_MESSAGE}s"
         private const val ENDPOINT_PAYMENT = "/payment"
@@ -150,5 +151,20 @@ class NetworkQueryMessageImpl(
     //////////////
     /// DELETE ///
     //////////////
-//    app.delete('/message/:id', messages.deleteMessage)
+    /**
+     * Deletes a message with the id [MessageId]
+     *
+     * DELETE /message/$messageId
+     */
+    override fun deleteMessage(
+        messageId: MessageId,
+        relayData: Pair<AuthorizationToken, RelayUrl>?
+    ): Flow<LoadResponse<MessageDto, ResponseError>> =
+        networkRelayCall.relayDelete(
+            responseJsonClass = MessageRelayResponse::class.java,
+            relayEndpoint = String.format(ENDPOINT_DELETE_MESSAGE, messageId.value),
+            requestBodyJsonClass = null,
+            requestBody = null,
+            relayData = relayData
+        )
 }

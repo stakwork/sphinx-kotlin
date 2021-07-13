@@ -2,14 +2,19 @@ package chat.sphinx.chat_common.ui
 
 import android.app.Application
 import android.net.Uri
+import android.os.Build
+import android.util.Log
 import android.webkit.MimeTypeMap
 import androidx.annotation.CallSuper
+import androidx.core.view.inputmethod.InputConnectionCompat
+import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavArgs
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.camera_view_model_coordinator.request.CameraRequest
 import chat.sphinx.camera_view_model_coordinator.response.CameraResponse
+import chat.sphinx.chat_common.BuildConfig
 import chat.sphinx.chat_common.R
 import chat.sphinx.chat_common.navigation.ChatNavigator
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
@@ -37,18 +42,29 @@ import chat.sphinx.kotlin_response.message
 import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.logger.e
 import chat.sphinx.resources.getRandomColor
-import chat.sphinx.wrapper_chat.*
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.ChatName
 import chat.sphinx.wrapper_chat.isConversation
+import chat.sphinx.wrapper_chat.isTribe
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.MessageUUID
 import chat.sphinx.wrapper_contact.Contact
-import chat.sphinx.wrapper_message.*
+import chat.sphinx.wrapper_message.GiphyData
+import chat.sphinx.wrapper_message.Message
+import chat.sphinx.wrapper_message.isDeleted
+import chat.sphinx.wrapper_message.isGroupAction
+import chat.sphinx.wrapper_message.retrieveTextToShow
 import chat.sphinx.wrapper_message_media.MediaType
 import chat.sphinx.wrapper_message_media.toMediaType
+import com.giphy.sdk.core.models.Media
+import com.giphy.sdk.ui.GPHContentType
+import com.giphy.sdk.ui.GPHSettings
+import com.giphy.sdk.ui.themes.GPHTheme
+import com.giphy.sdk.ui.themes.GridType
+import com.giphy.sdk.ui.utils.aspectRatio
+import com.giphy.sdk.ui.views.GiphyDialogFragment
 import io.matthewnelson.android_feature_viewmodel.MotionLayoutViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.android_feature_viewmodel.updateViewState
@@ -90,6 +106,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 {
     companion object {
         const val TAG = "ChatViewModel"
+        const val CONFIG_PLACE_HOLDER = "PLACE_HOLDER"
     }
 
     protected abstract val args: ARGS
@@ -170,7 +187,6 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         message: Message
     ): InitialHolderViewState
 
-    private var notify200Limit: Boolean = false
     internal val messageHolderViewStateFlow: StateFlow<List<MessageHolderViewState>> = flow {
         val chat = getChat()
         val chatName = getChatNameIfNull()
@@ -195,16 +211,6 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 
         messageRepository.getAllMessagesToShowByChatId(chat.id).distinctUntilChanged().collect { messages ->
             val newList = ArrayList<MessageHolderViewState>(messages.size)
-
-            if (messages.size > 199 && !notify200Limit) {
-                viewModelScope.launch(mainImmediate) {
-                    notify200Limit = true
-                    delay(2_000)
-                    submitSideEffect(ChatSideEffect.Notify(
-                        "Messages are temporarily limited to 200 for this chat"
-                    ))
-                }
-            }
 
             withContext(default) {
                 for (message in messages) {
@@ -336,6 +342,20 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         return msg
     }
 
+    /**
+     * Remotely and locally Deletes a [Message] through the [MessageRepository]
+     */
+    open fun deleteMessage(message: Message) {
+        viewModelScope.launch(mainImmediate) {
+            when (messageRepository.deleteMessage(message)) {
+                is Response.Error -> {
+                    submitSideEffect(ChatSideEffect.Notify("Failed to delete Message"))
+                }
+                is Response.Success -> {}
+            }
+        }
+    }
+
     private var toggleChatMutedJob: Job? = null
     private var notifyJob: Job? = null
     fun toggleChatMuted() {
@@ -426,6 +446,18 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                         } catch (e: Exception) {
 
                         }
+                    }
+                }
+            } else if (viewState is AttachmentSendViewState.PreviewGiphy) {
+
+                // Only delete the previous file in the event that a new pic is choosen
+                // to send when one is currently being previewed.
+                val current = viewStateFlow.value
+                if (current is AttachmentSendViewState.Preview) {
+                    try {
+                        current.file.delete()
+                    } catch (e: Exception) {
+
                     }
                 }
             }
@@ -556,12 +588,65 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     }
 
     @JvmSynthetic
-    internal fun chatMenuOptionGif() {
-        viewModelScope.launch(mainImmediate) {
-            submitSideEffect(
-                ChatSideEffect.Notify("Giphy search not implemented yet")
-            )
+    internal fun chatMenuOptionGif(parentFragmentManager: FragmentManager) {
+        if (BuildConfig.GIPHY_API_KEY != CONFIG_PLACE_HOLDER) {
+            val settings = GPHSettings(GridType.waterfall, GPHTheme.Dark)
+            settings.mediaTypeConfig = arrayOf(GPHContentType.gif, GPHContentType.sticker, GPHContentType.recents)
+
+            val giphyDialogFragment = GiphyDialogFragment.newInstance(settings, BuildConfig.GIPHY_API_KEY)
+
+            giphyDialogFragment.gifSelectionListener = object: GiphyDialogFragment.GifSelectionListener {
+                override fun didSearchTerm(term: String) { }
+
+                override fun onDismissed(selectedContentType: GPHContentType) {}
+
+                override fun onGifSelected(
+                    media: Media,
+                    searchTerm: String?,
+                    selectedContentType: GPHContentType
+                ) {
+                    updateViewState(ChatMenuViewState.Closed)
+                    val giphyData = GiphyData(media.id, "https://media.giphy.com/media/${media.id}/giphy.gif", media.aspectRatio.toDouble(), null)
+
+                    updateAttachmentSendViewState(
+                        AttachmentSendViewState.PreviewGiphy(giphyData)
+                    )
+
+                    updateFooterViewState(FooterViewState.Attachment)
+                }
+            }
+            giphyDialogFragment.show(parentFragmentManager, "giphy_search")
+        } else {
+            viewModelScope.launch(mainImmediate) {
+                submitSideEffect(
+                    ChatSideEffect.Notify("Giphy search not available")
+                )
+            }
         }
+
+    }
+
+    @JvmSynthetic
+    internal val onIMEContent = InputConnectionCompat.OnCommitContentListener { inputContentInfo, flags, _ ->
+        val lacksPermission = (flags and InputConnectionCompat.INPUT_CONTENT_GRANT_READ_URI_PERMISSION) != 0
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1 && lacksPermission) {
+            try {
+                inputContentInfo.requestPermission()
+            } catch (e: java.lang.Exception) {
+                Log.e(TAG, "Failed to get content from IME", e)
+
+                viewModelScope.launch(mainImmediate) {
+                    submitSideEffect(
+                        ChatSideEffect.Notify("Require permission for this content")
+                    )
+                }
+                return@OnCommitContentListener false
+            }
+        }
+        handleActivityResultUri(inputContentInfo.contentUri)
+        inputContentInfo.releasePermission()
+        true
     }
 
     @JvmSynthetic

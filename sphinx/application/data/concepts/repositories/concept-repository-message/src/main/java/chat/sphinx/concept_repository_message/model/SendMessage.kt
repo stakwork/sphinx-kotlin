@@ -2,8 +2,8 @@ package chat.sphinx.concept_repository_message.model
 
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
+import chat.sphinx.wrapper_message.GiphyData
 import chat.sphinx.wrapper_message.ReplyUUID
-import java.io.File
 
 class SendMessage private constructor(
     val attachmentInfo: AttachmentInfo?,
@@ -11,6 +11,7 @@ class SendMessage private constructor(
     val contactId: ContactId?,
     val replyUUID: ReplyUUID?,
     val text: String?,
+    val giphyData: GiphyData? = null,
 ) {
 
     class Builder {
@@ -19,6 +20,7 @@ class SendMessage private constructor(
         private var attachmentInfo: AttachmentInfo? = null
         private var replyUUID: ReplyUUID?           = null
         private var text: String?                   = null
+        private var giphyData: GiphyData?           = null
 
         @Synchronized
         fun clear() {
@@ -27,6 +29,7 @@ class SendMessage private constructor(
             contactId = null
             replyUUID = null
             text = null
+            giphyData = null
         }
 
         @get:Synchronized
@@ -43,7 +46,8 @@ class SendMessage private constructor(
                                 return false
                             }
                         }                                   != null     ||
-                        !text.isNullOrEmpty()
+                        !text.isNullOrEmpty()                           ||
+                        giphyData != null
                     )                                                   &&
                     (
                         chatId                              != null     ||
@@ -84,6 +88,11 @@ class SendMessage private constructor(
             return this
         }
 
+        fun setGiphyData(giphyData: GiphyData?): Builder {
+            this.giphyData = giphyData
+            return this
+        }
+
         @Synchronized
         fun build(): SendMessage? =
             if (!isValid) {
@@ -95,6 +104,7 @@ class SendMessage private constructor(
                     contactId,
                     replyUUID,
                     text,
+                    giphyData?.let { GiphyData(it.id, it.url, it.aspect_ratio, text) },
                 )
             }
     }

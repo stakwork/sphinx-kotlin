@@ -25,6 +25,7 @@ git submodule update
 
 ## Building The App
 See [HERE](./docs/NOTIFICATIONS.md) to enable building Sphinx with FirebaseMessaging  
+See [HERE](./docs/GIPHY.md) to enable building Sphinx with the Giphy SDK
   
 Checkout branch `master`:
 ```bash

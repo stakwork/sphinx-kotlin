@@ -4,6 +4,7 @@ import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
 import chat.sphinx.chat_common.ui.viewstate.selected.MenuItemState
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.isConversation
+import chat.sphinx.wrapper_chat.isTribeOwnedByAccount
 import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_contact.Contact
@@ -240,6 +241,10 @@ internal sealed class MessageHolderViewState(
 
             if (message.isReplyAllowed) {
                 list.add(MenuItemState.Reply)
+            }
+
+            if (this is Sent || chat.isTribeOwnedByAccount(accountOwner().nodePubKey)) {
+                list.add(MenuItemState.Delete)
             }
 
             if (list.isEmpty()) {

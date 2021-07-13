@@ -15,6 +15,8 @@
  - Update `docs/CHANGELOG.md` with features/fixes
  - Ensure notification settings are as desired (with or without FirebaseMessaging)
      - See [HERE](./NOTIFICATIONS.md) for more info about Notifications
+ - Ensure Giphy API key is present in the root project's `local.properties`
+     - See [HERE](./docs/GIPHY.md) to enable building Sphinx with the Giphy SDK
  - Build the app to ensure no errors exist
  ```bash
  $ ./gradlew clean
@@ -54,6 +56,8 @@
  ```
  - Ensure notification settings are as desired (with or without FirebaseMessaging)
      - See [HERE](./NOTIFICATIONS.md) for more info about Notifications
+ - Ensure Giphy API key is present in the root project's `local.properties`
+     - See [HERE](./docs/GIPHY.md) to enable building Sphinx with the Giphy SDK
  - Perform a clean release build
  ```bash
  $ ./gradlew clean
