@@ -51,6 +51,7 @@ import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.MessageUUID
 import chat.sphinx.wrapper_contact.Contact
+import chat.sphinx.wrapper_message.GiphyData
 import chat.sphinx.wrapper_message.Message
 import chat.sphinx.wrapper_message.isDeleted
 import chat.sphinx.wrapper_message.isGroupAction
@@ -626,7 +627,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     }
 
     @JvmSynthetic
-    internal val onIMEContent = InputConnectionCompat.OnCommitContentListener { inputContentInfo, flags, opts ->
+    internal val onIMEContent = InputConnectionCompat.OnCommitContentListener { inputContentInfo, flags, _ ->
         val lacksPermission = (flags and InputConnectionCompat.INPUT_CONTENT_GRANT_READ_URI_PERMISSION) != 0
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1 && lacksPermission) {
