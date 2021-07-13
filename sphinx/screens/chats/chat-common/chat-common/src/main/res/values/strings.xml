@@ -78,6 +78,7 @@
     <!-- Send Attachment -->
     <string name="attachment_send_header_image">SEND IMAGE</string>
     <string name="attachment_send_header_video">SEND VIDEO</string>
+    <string name="attachment_send_header_giphy">SEND GIPHY</string>
 
     <!-- Exit Tribe -->
     <string name="delete_own_tribe_not_supported">Delete own tribe is not supported yet</string>

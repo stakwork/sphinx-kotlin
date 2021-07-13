@@ -2,6 +2,7 @@ plugins {
     id 'app.cash.exhaustive'
     id 'com.android.library'
     id 'kotlin-android'
+    id 'com.google.android.secrets-gradle-plugin' version '1.1.0'
 }
 
 android {
@@ -55,4 +56,12 @@ dependencies {
     implementation deps.androidx.lifecycle.hilt
 
     implementation deps.square.okio
+
+    implementation deps.giphy.sdk
+}
+
+secrets {
+    // A properties file containing default secret values. This file can be checked in version
+    // control.
+    defaultPropertiesFileName = 'local.defaults.properties'
 }

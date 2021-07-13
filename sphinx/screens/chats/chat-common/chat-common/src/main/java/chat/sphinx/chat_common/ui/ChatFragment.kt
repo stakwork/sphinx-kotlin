@@ -151,6 +151,10 @@ abstract class ChatFragment<
                     viewModel.updateFooterViewState(FooterViewState.Default)
                     viewModel.deleteUnsentAttachment(attachmentViewState)
                 }
+                attachmentViewState is AttachmentSendViewState.PreviewGiphy -> {
+                    viewModel.updateAttachmentSendViewState(AttachmentSendViewState.Idle)
+                    viewModel.updateFooterViewState(FooterViewState.Default)
+                }
                 viewModel.getSelectedMessageViewStateFlow().value is SelectedMessageViewState.SelectedMessage -> {
                     viewModel.updateSelectedMessageViewState(SelectedMessageViewState.None)
                 }
@@ -182,7 +186,8 @@ abstract class ChatFragment<
             }
 
             layoutConstraintMenuOptionGif.setOnClickListener {
-                viewModel.chatMenuOptionGif()
+
+                viewModel.chatMenuOptionGif(parentFragmentManager)
             }
 
             layoutConstraintMenuOptionFile.setOnClickListener {
@@ -241,6 +246,9 @@ abstract class ChatFragment<
                             )
                         )
                     }
+                    is AttachmentSendViewState.PreviewGiphy -> {
+                        sendMessageBuilder.setGiphyData(attachmentViewState.giphyData)
+                    }
                 }
 
                 viewModel.sendMessage(sendMessageBuilder)?.let {
@@ -271,6 +279,8 @@ abstract class ChatFragment<
                     }
                 }
             }
+
+            editTextChatFooter.onCommitContentListener = viewModel.onIMEContent
         }
 
         replyingMessageBinding.apply {
@@ -344,6 +354,9 @@ abstract class ChatFragment<
                 val vs = viewModel.getAttachmentSendViewStateFlow().value
                 if (vs is AttachmentSendViewState.Preview) {
                     viewModel.deleteUnsentAttachment(vs)
+                    viewModel.updateFooterViewState(FooterViewState.Default)
+                    viewModel.updateAttachmentSendViewState(AttachmentSendViewState.Idle)
+                } else if (vs is AttachmentSendViewState.PreviewGiphy) {
                     viewModel.updateFooterViewState(FooterViewState.Default)
                     viewModel.updateAttachmentSendViewState(AttachmentSendViewState.Idle)
                 }
@@ -612,6 +625,18 @@ abstract class ChatFragment<
                             // will load almost immediately b/c it's a file, so
                             // no need to launch separate coroutine.
                             imageLoader.load(imageViewAttachmentSendPreview, viewState.file)
+                        }
+                        is AttachmentSendViewState.PreviewGiphy -> {
+
+                            textViewAttachmentSendHeaderName.apply {
+                                text = getString(R.string.attachment_send_header_giphy)
+                            }
+
+                            root.visible
+
+                            viewState.giphyData.retrieveImageUrlAndMessageMedia()?.let {
+                                imageLoader.load(imageViewAttachmentSendPreview, it.first)
+                            }
                         }
                     }
                 }

@@ -2,14 +2,19 @@ package chat.sphinx.chat_common.ui
 
 import android.app.Application
 import android.net.Uri
+import android.os.Build
+import android.util.Log
 import android.webkit.MimeTypeMap
 import androidx.annotation.CallSuper
+import androidx.core.view.inputmethod.InputConnectionCompat
+import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavArgs
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.camera_view_model_coordinator.request.CameraRequest
 import chat.sphinx.camera_view_model_coordinator.response.CameraResponse
+import chat.sphinx.chat_common.BuildConfig
 import chat.sphinx.chat_common.R
 import chat.sphinx.chat_common.navigation.ChatNavigator
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
@@ -52,6 +57,13 @@ import chat.sphinx.wrapper_message.isGroupAction
 import chat.sphinx.wrapper_message.retrieveTextToShow
 import chat.sphinx.wrapper_message_media.MediaType
 import chat.sphinx.wrapper_message_media.toMediaType
+import com.giphy.sdk.core.models.Media
+import com.giphy.sdk.ui.GPHContentType
+import com.giphy.sdk.ui.GPHSettings
+import com.giphy.sdk.ui.themes.GPHTheme
+import com.giphy.sdk.ui.themes.GridType
+import com.giphy.sdk.ui.utils.aspectRatio
+import com.giphy.sdk.ui.views.GiphyDialogFragment
 import io.matthewnelson.android_feature_viewmodel.MotionLayoutViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.android_feature_viewmodel.updateViewState
@@ -93,6 +105,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 {
     companion object {
         const val TAG = "ChatViewModel"
+        const val CONFIG_PLACE_HOLDER = "PLACE_HOLDER"
     }
 
     protected abstract val args: ARGS
@@ -445,6 +458,18 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                         }
                     }
                 }
+            } else if (viewState is AttachmentSendViewState.PreviewGiphy) {
+
+                // Only delete the previous file in the event that a new pic is choosen
+                // to send when one is currently being previewed.
+                val current = viewStateFlow.value
+                if (current is AttachmentSendViewState.Preview) {
+                    try {
+                        current.file.delete()
+                    } catch (e: Exception) {
+
+                    }
+                }
             }
 
             super.updateViewState(viewState)
@@ -573,12 +598,65 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     }
 
     @JvmSynthetic
-    internal fun chatMenuOptionGif() {
-        viewModelScope.launch(mainImmediate) {
-            submitSideEffect(
-                ChatSideEffect.Notify("Giphy search not implemented yet")
-            )
+    internal fun chatMenuOptionGif(parentFragmentManager: FragmentManager) {
+        if (BuildConfig.GIPHY_API_KEY != CONFIG_PLACE_HOLDER) {
+            val settings = GPHSettings(GridType.waterfall, GPHTheme.Dark)
+            settings.mediaTypeConfig = arrayOf(GPHContentType.gif, GPHContentType.sticker, GPHContentType.recents)
+
+            val giphyDialogFragment = GiphyDialogFragment.newInstance(settings, BuildConfig.GIPHY_API_KEY)
+
+            giphyDialogFragment.gifSelectionListener = object: GiphyDialogFragment.GifSelectionListener {
+                override fun didSearchTerm(term: String) { }
+
+                override fun onDismissed(selectedContentType: GPHContentType) {}
+
+                override fun onGifSelected(
+                    media: Media,
+                    searchTerm: String?,
+                    selectedContentType: GPHContentType
+                ) {
+                    updateViewState(ChatMenuViewState.Closed)
+                    val giphyData = GiphyData(media.id, "https://media.giphy.com/media/${media.id}/giphy.gif", media.aspectRatio.toDouble(), null)
+
+                    updateAttachmentSendViewState(
+                        AttachmentSendViewState.PreviewGiphy(giphyData)
+                    )
+
+                    updateFooterViewState(FooterViewState.Attachment)
+                }
+            }
+            giphyDialogFragment.show(parentFragmentManager, "giphy_search")
+        } else {
+            viewModelScope.launch(mainImmediate) {
+                submitSideEffect(
+                    ChatSideEffect.Notify("Giphy search not available")
+                )
+            }
         }
+
+    }
+
+    @JvmSynthetic
+    internal val onIMEContent = InputConnectionCompat.OnCommitContentListener { inputContentInfo, flags, opts ->
+        val lacksPermission = (flags and InputConnectionCompat.INPUT_CONTENT_GRANT_READ_URI_PERMISSION) != 0
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1 && lacksPermission) {
+            try {
+                inputContentInfo.requestPermission()
+            } catch (e: java.lang.Exception) {
+                Log.e(TAG, "Failed to get content from IME", e)
+
+                viewModelScope.launch(mainImmediate) {
+                    submitSideEffect(
+                        ChatSideEffect.Notify("Require permission for this content")
+                    )
+                }
+                return@OnCommitContentListener false
+            }
+        }
+        handleActivityResultUri(inputContentInfo.contentUri)
+        inputContentInfo.releasePermission()
+        true
     }
 
     @JvmSynthetic
