@@ -68,10 +68,7 @@ import chat.sphinx.wrapper_invite.Invite
 import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_lightning.NodeBalanceAll
 import chat.sphinx.wrapper_message.*
-import chat.sphinx.wrapper_message_media.MediaKey
-import chat.sphinx.wrapper_message_media.MediaKeyDecrypted
-import chat.sphinx.wrapper_message_media.MediaToken
-import chat.sphinx.wrapper_message_media.toMediaKeyDecrypted
+import chat.sphinx.wrapper_message_media.*
 import chat.sphinx.wrapper_message_media.token.MediaHost
 import chat.sphinx.wrapper_rsa.RsaPrivateKey
 import chat.sphinx.wrapper_rsa.RsaPublicKey
@@ -89,6 +86,7 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import java.io.InputStream
 import java.text.ParseException
 import kotlin.collections.ArrayList
 import kotlin.math.absoluteValue
@@ -827,6 +825,16 @@ abstract class SphinxRepository(
         } catch (e: Exception) {}
 
         return response
+    }
+
+    override suspend fun updateOwnerProfilePic(
+        stream: InputStream,
+        mediaType: MediaType,
+        fileName: String,
+        extension: String
+    ): Response<Any, ResponseError> {
+        // TODO: Implement
+        return Response.Error(ResponseError("Not Implemented"))
     }
 
     /////////////////

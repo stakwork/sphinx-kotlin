@@ -222,6 +222,23 @@ internal class ProfileViewModel @Inject constructor(
 
                             if (stream != null) {
                                 viewModelScope.launch(mainImmediate) {
+                                    val repoResponse = contactRepository.updateOwnerProfilePic(
+                                        stream,
+                                        mediaType,
+                                        response.value.value.name,
+                                        ext
+                                    )
+
+                                    @Exhaustive
+                                    when (repoResponse) {
+                                        is Response.Error -> {
+
+                                        }
+                                        is Response.Success -> {
+
+                                        }
+                                    }
+
                                     // TODO:
                                     //  - Use stream, MediaType, filename, extension
                                     //  - Delete file from cache on success
@@ -274,6 +291,22 @@ internal class ProfileViewModel @Inject constructor(
 
                             if (stream != null) {
                                 viewModelScope.launch(mainImmediate) {
+                                    val repoResponse = contactRepository.updateOwnerProfilePic(
+                                        stream,
+                                        mType,
+                                        "image",
+                                        ext
+                                    )
+
+                                    @Exhaustive
+                                    when (repoResponse) {
+                                        is Response.Error -> {
+
+                                        }
+                                        is Response.Success -> {
+
+                                        }
+                                    }
                                     // TODO: Use stream, MediaType, filename, extension
 
                                     // TODO: On success
