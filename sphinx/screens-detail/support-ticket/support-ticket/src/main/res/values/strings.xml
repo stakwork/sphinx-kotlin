@@ -7,5 +7,5 @@
     <string name="message_required">Message required</string>
     <string name="fetch_logs_failed">Failed to fetch logs</string>
     <string name="copy_logs_failed">Failed to fetch logs</string>
-    <string name="no_logs_to_copy">No logs to copy</string>
+    <string name="no_logs_loaded">No logs loaded</string>
 </resources>

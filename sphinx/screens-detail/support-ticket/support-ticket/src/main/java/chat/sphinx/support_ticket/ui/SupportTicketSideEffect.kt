@@ -15,13 +15,13 @@ internal sealed class  SupportTicketSideEffect: SideEffect<Context>()  {
 
     object FailedToFetchLogs: SupportTicketSideEffect() {
         override suspend fun execute(value: Context) {
-            SphinxToastUtils(true).show(value, R.string.fetch_logs_failed)
+            SphinxToastUtils(false).show(value, R.string.fetch_logs_failed)
         }
     }
 
     object NoLogsToCopy: SupportTicketSideEffect() {
         override suspend fun execute(value: Context) {
-            SphinxToastUtils(true).show(value, R.string.no_logs_to_copy)
+            SphinxToastUtils(true).show(value, R.string.no_logs_loaded)
         }
     }
 }

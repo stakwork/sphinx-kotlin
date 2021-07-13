@@ -13,9 +13,12 @@ import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.support_ticket.R
 import chat.sphinx.support_ticket.databinding.*
+import chat.sphinx.support_ticket.ui.viewstate.LogsViewState
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import javax.annotation.meta.Exhaustive
 
 
 @AndroidEntryPoint
@@ -71,26 +74,21 @@ internal class SupportTicketFragment: SideEffectFragment<
     }
 
     private fun setupSupportTicketFunctionality() {
-        layoutLogsTextBinding.apply {
-            viewModel.loadLogs(logsTextView)
-            copyLogsButton.root.setOnClickListener {
-                if (logsTextView.text.isNullOrEmpty()) {
-                    viewModel.showNoLogsToCopyMessage()
-                } else {
-                    context?.let {
-                        val clipboard: ClipboardManager = it.getSystemService(
-                            ClipboardManager::class.java
-                        )
-                        val clip = ClipData.newPlainText("Copied Logs", logsTextView.text)
-                        clipboard.setPrimaryClip(clip)
-                    }
+        copyLogsButton.root.setOnClickListener {
+            viewModel.loadedLogs()?.let { logs ->
+                context?.let {
+                    val clipboard: ClipboardManager = it.getSystemService(
+                        ClipboardManager::class.java
+                    )
+                    val clip = ClipData.newPlainText("Copied Logs", logs)
+                    clipboard.setPrimaryClip(clip)
                 }
             }
+        }
 
-            sendMessageButton.root.setOnClickListener {
-                viewModel.onSendMessage(includeSupportTicketLayout.supportTicketMessageText.text, logsTextView.text)?.let {
-                    startActivity(it)
-                }
+        sendMessageButton.root.setOnClickListener {
+            viewModel.onSendMessage(includeSupportTicketLayout.supportTicketMessageText.text)?.let {
+                startActivity(it)
             }
         }
     }
@@ -101,5 +99,26 @@ internal class SupportTicketFragment: SideEffectFragment<
 
     override suspend fun onSideEffectCollect(sideEffect: SupportTicketSideEffect) {
         sideEffect.execute(requireActivity())
+    }
+
+    override fun onStart() {
+        super.onStart()
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.getLogsViewStateFlow().collect { viewState ->
+                layoutLogsTextBinding.apply {
+                    @Exhaustive
+                    when(viewState) {
+                        is LogsViewState.Empty -> {
+                            logsTextView.text = ""
+                        }
+                        is LogsViewState.Fetched -> {
+                            logsTextView.text = viewState.logs
+                        }
+                    }
+                }
+            }
+        }
+        viewModel.loadLogs()
     }
 }
