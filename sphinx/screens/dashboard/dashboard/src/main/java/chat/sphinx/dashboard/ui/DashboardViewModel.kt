@@ -465,6 +465,15 @@ internal class DashboardViewModel @Inject constructor(
     }
 
     suspend fun payForInvite(invite: Invite) {
+        getAccountBalance().firstOrNull()?.let { balance ->
+            if (balance.balance.value < (invite.price?.value ?: 0)) {
+                submitSideEffect(
+                    DashboardSideEffect.Notify(app.getString(R.string.pay_invite_balance_too_low))
+                )
+                return
+            }
+        }
+
         submitSideEffect(
             DashboardSideEffect.AlertConfirmPayInvite(invite.price?.value ?: 0) {
                 viewModelScope.launch(mainImmediate) {

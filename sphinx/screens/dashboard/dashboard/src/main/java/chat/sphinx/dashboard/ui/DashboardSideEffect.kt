@@ -11,7 +11,7 @@ sealed class DashboardSideEffect: SideEffect<Context>() {
 
     class Notify(
         private val msg: String,
-        private val notificationLengthLong: Boolean = true
+        private val notificationLengthLong: Boolean = false
     ): DashboardSideEffect() {
         override suspend fun execute(value: Context) {
             SphinxToastUtils(toastLengthLong = notificationLengthLong).show(value, msg)
