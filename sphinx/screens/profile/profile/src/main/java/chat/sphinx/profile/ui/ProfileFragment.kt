@@ -85,14 +85,14 @@ internal class ProfileFragment: SideEffectFragment<
                         text = R.string.profile_menu_option_camera,
                         textColor = R.color.primaryBlueFontColor,
                         onClick = {
-                            // TODO: Implement
+                            viewModel.menuBottomProfilePicCamera()
                         }
                     ),
                     MenuBottomOption(
                         text = R.string.profile_menu_option_photo_library,
                         textColor = R.color.primaryBlueFontColor,
                         onClick = {
-                            // TODO: Implement
+                            viewModel.bottomMenuProfilePicPhotoLibrary()
                         }
                     )
                 )

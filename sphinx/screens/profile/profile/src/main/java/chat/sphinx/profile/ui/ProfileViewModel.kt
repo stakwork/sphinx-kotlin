@@ -1,12 +1,18 @@
 package chat.sphinx.profile.ui
 
+import android.app.Application
 import android.content.Context
+import android.net.Uri
+import android.webkit.MimeTypeMap
 import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
+import chat.sphinx.camera_view_model_coordinator.request.CameraRequest
+import chat.sphinx.camera_view_model_coordinator.response.CameraResponse
 import chat.sphinx.concept_background_login.BackgroundLoginHandler
 import chat.sphinx.concept_relay.RelayDataHandler
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_lightning.LightningRepository
+import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.menu_bottom.ui.MenuBottomViewState
@@ -14,6 +20,8 @@ import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_contact.PrivatePhoto
 import chat.sphinx.wrapper_lightning.NodeBalance
+import chat.sphinx.wrapper_message_media.MediaType
+import chat.sphinx.wrapper_message_media.toMediaType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
@@ -35,13 +43,17 @@ import kotlinx.coroutines.launch
 import okio.base64.encodeBase64
 import org.cryptonode.jncryptor.AES256JNCryptor
 import org.cryptonode.jncryptor.CryptorException
+import java.io.FileInputStream
+import java.io.InputStream
 import javax.inject.Inject
 
 @HiltViewModel
 internal class ProfileViewModel @Inject constructor(
     dispatchers: CoroutineDispatchers,
+    private val app: Application,
     private val authenticationCoordinator: AuthenticationCoordinator,
     private val backgroundLoginHandler: BackgroundLoginHandler,
+    private val cameraCoordinator: ViewModelCoordinator<CameraRequest, CameraResponse>,
     private val contactRepository: ContactRepository,
     private val lightningRepository: LightningRepository,
     private val relayDataHandler: RelayDataHandler,
@@ -174,6 +186,119 @@ internal class ProfileViewModel @Inject constructor(
             submitSideEffect(ProfileSideEffect.BackupKeysFailed)
         } catch (e: IllegalArgumentException) {
             submitSideEffect(ProfileSideEffect.BackupKeysFailed)
+        }
+    }
+
+    private var cameraJob: Job? = null
+
+    @Suppress("BlockingMethodInNonBlockingContext")
+    fun menuBottomProfilePicCamera() {
+        if (cameraJob?.isActive == true) {
+            return
+        }
+
+        cameraJob = viewModelScope.launch(mainImmediate) {
+            val response = cameraCoordinator.submitRequest(CameraRequest)
+
+            @Exhaustive
+            when (response) {
+                is Response.Error -> {
+
+                }
+                is Response.Success -> {
+
+                    @Exhaustive
+                    when (response.value) {
+                        is CameraResponse.Image -> {
+                            val ext = response.value.value.extension
+                            val mediaType = MediaType.Image(MediaType.IMAGE + "/$ext")
+
+                            val stream: FileInputStream? = try {
+                                FileInputStream(response.value.value)
+                            } catch (e: Exception) {
+                                // TODO: Handle error
+                                null
+                            }
+
+                            if (stream != null) {
+                                viewModelScope.launch(mainImmediate) {
+                                    // TODO:
+                                    //  - Use stream, MediaType, filename, extension
+                                    //  - Delete file from cache on success
+
+                                    // TODO: On success
+                                    profileMenuViewStateContainer.updateViewState(MenuBottomViewState.Closed)
+
+                                    // TODO: Remove upon implementation
+                                    try {
+                                        stream.close()
+                                    } catch (e: Exception) {}
+
+                                    response.value.value.delete()
+                                }.join()
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    fun bottomMenuProfilePicPhotoLibrary() {
+        // TODO: Implement
+    }
+
+    @Suppress("BlockingMethodInNonBlockingContext")
+    fun handleActivityResultUri(uri: Uri?) {
+        if (uri == null) {
+            return
+        }
+
+        val cr = app.contentResolver
+
+        cr.getType(uri)?.let { crType ->
+
+            MimeTypeMap.getSingleton().getExtensionFromMimeType(crType)?.let { ext ->
+
+                crType.toMediaType().let { mType ->
+
+                    @Exhaustive
+                    when (mType) {
+                        is MediaType.Image -> {
+                            val stream: InputStream? = try {
+                                cr.openInputStream(uri)
+                            } catch (e: Exception) {
+                                // TODO: Handle Error
+                                null
+                            }
+
+                            if (stream != null) {
+                                viewModelScope.launch(mainImmediate) {
+                                    // TODO: Use stream, MediaType, filename, extension
+
+                                    // TODO: On success
+                                    profileMenuViewStateContainer.updateViewState(MenuBottomViewState.Closed)
+
+                                    // TODO: Remove upon implementation
+                                    try {
+                                        stream.close()
+                                    } catch (e: Exception) {}
+                                }
+                            }
+                        }
+                        is MediaType.Audio,
+                        is MediaType.Pdf,
+                        is MediaType.Text,
+                        is MediaType.Unknown,
+                        is MediaType.Video -> {
+                            // do nothing
+                        }
+                    }
+
+                }
+
+            }
+
         }
     }
 
