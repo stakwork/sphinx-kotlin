@@ -9,7 +9,7 @@ interface MenuBottomItem {
     val onClick: (() -> Unit)?
 }
 
-open class MenuBottomOption(
+class MenuBottomOption(
     @StringRes
     override val text: Int,
 

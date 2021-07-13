@@ -6,8 +6,6 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.SeekBar
 import androidx.activity.OnBackPressedCallback
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.viewModels
@@ -21,9 +19,8 @@ import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.insetter_activity.addStatusBarPadding
-import chat.sphinx.menu_bottom.model.MenuBottomOption
-import chat.sphinx.menu_bottom.ui.BottomMenu
 import chat.sphinx.menu_bottom.ui.MenuBottomViewState
+import chat.sphinx.menu_bottom_profile_pic.BottomMenuProfilePic
 import chat.sphinx.profile.R
 import chat.sphinx.profile.databinding.FragmentProfileBinding
 import chat.sphinx.profile.navigation.ProfileNavigator
@@ -62,16 +59,11 @@ internal class ProfileFragment: SideEffectFragment<
     @Suppress("ProtectedInFinal")
     protected lateinit var profileNavigator: ProfileNavigator
 
-    private val contentChooserContract: ActivityResultLauncher<String> =
-        registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-            viewModel.handleActivityResultUri(uri)
-        }
-
-    private val bottomMenu: BottomMenu by lazy(LazyThreadSafetyMode.NONE) {
-        BottomMenu(
-            viewModel.dispatchers,
+    private val bottomMenuProfilePic: BottomMenuProfilePic by lazy(LazyThreadSafetyMode.NONE) {
+        BottomMenuProfilePic(
+            this,
             onStopSupervisor,
-            viewModel.profileMenuViewStateContainer,
+            viewModel
         )
     }
 
@@ -84,27 +76,7 @@ internal class ProfileFragment: SideEffectFragment<
         setupProfileTabs()
         setupProfile()
 
-        bottomMenu.newBuilder(binding.includeLayoutMenuBottomProfilePic, viewLifecycleOwner)
-            .setHeaderText(R.string.profile_menu_header_text)
-            .setOptions(
-                setOf(
-                    MenuBottomOption(
-                        text = R.string.profile_menu_option_camera,
-                        textColor = R.color.primaryBlueFontColor,
-                        onClick = {
-                            viewModel.menuBottomProfilePicCamera()
-                        }
-                    ),
-                    MenuBottomOption(
-                        text = R.string.profile_menu_option_photo_library,
-                        textColor = R.color.primaryBlueFontColor,
-                        onClick = {
-                            contentChooserContract.launch("image/*")
-                        }
-                    )
-                )
-            )
-            .build()
+        bottomMenuProfilePic.initialize(binding.includeLayoutMenuBottomProfilePic, viewLifecycleOwner)
     }
 
     private inner class BackPressHandler(
@@ -122,8 +94,8 @@ internal class ProfileFragment: SideEffectFragment<
         }
 
         override fun handleOnBackPressed() {
-            if (viewModel.profileMenuViewStateContainer.value is MenuBottomViewState.Open) {
-                viewModel.profileMenuViewStateContainer.updateViewState(MenuBottomViewState.Closed)
+            if (viewModel.profilePicMenuHandler.viewStateContainer.value is MenuBottomViewState.Open) {
+                viewModel.profilePicMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Closed)
             } else {
                 lifecycleScope.launch(viewModel.mainImmediate) {
                     profileNavigator.popBackStack()
@@ -150,7 +122,7 @@ internal class ProfileFragment: SideEffectFragment<
                 )
 
             includeProfileNamePictureHolder.imageViewProfilePicture.setOnClickListener {
-                viewModel.profileMenuViewStateContainer.updateViewState(MenuBottomViewState.Open)
+                viewModel.profilePicMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Open)
             }
 
             includeProfileHeader.apply {

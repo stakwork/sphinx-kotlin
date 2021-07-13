@@ -24,9 +24,4 @@
     <string name="side_effect_wrong_pin">Wrong PIN provided</string>
     <string name="side_effect_backup_keys_failed">Backup keys failed</string>
     <string name="profile_qr_code_header_name">PUBLIC KEY</string>
-
-    <!-- Menu -->
-    <string name="profile_menu_header_text">Profile Picture</string>
-    <string name="profile_menu_option_camera">Camera</string>
-    <string name="profile_menu_option_photo_library">Photo Library</string>
 </resources>

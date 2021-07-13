@@ -39,7 +39,7 @@ dependencies {
     // Sphinx
     implementation project(path: ':sphinx:activity:insetter-activity')
 
-    implementation project(path: ':sphinx:application:common:menus:menu-bottom')
+    implementation project(path: ':sphinx:application:common:menus:menu-bottom-profile-pic')
     implementation project(path: ':sphinx:application:common:wrappers:wrapper-message-media')
 
     implementation project(path: ':sphinx:application:data:concepts:concept-background-login')
