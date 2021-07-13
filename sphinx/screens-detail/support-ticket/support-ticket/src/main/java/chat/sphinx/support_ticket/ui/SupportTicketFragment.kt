@@ -13,9 +13,10 @@ import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.support_ticket.R
 import chat.sphinx.support_ticket.databinding.*
-import chat.sphinx.support_ticket.ui.viewstate.LogsViewState
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
+import io.matthewnelson.android_feature_screens.util.gone
+import io.matthewnelson.android_feature_screens.util.visible
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.annotation.meta.Exhaustive
@@ -66,11 +67,9 @@ internal class SupportTicketFragment: SideEffectFragment<
 
     private fun setupFragmentLayout() {
         val activity = (requireActivity() as InsetterActivity)
-        binding.apply {
-            activity.addNavigationBarPadding(
-                includeSupportTicketLayout.layoutConstraintSupportTicket
-            )
-        }
+        activity.addNavigationBarPadding(
+            includeSupportTicketLayout.layoutConstraintSupportTicket
+        )
     }
 
     private fun setupSupportTicketFunctionality() {
@@ -82,6 +81,7 @@ internal class SupportTicketFragment: SideEffectFragment<
                     )
                     val clip = ClipData.newPlainText("Copied Logs", logs)
                     clipboard.setPrimaryClip(clip)
+                    viewModel.showLogsCopiedToast()
                 }
             }
         }
@@ -91,6 +91,8 @@ internal class SupportTicketFragment: SideEffectFragment<
                 startActivity(it)
             }
         }
+
+        viewModel.loadLogs()
     }
 
     override suspend fun onViewStateFlowCollect(viewState: SupportTicketViewState) {
@@ -109,16 +111,20 @@ internal class SupportTicketFragment: SideEffectFragment<
                 layoutLogsTextBinding.apply {
                     @Exhaustive
                     when(viewState) {
-                        is LogsViewState.Empty -> {
+                        is SupportTicketViewState.Empty -> {
                             logsTextView.text = ""
+                            includeSupportTicketLayout.progressBarLoadingLogs.gone
                         }
-                        is LogsViewState.Fetched -> {
+                        is SupportTicketViewState.Fetched -> {
                             logsTextView.text = viewState.logs
+                            includeSupportTicketLayout.progressBarLoadingLogs.gone
+                        }
+                        SupportTicketViewState.LoadingLogs -> {
+                            includeSupportTicketLayout.progressBarLoadingLogs.visible
                         }
                     }
                 }
             }
         }
-        viewModel.loadLogs()
     }
 }

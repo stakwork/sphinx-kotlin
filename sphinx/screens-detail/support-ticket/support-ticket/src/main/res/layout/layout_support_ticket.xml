@@ -37,6 +37,22 @@
         app:layout_constraintStart_toStartOf="parent"
         />
 
+    <ProgressBar
+        android:id="@+id/progress_bar_loading_logs"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        style="?android:attr/progressBarStyle"
+        android:indeterminateTint="@android:color/white"
+        android:indeterminate="true"
+        android:visibility="gone"
+        android:layout_marginEnd="@dimen/default_half_layout_margin"
+        app:layout_constraintTop_toBottomOf="@+id/support_ticket_message_text"
+        app:layout_constraintBottom_toTopOf="@+id/include_button_send_message"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:visibility="visible"
+        />
+
     <include
         android:id="@+id/include_button_send_message"
         layout="@layout/layout_button_send_message"

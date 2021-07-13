@@ -9,7 +9,6 @@ import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.support_ticket.navigation.SupportTicketNavigator
-import chat.sphinx.support_ticket.ui.viewstate.LogsViewState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
@@ -30,24 +29,25 @@ internal class SupportTicketViewModel @Inject constructor(
 ): SideEffectViewModel<
         Context,
         SupportTicketSideEffect,
-        SupportTicketViewState>(dispatchers, SupportTicketViewState.Idle)
+        SupportTicketViewState>(dispatchers, SupportTicketViewState.Empty)
 {
-    private inner class LogsStateContainer: ViewStateContainer<LogsViewState>(LogsViewState.Empty)
+    private inner class LogsStateContainer: ViewStateContainer<SupportTicketViewState>(SupportTicketViewState.Empty)
 
-    private val logsStateContainer: ViewStateContainer<LogsViewState> by lazy {
+    private val logsStateContainer: ViewStateContainer<SupportTicketViewState> by lazy {
         LogsStateContainer()
     }
 
     @JvmSynthetic
-    internal fun getLogsViewStateFlow(): StateFlow<LogsViewState> =
+    internal fun getLogsViewStateFlow(): StateFlow<SupportTicketViewState> =
         logsStateContainer.viewStateFlow
 
     @JvmSynthetic
-    internal fun updateLogsSendViewState(viewState: LogsViewState) {
+    internal fun updateLogsSendViewState(viewState: SupportTicketViewState) {
         logsStateContainer.updateViewState(viewState)
     }
 
     fun loadLogs() {
+        updateLogsSendViewState(SupportTicketViewState.LoadingLogs)
         viewModelScope.launch(mainImmediate) {
             networkQueryLightning.getLogs().collect { loadedResponse ->
                 @Exhaustive
@@ -55,27 +55,36 @@ internal class SupportTicketViewModel @Inject constructor(
                     is LoadResponse.Loading -> {}
                     is Response.Error -> {
                         submitSideEffect(SupportTicketSideEffect.FailedToFetchLogs)
-                        updateLogsSendViewState(LogsViewState.Empty)
+                        updateLogsSendViewState(SupportTicketViewState.Empty)
                     }
                     is Response.Success -> {
-                        updateLogsSendViewState(LogsViewState.Fetched(loadedResponse.value))
+                        updateLogsSendViewState(SupportTicketViewState.Fetched(loadedResponse.value))
                     }
                 }
             }
         }
     }
 
+    fun showLogsCopiedToast() {
+        viewModelScope.launch(mainImmediate) {
+            submitSideEffect(SupportTicketSideEffect.LogsCopiedToClipboard)
+        }
+    }
+
     fun loadedLogs(): String? {
         logsStateContainer.value.let { logsViewState ->
             return when (logsViewState) {
-                is LogsViewState.Empty -> {
+                is SupportTicketViewState.Empty -> {
                     viewModelScope.launch(mainImmediate) {
-                        submitSideEffect(SupportTicketSideEffect.NoLogsToCopy)
+                        submitSideEffect(SupportTicketSideEffect.NoLogsLoaded)
                     }
                     null
                 }
-                is LogsViewState.Fetched -> {
+                is SupportTicketViewState.Fetched -> {
                     logsViewState.logs
+                }
+                SupportTicketViewState.LoadingLogs -> {
+                    null
                 }
             }
         }
@@ -85,12 +94,16 @@ internal class SupportTicketViewModel @Inject constructor(
         logsStateContainer.value.let { logsViewState ->
             return if (!text.isNullOrEmpty()) {
                 val body = when(logsViewState) {
-                    LogsViewState.Empty -> {
+                    is SupportTicketViewState.Empty -> {
                         text
                     }
-                    is LogsViewState.Fetched -> {
+                    is SupportTicketViewState.LoadingLogs -> {
+                        text
+                    }
+                    is SupportTicketViewState.Fetched -> {
                         "$text\n\n\n${logsViewState.logs}"
                     }
+
                 }
 
                 Intent(Intent.ACTION_SENDTO).apply {

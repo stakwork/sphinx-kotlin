@@ -19,9 +19,15 @@ internal sealed class  SupportTicketSideEffect: SideEffect<Context>()  {
         }
     }
 
-    object NoLogsToCopy: SupportTicketSideEffect() {
+    object NoLogsLoaded: SupportTicketSideEffect() {
         override suspend fun execute(value: Context) {
             SphinxToastUtils(true).show(value, R.string.no_logs_loaded)
+        }
+    }
+
+    object LogsCopiedToClipboard: SupportTicketSideEffect() {
+        override suspend fun execute(value: Context) {
+            SphinxToastUtils(true).show(value, R.string.logs_copied_to_clipboard)
         }
     }
 }
