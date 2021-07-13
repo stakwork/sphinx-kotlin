@@ -96,6 +96,10 @@ class BottomMenu(
                     if (headerSubText != null) {
                         textViewMenuBottomHeaderSubtext.text = headerSubText
                     }
+
+                    layoutConstraintMenuBottomHeader.setOnClickListener {
+                        // disable click through
+                    }
                 }
 
                 // Options
