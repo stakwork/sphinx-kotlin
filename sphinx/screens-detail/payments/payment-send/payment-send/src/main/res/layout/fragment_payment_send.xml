@@ -56,7 +56,7 @@
         />
 
     <include
-        android:id="@+id/layout_amount_pad"
+        android:id="@+id/include_amount_pad"
         layout="@layout/layout_amount_pad"
         android:layout_width="match_parent"
         android:layout_height="0dp"
