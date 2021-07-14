@@ -22,201 +22,58 @@
         android:layout_height="@dimen/default_header_height"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/layout_constraint_from_contact"
+    <include
+        android:id="@+id/include_constraint_from_contact"
+        layout="@layout/layout_constraint_from_contact"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:visibility="invisible"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/include_payment_send_header">
+        app:layout_constraintTop_toBottomOf="@+id/include_payment_send_header"/>
 
-        <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/image_view_contact_picture"
-            android:layout_width="@dimen/from_to_contact_image_xy"
-            android:layout_height="@dimen/from_to_contact_image_xy"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"/>
-
-        <androidx.appcompat.widget.AppCompatTextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/to"
-            android:layout_marginLeft="@dimen/default_layout_margin"
-            android:fontFamily="@font/roboto_regular"
-            android:textSize="@dimen/from_to_contact_text_size"
-            android:textColor="@color/washedOutReceivedText"
-            app:layout_constraintStart_toEndOf="@+id/image_view_contact_picture"
-            app:layout_constraintTop_toTopOf="parent"/>
-
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/text_view_contact_name"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text=""
-            android:layout_marginLeft="@dimen/default_layout_margin"
-            android:fontFamily="@font/roboto_regular"
-            android:textSize="@dimen/from_to_contact_name_text_size"
-            android:textColor="@color/primaryText"
-            app:layout_constraintStart_toEndOf="@+id/image_view_contact_picture"
-            app:layout_constraintBottom_toBottomOf="parent"
-            tools:text="Tomas"/>
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/layout_constraint_amount"
+    <include
+        android:id="@+id/include_constraint_amount"
+        layout="@layout/layout_constraint_amount"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_from_contact"
-        app:layout_constraintBottom_toTopOf="@+id/layout_constraint_message">
+        app:layout_constraintTop_toBottomOf="@+id/include_constraint_from_contact"
+        app:layout_constraintBottom_toTopOf="@+id/include_constraint_message"
+        />
 
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/text_view_amount"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:hint="0"
-            android:singleLine="true"
-            android:textColor="@color/primaryText"
-            android:textColorHint="@color/placeholderTextInverted"
-            android:textSize="@dimen/amount_edit_text_text_size"
-            android:fontFamily="@font/roboto_regular"
-            android:backgroundTint="@android:color/transparent"
-            android:layout_marginHorizontal="70dp"
-            android:gravity="center"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
-
-        <androidx.appcompat.widget.AppCompatTextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:fontFamily="@font/roboto_light"
-            android:textSize="@dimen/amount_sat_text_view_text_size"
-            android:textColor="@color/secondaryText"
-            android:text="@string/sat"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/text_view_amount"/>
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/layout_constraint_message"
+    <include
+        android:id="@+id/include_constraint_message"
+        layout="@layout/layout_constraint_message"
         android:layout_width="match_parent"
         android:layout_height="@dimen/message_edit_text_container_height"
         android:paddingHorizontal="@dimen/container_horizontal_padding"
         android:visibility="visible"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_amount"
-        app:layout_constraintBottom_toTopOf="@+id/guide_v5">
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent">
-
-            <androidx.core.widget.NestedScrollView
-                android:id="@+id/scroll_view_edit_text"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent">
-
-                <androidx.appcompat.widget.AppCompatEditText
-                    android:id="@+id/edit_text_message"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:background="@null"
-                    android:inputType="textMultiLine"
-                    android:hint="@string/add_message_hint"
-                    android:singleLine="true"
-                    android:textColor="@color/primaryText"
-                    android:textColorHint="@color/placeholderTextInverted"
-                    android:textSize="@dimen/message_edit_text_text_size"
-                    android:fontFamily="@font/roboto_regular"
-                    android:backgroundTint="@android:color/transparent"
-                    android:textCursorDrawable="@drawable/cursor"
-                    android:gravity="center"
-                    android:maxLength="200"
-                    android:maxLines="4"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent" />
-
-            </androidx.core.widget.NestedScrollView>
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@color/placeholderTextInverted"
-                android:layout_marginTop="@dimen/message_edit_text_divider_top_margin"
-                app:layout_constraintTop_toBottomOf="@+id/scroll_view_edit_text"></View>
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        app:layout_constraintTop_toBottomOf="@+id/include_constraint_amount"
+        app:layout_constraintBottom_toTopOf="@+id/guide_v5"
+        />
 
     <include
         android:id="@+id/layout_amount_pad"
         layout="@layout/layout_amount_pad"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@+id/layout_constraint_confirm_button"
-        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_message"
+        app:layout_constraintBottom_toTopOf="@+id/include_constraint_confirm_button"
+        app:layout_constraintTop_toBottomOf="@+id/include_constraint_message"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/layout_constraint_confirm_button"
+    <include
+        android:id="@+id/include_constraint_confirm_button"
+        layout="@layout/layout_constraint_confirm_button"
         android:layout_width="match_parent"
         android:layout_height="@dimen/confirm_button_container_height"
         android:paddingHorizontal="@dimen/container_horizontal_padding"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent">
-
-        <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/button_confirm"
-            android:layout_width="@dimen/confirm_button_width"
-            android:layout_height="@dimen/confirm_button_height"
-            android:fontFamily="@font/montserrat_semi_bold"
-            android:text="@string/confirm_button"
-            android:textSize="@dimen/confirm_button_text_size"
-            android:textColor="@android:color/white"
-            android:background="@drawable/button_background_white_rad_48"
-            android:backgroundTint="@color/primaryBlue"
-            android:gravity="center"
-            android:visibility="gone"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toTopOf="parent"/>
-
-        <ProgressBar
-            android:id="@+id/confirm_progress"
-            android:layout_width="@dimen/confirm_button_progress_bar_xy"
-            android:layout_height="@dimen/confirm_button_progress_bar_xy"
-            android:layout_marginLeft="@dimen/default_half_layout_margin"
-            style="?android:attr/progressBarStyle"
-            android:indeterminateTint="@color/mainBottomIcons"
-            app:layout_constraintStart_toEndOf="@+id/button_confirm"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            android:indeterminate="true"
-            android:visibility="gone" />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        app:layout_constraintBottom_toBottomOf="parent"
+        />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

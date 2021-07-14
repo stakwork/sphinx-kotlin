@@ -1,4 +1,4 @@
-package chat.sphinx.payment_send.ui
+package chat.sphinx.payment_common.ui
 
 import android.os.Bundle
 import android.view.View
@@ -13,8 +13,8 @@ import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
-import chat.sphinx.payment_send.R
-import chat.sphinx.payment_send.databinding.FragmentPaymentSendBinding
+import chat.sphinx.payment_common.R
+import chat.sphinx.payment_common.databinding.FragmentPaymentCommonBinding
 import chat.sphinx.wrapper_contact.Contact
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
@@ -28,13 +28,13 @@ import javax.annotation.meta.Exhaustive
 import javax.inject.Inject
 
 @AndroidEntryPoint
-internal class PaymentSendFragment: SideEffectFragment<
+internal class PaymentFragment: SideEffectFragment<
         FragmentActivity,
         PaymentSendSideEffect,
         PaymentSendViewState,
         PaymentSendViewModel,
-        FragmentPaymentSendBinding
-        >(R.layout.fragment_payment_send)
+        FragmentPaymentCommonBinding
+        >(R.layout.fragment_payment_common)
 {
 
     @Inject
@@ -42,14 +42,14 @@ internal class PaymentSendFragment: SideEffectFragment<
     protected lateinit var imageLoader: ImageLoader<ImageView>
 
     override val viewModel: PaymentSendViewModel by viewModels()
-    override val binding: FragmentPaymentSendBinding by viewBinding(FragmentPaymentSendBinding::bind)
+    override val binding: FragmentPaymentCommonBinding by viewBinding(FragmentPaymentCommonBinding::bind)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         binding.apply {
             includePaymentSendHeader.apply {
-                textViewDetailScreenHeaderName.text = getString(R.string.payment_send_header_name)
+                textViewDetailScreenHeaderName.text = getString(R.string.payment_common_header_name)
                 textViewDetailScreenClose.setOnClickListener {
                     lifecycleScope.launch(viewModel.mainImmediate) {
                         viewModel.navigator.closeDetailScreen()
@@ -57,9 +57,9 @@ internal class PaymentSendFragment: SideEffectFragment<
                 }
             }
 
-            includeConstraintConfirmButton.buttonConfirm.setOnClickListener {
-                viewModel.sendContactPayment(includeConstraintMessage.editTextMessage.text?.toString())
-            }
+//            binding.buttonConfirm.setOnClickListener {
+//                viewModel.sendContactPayment(editTextMessage.text?.toString())
+//            }
         }
 
         setupFooter()
@@ -72,30 +72,33 @@ internal class PaymentSendFragment: SideEffectFragment<
     }
 
     private fun setupDestination(contact: Contact) {
-        binding.apply {
-            contact.alias?.value?.let { alias ->
-                includeConstraintFromContact.textViewContactName.text = alias
-            }
 
-            lifecycleScope.launch(viewModel.mainImmediate) {
-                contact.photoUrl?.value?.let { img ->
-                    if (img.isNotEmpty()) {
-                        imageLoader.load(
-                            includeConstraintFromContact.imageViewContactPicture,
-                            img,
-                            ImageLoaderOptions.Builder()
-                                .placeholderResId(R.drawable.ic_profile_avatar_circle)
-                                .transformation(Transformation.CircleCrop)
-                                .build()
+        binding.apply {
+            includeConstraintFromContact.apply {
+                contact.alias?.value?.let { alias ->
+                    textViewContactName.text = alias
+                }
+
+                lifecycleScope.launch(viewModel.mainImmediate) {
+                    contact.photoUrl?.value?.let { img ->
+                        if (img.isNotEmpty()) {
+                            imageLoader.load(
+                                imageViewContactPicture,
+                                img,
+                                ImageLoaderOptions.Builder()
+                                    .placeholderResId(R.drawable.ic_profile_avatar_circle)
+                                    .transformation(Transformation.CircleCrop)
+                                    .build()
+                            )
+                        }
+                    } ?: imageViewContactPicture
+                        .setImageDrawable(
+                            ContextCompat.getDrawable(
+                                binding.root.context,
+                                R.drawable.ic_profile_avatar_circle
+                            )
                         )
-                    }
-                } ?: includeConstraintFromContact.imageViewContactPicture
-                    .setImageDrawable(
-                        ContextCompat.getDrawable(
-                            binding.root.context,
-                            R.drawable.ic_profile_avatar_circle
-                        )
-                    )
+                }
             }
         }
     }
@@ -148,7 +151,7 @@ internal class PaymentSendFragment: SideEffectFragment<
 
             is PaymentSendViewState.KeySendPayment -> {
                 binding.includeConstraintFromContact.root.invisible
-                binding.includeConstraintMessage.root.invisible
+                binding.includeConstraintMessage.layoutConstraintMessage.invisible
                 binding.includeConstraintConfirmButton.buttonConfirm.text = getString(R.string.continue_button)
             }
 

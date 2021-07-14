@@ -34,6 +34,7 @@ dependencies {
     implementation project(path: ':android:features:android-feature-screens')
     // Sphinx
     implementation project(path: ':sphinx:screens-detail:common:detail-resources')
+    implementation project(path: ':sphinx:screens-detail:payments:payment-common:payment-common')
 
     implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt

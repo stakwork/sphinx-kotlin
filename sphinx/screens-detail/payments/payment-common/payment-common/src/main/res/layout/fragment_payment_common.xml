@@ -2,10 +2,11 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_constraint_payment_send"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/background_detail_screen"
-    tools:context=".ui.PaymentReceiveFragment">
+    tools:context=".ui.PaymentFragment">
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guide_v5"
@@ -15,7 +16,7 @@
         app:layout_constraintGuide_percent=".5" />
 
     <include
-        android:id="@+id/include_payment_receive_header"
+        android:id="@+id/include_payment_send_header"
         layout="@layout/layout_detail_screen_header"
         android:layout_width="match_parent"
         android:layout_height="@dimen/default_header_height"
@@ -28,7 +29,7 @@
         android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/include_payment_receive_header"/>
+        app:layout_constraintTop_toBottomOf="@+id/include_payment_send_header"/>
 
     <include
         android:id="@+id/include_constraint_amount"
@@ -74,5 +75,4 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         />
-
 </androidx.constraintlayout.widget.ConstraintLayout>
