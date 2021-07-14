@@ -1,10 +1,9 @@
 package chat.sphinx.di
 
 import android.content.Context
-import chat.sphinx.concept_coredb.CoreDB
 import chat.sphinx.concept_crypto_rsa.RSA
 import chat.sphinx.concept_meme_server.MemeServerTokenHandler
-import chat.sphinx.concept_network_query_attachment.NetworkQueryAttachment
+import chat.sphinx.concept_network_query_meme_server.NetworkQueryMemeServer
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
@@ -13,7 +12,6 @@ import chat.sphinx.concept_network_query_invite.NetworkQueryInvite
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_message.NetworkQueryMessage
 import chat.sphinx.concept_repository_contact.ContactRepository
-import chat.sphinx.concept_repository_dashboard.RepositoryDashboard
 import chat.sphinx.concept_repository_dashboard_android.RepositoryDashboardAndroid
 import chat.sphinx.concept_repository_lightning.LightningRepository
 import chat.sphinx.concept_repository_media.RepositoryMedia
@@ -90,7 +88,7 @@ object RepositoryModule {
         applicationScope: CoroutineScope,
         authenticationStorage: AuthenticationStorage,
         dispatchers: CoroutineDispatchers,
-        networkQueryAttachment: NetworkQueryAttachment,
+        networkQueryMemeServer: NetworkQueryMemeServer,
         LOG: SphinxLogger,
     ): MemeServerTokenHandlerImpl =
         MemeServerTokenHandlerImpl(
@@ -98,7 +96,7 @@ object RepositoryModule {
             applicationScope,
             authenticationStorage,
             dispatchers,
-            networkQueryAttachment,
+            networkQueryMemeServer,
             LOG,
         )
 
@@ -119,7 +117,7 @@ object RepositoryModule {
         dispatchers: CoroutineDispatchers,
         moshi: Moshi,
         memeServerTokenHandler: MemeServerTokenHandler,
-        networkQueryAttachment: NetworkQueryAttachment,
+        networkQueryMemeServer: NetworkQueryMemeServer,
         networkQueryChat: NetworkQueryChat,
         networkQueryContact: NetworkQueryContact,
         networkQueryLightning: NetworkQueryLightning,
@@ -138,7 +136,7 @@ object RepositoryModule {
             dispatchers,
             moshi,
             memeServerTokenHandler,
-            networkQueryAttachment,
+            networkQueryMemeServer,
             networkQueryChat,
             networkQueryContact,
             networkQueryLightning,

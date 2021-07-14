@@ -10,7 +10,7 @@ dependencies {
     api project(path: ':kotlin:concepts:concept-coroutines')
 
     // Sphinx
-    api project(path: ':sphinx:application:network:concepts:queries:concept-network-query-attachment')
+    api project(path: ':sphinx:application:network:concepts:queries:concept-network-query-meme-server')
     api project(path: ':sphinx:application:network:concepts:calls:concept-network-relay-call')
 
     implementation deps.kotlin.coroutinesCore

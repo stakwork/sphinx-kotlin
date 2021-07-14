@@ -5,7 +5,7 @@ import androidx.paging.PagingSource
 import chat.sphinx.concept_coredb.CoreDB
 import chat.sphinx.concept_crypto_rsa.RSA
 import chat.sphinx.concept_meme_server.MemeServerTokenHandler
-import chat.sphinx.concept_network_query_attachment.NetworkQueryAttachment
+import chat.sphinx.concept_network_query_meme_server.NetworkQueryMemeServer
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
 import chat.sphinx.concept_network_query_contact.NetworkQueryContact
 import chat.sphinx.concept_network_query_invite.NetworkQueryInvite
@@ -40,7 +40,7 @@ class SphinxRepositoryAndroid(
     dispatchers: CoroutineDispatchers,
     moshi: Moshi,
     memeServerTokenHandler: MemeServerTokenHandler,
-    networkQueryAttachment: NetworkQueryAttachment,
+    networkQueryMemeServer: NetworkQueryMemeServer,
     networkQueryChat: NetworkQueryChat,
     networkQueryContact: NetworkQueryContact,
     networkQueryLightning: NetworkQueryLightning,
@@ -58,7 +58,7 @@ class SphinxRepositoryAndroid(
     dispatchers,
     moshi,
     memeServerTokenHandler,
-    networkQueryAttachment,
+    networkQueryMemeServer,
     networkQueryChat,
     networkQueryContact,
     networkQueryLightning,

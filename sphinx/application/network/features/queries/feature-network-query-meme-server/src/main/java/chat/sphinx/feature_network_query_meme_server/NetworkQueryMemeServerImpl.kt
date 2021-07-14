@@ -1,13 +1,13 @@
-package chat.sphinx.feature_network_query_attachment
+package chat.sphinx.feature_network_query_meme_server
 
 import chat.sphinx.concept_network_call.buildRequest
-import chat.sphinx.concept_network_query_attachment.NetworkQueryAttachment
-import chat.sphinx.concept_network_query_attachment.model.AttachmentAuthenticationDto
-import chat.sphinx.concept_network_query_attachment.model.AttachmentAuthenticationTokenDto
-import chat.sphinx.concept_network_query_attachment.model.AttachmentChallengeSigDto
-import chat.sphinx.concept_network_query_attachment.model.PostAttachmentUploadDto
+import chat.sphinx.concept_network_query_meme_server.NetworkQueryMemeServer
+import chat.sphinx.concept_network_query_meme_server.model.MemeServerAuthenticationDto
+import chat.sphinx.concept_network_query_meme_server.model.MemeServerAuthenticationTokenDto
+import chat.sphinx.concept_network_query_meme_server.model.MemeServerChallengeSigDto
+import chat.sphinx.concept_network_query_meme_server.model.PostMemeServerUploadDto
 import chat.sphinx.concept_network_relay_call.NetworkRelayCall
-import chat.sphinx.feature_network_query_attachment.model.SignChallengeRelayResponse
+import chat.sphinx.feature_network_query_meme_server.model.MemeServerChallengeSigRelayResponse
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
@@ -32,37 +32,37 @@ import org.cryptonode.jncryptor.AES256JNCryptorOutputStream
 import java.io.File
 import java.lang.Exception
 
-class NetworkQueryAttachmentImpl(
+class NetworkQueryMemeServerImpl(
     dispatchers: CoroutineDispatchers,
     private val networkRelayCall: NetworkRelayCall,
-): NetworkQueryAttachment(), CoroutineDispatchers by dispatchers {
+): NetworkQueryMemeServer(), CoroutineDispatchers by dispatchers {
 
     companion object {
         private const val FILE = "file"
         private const val NAME = "name"
 
-        private const val ATTACHMENTS_SERVER_URL = "https://%s"
+        private const val MEME_SERVER_URL = "https://%s"
 
-        private const val ENDPOINT_ASK_AUTHENTICATION = "$ATTACHMENTS_SERVER_URL/ask"
-        private const val ENDPOINT_POST_ATTACHMENT = "$ATTACHMENTS_SERVER_URL/file"
+        private const val ENDPOINT_ASK_AUTHENTICATION = "$MEME_SERVER_URL/ask"
+        private const val ENDPOINT_POST_ATTACHMENT = "$MEME_SERVER_URL/file"
         private const val ENDPOINT_SIGNER = "/signer/%s"
-        private const val ENDPOINT_VERIFY_AUTHENTICATION = "$ATTACHMENTS_SERVER_URL/verify?id=%s&sig=%s&pubkey=%s"
+        private const val ENDPOINT_VERIFY_AUTHENTICATION = "$MEME_SERVER_URL/verify?id=%s&sig=%s&pubkey=%s"
     }
 
     override fun askAuthentication(
         memeServerHost: MediaHost
-    ): Flow<LoadResponse<AttachmentAuthenticationDto, ResponseError>> =
+    ): Flow<LoadResponse<MemeServerAuthenticationDto, ResponseError>> =
         networkRelayCall.get(
             url = String.format(ENDPOINT_ASK_AUTHENTICATION, memeServerHost.value),
-            responseJsonClass = AttachmentAuthenticationDto::class.java,
+            responseJsonClass = MemeServerAuthenticationDto::class.java,
         )
 
     override fun signChallenge(
         challenge: AuthenticationChallenge,
         relayData: Pair<AuthorizationToken, RelayUrl>?
-    ): Flow<LoadResponse<AttachmentChallengeSigDto, ResponseError>> =
+    ): Flow<LoadResponse<MemeServerChallengeSigDto, ResponseError>> =
         networkRelayCall.relayGet(
-            responseJsonClass = SignChallengeRelayResponse::class.java,
+            responseJsonClass = MemeServerChallengeSigRelayResponse::class.java,
             relayEndpoint = String.format(ENDPOINT_SIGNER, challenge.value),
             relayData = relayData,
         )
@@ -72,7 +72,7 @@ class NetworkQueryAttachmentImpl(
         sig: AuthenticationSig,
         ownerPubKey: LightningNodePubKey,
         memeServerHost: MediaHost,
-    ): Flow<LoadResponse<AttachmentAuthenticationTokenDto, ResponseError>> =
+    ): Flow<LoadResponse<MemeServerAuthenticationTokenDto, ResponseError>> =
         networkRelayCall.post(
             url = String.format(
                 ENDPOINT_VERIFY_AUTHENTICATION,
@@ -81,7 +81,7 @@ class NetworkQueryAttachmentImpl(
                 sig.value,
                 ownerPubKey.value
             ),
-            responseJsonClass = AttachmentAuthenticationTokenDto::class.java,
+            responseJsonClass = MemeServerAuthenticationTokenDto::class.java,
             requestBodyJsonClass = Map::class.java,
             requestBody = mapOf(Pair("", "")),
         )
@@ -94,7 +94,7 @@ class NetworkQueryAttachmentImpl(
         file: File,
         password: Password?,
         memeServerHost: MediaHost
-    ): Response<PostAttachmentUploadDto, ResponseError> {
+    ): Response<PostMemeServerUploadDto, ResponseError> {
 
         val passwordCopy: CharArray? = password?.value?.copyOf()
         val tmpFile = File(file.absolutePath + ".tmp")
@@ -153,7 +153,7 @@ class NetworkQueryAttachmentImpl(
             requestBuilder.post(requestBody)
 
             val response = networkRelayCall.call(
-                PostAttachmentUploadDto::class.java,
+                PostMemeServerUploadDto::class.java,
                 requestBuilder.build(),
                 useExtendedNetworkCallClient = true
             )

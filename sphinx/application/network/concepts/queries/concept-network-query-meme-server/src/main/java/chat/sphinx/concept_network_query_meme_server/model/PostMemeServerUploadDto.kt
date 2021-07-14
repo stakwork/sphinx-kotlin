@@ -1,4 +1,4 @@
-package chat.sphinx.concept_network_query_attachment.model
+package chat.sphinx.concept_network_query_meme_server.model
 
 import com.squareup.moshi.JsonClass
 
@@ -21,7 +21,7 @@ import com.squareup.moshi.JsonClass
 // "template":false
 // }
 @JsonClass(generateAdapter = true)
-data class PostAttachmentUploadDto(
+data class PostMemeServerUploadDto(
     val muid: String,
     val owner_pub_key: String,
     val name: String,

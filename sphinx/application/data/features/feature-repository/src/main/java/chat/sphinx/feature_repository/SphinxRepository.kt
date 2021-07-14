@@ -4,8 +4,8 @@ import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_coredb.CoreDB
 import chat.sphinx.concept_crypto_rsa.RSA
 import chat.sphinx.concept_meme_server.MemeServerTokenHandler
-import chat.sphinx.concept_network_query_attachment.NetworkQueryAttachment
-import chat.sphinx.concept_network_query_attachment.model.PostAttachmentUploadDto
+import chat.sphinx.concept_network_query_meme_server.NetworkQueryMemeServer
+import chat.sphinx.concept_network_query_meme_server.model.PostMemeServerUploadDto
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
 import chat.sphinx.concept_network_query_chat.model.*
 import chat.sphinx.concept_network_query_contact.NetworkQueryContact
@@ -99,7 +99,7 @@ abstract class SphinxRepository(
     private val dispatchers: CoroutineDispatchers,
     private val moshi: Moshi,
     private val memeServerTokenHandler: MemeServerTokenHandler,
-    private val networkQueryAttachment: NetworkQueryAttachment,
+    private val networkQueryMemeServer: NetworkQueryMemeServer,
     private val networkQueryChat: NetworkQueryChat,
     private val networkQueryContact: NetworkQueryContact,
     private val networkQueryLightning: NetworkQueryLightning,
@@ -833,6 +833,7 @@ abstract class SphinxRepository(
         extension: String
     ): Response<Any, ResponseError> {
         // TODO: Implement
+        networkQueryMemeServer
         return Response.Error(ResponseError("Not Implemented"))
     }
 
@@ -1505,7 +1506,7 @@ abstract class SphinxRepository(
                 null
             }
 
-            val postAttachmentDto: PostAttachmentUploadDto? = if (media != null) {
+            val postMemeServerDto: PostMemeServerUploadDto? = if (media != null) {
                 val token = memeServerTokenHandler.retrieveAuthenticationToken(MediaHost.DEFAULT)
                     ?: provisionalMessageId?.let { provId ->
                         withContext(io) {
@@ -1515,7 +1516,7 @@ abstract class SphinxRepository(
                         return@launch
                     } ?: return@launch
 
-                val response = networkQueryAttachment.uploadAttachment(
+                val response = networkQueryMemeServer.uploadAttachment(
                     token,
                     media.third.mediaType,
                     media.third.file,
@@ -1553,8 +1554,8 @@ abstract class SphinxRepository(
                     message?.second?.value,
                     remoteTextMap,
                     mediaKeyMap,
-                    postAttachmentDto?.mime,
-                    postAttachmentDto?.muid,
+                    postMemeServerDto?.mime,
+                    postMemeServerDto?.muid,
                 )
             } catch (e: IllegalArgumentException) {
                 LOG.e(TAG, "Failed to create PostMessageDto", e)
