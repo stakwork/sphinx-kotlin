@@ -11,8 +11,9 @@ import chat.sphinx.feature_network_query_meme_server.model.MemeServerChallengeSi
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
-import chat.sphinx.wrapper_attachment.*
+import chat.sphinx.wrapper_meme_server.*
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
+import chat.sphinx.wrapper_io_utils.InputStreamProvider
 import chat.sphinx.wrapper_message_media.MediaType
 import chat.sphinx.wrapper_message_media.token.MediaHost
 import chat.sphinx.wrapper_relay.AuthorizationToken
@@ -30,6 +31,7 @@ import okhttp3.internal.closeQuietly
 import okio.*
 import org.cryptonode.jncryptor.AES256JNCryptorOutputStream
 import java.io.File
+import java.io.InputStream
 import java.lang.Exception
 
 class NetworkQueryMemeServerImpl(
@@ -44,7 +46,8 @@ class NetworkQueryMemeServerImpl(
         private const val MEME_SERVER_URL = "https://%s"
 
         private const val ENDPOINT_ASK_AUTHENTICATION = "$MEME_SERVER_URL/ask"
-        private const val ENDPOINT_POST_ATTACHMENT = "$MEME_SERVER_URL/file"
+        private const val ENDPOINT_POST_ATTACHMENT_PRIVATE = "$MEME_SERVER_URL/file"
+        private const val ENDPOINT_POST_ATTACHMENT_PUBLIC = "$MEME_SERVER_URL/public"
         private const val ENDPOINT_SIGNER = "/signer/%s"
         private const val ENDPOINT_VERIFY_AUTHENTICATION = "$MEME_SERVER_URL/verify?id=%s&sig=%s&pubkey=%s"
     }
@@ -88,15 +91,15 @@ class NetworkQueryMemeServerImpl(
 
     @OptIn(RawPasswordAccess::class)
     @Suppress("BlockingMethodInNonBlockingContext")
-    override suspend fun uploadAttachment(
+    override suspend fun uploadAttachmentEncrypted(
         authenticationToken: AuthenticationToken,
         mediaType: MediaType,
         file: File,
-        password: Password?,
+        password: Password,
         memeServerHost: MediaHost
     ): Response<PostMemeServerUploadDto, ResponseError> {
 
-        val passwordCopy: CharArray? = password?.value?.copyOf()
+        val passwordCopy: CharArray = password.value.copyOf()
         val tmpFile = File(file.absolutePath + ".tmp")
 
         return try {
@@ -104,45 +107,41 @@ class NetworkQueryMemeServerImpl(
             val type: okhttp3.MediaType = mediaType.value.toMediaType()
 
             val requestBuilder = networkRelayCall.buildRequest(
-                url = String.format(ENDPOINT_POST_ATTACHMENT, memeServerHost.value),
+                url = String.format(ENDPOINT_POST_ATTACHMENT_PRIVATE, memeServerHost.value),
                 headers = mapOf(Pair(authenticationToken.headerKey, authenticationToken.headerValue))
             )
 
-            val fileBody: RequestBody = passwordCopy?.let { nnPasswordCopy ->
+            val fileBody: RequestBody = withContext(io) {
 
-                withContext(io) {
+                val clearInputStream = file.inputStream()
 
-                    val clearInputStream = file.inputStream()
-
-                    try {
-                        if (tmpFile.exists() && !tmpFile.delete()) {
-                            throw IOException("Temp file exists already and could not delete")
-                        }
-
-                        val encryptedOutput =
-                            AES256JNCryptorOutputStream(
-                                tmpFile.outputStream(),
-                                nnPasswordCopy
-                            )
-
-                        encryptedOutput.use { outputStream ->
-                            val buf = ByteArray(1024)
-                            while (true) {
-                                val read = clearInputStream.read(buf)
-                                if (read == -1) break
-                                outputStream.write(buf, 0, read)
-                            }
-                        }
-
-                    } finally {
-                        clearInputStream.closeQuietly()
+                try {
+                    if (tmpFile.exists() && !tmpFile.delete()) {
+                        throw IOException("Temp file exists already and could not delete")
                     }
 
+                    val encryptedOutput =
+                        AES256JNCryptorOutputStream(
+                            tmpFile.outputStream(),
+                            passwordCopy
+                        )
+
+                    encryptedOutput.use { outputStream ->
+                        val buf = ByteArray(1024)
+                        while (true) {
+                            val read = clearInputStream.read(buf)
+                            if (read == -1) break
+                            outputStream.write(buf, 0, read)
+                        }
+                    }
+
+                } finally {
+                    clearInputStream.closeQuietly()
                 }
 
                 tmpFile.asRequestBody(type)
 
-            } ?: file.asRequestBody(type)
+            }
 
             val requestBody: RequestBody = MultipartBody.Builder()
                 .setType(MultipartBody.FORM)
@@ -165,8 +164,64 @@ class NetworkQueryMemeServerImpl(
             )
         } finally {
             tmpFile.delete()
-            passwordCopy?.fill('*')
+            passwordCopy.fill('*')
         }
 
+    }
+
+    @OptIn(RawPasswordAccess::class)
+    @Suppress("BlockingMethodInNonBlockingContext")
+    override suspend fun uploadAttachment(
+        authenticationToken: AuthenticationToken,
+        mediaType: MediaType,
+        stream: InputStreamProvider,
+        fileName: String,
+        contentLength: Long?,
+        memeServerHost: MediaHost,
+    ): Response<PostMemeServerUploadDto, ResponseError> {
+
+        return try {
+            val type: okhttp3.MediaType = mediaType.value.toMediaType()
+
+            val requestBuilder = networkRelayCall.buildRequest(
+                url = String.format(ENDPOINT_POST_ATTACHMENT_PUBLIC, memeServerHost.value),
+                headers = mapOf(Pair(authenticationToken.headerKey, authenticationToken.headerValue)),
+            )
+
+            val dataBody: RequestBody = object : RequestBody() {
+
+                override fun contentType(): okhttp3.MediaType {
+                    return type
+                }
+
+                override fun contentLength(): Long {
+                    return contentLength ?: super.contentLength()
+                }
+
+                override fun writeTo(sink: BufferedSink) {
+                    stream.newInputStream().source().use { source -> sink.writeAll(source) }
+                }
+            }
+
+            val requestBody: RequestBody = MultipartBody.Builder()
+                .setType(MultipartBody.FORM)
+                .addFormDataPart(NAME, type.type)
+                .addFormDataPart(FILE, fileName, dataBody)
+                .build()
+
+            requestBuilder.post(requestBody)
+
+            val response = networkRelayCall.call(
+                PostMemeServerUploadDto::class.java,
+                requestBuilder.build(),
+                useExtendedNetworkCallClient = true,
+            )
+
+            Response.Success(response)
+        } catch (e: Exception) {
+            Response.Error(
+                ResponseError("Failed to upload file $fileName", e)
+            )
+        }
     }
 }
