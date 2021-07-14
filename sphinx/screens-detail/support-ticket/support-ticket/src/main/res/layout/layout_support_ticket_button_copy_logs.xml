@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/layout_constraint_support_ticket_button_copy_logs"
+    android:layout_width="wrap_content"
+    android:layout_height="@dimen/add_buttons_height"
+    android:background="@drawable/button_background_white_rad_48"
+    android:backgroundTint="@color/primaryBlue"
+    android:paddingHorizontal="@dimen/default_layout_margin">
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/roboto_medium"
+        android:text="@string/copy_logs"
+        android:textColor="@android:color/white"
+        android:textSize="@dimen/support_buttons_text_size"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

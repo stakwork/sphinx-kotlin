@@ -9,6 +9,7 @@
     <dimen name="chat_footer_send_button_margin_horizontal">11dp</dimen>
     <dimen name="chat_footer_progress_line_height">2dp</dimen>
 
+    <dimen name="chat_header_exit_tribe_width">28sp</dimen>
     <dimen name="chat_header_mute_padding_horizontal">4dp</dimen>
     <dimen name="chat_message_inner_padding">8dp</dimen>
     <dimen name="chat_message_rounded_corner_radius">9dp</dimen>
@@ -88,7 +89,7 @@
     <!-- Selected Message -->
     <!-- Default Elevation + 2dp -->
     <dimen name="selected_message_elevation">10dp</dimen>
-    <dimen name="selected_message_menu_width">140dp</dimen>
+    <dimen name="selected_message_menu_width">150dp</dimen>
     <dimen name="selected_message_menu_icon_width">40dp</dimen>
     <dimen name="selected_message_menu_icon_padding">8dp</dimen>
     <dimen name="selected_message_menu_item_height">40dp</dimen>

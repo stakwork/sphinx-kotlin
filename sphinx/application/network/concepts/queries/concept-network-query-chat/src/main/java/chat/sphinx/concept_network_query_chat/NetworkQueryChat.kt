@@ -65,8 +65,11 @@ abstract class NetworkQueryChat {
         relayData: Pair<AuthorizationToken, RelayUrl>? = null
     ): Flow<LoadResponse<ChatDto, ResponseError>>
 
-    //////////////
-    /// DELETE ///
-    //////////////
-//    app.delete('/chat/:id', chats.deleteChat)
+    /**
+     * Returns a map of "chat_id": chatId
+     * */
+    abstract suspend fun deleteChat(
+        chatId: ChatId,
+        relayData: Pair<AuthorizationToken, RelayUrl>? = null
+    ): Flow<LoadResponse<Map<String, Long>, ResponseError>>
 }

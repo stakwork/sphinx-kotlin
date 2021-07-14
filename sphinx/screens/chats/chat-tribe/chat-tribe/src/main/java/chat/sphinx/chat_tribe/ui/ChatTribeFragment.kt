@@ -14,7 +14,6 @@ import chat.sphinx.chat_common.ui.ChatFragment
 import chat.sphinx.chat_tribe.R
 import chat.sphinx.chat_tribe.databinding.FragmentChatTribeBinding
 import chat.sphinx.chat_tribe.databinding.LayoutPodcastPlayerFooterBinding
-import chat.sphinx.chat_tribe.navigation.TribeChatNavigator
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.podcast_player.objects.Podcast
 import dagger.hilt.android.AndroidEntryPoint
@@ -77,6 +76,12 @@ internal class ChatTribeFragment: ChatFragment<
             viewModel.loadTribeAndPodcastData()?.let { podcast ->
                 configurePodcastPlayer(podcast)
                 addPodcastOnClickListeners(podcast)
+            }
+        }
+
+        headerBinding.apply {
+            imageViewChatHeaderExitTribe.setOnClickListener {
+                viewModel.exitTribeGetUserConfirmation()
             }
         }
     }

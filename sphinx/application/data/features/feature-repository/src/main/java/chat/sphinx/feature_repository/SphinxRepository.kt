@@ -29,8 +29,8 @@ import chat.sphinx.concept_repository_message.model.AttachmentInfo
 import chat.sphinx.concept_repository_message.model.SendMessage
 import chat.sphinx.concept_repository_message.model.SendPayment
 import chat.sphinx.concept_socket_io.SocketIOManager
-import chat.sphinx.concept_socket_io.SphinxSocketIOMessageListener
 import chat.sphinx.concept_socket_io.SphinxSocketIOMessage
+import chat.sphinx.concept_socket_io.SphinxSocketIOMessageListener
 import chat.sphinx.conceptcoredb.*
 import chat.sphinx.feature_repository.mappers.chat.ChatDboPresenterMapper
 import chat.sphinx.feature_repository.mappers.contact.ContactDboPresenterMapper
@@ -39,7 +39,6 @@ import chat.sphinx.feature_repository.mappers.mapListFrom
 import chat.sphinx.feature_repository.mappers.message.MessageDboPresenterMapper
 import chat.sphinx.feature_repository.model.MessageDboWrapper
 import chat.sphinx.feature_repository.model.MessageMediaDboWrapper
-import chat.sphinx.feature_repository.model.PasswordGenerator
 import chat.sphinx.feature_repository.util.*
 import chat.sphinx.kotlin_response.*
 import chat.sphinx.logger.SphinxLogger
@@ -54,7 +53,6 @@ import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.dashboard.InviteId
 import chat.sphinx.wrapper_common.dashboard.toChatId
 import chat.sphinx.wrapper_common.invite.InviteStatus
-import chat.sphinx.wrapper_common.invite.toInviteStatus
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.LightningRouteHint
 import chat.sphinx.wrapper_common.lightning.Sat
@@ -63,6 +61,7 @@ import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessagePagination
 import chat.sphinx.wrapper_common.message.MessageUUID
 import chat.sphinx.wrapper_common.message.toMessageUUID
+import chat.sphinx.wrapper_common.message.isProvisionalMessage
 import chat.sphinx.wrapper_contact.*
 import chat.sphinx.wrapper_invite.Invite
 import chat.sphinx.wrapper_lightning.NodeBalance
@@ -87,8 +86,8 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.io.InputStream
+import okio.base64.encodeBase64
 import java.text.ParseException
-import kotlin.collections.ArrayList
 import kotlin.math.absoluteValue
 
 abstract class SphinxRepository(
@@ -1227,6 +1226,20 @@ abstract class SphinxRepository(
 
     private val provisionalMessageLock = Mutex()
 
+    private fun messageText(sendMessage: SendMessage, moshi: Moshi): String? {
+        try {
+            if (sendMessage.giphyData != null) {
+                return sendMessage.giphyData?.let {
+                    "giphy::${it.toJson(moshi).toByteArray().encodeBase64()}"
+                }
+            }
+        } catch (e: Exception) {
+            LOG.e(TAG, "GiphyData toJson failed: ", e)
+        }
+
+        return sendMessage.text
+    }
+
     // TODO: Rework to handle different message types
     @OptIn(RawPasswordAccess::class)
     override fun sendMessage(sendMessage: SendMessage?) {
@@ -1278,8 +1291,7 @@ abstract class SphinxRepository(
             }
 
             // encrypt text
-            val message: Pair<MessageContentDecrypted, MessageContent>? = sendMessage.text?.let { msgText ->
-
+            val message: Pair<MessageContentDecrypted, MessageContent>? = messageText(sendMessage, moshi)?.let { msgText ->
 
                 val response = rsa.encrypt(
                     ownerPubKey,
@@ -1304,26 +1316,30 @@ abstract class SphinxRepository(
             }
 
             // media attachment
-            val media: Triple<Password, MediaKey, AttachmentInfo>? = sendMessage.attachmentInfo?.let { info ->
-                val password = PasswordGenerator(MEDIA_KEY_SIZE).password
+            val media: Triple<Password, MediaKey, AttachmentInfo>? = if (sendMessage.giphyData == null) {
+                sendMessage.attachmentInfo?.let { info ->
+                    val password = PasswordGenerator(MEDIA_KEY_SIZE).password
 
-                val response = rsa.encrypt(
-                    ownerPubKey,
-                    UnencryptedString(password.value.joinToString("")),
-                    formatOutput = false,
-                    dispatcher = default,
-                )
+                    val response = rsa.encrypt(
+                        ownerPubKey,
+                        UnencryptedString(password.value.joinToString("")),
+                        formatOutput = false,
+                        dispatcher = default,
+                    )
 
-                @Exhaustive
-                when (response) {
-                    is Response.Error -> {
-                        LOG.e(TAG, response.message, response.exception)
-                        null
-                    }
-                    is Response.Success -> {
-                        Triple(password, MediaKey(response.value.value), info)
+                    @Exhaustive
+                    when (response) {
+                        is Response.Error -> {
+                            LOG.e(TAG, response.message, response.exception)
+                            null
+                        }
+                        is Response.Success -> {
+                            Triple(password, MediaKey(response.value.value), info)
+                        }
                     }
                 }
+            } else {
+                null
             }
 
             if (message == null && media == null) {
@@ -1622,6 +1638,45 @@ abstract class SphinxRepository(
             }
 
         }
+    }
+
+    override suspend fun deleteMessage(message: Message) : Response<Any, ResponseError> {
+        var response: Response<Any, ResponseError> = Response.Success(true)
+
+        applicationScope.launch(mainImmediate) {
+            val queries = coreDB.getSphinxDatabaseQueries()
+
+            if (message.id.isProvisionalMessage) {
+                messageLock.withLock {
+                    withContext(io) {
+                        queries.messageDeleteById(message.id)
+                    }
+                }
+            } else {
+                networkQueryMessage.deleteMessage(message.id).collect { loadResponse ->
+                    @Exhaustive
+                    when (loadResponse) {
+                        is LoadResponse.Loading -> {}
+                        is Response.Error -> {
+                            response = Response.Error(
+                                ResponseError(loadResponse.message, loadResponse.exception)
+                            )
+                        }
+                        is Response.Success -> {
+                            messageLock.withLock {
+                                withContext(io) {
+                                    queries.transaction {
+                                        upsertMessage(loadResponse.value, queries)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }.join()
+
+        return response
     }
 
     override suspend fun sendPayment(
@@ -2429,5 +2484,67 @@ abstract class SphinxRepository(
             }
         }
         return response
+    }
+
+    override suspend fun exitTribe(chat: Chat): Response<Boolean, ResponseError> {
+        var response: Response<Boolean, ResponseError>? = null
+
+        val owner: Contact = accountOwner.value.let { contact ->
+            if (contact != null) {
+                contact
+            } else {
+                var resolvedOwner: Contact? = null
+                try {
+                    accountOwner.collect { ownerContact ->
+                        if (ownerContact != null) {
+                            resolvedOwner = ownerContact
+                            throw Exception()
+                        }
+                    }
+                } catch (e: Exception) {}
+                delay(25L)
+
+                resolvedOwner ?: return Response.Error(
+                    ResponseError("Could not resolve account owner")
+                )
+            }
+        }
+
+        if (owner.nodePubKey == chat.ownerPubKey) {
+            return Response.Error(ResponseError("Delete own tribe is not supported yet"))
+        }
+
+        applicationScope.launch(mainImmediate) {
+            networkQueryChat.deleteChat(chat.id).collect { loadResponse ->
+                when (loadResponse) {
+                    is LoadResponse.Loading -> {}
+
+                    is Response.Error -> {
+                        response = loadResponse
+                    }
+
+                    is Response.Success -> {
+                        response = Response.Success(true)
+                        val queries = coreDB.getSphinxDatabaseQueries()
+
+                        chatLock.withLock {
+                            messageLock.withLock {
+                                withContext(io) {
+                                    queries.transaction {
+                                        deleteChatById(
+                                            loadResponse.value["chat_id"]?.toChatId() ?: chat.id,
+                                            queries,
+                                            latestMessageUpdatedTimeMap
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }.join()
+
+        return response ?: Response.Error(ResponseError(("Failed to exit tribe")))
     }
 }

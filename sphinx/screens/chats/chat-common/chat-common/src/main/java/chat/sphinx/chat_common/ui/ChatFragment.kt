@@ -34,11 +34,11 @@ import chat.sphinx.chat_common.ui.viewstate.selected.setMenuColor
 import chat.sphinx.chat_common.ui.viewstate.selected.setMenuItems
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
-import chat.sphinx.concept_repository_message.model.AttachmentInfo
-import chat.sphinx.concept_repository_message.model.SendMessage
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_network_client_crypto.CryptoHeader
 import chat.sphinx.concept_network_client_crypto.CryptoScheme
+import chat.sphinx.concept_repository_message.model.AttachmentInfo
+import chat.sphinx.concept_repository_message.model.SendMessage
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.insetter_activity.addStatusBarPadding
@@ -50,10 +50,10 @@ import chat.sphinx.wrapper_attachment.headerValue
 import chat.sphinx.wrapper_chat.isTrue
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.lightning.unit
-import chat.sphinx.wrapper_message_media.MediaType
 import chat.sphinx.wrapper_message.retrieveImageUrlAndMessageMedia
 import chat.sphinx.wrapper_message.retrieveTextToShow
 import chat.sphinx.wrapper_message.toReplyUUID
+import chat.sphinx.wrapper_message_media.MediaType
 import chat.sphinx.wrapper_view.Dp
 import io.matthewnelson.android_feature_screens.ui.motionlayout.MotionLayoutFragment
 import io.matthewnelson.android_feature_screens.util.gone
@@ -151,6 +151,10 @@ abstract class ChatFragment<
                     viewModel.updateFooterViewState(FooterViewState.Default)
                     viewModel.deleteUnsentAttachment(attachmentViewState)
                 }
+                attachmentViewState is AttachmentSendViewState.PreviewGiphy -> {
+                    viewModel.updateAttachmentSendViewState(AttachmentSendViewState.Idle)
+                    viewModel.updateFooterViewState(FooterViewState.Default)
+                }
                 viewModel.getSelectedMessageViewStateFlow().value is SelectedMessageViewState.SelectedMessage -> {
                     viewModel.updateSelectedMessageViewState(SelectedMessageViewState.None)
                 }
@@ -182,7 +186,8 @@ abstract class ChatFragment<
             }
 
             layoutConstraintMenuOptionGif.setOnClickListener {
-                viewModel.chatMenuOptionGif()
+
+                viewModel.chatMenuOptionGif(parentFragmentManager)
             }
 
             layoutConstraintMenuOptionFile.setOnClickListener {
@@ -241,6 +246,9 @@ abstract class ChatFragment<
                             )
                         )
                     }
+                    is AttachmentSendViewState.PreviewGiphy -> {
+                        sendMessageBuilder.setGiphyData(attachmentViewState.giphyData)
+                    }
                 }
 
                 viewModel.sendMessage(sendMessageBuilder)?.let {
@@ -271,6 +279,8 @@ abstract class ChatFragment<
                     }
                 }
             }
+
+            editTextChatFooter.onCommitContentListener = viewModel.onIMEContent
         }
 
         replyingMessageBinding.apply {
@@ -346,6 +356,9 @@ abstract class ChatFragment<
                     viewModel.deleteUnsentAttachment(vs)
                     viewModel.updateFooterViewState(FooterViewState.Default)
                     viewModel.updateAttachmentSendViewState(AttachmentSendViewState.Idle)
+                } else if (vs is AttachmentSendViewState.PreviewGiphy) {
+                    viewModel.updateFooterViewState(FooterViewState.Default)
+                    viewModel.updateAttachmentSendViewState(AttachmentSendViewState.Idle)
                 }
             }
         }
@@ -370,7 +383,7 @@ abstract class ChatFragment<
                                 viewModel.copyMessageText(holderState.message)
                             }
                             is MenuItemState.Delete -> {
-                                // TODO: Implement
+                                viewModel.deleteMessage(holderState.message)
                             }
                             is MenuItemState.Reply -> {
                                 viewModel.replyToMessage(holderState.message)
@@ -613,6 +626,18 @@ abstract class ChatFragment<
                             // no need to launch separate coroutine.
                             imageLoader.load(imageViewAttachmentSendPreview, viewState.file)
                         }
+                        is AttachmentSendViewState.PreviewGiphy -> {
+
+                            textViewAttachmentSendHeaderName.apply {
+                                text = getString(R.string.attachment_send_header_giphy)
+                            }
+
+                            root.visible
+
+                            viewState.giphyData.retrieveImageUrlAndMessageMedia()?.let {
+                                imageLoader.load(imageViewAttachmentSendPreview, it.first)
+                            }
+                        }
                     }
                 }
             }
@@ -657,6 +682,8 @@ abstract class ChatFragment<
 
                             textViewChatHeaderName.text = viewState.chatHeaderName
                             textViewChatHeaderLock.goneIfFalse(viewState.showLock)
+
+                            imageViewChatHeaderExitTribe.goneIfFalse(viewState.showExitTribe)
 
                             viewState.contributions?.let {
                                 imageViewChatHeaderContributions.visible
