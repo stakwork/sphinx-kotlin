@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingBottom="20dp"
+    android:paddingBottom="10dp"
     android:background="@color/body">
 
     <androidx.appcompat.widget.AppCompatImageView
@@ -16,6 +16,22 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"/>
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/text_view_uploading_picture"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:textColor="@color/primaryText"
+        android:textSize="@dimen/profile_uploading_picture_text_size"
+        android:fontFamily="@font/roboto_light"
+        android:layout_marginTop="3dp"
+        android:visibility="gone"
+        android:text="@string/uploading"
+        app:layout_constraintTop_toBottomOf="@+id/image_view_profile_picture"
+        app:layout_constraintEnd_toEndOf="@+id/image_view_profile_picture"
+        app:layout_constraintStart_toStartOf="@+id/image_view_profile_picture"
+        tools:text="Uploading..."/>
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/text_view_profile_name"

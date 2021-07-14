@@ -12,7 +12,7 @@
         android:id="@+id/include_profile_header"
         layout="@layout/layout_profile_header"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/default_header_height"
+        android:layout_height="@dimen/profile_header_height"
         app:layout_constraintTop_toTopOf="parent" />
 
     <include
