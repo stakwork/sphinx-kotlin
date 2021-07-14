@@ -64,6 +64,7 @@ import chat.sphinx.wrapper_common.message.toMessageUUID
 import chat.sphinx.wrapper_common.message.isProvisionalMessage
 import chat.sphinx.wrapper_contact.*
 import chat.sphinx.wrapper_invite.Invite
+import chat.sphinx.wrapper_io_utils.InputStreamProvider
 import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_lightning.NodeBalanceAll
 import chat.sphinx.wrapper_message.*
@@ -826,15 +827,93 @@ abstract class SphinxRepository(
         return response
     }
 
-    override suspend fun updateOwnerProfilePic(
-        stream: InputStream,
+    override suspend fun updateProfilePic(
+//        chatId: ChatId?,
+        stream: InputStreamProvider,
         mediaType: MediaType,
         fileName: String,
-        extension: String
+        contentLength: Long?
     ): Response<Any, ResponseError> {
-        // TODO: Implement
-        networkQueryMemeServer
-        return Response.Error(ResponseError("Not Implemented"))
+        var response: Response<Any, ResponseError> = Response.Success(true)
+        val memeServerHost = MediaHost.DEFAULT
+
+        applicationScope.launch(mainImmediate) {
+            try {
+                val token = memeServerTokenHandler.retrieveAuthenticationToken(memeServerHost)
+                    ?: throw RuntimeException("MemeServerAuthenticationToken retrieval failure")
+
+                val networkResponse = networkQueryMemeServer.uploadAttachment(
+                    authenticationToken = token,
+                    mediaType = mediaType,
+                    stream = stream,
+                    fileName = fileName,
+                    contentLength = contentLength,
+                    memeServerHost = memeServerHost,
+                )
+
+                @Exhaustive
+                when (networkResponse) {
+                    is Response.Error -> {
+                        response = networkResponse
+                    }
+                    is Response.Success -> {
+                        val newUrl =
+                            PhotoUrl("https://${memeServerHost.value}/public/${networkResponse.value.muid}")
+
+                        // TODO: if chatId method argument is null, update owner record
+
+                        var owner = accountOwner.value
+
+                        if (owner == null) {
+                            try {
+                                accountOwner.collect { contact ->
+                                    if (contact != null) {
+                                        owner = contact
+                                        throw Exception()
+                                    }
+                                }
+                            } catch (e: Exception) {}
+                            delay(25L)
+                        }
+
+                        owner?.let { nnOwner ->
+
+                            networkQueryContact.updateContact(
+                                nnOwner.id,
+                                PutContactDto(photo_url = newUrl.value)
+                            ).collect { loadResponse ->
+
+                                @Exhaustive
+                                when (loadResponse) {
+                                    is LoadResponse.Loading -> {}
+                                    is Response.Error -> {
+                                        response = loadResponse
+                                    }
+                                    is Response.Success -> {
+                                        val queries = coreDB.getSphinxDatabaseQueries()
+
+                                        contactLock.withLock {
+                                            withContext(io) {
+                                                queries.contactUpdatePhotoUrl(
+                                                    newUrl,
+                                                    nnOwner.id,
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        } ?: throw IllegalStateException("Failed to retrieve account owner")
+                    }
+                }
+            } catch (e: Exception) {
+                response = Response.Error(
+                    ResponseError("Failed to update Profile Picture", e)
+                )
+            }
+        }.join()
+
+        return response
     }
 
     /////////////////
@@ -1516,7 +1595,7 @@ abstract class SphinxRepository(
                         return@launch
                     } ?: return@launch
 
-                val response = networkQueryMemeServer.uploadAttachment(
+                val response = networkQueryMemeServer.uploadAttachmentEncrypted(
                     token,
                     media.third.mediaType,
                     media.third.file,
