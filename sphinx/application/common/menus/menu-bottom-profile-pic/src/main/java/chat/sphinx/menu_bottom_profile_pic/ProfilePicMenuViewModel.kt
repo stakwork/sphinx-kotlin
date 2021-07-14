@@ -10,6 +10,7 @@ import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.menu_bottom.ui.MenuBottomViewState
+import chat.sphinx.wrapper_io_utils.InputStreamProvider
 import chat.sphinx.wrapper_message_media.MediaType
 import chat.sphinx.wrapper_message_media.toMediaType
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
@@ -49,9 +50,7 @@ class ProfilePicMenuHandler(
 
             @Exhaustive
             when (response) {
-                is Response.Error -> {
-
-                }
+                is Response.Error -> {}
                 is Response.Success -> {
 
                     @Exhaustive
@@ -68,37 +67,32 @@ class ProfilePicMenuHandler(
                             }
 
                             if (stream != null) {
+
+                                viewStateContainer.updateViewState(MenuBottomViewState.Closed)
+
                                 viewModelScope.launch(dispatchers.mainImmediate) {
-                                    val repoResponse = contactRepository.updateOwnerProfilePic(
-                                        stream,
-                                        mediaType,
-                                        response.value.value.name,
-                                        ext
+                                    val repoResponse = contactRepository.updateProfilePic(
+                                        stream = object : InputStreamProvider() {
+                                            override fun newInputStream(): InputStream {
+                                                return response.value.value.inputStream()
+                                            }
+                                        },
+                                        mediaType = mediaType,
+                                        fileName = response.value.value.name,
+                                        contentLength = response.value.value.length(),
                                     )
 
                                     @Exhaustive
                                     when (repoResponse) {
                                         is Response.Error -> {
-
+                                            // TODO: Handle Error
                                         }
-                                        is Response.Success -> {
-
-                                        }
+                                        is Response.Success -> {}
                                     }
 
-                                    // TODO:
-                                    //  - Use stream, MediaType, filename, extension
-                                    //  - Delete file from cache on success
-
-                                    // TODO: On success
-                                    viewStateContainer.updateViewState(MenuBottomViewState.Closed)
-
-                                    // TODO: Remove upon implementation
                                     try {
-                                        stream.close()
+                                        response.value.value.delete()
                                     } catch (e: Exception) {}
-
-                                    response.value.value.delete()
                                 }.join()
                             }
                         }
@@ -133,32 +127,36 @@ class ProfilePicMenuHandler(
                             }
 
                             if (stream != null) {
+
+                                viewStateContainer.updateViewState(MenuBottomViewState.Closed)
+
                                 viewModelScope.launch(dispatchers.mainImmediate) {
-                                    val repoResponse = contactRepository.updateOwnerProfilePic(
-                                        stream,
-                                        mType,
-                                        "image",
-                                        ext
+                                    val repoResponse = contactRepository.updateProfilePic(
+                                        stream = object : InputStreamProvider() {
+                                            var initialStreamUsed: Boolean = false
+                                            override fun newInputStream(): InputStream {
+                                                return if (!initialStreamUsed) {
+                                                    initialStreamUsed = true
+                                                    stream
+                                                } else {
+                                                    cr.openInputStream(uri)!!
+                                                }
+                                            }
+                                        },
+                                        mediaType = mType,
+                                        fileName = "image.$ext",
+                                        contentLength = null,
                                     )
 
                                     @Exhaustive
                                     when (repoResponse) {
                                         is Response.Error -> {
-
+                                            // TODO: Handle Error...
                                         }
                                         is Response.Success -> {
 
                                         }
                                     }
-                                    // TODO: Use stream, MediaType, filename, extension
-
-                                    // TODO: On success
-                                    viewStateContainer.updateViewState(MenuBottomViewState.Closed)
-
-                                    // TODO: Remove upon implementation
-                                    try {
-                                        stream.close()
-                                    } catch (e: Exception) {}
                                 }
                             }
                         }

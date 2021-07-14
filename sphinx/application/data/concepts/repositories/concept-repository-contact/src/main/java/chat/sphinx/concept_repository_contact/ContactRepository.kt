@@ -13,6 +13,7 @@ import chat.sphinx.wrapper_contact.ContactAlias
 import chat.sphinx.wrapper_contact.DeviceId
 import chat.sphinx.wrapper_contact.PrivatePhoto
 import chat.sphinx.wrapper_invite.Invite
+import chat.sphinx.wrapper_io_utils.InputStreamProvider
 import chat.sphinx.wrapper_message_media.MediaType
 import io.matthewnelson.crypto_common.clazzes.Password
 import kotlinx.coroutines.flow.Flow
@@ -48,10 +49,12 @@ interface ContactRepository {
     suspend fun updateOwnerNameAndKey(name: String, contactKey: Password): Response<Any, ResponseError>
     suspend fun updateOwner(alias: String?, privatePhoto: PrivatePhoto?, tipAmount: Sat?): Response<Any, ResponseError>
 
-    suspend fun updateOwnerProfilePic(
-        stream: InputStream,
+    // TODO: add chatId to argument to update alias photo
+    suspend fun updateProfilePic(
+//        chatId: ChatId?,
+        stream: InputStreamProvider,
         mediaType: MediaType,
         fileName: String,
-        extension: String,
+        contentLength: Long?
     ): Response<Any, ResponseError>
 }
