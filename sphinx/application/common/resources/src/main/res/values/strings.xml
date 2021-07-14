@@ -7,6 +7,7 @@
     <string name="sats">sats</string>
     <string name="new_contact">New Contact</string>
     <string name="default_sats_amount">…</string>
+    <string name="uploading">Uploading...…</string>
 
     <!--  Number Pad   -->
     <string name="_1">1</string>
