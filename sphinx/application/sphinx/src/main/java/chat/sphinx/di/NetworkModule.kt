@@ -29,7 +29,7 @@ import chat.sphinx.feature_network_tor.TorManagerAndroid
 import chat.sphinx.feature_relay.RelayDataHandlerImpl
 import chat.sphinx.feature_socket_io.SocketIOManagerImpl
 import chat.sphinx.logger.SphinxLogger
-import chat.sphinx.wrapper_attachment.AuthenticationToken
+import chat.sphinx.wrapper_meme_server.AuthenticationToken
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import coil.util.CoilUtils
 import com.squareup.moshi.Moshi

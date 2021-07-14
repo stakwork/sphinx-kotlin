@@ -10,7 +10,8 @@ dependencies {
 
     // Sphinx
     api project(path: ':sphinx:application:common:kotlin-response')
-    api project(path: ':sphinx:application:common:wrappers:wrapper-attachment')
+    api project(path: ':sphinx:application:common:wrappers:wrapper-io-utils')
+    api project(path: ':sphinx:application:common:wrappers:wrapper-meme-server')
     api project(path: ':sphinx:application:common:wrappers:wrapper-message-media')
     api project(path: ':sphinx:application:common:wrappers:wrapper-relay')
     implementation deps.kotlin.coroutinesCore

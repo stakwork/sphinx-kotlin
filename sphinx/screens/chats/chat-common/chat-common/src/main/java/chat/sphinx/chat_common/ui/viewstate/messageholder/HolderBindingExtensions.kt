@@ -21,8 +21,8 @@ import chat.sphinx.concept_network_client_crypto.CryptoScheme
 import chat.sphinx.resources.getString
 import chat.sphinx.resources.setBackgroundRandomColor
 import chat.sphinx.resources.setTextColorExt
-import chat.sphinx.wrapper_attachment.headerKey
-import chat.sphinx.wrapper_attachment.headerValue
+import chat.sphinx.wrapper_meme_server.headerKey
+import chat.sphinx.wrapper_meme_server.headerValue
 import chat.sphinx.wrapper_chat.ChatType
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_message.MessageType

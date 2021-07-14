@@ -1,4 +1,4 @@
-package chat.sphinx.wrapper_attachment
+package chat.sphinx.wrapper_meme_server
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun String.toAuthenticationSig(): AuthenticationSig? =

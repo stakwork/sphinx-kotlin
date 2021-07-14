@@ -10,7 +10,7 @@ import chat.sphinx.kotlin_response.message
 import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.logger.d
 import chat.sphinx.logger.e
-import chat.sphinx.wrapper_attachment.*
+import chat.sphinx.wrapper_meme_server.*
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_message_media.token.MediaHost
 import io.matthewnelson.concept_authentication.data.AuthenticationStorage
