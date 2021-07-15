@@ -27,6 +27,10 @@ suspend inline fun RelayDataHandler.retrieveRelayUrlAndAuthorizationToken(): Res
  * returned.
  * */
 abstract class RelayDataHandler {
+    /**
+     * Upon persisting of the [RelayUrl], depending on if it is an onion address, it will
+     * set tor network requirement to true or false.
+     * */
     abstract suspend fun persistRelayUrl(url: RelayUrl): Boolean
     abstract suspend fun retrieveRelayUrl(): RelayUrl?
 
@@ -35,4 +39,17 @@ abstract class RelayDataHandler {
      * */
     abstract suspend fun persistAuthorizationToken(token: AuthorizationToken?): Boolean
     abstract suspend fun retrieveAuthorizationToken(): AuthorizationToken?
+
+    /**
+     * Will parse the [relayUrl] for a proper scheme (http or https). If a scheme is
+     * not present, will determine whether or not http or https will be used depending
+     * on if the [RelayUrl] is an onion address or not.
+     *
+     *  - If it contains a scheme (http or https), returns [relayUrl] value passed, unmodified
+     *  - If it *is not* an onion address, defaults to `https`
+     *  - If it *is* an onion address, defaults to `http`
+     *
+     * Returns a properly formatted [RelayUrl]
+     * */
+    abstract fun formatRelayUrl(relayUrl: RelayUrl): RelayUrl
 }
