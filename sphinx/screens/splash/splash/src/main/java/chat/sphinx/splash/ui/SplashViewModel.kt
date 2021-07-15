@@ -5,7 +5,6 @@ import android.content.Context
 import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_background_login.BackgroundLoginHandler
-import chat.sphinx.concept_meme_server.MemeServerTokenHandler
 import chat.sphinx.concept_network_query_contact.NetworkQueryContact
 import chat.sphinx.concept_network_query_invite.NetworkQueryInvite
 import chat.sphinx.concept_network_query_invite.model.RedeemInviteDto
@@ -47,18 +46,17 @@ import javax.inject.Inject
 
 @HiltViewModel
 internal class SplashViewModel @Inject constructor(
+    private val app: Application,
     private val authenticationCoordinator: AuthenticationCoordinator,
     private val backgroundLoginHandler: BackgroundLoginHandler,
     dispatchers: CoroutineDispatchers,
     private val keyRestore: KeyRestore,
     private val lightningRepository: LightningRepository,
-    private val memeServerTokenHandler: MemeServerTokenHandler,
     private val navigator: SplashNavigator,
-    private val scannerCoordinator: ViewModelCoordinator<ScannerRequest, ScannerResponse>,
     private val networkQueryInvite: NetworkQueryInvite,
     private val networkQueryContact: NetworkQueryContact,
+    private val scannerCoordinator: ViewModelCoordinator<ScannerRequest, ScannerResponse>,
     private val torManager: TorManager,
-    private val app: Application,
 ): MotionLayoutViewModel<
         Any,
         Context,
