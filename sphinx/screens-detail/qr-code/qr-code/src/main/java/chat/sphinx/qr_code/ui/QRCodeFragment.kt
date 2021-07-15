@@ -13,6 +13,7 @@ import chat.sphinx.qr_code.databinding.FragmentQrCodeBinding
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
+import io.matthewnelson.android_feature_screens.util.visible
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -73,6 +74,7 @@ internal class QRCodeFragment: SideEffectFragment<
 
             viewState.description?.let {
                 textViewQrCodeDescription.text = it
+                textViewQrCodeDescription.visible
             }
         }
     }
