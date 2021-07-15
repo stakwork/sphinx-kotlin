@@ -4,6 +4,7 @@ import chat.sphinx.concept_network_query_chat.model.ChatDto
 import chat.sphinx.concept_network_query_contact.model.ContactDto
 import chat.sphinx.concept_network_query_invite.model.InviteDto
 import chat.sphinx.concept_network_query_lightning.model.invoice.InvoiceDto
+import chat.sphinx.concept_network_query_lightning.model.invoice.InvoicePaymentDto
 import chat.sphinx.concept_network_query_message.model.MessageDto
 import chat.sphinx.concept_socket_io.GroupDto
 import com.squareup.moshi.JsonClass
@@ -56,7 +57,7 @@ internal sealed class MessageResponse<T> {
     internal class ResponseInvite(override val response: InviteDto): MessageResponse<InviteDto>()
 
     @JsonClass(generateAdapter = true)
-    internal class ResponseInvoice(override val response: InvoiceDto): MessageResponse<InvoiceDto>()
+    internal class ResponseInvoice(override val response: InvoicePaymentDto): MessageResponse<InvoicePaymentDto>()
 
     @JsonClass(generateAdapter = true)
     internal class ResponseMessage(override val response: MessageDto): MessageResponse<MessageDto>()

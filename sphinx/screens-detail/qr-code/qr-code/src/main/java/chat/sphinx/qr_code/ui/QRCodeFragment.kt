@@ -3,6 +3,7 @@ package chat.sphinx.qr_code.ui
 import android.content.Context
 import android.os.Bundle
 import android.view.View
+import androidx.core.view.isGone
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import by.kirich1409.viewbindingdelegate.viewBinding
@@ -61,8 +62,7 @@ internal class QRCodeFragment: SideEffectFragment<
     override suspend fun onViewStateFlowCollect(viewState: QRCodeViewState) {
         binding.apply {
             includeQrCodeHeader.apply header@ {
-                this@header.textViewDetailScreenHeaderNavBack
-                    .goneIfFalse(viewState.showBackButton)
+                this@header.textViewDetailScreenHeaderNavBack.goneIfFalse(viewState.showBackButton)
                 this@header.textViewDetailScreenHeaderName.text = viewState.viewTitle
             }
 
@@ -76,6 +76,15 @@ internal class QRCodeFragment: SideEffectFragment<
                 textViewQrCodeDescription.text = it
                 textViewQrCodeDescription.visible
             }
+
+            if (viewState.paid && layoutConstraintInvoicePaid.isGone) {
+                layoutConstraintInvoicePaid.apply {
+                    alpha = 0.0F
+                    visible
+                    animate().alpha(1.0F)
+                }
+            }
+            layoutConstraintInvoicePaid.goneIfFalse(viewState.paid)
         }
     }
 

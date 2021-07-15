@@ -17,9 +17,9 @@ class ToQRCodeDetail(
         val builder = QRCodeFragmentArgs.Builder(
             qrText,
             viewTitle,
-            showBackArrow ?: controller.previousBackStackEntry != null,
+            description ?: "",
+            showBackArrow ?: (controller.previousBackStackEntry != null)
         )
-        builder.argDescription = description
 
         controller.navigate(
             R.id.qr_code_nav_graph,

@@ -8,6 +8,9 @@ import android.graphics.Bitmap
 import android.graphics.Color
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import chat.sphinx.concept_socket_io.SocketIOManager
+import chat.sphinx.concept_socket_io.SphinxSocketIOMessage
+import chat.sphinx.concept_socket_io.SphinxSocketIOMessageListener
 import chat.sphinx.qr_code.R
 import chat.sphinx.qr_code.navigation.QRCodeNavigator
 import com.google.zxing.BarcodeFormat
@@ -26,6 +29,7 @@ import javax.inject.Inject
 internal class QRCodeViewModel @Inject constructor(
     private val app: Application,
     val navigator: QRCodeNavigator,
+    private val socketIOManager: SocketIOManager,
     dispatchers: CoroutineDispatchers,
     handle: SavedStateHandle,
 ): SideEffectViewModel<
@@ -40,10 +44,11 @@ internal class QRCodeViewModel @Inject constructor(
                     it.value.viewTitle,
                     it.value.qrText,
                     null,
-                    it.value.argDescription
+                    it.value.argDescription,
                 )
             },
-        )
+        ),
+    SphinxSocketIOMessageListener
 {
 
     companion object {
@@ -53,6 +58,8 @@ internal class QRCodeViewModel @Inject constructor(
     private val args: QRCodeFragmentArgs by handle.navArgs()
 
     init {
+        socketIOManager.addListener(this)
+
         viewModelScope.launch(default) {
             val writer = QRCodeWriter()
             val bitMatrix = writer.encode(args.qrText, BarcodeFormat.QR_CODE, BITMAP_XY, BITMAP_XY)
@@ -70,7 +77,8 @@ internal class QRCodeViewModel @Inject constructor(
                     currentViewState.showBackButton,
                     currentViewState.viewTitle,
                     currentViewState.qrText,
-                    bitmap
+                    bitmap,
+                    currentViewState.description,
                 )
             )
         }
@@ -87,5 +95,29 @@ internal class QRCodeViewModel @Inject constructor(
                 )
             }
         }
+    }
+
+    @Suppress("BlockingMethodInNonBlockingContext")
+    override suspend fun onSocketIOMessageReceived(msg: SphinxSocketIOMessage) {
+        if (msg is SphinxSocketIOMessage.Type.InvoicePayment) {
+            if (args.qrText == msg.dto.invoice) {
+                updateViewState(
+                    QRCodeViewState(
+                        currentViewState.showBackButton,
+                        currentViewState.viewTitle,
+                        currentViewState.qrText,
+                        currentViewState.qrBitmap,
+                        currentViewState.description,
+                        true
+                    )
+                )
+            }
+        }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+
+        socketIOManager.removeListener(this)
     }
 }

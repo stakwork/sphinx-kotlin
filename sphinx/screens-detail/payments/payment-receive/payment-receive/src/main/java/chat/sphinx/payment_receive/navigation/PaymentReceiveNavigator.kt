@@ -7,5 +7,5 @@ import io.matthewnelson.concept_navigation.BaseNavigationDriver
 abstract class PaymentReceiveNavigator(
     navigationDriver: BaseNavigationDriver<NavController>
 ): PaymentNavigator(navigationDriver) {
-    abstract suspend fun toQRCodeDetail(qrText: String, viewTitle: String, description: String, showBackButton: Boolean?)
+    abstract suspend fun toQRCodeDetail(qrText: String, viewTitle: String, description: String, showBackButton: Boolean)
 }

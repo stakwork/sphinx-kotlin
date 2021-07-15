@@ -14,7 +14,14 @@ internal class PaymentReceiveNavigatorImpl @Inject constructor(
         detailDriver.closeDetailScreen()
     }
 
-    override suspend fun toQRCodeDetail(qrText: String, viewTitle: String, description: String, showBackButton: Boolean?) {
-        detailDriver.submitNavigationRequest(ToQRCodeDetail(qrText, viewTitle, description, showBackButton))
+    override suspend fun toQRCodeDetail(qrText: String, viewTitle: String, description: String, showBackButton: Boolean) {
+        detailDriver.submitNavigationRequest(
+            ToQRCodeDetail(
+                qrText,
+                viewTitle,
+                description,
+                showBackButton
+            )
+        )
     }
 }

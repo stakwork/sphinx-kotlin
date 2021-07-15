@@ -38,6 +38,9 @@ dependencies {
     // Sphinx
     implementation project(path: ':sphinx:activity:insetter-activity')
     implementation project(path: ':sphinx:screens-detail:common:detail-resources')
+    implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-lightning')
+
+    api project(path: ':sphinx:application:network:concepts:concept-socket-io')
 
     implementation deps.google.zxing
 
