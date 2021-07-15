@@ -11,6 +11,7 @@ import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.payment_common.ui.PaymentSideEffect
 import chat.sphinx.payment_common.ui.PaymentViewModel
+import chat.sphinx.payment_common.ui.viewstate.AmountViewState
 import chat.sphinx.payment_common.ui.viewstate.send.PaymentSendViewState
 import chat.sphinx.payment_send.R
 import chat.sphinx.payment_send.navigation.PaymentSendNavigator
@@ -40,7 +41,7 @@ internal inline val PaymentSendFragmentArgs.chatId: ChatId?
     }
 
 internal inline val PaymentSendFragmentArgs.contactId: ContactId?
-    get() = if (argContactId == ToPaymentSendDetail.NULL_CONTACT_ID) {
+    get() = if (argContactId == ContactId.NULL_CONTACT_ID) {
         null
     } else {
         ContactId(argContactId)
@@ -163,6 +164,10 @@ internal class PaymentSendViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    override fun updateAmount(amount: Int?) {
+        sendPaymentBuilder.setAmount(amount?.toLong() ?: 0)
     }
 
 }

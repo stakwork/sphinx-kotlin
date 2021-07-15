@@ -69,6 +69,8 @@ abstract class PaymentViewModel<ARGS: NavArgs, VS: ViewState<VS>>(
     protected suspend fun getAccountBalance(): StateFlow<NodeBalance?> =
         lightningRepository.getAccountBalance()
 
+    abstract fun updateAmount(amount: Int?)
+
     fun updateAmount(amountString: String) {
         viewModelScope.launch(mainImmediate) {
             submitSideEffect(PaymentSideEffect.ProduceHapticFeedback)
@@ -80,7 +82,7 @@ abstract class PaymentViewModel<ARGS: NavArgs, VS: ViewState<VS>>(
                     null
                 }
 
-                sendPaymentBuilder.setAmount(updatedAmount?.toLong() ?: 0)
+                updateAmount(updatedAmount)
 
                 when {
                     updatedAmount == null -> {

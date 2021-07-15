@@ -76,19 +76,12 @@ internal class PaymentSendFragment: PaymentFragment<
     override val imageLoader: ImageLoader<ImageView>
         get() = imageLoaderInj
 
-
-
-
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         confirmationBinding.buttonConfirm.setOnClickListener {
             viewModel.sendContactPayment(messageBinding.editTextMessage.text?.toString())
         }
-
-        setupFooter()
-        setupNumberPad()
     }
 
     override fun setupFooter() {

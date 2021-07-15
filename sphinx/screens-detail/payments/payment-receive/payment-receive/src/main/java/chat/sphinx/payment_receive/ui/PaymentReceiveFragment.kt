@@ -74,6 +74,17 @@ internal class PaymentReceiveFragment: PaymentFragment<
     override val imageLoader: ImageLoader<ImageView>
         get() = imageLoaderInj
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        confirmationBinding.buttonConfirm.setOnClickListener {
+            viewModel.requestPayment(messageBinding.editTextMessage.text?.toString())
+        }
+
+        setupFooter()
+        setupNumberPad()
+    }
+
     override fun setupFooter() {
         val insetterActivity = (requireActivity() as InsetterActivity)
         insetterActivity.addNavigationBarPadding(binding.layoutConstraintReceiveSend)
