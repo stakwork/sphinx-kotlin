@@ -14,8 +14,4 @@ sealed class PaymentReceiveViewState: ViewState<PaymentReceiveViewState>() {
 
     object ProcessingRequest: PaymentReceiveViewState()
     object RequestFailed: PaymentReceiveViewState()
-
-    class LightningInvoice(
-        val invoice: String
-    ): PaymentReceiveViewState()
 }

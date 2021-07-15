@@ -1,22 +1,19 @@
 package chat.sphinx.payment_receive.ui
 
 import android.app.Application
-import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_lightning.LightningRepository
 import chat.sphinx.concept_repository_lightning.model.RequestPayment
-import chat.sphinx.concept_repository_message.MessageRepository
-import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.payment_common.ui.PaymentSideEffect
 import chat.sphinx.payment_common.ui.PaymentViewModel
+import chat.sphinx.payment_common.ui.viewstate.AmountViewState
 import chat.sphinx.payment_common.ui.viewstate.receive.PaymentReceiveViewState
+import chat.sphinx.payment_receive.R
 import chat.sphinx.payment_receive.navigation.PaymentReceiveNavigator
-import chat.sphinx.scanner_view_model_coordinator.request.ScannerRequest
-import chat.sphinx.scanner_view_model_coordinator.response.ScannerResponse
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -51,17 +48,10 @@ internal class PaymentReceiveViewModel @Inject constructor(
     private val app: Application,
     private val contactRepository: ContactRepository,
     private val lightningRepository: LightningRepository,
-    private val messageRepository: MessageRepository,
-    private val scannerCoordinator: ViewModelCoordinator<ScannerRequest, ScannerResponse>
 ): PaymentViewModel<PaymentReceiveFragmentArgs, PaymentReceiveViewState>(
     dispatchers,
-    savedStateHandle,
     paymentReceiveNavigator,
-    app,
     contactRepository,
-    lightningRepository,
-    messageRepository,
-    scannerCoordinator,
     PaymentReceiveViewState.Idle
 )
 {
@@ -93,9 +83,10 @@ internal class PaymentReceiveViewModel @Inject constructor(
         viewModelScope.launch(mainImmediate) {
             requestPaymentBuilder.setChatId(args.chatId)
             requestPaymentBuilder.setContactId(args.contactId)
-            requestPaymentBuilder.setText(message)
+            requestPaymentBuilder.setMemo(message)
 
             val requestPayment = requestPaymentBuilder.build()
+
             if (requestPayment != null) {
                 updateViewState(PaymentReceiveViewState.ProcessingRequest)
                 lightningRepository.requestPayment(requestPayment).collect { loadedResponse ->
@@ -103,24 +94,22 @@ internal class PaymentReceiveViewModel @Inject constructor(
                     when (loadedResponse) {
                         is LoadResponse.Loading -> {}
                         is Response.Error -> {
-                            Log.e(TAG, "Error requesting payment: ", loadedResponse.cause.exception)
-                            submitSideEffect(PaymentSideEffect.Notify("Failed to request payment"))
+                            submitSideEffect(
+                                PaymentSideEffect.Notify(app.getString(R.string.failed_to_request_payment))
+                            )
                             refreshViewState()
                         }
                         is Response.Success -> {
-//                            paymentReceiveNavigator.closeDetailScreen()
                             paymentReceiveNavigator.toQRCodeDetail(
                                 loadedResponse.value.invoice,
-                                "PAYMENT REQUEST",
-                                "AMOUNT: ${requestPayment.amount} sats",
+                                app.getString(R.string.qr_code_title),
+                                String.format(app.getString(R.string.amount_n_sats), requestPayment.amount),
                                 false
                             )
-//                            updateViewState(PaymentReceiveViewState.LightningInvoice(loadedResponse.value.invoice))
                         }
                     }
                 }
             } else {
-                Log.d(TAG, "Request Builder is null")
                 submitSideEffect(PaymentSideEffect.Notify("Failed to request payment"))
             }
         }
@@ -128,11 +117,35 @@ internal class PaymentReceiveViewModel @Inject constructor(
 
     }
 
-    override fun updateAmount(amount: Int?) {
-        requestPaymentBuilder.setAmount(amount?.toLong() ?: 0)
+    override fun updateAmount(amountString: String) {
+        viewModelScope.launch(mainImmediate) {
+            submitSideEffect(PaymentSideEffect.ProduceHapticFeedback)
+
+            val updatedAmount: Int? = try {
+                amountString.toInt()
+            } catch (e: NumberFormatException) {
+                null
+            }
+
+            requestPaymentBuilder.setAmount(updatedAmount?.toLong() ?: 0)
+
+            when {
+                updatedAmount == null -> {
+                    amountViewStateContainer.updateViewState(AmountViewState.AmountUpdated(""))
+                }
+                updatedAmount <= MAXIMUM_RECEIVE_SAT_AMOUNT -> {
+                    amountViewStateContainer.updateViewState(AmountViewState.AmountUpdated(updatedAmount.toString()))
+                }
+                else -> {
+                    submitSideEffect(
+                        PaymentSideEffect.Notify(app.getString(R.string.requested_amount_too_high))
+                    )
+                }
+            }
+        }
     }
 
     companion object {
-        private const val TAG = "PaymentReceiveViewModel"
+        private const val MAXIMUM_RECEIVE_SAT_AMOUNT = 1_000_000
     }
 }

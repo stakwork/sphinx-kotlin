@@ -15,15 +15,15 @@ import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.detail_resources.databinding.LayoutDetailScreenHeaderBinding
 import chat.sphinx.payment_common.R
-import chat.sphinx.payment_common.databinding.*
+import chat.sphinx.payment_common.databinding.LayoutConstraintAmountBinding
+import chat.sphinx.payment_common.databinding.LayoutConstraintConfirmButtonBinding
+import chat.sphinx.payment_common.databinding.LayoutConstraintFromContactBinding
+import chat.sphinx.payment_common.databinding.LayoutConstraintMessageBinding
 import chat.sphinx.payment_common.ui.viewstate.AmountViewState
 import chat.sphinx.resources.databinding.LayoutAmountPadBinding
 import chat.sphinx.wrapper_contact.Contact
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
-import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
-import io.matthewnelson.android_feature_screens.util.invisible
-import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.concept_views.viewstate.ViewState
 import io.matthewnelson.concept_views.viewstate.collect
 import kotlinx.coroutines.launch
@@ -142,37 +142,6 @@ abstract class PaymentFragment<
             }
         }
     }
-
-//    override suspend fun onViewStateFlowCollect(viewState: VS) {
-//        @Exhaustive
-//        when (viewState) {
-//            is PaymentViewState.Idle -> {}
-//
-//            is PaymentViewState.ChatPayment -> {
-//                contactBinding.root.visible
-//                messageBinding.root.visible
-//                confirmationBinding.buttonConfirm.text = getString(R.string.confirm_button)
-//
-//                setupDestination(viewState.contact)
-//            }
-//
-//            is PaymentViewState.KeySendPayment -> {
-//                contactBinding.root.invisible
-//                messageBinding.layoutConstraintMessage.invisible
-//                confirmationBinding.buttonConfirm.text = getString(R.string.continue_button)
-//            }
-//
-//            is PaymentViewState.ProcessingPayment -> {
-//                confirmationBinding.buttonConfirm.isEnabled = false
-//                confirmationBinding.confirmProgress.visible
-//            }
-//
-//            is PaymentViewState.PaymentFailed -> {
-//                confirmationBinding.buttonConfirm.isEnabled = true
-//                confirmationBinding.confirmProgress.gone
-//            }
-//        }
-//    }
 
     override fun subscribeToViewStateFlow() {
         super.subscribeToViewStateFlow()

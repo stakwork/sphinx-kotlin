@@ -15,7 +15,6 @@ import chat.sphinx.payment_common.ui.viewstate.AmountViewState
 import chat.sphinx.payment_common.ui.viewstate.send.PaymentSendViewState
 import chat.sphinx.payment_send.R
 import chat.sphinx.payment_send.navigation.PaymentSendNavigator
-import chat.sphinx.payment_send.navigation.ToPaymentSendDetail
 import chat.sphinx.scanner_view_model_coordinator.request.ScannerFilter
 import chat.sphinx.scanner_view_model_coordinator.request.ScannerRequest
 import chat.sphinx.scanner_view_model_coordinator.response.ScannerResponse
@@ -23,13 +22,14 @@ import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.toLightningNodePubKey
-import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_lightning.NodeBalance
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -51,7 +51,7 @@ internal inline val PaymentSendFragmentArgs.contactId: ContactId?
 internal class PaymentSendViewModel @Inject constructor(
     dispatchers: CoroutineDispatchers,
     savedStateHandle: SavedStateHandle,
-    val paymentSendNavigator: PaymentSendNavigator,
+    private val paymentSendNavigator: PaymentSendNavigator,
     private val app: Application,
     private val contactRepository: ContactRepository,
     private val lightningRepository: LightningRepository,
@@ -59,13 +59,8 @@ internal class PaymentSendViewModel @Inject constructor(
     private val scannerCoordinator: ViewModelCoordinator<ScannerRequest, ScannerResponse>
 ): PaymentViewModel<PaymentSendFragmentArgs, PaymentSendViewState>(
     dispatchers,
-    savedStateHandle,
     paymentSendNavigator,
-    app,
     contactRepository,
-    lightningRepository,
-    messageRepository,
-    scannerCoordinator,
     PaymentSendViewState.Idle
 )
 {
@@ -74,6 +69,9 @@ internal class PaymentSendViewModel @Inject constructor(
     override val args: PaymentSendFragmentArgs by savedStateHandle.navArgs()
     override val chatId: ChatId? = args.chatId
     override val contactId: ContactId? = args.contactId
+
+    private suspend fun getAccountBalance(): StateFlow<NodeBalance?> =
+        lightningRepository.getAccountBalance()
 
     init {
         viewModelScope.launch(mainImmediate) {
@@ -166,8 +164,34 @@ internal class PaymentSendViewModel @Inject constructor(
         }
     }
 
-    override fun updateAmount(amount: Int?) {
-        sendPaymentBuilder.setAmount(amount?.toLong() ?: 0)
+    override fun updateAmount(amountString: String) {
+        viewModelScope.launch(mainImmediate) {
+            submitSideEffect(PaymentSideEffect.ProduceHapticFeedback)
+
+            getAccountBalance().firstOrNull()?.let { balance ->
+                val updatedAmount: Int? = try {
+                    amountString.toInt()
+                } catch (e: NumberFormatException) {
+                    null
+                }
+
+                sendPaymentBuilder.setAmount(updatedAmount?.toLong() ?: 0)
+
+                when {
+                    updatedAmount == null -> {
+                        amountViewStateContainer.updateViewState(AmountViewState.AmountUpdated(""))
+                    }
+                    updatedAmount <= balance.balance.value -> {
+                        amountViewStateContainer.updateViewState(AmountViewState.AmountUpdated(updatedAmount.toString()))
+                    }
+                    else -> {
+                        submitSideEffect(
+                            PaymentSideEffect.Notify(app.getString(chat.sphinx.payment_common.R.string.balance_too_low))
+                        )
+                    }
+                }
+            }
+        }
     }
 
 }

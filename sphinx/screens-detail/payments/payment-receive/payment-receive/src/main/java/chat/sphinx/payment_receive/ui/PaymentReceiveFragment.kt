@@ -40,15 +40,12 @@ internal class PaymentReceiveFragment: PaymentFragment<
     override val headerBinding: LayoutDetailScreenHeaderBinding by viewBinding(
         LayoutDetailScreenHeaderBinding::bind, R.id.include_payment_receive_header
     )
-
     override val contactBinding: LayoutConstraintFromContactBinding by viewBinding(
         LayoutConstraintFromContactBinding::bind, R.id.include_constraint_from_contact
     )
-
     override val amountBinding: LayoutConstraintAmountBinding by viewBinding(
         LayoutConstraintAmountBinding::bind, R.id.include_constraint_amount
     )
-
     override val amountPadBinding: LayoutAmountPadBinding by viewBinding(
         LayoutAmountPadBinding::bind, R.id.include_amount_pad
     )
@@ -73,14 +70,11 @@ internal class PaymentReceiveFragment: PaymentFragment<
         confirmationBinding.buttonConfirm.setOnClickListener {
             viewModel.requestPayment(messageBinding.editTextMessage.text?.toString())
         }
-
-        setupFooter()
-        setupNumberPad()
     }
 
     override fun setupFooter() {
         val insetterActivity = (requireActivity() as InsetterActivity)
-        insetterActivity.addNavigationBarPadding(binding.layoutConstraintReceiveSend)
+        insetterActivity.addNavigationBarPadding(binding.layoutConstraintPaymentReceive)
     }
 
     override suspend fun onViewStateFlowCollect(viewState: PaymentReceiveViewState) {
@@ -98,7 +92,7 @@ internal class PaymentReceiveFragment: PaymentFragment<
 
             is PaymentReceiveViewState.RequestLightningPayment -> {
                 binding.includeConstraintFromContact.root.invisible
-                binding.includeConstraintMessage.root.invisible
+                binding.includeConstraintMessage.root.visible
                 binding.includeConstraintConfirmButton.buttonConfirm.text = getString(R.string.continue_button)
             }
 
@@ -110,10 +104,6 @@ internal class PaymentReceiveFragment: PaymentFragment<
             is PaymentReceiveViewState.RequestFailed -> {
                 binding.includeConstraintConfirmButton.buttonConfirm.isEnabled = true
                 binding.includeConstraintConfirmButton.confirmProgress.gone
-            }
-            is PaymentReceiveViewState.LightningInvoice -> {
-
-                // TODO: open the lightning payment request
             }
         }
     }

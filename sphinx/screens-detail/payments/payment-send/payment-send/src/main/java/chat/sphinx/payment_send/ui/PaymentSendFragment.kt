@@ -3,13 +3,9 @@ package chat.sphinx.payment_send.ui
 import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.lifecycleScope
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.concept_image_loader.ImageLoader
-import chat.sphinx.concept_image_loader.ImageLoaderOptions
-import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.detail_resources.databinding.LayoutDetailScreenHeaderBinding
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
@@ -19,19 +15,14 @@ import chat.sphinx.payment_common.databinding.LayoutConstraintFromContactBinding
 import chat.sphinx.payment_common.databinding.LayoutConstraintMessageBinding
 import chat.sphinx.payment_common.ui.PaymentFragment
 import chat.sphinx.payment_common.ui.PaymentSideEffect
-import chat.sphinx.payment_common.ui.viewstate.AmountViewState
 import chat.sphinx.payment_common.ui.viewstate.send.PaymentSendViewState
 import chat.sphinx.payment_send.R
 import chat.sphinx.payment_send.databinding.FragmentPaymentSendBinding
 import chat.sphinx.resources.databinding.LayoutAmountPadBinding
-import chat.sphinx.wrapper_contact.Contact
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.util.gone
-import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.invisible
 import io.matthewnelson.android_feature_screens.util.visible
-import io.matthewnelson.concept_views.viewstate.collect
-import kotlinx.coroutines.launch
 import javax.annotation.meta.Exhaustive
 import javax.inject.Inject
 
@@ -116,24 +107,6 @@ internal class PaymentSendFragment: PaymentFragment<
             is PaymentSendViewState.PaymentFailed -> {
                 binding.includeConstraintConfirmButton.buttonConfirm.isEnabled = true
                 binding.includeConstraintConfirmButton.confirmProgress.gone
-            }
-        }
-    }
-
-    override fun subscribeToViewStateFlow() {
-        super.subscribeToViewStateFlow()
-
-        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-            viewModel.amountViewStateContainer.collect { viewState ->
-                @Exhaustive
-                when (viewState) {
-                    is AmountViewState.Idle -> {}
-
-                    is AmountViewState.AmountUpdated -> {
-                        binding.includeConstraintAmount.textViewAmount.text = viewState.amountString
-                        binding.includeConstraintConfirmButton.buttonConfirm.goneIfFalse(viewState.amountString.isNotEmpty())
-                    }
-                }
             }
         }
     }

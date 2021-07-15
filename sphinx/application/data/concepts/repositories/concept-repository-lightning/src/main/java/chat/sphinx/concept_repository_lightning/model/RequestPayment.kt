@@ -6,20 +6,20 @@ import chat.sphinx.wrapper_common.dashboard.ContactId
 class RequestPayment private constructor(
     val chatId: ChatId?,
     val contactId: ContactId?,
-    val text: String?,
+    val memo: String?,
     val amount: Long,
 ) {
     class Builder {
         private var chatId: ChatId?         = null
         private var contactId: ContactId?   = null
-        private var text: String?           = null
+        private var memo: String?           = null
         private var amount: Long            = 0
 
         @Synchronized
         fun clear() {
             chatId = null
             contactId = null
-            text = null
+            memo = null
             amount = 0
         }
 
@@ -50,11 +50,11 @@ class RequestPayment private constructor(
         }
 
         @Synchronized
-        fun setText(text: String?): Builder {
+        fun setMemo(text: String?): Builder {
             if (text == null || text.isEmpty()) {
-                this.text = null
+                this.memo = null
             } else {
-                this.text = text
+                this.memo = text
             }
             return this
         }
@@ -67,7 +67,7 @@ class RequestPayment private constructor(
                 RequestPayment(
                     chatId,
                     contactId,
-                    text,
+                    memo,
                     amount
                 )
             }
