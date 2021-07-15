@@ -58,8 +58,6 @@ dependencies {
 
     testImplementation testDeps.junit
 
-    implementation deps.square.okhttp
-
     androidTestImplementation testDeps.androidx.core
     androidTestImplementation testDeps.androidx.espresso
     androidTestImplementation testDeps.androidx.junit
