@@ -20,6 +20,7 @@ import chat.sphinx.scanner_view_model_coordinator.request.ScannerFilter
 import chat.sphinx.scanner_view_model_coordinator.request.ScannerRequest
 import chat.sphinx.scanner_view_model_coordinator.response.ScannerResponse
 import chat.sphinx.splash.navigation.SplashNavigator
+import chat.sphinx.splash.util.isInviteCode
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
 import chat.sphinx.wrapper_relay.isOnionAddress
@@ -155,9 +156,6 @@ internal class SplashViewModel @Inject constructor(
         }
     }
 
-    private inline val String.isInviteCode: Boolean
-        get() = matches("^[A-F0-9a-f]{40}\$".toRegex())
-
     fun processConnectionCode(input: String?) {
         if (input.isNullOrEmpty()) {
             viewModelScope.launch(mainImmediate) {
@@ -171,9 +169,7 @@ internal class SplashViewModel @Inject constructor(
         // going on in different classes
         // Invite Code
         if (input.isInviteCode) {
-            viewModelScope.launch(mainImmediate) {
-                redeemInvite(input)
-            }
+            redeemInvite(input)
             return
         }
 
