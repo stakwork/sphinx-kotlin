@@ -1,12 +1,9 @@
 package chat.sphinx.payment_receive.ui
 
-import android.content.Context
 import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.viewModelScope
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.detail_resources.databinding.LayoutDetailScreenHeaderBinding
@@ -18,17 +15,13 @@ import chat.sphinx.payment_common.databinding.LayoutConstraintFromContactBinding
 import chat.sphinx.payment_common.databinding.LayoutConstraintMessageBinding
 import chat.sphinx.payment_common.ui.PaymentFragment
 import chat.sphinx.payment_common.ui.viewstate.receive.PaymentReceiveViewState
-import chat.sphinx.payment_common.ui.viewstate.send.PaymentSendViewState
 import chat.sphinx.payment_receive.R
 import chat.sphinx.payment_receive.databinding.FragmentPaymentReceiveBinding
 import chat.sphinx.resources.databinding.LayoutAmountPadBinding
 import dagger.hilt.android.AndroidEntryPoint
-import io.matthewnelson.android_feature_screens.ui.base.BaseFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.invisible
 import io.matthewnelson.android_feature_screens.util.visible
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
 import javax.annotation.meta.Exhaustive
 import javax.inject.Inject
 
@@ -95,7 +88,7 @@ internal class PaymentReceiveFragment: PaymentFragment<
         when (viewState) {
             is PaymentReceiveViewState.Idle -> {}
 
-            is PaymentReceiveViewState.ChatPayment -> {
+            is PaymentReceiveViewState.ChatPaymentRequest -> {
                 binding.includeConstraintFromContact.root.visible
                 binding.includeConstraintMessage.root.visible
                 binding.includeConstraintConfirmButton.buttonConfirm.text = getString(R.string.confirm_button)
@@ -103,20 +96,24 @@ internal class PaymentReceiveFragment: PaymentFragment<
                 setupDestination(viewState.contact)
             }
 
-            is PaymentReceiveViewState.KeySendPayment -> {
+            is PaymentReceiveViewState.RequestLightningPayment -> {
                 binding.includeConstraintFromContact.root.invisible
                 binding.includeConstraintMessage.root.invisible
                 binding.includeConstraintConfirmButton.buttonConfirm.text = getString(R.string.continue_button)
             }
 
-            is PaymentReceiveViewState.ProcessingPayment -> {
+            is PaymentReceiveViewState.ProcessingRequest -> {
                 binding.includeConstraintConfirmButton.buttonConfirm.isEnabled = false
                 binding.includeConstraintConfirmButton.confirmProgress.visible
             }
 
-            is PaymentReceiveViewState.PaymentFailed -> {
+            is PaymentReceiveViewState.RequestFailed -> {
                 binding.includeConstraintConfirmButton.buttonConfirm.isEnabled = true
                 binding.includeConstraintConfirmButton.confirmProgress.gone
+            }
+            is PaymentReceiveViewState.LightningInvoice -> {
+
+                // TODO: open the lightning payment request
             }
         }
     }

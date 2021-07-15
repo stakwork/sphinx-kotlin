@@ -73,15 +73,19 @@ internal class PaymentReceiveViewModel @Inject constructor(
 
     init {
         viewModelScope.launch(mainImmediate) {
-            contactSharedFlow.collect { contact ->
-                viewStateContainer.updateViewState(
-                    if (contact != null) {
-                        PaymentReceiveViewState.ChatPayment(contact)
-                    } else {
-                        PaymentReceiveViewState.KeySendPayment
-                    }
-                )
-            }
+            refreshViewState()
+        }
+    }
+
+    private suspend fun refreshViewState() {
+        contactSharedFlow.collect { contact ->
+            viewStateContainer.updateViewState(
+                if (contact != null) {
+                    PaymentReceiveViewState.ChatPaymentRequest(contact)
+                } else {
+                    PaymentReceiveViewState.RequestLightningPayment
+                }
+            )
         }
     }
 
@@ -93,6 +97,7 @@ internal class PaymentReceiveViewModel @Inject constructor(
 
             val requestPayment = requestPaymentBuilder.build()
             if (requestPayment != null) {
+                updateViewState(PaymentReceiveViewState.ProcessingRequest)
                 lightningRepository.requestPayment(requestPayment).collect { loadedResponse ->
                     @Exhaustive
                     when (loadedResponse) {
@@ -100,11 +105,17 @@ internal class PaymentReceiveViewModel @Inject constructor(
                         is Response.Error -> {
                             Log.e(TAG, "Error requesting payment: ", loadedResponse.cause.exception)
                             submitSideEffect(PaymentSideEffect.Notify("Failed to request payment"))
-//                            updateViewState(SupportTicketViewState.Empty)
+                            refreshViewState()
                         }
                         is Response.Success -> {
-                            Log.d(TAG, "Invoice: ${loadedResponse.value.invoice}")
-//                            updateViewState(PaymentReceiveViewState.KeySendPayment)
+//                            paymentReceiveNavigator.closeDetailScreen()
+                            paymentReceiveNavigator.toQRCodeDetail(
+                                loadedResponse.value.invoice,
+                                "PAYMENT REQUEST",
+                                "AMOUNT: ${requestPayment.amount} sats",
+                                false
+                            )
+//                            updateViewState(PaymentReceiveViewState.LightningInvoice(loadedResponse.value.invoice))
                         }
                     }
                 }

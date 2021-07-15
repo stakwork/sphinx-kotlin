@@ -39,7 +39,8 @@ internal class QRCodeViewModel @Inject constructor(
                     it.value.argShowBackArrow,
                     it.value.viewTitle,
                     it.value.qrText,
-                    null
+                    null,
+                    it.value.argDescription
                 )
             },
         )

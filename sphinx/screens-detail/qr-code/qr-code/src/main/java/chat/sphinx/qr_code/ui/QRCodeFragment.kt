@@ -70,6 +70,10 @@ internal class QRCodeFragment: SideEffectFragment<
             viewState.qrBitmap?.let {
                 qrCode.setImageBitmap(it)
             }
+
+            viewState.description?.let {
+                textViewQrCodeDescription.text = it
+            }
         }
     }
 

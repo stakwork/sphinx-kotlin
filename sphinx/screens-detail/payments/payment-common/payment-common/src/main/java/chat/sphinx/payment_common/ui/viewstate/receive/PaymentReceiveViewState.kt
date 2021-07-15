@@ -6,12 +6,16 @@ import io.matthewnelson.concept_views.viewstate.ViewState
 sealed class PaymentReceiveViewState: ViewState<PaymentReceiveViewState>() {
     object Idle: PaymentReceiveViewState()
 
-    object KeySendPayment: PaymentReceiveViewState()
+    object RequestLightningPayment: PaymentReceiveViewState()
 
-    class ChatPayment(
+    class ChatPaymentRequest(
         val contact: Contact
     ): PaymentReceiveViewState()
 
-    object ProcessingPayment: PaymentReceiveViewState()
-    object PaymentFailed: PaymentReceiveViewState()
+    object ProcessingRequest: PaymentReceiveViewState()
+    object RequestFailed: PaymentReceiveViewState()
+
+    class LightningInvoice(
+        val invoice: String
+    ): PaymentReceiveViewState()
 }

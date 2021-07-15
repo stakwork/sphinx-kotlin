@@ -8,5 +8,6 @@ internal data class QRCodeViewState(
     val viewTitle: String,
     val qrText: String,
     val qrBitmap: Bitmap?,
+    val description: String? = null,
 ): ViewState<QRCodeViewState>()
 
