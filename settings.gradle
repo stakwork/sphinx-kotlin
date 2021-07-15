@@ -124,7 +124,7 @@ include ':sphinx:service:concepts:concept-service-media-player'
 include ':sphinx:service:features:media-player:feature-service-media-player-android'
 include ':sphinx:service:concepts:concept-service-notification'
 include ':sphinx:service:features:notifications:feature-service-notification-empty'
-//include ':sphinx:service:features:notifications:feature-service-notification-firebase'
+include ':sphinx:service:features:notifications:feature-service-notification-firebase'
 
 // Testing
 include ':sphinx:test:test-network-query'
