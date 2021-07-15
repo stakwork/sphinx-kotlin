@@ -9,6 +9,7 @@ import chat.sphinx.concept_network_query_contact.NetworkQueryContact
 import chat.sphinx.concept_network_query_invite.NetworkQueryInvite
 import chat.sphinx.concept_network_query_invite.model.RedeemInviteDto
 import chat.sphinx.concept_network_tor.TorManager
+import chat.sphinx.concept_relay.RelayDataHandler
 import chat.sphinx.concept_repository_lightning.LightningRepository
 import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
 import chat.sphinx.key_restore.KeyRestore
@@ -21,6 +22,7 @@ import chat.sphinx.scanner_view_model_coordinator.response.ScannerResponse
 import chat.sphinx.splash.navigation.SplashNavigator
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
+import chat.sphinx.wrapper_relay.isOnionAddress
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.MotionLayoutViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
@@ -55,6 +57,7 @@ internal class SplashViewModel @Inject constructor(
     private val navigator: SplashNavigator,
     private val networkQueryInvite: NetworkQueryInvite,
     private val networkQueryContact: NetworkQueryContact,
+    private val relayDataHandler: RelayDataHandler,
     private val scannerCoordinator: ViewModelCoordinator<ScannerRequest, ScannerResponse>,
     private val torManager: TorManager,
 ): MotionLayoutViewModel<
@@ -237,7 +240,8 @@ internal class SplashViewModel @Inject constructor(
             val authToken = AuthorizationToken(
                 PasswordGenerator(passwordLength = 20).password.value.joinToString("")
             )
-            val relayUrl = parseRelayUrl(RelayUrl(ip))
+            val relayUrl = relayDataHandler.formatRelayUrl(RelayUrl(ip))
+            torManager.setTorRequired(relayUrl.isOnionAddress)
 
             storeToken(authToken.value, relayUrl.value)
 
@@ -256,32 +260,6 @@ internal class SplashViewModel @Inject constructor(
                         }
                     }
                 }
-            }
-        }
-    }
-
-    // I had to copy this from the RelayDataHandlerImpl class, I needed this methods outside
-    // but I wasn't sure where to put them
-    private inline val String.isOnionAddress: Boolean
-        get() = matches("([a-z2-7]{56}).onion.*".toRegex())
-
-    private suspend fun parseRelayUrl(relayUrl: RelayUrl): RelayUrl {
-        return try {
-            val httpUrl = relayUrl.value.toHttpUrl()
-            torManager.setTorRequired(httpUrl.host.isOnionAddress)
-
-            // is a valid url with scheme
-            relayUrl
-        } catch (e: IllegalArgumentException) {
-
-            // does not contain http, https... check if it's an onion address
-            if (relayUrl.value.isOnionAddress) {
-                // only use http if it is an onion address
-                torManager.setTorRequired(true)
-                RelayUrl("http://${relayUrl.value}")
-            } else {
-                torManager.setTorRequired(false)
-                RelayUrl("https://${relayUrl.value}")
             }
         }
     }
