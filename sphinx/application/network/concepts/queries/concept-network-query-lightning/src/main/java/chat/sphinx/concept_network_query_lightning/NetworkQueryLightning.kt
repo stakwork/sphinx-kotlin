@@ -54,6 +54,7 @@ abstract class NetworkQueryLightning {
     abstract fun getLogs(
         relayData: Pair<AuthorizationToken, RelayUrl>? = null
     ): Flow<LoadResponse<String, ResponseError>>
+
 //    app.get('/getinfo', details.getInfo)
 //    app.get('/logs', details.getLogsSince)
 //    app.get('/info', details.getNodeInfo)

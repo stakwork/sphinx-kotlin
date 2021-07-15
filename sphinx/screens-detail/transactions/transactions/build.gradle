@@ -34,8 +34,12 @@ dependencies {
     implementation project(path: ':android:features:android-feature-screens')
     // Sphinx
     implementation project(path: ':sphinx:screens-detail:common:detail-resources')
+    implementation project(path: ':sphinx:activity:insetter-activity')
+    implementation project(path: ':sphinx:application:common:resources')
+    implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-message')
 
     implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt
+    implementation project(path: ':sphinx:application:data:concepts:concept-image-loader')
     kapt kaptDeps.google.hilt
 }

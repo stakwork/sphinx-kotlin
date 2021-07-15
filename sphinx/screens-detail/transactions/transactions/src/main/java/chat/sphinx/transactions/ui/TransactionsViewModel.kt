@@ -10,6 +10,6 @@ import javax.inject.Inject
 internal class TransactionsViewModel @Inject constructor(
     dispatchers: CoroutineDispatchers,
     val navigator: TransactionsNavigator,
-): BaseViewModel<TransactionsViewState>(dispatchers, TransactionsViewState.Idle)
+): BaseViewModel<TransactionsViewState>(dispatchers, TransactionsViewState.ListMode(listOf()))
 {
 }
