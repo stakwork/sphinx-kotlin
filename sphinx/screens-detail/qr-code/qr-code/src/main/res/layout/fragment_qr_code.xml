@@ -15,14 +15,41 @@
         android:layout_height="@dimen/default_header_height"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <ImageView
-        android:id="@+id/qr_code"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraint_qr_code_container"
         android:layout_width="match_parent"
-        android:layout_marginHorizontal="@dimen/default_double_layout_margin"
         android:layout_height="0dp"
         android:layout_marginTop="60dp"
         app:layout_constraintTop_toBottomOf="@+id/include_qr_code_header"
-        app:layout_constraintDimensionRatio="1:1" />
+        >
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_qr_code_description"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="20dp"
+            android:textAlignment="center"
+            android:gravity="center"
+            android:textColor="@color/text"
+            android:fontFamily="@font/roboto_regular"
+            android:textSize="@dimen/default_form_text_view_text_size"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:visibility="gone"
+            tools:text="Amount: 21 000 0000 sats"
+            tools:visibility="visible"
+            />
+
+        <ImageView
+            android:id="@+id/qr_code"
+            android:layout_width="match_parent"
+            android:layout_marginHorizontal="@dimen/default_double_layout_margin"
+            android:layout_height="0dp"
+            app:layout_constraintTop_toBottomOf="@+id/text_view_qr_code_description"
+            app:layout_constraintDimensionRatio="1:1" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/qr_code_label"
@@ -35,7 +62,7 @@
         android:layout_marginHorizontal="@dimen/default_double_layout_margin"
         android:layout_marginTop="30dp"
         android:paddingHorizontal="@dimen/default_double_layout_margin"
-        app:layout_constraintTop_toBottomOf="@+id/qr_code"
+        app:layout_constraintTop_toBottomOf="@+id/constraint_qr_code_container"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
@@ -69,7 +96,7 @@
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:orientation="vertical"
-            app:layout_constraintGuide_percent=".5" />
+            app:layout_constraintGuide_begin="176dp" />
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/button_qr_code_copy"

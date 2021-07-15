@@ -1,8 +1,8 @@
-package chat.sphinx.payment_send.ui
+package chat.sphinx.payment_common.ui.viewstate
 
 import io.matthewnelson.concept_views.viewstate.ViewState
 
-internal sealed class AmountViewState: ViewState<AmountViewState>() {
+sealed class AmountViewState: ViewState<AmountViewState>() {
     object Idle: AmountViewState()
 
     class AmountUpdated(

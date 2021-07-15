@@ -3,13 +3,16 @@ package chat.sphinx.concept_network_query_lightning
 import chat.sphinx.concept_network_query_lightning.model.balance.BalanceAllDto
 import chat.sphinx.concept_network_query_lightning.model.balance.BalanceDto
 import chat.sphinx.concept_network_query_lightning.model.channel.ChannelsDto
+import chat.sphinx.concept_network_query_lightning.model.invoice.InvoiceDto
 import chat.sphinx.concept_network_query_lightning.model.invoice.InvoicesDto
+import chat.sphinx.concept_network_query_lightning.model.invoice.PostRequestPaymentDto
 import chat.sphinx.concept_network_query_lightning.model.route.RouteSuccessProbabilityDto
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.LightningRouteHint
+import chat.sphinx.wrapper_lightning.RequestPaymentInvoice
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
 import kotlinx.coroutines.flow.Flow
@@ -54,6 +57,12 @@ abstract class NetworkQueryLightning {
     abstract fun getLogs(
         relayData: Pair<AuthorizationToken, RelayUrl>? = null
     ): Flow<LoadResponse<String, ResponseError>>
+
+    abstract fun postRequestPayment(
+        postPaymentDto: PostRequestPaymentDto,
+        relayData: Pair<AuthorizationToken, RelayUrl>? = null,
+    ): Flow<LoadResponse<RequestPaymentInvoice, ResponseError>>
+
 //    app.get('/getinfo', details.getInfo)
 //    app.get('/logs', details.getLogsSince)
 //    app.get('/info', details.getNodeInfo)
@@ -69,7 +78,6 @@ abstract class NetworkQueryLightning {
     ////////////
     /// POST ///
     ////////////
-//    app.post('/invoices', invoices.createInvoice)
 //    app.post('/invoices/cancel', invoices.cancelInvoice)
 
     //////////////

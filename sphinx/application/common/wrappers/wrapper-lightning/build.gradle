@@ -1,8 +1,13 @@
 plugins {
     id 'java-library'
     id 'kotlin'
+    id 'kotlin-kapt'
 }
 
 dependencies {
     api project(path: ':sphinx:application:common:wrappers:wrapper-common')
+
+    implementation deps.kotlin.reflect
+    implementation deps.square.moshi
+    kapt kaptDeps.square.moshiCodegen
 }

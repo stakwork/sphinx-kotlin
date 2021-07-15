@@ -18,6 +18,12 @@
         <argument
             android:name="argShowBackArrow"
             app:argType="boolean" />
+        <argument
+            android:name="argDescription"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="@null"
+            />
     </fragment>
 
 </navigation>

@@ -2,10 +2,18 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_constraint_payment_receive"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/background_detail_screen"
     tools:context=".ui.PaymentReceiveFragment">
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guide_v5"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent=".5" />
 
     <include
         android:id="@+id/include_payment_receive_header"
@@ -14,10 +22,58 @@
         android:layout_height="@dimen/default_header_height"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <TextView
+    <include
+        android:id="@+id/include_constraint_from_contact"
+        layout="@layout/layout_constraint_from_contact"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/include_payment_receive_header"/>
+
+    <include
+        android:id="@+id/include_constraint_amount"
+        layout="@layout/layout_constraint_amount"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center"
-        android:text="PAYMENT RECEIVE" />
+        android:layout_height="0dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/include_constraint_from_contact"
+        app:layout_constraintBottom_toTopOf="@+id/include_constraint_message"
+        />
+
+    <include
+        android:id="@+id/include_constraint_message"
+        layout="@layout/layout_constraint_message"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/message_edit_text_container_height"
+        android:paddingHorizontal="@dimen/container_horizontal_padding"
+        android:visibility="visible"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/include_constraint_amount"
+        app:layout_constraintBottom_toTopOf="@+id/guide_v5"
+        />
+
+    <include
+        android:id="@+id/include_amount_pad"
+        layout="@layout/layout_amount_pad"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@+id/include_constraint_confirm_button"
+        app:layout_constraintTop_toBottomOf="@+id/include_constraint_message"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <include
+        android:id="@+id/include_constraint_confirm_button"
+        layout="@layout/layout_constraint_confirm_button"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/confirm_button_container_height"
+        android:paddingHorizontal="@dimen/container_horizontal_padding"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
