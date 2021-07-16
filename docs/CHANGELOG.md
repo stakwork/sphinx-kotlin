@@ -1,7 +1,16 @@
 # ChangeLog
 
+## Version 1.0.0-alpha10 (2021-07-13)
+ - Adds ability to create Lightning Invoices for receiving payments
+ - Adds ability to view Lightning Transaction history
+ - Adds ability to change Profile Picture
+ - Updates dependencies to latest stable versions
+ - Fixes how direct payment's containing images are shown in chats 
+ - Fixes Chat Message Input Scroll View
+
 ## Version 1.0.0-alpha09 (2021-07-13)
  - Adds Giphy integration to chats
+ - Adds ability to delete messages
  - Adds Support Ticket detail screen
  - Documentation updates
  - Removes notification of 200 message limit for large chats
