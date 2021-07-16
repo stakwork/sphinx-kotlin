@@ -10,6 +10,10 @@ import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_network_query_message.model.TransactionDto
 import chat.sphinx.transactions.databinding.LayoutTransactionHolderBinding
 import chat.sphinx.transactions.ui.TransactionsViewModel
+import chat.sphinx.transactions.ui.viewstate.TransactionHolderViewState
+import chat.sphinx.wrapper_common.DateTime
+import chat.sphinx.wrapper_common.toDateTime
+import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_viewmodel.collectViewState
 import io.matthewnelson.android_feature_viewmodel.currentViewState
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
@@ -23,8 +27,8 @@ internal class TransactionsListAdapter(
 ): RecyclerView.Adapter<TransactionsListAdapter.TransactionViewHolder>(), DefaultLifecycleObserver {
 
     private inner class Diff(
-        private val oldList: List<TransactionDto>,
-        private val newList: List<TransactionDto>,
+        private val oldList: List<TransactionHolderViewState>,
+        private val newList: List<TransactionHolderViewState>,
     ): DiffUtil.Callback() {
         override fun getOldListSize(): Int {
             return oldList.size
@@ -42,7 +46,7 @@ internal class TransactionsListAdapter(
             val same: Boolean =  try {
                 oldList[oldItemPosition].let { old ->
                     newList[newItemPosition].let { new ->
-                        old.id == new.id
+                        old.transaction.id == new.transaction.id
                     }
                 }
             } catch (e: IndexOutOfBoundsException) {
@@ -58,8 +62,6 @@ internal class TransactionsListAdapter(
 
         override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
             val same: Boolean = try {
-                // the Contact is a data class so we can simply compare string
-                // values to see if any fields have changed.
                 oldList[oldItemPosition].toString() == newList[newItemPosition].toString()
             } catch (e: IndexOutOfBoundsException) {
                 false
@@ -74,7 +76,7 @@ internal class TransactionsListAdapter(
 
     }
 
-    private val transactions = ArrayList<TransactionDto>(viewModel.currentViewState.list)
+    private val transactions = ArrayList<TransactionHolderViewState>(viewModel.currentViewState.list)
 
     override fun onStart(owner: LifecycleOwner) {
         super.onStart(owner)
@@ -126,16 +128,36 @@ internal class TransactionsListAdapter(
     ): RecyclerView.ViewHolder(binding.root) {
 
         private var disposable: Disposable? = null
-        private var transaction: TransactionDto? = null
+        private var transactionHolderViewState: TransactionHolderViewState? = null
 
         fun bind(position: Int) {
             binding.apply {
-                val t: TransactionDto = transactions.getOrNull(position) ?: let {
-                    transaction = null
+                val t: TransactionHolderViewState = transactions.getOrNull(position) ?: let {
+                    transactionHolderViewState = null
                     return
                 }
-                transaction = t
+                transactionHolderViewState = t
                 disposable?.dispose()
+
+                val amount = t.transaction.amount.toString()
+                val date = DateTime.getFormateeemmddhmma().format(t.transaction.date.toDateTime().value)
+                val senderReceiverName = t.messageSenderName
+
+                includeIncomingTransaction.apply {
+                    root.goneIfFalse(t is TransactionHolderViewState.Incoming)
+
+                    textViewTransactionAmount.text = amount
+                    textViewTransactionDate.text = date
+                    textViewTransactionSenderReceiver.text = senderReceiverName
+                }
+
+                includeOutgoingTransaction.apply {
+                    root.goneIfFalse(t is TransactionHolderViewState.Outgoing)
+
+                    textViewTransactionAmount.text = amount
+                    textViewTransactionDate.text = date
+                    textViewTransactionSenderReceiver.text = senderReceiverName
+                }
             }
         }
     }

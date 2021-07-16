@@ -1,5 +1,6 @@
 package chat.sphinx.concept_network_query_message.model
 
+import chat.sphinx.wrapper_common.dashboard.ContactId
 import com.squareup.moshi.JsonClass
 
 
@@ -15,4 +16,13 @@ data class TransactionDto(
     val payment_request: String?,
     val date: String,
     val reply_uuid: String?,
-)
+) {
+
+    @Transient
+    var ownerId: ContactId? = null
+
+    fun setOwnerId(value: ContactId) {
+        ownerId = value
+    }
+
+}

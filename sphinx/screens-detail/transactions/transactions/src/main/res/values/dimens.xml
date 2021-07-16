@@ -1,4 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-<!--    <dimen name="address_book_contact_holder_text_size">17sp</dimen>-->
+    <dimen name="transactions_list_transaction_holder_height">85dp</dimen>
+    <dimen name="transactions_list_transaction_arrow_width">60dp</dimen>
+    <dimen name="transactions_list_transaction_icon_width">45dp</dimen>
+    <dimen name="transactions_list_transaction_amount_unit_margin">5dp</dimen>
+    <dimen name="transactions_list_transaction_arrow_margin">24dp</dimen>
+    <dimen name="transactions_list_transaction_icon_margin">14dp</dimen>
+    <dimen name="transactions_list_progress_bar_xy">25dp</dimen>
+
+    <dimen name="transactions_list_transaction_amount_unit_text_size">14sp</dimen>
+    <dimen name="transactions_list_transaction_sender_receiver_text_size">14sp</dimen>
+    <dimen name="transactions_list_transaction_date_text_size">10sp</dimen>
+    <dimen name="transactions_list_no_transactions_text_size">12sp</dimen>
 </resources>

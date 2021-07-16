@@ -33,10 +33,18 @@ dependencies {
     // KotlinAndroid
     implementation project(path: ':android:features:android-feature-screens')
     // Sphinx
+    api project(path: ':sphinx:application:common:wrappers:wrapper-common')
+    api project(path: ':sphinx:application:common:wrappers:wrapper-message')
+    api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-contact')
+    api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-chat')
+    api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-message')
+
     implementation project(path: ':sphinx:screens-detail:common:detail-resources')
     implementation project(path: ':sphinx:activity:insetter-activity')
     implementation project(path: ':sphinx:application:common:resources')
     implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-message')
+
+    implementation deps.androidx.recyclerView
 
     implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt

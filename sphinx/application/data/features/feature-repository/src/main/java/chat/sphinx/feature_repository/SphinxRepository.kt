@@ -53,10 +53,7 @@ import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.dashboard.InviteId
 import chat.sphinx.wrapper_common.dashboard.toChatId
 import chat.sphinx.wrapper_common.invite.InviteStatus
-import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
-import chat.sphinx.wrapper_common.lightning.LightningRouteHint
-import chat.sphinx.wrapper_common.lightning.Sat
-import chat.sphinx.wrapper_common.lightning.toSat
+import chat.sphinx.wrapper_common.lightning.*
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessagePagination
 import chat.sphinx.wrapper_common.message.MessageUUID
@@ -1167,6 +1164,45 @@ abstract class SphinxRepository(
                 .mapToOneOrNull(io)
                 .map { it?.let { messageDbo ->
                     mapMessageDboAndDecryptContentIfNeeded(queries, messageDbo)
+                }}
+                .distinctUntilChanged()
+        )
+    }
+
+    override fun getMessageByUUID(messageUUID: MessageUUID): Flow<Message?> = flow {
+        val queries = coreDB.getSphinxDatabaseQueries()
+        emitAll(
+            queries.messageGetByUUID(messageUUID)
+                .asFlow()
+                .mapToOneOrNull(io)
+                .map { it?.let { messageDbo ->
+                    mapMessageDboAndDecryptContentIfNeeded(queries, messageDbo)
+                }}
+                .distinctUntilChanged()
+        )
+    }
+
+    override fun getInvoiceBy(paymentHash: LightningPaymentHash): Flow<Message?> = flow {
+        val queries = coreDB.getSphinxDatabaseQueries()
+        emitAll(
+            queries.invoiceGetByPaymentHash(paymentHash)
+                .asFlow()
+                .mapToOneOrNull(io)
+                .map { it?.let { messageDbo ->
+                    messageDboPresenterMapper.mapFrom(messageDbo)
+                }}
+                .distinctUntilChanged()
+        )
+    }
+
+    override fun getInvoiceBy(paymentRequest: LightningPaymentRequest): Flow<Message?> = flow {
+        val queries = coreDB.getSphinxDatabaseQueries()
+        emitAll(
+            queries.invoiceGetByPaymentRequest(paymentRequest)
+                .asFlow()
+                .mapToOneOrNull(io)
+                .map { it?.let { messageDbo ->
+                    messageDboPresenterMapper.mapFrom(messageDbo)
                 }}
                 .distinctUntilChanged()
         )

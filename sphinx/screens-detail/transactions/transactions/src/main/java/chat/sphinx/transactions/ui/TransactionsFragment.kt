@@ -4,11 +4,17 @@ import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.ConcatAdapter
 import by.kirich1409.viewbindingdelegate.viewBinding
+import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.transactions.R
 import chat.sphinx.transactions.databinding.FragmentTransactionsBinding
+import chat.sphinx.transactions.ui.adapter.TransactionsFooterAdapter
+import chat.sphinx.transactions.ui.adapter.TransactionsListAdapter
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.base.BaseFragment
+import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -23,6 +29,7 @@ internal class TransactionsFragment: BaseFragment<
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
         binding.includeTransactionsHeader.apply {
             textViewDetailScreenHeaderName.text = getString(R.string.transactions_header_name)
             textViewDetailScreenClose.setOnClickListener {
@@ -31,9 +38,34 @@ internal class TransactionsFragment: BaseFragment<
                 }
             }
         }
+
+        setupTransactions()
+    }
+
+    private fun setupTransactions() {
+        val addressBookListAdapter = TransactionsListAdapter(viewLifecycleOwner, onStopSupervisor, viewModel)
+        val addressBookFooterAdapter = TransactionsFooterAdapter(requireActivity() as InsetterActivity)
+
+        binding.recyclerViewTransactions.apply {
+            this.setHasFixedSize(false)
+            layoutManager = LinearLayoutManager(binding.root.context)
+            adapter = ConcatAdapter(addressBookListAdapter, addressBookFooterAdapter)
+        }
     }
 
     override suspend fun onViewStateFlowCollect(viewState: TransactionsViewState) {
-//        TODO("Not yet implemented")
+        if (viewState is TransactionsViewState.ListMode) {
+            binding.apply {
+                progressBarTransactionsList.goneIfFalse(viewState.loading)
+
+                textViewNoTransactions.goneIfFalse(
+                    !viewState.loading && viewState.list.isEmpty()
+                )
+
+                recyclerViewTransactions.goneIfFalse(
+                    !viewState.loading && viewState.list.isNotEmpty()
+                )
+            }
+        }
     }
 }
