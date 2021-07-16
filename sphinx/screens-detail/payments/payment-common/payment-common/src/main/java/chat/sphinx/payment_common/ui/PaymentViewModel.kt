@@ -1,7 +1,6 @@
 package chat.sphinx.payment_common.ui
 
 import androidx.fragment.app.FragmentActivity
-import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavArgs
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_message.model.SendPayment
@@ -38,17 +37,9 @@ abstract class PaymentViewModel<ARGS: NavArgs, VS: ViewState<VS>>(
         ViewStateContainer(AmountViewState.Idle)
     }
 
-    protected val contactSharedFlow: SharedFlow<Contact?> = flow {
-        contactId?.let { contactId ->
-            emitAll(contactRepository.getContactById(contactId))
-        } ?: run {
-            emit(null)
-        }
-    }.distinctUntilChanged().shareIn(
-        viewModelScope,
-        SharingStarted.WhileSubscribed(2_000),
-        replay = 1,
-    )
+    protected suspend fun getContactOrNull(): Contact? {
+        return contactId?.let { id -> contactRepository.getContactById(id).firstOrNull() }
+    }
 
     abstract fun updateAmount(amountString: String)
 
