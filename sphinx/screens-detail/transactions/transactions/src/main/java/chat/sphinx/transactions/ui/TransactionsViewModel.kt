@@ -1,5 +1,6 @@
 package chat.sphinx.transactions.ui
 
+import android.util.Log
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_network_query_message.NetworkQueryMessage
 import chat.sphinx.concept_network_query_message.model.TransactionDto
@@ -12,7 +13,9 @@ import chat.sphinx.transactions.navigation.TransactionsNavigator
 import chat.sphinx.transactions.ui.viewstate.TransactionHolderViewState
 import chat.sphinx.wrapper_chat.isConversation
 import chat.sphinx.wrapper_chat.isTribeNotOwnedByAccount
+import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
+import chat.sphinx.wrapper_common.message.MessageUUID
 import chat.sphinx.wrapper_common.message.toMessageUUID
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_message.SenderAlias
@@ -132,45 +135,69 @@ internal class TransactionsViewModel @Inject constructor(
         owner: Contact
     ): List<TransactionHolderViewState> {
 
-        val contactIdsMap: MutableMap<Long, ContactId> = LinkedHashMap(transactions.size)
-        val contactAliasMap: MutableMap<Long, SenderAlias> = LinkedHashMap(transactions.size)
+        var chatsIdsMap: MutableMap<ChatId, ArrayList<Long>> = LinkedHashMap(transactions.size)
+        var originalMessageUUIDsMap: MutableMap<MessageUUID, Long> = LinkedHashMap(transactions.size)
+
+        var contactIdsMap: MutableMap<Long, ContactId> = LinkedHashMap(transactions.size)
+        var contactAliasMap: MutableMap<Long, SenderAlias> = LinkedHashMap(transactions.size)
 
         for (transaction in transactions) {
-            var senderReceiverAlias: SenderAlias? = null
-            var senderReceiverId: ContactId? = null
-
             when {
                 transaction.isIncomingWithSender(owner.id) -> {
-                    senderReceiverAlias = transaction.getSenderAlias()
-                    senderReceiverId = transaction.getSenderId()
+                    transaction.getSenderId()?.let { senderId ->
+                        contactIdsMap[transaction.id] = senderId
+                    }
+                    transaction.getSenderAlias()?.let { senderAlias ->
+                        contactAliasMap[transaction.id] = senderAlias
+                    }
                 }
                 transaction.isOutgoingWithReceiver(owner.id) -> {
-                    senderReceiverId = transaction.getReceiverId()
+                    transaction.getSenderId()?.let { senderId ->
+                        contactIdsMap[transaction.id] = senderId
+                    }
                 }
                 transaction.isOutgoingMessageBoost(owner.id) -> {
-                    transaction.reply_uuid?.toMessageUUID()?.let { originalMessageId ->
-                        messageRepository.getMessageByUUID(originalMessageId).firstOrNull()?.let { message ->
-                            senderReceiverAlias = message.senderAlias
-                            senderReceiverId = message.sender
-                        }
+                    transaction.reply_uuid?.toMessageUUID()?.let { originalMessageUUID ->
+                        originalMessageUUIDsMap[originalMessageUUID] = transaction.id
                     }
                 }
                 transaction.isPaymentInChat() -> {
                     transaction.getChatId()?.let { chatId ->
-                        chatRepository.getChatById(chatId).firstOrNull()?.let { chat ->
-                            if (chat.isTribeNotOwnedByAccount(owner.nodePubKey) || chat.isConversation()) {
-                                senderReceiverId = if (chat.contactIds.size > 1) chat.contactIds[1] else null
-                            }
+                        if (chatsIdsMap[chatId] == null) {
+                            chatsIdsMap[chatId] = ArrayList(0)
+                        }
+                        chatsIdsMap[chatId]?.add(transaction.id)
+                    }
+                }
+            }
+        }
+
+        val chatIds = chatsIdsMap.keys.map { it }
+        chatRepository.getAllChatsByIds(chatIds).let { response ->
+            response.forEach { chat ->
+                if (
+                    (chat.isTribeNotOwnedByAccount(owner.nodePubKey) || chat.isConversation()) &&
+                    chat.contactIds.size == 2
+                ) {
+                    chatsIdsMap[chat.id]?.let { transactionIds ->
+                        for (transactionId in transactionIds) {
+                            contactIdsMap[transactionId] = chat.contactIds[1]
                         }
                     }
                 }
             }
+        }
 
-            senderReceiverId?.let { srID ->
-                contactIdsMap[transaction.id] = srID
-            }
-            senderReceiverAlias?.let { srAlias ->
-                contactAliasMap[transaction.id] = srAlias
+        val originalMessageUUIDs = originalMessageUUIDsMap.keys.map { it }
+        messageRepository.getAllMessagesByUUID(originalMessageUUIDs).let { response ->
+            response.forEach { message ->
+                originalMessageUUIDsMap[message.uuid]?.let { transactionId ->
+                    contactIdsMap[transactionId] = message.sender
+
+                    message.senderAlias?.let { senderAlias ->
+                        contactAliasMap[transactionId] = senderAlias
+                    }
+                }
             }
         }
 

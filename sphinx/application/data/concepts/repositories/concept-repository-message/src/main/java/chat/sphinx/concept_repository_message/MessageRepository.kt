@@ -19,6 +19,8 @@ interface MessageRepository {
     fun getMessageById(messageId: MessageId): Flow<Message?>
     fun getMessageByUUID(messageUUID: MessageUUID): Flow<Message?>
 
+    suspend fun getAllMessagesByUUID(messageUUIDs: List<MessageUUID>): List<Message>
+
     val networkRefreshMessages: Flow<LoadResponse<Boolean, ResponseError>>
 
     suspend fun readMessages(chatId: ChatId)

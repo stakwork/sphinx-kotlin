@@ -90,6 +90,11 @@ chatGetAllIds:
 SELECT id
 FROM chatDbo;
 
+chatGetAllByIds:
+SELECT *
+FROM chatDbo
+WHERE id IN :chat_ids;
+
 chatGetById:
 SELECT *
 FROM chatDbo
@@ -500,6 +505,11 @@ WHERE chat_id = :chat_id
 AND (type = 29
     AND reply_uuid IN :reply_uuids
 );
+
+messageGetAllByUUID:
+SELECT *
+FROM messageDbo
+WHERE uuid IN :uuids;
 
 messageGetById:
 SELECT *
