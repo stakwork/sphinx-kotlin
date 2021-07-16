@@ -18,8 +18,6 @@ interface MessageRepository {
     fun getAllMessagesToShowByChatId(chatId: ChatId): Flow<List<Message>>
     fun getMessageById(messageId: MessageId): Flow<Message?>
     fun getMessageByUUID(messageUUID: MessageUUID): Flow<Message?>
-    fun getInvoiceBy(paymentHash: LightningPaymentHash): Flow<Message?>
-    fun getInvoiceBy(paymentRequest: LightningPaymentRequest): Flow<Message?>
 
     val networkRefreshMessages: Flow<LoadResponse<Boolean, ResponseError>>
 

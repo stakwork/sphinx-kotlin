@@ -1182,32 +1182,6 @@ abstract class SphinxRepository(
         )
     }
 
-    override fun getInvoiceBy(paymentHash: LightningPaymentHash): Flow<Message?> = flow {
-        val queries = coreDB.getSphinxDatabaseQueries()
-        emitAll(
-            queries.invoiceGetByPaymentHash(paymentHash)
-                .asFlow()
-                .mapToOneOrNull(io)
-                .map { it?.let { messageDbo ->
-                    messageDboPresenterMapper.mapFrom(messageDbo)
-                }}
-                .distinctUntilChanged()
-        )
-    }
-
-    override fun getInvoiceBy(paymentRequest: LightningPaymentRequest): Flow<Message?> = flow {
-        val queries = coreDB.getSphinxDatabaseQueries()
-        emitAll(
-            queries.invoiceGetByPaymentRequest(paymentRequest)
-                .asFlow()
-                .mapToOneOrNull(io)
-                .map { it?.let { messageDbo ->
-                    messageDboPresenterMapper.mapFrom(messageDbo)
-                }}
-                .distinctUntilChanged()
-        )
-    }
-
     @Suppress("RemoveExplicitTypeArguments")
     private val chatSeenMap: SynchronizedMap<ChatId, Seen> by lazy {
         SynchronizedMap<ChatId, Seen>()

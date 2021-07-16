@@ -506,18 +506,6 @@ SELECT *
 FROM messageDbo
 WHERE uuid = ?;
 
-invoiceGetByPaymentHash:
-SELECT *
-FROM messageDbo
-WHERE payment_hash = ?
-AND type = 2;
-
-invoiceGetByPaymentRequest:
-SELECT *
-FROM messageDbo
-WHERE payment_request = ?
-AND type = 2;
-
 messageGetToShowByUUID:
 SELECT *
 FROM messageDbo

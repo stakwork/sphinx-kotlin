@@ -1,6 +1,11 @@
 package chat.sphinx.concept_network_query_message.model
 
+import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
+import chat.sphinx.wrapper_common.dashboard.toChatId
+import chat.sphinx.wrapper_common.dashboard.toContactId
+import chat.sphinx.wrapper_message.SenderAlias
+import chat.sphinx.wrapper_message.toSenderAlias
 import com.squareup.moshi.JsonClass
 
 
@@ -10,6 +15,7 @@ data class TransactionDto(
     val chat_id: Long?,
     val type: Int,
     val sender: Long,
+    val sender_alias: String?,
     val receiver: Long?,
     val amount: Long,
     val payment_hash: String?,
@@ -18,11 +24,35 @@ data class TransactionDto(
     val reply_uuid: String?,
 ) {
 
-    @Transient
-    var ownerId: ContactId? = null
-
-    fun setOwnerId(value: ContactId) {
-        ownerId = value
+    fun isIncomingWithSender(ownerId: ContactId): Boolean {
+        return sender != null && sender != ownerId.value
     }
 
+    fun isOutgoingWithReceiver(ownerId: ContactId): Boolean {
+        return receiver != null && sender == ownerId.value
+    }
+
+    fun isOutgoingMessageBoost(ownerId: ContactId): Boolean {
+        return reply_uuid != null && sender == ownerId.value
+    }
+
+    fun isPaymentInChat(): Boolean {
+        return chat_id != null
+    }
+
+    fun getSenderId(): ContactId? {
+        return sender.toContactId()
+    }
+
+    fun getSenderAlias(): SenderAlias? {
+        return sender_alias?.toSenderAlias()
+    }
+
+    fun getReceiverId(): ContactId? {
+        return receiver?.toContactId()
+    }
+
+    fun getChatId(): ChatId? {
+        return chat_id?.toChatId()
+    }
 }

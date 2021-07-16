@@ -1,7 +1,5 @@
 package chat.sphinx.transactions.ui
 
-import android.content.ContentValues.TAG
-import android.util.Log
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_network_query_message.NetworkQueryMessage
 import chat.sphinx.concept_network_query_message.model.TransactionDto
@@ -13,17 +11,13 @@ import chat.sphinx.kotlin_response.Response
 import chat.sphinx.transactions.navigation.TransactionsNavigator
 import chat.sphinx.transactions.ui.viewstate.TransactionHolderViewState
 import chat.sphinx.wrapper_chat.isConversation
-import chat.sphinx.wrapper_chat.isTribe
 import chat.sphinx.wrapper_chat.isTribeNotOwnedByAccount
 import chat.sphinx.wrapper_chat.isTribeOwnedByAccount
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.dashboard.toChatId
 import chat.sphinx.wrapper_common.dashboard.toContactId
-import chat.sphinx.wrapper_common.lightning.toLightningPaymentHash
-import chat.sphinx.wrapper_common.lightning.toLightningPaymentRequest
 import chat.sphinx.wrapper_common.message.toMessageUUID
 import chat.sphinx.wrapper_contact.Contact
-import chat.sphinx.wrapper_message.Message
 import chat.sphinx.wrapper_message.SenderAlias
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.BaseViewModel
@@ -31,7 +25,6 @@ import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import javax.annotation.meta.Exhaustive
@@ -102,59 +95,31 @@ internal class TransactionsViewModel @Inject constructor(
         val transactionsHVSs = ArrayList<TransactionHolderViewState>(transactions.size)
 
         for (transaction in transactions) {
-            var senderReceiverAlias: String? = null
-            var senderReceiverId: Long? = null
+            var senderReceiverAlias: SenderAlias? = null
+            var senderReceiverId: ContactId? = null
 
-            if (transaction.amount == 125.toLong()) {
-                Log.d(TAG, "TEST")
+            if (transaction.isIncomingWithSender(owner.id)) {
+                senderReceiverAlias = transaction.getSenderAlias()
+                senderReceiverId = transaction.getSenderId()
             }
-
-
-            if (transaction.sender != owner.id.value) {
-                senderReceiverId = transaction.sender
+            else if (transaction.isOutgoingWithReceiver(owner.id)) {
+                senderReceiverId = transaction.getReceiverId()
             }
-            if (transaction.sender == owner.id.value && transaction.receiver != null) {
-                senderReceiverId = transaction.receiver
-            }
-            if (transaction.reply_uuid != null) {
+            else if (transaction.isOutgoingMessageBoost(owner.id)) {
                 transaction.reply_uuid?.toMessageUUID()?.let { originalMessageId ->
                     messageRepository.getMessageByUUID(originalMessageId).firstOrNull()?.let { message ->
-                        senderReceiverAlias = message.senderAlias?.value
-                        senderReceiverId = message.sender.value
+                        senderReceiverAlias = message.senderAlias
+                        senderReceiverId = message.sender
                     }
                 }
             }
-            if (transaction.payment_hash != null) {
-                transaction.payment_hash?.toLightningPaymentHash()?.let { paymentHash ->
-                    messageRepository.getInvoiceBy(paymentHash)?.firstOrNull()?.let { message ->
-                        if (message.sender == owner.id) {
-                            senderReceiverId = message.receiver?.value
-                        } else {
-                            senderReceiverAlias = message.senderAlias?.value
-                            senderReceiverId =message.sender.value
-                        }
-                    }
-                }
-            }
-            if (transaction.payment_request != null) {
-                transaction.payment_request?.toLightningPaymentRequest()?.let { paymentRequest ->
-                    messageRepository.getInvoiceBy(paymentRequest)?.firstOrNull()?.let { message ->
-                        if (message.sender == owner.id) {
-                            senderReceiverId = message.receiver?.value
-                        } else {
-                            senderReceiverAlias = message.senderAlias?.value
-                            senderReceiverId = message.sender.value
-                        }
-                    }
-                }
-            }
-            if (transaction.chat_id != null) {
-                transaction.chat_id?.toChatId()?.let { chatId ->
+            else if (transaction.isPaymentInChat()) {
+                transaction.getChatId()?.let { chatId ->
                     chatRepository.getChatById(chatId).firstOrNull()?.let { chat ->
                         if (chat.isTribeNotOwnedByAccount(owner.nodePubKey) || chat.isConversation()) {
-                            for (cId in chat.contactIds) {
-                                if (cId != owner.id) {
-                                    senderReceiverId = cId.value
+                            for (contactId in chat.contactIds) {
+                                if (contactId != owner.id) {
+                                    senderReceiverId = contactId
                                 }
                             }
                         }
@@ -163,16 +128,15 @@ internal class TransactionsViewModel @Inject constructor(
             }
 
             val senderReceiverName: String? = when {
-                senderReceiverAlias != null -> {
-                    senderReceiverAlias
+                (senderReceiverAlias != null) -> {
+                    senderReceiverAlias!!.value
                 }
-                senderReceiverId != null -> {
-                    senderReceiverId?.toContactId()?.let { contactId ->
-                        contactRepository.getContactById(contactId).firstOrNull()?.let { contact ->
-                            contact.alias?.value ?: null
-                        }
+                (senderReceiverId != null) -> {
+                    contactRepository.getContactById(senderReceiverId!!).firstOrNull()?.let { contact ->
+                        contact.alias?.value ?: null
                     }
-                } else -> {
+                }
+                else -> {
                     null
                 }
             }
