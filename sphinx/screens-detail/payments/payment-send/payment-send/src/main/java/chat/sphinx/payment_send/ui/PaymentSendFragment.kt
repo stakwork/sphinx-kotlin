@@ -112,6 +112,6 @@ internal class PaymentSendFragment: PaymentFragment<
     }
 
     override suspend fun onSideEffectCollect(sideEffect: PaymentSideEffect) {
-        sideEffect.execute(this)
+        sideEffect.execute(requireActivity())
     }
 }

@@ -14,15 +14,12 @@ class ToPaymentReceiveDetail(
     private val chatId: ChatId? = null,
     private val options: NavOptions = DetailNavOptions.defaultBuilt
 ): NavigationRequest<NavController>() {
-    companion object {
-        const val NULL_CONTACT_ID = Long.MAX_VALUE
-    }
 
     override fun navigate(controller: NavController) {
         controller.navigate(
             R.id.payment_receive_nav_graph,
             PaymentReceiveFragmentArgs.Builder(
-                contactId?.value ?: NULL_CONTACT_ID,
+                contactId?.value ?: ContactId.NULL_CONTACT_ID,
                 chatId?.value ?: ChatId.NULL_CHAT_ID.toLong()
             ).build().toBundle(),
             options

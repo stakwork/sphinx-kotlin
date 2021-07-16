@@ -1,5 +1,6 @@
 package chat.sphinx.payment_common.ui
 
+import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavArgs
 import chat.sphinx.concept_repository_contact.ContactRepository
@@ -21,7 +22,7 @@ abstract class PaymentViewModel<ARGS: NavArgs, VS: ViewState<VS>>(
     private val contactRepository: ContactRepository,
     initialViewState: VS
 ): SideEffectViewModel<
-        PaymentSideEffectFragment,
+        FragmentActivity,
         PaymentSideEffect,
         VS
         >(dispatchers, initialViewState)

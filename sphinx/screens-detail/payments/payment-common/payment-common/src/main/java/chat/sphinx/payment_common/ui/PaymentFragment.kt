@@ -1,6 +1,5 @@
 package chat.sphinx.payment_common.ui
 
-import android.content.Context
 import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
@@ -35,12 +34,12 @@ abstract class PaymentFragment<
         VM: PaymentViewModel<ARGS, VS>,
         VS: ViewState<VS>,
         >(@LayoutRes layoutId: Int): SideEffectFragment<
-        PaymentSideEffectFragment,
+        FragmentActivity,
         PaymentSideEffect,
         VS,
         VM,
         VB
-        >(layoutId), PaymentSideEffectFragment
+        >(layoutId)
 {
     protected abstract val imageLoader: ImageLoader<ImageView>
 
@@ -52,12 +51,6 @@ abstract class PaymentFragment<
     protected abstract val confirmationBinding: LayoutConstraintConfirmButtonBinding
 
     protected abstract val headerStringId: Int
-
-    override val paymentFragmentContext: Context
-        get() = binding.root.context
-
-    override val fragmentActivity: FragmentActivity?
-        get() = activity
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -162,6 +155,6 @@ abstract class PaymentFragment<
     }
 
     override suspend fun onSideEffectCollect(sideEffect: PaymentSideEffect) {
-        sideEffect.execute(this)
+        sideEffect.execute(requireActivity())
     }
 }
