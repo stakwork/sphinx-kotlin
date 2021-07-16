@@ -55,16 +55,12 @@ import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.dashboard.InviteId
 import chat.sphinx.wrapper_common.dashboard.toChatId
 import chat.sphinx.wrapper_common.invite.InviteStatus
-import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
-import chat.sphinx.wrapper_common.lightning.LightningRouteHint
-import chat.sphinx.wrapper_common.lightning.Sat
-import chat.sphinx.wrapper_common.lightning.toSat
+import chat.sphinx.wrapper_common.lightning.*
 import chat.sphinx.wrapper_common.message.*
 import chat.sphinx.wrapper_contact.*
 import chat.sphinx.wrapper_invite.Invite
 import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_lightning.NodeBalanceAll
-import chat.sphinx.wrapper_lightning.RequestPaymentInvoice
 import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message_media.MediaKey
 import chat.sphinx.wrapper_message_media.MediaKeyDecrypted
@@ -1936,7 +1932,9 @@ abstract class SphinxRepository(
         return response
     }
 
-    override suspend fun requestPayment(requestPayment: RequestPayment): Flow<LoadResponse<RequestPaymentInvoice, ResponseError>> {
+    // TODO: Remove from repository as it does not interact with
+    //  persistence layer at all and does not belong.
+    override suspend fun requestPayment(requestPayment: RequestPayment): Response<LightningPaymentRequest, ResponseError> {
         val postRequestPaymentDto = PostRequestPaymentDto(
             requestPayment.chatId?.value,
             requestPayment.contactId?.value,
@@ -1944,7 +1942,32 @@ abstract class SphinxRepository(
             requestPayment.memo,
         )
 
-        return networkQueryLightning.postRequestPayment(postRequestPaymentDto)
+        var response: Response<LightningPaymentRequest, ResponseError>? = null
+
+        applicationScope.launch(mainImmediate) {
+            networkQueryLightning.postRequestPayment(postRequestPaymentDto).collect { loadResponse ->
+                @Exhaustive
+                when (loadResponse) {
+                    is LoadResponse.Loading -> {}
+                    is Response.Error -> {
+                        LOG.e(TAG, loadResponse.message, loadResponse.exception)
+                        response = loadResponse
+                    }
+                    is Response.Success -> {
+                        response = try {
+                            Response.Success(LightningPaymentRequest(loadResponse.value.invoice))
+                        } catch (e: IllegalArgumentException) {
+                            val msg = "Network response returned an empty value"
+                            LOG.e(TAG, msg, e)
+
+                            Response.Error(ResponseError(msg, e))
+                        }
+                    }
+                }
+            }
+        }.join()
+
+        return response ?: Response.Error(ResponseError(""))
     }
 
     override suspend fun toggleChatMuted(chat: Chat): Response<Boolean, ResponseError> {

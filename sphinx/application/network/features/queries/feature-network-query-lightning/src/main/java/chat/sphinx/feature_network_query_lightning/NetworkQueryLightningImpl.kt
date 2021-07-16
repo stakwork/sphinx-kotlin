@@ -4,7 +4,7 @@ import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_lightning.model.balance.BalanceAllDto
 import chat.sphinx.concept_network_query_lightning.model.balance.BalanceDto
 import chat.sphinx.concept_network_query_lightning.model.channel.ChannelsDto
-import chat.sphinx.concept_network_query_lightning.model.invoice.InvoiceDto
+import chat.sphinx.concept_network_query_lightning.model.invoice.LightningPaymentInvoiceDto
 import chat.sphinx.concept_network_query_lightning.model.invoice.InvoicesDto
 import chat.sphinx.concept_network_query_lightning.model.invoice.PostRequestPaymentDto
 import chat.sphinx.concept_network_query_lightning.model.route.RouteSuccessProbabilityDto
@@ -15,7 +15,6 @@ import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.LightningRouteHint
-import chat.sphinx.wrapper_lightning.RequestPaymentInvoice
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
 import kotlinx.coroutines.flow.Flow
@@ -176,9 +175,9 @@ class NetworkQueryLightningImpl(
     override fun postRequestPayment(
         postPaymentDto: PostRequestPaymentDto,
         relayData: Pair<AuthorizationToken, RelayUrl>?
-    ): Flow<LoadResponse<RequestPaymentInvoice, ResponseError>> =
+    ): Flow<LoadResponse<LightningPaymentInvoiceDto, ResponseError>> =
         networkRelayCall.relayPost(
-            responseJsonClass = PostRequestPaymentRelayResponse::class.java,
+            responseJsonClass = PostInvoicePaymentRelayResponse::class.java,
             relayEndpoint = ENDPOINT_INVOICES,
             requestBodyJsonClass = PostRequestPaymentDto::class.java,
             requestBody = postPaymentDto,

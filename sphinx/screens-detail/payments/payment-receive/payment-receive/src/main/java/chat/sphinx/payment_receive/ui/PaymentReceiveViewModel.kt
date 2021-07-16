@@ -89,24 +89,23 @@ internal class PaymentReceiveViewModel @Inject constructor(
 
             if (requestPayment != null) {
                 updateViewState(PaymentReceiveViewState.ProcessingRequest)
-                lightningRepository.requestPayment(requestPayment).collect { loadedResponse ->
-                    @Exhaustive
-                    when (loadedResponse) {
-                        is LoadResponse.Loading -> {}
-                        is Response.Error -> {
-                            submitSideEffect(
-                                PaymentSideEffect.Notify(app.getString(R.string.failed_to_request_payment))
-                            )
-                            refreshViewState()
-                        }
-                        is Response.Success -> {
-                            paymentReceiveNavigator.toQRCodeDetail(
-                                loadedResponse.value.invoice,
-                                app.getString(R.string.qr_code_title),
-                                String.format(app.getString(R.string.amount_n_sats), requestPayment.amount),
-                                false
-                            )
-                        }
+                val response = lightningRepository.requestPayment(requestPayment)
+
+                @Exhaustive
+                when (response) {
+                    is Response.Error -> {
+                        submitSideEffect(
+                            PaymentSideEffect.Notify(app.getString(R.string.failed_to_request_payment))
+                        )
+                        refreshViewState()
+                    }
+                    is Response.Success -> {
+                        paymentReceiveNavigator.toQRCodeDetail(
+                            response.value.value,
+                            app.getString(R.string.qr_code_title),
+                            String.format(app.getString(R.string.amount_n_sats), requestPayment.amount),
+                            false
+                        )
                     }
                 }
             } else {
