@@ -2,7 +2,7 @@ package chat.sphinx.feature_meme_server
 
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_meme_server.MemeServerTokenHandler
-import chat.sphinx.concept_network_query_attachment.NetworkQueryAttachment
+import chat.sphinx.concept_network_query_meme_server.NetworkQueryMemeServer
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.exception
@@ -10,9 +10,7 @@ import chat.sphinx.kotlin_response.message
 import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.logger.d
 import chat.sphinx.logger.e
-import chat.sphinx.wrapper_attachment.*
-import chat.sphinx.wrapper_common.DateTime
-import chat.sphinx.wrapper_common.toDateTime
+import chat.sphinx.wrapper_meme_server.*
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_message_media.token.MediaHost
 import io.matthewnelson.concept_authentication.data.AuthenticationStorage
@@ -51,7 +49,7 @@ class MemeServerTokenHandlerImpl(
     applicationScope: CoroutineScope,
     private val authenticationStorage: AuthenticationStorage,
     dispatchers: CoroutineDispatchers,
-    private val networkQueryAttachment: NetworkQueryAttachment,
+    private val networkQueryMemeServer: NetworkQueryMemeServer,
     private val LOG: SphinxLogger,
 ) : MemeServerTokenHandler(),
     CoroutineDispatchers by dispatchers
@@ -193,7 +191,7 @@ class MemeServerTokenHandlerImpl(
             var id: AuthenticationId? = null
             var challenge: AuthenticationChallenge? = null
 
-            networkQueryAttachment.askAuthentication(mediaHost).collect { loadResponse ->
+            networkQueryMemeServer.askAuthentication(mediaHost).collect { loadResponse ->
                 @Exhaustive
                 when (loadResponse) {
                     is LoadResponse.Loading -> {}
@@ -212,7 +210,7 @@ class MemeServerTokenHandlerImpl(
 
                     var sig: AuthenticationSig? = null
 
-                    networkQueryAttachment.signChallenge(nnChallenge).collect { loadResponse ->
+                    networkQueryMemeServer.signChallenge(nnChallenge).collect { loadResponse ->
                         @Exhaustive
                         when (loadResponse) {
                             is LoadResponse.Loading -> {}
@@ -227,7 +225,7 @@ class MemeServerTokenHandlerImpl(
 
                     sig?.let { nnSig ->
 
-                        networkQueryAttachment.verifyAuthentication(
+                        networkQueryMemeServer.verifyAuthentication(
                             nnId,
                             nnSig,
                             nodePubKey,

@@ -4,7 +4,9 @@ import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_lightning.model.balance.BalanceAllDto
 import chat.sphinx.concept_network_query_lightning.model.balance.BalanceDto
 import chat.sphinx.concept_network_query_lightning.model.channel.ChannelsDto
+import chat.sphinx.concept_network_query_lightning.model.invoice.LightningPaymentInvoiceDto
 import chat.sphinx.concept_network_query_lightning.model.invoice.InvoicesDto
+import chat.sphinx.concept_network_query_lightning.model.invoice.PostRequestPaymentDto
 import chat.sphinx.concept_network_query_lightning.model.route.RouteSuccessProbabilityDto
 import chat.sphinx.concept_network_relay_call.NetworkRelayCall
 import chat.sphinx.feature_network_query_lightning.model.*
@@ -169,6 +171,19 @@ class NetworkQueryLightningImpl(
             relayEndpoint = ENDPOINT_LOGS,
             relayData = relayData,
         )
+
+    override fun postRequestPayment(
+        postPaymentDto: PostRequestPaymentDto,
+        relayData: Pair<AuthorizationToken, RelayUrl>?
+    ): Flow<LoadResponse<LightningPaymentInvoiceDto, ResponseError>> =
+        networkRelayCall.relayPost(
+            responseJsonClass = PostInvoicePaymentRelayResponse::class.java,
+            relayEndpoint = ENDPOINT_INVOICES,
+            requestBodyJsonClass = PostRequestPaymentDto::class.java,
+            requestBody = postPaymentDto,
+            relayData = relayData
+        )
+    
 //    app.get('/getinfo', details.getInfo)
 //    app.get('/info', details.getNodeInfo)
 //    app.get('/route', details.checkRoute)

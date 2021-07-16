@@ -34,16 +34,7 @@ dependencies {
     // KotlinAndroid
     implementation project(path: ':android:features:android-feature-screens')
     // Sphinx
-    implementation project(path: ':sphinx:screens-detail:common:detail-resources')
-    implementation project(path: ':sphinx:application:data:concepts:concept-image-loader')
-    implementation project(path: ':sphinx:screens-detail:scanner:scanner-view-model-coordinator')
-    implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-contact')
-    implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-lightning')
-    implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-message')
-
-    api project(path: ':sphinx:application:common:wrappers:wrapper-common')
-    api project(path: ':sphinx:application:common:wrappers:wrapper-contact')
-    api project(path: ':sphinx:activity:insetter-activity')
+    api project(path: ':sphinx:screens-detail:payments:payment-common:payment-common')
 
     implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt

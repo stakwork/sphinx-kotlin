@@ -6,6 +6,8 @@ import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.wrapper_common.dashboard.ChatId
+import chat.sphinx.wrapper_common.lightning.LightningPaymentHash
+import chat.sphinx.wrapper_common.lightning.LightningPaymentRequest
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessageUUID
@@ -15,6 +17,9 @@ import kotlinx.coroutines.flow.Flow
 interface MessageRepository {
     fun getAllMessagesToShowByChatId(chatId: ChatId): Flow<List<Message>>
     fun getMessageById(messageId: MessageId): Flow<Message?>
+    fun getMessageByUUID(messageUUID: MessageUUID): Flow<Message?>
+
+    suspend fun getAllMessagesByUUID(messageUUIDs: List<MessageUUID>): List<Message>
 
     val networkRefreshMessages: Flow<LoadResponse<Boolean, ResponseError>>
 

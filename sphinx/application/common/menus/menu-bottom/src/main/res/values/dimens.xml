@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="menu_bottom_header_text_size">15sp</dimen>
+    <dimen name="menu_bottom_header_subtext_size">13sp</dimen>
+
+    <dimen name="menu_bottom_option_vertical_padding">16dp</dimen>
+    <dimen name="menu_bottom_option_text_size">18sp</dimen>
+
+    <dimen name="menu_bottom_default_elevation">10dp</dimen>
+</resources>

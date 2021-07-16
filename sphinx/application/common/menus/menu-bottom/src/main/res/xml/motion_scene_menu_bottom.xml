@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<MotionScene xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+
+    <!-- ////////////////////////////////////////////////////////////////////////////////-->
+    <!-- ////////////////////////////////////////////////////////////////////////////////-->
+    <!-- ////////////////////////// Constraint Sets /////////////////////////////////////-->
+    <!-- ////////////////////////////////////////////////////////////////////////////////-->
+    <!-- ////////////////////////////////////////////////////////////////////////////////-->
+
+
+    <!--
+           Set 1: Menu Closed
+    -->
+    <ConstraintSet android:id="@+id/motion_scene_menu_bottom_closed">
+
+        <Constraint android:id="@+id/view_menu_bottom_input_lock">
+            <Layout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+            <PropertySet android:visibility="invisible" />
+        </Constraint>
+
+        <Constraint android:id="@+id/include_layout_menu_bottom_options">
+            <Layout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/default_layout_margin"
+                android:layout_marginEnd="@dimen/default_layout_margin"
+                app:layout_constraintTop_toBottomOf="parent" />
+        </Constraint>
+
+    </ConstraintSet>
+
+
+    <!--
+           Set 2: Menu Open
+    -->
+    <ConstraintSet
+        android:id="@+id/motion_scene_menu_bottom_open"
+        app:deriveConstraintsFrom="@+id/motion_scene_menu_bottom_closed">
+
+        <Constraint android:id="@+id/view_menu_bottom_input_lock">
+            <PropertySet
+                android:alpha="@dimen/options_menu_input_lock_alpha"
+                android:visibility="visible" />
+        </Constraint>
+
+        <Constraint android:id="@+id/include_layout_menu_bottom_options">
+            <Layout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/default_layout_margin"
+                android:layout_marginEnd="@dimen/default_layout_margin"
+                app:layout_constraintBottom_toBottomOf="parent" />
+        </Constraint>
+
+    </ConstraintSet>
+
+    <Transition
+        android:id="@+id/transition_menu_bottom_closed_to_open"
+        app:constraintSetEnd="@+id/motion_scene_menu_bottom_open"
+        app:constraintSetStart="@+id/motion_scene_menu_bottom_closed"
+        app:duration="300" />
+
+</MotionScene>

@@ -1,7 +1,6 @@
 package chat.sphinx.payment_send.ui
 
 import android.app.Application
-import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_repository_contact.ContactRepository
@@ -10,9 +9,12 @@ import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.concept_repository_message.model.SendPayment
 import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
 import chat.sphinx.kotlin_response.Response
+import chat.sphinx.payment_common.ui.PaymentSideEffect
+import chat.sphinx.payment_common.ui.PaymentViewModel
+import chat.sphinx.payment_common.ui.viewstate.AmountViewState
+import chat.sphinx.payment_common.ui.viewstate.send.PaymentSendViewState
 import chat.sphinx.payment_send.R
 import chat.sphinx.payment_send.navigation.PaymentSendNavigator
-import chat.sphinx.payment_send.navigation.ToPaymentSendDetail
 import chat.sphinx.scanner_view_model_coordinator.request.ScannerFilter
 import chat.sphinx.scanner_view_model_coordinator.request.ScannerRequest
 import chat.sphinx.scanner_view_model_coordinator.response.ScannerResponse
@@ -20,15 +22,13 @@ import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.toLightningNodePubKey
-import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_lightning.NodeBalance
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
-import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
-import io.matthewnelson.concept_views.viewstate.ViewStateContainer
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -40,7 +40,7 @@ internal inline val PaymentSendFragmentArgs.chatId: ChatId?
     }
 
 internal inline val PaymentSendFragmentArgs.contactId: ContactId?
-    get() = if (argContactId == ToPaymentSendDetail.NULL_CONTACT_ID) {
+    get() = if (argContactId == ContactId.NULL_CONTACT_ID) {
         null
     } else {
         ContactId(argContactId)
@@ -50,81 +50,38 @@ internal inline val PaymentSendFragmentArgs.contactId: ContactId?
 internal class PaymentSendViewModel @Inject constructor(
     dispatchers: CoroutineDispatchers,
     savedStateHandle: SavedStateHandle,
-    val navigator: PaymentSendNavigator,
+    private val paymentSendNavigator: PaymentSendNavigator,
     private val app: Application,
     private val contactRepository: ContactRepository,
     private val lightningRepository: LightningRepository,
     private val messageRepository: MessageRepository,
     private val scannerCoordinator: ViewModelCoordinator<ScannerRequest, ScannerResponse>
-): SideEffectViewModel<
-        FragmentActivity,
-        PaymentSendSideEffect,
-        PaymentSendViewState>(dispatchers, PaymentSendViewState.Idle)
+): PaymentViewModel<PaymentSendFragmentArgs, PaymentSendViewState>(
+    dispatchers,
+    paymentSendNavigator,
+    contactRepository,
+    PaymentSendViewState.Idle
+)
 {
     private val sendPaymentBuilder = SendPayment.Builder()
 
-    private val args: PaymentSendFragmentArgs by savedStateHandle.navArgs()
-
-    val amountViewStateContainer: ViewStateContainer<AmountViewState> by lazy {
-        ViewStateContainer(AmountViewState.Idle)
-    }
-
-    private val contactSharedFlow: SharedFlow<Contact?> = flow {
-        args.contactId?.let { contactId ->
-            emitAll(contactRepository.getContactById(contactId))
-        } ?: run {
-            emit(null)
-        }
-    }.distinctUntilChanged().shareIn(
-        viewModelScope,
-        SharingStarted.WhileSubscribed(2_000),
-        replay = 1,
-    )
+    override val args: PaymentSendFragmentArgs by savedStateHandle.navArgs()
+    override val chatId: ChatId? = args.chatId
+    override val contactId: ContactId? = args.contactId
 
     private suspend fun getAccountBalance(): StateFlow<NodeBalance?> =
         lightningRepository.getAccountBalance()
 
     init {
         viewModelScope.launch(mainImmediate) {
-            contactSharedFlow.collect { contact ->
-                viewStateContainer.updateViewState(
-                    if (contact != null) {
-                        PaymentSendViewState.ChatPayment(contact)
-                    } else {
-                        PaymentSendViewState.KeySendPayment
-                    }
-                )
-            }
-        }
-    }
-
-    fun updateAmount(amountString: String) {
-        viewModelScope.launch(mainImmediate) {
-            submitSideEffect(PaymentSendSideEffect.ProduceHapticFeedback)
-
-            getAccountBalance().firstOrNull()?.let { balance ->
-                val updatedAmount: Int? = try {
-                    amountString.toInt()
-                } catch (e: NumberFormatException) {
-                    null
+            val contact = getContactOrNull()
+            viewStateContainer.updateViewState(
+                if (contact != null) {
+                    PaymentSendViewState.ChatPayment(contact)
+                } else {
+                    PaymentSendViewState.KeySendPayment
                 }
-
-                sendPaymentBuilder.setAmount(updatedAmount?.toLong() ?: 0)
-
-                when {
-                    updatedAmount == null -> {
-                        amountViewStateContainer.updateViewState(AmountViewState.AmountUpdated(""))
-                    }
-                    updatedAmount <= balance.balance.value -> {
-                        amountViewStateContainer.updateViewState(AmountViewState.AmountUpdated(updatedAmount.toString()))
-                    }
-                    else -> {
-                        submitSideEffect(
-                            PaymentSendSideEffect.Notify(app.getString(R.string.balance_too_low))
-                        )
-                    }
-                }
-            }
+            )
         }
     }
 
@@ -147,7 +104,7 @@ internal class PaymentSendViewModel @Inject constructor(
             if (response is Response.Success) {
                 response.value.value.toLightningNodePubKey()?.let { destinationKey ->
                     submitSideEffect(
-                        PaymentSendSideEffect.AlertConfirmPaymentSend(sendPaymentBuilder.paymentAmount, destinationKey.value) {
+                        PaymentSideEffect.AlertConfirmPaymentSend(sendPaymentBuilder.paymentAmount, destinationKey.value) {
                             sendDirectPayment(destinationKey)
                         }
                     )
@@ -183,7 +140,7 @@ internal class PaymentSendViewModel @Inject constructor(
             when (messageRepository.sendPayment(sendPayment)) {
                 is Response.Error -> {
                     submitSideEffect(
-                        PaymentSendSideEffect.Notify(app.getString(R.string.error_processing_payment))
+                        PaymentSideEffect.Notify(app.getString(R.string.error_processing_payment))
                     )
                     viewStateContainer.updateViewState(PaymentSendViewState.PaymentFailed)
                 }
@@ -196,10 +153,40 @@ internal class PaymentSendViewModel @Inject constructor(
                         )
 
                         submitSideEffect(
-                            PaymentSendSideEffect.Notify(successMessage)
+                            PaymentSideEffect.Notify(successMessage)
                         )
                     }
                     navigator.closeDetailScreen()
+                }
+            }
+        }
+    }
+
+    override fun updateAmount(amountString: String) {
+        viewModelScope.launch(mainImmediate) {
+            submitSideEffect(PaymentSideEffect.ProduceHapticFeedback)
+
+            getAccountBalance().firstOrNull()?.let { balance ->
+                val updatedAmount: Int? = try {
+                    amountString.toInt()
+                } catch (e: NumberFormatException) {
+                    null
+                }
+
+                sendPaymentBuilder.setAmount(updatedAmount?.toLong() ?: 0)
+
+                when {
+                    updatedAmount == null -> {
+                        amountViewStateContainer.updateViewState(AmountViewState.AmountUpdated(""))
+                    }
+                    updatedAmount <= balance.balance.value -> {
+                        amountViewStateContainer.updateViewState(AmountViewState.AmountUpdated(updatedAmount.toString()))
+                    }
+                    else -> {
+                        submitSideEffect(
+                            PaymentSideEffect.Notify(app.getString(chat.sphinx.payment_common.R.string.balance_too_low))
+                        )
+                    }
                 }
             }
         }

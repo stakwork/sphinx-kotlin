@@ -1,0 +1,23 @@
+plugins {
+    id 'java-library'
+    id 'kotlin'
+    id 'kotlin-kapt'
+}
+
+dependencies {
+    // KotlinAndroid
+    api project(path: ':kotlin:crypto:crypto-common')
+
+    // Sphinx
+    api project(path: ':sphinx:application:common:kotlin-response')
+    api project(path: ':sphinx:application:common:wrappers:wrapper-io-utils')
+    api project(path: ':sphinx:application:common:wrappers:wrapper-meme-server')
+    api project(path: ':sphinx:application:common:wrappers:wrapper-message-media')
+    api project(path: ':sphinx:application:common:wrappers:wrapper-relay')
+    implementation deps.kotlin.coroutinesCore
+
+    // needed to override moshi's use of 1.4.31
+    implementation deps.kotlin.reflect
+    implementation deps.square.moshi
+    kapt kaptDeps.square.moshiCodegen
+}

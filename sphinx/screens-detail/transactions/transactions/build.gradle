@@ -32,8 +32,20 @@ dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
     // KotlinAndroid
     implementation project(path: ':android:features:android-feature-screens')
+
     // Sphinx
+    implementation project(path: ':sphinx:activity:insetter-activity')
+
+    implementation project(path: ':sphinx:application:data:concepts:concept-image-loader')
+    api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-contact')
+    api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-chat')
+    api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-message')
+
+    implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-message')
+
     implementation project(path: ':sphinx:screens-detail:common:detail-resources')
+
+    implementation deps.androidx.recyclerView
 
     implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt

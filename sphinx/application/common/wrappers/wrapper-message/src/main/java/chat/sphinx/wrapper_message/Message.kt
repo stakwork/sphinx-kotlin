@@ -37,10 +37,13 @@ inline fun Message.retrieveTextToShow(): String? =
 inline fun Message.retrieveImageUrlAndMessageMedia(): Pair<String, MessageMedia?>? {
     var mediaData: Pair<String, MessageMedia?>? = null
 
+    if (this.type.isDirectPayment()) {
+        return null
+    }
+
     giphyData?.let { giphyData ->
         mediaData = giphyData.retrieveImageUrlAndMessageMedia()
     } ?: messageMedia?.let { media ->
-
         if (media.mediaType.isImage && !isPaidMessage) {
 
             // always prefer loading a file if it exists over loading a url

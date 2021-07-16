@@ -5,8 +5,11 @@ import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
 import android.widget.SeekBar
+import androidx.activity.OnBackPressedCallback
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import app.cash.exhaustive.Exhaustive
 import by.kirich1409.viewbindingdelegate.viewBinding
@@ -16,6 +19,8 @@ import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.insetter_activity.addStatusBarPadding
+import chat.sphinx.menu_bottom.ui.MenuBottomViewState
+import chat.sphinx.menu_bottom_profile_pic.BottomMenuProfilePic
 import chat.sphinx.profile.R
 import chat.sphinx.profile.databinding.FragmentProfileBinding
 import chat.sphinx.profile.navigation.ProfileNavigator
@@ -29,6 +34,7 @@ import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.updateViewState
+import io.matthewnelson.concept_views.viewstate.value
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -53,12 +59,49 @@ internal class ProfileFragment: SideEffectFragment<
     @Suppress("ProtectedInFinal")
     protected lateinit var profileNavigator: ProfileNavigator
 
+    private val bottomMenuProfilePic: BottomMenuProfilePic by lazy(LazyThreadSafetyMode.NONE) {
+        BottomMenuProfilePic(
+            this,
+            onStopSupervisor,
+            viewModel
+        )
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        BackPressHandler(viewLifecycleOwner, requireActivity())
 
         setupProfileHeader()
         setupProfileTabs()
         setupProfile()
+
+        bottomMenuProfilePic.initialize(binding.includeLayoutMenuBottomProfilePic, viewLifecycleOwner)
+    }
+
+    private inner class BackPressHandler(
+        owner: LifecycleOwner,
+        activity: FragmentActivity,
+    ): OnBackPressedCallback(true) {
+
+        init {
+            activity.apply {
+                onBackPressedDispatcher.addCallback(
+                    owner,
+                    this@BackPressHandler,
+                )
+            }
+        }
+
+        override fun handleOnBackPressed() {
+            if (viewModel.profilePicMenuHandler.viewStateContainer.value is MenuBottomViewState.Open) {
+                viewModel.profilePicMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Closed)
+            } else {
+                lifecycleScope.launch(viewModel.mainImmediate) {
+                    profileNavigator.popBackStack()
+                }
+            }
+        }
     }
 
     private fun setupProfileHeader() {
@@ -74,6 +117,13 @@ internal class ProfileFragment: SideEffectFragment<
                     includeProfileAdvancedContainerHolder
                         .layoutConstraintProfileAdvancedContainerScrollViewContent
                 )
+                .addNavigationBarPadding(
+                    includeLayoutMenuBottomProfilePic.includeLayoutMenuBottomOptions.root
+                )
+
+            includeProfileNamePictureHolder.imageViewProfilePicture.setOnClickListener {
+                viewModel.profilePicMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Open)
+            }
 
             includeProfileHeader.apply {
                 root.layoutParams.height = root.layoutParams.height + activity.statusBarInsetHeight.top

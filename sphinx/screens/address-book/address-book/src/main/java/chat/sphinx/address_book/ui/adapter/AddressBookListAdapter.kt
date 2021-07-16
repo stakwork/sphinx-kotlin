@@ -88,9 +88,9 @@ internal class AddressBookListAdapter(
 
     override fun onStart(owner: LifecycleOwner) {
         super.onStart(owner)
+
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.collectViewState { viewState ->
-
                 if (addressBookContacts.isEmpty()) {
                     addressBookContacts.addAll(viewState.list)
                     this@AddressBookListAdapter.notifyDataSetChanged()

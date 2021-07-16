@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    tools:layout_marginHorizontal="@dimen/default_layout_margin">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_menu_bottom"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/background_menu_bottom"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layout_constraint_menu_bottom_header"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingVertical="@dimen/default_layout_margin"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_view_menu_bottom_header_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/roboto_regular"
+                android:gravity="center"
+                android:textColor="@color/text"
+                android:textSize="@dimen/menu_bottom_header_text_size"
+                android:textStyle="bold"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="Some Menu" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_view_menu_bottom_header_subtext"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/roboto_light"
+                android:gravity="center"
+                android:text="@string/menu_bottom_header_subtext"
+                android:textColor="@color/text"
+                android:textSize="@dimen/menu_bottom_header_subtext_size"
+                app:layout_constraintTop_toBottomOf="@+id/text_view_menu_bottom_header_text" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <include
+            android:id="@+id/include_layout_menu_bottom_option_1"
+            layout="@layout/layout_menu_bottom_option_holder"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@+id/layout_constraint_menu_bottom_header" />
+
+        <include
+            android:id="@+id/include_layout_menu_bottom_option_2"
+            layout="@layout/layout_menu_bottom_option_holder"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@+id/include_layout_menu_bottom_option_1" />
+
+        <include
+            android:id="@+id/include_layout_menu_bottom_option_3"
+            layout="@layout/layout_menu_bottom_option_holder"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@+id/include_layout_menu_bottom_option_2" />
+
+        <include
+            android:id="@+id/include_layout_menu_bottom_option_4"
+            layout="@layout/layout_menu_bottom_option_holder"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@+id/include_layout_menu_bottom_option_3" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/text_view_menu_bottom_dismiss"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/background_menu_bottom"
+        android:fontFamily="@font/roboto_regular"
+        android:gravity="center"
+        android:paddingVertical="@dimen/menu_bottom_option_vertical_padding"
+        android:text="@string/menu_bottom_cancel"
+        android:textColor="@color/primaryRed"
+        android:textSize="@dimen/menu_bottom_option_text_size"
+        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_menu_bottom" />
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/default_layout_margin"
+        app:layout_constraintTop_toBottomOf="@+id/text_view_menu_bottom_dismiss" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
