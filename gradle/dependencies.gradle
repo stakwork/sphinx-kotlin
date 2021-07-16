@@ -6,17 +6,17 @@ ext.versions = [
     'compileSdk': 30,
     'minSdk': 23,
 
-    'androidGradle': '4.2.1',
+    'androidGradle': '4.2.2',
     'arch': '2.1.0',
-    'camera': '1.1.0-alpha04',
-    'cameraView': '1.0.0-alpha24',
-    'coil': '1.2.1',
-    'coroutines': '1.5.0',
+    'camera': '1.1.0-alpha06',
+    'cameraView': '1.0.0-alpha26',
+    'coil': '1.3.0',
+    'coroutines': '1.5.1',
     'insetter': '0.5.0',
     'lifecycle': '2.3.1',
-    'hilt': '2.35.1',
+    'hilt': '2.37',
     'hiltJetpack': '1.0.0-alpha03',
-    'kotlin': '1.5.10',
+    'kotlin': '1.5.21',
     'moshi': '1.12.0',
     'navigation': '2.3.5',
     'okhttp': '4.9.1',
@@ -43,7 +43,7 @@ ext.deps = [
             extensions: "androidx.camera:camera-extensions:${versions.cameraView}",
         ],
         constraintLayout: "androidx.constraintlayout:constraintlayout:2.0.4",
-        core: "androidx.core:core-ktx:1.5.0",
+        core: "androidx.core:core-ktx:1.6.0",
         exifInterface: "androidx.exifinterface:exifinterface:1.3.2",
         lifecycle: [
             commonJava8: "androidx.lifecycle:lifecycle-common-java8:${versions.lifecycle}",
@@ -60,7 +60,7 @@ ext.deps = [
             ui: "androidx.navigation:navigation-ui-ktx:${versions.navigation}",
         ],
         paging3: "androidx.paging:paging-runtime:3.0.0",
-        recyclerView: "androidx.recyclerview:recyclerview:1.2.0",
+        recyclerView: "androidx.recyclerview:recyclerview:1.2.1",
         securityCrypto: "androidx.security:security-crypto:1.1.0-alpha03",
         viewBinding: "androidx.databinding:viewbinding:${versions.androidGradle}",
     ],
@@ -72,8 +72,8 @@ ext.deps = [
     google: [
         hilt: "com.google.dagger:hilt-android:${versions.hilt}",
         material: "com.google.android.material:material:1.4.0-beta01",
-        mlKitBarcodeScanning: "com.google.mlkit:barcode-scanning:16.1.1",
-        zxing: "com.google.zxing:core:3.4.0",
+        mlKitBarcodeScanning: "com.google.mlkit:barcode-scanning:16.2.0",
+        zxing: "com.google.zxing:core:3.4.1",
     ],
     guardianProject: [
         jtorctl: "info.guardianproject:jtorctl:0.4",
@@ -101,9 +101,9 @@ ext.deps = [
         torBinary: "io.matthewnelson.topl-android:tor-binary:0.4.6.2-alpha",
     ],
     sqlCipher: "net.zetetic:android-database-sqlcipher:4.4.3",
-    sqlRequery: "com.github.requery:sqlite-android:3.35.5",
+    sqlRequery: "com.github.requery:sqlite-android:3.36.0",
     square: [
-        okio: "com.squareup.okio:okio:2.9.0",
+        okio: "com.squareup.okio:okio:2.10.0",
         okhttp: "com.squareup.okhttp3:okhttp:${versions.okhttp}",
         okhttpLogging: "com.squareup.okhttp3:logging-interceptor:${versions.okhttp}",
         moshi: "com.squareup.moshi:moshi-kotlin:${versions.moshi}",
@@ -114,7 +114,7 @@ ext.deps = [
         sqlDelightNative: "com.squareup.sqldelight:native-driver:${versions.sqlDelight}",
         sqlDelightRuntime: "com.squareup.sqldelight:runtime:${versions.sqlDelight}",
     ],
-    viewBindingDelegateNoReflect: "com.github.kirich1409:viewbindingpropertydelegate-noreflection:1.4.6",
+    viewBindingDelegateNoReflect: "com.github.kirich1409:viewbindingpropertydelegate-noreflection:1.4.7",
     giphy: [
             sdk: "com.giphy.sdk:ui:2.1.2"
     ]
@@ -142,7 +142,7 @@ ext.plugin = [
     google: [
         hilt: "com.google.dagger:hilt-android-gradle-plugin:${versions.hilt}",
     ],
-    gradleVersions: "com.github.ben-manes:gradle-versions-plugin:0.38.0",
+    gradleVersions: "com.github.ben-manes:gradle-versions-plugin:0.39.0",
     kotlin: [
         dokka: "org.jetbrains.dokka:dokka-gradle-plugin:0.10.1",
         gradle: "org.jetbrains.kotlin:kotlin-gradle-plugin:${versions.kotlin}",
@@ -150,7 +150,7 @@ ext.plugin = [
     ],
     mavenPublish: "com.vanniktech:gradle-maven-publish-plugin:0.13.0",
     square: [
-        exhaustive: "app.cash.exhaustive:exhaustive-gradle:0.1.1",
+        exhaustive: "app.cash.exhaustive:exhaustive-gradle:0.2.0",
         sqlDelight: "com.squareup.sqldelight:gradle-plugin:${versions.sqlDelight}"
     ],
 ]
@@ -166,9 +166,9 @@ ext.plugin = [
 ext.testDeps = [
     androidx: [
         archCore: "androidx.arch.core:core-testing:${versions.arch}",
-        core: "androidx.test:core:1.3.0",
-        espresso: "androidx.test.espresso:espresso-core:3.3.0",
-        junit: "androidx.test.ext:junit:1.1.2",
+        core: "androidx.test:core:1.4.0",
+        espresso: "androidx.test.espresso:espresso-core:3.4.0",
+        junit: "androidx.test.ext:junit:1.1.3",
     ],
     google: [
         hilt: "com.google.dagger:hilt-android-testing:${versions.hilt}",
@@ -179,9 +179,9 @@ ext.testDeps = [
     kotlin: [
         coroutines: "org.jetbrains.kotlinx:kotlinx-coroutines-test:${versions.coroutines}",
     ],
-    robolectric: "org.robolectric:robolectric:4.5.1",
+    robolectric: "org.robolectric:robolectric:4.6.1",
     jsonAssert: "org.skyscreamer:jsonassert:1.5.0",
-    turbine: "app.cash.turbine:turbine:0.5.1",
+    turbine: "app.cash.turbine:turbine:0.5.2",
 ]
 
 /**
