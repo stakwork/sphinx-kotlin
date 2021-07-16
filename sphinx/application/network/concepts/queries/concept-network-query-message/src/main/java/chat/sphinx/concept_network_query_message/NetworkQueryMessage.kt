@@ -20,8 +20,10 @@ abstract class NetworkQueryMessage {
     ): Flow<LoadResponse<GetMessagesResponse, ResponseError>>
 
     abstract fun getPayments(
+        offset: Int = 0,
+        limit: Int = 50,
         relayData: Pair<AuthorizationToken, RelayUrl>? = null,
-    ): Flow<LoadResponse<List<MessageDto>, ResponseError>>
+    ): Flow<LoadResponse<List<TransactionDto>, ResponseError>>
 
     abstract fun sendMessage(
         postMessageDto: PostMessageDto,

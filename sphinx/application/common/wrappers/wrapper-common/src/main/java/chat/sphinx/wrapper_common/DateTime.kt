@@ -71,6 +71,7 @@ value class DateTime(val value: Date) {
         private const val FORMAT_H_MM_A = "h:mm a"
         private const val FORMAT_MMM = "MMM"
         private const val FORMAT_EEE_DD = "EEE dd"
+        private const val FORMAT_EEE_MM_DD_H_MM_A = "EEE MMM dd, h:mm a"
 
         @Volatile
         private var formatRelay: SimpleDateFormat? = null
@@ -115,6 +116,22 @@ value class DateTime(val value: Date) {
                 Date(System.currentTimeMillis())
             )
             .toDateTime()
+
+        @Volatile
+        private var formateeemmddhmma: SimpleDateFormat? = null
+        @Suppress("SpellCheckingInspection")
+        fun getFormateeemmddhmma(): SimpleDateFormat =
+            formateeemmddhmma?.also {
+                it.timeZone = TimeZone.getDefault()
+            } ?: synchronized(this) {
+                formateeemmddhmma?.also {
+                    it.timeZone = TimeZone.getDefault()
+                } ?: SimpleDateFormat(FORMAT_EEE_MM_DD_H_MM_A, Locale.getDefault())
+                    .also {
+                        it.timeZone = TimeZone.getDefault()
+                        formateeemmddhmma = it
+                    }
+            }
 
         @Volatile
         private var formathmma: SimpleDateFormat? = null

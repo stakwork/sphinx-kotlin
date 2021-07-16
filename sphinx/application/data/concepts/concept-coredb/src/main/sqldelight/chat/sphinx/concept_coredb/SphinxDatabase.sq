@@ -90,6 +90,11 @@ chatGetAllIds:
 SELECT id
 FROM chatDbo;
 
+chatGetAllByIds:
+SELECT *
+FROM chatDbo
+WHERE id IN :chat_ids;
+
 chatGetById:
 SELECT *
 FROM chatDbo
@@ -224,6 +229,11 @@ FROM contactDbo;
 contactGetAll:
 SELECT *
 FROM contactDbo;
+
+contactGetAllByIds:
+SELECT *
+FROM contactDbo
+WHERE id IN :contact_ids;
 
 contactGetById:
 SELECT *
@@ -501,10 +511,20 @@ AND (type = 29
     AND reply_uuid IN :reply_uuids
 );
 
+messageGetAllByUUID:
+SELECT *
+FROM messageDbo
+WHERE uuid IN :uuids;
+
 messageGetById:
 SELECT *
 FROM messageDbo
 WHERE id = ?;
+
+messageGetByUUID:
+SELECT *
+FROM messageDbo
+WHERE uuid = ?;
 
 messageGetToShowByUUID:
 SELECT *

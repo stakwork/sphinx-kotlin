@@ -34,6 +34,7 @@ interface ChatRepository {
     
     val networkRefreshChats: Flow<LoadResponse<Boolean, ResponseError>>
 
+    suspend fun getAllChatsByIds(chatIds: List<ChatId>): List<Chat>
     /**
      * Returns `true` if the user has muted the chat and there is a need
      * to notify them that they won't receive messages anymore.

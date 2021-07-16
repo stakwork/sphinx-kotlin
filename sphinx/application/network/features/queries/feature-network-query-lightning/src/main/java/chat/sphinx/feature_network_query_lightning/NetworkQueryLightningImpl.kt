@@ -183,7 +183,7 @@ class NetworkQueryLightningImpl(
             requestBody = postPaymentDto,
             relayData = relayData
         )
-
+    
 //    app.get('/getinfo', details.getInfo)
 //    app.get('/info', details.getNodeInfo)
 //    app.get('/route', details.checkRoute)

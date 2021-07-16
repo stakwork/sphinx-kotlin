@@ -35,6 +35,7 @@ interface ContactRepository {
 
     val getAllContacts: Flow<List<Contact>>
     fun getContactById(contactId: ContactId): Flow<Contact?>
+    suspend fun getAllContactsByIds(contactIds: List<ContactId>): List<Contact>
 
     fun getInviteByContactId(contactId: ContactId): Flow<Invite?>
     fun getInviteById(inviteId: InviteId): Flow<Invite?>

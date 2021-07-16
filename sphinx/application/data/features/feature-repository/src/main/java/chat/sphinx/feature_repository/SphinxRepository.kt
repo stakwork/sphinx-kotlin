@@ -253,6 +253,13 @@ abstract class SphinxRepository(
         }
     }
 
+    override suspend fun getAllChatsByIds(chatIds: List<ChatId>): List<Chat> {
+        return coreDB.getSphinxDatabaseQueries()
+            .chatGetAllByIds(chatIds)
+            .executeAsList()
+            .map { chatDboPresenterMapper.mapFrom(it) }
+    }
+
     override fun getChatById(chatId: ChatId): Flow<Chat?> = flow {
         emitAll(
             coreDB.getSphinxDatabaseQueries().chatGetById(chatId)
@@ -471,6 +478,13 @@ abstract class SphinxRepository(
                 .map { it?.let { contactDboPresenterMapper.mapFrom(it) } }
                 .distinctUntilChanged()
         )
+    }
+
+    override suspend fun getAllContactsByIds(contactIds: List<ContactId>): List<Contact> {
+        return coreDB.getSphinxDatabaseQueries()
+            .contactGetAllByIds(contactIds)
+            .executeAsList()
+            .map { contactDboPresenterMapper.mapFrom(it) }
     }
 
     override fun getInviteByContactId(contactId: ContactId): Flow<Invite?> = flow {
@@ -1253,6 +1267,26 @@ abstract class SphinxRepository(
                 }}
                 .distinctUntilChanged()
         )
+    }
+
+    override fun getMessageByUUID(messageUUID: MessageUUID): Flow<Message?> = flow {
+        val queries = coreDB.getSphinxDatabaseQueries()
+        emitAll(
+            queries.messageGetByUUID(messageUUID)
+                .asFlow()
+                .mapToOneOrNull(io)
+                .map { it?.let { messageDbo ->
+                    mapMessageDboAndDecryptContentIfNeeded(queries, messageDbo)
+                }}
+                .distinctUntilChanged()
+        )
+    }
+
+    override suspend fun getAllMessagesByUUID(messageUUIDs: List<MessageUUID>): List<Message> {
+        return coreDB.getSphinxDatabaseQueries()
+            .messageGetAllByUUID(messageUUIDs)
+            .executeAsList()
+            .map { messageDboPresenterMapper.mapFrom(it) }
     }
 
     @Suppress("RemoveExplicitTypeArguments")

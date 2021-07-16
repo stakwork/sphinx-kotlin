@@ -45,26 +45,16 @@ class NetworkQueryMessageImpl(
             relayData = relayData
         )
 
-    private val getPaymentsFlowNullData: Flow<LoadResponse<List<MessageDto>, ResponseError>> by lazy {
+    override fun getPayments(
+        offset: Int,
+        limit: Int,
+        relayData: Pair<AuthorizationToken, RelayUrl>?
+    ): Flow<LoadResponse<List<TransactionDto>, ResponseError>> =
         networkRelayCall.relayGet(
             responseJsonClass = GetPaymentsRelayResponse::class.java,
-            relayEndpoint = ENDPOINT_PAYMENTS,
-            relayData = null
+            relayEndpoint = "$ENDPOINT_PAYMENTS?offset=$offset&limit=$limit",
+            relayData = relayData
         )
-    }
-
-    override fun getPayments(
-        relayData: Pair<AuthorizationToken, RelayUrl>?
-    ): Flow<LoadResponse<List<MessageDto>, ResponseError>> =
-        if (relayData == null) {
-            getPaymentsFlowNullData
-        } else {
-            networkRelayCall.relayGet(
-                responseJsonClass = GetPaymentsRelayResponse::class.java,
-                relayEndpoint = ENDPOINT_PAYMENTS,
-                relayData = relayData
-            )
-        }
 
     override fun sendMessage(
         postMessageDto: PostMessageDto,
