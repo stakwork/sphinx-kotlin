@@ -16,8 +16,11 @@ import chat.sphinx.wrapper_chat.isTribeOwnedByAccount
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.dashboard.toChatId
 import chat.sphinx.wrapper_common.dashboard.toContactId
+import chat.sphinx.wrapper_common.message.MessageUUID
 import chat.sphinx.wrapper_common.message.toMessageUUID
 import chat.sphinx.wrapper_contact.Contact
+import chat.sphinx.wrapper_message.Message
+import chat.sphinx.wrapper_message.ReplyUUID
 import chat.sphinx.wrapper_message.SenderAlias
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.BaseViewModel
@@ -29,6 +32,7 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import javax.annotation.meta.Exhaustive
 import javax.inject.Inject
+import kotlin.math.absoluteValue
 
 @HiltViewModel
 internal class TransactionsViewModel @Inject constructor(
@@ -92,7 +96,9 @@ internal class TransactionsViewModel @Inject constructor(
         transactions: List<TransactionDto>,
         owner: Contact
     ): List<TransactionHolderViewState> {
-        val transactionsHVSs = ArrayList<TransactionHolderViewState>(transactions.size)
+
+        val contactIdsMap: MutableMap<Long, ContactId> = LinkedHashMap(transactions.size)
+        val contactAliasMap: MutableMap<Long, SenderAlias> = LinkedHashMap(transactions.size)
 
         for (transaction in transactions) {
             var senderReceiverAlias: SenderAlias? = null
@@ -127,32 +133,41 @@ internal class TransactionsViewModel @Inject constructor(
                 }
             }
 
-            val senderReceiverName: String? = when {
-                (senderReceiverAlias != null) -> {
-                    senderReceiverAlias!!.value
-                }
-                (senderReceiverId != null) -> {
-                    contactRepository.getContactById(senderReceiverId!!).firstOrNull()?.let { contact ->
-                        contact.alias?.value ?: null
-                    }
-                }
-                else -> {
-                    null
-                }
+            senderReceiverId?.let { srID ->
+                contactIdsMap[transaction.id] = srID
             }
+            senderReceiverAlias?.let { srAlias ->
+                contactAliasMap[transaction.id] = srAlias
+            }
+        }
+
+        val contactsMap: MutableMap<Long, Contact> = LinkedHashMap(transactions.size)
+        val contactIds = contactIdsMap.values.map { it }
+        
+        contactRepository.getAllContactsByIds(contactIds).let { response ->
+            response.forEach { contact ->
+                contactsMap[contact.id.value] = contact
+            }
+        }
+
+        val transactionsHVSs = ArrayList<TransactionHolderViewState>(transactions.size)
+
+        for (transaction in transactions) {
+            val senderId = contactIdsMap[transaction.id]
+            val senderAlias: String? = contactAliasMap[transaction.id]?.value ?: contactsMap[senderId?.value]?.alias?.value
 
             transactionsHVSs.add(
                 if (transaction.sender == owner.id.value) {
                     TransactionHolderViewState.Outgoing(
                         transaction,
                         null,
-                        senderReceiverName ?: "-",
+                        senderAlias ?: "-",
                     )
                 } else {
                     TransactionHolderViewState.Incoming(
                         transaction,
                         null,
-                        senderReceiverName ?: "-",
+                        senderAlias ?: "-",
                     )
                 }
             )

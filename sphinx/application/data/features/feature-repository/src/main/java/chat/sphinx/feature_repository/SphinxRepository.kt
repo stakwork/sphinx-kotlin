@@ -476,6 +476,13 @@ abstract class SphinxRepository(
         )
     }
 
+    override suspend fun getAllContactsByIds(contactIds: List<ContactId>): List<Contact> {
+        return coreDB.getSphinxDatabaseQueries()
+            .contactGetAllByIds(contactIds)
+            .executeAsList()
+            .map { contactDboPresenterMapper.mapFrom(it) }
+    }
+
     override fun getInviteByContactId(contactId: ContactId): Flow<Invite?> = flow {
         emitAll(
             coreDB.getSphinxDatabaseQueries().inviteGetByContactId(contactId)

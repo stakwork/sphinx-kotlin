@@ -225,6 +225,11 @@ contactGetAll:
 SELECT *
 FROM contactDbo;
 
+contactGetAllByIds:
+SELECT *
+FROM contactDbo
+WHERE id IN :contact_ids;
+
 contactGetById:
 SELECT *
 FROM contactDbo
