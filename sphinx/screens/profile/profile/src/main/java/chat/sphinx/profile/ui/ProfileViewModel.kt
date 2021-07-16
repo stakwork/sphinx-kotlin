@@ -1,14 +1,20 @@
 package chat.sphinx.profile.ui
 
+import android.app.Application
 import android.content.Context
 import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
+import chat.sphinx.camera_view_model_coordinator.request.CameraRequest
+import chat.sphinx.camera_view_model_coordinator.response.CameraResponse
 import chat.sphinx.concept_background_login.BackgroundLoginHandler
 import chat.sphinx.concept_relay.RelayDataHandler
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_lightning.LightningRepository
+import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
+import chat.sphinx.menu_bottom_profile_pic.ProfilePicMenuHandler
+import chat.sphinx.menu_bottom_profile_pic.ProfilePicMenuViewModel
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_contact.PrivatePhoto
@@ -38,16 +44,30 @@ import javax.inject.Inject
 @HiltViewModel
 internal class ProfileViewModel @Inject constructor(
     dispatchers: CoroutineDispatchers,
+    private val app: Application,
     private val authenticationCoordinator: AuthenticationCoordinator,
     private val backgroundLoginHandler: BackgroundLoginHandler,
+    private val cameraCoordinator: ViewModelCoordinator<CameraRequest, CameraResponse>,
     private val contactRepository: ContactRepository,
     private val lightningRepository: LightningRepository,
     private val relayDataHandler: RelayDataHandler,
 ): SideEffectViewModel<
         Context,
         ProfileSideEffect,
-        ProfileViewState>(dispatchers, ProfileViewState.Basic)
+        ProfileViewState>(dispatchers, ProfileViewState.Basic),
+    ProfilePicMenuViewModel
 {
+
+    override val profilePicMenuHandler: ProfilePicMenuHandler by lazy {
+        ProfilePicMenuHandler(
+            app,
+            cameraCoordinator,
+            contactRepository,
+            dispatchers,
+            viewModelScope,
+        )
+    }
+
     private var resetPINJob: Job? = null
     fun resetPIN() {
         if (resetPINJob?.isActive == true) return

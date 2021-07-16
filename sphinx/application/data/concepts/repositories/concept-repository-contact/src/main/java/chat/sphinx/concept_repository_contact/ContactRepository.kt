@@ -13,10 +13,12 @@ import chat.sphinx.wrapper_contact.ContactAlias
 import chat.sphinx.wrapper_contact.DeviceId
 import chat.sphinx.wrapper_contact.PrivatePhoto
 import chat.sphinx.wrapper_invite.Invite
+import chat.sphinx.wrapper_io_utils.InputStreamProvider
+import chat.sphinx.wrapper_message_media.MediaType
 import io.matthewnelson.crypto_common.clazzes.Password
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.flow
+import java.io.InputStream
 
 /**
  * All [Contact]s are cached to the DB such that a network refresh will update
@@ -47,4 +49,13 @@ interface ContactRepository {
     suspend fun updateOwnerDeviceId(deviceId: DeviceId): Response<Any, ResponseError>
     suspend fun updateOwnerNameAndKey(name: String, contactKey: Password): Response<Any, ResponseError>
     suspend fun updateOwner(alias: String?, privatePhoto: PrivatePhoto?, tipAmount: Sat?): Response<Any, ResponseError>
+
+    // TODO: add chatId to argument to update alias photo
+    suspend fun updateProfilePic(
+//        chatId: ChatId?,
+        stream: InputStreamProvider,
+        mediaType: MediaType,
+        fileName: String,
+        contentLength: Long?
+    ): Response<Any, ResponseError>
 }

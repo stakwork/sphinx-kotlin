@@ -16,6 +16,9 @@
             android:name="viewTitle"
             app:argType="string" />
         <argument
+            android:name="argDescription"
+            app:argType="string" />
+        <argument
             android:name="argShowBackArrow"
             app:argType="boolean" />
     </fragment>

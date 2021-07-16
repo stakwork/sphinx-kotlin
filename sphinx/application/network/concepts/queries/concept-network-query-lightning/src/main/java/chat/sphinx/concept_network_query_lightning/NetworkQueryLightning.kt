@@ -3,7 +3,9 @@ package chat.sphinx.concept_network_query_lightning
 import chat.sphinx.concept_network_query_lightning.model.balance.BalanceAllDto
 import chat.sphinx.concept_network_query_lightning.model.balance.BalanceDto
 import chat.sphinx.concept_network_query_lightning.model.channel.ChannelsDto
+import chat.sphinx.concept_network_query_lightning.model.invoice.LightningPaymentInvoiceDto
 import chat.sphinx.concept_network_query_lightning.model.invoice.InvoicesDto
+import chat.sphinx.concept_network_query_lightning.model.invoice.PostRequestPaymentDto
 import chat.sphinx.concept_network_query_lightning.model.route.RouteSuccessProbabilityDto
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.ResponseError
@@ -55,6 +57,11 @@ abstract class NetworkQueryLightning {
         relayData: Pair<AuthorizationToken, RelayUrl>? = null
     ): Flow<LoadResponse<String, ResponseError>>
 
+    abstract fun postRequestPayment(
+        postPaymentDto: PostRequestPaymentDto,
+        relayData: Pair<AuthorizationToken, RelayUrl>? = null,
+    ): Flow<LoadResponse<LightningPaymentInvoiceDto, ResponseError>>
+
 //    app.get('/getinfo', details.getInfo)
 //    app.get('/logs', details.getLogsSince)
 //    app.get('/info', details.getNodeInfo)
@@ -70,7 +77,6 @@ abstract class NetworkQueryLightning {
     ////////////
     /// POST ///
     ////////////
-//    app.post('/invoices', invoices.createInvoice)
 //    app.post('/invoices/cancel', invoices.cancelInvoice)
 
     //////////////

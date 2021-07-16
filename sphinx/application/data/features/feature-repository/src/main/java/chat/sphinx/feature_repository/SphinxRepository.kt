@@ -4,8 +4,8 @@ import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_coredb.CoreDB
 import chat.sphinx.concept_crypto_rsa.RSA
 import chat.sphinx.concept_meme_server.MemeServerTokenHandler
-import chat.sphinx.concept_network_query_attachment.NetworkQueryAttachment
-import chat.sphinx.concept_network_query_attachment.model.PostAttachmentUploadDto
+import chat.sphinx.concept_network_query_meme_server.NetworkQueryMemeServer
+import chat.sphinx.concept_network_query_meme_server.model.PostMemeServerUploadDto
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
 import chat.sphinx.concept_network_query_chat.model.*
 import chat.sphinx.concept_network_query_contact.NetworkQueryContact
@@ -15,6 +15,7 @@ import chat.sphinx.concept_network_query_contact.model.PutContactDto
 import chat.sphinx.concept_network_query_invite.NetworkQueryInvite
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_lightning.model.balance.BalanceDto
+import chat.sphinx.concept_network_query_lightning.model.invoice.PostRequestPaymentDto
 import chat.sphinx.concept_network_query_message.NetworkQueryMessage
 import chat.sphinx.concept_network_query_message.model.MessageDto
 import chat.sphinx.concept_network_query_message.model.PostMessageDto
@@ -23,6 +24,7 @@ import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_dashboard.RepositoryDashboard
 import chat.sphinx.concept_repository_lightning.LightningRepository
+import chat.sphinx.concept_repository_lightning.model.RequestPayment
 import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.concept_repository_message.model.AttachmentInfo
@@ -54,20 +56,14 @@ import chat.sphinx.wrapper_common.dashboard.InviteId
 import chat.sphinx.wrapper_common.dashboard.toChatId
 import chat.sphinx.wrapper_common.invite.InviteStatus
 import chat.sphinx.wrapper_common.lightning.*
-import chat.sphinx.wrapper_common.message.MessageId
-import chat.sphinx.wrapper_common.message.MessagePagination
-import chat.sphinx.wrapper_common.message.MessageUUID
-import chat.sphinx.wrapper_common.message.toMessageUUID
-import chat.sphinx.wrapper_common.message.isProvisionalMessage
+import chat.sphinx.wrapper_common.message.*
 import chat.sphinx.wrapper_contact.*
 import chat.sphinx.wrapper_invite.Invite
+import chat.sphinx.wrapper_io_utils.InputStreamProvider
 import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_lightning.NodeBalanceAll
 import chat.sphinx.wrapper_message.*
-import chat.sphinx.wrapper_message_media.MediaKey
-import chat.sphinx.wrapper_message_media.MediaKeyDecrypted
-import chat.sphinx.wrapper_message_media.MediaToken
-import chat.sphinx.wrapper_message_media.toMediaKeyDecrypted
+import chat.sphinx.wrapper_message_media.*
 import chat.sphinx.wrapper_message_media.token.MediaHost
 import chat.sphinx.wrapper_rsa.RsaPrivateKey
 import chat.sphinx.wrapper_rsa.RsaPublicKey
@@ -85,6 +81,7 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import java.io.InputStream
 import okio.base64.encodeBase64
 import java.text.ParseException
 import kotlin.math.absoluteValue
@@ -98,7 +95,7 @@ abstract class SphinxRepository(
     private val dispatchers: CoroutineDispatchers,
     private val moshi: Moshi,
     private val memeServerTokenHandler: MemeServerTokenHandler,
-    private val networkQueryAttachment: NetworkQueryAttachment,
+    private val networkQueryMemeServer: NetworkQueryMemeServer,
     private val networkQueryChat: NetworkQueryChat,
     private val networkQueryContact: NetworkQueryContact,
     private val networkQueryLightning: NetworkQueryLightning,
@@ -839,6 +836,95 @@ abstract class SphinxRepository(
         return response
     }
 
+    override suspend fun updateProfilePic(
+//        chatId: ChatId?,
+        stream: InputStreamProvider,
+        mediaType: MediaType,
+        fileName: String,
+        contentLength: Long?
+    ): Response<Any, ResponseError> {
+        var response: Response<Any, ResponseError> = Response.Success(true)
+        val memeServerHost = MediaHost.DEFAULT
+
+        applicationScope.launch(mainImmediate) {
+            try {
+                val token = memeServerTokenHandler.retrieveAuthenticationToken(memeServerHost)
+                    ?: throw RuntimeException("MemeServerAuthenticationToken retrieval failure")
+
+                val networkResponse = networkQueryMemeServer.uploadAttachment(
+                    authenticationToken = token,
+                    mediaType = mediaType,
+                    stream = stream,
+                    fileName = fileName,
+                    contentLength = contentLength,
+                    memeServerHost = memeServerHost,
+                )
+
+                @Exhaustive
+                when (networkResponse) {
+                    is Response.Error -> {
+                        response = networkResponse
+                    }
+                    is Response.Success -> {
+                        val newUrl =
+                            PhotoUrl("https://${memeServerHost.value}/public/${networkResponse.value.muid}")
+
+                        // TODO: if chatId method argument is null, update owner record
+
+                        var owner = accountOwner.value
+
+                        if (owner == null) {
+                            try {
+                                accountOwner.collect { contact ->
+                                    if (contact != null) {
+                                        owner = contact
+                                        throw Exception()
+                                    }
+                                }
+                            } catch (e: Exception) {}
+                            delay(25L)
+                        }
+
+                        owner?.let { nnOwner ->
+
+                            networkQueryContact.updateContact(
+                                nnOwner.id,
+                                PutContactDto(photo_url = newUrl.value)
+                            ).collect { loadResponse ->
+
+                                @Exhaustive
+                                when (loadResponse) {
+                                    is LoadResponse.Loading -> {}
+                                    is Response.Error -> {
+                                        response = loadResponse
+                                    }
+                                    is Response.Success -> {
+                                        val queries = coreDB.getSphinxDatabaseQueries()
+
+                                        contactLock.withLock {
+                                            withContext(io) {
+                                                queries.contactUpdatePhotoUrl(
+                                                    newUrl,
+                                                    nnOwner.id,
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        } ?: throw IllegalStateException("Failed to retrieve account owner")
+                    }
+                }
+            } catch (e: Exception) {
+                response = Response.Error(
+                    ResponseError("Failed to update Profile Picture", e)
+                )
+            }
+        }.join()
+
+        return response
+    }
+
     /////////////////
     /// Lightning ///
     /////////////////
@@ -1528,7 +1614,7 @@ abstract class SphinxRepository(
                 null
             }
 
-            val postAttachmentDto: PostAttachmentUploadDto? = if (media != null) {
+            val postMemeServerDto: PostMemeServerUploadDto? = if (media != null) {
                 val token = memeServerTokenHandler.retrieveAuthenticationToken(MediaHost.DEFAULT)
                     ?: provisionalMessageId?.let { provId ->
                         withContext(io) {
@@ -1538,7 +1624,7 @@ abstract class SphinxRepository(
                         return@launch
                     } ?: return@launch
 
-                val response = networkQueryAttachment.uploadAttachment(
+                val response = networkQueryMemeServer.uploadAttachmentEncrypted(
                     token,
                     media.third.mediaType,
                     media.third.file,
@@ -1576,8 +1662,8 @@ abstract class SphinxRepository(
                     message?.second?.value,
                     remoteTextMap,
                     mediaKeyMap,
-                    postAttachmentDto?.mime,
-                    postAttachmentDto?.muid,
+                    postMemeServerDto?.mime,
+                    postMemeServerDto?.muid,
                 )
             } catch (e: IllegalArgumentException) {
                 LOG.e(TAG, "Failed to create PostMessageDto", e)
@@ -1701,6 +1787,7 @@ abstract class SphinxRepository(
 
         return response
     }
+
     override suspend fun sendPayment(
         sendPayment: SendPayment?
     ): Response<Any, ResponseError> {
@@ -1966,6 +2053,44 @@ abstract class SphinxRepository(
         }.join()
 
         return response
+    }
+
+    // TODO: Remove from repository as it does not interact with
+    //  persistence layer at all and does not belong.
+    override suspend fun requestPayment(requestPayment: RequestPayment): Response<LightningPaymentRequest, ResponseError> {
+        val postRequestPaymentDto = PostRequestPaymentDto(
+            requestPayment.chatId?.value,
+            requestPayment.contactId?.value,
+            requestPayment.amount,
+            requestPayment.memo,
+        )
+
+        var response: Response<LightningPaymentRequest, ResponseError>? = null
+
+        applicationScope.launch(mainImmediate) {
+            networkQueryLightning.postRequestPayment(postRequestPaymentDto).collect { loadResponse ->
+                @Exhaustive
+                when (loadResponse) {
+                    is LoadResponse.Loading -> {}
+                    is Response.Error -> {
+                        LOG.e(TAG, loadResponse.message, loadResponse.exception)
+                        response = loadResponse
+                    }
+                    is Response.Success -> {
+                        response = try {
+                            Response.Success(LightningPaymentRequest(loadResponse.value.invoice))
+                        } catch (e: IllegalArgumentException) {
+                            val msg = "Network response returned an empty value"
+                            LOG.e(TAG, msg, e)
+
+                            Response.Error(ResponseError(msg, e))
+                        }
+                    }
+                }
+            }
+        }.join()
+
+        return response ?: Response.Error(ResponseError(""))
     }
 
     override suspend fun toggleChatMuted(chat: Chat): Response<Boolean, ResponseError> {

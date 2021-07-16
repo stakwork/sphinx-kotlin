@@ -310,6 +310,11 @@ UPDATE contactDbo
 SET invite_status = :invite_status
 WHERE invite_id = ?;
 
+contactUpdatePhotoUrl:
+UPDATE contactDbo
+SET photo_url = :photo_url
+WHERE id = ?;
+
 contactDeleteById:
 DELETE FROM contactDbo
 WHERE id = ?;
