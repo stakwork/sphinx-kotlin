@@ -1,6 +1,6 @@
 # ChangeLog
 
-## Version 1.0.0-alpha10 (2021-07-13)
+## Version 1.0.0-alpha10 (2021-07-16)
  - Adds ability to create Lightning Invoices for receiving payments
  - Adds ability to view Lightning Transaction history
  - Adds ability to change Profile Picture
