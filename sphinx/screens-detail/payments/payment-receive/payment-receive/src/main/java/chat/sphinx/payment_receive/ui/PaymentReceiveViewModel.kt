@@ -6,7 +6,6 @@ import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_lightning.LightningRepository
 import chat.sphinx.concept_repository_lightning.model.RequestPayment
-import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.payment_common.ui.PaymentSideEffect
 import chat.sphinx.payment_common.ui.PaymentViewModel
@@ -21,7 +20,7 @@ import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
-import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.annotation.meta.Exhaustive
 import javax.inject.Inject
@@ -68,15 +67,14 @@ internal class PaymentReceiveViewModel @Inject constructor(
     }
 
     private suspend fun refreshViewState() {
-        contactSharedFlow.collect { contact ->
-            viewStateContainer.updateViewState(
-                if (contact != null) {
-                    PaymentReceiveViewState.ChatPaymentRequest(contact)
-                } else {
-                    PaymentReceiveViewState.RequestLightningPayment
-                }
-            )
-        }
+        val contact = getContactOrNull()
+        viewStateContainer.updateViewState(
+            if (contact != null) {
+                PaymentReceiveViewState.ChatPaymentRequest(contact)
+            } else {
+                PaymentReceiveViewState.RequestLightningPayment
+            }
+        )
     }
 
     fun requestPayment(message: String? = null) {
@@ -106,6 +104,9 @@ internal class PaymentReceiveViewModel @Inject constructor(
                             String.format(app.getString(R.string.amount_n_sats), requestPayment.amount),
                             false
                         )
+                        refreshViewState()
+                        delay(100L)
+                        updateAmount("")
                     }
                 }
             } else {

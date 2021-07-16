@@ -28,7 +28,6 @@ import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -75,15 +74,14 @@ internal class PaymentSendViewModel @Inject constructor(
 
     init {
         viewModelScope.launch(mainImmediate) {
-            contactSharedFlow.collect { contact ->
-                viewStateContainer.updateViewState(
-                    if (contact != null) {
-                        PaymentSendViewState.ChatPayment(contact)
-                    } else {
-                        PaymentSendViewState.KeySendPayment
-                    }
-                )
-            }
+            val contact = getContactOrNull()
+            viewStateContainer.updateViewState(
+                if (contact != null) {
+                    PaymentSendViewState.ChatPayment(contact)
+                } else {
+                    PaymentSendViewState.KeySendPayment
+                }
+            )
         }
     }
 
