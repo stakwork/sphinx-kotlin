@@ -40,7 +40,7 @@ internal class TransactionsListAdapter(
         }
 
         override fun getNewListSize(): Int {
-            return oldList.size
+            return newList.size
         }
 
         @Volatile
