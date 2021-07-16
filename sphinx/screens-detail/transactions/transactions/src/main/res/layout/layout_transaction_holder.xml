@@ -23,4 +23,12 @@
         app:layout_constraintTop_toTopOf="parent"
         tools:visibility="visible"/>
 
+    <include
+        android:id="@+id/include_loading_more_transactions"
+        layout="@layout/layout_loading_more_transactions"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

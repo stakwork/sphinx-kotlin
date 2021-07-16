@@ -5,15 +5,17 @@ import chat.sphinx.wrapper_message.Message
 
 
 internal sealed class TransactionHolderViewState(
-    val transaction: TransactionDto,
-    val invoice: Message?,
-    val messageSenderName: String,
+    val transaction: TransactionDto? = null,
+    val invoice: Message? = null,
+    val messageSenderName: String? = null
 ) {
+
+    class Loader : TransactionHolderViewState()
 
     class Outgoing(
         transaction: TransactionDto,
         invoice: Message?,
-        messageSenderName: String,
+        messageSenderName: String?
     ) : TransactionHolderViewState(
         transaction,
         invoice,
@@ -23,7 +25,7 @@ internal sealed class TransactionHolderViewState(
     class Incoming(
         transaction: TransactionDto,
         invoice: Message?,
-        messageSenderName: String,
+        messageSenderName: String?
     ) : TransactionHolderViewState(
         transaction,
         invoice,

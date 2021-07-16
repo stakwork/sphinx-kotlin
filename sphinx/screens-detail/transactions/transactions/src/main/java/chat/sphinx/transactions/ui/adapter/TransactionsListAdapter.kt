@@ -10,6 +10,7 @@ import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_network_query_message.model.TransactionDto
 import chat.sphinx.transactions.databinding.LayoutTransactionHolderBinding
 import chat.sphinx.transactions.ui.TransactionsViewModel
+import chat.sphinx.transactions.ui.TransactionsViewState
 import chat.sphinx.transactions.ui.viewstate.TransactionHolderViewState
 import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_common.lightning.asFormattedString
@@ -21,6 +22,8 @@ import io.matthewnelson.android_feature_viewmodel.currentViewState
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.*
+import kotlin.collections.ArrayList
 
 internal class TransactionsListAdapter(
     private val lifecycleOwner: LifecycleOwner,
@@ -48,7 +51,7 @@ internal class TransactionsListAdapter(
             val same: Boolean =  try {
                 oldList[oldItemPosition].let { old ->
                     newList[newItemPosition].let { new ->
-                        old.transaction.id == new.transaction.id
+                        old.transaction?.id == new.transaction?.id
                     }
                 }
             } catch (e: IndexOutOfBoundsException) {
@@ -85,21 +88,24 @@ internal class TransactionsListAdapter(
 
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.collectViewState { viewState ->
+                if (viewState is TransactionsViewState.ListMode) {
+                    if (!viewState.loading && viewState.list.isNotEmpty()) {
 
-                if (transactions.isEmpty()) {
-                    transactions.addAll(viewState.list)
-                    this@TransactionsListAdapter.notifyDataSetChanged()
-                } else {
-                    val diff = Diff(transactions, viewState.list)
-
-                    withContext(viewModel.dispatchers.default) {
-                        DiffUtil.calculateDiff(diff)
-                    }.let {
-                        if (!diff.sameList) {
-                            transactions.clear()
+                        if (transactions.isEmpty()) {
                             transactions.addAll(viewState.list)
-                            this@TransactionsListAdapter.notifyDataSetChanged()
+                        } else {
+                            val diff = Diff(transactions, viewState.list)
+
+                            withContext(viewModel.dispatchers.default) {
+                                DiffUtil.calculateDiff(diff)
+                            }.let {
+                                if (!diff.sameList) {
+                                    transactions.removeLast()
+                                    transactions.addAll(viewState.list)
+                                }
+                            }
                         }
+                        this@TransactionsListAdapter.notifyDataSetChanged()
 
                     }
                 }
@@ -141,15 +147,20 @@ internal class TransactionsListAdapter(
                 transactionHolderViewState = t
                 disposable?.dispose()
 
-                val amount = t.transaction.amount.toSat()?.asFormattedString() ?: "0"
-                val date = DateTime.getFormateeemmddhmma().format(t.transaction.date.toDateTime().value)
-                val senderReceiverName = t.messageSenderName
+                val amount = t.transaction?.amount?.toSat()?.asFormattedString() ?: "0"
+                val date = t.transaction?.date?.toDateTime()?.value ?: Date(System.currentTimeMillis())
+                val dateString = DateTime.getFormateeemmddhmma().format(date)
+                val senderReceiverName = t.messageSenderName ?: "-"
+
+                includeLoadingMoreTransactions.apply {
+                    root.goneIfFalse(t is TransactionHolderViewState.Loader)
+                }
 
                 includeIncomingTransaction.apply {
                     root.goneIfFalse(t is TransactionHolderViewState.Incoming)
 
                     textViewTransactionAmount.text = amount
-                    textViewTransactionDate.text = date
+                    textViewTransactionDate.text = dateString
                     textViewTransactionSenderReceiver.text = senderReceiverName
                 }
 
@@ -157,7 +168,7 @@ internal class TransactionsListAdapter(
                     root.goneIfFalse(t is TransactionHolderViewState.Outgoing)
 
                     textViewTransactionAmount.text = amount
-                    textViewTransactionDate.text = date
+                    textViewTransactionDate.text = dateString
                     textViewTransactionSenderReceiver.text = senderReceiverName
                 }
             }

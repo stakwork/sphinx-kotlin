@@ -10,5 +10,6 @@ internal sealed class TransactionsViewState: ViewState<TransactionsViewState>() 
     class ListMode(
         override val list: List<TransactionHolderViewState>,
         val loading: Boolean,
+        val firstPage: Boolean,
     ): TransactionsViewState()
 }

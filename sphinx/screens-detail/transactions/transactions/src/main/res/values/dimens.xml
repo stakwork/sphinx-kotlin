@@ -12,4 +12,5 @@
     <dimen name="transactions_list_transaction_sender_receiver_text_size">14sp</dimen>
     <dimen name="transactions_list_transaction_date_text_size">10sp</dimen>
     <dimen name="transactions_list_no_transactions_text_size">12sp</dimen>
+    <dimen name="transactions_list_loading_more_text_size">15sp</dimen>
 </resources>

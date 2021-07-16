@@ -21,7 +21,7 @@ abstract class NetworkQueryMessage {
 
     abstract fun getPayments(
         offset: Int = 0,
-        limit: Int = 200,
+        limit: Int = 50,
         relayData: Pair<AuthorizationToken, RelayUrl>? = null,
     ): Flow<LoadResponse<List<TransactionDto>, ResponseError>>
 

@@ -12,15 +12,9 @@ import chat.sphinx.transactions.navigation.TransactionsNavigator
 import chat.sphinx.transactions.ui.viewstate.TransactionHolderViewState
 import chat.sphinx.wrapper_chat.isConversation
 import chat.sphinx.wrapper_chat.isTribeNotOwnedByAccount
-import chat.sphinx.wrapper_chat.isTribeOwnedByAccount
 import chat.sphinx.wrapper_common.dashboard.ContactId
-import chat.sphinx.wrapper_common.dashboard.toChatId
-import chat.sphinx.wrapper_common.dashboard.toContactId
-import chat.sphinx.wrapper_common.message.MessageUUID
 import chat.sphinx.wrapper_common.message.toMessageUUID
 import chat.sphinx.wrapper_contact.Contact
-import chat.sphinx.wrapper_message.Message
-import chat.sphinx.wrapper_message.ReplyUUID
 import chat.sphinx.wrapper_message.SenderAlias
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.BaseViewModel
@@ -32,7 +26,6 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import javax.annotation.meta.Exhaustive
 import javax.inject.Inject
-import kotlin.math.absoluteValue
 
 @HiltViewModel
 internal class TransactionsViewModel @Inject constructor(
@@ -42,51 +35,93 @@ internal class TransactionsViewModel @Inject constructor(
     private val chatRepository: ChatRepository,
     private val messageRepository: MessageRepository,
     private val networkQueryMessage: NetworkQueryMessage,
-): BaseViewModel<TransactionsViewState>(dispatchers, TransactionsViewState.ListMode(listOf(), true))
+): BaseViewModel<TransactionsViewState>(
+    dispatchers,
+    TransactionsViewState.ListMode(
+        listOf(),
+        loading = true,
+        firstPage = true
+    )
+)
 {
+    private var page: Int = 0
+    private var loading: Boolean = false
+    private val itemsPerPage: Int = 50
+
+    private suspend fun getOwnerContact(): Contact {
+        return contactRepository.accountOwner.value.let { contact ->
+            if (contact != null) {
+                contact
+            } else {
+                var resolvedOwner: Contact? = null
+                try {
+                    contactRepository.accountOwner.collect { ownerContact ->
+                        if (ownerContact != null) {
+                            resolvedOwner = ownerContact
+                            throw Exception()
+                        }
+                    }
+                } catch (e: Exception) {
+                }
+                delay(25L)
+
+                resolvedOwner!!
+            }
+        }
+    }
+
     init {
         viewModelScope.launch(mainImmediate) {
-            val owner: Contact = contactRepository.accountOwner.value.let { contact ->
-                if (contact != null) {
-                    contact
-                } else {
-                    var resolvedOwner: Contact? = null
-                    try {
-                        contactRepository.accountOwner.collect { ownerContact ->
-                            if (ownerContact != null) {
-                                resolvedOwner = ownerContact
-                                throw Exception()
-                            }
-                        }
-                    } catch (e: Exception) {
-                    }
-                    delay(25L)
+            loadTransactions(
+                getOwnerContact()
+            )
+        }
+    }
 
-                    resolvedOwner!!
+    suspend fun loadMoreTransactions() {
+        if (loading) {
+            return
+        }
+
+        loading = true
+        page += 1
+
+        loadTransactions(
+            getOwnerContact()
+        )
+
+        loading = false
+    }
+
+    private suspend fun loadTransactions(
+        owner: Contact
+    ) {
+        networkQueryMessage.getPayments(
+            offset = page * itemsPerPage,
+            limit = itemsPerPage
+        ).collect{ loadResponse ->
+            val firstPage = (page == 0)
+
+            @Exhaustive
+            when (loadResponse) {
+                is LoadResponse.Loading -> {
+                    updateViewState(
+                        TransactionsViewState.ListMode(listOf(), true, firstPage)
+                    )
                 }
-            }
-
-            networkQueryMessage.getPayments().collect{ loadResponse ->
-                @Exhaustive
-                when (loadResponse) {
-                    is LoadResponse.Loading -> {
-                        updateViewState(
-                            TransactionsViewState.ListMode(listOf(), true),
+                is Response.Error -> {
+                    updateViewState(
+                        TransactionsViewState.ListMode(listOf(), false, firstPage)
+                    )
+                }
+                is Response.Success -> {
+                    updateViewState(
+                        TransactionsViewState.ListMode(
+                            processTransactions(loadResponse.value, owner),
+                            false,
+                            firstPage
                         )
-                    }
-                    is Response.Error -> {
-                        updateViewState(
-                            TransactionsViewState.ListMode(listOf(), false),
-                        )
-                    }
-                    is Response.Success -> {
-                        updateViewState(
-                            TransactionsViewState.ListMode(
-                                processTransactions(loadResponse.value, owner),
-                                false
-                            )
-                        )
-                    }
+                    )
                 }
             }
         }
@@ -168,6 +203,12 @@ internal class TransactionsViewModel @Inject constructor(
                         senderAlias ?: "-",
                     )
                 }
+            )
+        }
+
+        if (transactions.size == itemsPerPage) {
+            transactionsHVSs.add(
+                TransactionHolderViewState.Loader()
             )
         }
 
