@@ -1,0 +1,43 @@
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_constraint_from_contact"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:visibility="invisible"
+    >
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/image_view_contact_picture"
+        android:layout_width="@dimen/from_to_contact_image_xy"
+        android:layout_height="@dimen/from_to_contact_image_xy"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/to"
+        android:layout_marginLeft="@dimen/default_layout_margin"
+        android:fontFamily="@font/roboto_regular"
+        android:textSize="@dimen/from_to_contact_text_size"
+        android:textColor="@color/washedOutReceivedText"
+        app:layout_constraintStart_toEndOf="@+id/image_view_contact_picture"
+        app:layout_constraintTop_toTopOf="parent"/>
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/text_view_contact_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:layout_marginLeft="@dimen/default_layout_margin"
+        android:fontFamily="@font/roboto_regular"
+        android:textSize="@dimen/from_to_contact_name_text_size"
+        android:textColor="@color/primaryText"
+        app:layout_constraintStart_toEndOf="@+id/image_view_contact_picture"
+        app:layout_constraintBottom_toBottomOf="parent"
+        tools:text="Tomas"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

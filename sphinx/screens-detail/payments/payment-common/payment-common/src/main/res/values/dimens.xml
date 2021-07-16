@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="from_to_contact_height">40dp</dimen>
+    <dimen name="from_to_contact_image_xy">35dp</dimen>
+
+    <dimen name="amount_edit_text_container_height">105dp</dimen>
+
+    <dimen name="message_edit_text_container_height">70dp</dimen>
+    <dimen name="container_horizontal_padding">30dp</dimen>
+    <dimen name="message_edit_text_divider_top_margin">10dp</dimen>
+
+    <dimen name="confirm_button_container_height">65dp</dimen>
+    <dimen name="confirm_button_width">150dp</dimen>
+    <dimen name="confirm_button_height">40dp</dimen>
+    <dimen name="confirm_button_progress_bar_xy">25dp</dimen>
+
+    <dimen name="from_to_contact_text_size">12sp</dimen>
+    <dimen name="from_to_contact_name_text_size">14sp</dimen>
+    <dimen name="amount_edit_text_text_size">50sp</dimen>
+    <dimen name="amount_sat_text_view_text_size">20sp</dimen>
+    <dimen name="message_edit_text_text_size">17sp</dimen>
+    <dimen name="confirm_button_text_size">14sp</dimen>
+</resources>

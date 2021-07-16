@@ -15,6 +15,7 @@ import chat.sphinx.concept_network_query_contact.model.PutContactDto
 import chat.sphinx.concept_network_query_invite.NetworkQueryInvite
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_lightning.model.balance.BalanceDto
+import chat.sphinx.concept_network_query_lightning.model.invoice.PostRequestPaymentDto
 import chat.sphinx.concept_network_query_message.NetworkQueryMessage
 import chat.sphinx.concept_network_query_message.model.MessageDto
 import chat.sphinx.concept_network_query_message.model.PostMessageDto
@@ -23,6 +24,7 @@ import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_dashboard.RepositoryDashboard
 import chat.sphinx.concept_repository_lightning.LightningRepository
+import chat.sphinx.concept_repository_lightning.model.RequestPayment
 import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.concept_repository_message.model.AttachmentInfo
@@ -53,15 +55,8 @@ import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.dashboard.InviteId
 import chat.sphinx.wrapper_common.dashboard.toChatId
 import chat.sphinx.wrapper_common.invite.InviteStatus
-import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
-import chat.sphinx.wrapper_common.lightning.LightningRouteHint
-import chat.sphinx.wrapper_common.lightning.Sat
-import chat.sphinx.wrapper_common.lightning.toSat
-import chat.sphinx.wrapper_common.message.MessageId
-import chat.sphinx.wrapper_common.message.MessagePagination
-import chat.sphinx.wrapper_common.message.MessageUUID
-import chat.sphinx.wrapper_common.message.toMessageUUID
-import chat.sphinx.wrapper_common.message.isProvisionalMessage
+import chat.sphinx.wrapper_common.lightning.*
+import chat.sphinx.wrapper_common.message.*
 import chat.sphinx.wrapper_contact.*
 import chat.sphinx.wrapper_invite.Invite
 import chat.sphinx.wrapper_io_utils.InputStreamProvider
@@ -2024,6 +2019,44 @@ abstract class SphinxRepository(
         }.join()
 
         return response
+    }
+
+    // TODO: Remove from repository as it does not interact with
+    //  persistence layer at all and does not belong.
+    override suspend fun requestPayment(requestPayment: RequestPayment): Response<LightningPaymentRequest, ResponseError> {
+        val postRequestPaymentDto = PostRequestPaymentDto(
+            requestPayment.chatId?.value,
+            requestPayment.contactId?.value,
+            requestPayment.amount,
+            requestPayment.memo,
+        )
+
+        var response: Response<LightningPaymentRequest, ResponseError>? = null
+
+        applicationScope.launch(mainImmediate) {
+            networkQueryLightning.postRequestPayment(postRequestPaymentDto).collect { loadResponse ->
+                @Exhaustive
+                when (loadResponse) {
+                    is LoadResponse.Loading -> {}
+                    is Response.Error -> {
+                        LOG.e(TAG, loadResponse.message, loadResponse.exception)
+                        response = loadResponse
+                    }
+                    is Response.Success -> {
+                        response = try {
+                            Response.Success(LightningPaymentRequest(loadResponse.value.invoice))
+                        } catch (e: IllegalArgumentException) {
+                            val msg = "Network response returned an empty value"
+                            LOG.e(TAG, msg, e)
+
+                            Response.Error(ResponseError(msg, e))
+                        }
+                    }
+                }
+            }
+        }.join()
+
+        return response ?: Response.Error(ResponseError(""))
     }
 
     override suspend fun toggleChatMuted(chat: Chat): Response<Boolean, ResponseError> {
