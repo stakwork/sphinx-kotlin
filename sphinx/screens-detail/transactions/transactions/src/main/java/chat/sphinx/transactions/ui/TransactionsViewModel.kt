@@ -104,29 +104,27 @@ internal class TransactionsViewModel @Inject constructor(
             var senderReceiverAlias: SenderAlias? = null
             var senderReceiverId: ContactId? = null
 
-            if (transaction.isIncomingWithSender(owner.id)) {
-                senderReceiverAlias = transaction.getSenderAlias()
-                senderReceiverId = transaction.getSenderId()
-            }
-            else if (transaction.isOutgoingWithReceiver(owner.id)) {
-                senderReceiverId = transaction.getReceiverId()
-            }
-            else if (transaction.isOutgoingMessageBoost(owner.id)) {
-                transaction.reply_uuid?.toMessageUUID()?.let { originalMessageId ->
-                    messageRepository.getMessageByUUID(originalMessageId).firstOrNull()?.let { message ->
-                        senderReceiverAlias = message.senderAlias
-                        senderReceiverId = message.sender
+            when {
+                transaction.isIncomingWithSender(owner.id) -> {
+                    senderReceiverAlias = transaction.getSenderAlias()
+                    senderReceiverId = transaction.getSenderId()
+                }
+                transaction.isOutgoingWithReceiver(owner.id) -> {
+                    senderReceiverId = transaction.getReceiverId()
+                }
+                transaction.isOutgoingMessageBoost(owner.id) -> {
+                    transaction.reply_uuid?.toMessageUUID()?.let { originalMessageId ->
+                        messageRepository.getMessageByUUID(originalMessageId).firstOrNull()?.let { message ->
+                            senderReceiverAlias = message.senderAlias
+                            senderReceiverId = message.sender
+                        }
                     }
                 }
-            }
-            else if (transaction.isPaymentInChat()) {
-                transaction.getChatId()?.let { chatId ->
-                    chatRepository.getChatById(chatId).firstOrNull()?.let { chat ->
-                        if (chat.isTribeNotOwnedByAccount(owner.nodePubKey) || chat.isConversation()) {
-                            for (contactId in chat.contactIds) {
-                                if (contactId != owner.id) {
-                                    senderReceiverId = contactId
-                                }
+                transaction.isPaymentInChat() -> {
+                    transaction.getChatId()?.let { chatId ->
+                        chatRepository.getChatById(chatId).firstOrNull()?.let { chat ->
+                            if (chat.isTribeNotOwnedByAccount(owner.nodePubKey) || chat.isConversation()) {
+                                senderReceiverId = if (chat.contactIds.size > 1) chat.contactIds[1] else null
                             }
                         }
                     }
@@ -143,7 +141,7 @@ internal class TransactionsViewModel @Inject constructor(
 
         val contactsMap: MutableMap<Long, Contact> = LinkedHashMap(transactions.size)
         val contactIds = contactIdsMap.values.map { it }
-        
+
         contactRepository.getAllContactsByIds(contactIds).let { response ->
             response.forEach { contact ->
                 contactsMap[contact.id.value] = contact

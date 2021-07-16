@@ -12,6 +12,8 @@ import chat.sphinx.transactions.databinding.LayoutTransactionHolderBinding
 import chat.sphinx.transactions.ui.TransactionsViewModel
 import chat.sphinx.transactions.ui.viewstate.TransactionHolderViewState
 import chat.sphinx.wrapper_common.DateTime
+import chat.sphinx.wrapper_common.lightning.asFormattedString
+import chat.sphinx.wrapper_common.lightning.toSat
 import chat.sphinx.wrapper_common.toDateTime
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_viewmodel.collectViewState
@@ -139,7 +141,7 @@ internal class TransactionsListAdapter(
                 transactionHolderViewState = t
                 disposable?.dispose()
 
-                val amount = t.transaction.amount.toString()
+                val amount = t.transaction.amount.toSat()?.asFormattedString() ?: "0"
                 val date = DateTime.getFormateeemmddhmma().format(t.transaction.date.toDateTime().value)
                 val senderReceiverName = t.messageSenderName
 
