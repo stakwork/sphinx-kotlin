@@ -1,5 +1,7 @@
 package chat.sphinx.wrapper_common.lightning
 
+import java.io.ByteArrayInputStream
+
 @Suppress("NOTHING_TO_INLINE")
 inline fun String.toLightningNodePubKey(): LightningNodePubKey? =
     try {
@@ -16,6 +18,10 @@ value class LightningNodePubKey(val value: String) {
 
     companion object {
         const val REGEX = "[A-F0-9a-f]{66}"
+
+        fun fromByteArray(byteArray: ByteArray): LightningNodePubKey {
+            return LightningNodePubKey(byteArray.decodeToString())
+        }
     }
 
     init {
