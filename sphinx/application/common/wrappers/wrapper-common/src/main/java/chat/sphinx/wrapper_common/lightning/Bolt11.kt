@@ -420,4 +420,20 @@ class Bolt11(
             fun encode(): List<Int5> = value.toList()
         }
     }
+
+    fun getSatsAmount(): Sat? {
+        amount?.let { amount ->
+            return amount.toSat()
+        }
+        return null
+    }
+
+    fun getMemo(): String {
+        if (tags.size > 1) {
+            (tags[1] as TaggedField.Description)?.let { descriptionTag ->
+                return descriptionTag.description
+            }
+        }
+        return "-"
+    }
 }

@@ -133,11 +133,11 @@ internal class DashboardViewModel @Inject constructor(
                     dashboardNavigator.toJoinTribeDetail(TribeJoinLink(code))
                 } else if (code.isValidLightningPaymentRequest) {
                     code.toBolt11()?.let { bolt11 ->
-                        val memo = (bolt11.tags[1] as Bolt11.TaggedField.Description).description
+                        val amount = bolt11.getSatsAmount()
 
-                        if (bolt11.amount != null) {
+                        if (amount != null) {
                             submitSideEffect(
-                                DashboardSideEffect.AlertConfirmPayLightningPaymentRequest(bolt11.amount!!.toSat().value, memo) {
+                                DashboardSideEffect.AlertConfirmPayLightningPaymentRequest(amount.value, bolt11.getMemo()) {
                                     payLightningPaymentRequest(code.toLightningPaymentRequest()!!)
                                 }
                             )
