@@ -94,7 +94,7 @@ internal class PaymentSendViewModel @Inject constructor(
                             if (data.toLightningNodePubKey() != null) {
                                 return Response.Success(Any())
                             }
-                            return Response.Error("QR code is not a Lightning Node Public Key")
+                            return Response.Error(app.getString(R.string.invalid_node_pub_key_qr_code))
                         }
                     },
                     showBottomView = true,
