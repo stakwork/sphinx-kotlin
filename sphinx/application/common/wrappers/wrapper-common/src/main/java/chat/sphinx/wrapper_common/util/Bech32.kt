@@ -2,6 +2,15 @@ package chat.sphinx.wrapper_common.util
 
 typealias Int5 = Byte
 
+@Suppress("NOTHING_TO_INLINE")
+inline fun String.isValidBech32(): Boolean =
+    try {
+        Bech32.decode(this)
+        true
+    } catch (e: Exception) {
+        false
+    }
+
 /**
  * Class to handling Bech32 and Bech32m address formats.
  *

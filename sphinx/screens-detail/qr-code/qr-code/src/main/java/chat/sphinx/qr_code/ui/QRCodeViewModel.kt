@@ -13,6 +13,7 @@ import chat.sphinx.concept_socket_io.SphinxSocketIOMessage
 import chat.sphinx.concept_socket_io.SphinxSocketIOMessageListener
 import chat.sphinx.qr_code.R
 import chat.sphinx.qr_code.navigation.QRCodeNavigator
+import chat.sphinx.wrapper_common.util.isValidBech32
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.qrcode.QRCodeWriter
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -62,7 +63,19 @@ internal class QRCodeViewModel @Inject constructor(
 
         viewModelScope.launch(default) {
             val writer = QRCodeWriter()
-            val bitMatrix = writer.encode(args.qrText, BarcodeFormat.QR_CODE, BITMAP_XY, BITMAP_XY)
+            val qrText = if (args.qrText.isValidBech32()) {
+                // Bech32 strings must be upper cased when show in QR codes
+                // https://github.com/lightningnetwork/lightning-rfc/blob/master/11-payment-encoding.md#requirements
+                args.qrText.uppercase()
+            } else {
+                args.qrText
+            }
+            val bitMatrix = writer.encode(
+                qrText,
+                BarcodeFormat.QR_CODE,
+                BITMAP_XY,
+                BITMAP_XY
+            )
             val width = bitMatrix.width
             val height = bitMatrix.height
             val bitmap: Bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565)
