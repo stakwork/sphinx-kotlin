@@ -370,14 +370,17 @@ internal abstract class MediaPlayerService: Service() {
                         if (count >= 60.0 * speed) {
                             Log.d("PODCAST", "THIS IS A ONE MINUTE NOTIFICATION")
 
-                            repositoryMedia.updateChatMetaData(
+                            repositoryMedia.streamPodcastPayments(
                                 nnData.chatId,
                                 ChatMetaData(
                                     ItemId(nnData.episodeId),
                                     nnData.satsPerMinute,
                                     currentTime,
                                     speed,
-                                )
+                                ),
+                                nnData.podcastId,
+                                nnData.episodeId,
+                                nnData.destinations
                             )
                             count = 0.0
                         } else {

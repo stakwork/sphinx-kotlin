@@ -65,6 +65,7 @@ import chat.sphinx.wrapper_lightning.NodeBalanceAll
 import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message_media.*
 import chat.sphinx.wrapper_message_media.token.MediaHost
+import chat.sphinx.wrapper_podcast.PodcastDestination
 import chat.sphinx.wrapper_rsa.RsaPrivateKey
 import chat.sphinx.wrapper_rsa.RsaPublicKey
 import com.squareup.moshi.Moshi
@@ -433,6 +434,57 @@ abstract class SphinxRepository(
                 ).collect {}
             } catch (e: AssertionError) {}
             // TODO: Network call to update Relay
+        }
+    }
+
+    override fun streamPodcastPayments(
+        chatId: ChatId,
+        metaData: ChatMetaData,
+        podcastId: Long,
+        episodeId: Long,
+        destinations: List<PodcastDestination>
+    ) {
+        applicationScope.launch(io) {
+            val queries = coreDB.getSphinxDatabaseQueries()
+            chatLock.withLock {
+                queries.chatUpdateMetaData(metaData, chatId)
+            }
+
+            val destinationsArray: MutableList<PostStreamSatsDestinationDto> = ArrayList(destinations.size)
+
+            for (destination in destinations) {
+                destinationsArray.add(
+                    PostStreamSatsDestinationDto(destination.address, destination.type, destination.split.toDouble())
+                )
+            }
+
+            val streamSatsText = StreamSatsText(podcastId, episodeId, metaData.timeSeconds.toLong(), metaData.speed)
+
+            try {
+                networkQueryChat.streamSats(
+                    PostStreamSatsDto(
+                        metaData.satsPerMinute.value,
+                        chatId.value,
+                        streamSatsText.toJson(moshi),
+                        true,
+                        destinationsArray
+                    )
+                ).collect { loadResponse ->
+                    @Exhaustive
+                    when (loadResponse) {
+                        is LoadResponse.Loading -> {
+                            LOG.d(TAG, "Streaming payments Loading")
+                        }
+                        is Response.Error -> {
+                            LOG.d(TAG, "Streaming payments Error")
+                        }
+                        is Response.Success -> {
+                            LOG.d(TAG, "Streaming payments Success")
+                        }
+                    }
+                }
+            } catch (e: AssertionError) {
+            }
         }
     }
 
