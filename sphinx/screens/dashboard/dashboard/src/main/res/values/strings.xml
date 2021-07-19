@@ -20,4 +20,15 @@
 
     <string name="alert_confirm_delete_invite_title">Delete Invite</string>
     <string name="alert_confirm_delete_invite_message">Are you sure you want to delete this invite?</string>
+
+    <string name="paste_invoice_of_tribe_link">Paste Invoice or Join Tribe Link</string>
+    <string name="alert_confirm_pay_invoice_title">Send Payment</string>
+    <string name="alert_confirm_pay_invoice_message">Are you sure you want to send scanned lightning payment of %d sat?</string>
+
+    <string name="payment_request_missing_amount">Payment request is missing amount</string>
+    <string name="not_valid_invoice_or_tribe_link">QR code is not a lightning invoice or Join Tribe link</string>
+
+    <string name="attempting_payment_request">Attempting Payment Request</string>
+    <string name="failed_to_pay_request">Failed to pay request</string>
+    <string name="successfully_paid_invoice">Successfully paid invoice</string>
 </resources>

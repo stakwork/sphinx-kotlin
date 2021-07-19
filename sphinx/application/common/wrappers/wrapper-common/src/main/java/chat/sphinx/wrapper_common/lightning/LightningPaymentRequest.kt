@@ -9,16 +9,25 @@ inline fun String.toLightningPaymentRequest(): LightningPaymentRequest? =
     }
 
 inline val String.isValidLightningPaymentRequest: Boolean
-    get() = isNotEmpty() && true
+    get() = isNotEmpty() && toLightningPaymentRequest() != null
 
 @JvmInline
 value class LightningPaymentRequest(val value: String) {
-    companion object {
-        const val BECH_32_CHAR_VALUES = "qpzry9x8gf2tvdw0s3jn54khce6mua7l"
-    }
     init {
         require(value.isNotEmpty()) {
             "LightningPaymentRequest cannot be empty"
+        }
+        require(toBolt11() != null) {
+            "LightningPaymentRequest could not be decoded using the bolt11 specification"
+        }
+    }
+
+    fun toBolt11(): Bolt11? {
+        return try {
+            Bolt11.decode(this)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
         }
     }
 }

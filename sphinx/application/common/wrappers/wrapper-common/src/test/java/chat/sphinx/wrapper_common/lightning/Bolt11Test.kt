@@ -49,4 +49,26 @@ internal class Bolt11Test {
         )
         Assert.assertEquals("fj9srp", bolt11.checksum)
     }
+
+    @Test
+    fun `Decode upper cased payment request`() {
+        val bolt11 = Bolt11.decode(
+            LightningPaymentRequest(
+                "LNBC1PVJLUEZPP5QQQSYQCYQ5RQWZQFQQQSYQCYQ5RQWZQFQQQSYQCYQ5RQWZQFQYPQDPL2PKX2CTNV5SXXMMWWD5KGETJYPEH2URSDAE8G6TWVUS8G6RFWVS8QUN0DFJKXAQ8RKX3YF5TCSYZ3D73GAFNH3CAX9RN449D9P5UXZ9EZHHYPD0ELX87SJLE52X86FUX2YPATGDDC6K63N7ERQZ25LE42C4U4ECKY03YLCQCA784W"
+            )
+        )
+        Assert.assertEquals("lnbc", bolt11.prefix)
+        Assert.assertNull(bolt11.amount)
+        Assert.assertEquals(1496314658,bolt11.timestampSeconds)
+
+        Assert.assertEquals(2, bolt11.tags.size)
+        Assert.assertEquals(Bolt11.TaggedField.PaymentHash.tag, bolt11.tags.first().tag)
+        Assert.assertEquals(Bolt11.TaggedField.Description.tag, bolt11.tags.last().tag)
+        Assert.assertEquals(
+            "38ec6891345e204145be8a3a99de38e98a39d6a569434e1845c8af7205afcfcc7f425fcd1463e93c32881ead0d6e356d467ec8c02553f9aab15e5738b11f127f",
+            bolt11.signature
+        )
+        Assert.assertEquals(0.toByte(), bolt11.recoveryFlag)
+        Assert.assertEquals("ca784w", bolt11.checksum)
+    }
 }

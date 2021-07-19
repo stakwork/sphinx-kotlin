@@ -7,6 +7,15 @@ import io.matthewnelson.crypto_common.extensions.toHex
 import java.io.ByteArrayInputStream
 
 
+@Suppress("NOTHING_TO_INLINE")
+inline fun String.toBolt11(): Bolt11? =
+    try {
+        LightningPaymentRequest(this).toBolt11()
+    } catch (e: IllegalArgumentException) {
+        null
+    }
+
+
 /**
  * Class used to handling bolt11 payment requests
  *
@@ -39,10 +48,10 @@ class Bolt11(
         fun decode(lightningPaymentRequest: LightningPaymentRequest): Bolt11 {
             val paymentRequest = lightningPaymentRequest.value.replaceFirst("lightning:", "")
 
-            if (!paymentRequest.startsWith("ln")) {
+            if (!paymentRequest.lowercase().startsWith("ln")) {
                 throw Exception("Not a valid Lightning Payment Request")
             }
-            val bech32PaymentRequest = Bech32.decode(paymentRequest)
+            val bech32PaymentRequest = Bech32.decode(paymentRequest.lowercase())
 
             val prefix = PREFIXES.find {
                 bech32PaymentRequest.humanReadablePart.startsWith(it)
