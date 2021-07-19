@@ -26,7 +26,6 @@ value class LightningPaymentRequest(val value: String) {
         return try {
             Bolt11.decode(this)
         } catch (e: Exception) {
-            e.printStackTrace()
             null
         }
     }

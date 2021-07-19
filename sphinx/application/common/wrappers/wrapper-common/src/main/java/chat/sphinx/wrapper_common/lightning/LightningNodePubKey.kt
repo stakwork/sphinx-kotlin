@@ -1,7 +1,5 @@
 package chat.sphinx.wrapper_common.lightning
 
-import java.io.ByteArrayInputStream
-
 @Suppress("NOTHING_TO_INLINE")
 inline fun String.toLightningNodePubKey(): LightningNodePubKey? =
     try {
