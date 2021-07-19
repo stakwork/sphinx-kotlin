@@ -28,7 +28,7 @@ class Podcast(
     var speed: Double = 1.0
 
     @Volatile
-    var satsPerMinute: Long = 0
+    var satsPerMinute: Long = value.model.suggested.toLong()
 
     //Duration
     @Volatile

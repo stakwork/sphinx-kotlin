@@ -147,6 +147,11 @@ internal abstract class MediaPlayerService: Service() {
                     repositoryMedia.updateChatMetaData(userAction.chatId, userAction.chatMetaData)
 
                 }
+                is UserAction.SetPaymentsDestinations -> {
+                    podData?.let { nnData ->
+                        nnData.setDestinations(userAction.destinations)
+                    }
+                }
                 is UserAction.ServiceAction.Pause -> {
 
                     pausePlayer(
@@ -203,6 +208,9 @@ internal abstract class MediaPlayerService: Service() {
                             stateDispatcherJob?.cancel()
 
                             currentState = MediaPlayerServiceState.ServiceActive.ServiceLoading
+                            mediaServiceController.dispatchState(currentState)
+
+                            currentState = MediaPlayerServiceState.ServiceActive.ServiceLoaded
                             mediaServiceController.dispatchState(currentState)
 
                             repositoryMedia.updateChatMetaData(
@@ -340,6 +348,7 @@ internal abstract class MediaPlayerService: Service() {
                 mp.prepareAsync()
                 podData = PodcastDataHolder.instantiate(
                     userAction.chatId,
+                    userAction.podcastId,
                     userAction.episodeId,
                     userAction.satPerMinute,
                     mp,

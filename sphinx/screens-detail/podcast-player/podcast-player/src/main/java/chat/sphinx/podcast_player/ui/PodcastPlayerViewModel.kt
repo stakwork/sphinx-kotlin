@@ -66,6 +66,9 @@ internal class PodcastPlayerViewModel @Inject constructor(
                 podcast.endEpisodeUpdate(serviceState.episodeId, ::retrieveEpisodeDuration)
                 viewStateContainer.updateViewState(PodcastPlayerViewState.MediaStateUpdate(podcast, serviceState))
             }
+            is MediaPlayerServiceState.ServiceActive.ServiceLoaded -> {
+                setPaymentsDestinations()
+            }
             is MediaPlayerServiceState.ServiceActive.ServiceLoading -> {
                 viewStateContainer.updateViewState(PodcastPlayerViewState.ServiceLoading)
             }
@@ -114,9 +117,10 @@ internal class PodcastPlayerViewModel @Inject constructor(
             mediaPlayerServiceController.submitAction(
                 UserAction.ServiceAction.Play(
                     args.chatId,
+                    podcast.id,
                     episode.id,
                     episode.enclosureUrl,
-                    Sat(0),
+                    Sat(podcast.satsPerMinute),
                     podcast.speed,
                     startTime,
                 )
@@ -168,6 +172,19 @@ internal class PodcastPlayerViewModel @Inject constructor(
                     podcast.getMetaData()
                 )
             )
+        }
+    }
+
+    private fun setPaymentsDestinations() {
+        podcast?.value?.destinations?.let { destinations ->
+            viewModelScope.launch(mainImmediate) {
+                mediaPlayerServiceController.submitAction(
+                    UserAction.SetPaymentsDestinations(
+                        args.chatId,
+                        destinations
+                    )
+                )
+            }
         }
     }
 

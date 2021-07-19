@@ -7,4 +7,5 @@ dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
 
     api project(path: ':sphinx:application:common:wrappers:wrapper-chat')
+    api project(path: ':sphinx:application:common:wrappers:wrapper-podcast')
 }

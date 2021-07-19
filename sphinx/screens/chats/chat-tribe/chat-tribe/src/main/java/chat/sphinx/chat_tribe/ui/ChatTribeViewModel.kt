@@ -191,6 +191,9 @@ internal class ChatTribeViewModel @Inject constructor(
                     podcast.endEpisodeUpdate(serviceState.episodeId, ::retrieveEpisodeDuration)
                     podcastViewStateContainer.updateViewState(PodcastViewState.MediaStateUpdate(podcast))
                 }
+                is MediaPlayerServiceState.ServiceActive.ServiceLoaded -> {
+                    setPaymentsDestinations()
+                }
                 is MediaPlayerServiceState.ServiceActive.ServiceLoading -> {
                     podcastViewStateContainer.updateViewState(PodcastViewState.ServiceLoading)
                 }
@@ -219,6 +222,8 @@ internal class ChatTribeViewModel @Inject constructor(
                 chatRepository.getChatById(chatId).firstOrNull()?.let { chat ->
                     chat.metaData?.let { metaData ->
                         podcast?.setMetaData(metaData)
+                    } ?: run {
+
                     }
                 }
             }
@@ -257,9 +262,10 @@ internal class ChatTribeViewModel @Inject constructor(
                 mediaPlayerServiceController.submitAction(
                     UserAction.ServiceAction.Play(
                         chatId,
+                        podcast.id,
                         episode.id,
                         episode.enclosureUrl,
-                        Sat(0),
+                        Sat(podcast.satsPerMinute),
                         podcast.speed,
                         startTime,
                     )
@@ -294,6 +300,18 @@ internal class ChatTribeViewModel @Inject constructor(
         }
     }
 
+    private fun setPaymentsDestinations() {
+        podcast?.value?.destinations?.let { destinations ->
+            viewModelScope.launch(mainImmediate) {
+                mediaPlayerServiceController.submitAction(
+                    UserAction.SetPaymentsDestinations(
+                        args.chatId,
+                        destinations
+                    )
+                )
+            }
+        }
+    }
 
     fun exitTribeGetUserConfirmation() {
         viewModelScope.launch(mainImmediate) {

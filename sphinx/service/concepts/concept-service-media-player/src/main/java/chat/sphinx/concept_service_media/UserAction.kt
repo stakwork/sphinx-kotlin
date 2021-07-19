@@ -3,6 +3,8 @@ package chat.sphinx.concept_service_media
 import chat.sphinx.wrapper_chat.ChatMetaData
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.lightning.Sat
+import chat.sphinx.wrapper_podcast.Podcast
+import chat.sphinx.wrapper_podcast.PodcastDestination
 
 // TODO: info - episode id, episode url, start time, speed, general info about episode, chatId
 sealed class UserAction(val chatId: ChatId) {
@@ -11,11 +13,11 @@ sealed class UserAction(val chatId: ChatId) {
 
         class Play(
             chatId: ChatId,
+            val podcastId: Long,
             val episodeId: Long,
             val episodeUrl: String,
             val satPerMinute: Sat,
             val speed: Double,
-//            val podcastInfo: PodcastDto,
             val startTime: Int,
         ): ServiceAction(chatId)
 
@@ -39,5 +41,10 @@ sealed class UserAction(val chatId: ChatId) {
     class AdjustSpeed(
         chatId: ChatId,
         val chatMetaData: ChatMetaData,
+    ): UserAction(chatId)
+
+    class SetPaymentsDestinations(
+        chatId: ChatId,
+        val destinations: List<PodcastDestination>
     ): UserAction(chatId)
 }
