@@ -10,6 +10,5 @@
     <string name="error_processing_payment">There was an error processing payment, please try again later.</string>
     <string name="payment_sent">Payment of %d sat sent to %s</string>
 
-    <string name="alert_confirm_payment_send_title">Send Payment</string>
-    <string name="alert_confirm_payment_send_message">Are you sure you want to send a payment of %d sat to %s?</string>
+    <string name="invalid_node_pub_key_qr_code">QR code is not a Lightning Node Public Key</string>
 </resources>
