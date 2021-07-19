@@ -16,5 +16,4 @@ data class PodcastDto(
     fun isValidPodcast() : Boolean {
         return episodes.isNotEmpty() && title.isNotEmpty()
     }
-
 }

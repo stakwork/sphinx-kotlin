@@ -39,6 +39,12 @@ abstract class NetworkQueryChat {
         relayData: Pair<AuthorizationToken, RelayUrl>? = null
     ): Flow<LoadResponse<ChatDto, ResponseError>>
 
+//    abstract fun streamSats(
+//        chatId: ChatId,
+//        putChatDto: PutChatDto,
+//        relayData: Pair<AuthorizationToken, RelayUrl>? = null
+//    ): Flow<LoadResponse<Any?, ResponseError>>
+
 //    app.put('/chat/:id', chats.addGroupMembers)
 //    app.put('/kick/:chat_id/:contact_id', chats.kickChatMember)
 //    app.put('/member/:contactId/:status/:messageId', chatTribes.approveOrRejectMember)

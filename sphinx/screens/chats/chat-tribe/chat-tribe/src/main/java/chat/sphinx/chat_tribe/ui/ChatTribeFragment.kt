@@ -15,7 +15,7 @@ import chat.sphinx.chat_tribe.R
 import chat.sphinx.chat_tribe.databinding.FragmentChatTribeBinding
 import chat.sphinx.chat_tribe.databinding.LayoutPodcastPlayerFooterBinding
 import chat.sphinx.concept_image_loader.ImageLoader
-import chat.sphinx.podcast_player.objects.Podcast
+import chat.sphinx.podcast_player.objects.ParcelablePodcast
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.concept_views.viewstate.collect
@@ -86,7 +86,7 @@ internal class ChatTribeFragment: ChatFragment<
         }
     }
 
-    private fun configurePodcastPlayer(podcast: Podcast) {
+    private fun configurePodcastPlayer(podcast: ParcelablePodcast) {
         podcastPlayerBinding.apply {
             if (root.isGone) {
                 scrollToBottom(callback = {
@@ -103,7 +103,7 @@ internal class ChatTribeFragment: ChatFragment<
         }
     }
 
-    private fun setProgressBar(podcast: Podcast) {
+    private fun setProgressBar(podcast: ParcelablePodcast) {
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             val progress: Int = withContext(viewModel.io) {
                 try {
@@ -136,7 +136,7 @@ internal class ChatTribeFragment: ChatFragment<
         }
     }
 
-    private fun addPodcastOnClickListeners(podcast: Podcast) {
+    private fun addPodcastOnClickListeners(podcast: ParcelablePodcast) {
         podcastPlayerBinding.apply {
             textViewEpisodeTitle.setOnClickListener {
                 viewModel.goToPodcastPlayerScreen()

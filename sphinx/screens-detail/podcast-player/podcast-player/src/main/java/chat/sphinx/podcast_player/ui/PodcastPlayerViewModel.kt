@@ -7,8 +7,8 @@ import chat.sphinx.concept_service_media.MediaPlayerServiceController
 import chat.sphinx.concept_service_media.MediaPlayerServiceState
 import chat.sphinx.concept_service_media.UserAction
 import chat.sphinx.podcast_player.navigation.PodcastPlayerNavigator
-import chat.sphinx.podcast_player.objects.Podcast
-import chat.sphinx.podcast_player.objects.PodcastEpisode
+import chat.sphinx.podcast_player.objects.ParcelablePodcast
+import chat.sphinx.podcast_player.objects.ParcelablePodcastEpisode
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.lightning.Sat
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -36,7 +36,7 @@ internal class PodcastPlayerViewModel @Inject constructor(
 
     private val args: PodcastPlayerFragmentArgs by savedStateHandle.navArgs()
 
-    val podcast: Podcast = args.argPodcast
+    val podcast: ParcelablePodcast = args.argPodcast
 
     override fun mediaServiceState(serviceState: MediaPlayerServiceState) {
         if (serviceState is MediaPlayerServiceState.ServiceActive.MediaState) {
@@ -86,7 +86,7 @@ internal class PodcastPlayerViewModel @Inject constructor(
         mediaPlayerServiceController.removeListener(this)
     }
 
-    fun playEpisodeFromList(episode: PodcastEpisode, startTime: Int) {
+    fun playEpisodeFromList(episode: ParcelablePodcastEpisode, startTime: Int) {
         viewModelScope.launch(mainImmediate) {
             viewStateContainer.updateViewState(PodcastPlayerViewState.LoadingEpisode(episode))
 
@@ -96,18 +96,18 @@ internal class PodcastPlayerViewModel @Inject constructor(
         }
     }
 
-    fun playEpisode(episode: PodcastEpisode, startTime: Int) {
+    fun playEpisode(episode: ParcelablePodcastEpisode, startTime: Int) {
         viewModelScope.launch(mainImmediate) {
-            mediaPlayerServiceController.submitAction(
-                UserAction.ServiceAction.Play(
-                    args.chatId,
-                    episode.id,
-                    episode.enclosureUrl,
-                    Sat(0),
-                    podcast.speed,
-                    startTime,
-                )
-            )
+//            mediaPlayerServiceController.submitAction(
+//                UserAction.ServiceAction.Play(
+//                    args.chatId,
+//                    episode.id,
+//                    episode.enclosureUrl,
+//                    Sat(0),
+//                    podcast.speed,
+//                    startTime,
+//                )
+//            )
 
             withContext(io) {
                 podcast.didStartPlayingEpisode(episode, startTime)
@@ -117,7 +117,7 @@ internal class PodcastPlayerViewModel @Inject constructor(
         }
     }
 
-    fun pauseEpisode(episode: PodcastEpisode) {
+    fun pauseEpisode(episode: ParcelablePodcastEpisode) {
         viewModelScope.launch(mainImmediate) {
             podcast.didPausePlayingEpisode(episode)
 

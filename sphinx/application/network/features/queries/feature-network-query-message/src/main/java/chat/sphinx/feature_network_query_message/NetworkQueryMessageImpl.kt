@@ -125,8 +125,8 @@ class NetworkQueryMessageImpl(
     }
 
     override fun readMessages(
-    chatId: ChatId,
-    relayData: Pair<AuthorizationToken, RelayUrl>?
+        chatId: ChatId,
+        relayData: Pair<AuthorizationToken, RelayUrl>?
     ): Flow<LoadResponse<Any?, ResponseError>> =
         networkRelayCall.relayPost(
             responseJsonClass = ReadMessagesRelayResponse::class.java,

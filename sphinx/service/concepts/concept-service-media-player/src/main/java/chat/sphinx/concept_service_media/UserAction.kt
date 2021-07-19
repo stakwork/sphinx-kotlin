@@ -15,7 +15,7 @@ sealed class UserAction(val chatId: ChatId) {
             val episodeUrl: String,
             val satPerMinute: Sat,
             val speed: Double,
-            // TODO: General episode info?
+//            val podcastInfo: PodcastDto,
             val startTime: Int,
         ): ServiceAction(chatId)
 

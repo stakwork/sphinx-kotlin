@@ -9,6 +9,7 @@ import android.net.wifi.WifiManager
 import android.os.Binder
 import android.os.IBinder
 import android.os.PowerManager
+import android.util.Log
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.concept_service_media.MediaPlayerServiceState
@@ -358,6 +359,8 @@ internal abstract class MediaPlayerService: Service() {
                         val currentTime = nnData.mediaPlayer.currentPosition
 
                         if (count >= 60.0 * speed) {
+                            Log.d("PODCAST", "THIS IS A ONE MINUTE NOTIFICATION")
+
                             repositoryMedia.updateChatMetaData(
                                 nnData.chatId,
                                 ChatMetaData(

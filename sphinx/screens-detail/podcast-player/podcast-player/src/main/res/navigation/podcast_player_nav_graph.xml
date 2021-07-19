@@ -14,7 +14,7 @@
             app:argType="long" />
         <argument
             android:name="argPodcast"
-            app:argType="chat.sphinx.podcast_player.objects.Podcast" />
+            app:argType="chat.sphinx.podcast_player.objects.ParcelablePodcast" />
     </fragment>
 
 </navigation>

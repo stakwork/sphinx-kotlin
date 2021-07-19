@@ -20,8 +20,8 @@ import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.podcast_player.R
 import chat.sphinx.podcast_player.databinding.FragmentPodcastPlayerBinding
-import chat.sphinx.podcast_player.objects.Podcast
-import chat.sphinx.podcast_player.objects.PodcastEpisode
+import chat.sphinx.podcast_player.objects.ParcelablePodcast
+import chat.sphinx.podcast_player.objects.ParcelablePodcastEpisode
 import chat.sphinx.podcast_player.ui.adapter.PodcastEpisodesFooterAdapter
 import chat.sphinx.podcast_player.ui.adapter.PodcastEpisodesListAdapter
 import chat.sphinx.wrapper_common.util.getTimeString
@@ -94,7 +94,7 @@ internal class PodcastPlayerFragment : BaseFragment<
     }
 
     private var dragging: Boolean = false
-    private fun addPodcastOnClickListeners(podcast: Podcast) {
+    private fun addPodcastOnClickListeners(podcast: ParcelablePodcast) {
         binding.apply {
             includeLayoutEpisodeSliderControl.apply {
                 seekBarCurrentEpisodeProgress.setOnSeekBarChangeListener(
@@ -193,7 +193,7 @@ internal class PodcastPlayerFragment : BaseFragment<
         }
     }
 
-    private suspend fun showPodcastInfo(podcast: Podcast) {
+    private suspend fun showPodcastInfo(podcast: ParcelablePodcast) {
         binding.apply {
             textViewEpisodeTitleLabel.text = podcast.getCurrentEpisode().title
 
@@ -232,7 +232,7 @@ internal class PodcastPlayerFragment : BaseFragment<
         }
     }
 
-    private fun loadingEpisode(episode: PodcastEpisode) {
+    private fun loadingEpisode(episode: ParcelablePodcastEpisode) {
         binding.apply {
             textViewEpisodeTitleLabel.text = episode.title
 
@@ -247,7 +247,7 @@ internal class PodcastPlayerFragment : BaseFragment<
         }
     }
 
-    private suspend fun seekTo(podcast: Podcast, progress: Int) {
+    private suspend fun seekTo(podcast: ParcelablePodcast, progress: Int) {
         val duration = withContext(viewModel.io) {
             podcast.getCurrentEpisodeDuration()
         }
@@ -255,13 +255,13 @@ internal class PodcastPlayerFragment : BaseFragment<
         viewModel.seekTo(seekTime)
     }
 
-    private fun updateViewAfterSeek(podcast: Podcast) {
+    private fun updateViewAfterSeek(podcast: ParcelablePodcast) {
         lifecycleScope.launch(viewModel.mainImmediate) {
             setTimeLabelsAndProgressBar(podcast)
         }
     }
 
-    private suspend fun setTimeLabelsAndProgressBar(podcast: Podcast) {
+    private suspend fun setTimeLabelsAndProgressBar(podcast: ParcelablePodcast) {
         var currentTime = podcast.currentTime.toLong()
 
         val duration = withContext(viewModel.io) {

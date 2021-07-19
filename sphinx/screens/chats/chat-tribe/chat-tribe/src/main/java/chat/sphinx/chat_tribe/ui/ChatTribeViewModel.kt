@@ -24,9 +24,9 @@ import chat.sphinx.kotlin_response.*
 import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.logger.d
 import chat.sphinx.logger.e
-import chat.sphinx.podcast_player.objects.Podcast
-import chat.sphinx.podcast_player.objects.PodcastEpisode
-import chat.sphinx.podcast_player.objects.toPodcast
+import chat.sphinx.podcast_player.objects.ParcelablePodcast
+import chat.sphinx.podcast_player.objects.ParcelablePodcastEpisode
+import chat.sphinx.podcast_player.objects.toParcelablePodcast
 import chat.sphinx.resources.getRandomColor
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.ChatName
@@ -98,7 +98,7 @@ internal class ChatTribeViewModel @Inject constructor(
         replay = 1,
     )
 
-    var podcast: Podcast? = null
+    var podcast: ParcelablePodcast? = null
 
     override val headerInitialHolderSharedFlow: SharedFlow<InitialHolderViewState> = flow {
         chatSharedFlow.collect { chat ->
@@ -207,20 +207,12 @@ internal class ChatTribeViewModel @Inject constructor(
         mediaPlayerServiceController.removeListener(this)
     }
 
-    suspend fun loadTribeAndPodcastData(): Podcast? {
+    suspend fun loadTribeAndPodcastData(): ParcelablePodcast? {
         chatRepository.getChatById(chatId).firstOrNull()?.let { chat ->
             chatRepository.updateTribeInfo(chat)?.let { podcastDto ->
-                podcast = podcastDto.toPodcast()
+                podcast = podcastDto.toParcelablePodcast()
 
                 chatRepository.getChatById(chatId).firstOrNull()?.let { chat ->
-//                    val pricePerMessage = chat.pricePerMessage?.value ?: 0
-//                    val escrowAmount = chat.escrowAmount?.value ?: 0
-//
-//                    submitSideEffect(
-//                        ChatSideEffect.Notify(
-//                            "Price per message: $pricePerMessage\n Amount to Stake: $escrowAmount"
-//                        )
-//                    )
 
                     chat.metaData?.let { metaData ->
                         podcast?.setMetaData(metaData)
@@ -252,28 +244,28 @@ internal class ChatTribeViewModel @Inject constructor(
         }
     }
 
-    private fun playEpisode(episode: PodcastEpisode, startTime: Int) {
+    private fun playEpisode(episode: ParcelablePodcastEpisode, startTime: Int) {
         viewModelScope.launch(mainImmediate) {
             podcast?.let { podcast ->
                 withContext(io) {
                     podcast.didStartPlayingEpisode(episode, startTime)
                 }
 
-                mediaPlayerServiceController.submitAction(
-                    UserAction.ServiceAction.Play(
-                        chatId,
-                        episode.id,
-                        episode.enclosureUrl,
-                        Sat(0),
-                        podcast.speed,
-                        startTime,
-                    )
-                )
+//                mediaPlayerServiceController.submitAction(
+//                    UserAction.ServiceAction.Play(
+//                        chatId,
+//                        episode.id,
+//                        episode.enclosureUrl,
+//                        Sat(0),
+//                        podcast.speed,
+//                        startTime,
+//                    )
+//                )
             }
         }
     }
 
-    private fun pauseEpisode(episode: PodcastEpisode) {
+    private fun pauseEpisode(episode: ParcelablePodcastEpisode) {
         viewModelScope.launch(mainImmediate) {
             podcast?.let { podcast ->
                 podcast.didPausePlayingEpisode(episode)
