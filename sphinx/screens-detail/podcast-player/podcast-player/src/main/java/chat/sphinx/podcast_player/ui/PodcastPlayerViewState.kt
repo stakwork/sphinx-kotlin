@@ -3,6 +3,8 @@ package chat.sphinx.podcast_player.ui
 import chat.sphinx.concept_service_media.MediaPlayerServiceState
 import chat.sphinx.podcast_player.objects.ParcelablePodcast
 import chat.sphinx.podcast_player.objects.ParcelablePodcastEpisode
+import chat.sphinx.wrapper_podcast.Podcast
+import chat.sphinx.wrapper_podcast.PodcastEpisode
 import io.matthewnelson.concept_views.viewstate.ViewState
 
 internal sealed class PodcastPlayerViewState: ViewState<PodcastPlayerViewState>() {
@@ -12,19 +14,19 @@ internal sealed class PodcastPlayerViewState: ViewState<PodcastPlayerViewState>(
     object ServiceInactive: PodcastPlayerViewState()
 
     class PodcastLoaded(
-        val podcast: ParcelablePodcast
+        val podcast: Podcast
     ): PodcastPlayerViewState()
 
     class LoadingEpisode(
-        val episode: ParcelablePodcastEpisode
+        val episode: PodcastEpisode
     ): PodcastPlayerViewState()
 
     class EpisodePlayed(
-        val podcast: ParcelablePodcast
+        val podcast: Podcast
     ): PodcastPlayerViewState()
 
     class MediaStateUpdate(
-        val podcast: ParcelablePodcast,
+        val podcast: Podcast,
         val state: MediaPlayerServiceState.ServiceActive.MediaState
     ): PodcastPlayerViewState()
 }

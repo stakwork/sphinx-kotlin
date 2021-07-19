@@ -10,10 +10,9 @@ data class ParcelablePodcastDestination(
     val split: Long,
     val address: String,
     val type: String,
-): Parcelable {
-}
+): Parcelable
 
-fun PodcastDestinationDto.toParcelablePodcastDestination(): ParcelablePodcastDestination {
+fun PodcastDestination.toParcelablePodcastDestination(): ParcelablePodcastDestination {
     return ParcelablePodcastDestination(this.split, this.address, this.type)
 }
 

@@ -15,16 +15,9 @@ data class ParcelablePodcastEpisode(
     val image: String,
     val link: String,
     val enclosureUrl: String,
-): Parcelable {
+): Parcelable
 
-    @IgnoredOnParcel
-    var playing: Boolean = false
-
-    @IgnoredOnParcel
-    var downloaded: Boolean = false
-}
-
-fun PodcastEpisodeDto.toParcelablePodcastEpisode(): ParcelablePodcastEpisode {
+fun PodcastEpisode.toParcelablePodcastEpisode(): ParcelablePodcastEpisode {
     return ParcelablePodcastEpisode(this.id, this.title ,this.description, this.image, this.link, this.enclosureUrl)
 }
 

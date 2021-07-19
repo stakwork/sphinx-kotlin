@@ -14,11 +14,10 @@ import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.concept_service_media.MediaPlayerServiceState
 import chat.sphinx.podcast_player.R
 import chat.sphinx.podcast_player.databinding.LayoutEpisodeListItemHolderBinding
-import chat.sphinx.podcast_player.objects.ParcelablePodcast
-import chat.sphinx.podcast_player.objects.ParcelablePodcastEpisode
 import chat.sphinx.podcast_player.ui.PodcastPlayerViewModel
 import chat.sphinx.podcast_player.ui.PodcastPlayerViewState
 import chat.sphinx.wrapper_chat.*
+import chat.sphinx.wrapper_podcast.PodcastEpisode
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_viewmodel.collectViewState
 import io.matthewnelson.android_feature_viewmodel.currentViewState
@@ -39,8 +38,8 @@ internal class PodcastEpisodesListAdapter(
 ): RecyclerView.Adapter<PodcastEpisodesListAdapter.EpisodeViewHolder>(), DefaultLifecycleObserver {
 
     private inner class Diff(
-        private val oldList: List<ParcelablePodcastEpisode>,
-        private val newList: List<ParcelablePodcastEpisode>,
+        private val oldList: List<PodcastEpisode>,
+        private val newList: List<PodcastEpisode>,
     ): DiffUtil.Callback() {
 
         override fun getOldListSize(): Int {
@@ -92,7 +91,7 @@ internal class PodcastEpisodesListAdapter(
 
     }
 
-    private val podcastEpisodes = ArrayList<ParcelablePodcastEpisode>()
+    private val podcastEpisodes = ArrayList<PodcastEpisode>()
 
     override fun onStart(owner: LifecycleOwner) {
         super.onStart(owner)
@@ -100,7 +99,7 @@ internal class PodcastEpisodesListAdapter(
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.collectViewState { viewState ->
 
-                var episodes = ArrayList<ParcelablePodcastEpisode>()
+                var episodes = ArrayList<PodcastEpisode>()
 
                 if (viewState is PodcastPlayerViewState.PodcastLoaded) {
                     episodes = viewState.podcast.getEpisodesListCopy()
@@ -181,7 +180,7 @@ internal class PodcastEpisodesListAdapter(
     ): RecyclerView.ViewHolder(binding.root), DefaultLifecycleObserver {
 
         private var disposable: Disposable? = null
-        private var episode: ParcelablePodcastEpisode? = null
+        private var episode: PodcastEpisode? = null
 
         init {
             binding.layoutConstraintEpisodeListItemHolder.setOnClickListener {
@@ -193,7 +192,7 @@ internal class PodcastEpisodesListAdapter(
 
         fun bind(position: Int) {
             binding.apply {
-                val podcastEpisode: ParcelablePodcastEpisode = podcastEpisodes.getOrNull(position) ?: let {
+                val podcastEpisode: PodcastEpisode = podcastEpisodes.getOrNull(position) ?: let {
                     episode = null
                     return
                 }

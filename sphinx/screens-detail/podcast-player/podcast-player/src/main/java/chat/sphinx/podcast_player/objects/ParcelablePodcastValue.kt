@@ -11,10 +11,9 @@ import kotlinx.parcelize.Parcelize
 data class ParcelablePodcastValue(
     val model: ParcelablePodcastModel,
     val destinations: List<ParcelablePodcastDestination>,
-): Parcelable {
-}
+): Parcelable
 
-fun PodcastValueDto.toParcelablePodcastValue(): ParcelablePodcastValue {
+fun PodcastValue.toParcelablePodcastValue(): ParcelablePodcastValue {
     val podcastDestinations = mutableListOf<ParcelablePodcastDestination>()
 
     for (destination in this.destinations) {

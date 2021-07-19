@@ -1,6 +1,7 @@
 package chat.sphinx.chat_tribe.ui
 
 import android.app.Application
+import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.camera_view_model_coordinator.request.CameraRequest
@@ -10,6 +11,7 @@ import chat.sphinx.chat_common.ui.ChatViewModel
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
 import chat.sphinx.chat_tribe.navigation.TribeChatNavigator
 import chat.sphinx.concept_meme_server.MemeServerTokenHandler
+import chat.sphinx.concept_network_query_chat.model.toPodcast
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_lightning.model.route.isRouteAvailable
 import chat.sphinx.concept_repository_chat.ChatRepository
@@ -24,9 +26,9 @@ import chat.sphinx.kotlin_response.*
 import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.logger.d
 import chat.sphinx.logger.e
-import chat.sphinx.podcast_player.objects.ParcelablePodcast
-import chat.sphinx.podcast_player.objects.ParcelablePodcastEpisode
 import chat.sphinx.podcast_player.objects.toParcelablePodcast
+import chat.sphinx.podcast_player.objects.toPodcast
+import chat.sphinx.podcast_player.ui.getMediaDuration
 import chat.sphinx.resources.getRandomColor
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.ChatName
@@ -35,6 +37,8 @@ import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.util.getInitials
 import chat.sphinx.wrapper_message.Message
+import chat.sphinx.wrapper_podcast.Podcast
+import chat.sphinx.wrapper_podcast.PodcastEpisode
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
@@ -98,7 +102,7 @@ internal class ChatTribeViewModel @Inject constructor(
         replay = 1,
     )
 
-    var podcast: ParcelablePodcast? = null
+    var podcast: Podcast? = null
 
     override val headerInitialHolderSharedFlow: SharedFlow<InitialHolderViewState> = flow {
         chatSharedFlow.collect { chat ->
@@ -184,7 +188,7 @@ internal class ChatTribeViewModel @Inject constructor(
                     podcastViewStateContainer.updateViewState(PodcastViewState.MediaStateUpdate(podcast))
                 }
                 is MediaPlayerServiceState.ServiceActive.MediaState.Ended -> {
-                    podcast.endEpisodeUpdate(serviceState.episodeId)
+                    podcast.endEpisodeUpdate(serviceState.episodeId, ::retrieveEpisodeDuration)
                     podcastViewStateContainer.updateViewState(PodcastViewState.MediaStateUpdate(podcast))
                 }
                 is MediaPlayerServiceState.ServiceActive.ServiceLoading -> {
@@ -207,13 +211,12 @@ internal class ChatTribeViewModel @Inject constructor(
         mediaPlayerServiceController.removeListener(this)
     }
 
-    suspend fun loadTribeAndPodcastData(): ParcelablePodcast? {
+    suspend fun loadTribeAndPodcastData(): Podcast? {
         chatRepository.getChatById(chatId).firstOrNull()?.let { chat ->
             chatRepository.updateTribeInfo(chat)?.let { podcastDto ->
-                podcast = podcastDto.toParcelablePodcast()
+                podcast = podcastDto.toPodcast()
 
                 chatRepository.getChatById(chatId).firstOrNull()?.let { chat ->
-
                     chat.metaData?.let { metaData ->
                         podcast?.setMetaData(metaData)
                     }
@@ -227,7 +230,7 @@ internal class ChatTribeViewModel @Inject constructor(
     fun goToPodcastPlayerScreen() {
         podcast?.let { podcast ->
             viewModelScope.launch(mainImmediate) {
-                (chatNavigator as TribeChatNavigator).toPodcastPlayerScreen(chatId, podcast)
+                (chatNavigator as TribeChatNavigator).toPodcastPlayerScreen(chatId, podcast.toParcelablePodcast())
             }
         }
     }
@@ -244,28 +247,28 @@ internal class ChatTribeViewModel @Inject constructor(
         }
     }
 
-    private fun playEpisode(episode: ParcelablePodcastEpisode, startTime: Int) {
+    private fun playEpisode(episode: PodcastEpisode, startTime: Int) {
         viewModelScope.launch(mainImmediate) {
             podcast?.let { podcast ->
                 withContext(io) {
-                    podcast.didStartPlayingEpisode(episode, startTime)
+                    podcast.didStartPlayingEpisode(episode, startTime, ::retrieveEpisodeDuration)
                 }
 
-//                mediaPlayerServiceController.submitAction(
-//                    UserAction.ServiceAction.Play(
-//                        chatId,
-//                        episode.id,
-//                        episode.enclosureUrl,
-//                        Sat(0),
-//                        podcast.speed,
-//                        startTime,
-//                    )
-//                )
+                mediaPlayerServiceController.submitAction(
+                    UserAction.ServiceAction.Play(
+                        chatId,
+                        episode.id,
+                        episode.enclosureUrl,
+                        Sat(0),
+                        podcast.speed,
+                        startTime,
+                    )
+                )
             }
         }
     }
 
-    private fun pauseEpisode(episode: ParcelablePodcastEpisode) {
+    private fun pauseEpisode(episode: PodcastEpisode) {
         viewModelScope.launch(mainImmediate) {
             podcast?.let { podcast ->
                 podcast.didPausePlayingEpisode(episode)
@@ -344,5 +347,10 @@ internal class ChatTribeViewModel @Inject constructor(
             } catch (e: Exception) {}
 
         }
+    }
+
+    fun retrieveEpisodeDuration(episodeUrl: String): Long {
+        val uri = Uri.parse(episodeUrl)
+        return uri.getMediaDuration()
     }
 }

@@ -9,10 +9,9 @@ import kotlinx.parcelize.Parcelize
 data class ParcelablePodcastModel(
     val type: String,
     val suggested: Double,
-): Parcelable {
-}
+): Parcelable
 
-fun PodcastModelDto.toParcelablePodcastModel(): ParcelablePodcastModel {
+fun PodcastModel.toParcelablePodcastModel(): ParcelablePodcastModel {
     return ParcelablePodcastModel(this.type, this.suggested)
 }
 
