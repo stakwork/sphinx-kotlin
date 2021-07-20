@@ -3,6 +3,7 @@ package chat.sphinx.activitymain.navigation.navigators.primary
 import chat.sphinx.activitymain.navigation.drivers.DetailNavigationDriver
 import chat.sphinx.activitymain.navigation.drivers.PrimaryNavigationDriver
 import chat.sphinx.chat_group.navigation.GroupChatNavigator
+import chat.sphinx.contact_detail.navigation.ToContactDetailScreen
 import chat.sphinx.payment_send.navigation.ToPaymentSendDetail
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
@@ -17,4 +18,7 @@ internal class GroupChatNavigatorImpl @Inject constructor(
         detailDriver.submitNavigationRequest(ToPaymentSendDetail(contactId, chatId))
     }
 
+    override suspend fun toChatDetail(chatId: ChatId, contactId: ContactId?) {
+        detailDriver.submitNavigationRequest(ToContactDetailScreen(chatId, contactId))
+    }
 }

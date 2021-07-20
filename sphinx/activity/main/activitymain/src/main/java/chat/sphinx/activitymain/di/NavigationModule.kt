@@ -12,6 +12,7 @@ import chat.sphinx.camera.navigation.CameraNavigator
 import chat.sphinx.chat_contact.navigation.ContactChatNavigator
 import chat.sphinx.chat_group.navigation.GroupChatNavigator
 import chat.sphinx.chat_tribe.navigation.TribeChatNavigator
+import chat.sphinx.contact_detail.navigation.ContactDetailNavigator
 import chat.sphinx.create_tribe.navigation.CreateTribeNavigator
 import chat.sphinx.dashboard.navigation.DashboardBottomNavBarNavigator
 import chat.sphinx.dashboard.navigation.DashboardNavDrawerNavigator
@@ -25,15 +26,16 @@ import chat.sphinx.new_contact.navigation.NewContactNavigator
 import chat.sphinx.onboard.navigation.OnBoardNavigator
 import chat.sphinx.onboard_name.navigation.OnBoardNameNavigator
 import chat.sphinx.onboard_ready.navigation.OnBoardReadyNavigator
-import chat.sphinx.profile.navigation.ProfileNavigator
 import chat.sphinx.payment_receive.navigation.PaymentReceiveNavigator
 import chat.sphinx.payment_send.navigation.PaymentSendNavigator
 import chat.sphinx.podcast_player.navigation.PodcastPlayerNavigator
+import chat.sphinx.profile.navigation.ProfileNavigator
 import chat.sphinx.qr_code.navigation.QRCodeNavigator
 import chat.sphinx.scanner.navigation.ScannerNavigator
 import chat.sphinx.splash.navigation.SplashNavigator
 import chat.sphinx.support_ticket.navigation.SupportTicketNavigator
 import chat.sphinx.transactions.navigation.TransactionsNavigator
+import chat.sphinx.tribe_detail.navigation.TribeDetailNavigator
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -239,5 +241,17 @@ internal object NavigationModule {
         inviteFriendNavigatorImpl: InviteFriendNavigatorImpl
     ): InviteFriendNavigator =
         inviteFriendNavigatorImpl
+
+    @Provides
+    fun provideTribeDetailNavigator(
+        tribeDetailNavigatorImpl: TribeDetailNavigatorImpl
+    ): TribeDetailNavigator =
+        tribeDetailNavigatorImpl
+
+    @Provides
+    fun provideContactDetailNavigator(
+        contactDetailNavigatorImpl: ContactDetailNavigatorImpl
+    ): ContactDetailNavigator =
+        contactDetailNavigatorImpl
 
 }

@@ -419,4 +419,10 @@ internal class ChatTribeViewModel @Inject constructor(
         val uri = Uri.parse(episodeUrl)
         return uri.getMediaDuration()
     }
+    
+    override fun goToChatDetailScreen() {
+        viewModelScope.launch(mainImmediate) {
+            (chatNavigator as TribeChatNavigator).toTribeDetailScreen(chatId, podcast)
+        }
+    }
 }
