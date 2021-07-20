@@ -473,8 +473,6 @@ abstract class SphinxRepository(
                 destinationsArray
             )
 
-            LOG.d(TAG, "Streaming payment")
-
             try {
                 networkQueryChat.streamSats(
                     postStreamSatsDto
