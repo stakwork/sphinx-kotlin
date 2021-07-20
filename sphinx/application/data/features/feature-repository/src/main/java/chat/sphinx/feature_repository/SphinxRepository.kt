@@ -473,23 +473,12 @@ abstract class SphinxRepository(
                 destinationsArray
             )
 
+            LOG.d(TAG, "Streaming payment")
+
             try {
                 networkQueryChat.streamSats(
                     postStreamSatsDto
-                ).collect { loadResponse ->
-                    @Exhaustive
-                    when (loadResponse) {
-                        is LoadResponse.Loading -> {
-                            LOG.d(TAG, "Streaming payments Loading")
-                        }
-                        is Response.Error -> {
-                            LOG.d(TAG, "Streaming payments Error")
-                        }
-                        is Response.Success -> {
-                            LOG.d(TAG, "Streaming payments Success")
-                        }
-                    }
-                }
+                ).collect {}
             } catch (e: AssertionError) {
             }
         }
