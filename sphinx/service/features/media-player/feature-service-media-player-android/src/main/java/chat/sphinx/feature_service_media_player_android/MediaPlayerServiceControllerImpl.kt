@@ -59,8 +59,6 @@ internal class MediaPlayerServiceControllerImpl(
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             if (service != null) {
                 binder.value = service as MediaPlayerService.MediaPlayerServiceBinder
-
-                dispatchState(MediaPlayerServiceState.ServiceActive.ServiceLoaded)
             } else {
                 clearBinderReference()
             }

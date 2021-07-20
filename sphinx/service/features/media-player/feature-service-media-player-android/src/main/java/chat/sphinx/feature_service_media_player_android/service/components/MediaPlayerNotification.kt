@@ -171,8 +171,8 @@ internal class MediaPlayerNotification(
             is MediaPlayerServiceState.ServiceActive.ServiceLoading -> {
                 notify(builder.setContentText("Loading Media"))
             }
-            is MediaPlayerServiceState.ServiceActive.ServiceLoaded -> {
-                notify(builder.setContentText("Media Service Loaded"))
+            is MediaPlayerServiceState.ServiceActive.ServiceConnected -> {
+                notify(builder.setContentText("Media Service Connected"))
             }
             is MediaPlayerServiceState.ServiceInactive -> {}
         }

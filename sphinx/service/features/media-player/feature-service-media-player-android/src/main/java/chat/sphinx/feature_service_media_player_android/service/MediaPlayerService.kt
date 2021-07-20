@@ -210,9 +210,6 @@ internal abstract class MediaPlayerService: Service() {
                             currentState = MediaPlayerServiceState.ServiceActive.ServiceLoading
                             mediaServiceController.dispatchState(currentState)
 
-                            currentState = MediaPlayerServiceState.ServiceActive.ServiceLoaded
-                            mediaServiceController.dispatchState(currentState)
-
                             repositoryMedia.updateChatMetaData(
                                 nnData.chatId,
                                 ChatMetaData(
@@ -355,6 +352,9 @@ internal abstract class MediaPlayerService: Service() {
                     userAction.speed
                 )
             }
+
+            currentState = MediaPlayerServiceState.ServiceActive.ServiceConnected
+            mediaServiceController.dispatchState(currentState)
         }
 
         private var stateDispatcherJob: Job? = null
@@ -368,8 +368,6 @@ internal abstract class MediaPlayerService: Service() {
                         val currentTime = nnData.mediaPlayer.currentPosition
 
                         if (count >= 60.0 * speed) {
-                            Log.d("PODCAST", "THIS IS A ONE MINUTE NOTIFICATION")
-
                             repositoryMedia.streamPodcastPayments(
                                 nnData.chatId,
                                 ChatMetaData(

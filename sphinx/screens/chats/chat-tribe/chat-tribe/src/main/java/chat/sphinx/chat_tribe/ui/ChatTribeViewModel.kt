@@ -191,7 +191,7 @@ internal class ChatTribeViewModel @Inject constructor(
                     podcast.endEpisodeUpdate(serviceState.episodeId, ::retrieveEpisodeDuration)
                     podcastViewStateContainer.updateViewState(PodcastViewState.MediaStateUpdate(podcast))
                 }
-                is MediaPlayerServiceState.ServiceActive.ServiceLoaded -> {
+                is MediaPlayerServiceState.ServiceActive.ServiceConnected -> {
                     setPaymentsDestinations()
                 }
                 is MediaPlayerServiceState.ServiceActive.ServiceLoading -> {

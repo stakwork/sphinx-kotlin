@@ -66,7 +66,7 @@ internal class PodcastPlayerViewModel @Inject constructor(
                 podcast.endEpisodeUpdate(serviceState.episodeId, ::retrieveEpisodeDuration)
                 viewStateContainer.updateViewState(PodcastPlayerViewState.MediaStateUpdate(podcast, serviceState))
             }
-            is MediaPlayerServiceState.ServiceActive.ServiceLoaded -> {
+            is MediaPlayerServiceState.ServiceActive.ServiceConnected -> {
                 setPaymentsDestinations()
             }
             is MediaPlayerServiceState.ServiceActive.ServiceLoading -> {

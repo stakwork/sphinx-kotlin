@@ -10,7 +10,7 @@ sealed class MediaPlayerServiceState {
 
         object ServiceLoading: ServiceActive()
 
-        object ServiceLoaded: ServiceActive()
+        object ServiceConnected: ServiceActive()
 
         sealed class MediaState(
             val chatId: ChatId,
