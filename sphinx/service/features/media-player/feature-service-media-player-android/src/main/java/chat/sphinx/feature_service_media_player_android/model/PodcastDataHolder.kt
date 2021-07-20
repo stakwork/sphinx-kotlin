@@ -49,4 +49,10 @@ internal class PodcastDataHolder private constructor(
     fun setDestinations(destinations: List<PodcastDestination>) {
         this.destinations = destinations
     }
+
+    val currentTimeSeconds: Int
+        get() = mediaPlayer.currentPosition / 1000
+
+    val currentTimeMilliSeconds: Int
+        get() = mediaPlayer.currentPosition
 }

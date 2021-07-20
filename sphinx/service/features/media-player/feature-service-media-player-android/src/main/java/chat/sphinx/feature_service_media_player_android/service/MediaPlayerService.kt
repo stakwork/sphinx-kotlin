@@ -215,7 +215,7 @@ internal abstract class MediaPlayerService: Service() {
                                 ChatMetaData(
                                     ItemId(nnData.episodeId),
                                     nnData.satsPerMinute,
-                                    nnData.mediaPlayer.currentPosition,
+                                    nnData.currentTimeSeconds,
                                     nnData.speed
                                 )
                             )
@@ -230,7 +230,7 @@ internal abstract class MediaPlayerService: Service() {
                         ChatMetaData(
                             ItemId(userAction.episodeId),
                             userAction.satPerMinute,
-                            userAction.startTime,
+                            userAction.startTime / 1000,
                             userAction.speed
                         )
                     )
@@ -285,7 +285,7 @@ internal abstract class MediaPlayerService: Service() {
                         }
 
                         stateDispatcherJob?.cancel()
-                        val currentTime = nnData.mediaPlayer.currentPosition
+                        val currentTime = nnData.currentTimeMilliSeconds
 
                         currentState = MediaPlayerServiceState.ServiceActive.MediaState.Paused(
                             nnData.chatId,
@@ -299,7 +299,7 @@ internal abstract class MediaPlayerService: Service() {
                             ChatMetaData(
                                 ItemId(nnData.episodeId),
                                 nnData.satsPerMinute,
-                                currentTime,
+                                nnData.currentTimeSeconds,
                                 nnData.speed,
                             )
                         )
@@ -365,7 +365,8 @@ internal abstract class MediaPlayerService: Service() {
                 while (isActive) {
                     val speed: Double = podData?.speed ?: 1.0
                     podData?.let { nnData ->
-                        val currentTime = nnData.mediaPlayer.currentPosition
+                        val currentTimeMilliseconds = nnData.currentTimeMilliSeconds
+                        val currentTimeSeconds = nnData.currentTimeSeconds
 
                         if (count >= 60.0 * speed) {
 
@@ -375,7 +376,7 @@ internal abstract class MediaPlayerService: Service() {
                                 ChatMetaData(
                                     ItemId(nnData.episodeId),
                                     nnData.satsPerMinute,
-                                    currentTime,
+                                    currentTimeSeconds,
                                     speed,
                                 ),
                                 nnData.podcastId,
@@ -392,21 +393,21 @@ internal abstract class MediaPlayerService: Service() {
                             currentState = MediaPlayerServiceState.ServiceActive.MediaState.Playing(
                                 nnData.chatId,
                                 nnData.episodeId,
-                                currentTime
+                                currentTimeMilliseconds
                             )
                         } else {
 
-                            val state = if (nnData.mediaPlayer.duration <= currentTime) {
+                            val state = if (nnData.mediaPlayer.duration <= currentTimeMilliseconds) {
                                 MediaPlayerServiceState.ServiceActive.MediaState.Ended(
                                     nnData.chatId,
                                     nnData.episodeId,
-                                    currentTime
+                                    currentTimeMilliseconds
                                 )
                             } else {
                                 MediaPlayerServiceState.ServiceActive.MediaState.Paused(
                                     nnData.chatId,
                                     nnData.episodeId,
-                                    currentTime
+                                    currentTimeMilliseconds
                                 )
                             }
 
@@ -440,7 +441,7 @@ internal abstract class MediaPlayerService: Service() {
                     ChatMetaData(
                         ItemId(data.episodeId),
                         data.satsPerMinute,
-                        data.mediaPlayer.currentPosition,
+                        data.currentTimeSeconds,
                         data.speed,
                     )
                 )
