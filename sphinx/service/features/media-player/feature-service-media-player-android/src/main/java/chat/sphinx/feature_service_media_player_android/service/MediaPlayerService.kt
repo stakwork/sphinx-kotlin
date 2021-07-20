@@ -147,6 +147,13 @@ internal abstract class MediaPlayerService: Service() {
                     repositoryMedia.updateChatMetaData(userAction.chatId, userAction.chatMetaData)
 
                 }
+                is UserAction.AdjustSatsPerMinute -> {
+                    podData?.let { nnData ->
+                        nnData.setSatsPerMinute(userAction.chatMetaData.satsPerMinute)
+                    }
+
+                    repositoryMedia.updateChatMetaData(userAction.chatId, userAction.chatMetaData)
+                }
                 is UserAction.SetPaymentsDestinations -> {
                     podData?.let { nnData ->
                         nnData.setDestinations(userAction.destinations)
@@ -164,6 +171,12 @@ internal abstract class MediaPlayerService: Service() {
                 is UserAction.ServiceAction.Play -> {
 
                     podData?.let { nnData ->
+                        if (nnData.chatId != userAction.chatId) {
+                            //Podcast has changed. Payments Destinations needs to be set again
+                            currentState = MediaPlayerServiceState.ServiceActive.ServiceConnected
+                            mediaServiceController.dispatchState(currentState)
+                        }
+
                         if (
                             nnData.chatId == userAction.chatId &&
                             nnData.episodeId == userAction.episodeId
@@ -352,9 +365,6 @@ internal abstract class MediaPlayerService: Service() {
                     userAction.speed
                 )
             }
-
-            currentState = MediaPlayerServiceState.ServiceActive.ServiceConnected
-            mediaServiceController.dispatchState(currentState)
         }
 
         private var stateDispatcherJob: Job? = null

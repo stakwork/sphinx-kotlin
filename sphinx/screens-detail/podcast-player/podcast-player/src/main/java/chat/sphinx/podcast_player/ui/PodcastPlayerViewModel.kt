@@ -86,14 +86,19 @@ internal class PodcastPlayerViewModel @Inject constructor(
 
     private fun podcastLoaded() {
         viewModelScope.launch(mainImmediate) {
-            delay(100L)
-
             chatRepository.getChatById(args.chatId).firstOrNull()?.let { chat ->
                 chat.metaData?.let { metaData ->
                     podcast?.setMetaData(metaData)
                 }
             }
             viewStateContainer.updateViewState(PodcastPlayerViewState.PodcastLoaded(podcast))
+
+            mediaPlayerServiceController.submitAction(
+                UserAction.AdjustSatsPerMinute(
+                    args.chatId,
+                    podcast.getMetaData()
+                )
+            )
         }
     }
 

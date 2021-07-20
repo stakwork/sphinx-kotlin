@@ -23,6 +23,8 @@ class ParcelablePodcast(
     val description: String,
     val author: String,
     val image: String,
+    val episodeId: Long?,
+    val episodeDuration: Long?,
     val value: ParcelablePodcastValue,
     val episodes: List<ParcelablePodcastEpisode>,
 ): Parcelable
@@ -34,7 +36,7 @@ fun Podcast.toParcelablePodcast(): ParcelablePodcast {
         podcastEpisodes.add(episode.toParcelablePodcastEpisode())
     }
 
-    return ParcelablePodcast(id, title, description, author, image, value.toParcelablePodcastValue(), podcastEpisodes)
+    return ParcelablePodcast(id, title, description, author, image, episodeId, episodeDuration, value.toParcelablePodcastValue(), podcastEpisodes)
 }
 
 fun ParcelablePodcast.toPodcast(): Podcast {
@@ -44,5 +46,9 @@ fun ParcelablePodcast.toPodcast(): Podcast {
         podcastEpisodes.add(episode.toPodcastEpisode())
     }
 
-    return Podcast(id, title, description, author, image, value.toPodcastValue(), podcastEpisodes)
+    var podcast = Podcast(id, title, description, author, image, value.toPodcastValue(), podcastEpisodes)
+    podcast.episodeId = episodeId
+    podcast.episodeDuration = episodeDuration
+
+    return podcast
 }

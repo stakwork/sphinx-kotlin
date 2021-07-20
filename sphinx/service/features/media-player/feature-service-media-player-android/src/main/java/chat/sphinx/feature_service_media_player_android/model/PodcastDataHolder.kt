@@ -9,7 +9,6 @@ internal class PodcastDataHolder private constructor(
     val chatId: ChatId,
     val podcastId: Long,
     val episodeId: Long,
-    val satsPerMinute: Sat,
     val mediaPlayer: MediaPlayer,
 ) {
     companion object {
@@ -26,12 +25,17 @@ internal class PodcastDataHolder private constructor(
                 chatId,
                 podcastId,
                 episodeId,
-                satsPerMinute,
                 mediaPlayer
-            ).also { it.setSpeed(speed) }
+            ).also {
+                it.setSpeed(speed)
+                it.setSatsPerMinute(satsPerMinute)
+            }
     }
 
     var speed: Double = 1.0
+        private set
+
+    var satsPerMinute: Sat = Sat(0)
         private set
 
     var destinations: List<PodcastDestination> = ArrayList(0)
@@ -44,6 +48,11 @@ internal class PodcastDataHolder private constructor(
             1.0
         }
         return this.speed
+    }
+
+    fun setSatsPerMinute(sats: Sat): Sat {
+        this.satsPerMinute = sats
+        return this.satsPerMinute
     }
 
     fun setDestinations(destinations: List<PodcastDestination>) {

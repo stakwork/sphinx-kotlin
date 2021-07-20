@@ -33,10 +33,10 @@ sealed class UserAction(val chatId: ChatId) {
 
     }
 
-//    class AdjustSatsPerMinute(
-//        chatId: ChatId,
-//        val chatMetaData: ChatMetaData,
-//    ): UserAction(chatId)
+    class AdjustSatsPerMinute(
+        chatId: ChatId,
+        val chatMetaData: ChatMetaData,
+    ): UserAction(chatId)
 
     class AdjustSpeed(
         chatId: ChatId,

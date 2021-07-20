@@ -99,6 +99,7 @@ class Podcast(
                 return episode
             }
         }
+
         return episodes[0]
     }
 
@@ -161,6 +162,12 @@ class Podcast(
     }
 
     fun playingEpisodeUpdate(episodeId: Long, time: Int) {
+        if (playingEpisode == null) {
+            this.episodeId?.let { currentEpisodeId ->
+                this.playingEpisode = getEpisodeWithId(currentEpisodeId)
+            }
+        }
+
         if (episodeId != playingEpisode?.id) {
             this.playingEpisode?.playing = false
 

@@ -27,7 +27,6 @@ import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.logger.d
 import chat.sphinx.logger.e
 import chat.sphinx.podcast_player.objects.toParcelablePodcast
-import chat.sphinx.podcast_player.objects.toPodcast
 import chat.sphinx.podcast_player.ui.getMediaDuration
 import chat.sphinx.resources.getRandomColor
 import chat.sphinx.wrapper_chat.Chat
@@ -222,10 +221,15 @@ internal class ChatTribeViewModel @Inject constructor(
                 chatRepository.getChatById(chatId).firstOrNull()?.let { chat ->
                     chat.metaData?.let { metaData ->
                         podcast?.setMetaData(metaData)
-                    } ?: run {
-
                     }
                 }
+
+                mediaPlayerServiceController.submitAction(
+                    UserAction.AdjustSatsPerMinute(
+                        args.chatId,
+                        podcast!!.getMetaData()
+                    )
+                )
             }
         }
 

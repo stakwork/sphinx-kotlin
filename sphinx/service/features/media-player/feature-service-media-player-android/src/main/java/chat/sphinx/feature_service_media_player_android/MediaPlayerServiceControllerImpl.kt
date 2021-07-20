@@ -82,6 +82,9 @@ internal class MediaPlayerServiceControllerImpl(
             is UserAction.AdjustSpeed -> {
                 repositoryMedia.updateChatMetaData(userAction.chatId, userAction.chatMetaData)
             }
+            is UserAction.AdjustSatsPerMinute -> {
+                repositoryMedia.updateChatMetaData(userAction.chatId, userAction.chatMetaData)
+            }
             is UserAction.ServiceAction.Pause -> {
                 listenerHandler.dispatch(getCurrentState())
             }
