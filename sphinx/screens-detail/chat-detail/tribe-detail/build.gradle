@@ -1,6 +1,7 @@
 plugins {
     id 'com.android.library'
     id 'dagger.hilt.android.plugin'
+    id 'androidx.navigation.safeargs'
     id 'kotlin-android'
     id 'kotlin-kapt'
 }
@@ -33,7 +34,10 @@ dependencies {
     // KotlinAndroid
     implementation project(path: ':android:features:android-feature-screens')
     // Sphinx
+    implementation project(path: ':sphinx:activity:insetter-activity')
     implementation project(path: ':sphinx:application:common:wrappers:wrapper-common')
+    implementation project(path: ':sphinx:application:data:concepts:concept-image-loader')
+    implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-chat')
     implementation project(path: ':sphinx:screens-detail:common:detail-resources')
     implementation project(path: ':sphinx:screens-detail:podcast-player:podcast-player')
 

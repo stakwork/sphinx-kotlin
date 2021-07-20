@@ -3,4 +3,7 @@
     <string name="tribe_detail_header_name">TRIBE DETAIL</string>
     <string name="podcast_sats_per_minute">Podcast sats per minute</string>
     <string name="alias">alias</string>
+
+    <string name="tribe_created_on">Created on %s</string>
+    <string name="tribe_costs">Price per message %d sat - Amount to Stake: %d sat</string>
 </resources>

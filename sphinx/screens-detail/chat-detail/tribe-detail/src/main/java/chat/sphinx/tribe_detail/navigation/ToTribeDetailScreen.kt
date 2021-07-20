@@ -5,18 +5,23 @@ import androidx.navigation.NavOptions
 import chat.sphinx.detail_resources.DetailNavOptions
 import chat.sphinx.podcast_player.objects.Podcast
 import chat.sphinx.tribe_detail.R
+import chat.sphinx.tribe_detail.ui.TribeDetailFragmentArgs
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import io.matthewnelson.concept_navigation.NavigationRequest
 
 class ToTribeDetailScreen(
-    chatId: ChatId,
-    podcast: Podcast?,
+    val chatId: ChatId,
+    val podcast: Podcast?,
     private val options: NavOptions = DetailNavOptions.defaultBuilt
 ): NavigationRequest<NavController>() {
     override fun navigate(controller: NavController) {
+
+        val args = TribeDetailFragmentArgs.Builder(chatId.value)
+        args.argPodcast = podcast
+
         controller.navigate(
             R.id.tribe_detail_nav_graph,
-            null,
+            args.build().toBundle(),
             options
         )
     }

@@ -8,6 +8,16 @@
     <fragment
         android:id="@+id/navigation_tribe_detail_fragment"
         android:name="chat.sphinx.tribe_detail.ui.TribeDetailFragment"
-        tools:layout="@layout/fragment_tribe_detail" />
+        tools:layout="@layout/fragment_tribe_detail">
+        <argument
+            android:name="argChatId"
+            app:argType="long" />
+        <argument
+            android:name="argPodcast"
+            app:argType="chat.sphinx.podcast_player.objects.Podcast"
+            app:nullable="true"
+            android:defaultValue="@null"
+            />
+    </fragment>
 
 </navigation>
