@@ -3,10 +3,15 @@ package chat.sphinx.tribe_detail.ui
 import android.app.Application
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import chat.sphinx.camera_view_model_coordinator.request.CameraRequest
+import chat.sphinx.camera_view_model_coordinator.response.CameraResponse
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
+import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
+import chat.sphinx.menu_bottom_tribe_profile_pic.TribeProfilePicMenuHandler
+import chat.sphinx.menu_bottom_tribe_profile_pic.TribeProfilePicMenuViewModel
 import chat.sphinx.tribe.TribeMenuHandler
 import chat.sphinx.tribe.TribeMenuViewModel
 import chat.sphinx.tribe_detail.R
@@ -33,9 +38,12 @@ internal class TribeDetailViewModel @Inject constructor(
     dispatchers: CoroutineDispatchers,
     savedStateHandle: SavedStateHandle,
     chatRepository: ChatRepository,
+    private val cameraCoordinator: ViewModelCoordinator<CameraRequest, CameraResponse>,
     private val contactRepository: ContactRepository,
     val navigator: TribeDetailNavigator,
-): BaseViewModel<TribeDetailViewState>(dispatchers, TribeDetailViewState.Idle), TribeMenuViewModel
+): BaseViewModel<TribeDetailViewState>(dispatchers, TribeDetailViewState.Idle),
+    TribeMenuViewModel,
+    TribeProfilePicMenuViewModel
 {
     private val args: TribeDetailFragmentArgs by savedStateHandle.navArgs()
 
@@ -109,8 +117,19 @@ internal class TribeDetailViewModel @Inject constructor(
     }
 
     override val tribeMenuHandler: TribeMenuHandler by lazy {
-            TribeMenuHandler(
+        TribeMenuHandler(
             app,
+            dispatchers,
+            viewModelScope,
+        )
+    }
+
+    override val tribeProfilePicMenuHandler: TribeProfilePicMenuHandler by lazy {
+        TribeProfilePicMenuHandler(
+            app,
+            chatSharedFlow,
+            cameraCoordinator,
+            chatRepository,
             dispatchers,
             viewModelScope,
         )

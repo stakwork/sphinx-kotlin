@@ -11,6 +11,7 @@ import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.menu_bottom.ui.MenuBottomViewState
+import chat.sphinx.menu_bottom_tribe_profile_pic.BottomMenuTribeProfilePic
 import chat.sphinx.tribe.BottomMenuTribe
 import chat.sphinx.tribe_detail.R
 import chat.sphinx.tribe_detail.databinding.FragmentTribeDetailBinding
@@ -34,11 +35,19 @@ internal class TribeDetailFragment: BaseFragment<
     @Inject
     lateinit var imageLoaderInj: ImageLoader<ImageView>
 
-    val imageLoader: ImageLoader<ImageView>
+    private val imageLoader: ImageLoader<ImageView>
         get() = imageLoaderInj
 
     private val bottomMenuTribe: BottomMenuTribe by lazy(LazyThreadSafetyMode.NONE) {
         BottomMenuTribe(
+            this,
+            onStopSupervisor,
+            viewModel
+        )
+    }
+
+    private val bottomMenuTribeProfilePic: BottomMenuTribeProfilePic by lazy(LazyThreadSafetyMode.NONE) {
+        BottomMenuTribeProfilePic(
             this,
             onStopSupervisor,
             viewModel
@@ -59,7 +68,7 @@ internal class TribeDetailFragment: BaseFragment<
         setupFragmentLayout()
         setupTribeDetailFunctionality()
 
-
+        bottomMenuTribeProfilePic.initialize(binding.includeLayoutMenuBottomTribeProfilePic, viewLifecycleOwner)
     }
 
     private fun setupFragmentLayout() {
@@ -70,6 +79,9 @@ internal class TribeDetailFragment: BaseFragment<
         )
         insetterActivity.addNavigationBarPadding(
             binding.includeLayoutMenuBottomTribe.root
+        )
+        insetterActivity.addNavigationBarPadding(
+            binding.includeLayoutMenuBottomTribeProfilePic.root
         )
     }
 
@@ -97,7 +109,20 @@ internal class TribeDetailFragment: BaseFragment<
                 }
             )
             imageViewMenuButton.setOnClickListener {
-                viewModel.tribeMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Open)
+                viewModel.tribeMenuHandler.viewStateContainer.updateViewState(
+                    MenuBottomViewState.Open
+                )
+            }
+
+            imageViewProfilePicture.setOnClickListener {
+                viewModel.tribeProfilePicMenuHandler.viewStateContainer.updateViewState(
+                    MenuBottomViewState.Open
+                )
+            }
+            editTextProfilePictureValue.setOnClickListener {
+                viewModel.tribeProfilePicMenuHandler.viewStateContainer.updateViewState(
+                    MenuBottomViewState.Open
+                )
             }
         }
         viewModel.load()

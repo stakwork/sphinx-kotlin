@@ -21,18 +21,19 @@ class TribeMenuHandler(
     }
 
     fun deleteTribe() {
-
+        viewStateContainer.updateViewState(MenuBottomViewState.Closed)
     }
 
     fun shareTribe() {
-
+        viewStateContainer.updateViewState(MenuBottomViewState.Closed)
     }
 
     fun exitTribe() {
-
+        viewStateContainer.updateViewState(MenuBottomViewState.Closed)
     }
 
     fun editTribe() {
+        viewStateContainer.updateViewState(MenuBottomViewState.Closed)
         TODO("Implement Edit Tribe Functionality on TribeMenuHandler")
     }
 

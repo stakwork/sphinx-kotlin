@@ -9,6 +9,8 @@ import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
+import chat.sphinx.wrapper_io_utils.InputStreamProvider
+import chat.sphinx.wrapper_message_media.MediaType
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -53,4 +55,12 @@ interface ChatRepository {
     suspend fun updateTribeInfo(chat: Chat): PodcastDto?
 
     suspend fun exitTribe(chat: Chat): Response<Boolean, ResponseError>
+
+    suspend fun updateChatProfilePic(
+        chat: Chat,
+        stream: InputStreamProvider,
+        mediaType: MediaType,
+        fileName: String,
+        contentLength: Long?
+    ): Response<Any, ResponseError>
 }

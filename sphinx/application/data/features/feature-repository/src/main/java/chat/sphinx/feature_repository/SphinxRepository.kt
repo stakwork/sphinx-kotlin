@@ -4,8 +4,6 @@ import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_coredb.CoreDB
 import chat.sphinx.concept_crypto_rsa.RSA
 import chat.sphinx.concept_meme_server.MemeServerTokenHandler
-import chat.sphinx.concept_network_query_meme_server.NetworkQueryMemeServer
-import chat.sphinx.concept_network_query_meme_server.model.PostMemeServerUploadDto
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
 import chat.sphinx.concept_network_query_chat.model.*
 import chat.sphinx.concept_network_query_contact.NetworkQueryContact
@@ -16,6 +14,8 @@ import chat.sphinx.concept_network_query_invite.NetworkQueryInvite
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_lightning.model.balance.BalanceDto
 import chat.sphinx.concept_network_query_lightning.model.invoice.PostRequestPaymentDto
+import chat.sphinx.concept_network_query_meme_server.NetworkQueryMemeServer
+import chat.sphinx.concept_network_query_meme_server.model.PostMemeServerUploadDto
 import chat.sphinx.concept_network_query_message.NetworkQueryMessage
 import chat.sphinx.concept_network_query_message.model.MessageDto
 import chat.sphinx.concept_network_query_message.model.PostMessageDto
@@ -82,7 +82,6 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import java.io.InputStream
 import okio.base64.encodeBase64
 import java.text.ParseException
 import kotlin.math.absoluteValue
@@ -975,6 +974,81 @@ abstract class SphinxRepository(
             } catch (e: Exception) {
                 response = Response.Error(
                     ResponseError("Failed to update Profile Picture", e)
+                )
+            }
+        }.join()
+
+        return response
+    }
+
+    override suspend fun updateChatProfilePic(
+        chat: Chat,
+        stream: InputStreamProvider,
+        mediaType: MediaType,
+        fileName: String,
+        contentLength: Long?
+    ): Response<Any, ResponseError> {
+        var response: Response<Any, ResponseError> = Response.Success(true)
+        val memeServerHost = MediaHost.DEFAULT
+
+        applicationScope.launch(mainImmediate) {
+            try {
+                val token = memeServerTokenHandler.retrieveAuthenticationToken(memeServerHost)
+                    ?: throw RuntimeException("MemeServerAuthenticationToken retrieval failure")
+
+                val networkResponse = networkQueryMemeServer.uploadAttachment(
+                    authenticationToken = token,
+                    mediaType = mediaType,
+                    stream = stream,
+                    fileName = fileName,
+                    contentLength = contentLength,
+                    memeServerHost = memeServerHost,
+                )
+
+                @Exhaustive
+                when (networkResponse) {
+                    is Response.Error -> {
+                        response = networkResponse
+                    }
+                    is Response.Success -> {
+                        val newUrl = PhotoUrl(
+                            "https://${memeServerHost.value}/public/${networkResponse.value.muid}"
+                        )
+
+                        networkQueryChat.updateChat(
+                            chat.id,
+                            PutChatDto(
+                                chat.myAlias?.value,
+                                newUrl.value
+                            )
+                        ).collect { loadResponse ->
+
+                            @Exhaustive
+                            when (loadResponse) {
+                                is LoadResponse.Loading -> {}
+                                is Response.Error -> {
+                                    response = loadResponse
+                                }
+                                is Response.Success -> {
+                                    val queries = coreDB.getSphinxDatabaseQueries()
+
+                                    chatLock.withLock {
+                                        withContext(io) {
+                                            // TODO:
+//                                            queries.chatUpdatePhotoUrl(
+//                                                newUrl,
+//                                                chat.id,
+//                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                response = Response.Error(
+                    ResponseError("Failed to update Chat Profile", e)
                 )
             }
         }.join()
