@@ -99,8 +99,10 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:src="@drawable/ic_baseline_more_vert_24"
+                    android:visibility="gone"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
+                    tools:visibility="visible"
                     />
             </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -158,7 +160,6 @@
                 android:thumbTint="@color/receivedIcon"
                 android:progressDrawable="@drawable/podcast_player_seek_bar_progress"
                 android:thumb="@drawable/podcast_player_seek_bar_thumb"
-                android:progress="0"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/constrain_layout_podcast_controls_text"
@@ -167,7 +168,7 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/constraint_layout_profile_details"
+            android:id="@+id/constraint_layout_profile_alias_container"
             android:layout_margin="@dimen/default_layout_margin"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -183,7 +184,7 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/constraint_layout_profile_picture"
+                app:layout_constraintEnd_toEndOf="parent"
                 >
 
                 <androidx.appcompat.widget.AppCompatTextView
@@ -226,6 +227,68 @@
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/constraint_layout_profile_picture_container"
+            android:layout_margin="@dimen/default_layout_margin"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@+id/constraint_layout_profile_alias_container"
+            >
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/constraint_layout_profile_picture_url"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/default_form_horizontal_margin"
+                android:layout_marginEnd="@dimen/default_form_horizontal_margin"
+                android:layout_marginVertical="@dimen/default_layout_margin"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/constraint_layout_profile_picture"
+                >
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/text_view_profile_picture_field"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/profile_picture"
+                    android:textColor="@color/secondaryText"
+                    android:fontFamily="@font/roboto_regular"
+                    android:textSize="@dimen/default_form_text_view_text_size"
+                    android:singleLine="true"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    />
+
+                <androidx.appcompat.widget.AppCompatEditText
+                    android:id="@+id/edit_text_profile_picture_value"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/text"
+                    android:fontFamily="@font/roboto_regular"
+                    android:textSize="@dimen/default_form_edit_view_text_size"
+                    android:layout_marginStart="@dimen/default_form_edit_text_left_margin"
+                    android:singleLine="true"
+                    android:enabled="false"
+                    app:backgroundTint="@android:color/transparent"
+                    app:layout_constraintTop_toBottomOf="@+id/text_view_profile_picture_field"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    tools:text= "https://memes.sphinx.chat/picture_with_all_the_stuff"/>
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/layout_constraint_profile_picture_bottom_border"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/lightDivider"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="@+id/text_view_profile_picture_field" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/constraint_layout_profile_picture"
                 android:layout_width="@dimen/default_chat_initial_image_xy"
@@ -248,5 +311,10 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 
+
+    <include
+        android:id="@+id/include_layout_menu_bottom_tribe"
+        layout="@layout/layout_menu_bottom"
+        tools:visibility="gone" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

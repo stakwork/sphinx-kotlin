@@ -1,14 +1,19 @@
 package chat.sphinx.tribe_detail.ui
 
+import android.app.Application
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.concept_repository_chat.ChatRepository
+import chat.sphinx.concept_repository_contact.ContactRepository
+import chat.sphinx.tribe.TribeMenuHandler
+import chat.sphinx.tribe.TribeMenuViewModel
 import chat.sphinx.tribe_detail.R
 import chat.sphinx.tribe_detail.navigation.TribeDetailNavigator
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_common.dashboard.ChatId
+import chat.sphinx.wrapper_contact.Contact
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.BaseViewModel
@@ -24,11 +29,13 @@ internal inline val TribeDetailFragmentArgs.chatId: ChatId
 
 @HiltViewModel
 internal class TribeDetailViewModel @Inject constructor(
+    private val app: Application,
     dispatchers: CoroutineDispatchers,
     savedStateHandle: SavedStateHandle,
     chatRepository: ChatRepository,
+    private val contactRepository: ContactRepository,
     val navigator: TribeDetailNavigator,
-): BaseViewModel<TribeDetailViewState>(dispatchers, TribeDetailViewState.Idle)
+): BaseViewModel<TribeDetailViewState>(dispatchers, TribeDetailViewState.Idle), TribeMenuViewModel
 {
     private val args: TribeDetailFragmentArgs by savedStateHandle.navArgs()
 
@@ -42,6 +49,27 @@ internal class TribeDetailViewModel @Inject constructor(
         SharingStarted.WhileSubscribed(2_000),
         replay = 1,
     )
+
+    private suspend fun getOwner(): Contact {
+        return contactRepository.accountOwner.value.let { contact ->
+            if (contact != null) {
+                contact
+            } else {
+                var resolvedOwner: Contact? = null
+                try {
+                    contactRepository.accountOwner.collect { ownerContact ->
+                        if (ownerContact != null) {
+                            resolvedOwner = ownerContact
+                            throw Exception()
+                        }
+                    }
+                } catch (e: Exception) {}
+                delay(25L)
+
+                resolvedOwner!!
+            }
+        }
+    }
 
     private suspend fun getChat(): Chat {
         chatSharedFlow.replayCache.firstOrNull()?.let { chat ->
@@ -69,7 +97,7 @@ internal class TribeDetailViewModel @Inject constructor(
 
     fun load() {
         viewModelScope.launch(mainImmediate) {
-            updateViewState(TribeDetailViewState.Tribe(getChat(), podcast))
+            updateViewState(TribeDetailViewState.Tribe(getChat(), getOwner(), podcast))
         }
     }
 
@@ -78,5 +106,13 @@ internal class TribeDetailViewModel @Inject constructor(
             .placeholderResId(R.drawable.ic_media_library)
             .transformation(Transformation.CircleCrop)
             .build()
+    }
+
+    override val tribeMenuHandler: TribeMenuHandler by lazy {
+            TribeMenuHandler(
+            app,
+            dispatchers,
+            viewModelScope,
+        )
     }
 }

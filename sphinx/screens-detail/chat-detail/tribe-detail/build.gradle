@@ -35,9 +35,11 @@ dependencies {
     implementation project(path: ':android:features:android-feature-screens')
     // Sphinx
     implementation project(path: ':sphinx:activity:insetter-activity')
+    implementation project(path: ':sphinx:application:common:menus:menu-bottom-tribe')
     implementation project(path: ':sphinx:application:common:wrappers:wrapper-common')
     implementation project(path: ':sphinx:application:data:concepts:concept-image-loader')
     implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-chat')
+    implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-contact')
     implementation project(path: ':sphinx:screens-detail:common:detail-resources')
     implementation project(path: ':sphinx:screens-detail:podcast-player:podcast-player')
 
