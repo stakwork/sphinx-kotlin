@@ -17,6 +17,7 @@ internal class PodcastDataHolder private constructor(
             chatId: ChatId,
             podcastId: Long,
             episodeId: Long,
+            episodeDuration: Long,
             satsPerMinute: Sat,
             mediaPlayer: MediaPlayer,
             speed: Double,
@@ -29,6 +30,7 @@ internal class PodcastDataHolder private constructor(
             ).also {
                 it.setSpeed(speed)
                 it.setSatsPerMinute(satsPerMinute)
+                it.setEpisodeDuration(episodeDuration)
             }
     }
 
@@ -36,6 +38,9 @@ internal class PodcastDataHolder private constructor(
         private set
 
     var satsPerMinute: Sat = Sat(0)
+        private set
+
+    var episodeDuration: Long = 0
         private set
 
     var destinations: List<PodcastDestination> = ArrayList(0)
@@ -48,6 +53,11 @@ internal class PodcastDataHolder private constructor(
             1.0
         }
         return this.speed
+    }
+
+    fun setEpisodeDuration(duration: Long): Long {
+        this.episodeDuration = duration
+        return this.episodeDuration
     }
 
     fun setSatsPerMinute(sats: Sat): Sat {

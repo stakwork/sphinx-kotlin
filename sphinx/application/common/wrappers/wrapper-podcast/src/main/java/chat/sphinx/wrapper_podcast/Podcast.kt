@@ -161,12 +161,14 @@ class Podcast(
         this.timeMilliSeconds = time
     }
 
-    fun playingEpisodeUpdate(episodeId: Long, time: Int) {
+    fun playingEpisodeUpdate(episodeId: Long, time: Int, duration: Long) {
         if (playingEpisode == null) {
             this.episodeId?.let { currentEpisodeId ->
                 this.playingEpisode = getEpisodeWithId(currentEpisodeId)
             }
         }
+
+        this.episodeDuration = if (duration > 0) duration else this.episodeDuration
 
         if (episodeId != playingEpisode?.id) {
             this.playingEpisode?.playing = false

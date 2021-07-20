@@ -303,7 +303,8 @@ internal abstract class MediaPlayerService: Service() {
                         currentState = MediaPlayerServiceState.ServiceActive.MediaState.Paused(
                             nnData.chatId,
                             nnData.episodeId,
-                            currentTime
+                            currentTime,
+                            nnData.episodeDuration
                         )
                         mediaServiceController.dispatchState(currentState)
 
@@ -360,6 +361,7 @@ internal abstract class MediaPlayerService: Service() {
                     userAction.chatId,
                     userAction.podcastId,
                     userAction.episodeId,
+                    userAction.episodeDuration,
                     userAction.satPerMinute,
                     mp,
                     userAction.speed
@@ -403,7 +405,8 @@ internal abstract class MediaPlayerService: Service() {
                             currentState = MediaPlayerServiceState.ServiceActive.MediaState.Playing(
                                 nnData.chatId,
                                 nnData.episodeId,
-                                currentTimeMilliseconds
+                                currentTimeMilliseconds,
+                                nnData.episodeDuration
                             )
                         } else {
 
@@ -411,13 +414,15 @@ internal abstract class MediaPlayerService: Service() {
                                 MediaPlayerServiceState.ServiceActive.MediaState.Ended(
                                     nnData.chatId,
                                     nnData.episodeId,
-                                    currentTimeMilliseconds
+                                    currentTimeMilliseconds,
+                                    nnData.episodeDuration
                                 )
                             } else {
                                 MediaPlayerServiceState.ServiceActive.MediaState.Paused(
                                     nnData.chatId,
                                     nnData.episodeId,
-                                    currentTimeMilliseconds
+                                    currentTimeMilliseconds,
+                                    nnData.episodeDuration
                                 )
                             }
 
