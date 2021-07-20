@@ -182,8 +182,8 @@ internal class PodcastPlayerViewModel @Inject constructor(
     }
 
     private fun setPaymentsDestinations() {
-        podcast?.value?.destinations?.let { destinations ->
-            viewModelScope.launch(mainImmediate) {
+        viewModelScope.launch(mainImmediate) {
+            podcast?.value?.destinations?.let { destinations ->
                 mediaPlayerServiceController.submitAction(
                     UserAction.SetPaymentsDestinations(
                         args.chatId,
