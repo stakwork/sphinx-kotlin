@@ -243,7 +243,7 @@ internal abstract class MediaPlayerService: Service() {
                             nnPlayer.episodeId == userAction.chatMetaData.itemId.value
                         ) {
                             try {
-                                nnPlayer.mediaPlayer.seekTo(userAction.chatMetaData.timeSeconds)
+                                nnPlayer.mediaPlayer.seekTo(userAction.chatMetaData.timeSeconds * 1000)
                                 // TODO: Dispatch State
                             } catch (e: IllegalStateException) {
                                 LOG.e(

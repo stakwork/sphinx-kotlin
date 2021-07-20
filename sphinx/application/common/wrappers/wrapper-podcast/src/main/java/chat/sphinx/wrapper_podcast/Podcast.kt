@@ -22,7 +22,7 @@ class Podcast(
     var episodeId: Long? = null
 
     @Volatile
-    var timeSeconds: Int? = null
+    var timeMilliSeconds: Int? = null
 
     @Volatile
     var speed: Double = 1.0
@@ -43,7 +43,7 @@ class Podcast(
         get() = episodes.count()
 
     val currentTime: Int
-        get() = timeSeconds ?: 0
+        get() = timeMilliSeconds ?: 0
 
     val isPlaying: Boolean
         get() = playingEpisode?.playing ?: false
@@ -63,7 +63,7 @@ class Podcast(
 
     fun setMetaData(metaData: ChatMetaData) {
         episodeId = metaData.itemId.value
-        timeSeconds = metaData.timeSeconds
+        timeMilliSeconds = metaData.timeSeconds * 1000
         speed = metaData.speed
         satsPerMinute = metaData.satsPerMinute.value
 
@@ -74,7 +74,7 @@ class Podcast(
         ChatMetaData(
             ItemId(episodeId ?: 0),
             satsPerMinute.toSat() ?: Sat(0),
-            timeSeconds ?: 0,
+            (timeMilliSeconds ?: 0) / 1000,
             speed,
         )
 
@@ -151,13 +151,13 @@ class Podcast(
 
         this.playingEpisode?.playing = true
         this.episodeId = episode.id
-        this.timeSeconds = time
+        this.timeMilliSeconds = time
 
         getCurrentEpisodeDuration(durationRetrieverHandle)
     }
 
     fun didSeekTo(time: Int) {
-        this.timeSeconds = time
+        this.timeMilliSeconds = time
     }
 
     fun playingEpisodeUpdate(episodeId: Long, time: Int) {
@@ -172,7 +172,7 @@ class Podcast(
             nnEpisode.playing = true
 
             this.episodeId = nnEpisode.id
-            this.timeSeconds = time
+            this.timeMilliSeconds = time
         }
     }
 
@@ -203,7 +203,7 @@ class Podcast(
         this.episodeId = nextEpisode.id
         this.episodeDuration = null
 
-        this.timeSeconds = 0
+        this.timeMilliSeconds = 0
 
         getCurrentEpisodeDuration(durationRetrieverHandle)
     }
