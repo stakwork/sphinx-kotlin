@@ -444,6 +444,11 @@ abstract class SphinxRepository(
         episodeId: Long,
         destinations: List<PodcastDestination>
     ) {
+
+        if (metaData.satsPerMinute.value <= 0 || destinations.isEmpty()) {
+            return
+        }
+
         applicationScope.launch(io) {
             val queries = coreDB.getSphinxDatabaseQueries()
             chatLock.withLock {
@@ -460,15 +465,17 @@ abstract class SphinxRepository(
 
             val streamSatsText = StreamSatsText(podcastId, episodeId, metaData.timeSeconds.toLong(), metaData.speed)
 
+            val postStreamSatsDto = PostStreamSatsDto(
+                metaData.satsPerMinute.value,
+                chatId.value,
+                streamSatsText.toJson(moshi),
+                true,
+                destinationsArray
+            )
+
             try {
                 networkQueryChat.streamSats(
-                    PostStreamSatsDto(
-                        metaData.satsPerMinute.value,
-                        chatId.value,
-                        streamSatsText.toJson(moshi),
-                        true,
-                        destinationsArray
-                    )
+                    postStreamSatsDto
                 ).collect { loadResponse ->
                     @Exhaustive
                     when (loadResponse) {

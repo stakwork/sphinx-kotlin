@@ -368,6 +368,8 @@ internal abstract class MediaPlayerService: Service() {
                         val currentTime = nnData.mediaPlayer.currentPosition
 
                         if (count >= 60.0 * speed) {
+
+                            //Chat meta data is updated on relay automatically on stream payments
                             repositoryMedia.streamPodcastPayments(
                                 nnData.chatId,
                                 ChatMetaData(
@@ -380,6 +382,7 @@ internal abstract class MediaPlayerService: Service() {
                                 nnData.episodeId,
                                 nnData.destinations
                             )
+
                             count = 0.0
                         } else {
                             count += 1.0
