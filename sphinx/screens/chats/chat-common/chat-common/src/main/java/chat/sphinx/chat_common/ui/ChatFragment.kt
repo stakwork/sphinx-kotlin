@@ -685,18 +685,6 @@ abstract class ChatFragment<
 
                             imageViewChatHeaderExitTribe.goneIfFalse(viewState.showExitTribe)
 
-                            viewState.contributions?.let {
-                                imageViewChatHeaderContributions.visible
-                                textViewChatHeaderContributions.apply {
-                                    visible
-                                    @SuppressLint("SetTextI18n")
-                                    text = getString(R.string.chat_tribe_contributions) + " ${it.asFormattedString()} ${it.unit}"
-                                }
-                            } ?: let {
-                                imageViewChatHeaderContributions.gone
-                                textViewChatHeaderContributions.gone
-                            }
-
                             imageViewChatHeaderMuted.apply {
                                 viewState.isMuted?.let { muted ->
                                     if (muted.isTrue()) {

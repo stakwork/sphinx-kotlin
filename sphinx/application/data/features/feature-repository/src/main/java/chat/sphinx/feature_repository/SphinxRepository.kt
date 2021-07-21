@@ -332,6 +332,17 @@ abstract class SphinxRepository(
         )
     }
 
+    override fun getPaymentsTotalFor(feedId: Long): Flow<Sat?> = flow {
+        emitAll(
+            coreDB.getSphinxDatabaseQueries()
+                .messageGetAmountSumForMessagesStartingWith("{\"feedID\":$feedId%")
+                .asFlow()
+                .mapToOneOrNull(io)
+                .map { it?.SUM }
+                .distinctUntilChanged()
+        )
+    }
+
     override val networkRefreshChats: Flow<LoadResponse<Boolean, ResponseError>> by lazy {
         flow {
             networkQueryChat.getChats().collect { loadResponse ->

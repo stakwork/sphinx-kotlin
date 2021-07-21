@@ -9,6 +9,7 @@ import chat.sphinx.camera_view_model_coordinator.response.CameraResponse
 import chat.sphinx.chat_common.ui.ChatSideEffect
 import chat.sphinx.chat_common.ui.ChatViewModel
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
+import chat.sphinx.chat_tribe.R
 import chat.sphinx.chat_tribe.navigation.TribeChatNavigator
 import chat.sphinx.concept_meme_server.MemeServerTokenHandler
 import chat.sphinx.concept_network_query_chat.model.toPodcast
@@ -31,10 +32,15 @@ import chat.sphinx.podcast_player.ui.getMediaDuration
 import chat.sphinx.resources.getRandomColor
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.ChatName
+import chat.sphinx.wrapper_chat.isTribeOwnedByAccount
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.Sat
+import chat.sphinx.wrapper_common.lightning.asFormattedString
+import chat.sphinx.wrapper_common.lightning.toSat
+import chat.sphinx.wrapper_common.lightning.unit
 import chat.sphinx.wrapper_common.util.getInitials
+import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_message.Message
 import chat.sphinx.wrapper_podcast.Podcast
 import chat.sphinx.wrapper_podcast.PodcastEpisode
@@ -45,6 +51,7 @@ import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_media_cache.MediaCacheHandler
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -234,6 +241,43 @@ internal class ChatTribeViewModel @Inject constructor(
         }
 
         return podcast
+    }
+
+    fun getPodcastContributionsString(): Flow<String> = flow {
+        podcast?.id?.let { podcastId ->
+            val owner: Contact = contactRepository.accountOwner.value.let { contact ->
+                if (contact != null) {
+                    contact
+                } else {
+                    var resolvedOwner: Contact? = null
+                    try {
+                        contactRepository.accountOwner.collect { ownerContact ->
+                            if (ownerContact != null) {
+                                resolvedOwner = ownerContact
+                                throw Exception()
+                            }
+                        }
+                    } catch (e: Exception) {
+                    }
+                    delay(25L)
+
+                    resolvedOwner!!
+                }
+            }
+
+            chatRepository.getChatById(chatId).firstOrNull()?.let { chat ->
+                messageRepository.getPaymentsTotalFor(podcastId).collect { paymentsTotal ->
+                    paymentsTotal?.let {
+                        val isMyTribe = chat.isTribeOwnedByAccount(owner.nodePubKey)
+                        val label = app.getString(if (isMyTribe) R.string.chat_tribe_earned else R.string.chat_tribe_contributed)
+
+                        emit(
+                            label + " ${it.asFormattedString()} ${it.unit}"
+                        )
+                    }
+                }
+            }
+        }
     }
 
     fun goToPodcastPlayerScreen() {
