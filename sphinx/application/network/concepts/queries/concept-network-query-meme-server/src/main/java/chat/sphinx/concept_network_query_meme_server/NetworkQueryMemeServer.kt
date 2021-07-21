@@ -7,12 +7,12 @@ import chat.sphinx.concept_network_query_meme_server.model.PostMemeServerUploadD
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
+import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
+import chat.sphinx.wrapper_io_utils.InputStreamProvider
 import chat.sphinx.wrapper_meme_server.AuthenticationChallenge
 import chat.sphinx.wrapper_meme_server.AuthenticationId
 import chat.sphinx.wrapper_meme_server.AuthenticationSig
 import chat.sphinx.wrapper_meme_server.AuthenticationToken
-import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
-import chat.sphinx.wrapper_io_utils.InputStreamProvider
 import chat.sphinx.wrapper_message_media.MediaType
 import chat.sphinx.wrapper_message_media.token.MediaHost
 import chat.sphinx.wrapper_relay.AuthorizationToken
@@ -20,7 +20,6 @@ import chat.sphinx.wrapper_relay.RelayUrl
 import io.matthewnelson.crypto_common.clazzes.Password
 import kotlinx.coroutines.flow.Flow
 import java.io.File
-import java.io.InputStream
 
 abstract class NetworkQueryMemeServer {
 
@@ -54,6 +53,13 @@ abstract class NetworkQueryMemeServer {
         stream: InputStreamProvider,
         fileName: String,
         contentLength: Long?,
+        memeServerHost: MediaHost = MediaHost.DEFAULT,
+    ): Response<PostMemeServerUploadDto, ResponseError>
+
+    abstract suspend fun uploadAttachment(
+        authenticationToken: AuthenticationToken,
+        mediaType: MediaType,
+        file: File,
         memeServerHost: MediaHost = MediaHost.DEFAULT,
     ): Response<PostMemeServerUploadDto, ResponseError>
 }

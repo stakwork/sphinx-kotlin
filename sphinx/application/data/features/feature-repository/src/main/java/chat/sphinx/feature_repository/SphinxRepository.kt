@@ -83,6 +83,7 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import okio.base64.encodeBase64
+import java.io.File
 import java.text.ParseException
 import kotlin.math.absoluteValue
 
@@ -983,10 +984,8 @@ abstract class SphinxRepository(
 
     override suspend fun updateChatProfilePic(
         chat: Chat,
-        stream: InputStreamProvider,
-        mediaType: MediaType,
-        fileName: String,
-        contentLength: Long?
+        file: File,
+        mediaType: MediaType
     ): Response<Any, ResponseError> {
         var response: Response<Any, ResponseError> = Response.Success(true)
         val memeServerHost = MediaHost.DEFAULT
@@ -999,9 +998,7 @@ abstract class SphinxRepository(
                 val networkResponse = networkQueryMemeServer.uploadAttachment(
                     authenticationToken = token,
                     mediaType = mediaType,
-                    stream = stream,
-                    fileName = fileName,
-                    contentLength = contentLength,
+                    file = file,
                     memeServerHost = memeServerHost,
                 )
 
@@ -1034,6 +1031,7 @@ abstract class SphinxRepository(
 
                                     chatLock.withLock {
                                         withContext(io) {
+                                            LOG.d(TAG, "Need to update the chat with the new details")
                                             // TODO:
 //                                            queries.chatUpdatePhotoUrl(
 //                                                newUrl,

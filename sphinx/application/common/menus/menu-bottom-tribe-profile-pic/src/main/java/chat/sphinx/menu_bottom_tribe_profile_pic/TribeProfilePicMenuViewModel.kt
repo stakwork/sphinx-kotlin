@@ -2,6 +2,7 @@ package chat.sphinx.menu_bottom_tribe_profile_pic
 
 import android.app.Application
 import android.net.Uri
+import android.util.Log
 import android.webkit.MimeTypeMap
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.camera_view_model_coordinator.request.CameraRequest
@@ -11,18 +12,17 @@ import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.menu_bottom.ui.MenuBottomViewState
 import chat.sphinx.wrapper_chat.Chat
-import chat.sphinx.wrapper_io_utils.InputStreamProvider
-import chat.sphinx.wrapper_io_utils.toInputStreamProvider
 import chat.sphinx.wrapper_message_media.MediaType
 import chat.sphinx.wrapper_message_media.toMediaType
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
+import io.matthewnelson.concept_media_cache.MediaCacheHandler
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
-import java.io.FileInputStream
+import java.io.File
 import java.io.InputStream
 
 interface TribeProfilePicMenuViewModel {
@@ -36,15 +36,18 @@ class TribeProfilePicMenuHandler(
     private val cameraCoordinator: ViewModelCoordinator<CameraRequest, CameraResponse>,
     private val chatRepository: ChatRepository,
     private val dispatchers: CoroutineDispatchers,
+    private val mediaCacheHandler: MediaCacheHandler,
     private val viewModelScope: CoroutineScope,
 ) {
+    companion object {
+        const val TAG = "TribeProfilePicMenuHandler"
+    }
     val viewStateContainer: ViewStateContainer<MenuBottomViewState> by lazy {
         ViewStateContainer(MenuBottomViewState.Closed)
     }
 
     private var cameraJob: Job? = null
 
-    @Suppress("BlockingMethodInNonBlockingContext")
     fun updateProfilePicCamera() {
         if (cameraJob?.isActive == true) {
             return
@@ -61,44 +64,39 @@ class TribeProfilePicMenuHandler(
                     @Exhaustive
                     when (response.value) {
                         is CameraResponse.Image -> {
-                            val ext = response.value.value.extension
-                            val mediaType = MediaType.Image(MediaType.IMAGE + "/$ext")
+                            val mediaType = MediaType.Image(
+                                "${MediaType.IMAGE}/${response.value.value.extension}"
+                            )
 
-                            val stream: FileInputStream? = try {
-                                FileInputStream(response.value.value)
-                            } catch (e: Exception) {
-                                // TODO: Handle error
-                                null
-                            }
+                            chatSharedFlow.collect { chat ->
+                                try {
+                                    val repoResponse = chatRepository.updateChatProfilePic(
+                                        chat!!,
+                                        file = response.value.value,
+                                        mediaType = mediaType
+                                    )
 
-                            if (stream != null) {
-                                viewStateContainer.updateViewState(MenuBottomViewState.Closed)
-
-                                viewModelScope.launch(dispatchers.mainImmediate) {
-                                    chatSharedFlow.collect {
-                                        if (it != null) {
-                                            val repoResponse = chatRepository.updateChatProfilePic(
-                                                it,
-                                                stream = stream.toInputStreamProvider(),
-                                                mediaType = mediaType,
-                                                fileName = response.value.value.name,
-                                                contentLength = response.value.value.length(),
-                                            )
-
-                                            @Exhaustive
-                                            when (repoResponse) {
-                                                is Response.Error -> {
-                                                    // TODO: Handle Error
-                                                }
-                                                is Response.Success -> {}
-                                            }
+                                    @Exhaustive
+                                    when (repoResponse) {
+                                        is Response.Error -> {
+                                            // TODO: Handle Error
+                                            Log.e(TAG, "Error update chat Profile Picture: ", repoResponse.cause.exception)
                                         }
-                                        try {
-                                            response.value.value.delete()
-                                        } catch (e: Exception) {}
+                                        is Response.Success -> {
+                                            // TODO: Tell user it was successful
+                                            //  update the chat
+                                        }
                                     }
-                                }.join()
+                                } catch (e: Exception) {
+                                    // TODO: Handle error
+                                    Log.e(TAG, "Error camera picture: ", e)
+                                }
+                                try {
+                                    // Make sure we detail the new image
+                                    response.value.value.delete()
+                                } catch (e: Exception) {}
                             }
+                            viewStateContainer.updateViewState(MenuBottomViewState.Closed)
                         }
                     }
                 }
@@ -106,7 +104,6 @@ class TribeProfilePicMenuHandler(
         }
     }
 
-    @Suppress("BlockingMethodInNonBlockingContext")
     fun handleActivityResultUri(uri: Uri?) {
         if (uri == null) {
             return
@@ -118,57 +115,50 @@ class TribeProfilePicMenuHandler(
 
             MimeTypeMap.getSingleton().getExtensionFromMimeType(crType)?.let { ext ->
 
-                crType.toMediaType().let { mType ->
+                val stream: InputStream = try {
+                    cr.openInputStream(uri) ?: return
+                } catch (e: Exception) {
+                    return
+                }
 
+                crType.toMediaType().let { mType ->
                     @Exhaustive
                     when (mType) {
                         is MediaType.Image -> {
-                            val stream: InputStream? = try {
-                                cr.openInputStream(uri)
-                            } catch (e: Exception) {
-                                // TODO: Handle Error
-                                null
-                            }
+                            viewModelScope.launch(dispatchers.mainImmediate) {
+                                chatSharedFlow.collect { chat ->
+                                    val newFile: File = mediaCacheHandler.createImageFile(ext)
 
-                            if (stream != null) {
+                                    try {
+                                        mediaCacheHandler.copyTo(stream, newFile)
+                                        val repoResponse = chatRepository.updateChatProfilePic(
+                                            chat!!,
+                                            file = newFile,
+                                            mediaType = mType
+                                        )
 
-                                viewStateContainer.updateViewState(MenuBottomViewState.Closed)
-
-                                viewModelScope.launch(dispatchers.mainImmediate) {
-                                    chatSharedFlow.collect {
-                                        if (it != null) {
-                                            val repoResponse = chatRepository.updateChatProfilePic(
-                                                it,
-                                                stream = object : InputStreamProvider() {
-                                                    var initialStreamUsed: Boolean = false
-                                                    override fun newInputStream(): InputStream {
-                                                        return if (!initialStreamUsed) {
-                                                            initialStreamUsed = true
-                                                            stream
-                                                        } else {
-                                                            cr.openInputStream(uri)!!
-                                                        }
-                                                    }
-                                                },
-                                                mediaType = mType,
-                                                fileName = "image.$ext",
-                                                contentLength = null,
-                                            )
-
-                                            @Exhaustive
-                                            when (repoResponse) {
-                                                is Response.Error -> {
-                                                    // TODO: Handle Error...
-                                                }
-                                                is Response.Success -> {
-
-                                                }
+                                        @Exhaustive
+                                        when (repoResponse) {
+                                            is Response.Error -> {
+                                                // TODO: Handle Error
+                                                Log.e(TAG, "Error update chat Profile Picture: ", repoResponse.cause.exception)
+                                            }
+                                            is Response.Success -> {
+                                                // TODO: Tell user it was successful
+                                                //  update the chat
                                             }
                                         }
+                                    } catch (e: Exception) {
+                                        newFile.delete()
+                                        Log.e(
+                                            TAG,
+                                            "Failed to copy content to new file: ${newFile.path}",
+                                            e
+                                        )
                                     }
-
                                 }
                             }
+                            viewStateContainer.updateViewState(MenuBottomViewState.Closed)
                         }
                         is MediaType.Audio,
                         is MediaType.Pdf,

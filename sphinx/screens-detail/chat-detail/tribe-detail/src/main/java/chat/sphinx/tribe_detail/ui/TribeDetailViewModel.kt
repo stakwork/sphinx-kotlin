@@ -24,6 +24,7 @@ import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.BaseViewModel
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
+import io.matthewnelson.concept_media_cache.MediaCacheHandler
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -40,6 +41,7 @@ internal class TribeDetailViewModel @Inject constructor(
     chatRepository: ChatRepository,
     private val cameraCoordinator: ViewModelCoordinator<CameraRequest, CameraResponse>,
     private val contactRepository: ContactRepository,
+    private val mediaCacheHandler: MediaCacheHandler,
     val navigator: TribeDetailNavigator,
 ): BaseViewModel<TribeDetailViewState>(dispatchers, TribeDetailViewState.Idle),
     TribeMenuViewModel,
@@ -131,6 +133,7 @@ internal class TribeDetailViewModel @Inject constructor(
             cameraCoordinator,
             chatRepository,
             dispatchers,
+            mediaCacheHandler,
             viewModelScope,
         )
     }

@@ -9,9 +9,9 @@ import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
-import chat.sphinx.wrapper_io_utils.InputStreamProvider
 import chat.sphinx.wrapper_message_media.MediaType
 import kotlinx.coroutines.flow.Flow
+import java.io.File
 
 /**
  * All [Chat]s are cached to the DB such that a network refresh will update
@@ -58,9 +58,7 @@ interface ChatRepository {
 
     suspend fun updateChatProfilePic(
         chat: Chat,
-        stream: InputStreamProvider,
+        file: File,
         mediaType: MediaType,
-        fileName: String,
-        contentLength: Long?
     ): Response<Any, ResponseError>
 }
