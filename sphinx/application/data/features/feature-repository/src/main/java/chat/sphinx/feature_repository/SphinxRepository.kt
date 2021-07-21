@@ -2411,14 +2411,14 @@ abstract class SphinxRepository(
 
                                                     val id: Long? = dto.chat_id
 
-                                                    if (id == null) {
-                                                        upsertMessage(dto, queries)
-                                                    } else if (chatIds.contains(ChatId(id))) {
+                                                    if (id != null && chatIds.contains(ChatId(id))) {
                                                         upsertMessage(dto, queries)
 
                                                         if (dto.updateChatDboLatestMessage) {
                                                             latestMessageMap[ChatId(id)] = dto
                                                         }
+                                                    } else {
+                                                        upsertMessage(dto, queries)
                                                     }
                                                 }
 
