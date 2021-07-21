@@ -1,5 +1,9 @@
 # ChangeLog
 
+## Version 1.0.0-alpha11 (2021-07-21)
+ - Adds ability to change and stream Sats to Podcast creators
+ - Adds ability to scan Lightning invoices from the dashboard
+
 ## Version 1.0.0-alpha10 (2021-07-16)
  - Adds ability to create Lightning Invoices for receiving payments
  - Adds ability to view Lightning Transaction history
