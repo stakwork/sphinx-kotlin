@@ -16,6 +16,7 @@ import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.logger.e
+import chat.sphinx.menu_bottom.ui.MenuBottomViewState
 import chat.sphinx.menu_bottom_tribe_profile_pic.TribeProfilePicMenuHandler
 import chat.sphinx.menu_bottom_tribe_profile_pic.TribeProfilePicMenuViewModel
 import chat.sphinx.tribe.TribeMenuHandler
@@ -24,6 +25,7 @@ import chat.sphinx.tribe_detail.R
 import chat.sphinx.tribe_detail.navigation.TribeDetailNavigator
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.ChatAlias
+import chat.sphinx.wrapper_chat.isTribeOwnedByAccount
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_message_media.MediaType
@@ -154,11 +156,7 @@ internal class TribeDetailViewModel @Inject constructor(
     }
 
     override val tribeMenuHandler: TribeMenuHandler by lazy {
-        TribeMenuHandler(
-            app,
-            dispatchers,
-            viewModelScope,
-        )
+        TribeMenuHandler()
     }
 
     override val tribeProfilePicMenuHandler: TribeProfilePicMenuHandler by lazy {
@@ -299,5 +297,36 @@ internal class TribeDetailViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    /***
+     * Tribe Menu Implementation
+     */
+    override fun deleteTribe() {
+        tribeMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Closed)
+    }
+
+    override fun shareTribe() {
+        viewModelScope.launch(mainImmediate) {
+            val chat = getChat()
+            if (chat.isTribeOwnedByAccount(getOwner().nodePubKey)) {
+
+                navigator.toTribeDetailScreen(chat.id, podcast)
+            }
+        }
+
+        tribeMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Closed)
+    }
+
+    override fun exitTribe() {
+        viewModelScope.launch(mainImmediate) {
+            chatRepository.exitTribe(getChat())
+        }
+        tribeMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Closed)
+    }
+
+    override fun editTribe() {
+        tribeMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Closed)
+//        TODO("Implement Edit Tribe Functionality on TribeMenuHandler")
     }
 }

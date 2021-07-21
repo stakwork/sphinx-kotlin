@@ -36,7 +36,7 @@ class BottomMenuTribe(
                     text = R.string.bottom_menu_tribe_option_share_tribe,
                     textColor = R.color.primaryBlueFontColor,
                     onClick = {
-                        tribeMenuViewModel.tribeMenuHandler.shareTribe()
+                        tribeMenuViewModel.shareTribe()
                     }
                 )
             )
@@ -46,7 +46,7 @@ class BottomMenuTribe(
                     text = R.string.bottom_menu_tribe_option_delete_tribe,
                     textColor = R.color.primaryBlueFontColor,
                     onClick = {
-                        tribeMenuViewModel.tribeMenuHandler.deleteTribe()
+                        tribeMenuViewModel.deleteTribe()
                     }
                 )
             )
@@ -57,7 +57,7 @@ class BottomMenuTribe(
                 text = R.string.bottom_menu_tribe_option_exit_tribe,
                 textColor = R.color.primaryRed,
                 onClick = {
-                    tribeMenuViewModel.tribeMenuHandler.exitTribe()
+                    tribeMenuViewModel.exitTribe()
                 }
             )
         )
