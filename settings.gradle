@@ -20,6 +20,7 @@ include ':sphinx:application:common:wrappers:wrapper-lightning'
 include ':sphinx:application:common:wrappers:wrapper-meme-server'
 include ':sphinx:application:common:wrappers:wrapper-message'
 include ':sphinx:application:common:wrappers:wrapper-message-media'
+include ':sphinx:application:common:wrappers:wrapper-podcast'
 include ':sphinx:application:common:wrappers:wrapper-relay'
 include ':sphinx:application:common:wrappers:wrapper-rsa'
 include ':sphinx:application:common:wrappers:wrapper-subscription'
@@ -256,4 +257,3 @@ project(':kotlin:test:test-k-openssl').projectDir =
 
 //include ':sample'
 //project(':sample').projectDir = file(new File(rootDir, 'kotlin-android/sample'))
-include ':sphinx:application:common:wrappers:wrapper-podcast'
