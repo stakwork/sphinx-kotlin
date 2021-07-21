@@ -20,11 +20,11 @@ import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.podcast_player.R
 import chat.sphinx.podcast_player.databinding.FragmentPodcastPlayerBinding
-import chat.sphinx.podcast_player.objects.Podcast
-import chat.sphinx.podcast_player.objects.PodcastEpisode
 import chat.sphinx.podcast_player.ui.adapter.PodcastEpisodesFooterAdapter
 import chat.sphinx.podcast_player.ui.adapter.PodcastEpisodesListAdapter
 import chat.sphinx.wrapper_common.util.getTimeString
+import chat.sphinx.wrapper_podcast.Podcast
+import chat.sphinx.wrapper_podcast.PodcastEpisode
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.base.BaseFragment
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
@@ -106,7 +106,7 @@ internal class PodcastPlayerFragment : BaseFragment<
                             fromUser: Boolean
                         ) {
                             if (fromUser) {
-                                val duration = podcast.getCurrentEpisodeDuration()
+                                val duration = podcast.getCurrentEpisodeDuration(viewModel::retrieveEpisodeDuration)
                                 setTimeLabelsAndProgressBarTo(duration, null, progress)
                             }
                         }
@@ -249,7 +249,7 @@ internal class PodcastPlayerFragment : BaseFragment<
 
     private suspend fun seekTo(podcast: Podcast, progress: Int) {
         val duration = withContext(viewModel.io) {
-            podcast.getCurrentEpisodeDuration()
+            podcast.getCurrentEpisodeDuration(viewModel::retrieveEpisodeDuration)
         }
         val seekTime = (duration * (progress.toDouble() / 100.toDouble())).toInt()
         viewModel.seekTo(seekTime)
@@ -262,10 +262,10 @@ internal class PodcastPlayerFragment : BaseFragment<
     }
 
     private suspend fun setTimeLabelsAndProgressBar(podcast: Podcast) {
-        var currentTime = podcast.currentTime.toLong()
+        val currentTime = podcast.currentTime.toLong()
 
         val duration = withContext(viewModel.io) {
-            podcast.getCurrentEpisodeDuration()
+            podcast.getCurrentEpisodeDuration(viewModel::retrieveEpisodeDuration)
         }
         val progress: Int =
             try {

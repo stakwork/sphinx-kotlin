@@ -1,8 +1,10 @@
 package chat.sphinx.podcast_player.ui
 
 import chat.sphinx.concept_service_media.MediaPlayerServiceState
-import chat.sphinx.podcast_player.objects.Podcast
-import chat.sphinx.podcast_player.objects.PodcastEpisode
+import chat.sphinx.podcast_player.objects.ParcelablePodcast
+import chat.sphinx.podcast_player.objects.ParcelablePodcastEpisode
+import chat.sphinx.wrapper_podcast.Podcast
+import chat.sphinx.wrapper_podcast.PodcastEpisode
 import io.matthewnelson.concept_views.viewstate.ViewState
 
 internal sealed class PodcastPlayerViewState: ViewState<PodcastPlayerViewState>() {

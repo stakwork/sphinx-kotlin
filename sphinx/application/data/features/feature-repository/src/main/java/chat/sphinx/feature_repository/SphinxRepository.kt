@@ -65,6 +65,7 @@ import chat.sphinx.wrapper_lightning.NodeBalanceAll
 import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message_media.*
 import chat.sphinx.wrapper_message_media.token.MediaHost
+import chat.sphinx.wrapper_podcast.PodcastDestination
 import chat.sphinx.wrapper_rsa.RsaPrivateKey
 import chat.sphinx.wrapper_rsa.RsaPublicKey
 import com.squareup.moshi.Moshi
@@ -331,6 +332,17 @@ abstract class SphinxRepository(
         )
     }
 
+    override fun getPaymentsTotalFor(feedId: Long): Flow<Sat?> = flow {
+        emitAll(
+            coreDB.getSphinxDatabaseQueries()
+                .messageGetAmountSumForMessagesStartingWith("{\"feedID\":$feedId%")
+                .asFlow()
+                .mapToOneOrNull(io)
+                .map { it?.SUM }
+                .distinctUntilChanged()
+        )
+    }
+
     override val networkRefreshChats: Flow<LoadResponse<Boolean, ResponseError>> by lazy {
         flow {
             networkQueryChat.getChats().collect { loadResponse ->
@@ -433,6 +445,51 @@ abstract class SphinxRepository(
                 ).collect {}
             } catch (e: AssertionError) {}
             // TODO: Network call to update Relay
+        }
+    }
+
+    override fun streamPodcastPayments(
+        chatId: ChatId,
+        metaData: ChatMetaData,
+        podcastId: Long,
+        episodeId: Long,
+        destinations: List<PodcastDestination>
+    ) {
+
+        if (metaData.satsPerMinute.value <= 0 || destinations.isEmpty()) {
+            return
+        }
+
+        applicationScope.launch(io) {
+            val queries = coreDB.getSphinxDatabaseQueries()
+            chatLock.withLock {
+                queries.chatUpdateMetaData(metaData, chatId)
+            }
+
+            val destinationsArray: MutableList<PostStreamSatsDestinationDto> = ArrayList(destinations.size)
+
+            for (destination in destinations) {
+                destinationsArray.add(
+                    PostStreamSatsDestinationDto(destination.address, destination.type, destination.split.toDouble())
+                )
+            }
+
+            val streamSatsText = StreamSatsText(podcastId, episodeId, metaData.timeSeconds.toLong(), metaData.speed)
+
+            val postStreamSatsDto = PostStreamSatsDto(
+                metaData.satsPerMinute.value,
+                chatId.value,
+                streamSatsText.toJson(moshi),
+                true,
+                destinationsArray
+            )
+
+            try {
+                networkQueryChat.streamSats(
+                    postStreamSatsDto
+                ).collect {}
+            } catch (e: AssertionError) {
+            }
         }
     }
 
@@ -2365,14 +2422,14 @@ abstract class SphinxRepository(
 
                                                     val id: Long? = dto.chat_id
 
-                                                    if (id == null) {
-                                                        upsertMessage(dto, queries)
-                                                    } else if (chatIds.contains(ChatId(id))) {
+                                                    if (id != null && chatIds.contains(ChatId(id))) {
                                                         upsertMessage(dto, queries)
 
                                                         if (dto.updateChatDboLatestMessage) {
                                                             latestMessageMap[ChatId(id)] = dto
                                                         }
+                                                    } else {
+                                                        upsertMessage(dto, queries)
                                                     }
                                                 }
 

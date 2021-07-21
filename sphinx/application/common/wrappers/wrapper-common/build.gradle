@@ -4,5 +4,6 @@ plugins {
 }
 
 dependencies {
+    implementation project(path: ':kotlin:crypto:crypto-common')
     testImplementation testDeps.junit
 }

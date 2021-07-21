@@ -6,6 +6,8 @@ import chat.sphinx.concept_network_query_lightning.model.balance.BalanceDto
 import chat.sphinx.concept_network_query_lightning.model.channel.ChannelsDto
 import chat.sphinx.concept_network_query_lightning.model.invoice.LightningPaymentInvoiceDto
 import chat.sphinx.concept_network_query_lightning.model.invoice.InvoicesDto
+import chat.sphinx.concept_network_query_lightning.model.invoice.PayRequestDto
+import chat.sphinx.concept_network_query_lightning.model.invoice.PaymentMessageDto
 import chat.sphinx.concept_network_query_lightning.model.invoice.PostRequestPaymentDto
 import chat.sphinx.concept_network_query_lightning.model.route.RouteSuccessProbabilityDto
 import chat.sphinx.concept_network_relay_call.NetworkRelayCall
@@ -183,17 +185,24 @@ class NetworkQueryLightningImpl(
             requestBody = postPaymentDto,
             relayData = relayData
         )
+
+    override fun putLightningPaymentRequest(
+        payRequestDto: PayRequestDto,
+        relayData: Pair<AuthorizationToken, RelayUrl>?
+    ): Flow<LoadResponse<PaymentMessageDto, ResponseError>> =
+        networkRelayCall.relayPut(
+            responseJsonClass = PayLightningPaymentRequestRelayResponse::class.java,
+            relayEndpoint = ENDPOINT_INVOICES,
+            requestBodyJsonClass = PayRequestDto::class.java,
+            requestBody = payRequestDto,
+            relayData = relayData
+        )
     
 //    app.get('/getinfo', details.getInfo)
 //    app.get('/info', details.getNodeInfo)
 //    app.get('/route', details.checkRoute)
 //    app.get('/query/onchain_address/:app', queries.queryOnchainAddress)
 //    app.get('/utxos', queries.listUTXOs)
-
-    ///////////
-    /// PUT ///
-    ///////////
-//    app.put('/invoices', invoices.payInvoice)
 
     ////////////
     /// POST ///

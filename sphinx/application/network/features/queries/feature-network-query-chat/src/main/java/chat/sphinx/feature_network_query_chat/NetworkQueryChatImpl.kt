@@ -1,12 +1,11 @@
 package chat.sphinx.feature_network_query_chat
 
-import chat.sphinx.feature_network_query_chat.model.UpdateChatRelayResponse
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
 import chat.sphinx.concept_network_query_chat.model.*
 import chat.sphinx.concept_network_relay_call.NetworkRelayCall
-import chat.sphinx.feature_network_query_chat.model.DeleteChatRelayResponse
+import chat.sphinx.feature_network_query_chat.model.*
 import chat.sphinx.feature_network_query_chat.model.GetChatsRelayResponse
-import chat.sphinx.feature_network_query_chat.model.JoinTribeRelayResponse
+import chat.sphinx.feature_network_query_chat.model.StreamSatsRelayResponse
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
@@ -36,6 +35,7 @@ class NetworkQueryChatImpl(
         private const val ENDPOINT_KICK = "/kick"
         private const val ENDPOINT_MEMBER = "/member"
         private const val ENDPOINT_TRIBE = "/tribe"
+        private const val ENDPOINT_STREAM_SATS = "/stream"
 
         private const val GET_TRIBE_INFO_URL = "https://%s/tribes/%s"
         private const val GET_PODCAST_FEED_URL = "https://%s/podcast?url=%s"
@@ -119,6 +119,18 @@ class NetworkQueryChatImpl(
     /// POST ///
     ////////////
 //    app.post('/group', chats.createGroupChat)
+
+    override fun streamSats(
+        postStreamSatsDto: PostStreamSatsDto,
+        relayData: Pair<AuthorizationToken, RelayUrl>?
+    ): Flow<LoadResponse<Any?, ResponseError>> =
+        networkRelayCall.relayPost(
+            responseJsonClass = StreamSatsRelayResponse::class.java,
+            relayEndpoint = ENDPOINT_STREAM_SATS,
+            requestBodyJsonClass = PostStreamSatsDto::class.java,
+            requestBody = postStreamSatsDto,
+            relayData = relayData
+        )
 
     override fun toggleMuteChat(
         chatId: ChatId,

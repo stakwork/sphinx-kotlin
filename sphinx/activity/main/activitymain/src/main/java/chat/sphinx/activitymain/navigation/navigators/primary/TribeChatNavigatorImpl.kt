@@ -5,7 +5,7 @@ import chat.sphinx.activitymain.navigation.drivers.PrimaryNavigationDriver
 import chat.sphinx.chat_tribe.navigation.TribeChatNavigator
 import chat.sphinx.payment_send.navigation.ToPaymentSendDetail
 import chat.sphinx.podcast_player.navigation.ToPodcastPlayerScreen
-import chat.sphinx.podcast_player.objects.Podcast
+import chat.sphinx.podcast_player.objects.ParcelablePodcast
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import javax.inject.Inject
@@ -20,7 +20,7 @@ internal class TribeChatNavigatorImpl @Inject constructor(
         detailDriver.submitNavigationRequest(ToPaymentSendDetail(contactId, chatId))
     }
 
-    override suspend fun toPodcastPlayerScreen(chatId: ChatId, podcast: Podcast) {
+    override suspend fun toPodcastPlayerScreen(chatId: ChatId, podcast: ParcelablePodcast) {
         detailDriver.submitNavigationRequest(ToPodcastPlayerScreen(chatId, podcast))
     }
 }

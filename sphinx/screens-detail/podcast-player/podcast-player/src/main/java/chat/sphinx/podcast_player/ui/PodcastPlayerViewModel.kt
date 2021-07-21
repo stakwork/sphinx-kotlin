@@ -1,21 +1,27 @@
 package chat.sphinx.podcast_player.ui
 
+import android.media.MediaMetadataRetriever
+import android.net.Uri
+import android.os.Build
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
+import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_service_media.MediaPlayerServiceController
 import chat.sphinx.concept_service_media.MediaPlayerServiceState
 import chat.sphinx.concept_service_media.UserAction
 import chat.sphinx.podcast_player.navigation.PodcastPlayerNavigator
-import chat.sphinx.podcast_player.objects.Podcast
-import chat.sphinx.podcast_player.objects.PodcastEpisode
+import chat.sphinx.podcast_player.objects.toPodcast
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.lightning.Sat
+import chat.sphinx.wrapper_podcast.Podcast
+import chat.sphinx.wrapper_podcast.PodcastEpisode
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.BaseViewModel
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -27,6 +33,7 @@ internal inline val PodcastPlayerFragmentArgs.chatId: ChatId
 internal class PodcastPlayerViewModel @Inject constructor(
     dispatchers: CoroutineDispatchers,
     val navigator: PodcastPlayerNavigator,
+    protected val chatRepository: ChatRepository,
     savedStateHandle: SavedStateHandle,
     private val mediaPlayerServiceController: MediaPlayerServiceController
 ) : BaseViewModel<PodcastPlayerViewState>(
@@ -36,7 +43,7 @@ internal class PodcastPlayerViewModel @Inject constructor(
 
     private val args: PodcastPlayerFragmentArgs by savedStateHandle.navArgs()
 
-    val podcast: Podcast = args.argPodcast
+    val podcast: Podcast = args.argPodcast.toPodcast()
 
     override fun mediaServiceState(serviceState: MediaPlayerServiceState) {
         if (serviceState is MediaPlayerServiceState.ServiceActive.MediaState) {
@@ -48,7 +55,7 @@ internal class PodcastPlayerViewModel @Inject constructor(
         @Exhaustive
         when (serviceState) {
             is MediaPlayerServiceState.ServiceActive.MediaState.Playing -> {
-                podcast.playingEpisodeUpdate(serviceState.episodeId, serviceState.currentTime)
+                podcast.playingEpisodeUpdate(serviceState.episodeId, serviceState.currentTime, serviceState.episodeDuration.toLong())
                 viewStateContainer.updateViewState(PodcastPlayerViewState.MediaStateUpdate(podcast, serviceState))
             }
             is MediaPlayerServiceState.ServiceActive.MediaState.Paused -> {
@@ -56,8 +63,11 @@ internal class PodcastPlayerViewModel @Inject constructor(
                 viewStateContainer.updateViewState(PodcastPlayerViewState.MediaStateUpdate(podcast, serviceState))
             }
             is MediaPlayerServiceState.ServiceActive.MediaState.Ended -> {
-                podcast.endEpisodeUpdate(serviceState.episodeId)
+                podcast.endEpisodeUpdate(serviceState.episodeId, ::retrieveEpisodeDuration)
                 viewStateContainer.updateViewState(PodcastPlayerViewState.MediaStateUpdate(podcast, serviceState))
+            }
+            is MediaPlayerServiceState.ServiceActive.ServiceConnected -> {
+                setPaymentsDestinations()
             }
             is MediaPlayerServiceState.ServiceActive.ServiceLoading -> {
                 viewStateContainer.updateViewState(PodcastPlayerViewState.ServiceLoading)
@@ -76,8 +86,19 @@ internal class PodcastPlayerViewModel @Inject constructor(
 
     private fun podcastLoaded() {
         viewModelScope.launch(mainImmediate) {
-            delay(100L)
+            chatRepository.getChatById(args.chatId).firstOrNull()?.let { chat ->
+                chat.metaData?.let { metaData ->
+                    podcast?.setMetaData(metaData)
+                }
+            }
             viewStateContainer.updateViewState(PodcastPlayerViewState.PodcastLoaded(podcast))
+
+            mediaPlayerServiceController.submitAction(
+                UserAction.AdjustSatsPerMinute(
+                    args.chatId,
+                    podcast.getMetaData()
+                )
+            )
         }
     }
 
@@ -101,16 +122,17 @@ internal class PodcastPlayerViewModel @Inject constructor(
             mediaPlayerServiceController.submitAction(
                 UserAction.ServiceAction.Play(
                     args.chatId,
+                    podcast.id,
                     episode.id,
                     episode.enclosureUrl,
-                    Sat(0),
+                    Sat(podcast.satsPerMinute),
                     podcast.speed,
                     startTime,
                 )
             )
 
             withContext(io) {
-                podcast.didStartPlayingEpisode(episode, startTime)
+                podcast.didStartPlayingEpisode(episode, startTime, ::retrieveEpisodeDuration)
             }
 
             viewStateContainer.updateViewState(PodcastPlayerViewState.EpisodePlayed(podcast))
@@ -156,5 +178,39 @@ internal class PodcastPlayerViewModel @Inject constructor(
                 )
             )
         }
+    }
+
+    private fun setPaymentsDestinations() {
+        viewModelScope.launch(mainImmediate) {
+            podcast?.value?.destinations?.let { destinations ->
+                mediaPlayerServiceController.submitAction(
+                    UserAction.SetPaymentsDestinations(
+                        args.chatId,
+                        destinations
+                    )
+                )
+            }
+        }
+    }
+
+    fun retrieveEpisodeDuration(episodeUrl: String): Long {
+        val uri = Uri.parse(episodeUrl)
+        return uri.getMediaDuration()
+    }
+}
+
+fun Uri.getMediaDuration(): Long {
+    val retriever = MediaMetadataRetriever()
+    return try {
+        if (Build.VERSION.SDK_INT >= 14) {
+            retriever.setDataSource(this.toString(), HashMap<String, String>())
+        } else {
+            retriever.setDataSource(this.toString())
+        }
+        val duration = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)
+        retriever.release()
+        duration?.toLongOrNull() ?: 0
+    } catch (exception: Exception) {
+        0
     }
 }
