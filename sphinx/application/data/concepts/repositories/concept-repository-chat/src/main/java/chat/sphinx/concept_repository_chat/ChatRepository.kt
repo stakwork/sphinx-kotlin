@@ -58,6 +58,8 @@ interface ChatRepository {
 
     suspend fun exitTribe(chat: Chat): Response<Boolean, ResponseError>
 
+    suspend fun deleteTribe(chat: Chat): Response<Boolean, ResponseError>
+
     suspend fun updateChatProfilePic(
         chat: Chat,
         file: File,

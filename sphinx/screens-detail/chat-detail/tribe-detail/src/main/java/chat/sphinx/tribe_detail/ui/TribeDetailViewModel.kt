@@ -21,6 +21,7 @@ import chat.sphinx.menu_bottom_tribe_profile_pic.TribeProfilePicMenuHandler
 import chat.sphinx.menu_bottom_tribe_profile_pic.TribeProfilePicMenuViewModel
 import chat.sphinx.tribe.TribeMenuHandler
 import chat.sphinx.tribe.TribeMenuViewModel
+import chat.sphinx.tribe_detail.BuildConfig
 import chat.sphinx.tribe_detail.R
 import chat.sphinx.tribe_detail.navigation.TribeDetailNavigator
 import chat.sphinx.wrapper_chat.Chat
@@ -303,14 +304,27 @@ internal class TribeDetailViewModel @Inject constructor(
      * Tribe Menu Implementation
      */
     override fun deleteTribe() {
+        // TODO: Add confirmation
+        viewModelScope.launch(mainImmediate) {
+            val chat = getChat()
+            if (chat.isTribeOwnedByAccount(getOwner().nodePubKey) || BuildConfig.DEBUG) {
+                submitSideEffect(
+                    TribeDetailSideEffect.AlertConfirmDeleteTribe(chat) {
+                        viewModelScope.launch(mainImmediate) {
+                            chatRepository.deleteTribe(getChat())
+                        }
+                    }
+                )
+
+            }
+        }
         tribeMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Closed)
     }
 
     override fun shareTribe() {
         viewModelScope.launch(mainImmediate) {
             val chat = getChat()
-            if (chat.isTribeOwnedByAccount(getOwner().nodePubKey)) {
-
+            if (chat.isTribeOwnedByAccount(getOwner().nodePubKey) || BuildConfig.DEBUG) {
                 navigator.toTribeDetailScreen(chat.id, podcast)
             }
         }
@@ -320,7 +334,15 @@ internal class TribeDetailViewModel @Inject constructor(
 
     override fun exitTribe() {
         viewModelScope.launch(mainImmediate) {
-            chatRepository.exitTribe(getChat())
+            val chat = getChat()
+            submitSideEffect(
+                TribeDetailSideEffect.AlertConfirmExitTribe(chat) {
+                    viewModelScope.launch(mainImmediate) {
+                        chatRepository.exitTribe(chat)
+                    }
+                }
+            )
+
         }
         tribeMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Closed)
     }

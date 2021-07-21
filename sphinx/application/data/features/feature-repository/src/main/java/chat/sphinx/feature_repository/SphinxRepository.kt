@@ -2840,8 +2840,45 @@ abstract class SphinxRepository(
         }
 
         if (owner.nodePubKey == chat.ownerPubKey) {
-            return Response.Error(ResponseError("Delete own tribe is not supported yet"))
+            return Response.Error(ResponseError("Exit/Delete own tribe needs explicit function"))
         }
+
+        applicationScope.launch(mainImmediate) {
+            networkQueryChat.deleteChat(chat.id).collect { loadResponse ->
+                when (loadResponse) {
+                    is LoadResponse.Loading -> {}
+
+                    is Response.Error -> {
+                        response = loadResponse
+                    }
+
+                    is Response.Success -> {
+                        response = Response.Success(true)
+                        val queries = coreDB.getSphinxDatabaseQueries()
+
+                        chatLock.withLock {
+                            messageLock.withLock {
+                                withContext(io) {
+                                    queries.transaction {
+                                        deleteChatById(
+                                            loadResponse.value["chat_id"]?.toChatId() ?: chat.id,
+                                            queries,
+                                            latestMessageUpdatedTimeMap
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }.join()
+
+        return response ?: Response.Error(ResponseError(("Failed to exit tribe")))
+    }
+
+    override suspend fun deleteTribe(chat: Chat): Response<Boolean, ResponseError> {
+        var response: Response<Boolean, ResponseError>? = null
 
         applicationScope.launch(mainImmediate) {
             networkQueryChat.deleteChat(chat.id).collect { loadResponse ->

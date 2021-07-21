@@ -5,6 +5,7 @@ import androidx.lifecycle.LifecycleOwner
 import chat.sphinx.menu_bottom.databinding.LayoutMenuBottomBinding
 import chat.sphinx.menu_bottom.model.MenuBottomOption
 import chat.sphinx.menu_bottom.ui.BottomMenu
+import chat.sphinx.menu_bottom_tribe.BuildConfig
 import chat.sphinx.menu_bottom_tribe.R
 import chat.sphinx.resources.getString
 import chat.sphinx.wrapper_chat.Chat
@@ -30,7 +31,7 @@ class BottomMenuTribe(
     ) {
         val menuBottomOptions = ArrayList<MenuBottomOption>()
 
-        if (chat.isTribeOwnedByAccount(accountOwner.nodePubKey)) {
+        if (chat.isTribeOwnedByAccount(accountOwner.nodePubKey) || BuildConfig.DEBUG) {
             menuBottomOptions.add(
                 MenuBottomOption(
                     text = R.string.bottom_menu_tribe_option_share_tribe,
@@ -44,7 +45,7 @@ class BottomMenuTribe(
             menuBottomOptions.add(
                 MenuBottomOption(
                     text = R.string.bottom_menu_tribe_option_delete_tribe,
-                    textColor = R.color.primaryBlueFontColor,
+                    textColor = R.color.primaryRed,
                     onClick = {
                         tribeMenuViewModel.deleteTribe()
                     }
