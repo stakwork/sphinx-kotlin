@@ -304,7 +304,6 @@ internal class TribeDetailViewModel @Inject constructor(
      * Tribe Menu Implementation
      */
     override fun deleteTribe() {
-        // TODO: Add confirmation
         viewModelScope.launch(mainImmediate) {
             val chat = getChat()
             if (chat.isTribeOwnedByAccount(getOwner().nodePubKey) || BuildConfig.DEBUG) {
@@ -342,7 +341,6 @@ internal class TribeDetailViewModel @Inject constructor(
                     }
                 }
             )
-
         }
         tribeMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Closed)
     }
