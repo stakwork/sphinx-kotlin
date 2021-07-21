@@ -186,7 +186,7 @@ internal class ChatTribeViewModel @Inject constructor(
             @Exhaustive
             when (serviceState) {
                 is MediaPlayerServiceState.ServiceActive.MediaState.Playing -> {
-                    podcast.playingEpisodeUpdate(serviceState.episodeId, serviceState.currentTime, serviceState.episodeDuration)
+                    podcast.playingEpisodeUpdate(serviceState.episodeId, serviceState.currentTime, serviceState.episodeDuration.toLong())
                     podcastViewStateContainer.updateViewState(PodcastViewState.MediaStateUpdate(podcast))
                 }
                 is MediaPlayerServiceState.ServiceActive.MediaState.Paused -> {
@@ -312,7 +312,6 @@ internal class ChatTribeViewModel @Inject constructor(
                         chatId,
                         podcast.id,
                         episode.id,
-                        podcast.episodeDuration ?: 0,
                         episode.enclosureUrl,
                         Sat(podcast.satsPerMinute),
                         podcast.speed,

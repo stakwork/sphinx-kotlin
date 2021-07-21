@@ -304,7 +304,7 @@ internal abstract class MediaPlayerService: Service() {
                             nnData.chatId,
                             nnData.episodeId,
                             currentTime,
-                            nnData.episodeDuration
+                            nnData.durationMilliSeconds
                         )
                         mediaServiceController.dispatchState(currentState)
 
@@ -361,7 +361,6 @@ internal abstract class MediaPlayerService: Service() {
                     userAction.chatId,
                     userAction.podcastId,
                     userAction.episodeId,
-                    userAction.episodeDuration,
                     userAction.satPerMinute,
                     mp,
                     userAction.speed
@@ -406,7 +405,7 @@ internal abstract class MediaPlayerService: Service() {
                                 nnData.chatId,
                                 nnData.episodeId,
                                 currentTimeMilliseconds,
-                                nnData.episodeDuration
+                                nnData.durationMilliSeconds
                             )
                         } else {
 
@@ -415,14 +414,14 @@ internal abstract class MediaPlayerService: Service() {
                                     nnData.chatId,
                                     nnData.episodeId,
                                     currentTimeMilliseconds,
-                                    nnData.episodeDuration
+                                    nnData.durationMilliSeconds
                                 )
                             } else {
                                 MediaPlayerServiceState.ServiceActive.MediaState.Paused(
                                     nnData.chatId,
                                     nnData.episodeId,
                                     currentTimeMilliseconds,
-                                    nnData.episodeDuration
+                                    nnData.durationMilliSeconds
                                 )
                             }
 
