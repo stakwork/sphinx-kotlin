@@ -8,11 +8,11 @@ import io.matthewnelson.concept_views.viewstate.ViewState
 internal sealed class TribeDetailViewState: ViewState<TribeDetailViewState>() {
     object Idle: TribeDetailViewState()
 
-    class Tribe(
+    class TribeProfile(
         val chat: Chat,
         val accountOwner: Contact,
         val podcast: Podcast?
     ): TribeDetailViewState()
 
-    object TribeProfileUpdating: TribeDetailViewState()
+    object UpdatingTribeProfilePicture: TribeDetailViewState()
 }

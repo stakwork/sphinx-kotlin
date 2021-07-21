@@ -1,5 +1,6 @@
 package chat.sphinx.tribe_detail.ui
 
+import android.content.Context
 import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
@@ -17,14 +18,17 @@ import chat.sphinx.tribe_detail.R
 import chat.sphinx.tribe_detail.databinding.FragmentTribeDetailBinding
 import chat.sphinx.wrapper_common.eeemmddhmma
 import dagger.hilt.android.AndroidEntryPoint
-import io.matthewnelson.android_feature_screens.ui.base.BaseFragment
+import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
+import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.visible
 import kotlinx.coroutines.launch
 import javax.annotation.meta.Exhaustive
 import javax.inject.Inject
 
 @AndroidEntryPoint
-internal class TribeDetailFragment: BaseFragment<
+internal class TribeDetailFragment: SideEffectFragment<
+        Context,
+        TribeDetailSideEffect,
         TribeDetailViewState,
         TribeDetailViewModel,
         FragmentTribeDetailBinding
@@ -67,7 +71,7 @@ internal class TribeDetailFragment: BaseFragment<
         }
 
         setupFragmentLayout()
-        setupTribeDetailFunctionality()
+        setupTribeDetail()
 
         bottomMenuTribeProfilePic.initialize(binding.includeLayoutMenuBottomTribeProfilePic, viewLifecycleOwner)
     }
@@ -86,9 +90,16 @@ internal class TribeDetailFragment: BaseFragment<
         )
     }
 
-    private fun setupTribeDetailFunctionality() {
+    private fun setupTribeDetail() {
 
         binding.apply {
+            editTextProfileAliasValue.setOnFocusChangeListener { _, hasFocus ->
+                if (hasFocus) {
+                    return@setOnFocusChangeListener
+                }
+
+                viewModel.updateProfileAlias(editTextProfileAliasValue.text.toString())
+            }
             seekBarSatsPerMinute.setOnSeekBarChangeListener(
                 object : SeekBar.OnSeekBarChangeListener {
 
@@ -133,14 +144,18 @@ internal class TribeDetailFragment: BaseFragment<
         @Exhaustive
         when(viewState) {
             is TribeDetailViewState.Idle -> { }
-            is TribeDetailViewState.TribeProfileUpdating -> {
+            is TribeDetailViewState.UpdatingTribeProfilePicture -> {
                 // TODO: set loading progress
+                binding.progressBarUploadProfilePicture.visible
                 viewModel.tribeProfilePicMenuHandler.viewStateContainer.updateViewState(
                     MenuBottomViewState.Closed
                 )
             }
-            is TribeDetailViewState.Tribe -> {
+            is TribeDetailViewState.TribeProfile -> {
                 binding.apply {
+                    // Hide the upload picture progress indicator
+                    progressBarUploadProfilePicture.gone
+                    // Initialize the Tribe Specific menu bar with the
                     bottomMenuTribe.initialize(
                         viewState.chat,
                         viewState.accountOwner,
@@ -186,5 +201,9 @@ internal class TribeDetailFragment: BaseFragment<
                 }
             }
         }
+    }
+
+    override suspend fun onSideEffectCollect(sideEffect: TribeDetailSideEffect) {
+        sideEffect.execute(requireActivity())
     }
 }

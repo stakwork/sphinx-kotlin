@@ -7,6 +7,7 @@ import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.wrapper_chat.Chat
+import chat.sphinx.wrapper_chat.ChatAlias
 import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
@@ -61,5 +62,10 @@ interface ChatRepository {
         chat: Chat,
         file: File,
         mediaType: MediaType,
+    ): Response<ChatDto, ResponseError>
+
+    suspend fun updateChatProfileAlias(
+        chatId: ChatId,
+        alias: ChatAlias?
     ): Response<ChatDto, ResponseError>
 }

@@ -1017,8 +1017,7 @@ abstract class SphinxRepository(
                         networkQueryChat.updateChat(
                             chat.id,
                             PutChatDto(
-                                chat.myAlias?.value,
-                                newUrl.value
+                                my_photo_url = newUrl.value,
                             )
                         ).collect { loadResponse ->
 
@@ -1054,6 +1053,53 @@ abstract class SphinxRepository(
                 response = Response.Error(
                     ResponseError("Failed to update Chat Profile", e)
                 )
+            }
+        }.join()
+
+        LOG.d(TAG, "Completed Upload Returning: $response")
+        return response
+    }
+
+    override suspend fun updateChatProfileAlias(
+        chatId: ChatId,
+        alias: ChatAlias?
+    ): Response<ChatDto, ResponseError> {
+        var response: Response<ChatDto, ResponseError> = Response.Error(
+            ResponseError("updateChatProfilePic failed to execute")
+        )
+
+        applicationScope.launch(mainImmediate) {
+            networkQueryChat.updateChat(
+                chatId,
+                PutChatDto(
+                    my_alias = alias?.value
+                )
+            ).collect { loadResponse ->
+                @Exhaustive
+                when (loadResponse) {
+                    is LoadResponse.Loading -> {}
+                    is Response.Error -> {
+                        response = loadResponse
+                    }
+                    is Response.Success -> {
+                        response = loadResponse
+                        val queries = coreDB.getSphinxDatabaseQueries()
+
+                        chatLock.withLock {
+                            withContext(io) {
+                                queries.transaction {
+                                    upsertChat(
+                                        loadResponse.value,
+                                        moshi,
+                                        chatSeenMap,
+                                        queries,
+                                        null
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }.join()
 

@@ -1,8 +1,8 @@
 package chat.sphinx.tribe_detail.ui
 
 import android.app.Application
+import android.content.Context
 import android.net.Uri
-import android.util.Log
 import android.webkit.MimeTypeMap
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
@@ -14,6 +14,8 @@ import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
 import chat.sphinx.kotlin_response.Response
+import chat.sphinx.logger.SphinxLogger
+import chat.sphinx.logger.e
 import chat.sphinx.menu_bottom_tribe_profile_pic.TribeProfilePicMenuHandler
 import chat.sphinx.menu_bottom_tribe_profile_pic.TribeProfilePicMenuViewModel
 import chat.sphinx.tribe.TribeMenuHandler
@@ -21,13 +23,15 @@ import chat.sphinx.tribe.TribeMenuViewModel
 import chat.sphinx.tribe_detail.R
 import chat.sphinx.tribe_detail.navigation.TribeDetailNavigator
 import chat.sphinx.wrapper_chat.Chat
+import chat.sphinx.wrapper_chat.ChatAlias
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_message_media.MediaType
 import chat.sphinx.wrapper_message_media.toMediaType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
-import io.matthewnelson.android_feature_viewmodel.BaseViewModel
+import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
+import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_media_cache.MediaCacheHandler
@@ -53,7 +57,11 @@ internal class TribeDetailViewModel @Inject constructor(
     private val contactRepository: ContactRepository,
     private val mediaCacheHandler: MediaCacheHandler,
     val navigator: TribeDetailNavigator,
-): BaseViewModel<TribeDetailViewState>(dispatchers, TribeDetailViewState.Idle),
+    val LOG: SphinxLogger,
+): SideEffectViewModel<
+        Context,
+        TribeDetailSideEffect,
+        TribeDetailViewState>(dispatchers, TribeDetailViewState.Idle),
     TribeMenuViewModel,
     TribeProfilePicMenuViewModel
 {
@@ -95,6 +103,19 @@ internal class TribeDetailViewModel @Inject constructor(
         }
     }
 
+    private suspend fun updateChatViewStat() {
+        chatRepository.getChatById(chatId).collect { chat ->
+            chat?.let {
+                updateViewState(
+                    TribeDetailViewState.TribeProfile(
+                        it,
+                        getOwner(),
+                        podcast
+                    )
+                )
+            }
+        }
+    }
     private suspend fun getChat(): Chat {
         chatSharedFlow.replayCache.firstOrNull()?.let { chat ->
             return chat
@@ -121,7 +142,7 @@ internal class TribeDetailViewModel @Inject constructor(
 
     fun load() {
         viewModelScope.launch(mainImmediate) {
-            updateViewState(TribeDetailViewState.Tribe(getChat(), getOwner(), podcast))
+            updateViewState(TribeDetailViewState.TribeProfile(getChat(), getOwner(), podcast))
         }
     }
 
@@ -144,6 +165,15 @@ internal class TribeDetailViewModel @Inject constructor(
         TribeProfilePicMenuHandler()
     }
 
+    fun updateProfileAlias(alias: String?) {
+        viewModelScope.launch(mainImmediate) {
+            chatRepository.updateChatProfileAlias(
+                getChat().id,
+                alias?.let { ChatAlias(it) }
+            )
+        }
+    }
+
     override fun updateProfilePicCamera() {
         if (cameraJob?.isActive == true) {
             return
@@ -153,7 +183,7 @@ internal class TribeDetailViewModel @Inject constructor(
             val response = cameraCoordinator.submitRequest(CameraRequest)
 
             updateViewState(
-                TribeDetailViewState.TribeProfileUpdating
+                TribeDetailViewState.UpdatingTribeProfilePicture
             )
             @Exhaustive
             when (response) {
@@ -177,22 +207,16 @@ internal class TribeDetailViewModel @Inject constructor(
                                 @Exhaustive
                                 when (repoResponse) {
                                     is Response.Error -> {
-                                        // TODO: Handle Error
-                                        Log.e(TAG, "Error update chat Profile Picture: ", repoResponse.cause.exception)
+                                        LOG.e(TAG, "Error update chat Profile Picture: ", repoResponse.cause.exception)
+                                        submitSideEffect(TribeDetailSideEffect.FailedToUpdateProfilePic)
                                     }
                                     is Response.Success -> {
-                                        updateViewState(
-                                            TribeDetailViewState.Tribe(
-                                                getChat(),
-                                                getOwner(),
-                                                podcast
-                                            )
-                                        )
+                                        updateChatViewStat()
                                     }
                                 }
                             } catch (e: Exception) {
-                                // TODO: Handle error
-                                Log.e(TAG, "Error camera picture: ", e)
+                                submitSideEffect(TribeDetailSideEffect.FailedToUpdateProfilePic)
+                                LOG.e(TAG, "Error camera picture: ", e)
                             }
                             try {
                                 // Make sure we detail the new image
@@ -228,7 +252,7 @@ internal class TribeDetailViewModel @Inject constructor(
                     when (mType) {
                         is MediaType.Image -> {
                             updateViewState(
-                                TribeDetailViewState.TribeProfileUpdating
+                                TribeDetailViewState.UpdatingTribeProfilePicture
                             )
                             viewModelScope.launch(dispatchers.mainImmediate) {
                                 val newFile: File = mediaCacheHandler.createImageFile(ext)
@@ -244,26 +268,16 @@ internal class TribeDetailViewModel @Inject constructor(
                                     @Exhaustive
                                     when (repoResponse) {
                                         is Response.Error -> {
-                                            // TODO: Handle Error
-                                            Log.e(TAG, "Error update chat Profile Picture: ", repoResponse.cause.exception)
+                                            LOG.e(TAG, "Error update chat Profile Picture: ", repoResponse.cause.exception)
+                                            submitSideEffect(TribeDetailSideEffect.FailedToUpdateProfilePic)
                                         }
                                         is Response.Success -> {
-                                            updateViewState(
-                                                TribeDetailViewState.Tribe(
-                                                    getChat(),
-                                                    getOwner(),
-                                                    podcast
-                                                )
-                                            )
+                                            updateChatViewStat()
                                         }
                                     }
                                 } catch (e: Exception) {
                                     newFile.delete()
-                                    Log.e(
-                                        TAG,
-                                        "Failed to copy content to new file: ${newFile.path}",
-                                        e
-                                    )
+                                    submitSideEffect(TribeDetailSideEffect.FailedToUpdateProfilePic)
                                 }
                             }
                         }
