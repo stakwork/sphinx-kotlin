@@ -1,10 +1,8 @@
 package chat.sphinx.activitymain.navigation.navigators.detail
 
 import chat.sphinx.activitymain.navigation.drivers.DetailNavigationDriver
-import chat.sphinx.podcast_player.objects.ParcelablePodcast
-import chat.sphinx.tribe_detail.navigation.ToTribeDetailScreen
+import chat.sphinx.qr_code.navigation.ToQRCodeDetail
 import chat.sphinx.tribe_detail.navigation.TribeDetailNavigator
-import chat.sphinx.wrapper_common.dashboard.ChatId
 import javax.inject.Inject
 
 internal class TribeDetailNavigatorImpl @Inject constructor(
@@ -14,7 +12,11 @@ internal class TribeDetailNavigatorImpl @Inject constructor(
         detailDriver.closeDetailScreen()
     }
 
-    override suspend fun toTribeDetailScreen(chatId: ChatId, podcast: ParcelablePodcast?) {
-        detailDriver.submitNavigationRequest(ToTribeDetailScreen(chatId, podcast))
+    override suspend fun toShareTribeScreen(
+        qrText: String,
+        viewTitle: String,
+        description: String?,
+    ) {
+        detailDriver.submitNavigationRequest(ToQRCodeDetail(qrText, viewTitle, description))
     }
 }

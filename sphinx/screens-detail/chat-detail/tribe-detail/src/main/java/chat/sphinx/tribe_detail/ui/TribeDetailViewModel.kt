@@ -19,7 +19,6 @@ import chat.sphinx.logger.e
 import chat.sphinx.menu_bottom.ui.MenuBottomViewState
 import chat.sphinx.menu_bottom_tribe_profile_pic.TribeProfilePicMenuHandler
 import chat.sphinx.menu_bottom_tribe_profile_pic.TribeProfilePicMenuViewModel
-import chat.sphinx.podcast_player.objects.toParcelablePodcast
 import chat.sphinx.podcast_player.objects.toPodcast
 import chat.sphinx.tribe.TribeMenuHandler
 import chat.sphinx.tribe.TribeMenuViewModel
@@ -326,7 +325,8 @@ internal class TribeDetailViewModel @Inject constructor(
         viewModelScope.launch(mainImmediate) {
             val chat = getChat()
             if (chat.isTribeOwnedByAccount(getOwner().nodePubKey) || BuildConfig.DEBUG) {
-                navigator.toTribeDetailScreen(chat.id, podcast?.toParcelablePodcast())
+                val shareTribeURL = "sphinx.chat://?action=tribe&uuid=${chat.uuid.value}&host=${chat.host?.value}"
+                navigator.toShareTribeScreen(shareTribeURL, chat.name!!.value, podcast?.description)
             }
         }
 
