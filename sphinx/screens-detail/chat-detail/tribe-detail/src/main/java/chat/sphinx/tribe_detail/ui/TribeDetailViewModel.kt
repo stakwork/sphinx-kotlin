@@ -167,10 +167,17 @@ internal class TribeDetailViewModel @Inject constructor(
 
     fun updateProfileAlias(alias: String?) {
         viewModelScope.launch(mainImmediate) {
-            chatRepository.updateChatProfileAlias(
+            val response = chatRepository.updateChatProfileAlias(
                 getChat().id,
                 alias?.let { ChatAlias(it) }
             )
+
+            when (response) {
+                is Response.Success -> {}
+                is Response.Error -> {
+                    submitSideEffect(TribeDetailSideEffect.FailedToUpdateProfileAlias)
+                }
+            }
         }
     }
 

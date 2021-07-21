@@ -8,6 +8,6 @@
     <string name="tribe_costs">Price per message %d sat - Amount to Stake: %d sat</string>
     <string name="profile_picture">Profile Picture</string>
 
-    <string name="failed_to_update_profile">Failed to update profile</string>
+    <string name="failed_to_update_profile_alias">Failed to update profile</string>
     <string name="failed_to_update_profile_pic">Failed to update profile picture</string>
 </resources>

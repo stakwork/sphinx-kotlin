@@ -8,9 +8,9 @@ import io.matthewnelson.concept_views.sideeffect.SideEffect
 
 internal sealed class  TribeDetailSideEffect: SideEffect<Context>()  {
 
-    object FailedToUpdateProfile: TribeDetailSideEffect() {
+    object FailedToUpdateProfileAlias: TribeDetailSideEffect() {
         override suspend fun execute(value: Context) {
-            SphinxToastUtils(false).show(value, R.string.failed_to_update_profile)
+            SphinxToastUtils(false).show(value, R.string.failed_to_update_profile_alias)
         }
     }
 
