@@ -1,6 +1,7 @@
 package chat.sphinx.chat_tribe.ui
 
 import android.app.Application
+import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.camera_view_model_coordinator.request.CameraRequest
@@ -8,8 +9,10 @@ import chat.sphinx.camera_view_model_coordinator.response.CameraResponse
 import chat.sphinx.chat_common.ui.ChatSideEffect
 import chat.sphinx.chat_common.ui.ChatViewModel
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
+import chat.sphinx.chat_tribe.R
 import chat.sphinx.chat_tribe.navigation.TribeChatNavigator
 import chat.sphinx.concept_meme_server.MemeServerTokenHandler
+import chat.sphinx.concept_network_query_chat.model.toPodcast
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_lightning.model.route.isRouteAvailable
 import chat.sphinx.concept_repository_chat.ChatRepository
@@ -24,17 +27,23 @@ import chat.sphinx.kotlin_response.*
 import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.logger.d
 import chat.sphinx.logger.e
-import chat.sphinx.podcast_player.objects.Podcast
-import chat.sphinx.podcast_player.objects.PodcastEpisode
-import chat.sphinx.podcast_player.objects.toPodcast
+import chat.sphinx.podcast_player.objects.toParcelablePodcast
+import chat.sphinx.podcast_player.ui.getMediaDuration
 import chat.sphinx.resources.getRandomColor
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.ChatName
+import chat.sphinx.wrapper_chat.isTribeOwnedByAccount
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.Sat
+import chat.sphinx.wrapper_common.lightning.asFormattedString
+import chat.sphinx.wrapper_common.lightning.toSat
+import chat.sphinx.wrapper_common.lightning.unit
 import chat.sphinx.wrapper_common.util.getInitials
+import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_message.Message
+import chat.sphinx.wrapper_podcast.Podcast
+import chat.sphinx.wrapper_podcast.PodcastEpisode
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
@@ -42,6 +51,7 @@ import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_media_cache.MediaCacheHandler
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -176,7 +186,7 @@ internal class ChatTribeViewModel @Inject constructor(
             @Exhaustive
             when (serviceState) {
                 is MediaPlayerServiceState.ServiceActive.MediaState.Playing -> {
-                    podcast.playingEpisodeUpdate(serviceState.episodeId, serviceState.currentTime)
+                    podcast.playingEpisodeUpdate(serviceState.episodeId, serviceState.currentTime, serviceState.episodeDuration.toLong())
                     podcastViewStateContainer.updateViewState(PodcastViewState.MediaStateUpdate(podcast))
                 }
                 is MediaPlayerServiceState.ServiceActive.MediaState.Paused -> {
@@ -184,8 +194,11 @@ internal class ChatTribeViewModel @Inject constructor(
                     podcastViewStateContainer.updateViewState(PodcastViewState.MediaStateUpdate(podcast))
                 }
                 is MediaPlayerServiceState.ServiceActive.MediaState.Ended -> {
-                    podcast.endEpisodeUpdate(serviceState.episodeId)
+                    podcast.endEpisodeUpdate(serviceState.episodeId, ::retrieveEpisodeDuration)
                     podcastViewStateContainer.updateViewState(PodcastViewState.MediaStateUpdate(podcast))
+                }
+                is MediaPlayerServiceState.ServiceActive.ServiceConnected -> {
+                    setPaymentsDestinations()
                 }
                 is MediaPlayerServiceState.ServiceActive.ServiceLoading -> {
                     podcastViewStateContainer.updateViewState(PodcastViewState.ServiceLoading)
@@ -213,29 +226,64 @@ internal class ChatTribeViewModel @Inject constructor(
                 podcast = podcastDto.toPodcast()
 
                 chatRepository.getChatById(chatId).firstOrNull()?.let { chat ->
-//                    val pricePerMessage = chat.pricePerMessage?.value ?: 0
-//                    val escrowAmount = chat.escrowAmount?.value ?: 0
-//
-//                    submitSideEffect(
-//                        ChatSideEffect.Notify(
-//                            "Price per message: $pricePerMessage\n Amount to Stake: $escrowAmount"
-//                        )
-//                    )
-
                     chat.metaData?.let { metaData ->
                         podcast?.setMetaData(metaData)
                     }
                 }
+
+                mediaPlayerServiceController.submitAction(
+                    UserAction.AdjustSatsPerMinute(
+                        args.chatId,
+                        podcast!!.getMetaData()
+                    )
+                )
             }
         }
 
         return podcast
     }
 
+    fun getPodcastContributionsString(): Flow<String> = flow {
+        podcast?.id?.let { podcastId ->
+            val owner: Contact = contactRepository.accountOwner.value.let { contact ->
+                if (contact != null) {
+                    contact
+                } else {
+                    var resolvedOwner: Contact? = null
+                    try {
+                        contactRepository.accountOwner.collect { ownerContact ->
+                            if (ownerContact != null) {
+                                resolvedOwner = ownerContact
+                                throw Exception()
+                            }
+                        }
+                    } catch (e: Exception) {
+                    }
+                    delay(25L)
+
+                    resolvedOwner!!
+                }
+            }
+
+            chatRepository.getChatById(chatId).firstOrNull()?.let { chat ->
+                messageRepository.getPaymentsTotalFor(podcastId).collect { paymentsTotal ->
+                    paymentsTotal?.let {
+                        val isMyTribe = chat.isTribeOwnedByAccount(owner.nodePubKey)
+                        val label = app.getString(if (isMyTribe) R.string.chat_tribe_earned else R.string.chat_tribe_contributed)
+
+                        emit(
+                            label + " ${it.asFormattedString()} ${it.unit}"
+                        )
+                    }
+                }
+            }
+        }
+    }
+
     fun goToPodcastPlayerScreen() {
         podcast?.let { podcast ->
             viewModelScope.launch(mainImmediate) {
-                (chatNavigator as TribeChatNavigator).toPodcastPlayerScreen(chatId, podcast)
+                (chatNavigator as TribeChatNavigator).toPodcastPlayerScreen(chatId, podcast.toParcelablePodcast())
             }
         }
     }
@@ -256,15 +304,16 @@ internal class ChatTribeViewModel @Inject constructor(
         viewModelScope.launch(mainImmediate) {
             podcast?.let { podcast ->
                 withContext(io) {
-                    podcast.didStartPlayingEpisode(episode, startTime)
+                    podcast.didStartPlayingEpisode(episode, startTime, ::retrieveEpisodeDuration)
                 }
 
                 mediaPlayerServiceController.submitAction(
                     UserAction.ServiceAction.Play(
                         chatId,
+                        podcast.id,
                         episode.id,
                         episode.enclosureUrl,
-                        Sat(0),
+                        Sat(podcast.satsPerMinute),
                         podcast.speed,
                         startTime,
                     )
@@ -299,6 +348,18 @@ internal class ChatTribeViewModel @Inject constructor(
         }
     }
 
+    private fun setPaymentsDestinations() {
+        viewModelScope.launch(mainImmediate) {
+            podcast?.value?.destinations?.let { destinations ->
+                mediaPlayerServiceController.submitAction(
+                    UserAction.SetPaymentsDestinations(
+                        args.chatId,
+                        destinations
+                    )
+                )
+            }
+        }
+    }
 
     fun exitTribeGetUserConfirmation() {
         viewModelScope.launch(mainImmediate) {
@@ -352,5 +413,10 @@ internal class ChatTribeViewModel @Inject constructor(
             } catch (e: Exception) {}
 
         }
+    }
+
+    fun retrieveEpisodeDuration(episodeUrl: String): Long {
+        val uri = Uri.parse(episodeUrl)
+        return uri.getMediaDuration()
     }
 }

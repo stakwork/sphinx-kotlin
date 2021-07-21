@@ -9,6 +9,7 @@ import android.net.wifi.WifiManager
 import android.os.Binder
 import android.os.IBinder
 import android.os.PowerManager
+import android.util.Log
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.concept_service_media.MediaPlayerServiceState
@@ -146,6 +147,18 @@ internal abstract class MediaPlayerService: Service() {
                     repositoryMedia.updateChatMetaData(userAction.chatId, userAction.chatMetaData)
 
                 }
+                is UserAction.AdjustSatsPerMinute -> {
+                    podData?.let { nnData ->
+                        nnData.setSatsPerMinute(userAction.chatMetaData.satsPerMinute)
+                    }
+
+                    repositoryMedia.updateChatMetaData(userAction.chatId, userAction.chatMetaData)
+                }
+                is UserAction.SetPaymentsDestinations -> {
+                    podData?.let { nnData ->
+                        nnData.setDestinations(userAction.destinations)
+                    }
+                }
                 is UserAction.ServiceAction.Pause -> {
 
                     pausePlayer(
@@ -158,6 +171,12 @@ internal abstract class MediaPlayerService: Service() {
                 is UserAction.ServiceAction.Play -> {
 
                     podData?.let { nnData ->
+                        if (nnData.chatId != userAction.chatId) {
+                            //Podcast has changed. Payments Destinations needs to be set again
+                            currentState = MediaPlayerServiceState.ServiceActive.ServiceConnected
+                            mediaServiceController.dispatchState(currentState)
+                        }
+
                         if (
                             nnData.chatId == userAction.chatId &&
                             nnData.episodeId == userAction.episodeId
@@ -209,7 +228,7 @@ internal abstract class MediaPlayerService: Service() {
                                 ChatMetaData(
                                     ItemId(nnData.episodeId),
                                     nnData.satsPerMinute,
-                                    nnData.mediaPlayer.currentPosition,
+                                    nnData.currentTimeSeconds,
                                     nnData.speed
                                 )
                             )
@@ -224,7 +243,7 @@ internal abstract class MediaPlayerService: Service() {
                         ChatMetaData(
                             ItemId(userAction.episodeId),
                             userAction.satPerMinute,
-                            userAction.startTime,
+                            userAction.startTime / 1000,
                             userAction.speed
                         )
                     )
@@ -237,7 +256,7 @@ internal abstract class MediaPlayerService: Service() {
                             nnPlayer.episodeId == userAction.chatMetaData.itemId.value
                         ) {
                             try {
-                                nnPlayer.mediaPlayer.seekTo(userAction.chatMetaData.timeSeconds)
+                                nnPlayer.mediaPlayer.seekTo(userAction.chatMetaData.timeSeconds * 1000)
                                 // TODO: Dispatch State
                             } catch (e: IllegalStateException) {
                                 LOG.e(
@@ -279,12 +298,13 @@ internal abstract class MediaPlayerService: Service() {
                         }
 
                         stateDispatcherJob?.cancel()
-                        val currentTime = nnData.mediaPlayer.currentPosition
+                        val currentTime = nnData.currentTimeMilliSeconds
 
                         currentState = MediaPlayerServiceState.ServiceActive.MediaState.Paused(
                             nnData.chatId,
                             nnData.episodeId,
-                            currentTime
+                            currentTime,
+                            nnData.durationMilliSeconds
                         )
                         mediaServiceController.dispatchState(currentState)
 
@@ -293,7 +313,7 @@ internal abstract class MediaPlayerService: Service() {
                             ChatMetaData(
                                 ItemId(nnData.episodeId),
                                 nnData.satsPerMinute,
-                                currentTime,
+                                nnData.currentTimeSeconds,
                                 nnData.speed,
                             )
                         )
@@ -339,6 +359,7 @@ internal abstract class MediaPlayerService: Service() {
                 mp.prepareAsync()
                 podData = PodcastDataHolder.instantiate(
                     userAction.chatId,
+                    userAction.podcastId,
                     userAction.episodeId,
                     userAction.satPerMinute,
                     mp,
@@ -355,18 +376,25 @@ internal abstract class MediaPlayerService: Service() {
                 while (isActive) {
                     val speed: Double = podData?.speed ?: 1.0
                     podData?.let { nnData ->
-                        val currentTime = nnData.mediaPlayer.currentPosition
+                        val currentTimeMilliseconds = nnData.currentTimeMilliSeconds
+                        val currentTimeSeconds = nnData.currentTimeSeconds
 
                         if (count >= 60.0 * speed) {
-                            repositoryMedia.updateChatMetaData(
+
+                            //Chat meta data is updated on relay automatically on stream payments
+                            repositoryMedia.streamPodcastPayments(
                                 nnData.chatId,
                                 ChatMetaData(
                                     ItemId(nnData.episodeId),
                                     nnData.satsPerMinute,
-                                    currentTime,
+                                    currentTimeSeconds,
                                     speed,
-                                )
+                                ),
+                                nnData.podcastId,
+                                nnData.episodeId,
+                                nnData.destinations
                             )
+
                             count = 0.0
                         } else {
                             count += 1.0
@@ -376,21 +404,24 @@ internal abstract class MediaPlayerService: Service() {
                             currentState = MediaPlayerServiceState.ServiceActive.MediaState.Playing(
                                 nnData.chatId,
                                 nnData.episodeId,
-                                currentTime
+                                currentTimeMilliseconds,
+                                nnData.durationMilliSeconds
                             )
                         } else {
 
-                            val state = if (nnData.mediaPlayer.duration <= currentTime) {
+                            val state = if (nnData.mediaPlayer.duration <= currentTimeMilliseconds) {
                                 MediaPlayerServiceState.ServiceActive.MediaState.Ended(
                                     nnData.chatId,
                                     nnData.episodeId,
-                                    currentTime
+                                    currentTimeMilliseconds,
+                                    nnData.durationMilliSeconds
                                 )
                             } else {
                                 MediaPlayerServiceState.ServiceActive.MediaState.Paused(
                                     nnData.chatId,
                                     nnData.episodeId,
-                                    currentTime
+                                    currentTimeMilliseconds,
+                                    nnData.durationMilliSeconds
                                 )
                             }
 
@@ -424,7 +455,7 @@ internal abstract class MediaPlayerService: Service() {
                     ChatMetaData(
                         ItemId(data.episodeId),
                         data.satsPerMinute,
-                        data.mediaPlayer.currentPosition,
+                        data.currentTimeSeconds,
                         data.speed,
                     )
                 )

@@ -1,20 +1,12 @@
-package chat.sphinx.podcast_player.objects
+package chat.sphinx.wrapper_podcast
 
-import android.media.MediaMetadataRetriever
-import android.net.Uri
-import android.os.Build
-import android.os.Parcelable
-import chat.sphinx.concept_network_query_chat.model.PodcastDto
 import chat.sphinx.wrapper_chat.ChatMetaData
 import chat.sphinx.wrapper_common.ItemId
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.lightning.toSat
-import kotlinx.parcelize.IgnoredOnParcel
-import kotlinx.parcelize.Parcelize
 import kotlin.math.roundToInt
 
 
-@Parcelize
 class Podcast(
     val id: Long,
     val title: String,
@@ -23,33 +15,27 @@ class Podcast(
     val image: String,
     val value: PodcastValue,
     val episodes: List<PodcastEpisode>,
-): Parcelable {
+) {
 
     //MetaData
     @Volatile
-    @IgnoredOnParcel
     var episodeId: Long? = null
 
     @Volatile
-    @IgnoredOnParcel
-    var timeSeconds: Int? = null
+    var timeMilliSeconds: Int? = null
 
     @Volatile
-    @IgnoredOnParcel
     var speed: Double = 1.0
 
     @Volatile
-    @IgnoredOnParcel
-    var satsPerMinute: Long = 0
+    var satsPerMinute: Long = value.model.suggested.toLong()
 
     //Duration
     @Volatile
-    @IgnoredOnParcel
     var episodeDuration: Long? = null
 
     //Current Episode
     @Volatile
-    @IgnoredOnParcel
     var playingEpisode: PodcastEpisode? = null
 
 
@@ -57,7 +43,7 @@ class Podcast(
         get() = episodes.count()
 
     val currentTime: Int
-        get() = timeSeconds ?: 0
+        get() = timeMilliSeconds ?: 0
 
     val isPlaying: Boolean
         get() = playingEpisode?.playing ?: false
@@ -77,7 +63,7 @@ class Podcast(
 
     fun setMetaData(metaData: ChatMetaData) {
         episodeId = metaData.itemId.value
-        timeSeconds = metaData.timeSeconds
+        timeMilliSeconds = metaData.timeSeconds * 1000
         speed = metaData.speed
         satsPerMinute = metaData.satsPerMinute.value
 
@@ -88,7 +74,7 @@ class Podcast(
         ChatMetaData(
             ItemId(episodeId ?: 0),
             satsPerMinute.toSat() ?: Sat(0),
-            timeSeconds ?: 0,
+            (timeMilliSeconds ?: 0) / 1000,
             speed,
         )
 
@@ -113,6 +99,7 @@ class Podcast(
                 return episode
             }
         }
+
         return episodes[0]
     }
 
@@ -125,7 +112,9 @@ class Podcast(
         return episodes[0]
     }
 
-    fun getCurrentEpisodeDuration(): Long {
+    fun getCurrentEpisodeDuration(
+        durationRetrieverHandle: (url: String) -> Long
+    ): Long {
         if (episodeDuration == null) {
 
             if (playingEpisode == null) {
@@ -133,8 +122,7 @@ class Podcast(
             }
 
             playingEpisode?.let { episode ->
-                val uri = Uri.parse(episode.enclosureUrl)
-                episodeDuration = uri.getMediaDuration()
+                episodeDuration = durationRetrieverHandle(episode.enclosureUrl)
             }
         }
 
@@ -142,12 +130,18 @@ class Podcast(
     }
 
     @Throws(ArithmeticException::class)
-    fun getPlayingProgress(): Int {
-        val progress = (currentTime.toLong() * 100) / getCurrentEpisodeDuration()
+    fun getPlayingProgress(
+        durationRetrieverHandle: (url: String) -> Long
+    ): Int {
+        val progress = (currentTime.toLong() * 100) / getCurrentEpisodeDuration(durationRetrieverHandle)
         return progress.toInt()
     }
 
-    fun didStartPlayingEpisode(episode: PodcastEpisode, time: Int) {
+    fun didStartPlayingEpisode(
+        episode: PodcastEpisode,
+        time: Int,
+        durationRetrieverHandle: (url: String) -> Long
+    ) {
         val didChangeEpisode = this.episodeId != episode.id
 
         if (didChangeEpisode) {
@@ -158,16 +152,24 @@ class Podcast(
 
         this.playingEpisode?.playing = true
         this.episodeId = episode.id
-        this.timeSeconds = time
+        this.timeMilliSeconds = time
 
-        getCurrentEpisodeDuration()
+        getCurrentEpisodeDuration(durationRetrieverHandle)
     }
 
     fun didSeekTo(time: Int) {
-        this.timeSeconds = time
+        this.timeMilliSeconds = time
     }
 
-    fun playingEpisodeUpdate(episodeId: Long, time: Int) {
+    fun playingEpisodeUpdate(episodeId: Long, time: Int, duration: Long) {
+        if (playingEpisode == null) {
+            this.episodeId?.let { currentEpisodeId ->
+                this.playingEpisode = getEpisodeWithId(currentEpisodeId)
+            }
+        }
+
+        this.episodeDuration = if (duration > 0) duration else this.episodeDuration
+
         if (episodeId != playingEpisode?.id) {
             this.playingEpisode?.playing = false
 
@@ -179,7 +181,7 @@ class Podcast(
             nnEpisode.playing = true
 
             this.episodeId = nnEpisode.id
-            this.timeSeconds = time
+            this.timeMilliSeconds = time
         }
     }
 
@@ -189,52 +191,33 @@ class Podcast(
         }
     }
 
-    fun endEpisodeUpdate(episodeId: Long) {
+    fun endEpisodeUpdate(
+        episodeId: Long,
+        durationRetrieverHandle: (url: String) -> Long
+    ) {
         playingEpisode?.let { episode ->
             val nextEpisode = getNextEpisode(episodeId)
-            didEndPlayingEpisode(episode, nextEpisode)
+            didEndPlayingEpisode(episode, nextEpisode, durationRetrieverHandle)
         }
     }
 
-    private fun didEndPlayingEpisode(episode: PodcastEpisode, nextEpisode: PodcastEpisode) {
+    private fun didEndPlayingEpisode(
+        episode: PodcastEpisode,
+        nextEpisode: PodcastEpisode,
+        durationRetrieverHandle: (url: String) -> Long
+    ) {
         episode.playing = false
 
         this.playingEpisode = nextEpisode
         this.episodeId = nextEpisode.id
         this.episodeDuration = null
 
-        this.timeSeconds = 0
+        this.timeMilliSeconds = 0
 
-        getCurrentEpisodeDuration()
+        getCurrentEpisodeDuration(durationRetrieverHandle)
     }
 
     fun didPausePlayingEpisode(episode: PodcastEpisode) {
         episode.playing = false
     }
-}
-
-fun Uri.getMediaDuration(): Long {
-    val retriever = MediaMetadataRetriever()
-    return try {
-        if (Build.VERSION.SDK_INT >= 14) {
-            retriever.setDataSource(this.toString(), HashMap<String, String>())
-        } else {
-            retriever.setDataSource(this.toString())
-        }
-        val duration = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)
-        retriever.release()
-        duration?.toLongOrNull() ?: 0
-    } catch (exception: Exception) {
-        0
-    }
-}
-
-fun PodcastDto.toPodcast(): Podcast {
-    val podcastEpisodes: MutableList<PodcastEpisode> = ArrayList(episodes.size)
-
-    for (episode in episodes) {
-        podcastEpisodes.add(episode.toPodcastEpisode())
-    }
-
-    return Podcast(id, title, description, author, image, value.toPodcastValue(), podcastEpisodes)
 }

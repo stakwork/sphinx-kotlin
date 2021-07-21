@@ -14,11 +14,10 @@ import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.concept_service_media.MediaPlayerServiceState
 import chat.sphinx.podcast_player.R
 import chat.sphinx.podcast_player.databinding.LayoutEpisodeListItemHolderBinding
-import chat.sphinx.podcast_player.objects.Podcast
-import chat.sphinx.podcast_player.objects.PodcastEpisode
 import chat.sphinx.podcast_player.ui.PodcastPlayerViewModel
 import chat.sphinx.podcast_player.ui.PodcastPlayerViewState
 import chat.sphinx.wrapper_chat.*
+import chat.sphinx.wrapper_podcast.PodcastEpisode
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_viewmodel.collectViewState
 import io.matthewnelson.android_feature_viewmodel.currentViewState

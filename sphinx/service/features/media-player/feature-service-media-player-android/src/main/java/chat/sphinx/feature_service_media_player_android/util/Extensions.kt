@@ -14,6 +14,7 @@ internal inline fun UserAction.ServiceAction.Play.toIntent(
     val intent = Intent(context.applicationContext, SphinxMediaPlayerService::class.java)
     intent.action = "PLAY"
     intent.putExtra("CHAT_ID", chatId.value)
+    intent.putExtra("PODCAST_ID", podcastId)
     intent.putExtra("EPISODE_ID", episodeId)
     intent.putExtra("EPISODE_URL", episodeUrl)
     intent.putExtra("SAT_PER_MINUTE", satPerMinute.value)
@@ -37,6 +38,14 @@ internal inline fun Intent.toServiceActionPlay(): UserAction.ServiceAction.Play?
             } catch (e: IllegalArgumentException) {
                 return null
             }
+        }
+    }
+
+    val podcastId: Long = getLongExtra("PODCAST_ID", -1L).let {
+        if (it == -1L) {
+            return null
+        } else {
+            it
         }
     }
 
@@ -66,6 +75,7 @@ internal inline fun Intent.toServiceActionPlay(): UserAction.ServiceAction.Play?
 
     return UserAction.ServiceAction.Play(
         chatId,
+        podcastId,
         episodeId,
         getStringExtra("EPISODE_URL") ?: return null,
         getLongExtra("SAT_PER_MINUTE", -1L).toSat() ?: return null,

@@ -1,5 +1,6 @@
 package chat.sphinx.chat_tribe.ui
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
@@ -15,10 +16,17 @@ import chat.sphinx.chat_tribe.R
 import chat.sphinx.chat_tribe.databinding.FragmentChatTribeBinding
 import chat.sphinx.chat_tribe.databinding.LayoutPodcastPlayerFooterBinding
 import chat.sphinx.concept_image_loader.ImageLoader
-import chat.sphinx.podcast_player.objects.Podcast
+import chat.sphinx.resources.getString
+import chat.sphinx.wrapper_common.lightning.Sat
+import chat.sphinx.wrapper_common.lightning.asFormattedString
+import chat.sphinx.wrapper_common.lightning.unit
+import chat.sphinx.wrapper_podcast.Podcast
 import dagger.hilt.android.AndroidEntryPoint
+import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
+import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.concept_views.viewstate.collect
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -75,6 +83,7 @@ internal class ChatTribeFragment: ChatFragment<
         lifecycleScope.launch(viewModel.mainImmediate) {
             viewModel.loadTribeAndPodcastData()?.let { podcast ->
                 configurePodcastPlayer(podcast)
+                configureContributions()
                 addPodcastOnClickListeners(podcast)
             }
         }
@@ -82,6 +91,21 @@ internal class ChatTribeFragment: ChatFragment<
         headerBinding.apply {
             imageViewChatHeaderExitTribe.setOnClickListener {
                 viewModel.exitTribeGetUserConfirmation()
+            }
+        }
+    }
+
+    private fun configureContributions() {
+        lifecycleScope.launch(viewModel.mainImmediate) {
+            viewModel.getPodcastContributionsString().collect { contributionsString ->
+                binding.includeChatTribeHeader.apply {
+                    textViewChatHeaderContributionsIcon.visible
+                    textViewChatHeaderContributions.apply {
+                        visible
+                        @SuppressLint("SetTextI18n")
+                        text = contributionsString
+                    }
+                }
             }
         }
     }
@@ -107,7 +131,7 @@ internal class ChatTribeFragment: ChatFragment<
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             val progress: Int = withContext(viewModel.io) {
                 try {
-                    podcast.getPlayingProgress()
+                    podcast.getPlayingProgress(viewModel::retrieveEpisodeDuration)
                 } catch (e: ArithmeticException) {
                     0
                 }

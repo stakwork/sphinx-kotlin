@@ -54,6 +54,11 @@ abstract class NetworkQueryChat {
     ////////////
 //    app.post('/group', chats.createGroupChat)\
 
+    abstract fun streamSats(
+        postStreamSatsDto: PostStreamSatsDto,
+        relayData: Pair<AuthorizationToken, RelayUrl>? = null
+    ): Flow<LoadResponse<Any?, ResponseError>>
+
     abstract fun toggleMuteChat(
         chatId: ChatId,
         muted: ChatMuted,

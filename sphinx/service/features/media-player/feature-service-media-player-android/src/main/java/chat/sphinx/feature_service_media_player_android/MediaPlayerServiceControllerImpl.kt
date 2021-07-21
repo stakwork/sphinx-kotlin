@@ -14,6 +14,7 @@ import chat.sphinx.feature_service_media_player_android.service.MediaPlayerServi
 import chat.sphinx.feature_service_media_player_android.service.SphinxMediaPlayerService
 import chat.sphinx.feature_service_media_player_android.util.toIntent
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.sync.Mutex
@@ -59,6 +60,8 @@ internal class MediaPlayerServiceControllerImpl(
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             if (service != null) {
                 binder.value = service as MediaPlayerService.MediaPlayerServiceBinder
+
+                dispatchState(MediaPlayerServiceState.ServiceActive.ServiceConnected)
             } else {
                 clearBinderReference()
             }
@@ -77,6 +80,9 @@ internal class MediaPlayerServiceControllerImpl(
     override suspend fun submitAction(userAction: UserAction) {
         binder.value?.processUserAction(userAction) ?: when (userAction) {
             is UserAction.AdjustSpeed -> {
+                repositoryMedia.updateChatMetaData(userAction.chatId, userAction.chatMetaData)
+            }
+            is UserAction.AdjustSatsPerMinute -> {
                 repositoryMedia.updateChatMetaData(userAction.chatId, userAction.chatMetaData)
             }
             is UserAction.ServiceAction.Pause -> {
