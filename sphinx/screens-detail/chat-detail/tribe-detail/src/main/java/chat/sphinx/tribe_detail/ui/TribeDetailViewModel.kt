@@ -19,6 +19,8 @@ import chat.sphinx.logger.e
 import chat.sphinx.menu_bottom.ui.MenuBottomViewState
 import chat.sphinx.menu_bottom_tribe_profile_pic.TribeProfilePicMenuHandler
 import chat.sphinx.menu_bottom_tribe_profile_pic.TribeProfilePicMenuViewModel
+import chat.sphinx.podcast_player.objects.toParcelablePodcast
+import chat.sphinx.podcast_player.objects.toPodcast
 import chat.sphinx.tribe.TribeMenuHandler
 import chat.sphinx.tribe.TribeMenuViewModel
 import chat.sphinx.tribe_detail.BuildConfig
@@ -75,7 +77,7 @@ internal class TribeDetailViewModel @Inject constructor(
     private val args: TribeDetailFragmentArgs by savedStateHandle.navArgs()
 
     val chatId = args.chatId
-    val podcast = args.argPodcast
+    val podcast = args.argPodcast?.toPodcast()
 
     private val chatSharedFlow: SharedFlow<Chat?> = flow {
         emitAll(chatRepository.getChatById(chatId))
@@ -324,7 +326,7 @@ internal class TribeDetailViewModel @Inject constructor(
         viewModelScope.launch(mainImmediate) {
             val chat = getChat()
             if (chat.isTribeOwnedByAccount(getOwner().nodePubKey) || BuildConfig.DEBUG) {
-                navigator.toTribeDetailScreen(chat.id, podcast)
+                navigator.toTribeDetailScreen(chat.id, podcast?.toParcelablePodcast())
             }
         }
 

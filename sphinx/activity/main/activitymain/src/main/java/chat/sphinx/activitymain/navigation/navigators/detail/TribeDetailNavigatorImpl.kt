@@ -1,7 +1,7 @@
 package chat.sphinx.activitymain.navigation.navigators.detail
 
 import chat.sphinx.activitymain.navigation.drivers.DetailNavigationDriver
-import chat.sphinx.podcast_player.objects.Podcast
+import chat.sphinx.podcast_player.objects.ParcelablePodcast
 import chat.sphinx.tribe_detail.navigation.ToTribeDetailScreen
 import chat.sphinx.tribe_detail.navigation.TribeDetailNavigator
 import chat.sphinx.wrapper_common.dashboard.ChatId
@@ -14,7 +14,7 @@ internal class TribeDetailNavigatorImpl @Inject constructor(
         detailDriver.closeDetailScreen()
     }
 
-    override suspend fun toTribeDetailScreen(chatId: ChatId, podcast: Podcast?) {
+    override suspend fun toTribeDetailScreen(chatId: ChatId, podcast: ParcelablePodcast?) {
         detailDriver.submitNavigationRequest(ToTribeDetailScreen(chatId, podcast))
     }
 }
