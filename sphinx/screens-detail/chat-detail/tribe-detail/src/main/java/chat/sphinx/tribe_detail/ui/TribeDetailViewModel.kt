@@ -225,7 +225,7 @@ internal class TribeDetailViewModel @Inject constructor(
                                 LOG.e(TAG, "Error camera picture: ", e)
                             }
                             try {
-                                // Make sure we detail the new image
+                                // Make sure we delete the new image from the device
                                 response.value.value.delete()
                             } catch (e: Exception) {}
                         }
