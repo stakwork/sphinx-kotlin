@@ -1,5 +1,6 @@
 package chat.sphinx.concept_repository_chat
 
+import chat.sphinx.concept_network_query_chat.model.ChatDto
 import chat.sphinx.concept_network_query_chat.model.PodcastDto
 import chat.sphinx.concept_network_query_chat.model.TribeDto
 import chat.sphinx.kotlin_response.LoadResponse
@@ -60,5 +61,5 @@ interface ChatRepository {
         chat: Chat,
         file: File,
         mediaType: MediaType,
-    ): Response<Any, ResponseError>
+    ): Response<ChatDto, ResponseError>
 }

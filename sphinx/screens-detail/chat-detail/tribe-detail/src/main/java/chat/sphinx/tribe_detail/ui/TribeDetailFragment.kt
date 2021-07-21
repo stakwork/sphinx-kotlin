@@ -20,6 +20,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.base.BaseFragment
 import io.matthewnelson.android_feature_screens.util.visible
 import kotlinx.coroutines.launch
+import javax.annotation.meta.Exhaustive
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -129,8 +130,15 @@ internal class TribeDetailFragment: BaseFragment<
     }
 
     override suspend fun onViewStateFlowCollect(viewState: TribeDetailViewState) {
+        @Exhaustive
         when(viewState) {
             is TribeDetailViewState.Idle -> { }
+            is TribeDetailViewState.TribeProfileUpdating -> {
+                // TODO: set loading progress
+                viewModel.tribeProfilePicMenuHandler.viewStateContainer.updateViewState(
+                    MenuBottomViewState.Closed
+                )
+            }
             is TribeDetailViewState.Tribe -> {
                 binding.apply {
                     bottomMenuTribe.initialize(

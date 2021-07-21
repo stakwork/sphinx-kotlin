@@ -19,9 +19,9 @@ class BottomMenuTribeProfilePic(
     tribeProfilePicMenuViewModel.tribeProfilePicMenuHandler.viewStateContainer,
 ) {
 
-    val contentChooserContract: ActivityResultLauncher<String> =
+    private val contentChooserContract: ActivityResultLauncher<String> =
         fragment.registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-            tribeProfilePicMenuViewModel.tribeProfilePicMenuHandler.handleActivityResultUri(uri)
+            tribeProfilePicMenuViewModel.handleActivityResultUri(uri)
         }
 
     fun initialize(
@@ -36,7 +36,7 @@ class BottomMenuTribeProfilePic(
                         text = R.string.bottom_menu_tribe_profile_pic_option_camera,
                         textColor = R.color.primaryBlueFontColor,
                         onClick = {
-                            tribeProfilePicMenuViewModel.tribeProfilePicMenuHandler.updateProfilePicCamera()
+                            tribeProfilePicMenuViewModel.updateProfilePicCamera()
                         }
                     ),
                     MenuBottomOption(

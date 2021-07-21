@@ -986,8 +986,10 @@ abstract class SphinxRepository(
         chat: Chat,
         file: File,
         mediaType: MediaType
-    ): Response<Any, ResponseError> {
-        var response: Response<Any, ResponseError> = Response.Success(true)
+    ): Response<ChatDto, ResponseError> {
+        var response: Response<ChatDto, ResponseError> = Response.Error(
+            ResponseError("updateChatProfilePic failed to execute")
+        )
         val memeServerHost = MediaHost.DEFAULT
 
         applicationScope.launch(mainImmediate) {
@@ -1027,16 +1029,20 @@ abstract class SphinxRepository(
                                     response = loadResponse
                                 }
                                 is Response.Success -> {
+                                    response = loadResponse
                                     val queries = coreDB.getSphinxDatabaseQueries()
 
                                     chatLock.withLock {
                                         withContext(io) {
-                                            LOG.d(TAG, "Need to update the chat with the new details")
-                                            // TODO:
-//                                            queries.chatUpdatePhotoUrl(
-//                                                newUrl,
-//                                                chat.id,
-//                                            )
+                                            queries.transaction {
+                                                upsertChat(
+                                                    loadResponse.value,
+                                                    moshi,
+                                                    chatSeenMap,
+                                                    queries,
+                                                    null
+                                                )
+                                            }
                                         }
                                     }
                                 }
@@ -1051,6 +1057,7 @@ abstract class SphinxRepository(
             }
         }.join()
 
+        LOG.d(TAG, "Completed Upload Returning: $response")
         return response
     }
 
