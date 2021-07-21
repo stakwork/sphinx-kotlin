@@ -43,6 +43,7 @@ dependencies {
     implementation project(path: ':sphinx:application:data:concepts:concept-image-loader')
     implementation project(path: ':sphinx:application:data:concepts:concept-background-login')
     implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-dashboard-android')
+    implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-lightning')
 
     implementation project(path: ':sphinx:application:network:concepts:concept-socket-io')
 

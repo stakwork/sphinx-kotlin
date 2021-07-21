@@ -16,6 +16,10 @@ value class LightningNodePubKey(val value: String) {
 
     companion object {
         const val REGEX = "[A-F0-9a-f]{66}"
+
+        fun fromByteArray(byteArray: ByteArray): LightningNodePubKey {
+            return LightningNodePubKey(byteArray.decodeToString())
+        }
     }
 
     init {
