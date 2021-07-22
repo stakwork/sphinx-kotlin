@@ -1,11 +1,13 @@
 package chat.sphinx.tribe_detail.ui
 
 import android.content.Context
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
 import android.widget.SeekBar
 import androidx.activity.OnBackPressedCallback
+import androidx.annotation.RequiresApi
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.LifecycleOwner
@@ -26,6 +28,7 @@ import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.concept_views.viewstate.value
 import kotlinx.coroutines.launch
+import java.lang.Math.abs
 import javax.annotation.meta.Exhaustive
 import javax.inject.Inject
 
@@ -46,6 +49,10 @@ internal class TribeDetailFragment: SideEffectFragment<
 
     private val imageLoader: ImageLoader<ImageView>
         get() = imageLoaderInj
+
+    companion object {
+        val SLIDER_VALUES = listOf(0,3,3,5,5,8,8,10,10,20,20,40,40,80,80,100)
+    }
 
     private val bottomMenuTribe: BottomMenuTribe by lazy(LazyThreadSafetyMode.NONE) {
         BottomMenuTribe(
@@ -97,13 +104,17 @@ internal class TribeDetailFragment: SideEffectFragment<
         }
 
         override fun handleOnBackPressed() {
-            if (viewModel.tribeProfilePicMenuHandler.viewStateContainer.value is MenuBottomViewState.Open) {
-                viewModel.tribeProfilePicMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Closed)
-            } else if (viewModel.tribeMenuHandler.viewStateContainer.value is MenuBottomViewState.Open) {
-                viewModel.tribeMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Closed)
-            } else {
-                lifecycleScope.launch(viewModel.mainImmediate) {
-                    viewModel.navigator.closeDetailScreen()
+            when {
+                viewModel.tribeProfilePicMenuHandler.viewStateContainer.value is MenuBottomViewState.Open -> {
+                    viewModel.tribeProfilePicMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Closed)
+                }
+                viewModel.tribeMenuHandler.viewStateContainer.value is MenuBottomViewState.Open -> {
+                    viewModel.tribeMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Closed)
+                }
+                else -> {
+                    lifecycleScope.launch(viewModel.mainImmediate) {
+                        viewModel.navigator.closeDetailScreen()
+                    }
                 }
             }
         }
@@ -141,14 +152,19 @@ internal class TribeDetailFragment: SideEffectFragment<
                         progress: Int,
                         fromUser: Boolean
                     ) {
-                        textViewPodcastSatsPerMinuteValue.text = progress.toString()
+
+                        SLIDER_VALUES[progress]?.let {
+                            textViewPodcastSatsPerMinuteValue.text = it.toString()
+                        }
                     }
 
                     override fun onStartTrackingTouch(seekBar: SeekBar?) { }
 
                     override fun onStopTrackingTouch(seekBar: SeekBar?) {
                         seekBar?.let {
-                            // TODO: Set satsPerMinute on this podcast
+                            SLIDER_VALUES[seekBar.progress]?.let {
+                                viewModel.updateSatsPerMinute(it.toLong())
+                            }
                         }
                     }
                 }
@@ -235,8 +251,14 @@ internal class TribeDetailFragment: SideEffectFragment<
 
                     viewState.podcast?.let {
                         constrainLayoutPodcastLightningControls.visible
-                        seekBarSatsPerMinute.progress = it.satsPerMinute.toInt()
-                        textViewPodcastSatsPerMinuteValue.text = it.satsPerMinute.toString()
+
+                        val satsPerMinute = viewState.chat.metaData?.satsPerMinute?.value ?: it.satsPerMinute
+                        val closest = SLIDER_VALUES.closestValue(satsPerMinute.toInt())
+                        val index = SLIDER_VALUES.indexOf(closest)
+
+                        seekBarSatsPerMinute.max = SLIDER_VALUES.size - 1
+                        seekBarSatsPerMinute.progress = index
+                        textViewPodcastSatsPerMinuteValue.text = closest.toString()
                     }
                 }
             }
@@ -245,5 +267,9 @@ internal class TribeDetailFragment: SideEffectFragment<
 
     override suspend fun onSideEffectCollect(sideEffect: TribeDetailSideEffect) {
         sideEffect.execute(requireActivity())
+    }
+
+    private fun List<Int>.closestValue(value: Int) = minByOrNull {
+        kotlin.math.abs(value - it)
     }
 }

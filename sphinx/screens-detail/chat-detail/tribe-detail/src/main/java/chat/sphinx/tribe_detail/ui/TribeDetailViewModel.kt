@@ -12,6 +12,8 @@ import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
+import chat.sphinx.concept_service_media.MediaPlayerServiceController
+import chat.sphinx.concept_service_media.UserAction
 import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.logger.SphinxLogger
@@ -26,6 +28,7 @@ import chat.sphinx.tribe_detail.R
 import chat.sphinx.tribe_detail.navigation.TribeDetailNavigator
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.ChatAlias
+import chat.sphinx.wrapper_chat.ChatMetaData
 import chat.sphinx.wrapper_chat.isTribeOwnedByAccount
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_contact.Contact
@@ -59,6 +62,7 @@ internal class TribeDetailViewModel @Inject constructor(
     private val cameraCoordinator: ViewModelCoordinator<CameraRequest, CameraResponse>,
     private val contactRepository: ContactRepository,
     private val mediaCacheHandler: MediaCacheHandler,
+    private val mediaPlayerServiceController: MediaPlayerServiceController,
     val navigator: TribeDetailNavigator,
     val LOG: SphinxLogger,
 ): SideEffectViewModel<
@@ -162,6 +166,21 @@ internal class TribeDetailViewModel @Inject constructor(
 
     override val tribeProfilePicMenuHandler: TribeProfilePicMenuHandler by lazy {
         TribeProfilePicMenuHandler()
+    }
+
+    fun updateSatsPerMinute(sats: Long) {
+        podcast?.let { podcast ->
+            podcast.satsPerMinute = sats
+
+            viewModelScope.launch(mainImmediate) {
+                mediaPlayerServiceController.submitAction(
+                    UserAction.AdjustSatsPerMinute(
+                        args.chatId,
+                        podcast.getMetaData()
+                    )
+                )
+            }
+        }
     }
 
     fun updateProfileAlias(alias: String?) {
