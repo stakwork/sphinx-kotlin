@@ -15,4 +15,6 @@ internal sealed class TribeDetailViewState: ViewState<TribeDetailViewState>() {
     ): TribeDetailViewState()
 
     object UpdatingTribeProfilePicture: TribeDetailViewState()
+
+    object ErrorUpdatingTribeProfilePicture: TribeDetailViewState()
 }

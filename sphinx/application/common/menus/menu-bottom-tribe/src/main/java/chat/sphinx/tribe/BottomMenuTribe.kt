@@ -14,7 +14,6 @@ import chat.sphinx.wrapper_contact.Contact
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
 
 class BottomMenuTribe(
-    fragment: Fragment,
     onStopSupervisor: OnStopSupervisor,
     private val tribeMenuViewModel: TribeMenuViewModel,
 ): BottomMenu(
@@ -31,7 +30,7 @@ class BottomMenuTribe(
     ) {
         val menuBottomOptions = ArrayList<MenuBottomOption>()
 
-        if (chat.isTribeOwnedByAccount(accountOwner.nodePubKey) || BuildConfig.DEBUG) {
+        if (chat.isTribeOwnedByAccount(accountOwner.nodePubKey)) {
             menuBottomOptions.add(
                 MenuBottomOption(
                     text = R.string.bottom_menu_tribe_option_share_tribe,
@@ -64,7 +63,7 @@ class BottomMenuTribe(
         )
 
         super.newBuilder(binding, lifecycleOwner)
-            .setHeaderText(chat.name?.value ?: binding.getString(R.string.bottom_menu_tribe_header_text))
+            .setHeaderText(binding.getString(R.string.bottom_menu_tribe_header_text))
             .setOptions(
                 menuBottomOptions.toSet()
             )
@@ -75,6 +74,6 @@ class BottomMenuTribe(
         binding: LayoutMenuBottomBinding,
         lifecycleOwner: LifecycleOwner
     ): Builder {
-        throw IllegalStateException("Use the BottomMenuProfilePic.initialize method")
+        throw IllegalStateException("Use the BottomMenuTribe.initialize method")
     }
 }

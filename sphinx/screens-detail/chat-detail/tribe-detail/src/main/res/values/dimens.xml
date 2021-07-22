@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <dimen name="seek_bar_sats_per_minute_margin_vertical">6dp</dimen>
+    <dimen name="seek_bar_sats_per_minute_margin_horizontal">12dp</dimen>
+    <dimen name="seek_bar_sats_container_margin_top">48dp</dimen>
+
     <dimen name="profile_form_field_container_height">75dp</dimen>
+
+    <dimen name="tribe_initial_image_xy">55dp</dimen>
+    <dimen name="options_button_icon_xy">32sp</dimen>
 </resources>

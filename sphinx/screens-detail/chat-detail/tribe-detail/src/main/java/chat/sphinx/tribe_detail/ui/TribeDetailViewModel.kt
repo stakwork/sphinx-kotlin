@@ -189,9 +189,6 @@ internal class TribeDetailViewModel @Inject constructor(
         cameraJob = viewModelScope.launch(dispatchers.mainImmediate) {
             val response = cameraCoordinator.submitRequest(CameraRequest)
 
-            updateViewState(
-                TribeDetailViewState.UpdatingTribeProfilePicture
-            )
             @Exhaustive
             when (response) {
                 is Response.Error -> {}
@@ -200,6 +197,8 @@ internal class TribeDetailViewModel @Inject constructor(
                     @Exhaustive
                     when (response.value) {
                         is CameraResponse.Image -> {
+                            updateViewState(TribeDetailViewState.UpdatingTribeProfilePicture)
+
                             val mediaType = MediaType.Image(
                                 "${MediaType.IMAGE}/${response.value.value.extension}"
                             )
@@ -226,12 +225,15 @@ internal class TribeDetailViewModel @Inject constructor(
                                 LOG.e(TAG, "Error camera picture: ", e)
                             }
                             try {
+                                updateViewState(TribeDetailViewState.ErrorUpdatingTribeProfilePicture)
                                 // Make sure we delete the new image from the device
                                 response.value.value.delete()
                             } catch (e: Exception) {}
                         }
+                        else -> {}
                     }
                 }
+                else -> {}
             }
         }
     }
@@ -258,9 +260,8 @@ internal class TribeDetailViewModel @Inject constructor(
                     @Exhaustive
                     when (mType) {
                         is MediaType.Image -> {
-                            updateViewState(
-                                TribeDetailViewState.UpdatingTribeProfilePicture
-                            )
+                            updateViewState(TribeDetailViewState.UpdatingTribeProfilePicture)
+
                             viewModelScope.launch(dispatchers.mainImmediate) {
                                 val newFile: File = mediaCacheHandler.createImageFile(ext)
 
@@ -283,6 +284,8 @@ internal class TribeDetailViewModel @Inject constructor(
                                         }
                                     }
                                 } catch (e: Exception) {
+                                    updateViewState(TribeDetailViewState.ErrorUpdatingTribeProfilePicture)
+
                                     newFile.delete()
                                     submitSideEffect(TribeDetailSideEffect.FailedToUpdateProfilePic)
                                 }
@@ -326,7 +329,7 @@ internal class TribeDetailViewModel @Inject constructor(
             val chat = getChat()
             if (chat.isTribeOwnedByAccount(getOwner().nodePubKey) || BuildConfig.DEBUG) {
                 val shareTribeURL = "sphinx.chat://?action=tribe&uuid=${chat.uuid.value}&host=${chat.host?.value}"
-                navigator.toShareTribeScreen(shareTribeURL, chat.name!!.value, podcast?.description)
+                navigator.toShareTribeScreen(shareTribeURL, app.getString(R.string.qr_code_title))
             }
         }
 

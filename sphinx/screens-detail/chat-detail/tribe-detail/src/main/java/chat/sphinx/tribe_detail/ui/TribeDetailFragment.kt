@@ -5,7 +5,10 @@ import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
 import android.widget.SeekBar
+import androidx.activity.OnBackPressedCallback
+import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.concept_image_loader.ImageLoader
@@ -21,6 +24,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.visible
+import io.matthewnelson.concept_views.viewstate.value
 import kotlinx.coroutines.launch
 import javax.annotation.meta.Exhaustive
 import javax.inject.Inject
@@ -45,7 +49,6 @@ internal class TribeDetailFragment: SideEffectFragment<
 
     private val bottomMenuTribe: BottomMenuTribe by lazy(LazyThreadSafetyMode.NONE) {
         BottomMenuTribe(
-            this,
             onStopSupervisor,
             viewModel
         )
@@ -61,6 +64,9 @@ internal class TribeDetailFragment: SideEffectFragment<
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        BackPressHandler(viewLifecycleOwner, requireActivity())
+
         binding.includeTribeDetailHeader.apply {
             textViewDetailScreenHeaderName.text = getString(R.string.tribe_detail_header_name)
             textViewDetailScreenClose.setOnClickListener {
@@ -76,11 +82,38 @@ internal class TribeDetailFragment: SideEffectFragment<
         bottomMenuTribeProfilePic.initialize(binding.includeLayoutMenuBottomTribeProfilePic, viewLifecycleOwner)
     }
 
+    private inner class BackPressHandler(
+        owner: LifecycleOwner,
+        activity: FragmentActivity,
+    ): OnBackPressedCallback(true) {
+
+        init {
+            activity.apply {
+                onBackPressedDispatcher.addCallback(
+                    owner,
+                    this@BackPressHandler,
+                )
+            }
+        }
+
+        override fun handleOnBackPressed() {
+            if (viewModel.tribeProfilePicMenuHandler.viewStateContainer.value is MenuBottomViewState.Open) {
+                viewModel.tribeProfilePicMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Closed)
+            } else if (viewModel.tribeMenuHandler.viewStateContainer.value is MenuBottomViewState.Open) {
+                viewModel.tribeMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Closed)
+            } else {
+                lifecycleScope.launch(viewModel.mainImmediate) {
+                    viewModel.navigator.closeDetailScreen()
+                }
+            }
+        }
+    }
+
     private fun setupFragmentLayout() {
         val insetterActivity = requireActivity() as InsetterActivity
 
         insetterActivity.addNavigationBarPadding(
-            binding.constraintLayoutTribeDetailLayout
+            binding.layoutConstraintTribeDetailLayout
         )
         insetterActivity.addNavigationBarPadding(
             binding.includeLayoutMenuBottomTribe.root
@@ -120,18 +153,14 @@ internal class TribeDetailFragment: SideEffectFragment<
                     }
                 }
             )
-            imageViewMenuButton.setOnClickListener {
+
+            textViewMenuButton.setOnClickListener {
                 viewModel.tribeMenuHandler.viewStateContainer.updateViewState(
                     MenuBottomViewState.Open
                 )
             }
 
-            imageViewProfilePicture.setOnClickListener {
-                viewModel.tribeProfilePicMenuHandler.viewStateContainer.updateViewState(
-                    MenuBottomViewState.Open
-                )
-            }
-            editTextProfilePictureValue.setOnClickListener {
+            buttonProfilePicture.setOnClickListener {
                 viewModel.tribeProfilePicMenuHandler.viewStateContainer.updateViewState(
                     MenuBottomViewState.Open
                 )
@@ -144,9 +173,16 @@ internal class TribeDetailFragment: SideEffectFragment<
         @Exhaustive
         when(viewState) {
             is TribeDetailViewState.Idle -> { }
+            is TribeDetailViewState.ErrorUpdatingTribeProfilePicture -> {
+                binding.progressBarUploadProfilePicture.gone
+
+                viewModel.tribeProfilePicMenuHandler.viewStateContainer.updateViewState(
+                    MenuBottomViewState.Closed
+                )
+            }
             is TribeDetailViewState.UpdatingTribeProfilePicture -> {
-                // TODO: set loading progress
                 binding.progressBarUploadProfilePicture.visible
+
                 viewModel.tribeProfilePicMenuHandler.viewStateContainer.updateViewState(
                     MenuBottomViewState.Closed
                 )
@@ -162,7 +198,7 @@ internal class TribeDetailFragment: SideEffectFragment<
                         includeLayoutMenuBottomTribe,
                         viewLifecycleOwner
                     )
-                    imageViewMenuButton.visible
+                    textViewMenuButton.visible
 
                     textViewTribeName.text = viewState.chat.name?.value
                     textViewTribeCreateDate.text = getString(
@@ -174,7 +210,9 @@ internal class TribeDetailFragment: SideEffectFragment<
                         viewState.chat.pricePerMessage?.value ?: 0L,
                         viewState.chat.escrowAmount?.value ?: 0L
                     )
-                    editTextProfileAliasValue.setText(viewState.chat.myAlias?.value)
+
+                    val userAlias = viewState.chat.myAlias?.value ?: viewState.accountOwner.alias?.value
+                    editTextProfileAliasValue.setText(userAlias)
 
                     viewState.chat.photoUrl?.let {
                         imageLoader.load(
@@ -184,8 +222,10 @@ internal class TribeDetailFragment: SideEffectFragment<
                         )
                     }
 
-                    viewState.chat.myPhotoUrl?.let {
+                    val userPhotoUrl = viewState.chat.myPhotoUrl ?: viewState.accountOwner.photoUrl
+                    userPhotoUrl?.let {
                         editTextProfilePictureValue.setText(it.value)
+
                         imageLoader.load(
                             imageViewProfilePicture,
                             it.value,
