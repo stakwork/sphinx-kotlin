@@ -6,4 +6,16 @@
 
     <string name="name_and_description_required">Name and description required</string>
     <string name="failed_to_create_tribe">Failed to create tribe</string>
+    <string name="list_on_tribes_sphinx_chat">List on tribes.sphinx.chat ?</string>
+    <string name="name">Name</string>
+    <string name="image">Image</string>
+    <string name="description">Description</string>
+    <string name="tags">Tags</string>
+    <string name="price_to_join_sats">Price to Join (sats)</string>
+    <string name="price_per_message_sats">Price Per Message (sats)</string>
+    <string name="amount_to_stake_sats">Amount to Stake (sats)</string>
+    <string name="time_to_stake_hours">Time to Stake (hours)</string>
+    <string name="app_url">App Url</string>
+    <string name="rss_feed_url">RSS Feed URL</string>
+    <string name="approve_each_membership_request">Approve each membership request?</string>
 </resources>
