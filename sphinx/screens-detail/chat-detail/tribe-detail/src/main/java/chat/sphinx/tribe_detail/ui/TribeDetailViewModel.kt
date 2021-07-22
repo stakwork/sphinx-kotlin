@@ -22,7 +22,6 @@ import chat.sphinx.menu_bottom_tribe_profile_pic.TribeProfilePicMenuViewModel
 import chat.sphinx.podcast_player.objects.toPodcast
 import chat.sphinx.tribe.TribeMenuHandler
 import chat.sphinx.tribe.TribeMenuViewModel
-import chat.sphinx.tribe_detail.BuildConfig
 import chat.sphinx.tribe_detail.R
 import chat.sphinx.tribe_detail.navigation.TribeDetailNavigator
 import chat.sphinx.wrapper_chat.Chat
@@ -310,7 +309,7 @@ internal class TribeDetailViewModel @Inject constructor(
     override fun deleteTribe() {
         viewModelScope.launch(mainImmediate) {
             val chat = getChat()
-            if (chat.isTribeOwnedByAccount(getOwner().nodePubKey) || BuildConfig.DEBUG) {
+            if (chat.isTribeOwnedByAccount(getOwner().nodePubKey)) {
                 submitSideEffect(
                     TribeDetailSideEffect.AlertConfirmDeleteTribe(chat) {
                         viewModelScope.launch(mainImmediate) {
@@ -327,7 +326,7 @@ internal class TribeDetailViewModel @Inject constructor(
     override fun shareTribe() {
         viewModelScope.launch(mainImmediate) {
             val chat = getChat()
-            if (chat.isTribeOwnedByAccount(getOwner().nodePubKey) || BuildConfig.DEBUG) {
+            if (chat.isTribeOwnedByAccount(getOwner().nodePubKey)) {
                 val shareTribeURL = "sphinx.chat://?action=tribe&uuid=${chat.uuid.value}&host=${chat.host?.value}"
                 navigator.toShareTribeScreen(shareTribeURL, app.getString(R.string.qr_code_title))
             }

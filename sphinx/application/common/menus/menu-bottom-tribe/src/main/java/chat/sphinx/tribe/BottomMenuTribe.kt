@@ -1,11 +1,9 @@
 package chat.sphinx.tribe
 
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.LifecycleOwner
 import chat.sphinx.menu_bottom.databinding.LayoutMenuBottomBinding
 import chat.sphinx.menu_bottom.model.MenuBottomOption
 import chat.sphinx.menu_bottom.ui.BottomMenu
-import chat.sphinx.menu_bottom_tribe.BuildConfig
 import chat.sphinx.menu_bottom_tribe.R
 import chat.sphinx.resources.getString
 import chat.sphinx.wrapper_chat.Chat
@@ -50,17 +48,17 @@ class BottomMenuTribe(
                     }
                 )
             )
-        }
-
-        menuBottomOptions.add(
-            MenuBottomOption(
-                text = R.string.bottom_menu_tribe_option_exit_tribe,
-                textColor = R.color.primaryRed,
-                onClick = {
-                    tribeMenuViewModel.exitTribe()
-                }
+        } else {
+            menuBottomOptions.add(
+                MenuBottomOption(
+                    text = R.string.bottom_menu_tribe_option_exit_tribe,
+                    textColor = R.color.primaryRed,
+                    onClick = {
+                        tribeMenuViewModel.exitTribe()
+                    }
+                )
             )
-        )
+        }
 
         super.newBuilder(binding, lifecycleOwner)
             .setHeaderText(binding.getString(R.string.bottom_menu_tribe_header_text))
