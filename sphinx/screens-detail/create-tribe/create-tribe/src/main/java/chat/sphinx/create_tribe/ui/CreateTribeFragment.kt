@@ -7,6 +7,8 @@ import androidx.lifecycle.lifecycleScope
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.create_tribe.R
 import chat.sphinx.create_tribe.databinding.FragmentCreateTribeBinding
+import chat.sphinx.insetter_activity.InsetterActivity
+import chat.sphinx.insetter_activity.addNavigationBarPadding
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.base.BaseFragment
 import kotlinx.coroutines.launch
@@ -31,6 +33,18 @@ internal class CreateTribeFragment: BaseFragment<
                 }
             }
         }
+
+        setupFragmentLayout()
+        setupCreateTribe()
+    }
+
+    fun setupFragmentLayout() {
+        (requireActivity() as InsetterActivity)
+            .addNavigationBarPadding(binding.constraintLayoutCreateTribeContainer)
+    }
+
+    fun setupCreateTribe() {
+        // TODO: Add functionality
     }
 
     override suspend fun onViewStateFlowCollect(viewState: CreateTribeViewState) {
