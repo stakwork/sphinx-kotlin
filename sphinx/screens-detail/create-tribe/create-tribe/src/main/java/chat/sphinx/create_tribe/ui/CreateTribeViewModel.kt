@@ -12,4 +12,5 @@ internal class CreateTribeViewModel @Inject constructor(
     val navigator: CreateTribeNavigator,
 ): BaseViewModel<CreateTribeViewState>(dispatchers, CreateTribeViewState.Idle)
 {
+
 }
