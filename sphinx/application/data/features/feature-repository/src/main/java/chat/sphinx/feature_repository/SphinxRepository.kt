@@ -2815,69 +2815,7 @@ abstract class SphinxRepository(
         return response
     }
 
-    override suspend fun exitTribe(chat: Chat): Response<Boolean, ResponseError> {
-        var response: Response<Boolean, ResponseError>? = null
-
-        val owner: Contact = accountOwner.value.let { contact ->
-            if (contact != null) {
-                contact
-            } else {
-                var resolvedOwner: Contact? = null
-                try {
-                    accountOwner.collect { ownerContact ->
-                        if (ownerContact != null) {
-                            resolvedOwner = ownerContact
-                            throw Exception()
-                        }
-                    }
-                } catch (e: Exception) {}
-                delay(25L)
-
-                resolvedOwner ?: return Response.Error(
-                    ResponseError("Could not resolve account owner")
-                )
-            }
-        }
-
-        if (owner.nodePubKey == chat.ownerPubKey) {
-            return Response.Error(ResponseError("Exit/Delete own tribe needs explicit function"))
-        }
-
-        applicationScope.launch(mainImmediate) {
-            networkQueryChat.deleteChat(chat.id).collect { loadResponse ->
-                when (loadResponse) {
-                    is LoadResponse.Loading -> {}
-
-                    is Response.Error -> {
-                        response = loadResponse
-                    }
-
-                    is Response.Success -> {
-                        response = Response.Success(true)
-                        val queries = coreDB.getSphinxDatabaseQueries()
-
-                        chatLock.withLock {
-                            messageLock.withLock {
-                                withContext(io) {
-                                    queries.transaction {
-                                        deleteChatById(
-                                            loadResponse.value["chat_id"]?.toChatId() ?: chat.id,
-                                            queries,
-                                            latestMessageUpdatedTimeMap
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }.join()
-
-        return response ?: Response.Error(ResponseError(("Failed to exit tribe")))
-    }
-
-    override suspend fun deleteTribe(chat: Chat): Response<Boolean, ResponseError> {
+    override suspend fun exitAndDeleteTribe(chat: Chat): Response<Boolean, ResponseError> {
         var response: Response<Boolean, ResponseError>? = null
 
         applicationScope.launch(mainImmediate) {

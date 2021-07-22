@@ -9,6 +9,8 @@ abstract class TribeDetailNavigator(
 ): Navigator<NavController>(navigationDriver) {
     abstract suspend fun closeDetailScreen()
 
+    abstract suspend fun goBackToDashboard()
+
     abstract suspend fun toShareTribeScreen(
         qrText: String,
         viewTitle: String,

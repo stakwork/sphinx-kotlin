@@ -56,9 +56,7 @@ interface ChatRepository {
 
     suspend fun updateTribeInfo(chat: Chat): PodcastDto?
 
-    suspend fun exitTribe(chat: Chat): Response<Boolean, ResponseError>
-
-    suspend fun deleteTribe(chat: Chat): Response<Boolean, ResponseError>
+    suspend fun exitAndDeleteTribe(chat: Chat): Response<Boolean, ResponseError>
 
     suspend fun updateChatProfilePic(
         chat: Chat,

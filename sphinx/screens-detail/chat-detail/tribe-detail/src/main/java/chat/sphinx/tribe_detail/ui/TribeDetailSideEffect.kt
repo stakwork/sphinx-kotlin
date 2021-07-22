@@ -22,6 +22,18 @@ internal sealed class  TribeDetailSideEffect: SideEffect<Context>()  {
         }
     }
 
+    object FailedToExitTribe: TribeDetailSideEffect() {
+        override suspend fun execute(value: Context) {
+            SphinxToastUtils(false).show(value, R.string.failed_to_update_profile_pic)
+        }
+    }
+
+    object FailedToDeleteTribe: TribeDetailSideEffect() {
+        override suspend fun execute(value: Context) {
+            SphinxToastUtils(false).show(value, R.string.failed_to_update_profile_pic)
+        }
+    }
+
     class AlertConfirmDeleteTribe(
         private val chat: Chat,
         private val callback: () -> Unit

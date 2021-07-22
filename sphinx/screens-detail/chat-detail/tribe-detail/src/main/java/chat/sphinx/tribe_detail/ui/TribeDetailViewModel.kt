@@ -328,16 +328,21 @@ internal class TribeDetailViewModel @Inject constructor(
     override fun deleteTribe() {
         viewModelScope.launch(mainImmediate) {
             val chat = getChat()
-            if (chat.isTribeOwnedByAccount(getOwner().nodePubKey)) {
-                submitSideEffect(
-                    TribeDetailSideEffect.AlertConfirmDeleteTribe(chat) {
-                        viewModelScope.launch(mainImmediate) {
-                            chatRepository.deleteTribe(getChat())
+
+            submitSideEffect(
+                TribeDetailSideEffect.AlertConfirmDeleteTribe(chat) {
+                    viewModelScope.launch(mainImmediate) {
+                        when (chatRepository.exitAndDeleteTribe(chat)) {
+                            is Response.Success -> {
+                                navigator.goBackToDashboard()
+                            }
+                            is Response.Error -> {
+                                submitSideEffect(TribeDetailSideEffect.FailedToDeleteTribe)
+                            }
                         }
                     }
-                )
-
-            }
+                }
+            )
         }
         tribeMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Closed)
     }
@@ -357,10 +362,18 @@ internal class TribeDetailViewModel @Inject constructor(
     override fun exitTribe() {
         viewModelScope.launch(mainImmediate) {
             val chat = getChat()
+
             submitSideEffect(
                 TribeDetailSideEffect.AlertConfirmExitTribe(chat) {
                     viewModelScope.launch(mainImmediate) {
-                        chatRepository.exitTribe(chat)
+                        when (chatRepository.exitAndDeleteTribe(chat)) {
+                            is Response.Success -> {
+                                navigator.goBackToDashboard()
+                            }
+                            is Response.Error -> {
+                                submitSideEffect(TribeDetailSideEffect.FailedToExitTribe)
+                            }
+                        }
                     }
                 }
             )
