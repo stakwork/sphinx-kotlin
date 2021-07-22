@@ -4,8 +4,6 @@ import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_coredb.CoreDB
 import chat.sphinx.concept_crypto_rsa.RSA
 import chat.sphinx.concept_meme_server.MemeServerTokenHandler
-import chat.sphinx.concept_network_query_meme_server.NetworkQueryMemeServer
-import chat.sphinx.concept_network_query_meme_server.model.PostMemeServerUploadDto
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
 import chat.sphinx.concept_network_query_chat.model.*
 import chat.sphinx.concept_network_query_contact.NetworkQueryContact
@@ -16,11 +14,14 @@ import chat.sphinx.concept_network_query_invite.NetworkQueryInvite
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_lightning.model.balance.BalanceDto
 import chat.sphinx.concept_network_query_lightning.model.invoice.PostRequestPaymentDto
+import chat.sphinx.concept_network_query_meme_server.NetworkQueryMemeServer
+import chat.sphinx.concept_network_query_meme_server.model.PostMemeServerUploadDto
 import chat.sphinx.concept_network_query_message.NetworkQueryMessage
 import chat.sphinx.concept_network_query_message.model.MessageDto
 import chat.sphinx.concept_network_query_message.model.PostMessageDto
 import chat.sphinx.concept_network_query_message.model.PostPaymentDto
 import chat.sphinx.concept_repository_chat.ChatRepository
+import chat.sphinx.concept_repository_chat.model.CreateTribe
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_dashboard.RepositoryDashboard
 import chat.sphinx.concept_repository_lightning.LightningRepository
@@ -82,7 +83,6 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import java.io.InputStream
 import okio.base64.encodeBase64
 import java.text.ParseException
 import kotlin.math.absoluteValue
@@ -2750,5 +2750,37 @@ abstract class SphinxRepository(
         }.join()
 
         return response ?: Response.Error(ResponseError(("Failed to exit tribe")))
+    }
+
+    override suspend fun createTribe(createTribe: CreateTribe): Response<Any, ResponseError> {
+        var response: Response<Any, ResponseError>  = Response.Error(ResponseError(("Failed to exit tribe")))
+
+        networkQueryChat.createTribe(createTribe.toPostGroupDto()).collect { loadResponse ->
+            when (loadResponse) {
+                is LoadResponse.Loading -> {}
+
+                is Response.Error -> {
+                    response = loadResponse
+                }
+
+                is Response.Success -> {
+                    loadResponse.value?.let { chatDto ->
+                        response = Response.Success(chatDto)
+                        val queries = coreDB.getSphinxDatabaseQueries()
+
+                        chatLock.withLock {
+                            messageLock.withLock {
+                                withContext(io) {
+                                    queries.transaction {
+                                        upsertChat(chatDto, moshi, chatSeenMap, queries, null)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return response
     }
 }

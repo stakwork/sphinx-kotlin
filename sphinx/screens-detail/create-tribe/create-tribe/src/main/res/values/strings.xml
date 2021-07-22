@@ -3,4 +3,7 @@
     <string name="create_tribe_header_name">NEW TRIBE</string>
     <string name="create_tribe">Create Tribe</string>
     <string name="add_icon"></string>
+
+    <string name="name_and_description_required">Name and description required</string>
+    <string name="failed_to_create_tribe">Failed to create tribe</string>
 </resources>

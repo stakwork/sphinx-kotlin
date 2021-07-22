@@ -1,5 +1,6 @@
 package chat.sphinx.create_tribe.ui
 
+import android.content.Context
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.content.res.AppCompatResources
@@ -13,11 +14,13 @@ import chat.sphinx.create_tribe.databinding.FragmentCreateTribeBinding
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import dagger.hilt.android.AndroidEntryPoint
-import io.matthewnelson.android_feature_screens.ui.base.BaseFragment
+import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-internal class CreateTribeFragment: BaseFragment<
+internal class CreateTribeFragment: SideEffectFragment<
+        Context,
+        CreateTribeSideEffect,
         CreateTribeViewState,
         CreateTribeViewModel,
         FragmentCreateTribeBinding
@@ -106,15 +109,15 @@ internal class CreateTribeFragment: BaseFragment<
             editTextTribeFeedUrl.addTextChangedListener {
                 createTribeBuilder.setFeedUrl(it.toString())
             }
-            // TODO: add listing functionality
-            // TODO: add approval functionality
+            switchTribeListingOnSphinx.setOnCheckedChangeListener { _, isChecked ->
+                createTribeBuilder.setUnlisted(!isChecked)
+            }
+            switchTribeApproveMembershipOnSphinx.setOnCheckedChangeListener { _, isChecked ->
+                createTribeBuilder.setUnlisted(isChecked)
+            }
 
             includeCreateTribeButton.layoutConstraintButtonCreateTribe.setOnClickListener {
-                if (createTribeBuilder.hasRequiredFields) {
-                    // TODO: createTribe
-                } else {
-                    // TODO: Give  user feed back that they need name+description
-                }
+                viewModel.createTribe(createTribeBuilder)
             }
         }
     }
@@ -135,5 +138,9 @@ internal class CreateTribeFragment: BaseFragment<
     }
     override suspend fun onViewStateFlowCollect(viewState: CreateTribeViewState) {
 //        TODO("Not yet implemented")
+    }
+
+    override suspend fun onSideEffectCollect(sideEffect: CreateTribeSideEffect) {
+        sideEffect.execute(requireActivity())
     }
 }
