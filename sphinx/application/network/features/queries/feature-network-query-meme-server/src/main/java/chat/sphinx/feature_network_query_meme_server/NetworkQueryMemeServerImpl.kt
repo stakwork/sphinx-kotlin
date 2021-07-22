@@ -11,9 +11,9 @@ import chat.sphinx.feature_network_query_meme_server.model.MemeServerChallengeSi
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
-import chat.sphinx.wrapper_meme_server.*
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_io_utils.InputStreamProvider
+import chat.sphinx.wrapper_meme_server.*
 import chat.sphinx.wrapper_message_media.MediaType
 import chat.sphinx.wrapper_message_media.token.MediaHost
 import chat.sphinx.wrapper_relay.AuthorizationToken
@@ -28,11 +28,12 @@ import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.internal.closeQuietly
-import okio.*
+import okio.BufferedSink
+import okio.IOException
+import okio.source
+import okio.use
 import org.cryptonode.jncryptor.AES256JNCryptorOutputStream
 import java.io.File
-import java.io.InputStream
-import java.lang.Exception
 
 class NetworkQueryMemeServerImpl(
     dispatchers: CoroutineDispatchers,
@@ -222,6 +223,50 @@ class NetworkQueryMemeServerImpl(
             Response.Error(
                 ResponseError("Failed to upload file $fileName", e)
             )
+        }
+    }
+
+    override suspend fun uploadAttachment(
+        authenticationToken: AuthenticationToken,
+        mediaType: MediaType,
+        file: File,
+        memeServerHost: MediaHost
+    ): Response<PostMemeServerUploadDto, ResponseError> {
+
+        return try {
+            // will throw an exception if the media type is invalid
+            val type: okhttp3.MediaType = mediaType.value.toMediaType()
+
+            val requestBuilder = networkRelayCall.buildRequest(
+                url = String.format(ENDPOINT_POST_ATTACHMENT_PRIVATE, memeServerHost.value),
+                headers = mapOf(Pair(authenticationToken.headerKey, authenticationToken.headerValue))
+            )
+
+            val fileBody: RequestBody = withContext(io) {
+                file.asRequestBody(type)
+            }
+
+            val requestBody: RequestBody = MultipartBody.Builder()
+                .setType(MultipartBody.FORM)
+                .addFormDataPart(NAME, type.type)
+                .addFormDataPart(FILE, file.name, fileBody)
+                .build()
+
+            requestBuilder.post(requestBody)
+
+            val response = networkRelayCall.call(
+                PostMemeServerUploadDto::class.java,
+                requestBuilder.build(),
+                useExtendedNetworkCallClient = true
+            )
+
+            Response.Success(response)
+        } catch (e: Exception) {
+            Response.Error(
+                ResponseError("Failed to upload file ${file.name}", e)
+            )
+        } finally {
+            file.delete()
         }
     }
 }

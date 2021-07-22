@@ -37,7 +37,6 @@ import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.lightning.asFormattedString
-import chat.sphinx.wrapper_common.lightning.toSat
 import chat.sphinx.wrapper_common.lightning.unit
 import chat.sphinx.wrapper_common.util.getInitials
 import chat.sphinx.wrapper_contact.Contact
@@ -418,5 +417,12 @@ internal class ChatTribeViewModel @Inject constructor(
     fun retrieveEpisodeDuration(episodeUrl: String): Long {
         val uri = Uri.parse(episodeUrl)
         return uri.getMediaDuration()
+    }
+    
+    override fun goToChatDetailScreen() {
+
+        viewModelScope.launch(mainImmediate) {
+            (chatNavigator as TribeChatNavigator).toTribeDetailScreen(chatId, podcast?.toParcelablePodcast())
+        }
     }
 }

@@ -11,4 +11,5 @@ abstract class TribeChatNavigator(
 ): ChatNavigator(navigationDriver)
 {
     abstract suspend fun toPodcastPlayerScreen(chatId: ChatId, podcast: ParcelablePodcast)
+    abstract suspend fun toTribeDetailScreen(chatId: ChatId, podcast: ParcelablePodcast?)
 }

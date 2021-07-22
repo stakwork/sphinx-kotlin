@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="seek_bar_sats_per_minute_margin_vertical">6dp</dimen>
+    <dimen name="profile_form_field_container_height">75dp</dimen>
+</resources>
