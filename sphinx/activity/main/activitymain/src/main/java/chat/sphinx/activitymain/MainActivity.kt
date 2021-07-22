@@ -181,23 +181,20 @@ internal class MainActivity: MotionLayoutNavigationActivity<
                 super.onBackPressed()
             }
 
-            // DetailNavController
-            detailNavController.previousBackStackEntry != null -> {
-                // Downside to this is that DetailScreens cannot add
-                // back press callbacks, but that's why they're detail screens
-                if (!transitionInProgress) {
-                    lifecycleScope.launch {
-                        viewModel.detailDriver.submitNavigationRequest(PopBackStack())
-                    }
-                }
-            }
-
-            // PrimaryNavController
             else -> {
                 when {
                     onBackPressedDispatcher.hasEnabledCallbacks() -> {
                         super.onBackPressed()
                     }
+                    // DetailNavController
+                    detailNavController.previousBackStackEntry != null -> {
+                        if (!transitionInProgress) {
+                            lifecycleScope.launch {
+                                viewModel.detailDriver.submitNavigationRequest(PopBackStack())
+                            }
+                        }
+                    }
+                    // PrimaryNavController
                     navController.previousBackStackEntry == null -> {
                         super.onBackPressed()
                     }
