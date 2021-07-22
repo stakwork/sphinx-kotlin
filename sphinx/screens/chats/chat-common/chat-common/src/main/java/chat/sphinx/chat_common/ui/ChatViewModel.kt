@@ -137,7 +137,6 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                     ChatHeaderViewState.Initialized(
                         chatHeaderName = chat?.name?.value ?: getChatNameIfNull()?.value ?: "",
                         showLock = chat != null,
-                        showExitTribe = chat?.isTribe() ?: false,
                         chat?.isMuted,
                     )
                 )

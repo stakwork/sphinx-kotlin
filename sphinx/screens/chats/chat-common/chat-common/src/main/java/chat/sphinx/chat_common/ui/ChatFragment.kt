@@ -687,8 +687,6 @@ abstract class ChatFragment<
                             textViewChatHeaderName.text = viewState.chatHeaderName
                             textViewChatHeaderLock.goneIfFalse(viewState.showLock)
 
-                            imageViewChatHeaderExitTribe.goneIfFalse(viewState.showExitTribe)
-
                             imageViewChatHeaderMuted.apply {
                                 viewState.isMuted?.let { muted ->
                                     if (muted.isTrue()) {

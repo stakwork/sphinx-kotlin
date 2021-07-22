@@ -360,60 +360,6 @@ internal class ChatTribeViewModel @Inject constructor(
         }
     }
 
-    fun exitTribeGetUserConfirmation() {
-        viewModelScope.launch(mainImmediate) {
-            submitSideEffect(
-                ChatSideEffect.AlertConfirmExitTribe {
-                    exitTribeUserConfirmed()
-                }
-            )
-        }
-    }
-
-    private var exitTribeJob: Job? = null
-    private fun exitTribeUserConfirmed() {
-        if (exitTribeJob?.isActive == true) {
-            return
-        }
-
-        exitTribeJob = viewModelScope.launch(mainImmediate) {
-
-            try {
-                chatSharedFlow.collect { chat ->
-                    if (chat != null) {
-
-                        val response = chatRepository.exitTribe(chat)
-
-                        @Exhaustive
-                        when (response) {
-                            is Response.Error -> {
-
-                                submitSideEffect(
-                                    ChatSideEffect.Notify(
-                                        if (response.exception == null) {
-                                            response.message
-                                        } else {
-                                            "Failed to leave tribe"
-                                        }
-                                    )
-                                )
-
-                                LOG.d(TAG, "Failed to leave tribe")
-                                LOG.e(TAG, response.message, response.exception)
-                            }
-                            is Response.Success -> {
-                                chatNavigator.popBackStack()
-                            }
-                        }
-
-                        throw Exception()
-                    }
-                }
-            } catch (e: Exception) {}
-
-        }
-    }
-
     fun retrieveEpisodeDuration(episodeUrl: String): Long {
         val uri = Uri.parse(episodeUrl)
         return uri.getMediaDuration()
