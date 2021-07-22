@@ -2761,8 +2761,8 @@ abstract class SphinxRepository(
 
                 is Response.Error -> {
                     response = loadResponse
+                    LOG.e(TAG, "Failed to create tribe: ", loadResponse.exception)
                 }
-
                 is Response.Success -> {
                     loadResponse.value?.let { chatDto ->
                         response = Response.Success(chatDto)
