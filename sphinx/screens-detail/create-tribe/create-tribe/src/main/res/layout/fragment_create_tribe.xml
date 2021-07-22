@@ -519,8 +519,84 @@
 
                     </androidx.constraintlayout.widget.ConstraintLayout>
 
-                    <!-- TODO: List on tribes.sphinx.chat -->
-                    <!-- TODO: Approve each membership request -->
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/constraint_layout_tribe_listing_container"
+                        android:layout_width="match_parent"
+                        android:layout_height="75dp"
+                        android:layout_marginTop="@dimen/default_half_layout_margin"
+                        android:layout_marginStart="@dimen/default_form_horizontal_margin"
+                        android:layout_marginEnd="@dimen/default_form_horizontal_margin"
+                        app:layout_constraintTop_toBottomOf="@+id/constraint_layout_tribe_feed_url_container">
+
+                        <androidx.appcompat.widget.AppCompatTextView
+                            android:id="@+id/text_view_tribe_listing_on_sphinx"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/text"
+                            android:fontFamily="@font/roboto_regular"
+                            android:textSize="@dimen/pin_text_view_size"
+                            android:maxLines="2"
+                            android:text="List on tribes.sphinx.chat?"
+                            android:layout_marginEnd="@dimen/default_layout_margin"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintEnd_toStartOf="@+id/switch_tribe_listing_on_sphinx"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <androidx.appcompat.widget.SwitchCompat
+                            android:id="@+id/switch_tribe_listing_on_sphinx"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:checked="true"
+                            android:theme="@style/CustomSwitch"
+                            android:thumb="@drawable/switch_thumb_selector"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toEndOf="@id/text_view_tribe_listing_on_sphinx"
+                            app:track="@drawable/switch_track_selector" />
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/constraint_layout_tribe_approve_membership_container"
+                        android:layout_width="match_parent"
+                        android:layout_height="75dp"
+                        android:layout_marginTop="@dimen/default_half_layout_margin"
+                        android:layout_marginStart="@dimen/default_form_horizontal_margin"
+                        android:layout_marginEnd="@dimen/default_form_horizontal_margin"
+                        app:layout_constraintTop_toBottomOf="@+id/constraint_layout_tribe_listing_container">
+
+                        <androidx.appcompat.widget.AppCompatTextView
+                            android:id="@+id/text_view_tribe_approve_membership_on_sphinx"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/text"
+                            android:fontFamily="@font/roboto_regular"
+                            android:textSize="@dimen/pin_text_view_size"
+                            android:maxLines="2"
+                            android:text="Approve each membership request?"
+                            android:layout_marginEnd="@dimen/default_layout_margin"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintEnd_toStartOf="@+id/switch_tribe_approve_membership_on_sphinx"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <androidx.appcompat.widget.SwitchCompat
+                            android:id="@+id/switch_tribe_approve_membership_on_sphinx"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:checked="false"
+                            android:theme="@style/CustomSwitch"
+                            android:thumb="@drawable/switch_thumb_selector"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toEndOf="@id/text_view_tribe_approve_membership_on_sphinx"
+                            app:track="@drawable/switch_track_selector" />
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
