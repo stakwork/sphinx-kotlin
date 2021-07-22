@@ -9,12 +9,12 @@
     <string name="tribe_costs">Price per message: %d sat - Amount to Stake: %d sat</string>
     <string name="profile_picture">Profile Picture</string>
 
-    <string name="failed_to_update_profile_alias">Failed to update profile</string>
-    <string name="failed_to_update_profile_pic">Failed to update profile picture</string>
+    <string name="failed_to_update_profile_alias">Failed to update tribe alias</string>
+    <string name="failed_to_update_profile_pic">Failed to update tribe profile picture</string>
 
-    <string name="alert_confirm_delete_tribe_heading">You are about to delete the tribe %s</string>
-    <string name="alert_confirm_delete_tribe_message">After deleting the tribe all members of the tribe will not be able to send any messages</string>
+    <string name="alert_confirm_delete_tribe_heading">Delete %s</string>
+    <string name="alert_confirm_delete_tribe_message">Are you sure you want to delete tribe?</string>
 
-    <string name="alert_confirm_exit_tribe_heading">You are about to exit the tribe %s</string>
-    <string name="alert_confirm_exit_tribe_message">After exiting the tribe all members of the tribe will not be able to send any messages</string>
+    <string name="alert_confirm_exit_tribe_heading">Exit %s</string>
+    <string name="alert_confirm_exit_tribe_message">Are you sure you want to exit and delete tribe?</string>
 </resources>
