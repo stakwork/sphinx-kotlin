@@ -6,6 +6,8 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_background_login.BackgroundLoginHandler
+import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
+import chat.sphinx.concept_network_query_lightning.model.invoice.PayRequestDto
 import chat.sphinx.concept_repository_dashboard_android.RepositoryDashboardAndroid
 import chat.sphinx.concept_service_notification.PushNotificationRegistrar
 import chat.sphinx.concept_socket_io.SocketIOManager
@@ -28,9 +30,9 @@ import chat.sphinx.scanner_view_model_coordinator.request.ScannerRequest
 import chat.sphinx.scanner_view_model_coordinator.response.ScannerResponse
 import chat.sphinx.wrapper_chat.isConversation
 import chat.sphinx.wrapper_common.dashboard.ContactId
+import chat.sphinx.wrapper_common.lightning.*
 import chat.sphinx.wrapper_common.tribe.TribeJoinLink
 import chat.sphinx.wrapper_common.tribe.isValidTribeJoinLink
-import chat.sphinx.wrapper_common.tribe.toTribeJoinLink
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_contact.isInviteContact
 import chat.sphinx.wrapper_contact.isTrue
@@ -79,6 +81,8 @@ internal class DashboardViewModel @Inject constructor(
 
     private val repositoryDashboard: RepositoryDashboardAndroid<Any>,
 
+    protected val networkQueryLightning: NetworkQueryLightning,
+
     private val pushNotificationRegistrar: PushNotificationRegistrar,
 
     private val scannerCoordinator: ViewModelCoordinator<ScannerRequest, ScannerResponse>,
@@ -104,15 +108,21 @@ internal class DashboardViewModel @Inject constructor(
                 ScannerRequest(
                     filter = object : ScannerFilter() {
                         override suspend fun checkData(data: String): Response<Any, String> {
-                            if (data.toTribeJoinLink() != null) {
-                                return Response.Success(Any())
+                            return when {
+                                data.isValidTribeJoinLink -> {
+                                    Response.Success(Any())
+                                }
+                                data.isValidLightningPaymentRequest -> {
+                                    Response.Success(Any())
+                                }
+                                else -> {
+                                    Response.Error(app.getString(R.string.not_valid_invoice_or_tribe_link))
+                                }
                             }
-
-                            return Response.Error(app.getString(R.string.not_valid_tribe_link))
                         }
                     },
                     showBottomView = true,
-                    scannerModeLabel = app.getString(R.string.join_tribe_link)
+                    scannerModeLabel = app.getString(R.string.paste_invoice_of_tribe_link)
                 )
             )
             if (response is Response.Success) {
@@ -121,6 +131,20 @@ internal class DashboardViewModel @Inject constructor(
 
                 if (code.isValidTribeJoinLink) {
                     dashboardNavigator.toJoinTribeDetail(TribeJoinLink(code))
+                } else if (code.isValidLightningPaymentRequest) {
+                    code.toBolt11()?.let { bolt11 ->
+                        val amount = bolt11.getSatsAmount()
+
+                        if (amount != null) {
+                            submitSideEffect(
+                                DashboardSideEffect.AlertConfirmPayLightningPaymentRequest(amount.value, bolt11.getMemo()) {
+                                    payLightningPaymentRequest(code.toLightningPaymentRequest()!!)
+                                }
+                            )
+                        } else {
+                            submitSideEffect(DashboardSideEffect.Notify(app.getString(R.string.payment_request_missing_amount), true))
+                        }
+                    }
                 }
             }
         }
@@ -274,6 +298,32 @@ internal class DashboardViewModel @Inject constructor(
                     }
                 }
             } catch (e: Exception) {}
+        }
+    }
+
+    private fun payLightningPaymentRequest(lightningPaymentRequest: LightningPaymentRequest) {
+        viewModelScope.launch(mainImmediate) {
+            val payLightningPaymentRequestDto = PayRequestDto(lightningPaymentRequest.value)
+            networkQueryLightning.putLightningPaymentRequest(payLightningPaymentRequestDto).collect { loadResponse ->
+                @Exhaustive
+                when (loadResponse) {
+                    is LoadResponse.Loading -> {
+                        submitSideEffect(
+                            DashboardSideEffect.Notify(app.getString(R.string.attempting_payment_request), true)
+                        )
+                    }
+                    is Response.Error -> {
+                        submitSideEffect(
+                            DashboardSideEffect.Notify(app.getString(R.string.failed_to_pay_request), true)
+                        )
+                    }
+                    is Response.Success -> {
+                        submitSideEffect(
+                            DashboardSideEffect.Notify(app.getString(R.string.successfully_paid_invoice), true)
+                        )
+                    }
+                }
+            }
         }
     }
 

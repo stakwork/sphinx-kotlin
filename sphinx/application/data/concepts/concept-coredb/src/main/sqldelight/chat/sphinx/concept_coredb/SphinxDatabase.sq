@@ -563,6 +563,12 @@ WHERE sender != :ownerId
 AND seen = 0
 AND chat_id = ?;
 
+messageGetAmountSumForMessagesStartingWith:
+SELECT SUM(amount)
+FROM messageDbo
+WHERE (chat_id IS NULL OR chat_id = 0)
+AND (message_content LIKE :message_content);
+
 messageUpdateSeenByChatId:
 UPDATE messageDbo
 SET seen = :seen

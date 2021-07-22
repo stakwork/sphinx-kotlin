@@ -36,6 +36,26 @@ sealed class DashboardSideEffect: SideEffect<Context>() {
         }
     }
 
+    class AlertConfirmPayLightningPaymentRequest(
+        private val amount: Long,
+        private val memo: String = "",
+        private val callback: () -> Unit
+    ): DashboardSideEffect() {
+        override suspend fun execute(value: Context) {
+            val memo = if (memo.isEmpty()) "-" else memo
+            val successMessage = String.format(value.getString(R.string.alert_confirm_pay_invoice_message), amount, memo)
+
+            val builder = AlertDialog.Builder(value)
+            builder.setTitle(value.getString(R.string.alert_confirm_pay_invoice_title))
+            builder.setMessage(successMessage)
+            builder.setNegativeButton(android.R.string.cancel) { _,_ -> }
+            builder.setPositiveButton(android.R.string.ok) { _, _ ->
+                callback()
+            }
+            builder.show()
+        }
+    }
+
     class AlertConfirmDeleteInvite(
         private val callback: () -> Unit
     ): DashboardSideEffect() {

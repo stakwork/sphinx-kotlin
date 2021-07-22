@@ -6,6 +6,7 @@ import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.isConversation
 import chat.sphinx.wrapper_chat.isTribeOwnedByAccount
 import chat.sphinx.wrapper_common.DateTime
+import chat.sphinx.wrapper_common.chatTimeFormat
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_message.*
@@ -60,7 +61,7 @@ internal sealed class MessageHolderViewState(
                 this is Sent,
                 this is Sent && (message.status.isReceived() || message.status.isConfirmed()),
                 message.messageContentDecrypted != null || message.messageMedia?.mediaKeyDecrypted != null,
-                DateTime.getFormathmma().format(message.date.value),
+                message.date.chatTimeFormat(),
             )
         } else {
             null
@@ -71,7 +72,7 @@ internal sealed class MessageHolderViewState(
         if (message.status.isDeleted()) {
             LayoutState.DeletedMessage(
                 gravityStart = this is Received,
-                timestamp = DateTime.getFormathmma().format(message.date.value)
+                timestamp = DateTime.getFormathmma().format(message.date.chatTimeFormat())
             )
         } else {
             null

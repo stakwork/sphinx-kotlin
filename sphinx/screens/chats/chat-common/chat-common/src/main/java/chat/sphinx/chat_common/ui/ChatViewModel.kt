@@ -142,7 +142,6 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                         chatHeaderName = chat?.name?.value ?: getChatNameIfNull()?.value ?: "",
                         showLock = chat != null,
                         showExitTribe = chat?.isTribe() ?: false,
-                        contributions = null,
                         chat?.isMuted,
                     )
                 )
@@ -190,6 +189,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     internal val messageHolderViewStateFlow: StateFlow<List<MessageHolderViewState>> = flow {
         val chat = getChat()
         val chatName = getChatNameIfNull()
+
         val owner: Contact = contactRepository.accountOwner.value.let { contact ->
             if (contact != null) {
                 contact

@@ -45,6 +45,7 @@ dependencies {
 
   api project(path: ':sphinx:service:concepts:concept-service-media-player')
   api project(path: ':sphinx:application:common:wrappers:wrapper-common')
+  api project(path: ':sphinx:application:common:wrappers:wrapper-podcast')
 
   implementation deps.androidx.lifecycle.hilt
   implementation deps.androidx.recyclerView
