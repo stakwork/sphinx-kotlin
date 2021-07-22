@@ -51,7 +51,7 @@ sealed class DashboardChat {
             get() = message?.date?.time ?: chat.createdAt.time
 
         override fun getDisplayTime(today00: DateTime): String {
-            return message?.date?.hhmmElseDate(today00) ?: ""
+            return message?.date?.chatTimeFormat(today00) ?: ""
         }
 
         fun isMessageSenderSelf(message: Message): Boolean =
