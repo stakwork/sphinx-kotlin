@@ -2754,33 +2754,69 @@ abstract class SphinxRepository(
 
     override suspend fun createTribe(createTribe: CreateTribe): Response<Any, ResponseError> {
         var response: Response<Any, ResponseError>  = Response.Error(ResponseError(("Failed to exit tribe")))
+        val memeServerHost = MediaHost.DEFAULT
 
-        networkQueryChat.createTribe(createTribe.toPostGroupDto()).collect { loadResponse ->
-            when (loadResponse) {
-                is LoadResponse.Loading -> {}
+        applicationScope.launch(mainImmediate) {
+            try {
+                val imgUrl: String? = createTribe.img?.let { imgFile ->
+                    // If an image file is provided we should upload it
+                    val token = memeServerTokenHandler.retrieveAuthenticationToken(memeServerHost)
+                        ?: throw RuntimeException("MemeServerAuthenticationToken retrieval failure")
 
-                is Response.Error -> {
-                    response = loadResponse
-                    LOG.e(TAG, "Failed to create tribe: ", loadResponse.exception)
+                    val networkResponse = networkQueryMemeServer.uploadAttachment(
+                        authenticationToken = token,
+                        mediaType = MediaType.Image(
+                            "${MediaType.IMAGE}/${imgFile.extension}"
+                        ),
+                        file = imgFile,
+                        memeServerHost = memeServerHost,
+                    )
+                    @Exhaustive
+                    when (networkResponse) {
+                        is Response.Error -> {
+                            LOG.e(TAG, "Failed to upload image: ", networkResponse.exception)
+                            response = networkResponse
+                            null
+                        }
+                        is Response.Success -> {
+                            "https://${memeServerHost.value}/public/${networkResponse.value.muid}"
+                        }
+                    }
                 }
-                is Response.Success -> {
-                    loadResponse.value?.let { chatDto ->
-                        response = Response.Success(chatDto)
-                        val queries = coreDB.getSphinxDatabaseQueries()
 
-                        chatLock.withLock {
-                            messageLock.withLock {
-                                withContext(io) {
-                                    queries.transaction {
-                                        upsertChat(chatDto, moshi, chatSeenMap, queries, null)
+                networkQueryChat.createTribe(createTribe.toPostGroupDto(imgUrl)).collect { loadResponse ->
+                    when (loadResponse) {
+                        is LoadResponse.Loading -> {}
+
+                        is Response.Error -> {
+                            response = loadResponse
+                            LOG.e(TAG, "Failed to create tribe: ", loadResponse.exception)
+                        }
+                        is Response.Success -> {
+                            loadResponse.value?.let { chatDto ->
+                                response = Response.Success(chatDto)
+                                val queries = coreDB.getSphinxDatabaseQueries()
+
+                                chatLock.withLock {
+                                    messageLock.withLock {
+                                        withContext(io) {
+                                            queries.transaction {
+                                                upsertChat(chatDto, moshi, chatSeenMap, queries, null)
+                                            }
+                                        }
                                     }
                                 }
                             }
                         }
                     }
                 }
+            } catch (e: Exception) {
+                response = Response.Error(
+                    ResponseError("Failed to update Chat Profile", e)
+                )
             }
-        }
+        }.join()
+
         return response
     }
 }

@@ -3,19 +3,25 @@ package chat.sphinx.create_tribe.ui
 import android.content.Context
 import android.os.Bundle
 import android.view.View
+import android.widget.ImageView
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import by.kirich1409.viewbindingdelegate.viewBinding
-import chat.sphinx.concept_repository_chat.model.CreateTribe
+import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.create_tribe.R
 import chat.sphinx.create_tribe.databinding.FragmentCreateTribeBinding
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
+import chat.sphinx.menu_bottom.ui.MenuBottomViewState
+import chat.sphinx.menu_bottom_tribe_pic.BottomMenuTribePic
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
+import io.matthewnelson.android_feature_screens.util.gone
+import io.matthewnelson.android_feature_screens.util.visible
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
 internal class CreateTribeFragment: SideEffectFragment<
@@ -29,8 +35,19 @@ internal class CreateTribeFragment: SideEffectFragment<
     override val viewModel: CreateTribeViewModel by viewModels()
     override val binding: FragmentCreateTribeBinding by viewBinding(FragmentCreateTribeBinding::bind)
 
-    private val createTribeBuilder = CreateTribe.Builder()
-    private val MILLISECONDS_IN_AN_HOUR = 3_600_000L
+    private val bottomMenuProfilePic: BottomMenuTribePic by lazy(LazyThreadSafetyMode.NONE) {
+        BottomMenuTribePic(
+            this,
+            onStopSupervisor,
+            viewModel
+        )
+    }
+
+    @Inject
+    lateinit var imageLoaderInj: ImageLoader<ImageView>
+
+    private val imageLoader: ImageLoader<ImageView>
+        get() = imageLoaderInj
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -45,6 +62,8 @@ internal class CreateTribeFragment: SideEffectFragment<
 
         setupFragmentLayout()
         setupCreateTribe()
+
+        bottomMenuProfilePic.initialize(binding.includeLayoutMenuBottomTribePic, viewLifecycleOwner)
     }
 
     fun setupFragmentLayout() {
@@ -55,19 +74,29 @@ internal class CreateTribeFragment: SideEffectFragment<
     fun setupCreateTribe() {
         binding.apply {
             editTextTribeName.addTextChangedListener {
-                createTribeBuilder.setName(it.toString())
+                viewModel.createTribeBuilder.setName(it.toString())
+
 
                 updateCreateButtonState()
             }
-            // TODO: Add Image Functionality...
+            imageViewTribePicture.setOnClickListener {
+                viewModel.tribePicMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Open)
+            }
+            editTextTribeImageValue.setOnClickListener {
+                viewModel.tribePicMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Open)
+            }
             editTextTribeDescription.addTextChangedListener {
-                createTribeBuilder.setDescription(it.toString())
+                viewModel.createTribeBuilder.setDescription(it.toString())
 
                 updateCreateButtonState()
             }
-            // TODO: Add tags functionality
+
+            editTextTribeTags.setOnClickListener {
+                // TODO: Add tags functionality
+            }
+
             editTextTribePriceToJoin.addTextChangedListener {
-                createTribeBuilder.setPriceToJoin(
+                viewModel.createTribeBuilder.setPriceToJoin(
                     if (it.isNullOrEmpty()) {
                         null
                     } else {
@@ -76,7 +105,7 @@ internal class CreateTribeFragment: SideEffectFragment<
                 )
             }
             editTextTribePricePerMessage.addTextChangedListener {
-                createTribeBuilder.setPricePerMessage(
+                viewModel.createTribeBuilder.setPricePerMessage(
                     if (it.isNullOrEmpty()) {
                         null
                     } else {
@@ -85,8 +114,7 @@ internal class CreateTribeFragment: SideEffectFragment<
                 )
             }
             editTextTribeAmountToStake.addTextChangedListener {
-
-                createTribeBuilder.setEscrowAmount(
+                viewModel.createTribeBuilder.setEscrowAmount(
                     if (it.isNullOrEmpty()) {
                         null
                     } else {
@@ -95,29 +123,29 @@ internal class CreateTribeFragment: SideEffectFragment<
                 )
             }
             editTextTribeTimeToStake.addTextChangedListener {
-                createTribeBuilder.setEscrowMillis(
+                viewModel.createTribeBuilder.setEscrowMillis(
                     if (it.isNullOrEmpty()) {
                         null
                     } else {
-                        it.toString().toLong() * MILLISECONDS_IN_AN_HOUR
+                        it.toString().toLong() * Companion.MILLISECONDS_IN_AN_HOUR
                     }
                 )
             }
             editTextTribeAppUrl.addTextChangedListener {
-                createTribeBuilder.setAppUrl(it.toString())
+                viewModel.createTribeBuilder.setAppUrl(it.toString())
             }
             editTextTribeFeedUrl.addTextChangedListener {
-                createTribeBuilder.setFeedUrl(it.toString())
+                viewModel.createTribeBuilder.setFeedUrl(it.toString())
             }
             switchTribeListingOnSphinx.setOnCheckedChangeListener { _, isChecked ->
-                createTribeBuilder.setUnlisted(!isChecked)
+                viewModel.createTribeBuilder.setUnlisted(!isChecked)
             }
             switchTribeApproveMembershipOnSphinx.setOnCheckedChangeListener { _, isChecked ->
-                createTribeBuilder.setUnlisted(isChecked)
+                viewModel.createTribeBuilder.setUnlisted(isChecked)
             }
 
             includeCreateTribeButton.layoutConstraintButtonCreateTribe.setOnClickListener {
-                viewModel.createTribe(createTribeBuilder)
+                viewModel.createTribe()
             }
         }
     }
@@ -125,22 +153,40 @@ internal class CreateTribeFragment: SideEffectFragment<
     private fun updateCreateButtonState() {
         requireActivity().let {
             binding.includeCreateTribeButton.apply {
-                if (layoutConstraintButtonCreateTribe.isEnabled != createTribeBuilder.hasRequiredFields) {
-                    layoutConstraintButtonCreateTribe.isEnabled = createTribeBuilder.hasRequiredFields
-                    layoutConstraintButtonCreateTribe.background = if (createTribeBuilder.hasRequiredFields) {
-                        AppCompatResources.getDrawable(it, R.drawable.button_background_enabled)
-                    } else {
-                        AppCompatResources.getDrawable(it, R.drawable.button_background_disabled)
-                    }
+                layoutConstraintButtonCreateTribe.background = if (viewModel.createTribeBuilder.hasRequiredFields) {
+                    AppCompatResources.getDrawable(it, R.drawable.button_background_enabled)
+                } else {
+                    AppCompatResources.getDrawable(it, R.drawable.button_background_disabled)
                 }
             }
         }
     }
     override suspend fun onViewStateFlowCollect(viewState: CreateTribeViewState) {
-//        TODO("Not yet implemented")
+        when (viewState) {
+            CreateTribeViewState.Idle -> {
+                binding.includeCreateTribeButton.layoutConstraintButtonCreateTribe.visible
+                binding.progressBarCreateTribe.gone
+            }
+            is CreateTribeViewState.TribeImageUpdated -> {
+                imageLoader.load(
+                    binding.imageViewTribePicture,
+                    viewState.imageFile,
+                    viewModel.imageLoaderDefaults
+                )
+                binding.editTextTribeImageValue.setText(getString(R.string.image_selected))
+            }
+            CreateTribeViewState.CreatingTribe -> {
+                binding.progressBarCreateTribe.visible
+                binding.includeCreateTribeButton.layoutConstraintButtonCreateTribe.gone
+            }
+        }
     }
 
     override suspend fun onSideEffectCollect(sideEffect: CreateTribeSideEffect) {
         sideEffect.execute(requireActivity())
+    }
+
+    companion object {
+        private const val MILLISECONDS_IN_AN_HOUR = 3_600_000L
     }
 }

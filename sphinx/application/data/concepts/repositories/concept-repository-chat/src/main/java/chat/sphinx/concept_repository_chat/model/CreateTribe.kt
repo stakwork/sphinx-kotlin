@@ -5,6 +5,7 @@ import chat.sphinx.wrapper_chat.AppUrl
 import chat.sphinx.wrapper_chat.FeedUrl
 import chat.sphinx.wrapper_chat.toAppUrl
 import chat.sphinx.wrapper_chat.toFeedUrl
+import java.io.File
 
 class CreateTribe private constructor(
     val name: String,
@@ -14,7 +15,7 @@ class CreateTribe private constructor(
     val priceToJoin: Long? = 0L,
     val escrowAmount: Long? = 0L,
     val escrowMillis: Long? = 0L,
-    val img: String? = null,
+    val img: File? = null,
     val tags: Array<String> = arrayOf(),
     val unlisted: Boolean? = false,
     val private: Boolean? = false,
@@ -30,7 +31,7 @@ class CreateTribe private constructor(
         private var priceToJoin: Long? = 0L
         private var escrowAmount: Long? = 0L
         private var escrowMillis: Long? = 0L
-        private var img: String? = null
+        private var img: File? = null
         private var tags: Array<String> = arrayOf()
         private var unlisted: Boolean? = false
         private var private: Boolean? = false
@@ -82,7 +83,12 @@ class CreateTribe private constructor(
             return this
         }
         @Synchronized
-        fun setImg(img: String?): Builder {
+        fun setImg(img: File?): Builder {
+            this.img?.let {
+                try {
+                    it.delete()
+                } catch (e: Exception) {}
+            }
             this.img = img
             return this
         }
@@ -138,7 +144,7 @@ class CreateTribe private constructor(
             }
     }
 
-    fun toPostGroupDto(): PostGroupDto {
+    fun toPostGroupDto(imgUrl: String? = null): PostGroupDto {
         return PostGroupDto(
             name = name,
             description = description,
@@ -147,7 +153,7 @@ class CreateTribe private constructor(
             price_to_join = priceToJoin,
             escrow_amount = escrowAmount,
             escrow_millis = escrowMillis,
-            img = img,
+            img = imgUrl,
             tags = tags,
             unlisted = unlisted,
             private = private,

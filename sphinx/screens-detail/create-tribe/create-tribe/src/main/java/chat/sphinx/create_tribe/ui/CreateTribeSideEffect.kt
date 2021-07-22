@@ -18,4 +18,10 @@ internal sealed class  CreateTribeSideEffect: SideEffect<Context>()  {
             SphinxToastUtils(true).show(value, R.string.failed_to_create_tribe)
         }
     }
+
+    object FailedToProcessImage: CreateTribeSideEffect() {
+        override suspend fun execute(value: Context) {
+            SphinxToastUtils(true).show(value, R.string.failed_to_process_image)
+        }
+    }
 }

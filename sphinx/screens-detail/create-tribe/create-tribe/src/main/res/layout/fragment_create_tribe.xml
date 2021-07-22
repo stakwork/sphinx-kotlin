@@ -95,43 +95,112 @@
                         android:layout_marginEnd="@dimen/default_form_horizontal_margin"
                         app:layout_constraintTop_toBottomOf="@+id/constraint_layout_tribe_name_container"
                         >
-
-                        <androidx.appcompat.widget.AppCompatTextView
-                            android:id="@+id/text_view_tribe_image"
-                            android:layout_width="wrap_content"
+                        <androidx.constraintlayout.widget.ConstraintLayout
+                            android:id="@+id/constraint_layout_tribe_image_text_container"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:text="@string/image"
-                            android:textColor="@color/secondaryText"
-                            android:fontFamily="@font/roboto_regular"
-                            app:layout_constraintBottom_toBottomOf="parent"
+                            android:layout_marginEnd="@dimen/default_layout_margin"
                             app:layout_constraintTop_toTopOf="parent"
-                            app:layout_constraintStart_toStartOf="parent"
-                            android:textSize="@dimen/default_form_text_view_text_size"
-                            android:singleLine="true" />
-
-                        <androidx.appcompat.widget.AppCompatEditText
-                            android:id="@+id/edit_text_tribe_image"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:textColor="@color/text"
-                            android:fontFamily="@font/roboto_regular"
-                            app:backgroundTint="@android:color/transparent"
-                            app:layout_constraintTop_toBottomOf="@+id/text_view_tribe_image"
                             app:layout_constraintBottom_toBottomOf="parent"
                             app:layout_constraintStart_toStartOf="parent"
-                            android:textSize="@dimen/default_form_edit_view_text_size"
-                            android:inputType="textVisiblePassword|textCapWords"
-                            android:singleLine="true"
-                            tools:text="File With a Preview"/>
+                            app:layout_constraintEnd_toStartOf="@+id/constraint_layout_profile_picture"
+                            >
+                            <androidx.appcompat.widget.AppCompatTextView
+                                android:id="@+id/text_view_tribe_image_field"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/image"
+                                android:textColor="@color/secondaryText"
+                                android:fontFamily="@font/roboto_regular"
+                                android:textSize="@dimen/default_form_text_view_text_size"
+                                android:singleLine="true"
+                                app:layout_constraintTop_toTopOf="parent"
+                                app:layout_constraintStart_toStartOf="parent"
+                                />
+
+                            <androidx.appcompat.widget.AppCompatEditText
+                                android:id="@+id/edit_text_tribe_image_value"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:textColor="@color/text"
+                                android:fontFamily="@font/roboto_regular"
+                                android:textSize="@dimen/default_form_edit_view_text_size"
+                                android:layout_marginStart="@dimen/default_form_edit_text_left_margin"
+                                android:singleLine="true"
+                                android:enabled="false"
+                                app:backgroundTint="@android:color/transparent"
+                                app:layout_constraintTop_toBottomOf="@+id/text_view_tribe_image_field"
+                                app:layout_constraintBottom_toBottomOf="parent"
+                                app:layout_constraintStart_toStartOf="parent"
+                                tools:text= "https://memes.sphinx.chat/picture_with_all_the_stuff"/>
+
+                            <androidx.constraintlayout.widget.ConstraintLayout
+                                android:id="@+id/layout_constraint_profile_picture_bottom_border"
+                                android:layout_width="match_parent"
+                                android:layout_height="1dp"
+                                android:background="@color/lightDivider"
+                                app:layout_constraintBottom_toBottomOf="parent"
+                                app:layout_constraintEnd_toEndOf="parent"
+                                app:layout_constraintStart_toStartOf="@+id/text_view_tribe_image_field" />
+
+                        </androidx.constraintlayout.widget.ConstraintLayout>
 
                         <androidx.constraintlayout.widget.ConstraintLayout
-                            android:id="@+id/constraint_layout_tribe_image_bottom_border"
-                            android:layout_width="match_parent"
-                            android:layout_height="1dp"
-                            android:background="@color/lightDivider"
-                            app:layout_constraintBottom_toBottomOf="parent"
+                            android:id="@+id/constraint_layout_profile_picture"
+                            android:layout_width="@dimen/default_chat_initial_image_xy"
+                            android:layout_height="@dimen/default_chat_initial_image_xy"
+                            android:layout_margin="@dimen/default_layout_margin"
                             app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintStart_toStartOf="@+id/text_view_tribe_image" />
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            >
+                            <androidx.appcompat.widget.AppCompatImageView
+                                android:id="@+id/image_view_tribe_picture"
+                                android:layout_width="@dimen/default_chat_initial_image_xy"
+                                android:layout_height="@dimen/default_chat_initial_image_xy"
+                                android:src="@drawable/ic_tribe"
+                                app:layout_constraintStart_toStartOf="parent"
+                                app:layout_constraintTop_toTopOf="parent"
+                                />
+                        </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+<!--                        <androidx.appcompat.widget.AppCompatTextView-->
+<!--                            android:id="@+id/text_view_tribe_image"-->
+<!--                            android:layout_width="wrap_content"-->
+<!--                            android:layout_height="wrap_content"-->
+<!--                            android:text="@string/image"-->
+<!--                            android:textColor="@color/secondaryText"-->
+<!--                            android:fontFamily="@font/roboto_regular"-->
+<!--                            app:layout_constraintBottom_toBottomOf="parent"-->
+<!--                            app:layout_constraintTop_toTopOf="parent"-->
+<!--                            app:layout_constraintStart_toStartOf="parent"-->
+<!--                            android:textSize="@dimen/default_form_text_view_text_size"-->
+<!--                            android:singleLine="true" />-->
+
+<!--                        <androidx.appcompat.widget.AppCompatEditText-->
+<!--                            android:id="@+id/edit_text_tribe_image"-->
+<!--                            android:layout_width="match_parent"-->
+<!--                            android:layout_height="wrap_content"-->
+<!--                            android:textColor="@color/text"-->
+<!--                            android:fontFamily="@font/roboto_regular"-->
+<!--                            app:backgroundTint="@android:color/transparent"-->
+<!--                            app:layout_constraintTop_toBottomOf="@+id/text_view_tribe_image"-->
+<!--                            app:layout_constraintBottom_toBottomOf="parent"-->
+<!--                            app:layout_constraintStart_toStartOf="parent"-->
+<!--                            android:textSize="@dimen/default_form_edit_view_text_size"-->
+<!--                            android:inputType="textVisiblePassword|textCapWords"-->
+<!--                            android:singleLine="true"-->
+<!--                            tools:text="File With a Preview"/>-->
+
+<!--                        <androidx.constraintlayout.widget.ConstraintLayout-->
+<!--                            android:id="@+id/constraint_layout_tribe_image_bottom_border"-->
+<!--                            android:layout_width="match_parent"-->
+<!--                            android:layout_height="1dp"-->
+<!--                            android:background="@color/lightDivider"-->
+<!--                            app:layout_constraintBottom_toBottomOf="parent"-->
+<!--                            app:layout_constraintEnd_toEndOf="parent"-->
+<!--                            app:layout_constraintStart_toStartOf="@+id/text_view_tribe_image" />-->
 
                     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -216,7 +285,7 @@
                             app:layout_constraintBottom_toBottomOf="parent"
                             app:layout_constraintStart_toStartOf="parent"
                             android:textSize="@dimen/default_form_edit_view_text_size"
-                            android:inputType="textVisiblePassword|textCapWords"
+                            android:inputType="none"
                             android:singleLine="true"
                             tools:text="Bitcoin, Podcast, Lightning..."/>
 
@@ -612,6 +681,21 @@
             app:layout_constraintBottom_toBottomOf="parent"
             android:layout_margin="@dimen/default_layout_margin"
             >
+            <ProgressBar
+                android:id="@+id/progress_bar_create_tribe"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:layout_margin="@dimen/default_layout_margin"
+                style="?android:attr/progressBarStyle"
+                android:indeterminateTint="@android:color/white"
+                android:indeterminate="true"
+                android:visibility="gone"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                tools:visibility="visible"/>
+
             <include
                 android:id="@+id/include_create_tribe_button"
                 layout="@layout/layout_button_create_tribe_submit"
@@ -624,5 +708,10 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <include
+        android:id="@+id/include_layout_menu_bottom_tribe_pic"
+        layout="@layout/layout_menu_bottom"
+        tools:visibility="gone"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
