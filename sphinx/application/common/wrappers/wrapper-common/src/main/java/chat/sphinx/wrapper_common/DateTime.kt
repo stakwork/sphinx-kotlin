@@ -44,13 +44,26 @@ inline fun DateTime.hhmmElseDate(today00: DateTime = DateTime.getToday00()): Str
     }
 }
 
-/**
- *
- */
 @Suppress("NOTHING_TO_INLINE", "SpellCheckingInspection")
-inline fun DateTime.eeemmddhmma(): String {
-    return DateTime.getFormateeemmddhmma().format(value)
-}
+inline fun DateTime.chatTimeFormat(
+    today00: DateTime = DateTime.getToday00(),
+    sixDaysAgo: DateTime = DateTime.getSixDaysAgo()
+): String =
+    when {
+        today00.before(this) -> {
+            DateTime.getFormathmma().format(value)
+        }
+        sixDaysAgo.before(this) -> {
+            DateTime.getFormatEEEhmma().format(value)
+        }
+        else -> {
+            DateTime.getFormatddmmmhhmm().format(value)
+        }
+    }
+
+@Suppress("NOTHING_TO_INLINE", "SpellCheckingInspection")
+inline fun DateTime.eeemmddhmma(): String =
+    DateTime.getFormateeemmddhmma().format(value)
 
 inline val DateTime.time: Long
     get() = value.time
@@ -77,9 +90,13 @@ value class DateTime(val value: Date) {
         private const val FORMAT_RELAY = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
         private const val FORMAT_TODAY_00 = "yyyy-MM-dd'T00:00:00.000Z'"
         private const val FORMAT_H_MM_A = "h:mm a"
+        private const val FORMAT_EEE_H_MM_A = "EEE h:mm a"
         private const val FORMAT_MMM = "MMM"
         private const val FORMAT_EEE_DD = "EEE dd"
         private const val FORMAT_EEE_MM_DD_H_MM_A = "EEE MMM dd, h:mm a"
+        private const val FORMAT_DD_MMM_HH_MM = "dd MMM, HH:mm"
+
+        private const val SIX_DAYS_IN_MILLISECONDS = 518_400_000L
 
         @Volatile
         private var formatRelay: SimpleDateFormat? = null
@@ -125,6 +142,12 @@ value class DateTime(val value: Date) {
             )
             .toDateTime()
 
+        /**
+         * Create a [DateTime] that is 6 days from the current time
+         * */
+        fun getSixDaysAgo(): DateTime =
+            DateTime(Date(System.currentTimeMillis() - SIX_DAYS_IN_MILLISECONDS))
+
         @Volatile
         private var formateeemmddhmma: SimpleDateFormat? = null
         @Suppress("SpellCheckingInspection")
@@ -142,6 +165,22 @@ value class DateTime(val value: Date) {
             }
 
         @Volatile
+        private var formatddmmmhhmm: SimpleDateFormat? = null
+        @Suppress("SpellCheckingInspection")
+        fun getFormatddmmmhhmm(): SimpleDateFormat =
+            formatddmmmhhmm?.also {
+                it.timeZone = TimeZone.getDefault()
+            } ?: synchronized(this) {
+                formatddmmmhhmm?.also {
+                    it.timeZone = TimeZone.getDefault()
+                } ?: SimpleDateFormat(FORMAT_DD_MMM_HH_MM, Locale.getDefault())
+                    .also {
+                        it.timeZone = TimeZone.getDefault()
+                        formatddmmmhhmm = it
+                    }
+            }
+
+        @Volatile
         private var formathmma: SimpleDateFormat? = null
         @Suppress("SpellCheckingInspection")
         fun getFormathmma(): SimpleDateFormat =
@@ -154,6 +193,22 @@ value class DateTime(val value: Date) {
                     .also {
                         it.timeZone = TimeZone.getDefault()
                         formathmma = it
+                    }
+            }
+
+        @Volatile
+        private var formateeehmma: SimpleDateFormat? = null
+        @Suppress("SpellCheckingInspection")
+        fun getFormatEEEhmma(): SimpleDateFormat =
+            formateeehmma?.also {
+                it.timeZone = TimeZone.getDefault()
+            } ?: synchronized(this) {
+                formateeehmma?.also {
+                    it.timeZone = TimeZone.getDefault()
+                } ?: SimpleDateFormat(FORMAT_EEE_H_MM_A, Locale.getDefault())
+                    .also {
+                        it.timeZone = TimeZone.getDefault()
+                        formateeehmma = it
                     }
             }
 
