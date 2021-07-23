@@ -11,6 +11,7 @@ abstract class AddFriendNavigator(
     abstract suspend fun toInviteFriendDetail()
     abstract suspend fun toAddContactDetail()
     abstract suspend fun closeDetailScreen()
+
     suspend fun popBackStack() {
         navigationDriver.submitNavigationRequest(PopBackStack())
     }

@@ -45,15 +45,25 @@ inline fun DateTime.hhmmElseDate(today00: DateTime = DateTime.getToday00()): Str
 }
 
 @Suppress("NOTHING_TO_INLINE", "SpellCheckingInspection")
-inline fun DateTime.chatTimeFormat(today00: DateTime = DateTime.getToday00(), sixDaysAgo: DateTime = DateTime.getSixDaysAgo()): String {
-    return if (today00.before(this)) {
-        DateTime.getFormathmma().format(value)
-    } else if (sixDaysAgo.before(this)) {
-        DateTime.getFormatEEEhmma().format(value)
-    } else {
-        DateTime.getFormatddmmmhhmm().format(value)
+inline fun DateTime.chatTimeFormat(
+    today00: DateTime = DateTime.getToday00(),
+    sixDaysAgo: DateTime = DateTime.getSixDaysAgo()
+): String =
+    when {
+        today00.before(this) -> {
+            DateTime.getFormathmma().format(value)
+        }
+        sixDaysAgo.before(this) -> {
+            DateTime.getFormatEEEhmma().format(value)
+        }
+        else -> {
+            DateTime.getFormatddmmmhhmm().format(value)
+        }
     }
-}
+
+@Suppress("NOTHING_TO_INLINE", "SpellCheckingInspection")
+inline fun DateTime.eeemmddhmma(): String =
+    DateTime.getFormateeemmddhmma().format(value)
 
 inline val DateTime.time: Long
     get() = value.time

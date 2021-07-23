@@ -87,12 +87,6 @@ internal class ChatTribeFragment: ChatFragment<
                 addPodcastOnClickListeners(podcast)
             }
         }
-
-        headerBinding.apply {
-            imageViewChatHeaderExitTribe.setOnClickListener {
-                viewModel.exitTribeGetUserConfirmation()
-            }
-        }
     }
 
     private fun configureContributions() {

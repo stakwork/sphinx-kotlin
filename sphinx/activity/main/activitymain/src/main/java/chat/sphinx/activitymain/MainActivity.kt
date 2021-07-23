@@ -180,7 +180,6 @@ internal class MainActivity: MotionLayoutNavigationActivity<
                 // Authentication Screen has a callback to handle it automatically
                 super.onBackPressed()
             }
-
             // DetailNavController
             detailNavController.previousBackStackEntry != null -> {
                 // Downside to this is that DetailScreens cannot add
