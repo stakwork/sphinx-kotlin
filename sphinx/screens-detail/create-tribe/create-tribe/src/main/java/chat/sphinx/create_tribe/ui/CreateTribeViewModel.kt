@@ -88,14 +88,15 @@ internal class CreateTribeViewModel @Inject constructor(
                 }
                 is Response.Success -> {
                     tribePicMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Closed)
+
                     @Exhaustive
                     when (response.value) {
                         is CameraResponse.Image -> {
                             createTribeBuilder.setImg(response.value.value)
+
                             updateViewState(
                                 CreateTribeViewState.TribeImageUpdated(response.value.value)
                             )
-                            // TODO: Update image...
                         }
                     }
                 }
@@ -135,6 +136,7 @@ internal class CreateTribeViewModel @Inject constructor(
                                             }
 
                                             createTribeBuilder.setImg(imageFile)
+
                                             updateViewState(
                                                 CreateTribeViewState.TribeImageUpdated(imageFile)
                                             )

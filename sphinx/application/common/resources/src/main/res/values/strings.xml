@@ -79,4 +79,6 @@
     <string name="group_pin_label">Privacy Setting</string>
     <string name="new_contact_pin_standard_private_label">Standard PIN / Privacy PIN</string>
 
+    <string name="invalid_url">Invalid URL</string>
+
 </resources>

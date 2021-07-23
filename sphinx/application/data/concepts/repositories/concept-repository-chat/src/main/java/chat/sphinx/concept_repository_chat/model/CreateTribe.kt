@@ -16,6 +16,7 @@ class CreateTribe private constructor(
     val escrowAmount: Long? = 0L,
     val escrowMillis: Long? = 0L,
     val img: File? = null,
+    val imgUrl: String? = null,
     val tags: Array<String> = arrayOf(),
     val unlisted: Boolean? = false,
     val private: Boolean? = false,
@@ -44,6 +45,7 @@ class CreateTribe private constructor(
         private var escrowAmount: Long? = 0L
         private var escrowMillis: Long? = 0L
         private var img: File? = null
+        private var imgUrl: String? = null
         private var unlisted: Boolean? = false
         private var private: Boolean? = false
         private var appUrl: AppUrl? = null
@@ -56,6 +58,12 @@ class CreateTribe private constructor(
         @Synchronized
         fun setName(name: String?): Builder {
             this.name = name
+            return this
+        }
+
+        @Synchronized
+        fun setImageUrl(imgUrl: String?): Builder {
+            this.imgUrl = imgUrl
             return this
         }
 
@@ -151,6 +159,7 @@ class CreateTribe private constructor(
                     escrowAmount = escrowAmount,
                     escrowMillis = escrowMillis,
                     img = img,
+                    imgUrl = imgUrl,
                     tags = tags.filter {
                         it.isSelected
                     }.map {
@@ -164,7 +173,7 @@ class CreateTribe private constructor(
             }
     }
 
-    fun toPostGroupDto(imgUrl: String? = null): PostGroupDto {
+    fun toPostGroupDto(imageUrl: String? = null): PostGroupDto {
         return PostGroupDto(
             name = name,
             description = description,
@@ -173,7 +182,7 @@ class CreateTribe private constructor(
             price_to_join = priceToJoin,
             escrow_amount = escrowAmount,
             escrow_millis = escrowMillis,
-            img = imgUrl,
+            img = imageUrl ?: imgUrl,
             tags = tags,
             unlisted = unlisted,
             private = private,

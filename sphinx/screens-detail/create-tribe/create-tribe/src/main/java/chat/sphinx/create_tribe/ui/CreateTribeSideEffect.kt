@@ -51,6 +51,12 @@ internal sealed class  CreateTribeSideEffect: SideEffect<Context>()  {
         }
     }
 
+    object InvalidUrl: CreateTribeSideEffect() {
+        override suspend fun execute(value: Context) {
+            SphinxToastUtils(true).show(value, R.string.invalid_url)
+        }
+    }
+
     class AlertSelectTags(
         private val createTribeBuilder: CreateTribe.Builder,
         private val callback: () -> Unit

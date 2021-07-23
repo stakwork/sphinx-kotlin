@@ -3,13 +3,17 @@ package chat.sphinx.create_tribe.ui
 import android.content.Context
 import android.os.Bundle
 import android.view.View
+import android.webkit.URLUtil
 import android.widget.ImageView
 import androidx.appcompat.content.res.AppCompatResources
+import androidx.core.content.ContextCompat
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.concept_image_loader.ImageLoader
+import chat.sphinx.concept_image_loader.ImageLoaderOptions
+import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.create_tribe.R
 import chat.sphinx.create_tribe.databinding.FragmentCreateTribeBinding
 import chat.sphinx.insetter_activity.InsetterActivity
@@ -20,6 +24,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.visible
+import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -72,13 +77,30 @@ internal class CreateTribeFragment: SideEffectFragment<
             .addNavigationBarPadding(binding.includeLayoutMenuBottomTribePic.root)
     }
 
-    fun setupCreateTribe() {
+    private fun setupCreateTribe() {
         binding.apply {
             editTextTribeName.addTextChangedListener {
                 viewModel.createTribeBuilder.setName(it.toString())
 
-
                 updateCreateButtonState()
+            }
+            editTextTribeImage.addTextChangedListener {
+                viewModel.createTribeBuilder.setImageUrl(it.toString())
+            }
+            editTextTribeImage.setOnFocusChangeListener { _, hasFocus ->
+                if (hasFocus) {
+                    return@setOnFocusChangeListener
+                }
+                editTextTribeImage.text.toString()?.let { imageUrl ->
+                    if (URLUtil.isValidUrl(imageUrl)) {
+                        showTribeImage(imageUrl)
+                    } else {
+                        showTribeImage("")
+                        editTextTribeImage.setText("")
+
+                        invalidUrlAlert()
+                    }
+                }
             }
             constraintLayoutTribeImageContainer.setOnClickListener {
                 viewModel.tribePicMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Open)
@@ -95,18 +117,17 @@ internal class CreateTribeFragment: SideEffectFragment<
                         it.isSelected
                     }
                     if (selectedTags.isNotEmpty()) {
-                        editTextTribeTags.setText(
+                        editTextTribeTags.text = (
                             selectedTags.joinToString {
                                 it.name
                             }
                         )
                     } else {
-                        editTextTribeTags.setText(getString(R.string.no_tags_selected))
+                        editTextTribeTags.text = ""
                     }
 
                 }
             }
-
             editTextTribePriceToJoin.addTextChangedListener {
                 viewModel.createTribeBuilder.setPriceToJoin(
                     if (it.isNullOrEmpty()) {
@@ -156,27 +177,58 @@ internal class CreateTribeFragment: SideEffectFragment<
                 viewModel.createTribeBuilder.setUnlisted(isChecked)
             }
 
-            includeCreateTribeButton.layoutConstraintButtonCreateTribe.setOnClickListener {
+            buttonCreateTribe.setOnClickListener {
                 viewModel.createTribe()
             }
         }
     }
 
+    private fun invalidUrlAlert() {
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.submitSideEffect(
+                CreateTribeSideEffect.InvalidUrl
+            )
+        }
+    }
+
+    private fun showTribeImage(url: String?) {
+        if (url == null) {
+            binding.imageViewTribePicture.setImageDrawable(
+                ContextCompat.getDrawable(
+                binding.root.context,
+                R.drawable.ic_tribe
+            ))
+            return
+        }
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            imageLoader.load(
+                binding.imageViewTribePicture,
+                url,
+                ImageLoaderOptions.Builder()
+                    .placeholderResId(R.drawable.ic_tribe)
+                    .transformation(Transformation.CircleCrop)
+                    .build()
+            )
+        }
+    }
+
     private fun updateCreateButtonState() {
         requireActivity().let {
-            binding.includeCreateTribeButton.apply {
-                layoutConstraintButtonCreateTribe.background = if (viewModel.createTribeBuilder.hasRequiredFields) {
-                    AppCompatResources.getDrawable(it, R.drawable.button_background_enabled)
+            binding.apply {
+                buttonCreateTribe.alpha = if (viewModel.createTribeBuilder.hasRequiredFields) {
+                    1.0f
                 } else {
-                    AppCompatResources.getDrawable(it, R.drawable.button_background_disabled)
+                    0.5f
                 }
+
+                buttonCreateTribe.isEnabled = viewModel.createTribeBuilder.hasRequiredFields
             }
         }
     }
     override suspend fun onViewStateFlowCollect(viewState: CreateTribeViewState) {
         when (viewState) {
             CreateTribeViewState.Idle -> {
-                binding.includeCreateTribeButton.layoutConstraintButtonCreateTribe.visible
                 binding.progressBarCreateTribe.gone
             }
             is CreateTribeViewState.TribeImageUpdated -> {
@@ -185,11 +237,9 @@ internal class CreateTribeFragment: SideEffectFragment<
                     viewState.imageFile,
                     viewModel.imageLoaderDefaults
                 )
-                binding.editTextTribeImageValue.setText(getString(R.string.image_selected))
             }
             CreateTribeViewState.CreatingTribe -> {
                 binding.progressBarCreateTribe.visible
-                binding.includeCreateTribeButton.layoutConstraintButtonCreateTribe.gone
             }
         }
     }

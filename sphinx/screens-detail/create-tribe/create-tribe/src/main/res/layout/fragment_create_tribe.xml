@@ -19,31 +19,28 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintTop_toBottomOf="@+id/include_create_tribe_header"
-        app:layout_constraintBottom_toBottomOf="parent"
-        >
+        app:layout_constraintBottom_toBottomOf="parent">
+
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/constraint_layout_create_tribe_container"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_margin="@dimen/default_layout_margin"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toTopOf="@+id/constraint_layout_create_tribe_button"
-            >
+            app:layout_constraintBottom_toTopOf="@+id/layout_constraint_create_tribe_button">
 
             <androidx.core.widget.NestedScrollView
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                >
+                android:layout_height="match_parent">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    >
+                    android:layout_height="wrap_content">
 
                     <androidx.constraintlayout.widget.ConstraintLayout
                         android:id="@+id/constraint_layout_tribe_name_container"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
+                        android:layout_height="@dimen/create_tribe_edit_text_container_height"
                         android:layout_marginStart="@dimen/default_form_horizontal_margin"
                         android:layout_marginEnd="@dimen/default_form_horizontal_margin"
                         app:layout_constraintTop_toTopOf="parent">
@@ -55,7 +52,7 @@
                             android:text="@string/name"
                             android:textColor="@color/secondaryText"
                             android:fontFamily="@font/roboto_regular"
-                            app:layout_constraintBottom_toBottomOf="parent"
+                            android:layout_marginTop="@dimen/create_tribe_text_view_margin_top"
                             app:layout_constraintTop_toTopOf="parent"
                             app:layout_constraintStart_toStartOf="parent"
                             android:textSize="@dimen/default_form_text_view_text_size"
@@ -68,12 +65,13 @@
                             android:textColor="@color/text"
                             android:fontFamily="@font/roboto_regular"
                             app:backgroundTint="@android:color/transparent"
-                            app:layout_constraintTop_toBottomOf="@+id/text_view_tribe_name"
-                            app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintStart_toStartOf="parent"
+                            android:layout_marginLeft="@dimen/default_form_edit_text_left_margin"
                             android:textSize="@dimen/default_form_edit_view_text_size"
                             android:inputType="textVisiblePassword|textCapWords"
                             android:singleLine="true"
+                            app:layout_constraintTop_toBottomOf="@+id/text_view_tribe_name"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
                             tools:text="Tribey McSphinxy"/>
 
                         <androidx.constraintlayout.widget.ConstraintLayout
@@ -90,21 +88,20 @@
                     <androidx.constraintlayout.widget.ConstraintLayout
                         android:id="@+id/constraint_layout_tribe_image_container"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
+                        android:layout_height="@dimen/create_tribe_edit_text_container_height"
                         android:layout_marginStart="@dimen/default_form_horizontal_margin"
                         android:layout_marginEnd="@dimen/default_form_horizontal_margin"
-                        app:layout_constraintTop_toBottomOf="@+id/constraint_layout_tribe_name_container"
-                        >
+                        app:layout_constraintTop_toBottomOf="@+id/constraint_layout_tribe_name_container">
+
                         <androidx.constraintlayout.widget.ConstraintLayout
                             android:id="@+id/constraint_layout_tribe_image_text_container"
                             android:layout_width="0dp"
-                            android:layout_height="wrap_content"
+                            android:layout_height="match_parent"
                             android:layout_marginEnd="@dimen/default_layout_margin"
-                            app:layout_constraintTop_toTopOf="parent"
                             app:layout_constraintBottom_toBottomOf="parent"
                             app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintEnd_toStartOf="@+id/constraint_layout_profile_picture"
-                            >
+                            app:layout_constraintEnd_toStartOf="@+id/constraint_layout_profile_picture">
+
                             <androidx.appcompat.widget.AppCompatTextView
                                 android:id="@+id/text_view_tribe_image_field"
                                 android:layout_width="wrap_content"
@@ -114,12 +111,12 @@
                                 android:fontFamily="@font/roboto_regular"
                                 android:textSize="@dimen/default_form_text_view_text_size"
                                 android:singleLine="true"
+                                android:layout_marginTop="@dimen/create_tribe_text_view_margin_top"
                                 app:layout_constraintTop_toTopOf="parent"
-                                app:layout_constraintStart_toStartOf="parent"
-                                />
+                                app:layout_constraintStart_toStartOf="parent" />
 
-                            <androidx.appcompat.widget.AppCompatTextView
-                                android:id="@+id/edit_text_tribe_image_value"
+                            <androidx.appcompat.widget.AppCompatEditText
+                                android:id="@+id/edit_text_tribe_image"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginVertical="@dimen/text_view_create_tribe_margin"
@@ -127,53 +124,50 @@
                                 android:fontFamily="@font/roboto_regular"
                                 android:textSize="@dimen/default_form_edit_view_text_size"
                                 android:singleLine="true"
+                                android:layout_marginLeft="@dimen/default_form_edit_text_left_margin"
                                 app:backgroundTint="@android:color/transparent"
                                 app:layout_constraintTop_toBottomOf="@+id/text_view_tribe_image_field"
                                 app:layout_constraintBottom_toBottomOf="parent"
                                 app:layout_constraintStart_toStartOf="parent"
                                 tools:text= "https://memes.sphinx.chat/picture_with_all_the_stuff"/>
 
-                            <androidx.constraintlayout.widget.ConstraintLayout
-                                android:id="@+id/layout_constraint_profile_picture_bottom_border"
-                                android:layout_width="match_parent"
-                                android:layout_height="1dp"
-                                android:background="@color/lightDivider"
-                                app:layout_constraintBottom_toBottomOf="parent"
-                                app:layout_constraintEnd_toEndOf="parent"
-                                app:layout_constraintStart_toStartOf="@+id/text_view_tribe_image_field" />
-
                         </androidx.constraintlayout.widget.ConstraintLayout>
 
                         <androidx.constraintlayout.widget.ConstraintLayout
                             android:id="@+id/constraint_layout_profile_picture"
                             android:layout_width="@dimen/default_chat_initial_image_xy"
-                            android:layout_height="@dimen/default_chat_initial_image_xy"
-                            android:layout_marginTop="@dimen/default_layout_margin"
-                            android:layout_marginHorizontal="@dimen/default_layout_margin"
-                            app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintTop_toTopOf="parent"
-                            app:layout_constraintBottom_toBottomOf="parent"
-                            >
+                            android:layout_height="match_parent"
+                            app:layout_constraintEnd_toEndOf="parent">
+
                             <androidx.appcompat.widget.AppCompatImageView
                                 android:id="@+id/image_view_tribe_picture"
                                 android:layout_width="@dimen/default_chat_initial_image_xy"
                                 android:layout_height="@dimen/default_chat_initial_image_xy"
                                 android:src="@drawable/ic_tribe"
                                 app:layout_constraintStart_toStartOf="parent"
-                                app:layout_constraintTop_toTopOf="parent"
-                                />
+                                app:layout_constraintBottom_toBottomOf="parent"
+                                app:layout_constraintTop_toTopOf="parent"/>
+
                         </androidx.constraintlayout.widget.ConstraintLayout>
+
+                        <androidx.constraintlayout.widget.ConstraintLayout
+                            android:id="@+id/layout_constraint_profile_picture_bottom_border"
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:background="@color/lightDivider"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent" />
 
                     </androidx.constraintlayout.widget.ConstraintLayout>
 
                     <androidx.constraintlayout.widget.ConstraintLayout
                         android:id="@+id/constraint_layout_tribe_description_container"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
+                        android:layout_height="@dimen/create_tribe_edit_text_container_height"
                         android:layout_marginStart="@dimen/default_form_horizontal_margin"
                         android:layout_marginEnd="@dimen/default_form_horizontal_margin"
-                        app:layout_constraintTop_toBottomOf="@+id/constraint_layout_tribe_image_container"
-                        >
+                        app:layout_constraintTop_toBottomOf="@+id/constraint_layout_tribe_image_container">
 
                         <androidx.appcompat.widget.AppCompatTextView
                             android:id="@+id/text_view_tribe_description"
@@ -182,7 +176,7 @@
                             android:text="@string/description"
                             android:textColor="@color/secondaryText"
                             android:fontFamily="@font/roboto_regular"
-                            app:layout_constraintBottom_toBottomOf="parent"
+                            android:layout_marginTop="@dimen/create_tribe_text_view_margin_top"
                             app:layout_constraintTop_toTopOf="parent"
                             app:layout_constraintStart_toStartOf="parent"
                             android:textSize="@dimen/default_form_text_view_text_size"
@@ -195,12 +189,13 @@
                             android:textColor="@color/text"
                             android:fontFamily="@font/roboto_regular"
                             app:backgroundTint="@android:color/transparent"
-                            app:layout_constraintTop_toBottomOf="@+id/text_view_tribe_description"
-                            app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintStart_toStartOf="parent"
                             android:textSize="@dimen/default_form_edit_view_text_size"
                             android:inputType="textVisiblePassword|textCapWords"
                             android:singleLine="true"
+                            android:layout_marginLeft="@dimen/default_form_edit_text_left_margin"
+                            app:layout_constraintTop_toBottomOf="@+id/text_view_tribe_description"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
                             tools:text="Can be best described as a collection of people sending messages"/>
 
                         <androidx.constraintlayout.widget.ConstraintLayout
@@ -217,12 +212,11 @@
                     <androidx.constraintlayout.widget.ConstraintLayout
                         android:id="@+id/constraint_layout_tribe_tags_container"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
+                        android:layout_height="@dimen/create_tribe_edit_text_container_height"
                         android:layout_marginStart="@dimen/default_form_horizontal_margin"
                         android:layout_marginEnd="@dimen/default_form_horizontal_margin"
                         android:descendantFocusability="blocksDescendants"
-                        app:layout_constraintTop_toBottomOf="@+id/constraint_layout_tribe_description_container"
-                        >
+                        app:layout_constraintTop_toBottomOf="@+id/constraint_layout_tribe_description_container">
 
                         <androidx.appcompat.widget.AppCompatTextView
                             android:id="@+id/text_view_tribe_tags"
@@ -231,7 +225,7 @@
                             android:text="@string/tags"
                             android:textColor="@color/secondaryText"
                             android:fontFamily="@font/roboto_regular"
-                            app:layout_constraintBottom_toBottomOf="parent"
+                            android:layout_marginTop="@dimen/create_tribe_text_view_margin_top"
                             app:layout_constraintTop_toTopOf="parent"
                             app:layout_constraintStart_toStartOf="parent"
                             android:textSize="@dimen/default_form_text_view_text_size"
@@ -248,7 +242,6 @@
                             app:layout_constraintTop_toBottomOf="@+id/text_view_tribe_tags"
                             app:layout_constraintBottom_toBottomOf="parent"
                             app:layout_constraintStart_toStartOf="parent"
-                            android:text="@string/no_tags_selected"
                             android:textSize="@dimen/default_form_edit_view_text_size"
                             android:singleLine="true"
                             tools:text="Bitcoin, Podcast, Lightning..."/>
@@ -267,11 +260,10 @@
                     <androidx.constraintlayout.widget.ConstraintLayout
                         android:id="@+id/constraint_layout_tribe_price_to_join_container"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
+                        android:layout_height="@dimen/create_tribe_edit_text_container_height"
                         android:layout_marginStart="@dimen/default_form_horizontal_margin"
                         android:layout_marginEnd="@dimen/default_form_horizontal_margin"
-                        app:layout_constraintTop_toBottomOf="@+id/constraint_layout_tribe_tags_container"
-                        >
+                        app:layout_constraintTop_toBottomOf="@+id/constraint_layout_tribe_tags_container">
 
                         <androidx.appcompat.widget.AppCompatTextView
                             android:id="@+id/text_view_tribe_price_to_join"
@@ -280,7 +272,7 @@
                             android:text="@string/price_to_join_sats"
                             android:textColor="@color/secondaryText"
                             android:fontFamily="@font/roboto_regular"
-                            app:layout_constraintBottom_toBottomOf="parent"
+                            android:layout_marginTop="@dimen/create_tribe_text_view_margin_top"
                             app:layout_constraintTop_toTopOf="parent"
                             app:layout_constraintStart_toStartOf="parent"
                             android:textSize="@dimen/default_form_text_view_text_size"
@@ -293,12 +285,13 @@
                             android:textColor="@color/text"
                             android:fontFamily="@font/roboto_regular"
                             app:backgroundTint="@android:color/transparent"
-                            app:layout_constraintTop_toBottomOf="@+id/text_view_tribe_price_to_join"
-                            app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintStart_toStartOf="parent"
                             android:textSize="@dimen/default_form_edit_view_text_size"
                             android:inputType="number"
                             android:singleLine="true"
+                            android:layout_marginLeft="@dimen/default_form_edit_text_left_margin"
+                            app:layout_constraintTop_toBottomOf="@+id/text_view_tribe_price_to_join"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
                             tools:text="200"/>
 
                         <androidx.constraintlayout.widget.ConstraintLayout
@@ -315,11 +308,10 @@
                     <androidx.constraintlayout.widget.ConstraintLayout
                         android:id="@+id/constraint_layout_tribe_price_per_message_container"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
+                        android:layout_height="@dimen/create_tribe_edit_text_container_height"
                         android:layout_marginStart="@dimen/default_form_horizontal_margin"
                         android:layout_marginEnd="@dimen/default_form_horizontal_margin"
-                        app:layout_constraintTop_toBottomOf="@+id/constraint_layout_tribe_price_to_join_container"
-                        >
+                        app:layout_constraintTop_toBottomOf="@+id/constraint_layout_tribe_price_to_join_container">
 
                         <androidx.appcompat.widget.AppCompatTextView
                             android:id="@+id/text_view_tribe_price_per_message"
@@ -328,7 +320,7 @@
                             android:text="@string/price_per_message_sats"
                             android:textColor="@color/secondaryText"
                             android:fontFamily="@font/roboto_regular"
-                            app:layout_constraintBottom_toBottomOf="parent"
+                            android:layout_marginTop="@dimen/create_tribe_text_view_margin_top"
                             app:layout_constraintTop_toTopOf="parent"
                             app:layout_constraintStart_toStartOf="parent"
                             android:textSize="@dimen/default_form_text_view_text_size"
@@ -341,12 +333,13 @@
                             android:textColor="@color/text"
                             android:fontFamily="@font/roboto_regular"
                             app:backgroundTint="@android:color/transparent"
-                            app:layout_constraintTop_toBottomOf="@+id/text_view_tribe_price_per_message"
-                            app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintStart_toStartOf="parent"
                             android:textSize="@dimen/default_form_edit_view_text_size"
                             android:inputType="number"
                             android:singleLine="true"
+                            android:layout_marginLeft="@dimen/default_form_edit_text_left_margin"
+                            app:layout_constraintTop_toBottomOf="@+id/text_view_tribe_price_per_message"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
                             tools:text="10"/>
 
                         <androidx.constraintlayout.widget.ConstraintLayout
@@ -363,11 +356,10 @@
                     <androidx.constraintlayout.widget.ConstraintLayout
                         android:id="@+id/constraint_layout_tribe_amount_to_stake_container"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
+                        android:layout_height="@dimen/create_tribe_edit_text_container_height"
                         android:layout_marginStart="@dimen/default_form_horizontal_margin"
                         android:layout_marginEnd="@dimen/default_form_horizontal_margin"
-                        app:layout_constraintTop_toBottomOf="@+id/constraint_layout_tribe_price_per_message_container"
-                        >
+                        app:layout_constraintTop_toBottomOf="@+id/constraint_layout_tribe_price_per_message_container">
 
                         <androidx.appcompat.widget.AppCompatTextView
                             android:id="@+id/text_view_tribe_amount_to_stake"
@@ -376,7 +368,7 @@
                             android:text="@string/amount_to_stake_sats"
                             android:textColor="@color/secondaryText"
                             android:fontFamily="@font/roboto_regular"
-                            app:layout_constraintBottom_toBottomOf="parent"
+                            android:layout_marginTop="@dimen/create_tribe_text_view_margin_top"
                             app:layout_constraintTop_toTopOf="parent"
                             app:layout_constraintStart_toStartOf="parent"
                             android:textSize="@dimen/default_form_text_view_text_size"
@@ -389,12 +381,13 @@
                             android:textColor="@color/text"
                             android:fontFamily="@font/roboto_regular"
                             app:backgroundTint="@android:color/transparent"
-                            app:layout_constraintTop_toBottomOf="@+id/text_view_tribe_amount_to_stake"
-                            app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintStart_toStartOf="parent"
                             android:textSize="@dimen/default_form_edit_view_text_size"
                             android:inputType="number"
                             android:singleLine="true"
+                            android:layout_marginLeft="@dimen/default_form_edit_text_left_margin"
+                            app:layout_constraintTop_toBottomOf="@+id/text_view_tribe_amount_to_stake"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
                             tools:text="10"/>
 
                         <androidx.constraintlayout.widget.ConstraintLayout
@@ -411,11 +404,10 @@
                     <androidx.constraintlayout.widget.ConstraintLayout
                         android:id="@+id/constraint_layout_tribe_time_to_stake_container"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
+                        android:layout_height="@dimen/create_tribe_edit_text_container_height"
                         android:layout_marginStart="@dimen/default_form_horizontal_margin"
                         android:layout_marginEnd="@dimen/default_form_horizontal_margin"
-                        app:layout_constraintTop_toBottomOf="@+id/constraint_layout_tribe_amount_to_stake_container"
-                        >
+                        app:layout_constraintTop_toBottomOf="@+id/constraint_layout_tribe_amount_to_stake_container">
 
                         <androidx.appcompat.widget.AppCompatTextView
                             android:id="@+id/text_view_tribe_time_to_stake"
@@ -424,7 +416,7 @@
                             android:text="@string/time_to_stake_hours"
                             android:textColor="@color/secondaryText"
                             android:fontFamily="@font/roboto_regular"
-                            app:layout_constraintBottom_toBottomOf="parent"
+                            android:layout_marginTop="@dimen/create_tribe_text_view_margin_top"
                             app:layout_constraintTop_toTopOf="parent"
                             app:layout_constraintStart_toStartOf="parent"
                             android:textSize="@dimen/default_form_text_view_text_size"
@@ -437,12 +429,13 @@
                             android:textColor="@color/text"
                             android:fontFamily="@font/roboto_regular"
                             app:backgroundTint="@android:color/transparent"
-                            app:layout_constraintTop_toBottomOf="@+id/text_view_tribe_time_to_stake"
-                            app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintStart_toStartOf="parent"
                             android:textSize="@dimen/default_form_edit_view_text_size"
                             android:inputType="number"
                             android:singleLine="true"
+                            android:layout_marginLeft="@dimen/default_form_edit_text_left_margin"
+                            app:layout_constraintTop_toBottomOf="@+id/text_view_tribe_time_to_stake"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
                             tools:text="3"/>
 
                         <androidx.constraintlayout.widget.ConstraintLayout
@@ -459,11 +452,10 @@
                     <androidx.constraintlayout.widget.ConstraintLayout
                         android:id="@+id/constraint_layout_tribe_app_url_container"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
+                        android:layout_height="@dimen/create_tribe_edit_text_container_height"
                         android:layout_marginStart="@dimen/default_form_horizontal_margin"
                         android:layout_marginEnd="@dimen/default_form_horizontal_margin"
-                        app:layout_constraintTop_toBottomOf="@+id/constraint_layout_tribe_time_to_stake_container"
-                        >
+                        app:layout_constraintTop_toBottomOf="@+id/constraint_layout_tribe_time_to_stake_container">
 
                         <androidx.appcompat.widget.AppCompatTextView
                             android:id="@+id/text_view_tribe_app_url"
@@ -472,7 +464,7 @@
                             android:text="@string/app_url"
                             android:textColor="@color/secondaryText"
                             android:fontFamily="@font/roboto_regular"
-                            app:layout_constraintBottom_toBottomOf="parent"
+                            android:layout_marginTop="@dimen/create_tribe_text_view_margin_top"
                             app:layout_constraintTop_toTopOf="parent"
                             app:layout_constraintStart_toStartOf="parent"
                             android:textSize="@dimen/default_form_text_view_text_size"
@@ -485,12 +477,13 @@
                             android:textColor="@color/text"
                             android:fontFamily="@font/roboto_regular"
                             app:backgroundTint="@android:color/transparent"
-                            app:layout_constraintTop_toBottomOf="@+id/text_view_tribe_app_url"
-                            app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintStart_toStartOf="parent"
                             android:textSize="@dimen/default_form_edit_view_text_size"
                             android:inputType="textUri"
                             android:singleLine="true"
+                            android:layout_marginLeft="@dimen/default_form_edit_text_left_margin"
+                            app:layout_constraintTop_toBottomOf="@+id/text_view_tribe_app_url"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
                             tools:text="https://fav.app.store/123456789"/>
 
                         <androidx.constraintlayout.widget.ConstraintLayout
@@ -507,11 +500,10 @@
                     <androidx.constraintlayout.widget.ConstraintLayout
                         android:id="@+id/constraint_layout_tribe_feed_url_container"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
+                        android:layout_height="@dimen/create_tribe_edit_text_container_height"
                         android:layout_marginStart="@dimen/default_form_horizontal_margin"
                         android:layout_marginEnd="@dimen/default_form_horizontal_margin"
-                        app:layout_constraintTop_toBottomOf="@+id/constraint_layout_tribe_app_url_container"
-                        >
+                        app:layout_constraintTop_toBottomOf="@+id/constraint_layout_tribe_app_url_container">
 
                         <androidx.appcompat.widget.AppCompatTextView
                             android:id="@+id/text_view_tribe_feed_url"
@@ -520,7 +512,7 @@
                             android:text="@string/rss_feed_url"
                             android:textColor="@color/secondaryText"
                             android:fontFamily="@font/roboto_regular"
-                            app:layout_constraintBottom_toBottomOf="parent"
+                            android:layout_marginTop="@dimen/create_tribe_text_view_margin_top"
                             app:layout_constraintTop_toTopOf="parent"
                             app:layout_constraintStart_toStartOf="parent"
                             android:textSize="@dimen/default_form_text_view_text_size"
@@ -533,12 +525,13 @@
                             android:textColor="@color/text"
                             android:fontFamily="@font/roboto_regular"
                             app:backgroundTint="@android:color/transparent"
-                            app:layout_constraintTop_toBottomOf="@+id/text_view_tribe_feed_url"
-                            app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintStart_toStartOf="parent"
                             android:textSize="@dimen/default_form_edit_view_text_size"
                             android:inputType="textUri"
                             android:singleLine="true"
+                            android:layout_marginLeft="@dimen/default_form_edit_text_left_margin"
+                            app:layout_constraintTop_toBottomOf="@+id/text_view_tribe_feed_url"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
                             tools:text="https://rss.feed/123456789"/>
 
                         <androidx.constraintlayout.widget.ConstraintLayout
@@ -555,7 +548,7 @@
                     <androidx.constraintlayout.widget.ConstraintLayout
                         android:id="@+id/constraint_layout_tribe_listing_container"
                         android:layout_width="match_parent"
-                        android:layout_height="75dp"
+                        android:layout_height="@dimen/create_tribe_edit_text_container_height"
                         android:layout_marginTop="@dimen/default_half_layout_margin"
                         android:layout_marginStart="@dimen/default_form_horizontal_margin"
                         android:layout_marginEnd="@dimen/default_form_horizontal_margin"
@@ -595,7 +588,8 @@
                     <androidx.constraintlayout.widget.ConstraintLayout
                         android:id="@+id/constraint_layout_tribe_approve_membership_container"
                         android:layout_width="match_parent"
-                        android:layout_height="75dp"
+                        android:layout_height="@dimen/create_tribe_edit_text_container_height"
+                        android:alpha="0.5"
                         android:layout_marginTop="@dimen/default_half_layout_margin"
                         android:layout_marginStart="@dimen/default_form_horizontal_margin"
                         android:layout_marginEnd="@dimen/default_form_horizontal_margin"
@@ -623,6 +617,7 @@
                             android:checked="false"
                             android:theme="@style/CustomSwitch"
                             android:thumb="@drawable/switch_thumb_selector"
+                            android:enabled="false"
                             app:layout_constraintBottom_toBottomOf="parent"
                             app:layout_constraintTop_toTopOf="parent"
                             app:layout_constraintEnd_toEndOf="parent"
@@ -631,7 +626,6 @@
 
                     </androidx.constraintlayout.widget.ConstraintLayout>
 
-
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
             </androidx.core.widget.NestedScrollView>
@@ -639,36 +633,47 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/constraint_layout_create_tribe_button"
+            android:id="@+id/layout_constraint_create_tribe_button"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/add_buttons_height"
-            app:layout_constraintBottom_toBottomOf="parent"
-            android:layout_margin="@dimen/default_layout_margin"
-            >
-            <ProgressBar
-                android:id="@+id/progress_bar_create_tribe"
-                android:layout_width="25dp"
-                android:layout_height="25dp"
-                android:layout_margin="@dimen/default_layout_margin"
-                style="?android:attr/progressBarStyle"
-                android:indeterminateTint="@android:color/white"
-                android:indeterminate="true"
-                android:visibility="gone"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                tools:visibility="visible"/>
+            android:layout_height="@dimen/create_tribe_button_container_height"
+            app:layout_constraintBottom_toBottomOf="parent">
 
-            <include
-                android:id="@+id/include_create_tribe_button"
-                layout="@layout/layout_button_create_tribe_submit"
-                android:layout_width="wrap_content"
-                android:layout_height="@dimen/add_buttons_height"
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="@dimen/create_tribe_button_width"
+                android:layout_height="@dimen/create_tribe_button_height"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
-                />
+                app:layout_constraintTop_toTopOf="parent">
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/button_create_tribe"
+                    style="@style/RoundedBlueButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:text="@string/create_tribe"
+                    android:textSize="@dimen/create_tribe_button_text_size"
+                    android:textColor="@android:color/white"
+                    android:background="@drawable/button_background_white_rad_48"
+                    android:backgroundTint="@color/primaryBlue"
+                    android:alpha="0.5"
+                    android:enabled="false"/>
+
+                <ProgressBar
+                    android:layout_width="@dimen/create_tribe_progress_bar_xy"
+                    android:layout_height="@dimen/create_tribe_progress_bar_xy"
+                    android:layout_marginLeft="@dimen/create_tribe_progress_bar_margin_left"
+                    android:id="@+id/progress_bar_create_tribe"
+                    style="?android:attr/progressBarStyle"
+                    android:indeterminateTint="@android:color/white"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    android:indeterminate="true"
+                    android:visibility="gone" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
