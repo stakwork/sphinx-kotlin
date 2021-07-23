@@ -51,11 +51,7 @@ import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.MessageUUID
 import chat.sphinx.wrapper_contact.Contact
-import chat.sphinx.wrapper_message.GiphyData
-import chat.sphinx.wrapper_message.Message
-import chat.sphinx.wrapper_message.isDeleted
-import chat.sphinx.wrapper_message.isGroupAction
-import chat.sphinx.wrapper_message.retrieveTextToShow
+import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message_media.MediaType
 import chat.sphinx.wrapper_message_media.toMediaType
 import com.giphy.sdk.core.models.Media
@@ -141,7 +137,6 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                     ChatHeaderViewState.Initialized(
                         chatHeaderName = chat?.name?.value ?: getChatNameIfNull()?.value ?: "",
                         showLock = chat != null,
-                        showExitTribe = chat?.isTribe() ?: false,
                         chat?.isMuted,
                     )
                 )
@@ -778,5 +773,13 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 
     override suspend fun onMotionSceneCompletion(value: Nothing) {
         // unused
+    }
+
+    open fun goToChatDetailScreen() {
+        viewModelScope.launch(mainImmediate) {
+            chatId?.let {
+                chatNavigator.toChatDetail(it, contactId)
+            }
+        }
     }
 }

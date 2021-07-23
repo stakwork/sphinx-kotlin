@@ -13,6 +13,8 @@ abstract class ChatNavigator(
 {
     abstract suspend fun toPaymentSendDetail(contactId: ContactId, chatId: ChatId?)
 
+    abstract suspend fun toChatDetail(chatId: ChatId, contactId: ContactId? = null)
+
     suspend fun popBackStack() {
         navigationDriver.submitNavigationRequest(
             PopBackStack()

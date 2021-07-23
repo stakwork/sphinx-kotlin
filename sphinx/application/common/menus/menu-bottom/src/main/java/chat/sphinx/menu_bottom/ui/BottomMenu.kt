@@ -46,7 +46,11 @@ open class BottomMenu(
         private var dismiss: MenuBottomDismiss? = null
 
         fun setHeaderText(@StringRes resId: Int) = apply {
-            headerText = binding.getString(resId)
+            setHeaderText(binding.getString(resId))
+        }
+
+        fun setHeaderText(text: String) = apply {
+            headerText = text
         }
 
         fun setHeaderSubText(@StringRes resId: Int) = apply {

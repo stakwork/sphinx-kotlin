@@ -10,4 +10,5 @@ dependencies {
     implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-chat')
 
     implementation deps.kotlin.coroutinesCore
+    implementation project(path: ':sphinx:application:common:wrappers:wrapper-io-utils')
 }
