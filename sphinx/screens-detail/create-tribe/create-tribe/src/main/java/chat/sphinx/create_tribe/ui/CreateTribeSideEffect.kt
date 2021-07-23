@@ -24,7 +24,7 @@ fun CreateTribe.Builder.adapter(context: Context) = object : ArrayAdapter<Create
         textView.isChecked = tag.isSelected
 
         AppCompatResources.getDrawable(context, tag.image)?.let { icon ->
-            icon.setBounds(0, 0, 72, 72)
+            icon.setBounds(0, 0, 96, 96)
             textView.setCompoundDrawables(icon, null, null, null)
         }
         return view

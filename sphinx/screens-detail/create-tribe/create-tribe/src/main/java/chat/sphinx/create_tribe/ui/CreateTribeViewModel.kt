@@ -46,14 +46,14 @@ internal class CreateTribeViewModel @Inject constructor(
 {
     val createTribeBuilder = CreateTribe.Builder(
         arrayOf(
-            CreateTribe.Builder.Tag("Bitcoin", R.drawable.ic_media_library),
-            CreateTribe.Builder.Tag("Lightning", R.drawable.ic_add_contact),
-            CreateTribe.Builder.Tag("Sphinx", R.drawable.sphinx_white_logo),
-            CreateTribe.Builder.Tag("Crypto", R.drawable.ic_tribe),
-            CreateTribe.Builder.Tag("Tech", R.drawable.ic_scan),
-            CreateTribe.Builder.Tag("Altcoins", R.drawable.ic_media_library),
-            CreateTribe.Builder.Tag("Music", R.drawable.ic_baseline_local_phone_24),
-            CreateTribe.Builder.Tag("Podcast", R.drawable.ic_baseline_mic_20),
+            CreateTribe.Builder.Tag("Bitcoin", R.drawable.ic_bitcoin),
+            CreateTribe.Builder.Tag("Lightning", R.drawable.ic_lightning),
+            CreateTribe.Builder.Tag("Sphinx", R.drawable.ic_sphinx),
+            CreateTribe.Builder.Tag("Crypto", R.drawable.ic_crypto),
+            CreateTribe.Builder.Tag("Tech", R.drawable.ic_tech),
+            CreateTribe.Builder.Tag("Altcoins", R.drawable.ic_altcoins),
+            CreateTribe.Builder.Tag("Music", R.drawable.ic_music),
+            CreateTribe.Builder.Tag("Podcast", R.drawable.ic_podcast),
         )
     )
 
