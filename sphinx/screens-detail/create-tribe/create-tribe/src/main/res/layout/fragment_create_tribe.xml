@@ -118,16 +118,15 @@
                                 app:layout_constraintStart_toStartOf="parent"
                                 />
 
-                            <androidx.appcompat.widget.AppCompatEditText
+                            <androidx.appcompat.widget.AppCompatTextView
                                 android:id="@+id/edit_text_tribe_image_value"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
+                                android:layout_marginVertical="@dimen/text_view_create_tribe_margin"
                                 android:textColor="@color/text"
                                 android:fontFamily="@font/roboto_regular"
                                 android:textSize="@dimen/default_form_edit_view_text_size"
-                                android:layout_marginStart="@dimen/default_form_edit_text_left_margin"
                                 android:singleLine="true"
-                                android:enabled="false"
                                 app:backgroundTint="@android:color/transparent"
                                 app:layout_constraintTop_toBottomOf="@+id/text_view_tribe_image_field"
                                 app:layout_constraintBottom_toBottomOf="parent"
@@ -258,6 +257,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="@dimen/default_form_horizontal_margin"
                         android:layout_marginEnd="@dimen/default_form_horizontal_margin"
+                        android:descendantFocusability="blocksDescendants"
                         app:layout_constraintTop_toBottomOf="@+id/constraint_layout_tribe_description_container"
                         >
 
@@ -274,18 +274,19 @@
                             android:textSize="@dimen/default_form_text_view_text_size"
                             android:singleLine="true" />
 
-                        <androidx.appcompat.widget.AppCompatEditText
+                        <androidx.appcompat.widget.AppCompatTextView
                             android:id="@+id/edit_text_tribe_tags"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:layout_marginVertical="@dimen/text_view_create_tribe_margin"
                             android:textColor="@color/text"
                             android:fontFamily="@font/roboto_regular"
                             app:backgroundTint="@android:color/transparent"
                             app:layout_constraintTop_toBottomOf="@+id/text_view_tribe_tags"
                             app:layout_constraintBottom_toBottomOf="parent"
                             app:layout_constraintStart_toStartOf="parent"
+                            android:text="@string/no_tags_selected"
                             android:textSize="@dimen/default_form_edit_view_text_size"
-                            android:inputType="none"
                             android:singleLine="true"
                             tools:text="Bitcoin, Podcast, Lightning..."/>
 

@@ -44,7 +44,18 @@ internal class CreateTribeViewModel @Inject constructor(
         CreateTribeViewState>(dispatchers, CreateTribeViewState.Idle),
     TribePicMenuViewModel
 {
-    val createTribeBuilder = CreateTribe.Builder()
+    val createTribeBuilder = CreateTribe.Builder(
+        arrayOf(
+            CreateTribe.Builder.Tag("Bitcoin", R.drawable.ic_media_library),
+            CreateTribe.Builder.Tag("Lightning", R.drawable.ic_add_contact),
+            CreateTribe.Builder.Tag("Sphinx", R.drawable.sphinx_white_logo),
+            CreateTribe.Builder.Tag("Crypto", R.drawable.ic_tribe),
+            CreateTribe.Builder.Tag("Tech", R.drawable.ic_scan),
+            CreateTribe.Builder.Tag("Altcoins", R.drawable.ic_media_library),
+            CreateTribe.Builder.Tag("Music", R.drawable.ic_baseline_local_phone_24),
+            CreateTribe.Builder.Tag("Podcast", R.drawable.ic_baseline_mic_20),
+        )
+    )
 
     val imageLoaderDefaults by lazy {
         ImageLoaderOptions.Builder()
@@ -181,6 +192,14 @@ internal class CreateTribeViewModel @Inject constructor(
             }
         } else {
             showNameAndDescriptionRequired()
+        }
+    }
+
+    fun selectTags(callback: () -> Unit) {
+        viewModelScope.launch(mainImmediate) {
+            submitSideEffect(
+                CreateTribeSideEffect.AlertSelectTags(createTribeBuilder, callback)
+            )
         }
     }
 }

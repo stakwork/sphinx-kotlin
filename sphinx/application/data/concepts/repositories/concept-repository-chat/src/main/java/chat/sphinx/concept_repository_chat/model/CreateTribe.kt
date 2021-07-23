@@ -23,7 +23,15 @@ class CreateTribe private constructor(
     val feedUrl: FeedUrl? = null,
 ) {
 
-    class Builder {
+    class Builder(
+        val tags: Array<Tag>
+    ) {
+        class Tag (
+            val name: String,
+            val image: Int,
+            var isSelected: Boolean = false
+        )
+
         private var name: String? = null
         private var description: String? = null
         private var isTribe: Boolean? = true
@@ -32,7 +40,6 @@ class CreateTribe private constructor(
         private var escrowAmount: Long? = 0L
         private var escrowMillis: Long? = 0L
         private var img: File? = null
-        private var tags: Array<String> = arrayOf()
         private var unlisted: Boolean? = false
         private var private: Boolean? = false
         private var appUrl: AppUrl? = null
@@ -94,8 +101,8 @@ class CreateTribe private constructor(
         }
 
         @Synchronized
-        fun setTags(tags: Array<String>): Builder {
-            this.tags = tags
+        fun selectTag(index: Int, isSelected: Boolean): Builder {
+            this.tags[index].isSelected = isSelected
             return this
         }
         @Synchronized
@@ -135,7 +142,11 @@ class CreateTribe private constructor(
                     escrowAmount = escrowAmount,
                     escrowMillis = escrowMillis,
                     img = img,
-                    tags = tags,
+                    tags = tags.filter {
+                        it.isSelected
+                    }.map {
+                        it.name
+                    }.toTypedArray(),
                     unlisted = unlisted,
                     private = private,
                     appUrl = appUrl,

@@ -79,10 +79,7 @@ internal class CreateTribeFragment: SideEffectFragment<
 
                 updateCreateButtonState()
             }
-            imageViewTribePicture.setOnClickListener {
-                viewModel.tribePicMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Open)
-            }
-            editTextTribeImageValue.setOnClickListener {
+            constraintLayoutTribeImageContainer.setOnClickListener {
                 viewModel.tribePicMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Open)
             }
             editTextTribeDescription.addTextChangedListener {
@@ -91,8 +88,22 @@ internal class CreateTribeFragment: SideEffectFragment<
                 updateCreateButtonState()
             }
 
-            editTextTribeTags.setOnClickListener {
-                // TODO: Add tags functionality
+            constraintLayoutTribeTagsContainer.setOnClickListener {
+                viewModel.selectTags() {
+                    val selectedTags = viewModel.createTribeBuilder.tags.filter {
+                        it.isSelected
+                    }
+                    if (selectedTags.isNotEmpty()) {
+                        editTextTribeTags.setText(
+                            selectedTags.joinToString {
+                                it.name
+                            }
+                        )
+                    } else {
+                        editTextTribeTags.setText(getString(R.string.no_tags_selected))
+                    }
+
+                }
             }
 
             editTextTribePriceToJoin.addTextChangedListener {

@@ -20,4 +20,5 @@
     <string name="rss_feed_url">RSS Feed URL</string>
     <string name="approve_each_membership_request">Approve each membership request?</string>
     <string name="image_selected">Image Selected</string>
+    <string name="no_tags_selected">No tags selected</string>
 </resources>
