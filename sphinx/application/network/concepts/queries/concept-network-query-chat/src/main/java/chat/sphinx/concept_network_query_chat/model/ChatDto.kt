@@ -1,5 +1,6 @@
 package chat.sphinx.concept_network_query_chat.model
 
+import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
 @JsonClass(generateAdapter = true)
@@ -23,6 +24,7 @@ data class ChatDto(
     val escrow_millis: Long?,
     val unlisted: Any?,
     val private: Any?,
+    @Json(name = "owner_pubkey")
     val owner_pub_key: String?,
     val seen: Any?,
     val app_url: String?,

@@ -55,6 +55,8 @@ dependencies {
 
     api project(path: ':sphinx:screens-detail:add-friend:add-friend')
     api project(path: ':sphinx:screens-detail:camera:camera')
+    api project(path: ':sphinx:screens-detail:chat-detail:tribe-detail')
+    api project(path: ':sphinx:screens-detail:chat-detail:contact-detail')
     api project(path: ':sphinx:screens-detail:create-tribe:create-tribe')
     api project(path: ':sphinx:screens-detail:invite-friend:invite-friend')
     api project(path: ':sphinx:screens-detail:join-tribe:join-tribe')

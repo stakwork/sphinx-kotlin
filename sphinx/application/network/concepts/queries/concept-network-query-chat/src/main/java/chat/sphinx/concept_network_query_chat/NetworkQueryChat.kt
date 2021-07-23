@@ -52,7 +52,10 @@ abstract class NetworkQueryChat {
     ////////////
     /// POST ///
     ////////////
-//    app.post('/group', chats.createGroupChat)\
+    abstract fun createTribe(
+        postGroupDto: PostGroupDto,
+        relayData: Pair<AuthorizationToken, RelayUrl>? = null
+    ): Flow<LoadResponse<ChatDto?, ResponseError>>
 
     abstract fun streamSats(
         postStreamSatsDto: PostStreamSatsDto,
