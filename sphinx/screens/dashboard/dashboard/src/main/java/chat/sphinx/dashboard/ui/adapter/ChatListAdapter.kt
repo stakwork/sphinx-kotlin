@@ -318,7 +318,7 @@ internal class ChatListAdapter(
                 imageViewChatHolderLock.invisibleIfFalse(encryptedChat)
                 imageViewChatHolderCenteredLock.invisibleIfFalse(encryptedChat)
 
-                val chatHasMessages = (dashboardChat as DashboardChat.Active)?.message != null
+                val chatHasMessages = (dashboardChat as? DashboardChat.Active)?.message != null
                 val activeChatOrInvite = ((dashboardChat is DashboardChat.Active && chatHasMessages) || dashboardChat is DashboardChat.Inactive.Invite)
                 layoutConstraintDashboardChatHolderMessage.invisibleIfFalse(activeChatOrInvite)
                 layoutConstraintDashboardChatNoMessageHolder.invisibleIfFalse(!activeChatOrInvite)
