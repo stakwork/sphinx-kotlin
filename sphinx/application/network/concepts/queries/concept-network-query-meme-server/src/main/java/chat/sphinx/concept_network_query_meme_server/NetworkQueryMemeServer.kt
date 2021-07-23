@@ -55,11 +55,4 @@ abstract class NetworkQueryMemeServer {
         contentLength: Long?,
         memeServerHost: MediaHost = MediaHost.DEFAULT,
     ): Response<PostMemeServerUploadDto, ResponseError>
-
-    abstract suspend fun uploadAttachment(
-        authenticationToken: AuthenticationToken,
-        mediaType: MediaType,
-        file: File,
-        memeServerHost: MediaHost = MediaHost.DEFAULT,
-    ): Response<PostMemeServerUploadDto, ResponseError>
 }

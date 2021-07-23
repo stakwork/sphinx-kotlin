@@ -225,49 +225,4 @@ class NetworkQueryMemeServerImpl(
             )
         }
     }
-
-
-    override suspend fun uploadAttachment(
-        authenticationToken: AuthenticationToken,
-        mediaType: MediaType,
-        file: File,
-        memeServerHost: MediaHost
-    ): Response<PostMemeServerUploadDto, ResponseError> {
-
-        return try {
-            // will throw an exception if the media type is invalid
-            val type: okhttp3.MediaType = mediaType.value.toMediaType()
-
-            val requestBuilder = networkRelayCall.buildRequest(
-                url = String.format(ENDPOINT_POST_ATTACHMENT_PUBLIC, memeServerHost.value),
-                headers = mapOf(Pair(authenticationToken.headerKey, authenticationToken.headerValue))
-            )
-
-            val fileBody: RequestBody = withContext(io) {
-                file.asRequestBody(type)
-            }
-
-            val requestBody: RequestBody = MultipartBody.Builder()
-                .setType(MultipartBody.FORM)
-                .addFormDataPart(NAME, type.type)
-                .addFormDataPart(FILE, file.name, fileBody)
-                .build()
-
-            requestBuilder.post(requestBody)
-
-            val response = networkRelayCall.call(
-                PostMemeServerUploadDto::class.java,
-                requestBuilder.build(),
-                useExtendedNetworkCallClient = true
-            )
-
-            Response.Success(response)
-        } catch (e: Exception) {
-            Response.Error(
-                ResponseError("Failed to upload file ${file.name}", e)
-            )
-        } finally {
-            file.delete()
-        }
-    }
 }

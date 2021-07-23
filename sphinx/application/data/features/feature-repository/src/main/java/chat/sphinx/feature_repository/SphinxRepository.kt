@@ -84,6 +84,7 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import okio.base64.encodeBase64
+import java.io.InputStream
 import java.text.ParseException
 import kotlin.math.absoluteValue
 
@@ -2765,10 +2766,12 @@ abstract class SphinxRepository(
 
                     val networkResponse = networkQueryMemeServer.uploadAttachment(
                         authenticationToken = token,
-                        mediaType = MediaType.Image(
-                            "${MediaType.IMAGE}/${imgFile.extension}"
-                        ),
-                        file = imgFile,
+                        mediaType = MediaType.Image("${MediaType.IMAGE}/${imgFile.extension}"),
+                        stream = object : InputStreamProvider() {
+                            override fun newInputStream(): InputStream = imgFile.inputStream()
+                        },
+                        fileName = imgFile.name,
+                        contentLength = imgFile.length(),
                         memeServerHost = memeServerHost,
                     )
                     @Exhaustive
