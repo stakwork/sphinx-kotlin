@@ -1,8 +1,7 @@
 plugins {
+    id 'app.cash.exhaustive'
     id 'com.android.library'
-    id 'dagger.hilt.android.plugin'
     id 'kotlin-android'
-    id 'kotlin-kapt'
 }
 
 android {
@@ -30,17 +29,8 @@ android {
 
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
-    // KotlinAndroid
-    implementation project(path: ':android:features:android-feature-screens')
-    // Sphinx
-    implementation project(path: ':sphinx:activity:insetter-activity')
-    implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-chat')
-    implementation project(path: ':sphinx:screens-detail:common:detail-resources')
-
-    implementation deps.androidx.lifecycle.hilt
-    implementation deps.google.hilt
-    implementation project(path: ':sphinx:application:common:menus:menu-bottom-tribe-pic')
+    api project(path: ':sphinx:application:common:menus:menu-bottom')
+    api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-contact')
     implementation project(path: ':sphinx:application:common:wrappers:wrapper-message-media')
-    implementation project(path: ':sphinx:application:data:concepts:concept-image-loader')
-    kapt kaptDeps.google.hilt
+    api project(path: ':sphinx:screens-detail:camera:camera-view-model-coordinator')
 }

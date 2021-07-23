@@ -4,11 +4,8 @@ import chat.sphinx.concept_network_query_chat.NetworkQueryChat
 import chat.sphinx.concept_network_query_chat.model.*
 import chat.sphinx.concept_network_relay_call.NetworkRelayCall
 import chat.sphinx.feature_network_query_chat.model.*
-import chat.sphinx.feature_network_query_chat.model.GetChatsRelayResponse
-import chat.sphinx.feature_network_query_chat.model.StreamSatsRelayResponse
-import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.kotlin_response.LoadResponse
-import chat.sphinx.kotlin_response.Response
+import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.wrapper_chat.ChatHost
 import chat.sphinx.wrapper_chat.ChatMuted
 import chat.sphinx.wrapper_chat.isTrue
@@ -16,7 +13,7 @@ import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
 
 class NetworkQueryChatImpl(
     private val networkRelayCall: NetworkRelayCall,
@@ -118,7 +115,17 @@ class NetworkQueryChatImpl(
     ////////////
     /// POST ///
     ////////////
-//    app.post('/group', chats.createGroupChat)
+    override fun createTribe(
+        postGroupDto: PostGroupDto,
+        relayData: Pair<AuthorizationToken, RelayUrl>?
+    ): Flow<LoadResponse<ChatDto?, ResponseError>> =
+        networkRelayCall.relayPost(
+            responseJsonClass = PostGroupRelayResponse::class.java,
+            relayEndpoint = ENDPOINT_GROUP,
+            requestBodyJsonClass = PostGroupDto::class.java,
+            requestBody = postGroupDto,
+            relayData = relayData
+        )
 
     override fun streamSats(
         postStreamSatsDto: PostStreamSatsDto,

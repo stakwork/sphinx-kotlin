@@ -2,6 +2,7 @@ package chat.sphinx.concept_repository_chat
 
 import chat.sphinx.concept_network_query_chat.model.PodcastDto
 import chat.sphinx.concept_network_query_chat.model.TribeDto
+import chat.sphinx.concept_repository_chat.model.CreateTribe
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
@@ -53,4 +54,6 @@ interface ChatRepository {
     suspend fun updateTribeInfo(chat: Chat): PodcastDto?
 
     suspend fun exitTribe(chat: Chat): Response<Boolean, ResponseError>
+
+    suspend fun createTribe(createTribe: CreateTribe): Response<Any, ResponseError>
 }
