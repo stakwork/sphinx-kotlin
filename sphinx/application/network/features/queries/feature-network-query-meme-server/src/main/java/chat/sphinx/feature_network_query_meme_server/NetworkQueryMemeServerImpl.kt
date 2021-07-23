@@ -239,7 +239,7 @@ class NetworkQueryMemeServerImpl(
             val type: okhttp3.MediaType = mediaType.value.toMediaType()
 
             val requestBuilder = networkRelayCall.buildRequest(
-                url = String.format(ENDPOINT_POST_ATTACHMENT_PRIVATE, memeServerHost.value),
+                url = String.format(ENDPOINT_POST_ATTACHMENT_PUBLIC, memeServerHost.value),
                 headers = mapOf(Pair(authenticationToken.headerKey, authenticationToken.headerValue))
             )
 
