@@ -69,6 +69,7 @@ internal class CreateTribeFragment: SideEffectFragment<
     fun setupFragmentLayout() {
         (requireActivity() as InsetterActivity)
             .addNavigationBarPadding(binding.constraintLayoutCreateTribeFragment)
+            .addNavigationBarPadding(binding.includeLayoutMenuBottomTribePic.root)
     }
 
     fun setupCreateTribe() {
