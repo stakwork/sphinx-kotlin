@@ -1,5 +1,10 @@
 # ChangeLog
 
+## Version 1.0.0-alpha12 (2021-07-23)
+ - Adds ability to create a Tribe
+ - Adds ability to edit Tribe details
+ - Fixes Time/Date formatting issues
+
 ## Version 1.0.0-alpha11 (2021-07-21)
  - Adds ability to change and stream Sats to Podcast creators
  - Adds ability to scan Lightning invoices from the dashboard
