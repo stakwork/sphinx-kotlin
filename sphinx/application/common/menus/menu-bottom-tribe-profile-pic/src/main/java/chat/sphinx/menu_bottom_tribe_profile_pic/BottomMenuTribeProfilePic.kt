@@ -9,6 +9,7 @@ import chat.sphinx.menu_bottom.model.MenuBottomOption
 import chat.sphinx.menu_bottom.ui.BottomMenu
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
 
+@Deprecated(message = "Do Not Use. Incorrect duplication of ProfilePicMenu")
 class BottomMenuTribeProfilePic(
     fragment: Fragment,
     onStopSupervisor: OnStopSupervisor,

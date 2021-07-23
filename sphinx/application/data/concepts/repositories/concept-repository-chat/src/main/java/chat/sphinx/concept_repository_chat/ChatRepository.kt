@@ -59,6 +59,7 @@ interface ChatRepository {
 
     suspend fun exitAndDeleteTribe(chat: Chat): Response<Boolean, ResponseError>
 
+    @Deprecated(message = "Do Not Use. Incorrect method duplication.")
     suspend fun updateChatProfilePic(
         chat: Chat,
         stream: InputStreamProvider,

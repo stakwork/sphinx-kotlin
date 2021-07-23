@@ -981,6 +981,7 @@ abstract class SphinxRepository(
         return response
     }
 
+    @Deprecated(message = "Do Not Use. Incorrect method duplication.")
     override suspend fun updateChatProfilePic(
         chat: Chat,
         stream: InputStreamProvider,
