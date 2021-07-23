@@ -11,6 +11,7 @@ import chat.sphinx.wrapper_chat.ChatAlias
 import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
+import chat.sphinx.wrapper_io_utils.InputStreamProvider
 import chat.sphinx.wrapper_message_media.MediaType
 import kotlinx.coroutines.flow.Flow
 import java.io.File
@@ -60,8 +61,10 @@ interface ChatRepository {
 
     suspend fun updateChatProfilePic(
         chat: Chat,
-        file: File,
+        stream: InputStreamProvider,
         mediaType: MediaType,
+        fileName: String,
+        contentLength: Long?
     ): Response<ChatDto, ResponseError>
 
     suspend fun updateChatProfileAlias(

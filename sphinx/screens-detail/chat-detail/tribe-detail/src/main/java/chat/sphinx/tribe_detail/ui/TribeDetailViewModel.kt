@@ -32,6 +32,7 @@ import chat.sphinx.wrapper_chat.ChatMetaData
 import chat.sphinx.wrapper_chat.isTribeOwnedByAccount
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_contact.Contact
+import chat.sphinx.wrapper_io_utils.InputStreamProvider
 import chat.sphinx.wrapper_message_media.MediaType
 import chat.sphinx.wrapper_message_media.toMediaType
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -199,7 +200,7 @@ internal class TribeDetailViewModel @Inject constructor(
         }
     }
 
-    override fun updateProfilePicCamera() {
+    override fun updateChatProfilePicCamera() {
         if (cameraJob?.isActive == true) {
             return
         }
@@ -224,14 +225,22 @@ internal class TribeDetailViewModel @Inject constructor(
                             try {
                                 val repoResponse = chatRepository.updateChatProfilePic(
                                     getChat(),
-                                    file = response.value.value,
-                                    mediaType = mediaType
+                                    stream = object : InputStreamProvider() {
+                                        override fun newInputStream(): InputStream {
+                                            return response.value.value.inputStream()
+                                        }
+                                    },
+                                    mediaType = mediaType,
+                                    fileName = response.value.value.name,
+                                    contentLength = response.value.value.length(),
                                 )
 
                                 @Exhaustive
                                 when (repoResponse) {
                                     is Response.Error -> {
                                         LOG.e(TAG, "Error update chat Profile Picture: ", repoResponse.cause.exception)
+
+                                        updateViewState(TribeDetailViewState.ErrorUpdatingTribeProfilePicture)
                                         submitSideEffect(TribeDetailSideEffect.FailedToUpdateProfilePic)
                                     }
                                     is Response.Success -> {
@@ -239,14 +248,11 @@ internal class TribeDetailViewModel @Inject constructor(
                                     }
                                 }
                             } catch (e: Exception) {
-                                submitSideEffect(TribeDetailSideEffect.FailedToUpdateProfilePic)
-                                LOG.e(TAG, "Error camera picture: ", e)
-                            }
-                            try {
                                 updateViewState(TribeDetailViewState.ErrorUpdatingTribeProfilePicture)
-                                // Make sure we delete the new image from the device
+                                submitSideEffect(TribeDetailSideEffect.FailedToUpdateProfilePic)
+
                                 response.value.value.delete()
-                            } catch (e: Exception) {}
+                            }
                         }
                         else -> {}
                     }
@@ -268,44 +274,57 @@ internal class TribeDetailViewModel @Inject constructor(
 
             MimeTypeMap.getSingleton().getExtensionFromMimeType(crType)?.let { ext ->
 
-                val stream: InputStream = try {
-                    cr.openInputStream(uri) ?: return
-                } catch (e: Exception) {
-                    return
-                }
-
                 crType.toMediaType().let { mType ->
+
                     @Exhaustive
                     when (mType) {
                         is MediaType.Image -> {
-                            updateViewState(TribeDetailViewState.UpdatingTribeProfilePicture)
+                            val stream: InputStream? = try {
+                                cr.openInputStream(uri)
+                            } catch (e: Exception) {
+                                // TODO: Handle Error
+                                null
+                            }
 
-                            viewModelScope.launch(dispatchers.mainImmediate) {
-                                val newFile: File = mediaCacheHandler.createImageFile(ext)
+                            if (stream != null) {
 
-                                try {
-                                    mediaCacheHandler.copyTo(stream, newFile)
+                                updateViewState(TribeDetailViewState.UpdatingTribeProfilePicture)
+
+                                viewModelScope.launch(dispatchers.mainImmediate) {
                                     val repoResponse = chatRepository.updateChatProfilePic(
                                         getChat(),
-                                        file = newFile,
-                                        mediaType = mType
+                                        stream = object : InputStreamProvider() {
+                                            var initialStreamUsed: Boolean = false
+                                            override fun newInputStream(): InputStream {
+                                                return if (!initialStreamUsed) {
+                                                    initialStreamUsed = true
+                                                    stream
+                                                } else {
+                                                    cr.openInputStream(uri)!!
+                                                }
+                                            }
+                                        },
+                                        mediaType = mType,
+                                        fileName = "image.$ext",
+                                        contentLength = null,
                                     )
 
                                     @Exhaustive
                                     when (repoResponse) {
                                         is Response.Error -> {
-                                            LOG.e(TAG, "Error update chat Profile Picture: ", repoResponse.cause.exception)
-                                            submitSideEffect(TribeDetailSideEffect.FailedToUpdateProfilePic)
-                                        }
-                                        is Response.Success -> {
-                                            updateChatViewStat()
-                                        }
-                                    }
-                                } catch (e: Exception) {
-                                    updateViewState(TribeDetailViewState.ErrorUpdatingTribeProfilePicture)
+                                                LOG.e(
+                                                    TAG,
+                                                    "Error update chat Profile Picture: ",
+                                                    repoResponse.cause.exception
+                                                )
 
-                                    newFile.delete()
-                                    submitSideEffect(TribeDetailSideEffect.FailedToUpdateProfilePic)
+                                                updateViewState(TribeDetailViewState.ErrorUpdatingTribeProfilePicture)
+                                                submitSideEffect(TribeDetailSideEffect.FailedToUpdateProfilePic)
+                                            }
+                                            is Response.Success -> {
+                                                updateChatViewStat()
+                                            }
+                                        }
                                 }
                             }
                         }

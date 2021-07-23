@@ -9,7 +9,7 @@ interface TribeProfilePicMenuViewModel {
     val tribeProfilePicMenuHandler: TribeProfilePicMenuHandler
     val dispatchers: CoroutineDispatchers
 
-    fun updateProfilePicCamera()
+    fun updateChatProfilePicCamera()
 
     fun handleActivityResultUri(uri: Uri?)
 }

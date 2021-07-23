@@ -894,7 +894,6 @@ abstract class SphinxRepository(
     }
 
     override suspend fun updateProfilePic(
-//        chatId: ChatId?,
         stream: InputStreamProvider,
         mediaType: MediaType,
         fileName: String,
@@ -984,8 +983,10 @@ abstract class SphinxRepository(
 
     override suspend fun updateChatProfilePic(
         chat: Chat,
-        file: File,
-        mediaType: MediaType
+        stream: InputStreamProvider,
+        mediaType: MediaType,
+        fileName: String,
+        contentLength: Long?
     ): Response<ChatDto, ResponseError> {
         var response: Response<ChatDto, ResponseError> = Response.Error(
             ResponseError("updateChatProfilePic failed to execute")
@@ -1000,7 +1001,9 @@ abstract class SphinxRepository(
                 val networkResponse = networkQueryMemeServer.uploadAttachment(
                     authenticationToken = token,
                     mediaType = mediaType,
-                    file = file,
+                    stream = stream,
+                    fileName = fileName,
+                    contentLength = contentLength,
                     memeServerHost = memeServerHost,
                 )
 

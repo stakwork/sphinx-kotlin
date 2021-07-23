@@ -36,7 +36,7 @@ class BottomMenuTribeProfilePic(
                         text = R.string.bottom_menu_tribe_profile_pic_option_camera,
                         textColor = R.color.primaryBlueFontColor,
                         onClick = {
-                            tribeProfilePicMenuViewModel.updateProfilePicCamera()
+                            tribeProfilePicMenuViewModel.updateChatProfilePicCamera()
                         }
                     ),
                     MenuBottomOption(
