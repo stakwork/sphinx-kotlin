@@ -30,7 +30,11 @@ class CreateTribe private constructor(
             val name: String,
             val image: Int,
             var isSelected: Boolean = false
-        )
+        ) {
+            override fun toString(): String {
+                return name
+            }
+        }
 
         private var name: String? = null
         private var description: String? = null
@@ -103,6 +107,11 @@ class CreateTribe private constructor(
         @Synchronized
         fun selectTag(index: Int, isSelected: Boolean): Builder {
             this.tags[index].isSelected = isSelected
+            return this
+        }
+
+        fun toggleTag(index: Int): Builder {
+            this.tags[index].isSelected = !this.tags[index].isSelected
             return this
         }
         @Synchronized
