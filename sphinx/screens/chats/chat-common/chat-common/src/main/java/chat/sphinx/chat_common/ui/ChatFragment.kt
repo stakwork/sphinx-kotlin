@@ -311,7 +311,7 @@ abstract class ChatFragment<
                 }
             }
 
-            textViewChatHeaderName.setOnClickListener {
+            layoutConstraintChatHeaderName.setOnClickListener {
                 viewModel.goToChatDetailScreen()
             }
         }

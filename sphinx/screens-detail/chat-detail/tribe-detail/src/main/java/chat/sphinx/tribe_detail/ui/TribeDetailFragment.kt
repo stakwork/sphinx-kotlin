@@ -1,13 +1,16 @@
 package chat.sphinx.tribe_detail.ui
 
 import android.content.Context
-import android.os.Build
 import android.os.Bundle
+import android.view.KeyEvent
 import android.view.View
+import android.view.inputmethod.EditorInfo
 import android.widget.ImageView
 import android.widget.SeekBar
+import android.widget.TextView
+import android.widget.TextView.OnEditorActionListener
+import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
-import androidx.annotation.RequiresApi
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.LifecycleOwner
@@ -18,6 +21,7 @@ import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.menu_bottom.ui.MenuBottomViewState
 import chat.sphinx.menu_bottom_tribe_profile_pic.BottomMenuTribeProfilePic
+import chat.sphinx.resources.inputMethodManager
 import chat.sphinx.tribe.BottomMenuTribe
 import chat.sphinx.tribe_detail.R
 import chat.sphinx.tribe_detail.databinding.FragmentTribeDetailBinding
@@ -28,9 +32,9 @@ import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.concept_views.viewstate.value
 import kotlinx.coroutines.launch
-import java.lang.Math.abs
 import javax.annotation.meta.Exhaustive
 import javax.inject.Inject
+
 
 @AndroidEntryPoint
 internal class TribeDetailFragment: SideEffectFragment<
@@ -135,15 +139,31 @@ internal class TribeDetailFragment: SideEffectFragment<
     }
 
     private fun setupTribeDetail() {
-
         binding.apply {
             editTextProfileAliasValue.setOnFocusChangeListener { _, hasFocus ->
                 if (hasFocus) {
                     return@setOnFocusChangeListener
                 }
-
                 viewModel.updateProfileAlias(editTextProfileAliasValue.text.toString())
             }
+
+            editTextProfileAliasValue.setOnEditorActionListener(object: OnEditorActionListener {
+                override fun onEditorAction(v: TextView, actionId: Int, event: KeyEvent?): Boolean {
+                    if (actionId == EditorInfo.IME_ACTION_DONE || event?.keyCode == KeyEvent.KEYCODE_ENTER) {
+                        editTextProfileAliasValue.let { editText ->
+                            binding.root.context.inputMethodManager?.let { imm ->
+                                if (imm.isActive(editText)) {
+                                    imm.hideSoftInputFromWindow(editText.windowToken, 0)
+                                    editText.clearFocus()
+                                }
+                            }
+                        }
+                        return true
+                    }
+                    return false
+                }
+            })
+
             seekBarSatsPerMinute.setOnSeekBarChangeListener(
                 object : SeekBar.OnSeekBarChangeListener {
 

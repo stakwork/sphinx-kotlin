@@ -36,6 +36,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:paddingVertical="8dp"
+        android:clickable="true"
         app:layout_constraintBottom_toBottomOf="@+id/layout_chat_initial_holder"
         app:layout_constraintEnd_toStartOf="@+id/image_view_chat_header_muted"
         app:layout_constraintStart_toEndOf="@+id/layout_chat_initial_holder"
