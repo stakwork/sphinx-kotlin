@@ -67,7 +67,7 @@
                             app:backgroundTint="@android:color/transparent"
                             android:layout_marginLeft="@dimen/default_form_edit_text_left_margin"
                             android:textSize="@dimen/default_form_edit_view_text_size"
-                            android:inputType="textVisiblePassword|textCapWords"
+                            android:inputType="textCapWords"
                             android:singleLine="true"
                             app:layout_constraintTop_toBottomOf="@+id/text_view_tribe_name"
                             app:layout_constraintBottom_toBottomOf="parent"

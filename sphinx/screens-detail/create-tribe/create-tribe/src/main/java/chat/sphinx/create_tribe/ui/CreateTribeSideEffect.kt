@@ -20,11 +20,13 @@ fun CreateTribe.Builder.adapter(context: Context) = object : ArrayAdapter<Create
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
         val view = super.getView(position, convertView, parent)
         val tag = tags[position]
+
         val textView = view.findViewById<CheckedTextView>(R.id.text_view_tag_item)
         textView.isChecked = tag.isSelected
+        textView.text = tag.toString()
 
         AppCompatResources.getDrawable(context, tag.image)?.let { icon ->
-            icon.setBounds(0, 0, 96, 96)
+            icon.setBounds(0, 0, 80, 80)
             textView.setCompoundDrawables(icon, null, null, null)
         }
         return view
@@ -75,6 +77,7 @@ internal sealed class  CreateTribeSideEffect: SideEffect<Context>()  {
             dialog.listView.setOnItemClickListener { _, view, which, _ ->
                 val tag = createTribeBuilder.tags[which]
                 tag.isSelected = !tag.isSelected
+
                 val textView = view.findViewById<CheckedTextView>(R.id.text_view_tag_item)
                 textView.isChecked = tag.isSelected
             }
