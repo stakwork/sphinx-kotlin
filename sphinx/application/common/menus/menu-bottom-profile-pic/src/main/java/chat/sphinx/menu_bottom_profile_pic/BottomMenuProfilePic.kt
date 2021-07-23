@@ -19,7 +19,7 @@ class BottomMenuProfilePic(
     profilePicMenuViewModel.profilePicMenuHandler.viewStateContainer,
 ) {
 
-    private val contentChooserContract: ActivityResultLauncher<String> =
+    val contentChooserContract: ActivityResultLauncher<String> =
         fragment.registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
             profilePicMenuViewModel.profilePicMenuHandler.handleActivityResultUri(uri)
         }
