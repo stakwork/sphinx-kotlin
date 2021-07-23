@@ -1,15 +1,20 @@
 package chat.sphinx.concept_repository_chat
 
+import chat.sphinx.concept_network_query_chat.model.ChatDto
 import chat.sphinx.concept_network_query_chat.model.PodcastDto
 import chat.sphinx.concept_network_query_chat.model.TribeDto
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.wrapper_chat.Chat
+import chat.sphinx.wrapper_chat.ChatAlias
 import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
+import chat.sphinx.wrapper_io_utils.InputStreamProvider
+import chat.sphinx.wrapper_message_media.MediaType
 import kotlinx.coroutines.flow.Flow
+import java.io.File
 
 /**
  * All [Chat]s are cached to the DB such that a network refresh will update
@@ -52,5 +57,19 @@ interface ChatRepository {
 
     suspend fun updateTribeInfo(chat: Chat): PodcastDto?
 
-    suspend fun exitTribe(chat: Chat): Response<Boolean, ResponseError>
+    suspend fun exitAndDeleteTribe(chat: Chat): Response<Boolean, ResponseError>
+
+    @Deprecated(message = "Do Not Use. Incorrect method duplication.")
+    suspend fun updateChatProfilePic(
+        chat: Chat,
+        stream: InputStreamProvider,
+        mediaType: MediaType,
+        fileName: String,
+        contentLength: Long?
+    ): Response<ChatDto, ResponseError>
+
+    suspend fun updateChatProfileAlias(
+        chatId: ChatId,
+        alias: ChatAlias?
+    ): Response<ChatDto, ResponseError>
 }

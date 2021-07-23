@@ -45,11 +45,11 @@ import chat.sphinx.insetter_activity.addStatusBarPadding
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.resources.*
-import chat.sphinx.wrapper_meme_server.headerKey
-import chat.sphinx.wrapper_meme_server.headerValue
 import chat.sphinx.wrapper_chat.isTrue
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.lightning.unit
+import chat.sphinx.wrapper_meme_server.headerKey
+import chat.sphinx.wrapper_meme_server.headerValue
 import chat.sphinx.wrapper_message.retrieveImageUrlAndMessageMedia
 import chat.sphinx.wrapper_message.retrieveTextToShow
 import chat.sphinx.wrapper_message.toReplyUUID
@@ -309,6 +309,10 @@ abstract class ChatFragment<
                 lifecycleScope.launch {
                     viewModel.chatNavigator.popBackStack()
                 }
+            }
+
+            layoutConstraintChatHeaderName.setOnClickListener {
+                viewModel.goToChatDetailScreen()
             }
         }
     }
@@ -682,8 +686,6 @@ abstract class ChatFragment<
 
                             textViewChatHeaderName.text = viewState.chatHeaderName
                             textViewChatHeaderLock.goneIfFalse(viewState.showLock)
-
-                            imageViewChatHeaderExitTribe.goneIfFalse(viewState.showExitTribe)
 
                             imageViewChatHeaderMuted.apply {
                                 viewState.isMuted?.let { muted ->

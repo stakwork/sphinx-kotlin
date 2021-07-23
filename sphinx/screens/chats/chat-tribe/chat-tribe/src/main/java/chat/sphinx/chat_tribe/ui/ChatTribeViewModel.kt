@@ -6,7 +6,6 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.camera_view_model_coordinator.request.CameraRequest
 import chat.sphinx.camera_view_model_coordinator.response.CameraResponse
-import chat.sphinx.chat_common.ui.ChatSideEffect
 import chat.sphinx.chat_common.ui.ChatViewModel
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
 import chat.sphinx.chat_tribe.R
@@ -25,8 +24,6 @@ import chat.sphinx.concept_service_media.UserAction
 import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
 import chat.sphinx.kotlin_response.*
 import chat.sphinx.logger.SphinxLogger
-import chat.sphinx.logger.d
-import chat.sphinx.logger.e
 import chat.sphinx.podcast_player.objects.toParcelablePodcast
 import chat.sphinx.podcast_player.ui.getMediaDuration
 import chat.sphinx.resources.getRandomColor
@@ -37,7 +34,6 @@ import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.lightning.asFormattedString
-import chat.sphinx.wrapper_common.lightning.toSat
 import chat.sphinx.wrapper_common.lightning.unit
 import chat.sphinx.wrapper_common.util.getInitials
 import chat.sphinx.wrapper_contact.Contact
@@ -46,11 +42,9 @@ import chat.sphinx.wrapper_podcast.Podcast
 import chat.sphinx.wrapper_podcast.PodcastEpisode
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
-import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_media_cache.MediaCacheHandler
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -361,62 +355,14 @@ internal class ChatTribeViewModel @Inject constructor(
         }
     }
 
-    fun exitTribeGetUserConfirmation() {
-        viewModelScope.launch(mainImmediate) {
-            submitSideEffect(
-                ChatSideEffect.AlertConfirmExitTribe {
-                    exitTribeUserConfirmed()
-                }
-            )
-        }
-    }
-
-    private var exitTribeJob: Job? = null
-    private fun exitTribeUserConfirmed() {
-        if (exitTribeJob?.isActive == true) {
-            return
-        }
-
-        exitTribeJob = viewModelScope.launch(mainImmediate) {
-
-            try {
-                chatSharedFlow.collect { chat ->
-                    if (chat != null) {
-
-                        val response = chatRepository.exitTribe(chat)
-
-                        @Exhaustive
-                        when (response) {
-                            is Response.Error -> {
-
-                                submitSideEffect(
-                                    ChatSideEffect.Notify(
-                                        if (response.exception == null) {
-                                            response.message
-                                        } else {
-                                            "Failed to leave tribe"
-                                        }
-                                    )
-                                )
-
-                                LOG.d(TAG, "Failed to leave tribe")
-                                LOG.e(TAG, response.message, response.exception)
-                            }
-                            is Response.Success -> {
-                                chatNavigator.popBackStack()
-                            }
-                        }
-
-                        throw Exception()
-                    }
-                }
-            } catch (e: Exception) {}
-
-        }
-    }
-
     fun retrieveEpisodeDuration(episodeUrl: String): Long {
         val uri = Uri.parse(episodeUrl)
         return uri.getMediaDuration()
+    }
+    
+    override fun goToChatDetailScreen() {
+        viewModelScope.launch(mainImmediate) {
+            (chatNavigator as TribeChatNavigator).toTribeDetailScreen(chatId, podcast?.toParcelablePodcast())
+        }
     }
 }

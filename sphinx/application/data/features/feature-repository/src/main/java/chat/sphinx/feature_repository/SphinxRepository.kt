@@ -4,8 +4,6 @@ import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_coredb.CoreDB
 import chat.sphinx.concept_crypto_rsa.RSA
 import chat.sphinx.concept_meme_server.MemeServerTokenHandler
-import chat.sphinx.concept_network_query_meme_server.NetworkQueryMemeServer
-import chat.sphinx.concept_network_query_meme_server.model.PostMemeServerUploadDto
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
 import chat.sphinx.concept_network_query_chat.model.*
 import chat.sphinx.concept_network_query_contact.NetworkQueryContact
@@ -16,6 +14,8 @@ import chat.sphinx.concept_network_query_invite.NetworkQueryInvite
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_lightning.model.balance.BalanceDto
 import chat.sphinx.concept_network_query_lightning.model.invoice.PostRequestPaymentDto
+import chat.sphinx.concept_network_query_meme_server.NetworkQueryMemeServer
+import chat.sphinx.concept_network_query_meme_server.model.PostMemeServerUploadDto
 import chat.sphinx.concept_network_query_message.NetworkQueryMessage
 import chat.sphinx.concept_network_query_message.model.MessageDto
 import chat.sphinx.concept_network_query_message.model.PostMessageDto
@@ -82,8 +82,8 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import java.io.InputStream
 import okio.base64.encodeBase64
+import java.io.File
 import java.text.ParseException
 import kotlin.math.absoluteValue
 
@@ -894,7 +894,6 @@ abstract class SphinxRepository(
     }
 
     override suspend fun updateProfilePic(
-//        chatId: ChatId?,
         stream: InputStreamProvider,
         mediaType: MediaType,
         fileName: String,
@@ -979,6 +978,136 @@ abstract class SphinxRepository(
             }
         }.join()
 
+        return response
+    }
+
+    @Deprecated(message = "Do Not Use. Incorrect method duplication.")
+    override suspend fun updateChatProfilePic(
+        chat: Chat,
+        stream: InputStreamProvider,
+        mediaType: MediaType,
+        fileName: String,
+        contentLength: Long?
+    ): Response<ChatDto, ResponseError> {
+        var response: Response<ChatDto, ResponseError> = Response.Error(
+            ResponseError("updateChatProfilePic failed to execute")
+        )
+        val memeServerHost = MediaHost.DEFAULT
+
+        applicationScope.launch(mainImmediate) {
+            try {
+                val token = memeServerTokenHandler.retrieveAuthenticationToken(memeServerHost)
+                    ?: throw RuntimeException("MemeServerAuthenticationToken retrieval failure")
+
+                val networkResponse = networkQueryMemeServer.uploadAttachment(
+                    authenticationToken = token,
+                    mediaType = mediaType,
+                    stream = stream,
+                    fileName = fileName,
+                    contentLength = contentLength,
+                    memeServerHost = memeServerHost,
+                )
+
+                @Exhaustive
+                when (networkResponse) {
+                    is Response.Error -> {
+                        response = networkResponse
+                    }
+                    is Response.Success -> {
+                        val newUrl = PhotoUrl(
+                            "https://${memeServerHost.value}/public/${networkResponse.value.muid}"
+                        )
+
+                        networkQueryChat.updateChat(
+                            chat.id,
+                            PutChatDto(
+                                my_photo_url = newUrl.value,
+                            )
+                        ).collect { loadResponse ->
+
+                            @Exhaustive
+                            when (loadResponse) {
+                                is LoadResponse.Loading -> {}
+                                is Response.Error -> {
+                                    response = loadResponse
+                                }
+                                is Response.Success -> {
+                                    response = loadResponse
+                                    val queries = coreDB.getSphinxDatabaseQueries()
+
+                                    chatLock.withLock {
+                                        withContext(io) {
+                                            queries.transaction {
+                                                upsertChat(
+                                                    loadResponse.value,
+                                                    moshi,
+                                                    chatSeenMap,
+                                                    queries,
+                                                    null
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                response = Response.Error(
+                    ResponseError("Failed to update Chat Profile", e)
+                )
+            }
+        }.join()
+
+        LOG.d(TAG, "Completed Upload Returning: $response")
+        return response
+    }
+
+    override suspend fun updateChatProfileAlias(
+        chatId: ChatId,
+        alias: ChatAlias?
+    ): Response<ChatDto, ResponseError> {
+        var response: Response<ChatDto, ResponseError> = Response.Error(
+            ResponseError("updateChatProfilePic failed to execute")
+        )
+
+        applicationScope.launch(mainImmediate) {
+            networkQueryChat.updateChat(
+                chatId,
+                PutChatDto(
+                    my_alias = alias?.value
+                )
+            ).collect { loadResponse ->
+                @Exhaustive
+                when (loadResponse) {
+                    is LoadResponse.Loading -> {}
+                    is Response.Error -> {
+                        response = loadResponse
+                    }
+                    is Response.Success -> {
+                        response = loadResponse
+                        val queries = coreDB.getSphinxDatabaseQueries()
+
+                        chatLock.withLock {
+                            withContext(io) {
+                                queries.transaction {
+                                    upsertChat(
+                                        loadResponse.value,
+                                        moshi,
+                                        chatSeenMap,
+                                        queries,
+                                        null
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }.join()
+
+        LOG.d(TAG, "Completed Upload Returning: $response")
         return response
     }
 
@@ -2690,33 +2819,8 @@ abstract class SphinxRepository(
         return response
     }
 
-    override suspend fun exitTribe(chat: Chat): Response<Boolean, ResponseError> {
+    override suspend fun exitAndDeleteTribe(chat: Chat): Response<Boolean, ResponseError> {
         var response: Response<Boolean, ResponseError>? = null
-
-        val owner: Contact = accountOwner.value.let { contact ->
-            if (contact != null) {
-                contact
-            } else {
-                var resolvedOwner: Contact? = null
-                try {
-                    accountOwner.collect { ownerContact ->
-                        if (ownerContact != null) {
-                            resolvedOwner = ownerContact
-                            throw Exception()
-                        }
-                    }
-                } catch (e: Exception) {}
-                delay(25L)
-
-                resolvedOwner ?: return Response.Error(
-                    ResponseError("Could not resolve account owner")
-                )
-            }
-        }
-
-        if (owner.nodePubKey == chat.ownerPubKey) {
-            return Response.Error(ResponseError("Delete own tribe is not supported yet"))
-        }
 
         applicationScope.launch(mainImmediate) {
             networkQueryChat.deleteChat(chat.id).collect { loadResponse ->

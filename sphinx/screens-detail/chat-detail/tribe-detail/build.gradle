@@ -1,0 +1,54 @@
+plugins {
+    id 'com.android.library'
+    id 'dagger.hilt.android.plugin'
+    id 'androidx.navigation.safeargs'
+    id 'kotlin-android'
+    id 'kotlin-kapt'
+}
+
+android {
+    compileSdkVersion versions.compileSdk
+    buildToolsVersion versions.buildTools
+
+    buildFeatures.viewBinding = true
+    defaultConfig {
+        minSdkVersion versions.minSdk
+        targetSdkVersion versions.compileSdk
+        versionCode VERSION_CODE.toInteger()
+        versionName VERSION_NAME
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunnerArguments disableAnalytics: 'true'
+        consumerProguardFiles "consumer-rules.pro"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: "libs", include: ["*.jar"])
+    // KotlinAndroid
+    implementation project(path: ':android:features:android-feature-screens')
+    // Sphinx
+    implementation project(path: ':sphinx:activity:insetter-activity')
+    implementation project(path: ':sphinx:application:common:menus:menu-bottom-tribe')
+    implementation project(path: ':sphinx:application:common:menus:menu-bottom-tribe-profile-pic')
+    implementation project(path: ':sphinx:application:common:wrappers:wrapper-common')
+    implementation project(path: ':sphinx:application:common:wrappers:wrapper-message-media')
+    implementation project(path: ':sphinx:application:data:concepts:concept-image-loader')
+    implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-chat')
+    implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-contact')
+    implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-chat')
+    implementation project(path: ':sphinx:screens-detail:camera:camera-view-model-coordinator')
+    implementation project(path: ':sphinx:screens-detail:common:detail-resources')
+    implementation project(path: ':sphinx:screens-detail:podcast-player:podcast-player')
+
+    implementation deps.androidx.lifecycle.hilt
+    implementation deps.google.hilt
+    implementation project(path: ':sphinx:application:common:logger')
+    kapt kaptDeps.google.hilt
+}

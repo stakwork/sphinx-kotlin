@@ -44,6 +44,14 @@ inline fun DateTime.hhmmElseDate(today00: DateTime = DateTime.getToday00()): Str
     }
 }
 
+/**
+ *
+ */
+@Suppress("NOTHING_TO_INLINE", "SpellCheckingInspection")
+inline fun DateTime.eeemmddhmma(): String {
+    return DateTime.getFormateeemmddhmma().format(value)
+}
+
 inline val DateTime.time: Long
     get() = value.time
 

@@ -3,6 +3,7 @@ package chat.sphinx.activitymain.navigation.navigators.primary
 import chat.sphinx.activitymain.navigation.drivers.DetailNavigationDriver
 import chat.sphinx.activitymain.navigation.drivers.PrimaryNavigationDriver
 import chat.sphinx.chat_contact.navigation.ContactChatNavigator
+import chat.sphinx.contact_detail.navigation.ToContactDetailScreen
 import chat.sphinx.payment_send.navigation.ToPaymentSendDetail
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
@@ -15,5 +16,9 @@ internal class ContactChatNavigatorImpl @Inject constructor(
 {
     override suspend fun toPaymentSendDetail(contactId: ContactId, chatId: ChatId?) {
         detailDriver.submitNavigationRequest(ToPaymentSendDetail(contactId, chatId))
+    }
+
+    override suspend fun toChatDetail(chatId: ChatId, contactId: ContactId?) {
+        detailDriver.submitNavigationRequest(ToContactDetailScreen(chatId, contactId))
     }
 }
