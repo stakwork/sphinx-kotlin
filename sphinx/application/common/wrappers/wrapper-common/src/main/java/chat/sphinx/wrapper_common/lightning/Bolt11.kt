@@ -6,16 +6,6 @@ import io.matthewnelson.crypto_common.clazzes.toSha256Hash
 import io.matthewnelson.crypto_common.extensions.toHex
 import java.io.ByteArrayInputStream
 
-
-@Suppress("NOTHING_TO_INLINE")
-inline fun String.toBolt11(): Bolt11? =
-    try {
-        LightningPaymentRequest(this).toBolt11()
-    } catch (e: IllegalArgumentException) {
-        null
-    }
-
-
 /**
  * Class used to handling bolt11 payment requests
  *

@@ -132,7 +132,7 @@ internal class DashboardViewModel @Inject constructor(
                 if (code.isValidTribeJoinLink) {
                     dashboardNavigator.toJoinTribeDetail(TribeJoinLink(code))
                 } else if (code.isValidLightningPaymentRequest) {
-                    code.toBolt11()?.let { bolt11 ->
+                    code.toLightningPaymentRequest()?.toBolt11()?.let { bolt11 ->
                         val amount = bolt11.getSatsAmount()
 
                         if (amount != null) {
