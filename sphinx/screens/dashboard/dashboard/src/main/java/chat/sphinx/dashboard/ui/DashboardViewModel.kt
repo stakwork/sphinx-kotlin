@@ -131,18 +131,29 @@ internal class DashboardViewModel @Inject constructor(
 
                 if (code.isValidTribeJoinLink) {
                     dashboardNavigator.toJoinTribeDetail(TribeJoinLink(code))
-                } else if (code.isValidLightningPaymentRequest) {
-                    code.toLightningPaymentRequest()?.toBolt11()?.let { bolt11 ->
-                        val amount = bolt11.getSatsAmount()
+                } else {
+                    code.toLightningPaymentRequestOrNull()?.let { lightningPaymentRequest ->
 
-                        if (amount != null) {
-                            submitSideEffect(
-                                DashboardSideEffect.AlertConfirmPayLightningPaymentRequest(amount.value, bolt11.getMemo()) {
-                                    payLightningPaymentRequest(code.toLightningPaymentRequest()!!)
-                                }
-                            )
-                        } else {
-                            submitSideEffect(DashboardSideEffect.Notify(app.getString(R.string.payment_request_missing_amount), true))
+                        lightningPaymentRequest.toBolt11OrNull()?.let { bolt11 ->
+                            val amount = bolt11.getSatsAmount()
+
+                            if (amount != null) {
+                                submitSideEffect(
+                                    DashboardSideEffect.AlertConfirmPayLightningPaymentRequest(
+                                        amount.value,
+                                        bolt11.getMemo()
+                                    ) {
+                                        payLightningPaymentRequest(lightningPaymentRequest)
+                                    }
+                                )
+                            } else {
+                                submitSideEffect(
+                                    DashboardSideEffect.Notify(
+                                        app.getString(R.string.payment_request_missing_amount),
+                                        true
+                                    )
+                                )
+                            }
                         }
                     }
                 }
