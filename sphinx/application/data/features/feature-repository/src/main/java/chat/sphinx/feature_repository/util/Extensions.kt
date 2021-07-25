@@ -280,7 +280,7 @@ inline fun TransactionCallbacks.upsertInvite(dto: InviteDto, queries: SphinxData
 
     queries.inviteUpsert(
         InviteString(dto.invite_string),
-        dto.invoice?.toLightningPaymentRequest(),
+        dto.invoice?.toLightningPaymentRequestOrNull(),
         inviteStatus,
         dto.price?.toSat(),
         InviteId(dto.id),
@@ -339,7 +339,7 @@ fun TransactionCallbacks.upsertMessage(dto: MessageDto, queries: SphinxDatabaseQ
         dto.receiver?.let { ContactId(it) },
         Sat(dto.amount),
         dto.payment_hash?.toLightningPaymentHash(),
-        dto.payment_request?.toLightningPaymentRequest(),
+        dto.payment_request?.toLightningPaymentRequestOrNull(),
         dto.date.toDateTime(),
         dto.expiration_date?.toDateTime(),
         dto.message_content?.toMessageContent(),
