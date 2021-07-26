@@ -16,8 +16,8 @@ import chat.sphinx.create_tribe.R
 import chat.sphinx.create_tribe.navigation.CreateTribeNavigator
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.menu_bottom.ui.MenuBottomViewState
-import chat.sphinx.menu_bottom_tribe_pic.TribePicMenuHandler
-import chat.sphinx.menu_bottom_tribe_pic.TribePicMenuViewModel
+import chat.sphinx.menu_bottom_profile_pic.PictureMenuHandler
+import chat.sphinx.menu_bottom_profile_pic.PictureMenuViewModel
 import chat.sphinx.wrapper_message_media.MediaType
 import chat.sphinx.wrapper_message_media.toMediaType
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -42,7 +42,7 @@ internal class CreateTribeViewModel @Inject constructor(
         Context,
         CreateTribeSideEffect,
         CreateTribeViewState>(dispatchers, CreateTribeViewState.Idle),
-    TribePicMenuViewModel
+    PictureMenuViewModel
 {
     val createTribeBuilder = CreateTribe.Builder(
         arrayOf(
@@ -64,14 +64,13 @@ internal class CreateTribeViewModel @Inject constructor(
             .build()
     }
 
-    override val tribePicMenuHandler: TribePicMenuHandler by lazy {
-        TribePicMenuHandler()
+    override val pictureMenuHandler: PictureMenuHandler by lazy {
+        PictureMenuHandler()
     }
 
     private var cameraJob: Job? = null
 
-
-    override fun updateProfilePicCamera() {
+    override fun updatePictureFromCamera() {
         if (cameraJob?.isActive == true) {
             return
         }
@@ -87,7 +86,7 @@ internal class CreateTribeViewModel @Inject constructor(
                     }
                 }
                 is Response.Success -> {
-                    tribePicMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Closed)
+                    pictureMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Closed)
 
                     @Exhaustive
                     when (response.value) {
@@ -118,7 +117,7 @@ internal class CreateTribeViewModel @Inject constructor(
                         @Exhaustive
                         when (mType) {
                             is MediaType.Image -> {
-                                tribePicMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Closed)
+                                pictureMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Closed)
 
                                 if (it.path == null) {
                                     showFailedToProcessImage()

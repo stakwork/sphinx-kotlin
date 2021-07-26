@@ -12,31 +12,32 @@ import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
 class BottomMenuProfilePic(
     fragment: Fragment,
     onStopSupervisor: OnStopSupervisor,
-    private val profilePicMenuViewModel: ProfilePicMenuViewModel,
+    private val profilePicMenuViewModel: PictureMenuViewModel,
 ): BottomMenu(
     profilePicMenuViewModel.dispatchers,
     onStopSupervisor,
-    profilePicMenuViewModel.profilePicMenuHandler.viewStateContainer,
+    profilePicMenuViewModel.pictureMenuHandler.viewStateContainer,
 ) {
 
-    val contentChooserContract: ActivityResultLauncher<String> =
+    private val contentChooserContract: ActivityResultLauncher<String> =
         fragment.registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-            profilePicMenuViewModel.profilePicMenuHandler.handleActivityResultUri(uri)
+            profilePicMenuViewModel.handleActivityResultUri(uri)
         }
 
     fun initialize(
+        headerText: String,
         binding: LayoutMenuBottomBinding,
         lifecycleOwner: LifecycleOwner
     ) {
         super.newBuilder(binding, lifecycleOwner)
-            .setHeaderText(R.string.bottom_menu_profile_pic_header_text)
+            .setHeaderText(headerText)
             .setOptions(
                 setOf(
                     MenuBottomOption(
                         text = R.string.bottom_menu_profile_pic_option_camera,
                         textColor = R.color.primaryBlueFontColor,
                         onClick = {
-                            profilePicMenuViewModel.profilePicMenuHandler.updateProfilePicCamera()
+                            profilePicMenuViewModel.updatePictureFromCamera()
                         }
                     ),
                     MenuBottomOption(

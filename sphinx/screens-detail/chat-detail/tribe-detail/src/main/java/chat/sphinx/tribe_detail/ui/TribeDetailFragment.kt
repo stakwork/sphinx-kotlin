@@ -9,7 +9,6 @@ import android.widget.ImageView
 import android.widget.SeekBar
 import android.widget.TextView
 import android.widget.TextView.OnEditorActionListener
-import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.viewModels
@@ -20,7 +19,7 @@ import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.menu_bottom.ui.MenuBottomViewState
-import chat.sphinx.menu_bottom_tribe_profile_pic.BottomMenuTribeProfilePic
+import chat.sphinx.menu_bottom_profile_pic.BottomMenuProfilePic
 import chat.sphinx.resources.inputMethodManager
 import chat.sphinx.tribe.BottomMenuTribe
 import chat.sphinx.tribe_detail.R
@@ -65,8 +64,8 @@ internal class TribeDetailFragment: SideEffectFragment<
         )
     }
 
-    private val bottomMenuTribeProfilePic: BottomMenuTribeProfilePic by lazy(LazyThreadSafetyMode.NONE) {
-        BottomMenuTribeProfilePic(
+    private val bottomMenuPicture: BottomMenuProfilePic by lazy(LazyThreadSafetyMode.NONE) {
+        BottomMenuProfilePic(
             this,
             onStopSupervisor,
             viewModel
@@ -90,7 +89,11 @@ internal class TribeDetailFragment: SideEffectFragment<
         setupFragmentLayout()
         setupTribeDetail()
 
-        bottomMenuTribeProfilePic.initialize(binding.includeLayoutMenuBottomTribeProfilePic, viewLifecycleOwner)
+        bottomMenuPicture.initialize(
+            getString(R.string.bottom_menu_tribe_profile_pic_header_text),
+            binding.includeLayoutMenuBottomTribeProfilePic,
+            viewLifecycleOwner
+        )
     }
 
     private inner class BackPressHandler(
@@ -109,8 +112,8 @@ internal class TribeDetailFragment: SideEffectFragment<
 
         override fun handleOnBackPressed() {
             when {
-                viewModel.tribeProfilePicMenuHandler.viewStateContainer.value is MenuBottomViewState.Open -> {
-                    viewModel.tribeProfilePicMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Closed)
+                viewModel.pictureMenuHandler.viewStateContainer.value is MenuBottomViewState.Open -> {
+                    viewModel.pictureMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Closed)
                 }
                 viewModel.tribeMenuHandler.viewStateContainer.value is MenuBottomViewState.Open -> {
                     viewModel.tribeMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Closed)
@@ -197,7 +200,7 @@ internal class TribeDetailFragment: SideEffectFragment<
             }
 
             buttonProfilePicture.setOnClickListener {
-                viewModel.tribeProfilePicMenuHandler.viewStateContainer.updateViewState(
+                viewModel.pictureMenuHandler.viewStateContainer.updateViewState(
                     MenuBottomViewState.Open
                 )
             }
@@ -212,14 +215,14 @@ internal class TribeDetailFragment: SideEffectFragment<
             is TribeDetailViewState.ErrorUpdatingTribeProfilePicture -> {
                 binding.progressBarUploadProfilePicture.gone
 
-                viewModel.tribeProfilePicMenuHandler.viewStateContainer.updateViewState(
+                viewModel.pictureMenuHandler.viewStateContainer.updateViewState(
                     MenuBottomViewState.Closed
                 )
             }
             is TribeDetailViewState.UpdatingTribeProfilePicture -> {
                 binding.progressBarUploadProfilePicture.visible
 
-                viewModel.tribeProfilePicMenuHandler.viewStateContainer.updateViewState(
+                viewModel.pictureMenuHandler.viewStateContainer.updateViewState(
                     MenuBottomViewState.Closed
                 )
             }

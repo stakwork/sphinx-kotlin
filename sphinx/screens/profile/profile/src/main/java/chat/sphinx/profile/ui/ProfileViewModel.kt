@@ -2,6 +2,8 @@ package chat.sphinx.profile.ui
 
 import android.app.Application
 import android.content.Context
+import android.net.Uri
+import android.webkit.MimeTypeMap
 import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.camera_view_model_coordinator.request.CameraRequest
@@ -13,12 +15,17 @@ import chat.sphinx.concept_repository_lightning.LightningRepository
 import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
-import chat.sphinx.menu_bottom_profile_pic.ProfilePicMenuHandler
-import chat.sphinx.menu_bottom_profile_pic.ProfilePicMenuViewModel
+import chat.sphinx.menu_bottom.ui.MenuBottomViewState
+import chat.sphinx.menu_bottom_profile_pic.PictureMenuHandler
+import chat.sphinx.menu_bottom_profile_pic.PictureMenuViewModel
+import chat.sphinx.menu_bottom_profile_pic.UpdatingImageViewState
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_contact.PrivatePhoto
+import chat.sphinx.wrapper_io_utils.InputStreamProvider
 import chat.sphinx.wrapper_lightning.NodeBalance
+import chat.sphinx.wrapper_message_media.MediaType
+import chat.sphinx.wrapper_message_media.toMediaType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
@@ -28,6 +35,7 @@ import io.matthewnelson.concept_authentication.coordinator.AuthenticationRespons
 import io.matthewnelson.concept_authentication.coordinator.ConfirmedPinListener
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_encryption_key.EncryptionKey
+import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import io.matthewnelson.crypto_common.annotations.RawPasswordAccess
 import io.matthewnelson.crypto_common.clazzes.*
 import kotlinx.coroutines.Job
@@ -39,6 +47,8 @@ import kotlinx.coroutines.launch
 import okio.base64.encodeBase64
 import org.cryptonode.jncryptor.AES256JNCryptor
 import org.cryptonode.jncryptor.CryptorException
+import java.io.FileInputStream
+import java.io.InputStream
 import javax.inject.Inject
 
 @HiltViewModel
@@ -55,17 +65,15 @@ internal class ProfileViewModel @Inject constructor(
         Context,
         ProfileSideEffect,
         ProfileViewState>(dispatchers, ProfileViewState.Basic),
-    ProfilePicMenuViewModel
+    PictureMenuViewModel
 {
 
-    override val profilePicMenuHandler: ProfilePicMenuHandler by lazy {
-        ProfilePicMenuHandler(
-            app,
-            cameraCoordinator,
-            contactRepository,
-            dispatchers,
-            viewModelScope,
-        )
+    override val pictureMenuHandler: PictureMenuHandler by lazy {
+        PictureMenuHandler()
+    }
+
+    val updatingImageViewStateContainer: ViewStateContainer<UpdatingImageViewState> by lazy {
+        ViewStateContainer(UpdatingImageViewState.Idle)
     }
 
     private var resetPINJob: Job? = null
@@ -187,6 +195,166 @@ internal class ProfileViewModel @Inject constructor(
             submitSideEffect(ProfileSideEffect.BackupKeysFailed)
         } catch (e: IllegalArgumentException) {
             submitSideEffect(ProfileSideEffect.BackupKeysFailed)
+        }
+    }
+
+    private var cameraJob: Job? = null
+
+    override fun updatePictureFromCamera() {
+        if (cameraJob?.isActive == true) {
+            return
+        }
+
+        cameraJob = viewModelScope.launch(dispatchers.mainImmediate) {
+            val response = cameraCoordinator.submitRequest(CameraRequest)
+
+            @Exhaustive
+            when (response) {
+                is Response.Error -> {}
+                is Response.Success -> {
+
+                    @Exhaustive
+                    when (response.value) {
+                        is CameraResponse.Image -> {
+                            val ext = response.value.value.extension
+                            val mediaType = MediaType.Image(MediaType.IMAGE + "/$ext")
+
+                            val stream: FileInputStream? = try {
+                                FileInputStream(response.value.value)
+                            } catch (e: Exception) {
+                                // TODO: Handle error
+                                null
+                            }
+
+                            if (stream != null) {
+
+                                pictureMenuHandler.viewStateContainer.updateViewState(
+                                    MenuBottomViewState.Closed
+                                )
+
+                                updatingImageViewStateContainer.updateViewState(
+                                    UpdatingImageViewState.UpdatingImage
+                                )
+
+                                viewModelScope.launch(dispatchers.mainImmediate) {
+                                    val repoResponse = contactRepository.updateProfilePic(
+                                        stream = object : InputStreamProvider() {
+                                            override fun newInputStream(): InputStream {
+                                                return response.value.value.inputStream()
+                                            }
+                                        },
+                                        mediaType = mediaType,
+                                        fileName = response.value.value.name,
+                                        contentLength = response.value.value.length(),
+                                    )
+
+                                    @Exhaustive
+                                    when (repoResponse) {
+                                        is Response.Error -> {
+                                            updatingImageViewStateContainer.updateViewState(
+                                                UpdatingImageViewState.UpdatingImageFailed
+                                            )
+                                        }
+                                        is Response.Success -> {
+                                            updatingImageViewStateContainer.updateViewState(
+                                                UpdatingImageViewState.UpdatingImageSucceed
+                                            )
+                                        }
+                                    }
+
+                                    try {
+                                        response.value.value.delete()
+                                    } catch (e: Exception) {}
+                                }.join()
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @Suppress("BlockingMethodInNonBlockingContext")
+    override fun handleActivityResultUri(uri: Uri?) {
+        if (uri == null) {
+            return
+        }
+
+        val cr = app.contentResolver
+
+        cr.getType(uri)?.let { crType ->
+
+            MimeTypeMap.getSingleton().getExtensionFromMimeType(crType)?.let { ext ->
+
+                crType.toMediaType().let { mType ->
+
+                    @Exhaustive
+                    when (mType) {
+                        is MediaType.Image -> {
+                            val stream: InputStream? = try {
+                                cr.openInputStream(uri)
+                            } catch (e: Exception) {
+                                // TODO: Handle Error
+                                null
+                            }
+
+                            if (stream != null) {
+
+                                pictureMenuHandler.viewStateContainer.updateViewState(
+                                    MenuBottomViewState.Closed
+                                )
+
+                                updatingImageViewStateContainer.updateViewState(
+                                    UpdatingImageViewState.UpdatingImage
+                                )
+
+                                viewModelScope.launch(dispatchers.mainImmediate) {
+                                    val repoResponse = contactRepository.updateProfilePic(
+                                        stream = object : InputStreamProvider() {
+                                            var initialStreamUsed: Boolean = false
+                                            override fun newInputStream(): InputStream {
+                                                return if (!initialStreamUsed) {
+                                                    initialStreamUsed = true
+                                                    stream
+                                                } else {
+                                                    cr.openInputStream(uri)!!
+                                                }
+                                            }
+                                        },
+                                        mediaType = mType,
+                                        fileName = "image.$ext",
+                                        contentLength = null,
+                                    )
+
+                                    @Exhaustive
+                                    when (repoResponse) {
+                                        is Response.Error -> {
+                                            updatingImageViewStateContainer.updateViewState(
+                                                UpdatingImageViewState.UpdatingImageFailed
+                                            )
+                                        }
+                                        is Response.Success -> {
+                                            updatingImageViewStateContainer.updateViewState(
+                                                UpdatingImageViewState.UpdatingImageSucceed
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        is MediaType.Audio,
+                        is MediaType.Pdf,
+                        is MediaType.Text,
+                        is MediaType.Unknown,
+                        is MediaType.Video -> {
+                            // do nothing
+                        }
+                    }
+
+                }
+
+            }
+
         }
     }
 

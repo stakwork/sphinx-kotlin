@@ -36,7 +36,7 @@ dependencies {
     // Sphinx
     implementation project(path: ':sphinx:activity:insetter-activity')
     implementation project(path: ':sphinx:application:common:menus:menu-bottom-tribe')
-    implementation project(path: ':sphinx:application:common:menus:menu-bottom-tribe-profile-pic')
+    implementation project(path: ':sphinx:application:common:menus:menu-bottom-profile-pic')
     implementation project(path: ':sphinx:application:common:wrappers:wrapper-common')
     implementation project(path: ':sphinx:application:common:wrappers:wrapper-message-media')
     implementation project(path: ':sphinx:application:data:concepts:concept-image-loader')

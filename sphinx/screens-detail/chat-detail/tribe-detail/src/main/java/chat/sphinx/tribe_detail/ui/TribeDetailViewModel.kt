@@ -19,8 +19,8 @@ import chat.sphinx.kotlin_response.Response
 import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.logger.e
 import chat.sphinx.menu_bottom.ui.MenuBottomViewState
-import chat.sphinx.menu_bottom_tribe_profile_pic.TribeProfilePicMenuHandler
-import chat.sphinx.menu_bottom_tribe_profile_pic.TribeProfilePicMenuViewModel
+import chat.sphinx.menu_bottom_profile_pic.PictureMenuHandler
+import chat.sphinx.menu_bottom_profile_pic.PictureMenuViewModel
 import chat.sphinx.podcast_player.objects.toPodcast
 import chat.sphinx.tribe.TribeMenuHandler
 import chat.sphinx.tribe.TribeMenuViewModel
@@ -28,7 +28,6 @@ import chat.sphinx.tribe_detail.R
 import chat.sphinx.tribe_detail.navigation.TribeDetailNavigator
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.ChatAlias
-import chat.sphinx.wrapper_chat.ChatMetaData
 import chat.sphinx.wrapper_chat.isTribeOwnedByAccount
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_contact.Contact
@@ -41,12 +40,10 @@ import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
-import io.matthewnelson.concept_media_cache.MediaCacheHandler
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import java.io.File
 import java.io.InputStream
 import javax.annotation.meta.Exhaustive
 import javax.inject.Inject
@@ -62,7 +59,6 @@ internal class TribeDetailViewModel @Inject constructor(
     private val chatRepository: ChatRepository,
     private val cameraCoordinator: ViewModelCoordinator<CameraRequest, CameraResponse>,
     private val contactRepository: ContactRepository,
-    private val mediaCacheHandler: MediaCacheHandler,
     private val mediaPlayerServiceController: MediaPlayerServiceController,
     val navigator: TribeDetailNavigator,
     val LOG: SphinxLogger,
@@ -71,7 +67,7 @@ internal class TribeDetailViewModel @Inject constructor(
         TribeDetailSideEffect,
         TribeDetailViewState>(dispatchers, TribeDetailViewState.Idle),
     TribeMenuViewModel,
-    TribeProfilePicMenuViewModel
+    PictureMenuViewModel
 {
     companion object {
         const val TAG = "TribeDetailViewModel"
@@ -165,8 +161,8 @@ internal class TribeDetailViewModel @Inject constructor(
         TribeMenuHandler()
     }
 
-    override val tribeProfilePicMenuHandler: TribeProfilePicMenuHandler by lazy {
-        TribeProfilePicMenuHandler()
+    override val pictureMenuHandler: PictureMenuHandler by lazy {
+        PictureMenuHandler()
     }
 
     fun updateSatsPerMinute(sats: Long) {
@@ -200,7 +196,7 @@ internal class TribeDetailViewModel @Inject constructor(
         }
     }
 
-    override fun updateChatProfilePicCamera() {
+    override fun updatePictureFromCamera() {
         if (cameraJob?.isActive == true) {
             return
         }
