@@ -23,6 +23,7 @@ import io.matthewnelson.android_feature_screens.R as R_screens
 import io.matthewnelson.android_feature_screens.ui.motionlayout.MotionLayoutFragment
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.invisibleIfFalse
+import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_toast_utils.show
 import io.matthewnelson.android_feature_viewmodel.currentViewState
 import io.matthewnelson.android_feature_viewmodel.updateViewState
@@ -89,7 +90,7 @@ internal class SplashFragment: MotionLayoutFragment<
     override suspend fun onSideEffectCollect(sideEffect: SplashSideEffect) {
         if (sideEffect is SplashSideEffect.FromScanner) {
             binding.layoutOnBoard.editTextCodeInput.setText(sideEffect.value.value)
-            processConnectionCode()
+            processConnectionCode(sideEffect.value.value)
         } else {
             sideEffect.execute(binding.root.context)
         }
@@ -133,7 +134,7 @@ internal class SplashFragment: MotionLayoutFragment<
 
                     editText.setOnEditorActionListener { _, actionId, _ ->
                         if (actionId == EditorInfo.IME_ACTION_DONE) {
-                            processConnectionCode()
+                            processConnectionCode(editText.text?.toString())
                             true
                         } else {
                             false
@@ -233,19 +234,15 @@ internal class SplashFragment: MotionLayoutFragment<
         }
     }
 
-    private fun processConnectionCode() {
+    private fun processConnectionCode(code: String?) {
         binding.root.context.inputMethodManager?.let { imm ->
             binding.layoutOnBoard.apply {
-                editTextCodeInput.let { editText ->
-                    if (imm.isActive(editText)) {
-                        imm.hideSoftInputFromWindow(editText.windowToken, 0)
-                    }
-                    signUpProgressBar.goneIfFalse(true)
-
-                    viewModel.processConnectionCode(
-                        editText.text?.toString()
-                    )
+                if (imm.isActive(editTextCodeInput)) {
+                    imm.hideSoftInputFromWindow(editTextCodeInput.windowToken, 0)
                 }
+                signUpProgressBar.visible
+
+                viewModel.processConnectionCode(code)
             }
         }
     }

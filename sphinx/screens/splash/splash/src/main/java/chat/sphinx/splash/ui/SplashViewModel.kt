@@ -143,33 +143,37 @@ internal class SplashViewModel @Inject constructor(
         }
     }
 
+    private var processConnectionCodeJob: Job? = null
     fun processConnectionCode(input: String?) {
-        if (input == null || input.isEmpty()) {
-            viewModelScope.launch(mainImmediate) {
+        if (processConnectionCodeJob?.isActive == true) {
+            return
+        }
+
+        processConnectionCodeJob = viewModelScope.launch(mainImmediate) {
+
+            if (input == null || input.isEmpty()) {
                 updateViewState(SplashViewState.HideLoadingWheel)
                 submitSideEffect(SplashSideEffect.InputNullOrEmpty)
+                return@launch
             }
-            return
-        }
 
-        // Maybe we can have a SignupStyle class to reflect this? Since there's a lot of decoding
-        // going on in different classes
-        // Invite Code
-        input.toValidInviteStringOrNull()?.let { inviteString ->
-            redeemInvite(inviteString)
-            return
-        }
+            // Maybe we can have a SignupStyle class to reflect this? Since there's a lot of decoding
+            // going on in different classes
+            // Invite Code
+            input.toValidInviteStringOrNull()?.let { inviteString ->
+                redeemInvite(inviteString)
+                return@launch
+            }
 
-        RedemptionCode.decode(input)?.let { code ->
-            @Exhaustive
-            when (code) {
-                is RedemptionCode.AccountRestoration -> {
-                    updateViewState(
-                        SplashViewState.Transition_Set3_DecryptKeys(code)
-                    )
-                }
-                is RedemptionCode.NodeInvite -> {
-                    viewModelScope.launch(mainImmediate) {
+            RedemptionCode.decode(input)?.let { code ->
+                @Exhaustive
+                when (code) {
+                    is RedemptionCode.AccountRestoration -> {
+                        updateViewState(
+                            SplashViewState.Transition_Set3_DecryptKeys(code)
+                        )
+                    }
+                    is RedemptionCode.NodeInvite -> {
                         withContext(io) {
                             storeTemporaryInvite()
                         }
@@ -181,65 +185,35 @@ internal class SplashViewModel @Inject constructor(
                         )
                     }
                 }
+
+                return@launch
             }
 
-            return
-        }
-//        input.decodeBase64ToArray()?.decodeToString()?.split("::")?.let { decodedSplit ->
-//            if (decodedSplit.size == 3) {
-//                //Token coming from Umbrel for example.
-//                if (decodedSplit.elementAt(0) == "ip") {
-//                    viewModelScope.launch(mainImmediate) {
-//                        storeTemporaryInvite()
-//
-//                        val ip = decodedSplit.elementAt(1)
-//                        val password = decodedSplit.elementAt(2)
-//                        generateToken(ip, null, password)
-//                    }
-//                    return
-//                }
-//            } else if (decodedSplit.size == 2) {
-//                if (decodedSplit.elementAt(0) == "keys") {
-//                    decodedSplit.elementAt(1).decodeBase64ToArray()?.let { toDecryptByteArray ->
-//                        updateViewState(
-//                            SplashViewState.Transition_Set3_DecryptKeys(toDecryptByteArray)
-//                        )
-//                        return
-//                    }
-//                }
-//
-//            } // input not properly formatted `type::data`
-//        }
-
-        viewModelScope.launch(mainImmediate) {
             updateViewState(SplashViewState.HideLoadingWheel)
             submitSideEffect(SplashSideEffect.InvalidCode)
         }
     }
 
-    private fun redeemInvite(input: InviteString) {
-        viewModelScope.launch(mainImmediate) {
-            networkQueryInvite.redeemInvite(input).collect { loadResponse ->
-                @Exhaustive
-                when (loadResponse) {
-                    is LoadResponse.Loading -> {
-                    }
-                    is Response.Error -> {
-                        updateViewState(SplashViewState.HideLoadingWheel)
-                        submitSideEffect(SplashSideEffect.InvalidCode)
-                    }
-                    is Response.Success -> {
-                        val inviteResponse = loadResponse.value.response
+    private suspend fun redeemInvite(input: InviteString) {
+        networkQueryInvite.redeemInvite(input).collect { loadResponse ->
+            @Exhaustive
+            when (loadResponse) {
+                is LoadResponse.Loading -> {}
+                is Response.Error -> {
+                    updateViewState(SplashViewState.HideLoadingWheel)
+                    submitSideEffect(SplashSideEffect.InvalidCode)
+                }
+                is Response.Success -> {
+                    val inviteResponse = loadResponse.value.response
 
-                        inviteResponse?.invite?.let { invite ->
-                            storeTemporaryInvite(invite)
+                    inviteResponse?.invite?.let { invite ->
+                        storeTemporaryInvite(invite)
 
-                            generateToken(
-                                ip = RelayUrl(inviteResponse.ip),
-                                nodePubKey = inviteResponse.pubkey,
-                                password = null,
-                            )
-                        }
+                        generateToken(
+                            ip = RelayUrl(inviteResponse.ip),
+                            nodePubKey = inviteResponse.pubkey,
+                            password = null,
+                        )
                     }
                 }
             }
@@ -266,9 +240,7 @@ internal class SplashViewModel @Inject constructor(
                     submitSideEffect(SplashSideEffect.GenerateTokenFailed)
                 }
                 is Response.Success -> {
-                    viewModelScope.launch(mainImmediate) {
-                        navigator.toOnBoardScreen()
-                    }
+                    navigator.toOnBoardScreen()
                 }
             }
         }
