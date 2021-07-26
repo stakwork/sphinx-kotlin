@@ -2,20 +2,48 @@ package chat.sphinx.onboard_name.navigation
 
 import androidx.annotation.IdRes
 import androidx.navigation.NavController
+import chat.sphinx.onboard_common.model.OnBoardInviterData
+import chat.sphinx.onboard_common.model.OnBoardStep
 import chat.sphinx.onboard_name.R
+import chat.sphinx.onboard_name.ui.OnBoardNameFragmentArgs
+import chat.sphinx.wrapper_common.lightning.toLightningNodePubKey
 import io.matthewnelson.android_feature_navigation.DefaultNavOptions
 import io.matthewnelson.concept_navigation.NavigationRequest
 
+internal inline val OnBoardNameFragmentArgs.inviterData: OnBoardInviterData
+    get() = OnBoardInviterData(
+        argNickname,
+        argPubkey?.toLightningNodePubKey(),
+        argRouteHint,
+        argMessage,
+        argAction,
+        argPin,
+    )
+
 class ToOnBoardNameScreen(
-    @IdRes private val popUpToId: Int
+    @IdRes private val popUpToId: Int,
+    private val onBoardStep: OnBoardStep.Step2,
 ): NavigationRequest<NavController>() {
+
     override fun navigate(controller: NavController) {
-        controller.navigate(
-            R.id.on_board_name_nav_graph,
-            null,
-            DefaultNavOptions.defaultAnims
-                .setPopUpTo(popUpToId, false)
-                .build()
-        )
+        OnBoardNameFragmentArgs.Builder(
+            onBoardStep.inviterData.nickname,
+            onBoardStep.inviterData.pubkey?.value,
+            onBoardStep.inviterData.routeHint,
+            onBoardStep.inviterData.message,
+            onBoardStep.inviterData.action,
+            onBoardStep.inviterData.pin,
+        ).build().let { args ->
+
+            controller.navigate(
+                R.id.on_board_name_nav_graph,
+                args.toBundle(),
+                DefaultNavOptions.defaultAnims
+                    .setPopUpTo(popUpToId, false)
+                    .build()
+            )
+
+        }
     }
+
 }

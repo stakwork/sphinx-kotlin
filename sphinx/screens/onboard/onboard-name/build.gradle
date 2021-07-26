@@ -1,6 +1,8 @@
 plugins {
+    id 'app.cash.exhaustive'
     id 'com.android.library'
     id 'dagger.hilt.android.plugin'
+    id 'androidx.navigation.safeargs'
     id 'kotlin-android'
     id 'kotlin-kapt'
 }
@@ -35,14 +37,12 @@ dependencies {
     implementation project(path: ':android:features:android-feature-screens')
     implementation project(path: ':kotlin:concepts:authentication:concept-authentication')
     implementation project(path: ':kotlin:encoders:base64')
-    implementation project(path: ':kotlin:concepts:authentication:concept-authentication-core')
-    implementation project(path: ':kotlin:features:authentication:feature-authentication-core')
 
     // Sphinx
     implementation project(path: ':sphinx:application:common:resources')
     implementation project(path: ':sphinx:activity:insetter-activity')
-    implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-contact')
     implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-contact')
+    api project(path: ':sphinx:screens:onboard:onboard-common')
 
     implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt
