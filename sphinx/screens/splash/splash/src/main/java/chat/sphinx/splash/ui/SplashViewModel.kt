@@ -18,7 +18,7 @@ import chat.sphinx.kotlin_response.Response
 import chat.sphinx.onboard_common.OnBoardStepHandler
 import chat.sphinx.onboard_common.model.OnBoardInviterData
 import chat.sphinx.onboard_common.model.OnBoardStep
-import chat.sphinx.onboard_common.model.RedemptionCode
+import chat.sphinx.splash.model.RedemptionCode
 import chat.sphinx.scanner_view_model_coordinator.request.ScannerFilter
 import chat.sphinx.scanner_view_model_coordinator.request.ScannerRequest
 import chat.sphinx.scanner_view_model_coordinator.response.ScannerResponse

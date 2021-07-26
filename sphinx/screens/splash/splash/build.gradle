@@ -51,6 +51,8 @@ dependencies {
     api project(path: ':sphinx:screens:onboard:onboard-common')
     implementation project(path: ':sphinx:screens-detail:scanner:scanner-view-model-coordinator')
 
+    implementation deps.jncryptor
+
     implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt
     kapt kaptDeps.google.hilt

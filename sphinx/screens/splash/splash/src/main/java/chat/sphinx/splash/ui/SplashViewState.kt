@@ -1,7 +1,7 @@
 package chat.sphinx.splash.ui
 
 import androidx.constraintlayout.motion.widget.MotionLayout
-import chat.sphinx.onboard_common.model.RedemptionCode
+import chat.sphinx.splash.model.RedemptionCode
 import chat.sphinx.splash.R
 import io.matthewnelson.android_concept_views.MotionLayoutViewState
 import java.io.CharArrayWriter
