@@ -16,6 +16,7 @@ import chat.sphinx.key_restore.KeyRestore
 import chat.sphinx.key_restore.KeyRestoreResponse
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
+import chat.sphinx.onboard_common.model.RedemptionCode
 import chat.sphinx.scanner_view_model_coordinator.request.ScannerFilter
 import chat.sphinx.scanner_view_model_coordinator.request.ScannerRequest
 import chat.sphinx.scanner_view_model_coordinator.response.ScannerResponse
@@ -34,17 +35,13 @@ import io.matthewnelson.concept_authentication.coordinator.AuthenticationRequest
 import io.matthewnelson.concept_authentication.coordinator.AuthenticationResponse
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.crypto_common.annotations.RawPasswordAccess
-import io.matthewnelson.crypto_common.clazzes.Password
 import io.matthewnelson.crypto_common.clazzes.PasswordGenerator
-import io.matthewnelson.crypto_common.extensions.decodeToString
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
-import okio.base64.decodeBase64ToArray
-import org.cryptonode.jncryptor.AES256JNCryptor
-import org.cryptonode.jncryptor.CryptorException
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
@@ -131,20 +128,10 @@ internal class SplashViewModel @Inject constructor(
                                 return Response.Success(Any())
                             }
 
-                            data.decodeBase64ToArray()
-                                ?.decodeToString()
-                                ?.split("::")
-                                ?.let { decodedSplit ->
+                            if (RedemptionCode.decode(data) != null) {
+                                return Response.Success(Any())
+                            }
 
-                                    if (decodedSplit.size == 3) {
-                                        if (decodedSplit[0] == "ip") {
-                                            return Response.Success(Any())
-                                        }
-                                    }
-
-                                }
-
-                            // TODO: make better
                             return Response.Error("QR code is not an account restore code")
                         }
                     }
@@ -173,31 +160,56 @@ internal class SplashViewModel @Inject constructor(
             return
         }
 
-        input.decodeBase64ToArray()?.decodeToString()?.split("::")?.let { decodedSplit ->
-            if (decodedSplit.size == 3) {
-                //Token coming from Umbrel for example.
-                if (decodedSplit.elementAt(0) == "ip") {
+        RedemptionCode.decode(input)?.let { code ->
+            @Exhaustive
+            when (code) {
+                is RedemptionCode.AccountRestoration -> {
+                    updateViewState(
+                        SplashViewState.Transition_Set3_DecryptKeys(code)
+                    )
+                }
+                is RedemptionCode.NodeInvite -> {
                     viewModelScope.launch(mainImmediate) {
-                        storeTemporaryInvite()
+                        withContext(io) {
+                            storeTemporaryInvite()
+                        }
 
-                        val ip = decodedSplit.elementAt(1)
-                        val password = decodedSplit.elementAt(2)
-                        generateToken(ip, null, password)
-                    }
-                    return
-                }
-            } else if (decodedSplit.size == 2) {
-                if (decodedSplit.elementAt(0) == "keys") {
-                    decodedSplit.elementAt(1).decodeBase64ToArray()?.let { toDecryptByteArray ->
-                        updateViewState(
-                            SplashViewState.Transition_Set3_DecryptKeys(toDecryptByteArray)
+                        generateToken(
+                            ip = code.ip,
+                            nodePubKey = null,
+                            password = code.password
                         )
-                        return
                     }
                 }
+            }
 
-            } // input not properly formatted `type::data`
+            return
         }
+//        input.decodeBase64ToArray()?.decodeToString()?.split("::")?.let { decodedSplit ->
+//            if (decodedSplit.size == 3) {
+//                //Token coming from Umbrel for example.
+//                if (decodedSplit.elementAt(0) == "ip") {
+//                    viewModelScope.launch(mainImmediate) {
+//                        storeTemporaryInvite()
+//
+//                        val ip = decodedSplit.elementAt(1)
+//                        val password = decodedSplit.elementAt(2)
+//                        generateToken(ip, null, password)
+//                    }
+//                    return
+//                }
+//            } else if (decodedSplit.size == 2) {
+//                if (decodedSplit.elementAt(0) == "keys") {
+//                    decodedSplit.elementAt(1).decodeBase64ToArray()?.let { toDecryptByteArray ->
+//                        updateViewState(
+//                            SplashViewState.Transition_Set3_DecryptKeys(toDecryptByteArray)
+//                        )
+//                        return
+//                    }
+//                }
+//
+//            } // input not properly formatted `type::data`
+//        }
 
         viewModelScope.launch(mainImmediate) {
             updateViewState(SplashViewState.HideLoadingWheel)
@@ -222,7 +234,11 @@ internal class SplashViewModel @Inject constructor(
                         inviteResponse?.invite?.let { invite ->
                             storeTemporaryInvite(invite)
 
-                            generateToken(inviteResponse.ip, inviteResponse.pubkey, null)
+                            generateToken(
+                                ip = RelayUrl(inviteResponse.ip),
+                                nodePubKey = inviteResponse.pubkey,
+                                password = null,
+                            )
                         }
                     }
                 }
@@ -230,30 +246,28 @@ internal class SplashViewModel @Inject constructor(
         }
     }
 
-    private fun generateToken(ip: String, nodePubKey: String? = null, password: String? = null) {
-        viewModelScope.launch(mainImmediate) {
-            @OptIn(RawPasswordAccess::class)
-            val authToken = AuthorizationToken(
-                PasswordGenerator(passwordLength = 20).password.value.joinToString("")
-            )
-            val relayUrl = relayDataHandler.formatRelayUrl(RelayUrl(ip))
-            torManager.setTorRequired(relayUrl.isOnionAddress)
+    private suspend fun generateToken(ip: RelayUrl, nodePubKey: String?, password: String?) {
+        @OptIn(RawPasswordAccess::class)
+        val authToken = AuthorizationToken(
+            PasswordGenerator(passwordLength = 20).password.value.joinToString("")
+        )
 
-            storeToken(authToken.value, relayUrl.value)
+        val relayUrl = relayDataHandler.formatRelayUrl(ip)
+        torManager.setTorRequired(relayUrl.isOnionAddress)
 
-            networkQueryContact.generateToken(relayUrl, authToken, password, nodePubKey).collect { loadResponse ->
-                @Exhaustive
-                when (loadResponse) {
-                    is LoadResponse.Loading -> {
-                    }
-                    is Response.Error -> {
-                        updateViewState(SplashViewState.HideLoadingWheel)
-                        submitSideEffect(SplashSideEffect.GenerateTokenFailed)
-                    }
-                    is Response.Success -> {
-                        viewModelScope.launch(mainImmediate) {
-                            navigator.toOnBoardScreen()
-                        }
+        storeToken(authToken.value, relayUrl.value)
+
+        networkQueryContact.generateToken(relayUrl, authToken, password, nodePubKey).collect { loadResponse ->
+            @Exhaustive
+            when (loadResponse) {
+                is LoadResponse.Loading -> {}
+                is Response.Error -> {
+                    updateViewState(SplashViewState.HideLoadingWheel)
+                    submitSideEffect(SplashSideEffect.GenerateTokenFailed)
+                }
+                is Response.Success -> {
+                    viewModelScope.launch(mainImmediate) {
+                        navigator.toOnBoardScreen()
                     }
                 }
             }
@@ -332,25 +346,20 @@ internal class SplashViewModel @Inject constructor(
         decryptionJob = viewModelScope.launch(default) {
             try {
                 val pin = viewState.pinWriter.toCharArray()
-                val decryptedSplit = AES256JNCryptor()
-                    .decryptData(viewState.toDecrypt, pin)
-                    .decodeToString()
-                    .split("::")
 
-                if (decryptedSplit.size != 4) {
-                    throw IllegalArgumentException("Decrypted keys do not contain enough arguments")
-                }
+                val decryptedCode: RedemptionCode.AccountRestoration.DecryptedRestorationCode =
+                    viewState.restoreCode.decrypt(pin, dispatchers)
 
                 // TODO: Ask to use Tor before any network calls go out.
                 // TODO: Hit relayUrl to verify creds work
 
                 var success: KeyRestoreResponse.Success? = null
                 keyRestore.restoreKeys(
-                    privateKey = Password(decryptedSplit[0].toCharArray()),
-                    publicKey = Password(decryptedSplit[1].toCharArray()),
+                    privateKey = decryptedCode.privateKey,
+                    publicKey = decryptedCode.publicKey,
                     userPin = pin,
-                    relayUrl = RelayUrl(decryptedSplit[2]),
-                    authorizationToken = AuthorizationToken(decryptedSplit[3]),
+                    relayUrl = decryptedCode.relayUrl,
+                    authorizationToken = decryptedCode.authorizationToken,
                 ).collect { flowResponse ->
                     // TODO: Implement in Authentication View when it get's built/refactored
                     if (flowResponse is KeyRestoreResponse.Success) {
@@ -368,15 +377,12 @@ internal class SplashViewModel @Inject constructor(
                     navigator.toDashboardScreen(updateBackgroundLoginTime = true)
 
                 } ?: updateViewState(
-                    SplashViewState.Set3_DecryptKeys(viewState.toDecrypt)
+                    SplashViewState.Set3_DecryptKeys(viewState.restoreCode)
                 ).also {
                     submitSideEffect(SplashSideEffect.InvalidPin)
                 }
 
-                // TODO: on success, show snackbar to clear clipboard
-            } catch (e: CryptorException) {
-                decryptionJobException = e
-            } catch (e: IllegalArgumentException) {
+            } catch (e: Exception) {
                 decryptionJobException = e
             }
         }
@@ -386,7 +392,7 @@ internal class SplashViewModel @Inject constructor(
             decryptionJobException?.let { exception ->
                 updateViewState(
                     // reset view state
-                    SplashViewState.Set3_DecryptKeys(viewState.toDecrypt)
+                    SplashViewState.Set3_DecryptKeys(viewState.restoreCode)
                 )
                 exception.printStackTrace()
                 submitSideEffect(SplashSideEffect.DecryptionFailure)

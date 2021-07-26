@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.view.HapticFeedbackConstants
 import android.view.View
 import android.view.inputmethod.EditorInfo
-import android.view.inputmethod.InputMethodManager
 import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -298,11 +297,11 @@ internal class SplashFragment: MotionLayoutFragment<
                 viewModel.updateViewState(
                     SplashViewState.Set3_DecryptKeys(
                         try {
-                            (viewModel.currentViewState as SplashViewState.Transition_Set3_DecryptKeys).toDecrypt
+                            (viewModel.currentViewState as SplashViewState.Transition_Set3_DecryptKeys).restoreCode
                         } catch (e: ClassCastException) {
                             // "Should" never happen, but if it does, this is the only other
                             // view state that contains set3's resource ID.
-                            (viewModel.currentViewState as SplashViewState.Set3_DecryptKeys).toDecrypt
+                            (viewModel.currentViewState as SplashViewState.Set3_DecryptKeys).restoreCode
                         }
                     )
                 )
