@@ -76,6 +76,8 @@ internal class CreateTribeViewModel @Inject constructor(
         }
 
         cameraJob = viewModelScope.launch(dispatchers.mainImmediate) {
+            pictureMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Closed)
+
             val response = cameraCoordinator.submitRequest(CameraRequest)
 
             @Exhaustive
@@ -86,8 +88,6 @@ internal class CreateTribeViewModel @Inject constructor(
                     }
                 }
                 is Response.Success -> {
-                    pictureMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Closed)
-
                     @Exhaustive
                     when (response.value) {
                         is CameraResponse.Image -> {
@@ -104,7 +104,6 @@ internal class CreateTribeViewModel @Inject constructor(
     }
 
     override fun handleActivityResultUri(uri: Uri?) {
-
         uri?.let {
             val cr = app.contentResolver
 
@@ -150,9 +149,7 @@ internal class CreateTribeViewModel @Inject constructor(
                             is MediaType.Text,
                             is MediaType.Unknown,
                             is MediaType.Video -> {
-                                viewModelScope.launch(mainImmediate) {
-                                    submitSideEffect(CreateTribeSideEffect.FailedToProcessImage)
-                                }
+                                showFailedToProcessImage()
                             }
                         }
                     }
@@ -160,8 +157,6 @@ internal class CreateTribeViewModel @Inject constructor(
 
             }
         }
-
-
     }
 
     private fun showNameAndDescriptionRequired() {

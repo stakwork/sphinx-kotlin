@@ -2339,15 +2339,43 @@ abstract class SphinxRepository(
     }
 
     override fun joinTribe(
-        tribeDto: TribeDto,
+        tribeDto: TribeDto
     ): Flow<LoadResponse<Any, ResponseError>> = flow {
         val queries = coreDB.getSphinxDatabaseQueries()
-
         var response: Response<Any, ResponseError>? = null
+        val memeServerHost = MediaHost.DEFAULT
 
         emit(LoadResponse.Loading)
 
         applicationScope.launch(mainImmediate) {
+
+            tribeDto.myPhotoUrl = tribeDto.profileImgFile?.let { imgFile ->
+                // If an image file is provided we should upload it
+                val token = memeServerTokenHandler.retrieveAuthenticationToken(memeServerHost)
+                    ?: throw RuntimeException("MemeServerAuthenticationToken retrieval failure")
+
+                val networkResponse = networkQueryMemeServer.uploadAttachment(
+                    authenticationToken = token,
+                    mediaType = MediaType.Image("${MediaType.IMAGE}/${imgFile.extension}"),
+                    stream = object : InputStreamProvider() {
+                        override fun newInputStream(): InputStream = imgFile.inputStream()
+                    },
+                    fileName = imgFile.name,
+                    contentLength = imgFile.length(),
+                    memeServerHost = memeServerHost,
+                )
+                @Exhaustive
+                when (networkResponse) {
+                    is Response.Error -> {
+                        LOG.e(TAG, "Failed to upload image: ", networkResponse.exception)
+                        response = networkResponse
+                        null
+                    }
+                    is Response.Success -> {
+                        "https://${memeServerHost.value}/public/${networkResponse.value.muid}"
+                    }
+                }
+            }
 
             networkQueryChat.joinTribe(tribeDto).collect { loadResponse ->
                 @Exhaustive
