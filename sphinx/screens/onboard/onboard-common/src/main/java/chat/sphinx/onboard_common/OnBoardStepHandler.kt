@@ -2,7 +2,9 @@ package chat.sphinx.onboard_common
 
 import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.logger.e
+import chat.sphinx.onboard_common.internal.json.*
 import chat.sphinx.onboard_common.internal.json.Step1Json
+import chat.sphinx.onboard_common.internal.json.Step2Json
 import chat.sphinx.onboard_common.internal.json.toOnboardStep1
 import chat.sphinx.onboard_common.internal.json.toStep1Json
 import chat.sphinx.onboard_common.model.OnBoardInviterData
@@ -36,7 +38,6 @@ class OnBoardStepHandler @Inject constructor(
         private const val STEP_1 = "STEP_1"
         private const val STEP_2 = "STEP_2"
         private const val STEP_3 = "STEP_3"
-        private const val STEP_4 = "STEP_4"
 
         // Character lengths must stay the same for
         // onboard step retrieval to function properly
@@ -82,6 +83,54 @@ class OnBoardStepHandler @Inject constructor(
         }
     }
 
+    suspend fun persistOnBoardStep2Data(inviterData: OnBoardInviterData): OnBoardStep.Step2? {
+        lock.withLock {
+
+            val step2 = OnBoardStep.Step2(inviterData)
+            val step2Json: String = try {
+                withContext(default) {
+                    moshi
+                        .adapter(Step2Json::class.java)
+                        .toJson(Step2Json(inviterData.toInviteDataJson()))
+                } ?: throw IOException("Failed to convert Step2Json data to String")
+            } catch (e: Exception) {
+                LOG.e(TAG, "Step2 Json Conversion Error", e)
+                return null
+            }
+
+            authenticationStorage.putString(KEY, STEP_2 + step2Json)
+
+            return step2
+        }
+    }
+
+    suspend fun persistOnBoardStep3Data(inviterData: OnBoardInviterData): OnBoardStep.Step3? {
+        lock.withLock {
+
+            val step3 = OnBoardStep.Step3(inviterData)
+            val step3Json: String = try {
+                withContext(default) {
+                    moshi
+                        .adapter(Step3Json::class.java)
+                        .toJson(Step3Json(inviterData.toInviteDataJson()))
+                } ?: throw IOException("Failed to convert Step3Json data to String")
+            } catch (e: Exception) {
+                LOG.e(TAG, "Step3 Json Conversion Error", e)
+                return null
+            }
+
+            authenticationStorage.putString(KEY, STEP_3 + step3Json)
+
+            return step3
+        }
+    }
+
+    suspend fun finishOnBoardSteps() {
+        lock.withLock {
+            authenticationStorage.removeString(KEY)
+        }
+    }
+
     @Suppress("BlockingMethodInNonBlockingContext")
     suspend fun retrieveOnBoardStep(): OnBoardStep? =
         lock.withLock {
@@ -98,13 +147,30 @@ class OnBoardStepHandler @Inject constructor(
                                 ?: throw IOException("Failed to convert Step1Json string to OnBoardStep1")
                         }
                         STEP_2 -> {
-                            null
+                            withContext(default) {
+                                moshi
+                                    .adapter(Step2Json::class.java)
+                                    .fromJson(stepString.drop(STEP_SIZE))
+                                    ?.invite_data_json
+                                    ?.toOnBoardInviteData()
+                                    ?.let { inviterData ->
+                                        OnBoardStep.Step2(inviterData)
+                                    }
+                            }
+                                ?: throw IOException("Failed to convert Step2Json string to OnBoardStep2")
                         }
                         STEP_3 -> {
-                            null
-                        }
-                        STEP_4 -> {
-                            null
+                            withContext(default) {
+                                moshi
+                                    .adapter(Step3Json::class.java)
+                                    .fromJson(stepString.drop(STEP_SIZE))
+                                    ?.invite_data_json
+                                    ?.toOnBoardInviteData()
+                                    ?.let { inviterData ->
+                                        OnBoardStep.Step3(inviterData)
+                                    }
+                            }
+                                ?: throw IOException("Failed to convert Step3Json string to OnBoardStep3")
                         }
                         else -> {
                             null

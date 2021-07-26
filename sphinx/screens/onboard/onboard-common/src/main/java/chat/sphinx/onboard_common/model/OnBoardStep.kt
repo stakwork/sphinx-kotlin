@@ -24,4 +24,22 @@ sealed class OnBoardStep {
 
     }
 
+    data class Step2 private constructor(val inviterData: OnBoardInviterData): OnBoardStep() {
+
+        companion object {
+            @JvmSynthetic
+            internal operator fun invoke(inviterData: OnBoardInviterData): Step2 =
+                Step2(inviterData)
+        }
+    }
+
+    data class Step3 private constructor(val inviterData: OnBoardInviterData): OnBoardStep() {
+
+        companion object {
+            @JvmSynthetic
+            internal operator fun invoke(inviterData: OnBoardInviterData): Step3 =
+                Step3(inviterData)
+        }
+    }
+
 }
