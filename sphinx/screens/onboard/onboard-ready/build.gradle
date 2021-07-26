@@ -1,6 +1,7 @@
 plugins {
     id 'com.android.library'
     id 'dagger.hilt.android.plugin'
+    id 'androidx.navigation.safeargs'
     id 'kotlin-android'
     id 'kotlin-kapt'
 }
@@ -45,6 +46,7 @@ dependencies {
     implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-contact')
     implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-contact')
     implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-lightning')
+    api project(path: ':sphinx:screens:onboard:onboard-common')
 
     implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt
