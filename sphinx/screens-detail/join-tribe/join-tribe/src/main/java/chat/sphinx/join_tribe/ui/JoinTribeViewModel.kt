@@ -131,18 +131,20 @@ internal class JoinTribeViewModel @Inject constructor(
         }
     }
 
-    fun joinTribe() {
+    fun joinTribe(alias: String) {
         viewModelScope.launch(mainImmediate) {
             var tribeInfo = tribeInfo ?: let {
                 submitSideEffect(JoinTribeSideEffect.Notify.InvalidTribe)
                 return@launch
             }
+
+            tribeInfo.myAlias = alias
+            tribeInfo.amount = tribeInfo.price_to_join
+
             tribeInfo?.myAlias?.trim()?.toContactAlias() ?: let {
                 submitSideEffect(JoinTribeSideEffect.Notify.AliasRequired)
                 return@launch
             }
-
-            tribeInfo.amount = tribeInfo.price_to_join
 
             chatRepository.joinTribe(tribeInfo).collect { loadResponse ->
                 @Exhaustive

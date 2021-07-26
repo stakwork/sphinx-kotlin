@@ -66,7 +66,8 @@ internal class JoinTribeFragment: SideEffectFragment<
             }
 
             buttonJoin.setOnClickListener {
-                viewModel.joinTribe()
+                val aliasString = binding.includeTribeMemberInfo.tribeMemberAliasEditText.text.toString()
+                viewModel.joinTribe(aliasString)
             }
 
             includeTribeMemberInfo.apply {
@@ -77,8 +78,7 @@ internal class JoinTribeFragment: SideEffectFragment<
                     }
                     //Alias needs to be set on Focus change
                     //otherwise view is re created when coming back from camera, and alias is lost
-                    val aliasString = binding.includeTribeMemberInfo.tribeMemberAliasEditText.text.toString()
-                    viewModel.setMyAlias(aliasString)
+                    persistCustomAlias()
                 }
 
                 buttonProfilePicture.setOnClickListener {
@@ -96,6 +96,11 @@ internal class JoinTribeFragment: SideEffectFragment<
         }
 
         viewModel.loadTribeData()
+    }
+
+    private fun persistCustomAlias() {
+        val aliasString = binding.includeTribeMemberInfo.tribeMemberAliasEditText.text.toString()
+        viewModel.setMyAlias(aliasString)
     }
 
     override suspend fun onViewStateFlowCollect(viewState: JoinTribeViewState) {
