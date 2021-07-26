@@ -93,6 +93,12 @@ internal class SplashViewModel @Inject constructor(
                     is OnBoardStep.Step1 -> {
                         navigator.toOnBoardScreen(onBoardStep)
                     }
+                    is OnBoardStep.Step2 -> {
+                        navigator.toOnBoardNameScreen(onBoardStep)
+                    }
+                    is OnBoardStep.Step3 -> {
+                        navigator.toOnBoardReadyScreen(onBoardStep)
+                    }
                     null -> {
                         navigator.toDashboardScreen(
                             // No need as it was already updated
@@ -121,6 +127,12 @@ internal class SplashViewModel @Inject constructor(
                                     is OnBoardStep.Step1 -> {
                                         navigator.toOnBoardScreen(onBoardStep)
                                     }
+                                    is OnBoardStep.Step2 -> {
+                                        navigator.toOnBoardNameScreen(onBoardStep)
+                                    }
+                                    is OnBoardStep.Step3 -> {
+                                        navigator.toOnBoardReadyScreen(onBoardStep)
+                                    }
                                     null -> {
                                         navigator.toDashboardScreen(updateBackgroundLoginTime = true)
                                     }
@@ -138,6 +150,12 @@ internal class SplashViewModel @Inject constructor(
                     when (onBoardStep) {
                         is OnBoardStep.Step1 -> {
                             navigator.toOnBoardScreen(onBoardStep)
+                        }
+                        is OnBoardStep.Step2 -> {
+                            navigator.toOnBoardNameScreen(onBoardStep)
+                        }
+                        is OnBoardStep.Step3 -> {
+                            navigator.toOnBoardReadyScreen(onBoardStep)
                         }
                         null -> {
                             // Display OnBoard

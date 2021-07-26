@@ -15,4 +15,6 @@ abstract class SplashNavigator(
     )
 
     abstract suspend fun toOnBoardScreen(onBoardStep1: OnBoardStep.Step1)
+    abstract suspend fun toOnBoardNameScreen(onBoardStep2: OnBoardStep.Step2)
+    abstract suspend fun toOnBoardReadyScreen(onBoardStep3: OnBoardStep.Step3)
 }
