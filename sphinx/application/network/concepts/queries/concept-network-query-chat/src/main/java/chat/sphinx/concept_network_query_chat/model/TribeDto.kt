@@ -1,5 +1,6 @@
 package chat.sphinx.concept_network_query_chat.model
 
+import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
 @JsonClass(generateAdapter = true)
@@ -23,9 +24,11 @@ data class TribeDto(
 ) {
 
     var amount: Long? = null
-    var myAlias: String? = null
     var host: String? = null
     var uuid: String? = null
+
+    @Json(name = "my_alias")
+    var myAlias: String? = null
 
     val hourToStake: Long
         get() = (escrow_millis) / 60 / 60 / 1000
