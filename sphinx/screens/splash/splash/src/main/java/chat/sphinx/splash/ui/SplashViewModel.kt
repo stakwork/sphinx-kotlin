@@ -20,7 +20,8 @@ import chat.sphinx.scanner_view_model_coordinator.request.ScannerFilter
 import chat.sphinx.scanner_view_model_coordinator.request.ScannerRequest
 import chat.sphinx.scanner_view_model_coordinator.response.ScannerResponse
 import chat.sphinx.splash.navigation.SplashNavigator
-import chat.sphinx.splash.util.isInviteCode
+import chat.sphinx.wrapper_invite.InviteString
+import chat.sphinx.wrapper_invite.toValidInviteStringOrNull
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
 import chat.sphinx.wrapper_relay.isOnionAddress
@@ -126,7 +127,7 @@ internal class SplashViewModel @Inject constructor(
                 ScannerRequest(
                     filter = object : ScannerFilter() {
                         override suspend fun checkData(data: String): Response<Any, String> {
-                            if (data.isInviteCode) {
+                            if (data.toValidInviteStringOrNull() != null) {
                                 return Response.Success(Any())
                             }
 
@@ -156,7 +157,7 @@ internal class SplashViewModel @Inject constructor(
     }
 
     fun processConnectionCode(input: String?) {
-        if (input.isNullOrEmpty()) {
+        if (input == null || input.isEmpty()) {
             viewModelScope.launch(mainImmediate) {
                 updateViewState(SplashViewState.HideLoadingWheel)
                 submitSideEffect(SplashSideEffect.InputNullOrEmpty)
@@ -167,8 +168,8 @@ internal class SplashViewModel @Inject constructor(
         // Maybe we can have a SignupStyle class to reflect this? Since there's a lot of decoding
         // going on in different classes
         // Invite Code
-        if (input.isInviteCode) {
-            redeemInvite(input)
+        input.toValidInviteStringOrNull()?.let { inviteString ->
+            redeemInvite(inviteString)
             return
         }
 
@@ -204,7 +205,7 @@ internal class SplashViewModel @Inject constructor(
         }
     }
 
-    private fun redeemInvite(input: String) {
+    private fun redeemInvite(input: InviteString) {
         viewModelScope.launch(mainImmediate) {
             networkQueryInvite.redeemInvite(input).collect { loadResponse ->
                 @Exhaustive
