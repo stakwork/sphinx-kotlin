@@ -33,6 +33,7 @@ import chat.sphinx.wrapper_chat.isTribeOwnedByAccount
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_io_utils.InputStreamProvider
+import chat.sphinx.wrapper_meme_server.PublicAttachmentInfo
 import chat.sphinx.wrapper_message_media.MediaType
 import chat.sphinx.wrapper_message_media.toMediaType
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -188,7 +189,7 @@ internal class TribeDetailViewModel @Inject constructor(
 
     fun updateProfileAlias(alias: String?) {
         viewModelScope.launch(mainImmediate) {
-            val response = chatRepository.updateChatProfileAlias(
+            val response = chatRepository.updateChatProfileInfo(
                 getChat().id,
                 alias?.let { ChatAlias(it) }
             )
@@ -233,8 +234,7 @@ internal class TribeDetailViewModel @Inject constructor(
                             )
 
                             try {
-                                val repoResponse = chatRepository.updateChatProfilePic(
-                                    getChat(),
+                                val attachmentInfo = PublicAttachmentInfo(
                                     stream = object : InputStreamProvider() {
                                         override fun newInputStream(): InputStream {
                                             return response.value.value.inputStream()
@@ -243,6 +243,12 @@ internal class TribeDetailViewModel @Inject constructor(
                                     mediaType = mediaType,
                                     fileName = response.value.value.name,
                                     contentLength = response.value.value.length(),
+                                )
+
+                                val repoResponse = chatRepository.updateChatProfileInfo(
+                                    getChat().id,
+                                    null,
+                                    attachmentInfo
                                 )
 
                                 @Exhaustive
@@ -316,8 +322,7 @@ internal class TribeDetailViewModel @Inject constructor(
                                 )
 
                                 viewModelScope.launch(dispatchers.mainImmediate) {
-                                    val repoResponse = chatRepository.updateChatProfilePic(
-                                        getChat(),
+                                    val attachmentInfo = PublicAttachmentInfo(
                                         stream = object : InputStreamProvider() {
                                             var initialStreamUsed: Boolean = false
                                             override fun newInputStream(): InputStream {
@@ -332,6 +337,12 @@ internal class TribeDetailViewModel @Inject constructor(
                                         mediaType = mType,
                                         fileName = "image.$ext",
                                         contentLength = null,
+                                    )
+
+                                    val repoResponse = chatRepository.updateChatProfileInfo(
+                                        getChat().id,
+                                        null,
+                                        attachmentInfo
                                     )
 
                                     @Exhaustive

@@ -63,6 +63,7 @@ import chat.sphinx.wrapper_invite.Invite
 import chat.sphinx.wrapper_io_utils.InputStreamProvider
 import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_lightning.NodeBalanceAll
+import chat.sphinx.wrapper_meme_server.PublicAttachmentInfo
 import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message_media.*
 import chat.sphinx.wrapper_message_media.token.MediaHost
@@ -983,9 +984,32 @@ abstract class SphinxRepository(
         return response
     }
 
-    @Deprecated(message = "Do Not Use. Incorrect method duplication.")
-    override suspend fun updateChatProfilePic(
-        chat: Chat,
+    override suspend fun updateChatProfileInfo(
+        chatId: ChatId,
+        alias: ChatAlias?,
+        profilePic: PublicAttachmentInfo?
+    ): Response<ChatDto, ResponseError> {
+        var response: Response<ChatDto, ResponseError> = Response.Error(
+            ResponseError("updateChatProfileInfo failed to execute")
+        )
+
+        if (alias != null) {
+            response = updateChatProfileAlias(chatId, alias)
+        } else if (profilePic != null) {
+            response = updateChatProfilePic(
+                chatId,
+                profilePic.stream,
+                profilePic.mediaType,
+                profilePic.fileName,
+                profilePic.contentLength
+            )
+        }
+
+        return response
+    }
+
+    suspend fun updateChatProfilePic(
+        chatId: ChatId,
         stream: InputStreamProvider,
         mediaType: MediaType,
         fileName: String,
@@ -1021,7 +1045,7 @@ abstract class SphinxRepository(
                         )
 
                         networkQueryChat.updateChat(
-                            chat.id,
+                            chatId,
                             PutChatDto(
                                 my_photo_url = newUrl.value,
                             )
@@ -1066,7 +1090,7 @@ abstract class SphinxRepository(
         return response
     }
 
-    override suspend fun updateChatProfileAlias(
+    private suspend fun updateChatProfileAlias(
         chatId: ChatId,
         alias: ChatAlias?
     ): Response<ChatDto, ResponseError> {
