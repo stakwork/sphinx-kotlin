@@ -2,8 +2,10 @@ package chat.sphinx.activitymain.navigation.navigators.detail
 
 import chat.sphinx.activitymain.navigation.drivers.DetailNavigationDriver
 import chat.sphinx.activitymain.navigation.drivers.PrimaryNavigationDriver
+import chat.sphinx.create_tribe.navigation.ToCreateTribeDetail
 import chat.sphinx.qr_code.navigation.ToQRCodeDetail
 import chat.sphinx.tribe_detail.navigation.TribeDetailNavigator
+import chat.sphinx.wrapper_common.dashboard.ChatId
 import io.matthewnelson.android_feature_navigation.requests.PopBackStack
 import kotlinx.coroutines.delay
 import javax.inject.Inject
@@ -31,5 +33,9 @@ internal class TribeDetailNavigatorImpl @Inject constructor(
         description: String?,
     ) {
         detailDriver.submitNavigationRequest(ToQRCodeDetail(qrText, viewTitle, description))
+    }
+
+    override suspend fun toCreateTribeScreen(chatId: ChatId) {
+        detailDriver.submitNavigationRequest(ToCreateTribeDetail(chatId))
     }
 }

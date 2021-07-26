@@ -57,6 +57,7 @@ interface ChatRepository {
 
     suspend fun updateTribeInfo(chat: Chat): PodcastDto?
     suspend fun createTribe(createTribe: CreateTribe): Response<Any, ResponseError>
+    suspend fun updateTribe(chatId: ChatId, createTribe: CreateTribe): Response<Any, ResponseError>
     suspend fun exitAndDeleteTribe(chat: Chat): Response<Boolean, ResponseError>
 
     @Deprecated(message = "Do Not Use. Incorrect method duplication.")

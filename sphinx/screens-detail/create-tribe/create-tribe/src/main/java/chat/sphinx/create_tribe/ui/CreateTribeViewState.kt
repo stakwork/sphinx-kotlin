@@ -6,8 +6,13 @@ import java.io.File
 internal sealed class CreateTribeViewState: ViewState<CreateTribeViewState>() {
     object Idle: CreateTribeViewState()
 
-    object CreatingTribe: CreateTribeViewState()
+    object SavingTribe: CreateTribeViewState()
+
     class TribeImageUpdated(
         val imageFile: File
     ): CreateTribeViewState()
+
+    object LoadingExistingTribe: CreateTribeViewState()
+
+    object ExistingTribe: CreateTribeViewState()
 }
