@@ -21,14 +21,13 @@ internal inline val OnBoardFragmentArgs.authorizationToken: AuthorizationToken
 
 internal inline val OnBoardFragmentArgs.inviterData: OnBoardInviterData
     get() = OnBoardInviterData(
-        argNickname,
+        argNickname?.ifEmpty { null },
         argPubkey?.toLightningNodePubKey(),
-        argRouteHint,
-        argMessage,
-        argAction,
-        argPin,
+        argRouteHint?.ifEmpty { null },
+        argMessage?.ifEmpty { null },
+        argAction?.ifEmpty { null },
+        argPin?.ifEmpty { null },
     )
-
 
 class ToOnBoardScreen(
     @IdRes private val popUpToId: Int,

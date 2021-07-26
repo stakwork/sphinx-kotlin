@@ -36,9 +36,9 @@ internal class OnBoardFragment: SideEffectFragment<
         >(R.layout.fragment_on_board)
 {
     private val args: OnBoardFragmentArgs by navArgs()
-    private val relayUrl: RelayUrl = args.relayUrl
-    private val authorizationToken: AuthorizationToken = args.authorizationToken
-    private val inviterData: OnBoardInviterData = args.inviterData
+    private val relayUrl: RelayUrl by lazy(LazyThreadSafetyMode.NONE) { args.relayUrl }
+    private val authorizationToken: AuthorizationToken by lazy(LazyThreadSafetyMode.NONE) { args.authorizationToken }
+    private val inviterData: OnBoardInviterData by lazy(LazyThreadSafetyMode.NONE) { args.inviterData }
 
     override val viewModel: OnBoardViewModel by viewModels()
     override val binding: FragmentOnBoardBinding by viewBinding(FragmentOnBoardBinding::bind)

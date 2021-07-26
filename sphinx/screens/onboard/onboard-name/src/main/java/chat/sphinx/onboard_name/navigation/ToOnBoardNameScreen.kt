@@ -12,12 +12,12 @@ import io.matthewnelson.concept_navigation.NavigationRequest
 
 internal inline val OnBoardNameFragmentArgs.inviterData: OnBoardInviterData
     get() = OnBoardInviterData(
-        argNickname,
+        argNickname?.ifEmpty { null },
         argPubkey?.toLightningNodePubKey(),
-        argRouteHint,
-        argMessage,
-        argAction,
-        argPin,
+        argRouteHint?.ifEmpty { null },
+        argMessage?.ifEmpty { null },
+        argAction?.ifEmpty { null },
+        argPin?.ifEmpty { null },
     )
 
 class ToOnBoardNameScreen(

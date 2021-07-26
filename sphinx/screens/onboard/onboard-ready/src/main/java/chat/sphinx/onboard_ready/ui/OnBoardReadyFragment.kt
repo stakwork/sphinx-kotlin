@@ -38,7 +38,7 @@ internal class OnBoardReadyFragment: SideEffectFragment<
         >(R.layout.fragment_on_board_ready)
 {
     private val args: OnBoardReadyFragmentArgs by navArgs()
-    private val inviterData: OnBoardInviterData = args.inviterData
+    private val inviterData: OnBoardInviterData by lazy(LazyThreadSafetyMode.NONE) { args.inviterData }
 
     override val viewModel: OnBoardReadyViewModel by viewModels()
     override val binding: FragmentOnBoardReadyBinding by viewBinding(FragmentOnBoardReadyBinding::bind)
