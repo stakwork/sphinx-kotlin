@@ -10,6 +10,7 @@ import android.widget.SeekBar
 import android.widget.TextView
 import android.widget.TextView.OnEditorActionListener
 import androidx.activity.OnBackPressedCallback
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.LifecycleOwner
@@ -19,7 +20,8 @@ import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.menu_bottom.ui.MenuBottomViewState
-import chat.sphinx.menu_bottom_profile_pic.BottomMenuProfilePic
+import chat.sphinx.menu_bottom_profile_pic.BottomMenuPicture
+import chat.sphinx.menu_bottom_profile_pic.UpdatingImageViewState
 import chat.sphinx.resources.inputMethodManager
 import chat.sphinx.tribe.BottomMenuTribe
 import chat.sphinx.tribe_detail.R
@@ -29,6 +31,8 @@ import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.visible
+import io.matthewnelson.android_feature_viewmodel.submitSideEffect
+import io.matthewnelson.concept_views.viewstate.collect
 import io.matthewnelson.concept_views.viewstate.value
 import kotlinx.coroutines.launch
 import javax.annotation.meta.Exhaustive
@@ -64,8 +68,8 @@ internal class TribeDetailFragment: SideEffectFragment<
         )
     }
 
-    private val bottomMenuPicture: BottomMenuProfilePic by lazy(LazyThreadSafetyMode.NONE) {
-        BottomMenuProfilePic(
+    private val bottomMenuPicture: BottomMenuPicture by lazy(LazyThreadSafetyMode.NONE) {
+        BottomMenuPicture(
             this,
             onStopSupervisor,
             viewModel
@@ -212,20 +216,7 @@ internal class TribeDetailFragment: SideEffectFragment<
         @Exhaustive
         when(viewState) {
             is TribeDetailViewState.Idle -> { }
-            is TribeDetailViewState.ErrorUpdatingTribeProfilePicture -> {
-                binding.progressBarUploadProfilePicture.gone
 
-                viewModel.pictureMenuHandler.viewStateContainer.updateViewState(
-                    MenuBottomViewState.Closed
-                )
-            }
-            is TribeDetailViewState.UpdatingTribeProfilePicture -> {
-                binding.progressBarUploadProfilePicture.visible
-
-                viewModel.pictureMenuHandler.viewStateContainer.updateViewState(
-                    MenuBottomViewState.Closed
-                )
-            }
             is TribeDetailViewState.TribeProfile -> {
                 binding.apply {
                     // Hide the upload picture progress indicator
@@ -282,6 +273,37 @@ internal class TribeDetailFragment: SideEffectFragment<
                         seekBarSatsPerMinute.max = SLIDER_VALUES.size - 1
                         seekBarSatsPerMinute.progress = index
                         textViewPodcastSatsPerMinuteValue.text = closest.toString()
+                    }
+                }
+            }
+        }
+    }
+
+    override fun subscribeToViewStateFlow() {
+        super.subscribeToViewStateFlow()
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.updatingImageViewStateContainer.collect { viewState ->
+                binding.apply {
+                    @Exhaustive
+                    when (viewState) {
+                        is UpdatingImageViewState.Idle -> {}
+                        is UpdatingImageViewState.UpdatingImage -> {
+                            progressBarUploadProfilePicture.visible
+
+                            imageViewProfilePicture.setImageDrawable(
+                                ContextCompat.getDrawable(
+                                    binding.root.context,
+                                    R.drawable.ic_profile_avatar_circle
+                                )
+                            )
+                        }
+                        is UpdatingImageViewState.UpdatingImageFailed -> {
+                            progressBarUploadProfilePicture.gone
+                        }
+                        is UpdatingImageViewState.UpdatingImageSucceed -> {
+                            progressBarUploadProfilePicture.visible
+                        }
                     }
                 }
             }

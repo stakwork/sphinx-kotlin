@@ -39,7 +39,7 @@ dependencies {
 
     implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt
-    implementation project(path: ':sphinx:application:common:menus:menu-bottom-profile-pic')
+    implementation project(path: ':sphinx:application:common:menus:menu-bottom-picture')
     implementation project(path: ':sphinx:application:common:wrappers:wrapper-message-media')
     implementation project(path: ':sphinx:application:data:concepts:concept-image-loader')
     kapt kaptDeps.google.hilt

@@ -9,19 +9,19 @@ import chat.sphinx.menu_bottom.model.MenuBottomOption
 import chat.sphinx.menu_bottom.ui.BottomMenu
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
 
-class BottomMenuProfilePic(
+class BottomMenuPicture(
     fragment: Fragment,
     onStopSupervisor: OnStopSupervisor,
-    private val profilePicMenuViewModel: PictureMenuViewModel,
+    private val pictureMenuViewModel: PictureMenuViewModel,
 ): BottomMenu(
-    profilePicMenuViewModel.dispatchers,
+    pictureMenuViewModel.dispatchers,
     onStopSupervisor,
-    profilePicMenuViewModel.pictureMenuHandler.viewStateContainer,
+    pictureMenuViewModel.pictureMenuHandler.viewStateContainer,
 ) {
 
     private val contentChooserContract: ActivityResultLauncher<String> =
         fragment.registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-            profilePicMenuViewModel.handleActivityResultUri(uri)
+            pictureMenuViewModel.handleActivityResultUri(uri)
         }
 
     fun initialize(
@@ -37,7 +37,7 @@ class BottomMenuProfilePic(
                         text = R.string.bottom_menu_profile_pic_option_camera,
                         textColor = R.color.primaryBlueFontColor,
                         onClick = {
-                            profilePicMenuViewModel.updatePictureFromCamera()
+                            pictureMenuViewModel.updatePictureFromCamera()
                         }
                     ),
                     MenuBottomOption(

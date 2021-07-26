@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.view.View
 import android.webkit.URLUtil
 import android.widget.ImageView
-import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.viewModels
@@ -19,7 +18,7 @@ import chat.sphinx.create_tribe.databinding.FragmentCreateTribeBinding
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.menu_bottom.ui.MenuBottomViewState
-import chat.sphinx.menu_bottom_profile_pic.BottomMenuProfilePic
+import chat.sphinx.menu_bottom_profile_pic.BottomMenuPicture
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
@@ -40,8 +39,8 @@ internal class CreateTribeFragment: SideEffectFragment<
     override val viewModel: CreateTribeViewModel by viewModels()
     override val binding: FragmentCreateTribeBinding by viewBinding(FragmentCreateTribeBinding::bind)
 
-    private val bottomMenuPicture: BottomMenuProfilePic by lazy(LazyThreadSafetyMode.NONE) {
-        BottomMenuProfilePic(
+    private val bottomMenuPicture: BottomMenuPicture by lazy(LazyThreadSafetyMode.NONE) {
+        BottomMenuPicture(
             this,
             onStopSupervisor,
             viewModel

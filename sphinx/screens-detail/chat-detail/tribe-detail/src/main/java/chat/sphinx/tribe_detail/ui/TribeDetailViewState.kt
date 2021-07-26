@@ -13,8 +13,4 @@ internal sealed class TribeDetailViewState: ViewState<TribeDetailViewState>() {
         val accountOwner: Contact,
         val podcast: Podcast?
     ): TribeDetailViewState()
-
-    object UpdatingTribeProfilePicture: TribeDetailViewState()
-
-    object ErrorUpdatingTribeProfilePicture: TribeDetailViewState()
 }

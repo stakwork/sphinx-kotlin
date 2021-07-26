@@ -21,6 +21,7 @@ import chat.sphinx.logger.e
 import chat.sphinx.menu_bottom.ui.MenuBottomViewState
 import chat.sphinx.menu_bottom_profile_pic.PictureMenuHandler
 import chat.sphinx.menu_bottom_profile_pic.PictureMenuViewModel
+import chat.sphinx.menu_bottom_profile_pic.UpdatingImageViewState
 import chat.sphinx.podcast_player.objects.toPodcast
 import chat.sphinx.tribe.TribeMenuHandler
 import chat.sphinx.tribe.TribeMenuViewModel
@@ -40,6 +41,7 @@ import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
+import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
@@ -72,11 +74,15 @@ internal class TribeDetailViewModel @Inject constructor(
     companion object {
         const val TAG = "TribeDetailViewModel"
     }
-    private var cameraJob: Job? = null
+
     private val args: TribeDetailFragmentArgs by savedStateHandle.navArgs()
 
     val chatId = args.chatId
     val podcast = args.argPodcast?.toPodcast()
+
+    val updatingImageViewStateContainer: ViewStateContainer<UpdatingImageViewState> by lazy {
+        ViewStateContainer(UpdatingImageViewState.Idle)
+    }
 
     private val chatSharedFlow: SharedFlow<Chat?> = flow {
         emitAll(chatRepository.getChatById(chatId))
@@ -196,6 +202,8 @@ internal class TribeDetailViewModel @Inject constructor(
         }
     }
 
+    private var cameraJob: Job? = null
+
     override fun updatePictureFromCamera() {
         if (cameraJob?.isActive == true) {
             return
@@ -212,7 +220,13 @@ internal class TribeDetailViewModel @Inject constructor(
                     @Exhaustive
                     when (response.value) {
                         is CameraResponse.Image -> {
-                            updateViewState(TribeDetailViewState.UpdatingTribeProfilePicture)
+                            pictureMenuHandler.viewStateContainer.updateViewState(
+                                MenuBottomViewState.Closed
+                            )
+
+                            updatingImageViewStateContainer.updateViewState(
+                                UpdatingImageViewState.UpdatingImage
+                            )
 
                             val mediaType = MediaType.Image(
                                 "${MediaType.IMAGE}/${response.value.value.extension}"
@@ -236,15 +250,25 @@ internal class TribeDetailViewModel @Inject constructor(
                                     is Response.Error -> {
                                         LOG.e(TAG, "Error update chat Profile Picture: ", repoResponse.cause.exception)
 
-                                        updateViewState(TribeDetailViewState.ErrorUpdatingTribeProfilePicture)
+                                        updatingImageViewStateContainer.updateViewState(
+                                            UpdatingImageViewState.UpdatingImageFailed
+                                        )
+
                                         submitSideEffect(TribeDetailSideEffect.FailedToUpdateProfilePic)
                                     }
                                     is Response.Success -> {
+                                        updatingImageViewStateContainer.updateViewState(
+                                            UpdatingImageViewState.UpdatingImageSucceed
+                                        )
+
                                         updateChatViewStat()
                                     }
                                 }
                             } catch (e: Exception) {
-                                updateViewState(TribeDetailViewState.ErrorUpdatingTribeProfilePicture)
+                                updatingImageViewStateContainer.updateViewState(
+                                    UpdatingImageViewState.UpdatingImageFailed
+                                )
+
                                 submitSideEffect(TribeDetailSideEffect.FailedToUpdateProfilePic)
 
                                 response.value.value.delete()
@@ -283,8 +307,13 @@ internal class TribeDetailViewModel @Inject constructor(
                             }
 
                             if (stream != null) {
+                                pictureMenuHandler.viewStateContainer.updateViewState(
+                                    MenuBottomViewState.Closed
+                                )
 
-                                updateViewState(TribeDetailViewState.UpdatingTribeProfilePicture)
+                                updatingImageViewStateContainer.updateViewState(
+                                    UpdatingImageViewState.UpdatingImage
+                                )
 
                                 viewModelScope.launch(dispatchers.mainImmediate) {
                                     val repoResponse = chatRepository.updateChatProfilePic(
@@ -314,10 +343,17 @@ internal class TribeDetailViewModel @Inject constructor(
                                                     repoResponse.cause.exception
                                                 )
 
-                                                updateViewState(TribeDetailViewState.ErrorUpdatingTribeProfilePicture)
+                                                updatingImageViewStateContainer.updateViewState(
+                                                    UpdatingImageViewState.UpdatingImageFailed
+                                                )
+
                                                 submitSideEffect(TribeDetailSideEffect.FailedToUpdateProfilePic)
                                             }
                                             is Response.Success -> {
+                                                updatingImageViewStateContainer.updateViewState(
+                                                    UpdatingImageViewState.UpdatingImageSucceed
+                                                )
+
                                                 updateChatViewStat()
                                             }
                                         }

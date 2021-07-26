@@ -20,7 +20,7 @@ import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.insetter_activity.addStatusBarPadding
 import chat.sphinx.menu_bottom.ui.MenuBottomViewState
-import chat.sphinx.menu_bottom_profile_pic.BottomMenuProfilePic
+import chat.sphinx.menu_bottom_profile_pic.BottomMenuPicture
 import chat.sphinx.menu_bottom_profile_pic.UpdatingImageViewState
 import chat.sphinx.profile.R
 import chat.sphinx.profile.databinding.FragmentProfileBinding
@@ -62,8 +62,8 @@ internal class ProfileFragment: SideEffectFragment<
     @Suppress("ProtectedInFinal")
     protected lateinit var profileNavigator: ProfileNavigator
 
-    private val bottomMenuPicture: BottomMenuProfilePic by lazy(LazyThreadSafetyMode.NONE) {
-        BottomMenuProfilePic(
+    private val bottomMenuPicture: BottomMenuPicture by lazy(LazyThreadSafetyMode.NONE) {
+        BottomMenuPicture(
             this,
             onStopSupervisor,
             viewModel
@@ -358,6 +358,13 @@ internal class ProfileFragment: SideEffectFragment<
                         is UpdatingImageViewState.Idle -> {}
                         is UpdatingImageViewState.UpdatingImage -> {
                             layoutConstraintUploadingPicture.visible
+
+                            imageViewProfilePicture.setImageDrawable(
+                                ContextCompat.getDrawable(
+                                    binding.root.context,
+                                    R.drawable.ic_profile_avatar_circle
+                                )
+                            )
                         }
                         is UpdatingImageViewState.UpdatingImageFailed -> {
                             layoutConstraintUploadingPicture.gone
