@@ -174,14 +174,11 @@ internal class SplashViewModel @Inject constructor(
                         )
                     }
                     is RedemptionCode.NodeInvite -> {
-                        withContext(io) {
-                            storeTemporaryInvite()
-                        }
-
-                        generateToken(
+                        registerTokenAndStartOnBoard(
                             ip = code.ip,
                             nodePubKey = null,
-                            password = code.password
+                            password = code.password,
+                            redeemInviteDto = null
                         )
                     }
                 }
@@ -207,12 +204,11 @@ internal class SplashViewModel @Inject constructor(
                     val inviteResponse = loadResponse.value.response
 
                     inviteResponse?.invite?.let { invite ->
-                        storeTemporaryInvite(invite)
-
-                        generateToken(
+                        registerTokenAndStartOnBoard(
                             ip = RelayUrl(inviteResponse.ip),
                             nodePubKey = inviteResponse.pubkey,
                             password = null,
+                            redeemInviteDto = invite,
                         )
                     }
                 }
@@ -220,7 +216,12 @@ internal class SplashViewModel @Inject constructor(
         }
     }
 
-    private suspend fun generateToken(ip: RelayUrl, nodePubKey: String?, password: String?) {
+    private suspend fun registerTokenAndStartOnBoard(
+        ip: RelayUrl,
+        nodePubKey: String?,
+        password: String?,
+        redeemInviteDto: RedeemInviteDto?,
+    ) {
         @OptIn(RawPasswordAccess::class)
         val authToken = AuthorizationToken(
             PasswordGenerator(passwordLength = 20).password.value.joinToString("")
@@ -229,6 +230,7 @@ internal class SplashViewModel @Inject constructor(
         val relayUrl = relayDataHandler.formatRelayUrl(ip)
         torManager.setTorRequired(relayUrl.isOnionAddress)
 
+        storeTemporaryInvite(redeemInviteDto)
         storeToken(authToken.value, relayUrl.value)
 
         networkQueryContact.generateToken(relayUrl, authToken, password, nodePubKey).collect { loadResponse ->
@@ -246,38 +248,39 @@ internal class SplashViewModel @Inject constructor(
         }
     }
 
-    private fun storeTemporaryInvite(invite: RedeemInviteDto? = null) {
+    private suspend fun storeTemporaryInvite(invite: RedeemInviteDto?) {
         // I needed a way to store this to transition between fragments
         // but I wasn't sure what to use besides this
-        app.getSharedPreferences("sphinx_temp_prefs", Context.MODE_PRIVATE).let {
-                sharedPrefs ->
-            sharedPrefs?.edit()?.let { editor ->
-                invite?.let { invite ->
-                    // Signing up with invite code. Inviter is coming from relay
-                    editor
-                        .putString("sphinx_temp_inviter_nickname", invite.nickname)
-                        .putString("sphinx_temp_inviter_pubkey", invite.pubkey)
-                        .putString("sphinx_temp_inviter_route_hint", invite.route_hint)
-                        .putString("sphinx_temp_invite_message", invite.message)
-                        .putString("sphinx_temp_invite_action", invite.action)
-                        .putString("sphinx_temp_invite_string", invite.pin)
-                        .let { editor ->
+        app.getSharedPreferences("sphinx_temp_prefs", Context.MODE_PRIVATE).edit().let { editor ->
+            invite?.let { invite ->
+                // Signing up with invite code. Inviter is coming from relay
+                editor
+                    .putString("sphinx_temp_inviter_nickname", invite.nickname)
+                    .putString("sphinx_temp_inviter_pubkey", invite.pubkey)
+                    .putString("sphinx_temp_inviter_route_hint", invite.route_hint)
+                    .putString("sphinx_temp_invite_message", invite.message)
+                    .putString("sphinx_temp_invite_action", invite.action)
+                    .putString("sphinx_temp_invite_string", invite.pin)
+                    .let { editor ->
+                        withContext(io) {
                             if (!editor.commit()) {
                                 editor.apply()
                             }
                         }
-                } ?: run {
-                    // Signing up relay connection string. Using default inviter
-                    editor
-                        .putString("sphinx_temp_inviter_nickname", "Sphinx Support")
-                        .putString("sphinx_temp_inviter_pubkey", "023d70f2f76d283c6c4e58109ee3a2816eb9d8feb40b23d62469060a2b2867b77f")
-                        .putString("sphinx_temp_invite_message", "Welcome to Sphinx")
-                        .let { editor ->
+                    }
+            } ?: run {
+                // Signing up relay connection string. Using default inviter
+                editor
+                    .putString("sphinx_temp_inviter_nickname", "Sphinx Support")
+                    .putString("sphinx_temp_inviter_pubkey", "023d70f2f76d283c6c4e58109ee3a2816eb9d8feb40b23d62469060a2b2867b77f")
+                    .putString("sphinx_temp_invite_message", "Welcome to Sphinx")
+                    .let { editor ->
+                        withContext(io) {
                             if (!editor.commit()) {
                                 editor.apply()
                             }
                         }
-                }
+                    }
             }
         }
     }
