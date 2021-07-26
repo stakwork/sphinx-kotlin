@@ -1,6 +1,5 @@
 package chat.sphinx.splash.ui
 
-import android.app.Application
 import android.content.Context
 import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
@@ -16,11 +15,15 @@ import chat.sphinx.key_restore.KeyRestore
 import chat.sphinx.key_restore.KeyRestoreResponse
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
+import chat.sphinx.onboard_common.OnBoardStepHandler
+import chat.sphinx.onboard_common.model.OnBoardInviterData
+import chat.sphinx.onboard_common.model.OnBoardStep
 import chat.sphinx.onboard_common.model.RedemptionCode
 import chat.sphinx.scanner_view_model_coordinator.request.ScannerFilter
 import chat.sphinx.scanner_view_model_coordinator.request.ScannerRequest
 import chat.sphinx.scanner_view_model_coordinator.response.ScannerResponse
 import chat.sphinx.splash.navigation.SplashNavigator
+import chat.sphinx.wrapper_common.lightning.toLightningNodePubKey
 import chat.sphinx.wrapper_invite.InviteString
 import chat.sphinx.wrapper_invite.toValidInviteStringOrNull
 import chat.sphinx.wrapper_relay.AuthorizationToken
@@ -41,12 +44,10 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
 internal class SplashViewModel @Inject constructor(
-    private val app: Application,
     private val authenticationCoordinator: AuthenticationCoordinator,
     private val backgroundLoginHandler: BackgroundLoginHandler,
     dispatchers: CoroutineDispatchers,
@@ -55,6 +56,7 @@ internal class SplashViewModel @Inject constructor(
     private val navigator: SplashNavigator,
     private val networkQueryInvite: NetworkQueryInvite,
     private val networkQueryContact: NetworkQueryContact,
+    private val onBoardStepHandler: OnBoardStepHandler,
     private val relayDataHandler: RelayDataHandler,
     private val scannerCoordinator: ViewModelCoordinator<ScannerRequest, ScannerResponse>,
     private val torManager: TorManager,
@@ -80,13 +82,25 @@ internal class SplashViewModel @Inject constructor(
         }
 
         viewModelScope.launch(mainImmediate) {
+            val onBoardStep: OnBoardStep? = onBoardStepHandler.retrieveOnBoardStep()
+
             backgroundLoginHandler.attemptBackgroundLogin(
                 updateLastLoginTimeOnSuccess = true
             )?.let {
-                navigator.toDashboardScreen(
-                    // No need as it was already updated
-                    updateBackgroundLoginTime = false
-                )
+
+                @Exhaustive
+                when (onBoardStep) {
+                    is OnBoardStep.Step1 -> {
+                        navigator.toOnBoardScreen(onBoardStep)
+                    }
+                    null -> {
+                        navigator.toDashboardScreen(
+                            // No need as it was already updated
+                            updateBackgroundLoginTime = false
+                        )
+                    }
+                }
+
             } ?: let {
                 if (authenticationCoordinator.isAnEncryptionKeySet()) {
                     authenticationCoordinator.submitAuthenticationRequest(
@@ -101,17 +115,37 @@ internal class SplashViewModel @Inject constructor(
                                 // User has authenticated
                             }
                             is AuthenticationResponse.Success.Authenticated -> {
-                                navigator.toDashboardScreen(updateBackgroundLoginTime = true)
+
+                                @Exhaustive
+                                when (onBoardStep) {
+                                    is OnBoardStep.Step1 -> {
+                                        navigator.toOnBoardScreen(onBoardStep)
+                                    }
+                                    null -> {
+                                        navigator.toDashboardScreen(updateBackgroundLoginTime = true)
+                                    }
+                                }
                             }
                             is AuthenticationResponse.Success.Key -> {
                                 // will never be returned
                             }
                         }
                     }
+
                 } else {
-                    // Display OnBoard
-                    delay(100L) // need a slight delay for window to fully hand over to splash
-                    updateViewState(SplashViewState.Transition_Set2_ShowWelcome)
+
+                    @Exhaustive
+                    when (onBoardStep) {
+                        is OnBoardStep.Step1 -> {
+                            navigator.toOnBoardScreen(onBoardStep)
+                        }
+                        null -> {
+                            // Display OnBoard
+                            delay(100L) // need a slight delay for window to fully hand over to splash
+                            updateViewState(SplashViewState.Transition_Set2_ShowWelcome)
+                        }
+                    }
+
                 }
             }
         }
@@ -230,8 +264,22 @@ internal class SplashViewModel @Inject constructor(
         val relayUrl = relayDataHandler.formatRelayUrl(ip)
         torManager.setTorRequired(relayUrl.isOnionAddress)
 
-        storeTemporaryInvite(redeemInviteDto)
-        storeToken(authToken.value, relayUrl.value)
+        val inviterData: OnBoardInviterData? = redeemInviteDto?.let { dto ->
+            OnBoardInviterData(
+                dto.nickname,
+                dto.pubkey?.toLightningNodePubKey(),
+                dto.route_hint,
+                dto.message,
+                dto.action,
+                dto.pin
+            )
+        }
+
+        val step1: OnBoardStep.Step1? = onBoardStepHandler.persistOnBoardStep1Data(
+            relayUrl,
+            authToken,
+            inviterData
+        )
 
         networkQueryContact.generateToken(relayUrl, authToken, password, nodePubKey).collect { loadResponse ->
             @Exhaustive
@@ -242,63 +290,15 @@ internal class SplashViewModel @Inject constructor(
                     submitSideEffect(SplashSideEffect.GenerateTokenFailed)
                 }
                 is Response.Success -> {
-                    navigator.toOnBoardScreen()
+
+                    if (step1 == null) {
+                        updateViewState(SplashViewState.HideLoadingWheel)
+                        submitSideEffect(SplashSideEffect.GenerateTokenFailed)
+                    } else {
+                        navigator.toOnBoardScreen(step1)
+                    }
+
                 }
-            }
-        }
-    }
-
-    private suspend fun storeTemporaryInvite(invite: RedeemInviteDto?) {
-        // I needed a way to store this to transition between fragments
-        // but I wasn't sure what to use besides this
-        app.getSharedPreferences("sphinx_temp_prefs", Context.MODE_PRIVATE).edit().let { editor ->
-            invite?.let { invite ->
-                // Signing up with invite code. Inviter is coming from relay
-                editor
-                    .putString("sphinx_temp_inviter_nickname", invite.nickname)
-                    .putString("sphinx_temp_inviter_pubkey", invite.pubkey)
-                    .putString("sphinx_temp_inviter_route_hint", invite.route_hint)
-                    .putString("sphinx_temp_invite_message", invite.message)
-                    .putString("sphinx_temp_invite_action", invite.action)
-                    .putString("sphinx_temp_invite_string", invite.pin)
-                    .let { editor ->
-                        withContext(io) {
-                            if (!editor.commit()) {
-                                editor.apply()
-                            }
-                        }
-                    }
-            } ?: run {
-                // Signing up relay connection string. Using default inviter
-                editor
-                    .putString("sphinx_temp_inviter_nickname", "Sphinx Support")
-                    .putString("sphinx_temp_inviter_pubkey", "023d70f2f76d283c6c4e58109ee3a2816eb9d8feb40b23d62469060a2b2867b77f")
-                    .putString("sphinx_temp_invite_message", "Welcome to Sphinx")
-                    .let { editor ->
-                        withContext(io) {
-                            if (!editor.commit()) {
-                                editor.apply()
-                            }
-                        }
-                    }
-            }
-        }
-    }
-
-    private fun storeToken(token: String, ip: String) {
-        // I needed a way to store this to transition between fragments
-        // but I wasn't sure what to use besides this
-        app.getSharedPreferences("sphinx_temp_prefs", Context.MODE_PRIVATE).let { sharedPrefs ->
-
-            sharedPrefs?.edit()?.let { editor ->
-                editor
-                    .putString("sphinx_temp_ip", ip)
-                    .putString("sphinx_temp_auth_token", token)
-                    .let { editor ->
-                        if (!editor.commit()) {
-                            editor.apply()
-                        }
-                    }
             }
         }
     }

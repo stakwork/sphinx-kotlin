@@ -48,7 +48,7 @@ dependencies {
 
     implementation project(path: ':sphinx:screens:authentication:authentication-resources')
     implementation project(path: ':sphinx:screens:splash:key-restore')
-    implementation project(path: ':sphinx:screens:onboard:onboard-common')
+    api project(path: ':sphinx:screens:onboard:onboard-common')
     implementation project(path: ':sphinx:screens-detail:scanner:scanner-view-model-coordinator')
 
     implementation deps.androidx.lifecycle.hilt

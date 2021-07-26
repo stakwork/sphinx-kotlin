@@ -43,6 +43,7 @@ dependencies {
     implementation project(path: ':sphinx:activity:insetter-activity')
     implementation project(path: ':sphinx:application:common:wrappers:wrapper-relay')
     implementation project(path: ':sphinx:application:data:concepts:concept-relay')
+    api project(path: ':sphinx:screens:onboard:onboard-common')
 
     kapt kaptDeps.google.hilt
 
