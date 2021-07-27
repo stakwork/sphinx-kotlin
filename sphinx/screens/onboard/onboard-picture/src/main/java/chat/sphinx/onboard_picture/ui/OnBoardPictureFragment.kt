@@ -26,6 +26,7 @@ import io.matthewnelson.android_feature_screens.navigation.CloseAppOnBackPress
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.concept_views.viewstate.collect
+import io.matthewnelson.concept_views.viewstate.value
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -66,7 +67,7 @@ internal class OnBoardPictureFragment: SideEffectFragment<
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        CloseAppOnBackPress(view.context)
+        OnBoardPictureBackPressHandler(view.context)
             .enableDoubleTapToClose(viewLifecycleOwner, SphinxToastUtils())
             .addCallback(viewLifecycleOwner, requireActivity())
 
@@ -87,6 +88,16 @@ internal class OnBoardPictureFragment: SideEffectFragment<
 
         binding.buttonOnBoardPictureNext.setOnClickListener {
             viewModel.nextScreen(args.inviterData)
+        }
+    }
+
+    private inner class OnBoardPictureBackPressHandler(context: Context): CloseAppOnBackPress(context) {
+        override fun handleOnBackPressed() {
+            if (viewModel.pictureMenuHandler.viewStateContainer.value is MenuBottomViewState.Open) {
+                viewModel.pictureMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Closed)
+            } else {
+                super.handleOnBackPressed()
+            }
         }
     }
 
