@@ -1,6 +1,8 @@
 package chat.sphinx.concept_network_query_chat.model
 
+import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
+import java.io.File
 
 @JsonClass(generateAdapter = true)
 data class TribeDto(
@@ -24,9 +26,26 @@ data class TribeDto(
 ) {
 
     var amount: Long? = null
-    var myAlias: String? = null
     var host: String? = null
     var uuid: String? = null
+
+    @Json(name = "my_alias")
+    var myAlias: String? = null
+
+    @Json(name = "my_photo_url")
+    var myPhotoUrl: String? = null
+
+    @Transient
+    var profileImgFile: File? = null
+
+    fun setProfileImageFile(img: File?) {
+        this.profileImgFile?.let {
+            try {
+                it.delete()
+            } catch (e: Exception) {}
+        }
+        this.profileImgFile = img
+    }
 
     val hourToStake: Long
         get() = (escrow_millis) / 60 / 60 / 1000

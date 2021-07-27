@@ -6,6 +6,8 @@
     <string name="save">Save</string>
     <string name="add_icon"></string>
 
+    <string name="bottom_menu_tribe_pic_header_text">Tribe Picture</string>
+
     <string name="name_and_description_required">Name and description required</string>
     <string name="failed_to_create_tribe">Failed to create tribe</string>
     <string name="failed_to_update_tribe">Failed to update tribe</string>

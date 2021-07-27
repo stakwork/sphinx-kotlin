@@ -284,7 +284,7 @@ internal class ChatTribeViewModel @Inject constructor(
 
     fun playPausePodcast() {
         podcast?.let { podcast ->
-            podcast.getCurrentEpisode()?.let { currentEpisode ->
+            podcast.getCurrentEpisode().let { currentEpisode ->
                 if (currentEpisode.playing) {
                     pauseEpisode(currentEpisode)
                 } else {

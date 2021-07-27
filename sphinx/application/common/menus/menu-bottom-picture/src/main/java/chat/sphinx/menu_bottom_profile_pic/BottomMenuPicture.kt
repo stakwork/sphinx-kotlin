@@ -1,7 +1,8 @@
-package chat.sphinx.menu_bottom_tribe_pic
+package chat.sphinx.menu_bottom_profile_pic
 
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.StringRes
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.LifecycleOwner
 import chat.sphinx.menu_bottom.databinding.LayoutMenuBottomBinding
@@ -9,34 +10,37 @@ import chat.sphinx.menu_bottom.model.MenuBottomOption
 import chat.sphinx.menu_bottom.ui.BottomMenu
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
 
-class BottomMenuTribePic(
+class BottomMenuPicture(
     fragment: Fragment,
     onStopSupervisor: OnStopSupervisor,
-    private val tribePicMenuViewModel: TribePicMenuViewModel,
+    private val pictureMenuViewModel: PictureMenuViewModel,
 ): BottomMenu(
-    tribePicMenuViewModel.dispatchers,
+    pictureMenuViewModel.pictureMenuHandler,
     onStopSupervisor,
-    tribePicMenuViewModel.tribePicMenuHandler.viewStateContainer,
+    pictureMenuViewModel.pictureMenuHandler.viewStateContainer,
 ) {
 
-    val contentChooserContract: ActivityResultLauncher<String> =
+    private val contentChooserContract: ActivityResultLauncher<String> =
         fragment.registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-            tribePicMenuViewModel.handleActivityResultUri(uri)
+            pictureMenuViewModel.pictureMenuHandler.updatePictureFromPhotoLibrary(uri)
         }
 
     fun initialize(
+        @StringRes
+        headerText: Int,
+
         binding: LayoutMenuBottomBinding,
         lifecycleOwner: LifecycleOwner
     ) {
         super.newBuilder(binding, lifecycleOwner)
-            .setHeaderText(R.string.bottom_menu_profile_pic_header_text)
+            .setHeaderText(headerText)
             .setOptions(
                 setOf(
                     MenuBottomOption(
                         text = R.string.bottom_menu_profile_pic_option_camera,
                         textColor = R.color.primaryBlueFontColor,
                         onClick = {
-                            tribePicMenuViewModel.updateProfilePicCamera()
+                            pictureMenuViewModel.pictureMenuHandler.updatePictureFromCamera()
                         }
                     ),
                     MenuBottomOption(

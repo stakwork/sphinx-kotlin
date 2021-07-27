@@ -16,6 +16,9 @@ import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.join_tribe.R
 import chat.sphinx.join_tribe.databinding.FragmentJoinTribeBinding
+import chat.sphinx.menu_bottom.ui.MenuBottomViewState
+import chat.sphinx.menu_bottom_profile_pic.BottomMenuPicture
+import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_contact.toContactAlias
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
@@ -41,34 +44,65 @@ internal class JoinTribeFragment: SideEffectFragment<
     override val viewModel: JoinTribeViewModel by viewModels()
     override val binding: FragmentJoinTribeBinding by viewBinding(FragmentJoinTribeBinding::bind)
 
+    private val bottomMenuPicture: BottomMenuPicture by lazy(LazyThreadSafetyMode.NONE) {
+        BottomMenuPicture(
+            this,
+            onStopSupervisor,
+            viewModel
+        )
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        (requireActivity() as InsetterActivity).addNavigationBarPadding(binding.layoutScrollViewContent)
+        (requireActivity() as InsetterActivity)
+            .addNavigationBarPadding(binding.layoutScrollViewContent)
+            .addNavigationBarPadding(binding.includeLayoutMenuBottomTribeProfilePic.root)
 
-        binding.includeJoinTribeHeader.apply {
-            textViewDetailScreenHeaderName.text = getString(R.string.join_tribe_header_name)
-            textViewDetailScreenClose.setOnClickListener {
-                lifecycleScope.launch { viewModel.navigator.closeDetailScreen() }
+        binding.apply {
+            includeJoinTribeHeader.apply {
+                textViewDetailScreenHeaderName.text = getString(R.string.join_tribe_header_name)
+                textViewDetailScreenClose.setOnClickListener {
+                    lifecycleScope.launch { viewModel.navigator.closeDetailScreen() }
+                }
             }
-        }
 
-        binding.buttonJoin.setOnClickListener {
-            joinTribe()
+            buttonJoin.setOnClickListener {
+                val aliasString = binding.includeTribeMemberInfo.tribeMemberAliasEditText.text.toString()
+                viewModel.joinTribe(aliasString)
+            }
+
+            includeTribeMemberInfo.apply {
+
+                tribeMemberAliasEditText.setOnFocusChangeListener { _, hasFocus ->
+                    if (hasFocus) {
+                        return@setOnFocusChangeListener
+                    }
+                    //Alias needs to be set on Focus change
+                    //otherwise view is re created when coming back from camera, and alias is lost
+                    persistCustomAlias()
+                }
+
+                buttonProfilePicture.setOnClickListener {
+                    viewModel.pictureMenuHandler.viewStateContainer.updateViewState(
+                        MenuBottomViewState.Open
+                    )
+                }
+            }
+
+            bottomMenuPicture.initialize(
+                R.string.bottom_menu_tribe_profile_pic_header_text,
+                includeLayoutMenuBottomTribeProfilePic,
+                viewLifecycleOwner
+            )
         }
 
         viewModel.loadTribeData()
     }
 
-    override fun onStart() {
-        super.onStart()
-        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-            viewModel.accountOwnerStateFlow.collect { owner ->
-                owner?.alias?.value.let { ownerAlias ->
-                    binding.includeTribeMemberInfo.tribeMemberAliasEditText.setText(ownerAlias.toString())
-                }
-            }
-        }
+    private fun persistCustomAlias() {
+        val aliasString = binding.includeTribeMemberInfo.tribeMemberAliasEditText.text.toString()
+        viewModel.setMyAlias(aliasString)
     }
 
     override suspend fun onViewStateFlowCollect(viewState: JoinTribeViewState) {
@@ -82,6 +116,16 @@ internal class JoinTribeFragment: SideEffectFragment<
             }
             is JoinTribeViewState.TribeLoaded -> {
                 showTribeData(viewState.tribe)
+            }
+            is JoinTribeViewState.TribeProfileImageUpdated -> {
+                binding.includeTribeMemberInfo.apply {
+                    imageLoader.load(
+                        imageViewProfilePicture,
+                        viewState.imageFile,
+                        viewModel.imageLoaderDefaults
+                    )
+                    editTextProfilePictureValue.setText("")
+                }
             }
 
             is JoinTribeViewState.JoiningTribe -> {
@@ -99,6 +143,17 @@ internal class JoinTribeFragment: SideEffectFragment<
 
     private fun showTribeData(tribe: TribeDto) {
         binding.apply {
+
+            val owner = viewModel.accountOwnerStateFlow.value
+
+            binding.includeTribeMemberInfo.apply {
+                val memberAlias = tribe.myAlias ?: owner?.alias?.value
+                tribeMemberAliasEditText.setText(memberAlias)
+
+                val memberPhotoUrl = tribe.myPhotoUrl ?: owner?.photoUrl?.value
+                loadProfileImage(memberPhotoUrl)
+            }
+
             loadTribeImage(tribe)
 
             textViewTribeName.text = tribe.name
@@ -110,11 +165,6 @@ internal class JoinTribeFragment: SideEffectFragment<
 
             loadingTribeInfoContent.goneIfFalse(false)
         }
-    }
-
-    private fun joinTribe() {
-        val aliasString = binding.includeTribeMemberInfo.tribeMemberAliasEditText.text.toString()
-        viewModel.joinTribe(aliasString)
     }
 
     private fun loadTribeImage(tribe: TribeDto) {
@@ -137,6 +187,22 @@ internal class JoinTribeFragment: SideEffectFragment<
                         R.drawable.ic_tribe_placeholder
                     )
                 )
+        }
+    }
+
+    private fun loadProfileImage(photoUrl: String?) {
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            photoUrl?.let {
+                binding.includeTribeMemberInfo.apply {
+                    editTextProfilePictureValue.setText(it)
+
+                    imageLoader.load(
+                        imageViewProfilePicture,
+                        it,
+                        viewModel.imageLoaderDefaults,
+                    )
+                }
+            }
         }
     }
 
