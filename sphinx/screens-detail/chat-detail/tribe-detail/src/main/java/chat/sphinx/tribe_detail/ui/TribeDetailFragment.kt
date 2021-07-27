@@ -284,20 +284,6 @@ internal class TribeDetailFragment: SideEffectFragment<
         super.subscribeToViewStateFlow()
 
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-            viewModel.chatSharedFlow.collect { chat ->
-                if (chat != null) {
-                    viewModel.updateViewState(
-                        TribeDetailViewState.TribeProfile(
-                            chat,
-                            viewModel.getOwner(),
-                            viewModel.podcast
-                        )
-                    )
-                }
-            }
-        }
-
-        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.updatingImageViewStateContainer.collect { viewState ->
                 binding.apply {
                     @Exhaustive

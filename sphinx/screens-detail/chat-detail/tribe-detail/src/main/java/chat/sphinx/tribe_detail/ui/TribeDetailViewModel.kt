@@ -85,13 +85,41 @@ internal class TribeDetailViewModel @Inject constructor(
         ViewStateContainer(UpdatingImageViewState.Idle)
     }
 
-    val chatSharedFlow: SharedFlow<Chat?> = flow {
+    private val chatSharedFlow: SharedFlow<Chat?> = flow {
         emitAll(chatRepository.getChatById(chatId))
     }.distinctUntilChanged().shareIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(2_000),
         replay = 1,
     )
+
+    private inner class TribeDetailViewStateContainer: ViewStateContainer<TribeDetailViewState>(TribeDetailViewState.Idle) {
+        override val viewStateFlow: StateFlow<TribeDetailViewState> by lazy {
+            flow {
+                chatSharedFlow.collect { chat ->
+                    emit(
+                        if (chat != null) {
+                            TribeDetailViewState.TribeProfile(
+                                chat,
+                                getOwner(),
+                                podcast,
+                            )
+                        } else {
+                            TribeDetailViewState.Idle
+                        }
+                    )
+                }
+            }.stateIn(
+                viewModelScope,
+                SharingStarted.WhileSubscribed(5_000),
+                TribeDetailViewState.Idle,
+            )
+        }
+    }
+
+    override val viewStateContainer: ViewStateContainer<TribeDetailViewState> by lazy {
+        TribeDetailViewStateContainer()
+    }
 
     suspend fun getOwner(): Contact {
         return contactRepository.accountOwner.value.let { contact ->
