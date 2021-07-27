@@ -38,6 +38,7 @@ class OnBoardStepHandler @Inject constructor(
         private const val STEP_1 = "STEP_1"
         private const val STEP_2 = "STEP_2"
         private const val STEP_3 = "STEP_3"
+        private const val STEP_4 = "STEP_4"
 
         // Character lengths must stay the same for
         // onboard step retrieval to function properly
@@ -125,6 +126,27 @@ class OnBoardStepHandler @Inject constructor(
         }
     }
 
+    suspend fun persistOnBoardStep4Data(inviterData: OnBoardInviterData): OnBoardStep.Step4? {
+        lock.withLock {
+
+            val step4 = OnBoardStep.Step4(inviterData)
+            val step4Json: String = try {
+                withContext(default) {
+                    moshi
+                        .adapter(Step4Json::class.java)
+                        .toJson(Step4Json(inviterData.toInviteDataJson()))
+                } ?: throw IOException("Failed to convert Step4Json data to String")
+            } catch (e: Exception) {
+                LOG.e(TAG, "Step4 Json Conversion Error", e)
+                return null
+            }
+
+            authenticationStorage.putString(KEY, STEP_4 + step4Json)
+
+            return step4
+        }
+    }
+
     suspend fun finishOnBoardSteps() {
         lock.withLock {
             authenticationStorage.removeString(KEY)
@@ -171,6 +193,19 @@ class OnBoardStepHandler @Inject constructor(
                                     }
                             }
                                 ?: throw IOException("Failed to convert Step3Json string to OnBoardStep3")
+                        }
+                        STEP_4 -> {
+                            withContext(default) {
+                                moshi
+                                    .adapter(Step4Json::class.java)
+                                    .fromJson(stepString.drop(STEP_SIZE))
+                                    ?.invite_data_json
+                                    ?.toOnBoardInviteData()
+                                    ?.let { inviterData ->
+                                        OnBoardStep.Step4(inviterData)
+                                    }
+                            }
+                                ?: throw IOException("Failed to convert Step4Json string to OnBoardStep4")
                         }
                         else -> {
                             null
