@@ -31,10 +31,6 @@ inline fun MessageType.isDirectPayment(): Boolean =
 inline fun MessageType.isAttachment(): Boolean =
     this is MessageType.Attachment
 
-@Suppress("NOTHING_TO_INLINE")
-inline fun MessageType.isPodcastBoost(): Boolean =
-    this is MessageType.Boost
-
 @OptIn(ExperimentalContracts::class)
 @Suppress("NOTHING_TO_INLINE")
 inline fun MessageType.isPurchase(): Boolean {

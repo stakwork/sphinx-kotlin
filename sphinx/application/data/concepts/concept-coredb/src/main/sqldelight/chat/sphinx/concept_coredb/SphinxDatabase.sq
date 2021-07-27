@@ -544,14 +544,17 @@ messageGetAllToShowByChatId:
 SELECT *
 FROM messageDbo
 WHERE chat_id = ?
-AND type IN(0, 2, 3, 5, 6, 14, 15, 25, 29)
---     OR type = 2
---     OR type = 3
---     OR type = 5
---     OR type = 6
---     OR type = 14
---     OR type = 15
---     OR type = 25
+AND (
+    type = 0 OR
+    type = 2 OR
+    type = 3 OR
+    type = 5 OR
+    type = 6 OR
+    type = 14 OR
+    type = 15 OR
+    type = 25 OR
+    (type = 29 AND reply_uuid IS NULL)
+)
 ORDER BY date DESC
 LIMIT 200;
 
