@@ -3,21 +3,25 @@ package chat.sphinx.onboard_picture.ui
 import android.content.Context
 import android.os.Bundle
 import android.view.View
+import android.widget.ImageView
 import androidx.fragment.app.viewModels
-import androidx.navigation.fragment.navArgs
+import androidx.lifecycle.lifecycleScope
 import app.cash.exhaustive.Exhaustive
 import by.kirich1409.viewbindingdelegate.viewBinding
+import chat.sphinx.concept_image_loader.ImageLoader
+import chat.sphinx.concept_image_loader.ImageLoaderOptions
+import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.insetter_activity.addStatusBarPadding
-import chat.sphinx.onboard_common.model.OnBoardInviterData
 import chat.sphinx.onboard_picture.R
 import chat.sphinx.onboard_picture.databinding.FragmentOnBoardPictureBinding
-import chat.sphinx.onboard_picture.navigation.inviterData
 import chat.sphinx.resources.SphinxToastUtils
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.navigation.CloseAppOnBackPress
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
 internal class OnBoardPictureFragment: SideEffectFragment<
@@ -28,8 +32,13 @@ internal class OnBoardPictureFragment: SideEffectFragment<
         FragmentOnBoardPictureBinding
         >(R.layout.fragment_on_board_picture)
 {
-    private val args: OnBoardPictureFragmentArgs by navArgs()
-    private val inviterData: OnBoardInviterData by lazy(LazyThreadSafetyMode.NONE) { args.inviterData }
+    @Inject
+    @Suppress("ProtectedInFinal")
+    protected lateinit var imageLoader: ImageLoader<ImageView>
+    private val options: ImageLoaderOptions = ImageLoaderOptions.Builder()
+        .transformation(Transformation.CircleCrop)
+        .build()
+
     override val viewModel: OnBoardPictureViewModel by viewModels()
     override val binding: FragmentOnBoardPictureBinding by viewBinding(FragmentOnBoardPictureBinding::bind)
 
@@ -52,7 +61,13 @@ internal class OnBoardPictureFragment: SideEffectFragment<
     override suspend fun onViewStateFlowCollect(viewState: OnBoardPictureViewState) {
         @Exhaustive
         when (viewState) {
-            OnBoardPictureViewState.Idle -> {}
+            is OnBoardPictureViewState.Idle -> {}
+            is OnBoardPictureViewState.UserInfo -> {
+                viewState.url?.let { url ->
+                    imageLoader.load(binding.userProfilePicture, url.value, options)
+                }
+                binding.textViewOnBoardPictureName.text = viewState.name?.value ?: ""
+            }
         }
     }
 }
