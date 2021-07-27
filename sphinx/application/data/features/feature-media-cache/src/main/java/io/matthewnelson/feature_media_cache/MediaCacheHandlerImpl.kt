@@ -85,7 +85,7 @@ class MediaCacheHandlerImpl(
     }
 
     @Suppress("BlockingMethodInNonBlockingContext")
-    fun copyToImpl(from: Source, to: BufferedSink): Job {
+    private fun copyToImpl(from: Source, to: BufferedSink): Job {
         return applicationScope.launch(io) {
             from.use {
                 to.writeAll(it)
@@ -93,6 +93,15 @@ class MediaCacheHandlerImpl(
                     to.close()
                 } catch (e: Exception) {}
             }
+        }
+    }
+
+    override fun retrieveImageFromCacheByName(fileName: String): File? {
+        val potentialFile = File(imageCache, fileName)
+        return if (potentialFile.exists()) {
+            potentialFile
+        } else {
+            null
         }
     }
 }
