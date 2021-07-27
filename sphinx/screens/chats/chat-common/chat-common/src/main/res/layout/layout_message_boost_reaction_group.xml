@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
-    android:layout_height="@dimen/message_type_boost_height">
+    android:layout_height="@dimen/message_boost_height">
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline_boost_reaction_images"
@@ -45,8 +45,8 @@
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/text_view_boost_reaction_count"
         android:layout_width="0dp"
-        android:layout_height="@dimen/message_type_boost_height"
-        android:layout_marginStart="@dimen/message_type_boost_height"
+        android:layout_height="@dimen/message_boost_height"
+        android:layout_marginStart="@dimen/message_boost_height"
         android:gravity="center_vertical"
         android:paddingStart="4dp"
         android:textColor="@color/secondaryTextSent"

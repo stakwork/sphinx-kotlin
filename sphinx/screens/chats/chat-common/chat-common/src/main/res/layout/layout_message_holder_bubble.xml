@@ -77,6 +77,12 @@
             layout="@layout/layout_message_type_invoice"
             tools:visibility="gone" />
 
+        <!--  Podcast boost  -->
+        <include
+            android:id="@+id/include_message_type_podcast_boost"
+            layout="@layout/layout_message_type_podcast_boost"
+            tools:visibility="gone" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 
@@ -160,7 +166,7 @@
         <!-- Boost Details -->
         <include
             android:id="@+id/include_message_type_boost"
-            layout="@layout/layout_message_type_boost"
+            layout="@layout/layout_message_boost"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:layout_constraintBottom_toBottomOf="parent"

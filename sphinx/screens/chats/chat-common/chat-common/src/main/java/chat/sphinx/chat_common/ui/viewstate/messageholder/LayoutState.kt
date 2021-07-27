@@ -80,6 +80,10 @@ internal sealed class LayoutState private constructor() {
                 val media: MessageMedia?,
             ): ContainerSecond()
 
+            data class PodcastBoost(
+                val amount: Sat,
+            ): ContainerSecond()
+
             // FileAttachment
             // AudioAttachment
             // VideoAttachment
