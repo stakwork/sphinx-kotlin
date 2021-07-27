@@ -16,7 +16,6 @@ import chat.sphinx.onboard_ready.navigation.OnBoardReadyNavigator
 import chat.sphinx.wrapper_chat.ChatHost
 import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
-import chat.sphinx.wrapper_common.lightning.LightningRouteHint
 import chat.sphinx.wrapper_common.lightning.toLightningRouteHint
 import chat.sphinx.wrapper_common.tribe.toTribeJoinLink
 import chat.sphinx.wrapper_contact.ContactAlias
@@ -35,11 +34,14 @@ import javax.inject.Inject
 internal class OnBoardReadyViewModel @Inject constructor(
     dispatchers: CoroutineDispatchers,
     private val navigator: OnBoardReadyNavigator,
+
     private val contactRepository: ContactRepository,
     private val lightningRepository: LightningRepository,
     private val chatRepository: ChatRepository,
+
     private val networkQueryChat: NetworkQueryChat,
     private val networkQueryInvite: NetworkQueryInvite,
+
     private val onBoardStepHandler: OnBoardStepHandler,
 ): SideEffectViewModel<
         Context,

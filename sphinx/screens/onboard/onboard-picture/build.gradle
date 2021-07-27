@@ -1,4 +1,5 @@
 plugins {
+    id 'app.cash.exhaustive'
     id 'com.android.library'
     id 'dagger.hilt.android.plugin'
     id 'androidx.navigation.safeargs'
@@ -31,21 +32,18 @@ android {
 
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
+
     // KotlinAndroid
     implementation project(path: ':android:features:android-feature-screens')
-    implementation project(path: ':kotlin:concepts:authentication:concept-authentication')
-    implementation project(path: ':kotlin:encoders:base64')
-
-    implementation deps.androidx.lifecycle.hilt
-    implementation deps.google.hilt
 
     // Sphinx
     implementation project(path: ':sphinx:activity:insetter-activity')
-    implementation project(path: ':sphinx:application:common:wrappers:wrapper-relay')
-    implementation project(path: ':sphinx:application:data:concepts:concept-relay')
+    implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-contact')
     api project(path: ':sphinx:screens:onboard:onboard-common')
     api project(path: ':sphinx:screens:onboard:onboard-resources')
 
+    implementation deps.androidx.lifecycle.hilt
+    implementation deps.google.hilt
     kapt kaptDeps.google.hilt
 
     testImplementation testDeps.junit

@@ -36,13 +36,12 @@ dependencies {
     // KotlinAndroid
     implementation project(path: ':android:features:android-feature-screens')
     implementation project(path: ':kotlin:concepts:authentication:concept-authentication')
-    implementation project(path: ':kotlin:encoders:base64')
 
     // Sphinx
-    implementation project(path: ':sphinx:application:common:resources')
     implementation project(path: ':sphinx:activity:insetter-activity')
     implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-contact')
     api project(path: ':sphinx:screens:onboard:onboard-common')
+    api project(path: ':sphinx:screens:onboard:onboard-resources')
 
     implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt

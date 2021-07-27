@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="side_effect_get_contacts_failed">Failed to retrieve main contact</string>
-    <string name="side_effect_update_owner_failed">Failed to update main contact</string>
-
-    <string name="sign_up_next_button">Next</string>
-    <string name="sign_up_name_edit_text_hint">Set Your Name</string>
-    <string name="sign_up_name_text_view">Your Name</string>
-</resources>
