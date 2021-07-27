@@ -114,6 +114,7 @@ internal class TribeDetailViewModel @Inject constructor(
         }
     }
 
+    @Deprecated(message = "Calling this multiple times leads to multiple collections of the chat that never stop as the viewmodel persists even after the screen stops displaying data. this should never be a thing and all observing (collecting) should be done from the view utilizing onStopSupervisor so that they end when the view has stopped and pick back up when the user returns to the application")
     private suspend fun updateChatViewStat() {
         chatRepository.getChatById(chatId).collect { chat ->
             chat?.let {
@@ -127,6 +128,7 @@ internal class TribeDetailViewModel @Inject constructor(
             }
         }
     }
+
     private suspend fun getChat(): Chat {
         chatSharedFlow.replayCache.firstOrNull()?.let { chat ->
             return chat
@@ -169,7 +171,63 @@ internal class TribeDetailViewModel @Inject constructor(
     }
 
     override val pictureMenuHandler: PictureMenuHandler by lazy {
-        PictureMenuHandler()
+        PictureMenuHandler(
+            app = app,
+            cameraCoordinator = cameraCoordinator,
+            dispatchers = this,
+            viewModel = this,
+            callback = { streamProvider, mediaType, fileName, contentLength, deleteFileWhenDone ->
+                updatingImageViewStateContainer.updateViewState(
+                    UpdatingImageViewState.UpdatingImage
+                )
+
+                viewModelScope.launch(mainImmediate) {
+                    try {
+                        val attachmentInfo = PublicAttachmentInfo(
+                            stream = streamProvider,
+                            mediaType = mediaType,
+                            fileName = fileName,
+                            contentLength = contentLength
+                        )
+
+                        val response = chatRepository.updateChatProfileInfo(
+                            chatId = ChatId(args.argChatId),
+                            alias = null,
+                            attachmentInfo,
+                        )
+
+                        @Exhaustive
+                        when (response) {
+                            is Response.Error -> {
+                                LOG.e(TAG, "Error update chat Profile Picture: ", response.cause.exception)
+
+                                updatingImageViewStateContainer.updateViewState(
+                                    UpdatingImageViewState.UpdatingImageFailed
+                                )
+
+                                submitSideEffect(TribeDetailSideEffect.FailedToUpdateProfilePic)
+                            }
+                            is Response.Success -> {
+                                updatingImageViewStateContainer.updateViewState(
+                                    UpdatingImageViewState.UpdatingImageSucceed
+                                )
+
+                                // TODO: REMOVE!!!!!!!!
+                                updateChatViewStat()
+                            }
+                        }
+                    } catch (e: Exception) {
+                        updatingImageViewStateContainer.updateViewState(
+                            UpdatingImageViewState.UpdatingImageFailed
+                        )
+
+                        submitSideEffect(TribeDetailSideEffect.FailedToUpdateProfilePic)
+                    }
+
+                    deleteFileWhenDone?.invoke()
+                }
+            }
+        )
     }
 
     fun updateSatsPerMinute(sats: Long) {
@@ -190,7 +248,7 @@ internal class TribeDetailViewModel @Inject constructor(
     fun updateProfileAlias(alias: String?) {
         viewModelScope.launch(mainImmediate) {
             val response = chatRepository.updateChatProfileInfo(
-                getChat().id,
+                ChatId(args.argChatId),
                 alias?.let { ChatAlias(it) }
             )
 
@@ -198,187 +256,6 @@ internal class TribeDetailViewModel @Inject constructor(
                 is Response.Success -> {}
                 is Response.Error -> {
                     submitSideEffect(TribeDetailSideEffect.FailedToUpdateProfileAlias)
-                }
-            }
-        }
-    }
-
-    private var cameraJob: Job? = null
-
-    override fun updatePictureFromCamera() {
-        if (cameraJob?.isActive == true) {
-            return
-        }
-
-        cameraJob = viewModelScope.launch(dispatchers.mainImmediate) {
-            val response = cameraCoordinator.submitRequest(CameraRequest)
-
-            @Exhaustive
-            when (response) {
-                is Response.Error -> {}
-                is Response.Success -> {
-
-                    @Exhaustive
-                    when (response.value) {
-                        is CameraResponse.Image -> {
-                            pictureMenuHandler.viewStateContainer.updateViewState(
-                                MenuBottomViewState.Closed
-                            )
-
-                            updatingImageViewStateContainer.updateViewState(
-                                UpdatingImageViewState.UpdatingImage
-                            )
-
-                            val mediaType = MediaType.Image(
-                                "${MediaType.IMAGE}/${response.value.value.extension}"
-                            )
-
-                            try {
-                                val attachmentInfo = PublicAttachmentInfo(
-                                    stream = object : InputStreamProvider() {
-                                        override fun newInputStream(): InputStream {
-                                            return response.value.value.inputStream()
-                                        }
-                                    },
-                                    mediaType = mediaType,
-                                    fileName = response.value.value.name,
-                                    contentLength = response.value.value.length(),
-                                )
-
-                                val repoResponse = chatRepository.updateChatProfileInfo(
-                                    getChat().id,
-                                    null,
-                                    attachmentInfo
-                                )
-
-                                @Exhaustive
-                                when (repoResponse) {
-                                    is Response.Error -> {
-                                        LOG.e(TAG, "Error update chat Profile Picture: ", repoResponse.cause.exception)
-
-                                        updatingImageViewStateContainer.updateViewState(
-                                            UpdatingImageViewState.UpdatingImageFailed
-                                        )
-
-                                        submitSideEffect(TribeDetailSideEffect.FailedToUpdateProfilePic)
-                                    }
-                                    is Response.Success -> {
-                                        updatingImageViewStateContainer.updateViewState(
-                                            UpdatingImageViewState.UpdatingImageSucceed
-                                        )
-
-                                        updateChatViewStat()
-                                    }
-                                }
-                            } catch (e: Exception) {
-                                updatingImageViewStateContainer.updateViewState(
-                                    UpdatingImageViewState.UpdatingImageFailed
-                                )
-
-                                submitSideEffect(TribeDetailSideEffect.FailedToUpdateProfilePic)
-
-                                response.value.value.delete()
-                            }
-                        }
-                        else -> {}
-                    }
-                }
-                else -> {}
-            }
-        }
-    }
-
-
-    override fun handleActivityResultUri(uri: Uri?) {
-        if (uri == null) {
-            return
-        }
-
-        val cr = app.contentResolver
-
-        cr.getType(uri)?.let { crType ->
-
-            MimeTypeMap.getSingleton().getExtensionFromMimeType(crType)?.let { ext ->
-
-                crType.toMediaType().let { mType ->
-
-                    @Exhaustive
-                    when (mType) {
-                        is MediaType.Image -> {
-                            val stream: InputStream? = try {
-                                cr.openInputStream(uri)
-                            } catch (e: Exception) {
-                                // TODO: Handle Error
-                                null
-                            }
-
-                            if (stream != null) {
-                                pictureMenuHandler.viewStateContainer.updateViewState(
-                                    MenuBottomViewState.Closed
-                                )
-
-                                updatingImageViewStateContainer.updateViewState(
-                                    UpdatingImageViewState.UpdatingImage
-                                )
-
-                                viewModelScope.launch(dispatchers.mainImmediate) {
-                                    val attachmentInfo = PublicAttachmentInfo(
-                                        stream = object : InputStreamProvider() {
-                                            var initialStreamUsed: Boolean = false
-                                            override fun newInputStream(): InputStream {
-                                                return if (!initialStreamUsed) {
-                                                    initialStreamUsed = true
-                                                    stream
-                                                } else {
-                                                    cr.openInputStream(uri)!!
-                                                }
-                                            }
-                                        },
-                                        mediaType = mType,
-                                        fileName = "image.$ext",
-                                        contentLength = null,
-                                    )
-
-                                    val repoResponse = chatRepository.updateChatProfileInfo(
-                                        getChat().id,
-                                        null,
-                                        attachmentInfo
-                                    )
-
-                                    @Exhaustive
-                                    when (repoResponse) {
-                                        is Response.Error -> {
-                                                LOG.e(
-                                                    TAG,
-                                                    "Error update chat Profile Picture: ",
-                                                    repoResponse.cause.exception
-                                                )
-
-                                                updatingImageViewStateContainer.updateViewState(
-                                                    UpdatingImageViewState.UpdatingImageFailed
-                                                )
-
-                                                submitSideEffect(TribeDetailSideEffect.FailedToUpdateProfilePic)
-                                            }
-                                            is Response.Success -> {
-                                                updatingImageViewStateContainer.updateViewState(
-                                                    UpdatingImageViewState.UpdatingImageSucceed
-                                                )
-
-                                                updateChatViewStat()
-                                            }
-                                        }
-                                }
-                            }
-                        }
-                        is MediaType.Audio,
-                        is MediaType.Pdf,
-                        is MediaType.Text,
-                        is MediaType.Unknown,
-                        is MediaType.Video -> {
-                            // do nothing
-                        }
-                    }
                 }
             }
         }
