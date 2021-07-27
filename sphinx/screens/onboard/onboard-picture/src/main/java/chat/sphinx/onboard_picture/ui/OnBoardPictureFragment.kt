@@ -7,6 +7,9 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.navArgs
 import app.cash.exhaustive.Exhaustive
 import by.kirich1409.viewbindingdelegate.viewBinding
+import chat.sphinx.insetter_activity.InsetterActivity
+import chat.sphinx.insetter_activity.addNavigationBarPadding
+import chat.sphinx.insetter_activity.addStatusBarPadding
 import chat.sphinx.onboard_common.model.OnBoardInviterData
 import chat.sphinx.onboard_picture.R
 import chat.sphinx.onboard_picture.databinding.FragmentOnBoardPictureBinding
@@ -36,6 +39,10 @@ internal class OnBoardPictureFragment: SideEffectFragment<
         CloseAppOnBackPress(view.context)
             .enableDoubleTapToClose(viewLifecycleOwner, SphinxToastUtils())
             .addCallback(viewLifecycleOwner, requireActivity())
+
+        (requireActivity() as InsetterActivity)
+            .addNavigationBarPadding(binding.root)
+            .addStatusBarPadding(binding.root)
     }
 
     override suspend fun onSideEffectCollect(sideEffect: OnBoardPictureSideEffect) {
