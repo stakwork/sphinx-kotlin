@@ -18,6 +18,7 @@ import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import chat.sphinx.onboard_picture.navigation.OnBoardPictureNavigator
 import io.matthewnelson.android_feature_navigation.util.navArgs
+import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
@@ -35,8 +36,8 @@ internal class OnBoardPictureViewModel @Inject constructor(
 ) : SideEffectViewModel<
         Context,
         OnBoardPictureSideEffect,
-        OnBoardPictureViewState
-        >(dispatchers, OnBoardPictureViewState.Idle),
+        OnBoardPictureProgressBarViewState
+        >(dispatchers, OnBoardPictureProgressBarViewState(showProgressBar = false)),
     PictureMenuViewModel
 {
     val args: OnBoardPictureFragmentArgs by handle.navArgs()
@@ -67,7 +68,7 @@ internal class OnBoardPictureViewModel @Inject constructor(
             dispatchers = this,
             viewModel = this,
             callback = { streamProvider, mediaType, fileName, contentLength, file ->
-                // TODO: Show Progress Bar
+                updateViewState(OnBoardPictureProgressBarViewState(showProgressBar = true))
 
                 viewModelScope.launch(mainImmediate) {
                     refreshJob?.join()
@@ -87,7 +88,7 @@ internal class OnBoardPictureViewModel @Inject constructor(
                         is Response.Success -> {}
                     }
 
-                    // TODO: Hide Progress Bar
+                    updateViewState(OnBoardPictureProgressBarViewState(showProgressBar = true))
 
                     try {
                         file?.delete()
@@ -117,7 +118,7 @@ internal class OnBoardPictureViewModel @Inject constructor(
         }
     }
 
-    override val viewStateContainer: ViewStateContainer<OnBoardPictureViewState> by lazy {
+    val userInfoViewStateContainer: ViewStateContainer<OnBoardPictureViewState> by lazy {
         OwnerViewStateContainer()
     }
 }
