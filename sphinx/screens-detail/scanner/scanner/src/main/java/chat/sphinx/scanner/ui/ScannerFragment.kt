@@ -103,7 +103,7 @@ internal class ScannerFragment: SideEffectFragment<
         binding.buttonScannerSave.setOnClickListener {
             val input = binding.codeEditText.text?.toString()
             if (input != null && input.isNotEmpty()) {
-                viewModel.processResponse(ScannerResponse(input))
+                viewModel.processResponse(ScannerResponse(input.trim()))
             }
         }
     }
@@ -176,7 +176,7 @@ internal class ScannerFragment: SideEffectFragment<
             return
         }
 
-        viewModel.processResponse(ScannerResponse(code))
+        viewModel.processResponse(ScannerResponse(code.trim()))
     }
 
     class QRAnalyzer(private val barcodeListener: BarcodeListener) : ImageAnalysis.Analyzer {

@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.view.View
 import android.webkit.URLUtil
 import android.widget.ImageView
-import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.viewModels
@@ -19,7 +18,7 @@ import chat.sphinx.create_tribe.databinding.FragmentCreateTribeBinding
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.menu_bottom.ui.MenuBottomViewState
-import chat.sphinx.menu_bottom_tribe_pic.BottomMenuTribePic
+import chat.sphinx.menu_bottom_profile_pic.BottomMenuPicture
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
@@ -40,8 +39,8 @@ internal class CreateTribeFragment: SideEffectFragment<
     override val viewModel: CreateTribeViewModel by viewModels()
     override val binding: FragmentCreateTribeBinding by viewBinding(FragmentCreateTribeBinding::bind)
 
-    private val bottomMenuProfilePic: BottomMenuTribePic by lazy(LazyThreadSafetyMode.NONE) {
-        BottomMenuTribePic(
+    private val bottomMenuPicture: BottomMenuPicture by lazy(LazyThreadSafetyMode.NONE) {
+        BottomMenuPicture(
             this,
             onStopSupervisor,
             viewModel
@@ -68,7 +67,11 @@ internal class CreateTribeFragment: SideEffectFragment<
         setupFragmentLayout()
         setupCreateTribe()
 
-        bottomMenuProfilePic.initialize(binding.includeLayoutMenuBottomTribePic, viewLifecycleOwner)
+        bottomMenuPicture.initialize(
+            R.string.bottom_menu_tribe_pic_header_text,
+            binding.includeLayoutMenuBottomTribePic,
+            viewLifecycleOwner
+        )
     }
 
     fun setupFragmentLayout() {
@@ -103,7 +106,7 @@ internal class CreateTribeFragment: SideEffectFragment<
                 }
             }
             constraintLayoutTribeImageContainer.setOnClickListener {
-                viewModel.tribePicMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Open)
+                viewModel.pictureMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Open)
             }
             editTextTribeDescription.addTextChangedListener {
                 viewModel.createTribeBuilder.setDescription(it.toString())

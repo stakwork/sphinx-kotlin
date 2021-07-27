@@ -19,8 +19,9 @@ import chat.sphinx.kotlin_response.Response
 import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.logger.e
 import chat.sphinx.menu_bottom.ui.MenuBottomViewState
-import chat.sphinx.menu_bottom_tribe_profile_pic.TribeProfilePicMenuHandler
-import chat.sphinx.menu_bottom_tribe_profile_pic.TribeProfilePicMenuViewModel
+import chat.sphinx.menu_bottom_profile_pic.PictureMenuHandler
+import chat.sphinx.menu_bottom_profile_pic.PictureMenuViewModel
+import chat.sphinx.menu_bottom_profile_pic.UpdatingImageViewState
 import chat.sphinx.podcast_player.objects.toPodcast
 import chat.sphinx.tribe.TribeMenuHandler
 import chat.sphinx.tribe.TribeMenuViewModel
@@ -28,11 +29,11 @@ import chat.sphinx.tribe_detail.R
 import chat.sphinx.tribe_detail.navigation.TribeDetailNavigator
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.ChatAlias
-import chat.sphinx.wrapper_chat.ChatMetaData
 import chat.sphinx.wrapper_chat.isTribeOwnedByAccount
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_io_utils.InputStreamProvider
+import chat.sphinx.wrapper_meme_server.PublicAttachmentInfo
 import chat.sphinx.wrapper_message_media.MediaType
 import chat.sphinx.wrapper_message_media.toMediaType
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -41,12 +42,11 @@ import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
-import io.matthewnelson.concept_media_cache.MediaCacheHandler
+import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import java.io.File
 import java.io.InputStream
 import javax.annotation.meta.Exhaustive
 import javax.inject.Inject
@@ -62,7 +62,6 @@ internal class TribeDetailViewModel @Inject constructor(
     private val chatRepository: ChatRepository,
     private val cameraCoordinator: ViewModelCoordinator<CameraRequest, CameraResponse>,
     private val contactRepository: ContactRepository,
-    private val mediaCacheHandler: MediaCacheHandler,
     private val mediaPlayerServiceController: MediaPlayerServiceController,
     val navigator: TribeDetailNavigator,
     val LOG: SphinxLogger,
@@ -71,16 +70,20 @@ internal class TribeDetailViewModel @Inject constructor(
         TribeDetailSideEffect,
         TribeDetailViewState>(dispatchers, TribeDetailViewState.Idle),
     TribeMenuViewModel,
-    TribeProfilePicMenuViewModel
+    PictureMenuViewModel
 {
     companion object {
         const val TAG = "TribeDetailViewModel"
     }
-    private var cameraJob: Job? = null
+
     private val args: TribeDetailFragmentArgs by savedStateHandle.navArgs()
 
     val chatId = args.chatId
     val podcast = args.argPodcast?.toPodcast()
+
+    val updatingImageViewStateContainer: ViewStateContainer<UpdatingImageViewState> by lazy {
+        ViewStateContainer(UpdatingImageViewState.Idle)
+    }
 
     private val chatSharedFlow: SharedFlow<Chat?> = flow {
         emitAll(chatRepository.getChatById(chatId))
@@ -90,7 +93,35 @@ internal class TribeDetailViewModel @Inject constructor(
         replay = 1,
     )
 
-    private suspend fun getOwner(): Contact {
+    private inner class TribeDetailViewStateContainer: ViewStateContainer<TribeDetailViewState>(TribeDetailViewState.Idle) {
+        override val viewStateFlow: StateFlow<TribeDetailViewState> by lazy {
+            flow {
+                chatSharedFlow.collect { chat ->
+                    emit(
+                        if (chat != null) {
+                            TribeDetailViewState.TribeProfile(
+                                chat,
+                                getOwner(),
+                                podcast,
+                            )
+                        } else {
+                            TribeDetailViewState.Idle
+                        }
+                    )
+                }
+            }.stateIn(
+                viewModelScope,
+                SharingStarted.WhileSubscribed(5_000),
+                TribeDetailViewState.Idle,
+            )
+        }
+    }
+
+    override val viewStateContainer: ViewStateContainer<TribeDetailViewState> by lazy {
+        TribeDetailViewStateContainer()
+    }
+
+    suspend fun getOwner(): Contact {
         return contactRepository.accountOwner.value.let { contact ->
             if (contact != null) {
                 contact
@@ -111,19 +142,6 @@ internal class TribeDetailViewModel @Inject constructor(
         }
     }
 
-    private suspend fun updateChatViewStat() {
-        chatRepository.getChatById(chatId).collect { chat ->
-            chat?.let {
-                updateViewState(
-                    TribeDetailViewState.TribeProfile(
-                        it,
-                        getOwner(),
-                        podcast
-                    )
-                )
-            }
-        }
-    }
     private suspend fun getChat(): Chat {
         chatSharedFlow.replayCache.firstOrNull()?.let { chat ->
             return chat
@@ -148,12 +166,6 @@ internal class TribeDetailViewModel @Inject constructor(
         return chat!!
     }
 
-    fun load() {
-        viewModelScope.launch(mainImmediate) {
-            updateViewState(TribeDetailViewState.TribeProfile(getChat(), getOwner(), podcast))
-        }
-    }
-
     val imageLoaderDefaults by lazy {
         ImageLoaderOptions.Builder()
             .placeholderResId(R.drawable.ic_profile_avatar_circle)
@@ -165,8 +177,63 @@ internal class TribeDetailViewModel @Inject constructor(
         TribeMenuHandler()
     }
 
-    override val tribeProfilePicMenuHandler: TribeProfilePicMenuHandler by lazy {
-        TribeProfilePicMenuHandler()
+    override val pictureMenuHandler: PictureMenuHandler by lazy {
+        PictureMenuHandler(
+            app = app,
+            cameraCoordinator = cameraCoordinator,
+            dispatchers = this,
+            viewModel = this,
+            callback = { streamProvider, mediaType, fileName, contentLength, file ->
+                updatingImageViewStateContainer.updateViewState(
+                    UpdatingImageViewState.UpdatingImage
+                )
+
+                viewModelScope.launch(mainImmediate) {
+                    try {
+                        val attachmentInfo = PublicAttachmentInfo(
+                            stream = streamProvider,
+                            mediaType = mediaType,
+                            fileName = fileName,
+                            contentLength = contentLength
+                        )
+
+                        val response = chatRepository.updateChatProfileInfo(
+                            chatId = ChatId(args.argChatId),
+                            alias = null,
+                            attachmentInfo,
+                        )
+
+                        @Exhaustive
+                        when (response) {
+                            is Response.Error -> {
+                                LOG.e(TAG, "Error update chat Profile Picture: ", response.cause.exception)
+
+                                updatingImageViewStateContainer.updateViewState(
+                                    UpdatingImageViewState.UpdatingImageFailed
+                                )
+
+                                submitSideEffect(TribeDetailSideEffect.FailedToUpdateProfilePic)
+                            }
+                            is Response.Success -> {
+                                updatingImageViewStateContainer.updateViewState(
+                                    UpdatingImageViewState.UpdatingImageSucceed
+                                )
+                            }
+                        }
+                    } catch (e: Exception) {
+                        updatingImageViewStateContainer.updateViewState(
+                            UpdatingImageViewState.UpdatingImageFailed
+                        )
+
+                        submitSideEffect(TribeDetailSideEffect.FailedToUpdateProfilePic)
+                    }
+
+                    try {
+                        file?.delete()
+                    } catch (e: Exception) {}
+                }
+            }
+        )
     }
 
     fun updateSatsPerMinute(sats: Long) {
@@ -186,8 +253,8 @@ internal class TribeDetailViewModel @Inject constructor(
 
     fun updateProfileAlias(alias: String?) {
         viewModelScope.launch(mainImmediate) {
-            val response = chatRepository.updateChatProfileAlias(
-                getChat().id,
+            val response = chatRepository.updateChatProfileInfo(
+                ChatId(args.argChatId),
                 alias?.let { ChatAlias(it) }
             )
 
@@ -195,147 +262,6 @@ internal class TribeDetailViewModel @Inject constructor(
                 is Response.Success -> {}
                 is Response.Error -> {
                     submitSideEffect(TribeDetailSideEffect.FailedToUpdateProfileAlias)
-                }
-            }
-        }
-    }
-
-    override fun updateChatProfilePicCamera() {
-        if (cameraJob?.isActive == true) {
-            return
-        }
-
-        cameraJob = viewModelScope.launch(dispatchers.mainImmediate) {
-            val response = cameraCoordinator.submitRequest(CameraRequest)
-
-            @Exhaustive
-            when (response) {
-                is Response.Error -> {}
-                is Response.Success -> {
-
-                    @Exhaustive
-                    when (response.value) {
-                        is CameraResponse.Image -> {
-                            updateViewState(TribeDetailViewState.UpdatingTribeProfilePicture)
-
-                            val mediaType = MediaType.Image(
-                                "${MediaType.IMAGE}/${response.value.value.extension}"
-                            )
-
-                            try {
-                                val repoResponse = chatRepository.updateChatProfilePic(
-                                    getChat(),
-                                    stream = object : InputStreamProvider() {
-                                        override fun newInputStream(): InputStream {
-                                            return response.value.value.inputStream()
-                                        }
-                                    },
-                                    mediaType = mediaType,
-                                    fileName = response.value.value.name,
-                                    contentLength = response.value.value.length(),
-                                )
-
-                                @Exhaustive
-                                when (repoResponse) {
-                                    is Response.Error -> {
-                                        LOG.e(TAG, "Error update chat Profile Picture: ", repoResponse.cause.exception)
-
-                                        updateViewState(TribeDetailViewState.ErrorUpdatingTribeProfilePicture)
-                                        submitSideEffect(TribeDetailSideEffect.FailedToUpdateProfilePic)
-                                    }
-                                    is Response.Success -> {
-                                        updateChatViewStat()
-                                    }
-                                }
-                            } catch (e: Exception) {
-                                updateViewState(TribeDetailViewState.ErrorUpdatingTribeProfilePicture)
-                                submitSideEffect(TribeDetailSideEffect.FailedToUpdateProfilePic)
-
-                                response.value.value.delete()
-                            }
-                        }
-                        else -> {}
-                    }
-                }
-                else -> {}
-            }
-        }
-    }
-
-
-    override fun handleActivityResultUri(uri: Uri?) {
-        if (uri == null) {
-            return
-        }
-
-        val cr = app.contentResolver
-
-        cr.getType(uri)?.let { crType ->
-
-            MimeTypeMap.getSingleton().getExtensionFromMimeType(crType)?.let { ext ->
-
-                crType.toMediaType().let { mType ->
-
-                    @Exhaustive
-                    when (mType) {
-                        is MediaType.Image -> {
-                            val stream: InputStream? = try {
-                                cr.openInputStream(uri)
-                            } catch (e: Exception) {
-                                // TODO: Handle Error
-                                null
-                            }
-
-                            if (stream != null) {
-
-                                updateViewState(TribeDetailViewState.UpdatingTribeProfilePicture)
-
-                                viewModelScope.launch(dispatchers.mainImmediate) {
-                                    val repoResponse = chatRepository.updateChatProfilePic(
-                                        getChat(),
-                                        stream = object : InputStreamProvider() {
-                                            var initialStreamUsed: Boolean = false
-                                            override fun newInputStream(): InputStream {
-                                                return if (!initialStreamUsed) {
-                                                    initialStreamUsed = true
-                                                    stream
-                                                } else {
-                                                    cr.openInputStream(uri)!!
-                                                }
-                                            }
-                                        },
-                                        mediaType = mType,
-                                        fileName = "image.$ext",
-                                        contentLength = null,
-                                    )
-
-                                    @Exhaustive
-                                    when (repoResponse) {
-                                        is Response.Error -> {
-                                                LOG.e(
-                                                    TAG,
-                                                    "Error update chat Profile Picture: ",
-                                                    repoResponse.cause.exception
-                                                )
-
-                                                updateViewState(TribeDetailViewState.ErrorUpdatingTribeProfilePicture)
-                                                submitSideEffect(TribeDetailSideEffect.FailedToUpdateProfilePic)
-                                            }
-                                            is Response.Success -> {
-                                                updateChatViewStat()
-                                            }
-                                        }
-                                }
-                            }
-                        }
-                        is MediaType.Audio,
-                        is MediaType.Pdf,
-                        is MediaType.Text,
-                        is MediaType.Unknown,
-                        is MediaType.Video -> {
-                            // do nothing
-                        }
-                    }
                 }
             }
         }

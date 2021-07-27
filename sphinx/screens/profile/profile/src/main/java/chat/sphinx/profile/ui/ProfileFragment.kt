@@ -20,7 +20,8 @@ import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.insetter_activity.addStatusBarPadding
 import chat.sphinx.menu_bottom.ui.MenuBottomViewState
-import chat.sphinx.menu_bottom_profile_pic.BottomMenuProfilePic
+import chat.sphinx.menu_bottom_profile_pic.BottomMenuPicture
+import chat.sphinx.menu_bottom_profile_pic.UpdatingImageViewState
 import chat.sphinx.profile.R
 import chat.sphinx.profile.databinding.FragmentProfileBinding
 import chat.sphinx.profile.navigation.ProfileNavigator
@@ -33,7 +34,9 @@ import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.visible
+import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.android_feature_viewmodel.updateViewState
+import io.matthewnelson.concept_views.viewstate.collect
 import io.matthewnelson.concept_views.viewstate.value
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -59,8 +62,8 @@ internal class ProfileFragment: SideEffectFragment<
     @Suppress("ProtectedInFinal")
     protected lateinit var profileNavigator: ProfileNavigator
 
-    private val bottomMenuProfilePic: BottomMenuProfilePic by lazy(LazyThreadSafetyMode.NONE) {
-        BottomMenuProfilePic(
+    private val bottomMenuPicture: BottomMenuPicture by lazy(LazyThreadSafetyMode.NONE) {
+        BottomMenuPicture(
             this,
             onStopSupervisor,
             viewModel
@@ -76,7 +79,11 @@ internal class ProfileFragment: SideEffectFragment<
         setupProfileTabs()
         setupProfile()
 
-        bottomMenuProfilePic.initialize(binding.includeLayoutMenuBottomProfilePic, viewLifecycleOwner)
+        bottomMenuPicture.initialize(
+            R.string.bottom_menu_profile_pic_header_text,
+            binding.includeLayoutMenuBottomProfilePic,
+            viewLifecycleOwner
+        )
     }
 
     private inner class BackPressHandler(
@@ -94,8 +101,8 @@ internal class ProfileFragment: SideEffectFragment<
         }
 
         override fun handleOnBackPressed() {
-            if (viewModel.profilePicMenuHandler.viewStateContainer.value is MenuBottomViewState.Open) {
-                viewModel.profilePicMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Closed)
+            if (viewModel.pictureMenuHandler.viewStateContainer.value is MenuBottomViewState.Open) {
+                viewModel.pictureMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Closed)
             } else {
                 lifecycleScope.launch(viewModel.mainImmediate) {
                     profileNavigator.popBackStack()
@@ -122,7 +129,7 @@ internal class ProfileFragment: SideEffectFragment<
                 )
 
             includeProfileNamePictureHolder.imageViewProfilePicture.setOnClickListener {
-                viewModel.profilePicMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Open)
+                viewModel.pictureMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Open)
             }
 
             includeProfileHeader.apply {
@@ -337,6 +344,45 @@ internal class ProfileFragment: SideEffectFragment<
                 }
             }
 
+        }
+    }
+
+    override fun subscribeToViewStateFlow() {
+        super.subscribeToViewStateFlow()
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.updatingImageViewStateContainer.collect { viewState ->
+                binding.includeProfileNamePictureHolder.apply {
+                    @Exhaustive
+                    when (viewState) {
+                        is UpdatingImageViewState.Idle -> {}
+                        is UpdatingImageViewState.UpdatingImage -> {
+                            layoutConstraintUploadingPicture.visible
+
+                            imageViewProfilePicture.setImageDrawable(
+                                ContextCompat.getDrawable(
+                                    binding.root.context,
+                                    R.drawable.ic_profile_avatar_circle
+                                )
+                            )
+                        }
+                        is UpdatingImageViewState.UpdatingImageFailed -> {
+                            layoutConstraintUploadingPicture.gone
+
+                            viewModel.submitSideEffect(
+                                ProfileSideEffect.FailedToProcessImage
+                            )
+                        }
+                        is UpdatingImageViewState.UpdatingImageSucceed -> {
+                            layoutConstraintUploadingPicture.gone
+
+                            viewModel.submitSideEffect(
+                                ProfileSideEffect.ImageUpdatedSuccessfully
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 
