@@ -69,7 +69,43 @@ internal class ProfileViewModel @Inject constructor(
 {
 
     override val pictureMenuHandler: PictureMenuHandler by lazy {
-        PictureMenuHandler()
+        PictureMenuHandler(
+            app = app,
+            cameraCoordinator = cameraCoordinator,
+            dispatchers = this,
+            viewModel = this,
+            callback = { streamProvider, mediaType, fileName, contentLength, deleteFileWhenDone ->
+
+                updatingImageViewStateContainer.updateViewState(
+                    UpdatingImageViewState.UpdatingImage
+                )
+
+                viewModelScope.launch(mainImmediate) {
+                    val response = contactRepository.updateProfilePic(
+                        stream = streamProvider,
+                        mediaType = mediaType,
+                        fileName = fileName,
+                        contentLength = contentLength,
+                    )
+
+                    @Exhaustive
+                    when (response) {
+                        is Response.Error -> {
+                            updatingImageViewStateContainer.updateViewState(
+                                UpdatingImageViewState.UpdatingImageFailed
+                            )
+                        }
+                        is Response.Success -> {
+                            updatingImageViewStateContainer.updateViewState(
+                                UpdatingImageViewState.UpdatingImageSucceed
+                            )
+                        }
+                    }
+
+                    deleteFileWhenDone?.invoke()
+                }
+            }
+        )
     }
 
     val updatingImageViewStateContainer: ViewStateContainer<UpdatingImageViewState> by lazy {
@@ -195,166 +231,6 @@ internal class ProfileViewModel @Inject constructor(
             submitSideEffect(ProfileSideEffect.BackupKeysFailed)
         } catch (e: IllegalArgumentException) {
             submitSideEffect(ProfileSideEffect.BackupKeysFailed)
-        }
-    }
-
-    private var cameraJob: Job? = null
-
-    override fun updatePictureFromCamera() {
-        if (cameraJob?.isActive == true) {
-            return
-        }
-
-        cameraJob = viewModelScope.launch(dispatchers.mainImmediate) {
-            val response = cameraCoordinator.submitRequest(CameraRequest)
-
-            @Exhaustive
-            when (response) {
-                is Response.Error -> {}
-                is Response.Success -> {
-
-                    @Exhaustive
-                    when (response.value) {
-                        is CameraResponse.Image -> {
-                            val ext = response.value.value.extension
-                            val mediaType = MediaType.Image(MediaType.IMAGE + "/$ext")
-
-                            val stream: FileInputStream? = try {
-                                FileInputStream(response.value.value)
-                            } catch (e: Exception) {
-                                // TODO: Handle error
-                                null
-                            }
-
-                            if (stream != null) {
-
-                                pictureMenuHandler.viewStateContainer.updateViewState(
-                                    MenuBottomViewState.Closed
-                                )
-
-                                updatingImageViewStateContainer.updateViewState(
-                                    UpdatingImageViewState.UpdatingImage
-                                )
-
-                                viewModelScope.launch(dispatchers.mainImmediate) {
-                                    val repoResponse = contactRepository.updateProfilePic(
-                                        stream = object : InputStreamProvider() {
-                                            override fun newInputStream(): InputStream {
-                                                return response.value.value.inputStream()
-                                            }
-                                        },
-                                        mediaType = mediaType,
-                                        fileName = response.value.value.name,
-                                        contentLength = response.value.value.length(),
-                                    )
-
-                                    @Exhaustive
-                                    when (repoResponse) {
-                                        is Response.Error -> {
-                                            updatingImageViewStateContainer.updateViewState(
-                                                UpdatingImageViewState.UpdatingImageFailed
-                                            )
-                                        }
-                                        is Response.Success -> {
-                                            updatingImageViewStateContainer.updateViewState(
-                                                UpdatingImageViewState.UpdatingImageSucceed
-                                            )
-                                        }
-                                    }
-
-                                    try {
-                                        response.value.value.delete()
-                                    } catch (e: Exception) {}
-                                }.join()
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    @Suppress("BlockingMethodInNonBlockingContext")
-    override fun handleActivityResultUri(uri: Uri?) {
-        if (uri == null) {
-            return
-        }
-
-        val cr = app.contentResolver
-
-        cr.getType(uri)?.let { crType ->
-
-            MimeTypeMap.getSingleton().getExtensionFromMimeType(crType)?.let { ext ->
-
-                crType.toMediaType().let { mType ->
-
-                    @Exhaustive
-                    when (mType) {
-                        is MediaType.Image -> {
-                            val stream: InputStream? = try {
-                                cr.openInputStream(uri)
-                            } catch (e: Exception) {
-                                // TODO: Handle Error
-                                null
-                            }
-
-                            if (stream != null) {
-
-                                pictureMenuHandler.viewStateContainer.updateViewState(
-                                    MenuBottomViewState.Closed
-                                )
-
-                                updatingImageViewStateContainer.updateViewState(
-                                    UpdatingImageViewState.UpdatingImage
-                                )
-
-                                viewModelScope.launch(dispatchers.mainImmediate) {
-                                    val repoResponse = contactRepository.updateProfilePic(
-                                        stream = object : InputStreamProvider() {
-                                            var initialStreamUsed: Boolean = false
-                                            override fun newInputStream(): InputStream {
-                                                return if (!initialStreamUsed) {
-                                                    initialStreamUsed = true
-                                                    stream
-                                                } else {
-                                                    cr.openInputStream(uri)!!
-                                                }
-                                            }
-                                        },
-                                        mediaType = mType,
-                                        fileName = "image.$ext",
-                                        contentLength = null,
-                                    )
-
-                                    @Exhaustive
-                                    when (repoResponse) {
-                                        is Response.Error -> {
-                                            updatingImageViewStateContainer.updateViewState(
-                                                UpdatingImageViewState.UpdatingImageFailed
-                                            )
-                                        }
-                                        is Response.Success -> {
-                                            updatingImageViewStateContainer.updateViewState(
-                                                UpdatingImageViewState.UpdatingImageSucceed
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        is MediaType.Audio,
-                        is MediaType.Pdf,
-                        is MediaType.Text,
-                        is MediaType.Unknown,
-                        is MediaType.Video -> {
-                            // do nothing
-                        }
-                    }
-
-                }
-
-            }
-
         }
     }
 
