@@ -47,4 +47,16 @@ internal sealed class ProfileSideEffect: SideEffect<Context>() {
             SphinxToastUtils().show(value, R.string.side_effect_backup_keys_failed)
         }
     }
+
+    object FailedToProcessImage: ProfileSideEffect() {
+        override suspend fun execute(value: Context) {
+            SphinxToastUtils().show(value, R.string.failed_to_process_image)
+        }
+    }
+
+    object ImageUpdatedSuccessfully: ProfileSideEffect() {
+        override suspend fun execute(value: Context) {
+            SphinxToastUtils().show(value, R.string.image_uploaded_successfully)
+        }
+    }
 }

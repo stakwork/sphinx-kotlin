@@ -4,7 +4,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingBottom="10dp"
     android:background="@color/body">
 
     <androidx.appcompat.widget.AppCompatImageView
@@ -13,25 +12,49 @@
         android:layout_height="@dimen/profile_picture_xy"
         android:src="@drawable/ic_profile_avatar_circle"
         android:layout_marginStart="@dimen/default_double_layout_margin"
+        android:layout_marginTop="@dimen/default_half_layout_margin"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"/>
+        app:layout_constraintTop_toTopOf="parent" />
 
-    <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/text_view_uploading_picture"
-        android:layout_width="0dp"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_uploading_picture"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:gravity="center"
-        android:textColor="@color/primaryText"
-        android:textSize="@dimen/profile_uploading_picture_text_size"
-        android:fontFamily="@font/roboto_light"
-        android:layout_marginTop="3dp"
+        android:layout_marginTop="5dp"
         android:visibility="gone"
-        android:text="@string/uploading"
         app:layout_constraintTop_toBottomOf="@+id/image_view_profile_picture"
         app:layout_constraintEnd_toEndOf="@+id/image_view_profile_picture"
         app:layout_constraintStart_toStartOf="@+id/image_view_profile_picture"
-        tools:text="Uploading..."/>
+        tools:visibility="visible">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_uploading_picture"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textColor="@color/primaryText"
+            android:textSize="@dimen/profile_uploading_picture_text_size"
+            android:fontFamily="@font/roboto_light"
+            android:text="@string/uploading"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            tools:text="Uploading"/>
+
+        <ProgressBar
+            android:id="@+id/sign_up_name_progress_bar"
+            android:layout_width="@dimen/profile_uploading_picture_progress_bar_xy"
+            android:layout_height="@dimen/profile_uploading_picture_progress_bar_xy"
+            style="?android:attr/progressBarStyle"
+            android:indeterminateTint="@android:color/white"
+            android:indeterminate="true"
+            android:layout_marginEnd="@dimen/default_small_layout_margin"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/text_view_uploading_picture"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/text_view_profile_name"
@@ -42,7 +65,7 @@
         android:layout_marginTop="@dimen/default_half_layout_margin"
         android:ellipsize="end"
         android:gravity="center_vertical"
-        android:lines="2"
+        android:maxLines="2"
         android:textAllCaps="true"
         android:textColor="@color/primaryText"
         android:textSize="@dimen/profile_name_text_size"

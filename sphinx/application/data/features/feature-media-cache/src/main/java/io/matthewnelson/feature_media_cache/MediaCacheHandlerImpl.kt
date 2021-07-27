@@ -85,7 +85,7 @@ class MediaCacheHandlerImpl(
     }
 
     @Suppress("BlockingMethodInNonBlockingContext")
-    fun copyToImpl(from: Source, to: BufferedSink): Job {
+    private fun copyToImpl(from: Source, to: BufferedSink): Job {
         return applicationScope.launch(io) {
             from.use {
                 to.writeAll(it)

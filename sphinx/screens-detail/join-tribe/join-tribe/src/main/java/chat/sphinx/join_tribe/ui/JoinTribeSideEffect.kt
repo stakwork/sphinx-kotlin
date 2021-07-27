@@ -41,5 +41,10 @@ internal sealed class JoinTribeSideEffect: SideEffect<Context>() {
             override val stringRes: Int
                 get() = R.string.error_joining
         }
+
+        object FailedToProcessImage: Notify() {
+            override val stringRes: Int
+                get() = R.string.failed_to_process_image
+        }
     }
 }
