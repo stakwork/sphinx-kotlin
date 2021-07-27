@@ -100,7 +100,7 @@ internal class CreateTribeFragment: SideEffectFragment<
                 if (hasFocus) {
                     return@setOnFocusChangeListener
                 }
-                editTextTribeImage.text.toString()?.let { imageUrl ->
+                editTextTribeImage.text.toString().let { imageUrl ->
                     if (URLUtil.isValidUrl(imageUrl)) {
                         showTribeImage(imageUrl)
                     } else {
@@ -167,7 +167,7 @@ internal class CreateTribeFragment: SideEffectFragment<
                     if (it.isNullOrEmpty()) {
                         null
                     } else {
-                        it.toString().toLong() * Companion.MILLISECONDS_IN_AN_HOUR
+                        it.toString().toLong() * MILLISECONDS_IN_AN_HOUR
                     }
                 )
             }
@@ -275,9 +275,9 @@ internal class CreateTribeFragment: SideEffectFragment<
 
                 binding.editTextTribeDescription.setText(tribe.description)
 
-                binding.editTextTribePriceToJoin.setText(tribe.price_to_join?.getStringOrEmpty())
-                binding.editTextTribePricePerMessage.setText(tribe.price_per_message?.getStringOrEmpty())
-                binding.editTextTribeAmountToStake.setText(tribe.escrow_amount?.getStringOrEmpty())
+                binding.editTextTribePriceToJoin.setText(tribe.price_to_join.getStringOrEmpty())
+                binding.editTextTribePricePerMessage.setText(tribe.price_per_message.getStringOrEmpty())
+                binding.editTextTribeAmountToStake.setText(tribe.escrow_amount.getStringOrEmpty())
                 binding.editTextTribeTimeToStake.setText(tribe.hourToStake.getStringOrEmpty())
 
                 binding.editTextTribeAppUrl.setText(tribe.app_url ?: "")
