@@ -2,7 +2,6 @@ package chat.sphinx.onboard_picture.ui
 
 import android.app.Application
 import android.content.Context
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.camera_view_model_coordinator.request.CameraRequest
@@ -14,12 +13,11 @@ import chat.sphinx.kotlin_response.Response
 import chat.sphinx.menu_bottom_profile_pic.PictureMenuHandler
 import chat.sphinx.menu_bottom_profile_pic.PictureMenuViewModel
 import chat.sphinx.onboard_common.OnBoardStepHandler
+import chat.sphinx.onboard_common.model.OnBoardInviterData
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import chat.sphinx.onboard_picture.navigation.OnBoardPictureNavigator
-import chat.sphinx.onboard_picture.navigation.inviterData
-import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
@@ -36,7 +34,6 @@ internal class OnBoardPictureViewModel @Inject constructor(
     dispatchers: CoroutineDispatchers,
     private val navigator: OnBoardPictureNavigator,
     private val onBoardStepHandler: OnBoardStepHandler,
-    handle: SavedStateHandle,
 ) : SideEffectViewModel<
         Context,
         OnBoardPictureSideEffect,
@@ -44,31 +41,42 @@ internal class OnBoardPictureViewModel @Inject constructor(
         >(dispatchers, OnBoardPictureProgressBarViewState(showProgressBar = false)),
     PictureMenuViewModel
 {
-    val args: OnBoardPictureFragmentArgs by handle.navArgs()
+    private var initViewModel = false
+    private var refreshJob: Job? = null
+    fun init(refreshContacts: Boolean) {
+        if (initViewModel) {
+            return
+        } else {
+            initViewModel = true
+        }
 
-    private val refreshJob: Job? = if (args.argRefreshContacts) {
-        viewModelScope.launch(mainImmediate) {
-            contactRepository.networkRefreshContacts.collect { response ->
-                @Exhaustive
-                when (response) {
-                    is LoadResponse.Loading -> {}
-                    is Response.Error -> {}
-                    is Response.Success -> {}
+        refreshJob = if (refreshContacts) {
+            viewModelScope.launch(mainImmediate) {
+                contactRepository.networkRefreshContacts.collect { response ->
+                    @Exhaustive
+                    when (response) {
+                        is LoadResponse.Loading -> {
+                        }
+                        is Response.Error -> {
+                        }
+                        is Response.Success -> {
+                        }
+                    }
                 }
             }
+        } else {
+            null
         }
-    } else {
-        null
     }
 
     private var nextScreenJob: Job? = null
-    fun nextScreen() {
+    fun nextScreen(inviterData: OnBoardInviterData) {
         if (nextScreenJob?.isActive == true) {
             return
         }
 
         nextScreenJob = viewModelScope.launch {
-            val step4 = onBoardStepHandler.persistOnBoardStep4Data(args.inviterData)
+            val step4 = onBoardStepHandler.persistOnBoardStep4Data(inviterData)
 
             if (step4 != null) {
                 navigator.toOnBoardReadyScreen(step4)

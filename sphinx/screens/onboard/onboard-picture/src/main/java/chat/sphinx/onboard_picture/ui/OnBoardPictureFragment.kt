@@ -6,6 +6,7 @@ import android.view.View
 import android.widget.ImageView
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.navArgs
 import app.cash.exhaustive.Exhaustive
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.concept_image_loader.ImageLoader
@@ -18,6 +19,7 @@ import chat.sphinx.menu_bottom.ui.MenuBottomViewState
 import chat.sphinx.menu_bottom_profile_pic.BottomMenuPicture
 import chat.sphinx.onboard_picture.R
 import chat.sphinx.onboard_picture.databinding.FragmentOnBoardPictureBinding
+import chat.sphinx.onboard_picture.navigation.inviterData
 import chat.sphinx.resources.SphinxToastUtils
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.navigation.CloseAppOnBackPress
@@ -44,6 +46,7 @@ internal class OnBoardPictureFragment: SideEffectFragment<
         .transformation(Transformation.CircleCrop)
         .build()
 
+    private val args: OnBoardPictureFragmentArgs by navArgs()
     override val viewModel: OnBoardPictureViewModel by viewModels()
     override val binding: FragmentOnBoardPictureBinding by viewBinding(FragmentOnBoardPictureBinding::bind)
 
@@ -57,7 +60,7 @@ internal class OnBoardPictureFragment: SideEffectFragment<
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        viewModel
+        viewModel.init(args.argRefreshContacts)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -82,7 +85,7 @@ internal class OnBoardPictureFragment: SideEffectFragment<
         }
 
         binding.buttonOnBoardPictureNext.setOnClickListener {
-            viewModel.nextScreen()
+            viewModel.nextScreen(args.inviterData)
         }
     }
 
