@@ -15,20 +15,20 @@ class BottomMenuPicture(
     onStopSupervisor: OnStopSupervisor,
     private val pictureMenuViewModel: PictureMenuViewModel,
 ): BottomMenu(
-    pictureMenuViewModel.dispatchers,
+    pictureMenuViewModel.pictureMenuHandler,
     onStopSupervisor,
     pictureMenuViewModel.pictureMenuHandler.viewStateContainer,
 ) {
 
     private val contentChooserContract: ActivityResultLauncher<String> =
         fragment.registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-            pictureMenuViewModel.handleActivityResultUri(uri)
+            pictureMenuViewModel.pictureMenuHandler.updatePictureFromPhotoLibrary(uri)
         }
 
     fun initialize(
         @StringRes
         headerText: Int,
-        
+
         binding: LayoutMenuBottomBinding,
         lifecycleOwner: LifecycleOwner
     ) {
@@ -40,7 +40,7 @@ class BottomMenuPicture(
                         text = R.string.bottom_menu_profile_pic_option_camera,
                         textColor = R.color.primaryBlueFontColor,
                         onClick = {
-                            pictureMenuViewModel.updatePictureFromCamera()
+                            pictureMenuViewModel.pictureMenuHandler.updatePictureFromCamera()
                         }
                     ),
                     MenuBottomOption(
