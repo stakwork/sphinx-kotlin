@@ -71,8 +71,9 @@ internal class OnBoardPictureFragment: SideEffectFragment<
             .addCallback(viewLifecycleOwner, requireActivity())
 
         (requireActivity() as InsetterActivity)
-            .addNavigationBarPadding(binding.root)
-            .addStatusBarPadding(binding.root)
+            .addStatusBarPadding(binding.layoutConstraintOnBoardPictureInsets)
+            .addNavigationBarPadding(binding.layoutConstraintOnBoardPictureInsets)
+            .addNavigationBarPadding(binding.includeOnBoardPictureMenuBottomPicture.includeLayoutMenuBottomOptions.root)
 
         pictureMenu.initialize(
             headerText = R.string.on_board_picture_bottom_menu_header,
