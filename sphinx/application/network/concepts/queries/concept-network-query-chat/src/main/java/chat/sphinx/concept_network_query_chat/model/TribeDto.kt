@@ -55,12 +55,3 @@ data class TribeDto(
         this.uuid = uuid
     }
 }
-
-//DateTime
-@Suppress("NOTHING_TO_INLINE")
-inline fun Long.getStringOrEmpty(): String {
-    if (this == 0.toLong()) {
-        return  ""
-    }
-    return "$this"
-}

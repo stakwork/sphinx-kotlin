@@ -13,7 +13,6 @@ import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
-import chat.sphinx.concept_network_query_chat.model.getStringOrEmpty
 import chat.sphinx.create_tribe.R
 import chat.sphinx.create_tribe.databinding.FragmentCreateTribeBinding
 import chat.sphinx.insetter_activity.InsetterActivity
@@ -28,6 +27,14 @@ import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import kotlinx.coroutines.launch
 import javax.annotation.meta.Exhaustive
 import javax.inject.Inject
+
+@Suppress("NOTHING_TO_INLINE")
+private inline fun Long.getStringOrEmpty(): String {
+    if (this == 0.toLong()) {
+        return  ""
+    }
+    return "$this"
+}
 
 @AndroidEntryPoint
 internal class CreateTribeFragment: SideEffectFragment<
