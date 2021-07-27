@@ -115,7 +115,7 @@ internal class JoinTribeFragment: SideEffectFragment<
                 viewModel.navigator.closeDetailScreen()
             }
             is JoinTribeViewState.TribeLoaded -> {
-                showTribeData(viewState.tribe)
+                showTribeData(viewState)
             }
             is JoinTribeViewState.TribeProfileImageUpdated -> {
                 binding.includeTribeMemberInfo.apply {
@@ -141,35 +141,35 @@ internal class JoinTribeFragment: SideEffectFragment<
         }
     }
 
-    private fun showTribeData(tribe: TribeDto) {
+    private fun showTribeData(viewState: JoinTribeViewState.TribeLoaded) {
         binding.apply {
 
             val owner = viewModel.accountOwnerStateFlow.value
 
             binding.includeTribeMemberInfo.apply {
-                val memberAlias = tribe.myAlias ?: owner?.alias?.value
+                val memberAlias = viewState.myAlias ?: owner?.alias?.value
                 tribeMemberAliasEditText.setText(memberAlias)
 
-                val memberPhotoUrl = tribe.myPhotoUrl ?: owner?.photoUrl?.value
+                val memberPhotoUrl = viewState.myPhotoUrl ?: owner?.photoUrl?.value
                 loadProfileImage(memberPhotoUrl)
             }
 
-            loadTribeImage(tribe)
+            loadTribeImage(viewState.imageUrl)
 
-            textViewTribeName.text = tribe.name
-            textViewTribeDescription.text = tribe.description
-            includeTribePrice.textViewPricePerMessage.text = tribe.price_per_message.toString()
-            includeTribePrice.textViewPriceToJoin.text = tribe.price_to_join.toString()
-            includeTribePrice.textViewAmountToStake.text = tribe.escrow_amount.toString()
-            includeTribePrice.textViewTimeToStake.text = tribe.hourToStake.toString()
+            textViewTribeName.text = viewState.name
+            textViewTribeDescription.text = viewState.description
+            includeTribePrice.textViewPricePerMessage.text = viewState.pricePerMessage.toString()
+            includeTribePrice.textViewPriceToJoin.text = viewState.priceToJoin.toString()
+            includeTribePrice.textViewAmountToStake.text = viewState.escrowAmount.toString()
+            includeTribePrice.textViewTimeToStake.text = viewState.hourToStake.toString()
 
             loadingTribeInfoContent.goneIfFalse(false)
         }
     }
 
-    private fun loadTribeImage(tribe: TribeDto) {
+    private fun loadTribeImage(img: String?) {
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-            tribe.img?.let { img ->
+            img?.let { img ->
                 if (img.isNotEmpty()) {
                     imageLoader.load(
                         binding.imageViewTribePicture,

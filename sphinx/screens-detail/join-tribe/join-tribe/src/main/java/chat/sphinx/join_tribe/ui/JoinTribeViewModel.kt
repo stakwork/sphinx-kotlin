@@ -128,8 +128,8 @@ internal class JoinTribeViewModel @Inject constructor(
     }
 
     fun loadTribeData() {
-        if (tribeInfo != null) {
-            viewStateContainer.updateViewState(JoinTribeViewState.TribeLoaded(tribeInfo!!))
+        tribeInfo?.let { tribeInfo ->
+            viewStateContainer.updateViewState(JoinTribeViewState.TribeLoaded(tribeInfo))
             return
         }
 

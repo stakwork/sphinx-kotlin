@@ -261,11 +261,9 @@ internal class CreateTribeFragment: SideEffectFragment<
             is CreateTribeViewState.ExistingTribe -> {
                 binding.progressBarLoadTribeContainer.gone
 
-                val tribe = viewState.tribe
+                binding.editTextTribeName.setText(viewState.name)
 
-                binding.editTextTribeName.setText(tribe.name)
-
-                tribe.img?.let { imgUrl ->
+                viewState.imageUrl?.let { imgUrl ->
                     if (imgUrl.isNotEmpty()) {
                         binding.editTextTribeImage.setText(imgUrl)
                         imageLoader.load(
@@ -276,18 +274,18 @@ internal class CreateTribeFragment: SideEffectFragment<
                     }
                 }
 
-                binding.editTextTribeTags.text = tribe.tags.joinToString { it }
+                binding.editTextTribeTags.text = viewState.tags.joinToString { it }
 
-                binding.editTextTribeDescription.setText(tribe.description)
+                binding.editTextTribeDescription.setText(viewState.description)
 
-                binding.editTextTribePriceToJoin.setText(tribe.price_to_join.getStringOrEmpty())
-                binding.editTextTribePricePerMessage.setText(tribe.price_per_message.getStringOrEmpty())
-                binding.editTextTribeAmountToStake.setText(tribe.escrow_amount.getStringOrEmpty())
-                binding.editTextTribeTimeToStake.setText(tribe.hourToStake.getStringOrEmpty())
+                binding.editTextTribePriceToJoin.setText(viewState.priceToJoin.getStringOrEmpty())
+                binding.editTextTribePricePerMessage.setText(viewState.pricePerMessage.getStringOrEmpty())
+                binding.editTextTribeAmountToStake.setText(viewState.escrowAmount.getStringOrEmpty())
+                binding.editTextTribeTimeToStake.setText(viewState.hourToStake.getStringOrEmpty())
 
-                binding.editTextTribeAppUrl.setText(tribe.app_url ?: "")
-                binding.editTextTribeFeedUrl.setText(tribe.feed_url ?: "")
-                binding.switchTribeListingOnSphinx.isChecked = tribe.unlisted == false
+                binding.editTextTribeAppUrl.setText(viewState.appUrl ?: "")
+                binding.editTextTribeFeedUrl.setText(viewState.feedUrl ?: "")
+                binding.switchTribeListingOnSphinx.isChecked = viewState.unlisted == false
             }
         }
     }
