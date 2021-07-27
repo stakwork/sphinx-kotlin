@@ -2,8 +2,6 @@ package chat.sphinx.create_tribe.ui
 
 import android.app.Application
 import android.content.Context
-import android.net.Uri
-import android.webkit.MimeTypeMap
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.camera_view_model_coordinator.request.CameraRequest
 import chat.sphinx.camera_view_model_coordinator.response.CameraResponse
@@ -15,28 +13,27 @@ import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
 import chat.sphinx.create_tribe.R
 import chat.sphinx.create_tribe.navigation.CreateTribeNavigator
 import chat.sphinx.kotlin_response.Response
-import chat.sphinx.menu_bottom.ui.MenuBottomViewState
 import chat.sphinx.menu_bottom_profile_pic.PictureMenuHandler
 import chat.sphinx.menu_bottom_profile_pic.PictureMenuViewModel
-import chat.sphinx.wrapper_message_media.MediaType
-import chat.sphinx.wrapper_message_media.toMediaType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
-import kotlinx.coroutines.Job
+import io.matthewnelson.concept_media_cache.MediaCacheHandler
 import kotlinx.coroutines.launch
 import java.io.File
-import javax.annotation.meta.Exhaustive
+import app.cash.exhaustive.Exhaustive
+import kotlinx.coroutines.Job
 import javax.inject.Inject
 
 @HiltViewModel
 internal class CreateTribeViewModel @Inject constructor(
     dispatchers: CoroutineDispatchers,
     private val app: Application,
-    val chatRepository: ChatRepository,
+    private val chatRepository: ChatRepository,
     private val cameraCoordinator: ViewModelCoordinator<CameraRequest, CameraResponse>,
+    private val mediaCacheHandler: MediaCacheHandler,
     val navigator: CreateTribeNavigator,
 ): SideEffectViewModel<
         Context,
@@ -65,98 +62,48 @@ internal class CreateTribeViewModel @Inject constructor(
     }
 
     override val pictureMenuHandler: PictureMenuHandler by lazy {
-        PictureMenuHandler()
-    }
+        PictureMenuHandler(
+            app = app,
+            cameraCoordinator = cameraCoordinator,
+            dispatchers = this,
+            viewModel = this,
+            callback = { streamProvider, _, fileName, _, deleteFileWhenDone ->
+                // If callback is being issued by camera, there will be a deleteFileWhenDone
+                // callback. So, look for the file in the image cache dir for the camera.
+                val imageFile: File? = deleteFileWhenDone?.let {
+                    mediaCacheHandler.retrieveImageFromCacheByName(fileName)
+                }
 
-    private var cameraJob: Job? = null
+                viewModelScope.launch(mainImmediate) {
+                    val imageFileResolved = if (imageFile != null) {
+                        imageFile
+                    } else {
 
-    override fun updatePictureFromCamera() {
-        if (cameraJob?.isActive == true) {
-            return
-        }
+                        val newFile = mediaCacheHandler.createImageFile(
+                            fileName.split(".").last()
+                        )
 
-        cameraJob = viewModelScope.launch(dispatchers.mainImmediate) {
-            pictureMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Closed)
+                        try {
+                            mediaCacheHandler.copyTo(
+                                from = streamProvider.newInputStream(),
+                                to = newFile
+                            )
+                            newFile
+                        } catch (e: Exception) {
+                            newFile.delete()
+                            null
+                        }
+                    }
 
-            val response = cameraCoordinator.submitRequest(CameraRequest)
-
-            @Exhaustive
-            when (response) {
-                is Response.Error -> {
-                    viewModelScope.launch(mainImmediate) {
+                    if (imageFileResolved != null) {
+                        createTribeBuilder.setImg(imageFileResolved)
+                        updateViewState(CreateTribeViewState.TribeImageUpdated(imageFileResolved))
+                    } else {
                         submitSideEffect(CreateTribeSideEffect.FailedToProcessImage)
                     }
                 }
-                is Response.Success -> {
-                    @Exhaustive
-                    when (response.value) {
-                        is CameraResponse.Image -> {
-                            createTribeBuilder.setImg(response.value.value)
-
-                            updateViewState(
-                                CreateTribeViewState.TribeImageUpdated(response.value.value)
-                            )
-                        }
-                    }
-                }
             }
-        }
-    }
-
-    override fun handleActivityResultUri(uri: Uri?) {
-        uri?.let {
-            val cr = app.contentResolver
-
-            cr.getType(it)?.let { crType ->
-
-                MimeTypeMap.getSingleton().getExtensionFromMimeType(crType)?.let { ext ->
-
-                    crType.toMediaType().let { mType ->
-
-                        @Exhaustive
-                        when (mType) {
-                            is MediaType.Image -> {
-                                pictureMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Closed)
-
-                                if (it.path == null) {
-                                    showFailedToProcessImage()
-                                } else {
-                                    try {
-                                        cr.openInputStream(uri)?.let { inputStream ->
-                                            val imageFile = File.createTempFile("sphinx", ".$ext", app.cacheDir)
-                                            val outputStream = imageFile.outputStream()
-
-                                            val buf = ByteArray(1024)
-                                            while (true) {
-                                                val read = inputStream.read(buf)
-                                                if (read == -1) break
-                                                outputStream.write(buf, 0, read)
-                                            }
-
-                                            createTribeBuilder.setImg(imageFile)
-
-                                            updateViewState(
-                                                CreateTribeViewState.TribeImageUpdated(imageFile)
-                                            )
-                                        }
-                                    } catch (e: Exception) {
-                                        showFailedToProcessImage()
-                                    }
-                                }
-                            }
-                            is MediaType.Audio,
-                            is MediaType.Pdf,
-                            is MediaType.Text,
-                            is MediaType.Unknown,
-                            is MediaType.Video -> {
-                                showFailedToProcessImage()
-                            }
-                        }
-                    }
-                }
-
-            }
-        }
+        )
     }
 
     private fun showNameAndDescriptionRequired() {
@@ -165,18 +112,22 @@ internal class CreateTribeViewModel @Inject constructor(
         }
     }
 
-    private fun showFailedToProcessImage() {
-        viewModelScope.launch(mainImmediate) {
-            submitSideEffect(CreateTribeSideEffect.FailedToProcessImage)
-        }
-    }
-
+    private var createTribeJob: Job? = null
     fun createTribe() {
+        if (createTribeJob?.isActive == true) {
+            return
+        }
+
         if (createTribeBuilder.hasRequiredFields) {
-            createTribeBuilder.build()?.let {
+            createTribeBuilder.build()?.let { createTribe ->
+
                 updateViewState(CreateTribeViewState.CreatingTribe)
-                viewModelScope.launch(mainImmediate) {
-                    when(chatRepository.createTribe(it)) {
+
+                createTribeJob = viewModelScope.launch(mainImmediate) {
+                    val response = chatRepository.createTribe(createTribe)
+
+                    @Exhaustive
+                    when(response) {
                         is Response.Error -> {
                             submitSideEffect(CreateTribeSideEffect.FailedToCreateTribe)
                         }
@@ -185,9 +136,12 @@ internal class CreateTribeViewModel @Inject constructor(
                         }
                     }
                 }
+
             }
         } else {
-            showNameAndDescriptionRequired()
+            viewModelScope.launch(mainImmediate) {
+                submitSideEffect(CreateTribeSideEffect.NameAndDescriptionRequired)
+            }
         }
     }
 
