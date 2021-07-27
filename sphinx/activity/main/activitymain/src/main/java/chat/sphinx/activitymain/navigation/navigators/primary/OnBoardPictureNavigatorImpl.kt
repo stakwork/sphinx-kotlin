@@ -11,7 +11,7 @@ internal class OnBoardPictureNavigatorImpl @Inject constructor(
     navigationDriver: PrimaryNavigationDriver
 ): OnBoardPictureNavigator(navigationDriver)
 {
-    override suspend fun toOnBoardReadyScreen(onBoardStep4: OnBoardStep.Step4) {
+    override suspend fun toOnBoardReadyScreen(onBoardStep4: OnBoardStep.Step4_Ready) {
         navigationDriver.submitNavigationRequest(
             ToOnBoardReadyScreen(popUpToId = R.id.main_primary_nav_graph, onBoardStep4)
         )

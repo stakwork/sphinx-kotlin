@@ -8,5 +8,5 @@ import io.matthewnelson.concept_navigation.Navigator
 abstract class OnBoardPictureNavigator(
     navigationDriver: BaseNavigationDriver<NavController>
 ): Navigator<NavController>(navigationDriver) {
-    abstract suspend fun toOnBoardReadyScreen(onBoardStep4: OnBoardStep.Step4)
+    abstract suspend fun toOnBoardReadyScreen(onBoardStep4: OnBoardStep.Step4_Ready)
 }

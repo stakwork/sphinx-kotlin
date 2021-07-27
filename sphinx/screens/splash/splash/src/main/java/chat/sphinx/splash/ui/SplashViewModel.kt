@@ -90,16 +90,16 @@ internal class SplashViewModel @Inject constructor(
 
                 @Exhaustive
                 when (onBoardStep) {
-                    is OnBoardStep.Step1 -> {
+                    is OnBoardStep.Step1_Welcome -> {
                         navigator.toOnBoardScreen(onBoardStep)
                     }
-                    is OnBoardStep.Step2 -> {
+                    is OnBoardStep.Step2_Name -> {
                         navigator.toOnBoardNameScreen(onBoardStep)
                     }
-                    is OnBoardStep.Step3 -> {
+                    is OnBoardStep.Step3_Picture -> {
                         navigator.toOnBoardPictureScreen(onBoardStep)
                     }
-                    is OnBoardStep.Step4 -> {
+                    is OnBoardStep.Step4_Ready -> {
                         navigator.toOnBoardReadyScreen(onBoardStep)
                     }
                     null -> {
@@ -127,16 +127,16 @@ internal class SplashViewModel @Inject constructor(
 
                                 @Exhaustive
                                 when (onBoardStep) {
-                                    is OnBoardStep.Step1 -> {
+                                    is OnBoardStep.Step1_Welcome -> {
                                         navigator.toOnBoardScreen(onBoardStep)
                                     }
-                                    is OnBoardStep.Step2 -> {
+                                    is OnBoardStep.Step2_Name -> {
                                         navigator.toOnBoardNameScreen(onBoardStep)
                                     }
-                                    is OnBoardStep.Step3 -> {
+                                    is OnBoardStep.Step3_Picture -> {
                                         navigator.toOnBoardPictureScreen(onBoardStep)
                                     }
-                                    is OnBoardStep.Step4 -> {
+                                    is OnBoardStep.Step4_Ready -> {
                                         navigator.toOnBoardReadyScreen(onBoardStep)
                                     }
                                     null -> {
@@ -154,16 +154,16 @@ internal class SplashViewModel @Inject constructor(
 
                     @Exhaustive
                     when (onBoardStep) {
-                        is OnBoardStep.Step1 -> {
+                        is OnBoardStep.Step1_Welcome -> {
                             navigator.toOnBoardScreen(onBoardStep)
                         }
-                        is OnBoardStep.Step2 -> {
+                        is OnBoardStep.Step2_Name -> {
                             navigator.toOnBoardNameScreen(onBoardStep)
                         }
-                        is OnBoardStep.Step3 -> {
+                        is OnBoardStep.Step3_Picture -> {
                             navigator.toOnBoardPictureScreen(onBoardStep)
                         }
-                        is OnBoardStep.Step4 -> {
+                        is OnBoardStep.Step4_Ready -> {
                             navigator.toOnBoardReadyScreen(onBoardStep)
                         }
                         null -> {
@@ -302,7 +302,7 @@ internal class SplashViewModel @Inject constructor(
             )
         }
 
-        val step1: OnBoardStep.Step1? = onBoardStepHandler.persistOnBoardStep1Data(
+        val step1: OnBoardStep.Step1_Welcome? = onBoardStepHandler.persistOnBoardStep1Data(
             relayUrl,
             authToken,
             inviterData

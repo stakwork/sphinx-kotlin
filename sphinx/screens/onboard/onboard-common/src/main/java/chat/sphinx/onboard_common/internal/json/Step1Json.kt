@@ -30,7 +30,7 @@ internal inline fun Step1Json.InviteDataJson.toOnBoardInviteData(): OnBoardInvit
     )
 
 @Suppress("NOTHING_TO_INLINE")
-internal inline fun OnBoardStep.Step1.toStep1Json(): Step1Json =
+internal inline fun OnBoardStep.Step1_Welcome.toStep1Json(): Step1Json =
     Step1Json(
         relayUrl.value,
         authorizationToken.value,
@@ -38,8 +38,8 @@ internal inline fun OnBoardStep.Step1.toStep1Json(): Step1Json =
     )
 
 @Suppress("NOTHING_TO_INLINE")
-internal inline fun Step1Json.toOnboardStep1(): OnBoardStep.Step1 =
-    OnBoardStep.Step1(
+internal inline fun Step1Json.toOnboardStep1(): OnBoardStep.Step1_Welcome =
+    OnBoardStep.Step1_Welcome(
         RelayUrl(relay_url),
         AuthorizationToken(authorization_token),
         invite_data_json.toOnBoardInviteData(),

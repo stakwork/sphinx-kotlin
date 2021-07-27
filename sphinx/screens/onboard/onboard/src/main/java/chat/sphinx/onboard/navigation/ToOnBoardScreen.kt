@@ -7,7 +7,6 @@ import chat.sphinx.onboard.ui.OnBoardFragmentArgs
 import chat.sphinx.onboard_common.model.OnBoardInviterData
 import chat.sphinx.onboard_common.model.OnBoardStep
 import chat.sphinx.wrapper_common.lightning.toLightningNodePubKey
-import chat.sphinx.wrapper_common.lightning.toLightningRouteHint
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
 import io.matthewnelson.android_feature_navigation.DefaultNavOptions
@@ -31,7 +30,7 @@ internal inline val OnBoardFragmentArgs.inviterData: OnBoardInviterData
 
 class ToOnBoardScreen(
     @IdRes private val popUpToId: Int,
-    private val onBoardStep: OnBoardStep.Step1,
+    private val onBoardStep: OnBoardStep.Step1_Welcome,
 ): NavigationRequest<NavController>() {
 
     override fun navigate(controller: NavController) {

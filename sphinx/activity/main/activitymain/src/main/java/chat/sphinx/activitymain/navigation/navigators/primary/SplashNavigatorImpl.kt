@@ -26,25 +26,25 @@ internal class SplashNavigatorImpl @Inject constructor(
         )
     }
 
-    override suspend fun toOnBoardScreen(onBoardStep1: OnBoardStep.Step1) {
+    override suspend fun toOnBoardScreen(onBoardStep1: OnBoardStep.Step1_Welcome) {
         navigationDriver.submitNavigationRequest(
             ToOnBoardScreen(popUpToId = R.id.main_primary_nav_graph, onBoardStep = onBoardStep1)
         )
     }
 
-    override suspend fun toOnBoardNameScreen(onBoardStep2: OnBoardStep.Step2) {
+    override suspend fun toOnBoardNameScreen(onBoardStep2: OnBoardStep.Step2_Name) {
         navigationDriver.submitNavigationRequest(
             ToOnBoardNameScreen(popUpToId = R.id.main_primary_nav_graph, onBoardStep = onBoardStep2)
         )
     }
 
-    override suspend fun toOnBoardPictureScreen(onBoardStep3: OnBoardStep.Step3) {
+    override suspend fun toOnBoardPictureScreen(onBoardStep3: OnBoardStep.Step3_Picture) {
         navigationDriver.submitNavigationRequest(
             ToOnBoardPictureScreen(popUpToId = R.id.main_primary_nav_graph, onBoardStep = onBoardStep3)
         )
     }
 
-    override suspend fun toOnBoardReadyScreen(onBoardStep4: OnBoardStep.Step4) {
+    override suspend fun toOnBoardReadyScreen(onBoardStep4: OnBoardStep.Step4_Ready) {
         navigationDriver.submitNavigationRequest(
             ToOnBoardReadyScreen(popUpToId = R.id.main_primary_nav_graph, onBoardStep = onBoardStep4)
         )

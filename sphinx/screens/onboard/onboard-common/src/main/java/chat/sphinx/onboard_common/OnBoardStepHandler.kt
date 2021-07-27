@@ -49,7 +49,7 @@ class OnBoardStepHandler @Inject constructor(
         relayUrl: RelayUrl,
         authorizationToken: AuthorizationToken,
         inviterData: OnBoardInviterData?
-    ): OnBoardStep.Step1? {
+    ): OnBoardStep.Step1_Welcome? {
         lock.withLock {
             val inviterDataRealized: OnBoardInviterData = inviterData
                 ?: OnBoardInviterData(
@@ -61,7 +61,7 @@ class OnBoardStepHandler @Inject constructor(
                     pin = null,
                 )
 
-            val step1 = OnBoardStep.Step1(
+            val step1 = OnBoardStep.Step1_Welcome(
                 relayUrl,
                 authorizationToken,
                 inviterDataRealized
@@ -84,10 +84,10 @@ class OnBoardStepHandler @Inject constructor(
         }
     }
 
-    suspend fun persistOnBoardStep2Data(inviterData: OnBoardInviterData): OnBoardStep.Step2? {
+    suspend fun persistOnBoardStep2Data(inviterData: OnBoardInviterData): OnBoardStep.Step2_Name? {
         lock.withLock {
 
-            val step2 = OnBoardStep.Step2(inviterData)
+            val step2 = OnBoardStep.Step2_Name(inviterData)
             val step2Json: String = try {
                 withContext(default) {
                     moshi
@@ -105,10 +105,10 @@ class OnBoardStepHandler @Inject constructor(
         }
     }
 
-    suspend fun persistOnBoardStep3Data(inviterData: OnBoardInviterData): OnBoardStep.Step3? {
+    suspend fun persistOnBoardStep3Data(inviterData: OnBoardInviterData): OnBoardStep.Step3_Picture? {
         lock.withLock {
 
-            val step3 = OnBoardStep.Step3(inviterData)
+            val step3 = OnBoardStep.Step3_Picture(inviterData)
             val step3Json: String = try {
                 withContext(default) {
                     moshi
@@ -126,10 +126,10 @@ class OnBoardStepHandler @Inject constructor(
         }
     }
 
-    suspend fun persistOnBoardStep4Data(inviterData: OnBoardInviterData): OnBoardStep.Step4? {
+    suspend fun persistOnBoardStep4Data(inviterData: OnBoardInviterData): OnBoardStep.Step4_Ready? {
         lock.withLock {
 
-            val step4 = OnBoardStep.Step4(inviterData)
+            val step4 = OnBoardStep.Step4_Ready(inviterData)
             val step4Json: String = try {
                 withContext(default) {
                     moshi
@@ -176,7 +176,7 @@ class OnBoardStepHandler @Inject constructor(
                                     ?.invite_data_json
                                     ?.toOnBoardInviteData()
                                     ?.let { inviterData ->
-                                        OnBoardStep.Step2(inviterData)
+                                        OnBoardStep.Step2_Name(inviterData)
                                     }
                             }
                                 ?: throw IOException("Failed to convert Step2Json string to OnBoardStep2")
@@ -189,7 +189,7 @@ class OnBoardStepHandler @Inject constructor(
                                     ?.invite_data_json
                                     ?.toOnBoardInviteData()
                                     ?.let { inviterData ->
-                                        OnBoardStep.Step3(inviterData)
+                                        OnBoardStep.Step3_Picture(inviterData)
                                     }
                             }
                                 ?: throw IOException("Failed to convert Step3Json string to OnBoardStep3")
@@ -202,7 +202,7 @@ class OnBoardStepHandler @Inject constructor(
                                     ?.invite_data_json
                                     ?.toOnBoardInviteData()
                                     ?.let { inviterData ->
-                                        OnBoardStep.Step4(inviterData)
+                                        OnBoardStep.Step4_Ready(inviterData)
                                     }
                             }
                                 ?: throw IOException("Failed to convert Step4Json string to OnBoardStep4")

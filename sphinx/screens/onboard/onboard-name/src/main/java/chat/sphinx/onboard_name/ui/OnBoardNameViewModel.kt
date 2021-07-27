@@ -80,7 +80,7 @@ internal class OnBoardNameViewModel @Inject constructor(
                                                 submitSideEffect(OnBoardNameSideEffect.UpdateOwnerFailed)
                                             }
                                             is Response.Success -> {
-                                                val step3: OnBoardStep.Step3? = onBoardStepHandler.persistOnBoardStep3Data(inviterData)
+                                                val step3: OnBoardStep.Step3_Picture? = onBoardStepHandler.persistOnBoardStep3Data(inviterData)
 
                                                 if (step3 != null) {
                                                     navigator.toOnBoardPictureScreen(step3)

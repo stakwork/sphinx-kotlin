@@ -22,7 +22,7 @@ internal inline val OnBoardNameFragmentArgs.inviterData: OnBoardInviterData
 
 class ToOnBoardNameScreen(
     @IdRes private val popUpToId: Int,
-    private val onBoardStep: OnBoardStep.Step2,
+    private val onBoardStep: OnBoardStep.Step2_Name,
 ): NavigationRequest<NavController>() {
 
     override fun navigate(controller: NavController) {
