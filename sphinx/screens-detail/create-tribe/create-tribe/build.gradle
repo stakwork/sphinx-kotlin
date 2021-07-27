@@ -1,5 +1,6 @@
 plugins {
     id 'com.android.library'
+    id 'androidx.navigation.safeargs'
     id 'dagger.hilt.android.plugin'
     id 'kotlin-android'
     id 'kotlin-kapt'
@@ -42,5 +43,6 @@ dependencies {
     implementation project(path: ':sphinx:application:common:menus:menu-bottom-tribe-pic')
     implementation project(path: ':sphinx:application:common:wrappers:wrapper-message-media')
     implementation project(path: ':sphinx:application:data:concepts:concept-image-loader')
+    implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-chat')
     kapt kaptDeps.google.hilt
 }

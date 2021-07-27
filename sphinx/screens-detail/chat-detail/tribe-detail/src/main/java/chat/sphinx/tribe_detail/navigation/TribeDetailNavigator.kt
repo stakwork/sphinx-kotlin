@@ -1,6 +1,7 @@
 package chat.sphinx.tribe_detail.navigation
 
 import androidx.navigation.NavController
+import chat.sphinx.wrapper_common.dashboard.ChatId
 import io.matthewnelson.concept_navigation.BaseNavigationDriver
 import io.matthewnelson.concept_navigation.Navigator
 
@@ -16,4 +17,6 @@ abstract class TribeDetailNavigator(
         viewTitle: String,
         description: String? = null,
     )
+
+    abstract suspend fun toCreateTribeScreen(chatId: ChatId)
 }

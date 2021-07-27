@@ -28,7 +28,6 @@ import chat.sphinx.tribe_detail.R
 import chat.sphinx.tribe_detail.navigation.TribeDetailNavigator
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.ChatAlias
-import chat.sphinx.wrapper_chat.ChatMetaData
 import chat.sphinx.wrapper_chat.isTribeOwnedByAccount
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_contact.Contact
@@ -46,7 +45,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import java.io.File
 import java.io.InputStream
 import javax.annotation.meta.Exhaustive
 import javax.inject.Inject
@@ -402,6 +400,8 @@ internal class TribeDetailViewModel @Inject constructor(
 
     override fun editTribe() {
         tribeMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Closed)
-//        TODO("Implement Edit Tribe Functionality on TribeMenuHandler")
+        viewModelScope.launch(mainImmediate) {
+            navigator.toCreateTribeScreen(chatId)
+        }
     }
 }

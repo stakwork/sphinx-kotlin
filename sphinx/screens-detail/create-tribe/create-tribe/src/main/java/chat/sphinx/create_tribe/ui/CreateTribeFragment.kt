@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.view.View
 import android.webkit.URLUtil
 import android.widget.ImageView
-import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.viewModels
@@ -26,6 +25,7 @@ import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import kotlinx.coroutines.launch
+import javax.annotation.meta.Exhaustive
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -57,18 +57,21 @@ internal class CreateTribeFragment: SideEffectFragment<
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.includeCreateTribeHeader.apply {
-            textViewDetailScreenHeaderName.text = getString(R.string.create_tribe_header_name)
+            textViewDetailScreenHeaderName.text = viewModel.headerText()
             textViewDetailScreenClose.setOnClickListener {
                 lifecycleScope.launch(viewModel.mainImmediate) {
                     viewModel.navigator.closeDetailScreen()
                 }
             }
+
+            binding.buttonCreateTribe.text = viewModel.submitButtonText()
         }
 
         setupFragmentLayout()
         setupCreateTribe()
 
         bottomMenuProfilePic.initialize(binding.includeLayoutMenuBottomTribePic, viewLifecycleOwner)
+        viewModel.load()
     }
 
     fun setupFragmentLayout() {
@@ -113,9 +116,7 @@ internal class CreateTribeFragment: SideEffectFragment<
 
             constraintLayoutTribeTagsContainer.setOnClickListener {
                 viewModel.selectTags() {
-                    val selectedTags = viewModel.createTribeBuilder.tags.filter {
-                        it.isSelected
-                    }
+                    val selectedTags = viewModel.createTribeBuilder.selectedTags()
                     if (selectedTags.isNotEmpty()) {
                         editTextTribeTags.text = (
                             selectedTags.joinToString {
@@ -178,7 +179,7 @@ internal class CreateTribeFragment: SideEffectFragment<
             }
 
             buttonCreateTribe.setOnClickListener {
-                viewModel.createTribe()
+                viewModel.saveTribe()
             }
         }
     }
@@ -227,9 +228,11 @@ internal class CreateTribeFragment: SideEffectFragment<
         }
     }
     override suspend fun onViewStateFlowCollect(viewState: CreateTribeViewState) {
+        @Exhaustive
         when (viewState) {
             CreateTribeViewState.Idle -> {
                 binding.progressBarCreateTribe.gone
+                binding.progressBarLoadTribeContainer.gone
             }
             is CreateTribeViewState.TribeImageUpdated -> {
                 imageLoader.load(
@@ -238,8 +241,35 @@ internal class CreateTribeFragment: SideEffectFragment<
                     viewModel.imageLoaderDefaults
                 )
             }
-            CreateTribeViewState.CreatingTribe -> {
+            CreateTribeViewState.SavingTribe -> {
                 binding.progressBarCreateTribe.visible
+            }
+            is CreateTribeViewState.LoadingExistingTribe -> {
+                binding.progressBarLoadTribeContainer.visible
+            }
+            is CreateTribeViewState.ExistingTribe -> {
+                binding.progressBarLoadTribeContainer.gone
+
+                binding.editTextTribeName.setText(viewModel.createTribeBuilder.name)
+                viewModel.createTribeBuilder.imgUrl?.let { imgUrl ->
+                    binding.editTextTribeImage.setText(imgUrl)
+                    imageLoader.load(
+                        binding.imageViewTribePicture,
+                        imgUrl,
+                        viewModel.imageLoaderDefaults
+                    )
+                }
+                binding.editTextTribeDescription.setText(viewModel.createTribeBuilder.description)
+                binding.editTextTribeTags.text = viewModel.createTribeBuilder.selectedTags().joinToString {
+                    it.name
+                }
+                binding.editTextTribePriceToJoin.setText(viewModel.createTribeBuilder.priceToJoin?.toString())
+                binding.editTextTribePricePerMessage.setText(viewModel.createTribeBuilder.pricePerMessage?.toString())
+                binding.editTextTribeAmountToStake.setText(viewModel.createTribeBuilder.escrowAmount?.toString())
+                binding.editTextTribeTimeToStake.setText(viewModel.createTribeBuilder.escrowMillis?.toString())
+                binding.editTextTribeAppUrl.setText(viewModel.createTribeBuilder.appUrl?.value)
+                binding.editTextTribeFeedUrl.setText(viewModel.createTribeBuilder.feedUrl?.value)
+                binding.switchTribeListingOnSphinx.isChecked = viewModel.createTribeBuilder.unlisted == false
             }
         }
     }
