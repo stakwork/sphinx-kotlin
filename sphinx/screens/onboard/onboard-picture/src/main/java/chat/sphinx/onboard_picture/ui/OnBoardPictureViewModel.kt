@@ -20,6 +20,7 @@ import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import chat.sphinx.onboard_picture.navigation.OnBoardPictureNavigator
 import chat.sphinx.onboard_picture.navigation.inviterData
 import io.matthewnelson.android_feature_navigation.util.navArgs
+import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import kotlinx.coroutines.Job
@@ -99,7 +100,7 @@ internal class OnBoardPictureViewModel @Inject constructor(
                     @Exhaustive
                     when (response) {
                         is Response.Error -> {
-                            // TODO: Handle Error
+                            submitSideEffect(OnBoardPictureSideEffect.NotifyUploadError)
                         }
                         is Response.Success -> {}
                     }
