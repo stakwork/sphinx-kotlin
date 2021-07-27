@@ -80,7 +80,7 @@ internal class ProfileFragment: SideEffectFragment<
         setupProfile()
 
         bottomMenuPicture.initialize(
-            getString(R.string.bottom_menu_profile_pic_header_text),
+            R.string.bottom_menu_profile_pic_header_text,
             binding.includeLayoutMenuBottomProfilePic,
             viewLifecycleOwner
         )

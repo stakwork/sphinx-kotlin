@@ -94,7 +94,7 @@ internal class TribeDetailFragment: SideEffectFragment<
         setupTribeDetail()
 
         bottomMenuPicture.initialize(
-            getString(R.string.bottom_menu_tribe_profile_pic_header_text),
+            R.string.bottom_menu_tribe_profile_pic_header_text,
             binding.includeLayoutMenuBottomTribeProfilePic,
             viewLifecycleOwner
         )

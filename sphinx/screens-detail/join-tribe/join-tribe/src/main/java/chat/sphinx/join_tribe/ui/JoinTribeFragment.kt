@@ -89,7 +89,7 @@ internal class JoinTribeFragment: SideEffectFragment<
             }
 
             bottomMenuPicture.initialize(
-                getString(R.string.bottom_menu_tribe_profile_pic_header_text),
+                R.string.bottom_menu_tribe_profile_pic_header_text,
                 includeLayoutMenuBottomTribeProfilePic,
                 viewLifecycleOwner
             )

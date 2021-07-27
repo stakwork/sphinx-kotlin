@@ -2,6 +2,7 @@ package chat.sphinx.menu_bottom_profile_pic
 
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.StringRes
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.LifecycleOwner
 import chat.sphinx.menu_bottom.databinding.LayoutMenuBottomBinding
@@ -25,7 +26,9 @@ class BottomMenuPicture(
         }
 
     fun initialize(
-        headerText: String,
+        @StringRes
+        headerText: Int,
+        
         binding: LayoutMenuBottomBinding,
         lifecycleOwner: LifecycleOwner
     ) {
