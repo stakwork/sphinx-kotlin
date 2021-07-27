@@ -57,10 +57,8 @@ internal class CreateTribeFragment: SideEffectFragment<
     }
 
     @Inject
-    lateinit var imageLoaderInj: ImageLoader<ImageView>
-
-    private val imageLoader: ImageLoader<ImageView>
-        get() = imageLoaderInj
+    @Suppress("ProtectedInFinal")
+    protected lateinit var imageLoader: ImageLoader<ImageView>
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
