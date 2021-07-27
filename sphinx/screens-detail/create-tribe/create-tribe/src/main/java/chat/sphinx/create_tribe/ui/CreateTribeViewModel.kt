@@ -16,7 +16,6 @@ import chat.sphinx.create_tribe.R
 import chat.sphinx.create_tribe.navigation.CreateTribeNavigator
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
-import chat.sphinx.menu_bottom.ui.MenuBottomViewState
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.menu_bottom_profile_pic.PictureMenuHandler
@@ -32,8 +31,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import io.matthewnelson.concept_media_cache.MediaCacheHandler
 import kotlinx.coroutines.launch
-import app.cash.exhaustive.Exhaustive
-import kotlinx.coroutines.Job
 import javax.inject.Inject
 
 internal inline val CreateTribeFragmentArgs.chatId: ChatId?
@@ -137,18 +134,25 @@ internal class CreateTribeViewModel @Inject constructor(
         viewModelScope.launch(mainImmediate) {
             getChat()?.let { chat ->
                 updateViewState(CreateTribeViewState.LoadingExistingTribe)
+
                 val host = chat.host
+
                 if (host != null) {
                     networkQueryChat.getTribeInfo(host, chat.uuid).collect { loadResponse ->
                         when (loadResponse) {
                             is LoadResponse.Loading -> {}
+
                             is Response.Error -> {
                                 submitSideEffect(CreateTribeSideEffect.FailedToLoadTribe)
                                 navigator.closeDetailScreen()
                             }
+
                             is Response.Success -> {
                                 createTribeBuilder.load(loadResponse.value)
-                                updateViewState(CreateTribeViewState.ExistingTribe)
+
+                                updateViewState(
+                                    CreateTribeViewState.ExistingTribe(loadResponse.value)
+                                )
                             }
                         }
                     }
@@ -200,11 +204,17 @@ internal class CreateTribeViewModel @Inject constructor(
         )
     }
 
+    private var saveTribeJob: Job? = null
+
     fun saveTribe() {
+        if (saveTribeJob?.isActive == true) {
+            return
+        }
+
         if (createTribeBuilder.hasRequiredFields) {
             createTribeBuilder.build()?.let {
                 updateViewState(CreateTribeViewState.SavingTribe)
-                viewModelScope.launch(mainImmediate) {
+                saveTribeJob = viewModelScope.launch(mainImmediate) {
                     if (chatId == null) {
                         when(chatRepository.createTribe(it)) {
                             is Response.Error -> {

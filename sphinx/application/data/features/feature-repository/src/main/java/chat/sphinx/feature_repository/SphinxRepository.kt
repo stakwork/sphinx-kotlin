@@ -2944,7 +2944,9 @@ abstract class SphinxRepository(
                     }
                 }
 
-                networkQueryChat.createTribe(createTribe.toPostGroupDto(imgUrl)).collect { loadResponse ->
+                networkQueryChat.createTribe(
+                    createTribe.toPostGroupDto(imgUrl)
+                ).collect { loadResponse ->
                     when (loadResponse) {
                         is LoadResponse.Loading -> {}
 
@@ -2980,45 +2982,47 @@ abstract class SphinxRepository(
         return response
     }
 
-    override suspend fun updateTribe(chatId: ChatId, createTribe: CreateTribe): Response<Any, ResponseError> {
+    override suspend fun updateTribe(
+        chatId: ChatId,
+        createTribe: CreateTribe
+    ): Response<Any, ResponseError> {
+
         var response: Response<Any, ResponseError>  = Response.Error(ResponseError(("Failed to exit tribe")))
         val memeServerHost = MediaHost.DEFAULT
 
         applicationScope.launch(mainImmediate) {
             try {
-                val imgUrl: String? = if (createTribe.imgUrl != null) {
-                    createTribe.imgUrl
-                } else {
-                    createTribe.img?.let { imgFile ->
-                        // If an image file is provided we should upload it
-                        val token = memeServerTokenHandler.retrieveAuthenticationToken(memeServerHost)
-                            ?: throw RuntimeException("MemeServerAuthenticationToken retrieval failure")
+                val imgUrl: String? = (createTribe.img?.let { imgFile ->
+                    val token = memeServerTokenHandler.retrieveAuthenticationToken(memeServerHost)
+                        ?: throw RuntimeException("MemeServerAuthenticationToken retrieval failure")
 
-                        val networkResponse = networkQueryMemeServer.uploadAttachment(
-                            authenticationToken = token,
-                            mediaType = MediaType.Image("${MediaType.IMAGE}/${imgFile.extension}"),
-                            stream = object : InputStreamProvider() {
-                                override fun newInputStream(): InputStream = imgFile.inputStream()
-                            },
-                            fileName = imgFile.name,
-                            contentLength = imgFile.length(),
-                            memeServerHost = memeServerHost,
-                        )
-                        @Exhaustive
-                        when (networkResponse) {
-                            is Response.Error -> {
-                                LOG.e(TAG, "Failed to upload image: ", networkResponse.exception)
-                                response = networkResponse
-                                null
-                            }
-                            is Response.Success -> {
-                                "https://${memeServerHost.value}/public/${networkResponse.value.muid}"
-                            }
+                    val networkResponse = networkQueryMemeServer.uploadAttachment(
+                        authenticationToken = token,
+                        mediaType = MediaType.Image("${MediaType.IMAGE}/${imgFile.extension}"),
+                        stream = object : InputStreamProvider() {
+                            override fun newInputStream(): InputStream = imgFile.inputStream()
+                        },
+                        fileName = imgFile.name,
+                        contentLength = imgFile.length(),
+                        memeServerHost = memeServerHost,
+                    )
+                    @Exhaustive
+                    when (networkResponse) {
+                        is Response.Error -> {
+                            LOG.e(TAG, "Failed to upload image: ", networkResponse.exception)
+                            response = networkResponse
+                            null
+                        }
+                        is Response.Success -> {
+                            "https://${memeServerHost.value}/public/${networkResponse.value.muid}"
                         }
                     }
-                }
+                }) ?: createTribe.imgUrl
 
-                networkQueryChat.updateTribe(chatId, createTribe.toPostGroupDto(imgUrl)).collect { loadResponse ->
+                networkQueryChat.updateTribe(
+                    chatId,
+                    createTribe.toPostGroupDto(imgUrl)
+                ).collect { loadResponse ->
                     when (loadResponse) {
                         is LoadResponse.Loading -> {}
 

@@ -13,6 +13,7 @@ import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
+import chat.sphinx.concept_network_query_chat.model.getStringOrEmpty
 import chat.sphinx.create_tribe.R
 import chat.sphinx.create_tribe.databinding.FragmentCreateTribeBinding
 import chat.sphinx.insetter_activity.InsetterActivity
@@ -75,6 +76,8 @@ internal class CreateTribeFragment: SideEffectFragment<
             binding.includeLayoutMenuBottomTribePic,
             viewLifecycleOwner
         )
+
+        viewModel.load()
     }
 
     fun setupFragmentLayout() {
@@ -253,26 +256,33 @@ internal class CreateTribeFragment: SideEffectFragment<
             is CreateTribeViewState.ExistingTribe -> {
                 binding.progressBarLoadTribeContainer.gone
 
-                binding.editTextTribeName.setText(viewModel.createTribeBuilder.name)
-                viewModel.createTribeBuilder.imgUrl?.let { imgUrl ->
-                    binding.editTextTribeImage.setText(imgUrl)
-                    imageLoader.load(
-                        binding.imageViewTribePicture,
-                        imgUrl,
-                        viewModel.imageLoaderDefaults
-                    )
+                val tribe = viewState.tribe
+
+                binding.editTextTribeName.setText(tribe.name)
+
+                tribe.img?.let { imgUrl ->
+                    if (imgUrl.isNotEmpty()) {
+                        binding.editTextTribeImage.setText(imgUrl)
+                        imageLoader.load(
+                            binding.imageViewTribePicture,
+                            imgUrl,
+                            viewModel.imageLoaderDefaults
+                        )
+                    }
                 }
-                binding.editTextTribeDescription.setText(viewModel.createTribeBuilder.description)
-                binding.editTextTribeTags.text = viewModel.createTribeBuilder.selectedTags().joinToString {
-                    it.name
-                }
-                binding.editTextTribePriceToJoin.setText(viewModel.createTribeBuilder.priceToJoin?.toString())
-                binding.editTextTribePricePerMessage.setText(viewModel.createTribeBuilder.pricePerMessage?.toString())
-                binding.editTextTribeAmountToStake.setText(viewModel.createTribeBuilder.escrowAmount?.toString())
-                binding.editTextTribeTimeToStake.setText(viewModel.createTribeBuilder.escrowMillis?.toString())
-                binding.editTextTribeAppUrl.setText(viewModel.createTribeBuilder.appUrl?.value)
-                binding.editTextTribeFeedUrl.setText(viewModel.createTribeBuilder.feedUrl?.value)
-                binding.switchTribeListingOnSphinx.isChecked = viewModel.createTribeBuilder.unlisted == false
+
+                binding.editTextTribeTags.text = tribe.tags.joinToString { it }
+
+                binding.editTextTribeDescription.setText(tribe.description)
+
+                binding.editTextTribePriceToJoin.setText(tribe.price_to_join?.getStringOrEmpty())
+                binding.editTextTribePricePerMessage.setText(tribe.price_per_message?.getStringOrEmpty())
+                binding.editTextTribeAmountToStake.setText(tribe.escrow_amount?.getStringOrEmpty())
+                binding.editTextTribeTimeToStake.setText(tribe.hourToStake.getStringOrEmpty())
+
+                binding.editTextTribeAppUrl.setText(tribe.app_url ?: "")
+                binding.editTextTribeFeedUrl.setText(tribe.feed_url ?: "")
+                binding.switchTribeListingOnSphinx.isChecked = tribe.unlisted == false
             }
         }
     }
