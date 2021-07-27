@@ -38,19 +38,19 @@ class CreateTribe private constructor(
             }
         }
 
-        var name: String? = null
-        var description: String? = null
-        var isTribe: Boolean? = true
-        var pricePerMessage: Long? = 0L
-        var priceToJoin: Long? = 0L
-        var escrowAmount: Long? = 0L
-        var escrowMillis: Long? = 0L
-        var img: File? = null
-        var imgUrl: String? = null
-        var unlisted: Boolean? = false
-        var private: Boolean? = false
-        var appUrl: AppUrl? = null
-        var feedUrl: FeedUrl? = null
+        private var name: String? = null
+        private var description: String? = null
+        private var isTribe: Boolean? = true
+        private var pricePerMessage: Long? = 0L
+        private var priceToJoin: Long? = 0L
+        private var escrowAmount: Long? = 0L
+        private var escrowMillis: Long? = 0L
+        private var img: File? = null
+        private var imgUrl: String? = null
+        private var unlisted: Boolean? = false
+        private var private: Boolean? = false
+        private var appUrl: AppUrl? = null
+        private var feedUrl: FeedUrl? = null
 
         @get:Synchronized
         val hasRequiredFields: Boolean
