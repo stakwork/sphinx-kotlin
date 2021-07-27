@@ -106,12 +106,6 @@ internal class CreateTribeViewModel @Inject constructor(
         )
     }
 
-    private fun showNameAndDescriptionRequired() {
-        viewModelScope.launch(mainImmediate) {
-            submitSideEffect(CreateTribeSideEffect.NameAndDescriptionRequired)
-        }
-    }
-
     private var createTribeJob: Job? = null
     fun createTribe() {
         if (createTribeJob?.isActive == true) {
