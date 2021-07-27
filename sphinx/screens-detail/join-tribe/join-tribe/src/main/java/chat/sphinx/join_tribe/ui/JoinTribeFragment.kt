@@ -55,7 +55,9 @@ internal class JoinTribeFragment: SideEffectFragment<
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        (requireActivity() as InsetterActivity).addNavigationBarPadding(binding.layoutScrollViewContent)
+        (requireActivity() as InsetterActivity)
+            .addNavigationBarPadding(binding.layoutScrollViewContent)
+            .addNavigationBarPadding(binding.includeLayoutMenuBottomTribeProfilePic.root)
 
         binding.apply {
             includeJoinTribeHeader.apply {
