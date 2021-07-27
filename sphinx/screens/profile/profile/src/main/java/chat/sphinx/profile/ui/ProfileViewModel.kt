@@ -74,7 +74,7 @@ internal class ProfileViewModel @Inject constructor(
             cameraCoordinator = cameraCoordinator,
             dispatchers = this,
             viewModel = this,
-            callback = { streamProvider, mediaType, fileName, contentLength, deleteFileWhenDone ->
+            callback = { streamProvider, mediaType, fileName, contentLength, file ->
 
                 updatingImageViewStateContainer.updateViewState(
                     UpdatingImageViewState.UpdatingImage
@@ -102,7 +102,9 @@ internal class ProfileViewModel @Inject constructor(
                         }
                     }
 
-                    deleteFileWhenDone?.invoke()
+                    try {
+                        file?.delete()
+                    } catch (e: Exception) {}
                 }
             }
         )

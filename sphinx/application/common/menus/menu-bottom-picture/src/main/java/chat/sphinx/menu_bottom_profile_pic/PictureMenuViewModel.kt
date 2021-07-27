@@ -38,7 +38,9 @@ class PictureMenuHandler(
         mediaType: MediaType,
         fileName: String,
         contentLength: Long?,
-        deleteFileWhenDone: (() -> Unit)?
+
+        // A File is returned only if coming from the camera
+        file: File?
     ) -> Unit
 
 ) : CoroutineDispatchers by dispatchers {
@@ -78,12 +80,9 @@ class PictureMenuHandler(
                                 },
                                 mediaType,
                                 response.value.value.name,
-                                response.value.value.length()
-                            ) {
-                                try {
-                                    response.value.value.delete()
-                                } catch (e: Exception) {}
-                            }
+                                response.value.value.length(),
+                                response.value.value,
+                            )
                         }
 //                        is CameraResponse.Video -> {}
                     }

@@ -22,7 +22,6 @@ import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_media_cache.MediaCacheHandler
 import kotlinx.coroutines.launch
-import java.io.File
 import app.cash.exhaustive.Exhaustive
 import kotlinx.coroutines.Job
 import javax.inject.Inject
@@ -67,16 +66,10 @@ internal class CreateTribeViewModel @Inject constructor(
             cameraCoordinator = cameraCoordinator,
             dispatchers = this,
             viewModel = this,
-            callback = { streamProvider, _, fileName, _, deleteFileWhenDone ->
-                // If callback is being issued by camera, there will be a deleteFileWhenDone
-                // callback. So, look for the file in the image cache dir for the camera.
-                val imageFile: File? = deleteFileWhenDone?.let {
-                    mediaCacheHandler.retrieveImageFromCacheByName(fileName)
-                }
-
+            callback = { streamProvider, _, fileName, _, file ->
                 viewModelScope.launch(mainImmediate) {
-                    val imageFileResolved = if (imageFile != null) {
-                        imageFile
+                    val imageFile = if (file != null) {
+                        file
                     } else {
 
                         val newFile = mediaCacheHandler.createImageFile(
@@ -95,9 +88,9 @@ internal class CreateTribeViewModel @Inject constructor(
                         }
                     }
 
-                    if (imageFileResolved != null) {
-                        createTribeBuilder.setImg(imageFileResolved)
-                        updateViewState(CreateTribeViewState.TribeImageUpdated(imageFileResolved))
+                    if (imageFile != null) {
+                        createTribeBuilder.setImg(imageFile)
+                        updateViewState(CreateTribeViewState.TribeImageUpdated(imageFile))
                     } else {
                         submitSideEffect(CreateTribeSideEffect.FailedToProcessImage)
                     }

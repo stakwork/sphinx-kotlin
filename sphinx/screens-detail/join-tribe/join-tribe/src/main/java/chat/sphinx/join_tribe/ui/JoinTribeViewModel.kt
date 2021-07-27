@@ -2,8 +2,6 @@ package chat.sphinx.join_tribe.ui
 
 import android.app.Application
 import android.content.Context
-import android.net.Uri
-import android.webkit.MimeTypeMap
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
@@ -20,7 +18,6 @@ import chat.sphinx.join_tribe.R
 import chat.sphinx.join_tribe.navigation.JoinTribeNavigator
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
-import chat.sphinx.menu_bottom.ui.MenuBottomViewState
 import chat.sphinx.menu_bottom_profile_pic.PictureMenuHandler
 import chat.sphinx.menu_bottom_profile_pic.PictureMenuViewModel
 import chat.sphinx.wrapper_chat.ChatHost
@@ -28,8 +25,6 @@ import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.tribe.toTribeJoinLink
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_contact.toContactAlias
-import chat.sphinx.wrapper_message_media.MediaType
-import chat.sphinx.wrapper_message_media.toMediaType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
@@ -37,13 +32,11 @@ import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_media_cache.MediaCacheHandler
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
-import java.io.File
 import javax.inject.Inject
 
 @HiltViewModel
@@ -81,16 +74,10 @@ internal class JoinTribeViewModel @Inject constructor(
             cameraCoordinator = cameraCoordinator,
             dispatchers = this,
             viewModel = this,
-            callback = { streamProvider, _, fileName, _, deleteFileWhenDone ->
-                // If callback is being issued by camera, there will be a deleteFileWhenDone
-                // callback. So, look for the file in the image cache dir for the camera.
-                val imageFile: File? = deleteFileWhenDone?.let {
-                    mediaCacheHandler.retrieveImageFromCacheByName(fileName)
-                }
-
+            callback = { streamProvider, _, fileName, _, file ->
                 viewModelScope.launch(mainImmediate) {
-                    val imageFileResolved = if (imageFile != null) {
-                        imageFile
+                    val imageFile = if (file != null) {
+                        file
                     } else {
 
                         // if the file does not exist, create a temporary file in the
@@ -111,9 +98,9 @@ internal class JoinTribeViewModel @Inject constructor(
                         }
                     }
 
-                    if (imageFileResolved != null) {
-                        tribeInfo?.setProfileImageFile(imageFileResolved)
-                        updateViewState(JoinTribeViewState.TribeProfileImageUpdated(imageFileResolved))
+                    if (imageFile != null) {
+                        tribeInfo?.setProfileImageFile(imageFile)
+                        updateViewState(JoinTribeViewState.TribeProfileImageUpdated(imageFile))
                     } else {
                         submitSideEffect(JoinTribeSideEffect.Notify.FailedToProcessImage)
                     }

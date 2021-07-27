@@ -85,7 +85,7 @@ internal class TribeDetailViewModel @Inject constructor(
         ViewStateContainer(UpdatingImageViewState.Idle)
     }
 
-    private val chatSharedFlow: SharedFlow<Chat?> = flow {
+    val chatSharedFlow: SharedFlow<Chat?> = flow {
         emitAll(chatRepository.getChatById(chatId))
     }.distinctUntilChanged().shareIn(
         viewModelScope,
@@ -93,7 +93,7 @@ internal class TribeDetailViewModel @Inject constructor(
         replay = 1,
     )
 
-    private suspend fun getOwner(): Contact {
+    suspend fun getOwner(): Contact {
         return contactRepository.accountOwner.value.let { contact ->
             if (contact != null) {
                 contact
@@ -110,21 +110,6 @@ internal class TribeDetailViewModel @Inject constructor(
                 delay(25L)
 
                 resolvedOwner!!
-            }
-        }
-    }
-
-    @Deprecated(message = "Calling this multiple times leads to multiple collections of the chat that never stop as the viewmodel persists even after the screen stops displaying data. this should never be a thing and all observing (collecting) should be done from the view utilizing onStopSupervisor so that they end when the view has stopped and pick back up when the user returns to the application")
-    private suspend fun updateChatViewStat() {
-        chatRepository.getChatById(chatId).collect { chat ->
-            chat?.let {
-                updateViewState(
-                    TribeDetailViewState.TribeProfile(
-                        it,
-                        getOwner(),
-                        podcast
-                    )
-                )
             }
         }
     }
@@ -153,12 +138,6 @@ internal class TribeDetailViewModel @Inject constructor(
         return chat!!
     }
 
-    fun load() {
-        viewModelScope.launch(mainImmediate) {
-            updateViewState(TribeDetailViewState.TribeProfile(getChat(), getOwner(), podcast))
-        }
-    }
-
     val imageLoaderDefaults by lazy {
         ImageLoaderOptions.Builder()
             .placeholderResId(R.drawable.ic_profile_avatar_circle)
@@ -176,7 +155,7 @@ internal class TribeDetailViewModel @Inject constructor(
             cameraCoordinator = cameraCoordinator,
             dispatchers = this,
             viewModel = this,
-            callback = { streamProvider, mediaType, fileName, contentLength, deleteFileWhenDone ->
+            callback = { streamProvider, mediaType, fileName, contentLength, file ->
                 updatingImageViewStateContainer.updateViewState(
                     UpdatingImageViewState.UpdatingImage
                 )
@@ -211,9 +190,6 @@ internal class TribeDetailViewModel @Inject constructor(
                                 updatingImageViewStateContainer.updateViewState(
                                     UpdatingImageViewState.UpdatingImageSucceed
                                 )
-
-                                // TODO: REMOVE!!!!!!!!
-                                updateChatViewStat()
                             }
                         }
                     } catch (e: Exception) {
@@ -224,7 +200,9 @@ internal class TribeDetailViewModel @Inject constructor(
                         submitSideEffect(TribeDetailSideEffect.FailedToUpdateProfilePic)
                     }
 
-                    deleteFileWhenDone?.invoke()
+                    try {
+                        file?.delete()
+                    } catch (e: Exception) {}
                 }
             }
         )

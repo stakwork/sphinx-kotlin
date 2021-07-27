@@ -32,8 +32,10 @@ import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
+import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_views.viewstate.collect
 import io.matthewnelson.concept_views.viewstate.value
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.annotation.meta.Exhaustive
 import javax.inject.Inject
@@ -209,7 +211,6 @@ internal class TribeDetailFragment: SideEffectFragment<
                 )
             }
         }
-        viewModel.load()
     }
 
     override suspend fun onViewStateFlowCollect(viewState: TribeDetailViewState) {
@@ -281,6 +282,20 @@ internal class TribeDetailFragment: SideEffectFragment<
 
     override fun subscribeToViewStateFlow() {
         super.subscribeToViewStateFlow()
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.chatSharedFlow.collect { chat ->
+                if (chat != null) {
+                    viewModel.updateViewState(
+                        TribeDetailViewState.TribeProfile(
+                            chat,
+                            viewModel.getOwner(),
+                            viewModel.podcast
+                        )
+                    )
+                }
+            }
+        }
 
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.updatingImageViewStateContainer.collect { viewState ->

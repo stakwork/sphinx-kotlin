@@ -95,13 +95,4 @@ class MediaCacheHandlerImpl(
             }
         }
     }
-
-    override fun retrieveImageFromCacheByName(fileName: String): File? {
-        val potentialFile = File(imageCache, fileName)
-        return if (potentialFile.exists()) {
-            potentialFile
-        } else {
-            null
-        }
-    }
 }
