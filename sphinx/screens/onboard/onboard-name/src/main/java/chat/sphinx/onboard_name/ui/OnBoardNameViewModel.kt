@@ -83,7 +83,7 @@ internal class OnBoardNameViewModel @Inject constructor(
                                                 val step3: OnBoardStep.Step3? = onBoardStepHandler.persistOnBoardStep3Data(inviterData)
 
                                                 if (step3 != null) {
-                                                    navigator.toOnBoardReadyScreen(step3)
+                                                    navigator.toOnBoardPictureScreen(step3)
                                                 } else {
                                                     // TODO: Handle Error
                                                 }

@@ -1,16 +1,16 @@
-package chat.sphinx.onboard_ready.navigation
+package chat.sphinx.onboard_picture.navigation
 
 import androidx.annotation.IdRes
 import androidx.navigation.NavController
 import chat.sphinx.onboard_common.model.OnBoardInviterData
 import chat.sphinx.onboard_common.model.OnBoardStep
-import chat.sphinx.onboard_ready.R
-import chat.sphinx.onboard_ready.ui.OnBoardReadyFragmentArgs
+import chat.sphinx.onboard_picture.R
+import chat.sphinx.onboard_picture.ui.OnBoardPictureFragmentArgs
 import chat.sphinx.wrapper_common.lightning.toLightningNodePubKey
 import io.matthewnelson.android_feature_navigation.DefaultNavOptions
 import io.matthewnelson.concept_navigation.NavigationRequest
 
-internal inline val OnBoardReadyFragmentArgs.inviterData: OnBoardInviterData
+internal inline val OnBoardPictureFragmentArgs.inviterData: OnBoardInviterData
     get() = OnBoardInviterData(
         argNickname?.ifEmpty { null },
         argPubkey?.toLightningNodePubKey(),
@@ -20,13 +20,13 @@ internal inline val OnBoardReadyFragmentArgs.inviterData: OnBoardInviterData
         argPin?.ifEmpty { null },
     )
 
-class ToOnBoardReadyScreen(
+class ToOnBoardPictureScreen(
     @IdRes private val popUpToId: Int,
-    private val onBoardStep: OnBoardStep.Step4,
+    private val onBoardStep: OnBoardStep.Step3,
 ): NavigationRequest<NavController>() {
 
     override fun navigate(controller: NavController) {
-        OnBoardReadyFragmentArgs.Builder(
+        OnBoardPictureFragmentArgs.Builder(
             onBoardStep.inviterData.nickname,
             onBoardStep.inviterData.pubkey?.value,
             onBoardStep.inviterData.routeHint,
@@ -36,7 +36,7 @@ class ToOnBoardReadyScreen(
         ).build().let { args ->
 
             controller.navigate(
-                R.id.on_board_ready_nav_graph,
+                R.id.on_board_picture_nav_graph,
                 args.toBundle(),
                 DefaultNavOptions.defaultAnims
                     .setPopUpTo(popUpToId, false)

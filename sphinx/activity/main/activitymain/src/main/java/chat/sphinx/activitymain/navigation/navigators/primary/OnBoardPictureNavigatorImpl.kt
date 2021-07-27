@@ -3,18 +3,17 @@ package chat.sphinx.activitymain.navigation.navigators.primary
 import chat.sphinx.activitymain.R
 import chat.sphinx.activitymain.navigation.drivers.PrimaryNavigationDriver
 import chat.sphinx.onboard_common.model.OnBoardStep
-import chat.sphinx.onboard_name.navigation.OnBoardNameNavigator
-import chat.sphinx.onboard_picture.navigation.ToOnBoardPictureScreen
+import chat.sphinx.onboard_picture.navigation.OnBoardPictureNavigator
 import chat.sphinx.onboard_ready.navigation.ToOnBoardReadyScreen
 import javax.inject.Inject
 
-internal class OnBoardNameNavigatorImpl @Inject constructor(
+internal class OnBoardPictureNavigatorImpl @Inject constructor(
     navigationDriver: PrimaryNavigationDriver
-): OnBoardNameNavigator(navigationDriver)
+): OnBoardPictureNavigator(navigationDriver)
 {
-    override suspend fun toOnBoardPictureScreen(onBoardStep3: OnBoardStep.Step3) {
+    override suspend fun toOnBoardReadyScreen(onBoardStep4: OnBoardStep.Step4) {
         navigationDriver.submitNavigationRequest(
-            ToOnBoardPictureScreen(popUpToId = R.id.main_primary_nav_graph, onBoardStep3)
+            ToOnBoardReadyScreen(popUpToId = R.id.main_primary_nav_graph, onBoardStep4)
         )
     }
 }

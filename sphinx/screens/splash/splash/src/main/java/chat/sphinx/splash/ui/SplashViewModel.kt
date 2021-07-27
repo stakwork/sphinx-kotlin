@@ -97,6 +97,9 @@ internal class SplashViewModel @Inject constructor(
                         navigator.toOnBoardNameScreen(onBoardStep)
                     }
                     is OnBoardStep.Step3 -> {
+                        navigator.toOnBoardPictureScreen(onBoardStep)
+                    }
+                    is OnBoardStep.Step4 -> {
                         navigator.toOnBoardReadyScreen(onBoardStep)
                     }
                     null -> {
@@ -131,6 +134,9 @@ internal class SplashViewModel @Inject constructor(
                                         navigator.toOnBoardNameScreen(onBoardStep)
                                     }
                                     is OnBoardStep.Step3 -> {
+                                        navigator.toOnBoardPictureScreen(onBoardStep)
+                                    }
+                                    is OnBoardStep.Step4 -> {
                                         navigator.toOnBoardReadyScreen(onBoardStep)
                                     }
                                     null -> {
@@ -155,6 +161,9 @@ internal class SplashViewModel @Inject constructor(
                             navigator.toOnBoardNameScreen(onBoardStep)
                         }
                         is OnBoardStep.Step3 -> {
+                            navigator.toOnBoardPictureScreen(onBoardStep)
+                        }
+                        is OnBoardStep.Step4 -> {
                             navigator.toOnBoardReadyScreen(onBoardStep)
                         }
                         null -> {

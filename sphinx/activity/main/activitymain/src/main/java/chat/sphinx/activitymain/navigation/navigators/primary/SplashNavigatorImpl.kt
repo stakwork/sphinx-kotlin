@@ -6,6 +6,7 @@ import chat.sphinx.dashboard.navigation.ToDashboardScreen
 import chat.sphinx.onboard.navigation.ToOnBoardScreen
 import chat.sphinx.onboard_common.model.OnBoardStep
 import chat.sphinx.onboard_name.navigation.ToOnBoardNameScreen
+import chat.sphinx.onboard_picture.navigation.ToOnBoardPictureScreen
 import chat.sphinx.onboard_ready.navigation.ToOnBoardReadyScreen
 import chat.sphinx.splash.navigation.SplashNavigator
 import javax.inject.Inject
@@ -37,9 +38,15 @@ internal class SplashNavigatorImpl @Inject constructor(
         )
     }
 
-    override suspend fun toOnBoardReadyScreen(onBoardStep3: OnBoardStep.Step3) {
+    override suspend fun toOnBoardPictureScreen(onBoardStep3: OnBoardStep.Step3) {
         navigationDriver.submitNavigationRequest(
-            ToOnBoardReadyScreen(popUpToId = R.id.main_primary_nav_graph, onBoardStep = onBoardStep3)
+            ToOnBoardPictureScreen(popUpToId = R.id.main_primary_nav_graph, onBoardStep = onBoardStep3)
+        )
+    }
+
+    override suspend fun toOnBoardReadyScreen(onBoardStep4: OnBoardStep.Step4) {
+        navigationDriver.submitNavigationRequest(
+            ToOnBoardReadyScreen(popUpToId = R.id.main_primary_nav_graph, onBoardStep = onBoardStep4)
         )
     }
 }

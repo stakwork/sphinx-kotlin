@@ -14,6 +14,7 @@
     <include app:graph="@navigation/dashboard_nav_graph" />
     <include app:graph="@navigation/on_board_nav_graph" />
     <include app:graph="@navigation/on_board_name_nav_graph" />
+    <include app:graph="@navigation/on_board_picture_nav_graph" />
     <include app:graph="@navigation/on_board_ready_nav_graph" />
     <include app:graph="@navigation/profile_nav_graph" />
 
