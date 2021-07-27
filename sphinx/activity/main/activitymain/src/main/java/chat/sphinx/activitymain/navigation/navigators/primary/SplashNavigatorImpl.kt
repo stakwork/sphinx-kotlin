@@ -40,7 +40,11 @@ internal class SplashNavigatorImpl @Inject constructor(
 
     override suspend fun toOnBoardPictureScreen(onBoardStep3: OnBoardStep.Step3_Picture) {
         navigationDriver.submitNavigationRequest(
-            ToOnBoardPictureScreen(popUpToId = R.id.main_primary_nav_graph, onBoardStep = onBoardStep3)
+            ToOnBoardPictureScreen(
+                popUpToId = R.id.main_primary_nav_graph,
+                onBoardStep = onBoardStep3,
+                refreshContacts = true,
+            )
         )
     }
 

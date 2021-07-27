@@ -10,6 +10,9 @@
         android:name="chat.sphinx.onboard_picture.ui.OnBoardPictureFragment"
         tools:layout="@layout/fragment_on_board_picture" >
         <argument
+            android:name="arg_refresh_contacts"
+            app:argType="boolean" />
+        <argument
             android:name="arg_nickname"
             app:argType="string"
             app:nullable="true" />
