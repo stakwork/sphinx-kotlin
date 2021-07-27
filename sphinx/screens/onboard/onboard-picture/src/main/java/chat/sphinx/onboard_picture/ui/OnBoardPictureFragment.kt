@@ -80,6 +80,10 @@ internal class OnBoardPictureFragment: SideEffectFragment<
         binding.buttonOnBoardPictureSelectImage.setOnClickListener {
             viewModel.pictureMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Open)
         }
+
+        binding.buttonOnBoardPictureNext.setOnClickListener {
+            viewModel.nextScreen()
+        }
     }
 
     override suspend fun onSideEffectCollect(sideEffect: OnBoardPictureSideEffect) {

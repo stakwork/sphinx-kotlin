@@ -13,10 +13,12 @@ import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.menu_bottom_profile_pic.PictureMenuHandler
 import chat.sphinx.menu_bottom_profile_pic.PictureMenuViewModel
+import chat.sphinx.onboard_common.OnBoardStepHandler
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import chat.sphinx.onboard_picture.navigation.OnBoardPictureNavigator
+import chat.sphinx.onboard_picture.navigation.inviterData
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
@@ -32,6 +34,7 @@ internal class OnBoardPictureViewModel @Inject constructor(
     cameraCoordinator: ViewModelCoordinator<CameraRequest, CameraResponse>,
     dispatchers: CoroutineDispatchers,
     private val navigator: OnBoardPictureNavigator,
+    private val onBoardStepHandler: OnBoardStepHandler,
     handle: SavedStateHandle,
 ) : SideEffectViewModel<
         Context,
@@ -57,8 +60,21 @@ internal class OnBoardPictureViewModel @Inject constructor(
         null
     }
 
+    private var nextScreenJob: Job? = null
     fun nextScreen() {
+        if (nextScreenJob?.isActive == true) {
+            return
+        }
 
+        nextScreenJob = viewModelScope.launch {
+            val step4 = onBoardStepHandler.persistOnBoardStep4Data(args.inviterData)
+
+            if (step4 != null) {
+                navigator.toOnBoardReadyScreen(step4)
+            } else {
+                // TODO: Handle Persistence Error
+            }
+        }
     }
 
     override val pictureMenuHandler: PictureMenuHandler by lazy {
@@ -88,7 +104,7 @@ internal class OnBoardPictureViewModel @Inject constructor(
                         is Response.Success -> {}
                     }
 
-                    updateViewState(OnBoardPictureProgressBarViewState(showProgressBar = true))
+                    updateViewState(OnBoardPictureProgressBarViewState(showProgressBar = false))
 
                     try {
                         file?.delete()
