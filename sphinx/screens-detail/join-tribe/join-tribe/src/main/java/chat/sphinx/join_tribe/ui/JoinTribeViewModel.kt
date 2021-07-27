@@ -6,6 +6,7 @@ import android.net.Uri
 import android.webkit.MimeTypeMap
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import app.cash.exhaustive.Exhaustive
 import chat.sphinx.camera_view_model_coordinator.request.CameraRequest
 import chat.sphinx.camera_view_model_coordinator.response.CameraResponse
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
@@ -26,7 +27,6 @@ import chat.sphinx.wrapper_chat.ChatHost
 import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.tribe.toTribeJoinLink
 import chat.sphinx.wrapper_contact.Contact
-import chat.sphinx.wrapper_contact.ContactAlias
 import chat.sphinx.wrapper_contact.toContactAlias
 import chat.sphinx.wrapper_message_media.MediaType
 import chat.sphinx.wrapper_message_media.toMediaType
@@ -36,6 +36,7 @@ import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
+import io.matthewnelson.concept_media_cache.MediaCacheHandler
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -43,7 +44,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import java.io.File
-import javax.annotation.meta.Exhaustive
 import javax.inject.Inject
 
 @HiltViewModel
@@ -56,6 +56,7 @@ internal class JoinTribeViewModel @Inject constructor(
     private val chatRepository: ChatRepository,
     private val networkQueryChat: NetworkQueryChat,
     private val cameraCoordinator: ViewModelCoordinator<CameraRequest, CameraResponse>,
+    private val mediaCacheHandler: MediaCacheHandler,
 ): SideEffectViewModel<
         Context,
         JoinTribeSideEffect,
@@ -75,7 +76,50 @@ internal class JoinTribeViewModel @Inject constructor(
     }
 
     override val pictureMenuHandler: PictureMenuHandler by lazy {
-        PictureMenuHandler()
+        PictureMenuHandler(
+            app = app,
+            cameraCoordinator = cameraCoordinator,
+            dispatchers = this,
+            viewModel = this,
+            callback = { streamProvider, _, fileName, _, deleteFileWhenDone ->
+                // If callback is being issued by camera, there will be a deleteFileWhenDone
+                // callback. So, look for the file in the image cache dir for the camera.
+                val imageFile: File? = deleteFileWhenDone?.let {
+                    mediaCacheHandler.retrieveImageFromCacheByName(fileName)
+                }
+
+                viewModelScope.launch(mainImmediate) {
+                    val imageFileResolved = if (imageFile != null) {
+                        imageFile
+                    } else {
+
+                        // if the file does not exist, create a temporary file in the
+                        // image cache directory
+                        val newFile = mediaCacheHandler.createImageFile(
+                            fileName.split(".").last()
+                        )
+
+                        try {
+                            mediaCacheHandler.copyTo(
+                                from = streamProvider.newInputStream(),
+                                to = newFile
+                            )
+                            newFile
+                        } catch (e: Exception) {
+                            newFile.delete()
+                            null
+                        }
+                    }
+
+                    if (imageFileResolved != null) {
+                        tribeInfo?.setProfileImageFile(imageFileResolved)
+                        updateViewState(JoinTribeViewState.TribeProfileImageUpdated(imageFileResolved))
+                    } else {
+                        submitSideEffect(JoinTribeSideEffect.Notify.FailedToProcessImage)
+                    }
+                }
+            }
+        )
     }
 
     val accountOwnerStateFlow: StateFlow<Contact?>
@@ -113,15 +157,10 @@ internal class JoinTribeViewModel @Inject constructor(
                             viewStateContainer.updateViewState(JoinTribeViewState.ErrorLoadingTribe)
                         }
                         is Response.Success -> {
-                            if (loadResponse.value is TribeDto) {
+                            tribeInfo = loadResponse.value
+                            tribeInfo?.set(tribeJoinLink.tribeHost, tribeJoinLink.tribeUUID)
 
-                                tribeInfo = loadResponse.value
-                                tribeInfo?.set(tribeJoinLink.tribeHost, tribeJoinLink.tribeUUID)
-
-                                viewStateContainer.updateViewState(JoinTribeViewState.TribeLoaded(tribeInfo!!))
-                            } else {
-                                viewStateContainer.updateViewState(JoinTribeViewState.ErrorLoadingTribe)
-                            }
+                            updateViewState(JoinTribeViewState.TribeLoaded(tribeInfo!!))
                         }
                     }
                 }
@@ -133,7 +172,7 @@ internal class JoinTribeViewModel @Inject constructor(
 
     fun joinTribe(alias: String) {
         viewModelScope.launch(mainImmediate) {
-            var tribeInfo = tribeInfo ?: let {
+            val tribeInfo = tribeInfo ?: let {
                 submitSideEffect(JoinTribeSideEffect.Notify.InvalidTribe)
                 return@launch
             }
@@ -141,7 +180,7 @@ internal class JoinTribeViewModel @Inject constructor(
             tribeInfo.myAlias = alias
             tribeInfo.amount = tribeInfo.price_to_join
 
-            tribeInfo?.myAlias?.trim()?.toContactAlias() ?: let {
+            tribeInfo.myAlias?.trim()?.toContactAlias() ?: let {
                 submitSideEffect(JoinTribeSideEffect.Notify.AliasRequired)
                 return@launch
             }
@@ -150,114 +189,16 @@ internal class JoinTribeViewModel @Inject constructor(
                 @Exhaustive
                 when(loadResponse) {
                     LoadResponse.Loading ->
-                        viewStateContainer.updateViewState(JoinTribeViewState.JoiningTribe)
+                        updateViewState(JoinTribeViewState.JoiningTribe)
                     is Response.Error -> {
                         submitSideEffect(JoinTribeSideEffect.Notify.ErrorJoining)
-                        viewStateContainer.updateViewState(JoinTribeViewState.ErrorJoiningTribe)
+                        updateViewState(JoinTribeViewState.ErrorJoiningTribe)
                     }
                     is Response.Success ->
-                        viewStateContainer.updateViewState(JoinTribeViewState.TribeJoined)
+                        updateViewState(JoinTribeViewState.TribeJoined)
                 }
 
             }
-        }
-    }
-
-    private var cameraJob: Job? = null
-
-    override fun updatePictureFromCamera() {
-        if (cameraJob?.isActive == true) {
-            return
-        }
-
-        cameraJob = viewModelScope.launch(dispatchers.mainImmediate) {
-            pictureMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Closed)
-
-            val response = cameraCoordinator.submitRequest(CameraRequest)
-
-            @Exhaustive
-            when (response) {
-                is Response.Error -> {
-                    viewModelScope.launch(mainImmediate) {
-                        submitSideEffect(JoinTribeSideEffect.Notify.FailedToProcessImage)
-                    }
-                }
-                is Response.Success -> {
-                    @Exhaustive
-                    when (response.value) {
-                        is CameraResponse.Image -> {
-                            tribeInfo?.setProfileImageFile(response.value.value)
-
-                            viewStateContainer.updateViewState(
-                                JoinTribeViewState.TribeProfileImageUpdated(
-                                    response.value.value
-                                )
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    override fun handleActivityResultUri(uri: Uri?) {
-        uri?.let {
-            val cr = app.contentResolver
-
-            cr.getType(it)?.let { crType ->
-
-                MimeTypeMap.getSingleton().getExtensionFromMimeType(crType)?.let { ext ->
-
-                    crType.toMediaType().let { mType ->
-
-                        @Exhaustive
-                        when (mType) {
-                            is MediaType.Image -> {
-                                pictureMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Closed)
-
-                                if (it.path == null) {
-                                    showFailedToProcessImage()
-                                } else {
-                                    try {
-                                        cr.openInputStream(uri)?.let { inputStream ->
-                                            val imageFile = File.createTempFile("sphinx", ".$ext", app.cacheDir)
-                                            val outputStream = imageFile.outputStream()
-
-                                            val buf = ByteArray(1024)
-                                            while (true) {
-                                                val read = inputStream.read(buf)
-                                                if (read == -1) break
-                                                outputStream.write(buf, 0, read)
-                                            }
-
-                                            tribeInfo?.setProfileImageFile(imageFile)
-
-                                            viewStateContainer.updateViewState(
-                                                JoinTribeViewState.TribeProfileImageUpdated(imageFile)
-                                            )
-                                        }
-                                    } catch (e: Exception) {
-                                        showFailedToProcessImage()
-                                    }
-                                }
-                            }
-                            is MediaType.Audio,
-                            is MediaType.Pdf,
-                            is MediaType.Text,
-                            is MediaType.Unknown,
-                            is MediaType.Video -> {
-                                showFailedToProcessImage()
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    private fun showFailedToProcessImage() {
-        viewModelScope.launch(mainImmediate) {
-            submitSideEffect(JoinTribeSideEffect.Notify.FailedToProcessImage)
         }
     }
 }
