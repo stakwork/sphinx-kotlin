@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="add_icon"></string>
+    <string name="join_tribe_link">Código QR de la tribu</string>
+    <string name="add_friend">Agregar Amigo</string>
+    <string name="create_tribe">Crear Tribu</string>
+    <string name="contacts">Contactos</string>
+    <string name="profile">Perfil</string>
+    <string name="support">Soporte</string>
+    <string name="add_sats">AGREGAR SATS</string>
+    <string name="search">Buscar</string>
+
+    <string name="not_valid_tribe_link">El código QR no es un código de tribu válido</string>
+    <string name="invite_name">Invitación: %s</string>
+    <string name="invite_qr_code_header_name">CÓDIGO DE INVITACIÓN</string>
+
+    <string name="alert_confirm_pay_invite_title">Pagar Invitación</string>
+    <string name="alert_confirm_pay_invite_message">¿Estás seguro que deseas pagar esta invitación?</string>
+    <string name="pay_invite_balance_too_low">"No se puede pagar por la invitación. El balance demasiado bajo"</string>
+
+    <string name="alert_confirm_delete_invite_title">Borrar Invitación</string>
+    <string name="alert_confirm_delete_invite_message">¿Estás seguro que deseas eliminar esta invitación?</string>
+
+    <string name="paste_invoice_of_tribe_link">Pega la solicitud de pago o el enlace de la tribu</string>
+    <string name="alert_confirm_pay_invoice_title">Pagar solicitud</string>
+    <string name="alert_confirm_pay_invoice_message">¿Estás seguro que deseas pagar esta solicitud?\n\nMonto: %d sat\n\nMemo: %s</string>
+
+    <string name="payment_request_missing_amount">Payment request is missing amount</string>
+    <string name="not_valid_invoice_or_tribe_link">Código QR no soportado</string>
+
+    <string name="attempting_payment_request">Procesando el pago de la solicitud</string>
+    <string name="failed_to_pay_request">No se pudo pagar la solicitud</string>
+    <string name="successfully_paid_invoice">Solicitud pagada con éxito</string>
+</resources>

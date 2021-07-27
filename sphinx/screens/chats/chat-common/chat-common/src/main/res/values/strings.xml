@@ -51,7 +51,7 @@
     <string name="purchase_status_label_paid_message_sent_status_pending">Pending</string>
     <string name="purchase_status_label_paid_message_sent_status_accepted">Succeeded</string>
     <string name="purchase_status_label_paid_message_sent_status_denied">Denied</string>
-    <string name="purchase_status_label_paid_message_sent_status_processing">Processing</string>
+    <string name="purchase_status_label_paid_message_sent_status_processing">Processing payment…</string>
     <string name="purchase_status_label_paid_message_sent_status_default">Unknown</string>
 
 
@@ -84,7 +84,7 @@
     <!-- Exit Tribe -->
     <string name="delete_own_tribe_not_supported">Delete own tribe is not supported yet</string>
     <string name="alert_confirm_exit_tribe_title">Exit Tribe</string>
-    <string name="alert_confirm_exit_tribe_message">Are you sure you exit and delete this tribe?</string>
+    <string name="alert_confirm_exit_tribe_message">Are you sure you wat to exit and delete this tribe?</string>
 
     <!-- Menu -->
     <string name="attachments_menu_cancel">CANCEL</string>
