@@ -8,6 +8,10 @@
     <fragment
         android:id="@+id/navigation_create_tribe_fragment"
         android:name="chat.sphinx.create_tribe.ui.CreateTribeFragment"
-        tools:layout="@layout/fragment_create_tribe" />
+        tools:layout="@layout/fragment_create_tribe">
+        <argument
+            android:name="argChatId"
+            app:argType="long" />
+    </fragment>
 
 </navigation>

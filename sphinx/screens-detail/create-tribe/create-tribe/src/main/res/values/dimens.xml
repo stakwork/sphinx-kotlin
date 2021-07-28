@@ -12,4 +12,7 @@
     <dimen name="create_tribe_button_width">230dp</dimen>
     <dimen name="create_tribe_progress_bar_xy">25dp</dimen>
     <dimen name="create_tribe_progress_bar_margin_left">10dp</dimen>
+
+
+    <dimen name="load_tribe_progress_bar_xy">50dp</dimen>
 </resources>

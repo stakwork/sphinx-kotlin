@@ -9,8 +9,31 @@ internal sealed class JoinTribeViewState: ViewState<JoinTribeViewState>() {
     object ErrorLoadingTribe : JoinTribeViewState()
 
     data class TribeLoaded(
-        val tribe: TribeDto
-    ): JoinTribeViewState()
+        val name: String,
+        val description: String,
+        val imageUrl: String?,
+        val priceToJoin: String,
+        val pricePerMessage: String,
+        val escrowAmount: String,
+        val hourToStake: String,
+        val myAlias: String?,
+        val myPhotoUrl: String?
+    ): JoinTribeViewState() {
+        companion object {
+            operator fun invoke(tribeDto: TribeDto): TribeLoaded =
+                TribeLoaded(
+                    tribeDto.name,
+                    tribeDto.description,
+                    tribeDto.img,
+                    tribeDto.price_to_join.toString(),
+                    tribeDto.price_per_message.toString(),
+                    tribeDto.escrow_amount.toString(),
+                    tribeDto.hourToStake.toString(),
+                    tribeDto.myAlias,
+                    tribeDto.myPhotoUrl,
+                )
+        }
+    }
 
     class TribeProfileImageUpdated(
         val imageFile: File
