@@ -12,7 +12,7 @@ inline val String.isValidLightningPaymentRequest: Boolean
     get() = toLightningPaymentRequestOrNull() != null
 
 @Suppress("NOTHING_TO_INLINE")
-inline fun LightningPaymentRequest.toBolt11OrNull(): Bolt11? =
+fun LightningPaymentRequest.toBolt11OrNull(): Bolt11? =
     try {
         Bolt11.decode(this)
     } catch (e: Exception) {

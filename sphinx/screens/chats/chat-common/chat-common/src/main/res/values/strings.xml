@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="edit_text_message_hint">Message...</string>
     <string name="edit_text_optional_message_hint">Optional Message...</string>
 
@@ -90,7 +90,7 @@
     <string name="alert_confirm_exit_tribe_message">Are you sure you wat to exit and delete this tribe?</string>
 
     <!-- Menu -->
-    <string name="attachments_menu_cancel">CANCEL</string>
+    <string name="attachments_menu_cancel" tools:ignore="ButtonCase">CANCEL</string>
     <string name="camera_attachment_option">Camera</string>
     <string name="library_attachment_option">Library</string>
     <string name="gif_attachment_option">Gif</string>
