@@ -56,7 +56,6 @@ internal class OnBoardFragment: SideEffectFragment<
         binding.inviterMessageTextView.text = inviterData.message ?: ""
 
         binding.buttonContinue.setOnClickListener {
-            viewModel.updateViewState(OnBoardViewState.Saving)
             viewModel.presentLoginModal(authorizationToken, relayUrl, inviterData)
         }
     }
@@ -74,7 +73,9 @@ internal class OnBoardFragment: SideEffectFragment<
     override suspend fun onViewStateFlowCollect(viewState: OnBoardViewState) {
         @Exhaustive
         when (viewState) {
-            is OnBoardViewState.Idle -> {}
+            is OnBoardViewState.Idle -> {
+                binding.welcomeGetStartedProgress.gone
+            }
             is OnBoardViewState.Saving -> {
                 binding.welcomeGetStartedProgress.visible
             }

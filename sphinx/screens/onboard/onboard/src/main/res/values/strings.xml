@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="on_board_relay_url_http_message">The Relay URL to be saved is using \'http\'. Network traffic will not be encrypted. Https is strongly recommended. Please confirm the URL Scheme to use.</string>
+    <string name="on_board_relay_url_http_negative_keep_http">http</string>
+    <string name="on_board_relay_url_http_positive_change_to_https">https</string>
+</resources>
