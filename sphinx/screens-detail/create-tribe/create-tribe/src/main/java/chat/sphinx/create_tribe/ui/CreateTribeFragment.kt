@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.view.View
 import android.webkit.URLUtil
 import android.widget.ImageView
-import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.viewModels
@@ -19,13 +18,14 @@ import chat.sphinx.create_tribe.databinding.FragmentCreateTribeBinding
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.menu_bottom.ui.MenuBottomViewState
-import chat.sphinx.menu_bottom_tribe_pic.BottomMenuTribePic
+import chat.sphinx.menu_bottom_profile_pic.BottomMenuPicture
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import kotlinx.coroutines.launch
+import javax.annotation.meta.Exhaustive
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -40,8 +40,8 @@ internal class CreateTribeFragment: SideEffectFragment<
     override val viewModel: CreateTribeViewModel by viewModels()
     override val binding: FragmentCreateTribeBinding by viewBinding(FragmentCreateTribeBinding::bind)
 
-    private val bottomMenuProfilePic: BottomMenuTribePic by lazy(LazyThreadSafetyMode.NONE) {
-        BottomMenuTribePic(
+    private val bottomMenuPicture: BottomMenuPicture by lazy(LazyThreadSafetyMode.NONE) {
+        BottomMenuPicture(
             this,
             onStopSupervisor,
             viewModel
@@ -49,26 +49,32 @@ internal class CreateTribeFragment: SideEffectFragment<
     }
 
     @Inject
-    lateinit var imageLoaderInj: ImageLoader<ImageView>
-
-    private val imageLoader: ImageLoader<ImageView>
-        get() = imageLoaderInj
+    @Suppress("ProtectedInFinal")
+    protected lateinit var imageLoader: ImageLoader<ImageView>
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.includeCreateTribeHeader.apply {
-            textViewDetailScreenHeaderName.text = getString(R.string.create_tribe_header_name)
+            textViewDetailScreenHeaderName.text = viewModel.headerText()
             textViewDetailScreenClose.setOnClickListener {
                 lifecycleScope.launch(viewModel.mainImmediate) {
                     viewModel.navigator.closeDetailScreen()
                 }
             }
+
+            binding.buttonCreateTribe.text = viewModel.submitButtonText()
         }
 
         setupFragmentLayout()
         setupCreateTribe()
 
-        bottomMenuProfilePic.initialize(binding.includeLayoutMenuBottomTribePic, viewLifecycleOwner)
+        bottomMenuPicture.initialize(
+            R.string.bottom_menu_tribe_pic_header_text,
+            binding.includeLayoutMenuBottomTribePic,
+            viewLifecycleOwner
+        )
+
+        viewModel.load()
     }
 
     fun setupFragmentLayout() {
@@ -91,7 +97,7 @@ internal class CreateTribeFragment: SideEffectFragment<
                 if (hasFocus) {
                     return@setOnFocusChangeListener
                 }
-                editTextTribeImage.text.toString()?.let { imageUrl ->
+                editTextTribeImage.text?.toString().let { imageUrl ->
                     if (URLUtil.isValidUrl(imageUrl)) {
                         showTribeImage(imageUrl)
                     } else {
@@ -103,7 +109,7 @@ internal class CreateTribeFragment: SideEffectFragment<
                 }
             }
             constraintLayoutTribeImageContainer.setOnClickListener {
-                viewModel.tribePicMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Open)
+                viewModel.pictureMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Open)
             }
             editTextTribeDescription.addTextChangedListener {
                 viewModel.createTribeBuilder.setDescription(it.toString())
@@ -113,9 +119,7 @@ internal class CreateTribeFragment: SideEffectFragment<
 
             constraintLayoutTribeTagsContainer.setOnClickListener {
                 viewModel.selectTags() {
-                    val selectedTags = viewModel.createTribeBuilder.tags.filter {
-                        it.isSelected
-                    }
+                    val selectedTags = viewModel.createTribeBuilder.selectedTags()
                     if (selectedTags.isNotEmpty()) {
                         editTextTribeTags.text = (
                             selectedTags.joinToString {
@@ -133,7 +137,7 @@ internal class CreateTribeFragment: SideEffectFragment<
                     if (it.isNullOrEmpty()) {
                         null
                     } else {
-                        it.toString().toLong()
+                        it.toString().toLongOrNull()
                     }
                 )
             }
@@ -142,7 +146,7 @@ internal class CreateTribeFragment: SideEffectFragment<
                     if (it.isNullOrEmpty()) {
                         null
                     } else {
-                        it.toString().toLong()
+                        it.toString().toLongOrNull()
                     }
                 )
             }
@@ -151,7 +155,7 @@ internal class CreateTribeFragment: SideEffectFragment<
                     if (it.isNullOrEmpty()) {
                         null
                     } else {
-                        it.toString().toLong()
+                        it.toString().toLongOrNull()
                     }
                 )
             }
@@ -160,7 +164,7 @@ internal class CreateTribeFragment: SideEffectFragment<
                     if (it.isNullOrEmpty()) {
                         null
                     } else {
-                        it.toString().toLong() * Companion.MILLISECONDS_IN_AN_HOUR
+                        (it.toString().toLongOrNull() ?: 0) * MILLISECONDS_IN_AN_HOUR
                     }
                 )
             }
@@ -178,7 +182,7 @@ internal class CreateTribeFragment: SideEffectFragment<
             }
 
             buttonCreateTribe.setOnClickListener {
-                viewModel.createTribe()
+                viewModel.saveTribe()
             }
         }
     }
@@ -227,9 +231,11 @@ internal class CreateTribeFragment: SideEffectFragment<
         }
     }
     override suspend fun onViewStateFlowCollect(viewState: CreateTribeViewState) {
+        @Exhaustive
         when (viewState) {
             CreateTribeViewState.Idle -> {
                 binding.progressBarCreateTribe.gone
+                binding.progressBarLoadTribeContainer.gone
             }
             is CreateTribeViewState.TribeImageUpdated -> {
                 imageLoader.load(
@@ -238,8 +244,40 @@ internal class CreateTribeFragment: SideEffectFragment<
                     viewModel.imageLoaderDefaults
                 )
             }
-            CreateTribeViewState.CreatingTribe -> {
+            CreateTribeViewState.SavingTribe -> {
                 binding.progressBarCreateTribe.visible
+            }
+            is CreateTribeViewState.LoadingExistingTribe -> {
+                binding.progressBarLoadTribeContainer.visible
+            }
+            is CreateTribeViewState.ExistingTribe -> {
+                binding.progressBarLoadTribeContainer.gone
+
+                binding.editTextTribeName.setText(viewState.name)
+
+                viewState.imageUrl?.let { imgUrl ->
+                    if (imgUrl.isNotEmpty()) {
+                        binding.editTextTribeImage.setText(imgUrl)
+                        imageLoader.load(
+                            binding.imageViewTribePicture,
+                            imgUrl,
+                            viewModel.imageLoaderDefaults
+                        )
+                    }
+                }
+
+                binding.editTextTribeTags.text = viewState.tags.joinToString { it }
+
+                binding.editTextTribeDescription.setText(viewState.description)
+
+                binding.editTextTribePriceToJoin.setText(viewState.priceToJoin)
+                binding.editTextTribePricePerMessage.setText(viewState.pricePerMessage)
+                binding.editTextTribeAmountToStake.setText(viewState.escrowAmount)
+                binding.editTextTribeTimeToStake.setText(viewState.hourToStake)
+
+                binding.editTextTribeAppUrl.setText(viewState.appUrl ?: "")
+                binding.editTextTribeFeedUrl.setText(viewState.feedUrl ?: "")
+                binding.switchTribeListingOnSphinx.isChecked = viewState.unlisted == false
             }
         }
     }

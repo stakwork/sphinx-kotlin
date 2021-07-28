@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="create_tribe_header_name">NUEVA TRIBU</string>
+    <string name="create_tribe">Crear Tribu</string>
+    <string name="add_icon"></string>
+
+    <string name="bottom_menu_tribe_pic_header_text">Imagen de la Tribu</string>
+
+    <string name="name_and_description_required">Nombre y descripción son requeridos</string>
+    <string name="failed_to_create_tribe">No se ha podido crear la tribu</string>
+    <string name="failed_to_process_image">No se ha podido procesar la imagen</string>
+    <string name="list_on_tribes_sphinx_chat">¿Mostrar en tribes.sphinx.chat?</string>
+    <string name="name">Nombre *</string>
+    <string name="image">Imagen</string>
+    <string name="description">Descripción *</string>
+    <string name="tags">Etiquetas</string>
+    <string name="price_to_join_sats">Precio para unirse</string>
+    <string name="price_per_message_sats">Precio por mensaje</string>
+    <string name="amount_to_stake_sats">Monto a retener</string>
+    <string name="time_to_stake_hours">Tiempo de retención (horas)</string>
+    <string name="app_url">Url de la Aplicación</string>
+    <string name="rss_feed_url">Url del Feed</string>
+    <string name="approve_each_membership_request">¿Aprobar solicitudes de membresías?</string>
+</resources>

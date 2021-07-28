@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="edit_text_message_hint">Mensaje...</string>
+    <string name="edit_text_optional_message_hint">Mensaje opcional...</string>
+
+    <string name="chat_muted_message">La conversación está ahora silenciada. No recibirás notificaciones para las mensajes entrantes en esta conversación</string>
+    <string name="chat_muted_waiting_on_network">Esperando conexión…</string>
+    <string name="chat_tribe_contributed">Contribuídos:</string>
+    <string name="chat_tribe_earned">Recibidos:</string>
+
+    <string name="unsupported_message_type_placeholder_text">%1$s: No soportado aún</string>
+    <string name="deleted_message_label_text">Este mensaje ha sido eliminado</string>
+    <string name="join_call_header_label_text">Unirse mediante…</string>
+
+    <!--  Message type placeholder display names  -->
+    <string name="placeholder_display_name_message_type_attachment">Mensaje de Archivo</string>
+    <string name="placeholder_display_name_message_type_bot_response">Mensaje de Respuesta de Bot</string>
+    <string name="placeholder_display_name_message_type_invoice">Message de Invoice</string>
+    <string name="placeholder_display_name_message_type_payment">Message de Pago de Invoice</string>
+    <string name="placeholder_display_name_message_type_tribe_delete">Message de Tribu eliminada</string>
+    <string name="placeholder_unsupported_message_type_default">Tipo de mensaje no soportado</string>
+
+    <!-- Paid Message Details: Status Labels   -->
+    <string name="paid_message_details_status_label_pay">Pagar</string>
+    <string name="paid_message_details_status_label_payment_accepted">Compra exitosa</string>
+    <string name="paid_message_details_status_label_payment_denied">Compra denegada</string>
+    <string name="paid_message_details_status_label_processing_payment">Procesando pago…</string>
+
+    <!-- Paid Message Overlays -->
+    <string name="paywall_overlay_label_text_message_received">Paga para desbloquear</string>
+    <string name="paywall_overlay_content_description_image_message_received">Paga para desbloquear la Imagen</string>
+    <string name="paywall_overlay_content_description_video_message_received">Paga para desbloquear el Video</string>
+
+
+    <!-- Link Previews -->
+    <string name="link_preview_add_contact_banner_label">Agregar Contacto</string>
+    <string name="link_preview_see_tribe_banner_label">Ver Tribu</string>
+
+    <!-- Replies -->
+    <string name="reply_message_media_content_description">Contenido del mensaje original</string>
+    <string name="reply_message_close_button_content_description">Cerrar</string>
+
+    <!-- Group Actions -->
+    <string name="message_action_group_kick">El administrador te ha\n eliminado de esta tribu</string>
+
+    <!--  Purchase Status Labels: Paid Message Details  -->
+    <string name="purchase_status_label_paid_message_details_pending">Pendiente</string>
+    <string name="purchase_status_label_paid_message_details_accepted">Compra exitosa</string>
+    <string name="purchase_status_label_paid_message_details_denied">Compra denegada</string>
+    <string name="purchase_status_label_paid_message_details_processing">Procesando pago…</string>
+    <string name="purchase_status_label_paid_message_details_default">Pagar</string>
+
+    <!--  Purchase Status Labels: Paid Message Sent Status  -->
+    <string name="purchase_status_label_paid_message_sent_status_pending">Pendiente</string>
+    <string name="purchase_status_label_paid_message_sent_status_accepted">Exitosa</string>
+    <string name="purchase_status_label_paid_message_sent_status_denied">Denegada</string>
+    <string name="purchase_status_label_paid_message_sent_status_processing">Procesando</string>
+    <string name="purchase_status_label_paid_message_sent_status_default">Desconocido</string>
+
+
+    <!--  Group Action Indicator Labels  -->
+    <string name="group_join_announcement_tribe">%1$s se ha unido a la tribu</string>
+    <string name="group_join_announcement_group">%1$s se ha unido al grupo</string>
+    <string name="group_leave_announcement_tribe">%1$s ha abandonado la tribu</string>
+    <string name="group_leave_announcement_group">%1$s ha abandonado el grupo</string>
+    <string name="group_kick_announcement_group_user_facing">El administrador te ha eliminado de este grupo</string>
+    <string name="group_kick_announcement_tribe_user_facing">El administrador te ha eliminado de esta tribu</string>
+
+    <!-- Selected Item Menu Labels -->
+    <string name="selected_message_menu_item_boost">Boost</string>
+    <string name="selected_message_menu_item_copy_text">Copiar Texto</string>
+    <string name="selected_message_menu_item_copy_call_link">Copiar Enlace</string>
+    <string name="selected_message_menu_item_copy_link">Copiar Enlace</string>
+    <string name="selected_message_menu_item_delete">Eliminar Mensaje</string>
+    <string name="selected_message_menu_item_reply">Responder</string>
+    <string name="selected_message_menu_item_save_file">Descargar</string>
+
+    <!-- Notify -->
+    <string name="notify_boost_failure">Pago de Boost falló</string>
+    <string name="side_effect_text_copied">Texto copiado al portapapeles</string>
+
+    <!-- Send Attachment -->
+    <string name="attachment_send_header_image">ENVIAR IMAGEN</string>
+    <string name="attachment_send_header_video">ENVIAR VIDEO</string>
+    <string name="attachment_send_header_giphy">ENVIAR GIPHY</string>
+
+    <!-- Exit Tribe -->
+    <string name="delete_own_tribe_not_supported">Eliminar la tribu no esta soportado aún</string>
+    <string name="alert_confirm_exit_tribe_title">Abandonar Tribu</string>
+    <string name="alert_confirm_exit_tribe_message">¿Estás seguro que deseas abandonar y eliminar la tribu?</string>
+
+    <!-- Menu -->
+    <string name="attachments_menu_cancel">CANCELAR</string>
+    <string name="camera_attachment_option">Camara</string>
+    <string name="library_attachment_option">Librería</string>
+    <string name="gif_attachment_option">Gif</string>
+    <string name="file_attachment_option">Archivo</string>
+    <string name="paid_message_attachment_option">Mensaje Pago</string>
+    <string name="request_attachment_option">Solicitar</string>
+    <string name="send_attachment_option">Enviar</string>
+</resources>

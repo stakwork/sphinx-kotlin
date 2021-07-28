@@ -12,8 +12,7 @@ import chat.sphinx.wrapper_chat.ChatAlias
 import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
-import chat.sphinx.wrapper_io_utils.InputStreamProvider
-import chat.sphinx.wrapper_message_media.MediaType
+import chat.sphinx.wrapper_meme_server.PublicAttachmentInfo
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -57,19 +56,12 @@ interface ChatRepository {
 
     suspend fun updateTribeInfo(chat: Chat): PodcastDto?
     suspend fun createTribe(createTribe: CreateTribe): Response<Any, ResponseError>
+    suspend fun updateTribe(chatId: ChatId, createTribe: CreateTribe): Response<Any, ResponseError>
     suspend fun exitAndDeleteTribe(chat: Chat): Response<Boolean, ResponseError>
 
-    @Deprecated(message = "Do Not Use. Incorrect method duplication.")
-    suspend fun updateChatProfilePic(
-        chat: Chat,
-        stream: InputStreamProvider,
-        mediaType: MediaType,
-        fileName: String,
-        contentLength: Long?
-    ): Response<ChatDto, ResponseError>
-
-    suspend fun updateChatProfileAlias(
+    suspend fun updateChatProfileInfo(
         chatId: ChatId,
-        alias: ChatAlias?
+        alias: ChatAlias? = null,
+        profilePic: PublicAttachmentInfo? = null,
     ): Response<ChatDto, ResponseError>
 }

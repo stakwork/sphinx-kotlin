@@ -63,6 +63,7 @@ import chat.sphinx.wrapper_invite.Invite
 import chat.sphinx.wrapper_io_utils.InputStreamProvider
 import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_lightning.NodeBalanceAll
+import chat.sphinx.wrapper_meme_server.PublicAttachmentInfo
 import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message_media.*
 import chat.sphinx.wrapper_message_media.token.MediaHost
@@ -85,7 +86,6 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import okio.base64.encodeBase64
 import java.io.InputStream
-import java.io.File
 import java.text.ParseException
 import kotlin.math.absoluteValue
 
@@ -983,9 +983,32 @@ abstract class SphinxRepository(
         return response
     }
 
-    @Deprecated(message = "Do Not Use. Incorrect method duplication.")
-    override suspend fun updateChatProfilePic(
-        chat: Chat,
+    override suspend fun updateChatProfileInfo(
+        chatId: ChatId,
+        alias: ChatAlias?,
+        profilePic: PublicAttachmentInfo?
+    ): Response<ChatDto, ResponseError> {
+        var response: Response<ChatDto, ResponseError> = Response.Error(
+            ResponseError("updateChatProfileInfo failed to execute")
+        )
+
+        if (alias != null) {
+            response = updateChatProfileAlias(chatId, alias)
+        } else if (profilePic != null) {
+            response = updateChatProfilePic(
+                chatId,
+                profilePic.stream,
+                profilePic.mediaType,
+                profilePic.fileName,
+                profilePic.contentLength
+            )
+        }
+
+        return response
+    }
+
+    suspend fun updateChatProfilePic(
+        chatId: ChatId,
         stream: InputStreamProvider,
         mediaType: MediaType,
         fileName: String,
@@ -1021,7 +1044,7 @@ abstract class SphinxRepository(
                         )
 
                         networkQueryChat.updateChat(
-                            chat.id,
+                            chatId,
                             PutChatDto(
                                 my_photo_url = newUrl.value,
                             )
@@ -1066,7 +1089,7 @@ abstract class SphinxRepository(
         return response
     }
 
-    override suspend fun updateChatProfileAlias(
+    private suspend fun updateChatProfileAlias(
         chatId: ChatId,
         alias: ChatAlias?
     ): Response<ChatDto, ResponseError> {
@@ -2315,15 +2338,43 @@ abstract class SphinxRepository(
     }
 
     override fun joinTribe(
-        tribeDto: TribeDto,
+        tribeDto: TribeDto
     ): Flow<LoadResponse<Any, ResponseError>> = flow {
         val queries = coreDB.getSphinxDatabaseQueries()
-
         var response: Response<Any, ResponseError>? = null
+        val memeServerHost = MediaHost.DEFAULT
 
         emit(LoadResponse.Loading)
 
         applicationScope.launch(mainImmediate) {
+
+            tribeDto.myPhotoUrl = tribeDto.profileImgFile?.let { imgFile ->
+                // If an image file is provided we should upload it
+                val token = memeServerTokenHandler.retrieveAuthenticationToken(memeServerHost)
+                    ?: throw RuntimeException("MemeServerAuthenticationToken retrieval failure")
+
+                val networkResponse = networkQueryMemeServer.uploadAttachment(
+                    authenticationToken = token,
+                    mediaType = MediaType.Image("${MediaType.IMAGE}/${imgFile.extension}"),
+                    stream = object : InputStreamProvider() {
+                        override fun newInputStream(): InputStream = imgFile.inputStream()
+                    },
+                    fileName = imgFile.name,
+                    contentLength = imgFile.length(),
+                    memeServerHost = memeServerHost,
+                )
+                @Exhaustive
+                when (networkResponse) {
+                    is Response.Error -> {
+                        LOG.e(TAG, "Failed to upload image: ", networkResponse.exception)
+                        response = networkResponse
+                        null
+                    }
+                    is Response.Success -> {
+                        "https://${memeServerHost.value}/public/${networkResponse.value.muid}"
+                    }
+                }
+            }
 
             networkQueryChat.joinTribe(tribeDto).collect { loadResponse ->
                 @Exhaustive
@@ -2403,9 +2454,10 @@ abstract class SphinxRepository(
                                 if (didChangeNameOrPhotoUrl) {
                                     networkQueryChat.updateTribe(
                                         chat.id,
-                                        PutTribeDto(
+                                        PostGroupDto(
                                             tribeDto.name,
-                                            tribeDto.img ?: "",
+                                            tribeDto.description,
+                                            img = tribeDto.img ?: "",
                                         )
                                     ).collect {}
                                 }
@@ -2892,7 +2944,85 @@ abstract class SphinxRepository(
                     }
                 }
 
-                networkQueryChat.createTribe(createTribe.toPostGroupDto(imgUrl)).collect { loadResponse ->
+                networkQueryChat.createTribe(
+                    createTribe.toPostGroupDto(imgUrl)
+                ).collect { loadResponse ->
+                    when (loadResponse) {
+                        is LoadResponse.Loading -> {}
+
+                        is Response.Error -> {
+                            response = loadResponse
+                            LOG.e(TAG, "Failed to create tribe: ", loadResponse.exception)
+                        }
+                        is Response.Success -> {
+                            loadResponse.value?.let { chatDto ->
+                                response = Response.Success(chatDto)
+                                val queries = coreDB.getSphinxDatabaseQueries()
+
+                                chatLock.withLock {
+                                    messageLock.withLock {
+                                        withContext(io) {
+                                            queries.transaction {
+                                                upsertChat(chatDto, moshi, chatSeenMap, queries, null)
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                response = Response.Error(
+                    ResponseError("Failed to update Chat Profile", e)
+                )
+            }
+        }.join()
+
+        return response
+    }
+
+    override suspend fun updateTribe(
+        chatId: ChatId,
+        createTribe: CreateTribe
+    ): Response<Any, ResponseError> {
+
+        var response: Response<Any, ResponseError>  = Response.Error(ResponseError(("Failed to exit tribe")))
+        val memeServerHost = MediaHost.DEFAULT
+
+        applicationScope.launch(mainImmediate) {
+            try {
+                val imgUrl: String? = (createTribe.img?.let { imgFile ->
+                    val token = memeServerTokenHandler.retrieveAuthenticationToken(memeServerHost)
+                        ?: throw RuntimeException("MemeServerAuthenticationToken retrieval failure")
+
+                    val networkResponse = networkQueryMemeServer.uploadAttachment(
+                        authenticationToken = token,
+                        mediaType = MediaType.Image("${MediaType.IMAGE}/${imgFile.extension}"),
+                        stream = object : InputStreamProvider() {
+                            override fun newInputStream(): InputStream = imgFile.inputStream()
+                        },
+                        fileName = imgFile.name,
+                        contentLength = imgFile.length(),
+                        memeServerHost = memeServerHost,
+                    )
+                    @Exhaustive
+                    when (networkResponse) {
+                        is Response.Error -> {
+                            LOG.e(TAG, "Failed to upload image: ", networkResponse.exception)
+                            response = networkResponse
+                            null
+                        }
+                        is Response.Success -> {
+                            "https://${memeServerHost.value}/public/${networkResponse.value.muid}"
+                        }
+                    }
+                }) ?: createTribe.imgUrl
+
+                networkQueryChat.updateTribe(
+                    chatId,
+                    createTribe.toPostGroupDto(imgUrl)
+                ).collect { loadResponse ->
                     when (loadResponse) {
                         is LoadResponse.Loading -> {}
 

@@ -20,17 +20,10 @@ inline fun Message.retrieveTextToShow(): String? =
         if (giphyData != null) {
             return giphyData?.text
         }
+        if (podBoost != null) {
+            return null
+        }
         decrypted.value
-
-//            ?.text
-//            ?: if (podBoost == null) {
-//                decrypted.value
-//            } else {
-//                null
-//            }
-//            ?.toString()
-//            ?:
-//            decrypted.value
     }
 
 @Suppress("NOTHING_TO_INLINE")

@@ -2,13 +2,5 @@
 <resources>
     <string name="payment_send_header_name">SEND PAYMENT</string>
 
-    <string name="destination_key">Public Key</string>
-    <string name="balance_too_low">Balance too low</string>
-    <string name="add_message_hint">Add Message</string>
-    <string name="confirm_button">CONFIRM</string>
-    <string name="continue_button">CONTINUE</string>
-    <string name="error_processing_payment">There was an error processing payment, please try again later.</string>
-    <string name="payment_sent">Payment of %d sat sent to %s</string>
-
     <string name="invalid_node_pub_key_qr_code">QR code is not a Lightning Node Public Key</string>
 </resources>

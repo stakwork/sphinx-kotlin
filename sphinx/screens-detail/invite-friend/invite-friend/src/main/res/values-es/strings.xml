@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="invite_friend_header_name">INVITAR A UN AMIGO</string>
+
+    <string name="invite_friend_nickname_label">ALIAS</string>
+    <string name="invite_friend_message_label">AGREGA UN MENSAJE...</string>
+    <string name="invite_friend_message_hint">Bienvenida/o a Sphinx!</string>
+    <string name="invite_friend_create_invitation_button">Crear Invitación</string>
+    <string name="invite_friend_estimated_cost_text_view">COSTO ESTIMADO</string>
+
+    <string name="invite_friend_nickname_empty">Alias no puede ser vacío</string>
+    <string name="invite_failed">La invitación falló. Por favor inténtalo luego.</string>
+</resources>

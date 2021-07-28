@@ -7,7 +7,10 @@
     <string name="sats">sats</string>
     <string name="new_contact">New Contact</string>
     <string name="default_sats_amount">…</string>
-    <string name="uploading">Uploading...…</string>
+    <string name="uploading">Uploading</string>
+    <string name="unknown">Unknown</string>
+    <string name="decryption_error">DECRYPTION ERROR...</string>
+    <string name="null_name_error">ERROR: NULL NAME</string>
 
     <!--  Number Pad   -->
     <string name="_1">1</string>

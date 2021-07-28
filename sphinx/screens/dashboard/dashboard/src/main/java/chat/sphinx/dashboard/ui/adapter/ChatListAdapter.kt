@@ -301,13 +301,16 @@ internal class ChatListAdapter(
                 }
 
                 // Name
-                val chatName = if (dashboardChat.chatName != null) {
+
+                val chatName = if (dashboardChat is DashboardChat.Inactive.Invite) {
+                    dashboardChat.getChatName(root.context)
+                } else if (dashboardChat.chatName != null) {
                     dashboardChat.chatName
                 } else {
                     // Should never make it here, but just in case...
                     textViewDashboardChatHolderName.setTextColorExt(R.color.primaryRed)
                     textViewChatHolderCenteredName.setTextColorExt(R.color.primaryRed)
-                    "ERROR: NULL NAME"
+                    root.context.getString(R.string.null_name_error)
                 }
 
                 textViewDashboardChatHolderName.text = chatName
@@ -327,10 +330,10 @@ internal class ChatListAdapter(
                 textViewChatHolderTime.text = dashboardChat.getDisplayTime(today00)
 
                 // Message
-                val messageText = dashboardChat.getMessageText()
+                val messageText = dashboardChat.getMessageText(root.context)
                 val hasUnseenMessages = dashboardChat.hasUnseenMessages()
 
-                if (messageText == DashboardChat.Active.DECRYPTION_ERROR) {
+                if (messageText == root.context.getString(R.string.decryption_error)) {
                     textViewChatHolderMessage.setTextColorExt(R.color.primaryRed)
                 } else {
                     textViewChatHolderMessage.setTextColorExt(if (hasUnseenMessages) R.color.text else R.color.placeholderText)

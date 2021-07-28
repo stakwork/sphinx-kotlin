@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="support_ticket_header_name">SOPORTE</string>
+    <string name="send_message">Enviar Mensaje</string>
+    <string name="copy_logs">Copiar Registros</string>
+    <string name="describe_your_problem_here">Describe tu problem aquí…</string>
+    <string name="message_required">Mensaje requerido</string>
+    <string name="fetch_logs_failed">Ha habido un error al obtener los registros</string>
+    <string name="logs_copied_to_clipboard">Registros copiados al portapapeles</string>
+    <string name="no_logs_loaded">No hay registros</string>
+</resources>

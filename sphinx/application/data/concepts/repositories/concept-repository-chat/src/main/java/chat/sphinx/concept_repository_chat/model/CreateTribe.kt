@@ -1,6 +1,7 @@
 package chat.sphinx.concept_repository_chat.model
 
 import chat.sphinx.concept_network_query_chat.model.PostGroupDto
+import chat.sphinx.concept_network_query_chat.model.TribeDto
 import chat.sphinx.wrapper_chat.AppUrl
 import chat.sphinx.wrapper_chat.FeedUrl
 import chat.sphinx.wrapper_chat.toAppUrl
@@ -10,18 +11,18 @@ import java.io.File
 class CreateTribe private constructor(
     val name: String,
     val description: String,
-    val isTribe: Boolean? = true,
-    val pricePerMessage: Long? = 0L,
-    val priceToJoin: Long? = 0L,
-    val escrowAmount: Long? = 0L,
-    val escrowMillis: Long? = 0L,
-    val img: File? = null,
-    val imgUrl: String? = null,
-    val tags: Array<String> = arrayOf(),
-    val unlisted: Boolean? = false,
-    val private: Boolean? = false,
-    val appUrl: AppUrl? = null,
-    val feedUrl: FeedUrl? = null,
+    val isTribe: Boolean?,
+    val pricePerMessage: Long?,
+    val priceToJoin: Long?,
+    val escrowAmount: Long?,
+    val escrowMillis: Long?,
+    val img: File?,
+    val imgUrl: String?,
+    val tags: Array<String>,
+    val unlisted: Boolean?,
+    val private: Boolean?,
+    val appUrl: AppUrl?,
+    val feedUrl: FeedUrl?,
 ) {
 
     class Builder(
@@ -118,10 +119,18 @@ class CreateTribe private constructor(
             return this
         }
 
+        @Synchronized
         fun toggleTag(index: Int): Builder {
             this.tags[index].isSelected = !this.tags[index].isSelected
             return this
         }
+
+        fun selectedTags(): Array<Tag> {
+            return tags.filter {
+                it.isSelected
+            }.toTypedArray()
+        }
+
         @Synchronized
         fun setUnlisted(unlisted: Boolean?): Builder {
             this.unlisted = unlisted
@@ -146,6 +155,24 @@ class CreateTribe private constructor(
         }
 
         @Synchronized
+        fun load(tribeDto: TribeDto) {
+            name = tribeDto.name
+            imgUrl = tribeDto.img
+            img = null
+            description = tribeDto.description
+            tags.forEach { tag ->
+                tag.isSelected = tribeDto.tags.contains(tag.name)
+            }
+            priceToJoin = tribeDto.price_to_join
+            pricePerMessage = tribeDto.price_per_message
+            escrowAmount = tribeDto.escrow_amount
+            escrowMillis = tribeDto.escrow_millis
+            appUrl = tribeDto.app_url?.toAppUrl()
+            feedUrl = tribeDto.feed_url?.toFeedUrl()
+            unlisted = tribeDto.unlisted
+        }
+
+        @Synchronized
         fun build(): CreateTribe? =
             if (!hasRequiredFields) {
                 null
@@ -160,9 +187,7 @@ class CreateTribe private constructor(
                     escrowMillis = escrowMillis,
                     img = img,
                     imgUrl = imgUrl,
-                    tags = tags.filter {
-                        it.isSelected
-                    }.map {
+                    tags = selectedTags().map {
                         it.name
                     }.toTypedArray(),
                     unlisted = unlisted,

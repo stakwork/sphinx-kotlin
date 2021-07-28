@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="on_board_welcome">Bienvenida/o</string>
+    <string name="on_board_welcome_info_code">Pega el código de conexión\no escanea el código QR</string>
+    <string name="on_board_edit_text_hint_code">Ingresa tu código…</string>
+
+    <string name="side_effect_generate_token_failed">Generación de token fallida</string>
+
+    <string name="on_board_welcome_info_decrypt">Ingresa tu PIN\npara desencriptar</string>
+    <string name="on_board_edit_text_hint_decrypt">Ingresa tu PIN…</string>
+
+    <string name="side_effect_decryption_failure">Desencriptado fallido</string>
+    <string name="side_effect_empty_input">El valor no puede ser vacío</string>
+    <string name="side_effect_pin_length">Longitud del PIN inválida</string>
+    <string name="side_effect_invalid_code">Código inválido</string>
+    <string name="side_effect_invalid_pin">PIN inválido</string>
+    <string name="side_effect_feature_not_implemented">Esta funcionalidad aún no está implementada</string>
+</resources>

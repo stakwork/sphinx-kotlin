@@ -2,7 +2,7 @@
 <resources>
     <dimen name="tribe_picture_xy">87dp</dimen>
     <dimen name="tribe_price_container_height">200dp</dimen>
-    <dimen name="tribe_member_info_container_height">65dp</dimen>
+    <dimen name="tribe_member_info_container_height">130dp</dimen>
     <dimen name="join_tribe_button_width">230dp</dimen>
     <dimen name="join_tribe_button_height">50dp</dimen>
     <dimen name="join_tribe_price_row_height">50dp</dimen>

@@ -17,6 +17,7 @@
     <dimen name="chat_header_headline_text_size">16sp</dimen>
     <dimen name="chat_header_phone_text_size">25sp</dimen>
     <dimen name="chat_message_text_size">17sp</dimen>
+    <dimen name="chat_podcast_boost_text_size">14sp</dimen>
 
     <item name="default_space_width_percent" format="float" type="dimen">.2</item>
     <dimen name="background_message_holder_default_corner_rad">12dp</dimen>
@@ -41,12 +42,13 @@
 
 
     <!-- Message type heights  -->
-    <dimen name="message_type_boost_height">26dp</dimen>
+    <dimen name="message_type_boost_height">50dp</dimen>
     <dimen name="message_type_direct_payment_height">46dp</dimen>
     <dimen name="message_type_image_attachment_min_height">140dp</dimen>
     <dimen name="message_type_file_attachment_height">60dp</dimen>
     <dimen name="message_type_audio_attachment_height">62dp</dimen>
     <dimen name="message_type_video_attachment_height">210dp</dimen>
+    <dimen name="message_boost_height">26dp</dimen>
     <dimen name="paid_message_details_holder_height">50dp</dimen>
     <dimen name="unsupported_message_type_placeholder_height">50dp</dimen>
     <dimen name="paywall_overlay_text_message_received_height">50dp</dimen>

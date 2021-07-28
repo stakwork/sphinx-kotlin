@@ -49,7 +49,11 @@ data class PodBoost(
     val itemId: ItemId,
     val timeSeconds: Int,
     val amount: Sat
-)
+) {
+    companion object {
+        const val MESSAGE_PREFIX = "boost::"
+    }
+}
 
 // "{\"feedID\":226249,\"itemID\":1997782557,\"ts\":1396,\"amount\":100}"
 @JsonClass(generateAdapter = true)

@@ -101,14 +101,14 @@ class NetworkQueryChatImpl(
 //    app.put('/member/:contactId/:status/:messageId', chatTribes.approveOrRejectMember)
     override fun updateTribe(
         chatId: ChatId,
-        putTribeDto: PutTribeDto,
+        postGroupDto: PostGroupDto,
         relayData: Pair<AuthorizationToken, RelayUrl>?
     ): Flow<LoadResponse<ChatDto, ResponseError>> =
         networkRelayCall.relayPut(
-            responseJsonClass = UpdateChatRelayResponse::class.java,
+            responseJsonClass = PostGroupRelayResponse::class.java,
             relayEndpoint = String.format(ENDPOINT_EDIT_GROUP, chatId.value),
-            requestBodyJsonClass = PutTribeDto::class.java,
-            requestBody = putTribeDto,
+            requestBodyJsonClass = PostGroupDto::class.java,
+            requestBody = postGroupDto,
             relayData = relayData
         )
 
