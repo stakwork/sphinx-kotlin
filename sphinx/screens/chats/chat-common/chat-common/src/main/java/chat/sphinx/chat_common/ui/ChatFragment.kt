@@ -585,7 +585,7 @@ abstract class ChatFragment<
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.getFooterViewStateFlow().collect { viewState ->
                 footerBinding.apply {
-                    editTextChatFooter.hint = viewState.hintText
+                    editTextChatFooter.hint = getString(viewState.hintTextStringId)
                     imageViewChatFooterMicrophone.goneIfFalse(viewState.showRecordAudioIcon)
                     textViewChatFooterSend.goneIfFalse(viewState.showSendIcon)
                     textViewChatFooterAttachment.goneIfFalse(viewState.showMenuIcon)

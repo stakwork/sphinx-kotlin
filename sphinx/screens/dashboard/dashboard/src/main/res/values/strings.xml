@@ -31,4 +31,34 @@
     <string name="attempting_payment_request">Attempting Payment Request</string>
     <string name="failed_to_pay_request">Failed to pay request</string>
     <string name="successfully_paid_invoice">Successfully paid invoice</string>
+
+    <string name="last_message_description_message_deleted">Message deleted</string>
+    <string name="last_message_description_you">You</string>
+    <string name="last_message_description_gif_shared">%sGIF shared</string>
+    <string name="last_message_description_boost">%sBoost %d %s</string>
+    <string name="last_message_description_invoice_sent">Invoice Sent: %d</string>
+    <string name="last_message_description_invoice_receive">Invoice Received: %d</string>
+    <string name="last_message_description_payment_sent">Payment Sent: %d</string>
+    <string name="last_message_description_payment_received">Payment Received: %d</string>
+
+    <string name="last_message_description_sent">sent</string>
+    <string name="last_message_description_an_audio_clip">an Audio Clip</string>
+    <string name="last_message_description_a_gif">a Gif</string>
+    <string name="last_message_description_an_image">an Image</string>
+    <string name="last_message_description_a_pdf">a PDF</string>
+    <string name="last_message_description_a_paid_message">a Paid Message</string>
+    <string name="last_message_description_an_attachment">an Attachment</string>
+    <string name="last_message_description_a_video">a Video</string>
+
+    <string name="last_message_description_has_join_tribe">%s has joined the tribe</string>
+    <string name="last_message_description_just_left_tribe">%s just left the tribe</string>
+
+    <string name="last_message_description_invite">Invite: %s</string>
+    <string name="last_message_description_looking_available_node">Looking for an available node for %s</string>
+    <string name="last_message_description_invite_ready">Ready! Tap to share. Expires in 24 hrs</string>
+    <string name="last_message_description_invite_signing_on">%s is signing on</string>
+    <string name="last_message_description_invite_tap_to_pay">Tap to pay and activate the invite</string>
+    <string name="last_message_description_invite_payment_sent">Payment sent. Waiting confirmation</string>
+    <string name="last_message_description_invite_signup_complete">Signup complete</string>
+    <string name="last_message_description_invite_expired">Expired</string>
 </resources>

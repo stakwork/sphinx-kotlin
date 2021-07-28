@@ -31,4 +31,34 @@
     <string name="attempting_payment_request">Procesando el pago de la solicitud</string>
     <string name="failed_to_pay_request">No se pudo pagar la solicitud</string>
     <string name="successfully_paid_invoice">Solicitud pagada con éxito</string>
+
+    <string name="last_message_description_message_deleted">Mensaje eliminado</string>
+    <string name="last_message_description_you">Tú</string>
+    <string name="last_message_description_gif_shared">%sGIF compartido</string>
+    <string name="last_message_description_boost">%sBoost %d %s</string>
+    <string name="last_message_description_invoice_sent">Solicitud enviáda: %d</string>
+    <string name="last_message_description_invoice_receive">Solicitud recibida: %d</string>
+    <string name="last_message_description_payment_sent">Pago enviádo: %d</string>
+    <string name="last_message_description_payment_received">Pago recibido: %d</string>
+
+    <string name="last_message_description_sent">envíado</string>
+    <string name="last_message_description_an_audio_clip">un Clip de Audio</string>
+    <string name="last_message_description_a_gif">un Gif</string>
+    <string name="last_message_description_an_image">una Imagen</string>
+    <string name="last_message_description_a_pdf">un PDF</string>
+    <string name="last_message_description_a_paid_message">un Mensaje Pago</string>
+    <string name="last_message_description_an_attachment">un Adjunto</string>
+    <string name="last_message_description_a_video">un Video</string>
+
+    <string name="last_message_description_has_join_tribe">%s se ha unido a la tribu</string>
+    <string name="last_message_description_just_left_tribe">%s ha abandonado la tribu</string>
+
+    <string name="last_message_description_invite">Invitación: %s</string>
+    <string name="last_message_description_looking_available_node">Buscando nodo disponible para %s</string>
+    <string name="last_message_description_invite_ready">¡Listo! Toca para compartir. Caduca en 24 horas</string>
+    <string name="last_message_description_invite_signing_on">%s se está registrando</string>
+    <string name="last_message_description_invite_tap_to_pay">Toca para pagar y actvar la invitación</string>
+    <string name="last_message_description_invite_payment_sent">Pago enviado, esperando confirmación</string>
+    <string name="last_message_description_invite_signup_complete">Registro completo</string>
+    <string name="last_message_description_invite_expired">Invitación caducada</string>
 </resources>
