@@ -5,6 +5,7 @@ import chat.sphinx.wrapper_common.util.Int5
 import io.matthewnelson.crypto_common.clazzes.toSha256Hash
 import io.matthewnelson.crypto_common.extensions.toHex
 import java.io.ByteArrayInputStream
+import kotlin.jvm.Throws
 
 /**
  * Class used to handling bolt11 payment requests
@@ -35,6 +36,7 @@ class Bolt11(
         private const val SIGNATURE_LENGTH = 104
         private const val TIMESTAMP_LENGTH = 7
 
+        @Throws(Exception::class)
         fun decode(lightningPaymentRequest: LightningPaymentRequest): Bolt11 {
             val paymentRequest = lightningPaymentRequest.value.replaceFirst("lightning:", "")
 
