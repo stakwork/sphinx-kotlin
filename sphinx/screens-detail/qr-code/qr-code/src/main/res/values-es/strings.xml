@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="share">Compartir</string>
+    <string name="copy">Copiar</string>
+    <string name="paid">PAGADO</string>
+    <string name="qr_code_notify_copied">%s copiado al portapapeles</string>
+</resources>
