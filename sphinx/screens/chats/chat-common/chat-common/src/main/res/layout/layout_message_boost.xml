@@ -35,7 +35,7 @@
     <!-- Boost Reactions -->
     <include
         android:id="@+id/include_boost_reactions_group"
-        layout="@layout/layout_message_type_boost_reaction_group"
+        layout="@layout/layout_message_boost_reaction_group"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         app:layout_constraintEnd_toEndOf="parent" />

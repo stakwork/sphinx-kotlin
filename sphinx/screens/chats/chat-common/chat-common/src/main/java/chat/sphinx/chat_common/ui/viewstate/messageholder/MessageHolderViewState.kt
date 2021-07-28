@@ -138,6 +138,14 @@ internal sealed class MessageHolderViewState(
         }
     }
 
+    val bubblePodcastBoost: LayoutState.Bubble.ContainerSecond.PodcastBoost? by lazy(LazyThreadSafetyMode.NONE) {
+        message.podBoost?.let { podBoost ->
+            LayoutState.Bubble.ContainerSecond.PodcastBoost(
+                podBoost.amount,
+            )
+        }
+    }
+
     // don't use by lazy as this uses a for loop and needs to be initialized on a background
     // thread (so, while the MHVS is being created)
     val bubbleReactionBoosts: LayoutState.Bubble.ContainerFourth.Boost? =

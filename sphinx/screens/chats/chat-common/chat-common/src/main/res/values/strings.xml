@@ -96,4 +96,6 @@
     <string name="request_attachment_option">Request</string>
     <string name="send_attachment_option">Send</string>
 
+    <string name="podcast_boost_label">Boost!</string>
+
 </resources>
