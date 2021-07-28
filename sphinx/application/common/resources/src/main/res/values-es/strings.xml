@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="to">To</string>
-    <string name="from">From</string>
+    <string name="to">A</string>
+    <string name="from">De</string>
 
     <string name="sat">sat</string>
     <string name="sats">sats</string>
-    <string name="new_contact">New Contact</string>
+    <string name="new_contact">Nuevo Contacto</string>
     <string name="default_sats_amount">…</string>
-    <string name="uploading">Uploading</string>
-    <string name="unknown">Unknown</string>
-    <string name="decryption_error">DECRYPTION ERROR...</string>
-    <string name="null_name_error">ERROR: NULL NAME</string>
+    <string name="uploading">Subiendo</string>
+    <string name="unknown">Desconocido</string>
+    <string name="decryption_error">ERROR DE DECRIPTACIÓN...</string>
+    <string name="null_name_error">ERROR: NOMBRE VACÍO</string>
 
     <!--  Number Pad   -->
     <string name="_1">1</string>
@@ -79,9 +79,9 @@
     <string name="media_type_label_video">Video</string>
 
     <!--  Group Pin View -->
-    <string name="group_pin_label">Privacy Setting</string>
-    <string name="new_contact_pin_standard_private_label">Standard PIN / Privacy PIN</string>
+    <string name="group_pin_label">Configuración de Privacidad</string>
+    <string name="new_contact_pin_standard_private_label">PIN Estandar / PIN Privado</string>
 
-    <string name="invalid_url">Invalid URL</string>
+    <string name="invalid_url">URL Inválida</string>
 
 </resources>

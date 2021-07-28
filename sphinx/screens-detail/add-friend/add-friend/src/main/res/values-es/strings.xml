@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="add_friend_header_name">AGREGAR AMIGO</string>
+    <string name="new_to_sphinx_button">Nuevo en Sphinx</string>
+    <string name="already_on_sphinx_button">Usuario de Sphinx</string>
+</resources>

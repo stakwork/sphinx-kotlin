@@ -13,7 +13,7 @@
     <string name="failed_to_update_tribe">Failed to update tribe</string>
     <string name="failed_to_load_tribe">Failed to load tribe</string>
     <string name="failed_to_process_image">Failed to process image</string>
-    <string name="list_on_tribes_sphinx_chat">List on tribes.sphinx.chat ?</string>
+    <string name="list_on_tribes_sphinx_chat">List on tribes.sphinx.chat?</string>
     <string name="name">Name *</string>
     <string name="image">Image</string>
     <string name="description">Description *</string>

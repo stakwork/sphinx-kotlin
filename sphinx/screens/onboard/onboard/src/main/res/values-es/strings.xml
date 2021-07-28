@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="side_effect_generate_token_failed">Generación de token fallida</string>
+    <string name="sign_up_get_started_button">Comencemos</string>
+    <string name="sign_up_friend_message">Un mensaje de tu amigo…</string>
+    <string name="sign_up_next_button">Siguiente</string>
+</resources>

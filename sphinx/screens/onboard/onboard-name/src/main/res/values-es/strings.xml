@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="side_effect_get_contacts_failed">No se ha podido recuperar el contacto principal</string>
+    <string name="side_effect_update_owner_failed">No se ha podido actualizar el contacto principal</string>
+
+    <string name="sign_up_next_button">Siguiente</string>
+    <string name="sign_up_name_edit_text_hint">Tu Nombre</string>
+    <string name="sign_up_name_text_view">Tu Nombre</string>
+</resources>

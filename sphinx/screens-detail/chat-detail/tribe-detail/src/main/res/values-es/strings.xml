@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tribe_detail_header_name">DETALLE DE LA TRIBU</string>
+    <string name="qr_code_title">Enlace para unirse a la tribu</string>
+    <string name="podcast_sats_per_minute">Podcast: sats por minuto</string>
+    <string name="alias">Alias</string>
+
+    <string name="bottom_menu_tribe_profile_pic_header_text">Foto de perfil para la tribu</string>
+
+    <string name="tribe_created_on">Creada en %s</string>
+    <string name="tribe_costs">Precio por mensaje: %d sat - Monto a retener: %d sat</string>
+    <string name="profile_picture">Foto de Perfil</string>
+
+    <string name="failed_to_update_profile_alias">No se ha podido actualizar el alias</string>
+    <string name="failed_to_update_profile_pic">No se ha podido actualizar la foto de perfil</string>
+
+    <string name="alert_confirm_delete_tribe_heading">Eliminar %s</string>
+    <string name="alert_confirm_delete_tribe_message">¿Estás seguro que deseas eliminar la tribu?</string>
+    <string name="failed_to_delete_tribe">No se ha podido eliminar la tribu</string>
+
+    <string name="alert_confirm_exit_tribe_heading">Abandonar %s</string>
+    <string name="alert_confirm_exit_tribe_message">¿Estás seguro que deseas abandonar la tribu?</string>
+    <string name="failed_to_exit_tribe">No se ha podido abandonar la tribu</string>
+</resources>
