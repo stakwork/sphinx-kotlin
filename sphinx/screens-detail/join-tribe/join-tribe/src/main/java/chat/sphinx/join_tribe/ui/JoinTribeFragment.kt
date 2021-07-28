@@ -158,10 +158,10 @@ internal class JoinTribeFragment: SideEffectFragment<
 
             textViewTribeName.text = viewState.name
             textViewTribeDescription.text = viewState.description
-            includeTribePrice.textViewPricePerMessage.text = viewState.pricePerMessage.toString()
-            includeTribePrice.textViewPriceToJoin.text = viewState.priceToJoin.toString()
-            includeTribePrice.textViewAmountToStake.text = viewState.escrowAmount.toString()
-            includeTribePrice.textViewTimeToStake.text = viewState.hourToStake.toString()
+            includeTribePrice.textViewPricePerMessage.text = viewState.pricePerMessage
+            includeTribePrice.textViewPriceToJoin.text = viewState.priceToJoin
+            includeTribePrice.textViewAmountToStake.text = viewState.escrowAmount
+            includeTribePrice.textViewTimeToStake.text = viewState.hourToStake
 
             loadingTribeInfoContent.goneIfFalse(false)
         }
@@ -169,24 +169,25 @@ internal class JoinTribeFragment: SideEffectFragment<
 
     private fun loadTribeImage(img: String?) {
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-            img?.let { img ->
-                if (img.isNotEmpty()) {
-                    imageLoader.load(
-                        binding.imageViewTribePicture,
-                        img,
-                        ImageLoaderOptions.Builder()
-                            .placeholderResId(R.drawable.ic_tribe_placeholder)
-                            .transformation(Transformation.CircleCrop)
-                            .build()
-                    )
-                }
-            } ?: binding.imageViewTribePicture
-                .setImageDrawable(
-                    ContextCompat.getDrawable(
-                        binding.root.context,
-                        R.drawable.ic_tribe_placeholder
-                    )
+            if (img != null && img.isNotEmpty()) {
+                imageLoader.load(
+                    binding.imageViewTribePicture,
+                    img,
+                    ImageLoaderOptions.Builder()
+                        .placeholderResId(R.drawable.ic_tribe_placeholder)
+                        .transformation(Transformation.CircleCrop)
+                        .build()
                 )
+            } else {
+                binding.imageViewTribePicture
+                    .setImageDrawable(
+                        ContextCompat.getDrawable(
+                            binding.root.context,
+                            R.drawable.ic_tribe_placeholder
+                        )
+                    )
+
+            }
         }
     }
 

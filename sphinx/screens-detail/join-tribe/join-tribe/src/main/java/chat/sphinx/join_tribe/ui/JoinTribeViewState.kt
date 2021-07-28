@@ -12,25 +12,25 @@ internal sealed class JoinTribeViewState: ViewState<JoinTribeViewState>() {
         val name: String,
         val description: String,
         val imageUrl: String?,
-        val priceToJoin: Long,
-        val pricePerMessage: Long,
-        val escrowAmount: Long,
-        val hourToStake: Long = 0,
+        val priceToJoin: String,
+        val pricePerMessage: String,
+        val escrowAmount: String,
+        val hourToStake: String,
         val myAlias: String?,
         val myPhotoUrl: String?
     ): JoinTribeViewState() {
         companion object {
             operator fun invoke(tribeDto: TribeDto): TribeLoaded =
                 TribeLoaded(
-                    name = tribeDto.name,
-                    description = tribeDto.description,
-                    imageUrl = tribeDto.img,
-                    priceToJoin = tribeDto.price_to_join,
-                    pricePerMessage = tribeDto.price_per_message,
-                    escrowAmount = tribeDto.escrow_amount,
-                    hourToStake = tribeDto.hourToStake,
-                    myAlias = tribeDto.myAlias,
-                    myPhotoUrl = tribeDto.myPhotoUrl,
+                    tribeDto.name,
+                    tribeDto.description,
+                    tribeDto.img,
+                    tribeDto.price_to_join.toString(),
+                    tribeDto.price_per_message.toString(),
+                    tribeDto.escrow_amount.toString(),
+                    tribeDto.hourToStake.toString(),
+                    tribeDto.myAlias,
+                    tribeDto.myPhotoUrl,
                 )
         }
     }

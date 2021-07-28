@@ -20,10 +20,10 @@ internal sealed class CreateTribeViewState: ViewState<CreateTribeViewState>() {
         val description: String,
         val imageUrl: String?,
         val tags: Array<String>,
-        val priceToJoin: Long,
-        val pricePerMessage: Long,
-        val escrowAmount: Long,
-        val hourToStake: Long = 0,
+        val priceToJoin: String,
+        val pricePerMessage: String,
+        val escrowAmount: String,
+        val hourToStake: String,
         val appUrl: String?,
         val feedUrl: String?,
         val unlisted: Boolean?,
@@ -32,19 +32,27 @@ internal sealed class CreateTribeViewState: ViewState<CreateTribeViewState>() {
         companion object {
             operator fun invoke(tribeDto: TribeDto): ExistingTribe =
                 ExistingTribe(
-                    name = tribeDto.name,
-                    description = tribeDto.description,
-                    imageUrl = tribeDto.img,
-                    tags = tribeDto.tags,
-                    priceToJoin = tribeDto.price_to_join,
-                    pricePerMessage = tribeDto.price_per_message,
-                    escrowAmount = tribeDto.escrow_amount,
-                    hourToStake = tribeDto.hourToStake,
-                    appUrl = tribeDto.app_url,
-                    feedUrl = tribeDto.feed_url,
-                    unlisted = tribeDto.unlisted,
-                    private = tribeDto.private,
+                    tribeDto.name,
+                    tribeDto.description,
+                    tribeDto.img,
+                    tribeDto.tags,
+                    tribeDto.price_to_join.getStringOrEmpty(),
+                    tribeDto.price_per_message.getStringOrEmpty(),
+                    tribeDto.escrow_amount.getStringOrEmpty(),
+                    tribeDto.hourToStake.getStringOrEmpty(),
+                    tribeDto.app_url,
+                    tribeDto.feed_url,
+                    tribeDto.unlisted,
+                    tribeDto.private,
                 )
         }
     }
+}
+
+@Suppress("NOTHING_TO_INLINE")
+private inline fun Long.getStringOrEmpty(): String {
+    if (this == 0.toLong()) {
+        return  ""
+    }
+    return "$this"
 }

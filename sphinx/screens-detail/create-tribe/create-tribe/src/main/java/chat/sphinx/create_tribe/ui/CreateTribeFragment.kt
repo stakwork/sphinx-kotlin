@@ -28,14 +28,6 @@ import kotlinx.coroutines.launch
 import javax.annotation.meta.Exhaustive
 import javax.inject.Inject
 
-@Suppress("NOTHING_TO_INLINE")
-private inline fun Long.getStringOrEmpty(): String {
-    if (this == 0.toLong()) {
-        return  ""
-    }
-    return "$this"
-}
-
 @AndroidEntryPoint
 internal class CreateTribeFragment: SideEffectFragment<
         Context,
@@ -105,7 +97,7 @@ internal class CreateTribeFragment: SideEffectFragment<
                 if (hasFocus) {
                     return@setOnFocusChangeListener
                 }
-                editTextTribeImage.text.toString().let { imageUrl ->
+                editTextTribeImage.text?.toString().let { imageUrl ->
                     if (URLUtil.isValidUrl(imageUrl)) {
                         showTribeImage(imageUrl)
                     } else {
@@ -145,7 +137,7 @@ internal class CreateTribeFragment: SideEffectFragment<
                     if (it.isNullOrEmpty()) {
                         null
                     } else {
-                        it.toString().toLong()
+                        it.toString().toLongOrNull()
                     }
                 )
             }
@@ -154,7 +146,7 @@ internal class CreateTribeFragment: SideEffectFragment<
                     if (it.isNullOrEmpty()) {
                         null
                     } else {
-                        it.toString().toLong()
+                        it.toString().toLongOrNull()
                     }
                 )
             }
@@ -163,7 +155,7 @@ internal class CreateTribeFragment: SideEffectFragment<
                     if (it.isNullOrEmpty()) {
                         null
                     } else {
-                        it.toString().toLong()
+                        it.toString().toLongOrNull()
                     }
                 )
             }
@@ -172,7 +164,7 @@ internal class CreateTribeFragment: SideEffectFragment<
                     if (it.isNullOrEmpty()) {
                         null
                     } else {
-                        it.toString().toLong() * MILLISECONDS_IN_AN_HOUR
+                        (it.toString().toLongOrNull() ?: 0) * MILLISECONDS_IN_AN_HOUR
                     }
                 )
             }
@@ -278,10 +270,10 @@ internal class CreateTribeFragment: SideEffectFragment<
 
                 binding.editTextTribeDescription.setText(viewState.description)
 
-                binding.editTextTribePriceToJoin.setText(viewState.priceToJoin.getStringOrEmpty())
-                binding.editTextTribePricePerMessage.setText(viewState.pricePerMessage.getStringOrEmpty())
-                binding.editTextTribeAmountToStake.setText(viewState.escrowAmount.getStringOrEmpty())
-                binding.editTextTribeTimeToStake.setText(viewState.hourToStake.getStringOrEmpty())
+                binding.editTextTribePriceToJoin.setText(viewState.priceToJoin)
+                binding.editTextTribePricePerMessage.setText(viewState.pricePerMessage)
+                binding.editTextTribeAmountToStake.setText(viewState.escrowAmount)
+                binding.editTextTribeTimeToStake.setText(viewState.hourToStake)
 
                 binding.editTextTribeAppUrl.setText(viewState.appUrl ?: "")
                 binding.editTextTribeFeedUrl.setText(viewState.feedUrl ?: "")
