@@ -134,7 +134,8 @@ internal class DashboardViewModel @Inject constructor(
                 } else {
                     code.toLightningPaymentRequestOrNull()?.let { lightningPaymentRequest ->
 
-                        lightningPaymentRequest.toBolt11OrNull()?.let { bolt11 ->
+                        try {
+                            val bolt11 = Bolt11.decode(lightningPaymentRequest)
                             val amount = bolt11.getSatsAmount()
 
                             if (amount != null) {
@@ -154,7 +155,7 @@ internal class DashboardViewModel @Inject constructor(
                                     )
                                 )
                             }
-                        }
+                        } catch (e: Exception) {}
                     }
                 }
             }
