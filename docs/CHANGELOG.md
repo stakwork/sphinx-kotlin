@@ -1,5 +1,10 @@
 # ChangeLog
 
+## Version 1.0.0-alpha13 (2021-07-28)
+ - Adds ability to edit a Tribe
+ - Displays Podcast Boosts (instead of showing the raw json)
+ - Spanish Translation
+
 ## Version 1.0.0-alpha12 (2021-07-23)
  - Adds ability to create a Tribe
  - Adds ability to edit Tribe details
