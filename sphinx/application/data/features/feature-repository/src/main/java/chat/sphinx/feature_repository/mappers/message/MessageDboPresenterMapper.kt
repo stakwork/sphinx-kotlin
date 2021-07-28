@@ -45,10 +45,12 @@ internal class MessageDboPresenterMapper(
                     }
                 } else if (message.type.isBoost() && message.uuid == null) {
                     //New Podcast boost with boost type (29) and null uuid
-                    decrypted.value.replaceFirst(PodBoost.MESSAGE_PREFIX, "")
-                        .toPodBoostOrNull(moshi)?.let { podBoost ->
-                            message._podBoost = podBoost
-                        }
+                    withContext(default) {
+                        decrypted.value.replaceFirst(PodBoost.MESSAGE_PREFIX, "")
+                            .toPodBoostOrNull(moshi)?.let { podBoost ->
+                                message._podBoost = podBoost
+                            }
+                    }
                 }
 
                 message._messageContentDecrypted = decrypted
