@@ -10,6 +10,7 @@ import chat.sphinx.wrapper_common.*
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.invite.InviteStatus
 import chat.sphinx.wrapper_common.lightning.Sat
+import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message_media.MediaType
@@ -83,12 +84,20 @@ sealed class DashboardChat {
                     message.messageContentDecrypted?.value?.let { decrypted ->
                         when {
                             message.giphyData != null -> {
-                                String.format(context.getString(R.string.last_message_description_gif_shared), getMessageSender(message, context))
+                                context.getString(
+                                    R.string.last_message_description_gif_shared,
+                                    getMessageSender(message, context)
+                                )
                             }
                             message.podBoost != null -> {
-                                val amount: Long = message.podBoost?.amount?.value ?: message.amount.value
-                                val unit: String = if (amount > 1) "sats" else "sat"
-                                String.format(context.getString(R.string.last_message_description_boost), amount, unit)
+                                val amount: String = (message.podBoost?.amount ?: message.amount)
+                                    .asFormattedString(separator = ',', appendUnit = true)
+
+                                context.getString(
+                                    R.string.last_message_description_boost,
+                                    getMessageSender(message, context),
+                                    amount
+                                )
                             }
                             // TODO: check for clip::
                             else -> {
@@ -98,30 +107,24 @@ sealed class DashboardChat {
                     } ?: "${getMessageSender(message, context)}..."
                 }
                 message.type.isInvoice() -> {
-                    val amount: String = if (message.amount.value > 1) {
-                        "${message.amount.value} sats"
-                    } else {
-                        "${message.amount.value} sat"
-                    }
+                    val amount: String = message.amount
+                        .asFormattedString(separator = ',', appendUnit = true)
 
                     if (isMessageSenderSelf(message)) {
-                        String.format(context.getString(R.string.last_message_description_invoice_sent), amount)
+                        context.getString(R.string.last_message_description_invoice_sent, amount)
                     } else {
-                        String.format(context.getString(R.string.last_message_description_invoice_receive), amount)
+                        context.getString(R.string.last_message_description_invoice_receive, amount)
                     }
 
                 }
                 message.type.isPayment() || message.type.isDirectPayment() -> {
-                    val amount: String = if (message.amount.value > 1) {
-                        "${message.amount.value} sats"
-                    } else {
-                        "${message.amount.value} sat"
-                    }
+                    val amount: String = message.amount
+                        .asFormattedString(separator = ',', appendUnit = true)
 
                     if (isMessageSenderSelf(message)) {
-                        String.format(context.getString(R.string.last_message_description_payment_sent), amount)
+                        context.getString(R.string.last_message_description_payment_sent, amount)
                     } else {
-                        String.format(context.getString(R.string.last_message_description_payment_received), amount)
+                        context.getString(R.string.last_message_description_payment_received, amount)
                     }
                 }
                 message.type.isAttachment() -> {
@@ -161,15 +164,26 @@ sealed class DashboardChat {
                     } ?: ""
                 }
                 message.type.isGroupJoin() -> {
-                    String.format(context.getString(R.string.last_message_description_has_join_tribe), getMessageSender(message, context, false))
+                    context.getString(
+                        R.string.last_message_description_has_join_tribe,
+                        getMessageSender(message, context, false)
+                    )
                 }
                 message.type.isGroupLeave() -> {
-                    String.format(context.getString(R.string.last_message_description_just_left_tribe), getMessageSender(message, context, false))
+                    context.getString(
+                        R.string.last_message_description_just_left_tribe,
+                        getMessageSender(message, context, false)
+                    )
                 }
                 message.type.isBoost() -> {
-                    val amount: Long = message.podBoost?.amount?.value ?: message.amount.value
-                    val unit: String = if (amount > 1) "sats" else "sat"
-                    String.format(context.getString(R.string.last_message_description_boost), amount, unit)
+                    val amount: String = (message.podBoost?.amount ?: message.amount)
+                        .asFormattedString(separator = ',', appendUnit = true)
+
+                    context.getString(
+                        R.string.last_message_description_boost,
+                        getMessageSender(message, context, true),
+                        amount
+                    )
                 }
                 else -> {
                     ""
@@ -295,21 +309,26 @@ sealed class DashboardChat {
 
             fun getChatName(context: Context): String {
                 val contactAlias = contact.alias?.value ?: context.getString(R.string.unknown)
-                return String.format(context.getString(R.string.last_message_description_invite), contactAlias)
+                return context.getString(R.string.last_message_description_invite, contactAlias)
             }
 
             override fun getMessageText(context: Context): String {
 
                 return when (invite?.status) {
                     is InviteStatus.Pending -> {
-                        String.format(context.getString(R.string.last_message_description_looking_available_node), (contact.alias?.value ?: "Unknown"))
+                        context.getString(
+                            R.string.last_message_description_looking_available_node,
+                            (contact.alias?.value ?: context.getString(R.string.unknown))
+                        )
                     }
                     is InviteStatus.Ready, InviteStatus.Delivered -> {
                         context.getString(R.string.last_message_description_invite_ready)
                     }
                     is InviteStatus.InProgress -> {
-                        val chatName = getChatName(context) ?: context.getString(R.string.unknown)
-                        String.format(context.getString(R.string.last_message_description_invite_signing_on), chatName)
+                        context.getString(
+                            R.string.last_message_description_invite_signing_on,
+                            getChatName(context)
+                        )
                     }
                     is InviteStatus.PaymentPending -> {
                         context.getString(R.string.last_message_description_invite_tap_to_pay)

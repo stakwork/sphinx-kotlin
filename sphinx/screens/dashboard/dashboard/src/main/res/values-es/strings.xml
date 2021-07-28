@@ -35,11 +35,11 @@
     <string name="last_message_description_message_deleted">Mensaje eliminado</string>
     <string name="last_message_description_you">Tú</string>
     <string name="last_message_description_gif_shared">%sGIF compartido</string>
-    <string name="last_message_description_boost">%sBoost %d %s</string>
-    <string name="last_message_description_invoice_sent">Solicitud enviáda: %d</string>
-    <string name="last_message_description_invoice_receive">Solicitud recibida: %d</string>
-    <string name="last_message_description_payment_sent">Pago enviádo: %d</string>
-    <string name="last_message_description_payment_received">Pago recibido: %d</string>
+    <string name="last_message_description_boost">%sBoost %s</string>
+    <string name="last_message_description_invoice_sent">Solicitud enviáda: %s</string>
+    <string name="last_message_description_invoice_receive">Solicitud recibida: %s</string>
+    <string name="last_message_description_payment_sent">Pago enviádo: %s</string>
+    <string name="last_message_description_payment_received">Pago recibido: %s</string>
 
     <string name="last_message_description_sent">envíado</string>
     <string name="last_message_description_an_audio_clip">un Clip de Audio</string>
