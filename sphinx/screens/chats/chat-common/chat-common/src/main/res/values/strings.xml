@@ -103,6 +103,9 @@
     <string name="send_attachment_option">Send</string>
     <string name="failed_to_approve_member">Failed to approve member</string>
     <string name="failed_to_reject_member">Failed to reject member</string>
+    <string name="waiting_for_admin_approval">Waiting for admin approval</string>
+    <string name="optional_message">Optional Message...</string>
+    <string name="message">Message...</string>
 
     <string name="podcast_boost_label">Boost!</string>
 

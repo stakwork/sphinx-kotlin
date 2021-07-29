@@ -830,7 +830,6 @@ private inline fun LayoutMessageHolderBinding.setGroupActionJoinRequestAdminLayo
     includeMessageTypeGroupActionHolder.includeMessageTypeGroupActionJoinRequestAdminView.apply {
         root.visible
 
-        // TODO: Set text and wire up action button click handlers.
         textViewGroupJoinRequestMessage.text = root.context.getString(R.string.user_wants_to_join_the_tribe, groupActionDetails.subjectName)
 
         buttonAcceptRequest.isEnabled = true

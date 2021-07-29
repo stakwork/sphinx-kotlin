@@ -25,7 +25,6 @@ internal sealed class LayoutState private constructor() {
 
 
     data class GroupActionIndicator(
-//        val chatViewModel: ChatViewModel,
         val actionType: MessageType.GroupAction,
         val chatType: ChatType?,
         val isAdminView: Boolean,

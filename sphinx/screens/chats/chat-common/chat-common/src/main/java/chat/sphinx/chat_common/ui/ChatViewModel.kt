@@ -45,6 +45,7 @@ import chat.sphinx.logger.e
 import chat.sphinx.resources.getRandomColor
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.ChatName
+import chat.sphinx.wrapper_chat.ChatStatus
 import chat.sphinx.wrapper_chat.isConversation
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
@@ -188,111 +189,115 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         val chat = getChat()
         val chatName = getChatNameIfNull()
 
-        val owner: Contact = contactRepository.accountOwner.value.let { contact ->
-            if (contact != null) {
-                contact
-            } else {
-                var resolvedOwner: Contact? = null
-                try {
-                    contactRepository.accountOwner.collect { ownerContact ->
-                        if (ownerContact != null) {
-                            resolvedOwner = ownerContact
-                            throw Exception()
+        if (chat.status == ChatStatus.Pending) {
+            updateFooterViewState(FooterViewState.PendingApproval(app))
+        } else {
+            val owner: Contact = contactRepository.accountOwner.value.let { contact ->
+                if (contact != null) {
+                    contact
+                } else {
+                    var resolvedOwner: Contact? = null
+                    try {
+                        contactRepository.accountOwner.collect { ownerContact ->
+                            if (ownerContact != null) {
+                                resolvedOwner = ownerContact
+                                throw Exception()
+                            }
                         }
-                    }
-                } catch (e: Exception) {}
-                delay(25L)
+                    } catch (e: Exception) {}
+                    delay(25L)
 
-                resolvedOwner!!
-            }
-        }
-
-        messageRepository.getAllMessagesToShowByChatId(chat.id).distinctUntilChanged().collect { messages ->
-            val newList = ArrayList<MessageHolderViewState>(messages.size)
-
-            withContext(default) {
-                for (message in messages) {
-                    if (message.sender == chat.contactIds.firstOrNull()) {
-                        newList.add(
-                            MessageHolderViewState.Sent(
-                                message,
-                                chat,
-                                background =  when {
-                                    message.status.isDeleted() -> {
-                                        BubbleBackground.Gone(setSpacingEqual = false)
-                                    }
-                                    message.type.isGroupAction() -> {
-                                        BubbleBackground.Gone(setSpacingEqual = true)
-                                    }
-                                    else -> {
-                                        BubbleBackground.First.Isolated
-                                    }
-                                },
-                                replyMessageSenderName = { replyMessage ->
-                                    when {
-                                        replyMessage.sender == chat.contactIds.firstOrNull() -> {
-                                            contactRepository.accountOwner.value?.alias?.value ?: ""
-                                        }
-                                        chat.type.isConversation() -> {
-                                            chatName?.value ?: ""
-                                        }
-                                        else -> {
-                                            replyMessage.senderAlias?.value ?: ""
-                                        }
-                                    }
-                                },
-                                accountOwner = { owner }
-                            )
-                        )
-                    } else {
-
-                        val isDeleted = message.status.isDeleted()
-
-                        newList.add(
-                            MessageHolderViewState.Received(
-                                message,
-                                chat,
-                                background = when {
-                                    isDeleted -> {
-                                        BubbleBackground.Gone(setSpacingEqual = false)
-                                    }
-                                    message.type.isGroupAction() -> {
-                                        BubbleBackground.Gone(setSpacingEqual = true)
-                                    }
-                                    else -> {
-                                        BubbleBackground.First.Isolated
-                                    }
-                                },
-                                initialHolder = when {
-                                    isDeleted ||
-                                    message.type.isGroupAction() -> {
-                                        InitialHolderViewState.None
-                                    }
-                                    else -> {
-                                        getInitialHolderViewStateForReceivedMessage(message)
-                                    }
-                                },
-                                replyMessageSenderName = { replyMessage ->
-                                    when {
-                                        replyMessage.sender == chat.contactIds.firstOrNull() -> {
-                                            contactRepository.accountOwner.value?.alias?.value ?: ""
-                                        }
-                                        chat.type.isConversation() -> {
-                                            chatName?.value ?: ""
-                                        }
-                                        else -> {
-                                            replyMessage.senderAlias?.value ?: ""
-                                        }
-                                    }
-                                },
-                                accountOwner = { owner }
-                            )
-                        )
-                    }
+                    resolvedOwner!!
                 }
             }
 
-            emit(newList.toList())
+            messageRepository.getAllMessagesToShowByChatId(chat.id).distinctUntilChanged().collect { messages ->
+                val newList = ArrayList<MessageHolderViewState>(messages.size)
+
+                withContext(default) {
+                    for (message in messages) {
+                        if (message.sender == chat.contactIds.firstOrNull()) {
+                            newList.add(
+                                MessageHolderViewState.Sent(
+                                    message,
+                                    chat,
+                                    background =  when {
+                                        message.status.isDeleted() -> {
+                                            BubbleBackground.Gone(setSpacingEqual = false)
+                                        }
+                                        message.type.isGroupAction() -> {
+                                            BubbleBackground.Gone(setSpacingEqual = true)
+                                        }
+                                        else -> {
+                                            BubbleBackground.First.Isolated
+                                        }
+                                    },
+                                    replyMessageSenderName = { replyMessage ->
+                                        when {
+                                            replyMessage.sender == chat.contactIds.firstOrNull() -> {
+                                                contactRepository.accountOwner.value?.alias?.value ?: ""
+                                            }
+                                            chat.type.isConversation() -> {
+                                                chatName?.value ?: ""
+                                            }
+                                            else -> {
+                                                replyMessage.senderAlias?.value ?: ""
+                                            }
+                                        }
+                                    },
+                                    accountOwner = { owner }
+                                )
+                            )
+                        } else {
+
+                            val isDeleted = message.status.isDeleted()
+
+                            newList.add(
+                                MessageHolderViewState.Received(
+                                    message,
+                                    chat,
+                                    background = when {
+                                        isDeleted -> {
+                                            BubbleBackground.Gone(setSpacingEqual = false)
+                                        }
+                                        message.type.isGroupAction() -> {
+                                            BubbleBackground.Gone(setSpacingEqual = true)
+                                        }
+                                        else -> {
+                                            BubbleBackground.First.Isolated
+                                        }
+                                    },
+                                    initialHolder = when {
+                                        isDeleted ||
+                                                message.type.isGroupAction() -> {
+                                            InitialHolderViewState.None
+                                        }
+                                        else -> {
+                                            getInitialHolderViewStateForReceivedMessage(message)
+                                        }
+                                    },
+                                    replyMessageSenderName = { replyMessage ->
+                                        when {
+                                            replyMessage.sender == chat.contactIds.firstOrNull() -> {
+                                                contactRepository.accountOwner.value?.alias?.value ?: ""
+                                            }
+                                            chat.type.isConversation() -> {
+                                                chatName?.value ?: ""
+                                            }
+                                            else -> {
+                                                replyMessage.senderAlias?.value ?: ""
+                                            }
+                                        }
+                                    },
+                                    accountOwner = { owner }
+                                )
+                            )
+                        }
+                    }
+                }
+
+                emit(newList.toList())
+            }
         }
     }.stateIn(
         viewModelScope,
@@ -418,7 +423,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     }
 
     private val footerViewStateContainer: ViewStateContainer<FooterViewState> by lazy {
-        ViewStateContainer(FooterViewState.Default)
+        ViewStateContainer(FooterViewState.Default(app))
     }
 
     @JvmSynthetic
@@ -572,7 +577,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                         AttachmentSendViewState.Preview(response.value.value, mediaType)
                     )
 
-                    updateFooterViewState(FooterViewState.Attachment)
+                    updateFooterViewState(FooterViewState.Attachment(app))
                 }
             }
         }
@@ -610,7 +615,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                         AttachmentSendViewState.PreviewGiphy(giphyData)
                     )
 
-                    updateFooterViewState(FooterViewState.Attachment)
+                    updateFooterViewState(FooterViewState.Attachment(app))
                 }
             }
             giphyDialogFragment.show(parentFragmentManager, "giphy_search")
@@ -703,7 +708,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                         AttachmentSendViewState.Preview(response.value.value, mediaType)
                     )
 
-                    updateFooterViewState(FooterViewState.Attachment)
+                    updateFooterViewState(FooterViewState.Attachment(app))
                 }
             }
         }
@@ -743,7 +748,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                                 try {
                                     mediaCacheHandler.copyTo(stream, newFile)
                                     updateViewState(ChatMenuViewState.Closed)
-                                    updateFooterViewState(FooterViewState.Attachment)
+                                    updateFooterViewState(FooterViewState.Attachment(app))
                                     attachmentSendStateContainer.updateViewState(
                                         AttachmentSendViewState.Preview(newFile, mType)
                                     )

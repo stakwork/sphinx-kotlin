@@ -1,6 +1,5 @@
 package chat.sphinx.chat_common.ui
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
 import android.view.View
@@ -46,8 +45,6 @@ import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.resources.*
 import chat.sphinx.wrapper_chat.isTrue
-import chat.sphinx.wrapper_common.lightning.asFormattedString
-import chat.sphinx.wrapper_common.lightning.unit
 import chat.sphinx.wrapper_meme_server.headerKey
 import chat.sphinx.wrapper_meme_server.headerValue
 import chat.sphinx.wrapper_message.retrieveImageUrlAndMessageMedia
@@ -127,7 +124,7 @@ abstract class ChatFragment<
 
     private inner class SelectedMessageStateBackPressHandler(
         owner: LifecycleOwner,
-        activity: FragmentActivity,
+        val activity: FragmentActivity,
     ): OnBackPressedCallback(true) {
 
         init {
@@ -148,12 +145,12 @@ abstract class ChatFragment<
                 }
                 attachmentViewState is AttachmentSendViewState.Preview -> {
                     viewModel.updateAttachmentSendViewState(AttachmentSendViewState.Idle)
-                    viewModel.updateFooterViewState(FooterViewState.Default)
+                    viewModel.updateFooterViewState(FooterViewState.Default(activity))
                     viewModel.deleteUnsentAttachment(attachmentViewState)
                 }
                 attachmentViewState is AttachmentSendViewState.PreviewGiphy -> {
                     viewModel.updateAttachmentSendViewState(AttachmentSendViewState.Idle)
-                    viewModel.updateFooterViewState(FooterViewState.Default)
+                    viewModel.updateFooterViewState(FooterViewState.Default(activity))
                 }
                 viewModel.getSelectedMessageViewStateFlow().value is SelectedMessageViewState.SelectedMessage -> {
                     viewModel.updateSelectedMessageViewState(SelectedMessageViewState.None)
@@ -255,7 +252,7 @@ abstract class ChatFragment<
                     // if it did not return null that means it was valid
                     if (attachmentViewState !is AttachmentSendViewState.Idle) {
                         viewModel.updateAttachmentSendViewState(AttachmentSendViewState.Idle)
-                        viewModel.updateFooterViewState(FooterViewState.Default)
+                        viewModel.updateFooterViewState(FooterViewState.Default(requireActivity()))
                     }
 
                     sendMessageBuilder.clear()
@@ -358,10 +355,10 @@ abstract class ChatFragment<
                 val vs = viewModel.getAttachmentSendViewStateFlow().value
                 if (vs is AttachmentSendViewState.Preview) {
                     viewModel.deleteUnsentAttachment(vs)
-                    viewModel.updateFooterViewState(FooterViewState.Default)
+                    viewModel.updateFooterViewState(FooterViewState.Default(requireActivity()))
                     viewModel.updateAttachmentSendViewState(AttachmentSendViewState.Idle)
                 } else if (vs is AttachmentSendViewState.PreviewGiphy) {
-                    viewModel.updateFooterViewState(FooterViewState.Default)
+                    viewModel.updateFooterViewState(FooterViewState.Default(requireActivity()))
                     viewModel.updateAttachmentSendViewState(AttachmentSendViewState.Idle)
                 }
             }
