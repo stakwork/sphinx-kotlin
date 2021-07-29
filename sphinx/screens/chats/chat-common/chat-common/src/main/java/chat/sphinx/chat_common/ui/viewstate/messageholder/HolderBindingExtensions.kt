@@ -10,7 +10,6 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.updateLayoutParams
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.chat_common.R
-import chat.sphinx.resources.R as common_R
 import chat.sphinx.chat_common.databinding.LayoutMessageHolderBinding
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
@@ -21,10 +20,10 @@ import chat.sphinx.concept_network_client_crypto.CryptoScheme
 import chat.sphinx.resources.getString
 import chat.sphinx.resources.setBackgroundRandomColor
 import chat.sphinx.resources.setTextColorExt
-import chat.sphinx.wrapper_meme_server.headerKey
-import chat.sphinx.wrapper_meme_server.headerValue
 import chat.sphinx.wrapper_chat.ChatType
 import chat.sphinx.wrapper_common.lightning.asFormattedString
+import chat.sphinx.wrapper_meme_server.headerKey
+import chat.sphinx.wrapper_meme_server.headerValue
 import chat.sphinx.wrapper_message.MessageType
 import chat.sphinx.wrapper_message_media.MessageMedia
 import chat.sphinx.wrapper_view.Px
@@ -36,6 +35,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import java.io.File
+import chat.sphinx.resources.R as common_R
 
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
@@ -751,14 +751,14 @@ internal inline fun LayoutMessageHolderBinding.setGroupActionIndicatorLayout(
             }
             MessageType.GroupAction.MemberApprove -> {
                 if (groupActionDetails.isAdminView) {
-                    setGroupActionJoinRequestAdminLayout(groupActionDetails)
+                    setGroupActionJoinApprovedAdminLayout(groupActionDetails)
                 } else {
                     setGroupActionAnnouncementLayout(groupActionDetails)
                 }
             }
             MessageType.GroupAction.MemberReject -> {
                 if (groupActionDetails.isAdminView) {
-                    setGroupActionJoinRequestAdminLayout(groupActionDetails)
+                    setGroupActionJoinRejectedAdminLayout(groupActionDetails)
                 } else {
                     setGroupActionMemberRemovalLayout(groupActionDetails)
                 }
@@ -830,7 +830,53 @@ private inline fun LayoutMessageHolderBinding.setGroupActionJoinRequestAdminLayo
     includeMessageTypeGroupActionHolder.includeMessageTypeGroupActionJoinRequestAdminView.apply {
         root.visible
 
-        // TODO: Set text and wire up action button click handlers.
+        textViewGroupJoinRequestMessage.text = root.context.getString(R.string.user_wants_to_join_the_tribe, groupActionDetails.subjectName)
+
+        buttonAcceptRequest.isEnabled = true
+        buttonAcceptRequest.alpha = 1.0f
+
+        buttonRejectRequest.isEnabled = true
+        buttonRejectRequest.alpha = 1.0f
+    }
+}
+
+/**
+ * Presents a view for an admin to handle see rejected group membership requests
+ */
+@MainThread
+@Suppress("NOTHING_TO_INLINE")
+private inline fun LayoutMessageHolderBinding.setGroupActionJoinRejectedAdminLayout(
+    groupActionDetails: LayoutState.GroupActionIndicator
+) {
+    includeMessageTypeGroupActionHolder.includeMessageTypeGroupActionJoinRequestAdminView.apply {
+        root.visible
+
+        textViewGroupJoinRequestMessage.text = root.context.getString(R.string.user_join_tribe_request_rejected, groupActionDetails.subjectName)
+        buttonAcceptRequest.isEnabled = false
+        buttonAcceptRequest.alpha = 0.2f
+
+        buttonRejectRequest.isEnabled = true
+        buttonRejectRequest.alpha = 1.0f
+    }
+}
+
+/**
+ * Presents a view for an admin to handle see group approved membership
+ */
+@MainThread
+@Suppress("NOTHING_TO_INLINE")
+private inline fun LayoutMessageHolderBinding.setGroupActionJoinApprovedAdminLayout(
+    groupActionDetails: LayoutState.GroupActionIndicator
+) {
+    includeMessageTypeGroupActionHolder.includeMessageTypeGroupActionJoinRequestAdminView.apply {
+        root.visible
+
+        textViewGroupJoinRequestMessage.text = root.context.getString(R.string.user_join_tribe_request_approved, groupActionDetails.subjectName)
+        buttonRejectRequest.isEnabled = false
+        buttonRejectRequest.alpha = 0.2f
+
+        buttonAcceptRequest.isEnabled = true
+        buttonAcceptRequest.alpha = 1.0f
     }
 }
 

@@ -1,6 +1,5 @@
 package chat.sphinx.chat_common.ui
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
 import android.view.View
@@ -46,8 +45,6 @@ import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.resources.*
 import chat.sphinx.wrapper_chat.isTrue
-import chat.sphinx.wrapper_common.lightning.asFormattedString
-import chat.sphinx.wrapper_common.lightning.unit
 import chat.sphinx.wrapper_meme_server.headerKey
 import chat.sphinx.wrapper_meme_server.headerValue
 import chat.sphinx.wrapper_message.retrieveImageUrlAndMessageMedia
@@ -86,6 +83,7 @@ abstract class ChatFragment<
     protected abstract val selectedMessageBinding: LayoutSelectedMessageBinding
     protected abstract val selectedMessageHolderBinding: LayoutMessageHolderBinding
     protected abstract val attachmentSendBinding: LayoutAttachmentSendPreviewBinding
+    protected abstract val memberRemovalBinding: LayoutMessageTypeGroupActionMemberRemovalBinding
     protected abstract val menuBinding: LayoutChatMenuBinding
     protected abstract val recyclerView: RecyclerView
 
@@ -584,6 +582,12 @@ abstract class ChatFragment<
 
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.getFooterViewStateFlow().collect { viewState ->
+                if (viewState is FooterViewState.MembershipRejected) {
+                    memberRemovalBinding.root.visible
+                    memberRemovalBinding.buttonDeleteGroup.setOnClickListener {
+                        viewModel.deleteTribe(memberRemovalBinding.progressBarDeleteTribe)
+                    }
+                }
                 footerBinding.apply {
                     editTextChatFooter.hint = getString(viewState.hintTextStringId)
                     imageViewChatFooterMicrophone.goneIfFalse(viewState.showRecordAudioIcon)

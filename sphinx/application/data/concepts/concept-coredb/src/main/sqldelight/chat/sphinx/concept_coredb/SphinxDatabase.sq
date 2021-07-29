@@ -552,6 +552,9 @@ AND (
     type = 6 OR
     type = 14 OR
     type = 15 OR
+    type = 19 OR
+    type = 20 OR
+    type = 21 OR
     type = 25 OR
     (type = 29 AND reply_uuid IS NULL)
 )

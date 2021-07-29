@@ -1,18 +1,17 @@
 package chat.sphinx.feature_network_query_message
 
-import chat.sphinx.wrapper_common.message.MessagePagination
 import chat.sphinx.concept_network_query_message.NetworkQueryMessage
 import chat.sphinx.concept_network_query_message.model.*
 import chat.sphinx.concept_network_relay_call.NetworkRelayCall
 import chat.sphinx.feature_network_query_message.model.*
-import chat.sphinx.feature_network_query_message.model.GetMessagesRelayResponse
-import chat.sphinx.feature_network_query_message.model.ReadMessagesRelayResponse
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.wrapper_common.dashboard.ChatId
+import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.MessageId
+import chat.sphinx.wrapper_common.message.MessagePagination
 import chat.sphinx.wrapper_common.message.MessageUUID
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
@@ -29,6 +28,8 @@ class NetworkQueryMessageImpl(
         private const val ENDPOINT_MSGS = "/msgs"
         private const val ENDPOINT_MESSAGE = "/message"
         private const val ENDPOINT_DELETE_MESSAGE = "/message/%d"
+        private const val ENDPOINT_MEMBER_APPROVED = "/member/%d/approved/%d"
+        private const val ENDPOINT_MEMBER_REJECTED = "/member/%d/rejected/%d"
         private const val ENDPOINT_MESSAGES_READ = "/messages/%d/read"
         private const val ENDPOINT_MESSAGES = "${ENDPOINT_MESSAGE}s"
         private const val ENDPOINT_PAYMENT = "/payment"
@@ -154,6 +155,31 @@ class NetworkQueryMessageImpl(
             responseJsonClass = MessageRelayResponse::class.java,
             relayEndpoint = String.format(ENDPOINT_DELETE_MESSAGE, messageId.value),
             requestBodyJsonClass = null,
+            requestBody = null,
+            relayData = relayData
+        )
+
+
+    override fun approveMember(
+        contactId: ContactId,
+        messageId: MessageId,
+        relayData: Pair<AuthorizationToken, RelayUrl>?
+    ): Flow<LoadResponse<PutMemberResponseDto, ResponseError>> =
+        networkRelayCall.relayPut(
+            responseJsonClass = PutMemberRelayResponse::class.java,
+            relayEndpoint = String.format(ENDPOINT_MEMBER_APPROVED, contactId.value, messageId.value),
+            requestBody = null,
+            relayData = relayData
+        )
+
+    override fun rejectMember(
+        contactId: ContactId,
+        messageId: MessageId,
+        relayData: Pair<AuthorizationToken, RelayUrl>?
+    ): Flow<LoadResponse<PutMemberResponseDto, ResponseError>> =
+        networkRelayCall.relayPut(
+            responseJsonClass = PutMemberRelayResponse::class.java,
+            relayEndpoint = String.format(ENDPOINT_MEMBER_REJECTED, contactId.value, messageId.value),
             requestBody = null,
             relayData = relayData
         )

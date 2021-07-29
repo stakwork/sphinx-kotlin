@@ -6,8 +6,7 @@ import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.wrapper_common.dashboard.ChatId
-import chat.sphinx.wrapper_common.lightning.LightningPaymentHash
-import chat.sphinx.wrapper_common.lightning.LightningPaymentRequest
+import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessageUUID
@@ -40,4 +39,14 @@ interface MessageRepository {
         escrowAmount: Sat,
         messageUUID: MessageUUID,
     ): Response<Any, ResponseError>
+
+    suspend fun approveMember(
+        contactId: ContactId,
+        messageId: MessageId
+    ): LoadResponse<Any, ResponseError>
+
+    suspend fun rejectMember(
+        contactId: ContactId,
+        messageId: MessageId
+    ): LoadResponse<Any, ResponseError>
 }

@@ -1,9 +1,10 @@
 package chat.sphinx.concept_network_query_message
 
 import chat.sphinx.concept_network_query_message.model.*
-import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.kotlin_response.LoadResponse
+import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.wrapper_common.dashboard.ChatId
+import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessagePagination
@@ -68,4 +69,17 @@ abstract class NetworkQueryMessage {
         messageId: MessageId,
         relayData: Pair<AuthorizationToken, RelayUrl>? = null,
     ): Flow<LoadResponse<MessageDto, ResponseError>>
+
+    abstract fun approveMember(
+        contactId: ContactId,
+        messageId: MessageId,
+        relayData: Pair<AuthorizationToken, RelayUrl>? = null
+    ): Flow<LoadResponse<PutMemberResponseDto, ResponseError>>
+
+    abstract fun rejectMember(
+        contactId: ContactId,
+        messageId: MessageId,
+        relayData: Pair<AuthorizationToken, RelayUrl>? = null
+    ): Flow<LoadResponse<PutMemberResponseDto, ResponseError>>
+
 }

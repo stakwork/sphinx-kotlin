@@ -8,7 +8,7 @@
     <string name="confirm_button">CONFIRMAR</string>
     <string name="continue_button">CONTINUAR</string>
     <string name="error_processing_payment">Ha habido un error procesando el pago, por favor inténtalo luego.</string>
-    <string name="payment_sent">Pago de %d sat enviádo a %s</string>
+    <string name="payment_sent">Pago de %d sat enviado a %s</string>
 
     <string name="alert_confirm_payment_send_title">Enviar Pago</string>
     <string name="alert_confirm_payment_send_message">¿Estás seguro que deseas enviar un pago de %d sat a %s?</string>

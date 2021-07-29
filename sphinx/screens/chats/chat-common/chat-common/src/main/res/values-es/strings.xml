@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="edit_text_message_hint">Mensaje...</string>
-    <string name="edit_text_optional_message_hint">Mensaje opcional...</string>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="edit_text_message_hint">Mensaje…</string>
+    <string name="edit_text_optional_message_hint">Mensaje opcional…</string>
 
     <string name="chat_muted_message">La conversación está ahora silenciada. No recibirás notificaciones para las mensajes entrantes en esta conversación</string>
     <string name="chat_muted_waiting_on_network">Esperando conexión…</string>
@@ -91,11 +91,13 @@
 
     <!-- Menu -->
     <string name="attachments_menu_cancel">CANCELAR</string>
-    <string name="camera_attachment_option">Camara</string>
+    <string name="camera_attachment_option" tools:ignore="Typos">Camara</string>
     <string name="library_attachment_option">Librería</string>
     <string name="gif_attachment_option">Gif</string>
     <string name="file_attachment_option">Archivo</string>
     <string name="paid_message_attachment_option">Mensaje Pago</string>
     <string name="request_attachment_option">Solicitar</string>
     <string name="send_attachment_option">Enviar</string>
+
+    <string name="podcast_boost_label">Boost!</string>
 </resources>

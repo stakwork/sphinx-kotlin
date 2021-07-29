@@ -17,12 +17,8 @@ import chat.sphinx.chat_tribe.databinding.FragmentChatTribeBinding
 import chat.sphinx.chat_tribe.databinding.LayoutPodcastPlayerFooterBinding
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.resources.getString
-import chat.sphinx.wrapper_common.lightning.Sat
-import chat.sphinx.wrapper_common.lightning.asFormattedString
-import chat.sphinx.wrapper_common.lightning.unit
 import chat.sphinx.wrapper_podcast.Podcast
 import dagger.hilt.android.AndroidEntryPoint
-import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.concept_views.viewstate.collect
@@ -63,6 +59,11 @@ internal class ChatTribeFragment: ChatFragment<
     override val menuBinding: LayoutChatMenuBinding by viewBinding(
         LayoutChatMenuBinding::bind, R.id.include_chat_tribe_menu
     )
+
+    override val memberRemovalBinding: LayoutMessageTypeGroupActionMemberRemovalBinding by viewBinding(
+        LayoutMessageTypeGroupActionMemberRemovalBinding::bind, R.id.include_message_type_group_action_member_removal
+    )
+
     override val menuEnablePayments: Boolean
         get() = false
 
@@ -92,7 +93,8 @@ internal class ChatTribeFragment: ChatFragment<
     private fun configureContributions() {
         lifecycleScope.launch(viewModel.mainImmediate) {
             viewModel.getPodcastContributionsString().collect { contributionsString ->
-                binding.includeChatTribeHeader.apply {
+
+                headerBinding.apply {
                     textViewChatHeaderContributionsIcon.visible
                     textViewChatHeaderContributions.apply {
                         visible
