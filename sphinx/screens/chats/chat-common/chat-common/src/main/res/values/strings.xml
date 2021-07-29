@@ -101,6 +101,8 @@
     <string name="paid_message_attachment_option">Paid Message</string>
     <string name="request_attachment_option">Request</string>
     <string name="send_attachment_option">Send</string>
+    <string name="failed_to_approve_member">Failed to approve member</string>
+    <string name="failed_to_reject_member">Failed to reject member</string>
 
     <string name="podcast_boost_label">Boost!</string>
 

@@ -3057,4 +3057,79 @@ abstract class SphinxRepository(
 
         return response
     }
+
+    override suspend fun approveMember(contactId: ContactId, messageId: MessageId): Response<Any, ResponseError> {
+        var response: Response<Any, ResponseError>  = Response.Error(ResponseError(("Failed to approve member")))
+
+        applicationScope.launch(mainImmediate) {
+            networkQueryMessage.approveMember(contactId, messageId).collect {loadResponse ->
+                when (loadResponse) {
+                    is LoadResponse.Loading -> {}
+
+                    is Response.Error -> {
+                        response = loadResponse
+                        LOG.e(TAG, "Failed to approve member: ", loadResponse.exception)
+                    }
+                    is Response.Success -> {
+                        loadResponse.value.let {
+                            response = Response.Success(it)
+                            val queries = coreDB.getSphinxDatabaseQueries()
+
+                            chatLock.withLock {
+                                messageLock.withLock {
+                                    withContext(io) {
+                                        queries.transaction {
+                                            upsertChat(it.chat, moshi, chatSeenMap, queries, null)
+                                            upsertMessage(it.message, queries)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }.join()
+
+        return response
+    }
+
+    override suspend fun rejectMember(
+        contactId: ContactId,
+        messageId: MessageId
+    ): Response<Any, ResponseError> {
+        var response: Response<Any, ResponseError>  = Response.Error(ResponseError(("Failed to reject member")))
+
+        applicationScope.launch(mainImmediate) {
+            networkQueryMessage.rejectMember(contactId, messageId).collect {loadResponse ->
+                when (loadResponse) {
+                    is LoadResponse.Loading -> {}
+
+                    is Response.Error -> {
+                        response = loadResponse
+                        LOG.e(TAG, "Failed to reject member: ", loadResponse.exception)
+                    }
+                    is Response.Success -> {
+                        loadResponse.value.let {
+                            response = Response.Success(it)
+                            val queries = coreDB.getSphinxDatabaseQueries()
+
+                            chatLock.withLock {
+                                messageLock.withLock {
+                                    withContext(io) {
+                                        queries.transaction {
+                                            upsertChat(it.chat, moshi, chatSeenMap, queries, null)
+                                            upsertMessage(it.message, queries)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }.join()
+
+        return response
+    }
 }

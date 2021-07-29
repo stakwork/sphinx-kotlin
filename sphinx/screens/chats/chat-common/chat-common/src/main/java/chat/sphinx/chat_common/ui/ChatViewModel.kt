@@ -6,6 +6,7 @@ import android.os.Build
 import android.util.Log
 import android.webkit.MimeTypeMap
 import androidx.annotation.CallSuper
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.inputmethod.InputConnectionCompat
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.SavedStateHandle
@@ -45,10 +46,10 @@ import chat.sphinx.resources.getRandomColor
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.ChatName
 import chat.sphinx.wrapper_chat.isConversation
-import chat.sphinx.wrapper_chat.isTribe
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.Sat
+import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessageUUID
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_message.*
@@ -61,6 +62,8 @@ import com.giphy.sdk.ui.themes.GPHTheme
 import com.giphy.sdk.ui.themes.GridType
 import com.giphy.sdk.ui.utils.aspectRatio
 import com.giphy.sdk.ui.views.GiphyDialogFragment
+import io.matthewnelson.android_feature_screens.util.gone
+import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.MotionLayoutViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.android_feature_viewmodel.updateViewState
@@ -779,6 +782,40 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         viewModelScope.launch(mainImmediate) {
             chatId?.let {
                 chatNavigator.toChatDetail(it, contactId)
+            }
+        }
+    }
+
+    fun approveNewMember(contactId: ContactId, messageId: MessageId, progressBarContainer: ConstraintLayout) {
+        viewModelScope.launch(mainImmediate) {
+            progressBarContainer.visible
+            val response = messageRepository.approveMember(contactId, messageId)
+            progressBarContainer.gone
+            when(response) {
+                LoadResponse.Loading -> {}
+                is Response.Error -> {
+                    submitSideEffect(ChatSideEffect.Notify(app.getString(R.string.failed_to_approve_member)))
+                }
+                is Response.Success -> {
+                    // TODO: Confirm we update the message view
+                }
+            }
+        }
+    }
+
+    fun rejectNewMember(contactId: ContactId, messageId: MessageId, progressBarContainer: ConstraintLayout) {
+        viewModelScope.launch(mainImmediate) {
+            progressBarContainer.visible
+            val response = messageRepository.rejectMember(contactId,messageId)
+            progressBarContainer.gone
+            when(response) {
+                LoadResponse.Loading -> {}
+                is Response.Error -> {
+                    submitSideEffect(ChatSideEffect.Notify(app.getString(R.string.failed_to_reject_member)))
+                }
+                is Response.Success -> {
+                    // TODO: Confirm we update the message view
+                }
             }
         }
     }

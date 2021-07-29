@@ -78,6 +78,32 @@
             app:layout_constraintStart_toEndOf="@+id/button_accept_request"
             app:layout_constraintTop_toTopOf="parent" />
 
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/constraint_layout_progress_bar_container"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:background="@color/bodyTransparent"
+            android:visibility="gone"
+            android:translationZ="@dimen/progress_bar_z"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/button_accept_request"
+            app:layout_constraintEnd_toEndOf="@+id/button_reject_request"
+            tools:visibility="visible"
+            >
+            <ProgressBar
+                android:id="@+id/progress_bar_membership_request"
+                android:layout_width="@dimen/default_tap_target_xy"
+                android:layout_height="@dimen/default_tap_target_xy"
+                style="?android:attr/progressBarStyle"
+                android:indeterminateTint="@android:color/white"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                android:indeterminate="true"
+                />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

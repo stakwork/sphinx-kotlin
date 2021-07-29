@@ -835,16 +835,9 @@ private inline fun LayoutMessageHolderBinding.setGroupActionJoinRequestAdminLayo
 
         buttonAcceptRequest.isEnabled = true
         buttonAcceptRequest.alpha = 1.0f
-        buttonAcceptRequest.setOnClickListener {
-            // TODO: Accept member logic...
-        }
 
         buttonRejectRequest.isEnabled = true
         buttonRejectRequest.alpha = 1.0f
-        buttonRejectRequest.setOnClickListener {
-            // TODO: Reject member logic
-
-        }
     }
 }
 
@@ -865,9 +858,6 @@ private inline fun LayoutMessageHolderBinding.setGroupActionJoinRejectedAdminLay
 
         buttonRejectRequest.isEnabled = true
         buttonRejectRequest.alpha = 1.0f
-        buttonRejectRequest.setOnClickListener {
-            // Nothing happens
-        }
     }
 }
 
@@ -888,9 +878,6 @@ private inline fun LayoutMessageHolderBinding.setGroupActionJoinApprovedAdminLay
 
         buttonAcceptRequest.isEnabled = true
         buttonAcceptRequest.alpha = 1.0f
-        buttonAcceptRequest.setOnClickListener {
-            // Nothing happens
-        }
     }
 }
 

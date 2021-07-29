@@ -57,8 +57,8 @@ abstract class NetworkCall {
     abstract fun <T: Any, RequestBody: Any> put(
         url: String,
         responseJsonClass: Class<T>,
-        requestBodyJsonClass: Class<RequestBody>,
-        requestBody: RequestBody,
+        requestBodyJsonClass: Class<RequestBody>? = null,
+        requestBody: RequestBody? = null,
         mediaType: String? = "application/json",
         headers: Map<String, String>? = null,
     ): Flow<LoadResponse<T, ResponseError>>

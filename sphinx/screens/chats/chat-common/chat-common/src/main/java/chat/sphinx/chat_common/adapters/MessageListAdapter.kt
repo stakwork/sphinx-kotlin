@@ -222,6 +222,29 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                     true
                 }
             }
+
+            binding.includeMessageTypeGroupActionHolder.apply {
+                includeMessageTypeGroupActionJoinRequestAdminView.buttonAcceptRequest.setOnClickListener {
+                    currentViewState?.message?.let {
+                        viewModel.approveNewMember(
+                            it.sender,
+                            it.id,
+                            includeMessageTypeGroupActionJoinRequestAdminView.constraintLayoutProgressBarContainer
+                        )
+                    }
+
+                }
+
+                includeMessageTypeGroupActionJoinRequestAdminView.buttonRejectRequest.setOnClickListener {
+                    currentViewState?.message?.let {
+                        viewModel.rejectNewMember(
+                            it.sender,
+                            it.id,
+                            includeMessageTypeGroupActionJoinRequestAdminView.constraintLayoutProgressBarContainer
+                        )
+                    }
+                }
+            }
         }
 
         fun bind(position: Int) {
