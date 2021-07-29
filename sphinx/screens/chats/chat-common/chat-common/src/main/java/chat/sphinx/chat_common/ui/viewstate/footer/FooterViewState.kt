@@ -13,7 +13,7 @@ internal sealed class FooterViewState: ViewState<FooterViewState>() {
         get() = true
     open val showRecordAudioIcon: Boolean
         get() = !showSendIcon
-    open val enableMessaging: Boolean
+    open val messagingEnabled: Boolean
         get() = true
 
     object Default: FooterViewState()
@@ -25,8 +25,8 @@ internal sealed class FooterViewState: ViewState<FooterViewState>() {
             get() = R.string.edit_text_optional_message_hint
     }
 
-    object PendingApproval: FooterViewState() {
-        override val enableMessaging: Boolean
+    object Disabled: FooterViewState() {
+        override val messagingEnabled: Boolean
             get() = false
     }
 }

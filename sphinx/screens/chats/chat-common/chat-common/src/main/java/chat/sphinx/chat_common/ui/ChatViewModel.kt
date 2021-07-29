@@ -147,7 +147,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 
                 if (chat?.status?.isApproved() != true) {
                     footerViewStateContainer.updateViewState(
-                        FooterViewState.PendingApproval
+                        FooterViewState.Disabled
                     )
                 } else {
                     footerViewStateContainer.updateViewState(
