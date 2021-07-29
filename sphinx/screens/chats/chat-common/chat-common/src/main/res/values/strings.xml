@@ -59,9 +59,6 @@
 
 
     <!--  Group Action Indicator Labels  -->
-    <string name="user_wants_to_join_the_tribe">%s wants to join the tribe</string>
-    <string name="user_join_tribe_request_approved">You have approved the request from %s</string>
-    <string name="user_join_tribe_request_rejected">You have rejected the request from %s</string>
     <string name="group_join_announcement_tribe">%1$s has joined the tribe</string>
     <string name="group_join_announcement_group">%1$s has joined the group</string>
     <string name="group_leave_announcement_tribe">%1$s just left the tribe</string>
@@ -109,4 +106,9 @@
 
     <string name="podcast_boost_label">Boost!</string>
 
+    <string name="failed_to_delete_tribe">Failed to delete Tribe</string>
+    <string name="delete_tribe">Delete Tribe</string>
+    <string name="user_wants_to_join_the_tribe">%s wants to join the tribe</string>
+    <string name="user_join_tribe_request_approved">You have approved the request from %s</string>
+    <string name="user_join_tribe_request_rejected">You have rejected the request from %s</string>
 </resources>

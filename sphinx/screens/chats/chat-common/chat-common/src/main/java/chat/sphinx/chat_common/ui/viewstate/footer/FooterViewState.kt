@@ -40,4 +40,15 @@ internal sealed class FooterViewState: ViewState<FooterViewState>() {
         override val showRecordAudioIcon: Boolean
             get() = false
     }
+
+    class MembershipRejected(val context: Context) : FooterViewState() {
+        override val showMenuIcon: Boolean
+            get() = false
+        override val hintText: String
+            get() = context.getString(R.string.message)
+        override val showSendIcon: Boolean
+            get() = false
+        override val showRecordAudioIcon: Boolean
+            get() = false
+    }
 }

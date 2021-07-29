@@ -38,13 +38,29 @@
             app:layout_constraintHorizontal_chainStyle="packed"
             app:layout_constraintTop_toTopOf="parent" />
 
+        <ProgressBar
+            android:id="@+id/progress_bar_delete_tribe"
+            android:layout_width="@dimen/default_progress_bar_xy"
+            android:layout_height="@dimen/default_progress_bar_xy"
+            style="?android:attr/progressBarStyle"
+            android:indeterminateTint="@android:color/white"
+            android:indeterminate="true"
+            android:visibility="gone"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/button_delete_group"
+            tools:visibility="gone"
+            />
+
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/button_delete_group"
             style="@style/Widget.AppCompat.Button"
             android:layout_width="wrap_content"
             android:layout_height="@dimen/default_tap_target_xy"
             android:backgroundTint="@color/badgeRed"
-            android:layout_marginStart="@dimen/chat_message_inner_padding"            android:fontFamily="@font/roboto_medium"
+            android:layout_marginStart="@dimen/chat_message_inner_padding"
+            android:fontFamily="@font/roboto_medium"
+            android:text="@string/delete_tribe"
             android:textColor="@android:color/white"
             android:textSize="@dimen/default_text_size_list_row_headline"
             app:layout_constraintBottom_toBottomOf="parent"
