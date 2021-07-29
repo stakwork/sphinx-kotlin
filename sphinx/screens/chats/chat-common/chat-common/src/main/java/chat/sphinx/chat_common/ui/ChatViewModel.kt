@@ -208,10 +208,10 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 
         when (chat.status) {
             ChatStatus.Pending -> {
-                updateFooterViewState(FooterViewState.PendingApproval(app))
+                updateFooterViewState(FooterViewState.PendingApproval)
             }
             ChatStatus.Rejected -> {
-                updateFooterViewState(FooterViewState.MembershipRejected(app))
+                updateFooterViewState(FooterViewState.MembershipRejected)
             }
             else -> {
 
@@ -428,7 +428,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     }
 
     private val footerViewStateContainer: ViewStateContainer<FooterViewState> by lazy {
-        ViewStateContainer(FooterViewState.Default(app))
+        ViewStateContainer(FooterViewState.Default)
     }
 
     @JvmSynthetic
@@ -582,7 +582,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                         AttachmentSendViewState.Preview(response.value.value, mediaType)
                     )
 
-                    updateFooterViewState(FooterViewState.Attachment(app))
+                    updateFooterViewState(FooterViewState.Attachment)
                 }
             }
         }
@@ -620,7 +620,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                         AttachmentSendViewState.PreviewGiphy(giphyData)
                     )
 
-                    updateFooterViewState(FooterViewState.Attachment(app))
+                    updateFooterViewState(FooterViewState.Attachment)
                 }
             }
             giphyDialogFragment.show(parentFragmentManager, "giphy_search")
@@ -713,7 +713,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                         AttachmentSendViewState.Preview(response.value.value, mediaType)
                     )
 
-                    updateFooterViewState(FooterViewState.Attachment(app))
+                    updateFooterViewState(FooterViewState.Attachment)
                 }
             }
         }
@@ -753,7 +753,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                                 try {
                                     mediaCacheHandler.copyTo(stream, newFile)
                                     updateViewState(ChatMenuViewState.Closed)
-                                    updateFooterViewState(FooterViewState.Attachment(app))
+                                    updateFooterViewState(FooterViewState.Attachment)
                                     attachmentSendStateContainer.updateViewState(
                                         AttachmentSendViewState.Preview(newFile, mType)
                                     )

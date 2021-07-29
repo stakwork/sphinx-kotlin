@@ -125,7 +125,7 @@ abstract class ChatFragment<
 
     private inner class SelectedMessageStateBackPressHandler(
         owner: LifecycleOwner,
-        val activity: FragmentActivity,
+        activity: FragmentActivity,
     ): OnBackPressedCallback(true) {
 
         init {
@@ -146,12 +146,12 @@ abstract class ChatFragment<
                 }
                 attachmentViewState is AttachmentSendViewState.Preview -> {
                     viewModel.updateAttachmentSendViewState(AttachmentSendViewState.Idle)
-                    viewModel.updateFooterViewState(FooterViewState.Default(activity))
+                    viewModel.updateFooterViewState(FooterViewState.Default)
                     viewModel.deleteUnsentAttachment(attachmentViewState)
                 }
                 attachmentViewState is AttachmentSendViewState.PreviewGiphy -> {
                     viewModel.updateAttachmentSendViewState(AttachmentSendViewState.Idle)
-                    viewModel.updateFooterViewState(FooterViewState.Default(activity))
+                    viewModel.updateFooterViewState(FooterViewState.Default)
                 }
                 viewModel.getSelectedMessageViewStateFlow().value is SelectedMessageViewState.SelectedMessage -> {
                     viewModel.updateSelectedMessageViewState(SelectedMessageViewState.None)
@@ -253,7 +253,7 @@ abstract class ChatFragment<
                     // if it did not return null that means it was valid
                     if (attachmentViewState !is AttachmentSendViewState.Idle) {
                         viewModel.updateAttachmentSendViewState(AttachmentSendViewState.Idle)
-                        viewModel.updateFooterViewState(FooterViewState.Default(requireActivity()))
+                        viewModel.updateFooterViewState(FooterViewState.Default)
                     }
 
                     sendMessageBuilder.clear()
@@ -356,10 +356,10 @@ abstract class ChatFragment<
                 val vs = viewModel.getAttachmentSendViewStateFlow().value
                 if (vs is AttachmentSendViewState.Preview) {
                     viewModel.deleteUnsentAttachment(vs)
-                    viewModel.updateFooterViewState(FooterViewState.Default(requireActivity()))
+                    viewModel.updateFooterViewState(FooterViewState.Default)
                     viewModel.updateAttachmentSendViewState(AttachmentSendViewState.Idle)
                 } else if (vs is AttachmentSendViewState.PreviewGiphy) {
-                    viewModel.updateFooterViewState(FooterViewState.Default(requireActivity()))
+                    viewModel.updateFooterViewState(FooterViewState.Default)
                     viewModel.updateAttachmentSendViewState(AttachmentSendViewState.Idle)
                 }
             }

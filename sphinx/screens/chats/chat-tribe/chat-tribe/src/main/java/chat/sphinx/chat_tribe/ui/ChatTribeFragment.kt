@@ -20,6 +20,7 @@ import chat.sphinx.resources.getString
 import chat.sphinx.wrapper_podcast.Podcast
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
+import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.concept_views.viewstate.collect
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -92,7 +93,8 @@ internal class ChatTribeFragment: ChatFragment<
     private fun configureContributions() {
         lifecycleScope.launch(viewModel.mainImmediate) {
             viewModel.getPodcastContributionsString().collect { contributionsString ->
-                binding.includeChatTribeHeader.apply {
+
+                headerBinding.apply {
                     textViewChatHeaderContributionsIcon.visible
                     textViewChatHeaderContributions.apply {
                         visible

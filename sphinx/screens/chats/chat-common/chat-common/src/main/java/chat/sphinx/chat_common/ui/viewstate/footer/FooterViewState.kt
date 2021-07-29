@@ -12,7 +12,7 @@ internal sealed class FooterViewState: ViewState<FooterViewState>() {
     open val showRecordAudioIcon: Boolean
         get() = !showSendIcon
 
-    class Default(val context: Context): FooterViewState() {
+    object Default: FooterViewState() {
         override val showMenuIcon: Boolean
             get() = true
         override val hintTextStringId: Int
@@ -21,7 +21,7 @@ internal sealed class FooterViewState: ViewState<FooterViewState>() {
             get() = true
     }
 
-    class Attachment(val context: Context): FooterViewState() {
+    object Attachment: FooterViewState() {
         override val showMenuIcon: Boolean
             get() = false
         override val hintTextStringId: Int
@@ -30,22 +30,22 @@ internal sealed class FooterViewState: ViewState<FooterViewState>() {
             get() = true
     }
 
-    class PendingApproval(val context: Context) : FooterViewState() {
+    object PendingApproval: FooterViewState() {
         override val showMenuIcon: Boolean
             get() = false
-        override val hintText: String
-            get() = context.getString(R.string.waiting_for_admin_approval)
+        override val hintTextStringId: Int
+            get() = R.string.waiting_for_admin_approval
         override val showSendIcon: Boolean
             get() = false
         override val showRecordAudioIcon: Boolean
             get() = false
     }
 
-    class MembershipRejected(val context: Context) : FooterViewState() {
+    object MembershipRejected: FooterViewState() {
         override val showMenuIcon: Boolean
             get() = false
-        override val hintText: String
-            get() = context.getString(R.string.message)
+        override val hintTextStringId: Int
+            get() = R.string.message
         override val showSendIcon: Boolean
             get() = false
         override val showRecordAudioIcon: Boolean
