@@ -843,11 +843,11 @@ private inline fun LayoutMessageHolderBinding.setGroupActionJoinRequestAdminLayo
 
         textViewGroupJoinRequestMessage.text = root.context.getString(R.string.tribe_request_admin_side, groupActionDetails.subjectName)
 
-        buttonAcceptRequest.isEnabled = true
-        buttonAcceptRequest.alpha = 1.0f
+        textViewAcceptRequest.isEnabled = true
+        textViewAcceptRequest.alpha = 1.0f
 
-        buttonRejectRequest.isEnabled = true
-        buttonRejectRequest.alpha = 1.0f
+        textViewRejectRequest.isEnabled = true
+        textViewRejectRequest.alpha = 1.0f
     }
 }
 
@@ -863,11 +863,11 @@ private inline fun LayoutMessageHolderBinding.setGroupActionJoinRejectedAdminLay
         root.visible
 
         textViewGroupJoinRequestMessage.text = root.context.getString(R.string.tribe_request_rejected_admin_side, groupActionDetails.subjectName)
-        buttonAcceptRequest.isEnabled = false
-        buttonAcceptRequest.alpha = 0.2f
+        textViewAcceptRequest.isEnabled = false
+        textViewAcceptRequest.alpha = 0.2f
 
-        buttonRejectRequest.isEnabled = false
-        buttonRejectRequest.alpha = 1.0f
+        textViewRejectRequest.isEnabled = false
+        textViewRejectRequest.alpha = 1.0f
     }
 }
 
@@ -883,11 +883,11 @@ private inline fun LayoutMessageHolderBinding.setGroupActionJoinApprovedAdminLay
         root.visible
 
         textViewGroupJoinRequestMessage.text = root.context.getString(R.string.tribe_request_approved_admin_side, groupActionDetails.subjectName)
-        buttonRejectRequest.isEnabled = false
-        buttonRejectRequest.alpha = 0.2f
+        textViewRejectRequest.isEnabled = false
+        textViewRejectRequest.alpha = 0.2f
 
-        buttonAcceptRequest.isEnabled = false
-        buttonAcceptRequest.alpha = 1.0f
+        textViewAcceptRequest.isEnabled = false
+        textViewAcceptRequest.alpha = 1.0f
     }
 }
 

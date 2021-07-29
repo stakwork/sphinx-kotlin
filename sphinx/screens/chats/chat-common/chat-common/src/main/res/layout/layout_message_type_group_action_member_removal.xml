@@ -33,22 +33,23 @@
             android:textColor="@color/text"
             android:textSize="@dimen/default_text_size_sub_headline"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/button_delete_group"
+            app:layout_constraintEnd_toStartOf="@+id/text_view_delete_group"
             app:layout_constraintHorizontal_chainStyle="packed"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/button_delete_group"
-            style="@style/Widget.AppCompat.Button"
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_delete_group"
             android:layout_width="wrap_content"
-            android:layout_height="@dimen/default_tap_target_xy"
-            android:backgroundTint="@color/badgeRed"
+            android:layout_height="@dimen/group_request_message_button_xy"
+            android:background="@drawable/background_group_delete_message_button"
             android:layout_marginStart="@dimen/chat_message_inner_padding"
+            android:paddingHorizontal="@dimen/default_half_layout_margin"
             android:fontFamily="@font/roboto_medium"
             android:textColor="@android:color/white"
             android:textSize="@dimen/default_text_size_list_row_headline"
             android:textAllCaps="false"
             android:text="@string/tribe_deleted_announcement_button_delete"
+            android:gravity="center"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toEndOf="@+id/text_view_group_kick_message"
             app:layout_constraintTop_toTopOf="parent" />
@@ -59,10 +60,9 @@
             android:layout_height="0dp"
             android:background="@color/receivedMsgBG"
             android:visibility="gone"
-            android:translationZ="@dimen/progress_bar_z"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="@+id/button_delete_group"
+            app:layout_constraintStart_toStartOf="@+id/text_view_delete_group"
             app:layout_constraintEnd_toEndOf="parent"
             tools:visibility="visible">
 

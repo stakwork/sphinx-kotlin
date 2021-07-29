@@ -819,7 +819,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                     }
                 }
             }
-        }
+        }.join()
     }
 
     suspend fun deleteTribe() {
@@ -836,6 +836,6 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                     }
                 }
             }
-        }
+        }.join()
     }
 }

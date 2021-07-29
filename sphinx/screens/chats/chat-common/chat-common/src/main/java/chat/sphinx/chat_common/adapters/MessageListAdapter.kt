@@ -233,13 +233,13 @@ internal class MessageListAdapter<ARGS : NavArgs>(
 
             binding.includeMessageTypeGroupActionHolder.apply {
                 includeMessageTypeGroupActionJoinRequestAdminView.apply {
-                    buttonAcceptRequest.setOnClickListener {
+                    textViewAcceptRequest.setOnClickListener {
                         currentViewState?.message?.let {
                             processMemberRequest(it.sender, it.id, MessageType.MEMBER_APPROVE.toMessageType())
                         }
                     }
 
-                    buttonRejectRequest.setOnClickListener {
+                    textViewRejectRequest.setOnClickListener {
                         currentViewState?.message?.let {
                             processMemberRequest(it.sender, it.id, MessageType.MEMBER_REJECT.toMessageType())
                         }
@@ -247,7 +247,7 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                 }
 
                 includeMessageTypeGroupActionMemberRemoval.apply {
-                    buttonDeleteGroup.setOnClickListener {
+                    textViewDeleteGroup.setOnClickListener {
                         deleteTribe()
                     }
                 }
@@ -272,7 +272,7 @@ internal class MessageListAdapter<ARGS : NavArgs>(
 
         private fun deleteTribe() {
             onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-                binding.includeMessageTypeGroupActionHolder.includeMessageTypeGroupActionJoinRequestAdminView.apply {
+                binding.includeMessageTypeGroupActionHolder.includeMessageTypeGroupActionMemberRemoval.apply {
                     constraintLayoutProgressBarContainer.visible
 
                     viewModel.deleteTribe()
