@@ -11,6 +11,7 @@ import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessageUUID
 import chat.sphinx.wrapper_message.Message
+import chat.sphinx.wrapper_message.MessageType
 import kotlinx.coroutines.flow.Flow
 
 interface MessageRepository {
@@ -40,13 +41,9 @@ interface MessageRepository {
         messageUUID: MessageUUID,
     ): Response<Any, ResponseError>
 
-    suspend fun approveMember(
+    suspend fun processMemberRequest(
         contactId: ContactId,
-        messageId: MessageId
-    ): LoadResponse<Any, ResponseError>
-
-    suspend fun rejectMember(
-        contactId: ContactId,
-        messageId: MessageId
+        messageId: MessageId,
+        type: MessageType,
     ): LoadResponse<Any, ResponseError>
 }

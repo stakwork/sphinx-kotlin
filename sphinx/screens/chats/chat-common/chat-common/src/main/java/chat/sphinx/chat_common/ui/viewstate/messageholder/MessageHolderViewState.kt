@@ -209,10 +209,7 @@ internal sealed class MessageHolderViewState(
     }
 
     val groupActionIndicator: LayoutState.GroupActionIndicator? by lazy(LazyThreadSafetyMode.NONE) {
-        if (
-            !message.type.isGroupAction() ||
-            message.senderAlias == null
-        ) {
+        if (!message.type.isGroupAction()) {
             null
         } else {
             LayoutState.GroupActionIndicator(
@@ -223,7 +220,7 @@ internal sealed class MessageHolderViewState(
                     chat.ownerPubKey == accountOwner().nodePubKey
                 },
                 chatType = chat.type,
-                subjectName = message.senderAlias!!.value
+                subjectName = message.senderAlias?.value ?: ""
             )
         }
     }

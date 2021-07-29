@@ -22,17 +22,6 @@
         app:layout_constraintTop_toBottomOf="@+id/include_chat_contact_header"
         tools:listitem="@layout/layout_message_holder" />
 
-
-    <include
-        android:id="@+id/include_message_type_group_action_member_removal"
-        layout="@layout/layout_message_type_group_action_member_removal"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/default_layout_margin"
-        android:visibility="gone"
-        app:layout_constraintTop_toBottomOf="@+id/include_chat_contact_header"
-        />
-
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/image_view_chat_footer_shadow"
         android:layout_width="match_parent"

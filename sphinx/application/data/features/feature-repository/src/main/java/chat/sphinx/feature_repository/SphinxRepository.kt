@@ -165,9 +165,6 @@ abstract class SphinxRepository(
                         executeNetworkRequest = false
                     )
                 }
-                is SphinxSocketIOMessage.Type.Group -> {
-                    // TODO: Implement
-                }
                 is SphinxSocketIOMessage.Type.Invite -> {
                     contactLock.withLock {
                         queries.transaction {
@@ -179,59 +176,80 @@ abstract class SphinxRepository(
                 is SphinxSocketIOMessage.Type.InvoicePayment -> {
                     // TODO: Implement
                 }
-                is SphinxSocketIOMessage.Type.MessageType -> {
+                is SphinxSocketIOMessage.Type.MessageType, is SphinxSocketIOMessage.Type.Group -> {
 
-                    // TODO: Implement conditional arguments depending on
-                    //  different MessageType
+                    val messageDto: MessageDto? = when (msg) {
+                        is SphinxSocketIOMessage.Type.MessageType -> msg.dto
+                        is SphinxSocketIOMessage.Type.Group -> msg.dto.message
+                        else -> null
+                    }
 
-                    decryptMessageDtoContentIfAvailable(
-                        msg.dto,
-                        coroutineScope { this },
-                        io
-                    )?.join()
+                    val contactDto: ContactDto? = when (msg) {
+                        is SphinxSocketIOMessage.Type.MessageType -> msg.dto.contact
+                        is SphinxSocketIOMessage.Type.Group -> msg.dto.contact
+                        else -> null
+                    }
 
-                    decryptMessageDtoMediaKeyIfAvailable(
-                        msg.dto,
-                        coroutineScope { this },
-                        io
-                    )?.join()
+                    val chatDto: ChatDto? = when (msg) {
+                        is SphinxSocketIOMessage.Type.MessageType -> msg.dto.chat
+                        is SphinxSocketIOMessage.Type.Group -> msg.dto.chat
+                        else -> null
+                    }
 
-                    chatLock.withLock {
-                        messageLock.withLock {
-                            contactLock.withLock {
-                                queries.transaction {
+                    val chatDtoId: ChatId? = when (msg) {
+                        is SphinxSocketIOMessage.Type.MessageType -> msg.dto.chat_id?.toChatId()
+                        else -> null
+                    }
 
-                                    upsertMessage(msg.dto, queries)
+                    messageDto?.let { nnMessageDto ->
+                        decryptMessageDtoContentIfAvailable(
+                            nnMessageDto,
+                            coroutineScope { this },
+                            io
+                        )?.join()
 
-                                    var chatId: ChatId? = null
+                        decryptMessageDtoMediaKeyIfAvailable(
+                            nnMessageDto,
+                            coroutineScope { this },
+                            io
+                        )?.join()
 
-                                    msg.dto.contact?.let { contactDto ->
-                                        upsertContact(contactDto, queries)
-                                    }
+                        chatLock.withLock {
+                            messageLock.withLock {
+                                contactLock.withLock {
+                                    queries.transaction {
 
-                                    msg.dto.chat?.let { chatDto ->
-                                        upsertChat(chatDto, moshi, chatSeenMap, queries, msg.dto.contact)
+                                        upsertMessage(nnMessageDto, queries)
 
-                                        chatId = ChatId(chatDto.id)
-                                    }
+                                        var chatId: ChatId? = null
 
-                                    msg.dto.chat_id?.let { nnChatId ->
-                                        chatId = ChatId(nnChatId)
-                                    }
+                                        contactDto?.let { nnContactDto ->
+                                            upsertContact(nnContactDto, queries)
+                                        }
 
-                                    chatId?.let { id ->
-                                        updateChatDboLatestMessage(
-                                            msg.dto,
-                                            id,
-                                            latestMessageUpdatedTimeMap,
-                                            queries
-                                        )
+                                        chatDto?.let { nnChatDto ->
+                                            upsertChat(nnChatDto, moshi, chatSeenMap, queries, contactDto)
+
+                                            chatId = ChatId(nnChatDto.id)
+                                        }
+
+                                        chatDtoId?.let { nnChatDtoId ->
+                                            chatId = nnChatDtoId
+                                        }
+
+                                        chatId?.let { id ->
+                                            updateChatDboLatestMessage(
+                                                nnMessageDto,
+                                                id,
+                                                latestMessageUpdatedTimeMap,
+                                                queries
+                                            )
+                                        }
                                     }
                                 }
                             }
                         }
                     }
-
                 }
             }
         }
@@ -1690,14 +1708,14 @@ abstract class SphinxRepository(
                                 chatDbo.my_photo_url,
                                 null,
                                 sendMessage.replyUUID,
-                                provisionalId,
-                                null,
-                                chatDbo.id,
                                 if (media != null) {
                                     MessageType.Attachment
                                 } else {
                                     MessageType.Message
                                 },
+                                provisionalId,
+                                null,
+                                chatDbo.id,
                                 owner.id,
                                 sendMessage.contactId,
                                 messagePrice,
@@ -3058,69 +3076,36 @@ abstract class SphinxRepository(
         return response
     }
 
-    override suspend fun approveMember(contactId: ContactId, messageId: MessageId): Response<Any, ResponseError> {
-        var response: Response<Any, ResponseError>  = Response.Error(ResponseError(("Failed to approve member")))
-
-        applicationScope.launch(mainImmediate) {
-            networkQueryMessage.approveMember(contactId, messageId).collect {loadResponse ->
-                when (loadResponse) {
-                    is LoadResponse.Loading -> {}
-
-                    is Response.Error -> {
-                        response = loadResponse
-                        LOG.e(TAG, "Failed to approve member: ", loadResponse.exception)
-                    }
-                    is Response.Success -> {
-                        loadResponse.value.let {
-                            response = Response.Success(it)
-                            val queries = coreDB.getSphinxDatabaseQueries()
-
-                            chatLock.withLock {
-                                messageLock.withLock {
-                                    withContext(io) {
-                                        queries.transaction {
-                                            upsertChat(it.chat, moshi, chatSeenMap, queries, null)
-                                            upsertMessage(it.message, queries)
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }.join()
-
-        return response
-    }
-
-    override suspend fun rejectMember(
+    override suspend fun processMemberRequest(
         contactId: ContactId,
-        messageId: MessageId
+        messageId: MessageId,
+        type: MessageType,
     ): Response<Any, ResponseError> {
-        var response: Response<Any, ResponseError>  = Response.Error(ResponseError(("Failed to reject member")))
+        var response: Response<Any, ResponseError>  = Response.Error(ResponseError(("")))
 
         applicationScope.launch(mainImmediate) {
-            networkQueryMessage.rejectMember(contactId, messageId).collect {loadResponse ->
+            networkQueryMessage.processMemberRequest(
+                contactId,
+                messageId,
+                type
+            ).collect { loadResponse ->
+
                 when (loadResponse) {
                     is LoadResponse.Loading -> {}
 
                     is Response.Error -> {
                         response = loadResponse
-                        LOG.e(TAG, "Failed to reject member: ", loadResponse.exception)
                     }
                     is Response.Success -> {
-                        loadResponse.value.let {
-                            response = Response.Success(it)
-                            val queries = coreDB.getSphinxDatabaseQueries()
+                        response = loadResponse
+                        val queries = coreDB.getSphinxDatabaseQueries()
 
-                            chatLock.withLock {
-                                messageLock.withLock {
-                                    withContext(io) {
-                                        queries.transaction {
-                                            upsertChat(it.chat, moshi, chatSeenMap, queries, null)
-                                            upsertMessage(it.message, queries)
-                                        }
+                        chatLock.withLock {
+                            messageLock.withLock {
+                                withContext(io) {
+                                    queries.transaction {
+                                        upsertChat(loadResponse.value.chat, moshi, chatSeenMap, queries, null)
+                                        upsertMessage(loadResponse.value.message, queries)
                                     }
                                 }
                             }

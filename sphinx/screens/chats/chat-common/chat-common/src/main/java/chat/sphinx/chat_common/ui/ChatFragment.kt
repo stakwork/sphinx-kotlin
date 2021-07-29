@@ -83,7 +83,6 @@ abstract class ChatFragment<
     protected abstract val selectedMessageBinding: LayoutSelectedMessageBinding
     protected abstract val selectedMessageHolderBinding: LayoutMessageHolderBinding
     protected abstract val attachmentSendBinding: LayoutAttachmentSendPreviewBinding
-    protected abstract val memberRemovalBinding: LayoutMessageTypeGroupActionMemberRemovalBinding
     protected abstract val menuBinding: LayoutChatMenuBinding
     protected abstract val recyclerView: RecyclerView
 
@@ -216,7 +215,6 @@ abstract class ChatFragment<
 
         menuBinding.viewChatMenuInputLock.setOnClickListener {
             viewModel.updateViewState(ChatMenuViewState.Closed)
-//            viewModel
         }
     }
 
@@ -582,17 +580,16 @@ abstract class ChatFragment<
 
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.getFooterViewStateFlow().collect { viewState ->
-                if (viewState is FooterViewState.MembershipRejected) {
-                    memberRemovalBinding.root.visible
-                    memberRemovalBinding.buttonDeleteGroup.setOnClickListener {
-                        viewModel.deleteTribe(memberRemovalBinding.progressBarDeleteTribe)
-                    }
-                }
                 footerBinding.apply {
                     editTextChatFooter.hint = getString(viewState.hintTextStringId)
                     imageViewChatFooterMicrophone.goneIfFalse(viewState.showRecordAudioIcon)
                     textViewChatFooterSend.goneIfFalse(viewState.showSendIcon)
                     textViewChatFooterAttachment.goneIfFalse(viewState.showMenuIcon)
+
+                    editTextChatFooter.isEnabled = viewState.enableMessaging
+                    textViewChatFooterSend.isEnabled = viewState.enableMessaging
+                    textViewChatFooterAttachment.isEnabled = viewState.enableMessaging
+                    root.alpha = if (viewState.enableMessaging) 1.0f else 0.4f
                 }
             }
         }

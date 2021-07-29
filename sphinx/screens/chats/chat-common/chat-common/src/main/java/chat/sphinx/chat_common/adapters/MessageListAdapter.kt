@@ -19,7 +19,14 @@ import chat.sphinx.chat_common.ui.viewstate.messageholder.*
 import chat.sphinx.chat_common.ui.viewstate.selected.SelectedMessageViewState
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
+import chat.sphinx.wrapper_common.dashboard.ContactId
+import chat.sphinx.wrapper_common.message.MessageId
+import chat.sphinx.wrapper_message.MessageType
+import chat.sphinx.wrapper_message.toMessageType
 import chat.sphinx.wrapper_view.Px
+import io.matthewnelson.android_feature_screens.util.gone
+import io.matthewnelson.android_feature_screens.util.goneIfFalse
+import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
@@ -87,6 +94,7 @@ internal class MessageListAdapter<ARGS : NavArgs>(
 
     override fun onStart(owner: LifecycleOwner) {
         super.onStart(owner)
+
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.messageHolderViewStateFlow.collect { list ->
                 if (messages.isEmpty()) {
@@ -224,25 +232,52 @@ internal class MessageListAdapter<ARGS : NavArgs>(
             }
 
             binding.includeMessageTypeGroupActionHolder.apply {
-                includeMessageTypeGroupActionJoinRequestAdminView.buttonAcceptRequest.setOnClickListener {
-                    currentViewState?.message?.let {
-                        viewModel.approveNewMember(
-                            it.sender,
-                            it.id,
-                            includeMessageTypeGroupActionJoinRequestAdminView.constraintLayoutProgressBarContainer
-                        )
+                includeMessageTypeGroupActionJoinRequestAdminView.apply {
+                    buttonAcceptRequest.setOnClickListener {
+                        currentViewState?.message?.let {
+                            processMemberRequest(it.sender, it.id, MessageType.MEMBER_APPROVE.toMessageType())
+                        }
                     }
 
+                    buttonRejectRequest.setOnClickListener {
+                        currentViewState?.message?.let {
+                            processMemberRequest(it.sender, it.id, MessageType.MEMBER_REJECT.toMessageType())
+                        }
+                    }
                 }
 
-                includeMessageTypeGroupActionJoinRequestAdminView.buttonRejectRequest.setOnClickListener {
-                    currentViewState?.message?.let {
-                        viewModel.rejectNewMember(
-                            it.sender,
-                            it.id,
-                            includeMessageTypeGroupActionJoinRequestAdminView.constraintLayoutProgressBarContainer
-                        )
+                includeMessageTypeGroupActionMemberRemoval.apply {
+                    buttonDeleteGroup.setOnClickListener {
+                        deleteTribe()
                     }
+                }
+            }
+        }
+
+        private fun processMemberRequest(contactId: ContactId, messageId: MessageId, type: MessageType) {
+            onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                binding.includeMessageTypeGroupActionHolder.includeMessageTypeGroupActionJoinRequestAdminView.apply {
+                    constraintLayoutProgressBarContainer.visible
+
+                    viewModel.processMemberRequest(
+                        contactId,
+                        messageId,
+                        type
+                    )
+
+                    constraintLayoutProgressBarContainer.gone
+                }
+            }
+        }
+
+        private fun deleteTribe() {
+            onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                binding.includeMessageTypeGroupActionHolder.includeMessageTypeGroupActionJoinRequestAdminView.apply {
+                    constraintLayoutProgressBarContainer.visible
+
+                    viewModel.deleteTribe()
+
+                    constraintLayoutProgressBarContainer.gone
                 }
             }
         }

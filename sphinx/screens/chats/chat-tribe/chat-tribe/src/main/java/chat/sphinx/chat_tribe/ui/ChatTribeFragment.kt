@@ -60,10 +60,6 @@ internal class ChatTribeFragment: ChatFragment<
         LayoutChatMenuBinding::bind, R.id.include_chat_tribe_menu
     )
 
-    override val memberRemovalBinding: LayoutMessageTypeGroupActionMemberRemovalBinding by viewBinding(
-        LayoutMessageTypeGroupActionMemberRemovalBinding::bind, R.id.include_message_type_group_action_member_removal
-    )
-
     override val menuEnablePayments: Boolean
         get() = false
 

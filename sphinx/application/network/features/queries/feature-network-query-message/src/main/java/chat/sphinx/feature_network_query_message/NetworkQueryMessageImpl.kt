@@ -13,6 +13,8 @@ import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessagePagination
 import chat.sphinx.wrapper_common.message.MessageUUID
+import chat.sphinx.wrapper_message.MessageType
+import chat.sphinx.wrapper_message.isMemberApprove
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
 import kotlinx.coroutines.flow.Flow
@@ -160,26 +162,19 @@ class NetworkQueryMessageImpl(
         )
 
 
-    override fun approveMember(
+    override fun processMemberRequest(
         contactId: ContactId,
         messageId: MessageId,
+        type: MessageType,
         relayData: Pair<AuthorizationToken, RelayUrl>?
     ): Flow<LoadResponse<PutMemberResponseDto, ResponseError>> =
         networkRelayCall.relayPut(
             responseJsonClass = PutMemberRelayResponse::class.java,
-            relayEndpoint = String.format(ENDPOINT_MEMBER_APPROVED, contactId.value, messageId.value),
-            requestBody = null,
-            relayData = relayData
-        )
-
-    override fun rejectMember(
-        contactId: ContactId,
-        messageId: MessageId,
-        relayData: Pair<AuthorizationToken, RelayUrl>?
-    ): Flow<LoadResponse<PutMemberResponseDto, ResponseError>> =
-        networkRelayCall.relayPut(
-            responseJsonClass = PutMemberRelayResponse::class.java,
-            relayEndpoint = String.format(ENDPOINT_MEMBER_REJECTED, contactId.value, messageId.value),
+            relayEndpoint = if (type.isMemberApprove()) {
+                String.format(ENDPOINT_MEMBER_APPROVED, contactId.value, messageId.value)
+            } else {
+                String.format(ENDPOINT_MEMBER_REJECTED, contactId.value, messageId.value)
+            },
             requestBody = null,
             relayData = relayData
         )

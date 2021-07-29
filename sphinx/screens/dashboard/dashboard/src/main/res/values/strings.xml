@@ -52,6 +52,13 @@
 
     <string name="last_message_description_has_join_tribe">%s has joined the tribe</string>
     <string name="last_message_description_just_left_tribe">%s just left the tribe</string>
+    <string name="last_message_description_wants_to_join">%s wants to join the tribe</string>
+    <string name="last_message_description_declined_request_from">You have declined the request from %s</string>
+    <string name="last_message_description_approved_request_from">You have approved the request from %s</string>
+    <string name="last_message_description_admin_declined_request">The admin declined your request</string>
+    <string name="last_message_description_welcome_member">Welcome! You’re now a member</string>
+    <string name="last_message_description_group_kick">The admin has removed you from this group</string>
+    <string name="last_message_description_tribe_deleted">The admin deleted this tribe</string>
 
     <string name="last_message_description_invite">Invite: %s</string>
     <string name="last_message_description_looking_available_node">Looking for an available node for %s</string>
