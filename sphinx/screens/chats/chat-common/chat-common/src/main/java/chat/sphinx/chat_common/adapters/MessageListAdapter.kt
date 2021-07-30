@@ -18,6 +18,7 @@ import chat.sphinx.chat_common.ui.ChatViewModel
 import chat.sphinx.chat_common.ui.isMessageSelected
 import chat.sphinx.chat_common.ui.viewstate.messageholder.*
 import chat.sphinx.chat_common.ui.viewstate.selected.SelectedMessageViewState
+import chat.sphinx.chat_common.util.LightningNodePubKeyLongClickUrlSpan
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.wrapper_view.Px
@@ -204,6 +205,8 @@ internal class MessageListAdapter<ARGS : NavArgs>(
 
         private val selectedMessageLongClickListener: OnLongClickListener
 
+        private val onLightningNodePubKeyClickListener: LightningNodePubKeyLongClickUrlSpan.OnClickListener
+
         init {
             binding.includeMessageHolderBubble.apply {
                 selectedMessageLongClickListener = OnLongClickListener { v ->
@@ -225,6 +228,12 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                     true
                 }
 
+                onLightningNodePubKeyClickListener = object: LightningNodePubKeyLongClickUrlSpan.OnClickListener {
+                    override fun onClick(url: String?) {
+                        viewModel.goToLightningNodePubKeyDetailScreen(url)
+                    }
+                }
+
                 root.setOnLongClickListener(selectedMessageLongClickListener)
             }
         }
@@ -242,7 +251,8 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                 viewModel.memeServerTokenHandler,
                 recyclerViewWidth,
                 viewState,
-                selectedMessageLongClickListener
+                selectedMessageLongClickListener,
+                onLightningNodePubKeyClickListener
             )
 
         }

@@ -13,6 +13,7 @@ open class LongClickUrlSpan(
 
     @ColorInt
     private var highlightColor = 0
+
     fun onLongClick(widget: View) {
         onLongClickListener.onLongClick(widget)
     }

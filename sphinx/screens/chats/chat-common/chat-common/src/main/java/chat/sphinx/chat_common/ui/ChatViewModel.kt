@@ -45,7 +45,6 @@ import chat.sphinx.resources.getRandomColor
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.ChatName
 import chat.sphinx.wrapper_chat.isConversation
-import chat.sphinx.wrapper_chat.isTribe
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.Sat
@@ -780,6 +779,12 @@ abstract class ChatViewModel<ARGS: NavArgs>(
             chatId?.let {
                 chatNavigator.toChatDetail(it, contactId)
             }
+        }
+    }
+
+    open fun goToLightningNodePubKeyDetailScreen(url: String?) {
+        viewModelScope.launch(mainImmediate) {
+            submitSideEffect(ChatSideEffect.Notify("Url clicked $url"))
         }
     }
 }

@@ -15,6 +15,7 @@ import androidx.annotation.IntDef
 import androidx.annotation.RestrictTo
 import androidx.core.util.PatternsCompat
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
+import chat.sphinx.wrapper_common.lightning.isValidLightningNodePubKey
 import chat.sphinx.wrapper_common.tribe.TribeJoinLink
 import java.util.*
 import java.util.regex.Matcher
@@ -92,7 +93,11 @@ object SphinxLinkify {
      *
      * @return True if at least one link is found and applied.
      */
-    private fun addLinks(text: Spannable, @LinkifyMask mask: Int, onLongClickListener: View.OnLongClickListener): Boolean {
+    private fun addLinks(
+        text: Spannable,
+        @LinkifyMask mask: Int,
+        onLongClickListener: View.OnLongClickListener,
+        onLightningNodePubKeyClickListener: LightningNodePubKeyLongClickUrlSpan.OnClickListener): Boolean {
         if (mask == 0) {
             return false
         }
@@ -133,7 +138,7 @@ object SphinxLinkify {
         }
         for (link in links) {
             if (link.frameworkAddedSpan == null) {
-                applyLink(link.url, link.start, link.end, text, onLongClickListener)
+                applyLink(link.url, link.start, link.end, text, onLongClickListener, onLightningNodePubKeyClickListener)
             }
         }
         return true
@@ -150,20 +155,25 @@ object SphinxLinkify {
      *
      * @return True if at least one link is found and applied.
      */
-    fun addLinks(text: TextView, @LinkifyMask mask: Int, onLongClickListener: View.OnLongClickListener): Boolean {
+    fun addLinks(
+        text: TextView,
+        @LinkifyMask mask: Int,
+        onLongClickListener: View.OnLongClickListener,
+        onLightningNodePubKeyClickListener: LightningNodePubKeyLongClickUrlSpan.OnClickListener
+    ): Boolean {
         if (mask == 0) {
             return false
         }
         val t = text.text
         return if (t is Spannable) {
-            if (addLinks(t, mask, onLongClickListener)) {
+            if (addLinks(t, mask, onLongClickListener, onLightningNodePubKeyClickListener)) {
                 addLinkMovementMethod(text)
                 return true
             }
             false
         } else {
             val s = SpannableString.valueOf(t)
-            if (addLinks(s, mask, onLongClickListener)) {
+            if (addLinks(s, mask, onLongClickListener, onLightningNodePubKeyClickListener)) {
                 addLinkMovementMethod(text)
                 text.text = s
                 return true
@@ -231,8 +241,19 @@ object SphinxLinkify {
         }
     }
 
-    private fun applyLink(url: String?, start: Int, end: Int, text: Spannable, onLongClickListener: View.OnLongClickListener) {
-        val span = LongClickUrlSpan(url, onLongClickListener)
+    private fun applyLink(
+        url: String?,
+        start: Int,
+        end: Int,
+        text: Spannable,
+        onLongClickListener: View.OnLongClickListener,
+        onLightningNodePubKeyClickListener: LightningNodePubKeyLongClickUrlSpan.OnClickListener
+    ) {
+        val span = if (url?.isValidLightningNodePubKey == true) {
+            LightningNodePubKeyLongClickUrlSpan(url, onLongClickListener, onLightningNodePubKeyClickListener)
+        } else {
+            LongClickUrlSpan(url, onLongClickListener)
+        }
         text.setSpan(span, start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
     }
 
@@ -292,11 +313,11 @@ object SphinxLinkify {
     }
 
     object SphinxPatterns {
-        var AUTOLINK_WEB_URL: Pattern = Pattern.compile(
+        val AUTOLINK_WEB_URL: Pattern = Pattern.compile(
             "(${TribeJoinLink.REGEX}|${PatternsCompat.AUTOLINK_WEB_URL.pattern()})"
         )
 
-        var LIGHTNING_NODE_PUBLIC_KEY: Pattern = Pattern.compile(
+        val LIGHTNING_NODE_PUBLIC_KEY: Pattern = Pattern.compile(
             LightningNodePubKey.REGEX
         )
     }
