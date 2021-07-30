@@ -17,6 +17,7 @@ import androidx.core.util.PatternsCompat
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.isValidLightningNodePubKey
 import chat.sphinx.wrapper_common.tribe.TribeJoinLink
+import chat.sphinx.wrapper_common.tribe.isValidTribeJoinLink
 import java.util.*
 import java.util.regex.Matcher
 import java.util.regex.Pattern
@@ -97,7 +98,7 @@ object SphinxLinkify {
         text: Spannable,
         @LinkifyMask mask: Int,
         onLongClickListener: View.OnLongClickListener,
-        onLightningNodePubKeyClickListener: LightningNodePubKeyLongClickUrlSpan.OnClickListener): Boolean {
+        onSphinxClickListener: SphinxLongClickUrlSpan.OnClickListener): Boolean {
         if (mask == 0) {
             return false
         }
@@ -121,7 +122,7 @@ object SphinxLinkify {
                 links,
                 text,
                 SphinxPatterns.AUTOLINK_WEB_URL,
-                arrayOf("http://", "https://", "rtsp://"),
+                arrayOf("http://", "https://", "rtsp://", "sphinx.chat://"),
                 Linkify.sUrlMatchFilter,
                 null
             )
@@ -138,7 +139,7 @@ object SphinxLinkify {
         }
         for (link in links) {
             if (link.frameworkAddedSpan == null) {
-                applyLink(link.url, link.start, link.end, text, onLongClickListener, onLightningNodePubKeyClickListener)
+                applyLink(link.url, link.start, link.end, text, onLongClickListener, onSphinxClickListener)
             }
         }
         return true
@@ -159,21 +160,21 @@ object SphinxLinkify {
         text: TextView,
         @LinkifyMask mask: Int,
         onLongClickListener: View.OnLongClickListener,
-        onLightningNodePubKeyClickListener: LightningNodePubKeyLongClickUrlSpan.OnClickListener
+        onSphinxClickListener: SphinxLongClickUrlSpan.OnClickListener
     ): Boolean {
         if (mask == 0) {
             return false
         }
         val t = text.text
         return if (t is Spannable) {
-            if (addLinks(t, mask, onLongClickListener, onLightningNodePubKeyClickListener)) {
+            if (addLinks(t, mask, onLongClickListener, onSphinxClickListener)) {
                 addLinkMovementMethod(text)
                 return true
             }
             false
         } else {
             val s = SpannableString.valueOf(t)
-            if (addLinks(s, mask, onLongClickListener, onLightningNodePubKeyClickListener)) {
+            if (addLinks(s, mask, onLongClickListener, onSphinxClickListener)) {
                 addLinkMovementMethod(text)
                 text.text = s
                 return true
@@ -247,10 +248,10 @@ object SphinxLinkify {
         end: Int,
         text: Spannable,
         onLongClickListener: View.OnLongClickListener,
-        onLightningNodePubKeyClickListener: LightningNodePubKeyLongClickUrlSpan.OnClickListener
+        onSphinxClickListener: SphinxLongClickUrlSpan.OnClickListener
     ) {
-        val span = if (url?.isValidLightningNodePubKey == true) {
-            LightningNodePubKeyLongClickUrlSpan(url, onLongClickListener, onLightningNodePubKeyClickListener)
+        val span = if (url?.isValidLightningNodePubKey == true || url?.isValidTribeJoinLink == true) {
+            SphinxLongClickUrlSpan(url, onLongClickListener, onSphinxClickListener)
         } else {
             LongClickUrlSpan(url, onLongClickListener)
         }

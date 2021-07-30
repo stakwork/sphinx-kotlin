@@ -48,12 +48,14 @@ internal class TribeChatNavigatorImpl @Inject constructor(
         )
     }
 
-    override suspend fun toChat(chat: Chat, contactId: ContactId) {
+    override suspend fun toChat(chat: Chat, contactId: ContactId?) {
         when (chat.type) {
             is ChatType.Conversation -> {
-                navigationDriver.submitNavigationRequest(
-                    ToChatContactScreen(chat.id, contactId)
-                )
+                contactId?.let {
+                    navigationDriver.submitNavigationRequest(
+                        ToChatContactScreen(chat.id, contactId)
+                    )
+                }
             }
             is ChatType.Group -> {
                 navigationDriver.submitNavigationRequest(

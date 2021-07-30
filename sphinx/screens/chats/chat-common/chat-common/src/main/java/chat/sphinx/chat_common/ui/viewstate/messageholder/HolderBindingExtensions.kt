@@ -12,8 +12,8 @@ import androidx.core.view.updateLayoutParams
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.chat_common.R
 import chat.sphinx.chat_common.databinding.LayoutMessageHolderBinding
-import chat.sphinx.chat_common.util.LightningNodePubKeyLongClickUrlSpan
 import chat.sphinx.chat_common.util.SphinxLinkify
+import chat.sphinx.chat_common.util.SphinxLongClickUrlSpan
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
@@ -53,7 +53,7 @@ internal fun LayoutMessageHolderBinding.setView(
     recyclerViewWidth: Px,
     viewState: MessageHolderViewState,
     onLongClickListener: View.OnLongClickListener? = null,
-    onLightningNodePubKeyClickListener: LightningNodePubKeyLongClickUrlSpan.OnClickListener? = null
+    onSphinxClickListener: SphinxLongClickUrlSpan.OnClickListener? = null
 ) {
     for (job in holderJobs) {
         job.cancel()
@@ -139,7 +139,7 @@ internal fun LayoutMessageHolderBinding.setView(
                 }
             }
             setUnsupportedMessageTypeLayout(viewState.unsupportedMessageType)
-            setBubbleMessageLayout(viewState.bubbleMessage, onLongClickListener, onLightningNodePubKeyClickListener)
+            setBubbleMessageLayout(viewState.bubbleMessage, onLongClickListener, onSphinxClickListener)
             setBubbleDirectPaymentLayout(viewState.bubbleDirectPayment)
             setBubbleDirectPaymentLayout(viewState.bubbleDirectPayment)
             setBubblePodcastBoost(viewState.bubblePodcastBoost)
@@ -475,7 +475,7 @@ internal inline fun LayoutMessageHolderBinding.setDeletedMessageLayout(
 internal inline fun LayoutMessageHolderBinding.setBubbleMessageLayout(
     message: LayoutState.Bubble.ContainerThird.Message?,
     onLongClickListener: View.OnLongClickListener?,
-    onLightningNodePubKeyClickListener: LightningNodePubKeyLongClickUrlSpan.OnClickListener?
+    onSphinxClickListener: SphinxLongClickUrlSpan.OnClickListener?
 ) {
     includeMessageHolderBubble.textViewMessageText.apply {
         if (message == null) {
@@ -484,7 +484,7 @@ internal inline fun LayoutMessageHolderBinding.setBubbleMessageLayout(
             visible
             text = message.text
             onLongClickListener?.let { longClickListener ->
-                onLightningNodePubKeyClickListener?.let { clickListener ->
+                onSphinxClickListener?.let { clickListener ->
                     SphinxLinkify.addLinks(this, SphinxLinkify.ALL, longClickListener, clickListener)
                 }
             }

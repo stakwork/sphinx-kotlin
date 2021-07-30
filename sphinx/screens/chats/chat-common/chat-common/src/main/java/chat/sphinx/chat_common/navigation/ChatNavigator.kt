@@ -19,7 +19,7 @@ abstract class ChatNavigator(
 
     abstract suspend fun toAddContactDetail()
 
-    abstract suspend fun toChat(chat: Chat, contactId: ContactId)
+    abstract suspend fun toChat(chat: Chat, contactId: ContactId?)
 
     abstract suspend fun toJoinTribeDetail(tribeLink: TribeJoinLink)
 

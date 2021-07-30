@@ -2,10 +2,10 @@ package chat.sphinx.chat_common.util
 
 import android.view.View
 
-open class LightningNodePubKeyLongClickUrlSpan(
+open class SphinxLongClickUrlSpan(
     url: String?,
     onLongClickListener: View.OnLongClickListener,
-    val onClickListener: OnClickListener
+    private val onClickListener: OnClickListener
 ): LongClickUrlSpan(url, onLongClickListener) {
 
     override fun onClick(widget: View) {
