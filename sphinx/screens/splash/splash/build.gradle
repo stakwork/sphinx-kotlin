@@ -38,25 +38,26 @@ dependencies {
 
     // Sphinx
     implementation project(path: ':sphinx:activity:insetter-activity')
+
     implementation project(path: ':sphinx:application:data:concepts:concept-background-login')
+    implementation project(path: ':sphinx:application:data:concepts:concept-relay')
     implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-lightning')
+
+    implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-contact')
+    implementation project(path: ':sphinx:application:network:concepts:tor:concept-network-tor')
+
     implementation project(path: ':sphinx:screens:authentication:authentication-resources')
     implementation project(path: ':sphinx:screens:splash:key-restore')
+    api project(path: ':sphinx:screens:onboard:onboard-common')
     implementation project(path: ':sphinx:screens-detail:scanner:scanner-view-model-coordinator')
+
     implementation deps.jncryptor
 
     implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt
-    implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-contact')
-    implementation project(path: ':sphinx:application:network:concepts:tor:concept-network-tor')
-    implementation project(path: ':sphinx:application:data:concepts:concept-meme-server')
-    implementation project(path: ':sphinx:application:data:concepts:concept-relay')
-    implementation project(path: ':sphinx:application:network:concepts:tor:concept-network-tor')
     kapt kaptDeps.google.hilt
 
     testImplementation testDeps.junit
-
-    implementation deps.square.okhttp
 
     androidTestImplementation testDeps.androidx.core
     androidTestImplementation testDeps.androidx.espresso

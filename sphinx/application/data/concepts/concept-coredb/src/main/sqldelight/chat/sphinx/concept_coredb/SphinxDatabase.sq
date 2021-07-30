@@ -552,6 +552,11 @@ AND (
     type = 6 OR
     type = 14 OR
     type = 15 OR
+    type = 16 OR
+    type = 19 OR
+    type = 20 OR
+    type = 21 OR
+    type = 22 OR
     type = 25 OR
     (type = 29 AND reply_uuid IS NULL)
 )
@@ -595,7 +600,8 @@ messageUpsert {
         sender_alias = :sender_alias,
         sender_pic = :sender_pic,
         original_muid = :original_muid,
-        reply_uuid = :reply_uuid
+        reply_uuid = :reply_uuid,
+        type = :type
     WHERE id = :id;
 
     INSERT OR IGNORE INTO messageDbo(

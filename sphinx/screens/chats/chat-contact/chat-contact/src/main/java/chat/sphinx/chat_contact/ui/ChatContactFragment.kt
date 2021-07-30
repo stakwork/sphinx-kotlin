@@ -6,12 +6,9 @@ import androidx.recyclerview.widget.RecyclerView
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.chat_common.databinding.*
 import chat.sphinx.chat_common.ui.ChatFragment
-import chat.sphinx.chat_common.navigation.ChatNavigator
 import chat.sphinx.chat_contact.R
 import chat.sphinx.chat_contact.databinding.FragmentChatContactBinding
-import chat.sphinx.chat_contact.navigation.ContactChatNavigator
 import chat.sphinx.concept_image_loader.ImageLoader
-import chat.sphinx.concept_network_query_chat.model.PodcastDto
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -44,6 +41,7 @@ internal class ChatContactFragment: ChatFragment<
     override val menuBinding: LayoutChatMenuBinding by viewBinding(
         LayoutChatMenuBinding::bind, R.id.include_chat_contact_menu
     )
+
     override val menuEnablePayments: Boolean
         get() = true
 

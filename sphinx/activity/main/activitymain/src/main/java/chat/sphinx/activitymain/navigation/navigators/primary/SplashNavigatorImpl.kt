@@ -4,6 +4,10 @@ import chat.sphinx.activitymain.R
 import chat.sphinx.activitymain.navigation.drivers.PrimaryNavigationDriver
 import chat.sphinx.dashboard.navigation.ToDashboardScreen
 import chat.sphinx.onboard.navigation.ToOnBoardScreen
+import chat.sphinx.onboard_common.model.OnBoardStep
+import chat.sphinx.onboard_name.navigation.ToOnBoardNameScreen
+import chat.sphinx.onboard_picture.navigation.ToOnBoardPictureScreen
+import chat.sphinx.onboard_ready.navigation.ToOnBoardReadyScreen
 import chat.sphinx.splash.navigation.SplashNavigator
 import javax.inject.Inject
 
@@ -22,9 +26,31 @@ internal class SplashNavigatorImpl @Inject constructor(
         )
     }
 
-    override suspend fun toOnBoardScreen() {
+    override suspend fun toOnBoardScreen(onBoardStep1: OnBoardStep.Step1_Welcome) {
         navigationDriver.submitNavigationRequest(
-            ToOnBoardScreen(popUpToId = R.id.main_primary_nav_graph)
+            ToOnBoardScreen(popUpToId = R.id.main_primary_nav_graph, onBoardStep = onBoardStep1)
+        )
+    }
+
+    override suspend fun toOnBoardNameScreen(onBoardStep2: OnBoardStep.Step2_Name) {
+        navigationDriver.submitNavigationRequest(
+            ToOnBoardNameScreen(popUpToId = R.id.main_primary_nav_graph, onBoardStep = onBoardStep2)
+        )
+    }
+
+    override suspend fun toOnBoardPictureScreen(onBoardStep3: OnBoardStep.Step3_Picture) {
+        navigationDriver.submitNavigationRequest(
+            ToOnBoardPictureScreen(
+                popUpToId = R.id.main_primary_nav_graph,
+                onBoardStep = onBoardStep3,
+                refreshContacts = true,
+            )
+        )
+    }
+
+    override suspend fun toOnBoardReadyScreen(onBoardStep4: OnBoardStep.Step4_Ready) {
+        navigationDriver.submitNavigationRequest(
+            ToOnBoardReadyScreen(popUpToId = R.id.main_primary_nav_graph, onBoardStep = onBoardStep4)
         )
     }
 }

@@ -4,6 +4,7 @@ import chat.sphinx.concept_network_tor.TorManager
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.concept_relay.RelayDataHandler
 import chat.sphinx.wrapper_relay.RelayUrl
+import chat.sphinx.wrapper_relay.isOnionAddress
 import io.matthewnelson.concept_authentication.data.AuthenticationStorage
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_encryption_key.EncryptionKeyHandler
@@ -20,9 +21,6 @@ import io.matthewnelson.crypto_common.exceptions.EncryptionException
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import okhttp3.HttpUrl.Companion.toHttpUrl
-
-private inline val String.isOnionAddress: Boolean
-    get() = matches("([a-z2-7]{56}).onion.*".toRegex())
 
 class RelayDataHandlerImpl(
     private val authenticationStorage: AuthenticationStorage,
@@ -108,35 +106,32 @@ class RelayDataHandlerImpl(
 
     suspend fun persistRelayUrlImpl(url: RelayUrl, privateKey: Password): Boolean {
         lock.withLock {
-            val parsedUrl = parseRelayUrl(url)
+            val formattedUrl = formatRelayUrl(url)
             val encryptedRelayUrl = try {
-                encryptData(privateKey, UnencryptedString(parsedUrl.value))
+                encryptData(privateKey, UnencryptedString(formattedUrl.value))
             } catch (e: Exception) {
                 return false
             }
 
             authenticationStorage.putString(RELAY_URL_KEY, encryptedRelayUrl.value)
-            relayUrlCache = parsedUrl
+            torManager.setTorRequired(formattedUrl.isOnionAddress)
+            relayUrlCache = formattedUrl
             return true
         }
     }
 
-    private suspend fun parseRelayUrl(relayUrl: RelayUrl): RelayUrl {
+    override fun formatRelayUrl(relayUrl: RelayUrl): RelayUrl {
         return try {
-            val httpUrl = relayUrl.value.toHttpUrl()
-            torManager.setTorRequired(httpUrl.host.isOnionAddress)
+            relayUrl.value.toHttpUrl()
 
-            // is a valid url with scheme
+            // is valid url with scheme
             relayUrl
         } catch (e: IllegalArgumentException) {
 
             // does not contain http, https... check if it's an onion address
-            if (relayUrl.value.isOnionAddress) {
-                // only use http if it is an onion address
-                torManager.setTorRequired(true)
+            if (relayUrl.isOnionAddress) {
                 RelayUrl("http://${relayUrl.value}")
             } else {
-                torManager.setTorRequired(false)
                 RelayUrl("https://${relayUrl.value}")
             }
         }

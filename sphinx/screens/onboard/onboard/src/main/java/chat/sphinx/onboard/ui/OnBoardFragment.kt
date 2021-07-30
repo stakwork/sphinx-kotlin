@@ -4,26 +4,26 @@ import android.content.Context
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.navArgs
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.insetter_activity.addStatusBarPadding
 import chat.sphinx.onboard.R
 import chat.sphinx.onboard.databinding.FragmentOnBoardBinding
+import chat.sphinx.onboard.navigation.authorizationToken
+import chat.sphinx.onboard.navigation.inviterData
+import chat.sphinx.onboard.navigation.relayUrl
+import chat.sphinx.onboard_common.model.OnBoardInviterData
 import chat.sphinx.resources.SphinxToastUtils
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
-import chat.sphinx.wrapper_relay.toAuthorizationToken
-import chat.sphinx.wrapper_relay.toRelayUrl
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.navigation.CloseAppOnBackPress
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.updateViewState
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import javax.annotation.meta.Exhaustive
 
 @AndroidEntryPoint
@@ -35,15 +35,10 @@ internal class OnBoardFragment: SideEffectFragment<
         FragmentOnBoardBinding
         >(R.layout.fragment_on_board)
 {
-    companion object {
-        const val SPHINX_TEMP_PREFS = "sphinx_temp_prefs"
-
-        // Keys
-        const val SPHINX_TEMP_INVITER_NICKNAME = "sphinx_temp_inviter_nickname"
-        const val SPHINX_TEMP_INVITE_MESSAGE = "sphinx_temp_invite_message"
-        const val SPHINX_TEMP_AUTH_TOKEN = "sphinx_temp_auth_token"
-        const val SPHINX_TEMP_IP = "sphinx_temp_ip"
-    }
+    private val args: OnBoardFragmentArgs by navArgs()
+    private val relayUrl: RelayUrl by lazy(LazyThreadSafetyMode.NONE) { args.relayUrl }
+    private val authorizationToken: AuthorizationToken by lazy(LazyThreadSafetyMode.NONE) { args.authorizationToken }
+    private val inviterData: OnBoardInviterData by lazy(LazyThreadSafetyMode.NONE) { args.inviterData }
 
     override val viewModel: OnBoardViewModel by viewModels()
     override val binding: FragmentOnBoardBinding by viewBinding(FragmentOnBoardBinding::bind)
@@ -57,31 +52,11 @@ internal class OnBoardFragment: SideEffectFragment<
             .enableDoubleTapToClose(viewLifecycleOwner, SphinxToastUtils())
             .addCallback(viewLifecycleOwner, requireActivity())
 
-        val prefs = binding.root.context.getSharedPreferences(SPHINX_TEMP_PREFS, Context.MODE_PRIVATE)
-
-        lifecycleScope.launch(viewModel.io) {
-            val nickname = prefs.getString(SPHINX_TEMP_INVITER_NICKNAME, "")
-            val message = prefs.getString(SPHINX_TEMP_INVITE_MESSAGE, "")
-
-            binding.inviterNameTextView.text = nickname
-            binding.inviterMessageTextView.text = message
-        }
+        binding.inviterNameTextView.text = inviterData.nickname ?: ""
+        binding.inviterMessageTextView.text = inviterData.message ?: ""
 
         binding.buttonContinue.setOnClickListener {
-            viewModel.updateViewState(OnBoardViewState.Saving)
-
-            lifecycleScope.launch(viewModel.mainImmediate) {
-                val authToken: AuthorizationToken? = withContext(viewModel.io) {
-                    prefs.getString(SPHINX_TEMP_AUTH_TOKEN, null)?.toAuthorizationToken()
-                }
-                val ip: RelayUrl? = withContext(viewModel.io) {
-                    prefs.getString(SPHINX_TEMP_IP, null)?.toRelayUrl()
-                }
-
-                if (authToken != null && ip != null) {
-                    viewModel.presentLoginModal(authToken, ip)
-                }
-            }
+            viewModel.presentLoginModal(authorizationToken, relayUrl, inviterData)
         }
     }
 
@@ -98,7 +73,9 @@ internal class OnBoardFragment: SideEffectFragment<
     override suspend fun onViewStateFlowCollect(viewState: OnBoardViewState) {
         @Exhaustive
         when (viewState) {
-            is OnBoardViewState.Idle -> {}
+            is OnBoardViewState.Idle -> {
+                binding.welcomeGetStartedProgress.gone
+            }
             is OnBoardViewState.Saving -> {
                 binding.welcomeGetStartedProgress.visible
             }

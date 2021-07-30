@@ -34,6 +34,7 @@
     <dimen name="status_badge_row_padding">10dp</dimen>
     <dimen name="group_action_message_padding_horizontal">20dp</dimen>
     <dimen name="group_action_message_padding_vertical">4dp</dimen>
+    <dimen name="group_request_message_button_xy">27dp</dimen>
 
 
     <!-- message_holder_in_photo_holder_xy + 8dp -->
@@ -109,4 +110,5 @@
 
     <dimen name="cancel_title_text_size">12sp</dimen>
     <dimen name="option_title_text_size">17sp</dimen>
+    <dimen name="progress_bar_z">10dp</dimen>
 </resources>

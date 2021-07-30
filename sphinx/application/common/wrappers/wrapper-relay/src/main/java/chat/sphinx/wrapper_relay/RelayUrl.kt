@@ -8,6 +8,12 @@ inline fun String.toRelayUrl(): RelayUrl? =
         null
     }
 
+inline val RelayUrl.isOnionAddress: Boolean
+    get() = value
+        .replaceFirst("http://", "")
+        .replaceFirst("https://", "")
+        .matches("([a-z2-7]{56}).onion.*".toRegex())
+
 @JvmInline
 value class RelayUrl(val value: String){
     init {

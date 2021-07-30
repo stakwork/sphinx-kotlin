@@ -10,7 +10,6 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.updateLayoutParams
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.chat_common.R
-import chat.sphinx.resources.R as common_R
 import chat.sphinx.chat_common.databinding.LayoutMessageHolderBinding
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
@@ -21,10 +20,10 @@ import chat.sphinx.concept_network_client_crypto.CryptoScheme
 import chat.sphinx.resources.getString
 import chat.sphinx.resources.setBackgroundRandomColor
 import chat.sphinx.resources.setTextColorExt
-import chat.sphinx.wrapper_meme_server.headerKey
-import chat.sphinx.wrapper_meme_server.headerValue
 import chat.sphinx.wrapper_chat.ChatType
 import chat.sphinx.wrapper_common.lightning.asFormattedString
+import chat.sphinx.wrapper_meme_server.headerKey
+import chat.sphinx.wrapper_meme_server.headerValue
 import chat.sphinx.wrapper_message.MessageType
 import chat.sphinx.wrapper_message_media.MessageMedia
 import chat.sphinx.wrapper_view.Px
@@ -36,6 +35,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import java.io.File
+import chat.sphinx.resources.R as common_R
 
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
@@ -751,14 +751,14 @@ internal inline fun LayoutMessageHolderBinding.setGroupActionIndicatorLayout(
             }
             MessageType.GroupAction.MemberApprove -> {
                 if (groupActionDetails.isAdminView) {
-                    setGroupActionJoinRequestAdminLayout(groupActionDetails)
+                    setGroupActionJoinApprovedAdminLayout(groupActionDetails)
                 } else {
                     setGroupActionAnnouncementLayout(groupActionDetails)
                 }
             }
             MessageType.GroupAction.MemberReject -> {
                 if (groupActionDetails.isAdminView) {
-                    setGroupActionJoinRequestAdminLayout(groupActionDetails)
+                    setGroupActionJoinRejectedAdminLayout(groupActionDetails)
                 } else {
                     setGroupActionMemberRemovalLayout(groupActionDetails)
                 }
@@ -790,22 +790,31 @@ internal inline fun LayoutMessageHolderBinding.setGroupActionIndicatorLayout(
 private inline fun LayoutMessageHolderBinding.setGroupActionAnnouncementLayout(
     groupActionDetails: LayoutState.GroupActionIndicator
 ) {
+    includeMessageTypeGroupActionHolder.includeMessageTypeGroupActionJoinRequest.root.gone
+
     includeMessageTypeGroupActionHolder.includeMessageTypeGroupActionAnnouncement.apply {
         root.visible
 
         val actionLabelText = when (groupActionDetails.actionType) {
             MessageType.GroupAction.Join -> {
                 if (groupActionDetails.chatType == ChatType.Tribe) {
-                    root.context.getString(R.string.group_join_announcement_tribe, groupActionDetails.subjectName)
+                    root.context.getString(R.string.tribe_join_announcement, groupActionDetails.subjectName)
                 } else {
-                    root.context.getString(R.string.group_join_announcement_group, groupActionDetails.subjectName)
+                    root.context.getString(R.string.group_join_announcement, groupActionDetails.subjectName)
                 }
             }
             MessageType.GroupAction.Leave -> {
                 if (groupActionDetails.chatType == ChatType.Tribe) {
-                    root.context.getString(R.string.group_leave_announcement_tribe, groupActionDetails.subjectName)
+                    root.context.getString(R.string.tribe_leave_announcement, groupActionDetails.subjectName)
                 } else {
-                    root.context.getString(R.string.group_leave_announcement_group, groupActionDetails.subjectName)
+                    root.context.getString(R.string.group_leave_announcement, groupActionDetails.subjectName)
+                }
+            }
+            MessageType.GroupAction.MemberApprove -> {
+                if (groupActionDetails.chatType == ChatType.Tribe) {
+                    root.context.getString(R.string.tribe_welcome_announcement_member_side)
+                } else {
+                    null
                 }
             }
             else -> {
@@ -814,7 +823,7 @@ private inline fun LayoutMessageHolderBinding.setGroupActionAnnouncementLayout(
         }
 
         actionLabelText?.let {
-            textViewGroupActionLabel.text = it
+            textViewGroupActionAnnouncementLabel.text = it
         } ?: root.gone
     }
 }
@@ -827,10 +836,60 @@ private inline fun LayoutMessageHolderBinding.setGroupActionAnnouncementLayout(
 private inline fun LayoutMessageHolderBinding.setGroupActionJoinRequestAdminLayout(
     groupActionDetails: LayoutState.GroupActionIndicator
 ) {
-    includeMessageTypeGroupActionHolder.includeMessageTypeGroupActionJoinRequestAdminView.apply {
+    includeMessageTypeGroupActionHolder.includeMessageTypeGroupActionAnnouncement.root.gone
+
+    includeMessageTypeGroupActionHolder.includeMessageTypeGroupActionJoinRequest.apply {
         root.visible
 
-        // TODO: Set text and wire up action button click handlers.
+        textViewGroupActionJoinRequestMessage.text = root.context.getString(R.string.tribe_request_admin_side, groupActionDetails.subjectName)
+
+        textViewGroupActionJoinRequestAcceptAction.isEnabled = true
+        textViewGroupActionJoinRequestAcceptAction.alpha = 1.0f
+
+        textViewGroupActionJoinRequestRejectAction.isEnabled = true
+        textViewGroupActionJoinRequestRejectAction.alpha = 1.0f
+    }
+}
+
+/**
+ * Presents a view for an admin to handle see rejected group membership requests
+ */
+@MainThread
+@Suppress("NOTHING_TO_INLINE")
+private inline fun LayoutMessageHolderBinding.setGroupActionJoinRejectedAdminLayout(
+    groupActionDetails: LayoutState.GroupActionIndicator
+) {
+    includeMessageTypeGroupActionHolder.includeMessageTypeGroupActionJoinRequest.apply {
+        root.visible
+
+        textViewGroupActionJoinRequestMessage.text = root.context.getString(R.string.tribe_request_rejected_admin_side, groupActionDetails.subjectName)
+
+        textViewGroupActionJoinRequestAcceptAction.isEnabled = false
+        textViewGroupActionJoinRequestAcceptAction.alpha = 0.2f
+
+        textViewGroupActionJoinRequestRejectAction.isEnabled = false
+        textViewGroupActionJoinRequestRejectAction.alpha = 1.0f
+    }
+}
+
+/**
+ * Presents a view for an admin to handle see group approved membership
+ */
+@MainThread
+@Suppress("NOTHING_TO_INLINE")
+private inline fun LayoutMessageHolderBinding.setGroupActionJoinApprovedAdminLayout(
+    groupActionDetails: LayoutState.GroupActionIndicator
+) {
+    includeMessageTypeGroupActionHolder.includeMessageTypeGroupActionJoinRequest.apply {
+        root.visible
+
+        textViewGroupActionJoinRequestMessage.text = root.context.getString(R.string.tribe_request_approved_admin_side, groupActionDetails.subjectName)
+
+        textViewGroupActionJoinRequestRejectAction.isEnabled = false
+        textViewGroupActionJoinRequestRejectAction.alpha = 0.2f
+
+        textViewGroupActionJoinRequestAcceptAction.isEnabled = false
+        textViewGroupActionJoinRequestAcceptAction.alpha = 1.0f
     }
 }
 
@@ -846,7 +905,17 @@ private inline fun LayoutMessageHolderBinding.setGroupActionMemberRemovalLayout(
     includeMessageTypeGroupActionHolder.includeMessageTypeGroupActionMemberRemoval.apply {
         root.visible
 
-        // TODO: Set text and wire up action button click handler.
+        textViewGroupActionMemberRemovalMessage.text = root.context.getString(
+            when (groupActionDetails.actionType) {
+                is MessageType.GroupAction.Kick -> {
+                    R.string.tribe_kick_announcement_member_side
+                }
+                is MessageType.GroupAction.MemberReject -> {
+                    R.string.tribe_request_rejected_member_side
+                }
+                else -> R.string.tribe_deleted_announcement
+            }
+        )
     }
 }
 

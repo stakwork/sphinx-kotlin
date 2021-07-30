@@ -52,7 +52,7 @@ class SphinxKeyRestore(
         }
     }
 
-    private suspend fun restoreKeysImpl(
+    private fun restoreKeysImpl(
         privateKey: Password,
         publicKey: Password,
         userPin: CharArray,

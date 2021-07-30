@@ -35,6 +35,7 @@ import kotlinx.coroutines.sync.withLock
 
 class TorManagerAndroid(
     application: Application,
+    private val applicationScope: CoroutineScope,
     private val authenticationStorage: AuthenticationStorage,
     buildConfigDebug: BuildConfigDebug,
     buildConfigVersionCode: BuildConfigVersionCode,
@@ -235,12 +236,6 @@ class TorManagerAndroid(
     }
 
     private val lock = Mutex()
-    private val supervisor: Job by lazy {
-        SupervisorJob()
-    }
-    private val torManagerScope: CoroutineScope by lazy {
-        CoroutineScope(supervisor + mainImmediate)
-    }
     private val requirementChangeLock = Mutex()
 
     override suspend fun setTorRequired(required: Boolean) {
@@ -250,7 +245,7 @@ class TorManagerAndroid(
             when (isTorRequiredCache) {
                 null -> {
 
-                    torManagerScope.launch {
+                    applicationScope.launch(mainImmediate) {
                         requirementChangeLock.withLock {
                             val persisted = authenticationStorage.getString(TOR_MANAGER_REQUIRED, null)
 
@@ -269,7 +264,7 @@ class TorManagerAndroid(
                     // no change, do nothing
                 }
                 else -> {
-                    torManagerScope.launch {
+                    applicationScope.launch(mainImmediate) {
                         requirementChangeLock.withLock {
                             authenticationStorage.putString(TOR_MANAGER_REQUIRED, requiredString)
                             isTorRequiredCache = required
@@ -307,7 +302,7 @@ class TorManagerAndroid(
     private inner class SphinxHooks: ServiceExecutionHooks() {
         override suspend fun executeOnCreateTorService(context: Context) {
             socksProxyAddressStateFlow.collect { address ->
-                torManagerScope.launch {
+                applicationScope.launch(mainImmediate) {
                     synchronizedListeners.dispatchSocksProxyAddressChange(address)
                 }.join()
             }

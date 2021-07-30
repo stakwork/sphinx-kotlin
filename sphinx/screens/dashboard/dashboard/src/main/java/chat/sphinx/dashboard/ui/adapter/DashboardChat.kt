@@ -6,6 +6,7 @@ import chat.sphinx.dashboard.ui.adapter.DashboardChat.Active
 import chat.sphinx.dashboard.ui.adapter.DashboardChat.Inactive
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.isConversation
+import chat.sphinx.wrapper_chat.isTribeOwnedByAccount
 import chat.sphinx.wrapper_common.*
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.invite.InviteStatus
@@ -43,6 +44,8 @@ sealed class DashboardChat {
         abstract val chat: Chat
         abstract val message: Message?
 
+        open val owner: Contact? = null
+
         override val sortBy: Long
             get() = message?.date?.time ?: chat.createdAt.time
 
@@ -54,6 +57,9 @@ sealed class DashboardChat {
             message.sender == chat.contactIds.firstOrNull()
 
         abstract fun getMessageSender(message: Message, context: Context, withColon: Boolean = true): String
+
+        fun isMyTribe(owner: Contact?): Boolean =
+            chat.isTribeOwnedByAccount(owner?.nodePubKey)
 
         override fun hasUnseenMessages(): Boolean {
             val ownerId: ContactId? = chat.contactIds.firstOrNull()
@@ -175,6 +181,38 @@ sealed class DashboardChat {
                         getMessageSender(message, context, false)
                     )
                 }
+                message.type.isMemberRequest() -> {
+                    context.getString(
+                        R.string.last_message_description_wants_to_join,
+                        getMessageSender(message, context, false)
+                    )
+                }
+                message.type.isMemberReject() -> {
+                    if (isMyTribe(owner)) {
+                        context.getString(
+                            R.string.last_message_description_declined_request_from,
+                            getMessageSender(message, context, false)
+                        )
+                    } else {
+                        context.getString(R.string.last_message_description_admin_declined_request)
+                    }
+                }
+                message.type.isMemberApprove() -> {
+                    if (isMyTribe(owner)) {
+                        context.getString(
+                            R.string.last_message_description_approved_request_from,
+                            getMessageSender(message, context, false)
+                        )
+                    } else {
+                        context.getString(R.string.last_message_description_welcome_member)
+                    }
+                }
+                message.type.isGroupKick() -> {
+                    context.getString(R.string.last_message_description_group_kick,)
+                }
+                message.type.isTribeDelete() -> {
+                    context.getString(R.string.last_message_description_tribe_deleted,)
+                }
                 message.type.isBoost() -> {
                     val amount: String = (message.podBoost?.amount ?: message.amount)
                         .asFormattedString(separator = ',', appendUnit = true)
@@ -228,6 +266,7 @@ sealed class DashboardChat {
         class GroupOrTribe(
             override val chat: Chat,
             override val message: Message?,
+            override val owner: Contact?,
             override val unseenMessageFlow: Flow<Long?>,
         ): Active() {
 
