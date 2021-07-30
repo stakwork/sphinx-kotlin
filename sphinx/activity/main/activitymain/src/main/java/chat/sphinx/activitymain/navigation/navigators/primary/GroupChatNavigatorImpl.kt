@@ -1,5 +1,6 @@
 package chat.sphinx.activitymain.navigation.navigators.primary
 
+import chat.sphinx.activitymain.R
 import chat.sphinx.activitymain.navigation.drivers.DetailNavigationDriver
 import chat.sphinx.activitymain.navigation.drivers.PrimaryNavigationDriver
 import chat.sphinx.chat_contact.navigation.ToChatContactScreen
@@ -43,19 +44,32 @@ internal class GroupChatNavigatorImpl @Inject constructor(
 
     override suspend fun toChatContact(chatId: ChatId?, contactId: ContactId) {
         navigationDriver.submitNavigationRequest(
-            ToChatContactScreen(chatId, contactId)
+            ToChatContactScreen(
+                chatId = chatId,
+                contactId = contactId,
+                popUpToId = R.id.navigation_dashboard_fragment,
+                popUpToInclusive = false,
+            )
         )
     }
 
     override suspend fun toChatGroup(chatId: ChatId) {
         navigationDriver.submitNavigationRequest(
-            ToChatGroupScreen(chatId)
+            ToChatGroupScreen(
+                chatId = chatId,
+                popUpToId = R.id.navigation_dashboard_fragment,
+                popUpToInclusive = false,
+            )
         )
     }
 
     override suspend fun toChatTribe(chatId: ChatId) {
         navigationDriver.submitNavigationRequest(
-            ToChatTribeScreen(chatId)
+            ToChatTribeScreen(
+                chatId = chatId,
+                popUpToId = R.id.navigation_dashboard_fragment,
+                popUpToInclusive = false,
+            )
         )
     }
 }
