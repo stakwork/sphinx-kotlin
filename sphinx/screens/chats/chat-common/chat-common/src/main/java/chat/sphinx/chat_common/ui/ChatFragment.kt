@@ -1,6 +1,5 @@
 package chat.sphinx.chat_common.ui
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
 import android.view.View
@@ -46,8 +45,6 @@ import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.resources.*
 import chat.sphinx.wrapper_chat.isTrue
-import chat.sphinx.wrapper_common.lightning.asFormattedString
-import chat.sphinx.wrapper_common.lightning.unit
 import chat.sphinx.wrapper_meme_server.headerKey
 import chat.sphinx.wrapper_meme_server.headerValue
 import chat.sphinx.wrapper_message.retrieveImageUrlAndMessageMedia
@@ -524,7 +521,7 @@ abstract class ChatFragment<
                                 viewModel.imageLoaderDefaults,
                                 viewModel.memeServerTokenHandler,
                                 viewState.recyclerViewWidth,
-                                viewState.messageHolderViewState
+                                viewState.messageHolderViewState,
                             )
                             includeMessageStatusHeader.root.gone
                             includeMessageHolderChatImageInitialHolder.root.gone

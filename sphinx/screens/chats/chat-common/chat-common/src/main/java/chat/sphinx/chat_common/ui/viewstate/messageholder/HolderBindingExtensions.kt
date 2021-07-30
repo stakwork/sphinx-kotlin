@@ -1,6 +1,7 @@
 package chat.sphinx.chat_common.ui.viewstate.messageholder
 
 import android.view.Gravity
+import android.view.View
 import android.widget.ImageView
 import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
@@ -10,8 +11,9 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.updateLayoutParams
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.chat_common.R
-import chat.sphinx.resources.R as common_R
 import chat.sphinx.chat_common.databinding.LayoutMessageHolderBinding
+import chat.sphinx.chat_common.util.SphinxLinkify
+import chat.sphinx.chat_common.util.SphinxLongClickUrlSpan
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
@@ -21,10 +23,10 @@ import chat.sphinx.concept_network_client_crypto.CryptoScheme
 import chat.sphinx.resources.getString
 import chat.sphinx.resources.setBackgroundRandomColor
 import chat.sphinx.resources.setTextColorExt
-import chat.sphinx.wrapper_meme_server.headerKey
-import chat.sphinx.wrapper_meme_server.headerValue
 import chat.sphinx.wrapper_chat.ChatType
 import chat.sphinx.wrapper_common.lightning.asFormattedString
+import chat.sphinx.wrapper_meme_server.headerKey
+import chat.sphinx.wrapper_meme_server.headerValue
 import chat.sphinx.wrapper_message.MessageType
 import chat.sphinx.wrapper_message_media.MessageMedia
 import chat.sphinx.wrapper_view.Px
@@ -36,6 +38,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import java.io.File
+import chat.sphinx.resources.R as common_R
 
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
@@ -49,6 +52,8 @@ internal fun LayoutMessageHolderBinding.setView(
     memeServerTokenHandler: MemeServerTokenHandler,
     recyclerViewWidth: Px,
     viewState: MessageHolderViewState,
+    onLongClickListener: View.OnLongClickListener? = null,
+    onSphinxClickListener: SphinxLongClickUrlSpan.OnClickListener? = null
 ) {
     for (job in holderJobs) {
         job.cancel()
@@ -134,7 +139,7 @@ internal fun LayoutMessageHolderBinding.setView(
                 }
             }
             setUnsupportedMessageTypeLayout(viewState.unsupportedMessageType)
-            setBubbleMessageLayout(viewState.bubbleMessage)
+            setBubbleMessageLayout(viewState.bubbleMessage, onLongClickListener, onSphinxClickListener)
             setBubbleDirectPaymentLayout(viewState.bubbleDirectPayment)
             setBubbleDirectPaymentLayout(viewState.bubbleDirectPayment)
             setBubblePodcastBoost(viewState.bubblePodcastBoost)
@@ -468,7 +473,9 @@ internal inline fun LayoutMessageHolderBinding.setDeletedMessageLayout(
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun LayoutMessageHolderBinding.setBubbleMessageLayout(
-    message: LayoutState.Bubble.ContainerThird.Message?
+    message: LayoutState.Bubble.ContainerThird.Message?,
+    onLongClickListener: View.OnLongClickListener?,
+    onSphinxClickListener: SphinxLongClickUrlSpan.OnClickListener?
 ) {
     includeMessageHolderBubble.textViewMessageText.apply {
         if (message == null) {
@@ -476,6 +483,11 @@ internal inline fun LayoutMessageHolderBinding.setBubbleMessageLayout(
         } else {
             visible
             text = message.text
+            onLongClickListener?.let { longClickListener ->
+                onSphinxClickListener?.let { clickListener ->
+                    SphinxLinkify.addLinks(this, SphinxLinkify.ALL, longClickListener, clickListener)
+                }
+            }
         }
     }
 }
