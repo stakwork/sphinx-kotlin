@@ -48,6 +48,7 @@ import chat.sphinx.wrapper_chat.isConversation
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.Sat
+import chat.sphinx.wrapper_common.lightning.toLightningNodePubKey
 import chat.sphinx.wrapper_common.message.MessageUUID
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_message.*
@@ -784,7 +785,22 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 
     open fun goToLightningNodePubKeyDetailScreen(url: String?) {
         viewModelScope.launch(mainImmediate) {
-            submitSideEffect(ChatSideEffect.Notify("Url clicked $url"))
+            url?.toLightningNodePubKey()?.let { lightningNodePubKey ->
+                contactRepository.getAllContacts.collect { contacts ->
+                    val existingContact = contacts.firstOrNull { it.nodePubKey == lightningNodePubKey }
+
+                    if (existingContact == null) {
+                        chatNavigator.toAddContactDetail()
+                    } else {
+                        chatRepository.getConversationByContactId(existingContact.id).collect { chat ->
+                            chat?.let {
+                                chatNavigator.toChat(chat, existingContact.id)
+                            }
+                        }
+                    }
+                }
+            }
+
         }
     }
 }
