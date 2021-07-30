@@ -15,7 +15,11 @@ inline val String.isValidLightningNodePubKey: Boolean
 value class LightningNodePubKey(val value: String) {
 
     companion object {
-        const val REGEX = "[A-F0-9a-f]{66}"
+
+        private const val PUB_KEY_REGEX = "[A-F0-9a-f]{66}"
+        private const val VIRTUAL_NODE_PUB_KEY_REGEX = "[A-F0-9a-f]{66}:[A-F0-9a-f]{66}:[0-9]+"
+
+        const val REGEX = "($VIRTUAL_NODE_PUB_KEY_REGEX|$PUB_KEY_REGEX)"
 
         fun fromByteArray(byteArray: ByteArray): LightningNodePubKey {
             return LightningNodePubKey(byteArray.decodeToString())
