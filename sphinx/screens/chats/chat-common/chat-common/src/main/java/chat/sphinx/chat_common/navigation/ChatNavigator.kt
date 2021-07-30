@@ -2,6 +2,7 @@ package chat.sphinx.chat_common.navigation
 
 import androidx.navigation.NavController
 import chat.sphinx.wrapper_chat.Chat
+import chat.sphinx.wrapper_chat.ChatType
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
@@ -20,13 +21,40 @@ abstract class ChatNavigator(
 
     abstract suspend fun toAddContactDetail(pubKey: LightningNodePubKey)
 
-    abstract suspend fun toChat(chat: Chat?, contactId: ContactId?)
-
     abstract suspend fun toJoinTribeDetail(tribeLink: TribeJoinLink)
 
-    suspend fun popBackStack() {
+    @JvmSynthetic
+    internal suspend fun popBackStack() {
         navigationDriver.submitNavigationRequest(
             PopBackStack()
         )
+    }
+
+    protected abstract suspend fun toChatContact(chatId: ChatId?, contactId: ContactId)
+    protected abstract suspend fun toChatGroup(chatId: ChatId)
+    protected abstract suspend fun toChatTribe(chatId: ChatId)
+
+    @JvmSynthetic
+    internal suspend fun toChat(chat: Chat?, contactId: ContactId?) {
+        if (chat == null) {
+            contactId?.let { nnContactId ->
+                toChatContact(null, nnContactId)
+            }
+        } else {
+            when (chat.type) {
+                is ChatType.Conversation -> {
+                    contactId?.let { nnContactId ->
+                        toChatContact(chat.id, nnContactId)
+                    }
+                }
+                is ChatType.Group -> {
+                    toChatGroup(chat.id)
+                }
+                is ChatType.Tribe -> {
+                    toChatTribe(chat.id)
+                }
+                else -> {}
+            }
+        }
     }
 }

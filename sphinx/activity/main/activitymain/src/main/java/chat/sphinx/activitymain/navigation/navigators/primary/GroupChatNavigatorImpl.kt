@@ -37,40 +37,25 @@ internal class GroupChatNavigatorImpl @Inject constructor(
         )
     }
 
-    override suspend fun toChat(chat: Chat?, contactId: ContactId?) {
-        popBackStack()
-
-        if (chat == null) {
-            contactId?.let {
-                navigationDriver.submitNavigationRequest(
-                    ToChatContactScreen(null, contactId)
-                )
-            }
-        } else {
-            when (chat.type) {
-                is ChatType.Conversation -> {
-                    contactId?.let {
-                        navigationDriver.submitNavigationRequest(
-                            ToChatContactScreen(chat.id, contactId)
-                        )
-                    }
-                }
-                is ChatType.Group -> {
-                    navigationDriver.submitNavigationRequest(
-                        ToChatGroupScreen(chat.id)
-                    )
-                }
-                is ChatType.Tribe -> {
-                    navigationDriver.submitNavigationRequest(
-                        ToChatTribeScreen(chat.id)
-                    )
-                }
-                else -> {}
-            }
-        }
-    }
-
     override suspend fun toJoinTribeDetail(tribeLink: TribeJoinLink) {
         detailDriver.submitNavigationRequest(ToJoinTribeDetail(tribeLink))
+    }
+
+    override suspend fun toChatContact(chatId: ChatId?, contactId: ContactId) {
+        navigationDriver.submitNavigationRequest(
+            ToChatContactScreen(chatId, contactId)
+        )
+    }
+
+    override suspend fun toChatGroup(chatId: ChatId) {
+        navigationDriver.submitNavigationRequest(
+            ToChatGroupScreen(chatId)
+        )
+    }
+
+    override suspend fun toChatTribe(chatId: ChatId) {
+        navigationDriver.submitNavigationRequest(
+            ToChatTribeScreen(chatId)
+        )
     }
 }
