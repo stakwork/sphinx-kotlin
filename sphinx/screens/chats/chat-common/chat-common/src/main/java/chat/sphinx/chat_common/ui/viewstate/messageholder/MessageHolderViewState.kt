@@ -209,11 +209,12 @@ internal sealed class MessageHolderViewState(
     }
 
     val groupActionIndicator: LayoutState.GroupActionIndicator? by lazy(LazyThreadSafetyMode.NONE) {
-        if (!message.type.isGroupAction()) {
+        val type = message.type
+        if (!type.isGroupAction()) {
             null
         } else {
             LayoutState.GroupActionIndicator(
-                actionType = message.type as MessageType.GroupAction,
+                actionType = type,
                 isAdminView = if (chat.ownerPubKey == null || accountOwner().nodePubKey == null) {
                     false
                 } else {
