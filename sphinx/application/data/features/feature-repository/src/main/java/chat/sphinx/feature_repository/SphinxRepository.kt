@@ -2479,15 +2479,17 @@ abstract class SphinxRepository(
 
         chat.host?.let { chatHost ->
             tribe.feed_url?.let { feedUrl ->
-                networkQueryChat.getPodcastFeed(chatHost, feedUrl).collect { loadResponse ->
-                    when (loadResponse) {
+                if (feedUrl.isNotEmpty()) {
+                    networkQueryChat.getPodcastFeed(chatHost, feedUrl).collect { loadResponse ->
+                        when (loadResponse) {
 
-                        is LoadResponse.Loading -> {}
-                        is Response.Error -> {}
+                            is LoadResponse.Loading -> {}
+                            is Response.Error -> {}
 
-                        is Response.Success -> {
-                            if (loadResponse.value.isValidPodcast()) {
-                                podcastDto = loadResponse.value
+                            is Response.Success -> {
+                                if (loadResponse.value.isValidPodcast()) {
+                                    podcastDto = loadResponse.value
+                                }
                             }
                         }
                     }
