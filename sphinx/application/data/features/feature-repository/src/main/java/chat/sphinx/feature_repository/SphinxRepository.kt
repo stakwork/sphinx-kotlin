@@ -3104,8 +3104,22 @@ abstract class SphinxRepository(
                             messageLock.withLock {
                                 withContext(io) {
                                     queries.transaction {
-                                        upsertChat(loadResponse.value.chat, moshi, chatSeenMap, queries, null)
+                                        upsertChat(
+                                            loadResponse.value.chat,
+                                            moshi,
+                                            chatSeenMap,
+                                            queries,
+                                            null
+                                        )
+
                                         upsertMessage(loadResponse.value.message, queries)
+
+                                        updateChatDboLatestMessage(
+                                            loadResponse.value.message,
+                                            ChatId(loadResponse.value.chat.id),
+                                            latestMessageUpdatedTimeMap,
+                                            queries,
+                                        )
                                     }
                                 }
                             }
