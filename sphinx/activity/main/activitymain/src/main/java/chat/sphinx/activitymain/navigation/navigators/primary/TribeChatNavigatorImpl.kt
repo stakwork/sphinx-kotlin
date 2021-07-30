@@ -50,6 +50,8 @@ internal class TribeChatNavigatorImpl @Inject constructor(
     }
 
     override suspend fun toChat(chat: Chat?, contactId: ContactId?) {
+        popBackStack()
+
         if (chat == null) {
             contactId?.let {
                 navigationDriver.submitNavigationRequest(
