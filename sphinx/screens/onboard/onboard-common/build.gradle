@@ -1,0 +1,24 @@
+plugins {
+    id 'java-library'
+    id 'kotlin'
+    id 'kotlin-kapt'
+}
+
+dependencies {
+    // KotlinAndroid
+    implementation project(":kotlin:concepts:concept-coroutines")
+    implementation project(":kotlin:concepts:authentication:concept-authentication")
+    implementation project(":kotlin:encoders:base64")
+
+    // Sphinx
+    api project(":sphinx:application:common:logger")
+    api project(":sphinx:application:common:wrappers:wrapper-invite")
+    api project(":sphinx:application:data:concepts:concept-relay")
+
+    implementation deps.javax.inject
+
+    // needed to override moshi's use of 1.4.31
+    implementation deps.kotlin.reflect
+    implementation deps.square.moshi
+    kapt kaptDeps.square.moshiCodegen
+}

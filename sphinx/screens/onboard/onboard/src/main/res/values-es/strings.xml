@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="side_effect_generate_token_failed">Generación de token fallida</string>
-    <string name="sign_up_get_started_button">Comencemos</string>
-    <string name="sign_up_friend_message">Un mensaje de tu amigo…</string>
-    <string name="sign_up_next_button">Siguiente</string>
+    <string name="on_board_relay_url_http_message">La URL de Relay utiliza \'http\'. El tráfico de la red no estará encriptado. Se recomienda fuertemente el uso de Https. Por favor confirma si deseas proceder.</string>
+    <string name="on_board_relay_url_http_negative_keep_http">http</string>
+    <string name="on_board_relay_url_http_positive_change_to_https">https</string>
 </resources>

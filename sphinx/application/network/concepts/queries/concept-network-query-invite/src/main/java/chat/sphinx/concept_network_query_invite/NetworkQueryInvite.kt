@@ -3,6 +3,7 @@ package chat.sphinx.concept_network_query_invite
 import chat.sphinx.concept_network_query_invite.model.*
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.ResponseError
+import chat.sphinx.wrapper_invite.InviteString
 import chat.sphinx.wrapper_relay.RelayUrl
 import kotlinx.coroutines.flow.Flow
 
@@ -27,7 +28,7 @@ abstract class NetworkQueryInvite {
 
     // TODO: Return RedeemInviteResponse
     abstract fun redeemInvite(
-        inviteString: String
+        inviteString: InviteString
     ): Flow<LoadResponse<HubRedeemInviteResponse, ResponseError>>
 
     abstract fun finishInvite(
@@ -35,7 +36,7 @@ abstract class NetworkQueryInvite {
     ): Flow<LoadResponse<RedeemInviteResponseDto, ResponseError>>
 
     abstract fun payInvite(
-        inviteString: String
+        inviteString: InviteString
     ): Flow<LoadResponse<PayInviteDto, ResponseError>>
 
     //////////////

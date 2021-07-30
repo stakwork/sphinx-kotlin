@@ -7,6 +7,7 @@ import chat.sphinx.feature_network_query_invite.model.PayInviteResponse
 import chat.sphinx.feature_network_query_invite.model.RedeemInviteRelayResponse
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.ResponseError
+import chat.sphinx.wrapper_invite.InviteString
 import kotlinx.coroutines.flow.Flow
 
 class NetworkQueryInviteImpl(
@@ -32,14 +33,14 @@ class NetworkQueryInviteImpl(
 
 
     override fun redeemInvite(
-        inviteString: String
+        inviteString: InviteString
     ): Flow<LoadResponse<HubRedeemInviteResponse, ResponseError>> {
         return networkRelayCall.post(
             url = HUB_URL + ENDPOINT_SIGNUP,
             responseJsonClass = HubRedeemInviteResponse::class.java,
             requestBodyJsonClass = Map::class.java,
             requestBody = mapOf(
-                Pair("invite_string", inviteString),
+                Pair("invite_string", inviteString.value),
             )
         )
     }
@@ -59,11 +60,11 @@ class NetworkQueryInviteImpl(
     }
 
     override fun payInvite(
-        inviteString: String
+        inviteString: InviteString
     ): Flow<LoadResponse<PayInviteDto, ResponseError>> {
         return networkRelayCall.relayPost(
             responseJsonClass = PayInviteResponse::class.java,
-            relayEndpoint = String.format(ENDPOINT_INVITE_PAY, inviteString),
+            relayEndpoint = String.format(ENDPOINT_INVITE_PAY, inviteString.value),
             requestBodyJsonClass = Map::class.java,
             requestBody = mapOf(Pair("", ""))
         )

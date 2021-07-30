@@ -2835,7 +2835,7 @@ abstract class SphinxRepository(
         }
 
         delay(25L)
-        networkQueryInvite.payInvite(invite.inviteString.value).collect { loadResponse ->
+        networkQueryInvite.payInvite(invite.inviteString).collect { loadResponse ->
             @Exhaustive
             when (loadResponse) {
                 is LoadResponse.Loading -> {}
