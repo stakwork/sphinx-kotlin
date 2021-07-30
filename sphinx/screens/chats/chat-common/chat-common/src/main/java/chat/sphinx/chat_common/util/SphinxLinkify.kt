@@ -9,6 +9,7 @@ import android.text.style.URLSpan
 import android.text.util.Linkify
 import android.text.util.Linkify.MatchFilter
 import android.text.util.Linkify.TransformFilter
+import android.view.View
 import android.widget.TextView
 import androidx.annotation.IntDef
 import androidx.annotation.RestrictTo
@@ -91,7 +92,7 @@ object SphinxLinkify {
      *
      * @return True if at least one link is found and applied.
      */
-    fun addLinks(text: Spannable, @LinkifyMask mask: Int): Boolean {
+    private fun addLinks(text: Spannable, @LinkifyMask mask: Int, onLongClickListener: View.OnLongClickListener): Boolean {
         if (mask == 0) {
             return false
         }
@@ -132,7 +133,7 @@ object SphinxLinkify {
         }
         for (link in links) {
             if (link.frameworkAddedSpan == null) {
-                applyLink(link.url, link.start, link.end, text)
+                applyLink(link.url, link.start, link.end, text, onLongClickListener)
             }
         }
         return true
@@ -149,20 +150,20 @@ object SphinxLinkify {
      *
      * @return True if at least one link is found and applied.
      */
-    fun addLinks(text: TextView, @LinkifyMask mask: Int): Boolean {
+    fun addLinks(text: TextView, @LinkifyMask mask: Int, onLongClickListener: View.OnLongClickListener): Boolean {
         if (mask == 0) {
             return false
         }
         val t = text.text
         return if (t is Spannable) {
-            if (addLinks(t, mask)) {
+            if (addLinks(t, mask, onLongClickListener)) {
                 addLinkMovementMethod(text)
                 return true
             }
             false
         } else {
             val s = SpannableString.valueOf(t)
-            if (addLinks(s, mask)) {
+            if (addLinks(s, mask, onLongClickListener)) {
                 addLinkMovementMethod(text)
                 text.text = s
                 return true
@@ -171,181 +172,11 @@ object SphinxLinkify {
         }
     }
 
-    /**
-     * Applies a regex to the text of a TextView turning the matches into
-     * links.  If links are found then UrlSpans are applied to the link
-     * text match areas, and the movement method for the text is changed
-     * to LinkMovementMethod.
-     *
-     * @param text         TextView whose text is to be marked-up with links
-     * @param pattern      Regex pattern to be used for finding links
-     * @param scheme       URL scheme string (eg `http://`) to be
-     * prepended to the links that do not start with this scheme.
-     */
-    fun addLinks(
-        text: TextView, pattern: Pattern,
-        scheme: String?
-    ) {
-        addLinks(text, pattern, scheme, null, null, null)
-    }
-
-    /**
-     * Applies a regex to the text of a TextView turning the matches into
-     * links.  If links are found then UrlSpans are applied to the link
-     * text match areas, and the movement method for the text is changed
-     * to LinkMovementMethod.
-     *
-     * @param text         TextView whose text is to be marked-up with links
-     * @param pattern      Regex pattern to be used for finding links
-     * @param scheme       URL scheme string (eg `http://`) to be
-     * prepended to the links that do not start with this scheme.
-     * @param matchFilter  The filter that is used to allow the client code
-     * additional control over which pattern matches are
-     * to be converted into links.
-     */
-    fun addLinks(
-        text: TextView, pattern: Pattern,
-        scheme: String?, matchFilter: MatchFilter?,
-        transformFilter: TransformFilter?
-    ) {
-        addLinks(text, pattern, scheme, null, matchFilter, transformFilter)
-    }
-
-    /**
-     * Applies a regex to the text of a TextView turning the matches into
-     * links.  If links are found then UrlSpans are applied to the link
-     * text match areas, and the movement method for the text is changed
-     * to LinkMovementMethod.
-     *
-     * @param text TextView whose text is to be marked-up with links.
-     * @param pattern Regex pattern to be used for finding links.
-     * @param defaultScheme The default scheme to be prepended to links if the link does not
-     * start with one of the `schemes` given.
-     * @param schemes Array of schemes (eg `http://`) to check if the link found
-     * contains a scheme. Passing a null or empty value means prepend defaultScheme
-     * to all links.
-     * @param matchFilter  The filter that is used to allow the client code additional control
-     * over which pattern matches are to be converted into links.
-     * @param transformFilter Filter to allow the client code to update the link found.
-     */
-    @SuppressLint("NewApi")
-    fun addLinks(
-        text: TextView, pattern: Pattern,
-        defaultScheme: String?, schemes: Array<String?>?,
-        matchFilter: MatchFilter?, transformFilter: TransformFilter?
-    ) {
-        val spannable = SpannableString.valueOf(text.text)
-        val linksAdded = addLinks(
-            spannable, pattern, defaultScheme, schemes, matchFilter,
-            transformFilter
-        )
-        if (linksAdded) {
-            text.text = spannable
-            addLinkMovementMethod(text)
-        }
-    }
-
-    /**
-     * Applies a regex to a Spannable turning the matches into
-     * links.
-     *
-     * @param text         Spannable whose text is to be marked-up with links
-     * @param pattern      Regex pattern to be used for finding links
-     * @param scheme       URL scheme string (eg `http://`) to be
-     * prepended to the links that do not start with this scheme.
-     */
-    fun addLinks(
-        text: Spannable, pattern: Pattern,
-        scheme: String?
-    ): Boolean {
-        return addLinks(text, pattern, scheme, null, null, null)
-    }
-
-    /**
-     * Applies a regex to a Spannable turning the matches into
-     * links.
-     *
-     * @param spannable    Spannable whose text is to be marked-up with links
-     * @param pattern      Regex pattern to be used for finding links
-     * @param scheme       URL scheme string (eg `http://`) to be
-     * prepended to the links that do not start with this scheme.
-     * @param matchFilter  The filter that is used to allow the client code
-     * additional control over which pattern matches are
-     * to be converted into links.
-     * @param transformFilter Filter to allow the client code to update the link found.
-     *
-     * @return True if at least one link is found and applied.
-     */
-    fun addLinks(
-        spannable: Spannable, pattern: Pattern,
-        scheme: String?, matchFilter: MatchFilter?,
-        transformFilter: TransformFilter?
-    ): Boolean {
-        return addLinks(
-            spannable, pattern, scheme, null, matchFilter,
-            transformFilter
-        )
-    }
-
-    /**
-     * Applies a regex to a Spannable turning the matches into links.
-     *
-     * @param spannable Spannable whose text is to be marked-up with links.
-     * @param pattern Regex pattern to be used for finding links.
-     * @param defaultScheme The default scheme to be prepended to links if the link does not
-     * start with one of the `schemes` given.
-     * @param schemes Array of schemes (eg `http://`) to check if the link found
-     * contains a scheme. Passing a null or empty value means prepend defaultScheme
-     * to all links.
-     * @param matchFilter  The filter that is used to allow the client code additional control
-     * over which pattern matches are to be converted into links.
-     * @param transformFilter Filter to allow the client code to update the link found.
-     *
-     * @return True if at least one link is found and applied.
-     */
-    @SuppressLint("NewApi")
-    fun addLinks(
-        spannable: Spannable, pattern: Pattern,
-        defaultScheme: String?, schemes: Array<String?>?,
-        matchFilter: MatchFilter?, transformFilter: TransformFilter?
-    ): Boolean {
-        var defaultScheme = defaultScheme
-        var schemes = schemes
-
-        val schemesCopy: Array<String?>
-        if (defaultScheme == null) defaultScheme = ""
-        if (schemes == null || schemes.size < 1) {
-            schemes = EMPTY_STRING
-        }
-        schemesCopy = arrayOfNulls(schemes.size + 1)
-        schemesCopy[0] = defaultScheme.toLowerCase(Locale.ROOT)
-        for (index in schemes.indices) {
-            val scheme = schemes[index]
-            schemesCopy[index + 1] = scheme?.toLowerCase(Locale.ROOT) ?: ""
-        }
-        var hasMatches = false
-        val m = pattern.matcher(spannable)
-        while (m.find()) {
-            val start = m.start()
-            val end = m.end()
-            var allowed = true
-            if (matchFilter != null) {
-                allowed = matchFilter.acceptMatch(spannable, start, end)
-            }
-            if (allowed) {
-                val url = makeUrl(m.group(0), schemesCopy, m, transformFilter)
-                applyLink(url, start, end, spannable)
-                hasMatches = true
-            }
-        }
-        return hasMatches
-    }
-
     private fun addLinkMovementMethod(t: TextView) {
         val m = t.movementMethod
         if (m !is LinkMovementMethod) {
             if (t.linksClickable) {
-                t.movementMethod = LinkMovementMethod.getInstance()
+                t.movementMethod = LongClickMovementMethod.getInstance(t.context)
             }
         }
     }
@@ -400,8 +231,8 @@ object SphinxLinkify {
         }
     }
 
-    private fun applyLink(url: String?, start: Int, end: Int, text: Spannable) {
-        val span = URLSpan(url)
+    private fun applyLink(url: String?, start: Int, end: Int, text: Spannable, onLongClickListener: View.OnLongClickListener) {
+        val span = LongClickUrlSpan(url, onLongClickListener)
         text.setSpan(span, start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
     }
 

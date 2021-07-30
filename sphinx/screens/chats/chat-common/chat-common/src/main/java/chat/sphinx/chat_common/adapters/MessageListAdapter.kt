@@ -2,6 +2,7 @@ package chat.sphinx.chat_common.adapters
 
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.OnLongClickListener
 import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.lifecycle.DefaultLifecycleObserver
@@ -201,17 +202,19 @@ internal class MessageListAdapter<ARGS : NavArgs>(
         private val disposables: ArrayList<Disposable> = ArrayList(3)
         private var currentViewState: MessageHolderViewState? = null
 
+        private val selectedMessageLongClickListener: OnLongClickListener
+
         init {
             binding.includeMessageHolderBubble.apply {
-                root.setOnLongClickListener {
+                selectedMessageLongClickListener = OnLongClickListener { v ->
                     SelectedMessageViewState.SelectedMessage.instantiate(
                         messageHolderViewState = currentViewState,
                         holderYPosTop = Px(binding.root.y),
                         holderHeight = Px(binding.root.measuredHeight.toFloat()),
                         holderWidth = Px(binding.root.measuredWidth.toFloat()),
-                        bubbleXPosStart = Px(it.x),
-                        bubbleWidth = Px(it.measuredWidth.toFloat()),
-                        bubbleHeight = Px(it.measuredHeight.toFloat()),
+                        bubbleXPosStart = Px(v.x),
+                        bubbleWidth = Px(v.measuredWidth.toFloat()),
+                        bubbleHeight = Px(v.measuredHeight.toFloat()),
                         headerHeight = headerHeight,
                         statusHeaderHeight = Px(binding.includeMessageStatusHeader.root.measuredHeight.toFloat()),
                         recyclerViewWidth = recyclerViewWidth,
@@ -221,6 +224,8 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                     }
                     true
                 }
+
+                root.setOnLongClickListener(selectedMessageLongClickListener)
             }
         }
 
@@ -237,6 +242,7 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                 viewModel.memeServerTokenHandler,
                 recyclerViewWidth,
                 viewState,
+                selectedMessageLongClickListener
             )
 
         }

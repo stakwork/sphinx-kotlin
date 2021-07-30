@@ -1,6 +1,7 @@
 package chat.sphinx.chat_common.ui.viewstate.messageholder
 
 import android.view.Gravity
+import android.view.View
 import android.widget.ImageView
 import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
@@ -50,6 +51,7 @@ internal fun LayoutMessageHolderBinding.setView(
     memeServerTokenHandler: MemeServerTokenHandler,
     recyclerViewWidth: Px,
     viewState: MessageHolderViewState,
+    onLongClickListener: View.OnLongClickListener? = null,
 ) {
     for (job in holderJobs) {
         job.cancel()
@@ -135,7 +137,7 @@ internal fun LayoutMessageHolderBinding.setView(
                 }
             }
             setUnsupportedMessageTypeLayout(viewState.unsupportedMessageType)
-            setBubbleMessageLayout(viewState.bubbleMessage)
+            setBubbleMessageLayout(viewState.bubbleMessage, onLongClickListener)
             setBubbleDirectPaymentLayout(viewState.bubbleDirectPayment)
             setBubbleDirectPaymentLayout(viewState.bubbleDirectPayment)
             setBubblePodcastBoost(viewState.bubblePodcastBoost)
@@ -469,7 +471,8 @@ internal inline fun LayoutMessageHolderBinding.setDeletedMessageLayout(
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun LayoutMessageHolderBinding.setBubbleMessageLayout(
-    message: LayoutState.Bubble.ContainerThird.Message?
+    message: LayoutState.Bubble.ContainerThird.Message?,
+    onLongClickListener: View.OnLongClickListener?,
 ) {
     includeMessageHolderBubble.textViewMessageText.apply {
         if (message == null) {
@@ -477,7 +480,9 @@ internal inline fun LayoutMessageHolderBinding.setBubbleMessageLayout(
         } else {
             visible
             text = message.text
-            SphinxLinkify.addLinks(this, SphinxLinkify.ALL)
+            onLongClickListener?.let {
+                SphinxLinkify.addLinks(this, SphinxLinkify.ALL, it)
+            }
         }
     }
 }
