@@ -253,6 +253,7 @@ internal class DashboardViewModel @Inject constructor(
                                     DashboardChat.Active.GroupOrTribe(
                                         chat,
                                         message,
+                                        accountOwnerStateFlow.value,
                                         repositoryDashboard.getUnseenMessagesByChatId(chat.id)
                                     )
                                 )

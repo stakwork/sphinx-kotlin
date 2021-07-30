@@ -1,6 +1,5 @@
 package chat.sphinx.chat_common.ui
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
 import android.view.View
@@ -46,8 +45,6 @@ import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.resources.*
 import chat.sphinx.wrapper_chat.isTrue
-import chat.sphinx.wrapper_common.lightning.asFormattedString
-import chat.sphinx.wrapper_common.lightning.unit
 import chat.sphinx.wrapper_meme_server.headerKey
 import chat.sphinx.wrapper_meme_server.headerValue
 import chat.sphinx.wrapper_message.retrieveImageUrlAndMessageMedia
@@ -218,7 +215,6 @@ abstract class ChatFragment<
 
         menuBinding.viewChatMenuInputLock.setOnClickListener {
             viewModel.updateViewState(ChatMenuViewState.Closed)
-//            viewModel
         }
     }
 
@@ -589,6 +585,11 @@ abstract class ChatFragment<
                     imageViewChatFooterMicrophone.goneIfFalse(viewState.showRecordAudioIcon)
                     textViewChatFooterSend.goneIfFalse(viewState.showSendIcon)
                     textViewChatFooterAttachment.goneIfFalse(viewState.showMenuIcon)
+
+                    editTextChatFooter.isEnabled = viewState.messagingEnabled
+                    textViewChatFooterSend.isEnabled = viewState.messagingEnabled
+                    textViewChatFooterAttachment.isEnabled = viewState.messagingEnabled
+                    root.alpha = if (viewState.messagingEnabled) 1.0f else 0.4f
                 }
             }
         }

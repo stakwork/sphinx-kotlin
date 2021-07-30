@@ -6,12 +6,9 @@ import androidx.recyclerview.widget.RecyclerView
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.chat_common.databinding.*
 import chat.sphinx.chat_common.ui.ChatFragment
-import chat.sphinx.chat_common.navigation.ChatNavigator
 import chat.sphinx.chat_group.R
 import chat.sphinx.chat_group.databinding.FragmentChatGroupBinding
-import chat.sphinx.chat_group.navigation.GroupChatNavigator
 import chat.sphinx.concept_image_loader.ImageLoader
-import chat.sphinx.concept_network_query_chat.model.PodcastDto
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -44,6 +41,7 @@ internal class ChatGroupFragment: ChatFragment<
     override val menuBinding: LayoutChatMenuBinding by viewBinding(
         LayoutChatMenuBinding::bind, R.id.include_chat_group_menu
     )
+
     override val menuEnablePayments: Boolean
         get() = false
 
@@ -56,4 +54,5 @@ internal class ChatGroupFragment: ChatFragment<
     protected lateinit var imageLoaderInj: ImageLoader<ImageView>
     override val imageLoader: ImageLoader<ImageView>
         get() = imageLoaderInj
+
 }

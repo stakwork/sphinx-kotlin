@@ -6,8 +6,10 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.camera_view_model_coordinator.request.CameraRequest
 import chat.sphinx.camera_view_model_coordinator.response.CameraResponse
+import chat.sphinx.chat_common.ui.ChatSideEffect
 import chat.sphinx.chat_common.ui.ChatViewModel
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
+import chat.sphinx.chat_common.ui.viewstate.menu.ChatMenuViewState
 import chat.sphinx.chat_tribe.R
 import chat.sphinx.chat_tribe.navigation.TribeChatNavigator
 import chat.sphinx.concept_meme_server.MemeServerTokenHandler
@@ -27,21 +29,25 @@ import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.podcast_player.objects.toParcelablePodcast
 import chat.sphinx.podcast_player.ui.getMediaDuration
 import chat.sphinx.resources.getRandomColor
-import chat.sphinx.wrapper_chat.Chat
-import chat.sphinx.wrapper_chat.ChatName
-import chat.sphinx.wrapper_chat.isTribeOwnedByAccount
+import chat.sphinx.wrapper_chat.*
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.lightning.unit
+import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.util.getInitials
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_message.Message
+import chat.sphinx.wrapper_message.MessageType
+import chat.sphinx.wrapper_message.isMemberApprove
+import chat.sphinx.wrapper_message.isMemberReject
 import chat.sphinx.wrapper_podcast.Podcast
 import chat.sphinx.wrapper_podcast.PodcastEpisode
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
+import io.matthewnelson.android_feature_viewmodel.submitSideEffect
+import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_media_cache.MediaCacheHandler
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
@@ -214,8 +220,51 @@ internal class ChatTribeViewModel @Inject constructor(
         mediaPlayerServiceController.removeListener(this)
     }
 
+    override suspend fun processMemberRequest(
+        contactId: ContactId,
+        messageId: MessageId,
+        type: MessageType,
+    ) {
+        viewModelScope.launch(mainImmediate) {
+            val errorMessage = if (type.isMemberApprove()) {
+                app.getString(R.string.failed_to_approve_member)
+            } else {
+                app.getString(R.string.failed_to_reject_member)
+            }
+
+            if (type.isMemberApprove() || type.isMemberReject()) {
+                when(messageRepository.processMemberRequest(contactId, messageId, type)) {
+                    is LoadResponse.Loading -> {}
+                    is Response.Success -> {}
+
+                    is Response.Error -> {
+                        submitSideEffect(ChatSideEffect.Notify(errorMessage))
+                    }
+                }
+            }
+        }.join()
+    }
+
+    override suspend fun deleteTribe() {
+        viewModelScope.launch(mainImmediate) {
+            chatRepository.getChatById(chatId).firstOrNull()?.let { chat ->
+                if (chat.type.isTribe()) {
+                    when (chatRepository.exitAndDeleteTribe(chat)) {
+                        is Response.Error -> {
+                            submitSideEffect(ChatSideEffect.Notify(app.getString(R.string.failed_to_delete_tribe)))
+                        }
+                        is Response.Success -> {
+                            chatNavigator.popBackStack()
+                        }
+                    }
+                }
+            }
+        }.join()
+    }
+
     suspend fun loadTribeAndPodcastData(): Podcast? {
         chatRepository.getChatById(chatId).firstOrNull()?.let { chat ->
+
             chatRepository.updateTribeInfo(chat)?.let { podcastDto ->
                 podcast = podcastDto.toPodcast()
 
