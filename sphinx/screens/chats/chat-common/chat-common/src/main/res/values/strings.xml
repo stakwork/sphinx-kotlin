@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="edit_text_message_hint">Message...</string>
+    <string name="edit_text_optional_message_hint">Optional Message...</string>
+
     <string name="chat_muted_message"> Chat is now muted. You won\'t get push notifications for incoming messages on this chat</string>
     <string name="chat_muted_waiting_on_network">Waiting on network…</string>
     <string name="chat_tribe_contributed">Contributed:</string>
@@ -51,7 +54,7 @@
     <string name="purchase_status_label_paid_message_sent_status_pending">Pending</string>
     <string name="purchase_status_label_paid_message_sent_status_accepted">Succeeded</string>
     <string name="purchase_status_label_paid_message_sent_status_denied">Denied</string>
-    <string name="purchase_status_label_paid_message_sent_status_processing">Processing</string>
+    <string name="purchase_status_label_paid_message_sent_status_processing">Processing payment…</string>
     <string name="purchase_status_label_paid_message_sent_status_default">Unknown</string>
 
 
@@ -84,10 +87,10 @@
     <!-- Exit Tribe -->
     <string name="delete_own_tribe_not_supported">Delete own tribe is not supported yet</string>
     <string name="alert_confirm_exit_tribe_title">Exit Tribe</string>
-    <string name="alert_confirm_exit_tribe_message">Are you sure you exit and delete this tribe?</string>
+    <string name="alert_confirm_exit_tribe_message">Are you sure you wat to exit and delete this tribe?</string>
 
     <!-- Menu -->
-    <string name="attachments_menu_cancel">CANCEL</string>
+    <string name="attachments_menu_cancel" tools:ignore="ButtonCase">CANCEL</string>
     <string name="camera_attachment_option">Camera</string>
     <string name="library_attachment_option">Library</string>
     <string name="gif_attachment_option">Gif</string>
@@ -95,5 +98,7 @@
     <string name="paid_message_attachment_option">Paid Message</string>
     <string name="request_attachment_option">Request</string>
     <string name="send_attachment_option">Send</string>
+
+    <string name="podcast_boost_label">Boost!</string>
 
 </resources>

@@ -17,11 +17,12 @@
      - See [HERE](./NOTIFICATIONS.md) for more info about Notifications
  - Ensure Giphy API key is present in the root project's `local.properties`
      - See [HERE](./GIPHY.md) to enable building Sphinx with the Giphy SDK
- - Build the app to ensure no errors exist
+ - Build the app to ensure no build errors exist
  ```bash
  $ ./gradlew clean
  $ ./gradlew :sphinx:application:sphinx:build
  ```
+ - Sign the apk, install, and navigate around.
  - Commit changes via (replace `<version name>` with actual name, ex: `1.0.0-alpha01`)
      - `$ git add --all`
      - `$ git commit --message "Prepare release <version name>"`
@@ -87,6 +88,7 @@
  ```
  - Signed apks for each CPU architecture will be located in `sphinx/application/sphinx/build/outputs/apk/release`
      - Signed apks will contain `signed` in their names.
+ - Install the Signed Release APK on a device and play with it for a moment.
  - Create a release on GitHub for the given tag used when building the app.
  - Add to the release description a link to the ChangeLog by copy/pasting the following:
      - `See [ChangeLog](./docs/CHANGELOG.md)`

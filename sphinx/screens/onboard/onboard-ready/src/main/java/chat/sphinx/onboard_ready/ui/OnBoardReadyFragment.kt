@@ -65,7 +65,7 @@ internal class OnBoardReadyFragment: SideEffectFragment<
                     }
                     is Response.Success -> {
                         val balance = loadResponse.value
-                        binding.balanceTextView.text = String.format(getString(R.string.sphinx_ready_balance_label), balance.localBalance.value, balance.remoteBalance.value)
+                        binding.balanceTextView.text = getString(R.string.sphinx_ready_balance_label, balance.localBalance.value, balance.remoteBalance.value)
                     }
                 }
             }

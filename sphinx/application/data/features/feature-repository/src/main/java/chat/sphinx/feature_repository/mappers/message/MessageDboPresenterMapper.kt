@@ -19,21 +19,20 @@ internal class MessageDboPresenterMapper(
             value.message_content_decrypted?.let { decrypted ->
                 if (message.type.isMessage()) {
                     when {
-                        decrypted.value.startsWith("boost::") -> {
+                        //Old Podcast boost with message type and text format
+                        decrypted.isPodBoost -> {
                             withContext(default) {
-                                decrypted.value.split("::")
-                                    .elementAtOrNull(1)
-                                    ?.toPodBoostOrNull(moshi)
+                                decrypted.value.replaceFirst(PodBoost.MESSAGE_PREFIX, "")
+                                    .toPodBoostOrNull(moshi)
                                     ?.let { podBoost ->
                                         message._podBoost = podBoost
                                     }
                             }
                         }
-                        decrypted.value.startsWith("giphy::") -> {
+                        decrypted.isGiphy -> {
                             withContext(default) {
-                                decrypted.value.split("::")
-                                    .elementAtOrNull(1)
-                                    ?.decodeBase64ToArray()
+                                decrypted.value.replaceFirst(GiphyData.MESSAGE_PREFIX, "")
+                                    .decodeBase64ToArray()
                                     ?.decodeToString()
                                     ?.toGiphyDataOrNull(moshi)
                                     ?.let { giphy ->
@@ -43,6 +42,14 @@ internal class MessageDboPresenterMapper(
                         }
                         // TODO: Handle podcast audio clips
                         // clip::{"ts":8818,"feedID":226249,"text":"Marty, I agree there is no climate emergency.","pubkey":"02683c5d0cf435fe8a0f42ba9a5999a98291476e82947707313cef69612000f718","itemID":2361506482,"title":"Rabbit Hole Recap: Bitcoin Week of 2021.05.10","url":"https://anchor.fm/s/558f520/podcast/play/33445131/https%3A%2F%2Fd3ctxlq1ktw2nl.cloudfront.net%2Fstaging%2F2021-4-13%2F186081984-44100-2-d892325769c3.m4a"}
+                    }
+                } else if (message.type.isBoost() && message.replyUUID == null) {
+                    //New Podcast boost with boost type (29) and null uuid
+                    withContext(default) {
+                        decrypted.value.replaceFirst(PodBoost.MESSAGE_PREFIX, "")
+                            .toPodBoostOrNull(moshi)?.let { podBoost ->
+                                message._podBoost = podBoost
+                            }
                     }
                 }
 

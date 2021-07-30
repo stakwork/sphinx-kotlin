@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/message_type_boost_height"
+    android:visibility="gone"
+    tools:visibility="visible">
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/text_view_podcast_boost_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/default_layout_margin"
+        android:lines="1"
+        android:textColor="@color/text"
+        android:fontFamily="@font/roboto_regular"
+        android:textSize="@dimen/chat_podcast_boost_text_size"
+        android:text="@string/podcast_boost_label"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/text_view_podcast_boost_amount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/default_small_layout_margin"
+        android:lines="1"
+        android:textColor="@color/text"
+        android:fontFamily="@font/roboto_bold"
+        android:textSize="@dimen/chat_podcast_boost_text_size"
+        android:text="-"
+        app:layout_constraintStart_toEndOf="@+id/text_view_podcast_boost_label"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/button_boost"
+        android:layout_width="28dp"
+        android:layout_height="28dp"
+        android:padding="2dp"
+        android:background="@drawable/button_background_white_rad_48"
+        android:backgroundTint="@color/primaryGreen"
+        android:src="@drawable/ic_boost"
+        android:layout_marginEnd="@dimen/default_layout_margin"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

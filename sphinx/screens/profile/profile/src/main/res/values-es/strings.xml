@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="profile_header_name">Perfil</string>
+    <string name="profile_basic_tab">Básico</string>
+    <string name="profile_advanced_tab">Avanzado</string>
+    <string name="profile_user_name">Nombre de Usuario</string>
+    <string name="profile_address">Dirección</string>
+    <string name="profile_route_hint">Pista de Ruta</string>
+    <string name="profile_share_picture">Compartir mi foto de perfil con mis contactos</string>
+    <string name="profile_tip">Valor de recompensa</string>
+    <string name="profile_meeting_server">Servidor de Llamadas</string>
+    <string name="profile_sync_devices">Sincronizar otros dispositivos</string>
+    <string name="profile_backup_keys">Guardar tus claves</string>
+    <string name="profile_server_url">URL del servidor</string>
+    <string name="profile_pin_timeout">Tiempo de PIN</string>
+    <string name="profile_pin_timeout_hours">12 horas</string>
+    <string name="profile_change_pin">Modificar PIN</string>
+    <string name="profile_change_privacy_pin">Modificar PIN Privado</string>
+    <string name="profile_always_require_pin">Siempre solicitar PIN</string>
+    <string name="profile_export_keys_title_alert">Exportar Claves</string>
+    <string name="profile_export_keys_pin_message">"Ingresa tu PIN para encriptar las claves. ¡Recuérdalo! Lo necesitarás para restaurar tu cuenta en otro dispositivo"</string>
+    <string name="profile_keys_copied_clipboard">"Tus claves se copiarán al portapapeles. Guarda las claves y recuerda tu PIN antes de borrar la aplicación o toda la información se perderá"</string>
+    <string name="side_effect_backup_keys_exported">Claves copiadas al portapapeles</string>
+    <string name="side_effect_wrong_pin">PIN incorrecto</string>
+    <string name="side_effect_backup_keys_failed">Guardado de claves fallido</string>
+    <string name="profile_qr_code_header_name">CLAVE PÚBLICA</string>
+    <string name="bottom_menu_profile_pic_header_text">Foto de Perfil</string>
+    <string name="failed_to_process_image">No se ha podido procesar la imagen</string>
+    <string name="image_uploaded_successfully">Imagen cargada con éxito</string>
+</resources>

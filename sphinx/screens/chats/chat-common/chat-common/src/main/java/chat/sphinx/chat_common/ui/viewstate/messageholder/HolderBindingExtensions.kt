@@ -136,6 +136,8 @@ internal fun LayoutMessageHolderBinding.setView(
             setUnsupportedMessageTypeLayout(viewState.unsupportedMessageType)
             setBubbleMessageLayout(viewState.bubbleMessage)
             setBubbleDirectPaymentLayout(viewState.bubbleDirectPayment)
+            setBubbleDirectPaymentLayout(viewState.bubbleDirectPayment)
+            setBubblePodcastBoost(viewState.bubblePodcastBoost)
             setBubblePaidMessageDetailsLayout(
                 viewState.bubblePaidMessageDetails,
                 viewState.background
@@ -606,28 +608,21 @@ internal inline fun LayoutMessageHolderBinding.setBubbleImageAttachment(
     }
 }
 
-//@MainThread
-//@Suppress("NOTHING_TO_INLINE")
-//internal inline fun LayoutMessageHolderBinding.setBubbleImageAttachment(
-//    giphy: LayoutState.Bubble.ContainerTop.Giphy?,
-//    imageAttachment: LayoutState.Bubble.ContainerTop.ImageAttachment?,
-//    loadImage: (ImageView, String, String?) -> Unit,
-//) {
-//    includeMessageHolderBubble.includeMessageTypeImageAttachment.apply {
-//        if (giphy == null && imageAttachment == null) {
-//            root.gone
-//        } else {
-//            root.visible
-//
-//            if (giphy != null) {
-//                loadImage(imageViewAttachmentImage, giphy.url, null)
-//                loadingImageProgressContainer.gone
-//            } else if (imageAttachment != null) {
-////                loadImage(imageViewAttachmentImage, imageAttachment.url, imageAttachment.mediaKey)
-//            }
-//        }
-//    }
-//}
+@MainThread
+@Suppress("NOTHING_TO_INLINE")
+internal inline fun LayoutMessageHolderBinding.setBubblePodcastBoost(
+    podcastBoost: LayoutState.Bubble.ContainerSecond.PodcastBoost?
+) {
+    includeMessageHolderBubble.includeMessageTypePodcastBoost.apply {
+        if (podcastBoost == null) {
+            root.gone
+        } else {
+            root.visible
+
+            textViewPodcastBoostAmount.text = podcastBoost.amount.asFormattedString()
+        }
+    }
+}
 
 @MainThread
 @Suppress("NOTHING_TO_INLINE")

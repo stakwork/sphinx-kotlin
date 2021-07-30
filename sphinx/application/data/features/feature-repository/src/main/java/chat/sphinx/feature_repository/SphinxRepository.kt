@@ -86,7 +86,6 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import okio.base64.encodeBase64
 import java.io.InputStream
-import java.io.File
 import java.text.ParseException
 import kotlin.math.absoluteValue
 
@@ -2455,9 +2454,10 @@ abstract class SphinxRepository(
                                 if (didChangeNameOrPhotoUrl) {
                                     networkQueryChat.updateTribe(
                                         chat.id,
-                                        PutTribeDto(
+                                        PostGroupDto(
                                             tribeDto.name,
-                                            tribeDto.img ?: "",
+                                            tribeDto.description,
+                                            img = tribeDto.img ?: "",
                                         )
                                     ).collect {}
                                 }
@@ -2479,15 +2479,17 @@ abstract class SphinxRepository(
 
         chat.host?.let { chatHost ->
             tribe.feed_url?.let { feedUrl ->
-                networkQueryChat.getPodcastFeed(chatHost, feedUrl).collect { loadResponse ->
-                    when (loadResponse) {
+                if (feedUrl.isNotEmpty()) {
+                    networkQueryChat.getPodcastFeed(chatHost, feedUrl).collect { loadResponse ->
+                        when (loadResponse) {
 
-                        is LoadResponse.Loading -> {}
-                        is Response.Error -> {}
+                            is LoadResponse.Loading -> {}
+                            is Response.Error -> {}
 
-                        is Response.Success -> {
-                            if (loadResponse.value.isValidPodcast()) {
-                                podcastDto = loadResponse.value
+                            is Response.Success -> {
+                                if (loadResponse.value.isValidPodcast()) {
+                                    podcastDto = loadResponse.value
+                                }
                             }
                         }
                     }
@@ -2944,7 +2946,85 @@ abstract class SphinxRepository(
                     }
                 }
 
-                networkQueryChat.createTribe(createTribe.toPostGroupDto(imgUrl)).collect { loadResponse ->
+                networkQueryChat.createTribe(
+                    createTribe.toPostGroupDto(imgUrl)
+                ).collect { loadResponse ->
+                    when (loadResponse) {
+                        is LoadResponse.Loading -> {}
+
+                        is Response.Error -> {
+                            response = loadResponse
+                            LOG.e(TAG, "Failed to create tribe: ", loadResponse.exception)
+                        }
+                        is Response.Success -> {
+                            loadResponse.value?.let { chatDto ->
+                                response = Response.Success(chatDto)
+                                val queries = coreDB.getSphinxDatabaseQueries()
+
+                                chatLock.withLock {
+                                    messageLock.withLock {
+                                        withContext(io) {
+                                            queries.transaction {
+                                                upsertChat(chatDto, moshi, chatSeenMap, queries, null)
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                response = Response.Error(
+                    ResponseError("Failed to update Chat Profile", e)
+                )
+            }
+        }.join()
+
+        return response
+    }
+
+    override suspend fun updateTribe(
+        chatId: ChatId,
+        createTribe: CreateTribe
+    ): Response<Any, ResponseError> {
+
+        var response: Response<Any, ResponseError>  = Response.Error(ResponseError(("Failed to exit tribe")))
+        val memeServerHost = MediaHost.DEFAULT
+
+        applicationScope.launch(mainImmediate) {
+            try {
+                val imgUrl: String? = (createTribe.img?.let { imgFile ->
+                    val token = memeServerTokenHandler.retrieveAuthenticationToken(memeServerHost)
+                        ?: throw RuntimeException("MemeServerAuthenticationToken retrieval failure")
+
+                    val networkResponse = networkQueryMemeServer.uploadAttachment(
+                        authenticationToken = token,
+                        mediaType = MediaType.Image("${MediaType.IMAGE}/${imgFile.extension}"),
+                        stream = object : InputStreamProvider() {
+                            override fun newInputStream(): InputStream = imgFile.inputStream()
+                        },
+                        fileName = imgFile.name,
+                        contentLength = imgFile.length(),
+                        memeServerHost = memeServerHost,
+                    )
+                    @Exhaustive
+                    when (networkResponse) {
+                        is Response.Error -> {
+                            LOG.e(TAG, "Failed to upload image: ", networkResponse.exception)
+                            response = networkResponse
+                            null
+                        }
+                        is Response.Success -> {
+                            "https://${memeServerHost.value}/public/${networkResponse.value.muid}"
+                        }
+                    }
+                }) ?: createTribe.imgUrl
+
+                networkQueryChat.updateTribe(
+                    chatId,
+                    createTribe.toPostGroupDto(imgUrl)
+                ).collect { loadResponse ->
                     when (loadResponse) {
                         is LoadResponse.Loading -> {}
 

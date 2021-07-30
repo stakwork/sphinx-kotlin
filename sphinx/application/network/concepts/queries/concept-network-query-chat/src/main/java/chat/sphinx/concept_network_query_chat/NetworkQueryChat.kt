@@ -45,7 +45,7 @@ abstract class NetworkQueryChat {
 
     abstract fun updateTribe(
         chatId: ChatId,
-        putTribeDto: PutTribeDto,
+        postGroupDto: PostGroupDto,
         relayData: Pair<AuthorizationToken, RelayUrl>? = null
     ): Flow<LoadResponse<ChatDto, ResponseError>>
 

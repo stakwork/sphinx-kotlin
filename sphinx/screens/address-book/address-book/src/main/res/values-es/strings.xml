@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="address_book_header_name">Contactos</string>
+    <string name="search">Buscar</string>
+    <string name="add_icon"></string>
+    <string name="add_friend">Nuevo Amigo</string>
+</resources>

@@ -15,6 +15,6 @@
     <string name="sign_up_name_text_view">Your Name</string>
 
     <string name="sphinx_ready_label">"You\'re ready\nto use Sphinx!"</string>
-    <string name="sphinx_ready_balance_label" formatted="false">"You can send messages,\nspend %d sats, or receive\nup to %d sats."</string>
+    <string name="sphinx_ready_balance_label">"You can send messages,\nspend %d sats, or receive\nup to %d sats."</string>
     <string name="sphinx_ready_loading_balance">Loading node balance…</string>
 </resources>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="camera_permissions_required">Los permisos de cámara y audio son requeridos para usar esta funcionalidad, por favor habilitalos en configuración.</string>
+    <string name="camera_retake">Tomar de nuevo</string>
+    <string name="camera_use_photo">Usar foto</string>
+    <string name="camera_cancel">Cancelar</string>
+</resources>

@@ -1,15 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="create_tribe_header_name">NEW TRIBE</string>
+    <string name="edit_tribe_header_name">EDIT TRIBE</string>
     <string name="create_tribe">Create Tribe</string>
+    <string name="save">Save</string>
     <string name="add_icon"></string>
 
     <string name="bottom_menu_tribe_pic_header_text">Tribe Picture</string>
 
     <string name="name_and_description_required">Name and description required</string>
     <string name="failed_to_create_tribe">Failed to create tribe</string>
+    <string name="failed_to_update_tribe">Failed to update tribe</string>
+    <string name="failed_to_load_tribe">Failed to load tribe</string>
     <string name="failed_to_process_image">Failed to process image</string>
-    <string name="list_on_tribes_sphinx_chat">List on tribes.sphinx.chat ?</string>
+    <string name="list_on_tribes_sphinx_chat">List on tribes.sphinx.chat?</string>
     <string name="name">Name *</string>
     <string name="image">Image</string>
     <string name="description">Description *</string>
