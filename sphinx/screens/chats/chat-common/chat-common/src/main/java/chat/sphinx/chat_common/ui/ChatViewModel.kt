@@ -49,6 +49,7 @@ import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.Sat
+import chat.sphinx.wrapper_common.lightning.getPubKey
 import chat.sphinx.wrapper_common.lightning.isValidLightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.toLightningNodePubKey
 import chat.sphinx.wrapper_common.message.MessageUUID
@@ -791,15 +792,13 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         viewModelScope.launch(mainImmediate) {
             if (url?.isValidLightningNodePubKey == true) {
                 url.toLightningNodePubKey()?.let { lightningNodePubKey ->
-                    contactRepository.getAllContacts.collect { contacts ->
-                        val existingContact = contacts.firstOrNull { it.nodePubKey == lightningNodePubKey }
-
-                        if (existingContact == null) {
-                            chatNavigator.toAddContactDetail()
-                        } else {
-                            chatRepository.getConversationByContactId(existingContact.id).collect { chat ->
-                                chat?.let {
-                                    chatNavigator.toChat(chat, existingContact.id)
+                    lightningNodePubKey.getPubKey()?.let { nnPubKey ->
+                        contactRepository.getContactByPubKey(nnPubKey).collect { contact ->
+                            if (contact == null) {
+                                chatNavigator.toAddContactDetail(lightningNodePubKey)
+                            } else {
+                                chatRepository.getConversationByContactId(contact.id).collect { chat ->
+                                    chatNavigator.toChat(chat, contact.id)
                                 }
                             }
                         }

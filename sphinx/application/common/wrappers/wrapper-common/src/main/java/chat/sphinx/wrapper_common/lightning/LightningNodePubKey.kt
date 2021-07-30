@@ -8,6 +8,24 @@ inline fun String.toLightningNodePubKey(): LightningNodePubKey? =
         null
     }
 
+@Suppress("NOTHING_TO_INLINE")
+inline fun LightningNodePubKey.getPubKey(): LightningNodePubKey? {
+    val elements = this.value.split(":")
+    if (elements.size > 1) {
+        return elements[0].toLightningNodePubKey()
+    }
+    return this.value.toLightningNodePubKey()
+}
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun LightningNodePubKey.getRouteHint(): LightningRouteHint? {
+    val elements = this.value.split(":")
+    if (elements.size == 3) {
+        return "${elements[1]}:${elements[2]}".toLightningRouteHint()
+    }
+    return null
+}
+
 inline val String.isValidLightningNodePubKey: Boolean
     get() = isNotEmpty() && matches("^${LightningNodePubKey.REGEX}\$".toRegex())
 

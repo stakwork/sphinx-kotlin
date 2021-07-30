@@ -52,7 +52,7 @@ object SphinxLinkify {
      * Bit field indicating that lightning public key should be matched in methods that
      * take an options mask
      */
-    const val LIGHTNING_NODE_PUBLICK_KEY: Int = 0x08
+    const val LIGHTNING_NODE_PUBLIC_KEY: Int = 0x08
 
     /**
      * Bit mask indicating that all available patterns should be matched in
@@ -62,7 +62,7 @@ object SphinxLinkify {
      * Use [android.view.textclassifier.TextClassifier.generateLinks]
      * instead and avoid it even when targeting API levels where no alternative is available.
      */
-    const val ALL: Int = WEB_URLS or EMAIL_ADDRESSES or PHONE_NUMBERS or LIGHTNING_NODE_PUBLICK_KEY
+    const val ALL: Int = WEB_URLS or EMAIL_ADDRESSES or PHONE_NUMBERS or LIGHTNING_NODE_PUBLIC_KEY
 
     private val EMPTY_STRING = arrayOfNulls<String>(0)
     private val COMPARATOR: Comparator<LinkSpec> = object : Comparator<LinkSpec> {
@@ -107,7 +107,7 @@ object SphinxLinkify {
             text.removeSpan(old[i])
         }
         val links = ArrayList<LinkSpec>()
-        if (mask and LIGHTNING_NODE_PUBLICK_KEY != 0) {
+        if (mask and LIGHTNING_NODE_PUBLIC_KEY != 0) {
             gatherLinks(
                 links, text, SphinxPatterns.LIGHTNING_NODE_PUBLIC_KEY, arrayOf(),
                 null, null
@@ -302,7 +302,7 @@ object SphinxLinkify {
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
     @IntDef(
         flag = true,
-        value = [WEB_URLS, EMAIL_ADDRESSES, PHONE_NUMBERS, LIGHTNING_NODE_PUBLICK_KEY, ALL]
+        value = [WEB_URLS, EMAIL_ADDRESSES, PHONE_NUMBERS, LIGHTNING_NODE_PUBLIC_KEY, ALL]
     )
     @kotlin.annotation.Retention(AnnotationRetention.SOURCE)
     annotation class LinkifyMask

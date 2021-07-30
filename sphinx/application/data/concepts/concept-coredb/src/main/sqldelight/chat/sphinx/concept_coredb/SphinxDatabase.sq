@@ -240,6 +240,11 @@ SELECT *
 FROM contactDbo
 WHERE id = ?;
 
+contactGetByPubKey:
+SELECT *
+FROM contactDbo
+WHERE node_pub_key = ?;
+
 contactGetOwner:
 SELECT *
 FROM contactDbo

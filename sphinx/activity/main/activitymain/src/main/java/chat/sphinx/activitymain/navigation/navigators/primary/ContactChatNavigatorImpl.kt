@@ -14,14 +14,14 @@ import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.ChatType
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
+import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.tribe.TribeJoinLink
 import javax.inject.Inject
 
 internal class ContactChatNavigatorImpl @Inject constructor(
     navigationDriver: PrimaryNavigationDriver,
     private val detailDriver: DetailNavigationDriver,
-): ContactChatNavigator(navigationDriver)
-{
+): ContactChatNavigator(navigationDriver) {
     override suspend fun toPaymentSendDetail(contactId: ContactId, chatId: ChatId?) {
         detailDriver.submitNavigationRequest(ToPaymentSendDetail(contactId, chatId))
     }
@@ -30,33 +30,39 @@ internal class ContactChatNavigatorImpl @Inject constructor(
         detailDriver.submitNavigationRequest(ToContactDetailScreen(chatId, contactId))
     }
 
-    override suspend fun toAddContactDetail() {
+    override suspend fun toAddContactDetail(pubKey: LightningNodePubKey) {
         detailDriver.submitNavigationRequest(
-            ToNewContactDetail()
+            ToNewContactDetail(pubKey, false)
         )
     }
 
-    override suspend fun toChat(chat: Chat, contactId: ContactId?) {
-        when (chat.type) {
-            is ChatType.Conversation -> {
-                contactId?.let {
+    override suspend fun toChat(chat: Chat?, contactId: ContactId?) {
+        if (chat == null) {
+            contactId?.let {
+                navigationDriver.submitNavigationRequest(
+                    ToChatContactScreen(null, contactId)
+                )
+            }
+        } else {
+            when (chat.type) {
+                is ChatType.Conversation -> {
+                    contactId?.let {
+                        navigationDriver.submitNavigationRequest(
+                            ToChatContactScreen(chat.id, contactId)
+                        )
+                    }
+                }
+                is ChatType.Group -> {
                     navigationDriver.submitNavigationRequest(
-                        ToChatContactScreen(chat.id, contactId)
+                        ToChatGroupScreen(chat.id)
                     )
                 }
-            }
-            is ChatType.Group -> {
-                navigationDriver.submitNavigationRequest(
-                    ToChatGroupScreen(chat.id)
-                )
-            }
-            is ChatType.Tribe -> {
-                navigationDriver.submitNavigationRequest(
-                    ToChatTribeScreen(chat.id)
-                )
-            }
-            is ChatType.Unknown -> {
-                // ChatType unsupported
+                is ChatType.Tribe -> {
+                    navigationDriver.submitNavigationRequest(
+                        ToChatTribeScreen(chat.id)
+                    )
+                }
+                else -> {}
             }
         }
     }

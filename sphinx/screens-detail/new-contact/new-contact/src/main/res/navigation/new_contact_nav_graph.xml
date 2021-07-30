@@ -8,6 +8,18 @@
     <fragment
         android:id="@+id/navigation_new_contact_fragment"
         android:name="chat.sphinx.new_contact.ui.NewContactFragment"
-        tools:layout="@layout/fragment_new_contact" />
+        tools:layout="@layout/fragment_new_contact">
+
+        <argument
+            android:name="argFromAddFriend"
+            app:argType="boolean" />
+
+        <argument
+            android:name="argPubKey"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="@null" />
+
+    </fragment>
 
 </navigation>

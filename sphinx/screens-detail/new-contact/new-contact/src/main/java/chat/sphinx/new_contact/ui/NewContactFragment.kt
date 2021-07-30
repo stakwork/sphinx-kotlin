@@ -14,11 +14,13 @@ import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.new_contact.R
 import chat.sphinx.new_contact.databinding.FragmentNewContactBinding
-import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
-import chat.sphinx.wrapper_common.lightning.LightningRouteHint
+import chat.sphinx.wrapper_common.dashboard.ChatId
+import chat.sphinx.wrapper_common.lightning.*
 import dagger.hilt.android.AndroidEntryPoint
+import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
+import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import kotlinx.coroutines.launch
@@ -33,10 +35,6 @@ internal class NewContactFragment : SideEffectFragment<
         >(R.layout.fragment_new_contact)
 {
 
-    companion object {
-        const val PASTE_REGEX = "^${LightningNodePubKey.REGEX}:${LightningRouteHint.REGEX}\$"
-    }
-
     override val viewModel: NewContactViewModel by viewModels()
     override val binding: FragmentNewContactBinding by viewBinding(FragmentNewContactBinding::bind)
 
@@ -44,6 +42,15 @@ internal class NewContactFragment : SideEffectFragment<
         @Exhaustive
         when (viewState) {
             is NewContactViewState.Idle -> {}
+
+            is NewContactViewState.NewContactLink -> {
+                binding.apply {
+                    newContactAddressEditText.setText(viewState.pubKey?.value ?: "")
+                    newContactRouteHintEditText.setText(viewState.routeHint?.value ?: "")
+
+                    includeNewContactHeader.textViewDetailScreenHeaderNavBack.goneIfFalse(viewState.fromAddFriend)
+                }
+            }
             is NewContactViewState.Saving -> {
                 binding.newContactSaveProgress.visible
             }
@@ -134,16 +141,9 @@ internal class NewContactFragment : SideEffectFragment<
 
     @SuppressLint("SetTextI18n")
     private fun pastePubKey(s: Editable?) {
-        if (!s.toString().trim().matches(PASTE_REGEX.toRegex())) {
-            return
-        }
-
-        s?.let {
-            val splitText = it.trim().split(":")
-            if (splitText.size == 3) {
-                binding.newContactAddressEditText.setText(splitText[0])
-                binding.newContactRouteHintEditText.setText("${splitText[1]}:${splitText[2]}")
-            }
+        s?.toString()?.toLightningNodePubKey()?.let { nnPubKey ->
+            binding.newContactAddressEditText.setText(nnPubKey.getPubKey()?.value ?: "")
+            binding.newContactRouteHintEditText.setText(nnPubKey.getRouteHint()?.value ?: "")
         }
     }
 
