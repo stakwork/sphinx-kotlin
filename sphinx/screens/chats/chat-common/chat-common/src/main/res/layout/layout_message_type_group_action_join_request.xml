@@ -33,7 +33,7 @@
             android:textColor="@color/text"
             android:textSize="@dimen/default_text_size_sub_headline"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/text_view_accept_request"
+            app:layout_constraintEnd_toStartOf="@+id/text_view_group_action_join_request_accept_action"
             app:layout_constraintHorizontal_chainStyle="packed"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="CypherPoet wants to\n join the group" />
