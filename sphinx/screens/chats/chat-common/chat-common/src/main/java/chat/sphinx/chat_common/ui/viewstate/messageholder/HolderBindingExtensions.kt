@@ -790,7 +790,7 @@ internal inline fun LayoutMessageHolderBinding.setGroupActionIndicatorLayout(
 private inline fun LayoutMessageHolderBinding.setGroupActionAnnouncementLayout(
     groupActionDetails: LayoutState.GroupActionIndicator
 ) {
-    includeMessageTypeGroupActionHolder.includeMessageTypeGroupActionJoinRequestAdminView.root.gone
+    includeMessageTypeGroupActionHolder.includeMessageTypeGroupActionJoinRequest.root.gone
 
     includeMessageTypeGroupActionHolder.includeMessageTypeGroupActionAnnouncement.apply {
         root.visible
@@ -823,7 +823,7 @@ private inline fun LayoutMessageHolderBinding.setGroupActionAnnouncementLayout(
         }
 
         actionLabelText?.let {
-            textViewGroupActionLabel.text = it
+            textViewGroupActionAnnouncementLabel.text = it
         } ?: root.gone
     }
 }
@@ -838,16 +838,16 @@ private inline fun LayoutMessageHolderBinding.setGroupActionJoinRequestAdminLayo
 ) {
     includeMessageTypeGroupActionHolder.includeMessageTypeGroupActionAnnouncement.root.gone
 
-    includeMessageTypeGroupActionHolder.includeMessageTypeGroupActionJoinRequestAdminView.apply {
+    includeMessageTypeGroupActionHolder.includeMessageTypeGroupActionJoinRequest.apply {
         root.visible
 
-        textViewGroupJoinRequestMessage.text = root.context.getString(R.string.tribe_request_admin_side, groupActionDetails.subjectName)
+        textViewGroupActionJoinRequestMessage.text = root.context.getString(R.string.tribe_request_admin_side, groupActionDetails.subjectName)
 
-        textViewAcceptRequest.isEnabled = true
-        textViewAcceptRequest.alpha = 1.0f
+        textViewGroupActionJoinRequestAcceptAction.isEnabled = true
+        textViewGroupActionJoinRequestAcceptAction.alpha = 1.0f
 
-        textViewRejectRequest.isEnabled = true
-        textViewRejectRequest.alpha = 1.0f
+        textViewGroupActionJoinRequestRejectAction.isEnabled = true
+        textViewGroupActionJoinRequestRejectAction.alpha = 1.0f
     }
 }
 
@@ -859,15 +859,16 @@ private inline fun LayoutMessageHolderBinding.setGroupActionJoinRequestAdminLayo
 private inline fun LayoutMessageHolderBinding.setGroupActionJoinRejectedAdminLayout(
     groupActionDetails: LayoutState.GroupActionIndicator
 ) {
-    includeMessageTypeGroupActionHolder.includeMessageTypeGroupActionJoinRequestAdminView.apply {
+    includeMessageTypeGroupActionHolder.includeMessageTypeGroupActionJoinRequest.apply {
         root.visible
 
-        textViewGroupJoinRequestMessage.text = root.context.getString(R.string.tribe_request_rejected_admin_side, groupActionDetails.subjectName)
-        textViewAcceptRequest.isEnabled = false
-        textViewAcceptRequest.alpha = 0.2f
+        textViewGroupActionJoinRequestMessage.text = root.context.getString(R.string.tribe_request_rejected_admin_side, groupActionDetails.subjectName)
 
-        textViewRejectRequest.isEnabled = false
-        textViewRejectRequest.alpha = 1.0f
+        textViewGroupActionJoinRequestAcceptAction.isEnabled = false
+        textViewGroupActionJoinRequestAcceptAction.alpha = 0.2f
+
+        textViewGroupActionJoinRequestRejectAction.isEnabled = false
+        textViewGroupActionJoinRequestRejectAction.alpha = 1.0f
     }
 }
 
@@ -879,15 +880,16 @@ private inline fun LayoutMessageHolderBinding.setGroupActionJoinRejectedAdminLay
 private inline fun LayoutMessageHolderBinding.setGroupActionJoinApprovedAdminLayout(
     groupActionDetails: LayoutState.GroupActionIndicator
 ) {
-    includeMessageTypeGroupActionHolder.includeMessageTypeGroupActionJoinRequestAdminView.apply {
+    includeMessageTypeGroupActionHolder.includeMessageTypeGroupActionJoinRequest.apply {
         root.visible
 
-        textViewGroupJoinRequestMessage.text = root.context.getString(R.string.tribe_request_approved_admin_side, groupActionDetails.subjectName)
-        textViewRejectRequest.isEnabled = false
-        textViewRejectRequest.alpha = 0.2f
+        textViewGroupActionJoinRequestMessage.text = root.context.getString(R.string.tribe_request_approved_admin_side, groupActionDetails.subjectName)
 
-        textViewAcceptRequest.isEnabled = false
-        textViewAcceptRequest.alpha = 1.0f
+        textViewGroupActionJoinRequestRejectAction.isEnabled = false
+        textViewGroupActionJoinRequestRejectAction.alpha = 0.2f
+
+        textViewGroupActionJoinRequestAcceptAction.isEnabled = false
+        textViewGroupActionJoinRequestAcceptAction.alpha = 1.0f
     }
 }
 
@@ -903,7 +905,7 @@ private inline fun LayoutMessageHolderBinding.setGroupActionMemberRemovalLayout(
     includeMessageTypeGroupActionHolder.includeMessageTypeGroupActionMemberRemoval.apply {
         root.visible
 
-        textViewGroupKickMessage.text = root.context.getString(
+        textViewGroupActionMemberRemovalMessage.text = root.context.getString(
             when (groupActionDetails.actionType) {
                 is MessageType.GroupAction.Kick -> {
                     R.string.tribe_kick_announcement_member_side

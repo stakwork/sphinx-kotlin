@@ -62,6 +62,7 @@ import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_media_cache.MediaCacheHandler
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
+import io.matthewnelson.concept_views.viewstate.value
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
@@ -136,23 +137,10 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                     )
                 )
 
-                if (chat?.status?.isPending() == true) {
-                    submitSideEffect(
-                        ChatSideEffect.Notify(
-                            app.getString(R.string.waiting_for_admin_approval),
-                            false
-                        )
-                    )
-                }
-
-                if (chat?.status?.isApproved() != true) {
-                    footerViewStateContainer.updateViewState(
-                        FooterViewState.Disabled
-                    )
-                } else {
-                    footerViewStateContainer.updateViewState(
-                        FooterViewState.Default
-                    )
+                chat?.let { nnChat ->
+                    if (nnChat.isPrivateTribe()) {
+                        handleDisabledFooterState(nnChat)
+                    }
                 }
             }
         }.stateIn(
@@ -188,6 +176,29 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         delay(25L)
 
         return chat!!
+    }
+
+    private fun handleDisabledFooterState(chat: Chat) {
+        if (chat.status.isPending()) {
+            viewModelScope.launch(mainImmediate) {
+                submitSideEffect(
+                    ChatSideEffect.Notify(
+                        app.getString(R.string.waiting_for_admin_approval),
+                        false
+                    )
+                )
+            }
+        }
+
+        if (!chat.status.isApproved()) {
+            footerViewStateContainer.updateViewState(
+                FooterViewState.Disabled
+            )
+        } else if (chat.status.isApproved() && footerViewStateContainer.value == FooterViewState.Disabled) {
+            footerViewStateContainer.updateViewState(
+                FooterViewState.Default
+            )
+        }
     }
 
     abstract suspend fun getInitialHolderViewStateForReceivedMessage(
@@ -796,46 +807,11 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         }
     }
 
-    suspend fun processMemberRequest(
+    open suspend fun processMemberRequest(
         contactId: ContactId,
         messageId: MessageId,
         type: MessageType,
-    ) {
-        viewModelScope.launch(mainImmediate) {
+    ) {}
 
-            val errorMessage = if (type.isMemberApprove()) {
-                app.getString(R.string.failed_to_approve_member)
-            } else {
-                app.getString(R.string.failed_to_reject_member)
-            }
-
-            if (type.isMemberApprove() || type.isMemberReject()) {
-                when(messageRepository.processMemberRequest(contactId, messageId, type)) {
-                    is LoadResponse.Loading -> {}
-                    is Response.Success -> {}
-
-                    is Response.Error -> {
-                        submitSideEffect(ChatSideEffect.Notify(errorMessage))
-                    }
-                }
-            }
-        }.join()
-    }
-
-    suspend fun deleteTribe() {
-        viewModelScope.launch(mainImmediate) {
-            val chat = getChat()
-
-            if (chat.type.isTribe()) {
-                when (chatRepository.exitAndDeleteTribe(chat)) {
-                    is Response.Error -> {
-                        submitSideEffect(ChatSideEffect.Notify(app.getString(R.string.failed_to_delete_tribe)))
-                    }
-                    is Response.Success -> {
-                        chatNavigator.popBackStack()
-                    }
-                }
-            }
-        }.join()
-    }
+    open suspend fun deleteTribe() {}
 }

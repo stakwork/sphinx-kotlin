@@ -35,9 +35,13 @@ import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.lightning.unit
+import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.util.getInitials
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_message.Message
+import chat.sphinx.wrapper_message.MessageType
+import chat.sphinx.wrapper_message.isMemberApprove
+import chat.sphinx.wrapper_message.isMemberReject
 import chat.sphinx.wrapper_podcast.Podcast
 import chat.sphinx.wrapper_podcast.PodcastEpisode
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -214,6 +218,48 @@ internal class ChatTribeViewModel @Inject constructor(
     override fun onCleared() {
         super.onCleared()
         mediaPlayerServiceController.removeListener(this)
+    }
+
+    override suspend fun processMemberRequest(
+        contactId: ContactId,
+        messageId: MessageId,
+        type: MessageType,
+    ) {
+        viewModelScope.launch(mainImmediate) {
+            val errorMessage = if (type.isMemberApprove()) {
+                app.getString(R.string.failed_to_approve_member)
+            } else {
+                app.getString(R.string.failed_to_reject_member)
+            }
+
+            if (type.isMemberApprove() || type.isMemberReject()) {
+                when(messageRepository.processMemberRequest(contactId, messageId, type)) {
+                    is LoadResponse.Loading -> {}
+                    is Response.Success -> {}
+
+                    is Response.Error -> {
+                        submitSideEffect(ChatSideEffect.Notify(errorMessage))
+                    }
+                }
+            }
+        }.join()
+    }
+
+    override suspend fun deleteTribe() {
+        viewModelScope.launch(mainImmediate) {
+            chatRepository.getChatById(chatId).firstOrNull()?.let { chat ->
+                if (chat.type.isTribe()) {
+                    when (chatRepository.exitAndDeleteTribe(chat)) {
+                        is Response.Error -> {
+                            submitSideEffect(ChatSideEffect.Notify(app.getString(R.string.failed_to_delete_tribe)))
+                        }
+                        is Response.Success -> {
+                            chatNavigator.popBackStack()
+                        }
+                    }
+                }
+            }
+        }.join()
     }
 
     suspend fun loadTribeAndPodcastData(): Podcast? {

@@ -10,7 +10,7 @@
 
     <!-- TODO: Remove unnecessary inner layout -->
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/holder_group_join_request_message_views"
+        android:id="@+id/layout_constraint_group_action_join_request_container"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@drawable/background_group_request_message"
@@ -23,7 +23,7 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/text_view_group_join_request_message"
+            android:id="@+id/text_view_group_action_join_request_message"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="10dp"
@@ -33,13 +33,13 @@
             android:textColor="@color/text"
             android:textSize="@dimen/default_text_size_sub_headline"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/button_accept_request"
+            app:layout_constraintEnd_toStartOf="@+id/text_view_accept_request"
             app:layout_constraintHorizontal_chainStyle="packed"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="CypherPoet wants to\n join the group" />
 
         <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/text_view_accept_request"
+            android:id="@+id/text_view_group_action_join_request_accept_action"
             android:layout_width="@dimen/group_request_message_button_xy"
             android:layout_height="@dimen/group_request_message_button_xy"
             android:layout_marginStart="@dimen/chat_message_inner_padding"
@@ -52,11 +52,11 @@
             android:textAlignment="center"
             android:gravity="center"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/text_view_group_join_request_message"
+            app:layout_constraintStart_toEndOf="@+id/text_view_group_action_join_request_message"
             app:layout_constraintTop_toTopOf="parent" />
 
         <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/text_view_reject_request"
+            android:id="@+id/text_view_group_action_join_request_reject_action"
             android:layout_width="@dimen/group_request_message_button_xy"
             android:layout_height="@dimen/group_request_message_button_xy"
             android:layout_marginStart="@dimen/chat_message_inner_padding"
@@ -69,23 +69,23 @@
             android:textAlignment="center"
             android:gravity="center"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/text_view_accept_request"
+            app:layout_constraintStart_toEndOf="@+id/text_view_group_action_join_request_accept_action"
             app:layout_constraintTop_toTopOf="parent" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/constraint_layout_progress_bar_container"
+            android:id="@+id/layout_constraint_group_action_join_request_progress_bar_container"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:background="@color/receivedMsgBG"
             android:visibility="gone"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="@+id/text_view_accept_request"
-            app:layout_constraintEnd_toEndOf="@+id/text_view_reject_request"
+            app:layout_constraintStart_toStartOf="@+id/text_view_group_action_join_request_accept_action"
+            app:layout_constraintEnd_toEndOf="@+id/text_view_group_action_join_request_reject_action"
             tools:visibility="visible">
 
             <ProgressBar
-                android:id="@+id/progress_bar_membership_request"
+                android:id="@+id/progress_bar_group_action_join_request_request_process"
                 android:layout_width="@dimen/group_request_message_button_xy"
                 android:layout_height="@dimen/group_request_message_button_xy"
                 style="?android:attr/progressBarStyle"

@@ -205,7 +205,7 @@ internal class MessageListAdapter<ARGS : NavArgs>(
         private val binding: LayoutMessageHolderBinding
     ): RecyclerView.ViewHolder(binding.root) {
 
-        private val holderJobs: ArrayList<Job> = ArrayList(3)
+        private val holderJobs: ArrayList<Job> = ArrayList(5)
         private val disposables: ArrayList<Disposable> = ArrayList(3)
         private var currentViewState: MessageHolderViewState? = null
 
@@ -231,33 +231,47 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                 }
             }
 
-            binding.includeMessageTypeGroupActionHolder.apply {
-                includeMessageTypeGroupActionJoinRequestAdminView.apply {
-                    textViewAcceptRequest.setOnClickListener {
-                        currentViewState?.message?.let {
-                            processMemberRequest(it.sender, it.id, MessageType.MEMBER_APPROVE.toMessageType())
+            binding.includeMessageTypeGroupActionHolder.apply groupActionHolder@ {
+                includeMessageTypeGroupActionJoinRequest.apply joinRequestHolder@ {
+                    this@joinRequestHolder.textViewGroupActionJoinRequestAcceptAction.setOnClickListener {
+                        currentViewState?.message?.let { nnMessage ->
+
+                            if (nnMessage.type is MessageType.GroupAction.MemberRequest) {
+                                processMemberRequest(
+                                    nnMessage.sender,
+                                    nnMessage.id,
+                                    MessageType.GroupAction.MemberApprove
+                                )
+                            }
                         }
                     }
 
-                    textViewRejectRequest.setOnClickListener {
-                        currentViewState?.message?.let {
-                            processMemberRequest(it.sender, it.id, MessageType.MEMBER_REJECT.toMessageType())
+                    this@joinRequestHolder.textViewGroupActionJoinRequestRejectAction.setOnClickListener {
+                        currentViewState?.message?.let { nnMessage ->
+
+                            if (nnMessage.type is MessageType.GroupAction.MemberRequest) {
+                                processMemberRequest(
+                                    nnMessage.sender,
+                                    nnMessage.id,
+                                    MessageType.GroupAction.MemberReject
+                                )
+                            }
                         }
                     }
                 }
 
-                includeMessageTypeGroupActionMemberRemoval.apply {
-                    textViewDeleteGroup.setOnClickListener {
+                includeMessageTypeGroupActionMemberRemoval.apply groupActionMemberRemoval@ {
+                    this@groupActionMemberRemoval.textViewGroupActionMemberRemovalDeleteGroup.setOnClickListener {
                         deleteTribe()
                     }
                 }
             }
         }
 
-        private fun processMemberRequest(contactId: ContactId, messageId: MessageId, type: MessageType) {
+        private fun processMemberRequest(contactId: ContactId, messageId: MessageId, type: MessageType.GroupAction) {
             onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-                binding.includeMessageTypeGroupActionHolder.includeMessageTypeGroupActionJoinRequestAdminView.apply {
-                    constraintLayoutProgressBarContainer.visible
+                binding.includeMessageTypeGroupActionHolder.includeMessageTypeGroupActionJoinRequest.apply joinRequestHolder@ {
+                    this@joinRequestHolder.layoutConstraintGroupActionJoinRequestProgressBarContainer.visible
 
                     viewModel.processMemberRequest(
                         contactId,
@@ -265,20 +279,24 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                         type
                     )
 
-                    constraintLayoutProgressBarContainer.gone
+                    this@joinRequestHolder.layoutConstraintGroupActionJoinRequestProgressBarContainer.gone
                 }
+            }.let { job ->
+                holderJobs.add(job)
             }
         }
 
         private fun deleteTribe() {
             onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-                binding.includeMessageTypeGroupActionHolder.includeMessageTypeGroupActionMemberRemoval.apply {
-                    constraintLayoutProgressBarContainer.visible
+                binding.includeMessageTypeGroupActionHolder.includeMessageTypeGroupActionMemberRemoval.apply groupActionMemberRemoval@ {
+                    this@groupActionMemberRemoval.layoutConstraintGroupActionMemberRemovalProgressBarContainer.visible
 
                     viewModel.deleteTribe()
 
-                    constraintLayoutProgressBarContainer.gone
+                    this@groupActionMemberRemoval.layoutConstraintGroupActionMemberRemovalProgressBarContainer.gone
                 }
+            }.let { job ->
+                holderJobs.add(job)
             }
         }
 
