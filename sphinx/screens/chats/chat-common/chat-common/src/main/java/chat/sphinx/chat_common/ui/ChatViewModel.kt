@@ -793,7 +793,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
             if (url?.isValidLightningNodePubKey == true) {
                 url.toLightningNodePubKey()?.let { lightningNodePubKey ->
                     lightningNodePubKey.getPubKey()?.let { nnPubKey ->
-                        contactRepository.getContactByPubKey(nnPubKey).collect { contact ->
+                        contactRepository.getContactByPubKey(nnPubKey).firstOrNull()?.let { contact ->
                             if (contact == null) {
                                 chatNavigator.toAddContactDetail(lightningNodePubKey)
                             } else {
