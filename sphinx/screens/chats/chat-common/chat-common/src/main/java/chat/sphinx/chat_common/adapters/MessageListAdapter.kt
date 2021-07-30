@@ -231,9 +231,9 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                 }
             }
 
-            binding.includeMessageTypeGroupActionHolder.apply groupActionHolder@ {
-                includeMessageTypeGroupActionJoinRequest.apply joinRequestHolder@ {
-                    this@joinRequestHolder.textViewGroupActionJoinRequestAcceptAction.setOnClickListener {
+            binding.includeMessageTypeGroupActionHolder.let { holder ->
+                holder.includeMessageTypeGroupActionJoinRequest.apply {
+                    textViewGroupActionJoinRequestAcceptAction.setOnClickListener {
                         currentViewState?.message?.let { nnMessage ->
 
                             if (nnMessage.type is MessageType.GroupAction.MemberRequest) {
@@ -246,7 +246,7 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                         }
                     }
 
-                    this@joinRequestHolder.textViewGroupActionJoinRequestRejectAction.setOnClickListener {
+                    textViewGroupActionJoinRequestRejectAction.setOnClickListener {
                         currentViewState?.message?.let { nnMessage ->
 
                             if (nnMessage.type is MessageType.GroupAction.MemberRequest) {
@@ -260,8 +260,8 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                     }
                 }
 
-                includeMessageTypeGroupActionMemberRemoval.apply groupActionMemberRemoval@ {
-                    this@groupActionMemberRemoval.textViewGroupActionMemberRemovalDeleteGroup.setOnClickListener {
+                holder.includeMessageTypeGroupActionMemberRemoval.apply {
+                    textViewGroupActionMemberRemovalDeleteGroup.setOnClickListener {
                         deleteTribe()
                     }
                 }
@@ -270,8 +270,8 @@ internal class MessageListAdapter<ARGS : NavArgs>(
 
         private fun processMemberRequest(contactId: ContactId, messageId: MessageId, type: MessageType.GroupAction) {
             onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-                binding.includeMessageTypeGroupActionHolder.includeMessageTypeGroupActionJoinRequest.apply joinRequestHolder@ {
-                    this@joinRequestHolder.layoutConstraintGroupActionJoinRequestProgressBarContainer.visible
+                binding.includeMessageTypeGroupActionHolder.includeMessageTypeGroupActionJoinRequest.apply {
+                    layoutConstraintGroupActionJoinRequestProgressBarContainer.visible
 
                     viewModel.processMemberRequest(
                         contactId,
@@ -279,7 +279,7 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                         type
                     )
 
-                    this@joinRequestHolder.layoutConstraintGroupActionJoinRequestProgressBarContainer.gone
+                    layoutConstraintGroupActionJoinRequestProgressBarContainer.gone
                 }
             }.let { job ->
                 holderJobs.add(job)
@@ -288,12 +288,12 @@ internal class MessageListAdapter<ARGS : NavArgs>(
 
         private fun deleteTribe() {
             onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-                binding.includeMessageTypeGroupActionHolder.includeMessageTypeGroupActionMemberRemoval.apply groupActionMemberRemoval@ {
-                    this@groupActionMemberRemoval.layoutConstraintGroupActionMemberRemovalProgressBarContainer.visible
+                binding.includeMessageTypeGroupActionHolder.includeMessageTypeGroupActionMemberRemoval.apply {
+                    layoutConstraintGroupActionMemberRemovalProgressBarContainer.visible
 
                     viewModel.deleteTribe()
 
-                    this@groupActionMemberRemoval.layoutConstraintGroupActionMemberRemovalProgressBarContainer.gone
+                    layoutConstraintGroupActionMemberRemovalProgressBarContainer.gone
                 }
             }.let { job ->
                 holderJobs.add(job)
