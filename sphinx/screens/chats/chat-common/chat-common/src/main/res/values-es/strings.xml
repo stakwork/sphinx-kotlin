@@ -98,7 +98,7 @@
     <!-- Menu -->
     <string name="attachments_menu_cancel">CANCELAR</string>
     <string name="camera_attachment_option" tools:ignore="Typos">Camara</string>
-    <string name="library_attachment_option">Librería</string>
+    <string name="library_attachment_option">Librería de Fotos</string>
     <string name="gif_attachment_option">Gif</string>
     <string name="file_attachment_option">Archivo</string>
     <string name="paid_message_attachment_option">Mensaje Pago</string>

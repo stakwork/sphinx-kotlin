@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="menu_bottom_header_subtext">Por favor selecciona una opción</string>
+    <string name="menu_bottom_dismiss">Cerrar</string>
+    <string name="menu_bottom_cancel">Cancelar</string>
+</resources>
