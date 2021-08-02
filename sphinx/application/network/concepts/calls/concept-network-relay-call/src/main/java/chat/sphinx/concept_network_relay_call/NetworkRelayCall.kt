@@ -57,8 +57,8 @@ abstract class NetworkRelayCall: NetworkCall() {
             > relayPut(
         responseJsonClass: Class<V>,
         relayEndpoint: String,
-        requestBodyJsonClass: Class<RequestBody>,
-        requestBody: RequestBody,
+        requestBodyJsonClass: Class<RequestBody>? = null,
+        requestBody: RequestBody? = null,
         mediaType: String? = "application/json",
         additionalHeaders: Map<String, String>? = null,
         relayData: Pair<AuthorizationToken, RelayUrl>? = null,

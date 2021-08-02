@@ -35,16 +35,11 @@ import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.concept_repository_message.model.SendMessage
 import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
-import chat.sphinx.kotlin_response.LoadResponse
-import chat.sphinx.kotlin_response.Response
-import chat.sphinx.kotlin_response.ResponseError
-import chat.sphinx.kotlin_response.message
+import chat.sphinx.kotlin_response.*
 import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.logger.e
 import chat.sphinx.resources.getRandomColor
-import chat.sphinx.wrapper_chat.Chat
-import chat.sphinx.wrapper_chat.ChatName
-import chat.sphinx.wrapper_chat.isConversation
+import chat.sphinx.wrapper_chat.*
 import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
@@ -52,6 +47,7 @@ import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.lightning.getPubKey
 import chat.sphinx.wrapper_common.lightning.isValidLightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.toLightningNodePubKey
+import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessageUUID
 import chat.sphinx.wrapper_common.tribe.isValidTribeJoinLink
 import chat.sphinx.wrapper_common.tribe.toTribeJoinLink
@@ -72,6 +68,7 @@ import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_media_cache.MediaCacheHandler
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
+import io.matthewnelson.concept_views.viewstate.value
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
@@ -146,6 +143,11 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                     )
                 )
 
+                chat?.let { nnChat ->
+                    if (nnChat.isPrivateTribe()) {
+                        handleDisabledFooterState(nnChat)
+                    }
+                }
             }
         }.stateIn(
             viewModelScope,
@@ -180,6 +182,29 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         delay(25L)
 
         return chat!!
+    }
+
+    private fun handleDisabledFooterState(chat: Chat) {
+        if (chat.status.isPending()) {
+            viewModelScope.launch(mainImmediate) {
+                submitSideEffect(
+                    ChatSideEffect.Notify(
+                        app.getString(R.string.waiting_for_admin_approval),
+                        false
+                    )
+                )
+            }
+        }
+
+        if (!chat.status.isApproved()) {
+            footerViewStateContainer.updateViewState(
+                FooterViewState.Disabled
+            )
+        } else if (chat.status.isApproved() && footerViewStateContainer.value == FooterViewState.Disabled) {
+            footerViewStateContainer.updateViewState(
+                FooterViewState.Default
+            )
+        }
     }
 
     abstract suspend fun getInitialHolderViewStateForReceivedMessage(
@@ -267,7 +292,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                                 },
                                 initialHolder = when {
                                     isDeleted ||
-                                    message.type.isGroupAction() -> {
+                                            message.type.isGroupAction() -> {
                                         InitialHolderViewState.None
                                     }
                                     else -> {
@@ -436,7 +461,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         override fun updateViewState(viewState: AttachmentSendViewState) {
             if (viewState is AttachmentSendViewState.Preview) {
 
-                // Only delete the previous file in the event that a new pic is choosen
+                // Only delete the previous file in the event that a new pic is chosen
                 // to send when one is currently being previewed.
                 val current = viewStateFlow.value
                 if (current is AttachmentSendViewState.Preview) {
@@ -450,7 +475,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                 }
             } else if (viewState is AttachmentSendViewState.PreviewGiphy) {
 
-                // Only delete the previous file in the event that a new pic is choosen
+                // Only delete the previous file in the event that a new pic is chosen
                 // to send when one is currently being previewed.
                 val current = viewStateFlow.value
                 if (current is AttachmentSendViewState.Preview) {
@@ -819,4 +844,12 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 
         }
     }
+    
+    open suspend fun processMemberRequest(
+        contactId: ContactId,
+        messageId: MessageId,
+        type: MessageType,
+    ) {}
+
+    open suspend fun deleteTribe() {}
 }

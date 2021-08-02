@@ -17,7 +17,7 @@
         android:text="@string/sign_up_name_text_view"
         android:textColor="@color/secondaryText"
         android:fontFamily="@font/roboto_regular"
-        android:textSize="@dimen/sign_up_name_text_view_text_size"
+        android:textSize="@dimen/on_board_name_text_view_text_size"
         android:layout_marginBottom="10dp"
         app:layout_constraintBottom_toTopOf="@+id/constraint_sign_up_name_edit_text_content"
         app:layout_constraintStart_toStartOf="parent"
@@ -26,13 +26,13 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/constraint_sign_up_name_edit_text_content"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/sign_up_edit_text_height"
+        android:layout_height="@dimen/on_board_edit_text_height"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         android:layout_marginHorizontal="@dimen/default_double_layout_margin"
-        android:background="@drawable/edit_text_sign_up_bordered_rad_48">
+        android:background="@drawable/background_button_transparent_bordered">
 
         <androidx.appcompat.widget.AppCompatEditText
             android:id="@+id/sign_up_name_edit_text"
@@ -41,7 +41,7 @@
             android:textColor="@color/text"
             android:fontFamily="@font/roboto_regular"
             android:inputType="textVisiblePassword|textCapWords"
-            android:textSize="@dimen/sign_up_edit_text_text_size"
+            android:textSize="@dimen/on_board_edit_text_text_size"
             android:layout_marginHorizontal="@dimen/default_double_layout_margin"
             android:singleLine="true"
             android:gravity="center"
@@ -57,12 +57,12 @@
 
     <ProgressBar
         android:id="@+id/sign_up_name_progress_bar"
-        android:layout_width="@dimen/sign_up_name_progress_bar_xy"
-        android:layout_height="@dimen/sign_up_name_progress_bar_xy"
+        android:layout_width="@dimen/on_board_name_progress_bar_xy"
+        android:layout_height="@dimen/on_board_name_progress_bar_xy"
         style="?android:attr/progressBarStyle"
         android:indeterminateTint="@android:color/white"
         android:indeterminate="true"
-        android:layout_marginTop="@dimen/sign_up_name_progress_bar_top_margin"
+        android:layout_marginTop="@dimen/on_board_name_progress_bar_top_margin"
         android:visibility="gone"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -70,18 +70,18 @@
 
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/button_next"
-        android:layout_width="@dimen/sign_up_next_button_width"
-        android:layout_height="@dimen/sign_up_next_button_height"
+        android:layout_width="@dimen/on_board_next_button_width"
+        android:layout_height="@dimen/on_board_next_button_height"
         android:textAllCaps="true"
         android:gravity="center"
         android:fontFamily="@font/montserrat_semi_bold"
-        android:text="@string/sign_up_next_button"
-        android:textSize="@dimen/sign_up_sphinx_ready_button_text_size"
+        android:text="@string/on_board_next_button"
+        android:textSize="@dimen/on_board_sphinx_ready_button_text_size"
         android:textColor="@android:color/white"
         android:background="@drawable/button_background_white_rad_48"
         android:backgroundTint="@color/primaryBlue"
         android:layout_marginRight="@dimen/default_double_layout_margin"
-        android:layout_marginBottom="@dimen/sign_up_button_bottom_margin"
+        android:layout_marginBottom="@dimen/on_board_button_bottom_margin"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 

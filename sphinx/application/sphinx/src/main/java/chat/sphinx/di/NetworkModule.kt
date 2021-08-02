@@ -44,6 +44,7 @@ import io.matthewnelson.concept_authentication.data.AuthenticationStorage
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_encryption_key.EncryptionKeyHandler
 import io.matthewnelson.feature_authentication_core.AuthenticationCoreManager
+import kotlinx.coroutines.CoroutineScope
 import javax.inject.Singleton
 
 @Module
@@ -54,6 +55,7 @@ object NetworkModule {
     @Singleton
     fun provideTorManagerAndroid(
         application: Application,
+        applicationScope: CoroutineScope,
         authenticationStorage: AuthenticationStorage,
         buildConfigDebug: BuildConfigDebug,
         buildConfigVersionCode: BuildConfigVersionCode,
@@ -62,6 +64,7 @@ object NetworkModule {
     ): TorManagerAndroid =
         TorManagerAndroid(
             application,
+            applicationScope,
             authenticationStorage,
             buildConfigDebug,
             buildConfigVersionCode,

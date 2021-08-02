@@ -11,11 +11,12 @@ import chat.sphinx.concept_repository_lightning.LightningRepository
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
+import chat.sphinx.onboard_common.OnBoardStepHandler
 import chat.sphinx.onboard_ready.navigation.OnBoardReadyNavigator
 import chat.sphinx.wrapper_chat.ChatHost
 import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
-import chat.sphinx.wrapper_common.lightning.LightningRouteHint
+import chat.sphinx.wrapper_common.lightning.toLightningRouteHint
 import chat.sphinx.wrapper_common.tribe.toTribeJoinLink
 import chat.sphinx.wrapper_contact.ContactAlias
 import chat.sphinx.wrapper_lightning.NodeBalanceAll
@@ -33,31 +34,42 @@ import javax.inject.Inject
 internal class OnBoardReadyViewModel @Inject constructor(
     dispatchers: CoroutineDispatchers,
     private val navigator: OnBoardReadyNavigator,
+
     private val contactRepository: ContactRepository,
     private val lightningRepository: LightningRepository,
     private val chatRepository: ChatRepository,
+
     private val networkQueryChat: NetworkQueryChat,
     private val networkQueryInvite: NetworkQueryInvite,
+
+    private val onBoardStepHandler: OnBoardStepHandler,
 ): SideEffectViewModel<
         Context,
         OnBoardReadySideEffect,
         OnBoardReadyViewState
         >(dispatchers, OnBoardReadyViewState.Idle)
 {
-    fun saveInviterAndFinish(nickname: String,
-                             pubkey: String,
-                             routeHint: String?,
-                             inviteString: String? = null) {
+
+    companion object {
+        private const val PLANET_SPHINX_TRIBE = "sphinx.chat://?action=tribe&uuid=X3IWAiAW5vNrtOX5TLEJzqNWWr3rrUaXUwaqsfUXRMGNF7IWOHroTGbD4Gn2_rFuRZcsER0tZkrLw3sMnzj4RFAk_sx0&host=tribes.sphinx.chat"
+    }
+
+    fun saveInviterAndFinish(
+        nickname: String,
+        pubkey: String,
+        routeHint: String?,
+        inviteString: String? = null
+    ) {
 
         viewModelScope.launch(mainImmediate) {
             val alias = ContactAlias(nickname)
             val pubKey = LightningNodePubKey(pubkey)
-            val routeHint = routeHint?.let { LightningRouteHint(it) }
+            val lightningRouteHint = routeHint?.toLightningRouteHint()
 
             contactRepository.createContact(
                 alias,
                 pubKey,
-                routeHint
+                lightningRouteHint
             ).collect { loadResponse ->
                 @Exhaustive
                 when (loadResponse) {
@@ -98,34 +110,28 @@ internal class OnBoardReadyViewModel @Inject constructor(
     }
 
     fun loadAndJoinDefaultTribeData() {
-        val planetSphinxTribeQuery = "sphinx.chat://?action=tribe&uuid=X3IWAiAW5vNrtOX5TLEJzqNWWr3rrUaXUwaqsfUXRMGNF7IWOHroTGbD4Gn2_rFuRZcsER0tZkrLw3sMnzj4RFAk_sx0&host=tribes.sphinx.chat"
+        viewModelScope.launch(mainImmediate) {
+            PLANET_SPHINX_TRIBE.toTribeJoinLink()?.let { tribeJoinLink ->
 
-        planetSphinxTribeQuery.toTribeJoinLink()?.let { tribeJoinLink ->
-            viewModelScope.launch(mainImmediate) {
                 networkQueryChat.getTribeInfo(
                     ChatHost(tribeJoinLink.tribeHost),
                     ChatUUID(tribeJoinLink.tribeUUID)
                 ).collect { loadResponse ->
                     when (loadResponse) {
                         is LoadResponse.Loading -> {}
-
                         is Response.Error -> {
+                            // TODO: Fix network call and handle error properly
                             goToDashboard()
                         }
                         is Response.Success -> {
-                            if (loadResponse.value is TribeDto) {
-                                val tribeInfo = loadResponse.value
-                                tribeInfo?.set(tribeJoinLink.tribeHost, tribeJoinLink.tribeUUID)
-                                joinDefaultTribe(tribeInfo)
-                            } else {
-                                goToDashboard()
-                            }
+                            val tribeInfo = loadResponse.value
+                            tribeInfo.set(tribeJoinLink.tribeHost, tribeJoinLink.tribeUUID)
+                            joinDefaultTribe(tribeInfo)
                         }
                     }
                 }
-            }
-        } ?: run {
-            goToDashboard()
+
+            } ?: goToDashboard()
         }
     }
 
@@ -149,8 +155,9 @@ internal class OnBoardReadyViewModel @Inject constructor(
         }
     }
 
-    private fun goToDashboard() {
+    private suspend fun goToDashboard() {
         viewModelScope.launch(mainImmediate) {
+            onBoardStepHandler.finishOnBoardSteps()
             navigator.toDashboardScreen()
         }
     }

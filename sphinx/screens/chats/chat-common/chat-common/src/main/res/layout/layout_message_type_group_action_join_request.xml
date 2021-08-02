@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/message_type_group_join_request_holder_height"
+    android:visibility="gone"
+    tools:visibility="visible">
+
+
+    <!-- TODO: Remove unnecessary inner layout -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_group_action_join_request_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/background_group_request_message"
+        android:paddingHorizontal="@dimen/default_header_headline_margin_horizontal"
+        android:paddingVertical="@dimen/default_header_headline_margin_vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_group_action_join_request_message"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="10dp"
+            android:fontFamily="@font/roboto_regular"
+            android:gravity="center"
+            android:textAlignment="center"
+            android:textColor="@color/text"
+            android:textSize="@dimen/default_text_size_sub_headline"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/text_view_group_action_join_request_accept_action"
+            app:layout_constraintHorizontal_chainStyle="packed"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="CypherPoet wants to\n join the group" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_group_action_join_request_accept_action"
+            android:layout_width="@dimen/group_request_message_button_xy"
+            android:layout_height="@dimen/group_request_message_button_xy"
+            android:layout_marginStart="@dimen/chat_message_inner_padding"
+            android:background="@drawable/circular_button"
+            android:backgroundTint="@color/primaryGreen"
+            android:fontFamily="@font/material_icons_regular"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/default_text_size_tap_target_material_icon"
+            android:text="@string/material_icon_name_group_action_accept_join_request"
+            android:textAlignment="center"
+            android:gravity="center"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/text_view_group_action_join_request_message"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_group_action_join_request_reject_action"
+            android:layout_width="@dimen/group_request_message_button_xy"
+            android:layout_height="@dimen/group_request_message_button_xy"
+            android:layout_marginStart="@dimen/chat_message_inner_padding"
+            android:background="@drawable/circular_button"
+            android:backgroundTint="@color/badgeRed"
+            android:fontFamily="@font/material_icons_regular"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/default_text_size_tap_target_material_icon"
+            android:text="@string/material_icon_name_group_action_reject_join_request"
+            android:textAlignment="center"
+            android:gravity="center"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/text_view_group_action_join_request_accept_action"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layout_constraint_group_action_join_request_progress_bar_container"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:background="@color/receivedMsgBG"
+            android:visibility="gone"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/text_view_group_action_join_request_accept_action"
+            app:layout_constraintEnd_toEndOf="@+id/text_view_group_action_join_request_reject_action"
+            tools:visibility="visible">
+
+            <ProgressBar
+                android:id="@+id/progress_bar_group_action_join_request_request_process"
+                android:layout_width="@dimen/group_request_message_button_xy"
+                android:layout_height="@dimen/group_request_message_button_xy"
+                style="?android:attr/progressBarStyle"
+                android:indeterminateTint="@android:color/white"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                android:indeterminate="true" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

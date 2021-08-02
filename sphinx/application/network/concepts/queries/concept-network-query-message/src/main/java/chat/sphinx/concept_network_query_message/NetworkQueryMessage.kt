@@ -1,13 +1,16 @@
 package chat.sphinx.concept_network_query_message
 
 import chat.sphinx.concept_network_query_message.model.*
-import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.kotlin_response.LoadResponse
+import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.wrapper_common.dashboard.ChatId
+import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessagePagination
 import chat.sphinx.wrapper_common.message.MessageUUID
+import chat.sphinx.wrapper_message.MessageStatus
+import chat.sphinx.wrapper_message.MessageType
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
 import kotlinx.coroutines.flow.Flow
@@ -68,4 +71,12 @@ abstract class NetworkQueryMessage {
         messageId: MessageId,
         relayData: Pair<AuthorizationToken, RelayUrl>? = null,
     ): Flow<LoadResponse<MessageDto, ResponseError>>
+
+    abstract fun processMemberRequest(
+        contactId: ContactId,
+        messageId: MessageId,
+        type: MessageType,
+        relayData: Pair<AuthorizationToken, RelayUrl>? = null
+    ): Flow<LoadResponse<PutMemberResponseDto, ResponseError>>
+
 }

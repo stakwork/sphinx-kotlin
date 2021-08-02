@@ -40,8 +40,6 @@
     <string name="reply_message_media_content_description">Contenido del mensaje original</string>
     <string name="reply_message_close_button_content_description">Cerrar</string>
 
-    <!-- Group Actions -->
-    <string name="message_action_group_kick">El administrador te ha\n eliminado de esta tribu</string>
 
     <!--  Purchase Status Labels: Paid Message Details  -->
     <string name="purchase_status_label_paid_message_details_pending">Pendiente</string>
@@ -58,13 +56,20 @@
     <string name="purchase_status_label_paid_message_sent_status_default">Desconocido</string>
 
 
-    <!--  Group Action Indicator Labels  -->
-    <string name="group_join_announcement_tribe">%1$s se ha unido a la tribu</string>
-    <string name="group_join_announcement_group">%1$s se ha unido al grupo</string>
-    <string name="group_leave_announcement_tribe">%1$s ha abandonado la tribu</string>
-    <string name="group_leave_announcement_group">%1$s ha abandonado el grupo</string>
-    <string name="group_kick_announcement_group_user_facing">El administrador te ha eliminado de este grupo</string>
-    <string name="group_kick_announcement_tribe_user_facing">El administrador te ha eliminado de esta tribu</string>
+    <!--  Group Action  -->
+    <string name="tribe_request_admin_side">%1$s desea\nunirse a la tribu</string>
+    <string name="tribe_request_approved_admin_side">Has aprobado la\nla solicitud de %1$s</string>
+    <string name="tribe_request_rejected_admin_side">Has denegado la\nla solicitud de %1$s</string>
+    <string name="tribe_request_rejected_member_side">El administrador\nha denegado tu solicitud</string>
+    <string name="tribe_join_announcement">%1$s se ha unido a la tribu</string>
+    <string name="group_join_announcement">%1$s se ha unido al grupo</string>
+    <string name="tribe_leave_announcement">%1$s ha abandonado la tribu</string>
+    <string name="group_leave_announcement">%1$s ha abandonado el grupo</string>
+    <string name="tribe_deleted_announcement">El administrador ha\neliminado esta tribu</string>
+    <string name="group_kick_announcement_member_side">El administrador te ha\neliminado de este grupo</string>
+    <string name="tribe_kick_announcement_member_side">El administrador te ha\neliminado de esta tribu</string>
+    <string name="tribe_welcome_announcement_member_side">¡Bienvenido! Ya eres miembro de la tribu</string>
+    <string name="tribe_deleted_announcement_button_delete">Eliminar Tribu</string>
 
     <!-- Selected Item Menu Labels -->
     <string name="selected_message_menu_item_boost">Boost</string>
@@ -98,6 +103,10 @@
     <string name="paid_message_attachment_option">Mensaje Pago</string>
     <string name="request_attachment_option">Solicitar</string>
     <string name="send_attachment_option">Enviar</string>
+    <string name="failed_to_approve_member">No se ha podido aprobar la solicitud</string>
+    <string name="failed_to_reject_member">No se ha podido denegar la solicitud</string>
+    <string name="waiting_for_admin_approval">Esperando la aprobación del administrador</string>
+    <string name="failed_to_delete_tribe">No se ha podido eliminar la tribu</string>
 
     <string name="podcast_boost_label">Boost!</string>
 </resources>

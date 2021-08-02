@@ -1,5 +1,14 @@
 # ChangeLog
 
+## Version 1.0.0-alpha14 (2021-07-30)
+ - Adds ability to approve/deny member join requests in Tribes
+ - Fixes bug that was attempting to fetch podcast feed when url was empty
+ - Refactors the On Board process
+     - User picks up where they left off if initial on boarding was incomplete.
+     - Imported RelayUrl with a scheme of `http` requires user confirmation.
+     - Sensitive information temporarily stored until after a user generates their private/public
+       key pair now uses Encrypted Shared Preferences.
+
 ## Version 1.0.0-alpha13 (2021-07-28)
  - Adds ability to edit a Tribe
  - Displays Podcast Boosts (instead of showing the raw json)

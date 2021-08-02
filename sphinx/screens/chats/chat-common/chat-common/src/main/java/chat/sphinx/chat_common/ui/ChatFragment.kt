@@ -215,7 +215,6 @@ abstract class ChatFragment<
 
         menuBinding.viewChatMenuInputLock.setOnClickListener {
             viewModel.updateViewState(ChatMenuViewState.Closed)
-//            viewModel
         }
     }
 
@@ -586,6 +585,11 @@ abstract class ChatFragment<
                     imageViewChatFooterMicrophone.goneIfFalse(viewState.showRecordAudioIcon)
                     textViewChatFooterSend.goneIfFalse(viewState.showSendIcon)
                     textViewChatFooterAttachment.goneIfFalse(viewState.showMenuIcon)
+
+                    editTextChatFooter.isEnabled = viewState.messagingEnabled
+                    textViewChatFooterSend.isEnabled = viewState.messagingEnabled
+                    textViewChatFooterAttachment.isEnabled = viewState.messagingEnabled
+                    root.alpha = if (viewState.messagingEnabled) 1.0f else 0.4f
                 }
             }
         }

@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="side_effect_generate_token_failed">Generate token failed</string>
-    <string name="sign_up_get_started_button">Get Started</string>
-    <string name="sign_up_friend_message">A message from your friend…</string>
-    <string name="sign_up_next_button">Next</string>
+    <string name="on_board_relay_url_http_message">The Relay URL to be saved is using \'http\'. Network traffic will not be encrypted. Https is strongly recommended. Please confirm the URL Scheme to use.</string>
+    <string name="on_board_relay_url_http_negative_keep_http">http</string>
+    <string name="on_board_relay_url_http_positive_change_to_https">https</string>
 </resources>

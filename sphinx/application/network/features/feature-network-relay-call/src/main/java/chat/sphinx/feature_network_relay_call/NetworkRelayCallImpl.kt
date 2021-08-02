@@ -18,13 +18,18 @@ import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
 import com.squareup.moshi.Moshi
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import okhttp3.*
-import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.internal.EMPTY_REQUEST
 import java.io.IOException
 import java.util.concurrent.TimeUnit
@@ -133,8 +138,8 @@ class NetworkRelayCallImpl(
     override fun <T: Any, V: Any> put(
         url: String,
         responseJsonClass: Class<T>,
-        requestBodyJsonClass: Class<V>,
-        requestBody: V,
+        requestBodyJsonClass: Class<V>?,
+        requestBody: V?,
         mediaType: String?,
         headers: Map<String, String>?
     ): Flow<LoadResponse<T, ResponseError>> = flow {
@@ -144,12 +149,15 @@ class NetworkRelayCallImpl(
         try {
             val requestBuilder = buildRequest(url, headers)
 
-            val requestBodyJson: String = moshi
-                .requestBodyToJson(dispatchers, requestBodyJsonClass, requestBody)
+            val requestBodyJson: String? = if (requestBody == null || requestBodyJsonClass == null) {
+                null
+            } else {
+                moshi.requestBodyToJson(dispatchers, requestBodyJsonClass, requestBody)
+            }
 
-            val reqBody = requestBodyJson.toRequestBody(mediaType?.toMediaType())
+            val reqBody = requestBodyJson?.toRequestBody(mediaType?.toMediaType())
 
-            val response = call(responseJsonClass, requestBuilder.put(reqBody).build())
+            val response = call(responseJsonClass, requestBuilder.put(reqBody ?: EMPTY_REQUEST).build())
 
             emit(Response.Success(response))
         } catch (e: Exception) {
@@ -314,8 +322,8 @@ class NetworkRelayCallImpl(
     override fun <T: Any, RequestBody: Any, V: RelayResponse<T>> relayPut(
         responseJsonClass: Class<V>,
         relayEndpoint: String,
-        requestBodyJsonClass: Class<RequestBody>,
-        requestBody: RequestBody,
+        requestBodyJsonClass: Class<RequestBody>?,
+        requestBody: RequestBody?,
         mediaType: String?,
         additionalHeaders: Map<String, String>?,
         relayData: Pair<AuthorizationToken, RelayUrl>?

@@ -21,7 +21,14 @@ import chat.sphinx.chat_common.ui.viewstate.selected.SelectedMessageViewState
 import chat.sphinx.chat_common.util.SphinxUrlSpan
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
+import chat.sphinx.wrapper_common.dashboard.ContactId
+import chat.sphinx.wrapper_common.message.MessageId
+import chat.sphinx.wrapper_message.MessageType
+import chat.sphinx.wrapper_message.toMessageType
 import chat.sphinx.wrapper_view.Px
+import io.matthewnelson.android_feature_screens.util.gone
+import io.matthewnelson.android_feature_screens.util.goneIfFalse
+import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
@@ -89,6 +96,7 @@ internal class MessageListAdapter<ARGS : NavArgs>(
 
     override fun onStart(owner: LifecycleOwner) {
         super.onStart(owner)
+
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.messageHolderViewStateFlow.collect { list ->
                 if (messages.isEmpty()) {
@@ -199,7 +207,7 @@ internal class MessageListAdapter<ARGS : NavArgs>(
         private val binding: LayoutMessageHolderBinding
     ): RecyclerView.ViewHolder(binding.root) {
 
-        private val holderJobs: ArrayList<Job> = ArrayList(3)
+        private val holderJobs: ArrayList<Job> = ArrayList(5)
         private val disposables: ArrayList<Disposable> = ArrayList(3)
         private var currentViewState: MessageHolderViewState? = null
 
@@ -234,6 +242,74 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                         viewModel.goToLightningNodePubKeyDetailScreen(url)
                     }
                 }
+            }
+
+            binding.includeMessageTypeGroupActionHolder.let { holder ->
+                holder.includeMessageTypeGroupActionJoinRequest.apply {
+                    textViewGroupActionJoinRequestAcceptAction.setOnClickListener {
+                        currentViewState?.message?.let { nnMessage ->
+
+                            if (nnMessage.type is MessageType.GroupAction.MemberRequest) {
+                                processMemberRequest(
+                                    nnMessage.sender,
+                                    nnMessage.id,
+                                    MessageType.GroupAction.MemberApprove
+                                )
+                            }
+                        }
+                    }
+
+                    textViewGroupActionJoinRequestRejectAction.setOnClickListener {
+                        currentViewState?.message?.let { nnMessage ->
+
+                            if (nnMessage.type is MessageType.GroupAction.MemberRequest) {
+                                processMemberRequest(
+                                    nnMessage.sender,
+                                    nnMessage.id,
+                                    MessageType.GroupAction.MemberReject
+                                )
+                            }
+                        }
+                    }
+                }
+
+                holder.includeMessageTypeGroupActionMemberRemoval.apply {
+                    textViewGroupActionMemberRemovalDeleteGroup.setOnClickListener {
+                        deleteTribe()
+                    }
+                }
+            }
+        }
+
+        private fun processMemberRequest(contactId: ContactId, messageId: MessageId, type: MessageType.GroupAction) {
+            onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                binding.includeMessageTypeGroupActionHolder.includeMessageTypeGroupActionJoinRequest.apply {
+                    layoutConstraintGroupActionJoinRequestProgressBarContainer.visible
+
+                    viewModel.processMemberRequest(
+                        contactId,
+                        messageId,
+                        type
+                    )
+
+                    layoutConstraintGroupActionJoinRequestProgressBarContainer.gone
+                }
+            }.let { job ->
+                holderJobs.add(job)
+            }
+        }
+
+        private fun deleteTribe() {
+            onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                binding.includeMessageTypeGroupActionHolder.includeMessageTypeGroupActionMemberRemoval.apply {
+                    layoutConstraintGroupActionMemberRemovalProgressBarContainer.visible
+
+                    viewModel.deleteTribe()
+
+                    layoutConstraintGroupActionMemberRemovalProgressBarContainer.gone
+                }
+            }.let { job ->
+                holderJobs.add(job)
             }
         }
 

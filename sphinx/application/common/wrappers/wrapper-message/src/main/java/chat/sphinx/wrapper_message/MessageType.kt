@@ -156,7 +156,7 @@ inline fun MessageType.isQueryResponse(): Boolean =
  * */
 @Suppress("NOTHING_TO_INLINE")
 inline fun Int.toMessageType(): MessageType =
-    when (this) {
+        when (this) {
         MessageType.MESSAGE -> {
             MessageType.Message
         }
@@ -538,7 +538,7 @@ sealed class MessageType {
                 get() = CAN_NOT_CONTAIN_MEDIA
 
             override val show: Boolean
-                get() = DO_NOT_SHOW
+                get() = SHOW
 
             override val value: Int
                 get() = GROUP_KICK
@@ -549,7 +549,7 @@ sealed class MessageType {
                 get() = CAN_NOT_CONTAIN_MEDIA
 
             override val show: Boolean
-                get() = DO_NOT_SHOW
+                get() = SHOW
 
             override val value: Int
                 get() = MEMBER_REQUEST
@@ -560,7 +560,7 @@ sealed class MessageType {
                 get() = CAN_NOT_CONTAIN_MEDIA
 
             override val show: Boolean
-                get() = DO_NOT_SHOW
+                get() = SHOW
 
             override val value: Int
                 get() = MEMBER_APPROVE
@@ -571,7 +571,7 @@ sealed class MessageType {
                 get() = CAN_NOT_CONTAIN_MEDIA
 
             override val show: Boolean
-                get() = DO_NOT_SHOW
+                get() = SHOW
 
             override val value: Int
                 get() = MEMBER_REJECT
@@ -582,7 +582,7 @@ sealed class MessageType {
                 get() = CAN_NOT_CONTAIN_MEDIA
 
             override val show: Boolean
-                get() = DO_NOT_SHOW
+                get() = SHOW
 
             override val value: Int
                 get() = TRIBE_DELETE
