@@ -7,7 +7,6 @@ import android.os.Build
 import android.util.Log
 import android.webkit.MimeTypeMap
 import androidx.annotation.CallSuper
-import androidx.core.content.ContextCompat.startActivity
 import androidx.core.view.inputmethod.InputConnectionCompat
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.SavedStateHandle
@@ -51,7 +50,6 @@ import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessageUUID
 import chat.sphinx.wrapper_common.message.SphinxCallLink
-import chat.sphinx.wrapper_common.message.toSphinxCallLink
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message_media.MediaType
@@ -75,8 +73,12 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.jitsi.meet.sdk.JitsiMeetActivity
+import org.jitsi.meet.sdk.JitsiMeetConferenceOptions
+import org.jitsi.meet.sdk.JitsiMeetUserInfo
 import java.io.File
 import java.io.InputStream
+import java.net.URL
 
 
 @JvmSynthetic
@@ -218,11 +220,8 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         message: Message
     ): InitialHolderViewState
 
-    internal val messageHolderViewStateFlow: StateFlow<List<MessageHolderViewState>> = flow {
-        val chat = getChat()
-        val chatName = getChatNameIfNull()
-
-        val owner: Contact = contactRepository.accountOwner.value.let { contact ->
+    private suspend fun getOwner(): Contact {
+        return contactRepository.accountOwner.value.let { contact ->
             if (contact != null) {
                 contact
             } else {
@@ -234,12 +233,19 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                             throw Exception()
                         }
                     }
-                } catch (e: Exception) {}
+                } catch (e: Exception) {
+                }
                 delay(25L)
 
                 resolvedOwner!!
             }
         }
+    }
+
+    internal val messageHolderViewStateFlow: StateFlow<List<MessageHolderViewState>> = flow {
+        val chat = getChat()
+        val chatName = getChatNameIfNull()
+        val owner = getOwner()
 
         messageRepository.getAllMessagesToShowByChatId(chat.id).distinctUntilChanged().collect { messages ->
             val newList = ArrayList<MessageHolderViewState>(messages.size)
@@ -830,17 +836,30 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     }
 
     fun joinCall(message: Message, audioOnly: Boolean) {
-        message?.retrieveSphinxCallLink()?.let { callLink ->
-            val url = if (!callLink.startAudioOnly && audioOnly) {
-                "${callLink.value}#${SphinxCallLink.AUDIO_ONLY_PARAM}=true"
-            } else {
-                callLink.value
-            }
+        viewModelScope.launch(mainImmediate) {
+            message?.retrieveSphinxCallLink()?.let { callLink ->
+                val owner = getOwner()
 
-            val i = Intent(Intent.ACTION_VIEW)
-            i.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-            i.data = Uri.parse(url)
-            app.startActivity(i)
+                val userInfo = JitsiMeetUserInfo()
+                userInfo.displayName = owner.alias?.value ?: ""
+                userInfo.avatar = URL(owner.photoUrl?.value ?: "")
+
+                val options = JitsiMeetConferenceOptions.Builder()
+                    .setServerURL(URL(callLink.callServer))
+                    .setRoom(callLink.callRoom)
+                    .setAudioMuted(false)
+                    .setVideoMuted(false)
+                    .setAudioOnly(audioOnly)
+                    .setWelcomePageEnabled(false)
+                    .setUserInfo(userInfo)
+                    .build()
+
+                val intent = Intent(app, JitsiMeetActivity::class.java)
+                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                intent.action = "org.jitsi.meet.CONFERENCE"
+                intent.putExtra("JitsiMeetConferenceOptions", options)
+                app.startActivity(intent)
+            }
         }
     }
 

@@ -117,6 +117,9 @@ ext.deps = [
     viewBindingDelegateNoReflect: "com.github.kirich1409:viewbindingpropertydelegate-noreflection:1.4.7",
     giphy: [
             sdk: "com.giphy.sdk:ui:2.1.2"
+    ],
+    jitsi: [
+            sdk: "org.jitsi.react:jitsi-meet-sdk:2.+"
     ]
 ]
 

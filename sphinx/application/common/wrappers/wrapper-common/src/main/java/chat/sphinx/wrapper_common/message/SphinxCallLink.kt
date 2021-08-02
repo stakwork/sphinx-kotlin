@@ -40,6 +40,12 @@ value class SphinxCallLink(val value: String) {
     inline val startAudioOnly : Boolean
         get() = getParameter(AUDIO_ONLY_PARAM).toBoolean()
 
+    inline val callServer : String
+        get() = value.substringBefore("sphinx.call")
+
+    inline val callRoom : String
+        get() = "sphinx.call." + value.substringAfter("sphinx.call.").substringBefore("#")
+
     fun getParameter(k: String): String? {
         val parameters = value.substringAfter("#").split("&")
         for (parameter in parameters) {
