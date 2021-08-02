@@ -24,7 +24,7 @@ abstract class ChatNavigator(
     abstract suspend fun toJoinTribeDetail(tribeLink: TribeJoinLink)
 
     @JvmSynthetic
-    internal suspend fun popBackStack() {
+    suspend fun popBackStack() {
         navigationDriver.submitNavigationRequest(
             PopBackStack()
         )
