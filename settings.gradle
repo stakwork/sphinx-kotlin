@@ -135,6 +135,7 @@ include ':sphinx:service:features:media-player:feature-service-media-player-andr
 include ':sphinx:service:concepts:concept-service-notification'
 include ':sphinx:service:features:notifications:feature-service-notification-empty'
 include ':sphinx:service:features:notifications:feature-service-notification-firebase'
+include ':sphinx:service:features:feature-sphinx-service'
 
 // Testing
 include ':sphinx:test:test-network-query'
