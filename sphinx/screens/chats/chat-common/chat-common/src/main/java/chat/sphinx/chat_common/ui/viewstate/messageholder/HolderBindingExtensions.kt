@@ -1,7 +1,6 @@
 package chat.sphinx.chat_common.ui.viewstate.messageholder
 
 import android.view.Gravity
-import android.view.View
 import android.widget.ImageView
 import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
@@ -13,7 +12,7 @@ import app.cash.exhaustive.Exhaustive
 import chat.sphinx.chat_common.R
 import chat.sphinx.chat_common.databinding.LayoutMessageHolderBinding
 import chat.sphinx.chat_common.util.SphinxLinkify
-import chat.sphinx.chat_common.util.SphinxLongClickUrlSpan
+import chat.sphinx.chat_common.util.SphinxUrlSpan
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
@@ -52,8 +51,7 @@ internal fun LayoutMessageHolderBinding.setView(
     memeServerTokenHandler: MemeServerTokenHandler,
     recyclerViewWidth: Px,
     viewState: MessageHolderViewState,
-    onLongClickListener: View.OnLongClickListener? = null,
-    onSphinxClickListener: SphinxLongClickUrlSpan.OnClickListener? = null
+    onSphinxInteractionListener: SphinxUrlSpan.OnInteractionListener? = null
 ) {
     for (job in holderJobs) {
         job.cancel()
@@ -139,7 +137,7 @@ internal fun LayoutMessageHolderBinding.setView(
                 }
             }
             setUnsupportedMessageTypeLayout(viewState.unsupportedMessageType)
-            setBubbleMessageLayout(viewState.bubbleMessage, onLongClickListener, onSphinxClickListener)
+            setBubbleMessageLayout(viewState.bubbleMessage, onSphinxInteractionListener)
             setBubbleDirectPaymentLayout(viewState.bubbleDirectPayment)
             setBubbleDirectPaymentLayout(viewState.bubbleDirectPayment)
             setBubblePodcastBoost(viewState.bubblePodcastBoost)
@@ -474,8 +472,7 @@ internal inline fun LayoutMessageHolderBinding.setDeletedMessageLayout(
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun LayoutMessageHolderBinding.setBubbleMessageLayout(
     message: LayoutState.Bubble.ContainerThird.Message?,
-    onLongClickListener: View.OnLongClickListener?,
-    onSphinxClickListener: SphinxLongClickUrlSpan.OnClickListener?
+    onSphinxInteractionListener: SphinxUrlSpan.OnInteractionListener?
 ) {
     includeMessageHolderBubble.textViewMessageText.apply {
         if (message == null) {
@@ -483,10 +480,9 @@ internal inline fun LayoutMessageHolderBinding.setBubbleMessageLayout(
         } else {
             visible
             text = message.text
-            onLongClickListener?.let { longClickListener ->
-                onSphinxClickListener?.let { clickListener ->
-                    SphinxLinkify.addLinks(this, SphinxLinkify.ALL, longClickListener, clickListener)
-                }
+            onSphinxInteractionListener?.let { sphinxInteractionListener ->
+                SphinxLinkify.addLinks(this, SphinxLinkify.ALL, sphinxInteractionListener)
+                setOnLongClickListener(sphinxInteractionListener)
             }
         }
     }
