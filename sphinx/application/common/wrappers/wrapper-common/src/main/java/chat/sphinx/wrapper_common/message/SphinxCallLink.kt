@@ -1,5 +1,8 @@
 package chat.sphinx.wrapper_common.message
 
+import java.net.MalformedURLException
+import java.net.URL
+
 @Suppress("NOTHING_TO_INLINE")
 inline fun String.toSphinxCallLink(): SphinxCallLink? =
     try {
@@ -45,6 +48,15 @@ value class SphinxCallLink(val value: String) {
 
     inline val callRoom : String
         get() = "sphinx.call." + value.substringAfter("sphinx.call.").substringBefore("#")
+
+    inline val callServerUrl : URL?
+        get() {
+            return try {
+                URL(callServer)
+            } catch (e: MalformedURLException) {
+                null
+            }
+        }
 
     fun getParameter(k: String): String? {
         val parameters = value.substringAfter("#").split("&")

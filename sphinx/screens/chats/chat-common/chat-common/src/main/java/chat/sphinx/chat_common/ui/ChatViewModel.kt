@@ -51,6 +51,7 @@ import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessageUUID
 import chat.sphinx.wrapper_common.message.SphinxCallLink
 import chat.sphinx.wrapper_contact.Contact
+import chat.sphinx.wrapper_contact.avatarUrl
 import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message_media.MediaType
 import chat.sphinx.wrapper_message_media.toMediaType
@@ -78,6 +79,7 @@ import org.jitsi.meet.sdk.JitsiMeetConferenceOptions
 import org.jitsi.meet.sdk.JitsiMeetUserInfo
 import java.io.File
 import java.io.InputStream
+import java.net.MalformedURLException
 import java.net.URL
 
 
@@ -837,28 +839,35 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 
     fun joinCall(message: Message, audioOnly: Boolean) {
         viewModelScope.launch(mainImmediate) {
-            message?.retrieveSphinxCallLink()?.let { callLink ->
-                val owner = getOwner()
+            message?.retrieveSphinxCallLink()?.let { sphinxCallLink ->
 
-                val userInfo = JitsiMeetUserInfo()
-                userInfo.displayName = owner.alias?.value ?: ""
-                userInfo.avatar = URL(owner.photoUrl?.value ?: "")
+                sphinxCallLink.callServerUrl?.let { nnCallUrl ->
 
-                val options = JitsiMeetConferenceOptions.Builder()
-                    .setServerURL(URL(callLink.callServer))
-                    .setRoom(callLink.callRoom)
-                    .setAudioMuted(false)
-                    .setVideoMuted(false)
-                    .setAudioOnly(audioOnly)
-                    .setWelcomePageEnabled(false)
-                    .setUserInfo(userInfo)
-                    .build()
+                    val owner = getOwner()
 
-                val intent = Intent(app, JitsiMeetActivity::class.java)
-                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                intent.action = "org.jitsi.meet.CONFERENCE"
-                intent.putExtra("JitsiMeetConferenceOptions", options)
-                app.startActivity(intent)
+                    val userInfo = JitsiMeetUserInfo()
+                    userInfo.displayName = owner.alias?.value ?: ""
+
+                    owner.avatarUrl?.let { nnAvatarUrl ->
+                        userInfo.avatar = nnAvatarUrl
+                    }
+
+                    val options = JitsiMeetConferenceOptions.Builder()
+                        .setServerURL(nnCallUrl)
+                        .setRoom(sphinxCallLink.callRoom)
+                        .setAudioMuted(false)
+                        .setVideoMuted(false)
+                        .setAudioOnly(audioOnly)
+                        .setWelcomePageEnabled(false)
+                        .setUserInfo(userInfo)
+                        .build()
+
+                    val intent = Intent(app, JitsiMeetActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    intent.action = "org.jitsi.meet.CONFERENCE"
+                    intent.putExtra("JitsiMeetConferenceOptions", options)
+                    app.startActivity(intent)
+                }
             }
         }
     }
