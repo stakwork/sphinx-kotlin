@@ -135,6 +135,7 @@ internal fun LayoutMessageHolderBinding.setView(
             }
             setUnsupportedMessageTypeLayout(viewState.unsupportedMessageType)
             setBubbleMessageLayout(viewState.bubbleMessage)
+            setBubbleCallInvite(viewState.bubbleCallInvite)
             setBubbleDirectPaymentLayout(viewState.bubbleDirectPayment)
             setBubbleDirectPaymentLayout(viewState.bubbleDirectPayment)
             setBubblePodcastBoost(viewState.bubblePodcastBoost)
@@ -476,6 +477,21 @@ internal inline fun LayoutMessageHolderBinding.setBubbleMessageLayout(
         } else {
             visible
             text = message.text
+        }
+    }
+}
+
+@MainThread
+@Suppress("NOTHING_TO_INLINE")
+internal inline fun LayoutMessageHolderBinding.setBubbleCallInvite(
+    callInvite: LayoutState.Bubble.ContainerSecond.CallInvite?
+) {
+    includeMessageHolderBubble.includeMessageTypeCallInvite.apply {
+        if (callInvite == null) {
+            root.gone
+        } else {
+            root.visible
+            layoutConstraintCallInviteJoinByVideo.goneIfFalse(callInvite.videoButtonVisible)
         }
     }
 }

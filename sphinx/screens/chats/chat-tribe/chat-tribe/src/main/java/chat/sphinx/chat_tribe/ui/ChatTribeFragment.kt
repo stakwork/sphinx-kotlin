@@ -16,6 +16,7 @@ import chat.sphinx.chat_tribe.R
 import chat.sphinx.chat_tribe.databinding.FragmentChatTribeBinding
 import chat.sphinx.chat_tribe.databinding.LayoutPodcastPlayerFooterBinding
 import chat.sphinx.concept_image_loader.ImageLoader
+import chat.sphinx.menu_bottom.databinding.LayoutMenuBottomBinding
 import chat.sphinx.resources.getString
 import chat.sphinx.wrapper_podcast.Podcast
 import dagger.hilt.android.AndroidEntryPoint
@@ -58,6 +59,10 @@ internal class ChatTribeFragment: ChatFragment<
     )
     override val menuBinding: LayoutChatMenuBinding by viewBinding(
         LayoutChatMenuBinding::bind, R.id.include_chat_tribe_menu
+    )
+
+    override val callMenuBinding: LayoutMenuBottomBinding by viewBinding(
+        LayoutMenuBottomBinding::bind, R.id.include_layout_menu_bottom_call
     )
 
     override val menuEnablePayments: Boolean

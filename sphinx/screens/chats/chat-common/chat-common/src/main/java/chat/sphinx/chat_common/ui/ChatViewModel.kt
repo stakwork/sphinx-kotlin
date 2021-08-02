@@ -1,11 +1,13 @@
 package chat.sphinx.chat_common.ui
 
 import android.app.Application
+import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.util.Log
 import android.webkit.MimeTypeMap
 import androidx.annotation.CallSuper
+import androidx.core.content.ContextCompat.startActivity
 import androidx.core.view.inputmethod.InputConnectionCompat
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.SavedStateHandle
@@ -38,6 +40,9 @@ import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
 import chat.sphinx.kotlin_response.*
 import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.logger.e
+import chat.sphinx.menu_bottom.ui.MenuBottomViewState
+import chat.sphinx.menu_bottom_call.CallMenuHandler
+import chat.sphinx.menu_bottom_call.CallMenuViewModel
 import chat.sphinx.resources.getRandomColor
 import chat.sphinx.wrapper_chat.*
 import chat.sphinx.wrapper_common.dashboard.ChatId
@@ -45,6 +50,8 @@ import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessageUUID
+import chat.sphinx.wrapper_common.message.SphinxCallLink
+import chat.sphinx.wrapper_common.message.toSphinxCallLink
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message_media.MediaType
@@ -71,6 +78,7 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.InputStream
 
+
 @JvmSynthetic
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun <ARGS: NavArgs> ChatViewModel<ARGS>.isMessageSelected(): Boolean =
@@ -94,7 +102,8 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         ChatSideEffectFragment,
         ChatSideEffect,
         ChatMenuViewState,
-        >(dispatchers, ChatMenuViewState.Closed)
+        >(dispatchers, ChatMenuViewState.Closed),
+    CallMenuViewModel
 {
     companion object {
         const val TAG = "ChatViewModel"
@@ -118,6 +127,10 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 
     protected val headerInitialsTextViewColor: Int by lazy {
         app.getRandomColor()
+    }
+
+    override val callMenuHandler: CallMenuHandler by lazy {
+        CallMenuHandler()
     }
 
     protected abstract val chatSharedFlow: SharedFlow<Chat?>
@@ -795,8 +808,40 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         }
     }
 
-    override suspend fun onMotionSceneCompletion(value: Nothing) {
-        // unused
+    override fun sendCallInvite(audioOnly: Boolean) {
+        callMenuHandler.viewStateContainer.updateViewState(
+            MenuBottomViewState.Closed
+        )
+        SphinxCallLink.newCallInvite(audioOnly)?.value?.let { newCallLink ->
+            val messageBuilder = SendMessage.Builder()
+            messageBuilder.setText(newCallLink)
+            sendMessage(messageBuilder)
+        }
+    }
+
+    fun copyCallLink(message: Message) {
+        message?.messageContentDecrypted?.value?.toSphinxCallLink()?.let { callLink ->
+            viewModelScope.launch(mainImmediate) {
+                submitSideEffect(
+                    ChatSideEffect.CopyCallLinkToClipboard(callLink.value)
+                )
+            }
+        }
+    }
+
+    fun joinCall(message: Message, audioOnly: Boolean) {
+        message?.messageContentDecrypted?.value?.toSphinxCallLink()?.let { callLink ->
+            val url = if (!callLink.startAudioOnly && audioOnly) {
+                "${callLink.value}#${SphinxCallLink.AUDIO_ONLY_PARAM}=true"
+            } else {
+                callLink.value
+            }
+
+            val i = Intent(Intent.ACTION_VIEW)
+            i.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            i.data = Uri.parse(url)
+            app.startActivity(i)
+        }
     }
 
     open fun goToChatDetailScreen() {
@@ -814,4 +859,8 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     ) {}
 
     open suspend fun deleteTribe() {}
+
+    override suspend fun onMotionSceneCompletion(value: Nothing) {
+        // unused
+    }
 }

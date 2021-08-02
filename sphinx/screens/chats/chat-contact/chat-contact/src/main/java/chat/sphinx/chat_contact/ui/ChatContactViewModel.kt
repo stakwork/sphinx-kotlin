@@ -21,6 +21,7 @@ import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.logger.SphinxLogger
+import chat.sphinx.menu_bottom_call.CallMenuViewModel
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.ChatName
 import chat.sphinx.wrapper_common.dashboard.ChatId
@@ -76,7 +77,7 @@ internal class ChatContactViewModel @Inject constructor(
     savedStateHandle,
     cameraViewModelCoordinator,
     LOG,
-) {
+), CallMenuViewModel {
     override val args: ChatContactFragmentArgs by savedStateHandle.navArgs()
     private var _chatId: ChatId? = args.chatId
     override val chatId: ChatId?

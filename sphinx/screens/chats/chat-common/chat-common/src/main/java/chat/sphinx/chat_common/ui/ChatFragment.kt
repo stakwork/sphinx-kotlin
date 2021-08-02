@@ -43,6 +43,9 @@ import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.insetter_activity.addStatusBarPadding
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
+import chat.sphinx.menu_bottom.databinding.LayoutMenuBottomBinding
+import chat.sphinx.menu_bottom.ui.MenuBottomViewState
+import chat.sphinx.menu_bottom_call.BottomMenuCall
 import chat.sphinx.resources.*
 import chat.sphinx.wrapper_chat.isTrue
 import chat.sphinx.wrapper_meme_server.headerKey
@@ -84,6 +87,7 @@ abstract class ChatFragment<
     protected abstract val selectedMessageHolderBinding: LayoutMessageHolderBinding
     protected abstract val attachmentSendBinding: LayoutAttachmentSendPreviewBinding
     protected abstract val menuBinding: LayoutChatMenuBinding
+    protected abstract val callMenuBinding: LayoutMenuBottomBinding
     protected abstract val recyclerView: RecyclerView
 
     protected abstract val menuEnablePayments: Boolean
@@ -97,6 +101,13 @@ abstract class ChatFragment<
 
     override val chatFragmentContext: Context
         get() = binding.root.context
+
+    private val bottomMenuCall: BottomMenuCall by lazy(LazyThreadSafetyMode.NONE) {
+        BottomMenuCall(
+            onStopSupervisor,
+            viewModel
+        )
+    }
 
     override val contentChooserContract: ActivityResultLauncher<String> =
         registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
@@ -183,7 +194,6 @@ abstract class ChatFragment<
             }
 
             layoutConstraintMenuOptionGif.setOnClickListener {
-
                 viewModel.chatMenuOptionGif(parentFragmentManager)
             }
 
@@ -219,6 +229,15 @@ abstract class ChatFragment<
     }
 
     private fun setupFooter(insetterActivity: InsetterActivity) {
+        bottomMenuCall.initialize(
+            callMenuBinding,
+            viewLifecycleOwner
+        )
+
+        callMenuBinding.apply {
+            insetterActivity.addNavigationBarPadding(root)
+        }
+
         footerBinding.apply {
             insetterActivity.addNavigationBarPadding(root)
 
@@ -299,6 +318,12 @@ abstract class ChatFragment<
 
             imageViewChatHeaderMuted.setOnClickListener {
                 viewModel.toggleChatMuted()
+            }
+
+            textViewChatHeaderPhone.setOnClickListener {
+                viewModel.callMenuHandler.viewStateContainer.updateViewState(
+                    MenuBottomViewState.Open
+                )
             }
 
             textViewChatHeaderNavBack.setOnClickListener {

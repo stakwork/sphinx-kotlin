@@ -83,6 +83,7 @@
     <!-- Notify -->
     <string name="notify_boost_failure">Pago de Boost falló</string>
     <string name="side_effect_text_copied">Texto copiado al portapapeles</string>
+    <string name="side_effect_call_link_copied">Enlace de llamada copiado al portapapeles</string>
 
     <!-- Send Attachment -->
     <string name="attachment_send_header_image">ENVIAR IMAGEN</string>

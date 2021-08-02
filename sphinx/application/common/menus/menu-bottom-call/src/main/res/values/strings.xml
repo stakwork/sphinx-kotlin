@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bottom_menu_call_header_text">Call Options</string>
+
+    <string name="bottom_menu_call_option_audio">Audio</string>
+    <string name="bottom_menu_call_option_video_or_audio">Video or Audio</string>
+</resources>

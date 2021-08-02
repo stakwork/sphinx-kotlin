@@ -1,10 +1,7 @@
 plugins {
     id 'app.cash.exhaustive'
     id 'com.android.library'
-    id 'androidx.navigation.safeargs'
-    id 'dagger.hilt.android.plugin'
     id 'kotlin-android'
-    id 'kotlin-kapt'
 }
 
 android {
@@ -32,15 +29,5 @@ android {
 
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
-    // Sphinx
-    api project(path: ':sphinx:screens:chats:chat-common:chat-common')
-    api project(path: ':sphinx:service:concepts:concept-service-media-player')
-    implementation project(path: ':sphinx:screens-detail:chat-detail:tribe-detail')
-    implementation project(path: ':sphinx:screens-detail:podcast-player:podcast-player')
-    implementation project(path: ':sphinx:application:common:menus:menu-bottom-call')
-
-    implementation deps.androidx.lifecycle.hilt
-    implementation deps.google.hilt
-    implementation project(path: ':sphinx:activity:concepts:concept-view-model-coordinator')
-    kapt kaptDeps.google.hilt
+    api project(path: ':sphinx:application:common:menus:menu-bottom')
 }

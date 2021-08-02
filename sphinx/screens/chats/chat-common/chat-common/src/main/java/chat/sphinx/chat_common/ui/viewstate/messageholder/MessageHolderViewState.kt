@@ -7,6 +7,7 @@ import chat.sphinx.wrapper_chat.isConversation
 import chat.sphinx.wrapper_chat.isTribeOwnedByAccount
 import chat.sphinx.wrapper_common.chatTimeFormat
 import chat.sphinx.wrapper_common.lightning.Sat
+import chat.sphinx.wrapper_common.message.toSphinxCallLink
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message_media.MessageMedia
@@ -93,6 +94,18 @@ internal sealed class MessageHolderViewState(
             } else {
                 null
             }
+        }
+    }
+
+    val bubbleCallInvite: LayoutState.Bubble.ContainerSecond.CallInvite? by lazy(LazyThreadSafetyMode.NONE) {
+        if (message.isSphinxCallLink) {
+            message?.messageContentDecrypted?.value?.toSphinxCallLink()?.let { callLink ->
+                LayoutState.Bubble.ContainerSecond.CallInvite(
+                    !callLink.startAudioOnly
+                )
+            }
+        } else {
+            null
         }
     }
 

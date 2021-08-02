@@ -36,6 +36,7 @@
     <string name="last_message_description_you">Tú</string>
     <string name="last_message_description_gif_shared">%sGIF compartido</string>
     <string name="last_message_description_boost">%sBoost %s</string>
+    <string name="last_message_description_call_invite">%sUnirse a la Llamada</string>
     <string name="last_message_description_invoice_sent">Solicitud enviada: %s</string>
     <string name="last_message_description_invoice_receive">Solicitud recibida: %s</string>
     <string name="last_message_description_payment_sent">Pago enviado: %s</string>

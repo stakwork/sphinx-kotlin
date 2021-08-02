@@ -26,6 +26,7 @@ import chat.sphinx.concept_service_media.UserAction
 import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
 import chat.sphinx.kotlin_response.*
 import chat.sphinx.logger.SphinxLogger
+import chat.sphinx.menu_bottom_call.CallMenuViewModel
 import chat.sphinx.podcast_player.objects.toParcelablePodcast
 import chat.sphinx.podcast_player.ui.getMediaDuration
 import chat.sphinx.resources.getRandomColor
@@ -89,7 +90,7 @@ internal class ChatTribeViewModel @Inject constructor(
     savedStateHandle,
     cameraViewModelCoordinator,
     LOG,
-), MediaPlayerServiceController.MediaServiceListener
+), MediaPlayerServiceController.MediaServiceListener, CallMenuViewModel
 {
     override val args: ChatTribeFragmentArgs by savedStateHandle.navArgs()
     override val chatId: ChatId = args.chatId
