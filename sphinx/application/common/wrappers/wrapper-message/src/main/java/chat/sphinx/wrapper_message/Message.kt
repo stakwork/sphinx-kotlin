@@ -8,9 +8,7 @@ import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.LightningPaymentHash
 import chat.sphinx.wrapper_common.lightning.LightningPaymentRequest
 import chat.sphinx.wrapper_common.lightning.Sat
-import chat.sphinx.wrapper_common.message.MessageId
-import chat.sphinx.wrapper_common.message.MessageUUID
-import chat.sphinx.wrapper_common.message.isValidSphinxCallLink
+import chat.sphinx.wrapper_common.message.*
 import chat.sphinx.wrapper_message_media.MessageMedia
 import chat.sphinx.wrapper_message_media.isImage
 
@@ -59,6 +57,15 @@ inline fun Message.retrieveImageUrlAndMessageMedia(): Pair<String, MessageMedia?
     }
     return mediaData
 }
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun Message.retrieveSphinxCallLink(): SphinxCallLink? =
+    messageContentDecrypted?.let { decrypted ->
+        decrypted?.value?.toSphinxCallLink()?.let { sphinxCallLink ->
+            return sphinxCallLink
+        }
+        null
+    }
 
 //Message Actions
 inline val Message.isBoostAllowed: Boolean

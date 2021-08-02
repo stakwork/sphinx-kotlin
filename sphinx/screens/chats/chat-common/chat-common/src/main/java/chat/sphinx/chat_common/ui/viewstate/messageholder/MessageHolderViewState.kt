@@ -99,7 +99,7 @@ internal sealed class MessageHolderViewState(
 
     val bubbleCallInvite: LayoutState.Bubble.ContainerSecond.CallInvite? by lazy(LazyThreadSafetyMode.NONE) {
         if (message.isSphinxCallLink) {
-            message?.messageContentDecrypted?.value?.toSphinxCallLink()?.let { callLink ->
+            message?.retrieveSphinxCallLink()?.let { callLink ->
                 LayoutState.Bubble.ContainerSecond.CallInvite(
                     !callLink.startAudioOnly
                 )

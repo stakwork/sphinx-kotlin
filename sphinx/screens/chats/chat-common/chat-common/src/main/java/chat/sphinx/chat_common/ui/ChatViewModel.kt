@@ -820,7 +820,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     }
 
     fun copyCallLink(message: Message) {
-        message?.messageContentDecrypted?.value?.toSphinxCallLink()?.let { callLink ->
+        message?.retrieveSphinxCallLink()?.let { callLink ->
             viewModelScope.launch(mainImmediate) {
                 submitSideEffect(
                     ChatSideEffect.CopyCallLinkToClipboard(callLink.value)
@@ -830,7 +830,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     }
 
     fun joinCall(message: Message, audioOnly: Boolean) {
-        message?.messageContentDecrypted?.value?.toSphinxCallLink()?.let { callLink ->
+        message?.retrieveSphinxCallLink()?.let { callLink ->
             val url = if (!callLink.startAudioOnly && audioOnly) {
                 "${callLink.value}#${SphinxCallLink.AUDIO_ONLY_PARAM}=true"
             } else {
