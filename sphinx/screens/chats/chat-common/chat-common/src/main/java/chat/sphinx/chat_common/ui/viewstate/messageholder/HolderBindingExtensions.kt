@@ -7,6 +7,8 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.MainThread
 import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
+import androidx.core.text.getSpans
+import androidx.core.text.toSpannable
 import androidx.core.view.updateLayoutParams
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.chat_common.R
@@ -24,6 +26,9 @@ import chat.sphinx.resources.setBackgroundRandomColor
 import chat.sphinx.resources.setTextColorExt
 import chat.sphinx.wrapper_chat.ChatType
 import chat.sphinx.wrapper_common.lightning.asFormattedString
+import chat.sphinx.wrapper_common.lightning.isValidLightningNodePubKey
+import chat.sphinx.wrapper_common.tribe.isValidTribeJoinLink
+import chat.sphinx.wrapper_common.tribe.toTribeJoinLink
 import chat.sphinx.wrapper_meme_server.headerKey
 import chat.sphinx.wrapper_meme_server.headerValue
 import chat.sphinx.wrapper_message.MessageType
@@ -483,6 +488,40 @@ internal inline fun LayoutMessageHolderBinding.setBubbleMessageLayout(
             onSphinxInteractionListener?.let { sphinxInteractionListener ->
                 SphinxLinkify.addLinks(this, SphinxLinkify.ALL, sphinxInteractionListener)
                 setOnLongClickListener(sphinxInteractionListener)
+            }
+
+            val sphinxUrlSpans =  text.toSpannable().getSpans<SphinxUrlSpan>()
+            sphinxUrlSpans.firstOrNull()?.let { sphinxUrlSpan ->
+                when {
+                    sphinxUrlSpan.url.isValidTribeJoinLink -> {
+                        includeMessageHolderBubble.includeMessageLinkPreviewTribe.apply {
+                            root.visible
+
+                            // Populate with the things...
+                            sphinxUrlSpan.url.toTribeJoinLink()?.let {
+                                onSphinxInteractionListener?.populateTribe(
+                                    it,
+                                    this
+                                )
+                            }
+                        }
+                    }
+                    sphinxUrlSpan.url.isValidLightningNodePubKey -> {
+                        includeMessageHolderBubble.includeMessageLinkPreviewContact.apply {
+                            root.visible
+
+                            // Populate the contact preview
+                        }
+                    }
+                    else -> {
+                        includeMessageHolderBubble.includeMessageLinkPreviewUrl.apply {
+                            root.visible
+
+                            // Populate the URL
+                        }
+                    }
+                }
+
             }
         }
     }
