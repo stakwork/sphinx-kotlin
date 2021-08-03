@@ -478,11 +478,12 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                         response.body()?.string()?.let {
                             val document = Jsoup.parse(it)
 
-                            val urlMetadata = document.toUrlMetadata()
+                            val urlMetadata = document.toUrlMetadata(url)
 
                             if (urlMetadata != null) {
                                 layoutMessageLinkPreviewUrlBinding.apply {
                                     textViewMessageLinkPreviewUrlTitle.text = urlMetadata.title
+                                    textViewMessageLinkPreviewUrlDomain.text = urlMetadata.domain
                                     if (urlMetadata.description == null) {
                                         textViewMessageLinkPreviewUrlDescription.gone
                                     } else {

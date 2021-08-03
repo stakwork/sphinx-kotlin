@@ -3,33 +3,42 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/web_link_preview_holder_height"
+    android:layout_height="wrap_content"
     android:paddingHorizontal="@dimen/chat_message_inner_padding"
     android:visibility="gone"
     tools:visibility="visible"
     tools:background="@color/body"
     >
 
-    <ProgressBar
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/progress_bar_link_preview"
-        android:layout_width="25dp"
-        android:layout_height="25dp"
-        style="?android:attr/progressBarStyle"
-        android:indeterminateTint="@android:color/white"
-        android:indeterminate="true"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/web_link_preview_holder_height"
         android:visibility="gone"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        tools:visibility="visible"/>
+        tools:visibility="gone"
+        >
+        <ProgressBar
+
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            style="?android:attr/progressBarStyle"
+            android:indeterminateTint="@android:color/white"
+            android:indeterminate="true"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            tools:visibility="visible"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/constraint_layout_url_link_preview"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/web_link_preview_holder_height"
+        android:layout_height="wrap_content"
+        android:layout_margin="2dp"
         app:layout_constraintTop_toTopOf="parent"
-        tools:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
         >
 
         <!-- Website Favicon -->
@@ -43,7 +52,9 @@
             app:layout_constraintEnd_toStartOf="@+id/text_view_message_link_preview_url_title"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="@+id/text_view_message_link_preview_url_title"
-            tools:srcCompat="@drawable/sphinx_white_notification" />
+            tools:srcCompat="@drawable/sphinx_white_notification"
+            tools:visibility="gone"
+            />
 
         <!-- Title -->
         <androidx.appcompat.widget.AppCompatTextView
@@ -51,29 +62,49 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:fontFamily="@font/roboto_bold"
-            android:paddingVertical="@dimen/default_list_row_padding_vertical"
+            android:paddingVertical="@dimen/default_small_layout_margin"
             android:textColor="@color/text"
-            android:textSize="@dimen/default_text_size_caption1"
+            android:textSize="@dimen/default_text_size_headline"
+            android:maxLines="2"
             app:layout_constraintBottom_toTopOf="@+id/text_view_message_link_preview_url_description"
             app:layout_constraintEnd_toStartOf="@id/image_view_message_link_preview_url_main_image"
             app:layout_constraintStart_toEndOf="@id/image_view_message_link_preview_url_favicon"
             app:layout_constraintTop_toTopOf="parent"
-            tools:text="SpaceX" />
+            tools:text="SpaceX Company with Starlink or Neural Link technology" />
 
         <!-- Description -->
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/text_view_message_link_preview_url_description"
             android:layout_width="0dp"
-            android:layout_height="0dp"
+            android:layout_height="wrap_content"
             android:fontFamily="@font/roboto_regular"
             android:textColor="@color/text"
-            android:textSize="@dimen/default_text_size_caption2"
-            app:layout_constraintBottom_toBottomOf="parent"
+            android:textSize="@dimen/default_text_size_caption1"
+            android:maxLines="3"
+            app:layout_constraintBottom_toTopOf="@+id/text_view_message_link_preview_url_domain"
             app:layout_constraintEnd_toStartOf="@id/image_view_message_link_preview_url_main_image"
             app:layout_constraintHorizontal_bias="1.0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/text_view_message_link_preview_url_title"
-            tools:text="SpaceX - Launches\n\nhttps://www.spacex.com/launches/" />
+            tools:text="SpaceX - Launches\n\nhttps://www.spacex.com/launches/"
+            />
+
+        <!-- Domain -->
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_message_link_preview_url_domain"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/roboto_regular"
+            android:textColor="@color/blueTextAccent"
+            android:textSize="@dimen/default_text_size_caption2"
+            android:paddingVertical="2dp"
+            android:maxLines="1"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/image_view_message_link_preview_url_main_image"
+            app:layout_constraintTop_toBottomOf="@+id/text_view_message_link_preview_url_description"
+            tools:text="spacex.com"
+            />
 
         <!-- Main Image -->
         <androidx.appcompat.widget.AppCompatImageView
@@ -84,9 +115,9 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toEndOf="@id/text_view_message_link_preview_url_description"
             app:layout_constraintTop_toTopOf="parent"
-            tools:srcCompat="@tools:sample/backgrounds/scenic" />
+            tools:srcCompat="@tools:sample/backgrounds/scenic"
+            />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 
