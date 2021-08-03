@@ -35,6 +35,7 @@
     <!-- Link Previews -->
     <string name="link_preview_add_contact_banner_label">Agregar Contacto</string>
     <string name="link_preview_see_tribe_banner_label">Ver Tribu</string>
+    <string name="link_preview_view_contact">Ver contacto</string>
 
     <!-- Replies -->
     <string name="reply_message_media_content_description">Contenido del mensaje original</string>

@@ -947,6 +947,10 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     fun getTribe(tribeJoinLink: TribeJoinLink): Flow<LoadResponse<TribeDto, ResponseError>> {
         return networkQueryChat.getTribeInfo(ChatHost(tribeJoinLink.tribeHost), ChatUUID(tribeJoinLink.tribeUUID))
     }
+
+    fun getContact(lightningNodePubKey: LightningNodePubKey): Flow<Contact?> {
+        return contactRepository.getContactByPubKey(lightningNodePubKey)
+    }
     open suspend fun processMemberRequest(
         contactId: ContactId,
         messageId: MessageId,

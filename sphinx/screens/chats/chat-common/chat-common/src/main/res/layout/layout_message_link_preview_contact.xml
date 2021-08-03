@@ -21,7 +21,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/ic_add_contact"
-        app:tint="@color/secondaryText" />
+        />
 
     <!-- Title -->
     <androidx.appcompat.widget.AppCompatTextView

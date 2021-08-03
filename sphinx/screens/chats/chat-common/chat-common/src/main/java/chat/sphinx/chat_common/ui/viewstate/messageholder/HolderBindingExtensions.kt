@@ -27,6 +27,7 @@ import chat.sphinx.resources.setTextColorExt
 import chat.sphinx.wrapper_chat.ChatType
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.lightning.isValidLightningNodePubKey
+import chat.sphinx.wrapper_common.lightning.toLightningNodePubKey
 import chat.sphinx.wrapper_common.tribe.isValidTribeJoinLink
 import chat.sphinx.wrapper_common.tribe.toTribeJoinLink
 import chat.sphinx.wrapper_meme_server.headerKey
@@ -513,6 +514,12 @@ internal inline fun LayoutMessageHolderBinding.setBubbleMessageLayout(
                             root.visible
 
                             // Populate the contact preview
+                            sphinxUrlSpan.url.toLightningNodePubKey()?.let {
+                                onSphinxInteractionListener?.populateContact(
+                                    it,
+                                    this
+                                )
+                            }
                         }
                     }
                     else -> {
