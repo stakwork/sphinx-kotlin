@@ -26,6 +26,7 @@ import chat.sphinx.chat_common.ui.viewstate.messageholder.BubbleBackground
 import chat.sphinx.chat_common.ui.viewstate.messageholder.MessageHolderViewState
 import chat.sphinx.chat_common.ui.viewstate.messagereply.MessageReplyViewState
 import chat.sphinx.chat_common.ui.viewstate.selected.SelectedMessageViewState
+import chat.sphinx.chat_common.util.SphinxLinkify
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.concept_meme_server.MemeServerTokenHandler
@@ -543,6 +544,23 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                 submitSideEffect(
                     ChatSideEffect.CopyTextToClipboard(text)
                 )
+            }
+        }
+    }
+
+    fun copyMessageLink(message: Message) {
+        viewModelScope.launch(mainImmediate) {
+            message.retrieveTextToShow()?.let { text ->
+                val matcher = SphinxLinkify.SphinxPatterns.COPYABLE_LINKS.matcher(text)
+                if (matcher.find()) {
+                    submitSideEffect(
+                        ChatSideEffect.CopyLinkToClipboard(matcher.group())
+                    )
+                } else {
+                    submitSideEffect(
+                        ChatSideEffect.Notify(app.getString(R.string.side_effect_no_link_to_copy))
+                    )
+                }
             }
         }
     }

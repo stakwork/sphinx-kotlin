@@ -377,7 +377,7 @@ abstract class ChatFragment<
                                 // TODO: Implement
                             }
                             is MenuItemState.CopyLink -> {
-                                // TODO: Implement
+                                viewModel.copyMessageLink(holderState.message)
                             }
                             is MenuItemState.CopyText -> {
                                 viewModel.copyMessageText(holderState.message)

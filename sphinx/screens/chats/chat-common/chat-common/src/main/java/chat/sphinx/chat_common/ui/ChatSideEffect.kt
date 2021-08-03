@@ -31,12 +31,25 @@ sealed class ChatSideEffect: SideEffect<ChatSideEffectFragment>() {
 
     class CopyTextToClipboard(private val text: String): ChatSideEffect() {
         override suspend fun execute(value: ChatSideEffectFragment) {
-            (value.chatFragmentContext.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager)?.let { manager ->
-                val clipData = ClipData.newPlainText("text", text)
-                manager.setPrimaryClip(clipData)
+            copyToClipBoard(
+                value,
+                text,
+                "text",
+                value.chatFragmentContext.getString(R.string.side_effect_text_copied)
+            )
+        }
+    }
 
-                SphinxToastUtils().show(value.chatFragmentContext, R.string.side_effect_text_copied)
-            }
+    class CopyLinkToClipboard(private val link: String): ChatSideEffect() {
+        override suspend fun execute(value: ChatSideEffectFragment) {
+            copyToClipBoard(
+                value,
+                link,
+                "link",
+                value.chatFragmentContext.getString(
+                    R.string.side_effect_link_copied, link
+                )
+            )
         }
     }
 
@@ -52,6 +65,22 @@ sealed class ChatSideEffect: SideEffect<ChatSideEffectFragment>() {
                 callback()
             }
             builder.show()
+        }
+    }
+
+    companion object {
+        fun copyToClipBoard(
+            chatSideEffectFragment: ChatSideEffectFragment,
+            contentToCopy: String,
+            label: String,
+            message: String
+        ) {
+            (chatSideEffectFragment.chatFragmentContext.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager)?.let { manager ->
+                val clipData = ClipData.newPlainText(label, contentToCopy)
+                manager.setPrimaryClip(clipData)
+
+                SphinxToastUtils().show(chatSideEffectFragment.chatFragmentContext, message)
+            }
         }
     }
 }

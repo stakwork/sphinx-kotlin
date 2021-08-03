@@ -311,5 +311,9 @@ object SphinxLinkify {
         val LIGHTNING_NODE_PUBLIC_KEY: Pattern = Pattern.compile(
             LightningNodePubKey.REGEX
         )
+
+        val COPYABLE_LINKS: Pattern = Pattern.compile(
+            "(${TribeJoinLink.REGEX}|${PatternsCompat.AUTOLINK_WEB_URL.pattern()}|${LightningNodePubKey.REGEX})"
+        )
     }
 }

@@ -2,6 +2,7 @@ package chat.sphinx.chat_common.ui.viewstate.messageholder
 
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
 import chat.sphinx.chat_common.ui.viewstate.selected.MenuItemState
+import chat.sphinx.chat_common.util.SphinxLinkify
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.isConversation
 import chat.sphinx.wrapper_chat.isTribeOwnedByAccount
@@ -11,6 +12,11 @@ import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message_media.MessageMedia
 import chat.sphinx.wrapper_message_media.isImage
+
+inline val Message.isCopyLinkAllowed: Boolean
+    get() = this.retrieveTextToShow()?.let {
+        SphinxLinkify.SphinxPatterns.COPYABLE_LINKS.matcher(it).find()
+    } ?: false
 
 internal inline val MessageHolderViewState.isReceived: Boolean
     get() = this is MessageHolderViewState.Received
@@ -239,6 +245,10 @@ internal sealed class MessageHolderViewState(
 
             if (this is Received && message.isBoostAllowed) {
                 list.add(MenuItemState.Boost)
+            }
+
+            if (message.isCopyLinkAllowed) {
+                list.add(MenuItemState.CopyLink)
             }
 
             if (message.isCopyAllowed) {
