@@ -10,6 +10,8 @@
     <string name="add_sats">ADD SATS</string>
     <string name="search">Search</string>
 
+    <string name="upgrade_app">UPGRADE APP</string>
+
     <string name="not_valid_tribe_link">QR code is not a Join Tribe link</string>
     <string name="invite_name">Invite: %s</string>
     <string name="invite_qr_code_header_name">INVITE CODE</string>
