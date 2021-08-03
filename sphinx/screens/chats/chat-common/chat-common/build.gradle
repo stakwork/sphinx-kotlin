@@ -67,6 +67,7 @@ dependencies {
 
     implementation deps.giphy.sdk
     implementation deps.jitsi.sdk
+    implementation deps.jsoup
 }
 
 secrets {

@@ -6,7 +6,9 @@
     android:layout_height="@dimen/web_link_preview_holder_height"
     android:paddingHorizontal="@dimen/chat_message_inner_padding"
     android:visibility="gone"
-    tools:visibility="visible">
+    tools:visibility="visible"
+    tools:background="@color/body"
+    >
 
     <!-- Website Favicon -->
     <androidx.appcompat.widget.AppCompatImageView
@@ -56,7 +58,7 @@
         android:id="@+id/image_view_message_link_preview_url_main_image"
         android:layout_width="@dimen/web_link_preview_image_xy"
         android:layout_height="@dimen/web_link_preview_image_xy"
-        android:scaleType="fitCenter"
+        android:scaleType="centerCrop"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
