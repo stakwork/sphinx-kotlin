@@ -57,7 +57,8 @@ internal fun LayoutMessageHolderBinding.setView(
     memeServerTokenHandler: MemeServerTokenHandler,
     recyclerViewWidth: Px,
     viewState: MessageHolderViewState,
-    onSphinxInteractionListener: SphinxUrlSpan.OnInteractionListener? = null
+    onSphinxInteractionListener: SphinxUrlSpan.OnInteractionListener? = null,
+    previewHandler: SphinxUrlSpan.PreviewHandler? = null
 ) {
     for (job in holderJobs) {
         job.cancel()
@@ -143,7 +144,7 @@ internal fun LayoutMessageHolderBinding.setView(
                 }
             }
             setUnsupportedMessageTypeLayout(viewState.unsupportedMessageType)
-            setBubbleMessageLayout(viewState.bubbleMessage, onSphinxInteractionListener)
+            setBubbleMessageLayout(viewState.bubbleMessage, onSphinxInteractionListener, previewHandler)
             setBubbleDirectPaymentLayout(viewState.bubbleDirectPayment)
             setBubbleDirectPaymentLayout(viewState.bubbleDirectPayment)
             setBubblePodcastBoost(viewState.bubblePodcastBoost)
@@ -478,7 +479,8 @@ internal inline fun LayoutMessageHolderBinding.setDeletedMessageLayout(
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun LayoutMessageHolderBinding.setBubbleMessageLayout(
     message: LayoutState.Bubble.ContainerThird.Message?,
-    onSphinxInteractionListener: SphinxUrlSpan.OnInteractionListener?
+    onSphinxInteractionListener: SphinxUrlSpan.OnInteractionListener?,
+    previewHandler: SphinxUrlSpan.PreviewHandler?
 ) {
     includeMessageHolderBubble.textViewMessageText.apply {
         if (message == null) {
@@ -500,7 +502,7 @@ internal inline fun LayoutMessageHolderBinding.setBubbleMessageLayout(
 
                             // Populate with the things...
                             sphinxUrlSpan.url.toTribeJoinLink()?.let {
-                                onSphinxInteractionListener?.populateTribe(
+                                previewHandler?.populateTribe(
                                     it,
                                     this
                                 )
@@ -513,7 +515,7 @@ internal inline fun LayoutMessageHolderBinding.setBubbleMessageLayout(
 
                             // Populate the contact preview
                             sphinxUrlSpan.url.toLightningNodePubKey()?.let {
-                                onSphinxInteractionListener?.populateContact(
+                                previewHandler?.populateContact(
                                     it,
                                     this
                                 )
@@ -525,6 +527,10 @@ internal inline fun LayoutMessageHolderBinding.setBubbleMessageLayout(
                             root.visible
 
                             // Populate the URL
+                            previewHandler?.populateUrlPreview(
+                                sphinxUrlSpan.url,
+                                this
+                            )
                         }
                     }
                 }
