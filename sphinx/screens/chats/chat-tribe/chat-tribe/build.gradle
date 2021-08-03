@@ -33,8 +33,8 @@ android {
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
     // Sphinx
-    api project(path: ':sphinx:screens:chats:chat-common:chat-common')
     api project(path: ':sphinx:service:concepts:concept-service-media-player')
+    implementation project(path: ':sphinx:screens:chats:chat-common:chat-common')
     implementation project(path: ':sphinx:screens-detail:chat-detail:tribe-detail')
     implementation project(path: ':sphinx:screens-detail:podcast-player:podcast-player')
 

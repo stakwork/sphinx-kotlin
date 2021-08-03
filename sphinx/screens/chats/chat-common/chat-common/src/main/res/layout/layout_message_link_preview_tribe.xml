@@ -10,6 +10,8 @@
 
 
     <!-- Tribe Image -->
+
+    <!-- Tribe Name -->
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/image_view_message_link_preview_tribe"
         android:layout_width="@dimen/contact_link_preview_avatar_image_xy"
@@ -19,9 +21,8 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/ic_tribe"
-        app:tint="@color/secondaryText" />
+        />
 
-    <!-- Tribe Name -->
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/text_view_message_link_preview_tribe_name_label"
         android:layout_width="0dp"

@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import chat.sphinx.chat_common.databinding.LayoutChatHeaderBinding
 import chat.sphinx.chat_common.databinding.LayoutMessageHolderBinding
+import chat.sphinx.chat_common.databinding.LayoutMessageLinkPreviewTribeBinding
 import chat.sphinx.chat_common.ui.ChatViewModel
 import chat.sphinx.chat_common.ui.isMessageSelected
 import chat.sphinx.chat_common.ui.viewstate.messageholder.*
@@ -21,15 +22,19 @@ import chat.sphinx.chat_common.ui.viewstate.selected.SelectedMessageViewState
 import chat.sphinx.chat_common.util.SphinxUrlSpan
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
+import chat.sphinx.concept_image_loader.ImageLoaderOptions
+import chat.sphinx.concept_image_loader.Transformation
+import chat.sphinx.join_tribe.R
+import chat.sphinx.kotlin_response.LoadResponse
+import chat.sphinx.kotlin_response.Response
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.toSphinxCallLink
 import chat.sphinx.wrapper_message.Message
+import chat.sphinx.wrapper_common.tribe.TribeJoinLink
 import chat.sphinx.wrapper_message.MessageType
-import chat.sphinx.wrapper_message.toMessageType
 import chat.sphinx.wrapper_view.Px
 import io.matthewnelson.android_feature_screens.util.gone
-import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
 import kotlinx.coroutines.Job
@@ -263,6 +268,39 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                     currentViewState?.message?.let { nnMessage ->
                         viewModel.copyCallLink(nnMessage)
                     }
+
+                    override fun populateTribe(tribeJoinLink: TribeJoinLink, layoutMessageLinkPreviewTribeBinding: LayoutMessageLinkPreviewTribeBinding) {
+                        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                            viewModel.getTribe(tribeJoinLink).collect { loadResponse ->
+
+                                when (loadResponse) {
+                                    is LoadResponse.Loading -> {}
+                                    is Response.Error -> {
+                                        // TODO: Set Failed
+                                    }
+                                    is Response.Success -> {
+                                        val tribeInfo = loadResponse.value
+
+                                        layoutMessageLinkPreviewTribeBinding.textViewMessageLinkPreviewTribeNameLabel.text = tribeInfo.name
+                                        layoutMessageLinkPreviewTribeBinding.textViewMessageLinkPreviewTribeDescription.text = tribeInfo.description
+                                        tribeInfo.img?.let {
+                                            imageLoader.load(
+                                                layoutMessageLinkPreviewTribeBinding.imageViewMessageLinkPreviewTribe,
+                                                it,
+                                                ImageLoaderOptions.Builder()
+                                                    .placeholderResId(R.drawable.ic_tribe_placeholder)
+                                                    .transformation(Transformation.CircleCrop)
+                                                    .build()
+                                            )
+                                        }
+                                        layoutMessageLinkPreviewTribeBinding.textViewMessageLinkPreviewTribeSeeBanner.setOnClickListener {
+                                            viewModel.goToLightningNodePubKeyDetailScreen(tribeJoinLink.value)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
 
@@ -301,6 +339,8 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                     }
                 }
             }
+
+            // TODO: Consider loading URL Previews here...
         }
 
         private fun processMemberRequest(contactId: ContactId, messageId: MessageId, type: MessageType.GroupAction) {
