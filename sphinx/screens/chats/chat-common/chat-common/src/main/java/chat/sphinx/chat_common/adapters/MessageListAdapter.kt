@@ -17,7 +17,7 @@ import chat.sphinx.chat_common.ui.ChatViewModel
 import chat.sphinx.chat_common.ui.isMessageSelected
 import chat.sphinx.chat_common.ui.viewstate.messageholder.*
 import chat.sphinx.chat_common.ui.viewstate.selected.SelectedMessageViewState
-import chat.sphinx.chat_common.util.SphinxUrlSpan
+import chat.sphinx.chat_common.util.*
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
@@ -38,6 +38,12 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import okhttp3.Call
+import okhttp3.Callback
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import org.jsoup.Jsoup
+import java.io.IOException
 
 internal class MessageListAdapter<ARGS : NavArgs>(
     private val recyclerView: RecyclerView,
@@ -420,6 +426,68 @@ internal class MessageListAdapter<ARGS : NavArgs>(
         url: String,
         layoutMessageLinkPreviewUrlBinding: LayoutMessageLinkPreviewUrlBinding
     ) {
-        // TODO: Preview URL
+        // TODO: Show loading...
+        val client = OkHttpClient()
+
+        val request: Request = Request.Builder()
+            .url(url)
+            .build()
+
+        client.newCall(request).enqueue(object: Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                layoutMessageLinkPreviewUrlBinding.root.gone
+            }
+
+            override fun onResponse(call: Call, response: okhttp3.Response) {
+                if (response.isSuccessful) {
+                    response.body()?.string()?.let {
+                        val document = Jsoup.parse(it)
+
+                        val urlMetadata = document.toUrlMetadata()
+
+                        if (urlMetadata != null) {
+
+                            onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                                layoutMessageLinkPreviewUrlBinding.apply {
+                                    textViewMessageLinkPreviewUrlTitle.text = urlMetadata.title
+                                    if (urlMetadata.description == null) {
+                                        textViewMessageLinkPreviewUrlDescription.gone
+                                    } else {
+                                        textViewMessageLinkPreviewUrlDescription.visible
+                                        textViewMessageLinkPreviewUrlDescription.text = urlMetadata.description
+                                    }
+
+                                    if (urlMetadata.imageUrl == null) {
+                                        imageViewMessageLinkPreviewUrlMainImage.gone
+                                    } else {
+                                        imageViewMessageLinkPreviewUrlMainImage.visible
+                                        imageLoader.load(
+                                            imageViewMessageLinkPreviewUrlMainImage,
+                                            urlMetadata.imageUrl
+                                        )
+                                    }
+
+                                    if (urlMetadata.favIconUrl == null) {
+                                        imageViewMessageLinkPreviewUrlFavicon.gone
+                                    } else {
+                                        imageViewMessageLinkPreviewUrlFavicon.visible
+                                        imageLoader.load(
+                                            imageViewMessageLinkPreviewUrlFavicon,
+                                            urlMetadata.favIconUrl
+                                        )
+                                    }
+                                }
+                            }
+                        } else {
+                            layoutMessageLinkPreviewUrlBinding.root.gone
+                        }
+                    }
+                } else {
+                    layoutMessageLinkPreviewUrlBinding.root.gone
+                }
+            }
+        })
+
+
     }
 }

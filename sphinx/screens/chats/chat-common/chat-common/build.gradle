@@ -61,6 +61,8 @@ dependencies {
     implementation deps.square.okio
 
     implementation deps.giphy.sdk
+
+    implementation deps.jsoup
 }
 
 secrets {

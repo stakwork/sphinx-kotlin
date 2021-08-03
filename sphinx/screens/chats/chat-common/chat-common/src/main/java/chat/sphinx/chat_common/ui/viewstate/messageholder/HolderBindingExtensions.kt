@@ -513,7 +513,6 @@ internal inline fun LayoutMessageHolderBinding.setBubbleMessageLayout(
                         includeMessageHolderBubble.includeMessageLinkPreviewContact.apply {
                             root.visible
 
-                            // Populate the contact preview
                             sphinxUrlSpan.url.toLightningNodePubKey()?.let {
                                 previewHandler?.populateContact(
                                     it,
@@ -526,7 +525,6 @@ internal inline fun LayoutMessageHolderBinding.setBubbleMessageLayout(
                         includeMessageHolderBubble.includeMessageLinkPreviewUrl.apply {
                             root.visible
 
-                            // Populate the URL
                             previewHandler?.populateUrlPreview(
                                 sphinxUrlSpan.url,
                                 this

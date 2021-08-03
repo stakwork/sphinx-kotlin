@@ -36,6 +36,7 @@
     <string name="link_preview_add_contact_banner_label">Add Contact</string>
     <string name="link_preview_see_tribe_banner_label">See Tribe</string>
     <string name="link_preview_view_contact">View Contact</string>
+    <string name="link_preview_failed_to_load">Failed to load link preview</string>
 
     <!-- Replies -->
     <string name="reply_message_media_content_description">Media content of the original message</string>
