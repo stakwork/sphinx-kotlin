@@ -144,7 +144,8 @@ internal fun LayoutMessageHolderBinding.setView(
                 }
             }
             setUnsupportedMessageTypeLayout(viewState.unsupportedMessageType)
-            setBubbleMessageLayout(viewState.bubbleMessage, onSphinxInteractionListener, previewHandler)
+            setBubbleMessageLayout(viewState.bubbleMessage, onSphinxInteractionListener)
+            setBubbleMessageLinkPreviewLayout(previewHandler)
             setBubbleDirectPaymentLayout(viewState.bubbleDirectPayment)
             setBubbleDirectPaymentLayout(viewState.bubbleDirectPayment)
             setBubblePodcastBoost(viewState.bubblePodcastBoost)
@@ -479,8 +480,7 @@ internal inline fun LayoutMessageHolderBinding.setDeletedMessageLayout(
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun LayoutMessageHolderBinding.setBubbleMessageLayout(
     message: LayoutState.Bubble.ContainerThird.Message?,
-    onSphinxInteractionListener: SphinxUrlSpan.OnInteractionListener?,
-    previewHandler: SphinxUrlSpan.PreviewHandler?
+    onSphinxInteractionListener: SphinxUrlSpan.OnInteractionListener?
 ) {
     includeMessageHolderBubble.textViewMessageText.apply {
         if (message == null) {
@@ -492,49 +492,52 @@ internal inline fun LayoutMessageHolderBinding.setBubbleMessageLayout(
                 SphinxLinkify.addLinks(this, SphinxLinkify.ALL, sphinxInteractionListener)
                 setOnLongClickListener(sphinxInteractionListener)
             }
+        }
+    }
+}
 
-            val sphinxUrlSpans =  text.toSpannable().getSpans<SphinxUrlSpan>()
-            sphinxUrlSpans.firstOrNull()?.let { sphinxUrlSpan ->
-                when {
-                    sphinxUrlSpan.url.isValidTribeJoinLink -> {
-                        includeMessageHolderBubble.includeMessageLinkPreviewTribe.apply {
-                            root.visible
+@MainThread
+@Suppress("NOTHING_TO_INLINE")
+internal inline fun LayoutMessageHolderBinding.setBubbleMessageLinkPreviewLayout(
+    previewHandler: SphinxUrlSpan.PreviewHandler?
+) {
+    includeMessageHolderBubble.includeMessageLinkPreviewTribe.root.gone
+    includeMessageHolderBubble.includeMessageLinkPreviewContact.root.gone
+    includeMessageHolderBubble.includeMessageLinkPreviewUrl.root.gone
 
-                            // Populate with the things...
-                            sphinxUrlSpan.url.toTribeJoinLink()?.let {
-                                previewHandler?.populateTribe(
-                                    it,
-                                    this
-                                )
-                            }
-                        }
-                    }
-                    sphinxUrlSpan.url.isValidLightningNodePubKey -> {
-                        includeMessageHolderBubble.includeMessageLinkPreviewContact.apply {
-                            root.visible
-
-                            sphinxUrlSpan.url.toLightningNodePubKey()?.let {
-                                previewHandler?.populateContact(
-                                    it,
-                                    this
-                                )
-                            }
-                        }
-                    }
-                    else -> {
-                        includeMessageHolderBubble.includeMessageLinkPreviewUrl.apply {
-                            root.visible
-
-                            previewHandler?.populateUrlPreview(
-                                sphinxUrlSpan.url,
-                                this
-                            )
-                        }
+    val sphinxUrlSpans =  includeMessageHolderBubble.textViewMessageText.text.toSpannable().getSpans<SphinxUrlSpan>()
+    sphinxUrlSpans.firstOrNull()?.let { sphinxUrlSpan ->
+        when {
+            sphinxUrlSpan.url.isValidTribeJoinLink -> {
+                includeMessageHolderBubble.includeMessageLinkPreviewTribe.apply {
+                    sphinxUrlSpan.url.toTribeJoinLink()?.let {
+                        previewHandler?.populateTribe(
+                            it,
+                            this
+                        )
                     }
                 }
-
+            }
+            sphinxUrlSpan.url.isValidLightningNodePubKey -> {
+                includeMessageHolderBubble.includeMessageLinkPreviewContact.apply {
+                    sphinxUrlSpan.url.toLightningNodePubKey()?.let {
+                        previewHandler?.populateContact(
+                            it,
+                            this
+                        )
+                    }
+                }
+            }
+            else -> {
+                includeMessageHolderBubble.includeMessageLinkPreviewUrl.apply {
+                    previewHandler?.populateUrlPreview(
+                        sphinxUrlSpan.url,
+                        this
+                    )
+                }
             }
         }
+
     }
 }
 
