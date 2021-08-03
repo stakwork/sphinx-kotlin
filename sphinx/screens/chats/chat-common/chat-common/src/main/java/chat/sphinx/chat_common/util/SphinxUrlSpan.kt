@@ -4,6 +4,7 @@ import android.text.style.URLSpan
 import android.view.View
 import chat.sphinx.chat_common.databinding.LayoutMessageLinkPreviewContactBinding
 import chat.sphinx.chat_common.databinding.LayoutMessageLinkPreviewTribeBinding
+import chat.sphinx.chat_common.databinding.LayoutMessageLinkPreviewUrlBinding
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.isValidLightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.isValidLightningPaymentRequest
@@ -46,13 +47,17 @@ open class SphinxUrlSpan(
          */
         abstract fun onClick(url: String?)
 
-        abstract fun populateTribe(tribeJoinLink: TribeJoinLink, layoutMessageLinkPreviewTribeBinding: LayoutMessageLinkPreviewTribeBinding)
-
-        abstract fun populateContact(lightningNodePubKey: LightningNodePubKey, layoutMessageLinkPreviewContactBinding: LayoutMessageLinkPreviewContactBinding)
-
         override fun onLongClick(view: View): Boolean {
             longClickCounter.incrementAndGet()
             return onLongClickListener.onLongClick(view)
         }
+    }
+
+    interface PreviewHandler {
+        fun populateTribe(tribeJoinLink: TribeJoinLink, layoutMessageLinkPreviewTribeBinding: LayoutMessageLinkPreviewTribeBinding)
+
+        fun populateContact(lightningNodePubKey: LightningNodePubKey, layoutMessageLinkPreviewContactBinding: LayoutMessageLinkPreviewContactBinding)
+
+        fun populateUrlPreview(url: String, layoutMessageLinkPreviewUrlBinding: LayoutMessageLinkPreviewUrlBinding)
     }
 }

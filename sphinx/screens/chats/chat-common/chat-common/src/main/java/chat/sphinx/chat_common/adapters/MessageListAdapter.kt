@@ -12,10 +12,7 @@ import androidx.navigation.NavArgs
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import chat.sphinx.chat_common.databinding.LayoutChatHeaderBinding
-import chat.sphinx.chat_common.databinding.LayoutMessageHolderBinding
-import chat.sphinx.chat_common.databinding.LayoutMessageLinkPreviewContactBinding
-import chat.sphinx.chat_common.databinding.LayoutMessageLinkPreviewTribeBinding
+import chat.sphinx.chat_common.databinding.*
 import chat.sphinx.chat_common.ui.ChatViewModel
 import chat.sphinx.chat_common.ui.isMessageSelected
 import chat.sphinx.chat_common.ui.viewstate.messageholder.*
@@ -54,7 +51,8 @@ internal class MessageListAdapter<ARGS : NavArgs>(
     private val imageLoader: ImageLoader<ImageView>,
 ) : RecyclerView.Adapter<MessageListAdapter<ARGS>.MessageViewHolder>(),
     DefaultLifecycleObserver,
-    View.OnLayoutChangeListener
+    View.OnLayoutChangeListener,
+    SphinxUrlSpan.PreviewHandler
 {
 
     private inner class Diff(
@@ -270,77 +268,6 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                     currentViewState?.message?.let { nnMessage ->
                         viewModel.copyCallLink(nnMessage)
                     }
-
-                    override fun populateTribe(
-                        tribeJoinLink: TribeJoinLink,
-                        layoutMessageLinkPreviewTribeBinding: LayoutMessageLinkPreviewTribeBinding
-                    ) {
-                        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-                            viewModel.getTribe(tribeJoinLink).collect { loadResponse ->
-
-                                when (loadResponse) {
-                                    is LoadResponse.Loading -> {}
-                                    is Response.Error -> {
-                                        // TODO: Set Failed
-                                    }
-                                    is Response.Success -> {
-                                        val tribeInfo = loadResponse.value
-
-                                        layoutMessageLinkPreviewTribeBinding.textViewMessageLinkPreviewTribeNameLabel.text = tribeInfo.name
-                                        layoutMessageLinkPreviewTribeBinding.textViewMessageLinkPreviewTribeDescription.text = tribeInfo.description
-                                        tribeInfo.img?.let {
-                                            imageLoader.load(
-                                                layoutMessageLinkPreviewTribeBinding.imageViewMessageLinkPreviewTribe,
-                                                it,
-                                                ImageLoaderOptions.Builder()
-                                                    .placeholderResId(R.drawable.ic_tribe_placeholder)
-                                                    .transformation(Transformation.CircleCrop)
-                                                    .build()
-                                            )
-                                        }
-                                        layoutMessageLinkPreviewTribeBinding.textViewMessageLinkPreviewTribeSeeBanner.setOnClickListener {
-                                            viewModel.goToLightningNodePubKeyDetailScreen(tribeJoinLink.value)
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    override fun populateContact(
-                        lightningNodePubKey: LightningNodePubKey,
-                        layoutMessageLinkPreviewContactBinding: LayoutMessageLinkPreviewContactBinding
-                    ) {
-                        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-                            viewModel.getContact(lightningNodePubKey).collect { contact ->
-                                layoutMessageLinkPreviewContactBinding.apply {
-                                    textViewMessageLinkPreviewContactPubkey.text = lightningNodePubKey.value
-                                    textViewMessageLinkPreviewAddContactBanner.setOnClickListener {
-                                        viewModel.goToLightningNodePubKeyDetailScreen(lightningNodePubKey.value)
-                                    }
-                                    imageViewMessageLinkPreviewQrInviteIcon.setOnClickListener {
-                                        viewModel.goToLightningNodePubKeyDetailScreen(lightningNodePubKey.value)
-                                    }
-                                    if (contact != null) {
-                                        // Existing contact
-                                        textViewMessageLinkPreviewNewContactLabel.text = contact.alias?.value
-                                        textViewMessageLinkPreviewAddContactBanner.text = binding.root.context.getString(chat.sphinx.chat_common.R.string.link_preview_view_contact)
-                                        contact.photoUrl?.let {
-                                            imageLoader.load(
-                                                imageViewMessageLinkPreviewContactAvatar,
-                                                it.value,
-                                                ImageLoaderOptions.Builder()
-                                                    .placeholderResId(R.drawable.ic_tribe_placeholder)
-                                                    .transformation(Transformation.CircleCrop)
-                                                    .build()
-                                            )
-                                        }
-                                    }
-                                }
-
-                            }
-                        }
-                    }
                 }
             }
 
@@ -432,7 +359,8 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                 viewModel.memeServerTokenHandler,
                 recyclerViewWidth,
                 viewState,
-                onSphinxInteractionListener
+                onSphinxInteractionListener,
+                this@MessageListAdapter
             )
 
         }
@@ -441,5 +369,83 @@ internal class MessageListAdapter<ARGS : NavArgs>(
 
     init {
         lifecycleOwner.lifecycle.addObserver(this)
+    }
+
+    override fun populateTribe(
+        tribeJoinLink: TribeJoinLink,
+        layoutMessageLinkPreviewTribeBinding: LayoutMessageLinkPreviewTribeBinding
+    ) {
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.getTribe(tribeJoinLink).collect { loadResponse ->
+
+                when (loadResponse) {
+                    is LoadResponse.Loading -> {}
+                    is Response.Error -> {
+                        // TODO: Set Failed
+                    }
+                    is Response.Success -> {
+                        val tribeInfo = loadResponse.value
+
+                        layoutMessageLinkPreviewTribeBinding.textViewMessageLinkPreviewTribeNameLabel.text = tribeInfo.name
+                        layoutMessageLinkPreviewTribeBinding.textViewMessageLinkPreviewTribeDescription.text = tribeInfo.description
+                        tribeInfo.img?.let {
+                            imageLoader.load(
+                                layoutMessageLinkPreviewTribeBinding.imageViewMessageLinkPreviewTribe,
+                                it,
+                                ImageLoaderOptions.Builder()
+                                    .placeholderResId(R.drawable.ic_tribe_placeholder)
+                                    .transformation(Transformation.CircleCrop)
+                                    .build()
+                            )
+                        }
+                        layoutMessageLinkPreviewTribeBinding.textViewMessageLinkPreviewTribeSeeBanner.setOnClickListener {
+                            viewModel.goToLightningNodePubKeyDetailScreen(tribeJoinLink.value)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    override fun populateContact(
+        lightningNodePubKey: LightningNodePubKey,
+        layoutMessageLinkPreviewContactBinding: LayoutMessageLinkPreviewContactBinding
+    ) {
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.getContact(lightningNodePubKey).collect { contact ->
+                layoutMessageLinkPreviewContactBinding.apply {
+                    textViewMessageLinkPreviewContactPubkey.text = lightningNodePubKey.value
+                    textViewMessageLinkPreviewAddContactBanner.setOnClickListener {
+                        viewModel.goToLightningNodePubKeyDetailScreen(lightningNodePubKey.value)
+                    }
+                    imageViewMessageLinkPreviewQrInviteIcon.setOnClickListener {
+                        viewModel.goToLightningNodePubKeyDetailScreen(lightningNodePubKey.value)
+                    }
+                    if (contact != null) {
+                        // Existing contact
+                        textViewMessageLinkPreviewNewContactLabel.text = contact.alias?.value
+                        textViewMessageLinkPreviewAddContactBanner.text = textViewMessageLinkPreviewNewContactLabel.context.getString(chat.sphinx.chat_common.R.string.link_preview_view_contact)
+                        contact.photoUrl?.let {
+                            imageLoader.load(
+                                imageViewMessageLinkPreviewContactAvatar,
+                                it.value,
+                                ImageLoaderOptions.Builder()
+                                    .placeholderResId(R.drawable.ic_tribe_placeholder)
+                                    .transformation(Transformation.CircleCrop)
+                                    .build()
+                            )
+                        }
+                    }
+                }
+
+            }
+        }
+    }
+
+    override fun populateUrlPreview(
+        url: String,
+        layoutMessageLinkPreviewUrlBinding: LayoutMessageLinkPreviewUrlBinding
+    ) {
+        // TODO: Preview URL
     }
 }
