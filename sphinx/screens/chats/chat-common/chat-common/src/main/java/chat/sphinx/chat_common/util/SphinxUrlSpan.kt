@@ -2,7 +2,9 @@ package chat.sphinx.chat_common.util
 
 import android.text.style.URLSpan
 import android.view.View
+import chat.sphinx.chat_common.databinding.LayoutMessageLinkPreviewContactBinding
 import chat.sphinx.chat_common.databinding.LayoutMessageLinkPreviewTribeBinding
+import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.isValidLightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.isValidLightningPaymentRequest
 import chat.sphinx.wrapper_common.tribe.TribeJoinLink
@@ -41,6 +43,8 @@ open class SphinxUrlSpan(
         abstract fun onClick(url: String?)
 
         abstract fun populateTribe(tribeJoinLink: TribeJoinLink, layoutMessageLinkPreviewTribeBinding: LayoutMessageLinkPreviewTribeBinding)
+
+        abstract fun populateContact(lightningNodePubKey: LightningNodePubKey, layoutMessageLinkPreviewContactBinding: LayoutMessageLinkPreviewContactBinding)
 
         override fun onLongClick(view: View): Boolean {
             longClickCounter.incrementAndGet()

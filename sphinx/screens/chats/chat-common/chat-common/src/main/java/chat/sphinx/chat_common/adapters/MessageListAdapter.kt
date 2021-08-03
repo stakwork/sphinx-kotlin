@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import chat.sphinx.chat_common.databinding.LayoutChatHeaderBinding
 import chat.sphinx.chat_common.databinding.LayoutMessageHolderBinding
+import chat.sphinx.chat_common.databinding.LayoutMessageLinkPreviewContactBinding
 import chat.sphinx.chat_common.databinding.LayoutMessageLinkPreviewTribeBinding
 import chat.sphinx.chat_common.ui.ChatViewModel
 import chat.sphinx.chat_common.ui.isMessageSelected
@@ -28,6 +29,7 @@ import chat.sphinx.join_tribe.R
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.wrapper_common.dashboard.ContactId
+import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.tribe.TribeJoinLink
 import chat.sphinx.wrapper_message.MessageType
@@ -247,7 +249,10 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                         viewModel.goToLightningNodePubKeyDetailScreen(url)
                     }
 
-                    override fun populateTribe(tribeJoinLink: TribeJoinLink, layoutMessageLinkPreviewTribeBinding: LayoutMessageLinkPreviewTribeBinding) {
+                    override fun populateTribe(
+                        tribeJoinLink: TribeJoinLink,
+                        layoutMessageLinkPreviewTribeBinding: LayoutMessageLinkPreviewTribeBinding
+                    ) {
                         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
                             viewModel.getTribe(tribeJoinLink).collect { loadResponse ->
 
@@ -276,6 +281,41 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                                         }
                                     }
                                 }
+                            }
+                        }
+                    }
+
+                    override fun populateContact(
+                        lightningNodePubKey: LightningNodePubKey,
+                        layoutMessageLinkPreviewContactBinding: LayoutMessageLinkPreviewContactBinding
+                    ) {
+                        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                            viewModel.getContact(lightningNodePubKey).collect { contact ->
+                                layoutMessageLinkPreviewContactBinding.apply {
+                                    textViewMessageLinkPreviewContactPubkey.text = lightningNodePubKey.value
+                                    textViewMessageLinkPreviewAddContactBanner.setOnClickListener {
+                                        viewModel.goToLightningNodePubKeyDetailScreen(lightningNodePubKey.value)
+                                    }
+                                    imageViewMessageLinkPreviewQrInviteIcon.setOnClickListener {
+                                        viewModel.goToLightningNodePubKeyDetailScreen(lightningNodePubKey.value)
+                                    }
+                                    if (contact != null) {
+                                        // Existing contact
+                                        textViewMessageLinkPreviewNewContactLabel.text = contact.alias?.value
+                                        textViewMessageLinkPreviewAddContactBanner.text = binding.root.context.getString(chat.sphinx.chat_common.R.string.link_preview_view_contact)
+                                        contact.photoUrl?.let {
+                                            imageLoader.load(
+                                                imageViewMessageLinkPreviewContactAvatar,
+                                                it.value,
+                                                ImageLoaderOptions.Builder()
+                                                    .placeholderResId(R.drawable.ic_tribe_placeholder)
+                                                    .transformation(Transformation.CircleCrop)
+                                                    .build()
+                                            )
+                                        }
+                                    }
+                                }
+
                             }
                         }
                     }

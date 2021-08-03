@@ -46,10 +46,7 @@ import chat.sphinx.wrapper_chat.*
 import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
-import chat.sphinx.wrapper_common.lightning.Sat
-import chat.sphinx.wrapper_common.lightning.getPubKey
-import chat.sphinx.wrapper_common.lightning.isValidLightningNodePubKey
-import chat.sphinx.wrapper_common.lightning.toLightningNodePubKey
+import chat.sphinx.wrapper_common.lightning.*
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessageUUID
 import chat.sphinx.wrapper_common.tribe.TribeJoinLink
@@ -869,6 +866,10 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 
     fun getTribe(tribeJoinLink: TribeJoinLink): Flow<LoadResponse<TribeDto, ResponseError>> {
         return networkQueryChat.getTribeInfo(ChatHost(tribeJoinLink.tribeHost), ChatUUID(tribeJoinLink.tribeUUID))
+    }
+
+    fun getContact(lightningNodePubKey: LightningNodePubKey): Flow<Contact?> {
+        return contactRepository.getContactByPubKey(lightningNodePubKey)
     }
     open suspend fun processMemberRequest(
         contactId: ContactId,
