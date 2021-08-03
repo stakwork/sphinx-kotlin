@@ -8,6 +8,8 @@ import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_background_login.BackgroundLoginHandler
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_lightning.model.invoice.PayRequestDto
+import chat.sphinx.concept_repository_chat.ChatRepository
+import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_dashboard_android.RepositoryDashboardAndroid
 import chat.sphinx.concept_service_notification.PushNotificationRegistrar
 import chat.sphinx.concept_socket_io.SocketIOManager
@@ -80,8 +82,10 @@ internal class DashboardViewModel @Inject constructor(
     dispatchers: CoroutineDispatchers,
 
     private val repositoryDashboard: RepositoryDashboardAndroid<Any>,
+    private val contactRepository: ContactRepository,
+    private val chatRepository: ChatRepository,
 
-    protected val networkQueryLightning: NetworkQueryLightning,
+    private val networkQueryLightning: NetworkQueryLightning,
 
     private val pushNotificationRegistrar: PushNotificationRegistrar,
 
@@ -109,10 +113,10 @@ internal class DashboardViewModel @Inject constructor(
                     filter = object : ScannerFilter() {
                         override suspend fun checkData(data: String): Response<Any, String> {
                             return when {
-                                data.isValidTribeJoinLink -> {
-                                    Response.Success(Any())
-                                }
-                                data.isValidLightningPaymentRequest -> {
+                                data.isValidTribeJoinLink ||
+                                data.isValidLightningPaymentRequest ||
+                                data.isValidLightningNodePubKey ->
+                                {
                                     Response.Success(Any())
                                 }
                                 else -> {
@@ -131,9 +135,22 @@ internal class DashboardViewModel @Inject constructor(
 
                 if (code.isValidTribeJoinLink) {
                     dashboardNavigator.toJoinTribeDetail(TribeJoinLink(code))
+                } else if (code.isValidLightningNodePubKey) {
+                    code.toLightningNodePubKey()?.let { lightningNodePubKey ->
+                        lightningNodePubKey.getPubKey()?.let { nnPubKey ->
+                            contactRepository.getContactByPubKey(nnPubKey).collect { contact ->
+                                if (contact == null) {
+                                    dashboardNavigator.toAddContactDetail(lightningNodePubKey)
+                                } else {
+                                    chatRepository.getConversationByContactId(contact.id).collect { chat ->
+                                        dashboardNavigator.toChatContact(chat?.id, contact.id)
+                                    }
+                                }
+                            }
+                        }
+                    }
                 } else {
                     code.toLightningPaymentRequestOrNull()?.let { lightningPaymentRequest ->
-
                         try {
                             val bolt11 = Bolt11.decode(lightningPaymentRequest)
                             val amount = bolt11.getSatsAmount()

@@ -1,5 +1,6 @@
 package chat.sphinx.activitymain.navigation.navigators.primary
 
+import chat.sphinx.activitymain.R
 import chat.sphinx.activitymain.navigation.drivers.DetailNavigationDriver
 import chat.sphinx.activitymain.navigation.drivers.PrimaryNavigationDriver
 import chat.sphinx.chat_contact.navigation.ToChatContactScreen
@@ -7,9 +8,11 @@ import chat.sphinx.chat_group.navigation.ToChatGroupScreen
 import chat.sphinx.chat_tribe.navigation.ToChatTribeScreen
 import chat.sphinx.dashboard.navigation.DashboardNavigator
 import chat.sphinx.join_tribe.navigation.ToJoinTribeDetail
+import chat.sphinx.new_contact.navigation.ToNewContactDetail
 import chat.sphinx.qr_code.navigation.ToQRCodeDetail
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
+import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.tribe.TribeJoinLink
 import javax.inject.Inject
 
@@ -42,5 +45,11 @@ internal class DashboardNavigatorImpl @Inject constructor(
 
     override suspend fun toQRCodeDetail(qrText: String, viewTitle: String) {
         detailDriver.submitNavigationRequest(ToQRCodeDetail(qrText, viewTitle))
+    }
+
+    override suspend fun toAddContactDetail(pubKey: LightningNodePubKey) {
+        detailDriver.submitNavigationRequest(
+            ToNewContactDetail(pubKey, false)
+        )
     }
 }
