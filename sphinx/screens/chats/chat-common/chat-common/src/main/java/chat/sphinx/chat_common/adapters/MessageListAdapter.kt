@@ -383,29 +383,31 @@ internal class MessageListAdapter<ARGS : NavArgs>(
     ) {
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.getTribe(tribeJoinLink).collect { loadResponse ->
-
                 when (loadResponse) {
                     is LoadResponse.Loading -> {}
                     is Response.Error -> {
-                        // TODO: Set Failed
+                        layoutMessageLinkPreviewTribeBinding.root.gone
                     }
                     is Response.Success -> {
                         val tribeInfo = loadResponse.value
 
-                        layoutMessageLinkPreviewTribeBinding.textViewMessageLinkPreviewTribeNameLabel.text = tribeInfo.name
-                        layoutMessageLinkPreviewTribeBinding.textViewMessageLinkPreviewTribeDescription.text = tribeInfo.description
-                        tribeInfo.img?.let {
-                            imageLoader.load(
-                                layoutMessageLinkPreviewTribeBinding.imageViewMessageLinkPreviewTribe,
-                                it,
-                                ImageLoaderOptions.Builder()
-                                    .placeholderResId(R.drawable.ic_tribe_placeholder)
-                                    .transformation(Transformation.CircleCrop)
-                                    .build()
-                            )
-                        }
-                        layoutMessageLinkPreviewTribeBinding.textViewMessageLinkPreviewTribeSeeBanner.setOnClickListener {
-                            viewModel.goToLightningNodePubKeyDetailScreen(tribeJoinLink.value)
+                        layoutMessageLinkPreviewTribeBinding.apply {
+                            textViewMessageLinkPreviewTribeNameLabel.text = tribeInfo.name
+                            textViewMessageLinkPreviewTribeDescription.text = tribeInfo.description
+                            tribeInfo.img?.let {
+                                imageLoader.load(
+                                    imageViewMessageLinkPreviewTribe,
+                                    it,
+                                    ImageLoaderOptions.Builder()
+                                        .placeholderResId(R.drawable.ic_tribe_placeholder)
+                                        .transformation(Transformation.CircleCrop)
+                                        .build()
+                                )
+                            }
+                            textViewMessageLinkPreviewTribeSeeBanner.setOnClickListener {
+                                viewModel.goToLightningNodePubKeyDetailScreen(tribeJoinLink.value)
+                            }
+                            root.visible
                         }
                     }
                 }
@@ -442,6 +444,7 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                             )
                         }
                     }
+                    root.visible
                 }
 
             }
@@ -452,7 +455,9 @@ internal class MessageListAdapter<ARGS : NavArgs>(
         url: String,
         layoutMessageLinkPreviewUrlBinding: LayoutMessageLinkPreviewUrlBinding
     ) {
-        // TODO: Show loading...
+        layoutMessageLinkPreviewUrlBinding.root.visible
+        layoutMessageLinkPreviewUrlBinding.constraintLayoutUrlLinkPreview.gone
+        layoutMessageLinkPreviewUrlBinding.progressBarLinkPreview.visible
         val client = OkHttpClient()
 
         val request: Request = Request.Builder()
@@ -461,19 +466,21 @@ internal class MessageListAdapter<ARGS : NavArgs>(
 
         client.newCall(request).enqueue(object: Callback {
             override fun onFailure(call: Call, e: IOException) {
-                layoutMessageLinkPreviewUrlBinding.root.gone
+                onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                    layoutMessageLinkPreviewUrlBinding.root.gone
+                }
             }
 
             override fun onResponse(call: Call, response: okhttp3.Response) {
-                if (response.isSuccessful) {
-                    response.body()?.string()?.let {
-                        val document = Jsoup.parse(it)
+                onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                    layoutMessageLinkPreviewUrlBinding.progressBarLinkPreview.gone
+                    if (response.isSuccessful) {
+                        response.body()?.string()?.let {
+                            val document = Jsoup.parse(it)
 
-                        val urlMetadata = document.toUrlMetadata()
+                            val urlMetadata = document.toUrlMetadata()
 
-                        if (urlMetadata != null) {
-
-                            onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                            if (urlMetadata != null) {
                                 layoutMessageLinkPreviewUrlBinding.apply {
                                     textViewMessageLinkPreviewUrlTitle.text = urlMetadata.title
                                     if (urlMetadata.description == null) {
@@ -503,13 +510,14 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                                         )
                                     }
                                 }
+                                layoutMessageLinkPreviewUrlBinding.constraintLayoutUrlLinkPreview.visible
+                            } else {
+                                layoutMessageLinkPreviewUrlBinding.root.gone
                             }
-                        } else {
-                            layoutMessageLinkPreviewUrlBinding.root.gone
                         }
+                    } else {
+                        layoutMessageLinkPreviewUrlBinding.root.gone
                     }
-                } else {
-                    layoutMessageLinkPreviewUrlBinding.root.gone
                 }
             }
         })
