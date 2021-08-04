@@ -193,8 +193,10 @@ internal class DashboardViewModel @Inject constructor(
         contactRepository.getContactByPubKey(pubKey).firstOrNull()?.let { contact ->
 
             chatRepository.getConversationByContactId(contact.id).firstOrNull()?.let { chat ->
+
                 dashboardNavigator.toChatContact(chat.id, contact.id)
-            }
+                
+            } ?: dashboardNavigator.toChatContact(null, contact.id)
 
         } ?: dashboardNavigator.toAddContactDetail(pubKey, routeHint)
     }
