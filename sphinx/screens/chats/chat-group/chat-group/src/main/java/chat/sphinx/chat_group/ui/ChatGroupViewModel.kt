@@ -19,7 +19,6 @@ import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.logger.SphinxLogger
-import chat.sphinx.menu_bottom_call.CallMenuViewModel
 import chat.sphinx.resources.getRandomColor
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.ChatName
@@ -65,7 +64,7 @@ class ChatGroupViewModel @Inject constructor(
     savedStateHandle,
     cameraViewModelCoordinator,
     LOG,
-), CallMenuViewModel {
+) {
     override val args: ChatGroupFragmentArgs by savedStateHandle.navArgs()
     override var chatId: ChatId = args.chatId
     override val contactId: ContactId?

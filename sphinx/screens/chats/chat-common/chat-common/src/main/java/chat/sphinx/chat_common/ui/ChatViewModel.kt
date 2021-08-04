@@ -40,8 +40,6 @@ import chat.sphinx.kotlin_response.*
 import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.logger.e
 import chat.sphinx.menu_bottom.ui.MenuBottomViewState
-import chat.sphinx.menu_bottom_call.CallMenuHandler
-import chat.sphinx.menu_bottom_call.CallMenuViewModel
 import chat.sphinx.resources.getRandomColor
 import chat.sphinx.wrapper_chat.*
 import chat.sphinx.wrapper_common.dashboard.ChatId
@@ -106,8 +104,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         ChatSideEffectFragment,
         ChatSideEffect,
         ChatMenuViewState,
-        >(dispatchers, ChatMenuViewState.Closed),
-    CallMenuViewModel
+        >(dispatchers, ChatMenuViewState.Closed)
 {
     companion object {
         const val TAG = "ChatViewModel"
@@ -133,8 +130,8 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         app.getRandomColor()
     }
 
-    override val callMenuHandler: CallMenuHandler by lazy {
-        CallMenuHandler()
+    val callMenuHandler: ViewStateContainer<MenuBottomViewState> by lazy {
+        ViewStateContainer(MenuBottomViewState.Closed)
     }
 
     protected abstract val chatSharedFlow: SharedFlow<Chat?>
@@ -816,8 +813,8 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         }
     }
 
-    override fun sendCallInvite(audioOnly: Boolean) {
-        callMenuHandler.viewStateContainer.updateViewState(
+    fun sendCallInvite(audioOnly: Boolean) {
+        callMenuHandler.updateViewState(
             MenuBottomViewState.Closed
         )
         SphinxCallLink.newCallInvite(audioOnly)?.value?.let { newCallLink ->

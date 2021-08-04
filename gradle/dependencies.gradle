@@ -119,7 +119,7 @@ ext.deps = [
             sdk: "com.giphy.sdk:ui:2.1.2"
     ],
     jitsi: [
-            sdk: "org.jitsi.react:jitsi-meet-sdk:2.+"
+            sdk: "org.jitsi.react:jitsi-meet-sdk:3.0.0"
     ]
 ]
 

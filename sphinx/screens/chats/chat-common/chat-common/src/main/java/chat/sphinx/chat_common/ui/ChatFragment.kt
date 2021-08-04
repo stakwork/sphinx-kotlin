@@ -44,8 +44,9 @@ import chat.sphinx.insetter_activity.addStatusBarPadding
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.menu_bottom.databinding.LayoutMenuBottomBinding
+import chat.sphinx.menu_bottom.model.MenuBottomOption
+import chat.sphinx.menu_bottom.ui.BottomMenu
 import chat.sphinx.menu_bottom.ui.MenuBottomViewState
-import chat.sphinx.menu_bottom_call.BottomMenuCall
 import chat.sphinx.resources.*
 import chat.sphinx.wrapper_chat.isTrue
 import chat.sphinx.wrapper_meme_server.headerKey
@@ -102,10 +103,11 @@ abstract class ChatFragment<
     override val chatFragmentContext: Context
         get() = binding.root.context
 
-    private val bottomMenuCall: BottomMenuCall by lazy(LazyThreadSafetyMode.NONE) {
-        BottomMenuCall(
+    private val bottomMenuCall: BottomMenu by lazy(LazyThreadSafetyMode.NONE) {
+        BottomMenu(
+            viewModel.dispatchers,
             onStopSupervisor,
-            viewModel
+            viewModel.callMenuHandler
         )
     }
 
@@ -229,10 +231,26 @@ abstract class ChatFragment<
     }
 
     private fun setupFooter(insetterActivity: InsetterActivity) {
-        bottomMenuCall.initialize(
-            callMenuBinding,
-            viewLifecycleOwner
-        )
+        bottomMenuCall.newBuilder(callMenuBinding, viewLifecycleOwner)
+            .setHeaderText(R.string.bottom_menu_call_header_text)
+            .setOptions(
+                setOf(
+                    MenuBottomOption(
+                        text = R.string.bottom_menu_call_option_audio,
+                        textColor = R.color.primaryBlueFontColor,
+                        onClick = {
+                            viewModel.sendCallInvite(true)
+                        }
+                    ),
+                    MenuBottomOption(
+                        text = R.string.bottom_menu_call_option_video_or_audio,
+                        textColor = R.color.primaryBlueFontColor,
+                        onClick = {
+                            viewModel.sendCallInvite(false)
+                        }
+                    )
+                )
+            ).build()
 
         callMenuBinding.apply {
             insetterActivity.addNavigationBarPadding(root)
@@ -321,7 +339,7 @@ abstract class ChatFragment<
             }
 
             textViewChatHeaderPhone.setOnClickListener {
-                viewModel.callMenuHandler.viewStateContainer.updateViewState(
+                viewModel.callMenuHandler.updateViewState(
                     MenuBottomViewState.Open
                 )
             }

@@ -37,7 +37,6 @@ dependencies {
     api project(path: ':sphinx:service:concepts:concept-service-media-player')
     implementation project(path: ':sphinx:screens-detail:chat-detail:tribe-detail')
     implementation project(path: ':sphinx:screens-detail:podcast-player:podcast-player')
-    implementation project(path: ':sphinx:application:common:menus:menu-bottom-call')
 
     implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt

@@ -34,6 +34,8 @@ dependencies {
     api project(path: ':android:features:android-feature-screens')
 
     // Sphinx
+    api project(path: ':sphinx:application:common:menus:menu-bottom')
+
     api project(path: ':sphinx:application:common:logger')
     api project(path: ':sphinx:application:common:resources')
 
@@ -46,7 +48,6 @@ dependencies {
     api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-contact')
     api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-message')
 
-    implementation project(path: ':sphinx:application:common:menus:menu-bottom-call')
     implementation project(path: ':sphinx:application:network:concepts:clients:concept-network-client-crypto')
 
     api project(path: ':sphinx:application:network:concepts:queries:concept-network-query-lightning')
