@@ -28,10 +28,7 @@ import chat.sphinx.wrapper_io_utils.InputStreamProvider
 import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_message_media.MediaType
 import chat.sphinx.wrapper_message_media.toMediaType
-import chat.sphinx.wrapper_relay.RelayUrl
-import chat.sphinx.wrapper_relay.isOnionAddress
-import chat.sphinx.wrapper_relay.isValidRelayUrl
-import chat.sphinx.wrapper_relay.toRelayUrl
+import chat.sphinx.wrapper_relay.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
@@ -153,13 +150,9 @@ internal class ProfileViewModel @Inject constructor(
         contactRepository.updateOwner(alias, privatePhoto, tipAmount)
 
     suspend fun updateRelayUrl(url: String?)  {
-        _relayUrlStateFlow.value = url
-
-        delay(50L)
-
         if (url == null || (!url.isValidRelayUrl && !url.isOnionAddress)) {
 
-            _relayUrlStateFlow.value = relayDataHandler.retrieveRelayUrl()?.value
+            _relayUrlStateFlow.value = RelayUrlString(relayDataHandler.retrieveRelayUrl()?.value)
 
             submitSideEffect(ProfileSideEffect.InvalidRelayUrl)
 
@@ -190,7 +183,7 @@ internal class ProfileViewModel @Inject constructor(
                 }
             }
 
-            _relayUrlStateFlow.value = relayDataHandler.retrieveRelayUrl()?.value
+            _relayUrlStateFlow.value = RelayUrlString(relayDataHandler.retrieveRelayUrl()?.value)
 
             val sideEffect = if (success) {
                 ProfileSideEffect.RelayUrlUpdatedSuccessfully
@@ -292,14 +285,14 @@ internal class ProfileViewModel @Inject constructor(
         }
     }
 
-    private val _relayUrlStateFlow: MutableStateFlow<String?> by lazy {
+    private val _relayUrlStateFlow: MutableStateFlow<RelayUrlString?> by lazy {
         MutableStateFlow(null)
     }
     private val _pinTimeoutStateFlow: MutableStateFlow<Int?> by lazy {
         MutableStateFlow(null)
     }
 
-    val relayUrlStateFlow: StateFlow<String?>
+    val relayUrlStateFlow: StateFlow<RelayUrlString?>
         get() = _relayUrlStateFlow.asStateFlow()
     val pinTimeoutStateFlow: StateFlow<Int?>
         get() = _pinTimeoutStateFlow.asStateFlow()
@@ -308,7 +301,7 @@ internal class ProfileViewModel @Inject constructor(
 
     init {
         viewModelScope.launch(mainImmediate) {
-            _relayUrlStateFlow.value = relayDataHandler.retrieveRelayUrl()?.value
+            _relayUrlStateFlow.value = RelayUrlString(relayDataHandler.retrieveRelayUrl()?.value)
             _pinTimeoutStateFlow.value = backgroundLoginHandler.getTimeOutSetting()
         }
     }

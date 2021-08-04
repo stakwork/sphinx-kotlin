@@ -1,5 +1,7 @@
 package chat.sphinx.wrapper_relay
 
+import kotlin.random.Random
+
 @Suppress("NOTHING_TO_INLINE")
 inline fun String.toRelayUrl(): RelayUrl? =
     try {
@@ -26,5 +28,17 @@ value class RelayUrl(val value: String){
         require(value.isNotEmpty()) {
             "RelayUrl cannot be empty"
         }
+    }
+}
+
+data class RelayUrlString(
+    val value: String? = null
+) {
+    override fun equals(other: Any?): Boolean {
+        return false
+    }
+
+    override fun hashCode(): Int {
+        return Random.nextInt()
     }
 }

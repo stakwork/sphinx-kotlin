@@ -273,10 +273,12 @@ internal class ProfileFragment: SideEffectFragment<
 
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.relayUrlStateFlow.collect { relayUrl ->
-                binding
-                    .includeProfileAdvancedContainerHolder
-                    .editTextProfileAdvancedContainerServerUrl
-                    .setText(relayUrl)
+                relayUrl?.let { nnRelayUrl ->
+                    binding
+                        .includeProfileAdvancedContainerHolder
+                        .editTextProfileAdvancedContainerServerUrl
+                        .setText(nnRelayUrl.value)
+                }
             }
         }
 
