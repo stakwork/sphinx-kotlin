@@ -20,6 +20,21 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/text_view_dashboard_header_upgrade_app"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/upgrade_app"
+        android:textSize="8sp"
+        android:padding="@dimen/default_half_layout_margin"
+        android:fontFamily="@font/montserrat_semi_bold"
+        android:textColor="@android:color/white"
+        android:background="@drawable/background_upgrade_app_button"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/image_view_nav_drawer_menu"
+        app:layout_constraintTop_toTopOf="parent"/>
+
+    <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/text_view_dashboard_header_balance"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -31,7 +46,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:text="134 456" />
+        tools:text="134 456 000" />
 
     <androidx.appcompat.widget.AppCompatTextView
         android:layout_width="wrap_content"

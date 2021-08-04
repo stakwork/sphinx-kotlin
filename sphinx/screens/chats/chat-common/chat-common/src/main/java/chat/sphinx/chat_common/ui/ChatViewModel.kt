@@ -1,6 +1,7 @@
 package chat.sphinx.chat_common.ui
 
 import android.app.Application
+import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.util.Log
@@ -38,14 +39,20 @@ import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
 import chat.sphinx.kotlin_response.*
 import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.logger.e
+import chat.sphinx.menu_bottom.ui.MenuBottomViewState
 import chat.sphinx.resources.getRandomColor
 import chat.sphinx.wrapper_chat.*
+import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
-import chat.sphinx.wrapper_common.lightning.Sat
+import chat.sphinx.wrapper_common.lightning.*
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessageUUID
+import chat.sphinx.wrapper_common.tribe.TribeJoinLink
+import chat.sphinx.wrapper_common.tribe.toTribeJoinLink
+import chat.sphinx.wrapper_common.message.SphinxCallLink
 import chat.sphinx.wrapper_contact.Contact
+import chat.sphinx.wrapper_contact.avatarUrl
 import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message_media.MediaType
 import chat.sphinx.wrapper_message_media.toMediaType
@@ -68,6 +75,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.jitsi.meet.sdk.JitsiMeetActivity
+import org.jitsi.meet.sdk.JitsiMeetConferenceOptions
+import org.jitsi.meet.sdk.JitsiMeetUserInfo
 import java.io.File
 import java.io.InputStream
 
@@ -118,6 +128,10 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 
     protected val headerInitialsTextViewColor: Int by lazy {
         app.getRandomColor()
+    }
+
+    val callMenuHandler: ViewStateContainer<MenuBottomViewState> by lazy {
+        ViewStateContainer(MenuBottomViewState.Closed)
     }
 
     protected abstract val chatSharedFlow: SharedFlow<Chat?>
@@ -205,11 +219,8 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         message: Message
     ): InitialHolderViewState
 
-    internal val messageHolderViewStateFlow: StateFlow<List<MessageHolderViewState>> = flow {
-        val chat = getChat()
-        val chatName = getChatNameIfNull()
-
-        val owner: Contact = contactRepository.accountOwner.value.let { contact ->
+    private suspend fun getOwner(): Contact {
+        return contactRepository.accountOwner.value.let { contact ->
             if (contact != null) {
                 contact
             } else {
@@ -221,12 +232,19 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                             throw Exception()
                         }
                     }
-                } catch (e: Exception) {}
+                } catch (e: Exception) {
+                }
                 delay(25L)
 
                 resolvedOwner!!
             }
         }
+    }
+
+    internal val messageHolderViewStateFlow: StateFlow<List<MessageHolderViewState>> = flow {
+        val chat = getChat()
+        val chatName = getChatNameIfNull()
+        val owner = getOwner()
 
         messageRepository.getAllMessagesToShowByChatId(chat.id).distinctUntilChanged().collect { messages ->
             val newList = ArrayList<MessageHolderViewState>(messages.size)
@@ -795,18 +813,115 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         }
     }
 
-    override suspend fun onMotionSceneCompletion(value: Nothing) {
-        // unused
+    fun sendCallInvite(audioOnly: Boolean) {
+        callMenuHandler.updateViewState(
+            MenuBottomViewState.Closed
+        )
+        SphinxCallLink.newCallInvite(audioOnly)?.value?.let { newCallLink ->
+            val messageBuilder = SendMessage.Builder()
+            messageBuilder.setText(newCallLink)
+            sendMessage(messageBuilder)
+        }
     }
 
-    open fun goToChatDetailScreen() {
-        viewModelScope.launch(mainImmediate) {
-            chatId?.let {
-                chatNavigator.toChatDetail(it, contactId)
+    fun copyCallLink(message: Message) {
+        message.retrieveSphinxCallLink()?.let { callLink ->
+            viewModelScope.launch(mainImmediate) {
+                submitSideEffect(
+                    ChatSideEffect.CopyCallLinkToClipboard(callLink.value)
+                )
             }
         }
     }
 
+    fun joinCall(message: Message, audioOnly: Boolean) {
+        message.retrieveSphinxCallLink()?.let { sphinxCallLink ->
+
+            sphinxCallLink.callServerUrl?.let { nnCallUrl ->
+
+                viewModelScope.launch(mainImmediate) {
+
+                    val owner = getOwner()
+
+                    val userInfo = JitsiMeetUserInfo()
+                    userInfo.displayName = owner.alias?.value ?: ""
+
+                    owner.avatarUrl?.let { nnAvatarUrl ->
+                        userInfo.avatar = nnAvatarUrl
+                    }
+
+                    val options = JitsiMeetConferenceOptions.Builder()
+                        .setServerURL(nnCallUrl)
+                        .setRoom(sphinxCallLink.callRoom)
+                        .setAudioMuted(false)
+                        .setVideoMuted(false)
+                        .setAudioOnly(audioOnly)
+                        .setWelcomePageEnabled(false)
+                        .setUserInfo(userInfo)
+                        .build()
+
+                    val intent = Intent(app, JitsiMeetActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    intent.action = "org.jitsi.meet.CONFERENCE"
+                    intent.putExtra("JitsiMeetConferenceOptions", options)
+                    app.startActivity(intent)
+                }
+            }
+        }
+    }
+
+    open fun goToChatDetailScreen() {
+        chatId?.let { id ->
+            viewModelScope.launch(mainImmediate) {
+                chatNavigator.toChatDetail(id, contactId)
+            }
+        }
+    }
+
+    open fun handleContactTribeLinks(url: String?) {
+        if (url != null) {
+
+            viewModelScope.launch(mainImmediate) {
+
+                url.toLightningNodePubKey()?.let { lightningNodePubKey ->
+
+                    handleContactLink(lightningNodePubKey, null)
+
+                } ?: url.toVirtualLightningNodeAddress()?.let { virtualNodeAddress ->
+
+                    virtualNodeAddress.getPubKey()?.let { lightningNodePubKey ->
+                        handleContactLink(
+                            lightningNodePubKey,
+                            virtualNodeAddress.getRouteHint()
+                        )
+                    }
+
+                } ?: url.toTribeJoinLink()?.let { tribeJoinLink ->
+
+                    handleTribeLink(tribeJoinLink)
+
+                }
+            }
+
+        }
+    }
+
+    private suspend fun handleTribeLink(tribeJoinLink: TribeJoinLink) {
+        chatRepository.getChatByUUID(ChatUUID(tribeJoinLink.tribeUUID)).firstOrNull()?.let { chat ->
+            chatNavigator.toChat(chat, null)
+        } ?: chatNavigator.toJoinTribeDetail(tribeJoinLink)
+    }
+
+    private suspend fun handleContactLink(pubKey: LightningNodePubKey, routeHint: LightningRouteHint?) {
+        contactRepository.getContactByPubKey(pubKey).firstOrNull()?.let { contact ->
+
+            chatRepository.getConversationByContactId(contact.id).collect { chat ->
+                chatNavigator.toChat(chat, contact.id)
+            }
+
+        } ?: chatNavigator.toAddContactDetail(pubKey, routeHint)
+    }
+    
     open suspend fun processMemberRequest(
         contactId: ContactId,
         messageId: MessageId,
@@ -814,4 +929,8 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     ) {}
 
     open suspend fun deleteTribe() {}
+
+    override suspend fun onMotionSceneCompletion(value: Nothing) {
+        // unused
+    }
 }

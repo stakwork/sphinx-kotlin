@@ -557,6 +557,16 @@ abstract class SphinxRepository(
         )
     }
 
+    override fun getContactByPubKey(pubKey: LightningNodePubKey): Flow<Contact?> = flow {
+        emitAll(
+            coreDB.getSphinxDatabaseQueries().contactGetByPubKey(pubKey)
+                .asFlow()
+                .mapToOneOrNull(io)
+                .map { it?.let { contactDboPresenterMapper.mapFrom(it) } }
+                .distinctUntilChanged()
+        )
+    }
+
     override suspend fun getAllContactsByIds(contactIds: List<ContactId>): List<Contact> {
         return coreDB.getSphinxDatabaseQueries()
             .contactGetAllByIds(contactIds)
