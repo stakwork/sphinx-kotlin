@@ -35,6 +35,7 @@ import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.*
 import chat.sphinx.wrapper_common.tribe.TribeJoinLink
 import chat.sphinx.wrapper_common.tribe.isValidTribeJoinLink
+import chat.sphinx.wrapper_common.tribe.toTribeJoinLink
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_contact.isInviteContact
 import chat.sphinx.wrapper_contact.isTrue
@@ -115,7 +116,8 @@ internal class DashboardViewModel @Inject constructor(
                             return when {
                                 data.isValidTribeJoinLink ||
                                 data.isValidLightningPaymentRequest ||
-                                data.isValidLightningNodePubKey ->
+                                data.isValidLightningNodePubKey ||
+                                data.isValidVirtualNodePubKey ->
                                 {
                                     Response.Success(Any())
                                 }
@@ -133,49 +135,58 @@ internal class DashboardViewModel @Inject constructor(
 
                 val code = response.value.value
 
-                if (code.isValidTribeJoinLink) {
-                    dashboardNavigator.toJoinTribeDetail(TribeJoinLink(code))
-                } else if (code.isValidLightningNodePubKey) {
-                    code.toLightningNodePubKey()?.let { lightningNodePubKey ->
-                        lightningNodePubKey.getPubKey()?.let { nnPubKey ->
-                            contactRepository.getContactByPubKey(nnPubKey).collect { contact ->
-                                if (contact == null) {
-                                    dashboardNavigator.toAddContactDetail(lightningNodePubKey)
-                                } else {
-                                    chatRepository.getConversationByContactId(contact.id).collect { chat ->
-                                        dashboardNavigator.toChatContact(chat?.id, contact.id)
-                                    }
-                                }
-                            }
-                        }
+                code.toTribeJoinLink()?.let { tribeJoinLink ->
+                    dashboardNavigator.toJoinTribeDetail(tribeJoinLink)
+                } ?: code.toLightningNodePubKey()?.let { lightningNodePubKey ->
+                    handleContactLink(lightningNodePubKey)
+                } ?: code.toVirtualLightningNodePubKey()?.let { virtualNodePubKey ->
+                    virtualNodePubKey?.getPubKey()?.let { lightningNodePubKey ->
+                        handleContactLink(
+                            lightningNodePubKey,
+                            virtualNodePubKey?.getRouteHint()
+                        )
                     }
-                } else {
-                    code.toLightningPaymentRequestOrNull()?.let { lightningPaymentRequest ->
-                        try {
-                            val bolt11 = Bolt11.decode(lightningPaymentRequest)
-                            val amount = bolt11.getSatsAmount()
+                } ?: code.toLightningPaymentRequestOrNull()?.let { lightningPaymentRequest ->
+                    try {
+                        val bolt11 = Bolt11.decode(lightningPaymentRequest)
+                        val amount = bolt11.getSatsAmount()
 
-                            if (amount != null) {
-                                submitSideEffect(
-                                    DashboardSideEffect.AlertConfirmPayLightningPaymentRequest(
-                                        amount.value,
-                                        bolt11.getMemo()
-                                    ) {
-                                        payLightningPaymentRequest(lightningPaymentRequest)
-                                    }
+                        if (amount != null) {
+                            submitSideEffect(
+                                DashboardSideEffect.AlertConfirmPayLightningPaymentRequest(
+                                    amount.value,
+                                    bolt11.getMemo()
+                                ) {
+                                    payLightningPaymentRequest(lightningPaymentRequest)
+                                }
+                            )
+                        } else {
+                            submitSideEffect(
+                                DashboardSideEffect.Notify(
+                                    app.getString(R.string.payment_request_missing_amount),
+                                    true
                                 )
-                            } else {
-                                submitSideEffect(
-                                    DashboardSideEffect.Notify(
-                                        app.getString(R.string.payment_request_missing_amount),
-                                        true
-                                    )
-                                )
-                            }
-                        } catch (e: Exception) {}
-                    }
+                            )
+                        }
+                    } catch (e: Exception) {}
                 }
             }
+        }
+    }
+
+    private suspend fun handleContactLink(
+        pubKey: LightningNodePubKey,
+        routeHint: LightningRouteHint? = null
+    ) {
+        contactRepository.getContactByPubKey(pubKey).firstOrNull()?.let { contact ->
+            chatRepository.getConversationByContactId(contact.id).collect { chat ->
+                dashboardNavigator.toChatContact(chat?.id, contact.id)
+            }
+        } ?: run {
+            dashboardNavigator.toAddContactDetail(
+                pubKey,
+                routeHint
+            )
         }
     }
 
