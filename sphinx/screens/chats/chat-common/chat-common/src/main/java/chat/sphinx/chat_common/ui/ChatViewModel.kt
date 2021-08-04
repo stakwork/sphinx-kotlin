@@ -816,11 +816,11 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 
             url?.toLightningNodePubKey()?.let { lightningNodePubKey ->
                 handleContactLink(lightningNodePubKey)
-            } ?: url?.toVirtualLightningNodePubKey()?.let { virtualLightningNodePubKey ->
-                virtualLightningNodePubKey?.getPubKey()?.let { lightningNodePubKey ->
+            } ?: url?.toVirtualLightningNodePubKey()?.let { virtualNodePubKey ->
+                virtualNodePubKey?.getPubKey()?.let { lightningNodePubKey ->
                     handleContactLink(
                         lightningNodePubKey,
-                        virtualLightningNodePubKey?.getRouteHint()
+                        virtualNodePubKey?.getRouteHint()
                     )
                 }
             } ?: url?.toTribeJoinLink()?.let { tribeJoinLink ->

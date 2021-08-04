@@ -4,14 +4,14 @@ import android.text.style.URLSpan
 import android.view.View
 import chat.sphinx.wrapper_common.lightning.isValidLightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.isValidLightningPaymentRequest
-import chat.sphinx.wrapper_common.lightning.isValidVirtualLightningNodePubKey
+import chat.sphinx.wrapper_common.lightning.isValidVirtualNodePubKey
 import chat.sphinx.wrapper_common.tribe.isValidTribeJoinLink
 import java.util.concurrent.atomic.AtomicInteger
 
 inline val String.isSphinxUrl: Boolean
     get() = isValidLightningPaymentRequest ||
             isValidLightningNodePubKey ||
-            isValidVirtualLightningNodePubKey ||
+            isValidVirtualNodePubKey ||
             isValidTribeJoinLink
 
 open class SphinxUrlSpan(
