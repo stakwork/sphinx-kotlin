@@ -5,6 +5,8 @@ import androidx.annotation.StringRes
 import chat.sphinx.new_contact.R
 import chat.sphinx.resources.SphinxToastUtils
 import chat.sphinx.scanner_view_model_coordinator.response.ScannerResponse
+import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
+import chat.sphinx.wrapper_common.lightning.LightningRouteHint
 import io.matthewnelson.android_feature_toast_utils.show
 import io.matthewnelson.concept_views.sideeffect.SideEffect
 
@@ -53,7 +55,10 @@ internal sealed class NewContactSideEffect: SideEffect<Context>() {
         }
     }
 
-    data class FromScanner(val value: ScannerResponse): NewContactSideEffect() {
+    data class ContactInfo(
+        val pubKey: LightningNodePubKey,
+        val routeHint: LightningRouteHint? = null
+    ): NewContactSideEffect() {
         override suspend fun execute(value: Context) {}
     }
 }

@@ -42,11 +42,14 @@ import chat.sphinx.logger.e
 import chat.sphinx.menu_bottom.ui.MenuBottomViewState
 import chat.sphinx.resources.getRandomColor
 import chat.sphinx.wrapper_chat.*
+import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
-import chat.sphinx.wrapper_common.lightning.Sat
+import chat.sphinx.wrapper_common.lightning.*
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessageUUID
+import chat.sphinx.wrapper_common.tribe.TribeJoinLink
+import chat.sphinx.wrapper_common.tribe.toTribeJoinLink
 import chat.sphinx.wrapper_common.message.SphinxCallLink
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_contact.avatarUrl
@@ -77,9 +80,6 @@ import org.jitsi.meet.sdk.JitsiMeetConferenceOptions
 import org.jitsi.meet.sdk.JitsiMeetUserInfo
 import java.io.File
 import java.io.InputStream
-import java.net.MalformedURLException
-import java.net.URL
-
 
 @JvmSynthetic
 @Suppress("NOTHING_TO_INLINE")
@@ -825,7 +825,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     }
 
     fun copyCallLink(message: Message) {
-        message?.retrieveSphinxCallLink()?.let { callLink ->
+        message.retrieveSphinxCallLink()?.let { callLink ->
             viewModelScope.launch(mainImmediate) {
                 submitSideEffect(
                     ChatSideEffect.CopyCallLinkToClipboard(callLink.value)
@@ -835,10 +835,11 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     }
 
     fun joinCall(message: Message, audioOnly: Boolean) {
-        viewModelScope.launch(mainImmediate) {
-            message?.retrieveSphinxCallLink()?.let { sphinxCallLink ->
+        message.retrieveSphinxCallLink()?.let { sphinxCallLink ->
 
-                sphinxCallLink.callServerUrl?.let { nnCallUrl ->
+            sphinxCallLink.callServerUrl?.let { nnCallUrl ->
+
+                viewModelScope.launch(mainImmediate) {
 
                     val owner = getOwner()
 
@@ -870,13 +871,57 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     }
 
     open fun goToChatDetailScreen() {
-        viewModelScope.launch(mainImmediate) {
-            chatId?.let {
-                chatNavigator.toChatDetail(it, contactId)
+        chatId?.let { id ->
+            viewModelScope.launch(mainImmediate) {
+                chatNavigator.toChatDetail(id, contactId)
             }
         }
     }
 
+    open fun handleContactTribeLinks(url: String?) {
+        if (url != null) {
+
+            viewModelScope.launch(mainImmediate) {
+
+                url.toLightningNodePubKey()?.let { lightningNodePubKey ->
+
+                    handleContactLink(lightningNodePubKey, null)
+
+                } ?: url.toVirtualLightningNodeAddress()?.let { virtualNodeAddress ->
+
+                    virtualNodeAddress.getPubKey()?.let { lightningNodePubKey ->
+                        handleContactLink(
+                            lightningNodePubKey,
+                            virtualNodeAddress.getRouteHint()
+                        )
+                    }
+
+                } ?: url.toTribeJoinLink()?.let { tribeJoinLink ->
+
+                    handleTribeLink(tribeJoinLink)
+
+                }
+            }
+
+        }
+    }
+
+    private suspend fun handleTribeLink(tribeJoinLink: TribeJoinLink) {
+        chatRepository.getChatByUUID(ChatUUID(tribeJoinLink.tribeUUID)).firstOrNull()?.let { chat ->
+            chatNavigator.toChat(chat, null)
+        } ?: chatNavigator.toJoinTribeDetail(tribeJoinLink)
+    }
+
+    private suspend fun handleContactLink(pubKey: LightningNodePubKey, routeHint: LightningRouteHint?) {
+        contactRepository.getContactByPubKey(pubKey).firstOrNull()?.let { contact ->
+
+            chatRepository.getConversationByContactId(contact.id).collect { chat ->
+                chatNavigator.toChat(chat, contact.id)
+            }
+
+        } ?: chatNavigator.toAddContactDetail(pubKey, routeHint)
+    }
+    
     open suspend fun processMemberRequest(
         contactId: ContactId,
         messageId: MessageId,

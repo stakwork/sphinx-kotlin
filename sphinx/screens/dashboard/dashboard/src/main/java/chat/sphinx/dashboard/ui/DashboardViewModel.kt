@@ -11,7 +11,6 @@ import chat.sphinx.concept_background_login.BackgroundLoginHandler
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_lightning.model.invoice.PayRequestDto
 import chat.sphinx.concept_network_query_version.NetworkQueryVersion
-import chat.sphinx.concept_network_query_version.model.AppVersionsDto
 import chat.sphinx.concept_repository_dashboard_android.RepositoryDashboardAndroid
 import chat.sphinx.concept_service_notification.PushNotificationRegistrar
 import chat.sphinx.concept_socket_io.SocketIOManager
@@ -82,7 +81,7 @@ internal class DashboardViewModel @Inject constructor(
     val navBarNavigator: DashboardBottomNavBarNavigator,
     val navDrawerNavigator: DashboardNavDrawerNavigator,
 
-    val buildConfigVersionCode: BuildConfigVersionCode,
+    private val buildConfigVersionCode: BuildConfigVersionCode,
     dispatchers: CoroutineDispatchers,
 
     private val repositoryDashboard: RepositoryDashboardAndroid<Any>,

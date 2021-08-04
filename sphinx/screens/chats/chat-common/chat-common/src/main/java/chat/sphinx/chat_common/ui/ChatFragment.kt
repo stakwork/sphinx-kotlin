@@ -563,7 +563,7 @@ abstract class ChatFragment<
                                 viewModel.imageLoaderDefaults,
                                 viewModel.memeServerTokenHandler,
                                 viewState.recyclerViewWidth,
-                                viewState.messageHolderViewState
+                                viewState.messageHolderViewState,
                             )
                             includeMessageStatusHeader.root.gone
                             includeMessageHolderChatImageInitialHolder.root.gone

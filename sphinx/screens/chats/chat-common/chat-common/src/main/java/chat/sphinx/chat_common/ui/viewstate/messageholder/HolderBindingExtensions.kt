@@ -11,6 +11,8 @@ import androidx.core.view.updateLayoutParams
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.chat_common.R
 import chat.sphinx.chat_common.databinding.LayoutMessageHolderBinding
+import chat.sphinx.chat_common.util.SphinxLinkify
+import chat.sphinx.chat_common.util.SphinxUrlSpan
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
@@ -49,6 +51,7 @@ internal fun LayoutMessageHolderBinding.setView(
     memeServerTokenHandler: MemeServerTokenHandler,
     recyclerViewWidth: Px,
     viewState: MessageHolderViewState,
+    onSphinxInteractionListener: SphinxUrlSpan.OnInteractionListener? = null
 ) {
     for (job in holderJobs) {
         job.cancel()
@@ -134,7 +137,7 @@ internal fun LayoutMessageHolderBinding.setView(
                 }
             }
             setUnsupportedMessageTypeLayout(viewState.unsupportedMessageType)
-            setBubbleMessageLayout(viewState.bubbleMessage)
+            setBubbleMessageLayout(viewState.bubbleMessage, onSphinxInteractionListener)
             setBubbleCallInvite(viewState.bubbleCallInvite)
             setBubbleDirectPaymentLayout(viewState.bubbleDirectPayment)
             setBubbleDirectPaymentLayout(viewState.bubbleDirectPayment)
@@ -469,7 +472,8 @@ internal inline fun LayoutMessageHolderBinding.setDeletedMessageLayout(
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun LayoutMessageHolderBinding.setBubbleMessageLayout(
-    message: LayoutState.Bubble.ContainerThird.Message?
+    message: LayoutState.Bubble.ContainerThird.Message?,
+    onSphinxInteractionListener: SphinxUrlSpan.OnInteractionListener?
 ) {
     includeMessageHolderBubble.textViewMessageText.apply {
         if (message == null) {
@@ -477,6 +481,11 @@ internal inline fun LayoutMessageHolderBinding.setBubbleMessageLayout(
         } else {
             visible
             text = message.text
+
+            if (onSphinxInteractionListener != null) {
+                SphinxLinkify.addLinks(this, SphinxLinkify.ALL, onSphinxInteractionListener)
+                setOnLongClickListener(onSphinxInteractionListener)
+            }
         }
     }
 }
