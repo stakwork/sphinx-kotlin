@@ -811,20 +811,30 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     }
 
     open fun handleContactTribeLinks(url: String?) {
-        viewModelScope.launch(mainImmediate) {
+        if (url != null) {
 
-            url?.toLightningNodePubKey()?.let { lightningNodePubKey ->
-                handleContactLink(lightningNodePubKey)
-            } ?: url?.toVirtualLightningNodeAddress()?.let { virtualNodeAddress ->
-                virtualNodeAddress.getPubKey()?.let { lightningNodePubKey ->
-                    handleContactLink(
-                        lightningNodePubKey,
-                        virtualNodeAddress.getRouteHint()
-                    )
+            viewModelScope.launch(mainImmediate) {
+
+                url.toLightningNodePubKey()?.let { lightningNodePubKey ->
+
+                    handleContactLink(lightningNodePubKey)
+
+                } ?: url.toVirtualLightningNodeAddress()?.let { virtualNodeAddress ->
+
+                    virtualNodeAddress.getPubKey()?.let { lightningNodePubKey ->
+                        handleContactLink(
+                            lightningNodePubKey,
+                            virtualNodeAddress.getRouteHint()
+                        )
+                    }
+
+                } ?: url.toTribeJoinLink()?.let { tribeJoinLink ->
+
+                    handleTribeLink(tribeJoinLink)
+
                 }
-            } ?: url?.toTribeJoinLink()?.let { tribeJoinLink ->
-                handleTribeLink(tribeJoinLink)
             }
+
         }
     }
 
