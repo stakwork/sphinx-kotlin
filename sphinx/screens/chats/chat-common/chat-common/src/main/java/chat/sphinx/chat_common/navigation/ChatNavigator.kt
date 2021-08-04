@@ -6,6 +6,8 @@ import chat.sphinx.wrapper_chat.ChatType
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
+import chat.sphinx.wrapper_common.lightning.LightningRouteHint
+import chat.sphinx.wrapper_common.lightning.VirtualLightningNodePubKey
 import chat.sphinx.wrapper_common.tribe.TribeJoinLink
 import io.matthewnelson.android_feature_navigation.requests.PopBackStack
 import io.matthewnelson.concept_navigation.BaseNavigationDriver
@@ -19,7 +21,10 @@ abstract class ChatNavigator(
 
     abstract suspend fun toChatDetail(chatId: ChatId, contactId: ContactId? = null)
 
-    abstract suspend fun toAddContactDetail(pubKey: LightningNodePubKey)
+    abstract suspend fun toAddContactDetail(
+        pubKey: LightningNodePubKey? = null,
+        routeHint: LightningRouteHint? = null
+    )
 
     abstract suspend fun toJoinTribeDetail(tribeLink: TribeJoinLink)
 

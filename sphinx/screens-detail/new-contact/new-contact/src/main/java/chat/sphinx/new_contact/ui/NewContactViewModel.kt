@@ -41,15 +41,18 @@ internal class NewContactViewModel @Inject constructor(
     val args: NewContactFragmentArgs by savedStateHandle.navArgs()
 
     init {
-        val pubKey = args.argPubKey?.toLightningNodePubKey()
+        args.argPubKey?.toLightningNodePubKey()?.let { lightningNodePubKey ->
+            val lightningRouteHint = args.argRouteHint?.toLightningRouteHint()
 
-        viewStateContainer.updateViewState(
-            NewContactViewState.NewContactLink(
-                args.argFromAddFriend,
-                pubKey?.getPubKey(),
-                pubKey?.getRouteHint()
-            )
-        )
+            viewModelScope.launch(mainImmediate) {
+                submitSideEffect(
+                    NewContactSideEffect.ContactInfo(
+                        lightningNodePubKey,
+                        lightningRouteHint
+                    )
+                )
+            }
+        }
     }
 
     fun requestScanner() {
@@ -61,14 +64,31 @@ internal class NewContactViewModel @Inject constructor(
                             if (data.toLightningNodePubKey() != null) {
                                 return Response.Success(Any())
                             }
-
+                            if (data.toVirtualLightningNodePubKey() != null) {
+                                return Response.Success(Any())
+                            }
                             return Response.Error("QR code is not a Lightning Node Public Key")
                         }
                     }
                 )
             )
             if (response is Response.Success) {
-                submitSideEffect(NewContactSideEffect.FromScanner(response.value))
+                val contactInfoSideEffect : NewContactSideEffect? = response.value.value.toLightningNodePubKey()?.let { lightningNodePubKey ->
+                    NewContactSideEffect.ContactInfo(lightningNodePubKey)
+                } ?: response.value.value.toVirtualLightningNodePubKey()?.let { virtualNodePubKey ->
+                    virtualNodePubKey.getPubKey()?.let { lightningNodePubKey ->
+
+                        NewContactSideEffect.ContactInfo(
+                            lightningNodePubKey,
+                            virtualNodePubKey.getRouteHint()
+                        )
+
+                    }
+                }
+
+                contactInfoSideEffect?.let { nnContactInfoSideEffect ->
+                    submitSideEffect(nnContactInfoSideEffect)
+                }
             }
         }
     }

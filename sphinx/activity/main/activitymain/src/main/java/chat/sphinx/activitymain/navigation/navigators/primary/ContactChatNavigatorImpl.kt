@@ -16,6 +16,8 @@ import chat.sphinx.wrapper_chat.ChatType
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
+import chat.sphinx.wrapper_common.lightning.LightningRouteHint
+import chat.sphinx.wrapper_common.lightning.VirtualLightningNodePubKey
 import chat.sphinx.wrapper_common.tribe.TribeJoinLink
 import javax.inject.Inject
 
@@ -31,9 +33,12 @@ internal class ContactChatNavigatorImpl @Inject constructor(
         detailDriver.submitNavigationRequest(ToContactDetailScreen(chatId, contactId))
     }
 
-    override suspend fun toAddContactDetail(pubKey: LightningNodePubKey) {
+    override suspend fun toAddContactDetail(
+        pubKey: LightningNodePubKey?,
+        routeHint: LightningRouteHint?
+    ) {
         detailDriver.submitNavigationRequest(
-            ToNewContactDetail(pubKey, false)
+            ToNewContactDetail(pubKey, routeHint, false)
         )
     }
 

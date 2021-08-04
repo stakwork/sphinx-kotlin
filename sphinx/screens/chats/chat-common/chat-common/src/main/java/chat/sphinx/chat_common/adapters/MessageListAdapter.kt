@@ -239,7 +239,7 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                 onSphinxInteractionListener = object: SphinxUrlSpan.OnInteractionListener(
                     selectedMessageLongClickListener) {
                     override fun onClick(url: String?) {
-                        viewModel.goToLightningNodePubKeyDetailScreen(url)
+                        viewModel.handleContactTribeLinks(url)
                     }
                 }
             }

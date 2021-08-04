@@ -8,36 +8,15 @@ inline fun String.toLightningNodePubKey(): LightningNodePubKey? =
         null
     }
 
-@Suppress("NOTHING_TO_INLINE")
-inline fun LightningNodePubKey.getPubKey(): LightningNodePubKey? {
-    val elements = this.value.split(":")
-    if (elements.size > 1) {
-        return elements[0].toLightningNodePubKey()
-    }
-    return this.value.toLightningNodePubKey()
-}
-
-@Suppress("NOTHING_TO_INLINE")
-inline fun LightningNodePubKey.getRouteHint(): LightningRouteHint? {
-    val elements = this.value.split(":")
-    if (elements.size == 3) {
-        return "${elements[1]}:${elements[2]}".toLightningRouteHint()
-    }
-    return null
-}
-
 inline val String.isValidLightningNodePubKey: Boolean
-    get() = isNotEmpty() && matches("^${LightningNodePubKey.REGEX}\$".toRegex())
+    get() = isNotEmpty() && matches("^${LightningNodePubKey.PUB_KEY_REGEX}\$".toRegex())
 
 @JvmInline
 value class LightningNodePubKey(val value: String) {
 
     companion object {
 
-        private const val PUB_KEY_REGEX = "[A-F0-9a-f]{66}"
-        private const val VIRTUAL_NODE_PUB_KEY_REGEX = "[A-F0-9a-f]{66}:[A-F0-9a-f]{66}:[0-9]+"
-
-        const val REGEX = "($VIRTUAL_NODE_PUB_KEY_REGEX|$PUB_KEY_REGEX)"
+        const val PUB_KEY_REGEX = "[A-F0-9a-f]{66}"
 
         fun fromByteArray(byteArray: ByteArray): LightningNodePubKey {
             return LightningNodePubKey(byteArray.decodeToString())

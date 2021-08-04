@@ -14,6 +14,7 @@ import androidx.annotation.IntDef
 import androidx.annotation.RestrictTo
 import androidx.core.util.PatternsCompat
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
+import chat.sphinx.wrapper_common.lightning.VirtualLightningNodePubKey
 import chat.sphinx.wrapper_common.tribe.TribeJoinLink
 import java.util.*
 import java.util.regex.Matcher
@@ -52,6 +53,12 @@ object SphinxLinkify {
     const val LIGHTNING_NODE_PUBLIC_KEY: Int = 0x08
 
     /**
+     * Bit field indicating that sphinx virtual public key should be matched in methods that
+     * take an options mask
+     */
+    const val VIRTUAL_NODE_PUBLIC_KEY: Int = 0x16
+
+    /**
      * Bit mask indicating that all available patterns should be matched in
      * methods that take an options mask
      *
@@ -59,7 +66,7 @@ object SphinxLinkify {
      * Use [android.view.textclassifier.TextClassifier.generateLinks]
      * instead and avoid it even when targeting API levels where no alternative is available.
      */
-    const val ALL: Int = WEB_URLS or EMAIL_ADDRESSES or PHONE_NUMBERS or LIGHTNING_NODE_PUBLIC_KEY
+    const val ALL: Int = WEB_URLS or EMAIL_ADDRESSES or PHONE_NUMBERS or LIGHTNING_NODE_PUBLIC_KEY or VIRTUAL_NODE_PUBLIC_KEY
 
     private val EMPTY_STRING = arrayOfNulls<String>(0)
     private val COMPARATOR: Comparator<LinkSpec> = object : Comparator<LinkSpec> {
@@ -106,6 +113,12 @@ object SphinxLinkify {
         if (mask and LIGHTNING_NODE_PUBLIC_KEY != 0) {
             gatherLinks(
                 links, text, SphinxPatterns.LIGHTNING_NODE_PUBLIC_KEY, arrayOf(),
+                null, null
+            )
+        }
+        if (mask and VIRTUAL_NODE_PUBLIC_KEY != 0) {
+            gatherLinks(
+                links, text, SphinxPatterns.VIRTUAL_NODE_PUBLIC_KEY, arrayOf(),
                 null, null
             )
         }
@@ -292,7 +305,7 @@ object SphinxLinkify {
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
     @IntDef(
         flag = true,
-        value = [WEB_URLS, EMAIL_ADDRESSES, PHONE_NUMBERS, LIGHTNING_NODE_PUBLIC_KEY, ALL]
+        value = [WEB_URLS, EMAIL_ADDRESSES, PHONE_NUMBERS, LIGHTNING_NODE_PUBLIC_KEY, VIRTUAL_NODE_PUBLIC_KEY, ALL]
     )
     @kotlin.annotation.Retention(AnnotationRetention.SOURCE)
     annotation class LinkifyMask
@@ -309,7 +322,11 @@ object SphinxLinkify {
         )
 
         val LIGHTNING_NODE_PUBLIC_KEY: Pattern = Pattern.compile(
-            LightningNodePubKey.REGEX
+            LightningNodePubKey.PUB_KEY_REGEX
+        )
+
+        val VIRTUAL_NODE_PUBLIC_KEY: Pattern = Pattern.compile(
+            VirtualLightningNodePubKey.VIRTUAL_NODE_PUB_KEY_REGEX
         )
     }
 }
