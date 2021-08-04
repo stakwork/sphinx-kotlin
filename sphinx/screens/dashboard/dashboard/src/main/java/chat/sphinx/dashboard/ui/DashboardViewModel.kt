@@ -137,6 +137,7 @@ internal class DashboardViewModel @Inject constructor(
                     scannerModeLabel = app.getString(R.string.paste_invoice_of_tribe_link)
                 )
             )
+
             if (response is Response.Success) {
 
                 val code = response.value.value
@@ -147,9 +148,10 @@ internal class DashboardViewModel @Inject constructor(
 
                 } ?: code.toLightningNodePubKey()?.let { lightningNodePubKey ->
 
-                    handleContactLink(lightningNodePubKey)
+                    handleContactLink(lightningNodePubKey, null)
 
                 } ?: code.toVirtualLightningNodeAddress()?.let { virtualNodeAddress ->
+
                     virtualNodeAddress.getPubKey()?.let { lightningNodePubKey ->
 
                         handleContactLink(
@@ -187,20 +189,14 @@ internal class DashboardViewModel @Inject constructor(
         }
     }
 
-    private suspend fun handleContactLink(
-        pubKey: LightningNodePubKey,
-        routeHint: LightningRouteHint? = null
-    ) {
+    private suspend fun handleContactLink(pubKey: LightningNodePubKey, routeHint: LightningRouteHint?) {
         contactRepository.getContactByPubKey(pubKey).firstOrNull()?.let { contact ->
-            chatRepository.getConversationByContactId(contact.id).collect { chat ->
-                dashboardNavigator.toChatContact(chat?.id, contact.id)
+
+            chatRepository.getConversationByContactId(contact.id).firstOrNull()?.let { chat ->
+                dashboardNavigator.toChatContact(chat.id, contact.id)
             }
-        } ?: run {
-            dashboardNavigator.toAddContactDetail(
-                pubKey,
-                routeHint
-            )
-        }
+
+        } ?: dashboardNavigator.toAddContactDetail(pubKey, routeHint)
     }
 
 //    @Volatile
