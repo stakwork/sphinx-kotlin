@@ -98,7 +98,7 @@ ext.deps = [
     matthewNelson: [
         toplService: "io.matthewnelson.topl-android:topl-service:${versions.toplAndroid}",
         toplServiceBase: "io.matthewnelson.topl-android:topl-service-base:${versions.toplAndroid}",
-        torBinary: "io.matthewnelson.topl-android:tor-binary:0.4.6.2-alpha",
+        torBinary: "io.matthewnelson.topl-android:tor-binary:0.4.6.5",
     ],
     sqlCipher: "net.zetetic:android-database-sqlcipher:4.4.3",
     sqlRequery: "com.github.requery:sqlite-android:3.36.0",
