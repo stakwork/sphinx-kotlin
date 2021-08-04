@@ -26,7 +26,7 @@ inline fun VirtualLightningNodePubKey.getRouteHint(): LightningRouteHint? {
     return null
 }
 
-inline val String.isValidVirtualLightningNodePubKey: Boolean
+inline val String.isValidVirtualNodePubKey: Boolean
     get() = isNotEmpty() && matches("^${VirtualLightningNodePubKey.VIRTUAL_NODE_PUB_KEY_REGEX}\$".toRegex())
 
 
@@ -34,16 +34,11 @@ inline val String.isValidVirtualLightningNodePubKey: Boolean
 value class VirtualLightningNodePubKey(val value: String) {
 
     companion object {
-
         const val VIRTUAL_NODE_PUB_KEY_REGEX = "[A-F0-9a-f]{66}:[A-F0-9a-f]{66}:[0-9]+"
-
-        fun fromByteArray(byteArray: ByteArray): LightningNodePubKey {
-            return LightningNodePubKey(byteArray.decodeToString())
-        }
     }
 
     init {
-        require(value.isValidVirtualLightningNodePubKey) {
+        require(value.isValidVirtualNodePubKey) {
             "Invalid Lightning Node Public Key"
         }
     }
