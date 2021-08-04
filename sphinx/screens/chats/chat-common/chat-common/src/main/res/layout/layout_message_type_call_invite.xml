@@ -4,6 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:paddingHorizontal="@dimen/default_layout_margin"
+    android:paddingVertical="@dimen/default_half_layout_margin"
     android:visibility="gone"
     tools:layout_width="200dp"
     tools:background="@color/receivedMsgBG"
@@ -33,93 +35,92 @@
         app:layout_constraintStart_toEndOf="@id/text_view_call_invite_icon"
         app:layout_constraintTop_toTopOf="@id/text_view_call_invite_icon" />
 
-
     <!-- Join By Audio Button -->
-
-    <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/button_call_invite_join_by_audio"
-        style="@style/Widget.AppCompat.ImageButton"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_call_invite_join_by_audio"
         android:layout_width="0dp"
-        android:layout_height="@dimen/default_tap_target_xy"
-        android:layout_marginTop="@dimen/default_vertical_spacing_action_button_column"
+        android:layout_height="@dimen/message_type_call_invite_join_button_height"
+        android:layout_marginTop="@dimen/default_layout_margin"
+        android:background="@drawable/background_call_invite_button"
         android:backgroundTint="@color/primaryBlue"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/text_view_call_invite_icon" />
+        app:layout_constraintTop_toBottomOf="@id/text_view_call_invite_icon">
 
-    <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/text_view_call_invite_join_by_audio_label"
-        style="@style/ActionButtonLabelText"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:gravity="center"
-        android:text="@string/media_type_label_audio"
-        android:textColor="@color/text"
-        app:layout_constraintBottom_toBottomOf="@id/button_call_invite_join_by_audio"
-        app:layout_constraintEnd_toEndOf="@id/button_call_invite_join_by_audio"
-        app:layout_constraintStart_toStartOf="@id/button_call_invite_join_by_audio"
-        app:layout_constraintTop_toTopOf="@id/button_call_invite_join_by_audio" />
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_call_invite_join_by_audio_label"
+            style="@style/ActionButtonLabelText"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:gravity="center"
+            android:text="@string/media_type_label_audio"
+            android:textColor="@color/text"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-    <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/text_view_call_invite_join_by_audio_icon"
-        style="@style/ActionButtonLabelIcon"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="@dimen/default_layout_margin"
-        android:text="@string/material_icon_name_microphone"
-        app:layout_constraintBottom_toBottomOf="@id/button_call_invite_join_by_audio"
-        app:layout_constraintEnd_toEndOf="@id/button_call_invite_join_by_audio"
-        app:layout_constraintTop_toTopOf="@id/button_call_invite_join_by_audio" />
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_call_invite_join_by_audio_icon"
+            style="@style/ActionButtonLabelIcon"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/default_layout_margin"
+            android:text="@string/material_icon_name_microphone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <!-- Join By Video Button -->
 
-    <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/button_call_invite_join_by_video"
-        style="@style/Widget.AppCompat.ImageButton"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_call_invite_join_by_video"
         android:layout_width="0dp"
-        android:layout_height="@dimen/default_tap_target_xy"
-        android:layout_marginTop="@dimen/default_vertical_spacing_action_button_column"
+        android:layout_height="@dimen/message_type_call_invite_join_button_height"
+        android:layout_marginTop="@dimen/default_layout_margin"
+        android:background="@drawable/background_call_invite_button"
         android:backgroundTint="@color/primaryGreen"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/button_call_invite_join_by_audio" />
+        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_call_invite_join_by_audio">
 
-    <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/text_view_call_invite_join_by_video_label"
-        style="@style/ActionButtonLabelText"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:gravity="center"
-        android:text="@string/media_type_label_video"
-        android:textColor="@color/text"
-        app:layout_constraintBottom_toBottomOf="@id/button_call_invite_join_by_video"
-        app:layout_constraintEnd_toEndOf="@id/button_call_invite_join_by_video"
-        app:layout_constraintStart_toStartOf="@id/button_call_invite_join_by_video"
-        app:layout_constraintTop_toTopOf="@id/button_call_invite_join_by_video" />
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_call_invite_join_by_video_label"
+            style="@style/ActionButtonLabelText"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:gravity="center"
+            android:text="@string/media_type_label_video"
+            android:textColor="@color/text"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-    <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/text_view_call_invite_join_by_video_icon"
-        style="@style/ActionButtonLabelIcon"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="@dimen/default_layout_margin"
-        android:text="@string/material_icon_name_videocam"
-        app:layout_constraintBottom_toBottomOf="@id/button_call_invite_join_by_video"
-        app:layout_constraintEnd_toEndOf="@id/button_call_invite_join_by_video"
-        app:layout_constraintTop_toTopOf="@id/button_call_invite_join_by_video" />
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_call_invite_join_by_video_icon"
+            style="@style/ActionButtonLabelIcon"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/default_layout_margin"
+            android:text="@string/material_icon_name_video_camera"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-
-    <!-- Copy Link Button -->
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/button_call_invite_copy_link"
         android:layout_width="0dp"
         android:layout_height="@dimen/default_tap_target_xy"
-        android:layout_marginTop="@dimen/default_vertical_spacing_action_button_column"
+        android:layout_marginTop="@dimen/default_layout_margin"
+        android:background="@android:color/transparent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/button_call_invite_join_by_video" />
+        app:layout_constraintTop_toBottomOf="@id/layout_constraint_call_invite_join_by_video" />
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/text_view_call_invite_copy_link_label"
@@ -140,7 +141,6 @@
         style="@style/ActionButtonLabelIcon"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="@dimen/default_layout_margin"
         android:text="@string/material_icon_name_message_action_copy_text"
         app:layout_constraintBottom_toBottomOf="@id/button_call_invite_copy_link"
         app:layout_constraintEnd_toEndOf="@id/button_call_invite_copy_link"

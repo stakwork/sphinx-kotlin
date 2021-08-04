@@ -83,6 +83,7 @@
     <!-- Notify -->
     <string name="notify_boost_failure">Pago de Boost falló</string>
     <string name="side_effect_text_copied">Texto copiado al portapapeles</string>
+    <string name="side_effect_call_link_copied">Enlace de llamada copiado al portapapeles</string>
 
     <!-- Send Attachment -->
     <string name="attachment_send_header_image">ENVIAR IMAGEN</string>
@@ -97,7 +98,7 @@
     <!-- Menu -->
     <string name="attachments_menu_cancel">CANCELAR</string>
     <string name="camera_attachment_option" tools:ignore="Typos">Camara</string>
-    <string name="library_attachment_option">Librería</string>
+    <string name="library_attachment_option">Librería de Fotos</string>
     <string name="gif_attachment_option">Gif</string>
     <string name="file_attachment_option">Archivo</string>
     <string name="paid_message_attachment_option">Mensaje Pago</string>
@@ -109,4 +110,8 @@
     <string name="failed_to_delete_tribe">No se ha podido eliminar la tribu</string>
 
     <string name="podcast_boost_label">Boost!</string>
+
+    <string name="bottom_menu_call_header_text">Opciones de LLamada</string>
+    <string name="bottom_menu_call_option_audio">Audio</string>
+    <string name="bottom_menu_call_option_video_or_audio">Video o Audio</string>
 </resources>

@@ -84,11 +84,14 @@ internal sealed class LayoutState private constructor() {
                 val amount: Sat,
             ): ContainerSecond()
 
+            data class CallInvite(
+                val videoButtonVisible: Boolean
+            ): ContainerSecond()
+
             // FileAttachment
             // AudioAttachment
             // VideoAttachment
 
-            // CallInvite
             // Invoice
         }
 
