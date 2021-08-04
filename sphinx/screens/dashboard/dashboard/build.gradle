@@ -31,6 +31,8 @@ android {
 }
 
 dependencies {
+    api project(path: ':kotlin:common:build-config')
+
     implementation fileTree(dir: "libs", include: ["*.jar"])
     // KotlinAndroid
     implementation project(path: ':android:features:android-feature-screens')
@@ -46,6 +48,7 @@ dependencies {
     api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-contact')
     api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-chat')
     implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-lightning')
+    implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-version')
 
     implementation project(path: ':sphinx:application:network:concepts:concept-socket-io')
 

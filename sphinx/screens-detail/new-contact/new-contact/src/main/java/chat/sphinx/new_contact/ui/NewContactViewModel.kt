@@ -64,7 +64,7 @@ internal class NewContactViewModel @Inject constructor(
                             if (data.toLightningNodePubKey() != null) {
                                 return Response.Success(Any())
                             }
-                            if (data.toVirtualLightningNodePubKey() != null) {
+                            if (data.toVirtualLightningNodeAddress() != null) {
                                 return Response.Success(Any())
                             }
                             return Response.Error("QR code is not a Lightning Node Public Key")
@@ -75,19 +75,19 @@ internal class NewContactViewModel @Inject constructor(
             if (response is Response.Success) {
                 val contactInfoSideEffect : NewContactSideEffect? = response.value.value.toLightningNodePubKey()?.let { lightningNodePubKey ->
                     NewContactSideEffect.ContactInfo(lightningNodePubKey)
-                } ?: response.value.value.toVirtualLightningNodePubKey()?.let { virtualNodePubKey ->
-                    virtualNodePubKey.getPubKey()?.let { lightningNodePubKey ->
+                } ?: response.value.value.toVirtualLightningNodeAddress()?.let { virtualNodeAddress ->
+                    virtualNodeAddress.getPubKey()?.let { lightningNodePubKey ->
 
                         NewContactSideEffect.ContactInfo(
                             lightningNodePubKey,
-                            virtualNodePubKey.getRouteHint()
+                            virtualNodeAddress.getRouteHint()
                         )
 
                     }
                 }
 
-                contactInfoSideEffect?.let { nnContactInfoSideEffect ->
-                    submitSideEffect(nnContactInfoSideEffect)
+                if (contactInfoSideEffect != null) {
+                    submitSideEffect(contactInfoSideEffect)
                 }
             }
         }

@@ -9,6 +9,7 @@ import chat.sphinx.chat_common.ui.ChatFragment
 import chat.sphinx.chat_group.R
 import chat.sphinx.chat_group.databinding.FragmentChatGroupBinding
 import chat.sphinx.concept_image_loader.ImageLoader
+import chat.sphinx.menu_bottom.databinding.LayoutMenuBottomBinding
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -40,6 +41,10 @@ internal class ChatGroupFragment: ChatFragment<
     )
     override val menuBinding: LayoutChatMenuBinding by viewBinding(
         LayoutChatMenuBinding::bind, R.id.include_chat_group_menu
+    )
+
+    override val callMenuBinding: LayoutMenuBottomBinding by viewBinding(
+        LayoutMenuBottomBinding::bind, R.id.include_layout_menu_bottom_call
     )
 
     override val menuEnablePayments: Boolean

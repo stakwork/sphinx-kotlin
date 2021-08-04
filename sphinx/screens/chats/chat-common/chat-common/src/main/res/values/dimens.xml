@@ -62,6 +62,7 @@
     <dimen name="message_type_group_join_request_holder_height">65dp</dimen>
     <dimen name="message_type_call_invite_holder_height_large">212dp</dimen>
     <dimen name="message_type_call_invite_holder_height_small">160dp</dimen>
+    <dimen name="message_type_call_invite_join_button_height">38dp</dimen>
 
     <!-- Images -->
     <dimen name="loading_image_progress_xy">50dp</dimen>

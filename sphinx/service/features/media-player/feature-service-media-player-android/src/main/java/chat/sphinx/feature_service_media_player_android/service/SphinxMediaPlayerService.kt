@@ -5,6 +5,7 @@ import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.feature_service_media_player_android.MediaPlayerServiceControllerImpl
 import chat.sphinx.feature_service_media_player_android.service.components.AudioManagerHandler
 import chat.sphinx.feature_service_media_player_android.service.components.SphinxAudioManagerHandler
+import chat.sphinx.feature_sphinx_service.ApplicationServiceTracker
 import chat.sphinx.logger.SphinxLogger
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
@@ -16,6 +17,13 @@ internal class SphinxMediaPlayerService: MediaPlayerService() {
 
     override val serviceContext: Context
         get() = this
+
+    @Inject
+    @Suppress("PropertyName", "ProtectedInFinal")
+    protected lateinit var _applicationServiceTracker: ApplicationServiceTracker
+
+    override val applicationServiceTracker: ApplicationServiceTracker
+        get() = _applicationServiceTracker
 
     @Inject
     @Suppress("PropertyName", "ProtectedInFinal")

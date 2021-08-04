@@ -82,6 +82,7 @@
     <!-- Notify -->
     <string name="notify_boost_failure">Boost payment failed</string>
     <string name="side_effect_text_copied">Text copied to clipboard</string>
+    <string name="side_effect_call_link_copied">Call link copied to clipboard</string>
 
     <!-- Send Attachment -->
     <string name="attachment_send_header_image">SEND IMAGE</string>
@@ -108,4 +109,9 @@
     <string name="failed_to_delete_tribe">Failed to delete Tribe</string>
 
     <string name="podcast_boost_label">Boost!</string>
+
+    <string name="bottom_menu_call_header_text">Call Options</string>
+    <string name="bottom_menu_call_option_audio">Audio</string>
+    <string name="bottom_menu_call_option_video_or_audio">Video or Audio</string>
+
 </resources>

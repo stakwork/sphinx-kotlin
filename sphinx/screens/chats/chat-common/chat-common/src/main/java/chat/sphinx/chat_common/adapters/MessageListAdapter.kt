@@ -23,6 +23,8 @@ import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.message.MessageId
+import chat.sphinx.wrapper_common.message.toSphinxCallLink
+import chat.sphinx.wrapper_message.Message
 import chat.sphinx.wrapper_message.MessageType
 import chat.sphinx.wrapper_message.toMessageType
 import chat.sphinx.wrapper_view.Px
@@ -244,6 +246,26 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                 }
             }
 
+            binding.includeMessageHolderBubble.includeMessageTypeCallInvite.let { holder ->
+                holder.layoutConstraintCallInviteJoinByAudio.setOnClickListener {
+                    currentViewState?.message?.let { nnMessage ->
+                        joinCall(nnMessage, true)
+                    }
+                }
+
+                holder.layoutConstraintCallInviteJoinByVideo.setOnClickListener {
+                    currentViewState?.message?.let { nnMessage ->
+                        joinCall(nnMessage, false)
+                    }
+                }
+
+                holder.buttonCallInviteCopyLink.setOnClickListener {
+                    currentViewState?.message?.let { nnMessage ->
+                        viewModel.copyCallLink(nnMessage)
+                    }
+                }
+            }
+
             binding.includeMessageTypeGroupActionHolder.let { holder ->
                 holder.includeMessageTypeGroupActionJoinRequest.apply {
                     textViewGroupActionJoinRequestAcceptAction.setOnClickListener {
@@ -311,6 +333,10 @@ internal class MessageListAdapter<ARGS : NavArgs>(
             }.let { job ->
                 holderJobs.add(job)
             }
+        }
+
+        private fun joinCall(message: Message, audioOnly: Boolean) {
+            viewModel.joinCall(message, audioOnly)
         }
 
         fun bind(position: Int) {

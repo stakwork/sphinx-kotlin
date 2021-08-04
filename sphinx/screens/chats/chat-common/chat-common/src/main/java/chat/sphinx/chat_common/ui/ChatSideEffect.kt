@@ -40,6 +40,17 @@ sealed class ChatSideEffect: SideEffect<ChatSideEffectFragment>() {
         }
     }
 
+    class CopyCallLinkToClipboard(private val link: String): ChatSideEffect() {
+        override suspend fun execute(value: ChatSideEffectFragment) {
+            (value.chatFragmentContext.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager)?.let { manager ->
+                val clipData = ClipData.newPlainText("text", link)
+                manager.setPrimaryClip(clipData)
+
+                SphinxToastUtils().show(value.chatFragmentContext, R.string.side_effect_call_link_copied)
+            }
+        }
+    }
+
     class AlertConfirmExitTribe(
         private val callback: () -> Unit
     ): ChatSideEffect() {

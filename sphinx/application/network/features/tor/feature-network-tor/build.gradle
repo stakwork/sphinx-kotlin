@@ -36,6 +36,7 @@ dependencies {
     // Sphinx
     api project(path: ':sphinx:application:common:logger')
     api project(path: ':sphinx:application:network:concepts:tor:concept-network-tor')
+    api project(path: ':sphinx:service:features:feature-sphinx-service')
 
     implementation deps.matthewNelson.toplService
     implementation deps.matthewNelson.torBinary

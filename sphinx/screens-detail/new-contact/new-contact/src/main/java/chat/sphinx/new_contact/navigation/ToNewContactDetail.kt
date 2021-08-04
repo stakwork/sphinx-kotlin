@@ -6,7 +6,6 @@ import chat.sphinx.new_contact.R
 import chat.sphinx.new_contact.ui.NewContactFragmentArgs
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.LightningRouteHint
-import chat.sphinx.wrapper_common.lightning.VirtualLightningNodePubKey
 import io.matthewnelson.android_feature_navigation.R as nav_R
 import io.matthewnelson.concept_navigation.NavigationRequest
 
