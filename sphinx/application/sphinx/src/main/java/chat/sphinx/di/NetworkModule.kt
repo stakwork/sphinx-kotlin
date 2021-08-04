@@ -12,6 +12,7 @@ import chat.sphinx.concept_network_query_invite.NetworkQueryInvite
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_message.NetworkQueryMessage
 import chat.sphinx.concept_network_query_subscription.NetworkQuerySubscription
+import chat.sphinx.concept_network_query_version.NetworkQueryVersion
 import chat.sphinx.concept_network_relay_call.NetworkRelayCall
 import chat.sphinx.concept_network_tor.TorManager
 import chat.sphinx.concept_relay.RelayDataHandler
@@ -24,6 +25,7 @@ import chat.sphinx.feature_network_query_invite.NetworkQueryInviteImpl
 import chat.sphinx.feature_network_query_lightning.NetworkQueryLightningImpl
 import chat.sphinx.feature_network_query_message.NetworkQueryMessageImpl
 import chat.sphinx.feature_network_query_subscription.NetworkQuerySubscriptionImpl
+import chat.sphinx.feature_network_query_version.NetworkQueryVersionImpl
 import chat.sphinx.feature_network_relay_call.NetworkRelayCallImpl
 import chat.sphinx.feature_network_tor.TorManagerAndroid
 import chat.sphinx.feature_relay.RelayDataHandlerImpl
@@ -279,4 +281,17 @@ object NetworkModule {
         networkQueryMemeServerImpl: NetworkQueryMemeServerImpl
     ): NetworkQueryMemeServer =
         networkQueryMemeServerImpl
+
+    @Provides
+    @Singleton
+    fun provideNetworkQueryVersionImpl(
+        networkRelayCall: NetworkRelayCall
+    ): NetworkQueryVersionImpl =
+        NetworkQueryVersionImpl(networkRelayCall)
+
+    @Provides
+    fun provideNetworkQueryVersion(
+        networkQueryVersionImpl: NetworkQueryVersionImpl
+    ): NetworkQueryVersion =
+        networkQueryVersionImpl
 }
