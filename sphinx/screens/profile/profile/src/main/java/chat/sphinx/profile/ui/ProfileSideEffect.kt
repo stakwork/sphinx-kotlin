@@ -59,4 +59,28 @@ internal sealed class ProfileSideEffect: SideEffect<Context>() {
             SphinxToastUtils().show(value, R.string.image_uploaded_successfully)
         }
     }
+
+    object InvalidRelayUrl: ProfileSideEffect() {
+        override suspend fun execute(value: Context) {
+            SphinxToastUtils(true).show(value, R.string.invalid_relay_url)
+        }
+    }
+
+    object UpdatingRelayUrl: ProfileSideEffect() {
+        override suspend fun execute(value: Context) {
+            SphinxToastUtils(true).show(value, R.string.testing_new_relay_url)
+        }
+    }
+
+    object RelayUrlUpdatedSuccessfully: ProfileSideEffect() {
+        override suspend fun execute(value: Context) {
+            SphinxToastUtils(true).show(value, R.string.updating_relay_url_succeed)
+        }
+    }
+
+    object FailedToUpdateRelayUrl: ProfileSideEffect() {
+        override suspend fun execute(value: Context) {
+            SphinxToastUtils(true).show(value, R.string.failed_updating_relay_url)
+        }
+    }
 }

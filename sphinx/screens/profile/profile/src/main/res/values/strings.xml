@@ -27,4 +27,10 @@
     <string name="bottom_menu_profile_pic_header_text">Profile Picture</string>
     <string name="failed_to_process_image">Failed to process image</string>
     <string name="image_uploaded_successfully">Image uploaded successfully</string>
+
+    <string name="empty_or_null_relay_url">New Relay URL can not be empty or null</string>
+    <string name="invalid_relay_url">New Relay URL is invalid</string>
+    <string name="testing_new_relay_url">Testing new Relay URL...</string>
+    <string name="failed_updating_relay_url">New URL test failed, restoring previous setting...</string>
+    <string name="updating_relay_url_succeed">Relay URL successfully updated</string>
 </resources>

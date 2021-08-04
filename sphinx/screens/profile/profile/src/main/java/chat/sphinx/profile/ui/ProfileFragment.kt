@@ -2,9 +2,12 @@ package chat.sphinx.profile.ui
 
 import android.content.Context
 import android.os.Bundle
+import android.view.KeyEvent
 import android.view.View
+import android.view.inputmethod.EditorInfo
 import android.widget.ImageView
 import android.widget.SeekBar
+import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
@@ -26,6 +29,7 @@ import chat.sphinx.profile.R
 import chat.sphinx.profile.databinding.FragmentProfileBinding
 import chat.sphinx.profile.navigation.ProfileNavigator
 import chat.sphinx.resources.getColor
+import chat.sphinx.resources.inputMethodManager
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.lightning.toSat
 import chat.sphinx.wrapper_contact.isTrue
@@ -164,7 +168,6 @@ internal class ProfileFragment: SideEffectFragment<
                     if (hasFocus) {
                         return@setOnFocusChangeListener
                     }
-
                     updateOwnerDetails()
                 }
 
@@ -172,7 +175,6 @@ internal class ProfileFragment: SideEffectFragment<
                     if (hasFocus) {
                         return@setOnFocusChangeListener
                     }
-
                     updateOwnerDetails()
                 }
 
@@ -200,6 +202,35 @@ internal class ProfileFragment: SideEffectFragment<
             }
 
             includeProfileAdvancedContainerHolder.apply {
+                editTextProfileAdvancedContainerServerUrl.setOnFocusChangeListener { _, hasFocus ->
+                    if (hasFocus) {
+                        return@setOnFocusChangeListener
+                    }
+                    onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                        viewModel.updateRelayUrl(
+                            editTextProfileAdvancedContainerServerUrl.text?.toString()
+                        )
+                    }
+                }
+
+                editTextProfileAdvancedContainerServerUrl.setOnEditorActionListener(object:
+                    TextView.OnEditorActionListener {
+                    override fun onEditorAction(v: TextView, actionId: Int, event: KeyEvent?): Boolean {
+                        if (actionId == EditorInfo.IME_ACTION_DONE || event?.keyCode == KeyEvent.KEYCODE_ENTER) {
+                            editTextProfileAdvancedContainerServerUrl.let { editText ->
+                                binding.root.context.inputMethodManager?.let { imm ->
+                                    if (imm.isActive(editText)) {
+                                        imm.hideSoftInputFromWindow(editText.windowToken, 0)
+                                        editText.clearFocus()
+                                    }
+                                }
+                            }
+                            return true
+                        }
+                        return false
+                    }
+                })
+
                 seekBarProfileAdvancedContainerPinTimeout.setOnSeekBarChangeListener(
                     object : SeekBar.OnSeekBarChangeListener {
                         override fun onProgressChanged(

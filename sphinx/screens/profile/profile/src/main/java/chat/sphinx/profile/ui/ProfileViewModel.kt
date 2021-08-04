@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.Context
 import android.net.Uri
 import android.webkit.MimeTypeMap
+import android.webkit.URLUtil
 import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.camera_view_model_coordinator.request.CameraRequest
@@ -13,6 +14,7 @@ import chat.sphinx.concept_relay.RelayDataHandler
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_lightning.LightningRepository
 import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
+import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.menu_bottom.ui.MenuBottomViewState
@@ -26,6 +28,10 @@ import chat.sphinx.wrapper_io_utils.InputStreamProvider
 import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_message_media.MediaType
 import chat.sphinx.wrapper_message_media.toMediaType
+import chat.sphinx.wrapper_relay.RelayUrl
+import chat.sphinx.wrapper_relay.isOnionAddress
+import chat.sphinx.wrapper_relay.isValidRelayUrl
+import chat.sphinx.wrapper_relay.toRelayUrl
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
@@ -39,11 +45,11 @@ import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import io.matthewnelson.crypto_common.annotations.RawPasswordAccess
 import io.matthewnelson.crypto_common.clazzes.*
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import okio.base64.encodeBase64
 import org.cryptonode.jncryptor.AES256JNCryptor
 import org.cryptonode.jncryptor.CryptorException
@@ -145,6 +151,56 @@ internal class ProfileViewModel @Inject constructor(
         tipAmount: Sat?
     ): Response<Any, ResponseError> =
         contactRepository.updateOwner(alias, privatePhoto, tipAmount)
+
+    suspend fun updateRelayUrl(url: String?)  {
+        _relayUrlStateFlow.value = url
+
+        delay(50L)
+
+        if (url == null || (!url.isValidRelayUrl && !url.isOnionAddress)) {
+
+            _relayUrlStateFlow.value = relayDataHandler.retrieveRelayUrl()?.value
+
+            submitSideEffect(ProfileSideEffect.InvalidRelayUrl)
+
+        } else {
+
+            submitSideEffect(ProfileSideEffect.UpdatingRelayUrl)
+
+            var success = false
+
+            relayDataHandler.retrieveAuthorizationToken()?.let { authorizationToken ->
+                url.toRelayUrl()?.let { relayUrl ->
+                    lightningRepository.getAccountBalanceAll(
+                        Pair(authorizationToken, relayUrl)
+                    ).collect { loadResponse ->
+                        @Exhaustive
+                        when (loadResponse) {
+                            is LoadResponse.Loading -> {
+                            }
+
+                            is Response.Error -> {
+                                success = false
+                            }
+                            is Response.Success -> {
+                                success = relayDataHandler.persistRelayUrl(relayUrl)
+                            }
+                        }
+                    }
+                }
+            }
+
+            _relayUrlStateFlow.value = relayDataHandler.retrieveRelayUrl()?.value
+
+            val sideEffect = if (success) {
+                ProfileSideEffect.RelayUrlUpdatedSuccessfully
+            } else {
+                ProfileSideEffect.FailedToUpdateRelayUrl
+            }
+
+            submitSideEffect(sideEffect)
+        }
+    }
 
     fun persistPINTimeout() {
         _pinTimeoutStateFlow.value?.let { timeout ->
