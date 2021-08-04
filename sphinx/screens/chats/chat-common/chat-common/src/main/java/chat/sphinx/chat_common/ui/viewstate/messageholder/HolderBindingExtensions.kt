@@ -25,9 +25,7 @@ import chat.sphinx.resources.getString
 import chat.sphinx.resources.setBackgroundRandomColor
 import chat.sphinx.resources.setTextColorExt
 import chat.sphinx.wrapper_chat.ChatType
-import chat.sphinx.wrapper_common.lightning.asFormattedString
-import chat.sphinx.wrapper_common.lightning.isValidLightningNodePubKey
-import chat.sphinx.wrapper_common.lightning.toLightningNodePubKey
+import chat.sphinx.wrapper_common.lightning.*
 import chat.sphinx.wrapper_common.tribe.isValidTribeJoinLink
 import chat.sphinx.wrapper_common.tribe.toTribeJoinLink
 import chat.sphinx.wrapper_meme_server.headerKey
@@ -520,9 +518,29 @@ internal inline fun LayoutMessageHolderBinding.setBubbleMessageLinkPreviewLayout
                     }
                 }
             }
+            sphinxUrlSpan.url.isValidVirtualNodeAddress -> {
+                includeMessageHolderBubble.includeMessageLinkPreviewContact.apply {
+                    sphinxUrlSpan.url.toVirtualLightningNodeAddress()?.let { virtualLightningNodeAddress ->
+                        previewHandler?.populateContact(
+                            virtualLightningNodeAddress,
+                            this
+                        )
+                    }
+                }
+            }
             sphinxUrlSpan.url.isValidLightningNodePubKey -> {
                 includeMessageHolderBubble.includeMessageLinkPreviewContact.apply {
                     sphinxUrlSpan.url.toLightningNodePubKey()?.let {
+                        previewHandler?.populateContact(
+                            it,
+                            this
+                        )
+                    }
+                }
+            }
+            sphinxUrlSpan.url.isValidVirtualNodeAddress -> {
+                includeMessageHolderBubble.includeMessageLinkPreviewContact.apply {
+                    sphinxUrlSpan.url.toVirtualLightningNodeAddress()?.let {
                         previewHandler?.populateContact(
                             it,
                             this

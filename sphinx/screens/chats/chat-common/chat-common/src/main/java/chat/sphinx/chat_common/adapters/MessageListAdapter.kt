@@ -28,9 +28,8 @@ import chat.sphinx.kotlin_response.Response
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.message.MessageId
-import chat.sphinx.wrapper_common.message.toSphinxCallLink
-import chat.sphinx.wrapper_message.Message
 import chat.sphinx.wrapper_common.tribe.TribeJoinLink
+import chat.sphinx.wrapper_message.Message
 import chat.sphinx.wrapper_message.MessageType
 import chat.sphinx.wrapper_view.Px
 import io.matthewnelson.android_feature_screens.util.gone
@@ -405,7 +404,7 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                                 )
                             }
                             textViewMessageLinkPreviewTribeSeeBanner.setOnClickListener {
-                                viewModel.goToLightningNodePubKeyDetailScreen(tribeJoinLink.value)
+                                viewModel.handleContactTribeLinks(tribeJoinLink.value)
                             }
                             root.visible
                         }
@@ -424,10 +423,10 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                 layoutMessageLinkPreviewContactBinding.apply {
                     textViewMessageLinkPreviewContactPubkey.text = lightningNodePubKey.value
                     textViewMessageLinkPreviewAddContactBanner.setOnClickListener {
-                        viewModel.goToLightningNodePubKeyDetailScreen(lightningNodePubKey.value)
+                        viewModel.handleContactTribeLinks(lightningNodePubKey.value)
                     }
                     imageViewMessageLinkPreviewQrInviteIcon.setOnClickListener {
-                        viewModel.goToLightningNodePubKeyDetailScreen(lightningNodePubKey.value)
+                        viewModel.handleContactTribeLinks(lightningNodePubKey.value)
                     }
                     if (contact != null) {
                         // Existing contact
@@ -472,10 +471,10 @@ internal class MessageListAdapter<ARGS : NavArgs>(
             }
 
             override fun onResponse(call: Call, response: okhttp3.Response) {
-                onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-                    layoutMessageLinkPreviewUrlBinding.progressBarLinkPreview.gone
-                    if (response.isSuccessful) {
-                        response.body()?.string()?.let {
+                if (response.isSuccessful) {
+                    response.body()?.string()?.let {
+                        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                            layoutMessageLinkPreviewUrlBinding.progressBarLinkPreview.gone
                             val document = Jsoup.parse(it)
 
                             val urlMetadata = document.toUrlMetadata(url)
@@ -516,10 +515,13 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                                 layoutMessageLinkPreviewUrlBinding.root.gone
                             }
                         }
-                    } else {
+                    }
+                } else {
+                    onStopSupervisor.scope.launch(viewModel.mainImmediate) {
                         layoutMessageLinkPreviewUrlBinding.root.gone
                     }
                 }
+
             }
         })
 
