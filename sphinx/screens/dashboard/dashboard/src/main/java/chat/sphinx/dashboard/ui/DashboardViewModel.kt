@@ -2,12 +2,17 @@ package chat.sphinx.dashboard.ui
 
 import android.app.Application
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_background_login.BackgroundLoginHandler
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_lightning.model.invoice.PayRequestDto
+import chat.sphinx.concept_repository_chat.ChatRepository
+import chat.sphinx.concept_repository_contact.ContactRepository
+import chat.sphinx.concept_network_query_version.NetworkQueryVersion
 import chat.sphinx.concept_repository_dashboard_android.RepositoryDashboardAndroid
 import chat.sphinx.concept_service_notification.PushNotificationRegistrar
 import chat.sphinx.concept_socket_io.SocketIOManager
@@ -33,6 +38,7 @@ import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.*
 import chat.sphinx.wrapper_common.tribe.TribeJoinLink
 import chat.sphinx.wrapper_common.tribe.isValidTribeJoinLink
+import chat.sphinx.wrapper_common.tribe.toTribeJoinLink
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_contact.isInviteContact
 import chat.sphinx.wrapper_contact.isTrue
@@ -43,6 +49,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.MotionLayoutViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
+import io.matthewnelson.build_config.BuildConfigVersionCode
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.collect
 import io.matthewnelson.concept_views.viewstate.value
@@ -77,11 +84,15 @@ internal class DashboardViewModel @Inject constructor(
     val navBarNavigator: DashboardBottomNavBarNavigator,
     val navDrawerNavigator: DashboardNavDrawerNavigator,
 
+    private val buildConfigVersionCode: BuildConfigVersionCode,
     dispatchers: CoroutineDispatchers,
 
     private val repositoryDashboard: RepositoryDashboardAndroid<Any>,
+    private val contactRepository: ContactRepository,
+    private val chatRepository: ChatRepository,
 
-    protected val networkQueryLightning: NetworkQueryLightning,
+    private val networkQueryLightning: NetworkQueryLightning,
+    private val networkQueryVersion: NetworkQueryVersion,
 
     private val pushNotificationRegistrar: PushNotificationRegistrar,
 
@@ -109,10 +120,11 @@ internal class DashboardViewModel @Inject constructor(
                     filter = object : ScannerFilter() {
                         override suspend fun checkData(data: String): Response<Any, String> {
                             return when {
-                                data.isValidTribeJoinLink -> {
-                                    Response.Success(Any())
-                                }
-                                data.isValidLightningPaymentRequest -> {
+                                data.isValidTribeJoinLink ||
+                                data.isValidLightningPaymentRequest ||
+                                data.isValidLightningNodePubKey ||
+                                data.isValidVirtualNodeAddress ->
+                                {
                                     Response.Success(Any())
                                 }
                                 else -> {
@@ -125,41 +137,68 @@ internal class DashboardViewModel @Inject constructor(
                     scannerModeLabel = app.getString(R.string.paste_invoice_of_tribe_link)
                 )
             )
+
             if (response is Response.Success) {
 
                 val code = response.value.value
 
-                if (code.isValidTribeJoinLink) {
-                    dashboardNavigator.toJoinTribeDetail(TribeJoinLink(code))
-                } else {
-                    code.toLightningPaymentRequestOrNull()?.let { lightningPaymentRequest ->
+                code.toTribeJoinLink()?.let { tribeJoinLink ->
 
-                        try {
-                            val bolt11 = Bolt11.decode(lightningPaymentRequest)
-                            val amount = bolt11.getSatsAmount()
+                    dashboardNavigator.toJoinTribeDetail(tribeJoinLink)
 
-                            if (amount != null) {
-                                submitSideEffect(
-                                    DashboardSideEffect.AlertConfirmPayLightningPaymentRequest(
-                                        amount.value,
-                                        bolt11.getMemo()
-                                    ) {
-                                        payLightningPaymentRequest(lightningPaymentRequest)
-                                    }
-                                )
-                            } else {
-                                submitSideEffect(
-                                    DashboardSideEffect.Notify(
-                                        app.getString(R.string.payment_request_missing_amount),
-                                        true
-                                    )
-                                )
-                            }
-                        } catch (e: Exception) {}
+                } ?: code.toLightningNodePubKey()?.let { lightningNodePubKey ->
+
+                    handleContactLink(lightningNodePubKey, null)
+
+                } ?: code.toVirtualLightningNodeAddress()?.let { virtualNodeAddress ->
+
+                    virtualNodeAddress.getPubKey()?.let { lightningNodePubKey ->
+
+                        handleContactLink(
+                            lightningNodePubKey,
+                            virtualNodeAddress.getRouteHint()
+                        )
+
                     }
+
+                } ?: code.toLightningPaymentRequestOrNull()?.let { lightningPaymentRequest ->
+                    try {
+                        val bolt11 = Bolt11.decode(lightningPaymentRequest)
+                        val amount = bolt11.getSatsAmount()
+
+                        if (amount != null) {
+                            submitSideEffect(
+                                DashboardSideEffect.AlertConfirmPayLightningPaymentRequest(
+                                    amount.value,
+                                    bolt11.getMemo()
+                                ) {
+                                    payLightningPaymentRequest(lightningPaymentRequest)
+                                }
+                            )
+                        } else {
+                            submitSideEffect(
+                                DashboardSideEffect.Notify(
+                                    app.getString(R.string.payment_request_missing_amount),
+                                    true
+                                )
+                            )
+                        }
+                    } catch (e: Exception) {}
                 }
             }
         }
+    }
+
+    private suspend fun handleContactLink(pubKey: LightningNodePubKey, routeHint: LightningRouteHint?) {
+        contactRepository.getContactByPubKey(pubKey).firstOrNull()?.let { contact ->
+
+            chatRepository.getConversationByContactId(contact.id).firstOrNull()?.let { chat ->
+
+                dashboardNavigator.toChatContact(chat.id, contact.id)
+                
+            } ?: dashboardNavigator.toChatContact(null, contact.id)
+
+        } ?: dashboardNavigator.toAddContactDetail(pubKey, routeHint)
     }
 
 //    @Volatile
@@ -201,6 +240,23 @@ internal class DashboardViewModel @Inject constructor(
 
     suspend fun getAccountBalance(): StateFlow<NodeBalance?> =
         repositoryDashboard.getAccountBalance()
+
+    suspend fun getNewVersionAvailable(): Boolean {
+        var newVersionAvailable = false
+
+        networkQueryVersion.getAppVersions().collect { loadResponse ->
+            @Exhaustive
+            when (loadResponse) {
+                is LoadResponse.Loading -> {}
+                is Response.Error -> {}
+                is Response.Success -> {
+                    newVersionAvailable = loadResponse.value.kotlin > buildConfigVersionCode.value.toLong()
+                }
+            }
+        }
+
+        return newVersionAvailable
+    }
 
     private val _contactsStateFlow: MutableStateFlow<List<Contact>> by lazy {
         MutableStateFlow(emptyList())
@@ -552,6 +608,13 @@ internal class DashboardViewModel @Inject constructor(
                 }
             }
         )
+    }
+
+    fun goToAppUpgrade() {
+        val i = Intent(Intent.ACTION_VIEW)
+        i.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        i.data = Uri.parse("https://github.com/stakwork/sphinx-kotlin/releases")
+        app.startActivity(i)
     }
 
     override suspend fun onMotionSceneCompletion(value: Any) {

@@ -3,6 +3,8 @@ package chat.sphinx.dashboard.navigation
 import androidx.navigation.NavController
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
+import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
+import chat.sphinx.wrapper_common.lightning.LightningRouteHint
 import chat.sphinx.wrapper_common.tribe.TribeJoinLink
 import io.matthewnelson.concept_navigation.BaseNavigationDriver
 import io.matthewnelson.concept_navigation.Navigator
@@ -15,4 +17,9 @@ abstract class DashboardNavigator(
     abstract suspend fun toChatTribe(chatId: ChatId)
     abstract suspend fun toJoinTribeDetail(tribeLink: TribeJoinLink)
     abstract suspend fun toQRCodeDetail(qrText: String, viewTitle: String)
+
+    abstract suspend fun toAddContactDetail(
+        pubKey: LightningNodePubKey,
+        routeHint: LightningRouteHint? = null
+    )
 }

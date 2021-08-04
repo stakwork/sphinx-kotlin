@@ -16,6 +16,7 @@ dependencies {
     api project(path: ':sphinx:application:network:features:queries:feature-network-query-lightning')
     api project(path: ':sphinx:application:network:features:queries:feature-network-query-message')
     api project(path: ':sphinx:application:network:features:queries:feature-network-query-subscription')
+    api project(path: ':sphinx:application:network:features:queries:feature-network-query-version')
     api project(path: ':sphinx:application:network:features:feature-network-client')
     api project(path: ':sphinx:application:network:features:feature-network-relay-call')
 

@@ -8,8 +8,7 @@ import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.LightningPaymentHash
 import chat.sphinx.wrapper_common.lightning.LightningPaymentRequest
 import chat.sphinx.wrapper_common.lightning.Sat
-import chat.sphinx.wrapper_common.message.MessageId
-import chat.sphinx.wrapper_common.message.MessageUUID
+import chat.sphinx.wrapper_common.message.*
 import chat.sphinx.wrapper_message_media.MessageMedia
 import chat.sphinx.wrapper_message_media.isImage
 
@@ -21,6 +20,9 @@ inline fun Message.retrieveTextToShow(): String? =
             return giphyData?.text
         }
         if (podBoost != null) {
+            return null
+        }
+        if (isSphinxCallLink) {
             return null
         }
         decrypted.value
@@ -56,6 +58,14 @@ inline fun Message.retrieveImageUrlAndMessageMedia(): Pair<String, MessageMedia?
     return mediaData
 }
 
+@Suppress("NOTHING_TO_INLINE")
+inline fun Message.retrieveSphinxCallLink(): SphinxCallLink? =
+    messageContentDecrypted?.let { decrypted ->
+        decrypted.value.toSphinxCallLink()?.let { sphinxCallLink ->
+            return sphinxCallLink
+        }
+        null
+    }
 
 //Message Actions
 inline val Message.isBoostAllowed: Boolean
@@ -74,6 +84,9 @@ inline val Message.isReplyAllowed: Boolean
 //Paid types
 inline val Message.isPaidMessage: Boolean
     get() = type.isAttachment() && (messageMedia?.price?.value ?: 0L) > 0L
+
+inline val Message.isSphinxCallLink: Boolean
+    get() = type.isMessage() && (messageContentDecrypted?.value?.isValidSphinxCallLink == true)
 
 abstract class Message {
     abstract val id: MessageId

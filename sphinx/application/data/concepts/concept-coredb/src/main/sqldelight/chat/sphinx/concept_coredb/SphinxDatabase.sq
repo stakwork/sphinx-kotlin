@@ -240,6 +240,13 @@ SELECT *
 FROM contactDbo
 WHERE id = ?;
 
+contactGetByPubKey:
+SELECT *
+FROM contactDbo
+WHERE node_pub_key = ?
+ORDER BY id
+LIMIT 1;
+
 contactGetOwner:
 SELECT *
 FROM contactDbo

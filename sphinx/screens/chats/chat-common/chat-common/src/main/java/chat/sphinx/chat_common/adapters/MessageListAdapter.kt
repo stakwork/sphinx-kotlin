@@ -2,6 +2,7 @@ package chat.sphinx.chat_common.adapters
 
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.OnLongClickListener
 import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.lifecycle.DefaultLifecycleObserver
@@ -17,10 +18,13 @@ import chat.sphinx.chat_common.ui.ChatViewModel
 import chat.sphinx.chat_common.ui.isMessageSelected
 import chat.sphinx.chat_common.ui.viewstate.messageholder.*
 import chat.sphinx.chat_common.ui.viewstate.selected.SelectedMessageViewState
+import chat.sphinx.chat_common.util.SphinxUrlSpan
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.message.MessageId
+import chat.sphinx.wrapper_common.message.toSphinxCallLink
+import chat.sphinx.wrapper_message.Message
 import chat.sphinx.wrapper_message.MessageType
 import chat.sphinx.wrapper_message.toMessageType
 import chat.sphinx.wrapper_view.Px
@@ -209,17 +213,21 @@ internal class MessageListAdapter<ARGS : NavArgs>(
         private val disposables: ArrayList<Disposable> = ArrayList(3)
         private var currentViewState: MessageHolderViewState? = null
 
+        private val selectedMessageLongClickListener: OnLongClickListener
+
+        private val onSphinxInteractionListener: SphinxUrlSpan.OnInteractionListener
+
         init {
             binding.includeMessageHolderBubble.apply {
-                root.setOnLongClickListener {
+                selectedMessageLongClickListener = OnLongClickListener { v ->
                     SelectedMessageViewState.SelectedMessage.instantiate(
                         messageHolderViewState = currentViewState,
                         holderYPosTop = Px(binding.root.y),
                         holderHeight = Px(binding.root.measuredHeight.toFloat()),
                         holderWidth = Px(binding.root.measuredWidth.toFloat()),
-                        bubbleXPosStart = Px(it.x),
-                        bubbleWidth = Px(it.measuredWidth.toFloat()),
-                        bubbleHeight = Px(it.measuredHeight.toFloat()),
+                        bubbleXPosStart = Px(v.x),
+                        bubbleWidth = Px(v.measuredWidth.toFloat()),
+                        bubbleHeight = Px(v.measuredHeight.toFloat()),
                         headerHeight = headerHeight,
                         statusHeaderHeight = Px(binding.includeMessageStatusHeader.root.measuredHeight.toFloat()),
                         recyclerViewWidth = recyclerViewWidth,
@@ -228,6 +236,33 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                         viewModel.updateSelectedMessageViewState(vs)
                     }
                     true
+                }
+
+                onSphinxInteractionListener = object: SphinxUrlSpan.OnInteractionListener(
+                    selectedMessageLongClickListener) {
+                    override fun onClick(url: String?) {
+                        viewModel.handleContactTribeLinks(url)
+                    }
+                }
+            }
+
+            binding.includeMessageHolderBubble.includeMessageTypeCallInvite.let { holder ->
+                holder.layoutConstraintCallInviteJoinByAudio.setOnClickListener {
+                    currentViewState?.message?.let { nnMessage ->
+                        joinCall(nnMessage, true)
+                    }
+                }
+
+                holder.layoutConstraintCallInviteJoinByVideo.setOnClickListener {
+                    currentViewState?.message?.let { nnMessage ->
+                        joinCall(nnMessage, false)
+                    }
+                }
+
+                holder.buttonCallInviteCopyLink.setOnClickListener {
+                    currentViewState?.message?.let { nnMessage ->
+                        viewModel.copyCallLink(nnMessage)
+                    }
                 }
             }
 
@@ -300,6 +335,10 @@ internal class MessageListAdapter<ARGS : NavArgs>(
             }
         }
 
+        private fun joinCall(message: Message, audioOnly: Boolean) {
+            viewModel.joinCall(message, audioOnly)
+        }
+
         fun bind(position: Int) {
             val viewState = messages.elementAtOrNull(position).also { currentViewState = it } ?: return
 
@@ -313,6 +352,7 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                 viewModel.memeServerTokenHandler,
                 recyclerViewWidth,
                 viewState,
+                onSphinxInteractionListener
             )
 
         }

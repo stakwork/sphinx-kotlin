@@ -1,5 +1,15 @@
 # ChangeLog
 
+## Version 1.0.0-alpha14 (2021-08-04)
+ - Adds link detections to messages
+     - Urls
+     - Share Tribe Links
+     - Share Contact (Lightning Node Public Key) links
+ - Adds Jitsi Calls
+ - Adds check for new app versions
+ - Adds support for scanning of new contact links when utilizing the scanner from the dashboard
+ - Bumps Tor version from `0.4.6.2-alpha` -> `0.4.6.5`
+
 ## Version 1.0.0-alpha14 (2021-07-30)
  - Adds ability to approve/deny member join requests in Tribes
  - Fixes bug that was attempting to fetch podcast feed when url was empty
