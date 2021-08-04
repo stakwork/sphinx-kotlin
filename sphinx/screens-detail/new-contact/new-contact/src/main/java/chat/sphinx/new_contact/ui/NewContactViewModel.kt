@@ -86,8 +86,8 @@ internal class NewContactViewModel @Inject constructor(
                     }
                 }
 
-                contactInfoSideEffect?.let { nnContactInfoSideEffect ->
-                    submitSideEffect(nnContactInfoSideEffect)
+                if (contactInfoSideEffect != null) {
+                    submitSideEffect(contactInfoSideEffect)
                 }
             }
         }
