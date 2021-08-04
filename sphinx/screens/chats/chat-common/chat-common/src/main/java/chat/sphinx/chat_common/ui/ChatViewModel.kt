@@ -47,7 +47,6 @@ import chat.sphinx.wrapper_common.lightning.*
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessageUUID
 import chat.sphinx.wrapper_common.tribe.TribeJoinLink
-import chat.sphinx.wrapper_common.tribe.isValidTribeJoinLink
 import chat.sphinx.wrapper_common.tribe.toTribeJoinLink
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_message.*
@@ -816,11 +815,11 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 
             url?.toLightningNodePubKey()?.let { lightningNodePubKey ->
                 handleContactLink(lightningNodePubKey)
-            } ?: url?.toVirtualLightningNodePubKey()?.let { virtualNodePubKey ->
-                virtualNodePubKey?.getPubKey()?.let { lightningNodePubKey ->
+            } ?: url?.toVirtualLightningNodeAddress()?.let { virtualNodeAddress ->
+                virtualNodeAddress.getPubKey()?.let { lightningNodePubKey ->
                     handleContactLink(
                         lightningNodePubKey,
-                        virtualNodePubKey?.getRouteHint()
+                        virtualNodeAddress.getRouteHint()
                     )
                 }
             } ?: url?.toTribeJoinLink()?.let { tribeJoinLink ->

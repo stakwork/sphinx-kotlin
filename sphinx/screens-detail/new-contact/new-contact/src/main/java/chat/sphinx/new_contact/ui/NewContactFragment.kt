@@ -14,10 +14,8 @@ import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.new_contact.R
 import chat.sphinx.new_contact.databinding.FragmentNewContactBinding
-import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.lightning.*
 import dagger.hilt.android.AndroidEntryPoint
-import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
@@ -137,9 +135,9 @@ internal class NewContactFragment : SideEffectFragment<
         s?.toString()?.toLightningNodePubKey()?.let { nnPubKey ->
             binding.newContactAddressEditText.setText(nnPubKey.value)
         }
-        s?.toString()?.toVirtualLightningNodePubKey()?.let { nnVirtualPubKey ->
-            binding.newContactAddressEditText.setText(nnVirtualPubKey.getPubKey()?.value)
-            binding.newContactRouteHintEditText.setText(nnVirtualPubKey.getRouteHint()?.value ?: "")
+        s?.toString()?.toVirtualLightningNodeAddress()?.let { nnVirtualAddress ->
+            binding.newContactAddressEditText.setText(nnVirtualAddress.getPubKey()?.value)
+            binding.newContactRouteHintEditText.setText(nnVirtualAddress.getRouteHint()?.value ?: "")
         }
     }
 

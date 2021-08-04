@@ -1,15 +1,15 @@
 package chat.sphinx.wrapper_common.lightning
 
 @Suppress("NOTHING_TO_INLINE")
-inline fun String.toVirtualLightningNodePubKey(): VirtualLightningNodePubKey? =
+inline fun String.toVirtualLightningNodeAddress(): VirtualLightningNodeAddress? =
     try {
-        VirtualLightningNodePubKey(this)
+        VirtualLightningNodeAddress(this)
     } catch (e: IllegalArgumentException) {
         null
     }
 
 @Suppress("NOTHING_TO_INLINE")
-inline fun VirtualLightningNodePubKey.getPubKey(): LightningNodePubKey? {
+inline fun VirtualLightningNodeAddress.getPubKey(): LightningNodePubKey? {
     val elements = this.value.split(":")
     if (elements.size > 1) {
         return elements[0].toLightningNodePubKey()
@@ -18,7 +18,7 @@ inline fun VirtualLightningNodePubKey.getPubKey(): LightningNodePubKey? {
 }
 
 @Suppress("NOTHING_TO_INLINE")
-inline fun VirtualLightningNodePubKey.getRouteHint(): LightningRouteHint? {
+inline fun VirtualLightningNodeAddress.getRouteHint(): LightningRouteHint? {
     val elements = this.value.split(":")
     if (elements.size == 3) {
         return "${elements[1]}:${elements[2]}".toLightningRouteHint()
@@ -26,20 +26,20 @@ inline fun VirtualLightningNodePubKey.getRouteHint(): LightningRouteHint? {
     return null
 }
 
-inline val String.isValidVirtualNodePubKey: Boolean
-    get() = isNotEmpty() && matches("^${VirtualLightningNodePubKey.REGEX}\$".toRegex())
+inline val String.isValidVirtualNodeAddress: Boolean
+    get() = isNotEmpty() && matches("^${VirtualLightningNodeAddress.REGEX}\$".toRegex())
 
 
 @JvmInline
-value class VirtualLightningNodePubKey(val value: String) {
+value class VirtualLightningNodeAddress(val value: String) {
 
     companion object {
         const val REGEX = "${LightningNodePubKey.REGEX}:${LightningRouteHint.REGEX}"
     }
 
     init {
-        require(value.isValidVirtualNodePubKey) {
-            "Invalid Lightning Node Public Key"
+        require(value.isValidVirtualNodeAddress) {
+            "Invalid VirtualLightningNodeAddress string value"
         }
     }
 }

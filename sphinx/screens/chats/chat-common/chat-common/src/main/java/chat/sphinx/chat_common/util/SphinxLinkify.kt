@@ -14,7 +14,7 @@ import androidx.annotation.IntDef
 import androidx.annotation.RestrictTo
 import androidx.core.util.PatternsCompat
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
-import chat.sphinx.wrapper_common.lightning.VirtualLightningNodePubKey
+import chat.sphinx.wrapper_common.lightning.VirtualLightningNodeAddress
 import chat.sphinx.wrapper_common.tribe.TribeJoinLink
 import java.util.*
 import java.util.regex.Matcher
@@ -118,7 +118,7 @@ object SphinxLinkify {
         }
         if (mask and VIRTUAL_NODE_PUBLIC_KEY != 0) {
             gatherLinks(
-                links, text, SphinxPatterns.VIRTUAL_NODE_PUBLIC_KEY, arrayOf(),
+                links, text, SphinxPatterns.VIRTUAL_NODE_ADDRESS, arrayOf(),
                 null, null
             )
         }
@@ -325,8 +325,8 @@ object SphinxLinkify {
             LightningNodePubKey.REGEX
         )
 
-        val VIRTUAL_NODE_PUBLIC_KEY: Pattern = Pattern.compile(
-            VirtualLightningNodePubKey.REGEX
+        val VIRTUAL_NODE_ADDRESS: Pattern = Pattern.compile(
+            VirtualLightningNodeAddress.REGEX
         )
     }
 }
