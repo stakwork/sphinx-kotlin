@@ -43,14 +43,6 @@ internal class NewContactFragment : SideEffectFragment<
         when (viewState) {
             is NewContactViewState.Idle -> {}
 
-            is NewContactViewState.NewContactLink -> {
-                binding.apply {
-                    newContactAddressEditText.setText(viewState.pubKey?.value ?: "")
-                    newContactRouteHintEditText.setText(viewState.routeHint?.value ?: "")
-
-                    includeNewContactHeader.textViewDetailScreenHeaderNavBack.goneIfFalse(viewState.fromAddFriend)
-                }
-            }
             is NewContactViewState.Saving -> {
                 binding.newContactSaveProgress.visible
             }
@@ -67,6 +59,8 @@ internal class NewContactFragment : SideEffectFragment<
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.includeNewContactHeader.apply {
+
+            textViewDetailScreenHeaderNavBack.goneIfFalse(viewModel.args.argFromAddFriend)
 
             textViewDetailScreenHeaderName.text = getString(R.string.new_contact_header_name)
 
@@ -142,15 +136,20 @@ internal class NewContactFragment : SideEffectFragment<
     @SuppressLint("SetTextI18n")
     private fun pastePubKey(s: Editable?) {
         s?.toString()?.toLightningNodePubKey()?.let { nnPubKey ->
-            binding.newContactAddressEditText.setText(nnPubKey.getPubKey()?.value ?: "")
-            binding.newContactRouteHintEditText.setText(nnPubKey.getRouteHint()?.value ?: "")
+            binding.newContactAddressEditText.setText(nnPubKey.value)
+        }
+        s?.toString()?.toVirtualLightningNodePubKey()?.let { nnVirtualPubKey ->
+            binding.newContactAddressEditText.setText(nnVirtualPubKey.getPubKey()?.value)
+            binding.newContactRouteHintEditText.setText(nnVirtualPubKey.getRouteHint()?.value ?: "")
         }
     }
 
     override suspend fun onSideEffectCollect(sideEffect: NewContactSideEffect) {
-        if (sideEffect is NewContactSideEffect.FromScanner) {
-            // TODO: Check if it contains a route hint
-            binding.newContactAddressEditText.setText(sideEffect.value.value)
+        if (sideEffect is NewContactSideEffect.ContactInfo) {
+            binding.apply {
+                newContactAddressEditText.setText(sideEffect.pubKey.value)
+                newContactRouteHintEditText.setText(sideEffect.routeHint?.value ?: "")
+            }
         } else {
             sideEffect.execute(binding.root.context)
         }

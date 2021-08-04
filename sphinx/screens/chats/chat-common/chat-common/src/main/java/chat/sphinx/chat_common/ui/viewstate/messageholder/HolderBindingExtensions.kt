@@ -480,9 +480,10 @@ internal inline fun LayoutMessageHolderBinding.setBubbleMessageLayout(
         } else {
             visible
             text = message.text
-            onSphinxInteractionListener?.let { sphinxInteractionListener ->
-                SphinxLinkify.addLinks(this, SphinxLinkify.ALL, sphinxInteractionListener)
-                setOnLongClickListener(sphinxInteractionListener)
+
+            if (onSphinxInteractionListener != null) {
+                SphinxLinkify.addLinks(this, SphinxLinkify.ALL, onSphinxInteractionListener)
+                setOnLongClickListener(onSphinxInteractionListener)
             }
         }
     }

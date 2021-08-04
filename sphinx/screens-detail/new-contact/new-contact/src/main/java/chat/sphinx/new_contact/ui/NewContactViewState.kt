@@ -7,13 +7,6 @@ import java.io.File
 
 internal sealed class NewContactViewState: ViewState<NewContactViewState>() {
     object Idle: NewContactViewState()
-
-    class NewContactLink(
-        val fromAddFriend: Boolean,
-        val pubKey: LightningNodePubKey?,
-        val routeHint: LightningRouteHint?
-    ): NewContactViewState()
-
     object Saving: NewContactViewState()
     object Saved: NewContactViewState()
     object Error: NewContactViewState()

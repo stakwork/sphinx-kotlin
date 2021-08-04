@@ -43,12 +43,10 @@ import chat.sphinx.wrapper_chat.*
 import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
-import chat.sphinx.wrapper_common.lightning.Sat
-import chat.sphinx.wrapper_common.lightning.getPubKey
-import chat.sphinx.wrapper_common.lightning.isValidLightningNodePubKey
-import chat.sphinx.wrapper_common.lightning.toLightningNodePubKey
+import chat.sphinx.wrapper_common.lightning.*
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessageUUID
+import chat.sphinx.wrapper_common.tribe.TribeJoinLink
 import chat.sphinx.wrapper_common.tribe.isValidTribeJoinLink
 import chat.sphinx.wrapper_common.tribe.toTribeJoinLink
 import chat.sphinx.wrapper_contact.Contact
@@ -813,35 +811,45 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         }
     }
 
-    open fun goToLightningNodePubKeyDetailScreen(url: String?) {
+    open fun handleContactTribeLinks(url: String?) {
         viewModelScope.launch(mainImmediate) {
-            if (url?.isValidLightningNodePubKey == true) {
-                url.toLightningNodePubKey()?.let { lightningNodePubKey ->
-                    lightningNodePubKey.getPubKey()?.let { nnPubKey ->
-                        contactRepository.getContactByPubKey(nnPubKey).collect { contact ->
-                            if (contact == null) {
-                                chatNavigator.toAddContactDetail(lightningNodePubKey)
-                            } else {
-                                chatRepository.getConversationByContactId(contact.id).collect { chat ->
-                                    chatNavigator.toChat(chat, contact.id)
-                                }
-                            }
-                        }
-                    }
+
+            url?.toLightningNodePubKey()?.let { lightningNodePubKey ->
+                handleContactLink(lightningNodePubKey)
+            } ?: url?.toVirtualLightningNodePubKey()?.let { virtualLightningNodePubKey ->
+                virtualLightningNodePubKey?.getPubKey()?.let { lightningNodePubKey ->
+                    handleContactLink(
+                        lightningNodePubKey,
+                        virtualLightningNodePubKey?.getRouteHint()
+                    )
                 }
-            } else if (url?.isValidTribeJoinLink == true) {
-                url.toTribeJoinLink()?.let { tribeJoinLink ->
-                    chatRepository.getChatByUUID(ChatUUID(tribeJoinLink.tribeUUID)).collect { chat ->
-                        if (chat == null) {
-                            chatNavigator.toJoinTribeDetail(tribeJoinLink)
-                        } else {
-                            chatNavigator.toChat(chat, null)
-                        }
-                    }
-                }
+            } ?: url?.toTribeJoinLink()?.let { tribeJoinLink ->
+                handleTribeLink(tribeJoinLink)
             }
+        }
+    }
 
+    private suspend fun handleTribeLink(tribeJoinLink: TribeJoinLink) {
+        chatRepository.getChatByUUID(ChatUUID(tribeJoinLink.tribeUUID)).firstOrNull()?.let { chat ->
+            chatNavigator.toChat(chat, null)
+        } ?: run {
+            chatNavigator.toJoinTribeDetail(tribeJoinLink)
+        }
+    }
 
+    private suspend fun handleContactLink(
+        pubKey: LightningNodePubKey,
+        routeHint: LightningRouteHint? = null
+    ) {
+        contactRepository.getContactByPubKey(pubKey).firstOrNull()?.let { contact ->
+            chatRepository.getConversationByContactId(contact.id).collect { chat ->
+                chatNavigator.toChat(chat, contact.id)
+            }
+        } ?: run {
+            chatNavigator.toAddContactDetail(
+                pubKey,
+                routeHint
+            )
         }
     }
     
