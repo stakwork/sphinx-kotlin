@@ -138,6 +138,7 @@ internal fun LayoutMessageHolderBinding.setView(
             }
             setUnsupportedMessageTypeLayout(viewState.unsupportedMessageType)
             setBubbleMessageLayout(viewState.bubbleMessage, onSphinxInteractionListener)
+            setBubbleCallInvite(viewState.bubbleCallInvite)
             setBubbleDirectPaymentLayout(viewState.bubbleDirectPayment)
             setBubbleDirectPaymentLayout(viewState.bubbleDirectPayment)
             setBubblePodcastBoost(viewState.bubblePodcastBoost)
@@ -485,6 +486,21 @@ internal inline fun LayoutMessageHolderBinding.setBubbleMessageLayout(
                 SphinxLinkify.addLinks(this, SphinxLinkify.ALL, onSphinxInteractionListener)
                 setOnLongClickListener(onSphinxInteractionListener)
             }
+        }
+    }
+}
+
+@MainThread
+@Suppress("NOTHING_TO_INLINE")
+internal inline fun LayoutMessageHolderBinding.setBubbleCallInvite(
+    callInvite: LayoutState.Bubble.ContainerSecond.CallInvite?
+) {
+    includeMessageHolderBubble.includeMessageTypeCallInvite.apply {
+        if (callInvite == null) {
+            root.gone
+        } else {
+            root.visible
+            layoutConstraintCallInviteJoinByVideo.goneIfFalse(callInvite.videoButtonVisible)
         }
     }
 }

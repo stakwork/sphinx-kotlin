@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bottom_menu_tribe_header_text">Opciones de la Tribu</string>
+    <!-- Menu -->
+    <string name="bottom_menu_tribe_option_share_tribe">Compartir código QR</string>
+    <string name="bottom_menu_tribe_option_delete_tribe">Eliminar Tribu</string>
+    <string name="bottom_menu_tribe_option_exit_tribe">Abandonar Tribu</string>
+    <string name="bottom_menu_tribe_option_edit_tribe">Editar Tribu</string>
+</resources>

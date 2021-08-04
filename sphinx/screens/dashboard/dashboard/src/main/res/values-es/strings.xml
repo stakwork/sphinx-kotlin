@@ -10,6 +10,8 @@
     <string name="add_sats">AGREGAR SATS</string>
     <string name="search">Buscar</string>
 
+    <string name="upgrade_app">ACTUALIZAR</string>
+
     <string name="not_valid_tribe_link">El código QR no es un código de tribu válido</string>
     <string name="invite_name">Invitación: %s</string>
     <string name="invite_qr_code_header_name">CÓDIGO DE INVITACIÓN</string>
@@ -36,6 +38,7 @@
     <string name="last_message_description_you">Tú</string>
     <string name="last_message_description_gif_shared">%sGIF compartido</string>
     <string name="last_message_description_boost">%sBoost %s</string>
+    <string name="last_message_description_call_invite">%sUnirse a la Llamada</string>
     <string name="last_message_description_invoice_sent">Solicitud enviada: %s</string>
     <string name="last_message_description_invoice_receive">Solicitud recibida: %s</string>
     <string name="last_message_description_payment_sent">Pago enviado: %s</string>

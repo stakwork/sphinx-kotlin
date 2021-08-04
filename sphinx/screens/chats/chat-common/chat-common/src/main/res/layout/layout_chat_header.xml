@@ -133,7 +133,7 @@
         android:text="@string/material_icon_name_call_button"
         android:textColor="@color/washedOutReceivedText"
         android:gravity="center"
-        android:visibility="gone"
+        android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />

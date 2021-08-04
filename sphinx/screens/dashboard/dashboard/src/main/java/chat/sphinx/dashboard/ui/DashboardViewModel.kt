@@ -2,12 +2,15 @@ package chat.sphinx.dashboard.ui
 
 import android.app.Application
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_background_login.BackgroundLoginHandler
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_lightning.model.invoice.PayRequestDto
+import chat.sphinx.concept_network_query_version.NetworkQueryVersion
 import chat.sphinx.concept_repository_dashboard_android.RepositoryDashboardAndroid
 import chat.sphinx.concept_service_notification.PushNotificationRegistrar
 import chat.sphinx.concept_socket_io.SocketIOManager
@@ -43,6 +46,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.MotionLayoutViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
+import io.matthewnelson.build_config.BuildConfigVersionCode
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.collect
 import io.matthewnelson.concept_views.viewstate.value
@@ -77,11 +81,13 @@ internal class DashboardViewModel @Inject constructor(
     val navBarNavigator: DashboardBottomNavBarNavigator,
     val navDrawerNavigator: DashboardNavDrawerNavigator,
 
+    private val buildConfigVersionCode: BuildConfigVersionCode,
     dispatchers: CoroutineDispatchers,
 
     private val repositoryDashboard: RepositoryDashboardAndroid<Any>,
 
-    protected val networkQueryLightning: NetworkQueryLightning,
+    private val networkQueryLightning: NetworkQueryLightning,
+    private val networkQueryVersion: NetworkQueryVersion,
 
     private val pushNotificationRegistrar: PushNotificationRegistrar,
 
@@ -201,6 +207,23 @@ internal class DashboardViewModel @Inject constructor(
 
     suspend fun getAccountBalance(): StateFlow<NodeBalance?> =
         repositoryDashboard.getAccountBalance()
+
+    suspend fun getNewVersionAvailable(): Boolean {
+        var newVersionAvailable = false
+
+        networkQueryVersion.getAppVersions().collect { loadResponse ->
+            @Exhaustive
+            when (loadResponse) {
+                is LoadResponse.Loading -> {}
+                is Response.Error -> {}
+                is Response.Success -> {
+                    newVersionAvailable = loadResponse.value.kotlin > buildConfigVersionCode.value.toLong()
+                }
+            }
+        }
+
+        return newVersionAvailable
+    }
 
     private val _contactsStateFlow: MutableStateFlow<List<Contact>> by lazy {
         MutableStateFlow(emptyList())
@@ -552,6 +575,13 @@ internal class DashboardViewModel @Inject constructor(
                 }
             }
         )
+    }
+
+    fun goToAppUpgrade() {
+        val i = Intent(Intent.ACTION_VIEW)
+        i.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        i.data = Uri.parse("https://github.com/stakwork/sphinx-kotlin/releases")
+        app.startActivity(i)
     }
 
     override suspend fun onMotionSceneCompletion(value: Any) {

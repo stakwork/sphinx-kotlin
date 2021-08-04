@@ -34,8 +34,12 @@ dependencies {
     api project(path: ':android:features:android-feature-screens')
 
     // Sphinx
+    api project(path: ':sphinx:application:common:menus:menu-bottom')
+
     api project(path: ':sphinx:application:common:logger')
     api project(path: ':sphinx:application:common:resources')
+
+    api project(path: ':sphinx:application:common:wrappers:wrapper-common')
 
     api project(path: ':sphinx:application:data:concepts:concept-image-loader')
     api project(path: ':sphinx:application:data:concepts:concept-media-cache')
@@ -45,6 +49,7 @@ dependencies {
     api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-message')
 
     implementation project(path: ':sphinx:application:network:concepts:clients:concept-network-client-crypto')
+
     api project(path: ':sphinx:application:network:concepts:queries:concept-network-query-lightning')
     api project(path: ':sphinx:application:network:concepts:queries:concept-network-query-chat')
     api project(path: ':sphinx:activity:insetter-activity')
@@ -61,6 +66,7 @@ dependencies {
     implementation deps.square.okio
 
     implementation deps.giphy.sdk
+    implementation deps.jitsi.sdk
 }
 
 secrets {

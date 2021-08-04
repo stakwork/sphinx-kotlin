@@ -73,4 +73,9 @@
         android:id="@+id/include_chat_tribe_menu"
         layout="@layout/layout_chat_menu" />
 
+    <include
+        android:id="@+id/include_layout_menu_bottom_call"
+        layout="@layout/layout_menu_bottom"
+        tools:visibility="gone" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
