@@ -120,7 +120,7 @@ internal class ChatTribeFragment: ChatFragment<
     }
 
     private fun setProgressBar(podcast: Podcast) {
-        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+        lifecycleScope.launch(viewModel.mainImmediate) {
             val progress: Int = withContext(viewModel.io) {
                 try {
                     podcast.getPlayingProgress(viewModel::retrieveEpisodeDuration)
