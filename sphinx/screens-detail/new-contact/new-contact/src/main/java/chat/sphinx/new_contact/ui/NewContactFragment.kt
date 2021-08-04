@@ -60,12 +60,11 @@ internal class NewContactFragment : SideEffectFragment<
         super.onViewCreated(view, savedInstanceState)
         binding.includeNewContactHeader.apply {
 
-            textViewDetailScreenHeaderNavBack.goneIfFalse(viewModel.args.argFromAddFriend)
-
             textViewDetailScreenHeaderName.text = getString(R.string.new_contact_header_name)
 
             textViewDetailScreenHeaderNavBack.apply {
-                visible
+                goneIfFalse(viewModel.args.argFromAddFriend)
+                
                 setOnClickListener {
                     lifecycleScope.launch(viewModel.mainImmediate) {
                         viewModel.navigator.popBackStack()
