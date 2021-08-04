@@ -817,7 +817,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 
                 url.toLightningNodePubKey()?.let { lightningNodePubKey ->
 
-                    handleContactLink(lightningNodePubKey)
+                    handleContactLink(lightningNodePubKey, null)
 
                 } ?: url.toVirtualLightningNodeAddress()?.let { virtualNodeAddress ->
 
@@ -841,25 +841,17 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     private suspend fun handleTribeLink(tribeJoinLink: TribeJoinLink) {
         chatRepository.getChatByUUID(ChatUUID(tribeJoinLink.tribeUUID)).firstOrNull()?.let { chat ->
             chatNavigator.toChat(chat, null)
-        } ?: run {
-            chatNavigator.toJoinTribeDetail(tribeJoinLink)
-        }
+        } ?: chatNavigator.toJoinTribeDetail(tribeJoinLink)
     }
 
-    private suspend fun handleContactLink(
-        pubKey: LightningNodePubKey,
-        routeHint: LightningRouteHint? = null
-    ) {
+    private suspend fun handleContactLink(pubKey: LightningNodePubKey, routeHint: LightningRouteHint?) {
         contactRepository.getContactByPubKey(pubKey).firstOrNull()?.let { contact ->
+
             chatRepository.getConversationByContactId(contact.id).collect { chat ->
                 chatNavigator.toChat(chat, contact.id)
             }
-        } ?: run {
-            chatNavigator.toAddContactDetail(
-                pubKey,
-                routeHint
-            )
-        }
+
+        } ?: chatNavigator.toAddContactDetail(pubKey, routeHint)
     }
     
     open suspend fun processMemberRequest(
