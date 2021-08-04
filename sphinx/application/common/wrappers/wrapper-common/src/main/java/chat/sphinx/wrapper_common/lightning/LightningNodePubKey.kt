@@ -9,14 +9,14 @@ inline fun String.toLightningNodePubKey(): LightningNodePubKey? =
     }
 
 inline val String.isValidLightningNodePubKey: Boolean
-    get() = isNotEmpty() && matches("^${LightningNodePubKey.PUB_KEY_REGEX}\$".toRegex())
+    get() = isNotEmpty() && matches("^${LightningNodePubKey.REGEX}\$".toRegex())
 
 @JvmInline
 value class LightningNodePubKey(val value: String) {
 
     companion object {
 
-        const val PUB_KEY_REGEX = "[A-F0-9a-f]{66}"
+        const val REGEX = "[A-F0-9a-f]{66}"
 
         fun fromByteArray(byteArray: ByteArray): LightningNodePubKey {
             return LightningNodePubKey(byteArray.decodeToString())

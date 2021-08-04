@@ -27,14 +27,14 @@ inline fun VirtualLightningNodePubKey.getRouteHint(): LightningRouteHint? {
 }
 
 inline val String.isValidVirtualNodePubKey: Boolean
-    get() = isNotEmpty() && matches("^${VirtualLightningNodePubKey.VIRTUAL_NODE_PUB_KEY_REGEX}\$".toRegex())
+    get() = isNotEmpty() && matches("^${VirtualLightningNodePubKey.REGEX}\$".toRegex())
 
 
 @JvmInline
 value class VirtualLightningNodePubKey(val value: String) {
 
     companion object {
-        const val VIRTUAL_NODE_PUB_KEY_REGEX = "[A-F0-9a-f]{66}:[A-F0-9a-f]{66}:[0-9]+"
+        const val REGEX = "${LightningNodePubKey.REGEX}:${LightningRouteHint.REGEX}"
     }
 
     init {

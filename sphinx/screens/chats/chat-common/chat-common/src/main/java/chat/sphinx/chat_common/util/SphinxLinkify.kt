@@ -322,11 +322,11 @@ object SphinxLinkify {
         )
 
         val LIGHTNING_NODE_PUBLIC_KEY: Pattern = Pattern.compile(
-            LightningNodePubKey.PUB_KEY_REGEX
+            LightningNodePubKey.REGEX
         )
 
         val VIRTUAL_NODE_PUBLIC_KEY: Pattern = Pattern.compile(
-            VirtualLightningNodePubKey.VIRTUAL_NODE_PUB_KEY_REGEX
+            VirtualLightningNodePubKey.REGEX
         )
     }
 }
