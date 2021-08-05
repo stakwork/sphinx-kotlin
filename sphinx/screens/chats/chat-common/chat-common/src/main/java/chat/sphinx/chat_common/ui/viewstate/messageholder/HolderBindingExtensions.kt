@@ -511,7 +511,7 @@ internal inline fun LayoutMessageHolderBinding.setBubbleMessageLinkPreviewLayout
             sphinxUrlSpan.url.isValidTribeJoinLink -> {
                 includeMessageHolderBubble.includeMessageLinkPreviewTribe.apply {
                     sphinxUrlSpan.url.toTribeJoinLink()?.let {
-                        previewHandler?.populateTribe(
+                        previewHandler?.populateTribePreview(
                             it,
                             this
                         )
@@ -521,7 +521,7 @@ internal inline fun LayoutMessageHolderBinding.setBubbleMessageLinkPreviewLayout
             sphinxUrlSpan.url.isValidVirtualNodeAddress -> {
                 includeMessageHolderBubble.includeMessageLinkPreviewContact.apply {
                     sphinxUrlSpan.url.toVirtualLightningNodeAddress()?.let { virtualLightningNodeAddress ->
-                        previewHandler?.populateContact(
+                        previewHandler?.populateContactPreview(
                             virtualLightningNodeAddress,
                             this
                         )
@@ -531,7 +531,7 @@ internal inline fun LayoutMessageHolderBinding.setBubbleMessageLinkPreviewLayout
             sphinxUrlSpan.url.isValidLightningNodePubKey -> {
                 includeMessageHolderBubble.includeMessageLinkPreviewContact.apply {
                     sphinxUrlSpan.url.toLightningNodePubKey()?.let {
-                        previewHandler?.populateContact(
+                        previewHandler?.populateContactPreview(
                             it,
                             this
                         )
@@ -541,7 +541,7 @@ internal inline fun LayoutMessageHolderBinding.setBubbleMessageLinkPreviewLayout
             sphinxUrlSpan.url.isValidVirtualNodeAddress -> {
                 includeMessageHolderBubble.includeMessageLinkPreviewContact.apply {
                     sphinxUrlSpan.url.toVirtualLightningNodeAddress()?.let {
-                        previewHandler?.populateContact(
+                        previewHandler?.populateContactPreview(
                             it,
                             this
                         )

@@ -51,10 +51,9 @@ import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.*
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessageUUID
-import chat.sphinx.wrapper_common.tribe.TribeJoinLink
-import chat.sphinx.wrapper_common.tribe.isValidTribeJoinLink
-import chat.sphinx.wrapper_common.tribe.toTribeJoinLink
 import chat.sphinx.wrapper_common.message.SphinxCallLink
+import chat.sphinx.wrapper_common.tribe.TribeJoinLink
+import chat.sphinx.wrapper_common.tribe.toTribeJoinLink
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_contact.avatarUrl
 import chat.sphinx.wrapper_message.*
@@ -943,14 +942,23 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 
         } ?: chatNavigator.toAddContactDetail(pubKey, routeHint)
     }
-    
-    fun getTribe(tribeJoinLink: TribeJoinLink): Flow<LoadResponse<TribeDto, ResponseError>> {
+
+    fun getChatTribe(tribeJoinLink: TribeJoinLink): Flow<Chat?> {
+        return chatRepository.getChatByUUID(ChatUUID(tribeJoinLink.tribeUUID))
+    }
+
+    fun getTribeInfo(tribeJoinLink: TribeJoinLink): Flow<LoadResponse<TribeDto, ResponseError>> {
         return networkQueryChat.getTribeInfo(ChatHost(tribeJoinLink.tribeHost), ChatUUID(tribeJoinLink.tribeUUID))
     }
 
     fun getContact(lightningNodePubKey: LightningNodePubKey): Flow<Contact?> {
         return contactRepository.getContactByPubKey(lightningNodePubKey)
     }
+
+    fun getUrlMetaData(url: String): Flow<LoadResponse<String, ResponseError>> {
+        return networkQueryChat.getHtml(url)
+    }
+
     open suspend fun processMemberRequest(
         contactId: ContactId,
         messageId: MessageId,

@@ -31,6 +31,7 @@ import okhttp3.Request
 import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.internal.EMPTY_REQUEST
+import okio.BufferedSource
 import java.io.IOException
 import java.util.concurrent.TimeUnit
 
@@ -129,6 +130,25 @@ class NetworkRelayCallImpl(
             val response = call(responseJsonClass, requestBuilder.build(), useExtendedNetworkCallClient)
 
             emit(Response.Success(response))
+        } catch (e: Exception) {
+            emit(handleException(LOG, GET, url, e))
+        }
+    }
+
+    override fun getRaw(
+        url: String,
+        headers: Map<String, String>?,
+        useExtendedNetworkCallClient: Boolean
+    ): Flow<LoadResponse<String, ResponseError>> = flow {
+
+        emit(LoadResponse.Loading)
+
+        try {
+            val requestBuilder = buildRequest(url, headers)
+
+            val response = callRaw(requestBuilder.build(), useExtendedNetworkCallClient)
+
+            emit(Response.Success(response.readUtf8()))
         } catch (e: Exception) {
             emit(handleException(LOG, GET, url, e))
         }
@@ -245,6 +265,21 @@ class NetworkRelayCallImpl(
         useExtendedNetworkCallClient: Boolean
     ): T {
 
+        return withContext(default) {
+            moshi.adapter(responseJsonClass).fromJson(callRaw(request, useExtendedNetworkCallClient))
+        } ?: throw IOException(
+            """
+                Failed to convert Json to ${responseJsonClass.simpleName}
+            """.trimIndent()
+        )
+    }
+
+    @Throws(NullPointerException::class, IOException::class)
+    override suspend fun callRaw(
+        request: Request,
+        useExtendedNetworkCallClient: Boolean
+    ): BufferedSource {
+
         // TODO: Make less horrible. Needed for the `/contacts` endpoint for users who
         //  have a large number of contacts as Relay needs more time than the default
         //  client's settings. Replace once the `aa/contacts` endpoint gets pagination.
@@ -278,14 +313,10 @@ class NetworkRelayCallImpl(
         )
 
         return withContext(default) {
-            moshi.adapter(responseJsonClass).fromJson(body.source())
-        } ?: throw IOException(
-            """
-                Failed to convert Json to ${responseJsonClass.simpleName}
-                NetworkResponse: $networkResponse
-            """.trimIndent()
-        )
+            body.source()
+        }
     }
+
 
     ////////////////////////
     /// NetworkRelayCall ///

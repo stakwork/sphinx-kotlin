@@ -1,5 +1,6 @@
 package chat.sphinx.chat_common.util
 
+import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import java.net.URI
 
@@ -109,6 +110,14 @@ internal inline fun Document.toUrlMetadata(url: String): UrlMetadata? {
             )
         }
     }
+    return null
+}
+
+@Suppress("NOTHING_TO_INLINE")
+internal inline fun String.toUrlMetadata(url: String): UrlMetadata? {
+    try {
+        return Jsoup.parse(this).toUrlMetadata(url)
+    } catch (exception: Exception) { }
     return null
 }
 

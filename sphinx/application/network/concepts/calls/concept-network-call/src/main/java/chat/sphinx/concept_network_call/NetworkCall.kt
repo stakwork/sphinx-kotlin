@@ -4,6 +4,7 @@ import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.ResponseError
 import kotlinx.coroutines.flow.Flow
 import okhttp3.Request
+import okio.BufferedSource
 import java.io.IOException
 
 @Suppress("NOTHING_TO_INLINE")
@@ -43,6 +44,12 @@ abstract class NetworkCall {
         headers: Map<String, String>? = null,
         useExtendedNetworkCallClient: Boolean = false,
     ): Flow<LoadResponse<T, ResponseError>>
+
+    abstract fun getRaw(
+        url: String,
+        headers: Map<String, String>? = null,
+        useExtendedNetworkCallClient: Boolean = false,
+    ): Flow<LoadResponse<String, ResponseError>>
 
     /**
      * PUT
@@ -108,4 +115,9 @@ abstract class NetworkCall {
         useExtendedNetworkCallClient: Boolean = false
     ): T
 
+    @Throws(NullPointerException::class, IOException::class)
+    abstract suspend fun callRaw(
+        request: Request,
+        useExtendedNetworkCallClient: Boolean = false
+    ): BufferedSource
 }

@@ -51,15 +51,15 @@ open class SphinxUrlSpan(
     }
 
     interface PreviewHandler {
-        fun populateContact(lightningNodePubKey: LightningNodePubKey, layoutMessageLinkPreviewContactBinding: LayoutMessageLinkPreviewContactBinding)
+        fun populateContactPreview(lightningNodePubKey: LightningNodePubKey, layoutMessageLinkPreviewContactBinding: LayoutMessageLinkPreviewContactBinding)
 
-        fun populateContact(virtualLightningNodeAddress: VirtualLightningNodeAddress, layoutMessageLinkPreviewContactBinding: LayoutMessageLinkPreviewContactBinding) {
+        fun populateContactPreview(virtualLightningNodeAddress: VirtualLightningNodeAddress, layoutMessageLinkPreviewContactBinding: LayoutMessageLinkPreviewContactBinding) {
             virtualLightningNodeAddress.getPubKey()?.let { lightningNodePubKey ->
-                populateContact(lightningNodePubKey, layoutMessageLinkPreviewContactBinding)
+                populateContactPreview(lightningNodePubKey, layoutMessageLinkPreviewContactBinding)
             }
         }
 
-        fun populateTribe(tribeJoinLink: TribeJoinLink, layoutMessageLinkPreviewTribeBinding: LayoutMessageLinkPreviewTribeBinding)
+        fun populateTribePreview(tribeJoinLink: TribeJoinLink, layoutMessageLinkPreviewTribeBinding: LayoutMessageLinkPreviewTribeBinding)
 
         fun populateUrlPreview(url: String, layoutMessageLinkPreviewUrlBinding: LayoutMessageLinkPreviewUrlBinding)
     }
