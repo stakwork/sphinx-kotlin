@@ -4,10 +4,19 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="@dimen/contact_link_preview_holder_height"
-    android:paddingHorizontal="@dimen/chat_message_inner_padding"
+    android:padding="@dimen/chat_message_inner_padding"
     android:visibility="gone"
-    tools:visibility="visible">
+    tools:visibility="visible"
+    tools:background="@color/body">
 
+    <View
+        android:id="@+id/view_preview_divider"
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:layout_marginBottom="@dimen/chat_message_inner_padding"
+        android:background="@color/body"
+        app:layout_constraintTop_toTopOf="parent"
+        />
 
     <!-- Contact Avatar -->
     <androidx.appcompat.widget.AppCompatImageView
@@ -15,11 +24,12 @@
         android:layout_width="@dimen/contact_link_preview_avatar_image_xy"
         android:layout_height="@dimen/contact_link_preview_avatar_image_xy"
         android:layout_marginEnd="@dimen/default_inner_spacing_list_item_title"
+        android:layout_marginVertical="@dimen/default_half_layout_margin"
         app:layout_constraintBottom_toTopOf="@id/text_view_message_link_preview_add_contact_banner"
         app:layout_constraintEnd_toStartOf="@id/text_view_message_link_preview_new_contact_label"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/view_preview_divider"
         app:srcCompat="@drawable/ic_add_contact"
         />
 

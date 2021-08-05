@@ -384,6 +384,7 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                             name = it,
                             null,
                             img = chat.photoUrl?.value,
+                            isTribeMember = true,
                             tribeJoinLink,
                             layoutMessageLinkPreviewTribeBinding
                         )
@@ -402,6 +403,7 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                                     tribeInfo.name,
                                     tribeInfo.description,
                                     tribeInfo.img,
+                                    isTribeMember = false,
                                     tribeJoinLink,
                                     layoutMessageLinkPreviewTribeBinding
                                 )
@@ -418,6 +420,7 @@ internal class MessageListAdapter<ARGS : NavArgs>(
         name: String,
         description: String?,
         img: String?,
+        isTribeMember: Boolean,
         tribeJoinLink: TribeJoinLink,
         layoutMessageLinkPreviewTribeBinding: LayoutMessageLinkPreviewTribeBinding
     ) {
@@ -427,8 +430,14 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                 if (description != null) {
                     textViewMessageLinkPreviewTribeDescription.text = description
                 } else {
-
                     textViewMessageLinkPreviewTribeDescription.gone
+                }
+
+                if (isTribeMember) {
+                    // Don't show the banner when we are a member of the tribe
+                    textViewMessageLinkPreviewTribeSeeBanner.gone
+                } else {
+                    textViewMessageLinkPreviewTribeSeeBanner.visible
                 }
 
                 img?.let {
