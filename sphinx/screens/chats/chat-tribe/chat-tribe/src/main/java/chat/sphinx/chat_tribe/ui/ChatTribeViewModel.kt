@@ -224,6 +224,10 @@ internal class ChatTribeViewModel @Inject constructor(
                 )
             )
         }
+
+        viewModelScope.launch(mainImmediate) {
+            loadTribeAndPodcastData()
+        }
     }
 
     override fun onCleared() {
@@ -295,7 +299,7 @@ internal class ChatTribeViewModel @Inject constructor(
         }.join()
     }
 
-    suspend fun loadTribeAndPodcastData(): Podcast? {
+    private suspend fun loadTribeAndPodcastData() {
         chatRepository.getChatById(chatId).firstOrNull()?.let { chat ->
 
             chatRepository.updateTribeInfo(chat)?.let { podcastDto ->
@@ -307,6 +311,12 @@ internal class ChatTribeViewModel @Inject constructor(
                     }
                 }
 
+                podcastViewStateContainer.updateViewState(
+                    PodcastViewState.PodcastLoaded(
+                        podcast!!
+                    )
+                )
+
                 mediaPlayerServiceController.submitAction(
                     UserAction.AdjustSatsPerMinute(
                         args.chatId,
@@ -316,10 +326,10 @@ internal class ChatTribeViewModel @Inject constructor(
             }
         }
 
-        return podcast
+        loadPodcastContributionsString()
     }
 
-    fun getPodcastContributionsString(): Flow<String> = flow {
+    private suspend fun loadPodcastContributionsString() {
         podcast?.id?.let { podcastId ->
             val owner: Contact = getOwner()
 
@@ -329,8 +339,10 @@ internal class ChatTribeViewModel @Inject constructor(
                         val isMyTribe = chat.isTribeOwnedByAccount(owner.nodePubKey)
                         val label = app.getString(if (isMyTribe) R.string.chat_tribe_earned else R.string.chat_tribe_contributed)
 
-                        emit(
-                            label + " ${it.asFormattedString()} ${it.unit}"
+                        podcastViewStateContainer.updateViewState(
+                            PodcastViewState.PodcastContributionsLoaded(
+                                label + " ${it.asFormattedString()} ${it.unit}"
+                            )
                         )
                     }
                 }

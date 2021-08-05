@@ -471,6 +471,7 @@ abstract class ChatFragment<
 
     override fun onStart() {
         super.onStart()
+
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.headerInitialHolderSharedFlow.collect { viewState ->
 

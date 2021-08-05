@@ -91,19 +91,6 @@ internal class ChatTribeFragment: ChatFragment<
     override val imageLoader: ImageLoader<ImageView>
         get() = imageLoaderInj
 
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        lifecycleScope.launch(viewModel.mainImmediate) {
-            viewModel.loadTribeAndPodcastData()?.let { podcast ->
-                configurePodcastPlayer(podcast)
-                configureContributions()
-                addPodcastOnClickListeners(podcast)
-            }
-        }
-    }
-
     private suspend fun setupBoostAnimation(
         photoUrl: PhotoUrl?,
         amount: Sat?
@@ -137,18 +124,13 @@ internal class ChatTribeFragment: ChatFragment<
         }
     }
 
-    private fun configureContributions() {
-        lifecycleScope.launch(viewModel.mainImmediate) {
-            viewModel.getPodcastContributionsString().collect { contributionsString ->
-
-                headerBinding.apply {
-                    textViewChatHeaderContributionsIcon.visible
-                    textViewChatHeaderContributions.apply {
-                        visible
-                        @SuppressLint("SetTextI18n")
-                        text = contributionsString
-                    }
-                }
+    private fun configureContributions(contributions: String) {
+        headerBinding.apply {
+            textViewChatHeaderContributionsIcon.visible
+            textViewChatHeaderContributions.apply {
+                visible
+                @SuppressLint("SetTextI18n")
+                text = contributions
             }
         }
     }
@@ -168,6 +150,8 @@ internal class ChatTribeFragment: ChatFragment<
 
             setProgressBar(podcast)
         }
+
+        addPodcastOnClickListeners(podcast)
     }
 
     private fun setProgressBar(podcast: Podcast) {
@@ -238,6 +222,14 @@ internal class ChatTribeFragment: ChatFragment<
                 @Exhaustive
                 when (viewState) {
                     is PodcastViewState.Idle -> {
+                    }
+
+                    is PodcastViewState.PodcastLoaded -> {
+                        configurePodcastPlayer(viewState.podcast)
+                    }
+
+                    is PodcastViewState.PodcastContributionsLoaded -> {
+                        configureContributions(viewState.contributions)
                     }
 
                     is PodcastViewState.ServiceInactive -> {
