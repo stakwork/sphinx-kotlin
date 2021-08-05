@@ -1,6 +1,5 @@
 package chat.sphinx.feature_service_media_player_android.service
 
-import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.media.AudioAttributes
@@ -9,7 +8,6 @@ import android.net.wifi.WifiManager
 import android.os.Binder
 import android.os.IBinder
 import android.os.PowerManager
-import android.util.Log
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.concept_service_media.MediaPlayerServiceState
@@ -19,34 +17,33 @@ import chat.sphinx.feature_service_media_player_android.model.PodcastDataHolder
 import chat.sphinx.feature_service_media_player_android.service.components.AudioManagerHandler
 import chat.sphinx.feature_service_media_player_android.service.components.MediaPlayerNotification
 import chat.sphinx.feature_service_media_player_android.util.toServiceActionPlay
+import chat.sphinx.feature_sphinx_service.SphinxService
 import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.logger.e
 import chat.sphinx.wrapper_chat.ChatMetaData
 import chat.sphinx.wrapper_common.ItemId
 import chat.sphinx.wrapper_common.dashboard.ChatId
-import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_foreground_state.ForegroundState
 import io.matthewnelson.concept_foreground_state.ForegroundStateManager
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
 
-internal abstract class MediaPlayerService: Service() {
+internal abstract class MediaPlayerService: SphinxService() {
 
     companion object {
         const val TAG = "MediaPlayerService"
     }
 
+    override val mustComplete: Boolean
+        get() = true
+
     abstract val serviceContext: Context
 
-    protected abstract val dispatchers: CoroutineDispatchers
     protected abstract val audioManagerHandler: AudioManagerHandler
     protected abstract val foregroundStateManager: ForegroundStateManager
     protected abstract val LOG: SphinxLogger
-    abstract val mediaServiceController: MediaPlayerServiceControllerImpl
+    internal abstract val mediaServiceController: MediaPlayerServiceControllerImpl
     protected abstract val repositoryMedia: RepositoryMedia
-
-    private val supervisor = SupervisorJob()
-    protected val serviceLifecycleScope = CoroutineScope(supervisor)
 
     @Suppress("DEPRECATION")
     private val wifiLock: WifiManager.WifiLock? by lazy {
@@ -371,7 +368,7 @@ internal abstract class MediaPlayerService: Service() {
         private var stateDispatcherJob: Job? = null
         private fun startStateDispatcher() {
             stateDispatcherJob?.cancel()
-            stateDispatcherJob = serviceLifecycleScope.launch(dispatchers.mainImmediate) {
+            stateDispatcherJob = serviceLifecycleScope.launch {
                 var count: Double = 0.0
                 while (isActive) {
                     val speed: Double = podData?.speed ?: 1.0
@@ -492,7 +489,7 @@ internal abstract class MediaPlayerService: Service() {
         super.onCreate()
         mediaServiceController.dispatchState(currentState)
         notification
-        rebindJob = serviceLifecycleScope.launch(dispatchers.mainImmediate) {
+        rebindJob = serviceLifecycleScope.launch {
             foregroundStateManager.foregroundStateFlow.collect { foregroundState ->
                 @Exhaustive
                 when (foregroundState) {
@@ -535,8 +532,7 @@ internal abstract class MediaPlayerService: Service() {
     }
 
     override fun onDestroy() {
-        super.onDestroy()
         mediaPlayerHolder.clear()
-        supervisor.cancel()
+        super.onDestroy()
     }
 }

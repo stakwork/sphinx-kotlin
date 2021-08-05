@@ -34,6 +34,7 @@ import chat.sphinx.wrapper_common.lightning.asFormattedString
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.navigation.CloseAppOnBackPress
 import io.matthewnelson.android_feature_screens.ui.motionlayout.MotionLayoutFragment
+import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.invisibleIfFalse
 import io.matthewnelson.android_feature_viewmodel.currentViewState
 import io.matthewnelson.android_feature_viewmodel.updateViewState
@@ -141,6 +142,10 @@ internal class DashboardFragment : MotionLayoutFragment<
             header.imageViewNavDrawerMenu.setOnClickListener {
                 viewModel.updateViewState(NavDrawerViewState.Open)
             }
+
+            header.textViewDashboardHeaderUpgradeApp.setOnClickListener {
+                viewModel.goToAppUpgrade()
+            }
         }
     }
 
@@ -208,6 +213,12 @@ internal class DashboardFragment : MotionLayoutFragment<
 
     override fun onStart() {
         super.onStart()
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            binding.layoutDashboardHeader.textViewDashboardHeaderUpgradeApp.goneIfFalse(
+                viewModel.getNewVersionAvailable()
+            )
+        }
 
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.getAccountBalance().collect { nodeBalance ->

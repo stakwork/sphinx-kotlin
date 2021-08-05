@@ -12,6 +12,7 @@ import chat.sphinx.feature_crypto_rsa.RSAAlgorithm
 import chat.sphinx.feature_crypto_rsa.RSAImpl
 import chat.sphinx.feature_network_tor.TorManagerAndroid
 import chat.sphinx.feature_relay.RelayDataHandlerImpl
+import chat.sphinx.feature_sphinx_service.ApplicationServiceTracker
 import chat.sphinx.key_restore.KeyRestoreResponse
 import chat.sphinx.test_tor_manager.TestTorManager
 import chat.sphinx.util.SphinxLoggerImpl
@@ -86,9 +87,16 @@ class SphinxKeyRestoreUnitTest: CoroutineTestHelper() {
         TestCoreDBImpl(moshi)
     }
 
+    private val serviceTracker: ApplicationServiceTracker by lazy {
+        object : ApplicationServiceTracker() {
+
+        }
+    }
+
     private val sphinxManager: SphinxAuthenticationCoreManager by lazy {
         SphinxAuthenticationCoreManager(
             app,
+            serviceTracker,
             dispatchers,
             sphinxKeyHandler,
             sphinxStorage,

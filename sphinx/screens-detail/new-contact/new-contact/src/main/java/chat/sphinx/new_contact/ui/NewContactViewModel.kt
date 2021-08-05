@@ -1,6 +1,7 @@
 package chat.sphinx.new_contact.ui
 
 import android.content.Context
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
@@ -10,13 +11,11 @@ import chat.sphinx.new_contact.navigation.NewContactNavigator
 import chat.sphinx.scanner_view_model_coordinator.request.ScannerFilter
 import chat.sphinx.scanner_view_model_coordinator.request.ScannerRequest
 import chat.sphinx.scanner_view_model_coordinator.response.ScannerResponse
-import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
-import chat.sphinx.wrapper_common.lightning.LightningRouteHint
-import chat.sphinx.wrapper_common.lightning.toLightningNodePubKey
-import chat.sphinx.wrapper_common.lightning.toLightningRouteHint
+import chat.sphinx.wrapper_common.lightning.*
 import chat.sphinx.wrapper_contact.ContactAlias
 import chat.sphinx.wrapper_contact.toContactAlias
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
@@ -29,6 +28,7 @@ import javax.inject.Inject
 internal class NewContactViewModel @Inject constructor(
     val navigator: NewContactNavigator,
     dispatchers: CoroutineDispatchers,
+    savedStateHandle: SavedStateHandle,
     private val contactRepository: ContactRepository,
     private val scannerCoordinator: ViewModelCoordinator<ScannerRequest, ScannerResponse>
 ): SideEffectViewModel<
@@ -37,26 +37,58 @@ internal class NewContactViewModel @Inject constructor(
         NewContactViewState
         >(dispatchers, NewContactViewState.Idle)
 {
+
+    val args: NewContactFragmentArgs by savedStateHandle.navArgs()
+
+    init {
+        args.argPubKey?.toLightningNodePubKey()?.let { lightningNodePubKey ->
+            val lightningRouteHint = args.argRouteHint?.toLightningRouteHint()
+
+            viewModelScope.launch(mainImmediate) {
+                submitSideEffect(
+                    NewContactSideEffect.ContactInfo(
+                        lightningNodePubKey,
+                        lightningRouteHint
+                    )
+                )
+            }
+        }
+    }
+
     fun requestScanner() {
         viewModelScope.launch(mainImmediate) {
             val response = scannerCoordinator.submitRequest(
                 ScannerRequest(
                     filter = object : ScannerFilter() {
                         override suspend fun checkData(data: String): Response<Any, String> {
-                            if (data.trim().matches(NewContactFragment.PASTE_REGEX.toRegex())) {
-                                return Response.Success(Any())
-                            }
                             if (data.toLightningNodePubKey() != null) {
                                 return Response.Success(Any())
                             }
-
+                            if (data.toVirtualLightningNodeAddress() != null) {
+                                return Response.Success(Any())
+                            }
                             return Response.Error("QR code is not a Lightning Node Public Key")
                         }
                     }
                 )
             )
             if (response is Response.Success) {
-                submitSideEffect(NewContactSideEffect.FromScanner(response.value))
+                val contactInfoSideEffect : NewContactSideEffect? = response.value.value.toLightningNodePubKey()?.let { lightningNodePubKey ->
+                    NewContactSideEffect.ContactInfo(lightningNodePubKey)
+                } ?: response.value.value.toVirtualLightningNodeAddress()?.let { virtualNodeAddress ->
+                    virtualNodeAddress.getPubKey()?.let { lightningNodePubKey ->
+
+                        NewContactSideEffect.ContactInfo(
+                            lightningNodePubKey,
+                            virtualNodeAddress.getRouteHint()
+                        )
+
+                    }
+                }
+
+                if (contactInfoSideEffect != null) {
+                    submitSideEffect(contactInfoSideEffect)
+                }
             }
         }
     }
