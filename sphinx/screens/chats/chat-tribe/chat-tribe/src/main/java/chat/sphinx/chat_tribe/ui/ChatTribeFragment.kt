@@ -40,44 +40,30 @@ internal class ChatTribeFragment: ChatFragment<
         ChatTribeViewModel,
         >(R.layout.fragment_chat_tribe)
 {
-    private val podcastPlayerBinding: LayoutPodcastPlayerFooterBinding by viewBinding(LayoutPodcastPlayerFooterBinding::bind, R.id.include_podcast_player_footer)
-
     override val binding: FragmentChatTribeBinding by viewBinding(FragmentChatTribeBinding::bind)
+    private val podcastPlayerBinding: LayoutPodcastPlayerFooterBinding
+        get() = binding.includePodcastPlayerFooter
 
-    override val footerBinding: LayoutChatFooterBinding by viewBinding(
-        LayoutChatFooterBinding::bind, R.id.include_chat_tribe_footer
-    )
-    override val headerBinding: LayoutChatHeaderBinding by viewBinding(
-        LayoutChatHeaderBinding::bind, R.id.include_chat_tribe_header
-    )
-    override val replyingMessageBinding: LayoutMessageReplyBinding by viewBinding(
-        LayoutMessageReplyBinding::bind, R.id.include_chat_tribe_message_reply
-    )
-    override val selectedMessageBinding: LayoutSelectedMessageBinding by viewBinding(
-        LayoutSelectedMessageBinding::bind, R.id.include_chat_tribe_selected_message
-    )
-    override val selectedMessageHolderBinding: LayoutMessageHolderBinding by viewBinding(
-        LayoutMessageHolderBinding::bind, R.id.include_layout_message_holder_selected_message
-    )
-    override val attachmentSendBinding: LayoutAttachmentSendPreviewBinding by viewBinding(
-        LayoutAttachmentSendPreviewBinding::bind, R.id.include_chat_tribe_attachment_send_preview
-    )
-
-    override val attachmentFullscreenBinding: LayoutAttachmentFullscreenBinding by viewBinding(
-        LayoutAttachmentFullscreenBinding::bind, R.id.include_chat_tribe_attachment_fullscreen
-    )
-
-    override val menuBinding: LayoutChatMenuBinding by viewBinding(
-        LayoutChatMenuBinding::bind, R.id.include_chat_tribe_menu
-    )
-
-    override val callMenuBinding: LayoutMenuBottomBinding by viewBinding(
-        LayoutMenuBottomBinding::bind, R.id.include_layout_menu_bottom_call
-    )
-
-    private val boostAnimationBinding: LayoutBoostFireworksBinding by viewBinding(
-        LayoutBoostFireworksBinding::bind, R.id.include_layout_boost_fireworks
-    )
+    override val footerBinding: LayoutChatFooterBinding
+        get() = binding.includeChatTribeFooter
+    override val headerBinding: LayoutChatHeaderBinding
+        get() = binding.includeChatTribeHeader
+    override val replyingMessageBinding: LayoutMessageReplyBinding
+        get() = binding.includeChatTribeMessageReply
+    override val selectedMessageBinding: LayoutSelectedMessageBinding
+        get() = binding.includeChatTribeSelectedMessage
+    override val selectedMessageHolderBinding: LayoutMessageHolderBinding
+        get() = binding.includeChatTribeSelectedMessage.includeLayoutMessageHolderSelectedMessage
+    override val attachmentSendBinding: LayoutAttachmentSendPreviewBinding
+        get() = binding.includeChatTribeAttachmentSendPreview
+    override val menuBinding: LayoutChatMenuBinding
+        get() = binding.includeChatTribeMenu
+    override val callMenuBinding: LayoutMenuBottomBinding
+        get() = binding.includeLayoutMenuBottomCall
+    private val boostAnimationBinding: LayoutBoostFireworksBinding
+        get() = binding.includeLayoutBoostFireworks
+    override val attachmentFullscreenBinding: LayoutAttachmentFullscreenBinding
+        get() = binding.includeChatTribeAttachmentFullscreen
 
     override val menuEnablePayments: Boolean
         get() = false

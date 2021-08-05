@@ -1,6 +1,5 @@
 package chat.sphinx.chat_tribe.ui
 
-import chat.sphinx.podcast_player.objects.ParcelablePodcast
 import chat.sphinx.wrapper_podcast.Podcast
 import io.matthewnelson.concept_views.viewstate.ViewState
 
