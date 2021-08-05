@@ -173,7 +173,7 @@ internal class ChatTribeFragment: ChatFragment<
             }
 
             textViewBoostPodcastButton.setOnClickListener {
-                //TODO: Boost podcast episode
+                viewModel.sendPodcastBoost()
             }
         }
     }

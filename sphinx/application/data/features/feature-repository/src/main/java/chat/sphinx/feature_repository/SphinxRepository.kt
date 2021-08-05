@@ -67,6 +67,7 @@ import chat.sphinx.wrapper_meme_server.PublicAttachmentInfo
 import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message_media.*
 import chat.sphinx.wrapper_message_media.token.MediaHost
+import chat.sphinx.wrapper_podcast.Podcast
 import chat.sphinx.wrapper_podcast.PodcastDestination
 import chat.sphinx.wrapper_rsa.RsaPrivateKey
 import chat.sphinx.wrapper_rsa.RsaPublicKey
@@ -1720,6 +1721,8 @@ abstract class SphinxRepository(
                                 sendMessage.replyUUID,
                                 if (media != null) {
                                     MessageType.Attachment
+                                } else if (sendMessage.isBoost){
+                                    MessageType.Boost
                                 } else {
                                     MessageType.Message
                                 },
@@ -1903,6 +1906,7 @@ abstract class SphinxRepository(
                     mediaKeyMap,
                     postMemeServerDto?.mime,
                     postMemeServerDto?.muid,
+                    sendMessage.isBoost
                 )
             } catch (e: IllegalArgumentException) {
                 LOG.e(TAG, "Failed to create PostMessageDto", e)
@@ -2292,6 +2296,45 @@ abstract class SphinxRepository(
         }.join()
 
         return response
+    }
+
+    override fun sendPodcastBoost(chatId: ChatId, podcast: Podcast) {
+        applicationScope.launch(mainImmediate) {
+            val owner: Contact? = accountOwner.value
+                ?: let {
+                    var owner: Contact? = null
+                    try {
+                        accountOwner.collect {
+                            if (it != null) {
+                                owner = it
+                                throw Exception()
+                            }
+                        }
+                    } catch (e: Exception) {}
+                    delay(25L)
+                    owner
+                }
+
+            owner?.tipAmount?.let { tipAmount ->
+                if (tipAmount.value > 0) {
+                    val metaData = podcast.getMetaData(tipAmount)
+
+                    val message = PodBoost(
+                        FeedId(podcast.id),
+                        metaData.itemId,
+                        metaData.timeSeconds,
+                        tipAmount
+                    ).toJson(moshi)
+
+                    val sendMessageBuilder = SendMessage.Builder()
+                    sendMessageBuilder.setChatId(chatId)
+                    sendMessageBuilder.setText(message)
+                    sendMessageBuilder.setIsBoost(true)
+
+                    sendMessage(sendMessageBuilder.build())
+                }
+            }
+        }
     }
 
     // TODO: Remove from repository as it does not interact with

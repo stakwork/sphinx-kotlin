@@ -27,6 +27,7 @@ import chat.sphinx.wrapper_podcast.Podcast
 import chat.sphinx.wrapper_podcast.PodcastEpisode
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.base.BaseFragment
+import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -34,7 +35,9 @@ import javax.inject.Inject
 
 
 @AndroidEntryPoint
-internal class PodcastPlayerFragment : BaseFragment<
+internal class PodcastPlayerFragment : SideEffectFragment<
+        Context,
+        PodcastPlayerSideEffect,
         PodcastPlayerViewState,
         PodcastPlayerViewModel,
         FragmentPodcastPlayerBinding
@@ -126,20 +129,20 @@ internal class PodcastPlayerFragment : BaseFragment<
             }
 
             includeLayoutEpisodePlaybackControlButtons.apply {
-                buttonPlaybackSpeed.setOnClickListener {
+                textViewPlaybackSpeedButton.setOnClickListener {
                     showSpeedPopup()
                 }
 
-                buttonShareClip.setOnClickListener {
+                textViewShareClipButton.setOnClickListener {
                     //TODO share clip feature
                 }
 
-                buttonReplay15.setOnClickListener {
+                textViewReplay15Button.setOnClickListener {
                     viewModel.seekTo(podcast.currentTime - 15000)
                     updateViewAfterSeek(podcast)
                 }
 
-                buttonPlayPause.setOnClickListener {
+                textViewPlayPauseButton.setOnClickListener {
                     val currentEpisode = podcast.getCurrentEpisode()
 
                     if (currentEpisode.playing) {
@@ -149,13 +152,13 @@ internal class PodcastPlayerFragment : BaseFragment<
                     }
                 }
 
-                buttonForward30.setOnClickListener {
+                textViewForward30Button.setOnClickListener {
                     viewModel.seekTo(podcast.currentTime + 30000)
                     updateViewAfterSeek(podcast)
                 }
 
-                buttonBoost.setOnClickListener {
-                    //TODO Boost podcast
+                imageViewPodcastBoostButton.setOnClickListener {
+                    viewModel.sendPodcastBoost()
                 }
             }
         }
@@ -209,7 +212,7 @@ internal class PodcastPlayerFragment : BaseFragment<
 
             includeLayoutPodcastEpisodesList.textViewEpisodesListCount.text = podcast.episodesCount.toString()
 
-            includeLayoutEpisodePlaybackControlButtons.buttonPlaybackSpeed.text = "${podcast.getSpeedString()}"
+            includeLayoutEpisodePlaybackControlButtons.textViewPlaybackSpeedButton.text = "${podcast.getSpeedString()}"
 
             togglePlayPauseButton(podcast.isPlaying)
         }
@@ -224,7 +227,7 @@ internal class PodcastPlayerFragment : BaseFragment<
     private fun togglePlayPauseButton(playing: Boolean) {
         binding.apply {
             includeLayoutEpisodePlaybackControlButtons.apply {
-                buttonPlayPause.background =
+                textViewPlayPauseButton.background =
                     ContextCompat.getDrawable(root.context,
                         if (playing) R.drawable.ic_podcast_pause_circle else R.drawable.ic_podcast_play_circle
                     )
@@ -291,33 +294,33 @@ internal class PodcastPlayerFragment : BaseFragment<
     private fun showSpeedPopup() {
         binding.includeLayoutEpisodePlaybackControlButtons.apply {
             val wrapper: Context = ContextThemeWrapper(context, R.style.speedMenu)
-            val popup = PopupMenu(wrapper, buttonPlaybackSpeed)
+            val popup = PopupMenu(wrapper, textViewPlaybackSpeedButton)
             popup.inflate(R.menu.speed_menu)
 
             popup.setOnMenuItemClickListener { item: MenuItem? ->
                 when (item!!.itemId) {
                     R.id.speed0_5 -> {
-                        buttonPlaybackSpeed.text = "0.5x"
+                        textViewPlaybackSpeedButton.text = "0.5x"
                         viewModel.adjustSpeed(0.5)
                     }
                     R.id.speed0_8 -> {
-                        buttonPlaybackSpeed.text = "0.8x"
+                        textViewPlaybackSpeedButton.text = "0.8x"
                         viewModel.adjustSpeed(0.8)
                     }
                     R.id.speed1 -> {
-                        buttonPlaybackSpeed.text = "1x"
+                        textViewPlaybackSpeedButton.text = "1x"
                         viewModel.adjustSpeed(1.0)
                     }
                     R.id.speed1_2 -> {
-                        buttonPlaybackSpeed.text = "1.2x"
+                        textViewPlaybackSpeedButton.text = "1.2x"
                         viewModel.adjustSpeed(1.2)
                     }
                     R.id.speed1_5 -> {
-                        buttonPlaybackSpeed.text = "1.5x"
+                        textViewPlaybackSpeedButton.text = "1.5x"
                         viewModel.adjustSpeed(1.5)
                     }
                     R.id.speed2_1 -> {
-                        buttonPlaybackSpeed.text = "2.1x"
+                        textViewPlaybackSpeedButton.text = "2.1x"
                         viewModel.adjustSpeed(2.1)
                     }
                 }
@@ -326,5 +329,9 @@ internal class PodcastPlayerFragment : BaseFragment<
 
             popup.show()
         }
+    }
+
+    override suspend fun onSideEffectCollect(sideEffect: PodcastPlayerSideEffect) {
+        sideEffect.execute(binding.root.context)
     }
 }

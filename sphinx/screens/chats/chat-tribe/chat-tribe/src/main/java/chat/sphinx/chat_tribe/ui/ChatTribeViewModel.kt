@@ -9,7 +9,6 @@ import chat.sphinx.camera_view_model_coordinator.response.CameraResponse
 import chat.sphinx.chat_common.ui.ChatSideEffect
 import chat.sphinx.chat_common.ui.ChatViewModel
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
-import chat.sphinx.chat_common.ui.viewstate.menu.ChatMenuViewState
 import chat.sphinx.chat_tribe.R
 import chat.sphinx.chat_tribe.navigation.TribeChatNavigator
 import chat.sphinx.concept_meme_server.MemeServerTokenHandler
@@ -38,16 +37,12 @@ import chat.sphinx.wrapper_common.lightning.unit
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.util.getInitials
 import chat.sphinx.wrapper_contact.Contact
-import chat.sphinx.wrapper_message.Message
-import chat.sphinx.wrapper_message.MessageType
-import chat.sphinx.wrapper_message.isMemberApprove
-import chat.sphinx.wrapper_message.isMemberReject
+import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_podcast.Podcast
 import chat.sphinx.wrapper_podcast.PodcastEpisode
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
-import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_media_cache.MediaCacheHandler
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
@@ -75,7 +70,7 @@ internal class ChatTribeViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     cameraViewModelCoordinator: ViewModelCoordinator<CameraRequest, CameraResponse>,
     LOG: SphinxLogger,
-    private val mediaPlayerServiceController: MediaPlayerServiceController
+    private val mediaPlayerServiceController: MediaPlayerServiceController,
 ): ChatViewModel<ChatTribeFragmentArgs>(
     app,
     dispatchers,
@@ -220,6 +215,28 @@ internal class ChatTribeViewModel @Inject constructor(
         mediaPlayerServiceController.removeListener(this)
     }
 
+    private suspend fun getOwner(): Contact {
+        return contactRepository.accountOwner.value.let { contact ->
+            if (contact != null) {
+                contact
+            } else {
+                var resolvedOwner: Contact? = null
+                try {
+                    contactRepository.accountOwner.collect { ownerContact ->
+                        if (ownerContact != null) {
+                            resolvedOwner = ownerContact
+                            throw Exception()
+                        }
+                    }
+                } catch (e: Exception) {
+                }
+                delay(25L)
+
+                resolvedOwner!!
+            }
+        }
+    }
+
     override suspend fun processMemberRequest(
         contactId: ContactId,
         messageId: MessageId,
@@ -288,25 +305,7 @@ internal class ChatTribeViewModel @Inject constructor(
 
     fun getPodcastContributionsString(): Flow<String> = flow {
         podcast?.id?.let { podcastId ->
-            val owner: Contact = contactRepository.accountOwner.value.let { contact ->
-                if (contact != null) {
-                    contact
-                } else {
-                    var resolvedOwner: Contact? = null
-                    try {
-                        contactRepository.accountOwner.collect { ownerContact ->
-                            if (ownerContact != null) {
-                                resolvedOwner = ownerContact
-                                throw Exception()
-                            }
-                        }
-                    } catch (e: Exception) {
-                    }
-                    delay(25L)
-
-                    resolvedOwner!!
-                }
-            }
+            val owner: Contact = getOwner()
 
             chatRepository.getChatById(chatId).firstOrNull()?.let { chat ->
                 messageRepository.getPaymentsTotalFor(podcastId).collect { paymentsTotal ->
@@ -400,6 +399,34 @@ internal class ChatTribeViewModel @Inject constructor(
                         destinations
                     )
                 )
+            }
+        }
+    }
+
+    fun sendPodcastBoost() {
+        viewModelScope.launch(mainImmediate) {
+            val owner: Contact = getOwner()
+
+            owner.tipAmount?.let { tipAmount ->
+                podcast?.let { nnPodcast ->
+
+                    if (tipAmount.value > 0) {
+                        val metaData = nnPodcast.getMetaData(tipAmount)
+
+                        messageRepository.sendPodcastBoost(chatId, nnPodcast)
+
+                        nnPodcast.value?.destinations?.let { destinations ->
+                            mediaPlayerServiceController.submitAction(
+                                UserAction.SendBoost(
+                                    chatId,
+                                    nnPodcast.id,
+                                    metaData,
+                                    destinations
+                                )
+                            )
+                        }
+                    }
+                }
             }
         }
     }
