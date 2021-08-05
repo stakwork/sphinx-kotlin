@@ -1,6 +1,2 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="on_board_relay_url_http_message">La URL de Relay utiliza \'http\'. El tráfico de la red no estará encriptado. Se recomienda fuertemente el uso de Https. Por favor confirma si deseas proceder.</string>
-    <string name="on_board_relay_url_http_negative_keep_http">http</string>
-    <string name="on_board_relay_url_http_positive_change_to_https">https</string>
-</resources>
+<resources></resources>

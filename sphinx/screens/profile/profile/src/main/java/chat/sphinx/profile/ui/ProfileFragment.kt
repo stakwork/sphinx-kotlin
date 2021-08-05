@@ -208,7 +208,7 @@ internal class ProfileFragment: SideEffectFragment<
                     }
                     onStopSupervisor.scope.launch(viewModel.mainImmediate) {
                         viewModel.updateRelayUrl(
-                            editTextProfileAdvancedContainerServerUrl.text?.toString()
+                            editTextProfileAdvancedContainerServerUrl.text.toString()
                         )
                     }
                 }
@@ -277,7 +277,7 @@ internal class ProfileFragment: SideEffectFragment<
                     binding
                         .includeProfileAdvancedContainerHolder
                         .editTextProfileAdvancedContainerServerUrl
-                        .setText(nnRelayUrl.value)
+                        .setText(nnRelayUrl)
                 }
             }
         }

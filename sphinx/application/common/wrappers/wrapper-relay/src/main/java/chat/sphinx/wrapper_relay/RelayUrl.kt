@@ -30,15 +30,3 @@ value class RelayUrl(val value: String){
         }
     }
 }
-
-data class RelayUrlString(
-    val value: String? = null
-) {
-    override fun equals(other: Any?): Boolean {
-        return false
-    }
-
-    override fun hashCode(): Int {
-        return Random.nextInt()
-    }
-}

@@ -32,6 +32,7 @@ import chat.sphinx.wrapper_relay.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
+import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_authentication.coordinator.AuthenticationCoordinator
 import io.matthewnelson.concept_authentication.coordinator.AuthenticationRequest
 import io.matthewnelson.concept_authentication.coordinator.AuthenticationResponse
@@ -53,6 +54,7 @@ import org.cryptonode.jncryptor.CryptorException
 import java.io.FileInputStream
 import java.io.InputStream
 import javax.inject.Inject
+import kotlin.random.Random
 
 @HiltViewModel
 internal class ProfileViewModel @Inject constructor(
@@ -149,41 +151,57 @@ internal class ProfileViewModel @Inject constructor(
     ): Response<Any, ResponseError> =
         contactRepository.updateOwner(alias, privatePhoto, tipAmount)
 
-    suspend fun updateRelayUrl(url: String?)  {
-        if (url == null || (!url.isValidRelayUrl && !url.isOnionAddress)) {
+    suspend fun updateRelayUrl(url: String)  {
+        _relayUrlStateFlow.value = url
 
-            _relayUrlStateFlow.value = RelayUrlString(relayDataHandler.retrieveRelayUrl()?.value)
+        url.toRelayUrl()?.let { relayUrl ->
+            relayDataHandler.retrieveAuthorizationToken()?.let { authorizationToken ->
+                if (relayUrl.value.startsWith("http://") && !relayUrl.isOnionAddress) {
+                    submitSideEffect(
+                        ProfileSideEffect.RelayUrlHttpConfirmation(
+                            relayUrl = relayUrl,
+                            callback = { url ->
+                                testAndPersistRelayUrl(url, authorizationToken)
+                            }
+                        )
+                    )
+                } else {
+                    testAndPersistRelayUrl(relayUrl, authorizationToken)
+                }
+                return
+            }
+        }
+        testAndPersistRelayUrl(null, null)
+    }
 
-            submitSideEffect(ProfileSideEffect.InvalidRelayUrl)
-
-        } else {
-
-            submitSideEffect(ProfileSideEffect.UpdatingRelayUrl)
-
+    private fun testAndPersistRelayUrl(relayUrl: RelayUrl?, authorizationToken: AuthorizationToken?) {
+        viewModelScope.launch(mainImmediate) {
             var success = false
 
-            relayDataHandler.retrieveAuthorizationToken()?.let { authorizationToken ->
-                url.toRelayUrl()?.let { relayUrl ->
-                    lightningRepository.getAccountBalanceAll(
-                        Pair(authorizationToken, relayUrl)
-                    ).collect { loadResponse ->
-                        @Exhaustive
-                        when (loadResponse) {
-                            is LoadResponse.Loading -> {
-                            }
+            if (relayUrl != null && authorizationToken != null) {
+                _relayUrlStateFlow.value = relayUrl.value
 
-                            is Response.Error -> {
-                                success = false
-                            }
-                            is Response.Success -> {
-                                success = relayDataHandler.persistRelayUrl(relayUrl)
-                            }
+                submitSideEffect(ProfileSideEffect.UpdatingRelayUrl)
+
+                lightningRepository.getAccountBalanceAll(
+                    Pair(authorizationToken, relayUrl)
+                ).collect { loadResponse ->
+                    @Exhaustive
+                    when (loadResponse) {
+                        is LoadResponse.Loading -> {
+                        }
+
+                        is Response.Error -> {
+                            success = false
+                        }
+                        is Response.Success -> {
+                            success = relayDataHandler.persistRelayUrl(relayUrl)
                         }
                     }
                 }
             }
 
-            _relayUrlStateFlow.value = RelayUrlString(relayDataHandler.retrieveRelayUrl()?.value)
+            _relayUrlStateFlow.value = relayDataHandler.retrieveRelayUrl()?.value
 
             val sideEffect = if (success) {
                 ProfileSideEffect.RelayUrlUpdatedSuccessfully
@@ -285,14 +303,14 @@ internal class ProfileViewModel @Inject constructor(
         }
     }
 
-    private val _relayUrlStateFlow: MutableStateFlow<RelayUrlString?> by lazy {
+    private val _relayUrlStateFlow: MutableStateFlow<String?> by lazy {
         MutableStateFlow(null)
     }
     private val _pinTimeoutStateFlow: MutableStateFlow<Int?> by lazy {
         MutableStateFlow(null)
     }
 
-    val relayUrlStateFlow: StateFlow<RelayUrlString?>
+    val relayUrlStateFlow: StateFlow<String?>
         get() = _relayUrlStateFlow.asStateFlow()
     val pinTimeoutStateFlow: StateFlow<Int?>
         get() = _pinTimeoutStateFlow.asStateFlow()
@@ -301,7 +319,7 @@ internal class ProfileViewModel @Inject constructor(
 
     init {
         viewModelScope.launch(mainImmediate) {
-            _relayUrlStateFlow.value = RelayUrlString(relayDataHandler.retrieveRelayUrl()?.value)
+            _relayUrlStateFlow.value =  relayDataHandler.retrieveRelayUrl()?.value
             _pinTimeoutStateFlow.value = backgroundLoginHandler.getTimeOutSetting()
         }
     }
