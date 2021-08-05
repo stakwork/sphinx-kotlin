@@ -1,5 +1,6 @@
 package chat.sphinx.chat_tribe.ui
 
+import android.animation.Animator
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.View
@@ -16,10 +17,18 @@ import chat.sphinx.chat_tribe.R
 import chat.sphinx.chat_tribe.databinding.FragmentChatTribeBinding
 import chat.sphinx.chat_tribe.databinding.LayoutPodcastPlayerFooterBinding
 import chat.sphinx.concept_image_loader.ImageLoader
+import chat.sphinx.concept_image_loader.ImageLoaderOptions
+import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.menu_bottom.databinding.LayoutMenuBottomBinding
+import chat.sphinx.resources.databinding.LayoutBoostFireworksBinding
 import chat.sphinx.resources.getString
+import chat.sphinx.wrapper_common.PhotoUrl
+import chat.sphinx.wrapper_common.lightning.Sat
+import chat.sphinx.wrapper_common.lightning.asFormattedString
+import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_podcast.Podcast
 import dagger.hilt.android.AndroidEntryPoint
+import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.concept_views.viewstate.collect
@@ -65,6 +74,10 @@ internal class ChatTribeFragment: ChatFragment<
         LayoutMenuBottomBinding::bind, R.id.include_layout_menu_bottom_call
     )
 
+    private val boostAnimationBinding: LayoutBoostFireworksBinding by viewBinding(
+        LayoutBoostFireworksBinding::bind, R.id.include_layout_boost_fireworks
+    )
+
     override val menuEnablePayments: Boolean
         get() = false
 
@@ -88,6 +101,39 @@ internal class ChatTribeFragment: ChatFragment<
                 configureContributions()
                 addPodcastOnClickListeners(podcast)
             }
+        }
+    }
+
+    private suspend fun setupBoostAnimation(
+        photoUrl: PhotoUrl?,
+        amount: Sat?
+    ) {
+        boostAnimationBinding.apply {
+
+            photoUrl?.let { photoUrl ->
+                imageLoader.load(
+                    imageViewProfilePicture,
+                    photoUrl.value,
+                    ImageLoaderOptions.Builder()
+                        .placeholderResId(chat.sphinx.podcast_player.R.drawable.ic_profile_avatar_circle)
+                        .transformation(Transformation.CircleCrop)
+                        .build()
+                )
+            }
+
+            textViewSatsAmount.text = amount?.asFormattedString()
+
+            lottieAnimationView.addAnimatorListener(object : Animator.AnimatorListener{
+                override fun onAnimationEnd(animation: Animator?) {
+                    root.gone
+                }
+
+                override fun onAnimationRepeat(animation: Animator?) {}
+
+                override fun onAnimationCancel(animation: Animator?) {}
+
+                override fun onAnimationStart(animation: Animator?) {}
+            })
         }
     }
 
@@ -174,6 +220,12 @@ internal class ChatTribeFragment: ChatFragment<
 
             textViewBoostPodcastButton.setOnClickListener {
                 viewModel.sendPodcastBoost()
+
+                boostAnimationBinding.apply {
+                    root.visible
+
+                    lottieAnimationView.playAnimation()
+                }
             }
         }
     }
@@ -185,7 +237,8 @@ internal class ChatTribeFragment: ChatFragment<
             viewModel.podcastViewStateContainer.collect { viewState ->
                 @Exhaustive
                 when (viewState) {
-                    is PodcastViewState.Idle -> {}
+                    is PodcastViewState.Idle -> {
+                    }
 
                     is PodcastViewState.ServiceInactive -> {
                         togglePlayPauseButton(false)
@@ -198,6 +251,22 @@ internal class ChatTribeFragment: ChatFragment<
                     is PodcastViewState.MediaStateUpdate -> {
                         toggleLoadingWheel(false)
                         configurePodcastPlayer(viewState.podcast)
+                    }
+                }
+            }
+        }
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.boostAnimationViewStateContainer.collect { viewState ->
+                @Exhaustive
+                when (viewState) {
+                    is BoostAnimationViewState.Idle -> {}
+
+                    is BoostAnimationViewState.BoosAnimationInfo -> {
+                        setupBoostAnimation(
+                            viewState.photoUrl,
+                            viewState.amount
+                        )
                     }
                 }
             }

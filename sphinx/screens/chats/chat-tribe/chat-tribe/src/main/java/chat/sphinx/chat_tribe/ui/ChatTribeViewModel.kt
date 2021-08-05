@@ -9,6 +9,7 @@ import chat.sphinx.camera_view_model_coordinator.response.CameraResponse
 import chat.sphinx.chat_common.ui.ChatSideEffect
 import chat.sphinx.chat_common.ui.ChatViewModel
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
+import chat.sphinx.chat_common.ui.viewstate.messagereply.MessageReplyViewState
 import chat.sphinx.chat_tribe.R
 import chat.sphinx.chat_tribe.navigation.TribeChatNavigator
 import chat.sphinx.concept_meme_server.MemeServerTokenHandler
@@ -93,6 +94,10 @@ internal class ChatTribeViewModel @Inject constructor(
 
     val podcastViewStateContainer: ViewStateContainer<PodcastViewState> by lazy {
         ViewStateContainer(PodcastViewState.Idle)
+    }
+
+    val boostAnimationViewStateContainer: ViewStateContainer<BoostAnimationViewState> by lazy {
+        ViewStateContainer(BoostAnimationViewState.Idle)
     }
 
     override val chatSharedFlow: SharedFlow<Chat?> = flow {
@@ -208,6 +213,17 @@ internal class ChatTribeViewModel @Inject constructor(
 
     init {
         mediaPlayerServiceController.addListener(this)
+
+        viewModelScope.launch(mainImmediate) {
+            val owner = getOwner()
+
+            boostAnimationViewStateContainer.updateViewState(
+                BoostAnimationViewState.BoosAnimationInfo(
+                    owner.photoUrl,
+                    owner.tipAmount
+                )
+            )
+        }
     }
 
     override fun onCleared() {
@@ -425,6 +441,8 @@ internal class ChatTribeViewModel @Inject constructor(
                                 )
                             )
                         }
+
+
                     }
                 }
             }

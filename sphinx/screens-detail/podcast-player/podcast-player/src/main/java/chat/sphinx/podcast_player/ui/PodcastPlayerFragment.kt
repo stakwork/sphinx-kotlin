@@ -1,5 +1,6 @@
 package chat.sphinx.podcast_player.ui
 
+import android.animation.Animator
 import android.content.Context
 import android.os.Bundle
 import android.view.ContextThemeWrapper
@@ -17,27 +18,31 @@ import app.cash.exhaustive.Exhaustive
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
+import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.podcast_player.R
 import chat.sphinx.podcast_player.databinding.FragmentPodcastPlayerBinding
 import chat.sphinx.podcast_player.ui.adapter.PodcastEpisodesFooterAdapter
 import chat.sphinx.podcast_player.ui.adapter.PodcastEpisodesListAdapter
+import chat.sphinx.wrapper_common.PhotoUrl
+import chat.sphinx.wrapper_common.lightning.Sat
+import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.util.getTimeString
 import chat.sphinx.wrapper_podcast.Podcast
 import chat.sphinx.wrapper_podcast.PodcastEpisode
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.base.BaseFragment
-import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
+import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
+import io.matthewnelson.android_feature_screens.util.visible
+import io.matthewnelson.concept_views.viewstate.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 
 @AndroidEntryPoint
-internal class PodcastPlayerFragment : SideEffectFragment<
-        Context,
-        PodcastPlayerSideEffect,
+internal class PodcastPlayerFragment : BaseFragment<
         PodcastPlayerViewState,
         PodcastPlayerViewModel,
         FragmentPodcastPlayerBinding
@@ -159,6 +164,12 @@ internal class PodcastPlayerFragment : SideEffectFragment<
 
                 imageViewPodcastBoostButton.setOnClickListener {
                     viewModel.sendPodcastBoost()
+
+                    includeLayoutBoostFireworks.apply {
+                        root.visible
+
+                        lottieAnimationView.playAnimation()
+                    }
                 }
             }
         }
@@ -215,6 +226,39 @@ internal class PodcastPlayerFragment : SideEffectFragment<
             includeLayoutEpisodePlaybackControlButtons.textViewPlaybackSpeedButton.text = "${podcast.getSpeedString()}"
 
             togglePlayPauseButton(podcast.isPlaying)
+        }
+    }
+
+    private suspend fun setupBoostAnimation(
+        photoUrl: PhotoUrl?,
+        amount: Sat?
+    ) {
+        binding.includeLayoutBoostFireworks.apply {
+
+            photoUrl?.let { photoUrl ->
+                imageLoader.load(
+                    imageViewProfilePicture,
+                    photoUrl.value,
+                    ImageLoaderOptions.Builder()
+                        .placeholderResId(R.drawable.ic_profile_avatar_circle)
+                        .transformation(Transformation.CircleCrop)
+                        .build()
+                )
+            }
+
+            textViewSatsAmount.text = amount?.asFormattedString()
+
+            lottieAnimationView.addAnimatorListener(object : Animator.AnimatorListener{
+                override fun onAnimationEnd(animation: Animator?) {
+                    root.gone
+                }
+
+                override fun onAnimationRepeat(animation: Animator?) {}
+
+                override fun onAnimationCancel(animation: Animator?) {}
+
+                override fun onAnimationStart(animation: Animator?) {}
+            })
         }
     }
 
@@ -331,7 +375,23 @@ internal class PodcastPlayerFragment : SideEffectFragment<
         }
     }
 
-    override suspend fun onSideEffectCollect(sideEffect: PodcastPlayerSideEffect) {
-        sideEffect.execute(binding.root.context)
+    override fun subscribeToViewStateFlow() {
+        super.subscribeToViewStateFlow()
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.boostAnimationViewStateContainer.collect { viewState ->
+                @Exhaustive
+                when (viewState) {
+                    is BoostAnimationViewState.Idle -> {}
+
+                    is BoostAnimationViewState.BoosAnimationInfo -> {
+                        setupBoostAnimation(
+                            viewState.photoUrl,
+                            viewState.amount
+                        )
+                    }
+                }
+            }
+        }
     }
 }
