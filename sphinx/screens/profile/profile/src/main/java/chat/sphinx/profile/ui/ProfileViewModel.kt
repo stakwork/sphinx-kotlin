@@ -151,7 +151,11 @@ internal class ProfileViewModel @Inject constructor(
     ): Response<Any, ResponseError> =
         contactRepository.updateOwner(alias, privatePhoto, tipAmount)
 
-    suspend fun updateRelayUrl(url: String)  {
+    suspend fun updateRelayUrl(url: String?)  {
+        if (url == null || url.isEmpty()) {
+            return
+        }
+
         _relayUrlStateFlow.value = url
 
         url.toRelayUrl()?.let { relayUrl ->
