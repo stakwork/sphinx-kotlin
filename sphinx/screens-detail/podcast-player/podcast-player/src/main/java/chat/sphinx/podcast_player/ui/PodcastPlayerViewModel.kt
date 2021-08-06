@@ -7,6 +7,8 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_repository_chat.ChatRepository
+import chat.sphinx.concept_repository_contact.ContactRepository
+import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.concept_service_media.MediaPlayerServiceController
 import chat.sphinx.concept_service_media.MediaPlayerServiceState
 import chat.sphinx.concept_service_media.UserAction
@@ -14,13 +16,16 @@ import chat.sphinx.podcast_player.navigation.PodcastPlayerNavigator
 import chat.sphinx.podcast_player.objects.toPodcast
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.lightning.Sat
+import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_podcast.Podcast
 import chat.sphinx.wrapper_podcast.PodcastEpisode
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.BaseViewModel
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
+import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -33,7 +38,9 @@ internal inline val PodcastPlayerFragmentArgs.chatId: ChatId
 internal class PodcastPlayerViewModel @Inject constructor(
     dispatchers: CoroutineDispatchers,
     val navigator: PodcastPlayerNavigator,
-    protected val chatRepository: ChatRepository,
+    private val chatRepository: ChatRepository,
+    private val messageRepository: MessageRepository,
+    private val contactRepository: ContactRepository,
     savedStateHandle: SavedStateHandle,
     private val mediaPlayerServiceController: MediaPlayerServiceController
 ) : BaseViewModel<PodcastPlayerViewState>(
@@ -41,9 +48,14 @@ internal class PodcastPlayerViewModel @Inject constructor(
     PodcastPlayerViewState.Idle
 ), MediaPlayerServiceController.MediaServiceListener {
 
+
     private val args: PodcastPlayerFragmentArgs by savedStateHandle.navArgs()
 
     val podcast: Podcast = args.argPodcast.toPodcast()
+
+    val boostAnimationViewStateContainer: ViewStateContainer<BoostAnimationViewState> by lazy {
+        ViewStateContainer(BoostAnimationViewState.Idle)
+    }
 
     override fun mediaServiceState(serviceState: MediaPlayerServiceState) {
         if (serviceState is MediaPlayerServiceState.ServiceActive.MediaState) {
@@ -82,6 +94,17 @@ internal class PodcastPlayerViewModel @Inject constructor(
     init {
         mediaPlayerServiceController.addListener(this)
         podcastLoaded()
+
+        viewModelScope.launch(mainImmediate) {
+            val owner = getOwner()
+
+            boostAnimationViewStateContainer.updateViewState(
+                BoostAnimationViewState.BoosAnimationInfo(
+                    owner.photoUrl,
+                    owner.tipAmount
+                )
+            )
+        }
     }
 
     private fun podcastLoaded() {
@@ -189,6 +212,54 @@ internal class PodcastPlayerViewModel @Inject constructor(
                         destinations
                     )
                 )
+            }
+        }
+    }
+
+    fun sendPodcastBoost() {
+        viewModelScope.launch(mainImmediate) {
+            getOwner().tipAmount?.let { tipAmount ->
+                podcast?.let { nnPodcast ->
+
+                    if (tipAmount.value > 0) {
+                        val metaData = nnPodcast.getMetaData(tipAmount)
+
+                        messageRepository.sendPodcastBoost(args.chatId, nnPodcast)
+
+                        nnPodcast.value?.destinations?.let { destinations ->
+                            mediaPlayerServiceController.submitAction(
+                                UserAction.SendBoost(
+                                    args.chatId,
+                                    nnPodcast.id,
+                                    metaData,
+                                    destinations
+                                )
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private suspend fun getOwner(): Contact {
+        return contactRepository.accountOwner.value.let { contact ->
+            if (contact != null) {
+                contact
+            } else {
+                var resolvedOwner: Contact? = null
+                try {
+                    contactRepository.accountOwner.collect { ownerContact ->
+                        if (ownerContact != null) {
+                            resolvedOwner = ownerContact
+                            throw Exception()
+                        }
+                    }
+                } catch (e: Exception) {
+                }
+                delay(25L)
+
+                resolvedOwner!!
             }
         }
     }

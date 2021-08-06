@@ -13,6 +13,8 @@ import chat.sphinx.concept_service_media.UserAction
 import chat.sphinx.feature_service_media_player_android.service.MediaPlayerService
 import chat.sphinx.feature_service_media_player_android.service.SphinxMediaPlayerService
 import chat.sphinx.feature_service_media_player_android.util.toIntent
+import chat.sphinx.wrapper_chat.ChatMetaData
+import chat.sphinx.wrapper_common.ItemId
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -84,6 +86,15 @@ internal class MediaPlayerServiceControllerImpl(
             }
             is UserAction.AdjustSatsPerMinute -> {
                 repositoryMedia.updateChatMetaData(userAction.chatId, userAction.chatMetaData)
+            }
+            is UserAction.SendBoost -> {
+                repositoryMedia.streamPodcastPayments(
+                    userAction.chatId,
+                    userAction.metaData,
+                    userAction.podcastId,
+                    userAction.metaData.itemId.value,
+                    userAction.destinations
+                )
             }
             is UserAction.ServiceAction.Pause -> {
                 listenerHandler.dispatch(getCurrentState())

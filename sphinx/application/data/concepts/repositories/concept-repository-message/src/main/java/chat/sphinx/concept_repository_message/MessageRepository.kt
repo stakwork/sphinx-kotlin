@@ -12,6 +12,7 @@ import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessageUUID
 import chat.sphinx.wrapper_message.Message
 import chat.sphinx.wrapper_message.MessageType
+import chat.sphinx.wrapper_podcast.Podcast
 import kotlinx.coroutines.flow.Flow
 
 interface MessageRepository {
@@ -27,6 +28,11 @@ interface MessageRepository {
     suspend fun readMessages(chatId: ChatId)
 
     fun sendMessage(sendMessage: SendMessage?)
+
+    fun sendPodcastBoost(
+        chatId: ChatId,
+        podcast: Podcast
+    )
 
     suspend fun deleteMessage(message: Message) : Response<Any, ResponseError>
 

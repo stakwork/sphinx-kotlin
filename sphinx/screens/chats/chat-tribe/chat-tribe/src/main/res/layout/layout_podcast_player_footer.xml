@@ -52,8 +52,6 @@
         android:background="@drawable/button_background_white_rad_48"
         android:backgroundTint="@color/primaryGreen"
         android:src="@drawable/ic_boost"
-        android:alpha="0.3"
-        android:enabled="false"
         android:clickable="true"
         android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"

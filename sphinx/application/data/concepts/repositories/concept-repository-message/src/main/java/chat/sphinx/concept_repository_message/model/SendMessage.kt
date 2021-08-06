@@ -12,6 +12,7 @@ class SendMessage private constructor(
     val replyUUID: ReplyUUID?,
     val text: String?,
     val giphyData: GiphyData? = null,
+    val isBoost: Boolean = false
 ) {
 
     class Builder {
@@ -21,6 +22,7 @@ class SendMessage private constructor(
         private var replyUUID: ReplyUUID?           = null
         private var text: String?                   = null
         private var giphyData: GiphyData?           = null
+        private var isBoost: Boolean                = false
 
         @Synchronized
         fun clear() {
@@ -30,6 +32,7 @@ class SendMessage private constructor(
             replyUUID = null
             text = null
             giphyData = null
+            isBoost = false
         }
 
         @get:Synchronized
@@ -88,8 +91,15 @@ class SendMessage private constructor(
             return this
         }
 
+        @Synchronized
         fun setGiphyData(giphyData: GiphyData?): Builder {
             this.giphyData = giphyData
+            return this
+        }
+
+        @Synchronized
+        fun setIsBoost(isBoost: Boolean): Builder {
+            this.isBoost = isBoost
             return this
         }
 
@@ -105,6 +115,7 @@ class SendMessage private constructor(
                     replyUUID,
                     text,
                     giphyData?.let { GiphyData(it.id, it.url, it.aspect_ratio, text) },
+                    isBoost
                 )
             }
     }
