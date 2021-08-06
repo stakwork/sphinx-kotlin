@@ -1,6 +1,12 @@
 # ChangeLog
 
-## Version 1.0.0-alpha14 (2021-08-04)
+## Version 1.0.0-alpha16 (2021-08-06)
+ - Adds ability to boost podcast content creators from the Tribe Chat and Podcast screen
+ - Adds limited functionality for changing the RelayUrl from Profile screen
+     - Changing it to an onion address if Tor is not running currently not supported
+ - Fixes bug that was joining a tribe twice if share tribe link was scanned from the dashboard
+
+## Version 1.0.0-alpha15 (2021-08-04)
  - Adds link detections to messages
      - Urls
      - Share Tribe Links
