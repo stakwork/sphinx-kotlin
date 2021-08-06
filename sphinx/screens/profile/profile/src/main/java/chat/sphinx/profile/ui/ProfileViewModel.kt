@@ -10,6 +10,7 @@ import app.cash.exhaustive.Exhaustive
 import chat.sphinx.camera_view_model_coordinator.request.CameraRequest
 import chat.sphinx.camera_view_model_coordinator.response.CameraResponse
 import chat.sphinx.concept_background_login.BackgroundLoginHandler
+import chat.sphinx.concept_network_tor.TorManager
 import chat.sphinx.concept_relay.RelayDataHandler
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_lightning.LightningRepository
@@ -66,6 +67,8 @@ internal class ProfileViewModel @Inject constructor(
     private val contactRepository: ContactRepository,
     private val lightningRepository: LightningRepository,
     private val relayDataHandler: RelayDataHandler,
+
+    private val torManager: TorManager,
 ): SideEffectViewModel<
         Context,
         ProfileSideEffect,
@@ -157,6 +160,15 @@ internal class ProfileViewModel @Inject constructor(
         }
 
         _relayUrlStateFlow.value = url
+
+        // Block updating to an onion address if Tor is not already
+        // required (which means it is not running, and thus would leak
+        // the onion address to the device DNS provider
+        if (url.isOnionAddress && torManager.isTorRequired() != true) {
+            _relayUrlStateFlow.value = relayDataHandler.retrieveRelayUrl()?.value
+            submitSideEffect(ProfileSideEffect.RelayUrlUpdateToTorNotSupported)
+            return
+        }
 
         url.toRelayUrl()?.let { relayUrl ->
             relayDataHandler.retrieveAuthorizationToken()?.let { authorizationToken ->

@@ -96,6 +96,12 @@ internal sealed class ProfileSideEffect: SideEffect<Context>() {
         }
     }
 
+    object RelayUrlUpdateToTorNotSupported: ProfileSideEffect() {
+        override suspend fun execute(value: Context) {
+            SphinxToastUtils(true).show(value, R.string.relay_url_update_from_http_to_tor_not_implemented)
+        }
+    }
+
     object RelayUrlUpdatedSuccessfully: ProfileSideEffect() {
         override suspend fun execute(value: Context) {
             SphinxToastUtils(true).show(value, R.string.updating_relay_url_succeed)

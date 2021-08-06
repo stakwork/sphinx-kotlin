@@ -30,7 +30,9 @@
 
     <string name="empty_or_null_relay_url">La nueva URL de Relay no puede ser vacía o nula</string>
     <string name="invalid_relay_url">La nueva URL de Relay es inválida</string>
-    <string name="testing_new_relay_url">Verificando la nueva URL de Relay...</string>
-    <string name="failed_updating_relay_url">La verificación de la nueva URL de Relay ha fallado, restaurando configuración previa...</string>
+    <!-- TODO: Add spanish translation -->
+    <string name="relay_url_update_from_http_to_tor_not_implemented">Updating to an onion address is currently not supported.</string>
+    <string name="testing_new_relay_url">Verificando la nueva URL de Relay…</string>
+    <string name="failed_updating_relay_url">La verificación de la nueva URL de Relay ha fallado, restaurando configuración previa…</string>
     <string name="updating_relay_url_succeed">La URL de Relay ha sido actualizada con éxito</string>
 </resources>

@@ -30,7 +30,8 @@
 
     <string name="empty_or_null_relay_url">New Relay URL can not be empty or null</string>
     <string name="invalid_relay_url">New Relay URL is invalid</string>
-    <string name="testing_new_relay_url">Testing new Relay URL...</string>
-    <string name="failed_updating_relay_url">New URL test failed, restoring previous setting...</string>
+    <string name="relay_url_update_from_http_to_tor_not_implemented">Updating to an onion address is currently not supported.</string>
+    <string name="testing_new_relay_url">Testing new Relay URL…</string>
+    <string name="failed_updating_relay_url">New URL test failed, restoring previous setting…</string>
     <string name="updating_relay_url_succeed">Relay URL successfully updated</string>
 </resources>
