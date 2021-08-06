@@ -16,11 +16,11 @@ internal sealed class OnBoardSideEffect: SideEffect<Context>() {
         override suspend fun execute(value: Context) {
             val builder = AlertDialog.Builder(value)
             builder.setTitle(relayUrl.value)
-            builder.setMessage(value.getString(R.string.on_board_relay_url_http_message))
-            builder.setPositiveButton(R.string.on_board_relay_url_http_positive_change_to_https) { _, _ ->
+            builder.setMessage(value.getString(R.string.relay_url_http_message))
+            builder.setPositiveButton(R.string.relay_url_http_positive_change_to_https) { _, _ ->
                 callback.invoke(RelayUrl(relayUrl.value.replaceFirst("http://", "https://")))
             }
-            builder.setNegativeButton(R.string.on_board_relay_url_http_negative_keep_http) { _, _ ->
+            builder.setNegativeButton(R.string.relay_url_http_negative_keep_http) { _, _ ->
                 callback.invoke(relayUrl)
             }
             builder.setOnCancelListener {

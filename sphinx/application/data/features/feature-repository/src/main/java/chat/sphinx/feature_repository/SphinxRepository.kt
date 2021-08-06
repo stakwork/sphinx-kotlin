@@ -68,6 +68,8 @@ import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message_media.*
 import chat.sphinx.wrapper_message_media.token.MediaHost
 import chat.sphinx.wrapper_podcast.PodcastDestination
+import chat.sphinx.wrapper_relay.AuthorizationToken
+import chat.sphinx.wrapper_relay.RelayUrl
 import chat.sphinx.wrapper_rsa.RsaPrivateKey
 import chat.sphinx.wrapper_rsa.RsaPublicKey
 import com.squareup.moshi.Moshi
@@ -1256,8 +1258,13 @@ abstract class SphinxRepository(
         }
     }
 
-    override suspend fun getAccountBalanceAll(): Flow<LoadResponse<NodeBalanceAll, ResponseError>> = flow {
-        networkQueryLightning.getBalanceAll().collect { loadResponse ->
+    override suspend fun getAccountBalanceAll(
+        relayData: Pair<AuthorizationToken, RelayUrl>?
+    ): Flow<LoadResponse<NodeBalanceAll, ResponseError>> = flow {
+
+        networkQueryLightning.getBalanceAll(
+            relayData
+        ).collect { loadResponse ->
             @Exhaustive
             when (loadResponse) {
                 is LoadResponse.Loading -> {

@@ -83,5 +83,8 @@
     <string name="new_contact_pin_standard_private_label">PIN Estandar / PIN Privado</string>
 
     <string name="invalid_url">URL Inválida</string>
+    <string name="relay_url_http_message">La URL de Relay utiliza \'http\'. El tráfico de la red no estará encriptado. Se recomienda fuertemente el uso de Https. Por favor confirma si deseas proceder.</string>
+    <string name="relay_url_http_negative_keep_http">http</string>
+    <string name="relay_url_http_positive_change_to_https">https</string>
 
 </resources>
