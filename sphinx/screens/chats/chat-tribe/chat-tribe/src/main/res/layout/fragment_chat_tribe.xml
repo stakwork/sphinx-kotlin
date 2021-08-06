@@ -78,4 +78,11 @@
         layout="@layout/layout_menu_bottom"
         tools:visibility="gone" />
 
+    <include
+        android:id="@id/include_layout_boost_fireworks"
+        layout="@layout/layout_boost_fireworks"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

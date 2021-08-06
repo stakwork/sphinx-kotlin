@@ -70,10 +70,12 @@ class Podcast(
         playingEpisode = getEpisodeWithId(metaData.itemId.value)
     }
 
-    fun getMetaData(): ChatMetaData =
+    fun getMetaData(
+        customAmount: Sat? = null
+    ): ChatMetaData =
         ChatMetaData(
             ItemId(episodeId ?: 0),
-            satsPerMinute.toSat() ?: Sat(0),
+            customAmount ?: satsPerMinute.toSat() ?: Sat(0),
             (timeMilliSeconds ?: 0) / 1000,
             speed,
         )

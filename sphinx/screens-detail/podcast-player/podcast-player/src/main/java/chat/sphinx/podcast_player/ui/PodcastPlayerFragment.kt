@@ -1,5 +1,6 @@
 package chat.sphinx.podcast_player.ui
 
+import android.animation.Animator
 import android.content.Context
 import android.os.Bundle
 import android.view.ContextThemeWrapper
@@ -17,17 +18,24 @@ import app.cash.exhaustive.Exhaustive
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
+import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.podcast_player.R
 import chat.sphinx.podcast_player.databinding.FragmentPodcastPlayerBinding
 import chat.sphinx.podcast_player.ui.adapter.PodcastEpisodesFooterAdapter
 import chat.sphinx.podcast_player.ui.adapter.PodcastEpisodesListAdapter
+import chat.sphinx.wrapper_common.PhotoUrl
+import chat.sphinx.wrapper_common.lightning.Sat
+import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.util.getTimeString
 import chat.sphinx.wrapper_podcast.Podcast
 import chat.sphinx.wrapper_podcast.PodcastEpisode
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.base.BaseFragment
+import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
+import io.matthewnelson.android_feature_screens.util.visible
+import io.matthewnelson.concept_views.viewstate.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -126,20 +134,20 @@ internal class PodcastPlayerFragment : BaseFragment<
             }
 
             includeLayoutEpisodePlaybackControlButtons.apply {
-                buttonPlaybackSpeed.setOnClickListener {
+                textViewPlaybackSpeedButton.setOnClickListener {
                     showSpeedPopup()
                 }
 
-                buttonShareClip.setOnClickListener {
+                textViewShareClipButton.setOnClickListener {
                     //TODO share clip feature
                 }
 
-                buttonReplay15.setOnClickListener {
+                textViewReplay15Button.setOnClickListener {
                     viewModel.seekTo(podcast.currentTime - 15000)
                     updateViewAfterSeek(podcast)
                 }
 
-                buttonPlayPause.setOnClickListener {
+                textViewPlayPauseButton.setOnClickListener {
                     val currentEpisode = podcast.getCurrentEpisode()
 
                     if (currentEpisode.playing) {
@@ -149,13 +157,19 @@ internal class PodcastPlayerFragment : BaseFragment<
                     }
                 }
 
-                buttonForward30.setOnClickListener {
+                textViewForward30Button.setOnClickListener {
                     viewModel.seekTo(podcast.currentTime + 30000)
                     updateViewAfterSeek(podcast)
                 }
 
-                buttonBoost.setOnClickListener {
-                    //TODO Boost podcast
+                imageViewPodcastBoostButton.setOnClickListener {
+                    viewModel.sendPodcastBoost()
+
+                    includeLayoutBoostFireworks.apply {
+                        root.visible
+
+                        lottieAnimationView.playAnimation()
+                    }
                 }
             }
         }
@@ -209,9 +223,42 @@ internal class PodcastPlayerFragment : BaseFragment<
 
             includeLayoutPodcastEpisodesList.textViewEpisodesListCount.text = podcast.episodesCount.toString()
 
-            includeLayoutEpisodePlaybackControlButtons.buttonPlaybackSpeed.text = "${podcast.getSpeedString()}"
+            includeLayoutEpisodePlaybackControlButtons.textViewPlaybackSpeedButton.text = "${podcast.getSpeedString()}"
 
             togglePlayPauseButton(podcast.isPlaying)
+        }
+    }
+
+    private suspend fun setupBoostAnimation(
+        photoUrl: PhotoUrl?,
+        amount: Sat?
+    ) {
+        binding.includeLayoutBoostFireworks.apply {
+
+            photoUrl?.let { photoUrl ->
+                imageLoader.load(
+                    imageViewProfilePicture,
+                    photoUrl.value,
+                    ImageLoaderOptions.Builder()
+                        .placeholderResId(R.drawable.ic_profile_avatar_circle)
+                        .transformation(Transformation.CircleCrop)
+                        .build()
+                )
+            }
+
+            textViewSatsAmount.text = amount?.asFormattedString()
+
+            lottieAnimationView.addAnimatorListener(object : Animator.AnimatorListener{
+                override fun onAnimationEnd(animation: Animator?) {
+                    root.gone
+                }
+
+                override fun onAnimationRepeat(animation: Animator?) {}
+
+                override fun onAnimationCancel(animation: Animator?) {}
+
+                override fun onAnimationStart(animation: Animator?) {}
+            })
         }
     }
 
@@ -224,7 +271,7 @@ internal class PodcastPlayerFragment : BaseFragment<
     private fun togglePlayPauseButton(playing: Boolean) {
         binding.apply {
             includeLayoutEpisodePlaybackControlButtons.apply {
-                buttonPlayPause.background =
+                textViewPlayPauseButton.background =
                     ContextCompat.getDrawable(root.context,
                         if (playing) R.drawable.ic_podcast_pause_circle else R.drawable.ic_podcast_play_circle
                     )
@@ -291,33 +338,33 @@ internal class PodcastPlayerFragment : BaseFragment<
     private fun showSpeedPopup() {
         binding.includeLayoutEpisodePlaybackControlButtons.apply {
             val wrapper: Context = ContextThemeWrapper(context, R.style.speedMenu)
-            val popup = PopupMenu(wrapper, buttonPlaybackSpeed)
+            val popup = PopupMenu(wrapper, textViewPlaybackSpeedButton)
             popup.inflate(R.menu.speed_menu)
 
             popup.setOnMenuItemClickListener { item: MenuItem? ->
                 when (item!!.itemId) {
                     R.id.speed0_5 -> {
-                        buttonPlaybackSpeed.text = "0.5x"
+                        textViewPlaybackSpeedButton.text = "0.5x"
                         viewModel.adjustSpeed(0.5)
                     }
                     R.id.speed0_8 -> {
-                        buttonPlaybackSpeed.text = "0.8x"
+                        textViewPlaybackSpeedButton.text = "0.8x"
                         viewModel.adjustSpeed(0.8)
                     }
                     R.id.speed1 -> {
-                        buttonPlaybackSpeed.text = "1x"
+                        textViewPlaybackSpeedButton.text = "1x"
                         viewModel.adjustSpeed(1.0)
                     }
                     R.id.speed1_2 -> {
-                        buttonPlaybackSpeed.text = "1.2x"
+                        textViewPlaybackSpeedButton.text = "1.2x"
                         viewModel.adjustSpeed(1.2)
                     }
                     R.id.speed1_5 -> {
-                        buttonPlaybackSpeed.text = "1.5x"
+                        textViewPlaybackSpeedButton.text = "1.5x"
                         viewModel.adjustSpeed(1.5)
                     }
                     R.id.speed2_1 -> {
-                        buttonPlaybackSpeed.text = "2.1x"
+                        textViewPlaybackSpeedButton.text = "2.1x"
                         viewModel.adjustSpeed(2.1)
                     }
                 }
@@ -325,6 +372,26 @@ internal class PodcastPlayerFragment : BaseFragment<
             }
 
             popup.show()
+        }
+    }
+
+    override fun subscribeToViewStateFlow() {
+        super.subscribeToViewStateFlow()
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.boostAnimationViewStateContainer.collect { viewState ->
+                @Exhaustive
+                when (viewState) {
+                    is BoostAnimationViewState.Idle -> {}
+
+                    is BoostAnimationViewState.BoosAnimationInfo -> {
+                        setupBoostAnimation(
+                            viewState.photoUrl,
+                            viewState.amount
+                        )
+                    }
+                }
+            }
         }
     }
 }

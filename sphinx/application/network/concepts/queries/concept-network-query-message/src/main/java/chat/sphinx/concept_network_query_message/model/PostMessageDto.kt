@@ -13,6 +13,7 @@ data class PostMessageDto(
     val media_key_map: Map<String, String>?,
     val media_type: String?,
     val muid: String?,
+    val boost: Boolean = false,
 ) {
     init {
         require(!(chat_id == null && contact_id == null)) {

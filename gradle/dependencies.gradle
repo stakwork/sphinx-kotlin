@@ -120,6 +120,9 @@ ext.deps = [
     ],
     jitsi: [
             sdk: "org.jitsi.react:jitsi-meet-sdk:3.0.0"
+    ],
+    lottie: [
+            sdk: "com.airbnb.android:lottie:4.0.0"
     ]
 ]
 

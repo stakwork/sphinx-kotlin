@@ -11,6 +11,14 @@ sealed class PodcastViewState: ViewState<PodcastViewState>() {
     
     object ServiceInactive: PodcastViewState()
 
+    class PodcastLoaded(
+        val podcast: Podcast,
+    ): PodcastViewState()
+
+    class PodcastContributionsLoaded(
+        val contributions: String,
+    ): PodcastViewState()
+
     class MediaStateUpdate(
         val podcast: Podcast,
     ): PodcastViewState()

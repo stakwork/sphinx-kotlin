@@ -43,6 +43,13 @@ sealed class UserAction(val chatId: ChatId) {
         val chatMetaData: ChatMetaData,
     ): UserAction(chatId)
 
+    class SendBoost(
+        chatId: ChatId,
+        val podcastId: Long,
+        val metaData: ChatMetaData,
+        val destinations: List<PodcastDestination>
+    ): UserAction(chatId)
+
     class SetPaymentsDestinations(
         chatId: ChatId,
         val destinations: List<PodcastDestination>
