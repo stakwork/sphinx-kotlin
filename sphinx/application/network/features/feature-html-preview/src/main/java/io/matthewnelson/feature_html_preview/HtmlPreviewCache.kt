@@ -4,13 +4,23 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 
-internal class HtmlPreviewCache {
+internal class HtmlPreviewCache private constructor() {
 
     companion object {
         const val CACHE_SIZE = 10
-        private var counter = 0
+
+        @Volatile
+        private var instance: HtmlPreviewCache? = null
+
+        @JvmSynthetic
+        internal fun getInstance(): HtmlPreviewCache =
+            instance ?: synchronized(this) {
+                instance ?: HtmlPreviewCache()
+                    .also { instance = it }
+            }
     }
 
+    private var counter = 0
     private val list: MutableList<HtmlPreviewDataRetriever> = ArrayList(CACHE_SIZE)
     private val lock = Mutex()
 

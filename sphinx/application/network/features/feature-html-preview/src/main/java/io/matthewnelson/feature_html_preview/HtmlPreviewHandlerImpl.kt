@@ -10,15 +10,10 @@ class HtmlPreviewHandlerImpl(
     private val networkClient: NetworkClient
 ) : HtmlPreviewHandler() {
 
-    companion object {
-        private val cache by lazy {
-            HtmlPreviewCache()
-        }
-    }
-
     override suspend fun retrieveHtmlPreview(url: String): HtmlPreview? {
-       return cache
+       return HtmlPreviewCache.getInstance()
            .getHtmlPreviewDataRetriever(url)
            ?.getHtmlPreview(dispatchers, networkClient.getClient())
     }
+
 }
