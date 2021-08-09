@@ -46,7 +46,9 @@ import io.matthewnelson.build_config.BuildConfigVersionCode
 import io.matthewnelson.concept_authentication.data.AuthenticationStorage
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_encryption_key.EncryptionKeyHandler
+import io.matthewnelson.concept_html_preview.HtmlPreviewHandler
 import io.matthewnelson.feature_authentication_core.AuthenticationCoreManager
+import io.matthewnelson.feature_html_preview.HtmlPreviewHandlerImpl
 import kotlinx.coroutines.CoroutineScope
 import javax.inject.Singleton
 
@@ -196,6 +198,13 @@ object NetworkModule {
         networkRelayCallImpl: NetworkRelayCallImpl
     ): NetworkCall =
         networkRelayCallImpl
+
+    @Provides
+    fun provideHtmlPreviewHandler(
+        dispatchers: CoroutineDispatchers,
+        networkClient: NetworkClient,
+    ): HtmlPreviewHandler =
+        HtmlPreviewHandlerImpl(dispatchers, networkClient)
 
     @Provides
     @Singleton
