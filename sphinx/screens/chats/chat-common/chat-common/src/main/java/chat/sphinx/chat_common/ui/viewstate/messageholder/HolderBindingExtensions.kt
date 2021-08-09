@@ -1,6 +1,7 @@
 package chat.sphinx.chat_common.ui.viewstate.messageholder
 
 import android.view.Gravity
+import android.view.View
 import android.widget.ImageView
 import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
@@ -51,6 +52,7 @@ internal fun LayoutMessageHolderBinding.setView(
     memeServerTokenHandler: MemeServerTokenHandler,
     recyclerViewWidth: Px,
     viewState: MessageHolderViewState,
+    longClickListener: View.OnLongClickListener? = null,
     onSphinxInteractionListener: SphinxUrlSpan.OnInteractionListener? = null
 ) {
     for (job in holderJobs) {
@@ -79,7 +81,7 @@ internal fun LayoutMessageHolderBinding.setView(
 
         setStatusHeader(viewState.statusHeader)
         setDeletedMessageLayout(viewState.deletedMessage)
-        setBubbleBackground(viewState, recyclerViewWidth)
+        setBubbleBackground(viewState, recyclerViewWidth, longClickListener)
         setGroupActionIndicatorLayout(viewState.groupActionIndicator)
 
         if (viewState.background !is BubbleBackground.Gone) {
@@ -309,9 +311,9 @@ internal inline fun LayoutMessageHolderBinding.setBubbleDirectPaymentLayout(
 internal fun LayoutMessageHolderBinding.setBubbleBackground(
     viewState: MessageHolderViewState,
     holderWidth: Px,
+    longClickListener: View.OnLongClickListener?,
 ) {
     if (viewState.background is BubbleBackground.Gone) {
-
         includeMessageHolderBubble.root.gone
         receivedBubbleArrow.gone
         sentBubbleArrow.gone
@@ -321,6 +323,8 @@ internal fun LayoutMessageHolderBinding.setBubbleBackground(
         sentBubbleArrow.goneIfFalse(viewState.showSentBubbleArrow)
 
         includeMessageHolderBubble.root.apply {
+            setOnLongClickListener(longClickListener)
+
             visible
 
             @DrawableRes
@@ -435,8 +439,10 @@ internal inline fun LayoutMessageHolderBinding.setStatusHeader(
 
             if (statusHeader.showSent) {
                 textViewMessageStatusSentTimestamp.text = statusHeader.timestamp
-                textViewMessageStatusSentBoltIcon.goneIfFalse(statusHeader.showBoltIcon)
                 textViewMessageStatusSentLockIcon.goneIfFalse(statusHeader.showLockIcon)
+                progressBarMessageStatusSending.goneIfFalse(statusHeader.showSendingIcon)
+                textViewMessageStatusSentBoltIcon.goneIfFalse(statusHeader.showBoltIcon)
+                layoutConstraintMessageStatusSentFailedContainer.goneIfFalse(statusHeader.showFailedContainer)
             } else {
                 textViewMessageStatusReceivedTimestamp.text = statusHeader.timestamp
                 textViewMessageStatusReceivedLockIcon.goneIfFalse(statusHeader.showLockIcon)

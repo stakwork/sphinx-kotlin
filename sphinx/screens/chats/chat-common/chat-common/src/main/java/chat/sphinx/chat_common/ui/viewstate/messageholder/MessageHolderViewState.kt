@@ -59,7 +59,9 @@ internal sealed class MessageHolderViewState(
             LayoutState.MessageStatusHeader(
                 if (chat.type.isConversation()) null else message.senderAlias?.value,
                 this is Sent,
+                this is Sent && message.status.isPending(),
                 this is Sent && (message.status.isReceived() || message.status.isConfirmed()),
+                this is Sent && message.status.isFailed(),
                 message.messageContentDecrypted != null || message.messageMedia?.mediaKeyDecrypted != null,
                 message.date.chatTimeFormat(),
             )
@@ -260,6 +262,10 @@ internal sealed class MessageHolderViewState(
 
             if (message.isReplyAllowed) {
                 list.add(MenuItemState.Reply)
+            }
+
+            if (message.isResendAllowed) {
+                list.add(MenuItemState.Resend)
             }
 
             if (this is Sent || chat.isTribeOwnedByAccount(accountOwner().nodePubKey)) {
