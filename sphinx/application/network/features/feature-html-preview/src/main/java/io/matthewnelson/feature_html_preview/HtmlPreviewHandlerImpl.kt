@@ -6,16 +6,19 @@ import io.matthewnelson.concept_html_preview.HtmlPreviewHandler
 import io.matthewnelson.concept_html_preview.model.HtmlPreview
 
 class HtmlPreviewHandlerImpl(
-    dispatchers: CoroutineDispatchers,
+    private val dispatchers: CoroutineDispatchers,
     private val networkClient: NetworkClient
-): HtmlPreviewHandler(), CoroutineDispatchers by dispatchers {
+) : HtmlPreviewHandler() {
 
     companion object {
-        // TODO: html preview cache
-        // TODO: html preview queue
+        private val cache by lazy {
+            HtmlPreviewCache()
+        }
     }
 
-    override suspend fun retrieveHtmlPreview(url: String): HtmlPreview {
-        TODO("Not yet implemented")
+    override suspend fun retrieveHtmlPreview(url: String): HtmlPreview? {
+       return cache
+           .getHtmlPreviewDataRetriever(url)
+           .getHtmlPreview(dispatchers, networkClient.getClient())
     }
 }
