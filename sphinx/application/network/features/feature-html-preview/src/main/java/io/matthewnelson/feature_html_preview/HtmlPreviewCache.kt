@@ -2,6 +2,7 @@ package io.matthewnelson.feature_html_preview
 
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 
 internal class HtmlPreviewCache {
 
@@ -13,15 +14,17 @@ internal class HtmlPreviewCache {
     private val list: MutableList<HtmlPreviewDataRetriever> = ArrayList(CACHE_SIZE)
     private val lock = Mutex()
 
-    suspend fun getHtmlPreviewDataRetriever(url: String): HtmlPreviewDataRetriever =
+    suspend fun getHtmlPreviewDataRetriever(url: String): HtmlPreviewDataRetriever? {
+        val httpUrl = url.toHttpUrlOrNull() ?: return null
+
         lock.withLock {
             for (item in list) {
-                if (item.url == url) {
+                if (item.url == httpUrl) {
                     return item
                 }
             }
 
-            HtmlPreviewDataRetriever(url).also { retriever ->
+            return HtmlPreviewDataRetriever(httpUrl).also { retriever ->
                 list[counter] = retriever
 
                 if (counter < CACHE_SIZE - 1 /* last index */) {
@@ -31,4 +34,5 @@ internal class HtmlPreviewCache {
                 }
             }
         }
+    }
 }

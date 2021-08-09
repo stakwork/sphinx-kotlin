@@ -19,6 +19,6 @@ class HtmlPreviewHandlerImpl(
     override suspend fun retrieveHtmlPreview(url: String): HtmlPreview? {
        return cache
            .getHtmlPreviewDataRetriever(url)
-           .getHtmlPreview(dispatchers, networkClient.getClient())
+           ?.getHtmlPreview(dispatchers, networkClient.getClient())
     }
 }
