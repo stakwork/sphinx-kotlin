@@ -49,13 +49,6 @@ class NetworkQueryChatImpl(
         )
     }
 
-    override fun getHtml(
-        url: String
-    ): Flow<LoadResponse<String, ResponseError>> =
-        networkRelayCall.getRaw(
-            url = url
-        )
-
     override fun getChats(
         relayData: Pair<AuthorizationToken, RelayUrl>?
     ): Flow<LoadResponse<List<ChatDto>, ResponseError>> =
