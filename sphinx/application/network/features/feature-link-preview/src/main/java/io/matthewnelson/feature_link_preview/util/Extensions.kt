@@ -1,4 +1,4 @@
-package io.matthewnelson.feature_html_preview.util
+package io.matthewnelson.feature_link_preview.util
 
 import org.jsoup.nodes.Document
 

@@ -1,30 +1,30 @@
-package io.matthewnelson.feature_html_preview
+package io.matthewnelson.feature_link_preview
 
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 
-internal class HtmlPreviewCache private constructor() {
+internal class LinkPreviewCache private constructor() {
 
     companion object {
         const val CACHE_SIZE = 10
 
         @Volatile
-        private var instance: HtmlPreviewCache? = null
+        private var instance: LinkPreviewCache? = null
 
         @JvmSynthetic
-        internal fun getInstance(): HtmlPreviewCache =
+        internal fun getInstance(): LinkPreviewCache =
             instance ?: synchronized(this) {
-                instance ?: HtmlPreviewCache()
+                instance ?: LinkPreviewCache()
                     .also { instance = it }
             }
     }
 
     private var counter = 0
-    private val list: MutableList<HtmlPreviewDataRetriever> = ArrayList(CACHE_SIZE)
+    private val list: MutableList<LinkPreviewDataRetriever> = ArrayList(CACHE_SIZE)
     private val lock = Mutex()
 
-    suspend fun getHtmlPreviewDataRetriever(url: String): HtmlPreviewDataRetriever? {
+    suspend fun getHtmlPreviewDataRetriever(url: String): LinkPreviewDataRetriever? {
         val httpUrl = url.toHttpUrlOrNull() ?: return null
 
         lock.withLock {
@@ -34,7 +34,7 @@ internal class HtmlPreviewCache private constructor() {
                 }
             }
 
-            return HtmlPreviewDataRetriever(httpUrl).also { retriever ->
+            return LinkPreviewDataRetriever(httpUrl).also { retriever ->
                 list[counter] = retriever
 
                 if (counter < CACHE_SIZE - 1 /* last index */) {

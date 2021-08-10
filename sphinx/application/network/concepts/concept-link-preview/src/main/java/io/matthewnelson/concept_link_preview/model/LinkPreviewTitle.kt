@@ -1,4 +1,4 @@
-package io.matthewnelson.concept_html_preview.model
+package io.matthewnelson.concept_link_preview.model
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun String.toHtmlPreviewTitleOrNull(): HtmlPreviewTitle? =

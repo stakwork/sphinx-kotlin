@@ -1,11 +1,11 @@
-package io.matthewnelson.feature_html_preview
+package io.matthewnelson.feature_link_preview
 
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
-import io.matthewnelson.concept_html_preview.model.*
-import io.matthewnelson.feature_html_preview.util.getDescription
-import io.matthewnelson.feature_html_preview.util.getFavIconUrl
-import io.matthewnelson.feature_html_preview.util.getImageUrl
-import io.matthewnelson.feature_html_preview.util.getTitle
+import io.matthewnelson.concept_link_preview.model.*
+import io.matthewnelson.feature_link_preview.util.getDescription
+import io.matthewnelson.feature_link_preview.util.getFavIconUrl
+import io.matthewnelson.feature_link_preview.util.getImageUrl
+import io.matthewnelson.feature_link_preview.util.getTitle
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -17,23 +17,23 @@ import okhttp3.internal.closeQuietly
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 
-internal data class HtmlPreviewDataRetriever(val url: HttpUrl) {
+internal data class LinkPreviewDataRetriever(val url: HttpUrl) {
     private val lock = Mutex()
 
     @Volatile
-    private var preview: HtmlPreview? = null
+    private var previewData: LinkPreviewData? = null
 
     suspend fun getHtmlPreview(
         dispatchers: CoroutineDispatchers,
         okHttpClient: OkHttpClient
-    ): HtmlPreview? =
-        preview ?: lock.withLock {
-            preview ?: retrievePreview(
+    ): LinkPreviewData? =
+        previewData ?: lock.withLock {
+            previewData ?: retrievePreview(
                 dispatchers = dispatchers,
                 okHttpClient = okHttpClient,
             ).also {
                 if (it != null) {
-                    preview = it
+                    previewData = it
                 }
             }
         }
@@ -42,7 +42,7 @@ internal data class HtmlPreviewDataRetriever(val url: HttpUrl) {
     private suspend fun retrievePreview(
         dispatchers: CoroutineDispatchers,
         okHttpClient: OkHttpClient
-    ): HtmlPreview? {
+    ): LinkPreviewData? {
         val request = Request.Builder().url(url).build()
 
         val response: Response = withContext(dispatchers.io) {
@@ -69,9 +69,9 @@ internal data class HtmlPreviewDataRetriever(val url: HttpUrl) {
                         /* baseUri */       url.toString(),
                     )
 
-                    HtmlPreview(
+                    LinkPreviewData(
                         document.getTitle()?.toHtmlPreviewTitleOrNull(),
-                        HtmlPreviewDomainHost(url.host),
+                        LinkPreviewDomainHost(url.host),
                         document.getDescription()?.toHtmlPreviewDescriptionOrNull(),
                         document.getImageUrl()?.toHtmlPreviewImageUrlOrNull(),
                         document.getFavIconUrl()?.toHtmlPreviewFavIconUrlOrNull(),

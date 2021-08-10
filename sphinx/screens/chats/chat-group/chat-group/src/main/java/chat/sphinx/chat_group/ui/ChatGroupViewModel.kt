@@ -29,7 +29,7 @@ import chat.sphinx.wrapper_message.Message
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
-import io.matthewnelson.concept_html_preview.HtmlPreviewHandler
+import io.matthewnelson.concept_link_preview.LinkPreviewHandler
 import io.matthewnelson.concept_media_cache.MediaCacheHandler
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -52,7 +52,7 @@ class ChatGroupViewModel @Inject constructor(
     mediaCacheHandler: MediaCacheHandler,
     savedStateHandle: SavedStateHandle,
     cameraViewModelCoordinator: ViewModelCoordinator<CameraRequest, CameraResponse>,
-    htmlPreviewHandler: HtmlPreviewHandler,
+    linkPreviewHandler: LinkPreviewHandler,
     LOG: SphinxLogger,
 ): ChatViewModel<ChatGroupFragmentArgs>(
     app,
@@ -67,7 +67,7 @@ class ChatGroupViewModel @Inject constructor(
     mediaCacheHandler,
     savedStateHandle,
     cameraViewModelCoordinator,
-    htmlPreviewHandler,
+    linkPreviewHandler,
     LOG,
 ) {
     override val args: ChatGroupFragmentArgs by savedStateHandle.navArgs()

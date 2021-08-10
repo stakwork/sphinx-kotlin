@@ -9,7 +9,7 @@ dependencies {
     api project(path: ':kotlin:concepts:concept-coroutines')
 
     // Sphinx
-    api project(path: ':sphinx:application:network:concepts:concept-html-preview')
+    api project(path: ':sphinx:application:network:concepts:concept-link-preview')
     api project(path: ':sphinx:application:network:concepts:clients:concept-network-client')
 
     implementation deps.jsoup
