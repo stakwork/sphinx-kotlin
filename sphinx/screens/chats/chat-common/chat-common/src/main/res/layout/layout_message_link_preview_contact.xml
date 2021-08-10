@@ -11,7 +11,7 @@
     <View
         android:id="@+id/view_preview_divider"
         android:layout_width="match_parent"
-        android:layout_height="4dp"
+        android:layout_height="3dp"
         android:layout_marginBottom="@dimen/chat_message_inner_padding"
         android:background="@color/body"
         app:layout_constraintTop_toTopOf="parent" />
