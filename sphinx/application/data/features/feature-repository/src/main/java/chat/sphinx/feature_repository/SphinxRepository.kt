@@ -217,6 +217,9 @@ abstract class SphinxRepository(
                             io
                         )?.join()
 
+                        val isAttachmentMessage = nnMessageDto.type.toMessageType().isAttachment()
+                        delay(if (isAttachmentMessage) 500L else 0L)
+
                         chatLock.withLock {
                             messageLock.withLock {
                                 contactLock.withLock {
@@ -1719,6 +1722,18 @@ abstract class SphinxRepository(
 
                         queries.transaction {
 
+                            if (media != null) {
+                                queries.messageMediaUpsert(
+                                    media.second,
+                                    media.third.mediaType,
+                                    MediaToken.PROVISIONAL_TOKEN,
+                                    provisionalId,
+                                    chatDbo.id,
+                                    MediaKeyDecrypted(media.first.value.joinToString("")),
+                                    media.third.file,
+                                )
+                            }
+
                             queries.messageUpsert(
                                 MessageStatus.Pending,
                                 Seen.True,
@@ -1746,18 +1761,6 @@ abstract class SphinxRepository(
                                 message?.second,
                                 message?.first,
                             )
-
-                            if (media != null) {
-                                queries.messageMediaUpsert(
-                                    media.second,
-                                    media.third.mediaType,
-                                    MediaToken.PROVISIONAL_TOKEN,
-                                    provisionalId,
-                                    chatDbo.id,
-                                    MediaKeyDecrypted(media.first.value.joinToString("")),
-                                    media.third.file,
-                                )
-                            }
                         }
                     }
 
@@ -1984,9 +1987,8 @@ abstract class SphinxRepository(
                                             upsertMessage(loadResponse.value, queries)
 
                                             provisionalMessageId?.let { provId ->
-                                                queries.messageDeleteById(provId)
+                                                deleteMessageById(provId, queries)
                                             }
-
                                         }
                                     }
                                 }
@@ -2008,7 +2010,9 @@ abstract class SphinxRepository(
             if (message.id.isProvisionalMessage) {
                 messageLock.withLock {
                     withContext(io) {
-                        queries.messageDeleteById(message.id)
+                        queries.transaction {
+                            deleteMessageById(message.id, queries)
+                        }
                     }
                 }
             } else {
