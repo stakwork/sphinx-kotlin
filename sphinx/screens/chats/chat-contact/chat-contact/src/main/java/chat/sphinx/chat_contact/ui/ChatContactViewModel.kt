@@ -9,7 +9,6 @@ import chat.sphinx.chat_common.ui.ChatViewModel
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
 import chat.sphinx.chat_contact.navigation.ContactChatNavigator
 import chat.sphinx.concept_meme_server.MemeServerTokenHandler
-import chat.sphinx.concept_network_query_chat.NetworkQueryChat
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_lightning.model.route.RouteSuccessProbabilityDto
 import chat.sphinx.concept_network_query_lightning.model.route.isRouteAvailable
@@ -33,6 +32,7 @@ import chat.sphinx.wrapper_message.Message
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
+import io.matthewnelson.concept_html_preview.HtmlPreviewHandler
 import io.matthewnelson.concept_media_cache.MediaCacheHandler
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
@@ -60,10 +60,11 @@ internal class ChatContactViewModel @Inject constructor(
     contactRepository: ContactRepository,
     messageRepository: MessageRepository,
     networkQueryLightning: NetworkQueryLightning,
-    networkQueryChat: NetworkQueryChat,
+//    networkQueryChat: NetworkQueryChat,
     mediaCacheHandler: MediaCacheHandler,
     savedStateHandle: SavedStateHandle,
     cameraViewModelCoordinator: ViewModelCoordinator<CameraRequest, CameraResponse>,
+    htmlPreviewHandler: HtmlPreviewHandler,
     LOG: SphinxLogger,
 ): ChatViewModel<ChatContactFragmentArgs>(
     app,
@@ -74,10 +75,11 @@ internal class ChatContactViewModel @Inject constructor(
     contactRepository,
     messageRepository,
     networkQueryLightning,
-    networkQueryChat,
+//    networkQueryChat,
     mediaCacheHandler,
     savedStateHandle,
     cameraViewModelCoordinator,
+    htmlPreviewHandler,
     LOG,
 ) {
     override val args: ChatContactFragmentArgs by savedStateHandle.navArgs()

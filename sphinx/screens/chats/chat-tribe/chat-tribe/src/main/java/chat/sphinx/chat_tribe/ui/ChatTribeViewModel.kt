@@ -12,7 +12,6 @@ import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
 import chat.sphinx.chat_tribe.R
 import chat.sphinx.chat_tribe.navigation.TribeChatNavigator
 import chat.sphinx.concept_meme_server.MemeServerTokenHandler
-import chat.sphinx.concept_network_query_chat.NetworkQueryChat
 import chat.sphinx.concept_network_query_chat.model.toPodcast
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_lightning.model.route.isRouteAvailable
@@ -53,6 +52,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
+import io.matthewnelson.concept_html_preview.HtmlPreviewHandler
 import io.matthewnelson.concept_media_cache.MediaCacheHandler
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import kotlinx.coroutines.delay
@@ -75,10 +75,11 @@ internal class ChatTribeViewModel @Inject constructor(
     contactRepository: ContactRepository,
     messageRepository: MessageRepository,
     networkQueryLightning: NetworkQueryLightning,
-    networkQueryChat: NetworkQueryChat,
+//    networkQueryChat: NetworkQueryChat,
     mediaCacheHandler: MediaCacheHandler,
     savedStateHandle: SavedStateHandle,
     cameraViewModelCoordinator: ViewModelCoordinator<CameraRequest, CameraResponse>,
+    htmlPreviewHandler: HtmlPreviewHandler,
     LOG: SphinxLogger,
     private val mediaPlayerServiceController: MediaPlayerServiceController
 ): ChatViewModel<ChatTribeFragmentArgs>(
@@ -90,10 +91,11 @@ internal class ChatTribeViewModel @Inject constructor(
     contactRepository,
     messageRepository,
     networkQueryLightning,
-    networkQueryChat,
+//    networkQueryChat,
     mediaCacheHandler,
     savedStateHandle,
     cameraViewModelCoordinator,
+    htmlPreviewHandler,
     LOG,
 ), MediaPlayerServiceController.MediaServiceListener
 {

@@ -56,7 +56,7 @@ internal fun LayoutMessageHolderBinding.setView(
     recyclerViewWidth: Px,
     viewState: MessageHolderViewState,
     onSphinxInteractionListener: SphinxUrlSpan.OnInteractionListener? = null,
-    previewHandler: SphinxUrlSpan.PreviewHandler? = null
+//    previewHandler: SphinxUrlSpan.PreviewHandler? = null
 ) {
     for (job in holderJobs) {
         job.cancel()
@@ -143,7 +143,7 @@ internal fun LayoutMessageHolderBinding.setView(
             }
             setUnsupportedMessageTypeLayout(viewState.unsupportedMessageType)
             setBubbleMessageLayout(viewState.bubbleMessage, onSphinxInteractionListener)
-            setBubbleMessageLinkPreviewLayout(previewHandler)
+//            setBubbleMessageLinkPreviewLayout(previewHandler)
             setBubbleCallInvite(viewState.bubbleCallInvite)
             setBubbleDirectPaymentLayout(viewState.bubbleDirectPayment)
             setBubbleDirectPaymentLayout(viewState.bubbleDirectPayment)
@@ -496,70 +496,70 @@ internal inline fun LayoutMessageHolderBinding.setBubbleMessageLayout(
     }
 }
 
-@MainThread
-@Suppress("NOTHING_TO_INLINE")
-internal inline fun LayoutMessageHolderBinding.setBubbleMessageLinkPreviewLayout(
-    previewHandler: SphinxUrlSpan.PreviewHandler?
-) {
-    includeMessageHolderBubble.includeMessageLinkPreviewTribe.root.gone
-    includeMessageHolderBubble.includeMessageLinkPreviewContact.root.gone
-    includeMessageHolderBubble.includeMessageLinkPreviewUrl.root.gone
-
-    val sphinxUrlSpans =  includeMessageHolderBubble.textViewMessageText.text.toSpannable().getSpans<SphinxUrlSpan>()
-    sphinxUrlSpans.firstOrNull()?.let { sphinxUrlSpan ->
-        when {
-            sphinxUrlSpan.url.isValidTribeJoinLink -> {
-                includeMessageHolderBubble.includeMessageLinkPreviewTribe.apply {
-                    sphinxUrlSpan.url.toTribeJoinLink()?.let {
-                        previewHandler?.populateTribePreview(
-                            it,
-                            this
-                        )
-                    }
-                }
-            }
-            sphinxUrlSpan.url.isValidVirtualNodeAddress -> {
-                includeMessageHolderBubble.includeMessageLinkPreviewContact.apply {
-                    sphinxUrlSpan.url.toVirtualLightningNodeAddress()?.let { virtualLightningNodeAddress ->
-                        previewHandler?.populateContactPreview(
-                            virtualLightningNodeAddress,
-                            this
-                        )
-                    }
-                }
-            }
-            sphinxUrlSpan.url.isValidLightningNodePubKey -> {
-                includeMessageHolderBubble.includeMessageLinkPreviewContact.apply {
-                    sphinxUrlSpan.url.toLightningNodePubKey()?.let {
-                        previewHandler?.populateContactPreview(
-                            it,
-                            this
-                        )
-                    }
-                }
-            }
-            sphinxUrlSpan.url.isValidVirtualNodeAddress -> {
-                includeMessageHolderBubble.includeMessageLinkPreviewContact.apply {
-                    sphinxUrlSpan.url.toVirtualLightningNodeAddress()?.let {
-                        previewHandler?.populateContactPreview(
-                            it,
-                            this
-                        )
-                    }
-                }
-            }
-            else -> {
-                includeMessageHolderBubble.includeMessageLinkPreviewUrl.apply {
-                    previewHandler?.populateUrlPreview(
-                        sphinxUrlSpan.url,
-                        this
-                    )
-                }
-            }
-        }
-
-    }
-}
+//@MainThread
+//@Suppress("NOTHING_TO_INLINE")
+//internal inline fun LayoutMessageHolderBinding.setBubbleMessageLinkPreviewLayout(
+//    previewHandler: SphinxUrlSpan.PreviewHandler?
+//) {
+//    includeMessageHolderBubble.includeMessageLinkPreviewTribe.root.gone
+//    includeMessageHolderBubble.includeMessageLinkPreviewContact.root.gone
+//    includeMessageHolderBubble.includeMessageLinkPreviewUrl.root.gone
+//
+//    val sphinxUrlSpans =  includeMessageHolderBubble.textViewMessageText.text.toSpannable().getSpans<SphinxUrlSpan>()
+//    sphinxUrlSpans.firstOrNull()?.let { sphinxUrlSpan ->
+//        when {
+//            sphinxUrlSpan.url.isValidTribeJoinLink -> {
+//                includeMessageHolderBubble.includeMessageLinkPreviewTribe.apply {
+//                    sphinxUrlSpan.url.toTribeJoinLink()?.let {
+//                        previewHandler?.populateTribePreview(
+//                            it,
+//                            this
+//                        )
+//                    }
+//                }
+//            }
+//            sphinxUrlSpan.url.isValidVirtualNodeAddress -> {
+//                includeMessageHolderBubble.includeMessageLinkPreviewContact.apply {
+//                    sphinxUrlSpan.url.toVirtualLightningNodeAddress()?.let { virtualLightningNodeAddress ->
+//                        previewHandler?.populateContactPreview(
+//                            virtualLightningNodeAddress,
+//                            this
+//                        )
+//                    }
+//                }
+//            }
+//            sphinxUrlSpan.url.isValidLightningNodePubKey -> {
+//                includeMessageHolderBubble.includeMessageLinkPreviewContact.apply {
+//                    sphinxUrlSpan.url.toLightningNodePubKey()?.let {
+//                        previewHandler?.populateContactPreview(
+//                            it,
+//                            this
+//                        )
+//                    }
+//                }
+//            }
+//            sphinxUrlSpan.url.isValidVirtualNodeAddress -> {
+//                includeMessageHolderBubble.includeMessageLinkPreviewContact.apply {
+//                    sphinxUrlSpan.url.toVirtualLightningNodeAddress()?.let {
+//                        previewHandler?.populateContactPreview(
+//                            it,
+//                            this
+//                        )
+//                    }
+//                }
+//            }
+//            else -> {
+//                includeMessageHolderBubble.includeMessageLinkPreviewUrl.apply {
+//                    previewHandler?.populateUrlPreview(
+//                        sphinxUrlSpan.url,
+//                        this
+//                    )
+//                }
+//            }
+//        }
+//
+//    }
+//}
 
 @MainThread
 @Suppress("NOTHING_TO_INLINE")

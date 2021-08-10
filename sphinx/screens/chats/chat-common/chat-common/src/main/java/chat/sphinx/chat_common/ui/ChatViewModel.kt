@@ -31,8 +31,6 @@ import chat.sphinx.chat_common.util.*
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.concept_meme_server.MemeServerTokenHandler
-import chat.sphinx.concept_network_query_chat.NetworkQueryChat
-import chat.sphinx.concept_network_query_chat.model.TribeDto
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
@@ -70,6 +68,7 @@ import io.matthewnelson.android_feature_viewmodel.MotionLayoutViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
+import io.matthewnelson.concept_html_preview.HtmlPreviewHandler
 import io.matthewnelson.concept_media_cache.MediaCacheHandler
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import io.matthewnelson.concept_views.viewstate.value
@@ -98,10 +97,11 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     protected val contactRepository: ContactRepository,
     protected val messageRepository: MessageRepository,
     protected val networkQueryLightning: NetworkQueryLightning,
-    protected val networkQueryChat: NetworkQueryChat,
+//    protected val networkQueryChat: NetworkQueryChat,
     protected val mediaCacheHandler: MediaCacheHandler,
     protected val savedStateHandle: SavedStateHandle,
     protected val cameraCoordinator: ViewModelCoordinator<CameraRequest, CameraResponse>,
+    protected val htmlPreviewHandler: HtmlPreviewHandler,
     protected val LOG: SphinxLogger,
 ): MotionLayoutViewModel<
         Nothing,
@@ -943,21 +943,21 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         } ?: chatNavigator.toAddContactDetail(pubKey, routeHint)
     }
 
-    fun getChatTribe(tribeJoinLink: TribeJoinLink): Flow<Chat?> {
-        return chatRepository.getChatByUUID(ChatUUID(tribeJoinLink.tribeUUID))
-    }
-
-    fun getTribeInfo(tribeJoinLink: TribeJoinLink): Flow<LoadResponse<TribeDto, ResponseError>> {
-        return networkQueryChat.getTribeInfo(ChatHost(tribeJoinLink.tribeHost), ChatUUID(tribeJoinLink.tribeUUID))
-    }
-
-    fun getContact(lightningNodePubKey: LightningNodePubKey): Flow<Contact?> {
-        return contactRepository.getContactByPubKey(lightningNodePubKey)
-    }
-
-    fun getUrlMetaData(url: String): Flow<LoadResponse<String, ResponseError>> {
-        return networkQueryChat.getHtml(url)
-    }
+//    fun getChatTribe(tribeJoinLink: TribeJoinLink): Flow<Chat?> {
+//        return chatRepository.getChatByUUID(ChatUUID(tribeJoinLink.tribeUUID))
+//    }
+//
+//    fun getTribeInfo(tribeJoinLink: TribeJoinLink): Flow<LoadResponse<TribeDto, ResponseError>> {
+//        return networkQueryChat.getTribeInfo(ChatHost(tribeJoinLink.tribeHost), ChatUUID(tribeJoinLink.tribeUUID))
+//    }
+//
+//    fun getContact(lightningNodePubKey: LightningNodePubKey): Flow<Contact?> {
+//        return contactRepository.getContactByPubKey(lightningNodePubKey)
+//    }
+//
+//    fun getUrlMetaData(url: String): Flow<LoadResponse<String, ResponseError>> {
+//        return networkQueryChat.getHtml(url)
+//    }
 
     open suspend fun processMemberRequest(
         contactId: ContactId,

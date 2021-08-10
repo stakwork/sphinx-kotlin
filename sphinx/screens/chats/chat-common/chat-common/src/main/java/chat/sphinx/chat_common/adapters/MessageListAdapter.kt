@@ -51,8 +51,8 @@ internal class MessageListAdapter<ARGS : NavArgs>(
     private val imageLoader: ImageLoader<ImageView>,
 ) : RecyclerView.Adapter<MessageListAdapter<ARGS>.MessageViewHolder>(),
     DefaultLifecycleObserver,
-    View.OnLayoutChangeListener,
-    SphinxUrlSpan.PreviewHandler
+    View.OnLayoutChangeListener
+//    SphinxUrlSpan.PreviewHandler
 {
 
     private inner class Diff(
@@ -306,8 +306,8 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                     }
                 }
             }
-
-            // TODO: Consider loading URL Previews here...
+//
+//             TODO: Consider loading URL Previews here...
         }
 
         private fun processMemberRequest(contactId: ContactId, messageId: MessageId, type: MessageType.GroupAction) {
@@ -360,7 +360,7 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                 recyclerViewWidth,
                 viewState,
                 onSphinxInteractionListener,
-                this@MessageListAdapter
+//                this@MessageListAdapter
             )
 
         }
@@ -371,190 +371,190 @@ internal class MessageListAdapter<ARGS : NavArgs>(
         lifecycleOwner.lifecycle.addObserver(this)
     }
 
-    override fun populateTribePreview(
-        tribeJoinLink: TribeJoinLink,
-        layoutMessageLinkPreviewTribeBinding: LayoutMessageLinkPreviewTribeBinding
-    ) {
-        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-            // set progress thingy...
-            viewModel.getChatTribe(tribeJoinLink).collectLatest { chat ->
-                if (chat != null) {
-                    chat.name?.value?.let {
-                        populateTribePreview(
-                            name = it,
-                            null,
-                            img = chat.photoUrl?.value,
-                            isTribeMember = true,
-                            tribeJoinLink,
-                            layoutMessageLinkPreviewTribeBinding
-                        )
-                    }
-                } else {
-                    viewModel.getTribeInfo(tribeJoinLink).collect { loadResponse ->
-                        when (loadResponse) {
-                            is LoadResponse.Loading -> {}
-                            is Response.Error -> {
-                                layoutMessageLinkPreviewTribeBinding.root.gone
-                            }
-                            is Response.Success -> {
-                                val tribeInfo = loadResponse.value
-
-                                populateTribePreview(
-                                    tribeInfo.name,
-                                    tribeInfo.description,
-                                    tribeInfo.img,
-                                    isTribeMember = false,
-                                    tribeJoinLink,
-                                    layoutMessageLinkPreviewTribeBinding
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-
-        }
-    }
-
-    private fun populateTribePreview(
-        name: String,
-        description: String?,
-        img: String?,
-        isTribeMember: Boolean,
-        tribeJoinLink: TribeJoinLink,
-        layoutMessageLinkPreviewTribeBinding: LayoutMessageLinkPreviewTribeBinding
-    ) {
-        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-            layoutMessageLinkPreviewTribeBinding.apply {
-                textViewMessageLinkPreviewTribeNameLabel.text = name
-                if (description != null) {
-                    textViewMessageLinkPreviewTribeDescription.text = description
-                } else {
-                    textViewMessageLinkPreviewTribeDescription.gone
-                }
-
-                if (isTribeMember) {
-                    // Don't show the banner when we are a member of the tribe
-                    textViewMessageLinkPreviewTribeSeeBanner.gone
-                } else {
-                    textViewMessageLinkPreviewTribeSeeBanner.visible
-                }
-
-                img?.let {
-                    imageLoader.load(
-                        imageViewMessageLinkPreviewTribe,
-                        it,
-                        ImageLoaderOptions.Builder()
-                            .placeholderResId(R.drawable.ic_tribe_placeholder)
-                            .transformation(Transformation.CircleCrop)
-                            .build()
-                    )
-                }
-                textViewMessageLinkPreviewTribeSeeBanner.setOnClickListener {
-                    viewModel.handleContactTribeLinks(tribeJoinLink.value)
-                }
-                root.setOnClickListener {
-                    viewModel.handleContactTribeLinks(tribeJoinLink.value)
-                }
-                root.visible
-            }
-        }
-    }
-
-    override fun populateContactPreview(
-        lightningNodePubKey: LightningNodePubKey,
-        layoutMessageLinkPreviewContactBinding: LayoutMessageLinkPreviewContactBinding
-    ) {
-        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-            viewModel.getContact(lightningNodePubKey).collect { contact ->
-                layoutMessageLinkPreviewContactBinding.apply {
-                    textViewMessageLinkPreviewContactPubkey.text = lightningNodePubKey.value
-                    if (contact != null) {
-                        textViewMessageLinkPreviewNewContactLabel.text = contact.alias?.value
-                        textViewMessageLinkPreviewAddContactBanner.gone
-                        contact.photoUrl?.let {
-                            imageLoader.load(
-                                imageViewMessageLinkPreviewContactAvatar,
-                                it.value,
-                                ImageLoaderOptions.Builder()
-                                    .placeholderResId(R.drawable.ic_tribe_placeholder)
-                                    .transformation(Transformation.CircleCrop)
-                                    .build()
-                            )
-                        }
-                    } else {
-                        textViewMessageLinkPreviewAddContactBanner.setOnClickListener {
-                            viewModel.handleContactTribeLinks(lightningNodePubKey.value)
-                        }
-                    }
-                    root.setOnClickListener {
-                        viewModel.handleContactTribeLinks(lightningNodePubKey.value)
-                    }
-                    root.visible
-                }
-
-            }
-        }
-    }
-
-    override fun populateUrlPreview(
-        url: String,
-        layoutMessageLinkPreviewUrlBinding: LayoutMessageLinkPreviewUrlBinding
-    ) {
-        layoutMessageLinkPreviewUrlBinding.root.visible
-        layoutMessageLinkPreviewUrlBinding.constraintLayoutUrlLinkPreview.gone
-
-        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-            viewModel.getUrlMetaData(url).collectLatest { loadResponse ->
-                when (loadResponse) {
-                    LoadResponse.Loading -> {
-                        layoutMessageLinkPreviewUrlBinding.progressBarLinkPreview.visible
-                    }
-                    is Response.Error -> {
-                        layoutMessageLinkPreviewUrlBinding.root.gone
-                    }
-                    is Response.Success -> {
-                        val urlMetadata = loadResponse.value.toUrlMetadata(url)
-
-                        if (urlMetadata != null) {
-                            layoutMessageLinkPreviewUrlBinding.apply {
-                                textViewMessageLinkPreviewUrlTitle.text = urlMetadata.title
-                                textViewMessageLinkPreviewUrlDomain.text = urlMetadata.domain
-                                if (urlMetadata.description == null) {
-                                    textViewMessageLinkPreviewUrlDescription.gone
-                                } else {
-                                    textViewMessageLinkPreviewUrlDescription.visible
-                                    textViewMessageLinkPreviewUrlDescription.text = urlMetadata.description
-                                }
-
-                                if (urlMetadata.imageUrl == null) {
-                                    imageViewMessageLinkPreviewUrlMainImage.gone
-                                } else {
-                                    imageViewMessageLinkPreviewUrlMainImage.visible
-                                    imageLoader.load(
-                                        imageViewMessageLinkPreviewUrlMainImage,
-                                        urlMetadata.imageUrl
-                                    )
-                                }
-
-                                if (urlMetadata.favIconUrl == null) {
-                                    imageViewMessageLinkPreviewUrlFavicon.gone
-                                } else {
-                                    imageViewMessageLinkPreviewUrlFavicon.visible
-                                    imageLoader.load(
-                                        imageViewMessageLinkPreviewUrlFavicon,
-                                        urlMetadata.favIconUrl
-                                    )
-                                }
-                            }
-                            layoutMessageLinkPreviewUrlBinding.progressBarLinkPreview.gone
-                            layoutMessageLinkPreviewUrlBinding.constraintLayoutUrlLinkPreview.visible
-                        } else {
-                            layoutMessageLinkPreviewUrlBinding.root.gone
-                        }
-                    }
-                }
-            }
-        }
-    }
+//    override fun populateTribePreview(
+//        tribeJoinLink: TribeJoinLink,
+//        layoutMessageLinkPreviewTribeBinding: LayoutMessageLinkPreviewTribeBinding
+//    ) {
+//        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+//            // set progress thingy...
+//            viewModel.getChatTribe(tribeJoinLink).collectLatest { chat ->
+//                if (chat != null) {
+//                    chat.name?.value?.let {
+//                        populateTribePreview(
+//                            name = it,
+//                            null,
+//                            img = chat.photoUrl?.value,
+//                            isTribeMember = true,
+//                            tribeJoinLink,
+//                            layoutMessageLinkPreviewTribeBinding
+//                        )
+//                    }
+//                } else {
+//                    viewModel.getTribeInfo(tribeJoinLink).collect { loadResponse ->
+//                        when (loadResponse) {
+//                            is LoadResponse.Loading -> {}
+//                            is Response.Error -> {
+//                                layoutMessageLinkPreviewTribeBinding.root.gone
+//                            }
+//                            is Response.Success -> {
+//                                val tribeInfo = loadResponse.value
+//
+//                                populateTribePreview(
+//                                    tribeInfo.name,
+//                                    tribeInfo.description,
+//                                    tribeInfo.img,
+//                                    isTribeMember = false,
+//                                    tribeJoinLink,
+//                                    layoutMessageLinkPreviewTribeBinding
+//                                )
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//
+//        }
+//    }
+//
+//    private fun populateTribePreview(
+//        name: String,
+//        description: String?,
+//        img: String?,
+//        isTribeMember: Boolean,
+//        tribeJoinLink: TribeJoinLink,
+//        layoutMessageLinkPreviewTribeBinding: LayoutMessageLinkPreviewTribeBinding
+//    ) {
+//        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+//            layoutMessageLinkPreviewTribeBinding.apply {
+//                textViewMessageLinkPreviewTribeNameLabel.text = name
+//                if (description != null) {
+//                    textViewMessageLinkPreviewTribeDescription.text = description
+//                } else {
+//                    textViewMessageLinkPreviewTribeDescription.gone
+//                }
+//
+//                if (isTribeMember) {
+//                    // Don't show the banner when we are a member of the tribe
+//                    textViewMessageLinkPreviewTribeSeeBanner.gone
+//                } else {
+//                    textViewMessageLinkPreviewTribeSeeBanner.visible
+//                }
+//
+//                img?.let {
+//                    imageLoader.load(
+//                        imageViewMessageLinkPreviewTribe,
+//                        it,
+//                        ImageLoaderOptions.Builder()
+//                            .placeholderResId(R.drawable.ic_tribe_placeholder)
+//                            .transformation(Transformation.CircleCrop)
+//                            .build()
+//                    )
+//                }
+//                textViewMessageLinkPreviewTribeSeeBanner.setOnClickListener {
+//                    viewModel.handleContactTribeLinks(tribeJoinLink.value)
+//                }
+//                root.setOnClickListener {
+//                    viewModel.handleContactTribeLinks(tribeJoinLink.value)
+//                }
+//                root.visible
+//            }
+//        }
+//    }
+//
+//    override fun populateContactPreview(
+//        lightningNodePubKey: LightningNodePubKey,
+//        layoutMessageLinkPreviewContactBinding: LayoutMessageLinkPreviewContactBinding
+//    ) {
+//        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+//            viewModel.getContact(lightningNodePubKey).collect { contact ->
+//                layoutMessageLinkPreviewContactBinding.apply {
+//                    textViewMessageLinkPreviewContactPubkey.text = lightningNodePubKey.value
+//                    if (contact != null) {
+//                        textViewMessageLinkPreviewNewContactLabel.text = contact.alias?.value
+//                        textViewMessageLinkPreviewAddContactBanner.gone
+//                        contact.photoUrl?.let {
+//                            imageLoader.load(
+//                                imageViewMessageLinkPreviewContactAvatar,
+//                                it.value,
+//                                ImageLoaderOptions.Builder()
+//                                    .placeholderResId(R.drawable.ic_tribe_placeholder)
+//                                    .transformation(Transformation.CircleCrop)
+//                                    .build()
+//                            )
+//                        }
+//                    } else {
+//                        textViewMessageLinkPreviewAddContactBanner.setOnClickListener {
+//                            viewModel.handleContactTribeLinks(lightningNodePubKey.value)
+//                        }
+//                    }
+//                    root.setOnClickListener {
+//                        viewModel.handleContactTribeLinks(lightningNodePubKey.value)
+//                    }
+//                    root.visible
+//                }
+//
+//            }
+//        }
+//    }
+//
+//    override fun populateUrlPreview(
+//        url: String,
+//        layoutMessageLinkPreviewUrlBinding: LayoutMessageLinkPreviewUrlBinding
+//    ) {
+//        layoutMessageLinkPreviewUrlBinding.root.visible
+//        layoutMessageLinkPreviewUrlBinding.constraintLayoutUrlLinkPreview.gone
+//
+//        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+//            viewModel.getUrlMetaData(url).collectLatest { loadResponse ->
+//                when (loadResponse) {
+//                    LoadResponse.Loading -> {
+//                        layoutMessageLinkPreviewUrlBinding.progressBarLinkPreview.visible
+//                    }
+//                    is Response.Error -> {
+//                        layoutMessageLinkPreviewUrlBinding.root.gone
+//                    }
+//                    is Response.Success -> {
+//                        val urlMetadata = loadResponse.value.toUrlMetadata(url)
+//
+//                        if (urlMetadata != null) {
+//                            layoutMessageLinkPreviewUrlBinding.apply {
+//                                textViewMessageLinkPreviewUrlTitle.text = urlMetadata.title
+//                                textViewMessageLinkPreviewUrlDomain.text = urlMetadata.domain
+//                                if (urlMetadata.description == null) {
+//                                    textViewMessageLinkPreviewUrlDescription.gone
+//                                } else {
+//                                    textViewMessageLinkPreviewUrlDescription.visible
+//                                    textViewMessageLinkPreviewUrlDescription.text = urlMetadata.description
+//                                }
+//
+//                                if (urlMetadata.imageUrl == null) {
+//                                    imageViewMessageLinkPreviewUrlMainImage.gone
+//                                } else {
+//                                    imageViewMessageLinkPreviewUrlMainImage.visible
+//                                    imageLoader.load(
+//                                        imageViewMessageLinkPreviewUrlMainImage,
+//                                        urlMetadata.imageUrl
+//                                    )
+//                                }
+//
+//                                if (urlMetadata.favIconUrl == null) {
+//                                    imageViewMessageLinkPreviewUrlFavicon.gone
+//                                } else {
+//                                    imageViewMessageLinkPreviewUrlFavicon.visible
+//                                    imageLoader.load(
+//                                        imageViewMessageLinkPreviewUrlFavicon,
+//                                        urlMetadata.favIconUrl
+//                                    )
+//                                }
+//                            }
+//                            layoutMessageLinkPreviewUrlBinding.progressBarLinkPreview.gone
+//                            layoutMessageLinkPreviewUrlBinding.constraintLayoutUrlLinkPreview.visible
+//                        } else {
+//                            layoutMessageLinkPreviewUrlBinding.root.gone
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//    }
 }
