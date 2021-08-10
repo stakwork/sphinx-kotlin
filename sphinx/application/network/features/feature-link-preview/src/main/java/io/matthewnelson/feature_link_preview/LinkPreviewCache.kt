@@ -24,17 +24,17 @@ internal class LinkPreviewCache private constructor() {
     private val list: MutableList<LinkPreviewDataRetriever> = ArrayList(CACHE_SIZE)
     private val lock = Mutex()
 
-    suspend fun getHtmlPreviewDataRetriever(url: String): LinkPreviewDataRetriever? {
+    suspend fun getHtmlPreviewDataRetriever(url: String): HtmlPreviewDataRetriever? {
         val httpUrl = url.toHttpUrlOrNull() ?: return null
 
         lock.withLock {
             for (item in list) {
-                if (item.url == httpUrl) {
+                if (item is HtmlPreviewDataRetriever && item.url == httpUrl) {
                     return item
                 }
             }
 
-            return LinkPreviewDataRetriever(httpUrl).also { retriever ->
+            return HtmlPreviewDataRetriever(httpUrl).also { retriever ->
                 list[counter] = retriever
 
                 if (counter < CACHE_SIZE - 1 /* last index */) {

@@ -17,16 +17,18 @@ import okhttp3.internal.closeQuietly
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 
-internal data class LinkPreviewDataRetriever(val url: HttpUrl) {
+internal sealed interface LinkPreviewDataRetriever
+
+internal data class HtmlPreviewDataRetriever(val url: HttpUrl): LinkPreviewDataRetriever {
     private val lock = Mutex()
 
     @Volatile
-    private var previewData: LinkPreviewData? = null
+    private var previewData: HtmlPreviewData? = null
 
     suspend fun getHtmlPreview(
         dispatchers: CoroutineDispatchers,
         okHttpClient: OkHttpClient
-    ): LinkPreviewData? =
+    ): HtmlPreviewData? =
         previewData ?: lock.withLock {
             previewData ?: retrievePreview(
                 dispatchers = dispatchers,
@@ -42,7 +44,7 @@ internal data class LinkPreviewDataRetriever(val url: HttpUrl) {
     private suspend fun retrievePreview(
         dispatchers: CoroutineDispatchers,
         okHttpClient: OkHttpClient
-    ): LinkPreviewData? {
+    ): HtmlPreviewData? {
         val request = Request.Builder().url(url).build()
 
         val response: Response = withContext(dispatchers.io) {
@@ -69,7 +71,7 @@ internal data class LinkPreviewDataRetriever(val url: HttpUrl) {
                         /* baseUri */       url.toString(),
                     )
 
-                    LinkPreviewData(
+                    HtmlPreviewData(
                         document.getTitle()?.toHtmlPreviewTitleOrNull(),
                         LinkPreviewDomainHost(url.host),
                         document.getDescription()?.toHtmlPreviewDescriptionOrNull(),

@@ -1,6 +1,6 @@
 package io.matthewnelson.concept_link_preview.model
 
-data class LinkPreviewData(
+data class HtmlPreviewData(
     val title: HtmlPreviewTitle?,
     val domainHost: LinkPreviewDomainHost,
     val description: HtmlPreviewDescription?,
