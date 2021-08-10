@@ -7,6 +7,7 @@ import chat.sphinx.wrapper_chat.isConversation
 import chat.sphinx.wrapper_chat.isTribeOwnedByAccount
 import chat.sphinx.wrapper_common.chatTimeFormat
 import chat.sphinx.wrapper_common.lightning.Sat
+import chat.sphinx.wrapper_common.message.isProvisionalMessage
 import chat.sphinx.wrapper_common.message.toSphinxCallLink
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_message.*
@@ -59,7 +60,7 @@ internal sealed class MessageHolderViewState(
             LayoutState.MessageStatusHeader(
                 if (chat.type.isConversation()) null else message.senderAlias?.value,
                 this is Sent,
-                this is Sent && message.status.isPending(),
+                this is Sent && message.id.isProvisionalMessage && message.status.isPending(),
                 this is Sent && (message.status.isReceived() || message.status.isConfirmed()),
                 this is Sent && message.status.isFailed(),
                 message.messageContentDecrypted != null || message.messageMedia?.mediaKeyDecrypted != null,

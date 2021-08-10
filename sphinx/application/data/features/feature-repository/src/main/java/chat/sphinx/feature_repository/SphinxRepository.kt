@@ -1715,6 +1715,18 @@ abstract class SphinxRepository(
 
                         queries.transaction {
 
+                            if (media != null) {
+                                queries.messageMediaUpsert(
+                                    media.second,
+                                    media.third.mediaType,
+                                    MediaToken.PROVISIONAL_TOKEN,
+                                    provisionalId,
+                                    chatDbo.id,
+                                    MediaKeyDecrypted(media.first.value.joinToString("")),
+                                    media.third.file
+                                )
+                            }
+
                             queries.messageUpsert(
                                 MessageStatus.Pending,
                                 Seen.True,
@@ -1742,18 +1754,6 @@ abstract class SphinxRepository(
                                 message?.second,
                                 message?.first,
                             )
-
-                            if (media != null) {
-                                queries.messageMediaUpsert(
-                                    media.second,
-                                    media.third.mediaType,
-                                    MediaToken.PROVISIONAL_TOKEN,
-                                    provisionalId,
-                                    chatDbo.id,
-                                    MediaKeyDecrypted(media.first.value.joinToString("")),
-                                    media.third.file,
-                                )
-                            }
                         }
                     }
 
@@ -1967,74 +1967,71 @@ abstract class SphinxRepository(
     }
 
     @OptIn(RawPasswordAccess::class)
-    fun sendMessage(
+    suspend fun sendMessage(
         provisionalMessageId: MessageId?,
         postMessageDto: PostMessageDto,
         messageContentDecrypted: MessageContentDecrypted?,
         media: Triple<Password, MediaKey, AttachmentInfo>?,
     ) {
-        applicationScope.launch(mainImmediate) {
-            val queries = coreDB.getSphinxDatabaseQueries()
+        val queries = coreDB.getSphinxDatabaseQueries()
 
-            networkQueryMessage.sendMessage(postMessageDto).collect { loadResponse ->
-                @Exhaustive
-                when (loadResponse) {
-                    is LoadResponse.Loading -> {}
-                    is Response.Error -> {
-                        LOG.e(TAG, loadResponse.message, loadResponse.exception)
+        networkQueryMessage.sendMessage(postMessageDto).collect { loadResponse ->
+            @Exhaustive
+            when (loadResponse) {
+                is LoadResponse.Loading -> {}
+                is Response.Error -> {
+                    LOG.e(TAG, loadResponse.message, loadResponse.exception)
 
+                    messageLock.withLock {
                         provisionalMessageId?.let { provId ->
                             withContext(io) {
-                                queries
-                                    .messageUpdateStatus(MessageStatus.Failed, provId)
+                                queries.messageUpdateStatus(MessageStatus.Failed, provId)
                             }
                         }
-
                     }
-                    is Response.Success -> {
 
-                        loadResponse.value.apply {
-                            if (media != null) {
-                                setMediaKeyDecrypted(media.first.value.joinToString(""))
-                                setMediaLocalFile(media.third.file)
-                            }
+                }
+                is Response.Success -> {
 
-                            if (messageContentDecrypted != null) {
-                                setMessageContentDecrypted(messageContentDecrypted.value)
-                            }
+                    loadResponse.value.apply {
+                        if (media != null) {
+                            setMediaKeyDecrypted(media.first.value.joinToString(""))
+                            setMediaLocalFile(media.third.file)
                         }
 
-                        chatLock.withLock {
-                            messageLock.withLock {
-                                contactLock.withLock {
-                                    withContext(io) {
+                        if (messageContentDecrypted != null) {
+                            setMessageContentDecrypted(messageContentDecrypted.value)
+                        }
+                    }
 
+                    chatLock.withLock {
+                        messageLock.withLock {
+                            contactLock.withLock {
+                                withContext(io) {
+                                    queries.transaction {
                                         // chat is returned only if this is the
                                         // first message sent to a new contact
                                         loadResponse.value.chat?.let { chatDto ->
-                                            queries.transaction {
-                                                upsertChat(
-                                                    chatDto,
-                                                    moshi,
-                                                    chatSeenMap,
-                                                    queries,
-                                                    loadResponse.value.contact,
-                                                )
-                                            }
+                                            upsertChat(
+                                                chatDto,
+                                                moshi,
+                                                chatSeenMap,
+                                                queries,
+                                                loadResponse.value.contact,
+                                            )
                                         }
 
-                                        queries.transaction {
+                                        loadResponse.value.contact?.let { contactDto ->
+                                            upsertContact(contactDto, queries)
+                                        }
 
-                                            loadResponse.value.contact?.let { contactDto ->
-                                                upsertContact(contactDto, queries)
-                                            }
+                                        upsertMessage(
+                                            loadResponse.value,
+                                            queries
+                                        )
 
-                                            upsertMessage(loadResponse.value, queries)
-
-                                            provisionalMessageId?.let { provId ->
-                                                queries.messageDeleteById(provId)
-                                            }
-
+                                        provisionalMessageId?.let { provId ->
+                                            deleteMessageById(provId, queries)
                                         }
                                     }
                                 }
@@ -2113,7 +2110,9 @@ abstract class SphinxRepository(
             if (message.id.isProvisionalMessage) {
                 messageLock.withLock {
                     withContext(io) {
-                        queries.messageDeleteById(message.id)
+                        queries.transaction {
+                            deleteMessageById(message.id, queries)
+                        }
                     }
                 }
             } else {

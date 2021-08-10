@@ -715,6 +715,34 @@ messageMediaUpsert {
     );
 }
 
+messageMediaUpsertWithFile {
+    UPDATE messageMediaDbo
+    SET media_key = :media_key,
+        media_type = :media_type,
+        media_token = :media_token,
+        local_file = :local_file
+    WHERE id = :id;
+
+    INSERT OR IGNORE INTO messageMediaDbo(
+        id,
+        chat_id,
+        media_key,
+        media_key_decrypted,
+        media_type,
+        media_token,
+        local_file
+    )
+    VALUES(
+        :id,
+        :chat_id,
+        :media_key,
+        :media_key_decrypted,
+        :media_type,
+        :media_token,
+        :local_file
+    );
+}
+
 messageMediaDeleteById:
 DELETE FROM messageMediaDbo
 WHERE id = ?;

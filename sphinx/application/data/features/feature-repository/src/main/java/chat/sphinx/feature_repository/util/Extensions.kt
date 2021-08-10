@@ -316,13 +316,45 @@ inline fun TransactionCallbacks.updateInviteStatus(
 }
 
 @Suppress("SpellCheckingInspection")
-fun TransactionCallbacks.upsertMessage(dto: MessageDto, queries: SphinxDatabaseQueries) {
+fun TransactionCallbacks.upsertMessage(
+    dto: MessageDto,
+    queries: SphinxDatabaseQueries
+) {
 
     val chatId: ChatId = dto.chat_id?.let {
         ChatId(it)
     } ?: dto.chat?.id?.let {
         ChatId(it)
     } ?: ChatId(ChatId.NULL_CHAT_ID.toLong())
+
+    dto.media_token?.let { mediaToken ->
+        dto.media_type?.let { mediaType ->
+
+            if (mediaToken.isEmpty() || mediaType.isEmpty()) return
+
+            if (dto.mediaLocalFile != null) {
+                queries.messageMediaUpsertWithFile(
+                    dto.media_key?.toMediaKey(),
+                    mediaType.toMediaType(),
+                    MediaToken(mediaToken),
+                    dto.mediaLocalFile,
+                    MessageId(dto.id),
+                    chatId,
+                    dto.mediaKeyDecrypted?.toMediaKeyDecrypted()
+                )
+            } else {
+                queries.messageMediaUpsert(
+                    dto.media_key?.toMediaKey(),
+                    mediaType.toMediaType(),
+                    MediaToken(mediaToken),
+                    MessageId(dto.id),
+                    chatId,
+                    dto.mediaKeyDecrypted?.toMediaKeyDecrypted(),
+                    dto.mediaLocalFile
+                )
+            }
+        }
+    }
 
     queries.messageUpsert(
         dto.status.toMessageStatus(),
@@ -345,24 +377,15 @@ fun TransactionCallbacks.upsertMessage(dto: MessageDto, queries: SphinxDatabaseQ
         dto.message_content?.toMessageContent(),
         dto.messageContentDecrypted?.toMessageContentDecrypted(),
     )
+}
 
-    dto.media_token?.let { mediaToken ->
-        dto.media_type?.let { mediaType ->
-
-            if (mediaToken.isEmpty() || mediaType.isEmpty()) return
-
-            queries.messageMediaUpsert(
-                dto.media_key?.toMediaKey(),
-                mediaType.toMediaType(),
-                MediaToken(mediaToken),
-                MessageId(dto.id),
-                chatId,
-                dto.mediaKeyDecrypted?.toMediaKeyDecrypted(),
-                dto.mediaLocalFile,
-            )
-
-        }
-    }
+@Suppress("NOTHING_TO_INLINE")
+inline fun TransactionCallbacks.deleteMessageById(
+    messageId: MessageId,
+    queries: SphinxDatabaseQueries
+) {
+    queries.messageDeleteById(messageId)
+    queries.messageMediaDeleteById(messageId)
 }
 
 @Suppress("NOTHING_TO_INLINE")
