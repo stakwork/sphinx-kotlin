@@ -203,8 +203,9 @@ object NetworkModule {
     fun provideLinkPreviewHandler(
         dispatchers: CoroutineDispatchers,
         networkClient: NetworkClient,
+        networkQueryChat: NetworkQueryChat,
     ): LinkPreviewHandler =
-        LinkPreviewHandlerImpl(dispatchers, networkClient)
+        LinkPreviewHandlerImpl(dispatchers, networkClient, networkQueryChat)
 
     @Provides
     @Singleton
