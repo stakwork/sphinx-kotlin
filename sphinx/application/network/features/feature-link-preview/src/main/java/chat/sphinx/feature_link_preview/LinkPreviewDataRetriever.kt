@@ -1,4 +1,4 @@
-package io.matthewnelson.feature_link_preview
+package chat.sphinx.feature_link_preview
 
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
@@ -7,11 +7,11 @@ import chat.sphinx.wrapper_chat.ChatHost
 import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.tribe.TribeJoinLink
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
-import io.matthewnelson.concept_link_preview.model.*
-import io.matthewnelson.feature_link_preview.util.getDescription
-import io.matthewnelson.feature_link_preview.util.getFavIconUrl
-import io.matthewnelson.feature_link_preview.util.getImageUrl
-import io.matthewnelson.feature_link_preview.util.getTitle
+import chat.sphinx.concept_link_preview.model.*
+import chat.sphinx.feature_link_preview.util.getDescription
+import chat.sphinx.feature_link_preview.util.getFavIconUrl
+import chat.sphinx.feature_link_preview.util.getImageUrl
+import chat.sphinx.feature_link_preview.util.getTitle
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -80,9 +80,9 @@ internal data class HtmlPreviewDataRetriever(val url: HttpUrl): LinkPreviewDataR
 
                     HtmlPreviewData(
                         document.getTitle()?.toHtmlPreviewTitleOrNull(),
-                        LinkPreviewDomainHost(url.host),
-                        document.getDescription()?.toHtmlPreviewDescriptionOrNull(),
-                        document.getImageUrl()?.toHtmlPreviewImageUrlOrNull(),
+                        HtmlPreviewDomainHost(url.host),
+                        document.getDescription()?.toPreviewDescriptionOrNull(),
+                        document.getImageUrl()?.toPreviewImageUrlOrNull(),
                         document.getFavIconUrl()?.toHtmlPreviewFavIconUrlOrNull(),
                     )
                 }
@@ -125,8 +125,11 @@ internal class TribePreviewDataRetriever(val tribeJoinLink: TribeJoinLink): Link
                 is LoadResponse.Loading -> {}
                 is chat.sphinx.kotlin_response.Response.Error -> {}
                 is chat.sphinx.kotlin_response.Response.Success -> {
-                    // TODO: Build out preview data
-                    data = TribePreviewData()
+                    data = TribePreviewData(
+                        TribePreviewName(response.value.name),
+                        response.value.description.toPreviewDescriptionOrNull(),
+                        response.value.img?.toPreviewImageUrlOrNull(),
+                    )
                 }
             }
         }

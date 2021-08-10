@@ -1,9 +1,12 @@
 package chat.sphinx.chat_common.ui.viewstate.messageholder
 
+import chat.sphinx.concept_link_preview.model.*
+import chat.sphinx.wrapper_chat.ChatName
 import chat.sphinx.wrapper_chat.ChatType
-import chat.sphinx.wrapper_common.lightning.Sat
-import chat.sphinx.wrapper_common.lightning.asFormattedString
-import chat.sphinx.wrapper_common.lightning.unit
+import chat.sphinx.wrapper_common.PhotoUrl
+import chat.sphinx.wrapper_common.lightning.*
+import chat.sphinx.wrapper_common.tribe.TribeJoinLink
+import chat.sphinx.wrapper_contact.ContactAlias
 import chat.sphinx.wrapper_message.MessageType
 import chat.sphinx.wrapper_message_media.MessageMedia
 
@@ -106,9 +109,38 @@ internal sealed class LayoutState private constructor() {
                 val text: String
             ): ContainerThird()
 
-            // MessageLinkPreview
-            // TribeLinkPreview
-            // UrlLinkPreview
+            sealed class LinkPreview private constructor(): ContainerThird() {
+
+                data class ContactPreview(
+                    val alias: ContactAlias?,
+                    val photoUrl: PhotoUrl?,
+                    val showBanner: Boolean,
+
+                    // Used only to anchor data for click listeners
+                    val lightningNodeDescriptor: LightningNodeDescriptor
+                )
+
+                data class HttpUrlPreview(
+                    val title: HtmlPreviewTitle?,
+                    val domainHost: HtmlPreviewDomainHost,
+                    val description: PreviewDescription?,
+                    val imageUrl: PreviewImageUrl?,
+                    val favIconUrl: HtmlPreviewFavIconUrl?,
+
+                    // Used only to anchor data for click listeners
+                    val url: String,
+                ): LinkPreview()
+
+                data class TribeLinkPreview(
+                    val name: TribePreviewName,
+                    val description: PreviewDescription?,
+                    val imageUrl: PreviewImageUrl?,
+                    val showBanner: Boolean,
+
+                    // Used only to anchor data for click listeners
+                    val joinLink: TribeJoinLink,
+                ) : LinkPreview()
+            }
 
         }
 

@@ -540,16 +540,6 @@ internal inline fun LayoutMessageHolderBinding.setBubbleMessageLayout(
 //                    }
 //                }
 //            }
-//            sphinxUrlSpan.url.isValidVirtualNodeAddress -> {
-//                includeMessageHolderBubble.includeMessageLinkPreviewContact.apply {
-//                    sphinxUrlSpan.url.toVirtualLightningNodeAddress()?.let {
-//                        previewHandler?.populateContactPreview(
-//                            it,
-//                            this
-//                        )
-//                    }
-//                }
-//            }
 //            else -> {
 //                includeMessageHolderBubble.includeMessageLinkPreviewUrl.apply {
 //                    previewHandler?.populateUrlPreview(
