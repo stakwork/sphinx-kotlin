@@ -3,100 +3,98 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/contact_link_preview_holder_height"
-    android:padding="@dimen/chat_message_inner_padding"
+    android:layout_height="wrap_content"
     android:visibility="gone"
     tools:background="@color/body"
     tools:visibility="visible">
 
-
     <View
         android:id="@+id/view_preview_divider"
         android:layout_width="match_parent"
-        android:layout_height="2dp"
+        android:layout_height="4dp"
         android:layout_marginBottom="@dimen/chat_message_inner_padding"
         android:background="@color/body"
-        app:layout_constraintTop_toTopOf="parent"
-        />
+        app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- Tribe Image -->
-    <androidx.appcompat.widget.AppCompatImageView
-        android:id="@+id/image_view_message_link_preview_tribe"
-        android:layout_width="@dimen/contact_link_preview_avatar_image_xy"
-        android:layout_height="@dimen/contact_link_preview_avatar_image_xy"
-        android:layout_marginHorizontal="@dimen/default_small_layout_margin"
-        android:layout_marginVertical="@dimen/default_half_layout_margin"
-        app:layout_constraintBottom_toTopOf="@id/text_view_message_link_preview_tribe_see_banner"
-        app:layout_constraintEnd_toStartOf="@id/text_view_message_link_preview_tribe_name_label"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/view_preview_divider"
-        app:srcCompat="@drawable/ic_tribe"
-        />
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingVertical="@dimen/default_layout_margin"
+        android:paddingHorizontal="@dimen/default_layout_margin">
 
-    <!-- Tribe Name -->
-    <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/text_view_message_link_preview_tribe_name_label"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/default_inner_spacing_list_item_title"
-        android:fontFamily="@font/roboto_medium"
-        android:maxLines="2"
-        android:textColor="@color/text"
-        android:textSize="@dimen/chat_header_headline_text_size"
-        app:layout_constraintBottom_toTopOf="@id/text_view_message_link_preview_tribe_description"
-        app:layout_constraintStart_toEndOf="@id/image_view_message_link_preview_tribe"
-        app:layout_constraintTop_toTopOf="@id/image_view_message_link_preview_tribe"
-        app:layout_constraintVertical_chainStyle="packed"
-        tools:text="Planet Sphinx" />
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/image_view_message_link_preview_tribe"
+            android:layout_width="@dimen/contact_link_preview_avatar_image_xy"
+            android:layout_height="@dimen/contact_link_preview_avatar_image_xy"
+            android:layout_marginHorizontal="@dimen/default_small_layout_margin"
+            android:layout_marginVertical="@dimen/default_half_layout_margin"
+            android:tint="@color/secondaryTextSent"
+            app:layout_constraintBottom_toTopOf="@id/text_view_message_link_preview_tribe_see_banner"
+            app:layout_constraintEnd_toStartOf="@id/text_view_message_link_preview_tribe_name_label"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_tribe" />
 
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_message_link_preview_tribe_name_label"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/default_inner_spacing_list_item_title"
+            android:fontFamily="@font/roboto_medium"
+            android:maxLines="2"
+            android:textColor="@color/text"
+            android:textSize="@dimen/chat_message_link_preview_name_text_size"
+            app:layout_constraintBottom_toTopOf="@id/text_view_message_link_preview_tribe_description"
+            app:layout_constraintStart_toEndOf="@id/image_view_message_link_preview_tribe"
+            app:layout_constraintTop_toTopOf="@id/image_view_message_link_preview_tribe"
+            app:layout_constraintVertical_chainStyle="packed"
+            tools:text="Planet Sphinx" />
 
-    <!-- Tribe Description Block -->
-    <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/text_view_message_link_preview_tribe_description"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:ellipsize="end"
-        android:fontFamily="@font/roboto_regular"
-        android:maxLines="4"
-        android:textColor="@color/secondaryText"
-        android:textSize="@dimen/default_text_size_body"
-        app:layout_constraintBottom_toBottomOf="@id/image_view_message_link_preview_tribe"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="@id/text_view_message_link_preview_tribe_name_label"
-        app:layout_constraintTop_toBottomOf="@id/text_view_message_link_preview_tribe_name_label"
-        tools:text="Trading bitcoin tips, TA exchanges, short/long ratio, trading strategies and more."
-        tools:visibility="gone" />
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_message_link_preview_tribe_description"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="4"
+            android:fontFamily="@font/roboto_regular"
+            android:textColor="@color/secondaryTextSent"
+            android:textSize="@dimen/chat_message_link_preview_pub_key_text_size"
+            android:layout_marginTop="@dimen/default_small_layout_margin"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@id/text_view_message_link_preview_tribe_name_label"
+            app:layout_constraintTop_toBottomOf="@id/text_view_message_link_preview_tribe_name_label"
+            tools:text="Trading bitcoin tips, TA exchanges, short/long ratio, trading strategies and more."
+            tools:visibility="gone" />
 
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_message_link_preview_tribe_see_banner"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/link_preview_action_button_height"
+            android:background="@drawable/background_slightly_rounded_corner_button"
+            android:backgroundTint="@color/primaryBlue"
+            android:fontFamily="@font/montserrat_regular"
+            android:gravity="center"
+            android:text="@string/link_preview_see_tribe_banner_label"
+            android:textAlignment="center"
+            android:textAllCaps="true"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/default_text_size_caption1"
+            android:layout_marginTop="@dimen/default_layout_margin"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            tools:visibility="visible"/>
 
-    <!-- "See Tribe" Banner -->
-    <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/text_view_message_link_preview_tribe_see_banner"
-        android:layout_width="0dp"
-        android:layout_height="@dimen/link_preview_action_button_height"
-        android:background="@color/primaryBlue"
-        android:fontFamily="@font/montserrat_regular"
-        android:gravity="center"
-        android:text="@string/link_preview_see_tribe_banner_label"
-        android:textAlignment="center"
-        android:textAllCaps="true"
-        android:textColor="@android:color/white"
-        android:textSize="@dimen/default_text_size_caption1"
-        android:layout_marginTop="@dimen/default_layout_margin"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        tools:visibility="visible"/>
+        <androidx.constraintlayout.widget.Group
+            android:id="@+id/message_link_preview_group_tribe_name_and_description"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:constraint_referenced_ids="text_view_message_link_preview_tribe_description,text_view_message_link_preview_tribe_name_label"
+            app:layout_constraintBottom_toBottomOf="@id/image_view_message_link_preview_tribe"
+            app:layout_constraintEnd_toStartOf="parent"
+            app:layout_constraintStart_toEndOf="@id/image_view_message_link_preview_tribe"
+            app:layout_constraintTop_toTopOf="@id/image_view_message_link_preview_tribe" />
 
-
-    <androidx.constraintlayout.widget.Group
-        android:id="@+id/message_link_preview_group_tribe_name_and_description"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        app:constraint_referenced_ids="text_view_message_link_preview_tribe_description,text_view_message_link_preview_tribe_name_label"
-        app:layout_constraintBottom_toBottomOf="@id/image_view_message_link_preview_tribe"
-        app:layout_constraintEnd_toStartOf="parent"
-        app:layout_constraintStart_toEndOf="@id/image_view_message_link_preview_tribe"
-        app:layout_constraintTop_toTopOf="@id/image_view_message_link_preview_tribe" />
-
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
