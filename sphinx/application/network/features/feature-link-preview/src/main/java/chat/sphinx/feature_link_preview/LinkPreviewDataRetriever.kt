@@ -80,9 +80,9 @@ internal data class HtmlPreviewDataRetriever(val url: HttpUrl): LinkPreviewDataR
 
                     HtmlPreviewData(
                         document.getTitle()?.toHtmlPreviewTitleOrNull(),
-                        LinkPreviewDomainHost(url.host),
+                        HtmlPreviewDomainHost(url.host),
                         document.getDescription()?.toHtmlPreviewDescriptionOrNull(),
-                        document.getImageUrl()?.toHtmlPreviewImageUrlOrNull(),
+                        document.getImageUrl()?.toPreviewImageUrlOrNull(),
                         document.getFavIconUrl()?.toHtmlPreviewFavIconUrlOrNull(),
                     )
                 }

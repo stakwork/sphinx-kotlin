@@ -2,8 +2,8 @@ package chat.sphinx.concept_link_preview.model
 
 data class HtmlPreviewData(
     val title: HtmlPreviewTitle?,
-    val domainHost: LinkPreviewDomainHost,
-    val description: HtmlPreviewDescription?,
-    val imageUrl: HtmlPreviewImageUrl?,
-    val favIconUrl: HtmlPreviewFavIconUrl?
+    val domainHost: HtmlPreviewDomainHost,
+    val description: PreviewDescription?,
+    val imageUrl: PreviewImageUrl?,
+    val favIconUrl: HtmlPreviewFavIconUrl?,
 )
