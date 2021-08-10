@@ -1,7 +1,11 @@
 package io.matthewnelson.feature_html_preview
 
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
-import io.matthewnelson.concept_html_preview.model.HtmlPreview
+import io.matthewnelson.concept_html_preview.model.*
+import io.matthewnelson.feature_html_preview.util.getDescription
+import io.matthewnelson.feature_html_preview.util.getFavIconUrl
+import io.matthewnelson.feature_html_preview.util.getImageUrl
+import io.matthewnelson.feature_html_preview.util.getTitle
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -10,6 +14,8 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 import okhttp3.internal.closeQuietly
+import org.jsoup.Jsoup
+import org.jsoup.nodes.Document
 
 internal data class HtmlPreviewDataRetriever(val url: HttpUrl) {
     private val lock = Mutex()
@@ -52,9 +58,30 @@ internal data class HtmlPreviewDataRetriever(val url: HttpUrl) {
             return null
         }
 
-        return response.body?.let { body ->
-            // TODO: Implement
-            HtmlPreview()
+        return response.body?.source()?.inputStream()?.let { stream ->
+
+            try {
+                withContext(dispatchers.default) {
+
+                    val document: Document = Jsoup.parse(
+                        /* in */            stream,
+                        /* charsetName */   null,
+                        /* baseUri */       url.toString(),
+                    )
+
+                    HtmlPreview(
+                        document.getTitle()?.toHtmlPreviewTitleOrNull(),
+                        HtmlPreviewDomainHost(url.host),
+                        document.getDescription()?.toHtmlPreviewDescriptionOrNull(),
+                        document.getImageUrl()?.toHtmlPreviewImageUrlOrNull(),
+                        document.getFavIconUrl()?.toHtmlPreviewFavIconUrlOrNull(),
+                    )
+                }
+            } catch (e: Exception) {
+                null
+            } finally {
+                stream.closeQuietly()
+            }
         }
     }
 }
