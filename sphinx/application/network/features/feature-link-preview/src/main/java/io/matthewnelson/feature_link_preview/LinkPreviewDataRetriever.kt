@@ -1,5 +1,10 @@
 package io.matthewnelson.feature_link_preview
 
+import app.cash.exhaustive.Exhaustive
+import chat.sphinx.concept_network_query_chat.NetworkQueryChat
+import chat.sphinx.kotlin_response.LoadResponse
+import chat.sphinx.wrapper_chat.ChatHost
+import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.tribe.TribeJoinLink
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_link_preview.model.*
@@ -7,6 +12,7 @@ import io.matthewnelson.feature_link_preview.util.getDescription
 import io.matthewnelson.feature_link_preview.util.getFavIconUrl
 import io.matthewnelson.feature_link_preview.util.getImageUrl
 import io.matthewnelson.feature_link_preview.util.getTitle
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -95,11 +101,9 @@ internal class TribePreviewDataRetriever(val tribeJoinLink: TribeJoinLink): Link
     @Volatile
     private var previewData: TribePreviewData? = null
 
-    suspend fun getTribePreview(
-        dispatchers: CoroutineDispatchers,
-    ): TribePreviewData? =
+    suspend fun getTribePreview(networkQueryChat: NetworkQueryChat): TribePreviewData? =
         previewData ?: lock.withLock {
-            previewData ?: retrievePreview(dispatchers)
+            previewData ?: retrievePreview(networkQueryChat)
                 .also {
                     if (it != null) {
                         previewData = it
@@ -108,10 +112,25 @@ internal class TribePreviewDataRetriever(val tribeJoinLink: TribeJoinLink): Link
 
         }
 
-    private suspend fun retrievePreview(
-        dispatchers: CoroutineDispatchers,
-    ): TribePreviewData? {
-        // TODO: Implement
-        return null
+    private suspend fun retrievePreview(networkQueryChat: NetworkQueryChat): TribePreviewData? {
+
+        var data: TribePreviewData? = null
+
+        networkQueryChat.getTribeInfo(
+            ChatHost(tribeJoinLink.tribeHost),
+            ChatUUID(tribeJoinLink.tribeUUID)
+        ).collect { response ->
+            @Exhaustive
+            when (response) {
+                is LoadResponse.Loading -> {}
+                is chat.sphinx.kotlin_response.Response.Error -> {}
+                is chat.sphinx.kotlin_response.Response.Success -> {
+                    // TODO: Build out preview data
+                    data = TribePreviewData()
+                }
+            }
+        }
+
+        return data
     }
 }

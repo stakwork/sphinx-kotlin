@@ -41,7 +41,11 @@ internal class LinkPreviewCache private constructor() {
         }
     }
 
-    suspend fun getTribePreviewDataRetriever(tribeJoinLink: TribeJoinLink): TribePreviewDataRetriever {
+    suspend fun getTribePreviewDataRetriever(tribeJoinLink: TribeJoinLink): TribePreviewDataRetriever? {
+        if (tribeJoinLink.tribeHost.isEmpty() || tribeJoinLink.tribeUUID.isEmpty()) {
+            return null
+        }
+
         lock.withLock {
             for (item in list) {
                 if (item is TribePreviewDataRetriever && item.tribeJoinLink == tribeJoinLink) {
