@@ -332,27 +332,15 @@ fun TransactionCallbacks.upsertMessage(
 
             if (mediaToken.isEmpty() || mediaType.isEmpty()) return
 
-            if (dto.mediaLocalFile != null) {
-                queries.messageMediaUpsertWithFile(
-                    dto.media_key?.toMediaKey(),
-                    mediaType.toMediaType(),
-                    MediaToken(mediaToken),
-                    dto.mediaLocalFile,
-                    MessageId(dto.id),
-                    chatId,
-                    dto.mediaKeyDecrypted?.toMediaKeyDecrypted()
-                )
-            } else {
-                queries.messageMediaUpsert(
-                    dto.media_key?.toMediaKey(),
-                    mediaType.toMediaType(),
-                    MediaToken(mediaToken),
-                    MessageId(dto.id),
-                    chatId,
-                    dto.mediaKeyDecrypted?.toMediaKeyDecrypted(),
-                    dto.mediaLocalFile
-                )
-            }
+            queries.messageMediaUpsert(
+                dto.media_key?.toMediaKey(),
+                mediaType.toMediaType(),
+                MediaToken(mediaToken),
+                MessageId(dto.id),
+                chatId,
+                dto.mediaKeyDecrypted?.toMediaKeyDecrypted(),
+                dto.mediaLocalFile
+            )
         }
     }
 
