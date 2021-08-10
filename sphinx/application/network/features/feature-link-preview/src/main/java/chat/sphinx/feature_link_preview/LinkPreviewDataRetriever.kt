@@ -1,4 +1,4 @@
-package io.matthewnelson.feature_link_preview
+package chat.sphinx.feature_link_preview
 
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
@@ -7,11 +7,11 @@ import chat.sphinx.wrapper_chat.ChatHost
 import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.tribe.TribeJoinLink
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
-import io.matthewnelson.concept_link_preview.model.*
-import io.matthewnelson.feature_link_preview.util.getDescription
-import io.matthewnelson.feature_link_preview.util.getFavIconUrl
-import io.matthewnelson.feature_link_preview.util.getImageUrl
-import io.matthewnelson.feature_link_preview.util.getTitle
+import chat.sphinx.concept_link_preview.model.*
+import chat.sphinx.feature_link_preview.util.getDescription
+import chat.sphinx.feature_link_preview.util.getFavIconUrl
+import chat.sphinx.feature_link_preview.util.getImageUrl
+import chat.sphinx.feature_link_preview.util.getTitle
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock

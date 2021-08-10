@@ -1,4 +1,4 @@
-package io.matthewnelson.feature_link_preview
+package chat.sphinx.feature_link_preview
 
 import chat.sphinx.wrapper_common.tribe.TribeJoinLink
 import kotlinx.coroutines.sync.Mutex

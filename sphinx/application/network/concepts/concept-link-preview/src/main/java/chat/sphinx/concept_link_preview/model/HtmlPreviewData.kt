@@ -1,4 +1,4 @@
-package io.matthewnelson.concept_link_preview.model
+package chat.sphinx.concept_link_preview.model
 
 data class HtmlPreviewData(
     val title: HtmlPreviewTitle?,
