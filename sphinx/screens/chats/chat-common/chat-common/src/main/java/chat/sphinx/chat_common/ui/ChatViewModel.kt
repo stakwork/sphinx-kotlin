@@ -943,6 +943,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         } ?: chatNavigator.toAddContactDetail(pubKey, routeHint)
     }
 
+    val j = TribeJoinLink
 //    fun getChatTribe(tribeJoinLink: TribeJoinLink): Flow<Chat?> {
 //        return chatRepository.getChatByUUID(ChatUUID(tribeJoinLink.tribeUUID))
 //    }

@@ -1,5 +1,6 @@
 package io.matthewnelson.feature_link_preview
 
+import chat.sphinx.wrapper_common.tribe.TribeJoinLink
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_link_preview.model.*
 import io.matthewnelson.feature_link_preview.util.getDescription
@@ -85,5 +86,32 @@ internal data class HtmlPreviewDataRetriever(val url: HttpUrl): LinkPreviewDataR
                 stream.closeQuietly()
             }
         }
+    }
+}
+
+internal class TribePreviewDataRetriever(val tribeJoinLink: TribeJoinLink): LinkPreviewDataRetriever{
+    private val lock = Mutex()
+
+    @Volatile
+    private var previewData: TribePreviewData? = null
+
+    suspend fun getTribePreview(
+        dispatchers: CoroutineDispatchers,
+    ): TribePreviewData? =
+        previewData ?: lock.withLock {
+            previewData ?: retrievePreview(dispatchers)
+                .also {
+                    if (it != null) {
+                        previewData = it
+                    }
+                }
+
+        }
+
+    private suspend fun retrievePreview(
+        dispatchers: CoroutineDispatchers,
+    ): TribePreviewData? {
+        // TODO: Implement
+        return null
     }
 }
