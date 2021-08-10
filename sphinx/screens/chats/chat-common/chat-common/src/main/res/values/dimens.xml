@@ -19,6 +19,9 @@
     <dimen name="chat_message_text_size">17sp</dimen>
     <dimen name="chat_podcast_boost_text_size">14sp</dimen>
 
+    <dimen name="chat_message_contact_link_preview_name_text_size">17sp</dimen>
+    <dimen name="chat_message_contact_link_preview_pub_key_text_size">14sp</dimen>
+
     <item name="default_space_width_percent" format="float" type="dimen">.2</item>
     <dimen name="background_message_holder_default_corner_rad">12dp</dimen>
     <dimen name="background_message_holder_default_padding">16dp</dimen>
