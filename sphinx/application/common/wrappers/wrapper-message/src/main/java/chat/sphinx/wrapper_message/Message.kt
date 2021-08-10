@@ -60,12 +60,7 @@ inline fun Message.retrieveImageUrlAndMessageMedia(): Pair<String, MessageMedia?
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun Message.retrieveSphinxCallLink(): SphinxCallLink? =
-    messageContentDecrypted?.let { decrypted ->
-        decrypted.value.toSphinxCallLink()?.let { sphinxCallLink ->
-            return sphinxCallLink
-        }
-        null
-    }
+    messageContentDecrypted?.value?.toSphinxCallLink()
 
 //Message Actions
 inline val Message.isBoostAllowed: Boolean
