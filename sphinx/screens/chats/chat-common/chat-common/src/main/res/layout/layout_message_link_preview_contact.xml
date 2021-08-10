@@ -42,10 +42,9 @@
             android:maxLines="2"
             android:text="@string/new_contact"
             android:textColor="@color/text"
-            android:textSize="@dimen/chat_message_contact_link_preview_name_text_size"
-            android:layout_marginTop="@dimen/default_layout_margin"
+            android:textSize="@dimen/chat_message_link_preview_name_text_size"
+            app:layout_constraintBottom_toTopOf="@id/text_view_message_link_preview_contact_pubkey"
             app:layout_constraintStart_toEndOf="@id/image_view_message_link_preview_contact_avatar"
-            app:layout_constraintStart_toStartOf="@+id/text_view_message_link_preview_contact_pubkey"
             app:layout_constraintTop_toTopOf="@id/image_view_message_link_preview_contact_avatar"
             app:layout_constraintVertical_chainStyle="packed" />
 
@@ -57,11 +56,12 @@
             android:lines="1"
             android:fontFamily="@font/roboto_regular"
             android:textColor="@color/secondaryText"
-            android:textSize="@dimen/chat_message_contact_link_preview_pub_key_text_size"
-            android:layout_marginBottom="@dimen/default_layout_margin"
+            android:textSize="@dimen/chat_message_link_preview_pub_key_text_size"
+            android:layout_marginTop="@dimen/default_small_layout_margin"
             app:layout_constraintBottom_toBottomOf="@id/image_view_message_link_preview_contact_avatar"
-            app:layout_constraintEnd_toEndOf="@id/image_view_message_link_preview_qr_invite_icon"
+            app:layout_constraintEnd_toStartOf="@+id/image_view_message_link_preview_qr_invite_icon"
             app:layout_constraintStart_toStartOf="@id/text_view_message_link_preview_new_contact_label"
+            app:layout_constraintTop_toBottomOf="@id/text_view_message_link_preview_new_contact_label"
             tools:text="askdjh12387sdhkasd79123h1238asdhad19823791283h" />
 
 
