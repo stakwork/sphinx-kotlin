@@ -353,7 +353,6 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                 viewModel.memeServerTokenHandler,
                 recyclerViewWidth,
                 viewState,
-                selectedMessageLongClickListener,
                 onSphinxInteractionListener
             )
 

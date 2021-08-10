@@ -28,7 +28,6 @@
     <string name="material_icon_name_lock_outline">lock_outline</string>
     <string name="material_icon_name_lock">lock</string>
     <string name="material_icon_name_error">error</string>
-    <string name="material_icon_name_hourglass_bottom">hourglass</string>
     <string name="material_icon_name_bolt">flash_on</string>
     <string name="material_icon_name_backspace_button">backspace</string>
     <string name="material_icon_name_call_button">phone</string>

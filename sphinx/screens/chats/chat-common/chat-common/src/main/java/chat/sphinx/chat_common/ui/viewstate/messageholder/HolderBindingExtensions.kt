@@ -52,7 +52,6 @@ internal fun LayoutMessageHolderBinding.setView(
     memeServerTokenHandler: MemeServerTokenHandler,
     recyclerViewWidth: Px,
     viewState: MessageHolderViewState,
-    longClickListener: View.OnLongClickListener? = null,
     onSphinxInteractionListener: SphinxUrlSpan.OnInteractionListener? = null
 ) {
     for (job in holderJobs) {
@@ -81,7 +80,7 @@ internal fun LayoutMessageHolderBinding.setView(
 
         setStatusHeader(viewState.statusHeader)
         setDeletedMessageLayout(viewState.deletedMessage)
-        setBubbleBackground(viewState, recyclerViewWidth, longClickListener)
+        setBubbleBackground(viewState, recyclerViewWidth)
         setGroupActionIndicatorLayout(viewState.groupActionIndicator)
 
         if (viewState.background !is BubbleBackground.Gone) {
@@ -311,7 +310,6 @@ internal inline fun LayoutMessageHolderBinding.setBubbleDirectPaymentLayout(
 internal fun LayoutMessageHolderBinding.setBubbleBackground(
     viewState: MessageHolderViewState,
     holderWidth: Px,
-    longClickListener: View.OnLongClickListener?,
 ) {
     if (viewState.background is BubbleBackground.Gone) {
         includeMessageHolderBubble.root.gone
@@ -323,8 +321,6 @@ internal fun LayoutMessageHolderBinding.setBubbleBackground(
         sentBubbleArrow.goneIfFalse(viewState.showSentBubbleArrow)
 
         includeMessageHolderBubble.root.apply {
-            setOnLongClickListener(longClickListener)
-
             visible
 
             @DrawableRes
