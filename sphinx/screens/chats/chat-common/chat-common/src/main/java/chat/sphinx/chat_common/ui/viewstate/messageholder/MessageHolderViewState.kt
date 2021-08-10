@@ -14,8 +14,9 @@ import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message_media.MessageMedia
 import chat.sphinx.wrapper_message_media.isImage
 
+// TODO: Remove
 inline val Message.isCopyLinkAllowed: Boolean
-    get() = this.retrieveTextToShow()?.let {
+    get() = retrieveTextToShow(checkForJitsiLink = false)?.let {
         SphinxLinkify.SphinxPatterns.COPYABLE_LINKS.matcher(it).find()
     } ?: false
 
