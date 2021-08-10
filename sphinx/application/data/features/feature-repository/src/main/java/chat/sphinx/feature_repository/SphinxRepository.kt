@@ -217,9 +217,6 @@ abstract class SphinxRepository(
                             io
                         )?.join()
 
-                        val isAttachmentMessage = nnMessageDto.type.toMessageType().isAttachment()
-                        delay(if (isAttachmentMessage) 500L else 0L)
-
                         chatLock.withLock {
                             messageLock.withLock {
                                 contactLock.withLock {
