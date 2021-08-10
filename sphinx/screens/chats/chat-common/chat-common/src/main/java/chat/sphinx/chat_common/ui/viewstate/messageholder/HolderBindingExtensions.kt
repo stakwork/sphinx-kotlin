@@ -378,14 +378,16 @@ internal fun LayoutMessageHolderBinding.setBubbleBackground(
         @Exhaustive
         when (viewState) {
             is MessageHolderViewState.Received -> {
+                val avatarImageSpace = root
+                    .context
+                    .resources
+                    .getDimensionPixelSize(R.dimen.message_holder_space_width_left)
+
                 spaceMessageHolderLeft.updateLayoutParams {
-                    width = root
-                        .context
-                        .resources
-                        .getDimensionPixelSize(R.dimen.message_holder_space_width_left)
+                    width = avatarImageSpace
                 }
                 spaceMessageHolderRight.updateLayoutParams {
-                    width = (holderWidth.value * BubbleBackground.SPACE_WIDTH_MULTIPLE).toInt()
+                    width = (holderWidth.value * BubbleBackground.SPACE_WIDTH_MULTIPLE).toInt() - (avatarImageSpace / 2)
                 }
             }
             is MessageHolderViewState.Sent -> {
