@@ -132,7 +132,7 @@ internal sealed class LayoutState private constructor() {
                 ): LinkPreview()
 
                 data class TribeLinkPreview(
-                    val name: ChatName,
+                    val name: TribePreviewName,
                     val description: PreviewDescription?,
                     val imageUrl: PreviewImageUrl?,
                     val showBanner: Boolean,

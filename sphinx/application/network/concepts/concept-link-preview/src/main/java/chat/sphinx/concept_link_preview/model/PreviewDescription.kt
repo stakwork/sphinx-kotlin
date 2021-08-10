@@ -1,7 +1,7 @@
 package chat.sphinx.concept_link_preview.model
 
 @Suppress("NOTHING_TO_INLINE")
-inline fun String.toHtmlPreviewDescriptionOrNull(): PreviewDescription? =
+inline fun String.toPreviewDescriptionOrNull(): PreviewDescription? =
     try {
         PreviewDescription(this)
     } catch (e: IllegalArgumentException) {
@@ -12,7 +12,7 @@ inline fun String.toHtmlPreviewDescriptionOrNull(): PreviewDescription? =
 value class PreviewDescription(val value: String) {
     init {
         require(value.isNotEmpty()) {
-            "HtmlPreviewDescription cannot be empty"
+            "PreviewDescription cannot be empty"
         }
     }
 }

@@ -81,7 +81,7 @@ internal data class HtmlPreviewDataRetriever(val url: HttpUrl): LinkPreviewDataR
                     HtmlPreviewData(
                         document.getTitle()?.toHtmlPreviewTitleOrNull(),
                         HtmlPreviewDomainHost(url.host),
-                        document.getDescription()?.toHtmlPreviewDescriptionOrNull(),
+                        document.getDescription()?.toPreviewDescriptionOrNull(),
                         document.getImageUrl()?.toPreviewImageUrlOrNull(),
                         document.getFavIconUrl()?.toHtmlPreviewFavIconUrlOrNull(),
                     )
@@ -125,8 +125,11 @@ internal class TribePreviewDataRetriever(val tribeJoinLink: TribeJoinLink): Link
                 is LoadResponse.Loading -> {}
                 is chat.sphinx.kotlin_response.Response.Error -> {}
                 is chat.sphinx.kotlin_response.Response.Success -> {
-                    // TODO: Build out preview data
-                    data = TribePreviewData()
+                    data = TribePreviewData(
+                        TribePreviewName(response.value.name),
+                        response.value.description.toPreviewDescriptionOrNull(),
+                        response.value.img?.toPreviewImageUrlOrNull(),
+                    )
                 }
             }
         }
