@@ -33,7 +33,9 @@ import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.scanner_view_model_coordinator.request.ScannerFilter
 import chat.sphinx.scanner_view_model_coordinator.request.ScannerRequest
 import chat.sphinx.scanner_view_model_coordinator.response.ScannerResponse
+import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.isConversation
+import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.*
 import chat.sphinx.wrapper_common.tribe.TribeJoinLink
@@ -144,7 +146,7 @@ internal class DashboardViewModel @Inject constructor(
 
                 code.toTribeJoinLink()?.let { tribeJoinLink ->
 
-                    dashboardNavigator.toJoinTribeDetail(tribeJoinLink)
+                    handleTribeJoinLink(tribeJoinLink)
 
                 } ?: code.toLightningNodePubKey()?.let { lightningNodePubKey ->
 
@@ -186,6 +188,22 @@ internal class DashboardViewModel @Inject constructor(
                     } catch (e: Exception) {}
                 }
             }
+        }
+    }
+
+    private suspend fun handleTribeJoinLink(tribeJoinLink: TribeJoinLink) {
+        val chat: Chat? = try {
+            chatRepository.getChatByUUID(
+                ChatUUID(tribeJoinLink.tribeUUID)
+            ).firstOrNull()
+        } catch (e: IllegalArgumentException) {
+            null
+        }
+
+        if (chat != null) {
+            dashboardNavigator.toChatTribe(chat.id)
+        } else {
+            dashboardNavigator.toJoinTribeDetail(tribeJoinLink)
         }
     }
 

@@ -245,6 +245,8 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                     true
                 }
 
+                root.setOnLongClickListener(selectedMessageLongClickListener)
+
                 onSphinxInteractionListener = object: SphinxUrlSpan.OnInteractionListener(
                     selectedMessageLongClickListener
                 ) {

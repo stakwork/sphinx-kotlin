@@ -27,6 +27,7 @@
     <!--  Material Icons   -->
     <string name="material_icon_name_lock_outline">lock_outline</string>
     <string name="material_icon_name_lock">lock</string>
+    <string name="material_icon_name_error">error</string>
     <string name="material_icon_name_bolt">flash_on</string>
     <string name="material_icon_name_backspace_button">backspace</string>
     <string name="material_icon_name_call_button">phone</string>
@@ -59,6 +60,7 @@
     <string name="material_icon_name_message_action_copy_pubkey">supervisor_account</string>
     <string name="material_icon_name_message_action_copy_call_link">link</string>
     <string name="material_icon_name_message_action_reply">reply</string>
+    <string name="material_icon_name_message_action_resend">redo</string>
     <string name="material_icon_name_message_action_save_file">file_download</string>
 
     <!--  Invite Status Material Icons  -->
@@ -83,5 +85,8 @@
     <string name="new_contact_pin_standard_private_label">PIN Estandar / PIN Privado</string>
 
     <string name="invalid_url">URL Inválida</string>
+    <string name="relay_url_http_message">La URL de Relay utiliza \'http\'. El tráfico de la red no estará encriptado. Se recomienda fuertemente el uso de Https. Por favor confirma si deseas proceder.</string>
+    <string name="relay_url_http_negative_keep_http">http</string>
+    <string name="relay_url_http_positive_change_to_https">https</string>
 
 </resources>

@@ -434,6 +434,9 @@ abstract class ChatFragment<
                             is MenuItemState.SaveFile -> {
                                 // TODO: Implement
                             }
+                            is MenuItemState.Resend -> {
+                                viewModel.resendMessage(holderState.message)
+                            }
                         }
                     }
                 }
@@ -471,6 +474,7 @@ abstract class ChatFragment<
 
     override fun onStart() {
         super.onStart()
+
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.headerInitialHolderSharedFlow.collect { viewState ->
 

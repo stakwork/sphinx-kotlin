@@ -67,7 +67,10 @@ import chat.sphinx.wrapper_meme_server.PublicAttachmentInfo
 import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message_media.*
 import chat.sphinx.wrapper_message_media.token.MediaHost
+import chat.sphinx.wrapper_podcast.Podcast
 import chat.sphinx.wrapper_podcast.PodcastDestination
+import chat.sphinx.wrapper_relay.AuthorizationToken
+import chat.sphinx.wrapper_relay.RelayUrl
 import chat.sphinx.wrapper_rsa.RsaPrivateKey
 import chat.sphinx.wrapper_rsa.RsaPublicKey
 import com.squareup.moshi.Moshi
@@ -213,6 +216,9 @@ abstract class SphinxRepository(
                             coroutineScope { this },
                             io
                         )?.join()
+
+                        val isAttachmentMessage = nnMessageDto.type.toMessageType().isAttachment()
+                        delay(if (isAttachmentMessage) 500L else 0L)
 
                         chatLock.withLock {
                             messageLock.withLock {
@@ -1256,8 +1262,13 @@ abstract class SphinxRepository(
         }
     }
 
-    override suspend fun getAccountBalanceAll(): Flow<LoadResponse<NodeBalanceAll, ResponseError>> = flow {
-        networkQueryLightning.getBalanceAll().collect { loadResponse ->
+    override suspend fun getAccountBalanceAll(
+        relayData: Pair<AuthorizationToken, RelayUrl>?
+    ): Flow<LoadResponse<NodeBalanceAll, ResponseError>> = flow {
+
+        networkQueryLightning.getBalanceAll(
+            relayData
+        ).collect { loadResponse ->
             @Exhaustive
             when (loadResponse) {
                 is LoadResponse.Loading -> {
@@ -1598,16 +1609,12 @@ abstract class SphinxRepository(
             val queries = coreDB.getSphinxDatabaseQueries()
 
             // TODO: Update SendMessage to accept a Chat && Contact instead of just IDs
-            val chat: ChatDbo? = sendMessage.chatId?.let {
-                withContext(io) {
-                    queries.chatGetById(it).executeAsOneOrNull()
-                }
+            val chat: Chat? = sendMessage.chatId?.let {
+                getChatById(it).firstOrNull()
             }
 
-            val contact: ContactDbo? = sendMessage.contactId?.let {
-                withContext(io) {
-                    queries.contactGetById(it).executeAsOneOrNull()
-                }
+            val contact: Contact? = sendMessage.contactId?.let {
+                getContactById(it).firstOrNull()
             }
 
             val owner: Contact? = accountOwner.value
@@ -1694,8 +1701,8 @@ abstract class SphinxRepository(
                 return@launch
             }
 
-            val pricePerMessage = chat?.price_per_message?.value ?: 0
-            val escrowAmount = chat?.escrow_amount?.value ?: 0
+            val pricePerMessage = chat?.pricePerMessage?.value ?: 0
+            val escrowAmount = chat?.escrowAmount?.value ?: 0
             val messagePrice = (pricePerMessage + escrowAmount).toSat() ?: Sat(0)
 
             val provisionalMessageId: MessageId? = chat?.let { chatDbo ->
@@ -1711,15 +1718,29 @@ abstract class SphinxRepository(
 
                         queries.transaction {
 
+                            if (media != null) {
+                                queries.messageMediaUpsert(
+                                    media.second,
+                                    media.third.mediaType,
+                                    MediaToken.PROVISIONAL_TOKEN,
+                                    provisionalId,
+                                    chatDbo.id,
+                                    MediaKeyDecrypted(media.first.value.joinToString("")),
+                                    media.third.file,
+                                )
+                            }
+
                             queries.messageUpsert(
                                 MessageStatus.Pending,
                                 Seen.True,
-                                chatDbo.my_alias?.value?.toSenderAlias(),
-                                chatDbo.my_photo_url,
+                                chatDbo.myAlias?.value?.toSenderAlias(),
+                                chatDbo.myPhotoUrl,
                                 null,
                                 sendMessage.replyUUID,
                                 if (media != null) {
                                     MessageType.Attachment
+                                } else if (sendMessage.isBoost){
+                                    MessageType.Boost
                                 } else {
                                     MessageType.Message
                                 },
@@ -1745,7 +1766,7 @@ abstract class SphinxRepository(
                                     provisionalId,
                                     chatDbo.id,
                                     MediaKeyDecrypted(media.first.value.joinToString("")),
-                                    media.third.file,
+                                    media.third.file
                                 )
                             }
                         }
@@ -1755,100 +1776,20 @@ abstract class SphinxRepository(
                 }
             }
 
-            val remoteTextMap: Map<String, String>? = if (message != null) {
-                sendMessage.contactId?.let { nnContactId ->
-                    // we know it's a conversation as the contactId is always sent
-                    contact?.public_key?.let { pubKey ->
-
-                        val response = rsa.encrypt(
-                            pubKey,
-                            UnencryptedString(message.first.value),
-                            formatOutput = false,
-                            dispatcher = default,
-                        )
-
-                        @Exhaustive
-                        when (response) {
-                            is Response.Error -> {
-                                LOG.e(TAG, response.message, response.exception)
-                                null
-                            }
-                            is Response.Success -> {
-                                mapOf(Pair(nnContactId.value.toString(), response.value.value))
-                            }
-                        }
-                    }
-
-                } ?: chat?.group_key?.value?.let { rsaPubKeyString ->
-                    val response = rsa.encrypt(
-                        RsaPublicKey(rsaPubKeyString.toCharArray()),
-                        UnencryptedString(message.first.value),
-                        formatOutput = false,
-                        dispatcher = default,
-                    )
-
-                    @Exhaustive
-                    when (response) {
-                        is Response.Error -> {
-                            LOG.e(TAG, response.message, response.exception)
-                            null
-                        }
-                        is Response.Success -> {
-                            mapOf(Pair("chat", response.value.value))
-                        }
-                    }
-                }
-            } else {
-                null
-            }
+            val remoteTextMap: Map<String, String>? = getRemoteTextMap(
+                UnencryptedString(message?.first?.value ?: ""),
+                contact,
+                chat
+            )
 
             val mediaKeyMap: Map<String, String>? = if (media != null) {
-                val map: MutableMap<String, String> = LinkedHashMap(2)
-
-                map[owner.id.value.toString()] = media.second.value
-
-                sendMessage.contactId?.let { nnContactId ->
-                    // we know it's a conversation as the contactId is always sent
-                    contact?.public_key?.let { pubKey ->
-
-                        val response = rsa.encrypt(
-                            pubKey,
-                            UnencryptedString(media.first.value.joinToString("")),
-                            formatOutput = false,
-                            dispatcher = default,
-                        )
-
-                        @Exhaustive
-                        when (response) {
-                            is Response.Error -> {
-                                LOG.e(TAG, response.message, response.exception)
-                            }
-                            is Response.Success -> {
-                                map[nnContactId.value.toString()] = response.value.value
-                            }
-                        }
-                    }
-
-                } ?: chat?.group_key?.value?.let { rsaPubKeyString ->
-                    val response = rsa.encrypt(
-                        RsaPublicKey(rsaPubKeyString.toCharArray()),
-                        UnencryptedString(media.first.value.joinToString("")),
-                        formatOutput = false,
-                        dispatcher = default,
-                    )
-
-                    @Exhaustive
-                    when (response) {
-                        is Response.Error -> {
-                            LOG.e(TAG, response.message, response.exception)
-                        }
-                        is Response.Success -> {
-                            map["chat"] = response.value.value
-                        }
-                    }
-                }
-
-                map
+                getMediaKeyMap(
+                    owner.id,
+                    media.second,
+                    UnencryptedString(media.first.value.joinToString("")),
+                    contact,
+                    chat
+                )
             } else {
                 null
             }
@@ -1903,6 +1844,7 @@ abstract class SphinxRepository(
                     mediaKeyMap,
                     postMemeServerDto?.mime,
                     postMemeServerDto?.muid,
+                    sendMessage.isBoost
                 )
             } catch (e: IllegalArgumentException) {
                 LOG.e(TAG, "Failed to create PostMessageDto", e)
@@ -1916,66 +1858,192 @@ abstract class SphinxRepository(
                 return@launch
             }
 
-            networkQueryMessage.sendMessage(postMessageDto).collect { loadResponse ->
-                @Exhaustive
-                when (loadResponse) {
-                    is LoadResponse.Loading -> {}
-                    is Response.Error -> {
-                        LOG.e(TAG, loadResponse.message, loadResponse.exception)
+            sendMessage(
+                provisionalMessageId,
+                postMessageDto,
+                message?.first,
+                media
+            )
+        }
+    }
 
-                        provisionalMessageId?.let { provId ->
-                            withContext(io) {
-                                queries
-                                    .messageUpdateStatus(MessageStatus.Failed, provId)
-                            }
+    private suspend fun getRemoteTextMap(
+        unencryptedString: UnencryptedString?,
+        contact: Contact?,
+        chat: Chat?,
+    ): Map<String, String>? {
+
+        return if (unencryptedString != null) {
+            contact?.id?.let { nnContactId ->
+                // we know it's a conversation as the contactId is always sent
+                contact?.rsaPublicKey?.let { pubKey ->
+
+                    val response = rsa.encrypt(
+                        pubKey,
+                        unencryptedString,
+                        formatOutput = false,
+                        dispatcher = default,
+                    )
+
+                    @Exhaustive
+                    when (response) {
+                        is Response.Error -> {
+                            LOG.e(TAG, response.message, response.exception)
+                            null
                         }
+                        is Response.Success -> {
+                            mapOf(Pair(nnContactId.value.toString(), response.value.value))
+                        }
+                    }
+                }
 
+            } ?: chat?.groupKey?.value?.let { rsaPubKeyString ->
+                val response = rsa.encrypt(
+                    RsaPublicKey(rsaPubKeyString.toCharArray()),
+                    unencryptedString,
+                    formatOutput = false,
+                    dispatcher = default,
+                )
+
+                @Exhaustive
+                when (response) {
+                    is Response.Error -> {
+                        LOG.e(TAG, response.message, response.exception)
+                        null
                     }
                     is Response.Success -> {
+                        mapOf(Pair("chat", response.value.value))
+                    }
+                }
+            }
+        } else {
+            null
+        }
+    }
 
+    private suspend fun getMediaKeyMap(
+        ownerId: ContactId,
+        mediaKey: MediaKey,
+        unencryptedMediaKey: UnencryptedString?,
+        contact: Contact?,
+        chat: Chat?,
+    ): Map<String, String>? {
 
-                        loadResponse.value.apply {
-                            if (media != null) {
-                                setMediaKeyDecrypted(media.first.value.joinToString(""))
-                                setMediaLocalFile(media.third.file)
-                            }
+        return if (unencryptedMediaKey != null) {
+            val map: MutableMap<String, String> = LinkedHashMap(2)
 
-                            if (message != null) {
-                                setMessageContentDecrypted(message.first.value)
+            map[ownerId.value.toString()] = mediaKey.value
+
+            contact?.id?.let { nnContactId ->
+                // we know it's a conversation as the contactId is always sent
+                contact.rsaPublicKey?.let { pubKey ->
+
+                    val response = rsa.encrypt(
+                        pubKey,
+                        unencryptedMediaKey,
+                        formatOutput = false,
+                        dispatcher = default,
+                    )
+
+                    @Exhaustive
+                    when (response) {
+                        is Response.Error -> {
+                            LOG.e(TAG, response.message, response.exception)
+                        }
+                        is Response.Success -> {
+                            map[nnContactId.value.toString()] = response.value.value
+                        }
+                    }
+                }
+
+            } ?: chat?.groupKey?.value?.let { rsaPubKeyString ->
+                val response = rsa.encrypt(
+                    RsaPublicKey(rsaPubKeyString.toCharArray()),
+                    unencryptedMediaKey,
+                    formatOutput = false,
+                    dispatcher = default,
+                )
+
+                @Exhaustive
+                when (response) {
+                    is Response.Error -> {
+                        LOG.e(TAG, response.message, response.exception)
+                    }
+                    is Response.Success -> {
+                        map["chat"] = response.value.value
+                    }
+                }
+            }
+
+            map
+        } else {
+            null
+        }
+    }
+
+    @OptIn(RawPasswordAccess::class)
+    suspend fun sendMessage(
+        provisionalMessageId: MessageId?,
+        postMessageDto: PostMessageDto,
+        messageContentDecrypted: MessageContentDecrypted?,
+        media: Triple<Password, MediaKey, AttachmentInfo>?,
+    ) {
+        val queries = coreDB.getSphinxDatabaseQueries()
+
+        networkQueryMessage.sendMessage(postMessageDto).collect { loadResponse ->
+            @Exhaustive
+            when (loadResponse) {
+                is LoadResponse.Loading -> {}
+                is Response.Error -> {
+                    LOG.e(TAG, loadResponse.message, loadResponse.exception)
+
+                    messageLock.withLock {
+                        provisionalMessageId?.let { provId ->
+                            withContext(io) {
+                                queries.messageUpdateStatus(MessageStatus.Failed, provId)
                             }
                         }
+                    }
 
-                        chatLock.withLock {
-                            messageLock.withLock {
-                                contactLock.withLock {
-                                    withContext(io) {
+                }
+                is Response.Success -> {
 
+                    loadResponse.value.apply {
+                        if (media != null) {
+                            setMediaKeyDecrypted(media.first.value.joinToString(""))
+                            setMediaLocalFile(media.third.file)
+                        }
+
+                        if (messageContentDecrypted != null) {
+                            setMessageContentDecrypted(messageContentDecrypted.value)
+                        }
+                    }
+
+                    chatLock.withLock {
+                        messageLock.withLock {
+                            contactLock.withLock {
+                                withContext(io) {
+                                    queries.transaction {
                                         // chat is returned only if this is the
                                         // first message sent to a new contact
                                         loadResponse.value.chat?.let { chatDto ->
-                                            queries.transaction {
-                                                upsertChat(
-                                                    chatDto,
-                                                    moshi,
-                                                    chatSeenMap,
-                                                    queries,
-                                                    loadResponse.value.contact,
-                                                )
-                                            }
+                                            upsertChat(
+                                                chatDto,
+                                                moshi,
+                                                chatSeenMap,
+                                                queries,
+                                                loadResponse.value.contact,
+                                            )
                                         }
 
-                                        queries.transaction {
+                                        loadResponse.value.contact?.let { contactDto ->
+                                            upsertContact(contactDto, queries)
+                                        }
 
-                                            loadResponse.value.contact?.let { contactDto ->
-                                                upsertContact(contactDto, queries)
-                                            }
+                                        upsertMessage(loadResponse.value, queries)
 
-                                            upsertMessage(loadResponse.value, queries)
-
-                                            provisionalMessageId?.let { provId ->
-                                                queries.messageDeleteById(provId)
-                                            }
-
+                                        provisionalMessageId?.let { provId ->
+                                            deleteMessageById(provId, queries)
                                         }
                                     }
                                 }
@@ -1984,7 +2052,61 @@ abstract class SphinxRepository(
                     }
                 }
             }
+        }
+    }
 
+    override fun resendMessage(message: Message, chat: Chat) {
+
+        applicationScope.launch(mainImmediate) {
+            val queries = coreDB.getSphinxDatabaseQueries()
+
+            val pricePerMessage = chat.pricePerMessage?.value ?: 0
+            val escrowAmount = chat.escrowAmount?.value ?: 0
+            val messagePrice = (pricePerMessage + escrowAmount).toSat() ?: Sat(0)
+
+            val contact: Contact? = if (chat.type.isConversation()) {
+                chat.contactIds.elementAtOrNull(1)?.let { contactId ->
+                    getContactById(contactId).firstOrNull()
+                }
+            } else {
+                null
+            }
+
+            val remoteTextMap: Map<String, String>? = getRemoteTextMap(
+                UnencryptedString(message.messageContentDecrypted?.value ?: ""),
+                contact,
+                chat
+            )
+
+            val postMessageDto: PostMessageDto = try {
+                PostMessageDto(
+                    message.chatId.value,
+                    contact?.id?.value,
+                    messagePrice.value,
+                    message.replyUUID?.value,
+                    message.messageContentDecrypted?.value,
+                    remoteTextMap,
+                    null,
+                    message.messageMedia?.mediaType?.value,
+                    message.messageMedia?.muid?.value,
+                    false
+                )
+            } catch (e: IllegalArgumentException) {
+                LOG.e(TAG, "Failed to create PostMessageDto", e)
+
+                withContext(io) {
+                    queries.messageUpdateStatus(MessageStatus.Failed, message.id)
+                }
+
+                return@launch
+            }
+
+            sendMessage(
+                message.id,
+                postMessageDto,
+                message.messageContentDecrypted,
+                null
+            )
         }
     }
 
@@ -1997,7 +2119,9 @@ abstract class SphinxRepository(
             if (message.id.isProvisionalMessage) {
                 messageLock.withLock {
                     withContext(io) {
-                        queries.messageDeleteById(message.id)
+                        queries.transaction {
+                            deleteMessageById(message.id, queries)
+                        }
                     }
                 }
             } else {
@@ -2292,6 +2416,45 @@ abstract class SphinxRepository(
         }.join()
 
         return response
+    }
+
+    override fun sendPodcastBoost(chatId: ChatId, podcast: Podcast) {
+        applicationScope.launch(mainImmediate) {
+            val owner: Contact? = accountOwner.value
+                ?: let {
+                    var owner: Contact? = null
+                    try {
+                        accountOwner.collect {
+                            if (it != null) {
+                                owner = it
+                                throw Exception()
+                            }
+                        }
+                    } catch (e: Exception) {}
+                    delay(25L)
+                    owner
+                }
+
+            owner?.tipAmount?.let { tipAmount ->
+                if (tipAmount.value > 0) {
+                    val metaData = podcast.getMetaData(tipAmount)
+
+                    val message = PodBoost(
+                        FeedId(podcast.id),
+                        metaData.itemId,
+                        metaData.timeSeconds,
+                        tipAmount
+                    ).toJson(moshi)
+
+                    val sendMessageBuilder = SendMessage.Builder()
+                    sendMessageBuilder.setChatId(chatId)
+                    sendMessageBuilder.setText(message)
+                    sendMessageBuilder.setIsBoost(true)
+
+                    sendMessage(sendMessageBuilder.build())
+                }
+            }
+        }
     }
 
     // TODO: Remove from repository as it does not interact with

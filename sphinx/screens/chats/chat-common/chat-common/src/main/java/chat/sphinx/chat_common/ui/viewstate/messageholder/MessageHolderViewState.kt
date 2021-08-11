@@ -9,6 +9,7 @@ import chat.sphinx.wrapper_chat.isConversation
 import chat.sphinx.wrapper_chat.isTribeOwnedByAccount
 import chat.sphinx.wrapper_common.chatTimeFormat
 import chat.sphinx.wrapper_common.lightning.Sat
+import chat.sphinx.wrapper_common.message.isProvisionalMessage
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message_media.MessageMedia
@@ -45,7 +46,6 @@ internal sealed class MessageHolderViewState(
         val unsupportedMessageTypes: List<MessageType> by lazy {
             listOf(
                 MessageType.Attachment,
-                MessageType.BotRes,
                 MessageType.Invoice,
                 MessageType.Payment,
                 MessageType.GroupAction.TribeDelete,
@@ -69,7 +69,9 @@ internal sealed class MessageHolderViewState(
             LayoutState.MessageStatusHeader(
                 if (chat.type.isConversation()) null else message.senderAlias?.value,
                 this is Sent,
+                this is Sent && message.id.isProvisionalMessage && message.status.isPending(),
                 this is Sent && (message.status.isReceived() || message.status.isConfirmed()),
+                this is Sent && message.status.isFailed(),
                 message.messageContentDecrypted != null || message.messageMedia?.mediaKeyDecrypted != null,
                 message.date.chatTimeFormat(),
             )
@@ -110,6 +112,18 @@ internal sealed class MessageHolderViewState(
     val bubbleCallInvite: LayoutState.Bubble.ContainerSecond.CallInvite? by lazy(LazyThreadSafetyMode.NONE) {
         message.retrieveSphinxCallLink()?.let { callLink ->
             LayoutState.Bubble.ContainerSecond.CallInvite(!callLink.startAudioOnly)
+        }
+    }
+
+    val bubbleBotResponse: LayoutState.Bubble.ContainerSecond.BotResponse? by lazy(LazyThreadSafetyMode.NONE) {
+        if (message.type.isBotRes()) {
+            message.retrieveBotResponseHtmlString()?.let { html ->
+                LayoutState.Bubble.ContainerSecond.BotResponse(
+                    html
+                )
+            }
+        } else {
+            null
         }
     }
 
@@ -284,6 +298,10 @@ internal sealed class MessageHolderViewState(
 
             if (message.isReplyAllowed) {
                 list.add(MenuItemState.Reply)
+            }
+
+            if (message.isResendAllowed) {
+                list.add(MenuItemState.Resend)
             }
 
             if (this is Sent || chat.isTribeOwnedByAccount(accountOwner().nodePubKey)) {

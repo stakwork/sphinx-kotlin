@@ -1,6 +1,5 @@
 package chat.sphinx.chat_common.ui.viewstate.messageholder
 
-import android.graphics.drawable.Drawable
 import android.view.Gravity
 import android.widget.ImageView
 import androidx.annotation.ColorRes
@@ -9,8 +8,6 @@ import androidx.annotation.MainThread
 import androidx.annotation.StringRes
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
-import androidx.core.text.getSpans
-import androidx.core.text.toSpannable
 import androidx.core.view.updateLayoutParams
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.chat_common.R
@@ -27,14 +24,9 @@ import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.concept_meme_server.MemeServerTokenHandler
 import chat.sphinx.concept_network_client_crypto.CryptoHeader
 import chat.sphinx.concept_network_client_crypto.CryptoScheme
-import chat.sphinx.resources.getString
-import chat.sphinx.resources.setBackgroundRandomColor
-import chat.sphinx.resources.setTextColorExt
+import chat.sphinx.resources.*
 import chat.sphinx.wrapper_chat.ChatType
-import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.lightning.*
-import chat.sphinx.wrapper_common.tribe.isValidTribeJoinLink
-import chat.sphinx.wrapper_common.tribe.toTribeJoinLink
 import chat.sphinx.wrapper_meme_server.headerKey
 import chat.sphinx.wrapper_meme_server.headerValue
 import chat.sphinx.wrapper_message.MessageType
@@ -47,7 +39,6 @@ import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import java.io.File
 import chat.sphinx.resources.R as common_R
@@ -65,7 +56,6 @@ internal fun LayoutMessageHolderBinding.setView(
     recyclerViewWidth: Px,
     viewState: MessageHolderViewState,
     onSphinxInteractionListener: SphinxUrlSpan.OnInteractionListener? = null,
-//    previewHandler: SphinxUrlSpan.PreviewHandler? = null
 ) {
     for (job in holderJobs) {
         job.cancel()
@@ -160,6 +150,7 @@ internal fun LayoutMessageHolderBinding.setView(
                 viewState
             )
             setBubbleCallInvite(viewState.bubbleCallInvite)
+            setBubbleBotResponse(viewState.bubbleBotResponse)
             setBubbleDirectPaymentLayout(viewState.bubbleDirectPayment)
             setBubbleDirectPaymentLayout(viewState.bubbleDirectPayment)
             setBubblePodcastBoost(viewState.bubblePodcastBoost)
@@ -249,9 +240,6 @@ internal inline fun LayoutMessageHolderBinding.setUnsupportedMessageTypeLayout(
                 MessageType.Attachment -> {
                     getString(R.string.placeholder_display_name_message_type_attachment)
                 }
-                MessageType.BotRes -> {
-                    getString(R.string.placeholder_display_name_message_type_bot_response)
-                }
                 MessageType.Invoice -> {
                     getString(R.string.placeholder_display_name_message_type_invoice)
                 }
@@ -281,6 +269,7 @@ internal inline fun LayoutMessageHolderBinding.setUnsupportedMessageTypeLayout(
                 MessageType.QueryResponse,
                 MessageType.Repayment,
                 MessageType.Boost,
+                MessageType.BotRes,
                 MessageType.BotCmd,
                 MessageType.BotInstall,
                 is MessageType.Unknown -> {
@@ -332,7 +321,6 @@ internal fun LayoutMessageHolderBinding.setBubbleBackground(
     holderWidth: Px,
 ) {
     if (viewState.background is BubbleBackground.Gone) {
-
         includeMessageHolderBubble.root.gone
         receivedBubbleArrow.gone
         sentBubbleArrow.gone
@@ -458,8 +446,10 @@ internal inline fun LayoutMessageHolderBinding.setStatusHeader(
 
             if (statusHeader.showSent) {
                 textViewMessageStatusSentTimestamp.text = statusHeader.timestamp
-                textViewMessageStatusSentBoltIcon.goneIfFalse(statusHeader.showBoltIcon)
                 textViewMessageStatusSentLockIcon.goneIfFalse(statusHeader.showLockIcon)
+                progressBarMessageStatusSending.goneIfFalse(statusHeader.showSendingIcon)
+                textViewMessageStatusSentBoltIcon.goneIfFalse(statusHeader.showBoltIcon)
+                layoutConstraintMessageStatusSentFailedContainer.goneIfFalse(statusHeader.showFailedContainer)
             } else {
                 textViewMessageStatusReceivedTimestamp.text = statusHeader.timestamp
                 textViewMessageStatusReceivedLockIcon.goneIfFalse(statusHeader.showLockIcon)
@@ -738,6 +728,35 @@ internal inline fun LayoutMessageHolderBinding.setBubbleCallInvite(
         } else {
             root.visible
             layoutConstraintCallInviteJoinByVideo.goneIfFalse(callInvite.videoButtonVisible)
+        }
+    }
+}
+
+@MainThread
+@Suppress("NOTHING_TO_INLINE")
+internal inline fun LayoutMessageHolderBinding.setBubbleBotResponse(
+    botResponse: LayoutState.Bubble.ContainerSecond.BotResponse?
+) {
+    includeMessageHolderBubble.includeMessageTypeBotResponse.apply {
+        if (botResponse == null) {
+            root.gone
+        } else {
+            root.visible
+
+            val textColorString = getColorHexCode(R.color.text)
+            val backgroundColorString = getColorHexCode(R.color.receivedMsgBG)
+
+            val htmlPrefix = "<head><meta name=\"viewport\" content=\"width=device-width, height=device-height, shrink-to-fit=YES\"></head><body style=\"font-family: 'Roboto', sans-serif; color: $textColorString; margin:0px !important; padding:0px!important; background: $backgroundColorString;\"><div id=\"bot-response-container\" style=\"background: $backgroundColorString;\">"
+            val htmlSuffix = "</div></body>"
+            val contentHtml = htmlPrefix + botResponse.html + htmlSuffix
+
+            webViewMessageTypeBotResponse.loadDataWithBaseURL(
+                null,
+                contentHtml,
+                "text/html",
+                "utf-8",
+                null
+            )
         }
     }
 }

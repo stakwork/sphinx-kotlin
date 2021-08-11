@@ -37,4 +37,6 @@ dependencies {
     implementation deps.androidx.annotation
     implementation deps.androidx.appCompat
     implementation deps.androidx.constraintLayout
+
+    implementation deps.lottie.sdk
 }

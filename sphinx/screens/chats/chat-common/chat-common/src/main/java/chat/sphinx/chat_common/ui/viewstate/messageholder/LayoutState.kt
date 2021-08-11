@@ -14,10 +14,9 @@ internal sealed class LayoutState private constructor() {
     data class MessageStatusHeader(
         val senderName: String?,
         val showSent: Boolean,
-
-        // TODO: rework bolt icon when sending messages to be yellow (sending), red (failed), green(sent)
+        val showSendingIcon: Boolean,
         val showBoltIcon: Boolean,
-
+        val showFailedContainer: Boolean,
         val showLockIcon: Boolean,
         val timestamp: String,
     ): LayoutState() {
@@ -88,6 +87,10 @@ internal sealed class LayoutState private constructor() {
 
             data class CallInvite(
                 val videoButtonVisible: Boolean
+            ): ContainerSecond()
+
+            data class BotResponse(
+                val html: String
             ): ContainerSecond()
 
             // FileAttachment

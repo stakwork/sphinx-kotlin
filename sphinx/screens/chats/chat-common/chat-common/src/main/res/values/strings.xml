@@ -12,6 +12,8 @@
     <string name="deleted_message_label_text">This message has been deleted</string>
     <string name="join_call_header_label_text">Join call by…</string>
 
+    <string name="failed_message">Failed Message</string>
+
     <!--  Message type placeholder display names  -->
     <string name="placeholder_display_name_message_type_attachment">Attachment Message</string>
     <string name="placeholder_display_name_message_type_bot_response">Bot Response Message</string>
@@ -80,6 +82,7 @@
     <string name="selected_message_menu_item_delete">Delete Message</string>
     <string name="selected_message_menu_item_reply">Reply</string>
     <string name="selected_message_menu_item_save_file">Save File</string>
+    <string name="selected_message_menu_item_resend">Resend</string>
 
     <!-- Notify -->
     <string name="notify_boost_failure">Boost payment failed</string>
