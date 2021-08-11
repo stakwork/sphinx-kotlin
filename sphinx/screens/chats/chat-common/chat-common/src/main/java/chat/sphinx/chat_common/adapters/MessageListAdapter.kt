@@ -214,8 +214,8 @@ internal class MessageListAdapter<ARGS : NavArgs>(
         private val binding: LayoutMessageHolderBinding
     ): RecyclerView.ViewHolder(binding.root) {
 
-        private val holderJobs: ArrayList<Job> = ArrayList(5)
-        private val disposables: ArrayList<Disposable> = ArrayList(3)
+        private val holderJobs: ArrayList<Job> = ArrayList(6)
+        private val disposables: ArrayList<Disposable> = ArrayList(4)
         private var currentViewState: MessageHolderViewState? = null
 
         private val selectedMessageLongClickListener: OnLongClickListener

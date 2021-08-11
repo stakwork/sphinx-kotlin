@@ -97,8 +97,8 @@ abstract class ChatFragment<
 
     private val sendMessageBuilder = SendMessage.Builder()
 
-    private val holderJobs: ArrayList<Job> = ArrayList(3)
-    private val disposables: ArrayList<Disposable> = ArrayList(3)
+    private val holderJobs: ArrayList<Job> = ArrayList(6)
+    private val disposables: ArrayList<Disposable> = ArrayList(4)
 
     override val chatFragmentContext: Context
         get() = binding.root.context

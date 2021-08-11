@@ -1,11 +1,13 @@
 package chat.sphinx.chat_common.ui.viewstate.messageholder
 
+import android.graphics.drawable.Drawable
 import android.view.Gravity
 import android.widget.ImageView
 import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
 import androidx.annotation.MainThread
 import androidx.annotation.StringRes
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
 import androidx.core.text.getSpans
 import androidx.core.text.toSpannable
@@ -21,6 +23,7 @@ import chat.sphinx.chat_common.util.SphinxUrlSpan
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
+import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.concept_meme_server.MemeServerTokenHandler
 import chat.sphinx.concept_network_client_crypto.CryptoHeader
 import chat.sphinx.concept_network_client_crypto.CryptoScheme
@@ -151,11 +154,10 @@ internal fun LayoutMessageHolderBinding.setView(
             setBubbleMessageLinkPreviewLayout(
                 dispatchers,
                 holderJobs,
+                imageLoader,
                 lifecycleScope,
                 viewState
-            ) { imageView, photoUrl ->
-
-            }
+            )
             setBubbleCallInvite(viewState.bubbleCallInvite)
             setBubbleDirectPaymentLayout(viewState.bubbleDirectPayment)
             setBubbleDirectPaymentLayout(viewState.bubbleDirectPayment)
@@ -515,13 +517,15 @@ internal inline fun LayoutMessageHolderBinding.setBubbleMessageLayout(
 internal inline fun LayoutMessageHolderBinding.setBubbleMessageLinkPreviewLayout(
     dispatchers: CoroutineDispatchers,
     holderJobs: ArrayList<Job>,
+    imageLoader: ImageLoader<ImageView>,
     lifecycleScope: CoroutineScope,
     viewState: MessageHolderViewState,
-    setImageUrl: (ImageView, PhotoUrl) -> Unit,
 ) {
     includeMessageHolderBubble.apply {
+        val previewLink = viewState.messageLinkPreview
+
         @Exhaustive
-        when (viewState.messageLinkPreview) {
+        when (previewLink) {
             null -> {
                 includeMessageLinkPreviewContact.root.gone
                 includeMessageLinkPreviewTribe.root.gone
@@ -532,6 +536,33 @@ internal inline fun LayoutMessageHolderBinding.setBubbleMessageLinkPreviewLayout
                 includeMessageLinkPreviewUrl.root.gone
 
                 includeMessageLinkPreviewContact.apply {
+
+                    // TODO: Fix Photo Url setting...
+                    textViewMessageLinkPreviewContactPubkey.text = previewLink.nodeDescriptor.value
+//                    val drawable = AppCompatResources.getDrawable(root.context, R.drawable.ic_add_contact)
+//                    imageViewMessageLinkPreviewContactAvatar.setImageDrawable(drawable)
+
+                    lifecycleScope.launch(dispatchers.mainImmediate) {
+                        val state =
+                            viewState.retrieveLinkPreview() as? LayoutState.Bubble.ContainerThird.LinkPreview.ContactPreview
+
+                        if (state != null) {
+                            textViewMessageLinkPreviewNewContactLabel.text = state.alias?.value ?: ""
+//                            state.photoUrl?.let { nnPhotoUrl ->
+//                                imageLoader.load(
+//                                    imageViewMessageLinkPreviewContactAvatar,
+//                                    nnPhotoUrl.value,
+//                                    ImageLoaderOptions.Builder()
+////                                        .placeholderResId(R.drawable.ic_add_contact)
+//                                        .transformation(Transformation.CircleCrop)
+//                                        .build(),
+//                                )
+//                            }/* ?: imageViewMessageLinkPreviewContactAvatar.setImageDrawable(drawable)*/
+                        }
+                    }.let { job ->
+                        holderJobs.add(job)
+                    }
+
                     root.visible
                 }
             }
@@ -540,6 +571,18 @@ internal inline fun LayoutMessageHolderBinding.setBubbleMessageLinkPreviewLayout
                 includeMessageLinkPreviewUrl.root.gone
 
                 includeMessageLinkPreviewTribe.apply {
+                    lifecycleScope.launch(dispatchers.mainImmediate) {
+                        val state =
+                            viewState.retrieveLinkPreview() as? LayoutState.Bubble.ContainerThird.LinkPreview.TribeLinkPreview
+
+                        if (state != null) {
+
+                        }
+
+                    }.let { job ->
+                        holderJobs.add(job)
+                    }
+
                     root.visible
                 }
             }
@@ -548,6 +591,18 @@ internal inline fun LayoutMessageHolderBinding.setBubbleMessageLinkPreviewLayout
                 includeMessageLinkPreviewTribe.root.gone
 
                 includeMessageLinkPreviewUrl.apply {
+                    lifecycleScope.launch(dispatchers.mainImmediate) {
+                        val state =
+                            viewState.retrieveLinkPreview() as? LayoutState.Bubble.ContainerThird.LinkPreview.HttpUrlPreview
+
+                        if (state != null) {
+
+                        }
+                        
+                    }.let { job ->
+                        holderJobs.add(job)
+                    }
+
                     root.visible
                 }
             }
