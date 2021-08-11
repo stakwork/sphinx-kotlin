@@ -12,7 +12,10 @@ import androidx.navigation.NavArgs
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import app.cash.exhaustive.Exhaustive
 import chat.sphinx.chat_common.databinding.*
+import chat.sphinx.chat_common.model.NodeDescriptor
+import chat.sphinx.chat_common.model.TribeLink
 import chat.sphinx.chat_common.ui.ChatViewModel
 import chat.sphinx.chat_common.ui.isMessageSelected
 import chat.sphinx.chat_common.ui.viewstate.messageholder.*
@@ -307,8 +310,41 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                     }
                 }
             }
-//
-//             TODO: Consider loading URL Previews here...
+
+            binding.includeMessageHolderBubble.apply {
+                includeMessageLinkPreviewContact.apply contact@ {
+                    textViewMessageLinkPreviewAddContactBanner.setOnClickListener {
+                        currentViewState?.messageLinkPreview?.let { preview ->
+                            if (preview is NodeDescriptor) {
+                                viewModel.handleContactTribeLinks(preview.nodeDescriptor.value)
+                            }
+                        }
+                    }
+                    root.setOnClickListener {
+                        currentViewState?.messageLinkPreview?.let { preview ->
+                            if (preview is NodeDescriptor) {
+                                viewModel.handleContactTribeLinks(preview.nodeDescriptor.value)
+                            }
+                        }
+                    }
+                }
+                includeMessageLinkPreviewTribe.apply tribe@ {
+                    textViewMessageLinkPreviewTribeSeeBanner.setOnClickListener {
+                        currentViewState?.messageLinkPreview?.let { preview ->
+                            if (preview is TribeLink) {
+                                viewModel.handleContactTribeLinks(preview.tribeJoinLink.value)
+                            }
+                        }
+                    }
+                    root.setOnClickListener {
+                        currentViewState?.messageLinkPreview?.let { preview ->
+                            if (preview is TribeLink) {
+                                viewModel.handleContactTribeLinks(preview.tribeJoinLink.value)
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         private fun processMemberRequest(contactId: ContactId, messageId: MessageId, type: MessageType.GroupAction) {
