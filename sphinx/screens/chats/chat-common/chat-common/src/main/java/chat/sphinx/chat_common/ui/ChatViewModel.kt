@@ -105,7 +105,6 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     protected val contactRepository: ContactRepository,
     protected val messageRepository: MessageRepository,
     protected val networkQueryLightning: NetworkQueryLightning,
-//    protected val networkQueryChat: NetworkQueryChat,
     protected val mediaCacheHandler: MediaCacheHandler,
     protected val savedStateHandle: SavedStateHandle,
     protected val cameraCoordinator: ViewModelCoordinator<CameraRequest, CameraResponse>,
@@ -352,22 +351,6 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         SharingStarted.WhileSubscribed(5_000),
         emptyList()
     )
-
-//    fun getChatTribe(tribeJoinLink: TribeJoinLink): Flow<Chat?> {
-//        return chatRepository.getChatByUUID(ChatUUID(tribeJoinLink.tribeUUID))
-//    }
-//
-//    fun getTribeInfo(tribeJoinLink: TribeJoinLink): Flow<LoadResponse<TribeDto, ResponseError>> {
-//        return networkQueryChat.getTribeInfo(ChatHost(tribeJoinLink.tribeHost), ChatUUID(tribeJoinLink.tribeUUID))
-//    }
-//
-//    fun getContact(lightningNodePubKey: LightningNodePubKey): Flow<Contact?> {
-//        return contactRepository.getContactByPubKey(lightningNodePubKey)
-//    }
-//
-//    fun getUrlMetaData(url: String): Flow<LoadResponse<String, ResponseError>> {
-//        return networkQueryChat.getHtml(url)
-//    }
 
     private suspend fun handleLinkPreview(link: MessageLinkPreview): LayoutState.Bubble.ContainerThird.LinkPreview? {
         var preview: LayoutState.Bubble.ContainerThird.LinkPreview? = null

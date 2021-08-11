@@ -49,18 +49,4 @@ open class SphinxUrlSpan(
             return onLongClickListener.onLongClick(view)
         }
     }
-
-    interface PreviewHandler {
-        fun populateContactPreview(lightningNodePubKey: LightningNodePubKey, layoutMessageLinkPreviewContactBinding: LayoutMessageLinkPreviewContactBinding)
-
-        fun populateContactPreview(virtualLightningNodeAddress: VirtualLightningNodeAddress, layoutMessageLinkPreviewContactBinding: LayoutMessageLinkPreviewContactBinding) {
-            virtualLightningNodeAddress.getPubKey()?.let { lightningNodePubKey ->
-                populateContactPreview(lightningNodePubKey, layoutMessageLinkPreviewContactBinding)
-            }
-        }
-
-        fun populateTribePreview(tribeJoinLink: TribeJoinLink, layoutMessageLinkPreviewTribeBinding: LayoutMessageLinkPreviewTribeBinding)
-
-        fun populateUrlPreview(url: String, layoutMessageLinkPreviewUrlBinding: LayoutMessageLinkPreviewUrlBinding)
-    }
 }
