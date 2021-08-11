@@ -87,6 +87,10 @@ internal sealed class LayoutState private constructor() {
                 val videoButtonVisible: Boolean
             ): ContainerSecond()
 
+            data class BotResponse(
+                val html: String
+            ): ContainerSecond()
+
             // FileAttachment
             // AudioAttachment
             // VideoAttachment

@@ -1,6 +1,8 @@
 package chat.sphinx.chat_common.ui.viewstate.messageholder
 
 import android.view.Gravity
+import android.webkit.WebView
+import android.webkit.WebViewClient
 import android.view.View
 import android.widget.ImageView
 import androidx.annotation.ColorRes
@@ -20,9 +22,7 @@ import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_meme_server.MemeServerTokenHandler
 import chat.sphinx.concept_network_client_crypto.CryptoHeader
 import chat.sphinx.concept_network_client_crypto.CryptoScheme
-import chat.sphinx.resources.getString
-import chat.sphinx.resources.setBackgroundRandomColor
-import chat.sphinx.resources.setTextColorExt
+import chat.sphinx.resources.*
 import chat.sphinx.wrapper_chat.ChatType
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_meme_server.headerKey
@@ -140,6 +140,7 @@ internal fun LayoutMessageHolderBinding.setView(
             setUnsupportedMessageTypeLayout(viewState.unsupportedMessageType)
             setBubbleMessageLayout(viewState.bubbleMessage, onSphinxInteractionListener)
             setBubbleCallInvite(viewState.bubbleCallInvite)
+            setBubbleBotResponse(viewState.bubbleBotResponse)
             setBubbleDirectPaymentLayout(viewState.bubbleDirectPayment)
             setBubbleDirectPaymentLayout(viewState.bubbleDirectPayment)
             setBubblePodcastBoost(viewState.bubblePodcastBoost)
@@ -229,9 +230,6 @@ internal inline fun LayoutMessageHolderBinding.setUnsupportedMessageTypeLayout(
                 MessageType.Attachment -> {
                     getString(R.string.placeholder_display_name_message_type_attachment)
                 }
-                MessageType.BotRes -> {
-                    getString(R.string.placeholder_display_name_message_type_bot_response)
-                }
                 MessageType.Invoice -> {
                     getString(R.string.placeholder_display_name_message_type_invoice)
                 }
@@ -261,6 +259,7 @@ internal inline fun LayoutMessageHolderBinding.setUnsupportedMessageTypeLayout(
                 MessageType.QueryResponse,
                 MessageType.Repayment,
                 MessageType.Boost,
+                MessageType.BotRes,
                 MessageType.BotCmd,
                 MessageType.BotInstall,
                 is MessageType.Unknown -> {
@@ -503,6 +502,35 @@ internal inline fun LayoutMessageHolderBinding.setBubbleCallInvite(
         } else {
             root.visible
             layoutConstraintCallInviteJoinByVideo.goneIfFalse(callInvite.videoButtonVisible)
+        }
+    }
+}
+
+@MainThread
+@Suppress("NOTHING_TO_INLINE")
+internal inline fun LayoutMessageHolderBinding.setBubbleBotResponse(
+    botResponse: LayoutState.Bubble.ContainerSecond.BotResponse?
+) {
+    includeMessageHolderBubble.includeMessageTypeBotResponse.apply {
+        if (botResponse == null) {
+            root.gone
+        } else {
+            root.visible
+
+            val textColorString = getColorHexCode(R.color.text)
+            val backgroundColorString = getColorHexCode(R.color.receivedMsgBG)
+
+            val htmlPrefix = "<head><meta name=\"viewport\" content=\"width=device-width, height=device-height, shrink-to-fit=YES\"></head><body style=\"font-family: 'Roboto', sans-serif; color: $textColorString; margin:0px !important; padding:0px!important; background: $backgroundColorString;\"><div id=\"bot-response-container\" style=\"background: $backgroundColorString;\">"
+            val htmlSuffix = "</div></body>"
+            val contentHtml = htmlPrefix + botResponse.html + htmlSuffix
+
+            webViewMessageTypeBotResponse.loadDataWithBaseURL(
+                null,
+                contentHtml,
+                "text/html",
+                "utf-8",
+                null
+            )
         }
     }
 }
