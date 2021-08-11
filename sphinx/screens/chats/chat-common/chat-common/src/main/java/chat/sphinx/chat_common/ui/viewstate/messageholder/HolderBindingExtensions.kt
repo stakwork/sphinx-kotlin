@@ -1,7 +1,6 @@
 package chat.sphinx.chat_common.ui.viewstate.messageholder
 
 import android.view.Gravity
-import android.view.View
 import android.widget.ImageView
 import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
@@ -52,7 +51,6 @@ internal fun LayoutMessageHolderBinding.setView(
     memeServerTokenHandler: MemeServerTokenHandler,
     recyclerViewWidth: Px,
     viewState: MessageHolderViewState,
-    longClickListener: View.OnLongClickListener? = null,
     onSphinxInteractionListener: SphinxUrlSpan.OnInteractionListener? = null
 ) {
     for (job in holderJobs) {
@@ -81,7 +79,7 @@ internal fun LayoutMessageHolderBinding.setView(
 
         setStatusHeader(viewState.statusHeader)
         setDeletedMessageLayout(viewState.deletedMessage)
-        setBubbleBackground(viewState, recyclerViewWidth, longClickListener)
+        setBubbleBackground(viewState, recyclerViewWidth)
         setGroupActionIndicatorLayout(viewState.groupActionIndicator)
 
         if (viewState.background !is BubbleBackground.Gone) {
@@ -311,7 +309,6 @@ internal inline fun LayoutMessageHolderBinding.setBubbleDirectPaymentLayout(
 internal fun LayoutMessageHolderBinding.setBubbleBackground(
     viewState: MessageHolderViewState,
     holderWidth: Px,
-    longClickListener: View.OnLongClickListener?
 ) {
     if (viewState.background is BubbleBackground.Gone) {
 
@@ -325,8 +322,6 @@ internal fun LayoutMessageHolderBinding.setBubbleBackground(
 
         includeMessageHolderBubble.root.apply {
             visible
-
-            setOnLongClickListener(longClickListener)
 
             @DrawableRes
             val resId: Int? = when (viewState.background) {
