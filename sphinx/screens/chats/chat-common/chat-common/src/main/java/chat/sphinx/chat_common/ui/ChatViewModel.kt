@@ -17,6 +17,7 @@ import chat.sphinx.camera_view_model_coordinator.request.CameraRequest
 import chat.sphinx.camera_view_model_coordinator.response.CameraResponse
 import chat.sphinx.chat_common.BuildConfig
 import chat.sphinx.chat_common.R
+import chat.sphinx.chat_common.model.MessageLinkPreview
 import chat.sphinx.chat_common.navigation.ChatNavigator
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
 import chat.sphinx.chat_common.ui.viewstate.attachment.AttachmentSendViewState
@@ -24,6 +25,7 @@ import chat.sphinx.chat_common.ui.viewstate.footer.FooterViewState
 import chat.sphinx.chat_common.ui.viewstate.header.ChatHeaderViewState
 import chat.sphinx.chat_common.ui.viewstate.menu.ChatMenuViewState
 import chat.sphinx.chat_common.ui.viewstate.messageholder.BubbleBackground
+import chat.sphinx.chat_common.ui.viewstate.messageholder.LayoutState
 import chat.sphinx.chat_common.ui.viewstate.messageholder.MessageHolderViewState
 import chat.sphinx.chat_common.ui.viewstate.messagereply.MessageReplyViewState
 import chat.sphinx.chat_common.ui.viewstate.selected.SelectedMessageViewState
@@ -284,7 +286,8 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                                         }
                                     }
                                 },
-                                accountOwner = { owner }
+                                accountOwner = { owner },
+                                previewProvider = { handleLinkPreview(it) },
                             )
                         )
                     } else {
@@ -328,7 +331,8 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                                         }
                                     }
                                 },
-                                accountOwner = { owner }
+                                accountOwner = { owner },
+                                previewProvider = { link -> handleLinkPreview(link) },
                             )
                         )
                     }
@@ -342,6 +346,16 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         SharingStarted.WhileSubscribed(5_000),
         emptyList()
     )
+
+    private suspend fun handleLinkPreview(link: MessageLinkPreview): LayoutState.Bubble.ContainerThird.LinkPreview? {
+        var preview: LayoutState.Bubble.ContainerThird.LinkPreview? = null
+
+        viewModelScope.launch(mainImmediate) {
+            // TODO: Implement
+        }.join()
+
+        return preview
+    }
 
     fun init() {
         // Prime our states immediately so they're already

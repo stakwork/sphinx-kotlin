@@ -1,5 +1,6 @@
 package chat.sphinx.chat_common.ui.viewstate.messageholder
 
+import chat.sphinx.chat_common.model.MessageLinkPreview
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
 import chat.sphinx.chat_common.ui.viewstate.selected.MenuItemState
 import chat.sphinx.chat_common.util.SphinxLinkify
@@ -8,15 +9,16 @@ import chat.sphinx.wrapper_chat.isConversation
 import chat.sphinx.wrapper_chat.isTribeOwnedByAccount
 import chat.sphinx.wrapper_common.chatTimeFormat
 import chat.sphinx.wrapper_common.lightning.Sat
-import chat.sphinx.wrapper_common.message.toSphinxCallLink
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message_media.MessageMedia
 import chat.sphinx.wrapper_message_media.isImage
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 // TODO: Remove
 inline val Message.isCopyLinkAllowed: Boolean
-    get() = retrieveTextToShow(checkForJitsiLink = false)?.let {
+    get() = retrieveTextToShow()?.let {
         SphinxLinkify.SphinxPatterns.COPYABLE_LINKS.matcher(it).find()
     } ?: false
 
@@ -34,8 +36,9 @@ internal sealed class MessageHolderViewState(
     chat: Chat,
     val background: BubbleBackground,
     val initialHolder: InitialHolderViewState,
-    val messageSenderName: (Message) -> String,
-    val accountOwner: () -> Contact,
+    private val messageSenderName: (Message) -> String,
+    private val accountOwner: () -> Contact,
+    private val previewProvider: suspend (link: MessageLinkPreview) -> LayoutState.Bubble.ContainerThird.LinkPreview?,
 ) {
 
     companion object {
@@ -240,6 +243,22 @@ internal sealed class MessageHolderViewState(
         }
     }
 
+    val messageLinkPreview: MessageLinkPreview? by lazy {
+        MessageLinkPreview.parse(bubbleMessage)
+    }
+
+    @Volatile
+    private var linkPreviewLayoutState: LayoutState.Bubble.ContainerThird.LinkPreview? = null
+    private val previewLock = Mutex()
+    suspend fun retrieveLinkPreview(): LayoutState.Bubble.ContainerThird.LinkPreview? {
+        return messageLinkPreview?.let { nnPreview ->
+            linkPreviewLayoutState ?: previewLock.withLock {
+                linkPreviewLayoutState ?: previewProvider.invoke(nnPreview)
+                    ?.also { linkPreviewLayoutState = it }
+            }
+        }
+    }
+
     val selectionMenuItems: List<MenuItemState>? by lazy(LazyThreadSafetyMode.NONE) {
         if (
             background is BubbleBackground.Gone         ||
@@ -286,6 +305,7 @@ internal sealed class MessageHolderViewState(
         background: BubbleBackground,
         replyMessageSenderName: (Message) -> String,
         accountOwner: () -> Contact,
+        previewProvider: suspend (link: MessageLinkPreview) -> LayoutState.Bubble.ContainerThird.LinkPreview?,
     ) : MessageHolderViewState(
         message,
         chat,
@@ -293,6 +313,7 @@ internal sealed class MessageHolderViewState(
         InitialHolderViewState.None,
         replyMessageSenderName,
         accountOwner,
+        previewProvider,
     )
 
     class Received(
@@ -302,6 +323,7 @@ internal sealed class MessageHolderViewState(
         initialHolder: InitialHolderViewState,
         replyMessageSenderName: (Message) -> String,
         accountOwner: () -> Contact,
+        previewProvider: suspend (link: MessageLinkPreview) -> LayoutState.Bubble.ContainerThird.LinkPreview?,
     ) : MessageHolderViewState(
         message,
         chat,
@@ -309,5 +331,6 @@ internal sealed class MessageHolderViewState(
         initialHolder,
         replyMessageSenderName,
         accountOwner,
+        previewProvider,
     )
 }
