@@ -12,6 +12,8 @@
     <string name="deleted_message_label_text">Este mensaje ha sido eliminado</string>
     <string name="join_call_header_label_text">Unirse mediante…</string>
 
+    <string name="failed_message">Mensaje Fallido</string>
+
     <!--  Message type placeholder display names  -->
     <string name="placeholder_display_name_message_type_attachment">Mensaje de Archivo</string>
     <string name="placeholder_display_name_message_type_bot_response">Mensaje de Respuesta de Bot</string>
@@ -35,6 +37,8 @@
     <!-- Link Previews -->
     <string name="link_preview_add_contact_banner_label">Agregar Contacto</string>
     <string name="link_preview_see_tribe_banner_label">Ver Tribu</string>
+    <string name="link_preview_view_contact">Ver contacto</string>
+    <string name="link_preview_failed_to_load">No se pudo cargar la vista previa del enlace</string>
 
     <!-- Replies -->
     <string name="reply_message_media_content_description">Contenido del mensaje original</string>
@@ -79,11 +83,14 @@
     <string name="selected_message_menu_item_delete">Eliminar Mensaje</string>
     <string name="selected_message_menu_item_reply">Responder</string>
     <string name="selected_message_menu_item_save_file">Descargar</string>
+    <string name="selected_message_menu_item_resend">Reenviar</string>
 
     <!-- Notify -->
     <string name="notify_boost_failure">Pago de Boost falló</string>
     <string name="side_effect_text_copied">Texto copiado al portapapeles</string>
     <string name="side_effect_call_link_copied">Enlace de llamada copiado al portapapeles</string>
+    <string name="side_effect_link_copied">Copiado %s</string>
+    <string name="side_effect_no_link_to_copy">Sin enlace para copiar</string>
 
     <!-- Send Attachment -->
     <string name="attachment_send_header_image">ENVIAR IMAGEN</string>

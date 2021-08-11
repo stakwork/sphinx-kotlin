@@ -24,12 +24,17 @@ import chat.sphinx.concept_service_media.MediaPlayerServiceController
 import chat.sphinx.concept_service_media.MediaPlayerServiceState
 import chat.sphinx.concept_service_media.UserAction
 import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
-import chat.sphinx.kotlin_response.*
+import chat.sphinx.kotlin_response.LoadResponse
+import chat.sphinx.kotlin_response.Response
+import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.podcast_player.objects.toParcelablePodcast
 import chat.sphinx.podcast_player.ui.getMediaDuration
 import chat.sphinx.resources.getRandomColor
-import chat.sphinx.wrapper_chat.*
+import chat.sphinx.wrapper_chat.Chat
+import chat.sphinx.wrapper_chat.ChatName
+import chat.sphinx.wrapper_chat.isTribe
+import chat.sphinx.wrapper_chat.isTribeOwnedByAccount
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.Sat
@@ -45,6 +50,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
+import chat.sphinx.concept_link_preview.LinkPreviewHandler
 import io.matthewnelson.concept_media_cache.MediaCacheHandler
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import kotlinx.coroutines.delay
@@ -70,6 +76,7 @@ internal class ChatTribeViewModel @Inject constructor(
     mediaCacheHandler: MediaCacheHandler,
     savedStateHandle: SavedStateHandle,
     cameraViewModelCoordinator: ViewModelCoordinator<CameraRequest, CameraResponse>,
+    linkPreviewHandler: LinkPreviewHandler,
     LOG: SphinxLogger,
     private val mediaPlayerServiceController: MediaPlayerServiceController,
 ): ChatViewModel<ChatTribeFragmentArgs>(
@@ -84,6 +91,7 @@ internal class ChatTribeViewModel @Inject constructor(
     mediaCacheHandler,
     savedStateHandle,
     cameraViewModelCoordinator,
+    linkPreviewHandler,
     LOG,
 ), MediaPlayerServiceController.MediaServiceListener
 {

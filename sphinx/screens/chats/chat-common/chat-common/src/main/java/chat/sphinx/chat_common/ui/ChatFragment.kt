@@ -97,8 +97,8 @@ abstract class ChatFragment<
 
     private val sendMessageBuilder = SendMessage.Builder()
 
-    private val holderJobs: ArrayList<Job> = ArrayList(3)
-    private val disposables: ArrayList<Disposable> = ArrayList(3)
+    private val holderJobs: ArrayList<Job> = ArrayList(6)
+    private val disposables: ArrayList<Disposable> = ArrayList(4)
 
     override val chatFragmentContext: Context
         get() = binding.root.context
@@ -420,7 +420,7 @@ abstract class ChatFragment<
                                 // TODO: Implement
                             }
                             is MenuItemState.CopyLink -> {
-                                // TODO: Implement
+                                viewModel.copyMessageLink(holderState.message)
                             }
                             is MenuItemState.CopyText -> {
                                 viewModel.copyMessageText(holderState.message)
@@ -433,6 +433,9 @@ abstract class ChatFragment<
                             }
                             is MenuItemState.SaveFile -> {
                                 // TODO: Implement
+                            }
+                            is MenuItemState.Resend -> {
+                                viewModel.resendMessage(holderState.message)
                             }
                         }
                     }

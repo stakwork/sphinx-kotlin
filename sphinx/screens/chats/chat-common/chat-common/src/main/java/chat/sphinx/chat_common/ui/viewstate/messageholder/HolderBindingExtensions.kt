@@ -6,24 +6,27 @@ import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
 import androidx.annotation.MainThread
 import androidx.annotation.StringRes
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
 import androidx.core.view.updateLayoutParams
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.chat_common.R
 import chat.sphinx.chat_common.databinding.LayoutMessageHolderBinding
+import chat.sphinx.chat_common.model.NodeDescriptor
+import chat.sphinx.chat_common.model.TribeLink
+import chat.sphinx.chat_common.model.UnspecifiedUrl
 import chat.sphinx.chat_common.util.SphinxLinkify
 import chat.sphinx.chat_common.util.SphinxUrlSpan
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
+import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.concept_meme_server.MemeServerTokenHandler
 import chat.sphinx.concept_network_client_crypto.CryptoHeader
 import chat.sphinx.concept_network_client_crypto.CryptoScheme
-import chat.sphinx.resources.getString
-import chat.sphinx.resources.setBackgroundRandomColor
-import chat.sphinx.resources.setTextColorExt
+import chat.sphinx.resources.*
 import chat.sphinx.wrapper_chat.ChatType
-import chat.sphinx.wrapper_common.lightning.asFormattedString
+import chat.sphinx.wrapper_common.lightning.*
 import chat.sphinx.wrapper_meme_server.headerKey
 import chat.sphinx.wrapper_meme_server.headerValue
 import chat.sphinx.wrapper_message.MessageType
@@ -31,6 +34,7 @@ import chat.sphinx.wrapper_message_media.MessageMedia
 import chat.sphinx.wrapper_view.Px
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
+import io.matthewnelson.android_feature_screens.util.goneIfTrue
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.CoroutineScope
@@ -51,7 +55,7 @@ internal fun LayoutMessageHolderBinding.setView(
     memeServerTokenHandler: MemeServerTokenHandler,
     recyclerViewWidth: Px,
     viewState: MessageHolderViewState,
-    onSphinxInteractionListener: SphinxUrlSpan.OnInteractionListener? = null
+    onSphinxInteractionListener: SphinxUrlSpan.OnInteractionListener? = null,
 ) {
     for (job in holderJobs) {
         job.cancel()
@@ -138,7 +142,15 @@ internal fun LayoutMessageHolderBinding.setView(
             }
             setUnsupportedMessageTypeLayout(viewState.unsupportedMessageType)
             setBubbleMessageLayout(viewState.bubbleMessage, onSphinxInteractionListener)
+            setBubbleMessageLinkPreviewLayout(
+                dispatchers,
+                holderJobs,
+                imageLoader,
+                lifecycleScope,
+                viewState
+            )
             setBubbleCallInvite(viewState.bubbleCallInvite)
+            setBubbleBotResponse(viewState.bubbleBotResponse)
             setBubbleDirectPaymentLayout(viewState.bubbleDirectPayment)
             setBubbleDirectPaymentLayout(viewState.bubbleDirectPayment)
             setBubblePodcastBoost(viewState.bubblePodcastBoost)
@@ -228,9 +240,6 @@ internal inline fun LayoutMessageHolderBinding.setUnsupportedMessageTypeLayout(
                 MessageType.Attachment -> {
                     getString(R.string.placeholder_display_name_message_type_attachment)
                 }
-                MessageType.BotRes -> {
-                    getString(R.string.placeholder_display_name_message_type_bot_response)
-                }
                 MessageType.Invoice -> {
                     getString(R.string.placeholder_display_name_message_type_invoice)
                 }
@@ -260,6 +269,7 @@ internal inline fun LayoutMessageHolderBinding.setUnsupportedMessageTypeLayout(
                 MessageType.QueryResponse,
                 MessageType.Repayment,
                 MessageType.Boost,
+                MessageType.BotRes,
                 MessageType.BotCmd,
                 MessageType.BotInstall,
                 is MessageType.Unknown -> {
@@ -311,7 +321,6 @@ internal fun LayoutMessageHolderBinding.setBubbleBackground(
     holderWidth: Px,
 ) {
     if (viewState.background is BubbleBackground.Gone) {
-
         includeMessageHolderBubble.root.gone
         receivedBubbleArrow.gone
         sentBubbleArrow.gone
@@ -372,14 +381,16 @@ internal fun LayoutMessageHolderBinding.setBubbleBackground(
         @Exhaustive
         when (viewState) {
             is MessageHolderViewState.Received -> {
+                val avatarImageSpace = root
+                    .context
+                    .resources
+                    .getDimensionPixelSize(R.dimen.message_holder_space_width_left)
+
                 spaceMessageHolderLeft.updateLayoutParams {
-                    width = root
-                        .context
-                        .resources
-                        .getDimensionPixelSize(R.dimen.message_holder_space_width_left)
+                    width = avatarImageSpace
                 }
                 spaceMessageHolderRight.updateLayoutParams {
-                    width = (holderWidth.value * BubbleBackground.SPACE_WIDTH_MULTIPLE).toInt()
+                    width = (holderWidth.value * BubbleBackground.SPACE_WIDTH_MULTIPLE).toInt() - (avatarImageSpace / 2)
                 }
             }
             is MessageHolderViewState.Sent -> {
@@ -435,8 +446,10 @@ internal inline fun LayoutMessageHolderBinding.setStatusHeader(
 
             if (statusHeader.showSent) {
                 textViewMessageStatusSentTimestamp.text = statusHeader.timestamp
-                textViewMessageStatusSentBoltIcon.goneIfFalse(statusHeader.showBoltIcon)
                 textViewMessageStatusSentLockIcon.goneIfFalse(statusHeader.showLockIcon)
+                progressBarMessageStatusSending.goneIfFalse(statusHeader.showSendingIcon)
+                textViewMessageStatusSentBoltIcon.goneIfFalse(statusHeader.showBoltIcon)
+                layoutConstraintMessageStatusSentFailedContainer.goneIfFalse(statusHeader.showFailedContainer)
             } else {
                 textViewMessageStatusReceivedTimestamp.text = statusHeader.timestamp
                 textViewMessageStatusReceivedLockIcon.goneIfFalse(statusHeader.showLockIcon)
@@ -491,6 +504,220 @@ internal inline fun LayoutMessageHolderBinding.setBubbleMessageLayout(
 }
 
 @MainThread
+internal fun LayoutMessageHolderBinding.setBubbleMessageLinkPreviewLayout(
+    dispatchers: CoroutineDispatchers,
+    holderJobs: ArrayList<Job>,
+    imageLoader: ImageLoader<ImageView>,
+    lifecycleScope: CoroutineScope,
+    viewState: MessageHolderViewState,
+) {
+    includeMessageHolderBubble.apply {
+        val previewLink = viewState.messageLinkPreview
+
+        val placeHolderAndTextColor = ContextCompat.getColor(
+            root.context,
+            if (viewState.isReceived) R.color.secondaryText else R.color.secondaryTextSent
+        )
+
+        @Exhaustive
+        when (previewLink) {
+            null -> {
+                includeMessageLinkPreviewContact.root.gone
+                includeMessageLinkPreviewTribe.root.gone
+                includeMessageLinkPreviewUrl.root.gone
+            }
+            is NodeDescriptor -> {
+                includeMessageLinkPreviewTribe.root.gone
+                includeMessageLinkPreviewUrl.root.gone
+
+                includeMessageLinkPreviewContact.apply {
+                    textViewMessageLinkPreviewContactPubkey.text = previewLink.nodeDescriptor.value
+                    textViewMessageLinkPreviewContactPubkey.setTextColor(placeHolderAndTextColor)
+
+                    imageViewMessageLinkPreviewQrInviteIcon.setColorFilter(placeHolderAndTextColor, android.graphics.PorterDuff.Mode.SRC_IN)
+
+                    imageViewMessageLinkPreviewContactAvatar.setColorFilter(placeHolderAndTextColor, android.graphics.PorterDuff.Mode.SRC_IN)
+                    imageViewMessageLinkPreviewContactAvatar.setImageDrawable(
+                        AppCompatResources.getDrawable(root.context, R.drawable.ic_add_contact)
+                    )
+
+                    viewLinkPreviewTribeDashedBorder.background = AppCompatResources.getDrawable(
+                        root.context,
+                        if (viewState.isReceived) R.drawable.background_received_rounded_corner_dashed_border_button else R.drawable.background_sent_rounded_corner_dashed_border_button
+                    )
+
+                    lifecycleScope.launch(dispatchers.mainImmediate) {
+                        val state =
+                            viewState.retrieveLinkPreview() as? LayoutState.Bubble.ContainerThird.LinkPreview.ContactPreview
+
+                        if (state != null) {
+                            textViewMessageLinkPreviewNewContactLabel.text = state.alias?.value ?: getString(R.string.new_contact)
+                            state.photoUrl?.let { nnPhotoUrl ->
+
+                                imageViewMessageLinkPreviewContactAvatar.clearColorFilter()
+
+                                launch {
+                                    imageLoader.load(
+                                        imageViewMessageLinkPreviewContactAvatar,
+                                        nnPhotoUrl.value,
+                                        ImageLoaderOptions.Builder()
+                                            .placeholderResId(R.drawable.ic_add_contact)
+                                            .transformation(Transformation.CircleCrop)
+                                            .build(),
+                                    )
+                                }.let { job ->
+                                    holderJobs.add(job)
+                                }
+                            }
+                            layoutConstraintLinkPreviewContactDashedBorder.goneIfFalse(state.showBanner)
+                            textViewMessageLinkPreviewAddContactBanner.goneIfFalse(state.showBanner)
+                        }
+                    }.let { job ->
+                        holderJobs.add(job)
+                    }
+
+                    root.visible
+                }
+            }
+            is TribeLink -> {
+                includeMessageLinkPreviewContact.root.gone
+                includeMessageLinkPreviewUrl.root.gone
+
+                includeMessageLinkPreviewTribe.apply {
+
+                    // reset view
+                    textViewMessageLinkPreviewTribeDescription.gone
+                    textViewMessageLinkPreviewTribeNameLabel.gone
+                    textViewMessageLinkPreviewTribeSeeBanner.gone
+
+                    imageViewMessageLinkPreviewTribe.setColorFilter(placeHolderAndTextColor, android.graphics.PorterDuff.Mode.SRC_IN)
+
+                    imageViewMessageLinkPreviewTribe.setImageDrawable(
+                        AppCompatResources.getDrawable(root.context, R.drawable.ic_tribe)
+                    )
+
+                    viewLinkPreviewTribeDashedBorder.background = AppCompatResources.getDrawable(
+                        root.context,
+                        if (viewState.isReceived) R.drawable.background_received_rounded_corner_dashed_border_button else R.drawable.background_sent_rounded_corner_dashed_border_button
+                    )
+
+                    lifecycleScope.launch(dispatchers.mainImmediate) {
+                        val state =
+                            viewState.retrieveLinkPreview() as? LayoutState.Bubble.ContainerThird.LinkPreview.TribeLinkPreview
+
+                        if (state != null) {
+                            textViewMessageLinkPreviewTribeDescription.apply desc@ {
+                                this@desc.text = state.description?.value
+                                this@desc.goneIfTrue(state.description == null)
+                            }
+                            textViewMessageLinkPreviewTribeDescription.setTextColor(placeHolderAndTextColor)
+
+                            textViewMessageLinkPreviewTribeNameLabel.apply name@ {
+                                this@name.text = state.name.value
+                                this@name.visible
+                            }
+
+                            state.imageUrl?.let { url ->
+                                imageViewMessageLinkPreviewTribe.clearColorFilter()
+
+                                launch {
+                                    imageLoader.load(
+                                        imageViewMessageLinkPreviewTribe,
+                                        url.value,
+                                        ImageLoaderOptions.Builder()
+                                            .placeholderResId(R.drawable.ic_tribe)
+                                            .transformation(Transformation.RoundedCorners(Px(5f),Px(5f),Px(5f),Px(5f)))
+                                            .build(),
+                                    )
+                                }.let { job ->
+                                    holderJobs.add(job)
+                                }
+                            }
+
+                            layoutConstraintLinkPreviewTribeDashedBorder.goneIfFalse(state.showBanner)
+                            textViewMessageLinkPreviewTribeSeeBanner.goneIfFalse(state.showBanner)
+                        }
+
+                    }.let { job ->
+                        holderJobs.add(job)
+                    }
+
+                    root.visible
+                }
+            }
+            is UnspecifiedUrl -> {
+                includeMessageLinkPreviewContact.root.gone
+                includeMessageLinkPreviewTribe.root.gone
+
+                includeMessageLinkPreviewUrl.apply {
+
+                    // reset view
+                    textViewMessageLinkPreviewUrlDomain.gone
+                    textViewMessageLinkPreviewUrlDescription.gone
+                    textViewMessageLinkPreviewUrlTitle.gone
+                    imageViewMessageLinkPreviewUrlFavicon.gone
+                    imageViewMessageLinkPreviewUrlMainImage.gone
+
+                    lifecycleScope.launch(dispatchers.mainImmediate) {
+                        progressBarLinkPreview.visible
+
+                        val state =
+                            viewState.retrieveLinkPreview() as? LayoutState.Bubble.ContainerThird.LinkPreview.HttpUrlPreview
+
+                        if (state != null) {
+                            textViewMessageLinkPreviewUrlDomain.apply domain@ {
+                                this@domain.text = state.domainHost.value
+                                this@domain.visible
+                            }
+                            textViewMessageLinkPreviewUrlDescription.apply desc@ {
+                                this@desc.text = state.description?.value
+                                this@desc.goneIfTrue(state.description == null)
+                            }
+                            textViewMessageLinkPreviewUrlTitle.apply title@ {
+                                this@title.text = state.title?.value
+                                this@title.goneIfTrue( state.title == null)
+                            }
+                            imageViewMessageLinkPreviewUrlFavicon.apply favIcon@ {
+                                state.favIconUrl?.let { url ->
+                                    launch {
+                                        imageLoader.load(
+                                            imageView = this@favIcon,
+                                            url = url.value,
+                                        )
+                                    }.let { job ->
+                                        holderJobs.add(job)
+                                    }
+                                    this@favIcon.visible
+                                }
+                            }
+                            imageViewMessageLinkPreviewUrlMainImage.apply main@ {
+                                state.imageUrl?.let { url ->
+                                    launch {
+                                        imageLoader.load(
+                                            imageView = this@main,
+                                            url = url.value,
+                                        )
+                                    }.let { job ->
+                                        holderJobs.add(job)
+                                    }
+                                    this@main.visible
+                                }
+                            }
+
+                            progressBarLinkPreview.gone
+                        }
+                    }.let { job ->
+                        holderJobs.add(job)
+                    }
+
+                    root.visible
+                }
+            }
+        }
+    }
+}
+
+@MainThread
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun LayoutMessageHolderBinding.setBubbleCallInvite(
     callInvite: LayoutState.Bubble.ContainerSecond.CallInvite?
@@ -501,6 +728,35 @@ internal inline fun LayoutMessageHolderBinding.setBubbleCallInvite(
         } else {
             root.visible
             layoutConstraintCallInviteJoinByVideo.goneIfFalse(callInvite.videoButtonVisible)
+        }
+    }
+}
+
+@MainThread
+@Suppress("NOTHING_TO_INLINE")
+internal inline fun LayoutMessageHolderBinding.setBubbleBotResponse(
+    botResponse: LayoutState.Bubble.ContainerSecond.BotResponse?
+) {
+    includeMessageHolderBubble.includeMessageTypeBotResponse.apply {
+        if (botResponse == null) {
+            root.gone
+        } else {
+            root.visible
+
+            val textColorString = getColorHexCode(R.color.text)
+            val backgroundColorString = getColorHexCode(R.color.receivedMsgBG)
+
+            val htmlPrefix = "<head><meta name=\"viewport\" content=\"width=device-width, height=device-height, shrink-to-fit=YES\"></head><body style=\"font-family: 'Roboto', sans-serif; color: $textColorString; margin:0px !important; padding:0px!important; background: $backgroundColorString;\"><div id=\"bot-response-container\" style=\"background: $backgroundColorString;\">"
+            val htmlSuffix = "</div></body>"
+            val contentHtml = htmlPrefix + botResponse.html + htmlSuffix
+
+            webViewMessageTypeBotResponse.loadDataWithBaseURL(
+                null,
+                contentHtml,
+                "text/html",
+                "utf-8",
+                null
+            )
         }
     }
 }

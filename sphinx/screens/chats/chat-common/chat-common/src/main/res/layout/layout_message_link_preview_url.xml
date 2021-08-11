@@ -3,65 +3,121 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/web_link_preview_holder_height"
-    android:paddingHorizontal="@dimen/chat_message_inner_padding"
+    android:layout_height="wrap_content"
     android:visibility="gone"
-    tools:visibility="visible">
+    tools:visibility="visible"
+    tools:background="@color/body">
 
-    <!-- Website Favicon -->
-    <androidx.appcompat.widget.AppCompatImageView
-        android:id="@+id/image_view_message_link_preview_url_favicon"
-        android:layout_width="20dp"
-        android:layout_height="20dp"
-        android:layout_marginEnd="@dimen/default_status_badge_inner_padding"
-        android:scaleType="fitCenter"
-        app:layout_constraintBottom_toBottomOf="@+id/text_view_message_link_preview_url_title"
-        app:layout_constraintEnd_toStartOf="@+id/text_view_message_link_preview_url_title"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/text_view_message_link_preview_url_title"
-        tools:srcCompat="@drawable/sphinx_white_notification" />
+    <View
+        android:id="@+id/view_preview_divider"
+        android:layout_width="match_parent"
+        android:layout_height="3dp"
+        android:layout_marginBottom="@dimen/chat_message_inner_padding"
+        android:background="@color/body"
+        app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- Title -->
-    <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/text_view_message_link_preview_url_title"
-        android:layout_width="0dp"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/progress_bar_link_preview"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:fontFamily="@font/roboto_bold"
-        android:paddingVertical="@dimen/default_list_row_padding_vertical"
-        android:textColor="@color/text"
-        android:textSize="@dimen/default_text_size_caption1"
-        app:layout_constraintBottom_toTopOf="@+id/text_view_message_link_preview_url_description"
-        app:layout_constraintEnd_toStartOf="@id/image_view_message_link_preview_url_main_image"
-        app:layout_constraintStart_toEndOf="@id/image_view_message_link_preview_url_favicon"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:text="SpaceX" />
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@+id/view_preview_divider"
+        tools:visibility="gone">
 
-    <!-- Description -->
-    <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/text_view_message_link_preview_url_description"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:fontFamily="@font/roboto_regular"
-        android:textColor="@color/text"
-        android:textSize="@dimen/default_text_size_caption2"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/image_view_message_link_preview_url_main_image"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/text_view_message_link_preview_url_title"
-        tools:text="SpaceX - Launches\n\nhttps://www.spacex.com/launches/" />
+        <ProgressBar
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            style="?android:attr/progressBarStyle"
+            android:indeterminateTint="@android:color/white"
+            android:indeterminate="true"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            tools:visibility="visible"/>
 
-    <!-- Main Image -->
-    <androidx.appcompat.widget.AppCompatImageView
-        android:id="@+id/image_view_message_link_preview_url_main_image"
-        android:layout_width="@dimen/web_link_preview_image_xy"
-        android:layout_height="@dimen/web_link_preview_image_xy"
-        android:scaleType="fitCenter"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toEndOf="@id/text_view_message_link_preview_url_description"
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraint_layout_url_link_preview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="2dp"
+        android:padding="@dimen/default_layout_margin"
         app:layout_constraintTop_toTopOf="parent"
-        tools:srcCompat="@tools:sample/backgrounds/scenic" />
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/image_view_message_link_preview_url_favicon"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_marginEnd="@dimen/default_half_layout_margin"
+            android:scaleType="fitCenter"
+            app:layout_constraintBottom_toBottomOf="@+id/text_view_message_link_preview_url_title"
+            app:layout_constraintEnd_toStartOf="@+id/text_view_message_link_preview_url_title"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/text_view_message_link_preview_url_title"
+            tools:srcCompat="@drawable/sphinx_white_notification"
+            tools:visibility="visible" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_message_link_preview_url_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/roboto_bold"
+            android:paddingVertical="@dimen/default_small_layout_margin"
+            android:layout_marginEnd="@dimen/default_half_layout_margin"
+            android:textColor="@color/text"
+            android:textSize="@dimen/default_text_size_headline"
+            android:maxLines="2"
+            app:layout_constraintBottom_toTopOf="@+id/text_view_message_link_preview_url_description"
+            app:layout_constraintEnd_toStartOf="@id/image_view_message_link_preview_url_main_image"
+            app:layout_constraintStart_toEndOf="@id/image_view_message_link_preview_url_favicon"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="SpaceX Company with Starlink or Neural Link technology" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_message_link_preview_url_description"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/roboto_regular"
+            android:textColor="@color/text"
+            android:textSize="@dimen/default_text_size_caption1"
+            android:maxLines="3"
+            android:layout_marginEnd="@dimen/default_half_layout_margin"
+            app:layout_constraintBottom_toTopOf="@+id/text_view_message_link_preview_url_domain"
+            app:layout_constraintEnd_toStartOf="@id/image_view_message_link_preview_url_main_image"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/text_view_message_link_preview_url_title"
+            tools:text="SpaceX - Launches\n\nhttps://www.spacex.com/launches/" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_message_link_preview_url_domain"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/roboto_regular"
+            android:textColor="@color/blueTextAccent"
+            android:textSize="@dimen/default_text_size_caption2"
+            android:paddingVertical="2dp"
+            android:maxLines="1"
+            android:layout_marginEnd="@dimen/default_half_layout_margin"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/image_view_message_link_preview_url_main_image"
+            app:layout_constraintTop_toBottomOf="@+id/text_view_message_link_preview_url_description"
+            tools:text="spacex.com" />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/image_view_message_link_preview_url_main_image"
+            android:layout_width="@dimen/web_link_preview_image_xy"
+            android:layout_height="@dimen/web_link_preview_image_xy"
+            android:scaleType="centerCrop"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:srcCompat="@tools:sample/backgrounds/scenic" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

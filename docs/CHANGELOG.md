@@ -1,5 +1,15 @@
 # ChangeLog
 
+## Version 1.0.0-alpha17 (2021-08-11)
+ - Adds ability to resend failed messages
+ - Adds previews for
+     - Shared Contacts
+     - Shared Tribes
+     - Http urls
+ - Adds capability to now see tribe bot messages
+ - Fixes bubble long click listener
+ - Fixes some issues related to sending of attachments
+
 ## Version 1.0.0-alpha16 (2021-08-06)
  - Adds ability to boost podcast content creators from the Tribe Chat and Podcast screen
  - Adds limited functionality for changing the RelayUrl from Profile screen

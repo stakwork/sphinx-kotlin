@@ -328,5 +328,13 @@ object SphinxLinkify {
         val VIRTUAL_NODE_ADDRESS: Pattern = Pattern.compile(
             VirtualLightningNodeAddress.REGEX
         )
+
+        val LINK_PREVIEWS: Pattern = Pattern.compile(
+            "(${TribeJoinLink.REGEX}|${PatternsCompat.AUTOLINK_WEB_URL.pattern()}|${LightningNodePubKey.REGEX}|${VirtualLightningNodeAddress.REGEX})"
+        )
+            
+        val COPYABLE_LINKS: Pattern = Pattern.compile(
+            "(${TribeJoinLink.REGEX}|${PatternsCompat.AUTOLINK_WEB_URL.pattern()}|${LightningNodePubKey.REGEX}|${VirtualLightningNodeAddress.REGEX})"
+        )
     }
 }

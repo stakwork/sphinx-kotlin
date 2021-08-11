@@ -58,6 +58,8 @@ include ':sphinx:application:network:concepts:clients:concept-network-client-cac
 include ':sphinx:application:network:concepts:clients:concept-network-client-crypto'
 include ':sphinx:application:network:features:feature-network-client'
 
+include ':sphinx:application:network:concepts:concept-link-preview'
+include ':sphinx:application:network:features:feature-link-preview'
 include ':sphinx:application:network:concepts:queries:concept-network-query-meme-server'
 include ':sphinx:application:network:features:queries:feature-network-query-meme-server'
 include ':sphinx:application:network:concepts:queries:concept-network-query-chat'

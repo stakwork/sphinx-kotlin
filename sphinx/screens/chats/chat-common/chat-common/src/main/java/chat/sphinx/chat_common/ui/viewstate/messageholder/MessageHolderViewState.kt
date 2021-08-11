@@ -1,17 +1,27 @@
 package chat.sphinx.chat_common.ui.viewstate.messageholder
 
+import chat.sphinx.chat_common.model.MessageLinkPreview
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
 import chat.sphinx.chat_common.ui.viewstate.selected.MenuItemState
+import chat.sphinx.chat_common.util.SphinxLinkify
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.isConversation
 import chat.sphinx.wrapper_chat.isTribeOwnedByAccount
 import chat.sphinx.wrapper_common.chatTimeFormat
 import chat.sphinx.wrapper_common.lightning.Sat
-import chat.sphinx.wrapper_common.message.toSphinxCallLink
+import chat.sphinx.wrapper_common.message.isProvisionalMessage
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message_media.MessageMedia
 import chat.sphinx.wrapper_message_media.isImage
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+
+// TODO: Remove
+inline val Message.isCopyLinkAllowed: Boolean
+    get() = retrieveTextToShow()?.let {
+        SphinxLinkify.SphinxPatterns.COPYABLE_LINKS.matcher(it).find()
+    } ?: false
 
 internal inline val MessageHolderViewState.isReceived: Boolean
     get() = this is MessageHolderViewState.Received
@@ -27,15 +37,15 @@ internal sealed class MessageHolderViewState(
     chat: Chat,
     val background: BubbleBackground,
     val initialHolder: InitialHolderViewState,
-    val messageSenderName: (Message) -> String,
-    val accountOwner: () -> Contact,
+    private val messageSenderName: (Message) -> String,
+    private val accountOwner: () -> Contact,
+    private val previewProvider: suspend (link: MessageLinkPreview) -> LayoutState.Bubble.ContainerThird.LinkPreview?,
 ) {
 
     companion object {
         val unsupportedMessageTypes: List<MessageType> by lazy {
             listOf(
                 MessageType.Attachment,
-                MessageType.BotRes,
                 MessageType.Invoice,
                 MessageType.Payment,
                 MessageType.GroupAction.TribeDelete,
@@ -59,7 +69,9 @@ internal sealed class MessageHolderViewState(
             LayoutState.MessageStatusHeader(
                 if (chat.type.isConversation()) null else message.senderAlias?.value,
                 this is Sent,
+                this is Sent && message.id.isProvisionalMessage && message.status.isPending(),
                 this is Sent && (message.status.isReceived() || message.status.isConfirmed()),
+                this is Sent && message.status.isFailed(),
                 message.messageContentDecrypted != null || message.messageMedia?.mediaKeyDecrypted != null,
                 message.date.chatTimeFormat(),
             )
@@ -98,10 +110,16 @@ internal sealed class MessageHolderViewState(
     }
 
     val bubbleCallInvite: LayoutState.Bubble.ContainerSecond.CallInvite? by lazy(LazyThreadSafetyMode.NONE) {
-        if (message.isSphinxCallLink) {
-            message?.retrieveSphinxCallLink()?.let { callLink ->
-                LayoutState.Bubble.ContainerSecond.CallInvite(
-                    !callLink.startAudioOnly
+        message.retrieveSphinxCallLink()?.let { callLink ->
+            LayoutState.Bubble.ContainerSecond.CallInvite(!callLink.startAudioOnly)
+        }
+    }
+
+    val bubbleBotResponse: LayoutState.Bubble.ContainerSecond.BotResponse? by lazy(LazyThreadSafetyMode.NONE) {
+        if (message.type.isBotRes()) {
+            message.retrieveBotResponseHtmlString()?.let { html ->
+                LayoutState.Bubble.ContainerSecond.BotResponse(
+                    html
                 )
             }
         } else {
@@ -239,6 +257,22 @@ internal sealed class MessageHolderViewState(
         }
     }
 
+    val messageLinkPreview: MessageLinkPreview? by lazy {
+        MessageLinkPreview.parse(bubbleMessage)
+    }
+
+    @Volatile
+    private var linkPreviewLayoutState: LayoutState.Bubble.ContainerThird.LinkPreview? = null
+    private val previewLock = Mutex()
+    suspend fun retrieveLinkPreview(): LayoutState.Bubble.ContainerThird.LinkPreview? {
+        return messageLinkPreview?.let { nnPreview ->
+            linkPreviewLayoutState ?: previewLock.withLock {
+                linkPreviewLayoutState ?: previewProvider.invoke(nnPreview)
+                    ?.also { linkPreviewLayoutState = it }
+            }
+        }
+    }
+
     val selectionMenuItems: List<MenuItemState>? by lazy(LazyThreadSafetyMode.NONE) {
         if (
             background is BubbleBackground.Gone         ||
@@ -254,12 +288,20 @@ internal sealed class MessageHolderViewState(
                 list.add(MenuItemState.Boost)
             }
 
+            if (message.isCopyLinkAllowed) {
+                list.add(MenuItemState.CopyLink)
+            }
+
             if (message.isCopyAllowed) {
                 list.add(MenuItemState.CopyText)
             }
 
             if (message.isReplyAllowed) {
                 list.add(MenuItemState.Reply)
+            }
+
+            if (message.isResendAllowed) {
+                list.add(MenuItemState.Resend)
             }
 
             if (this is Sent || chat.isTribeOwnedByAccount(accountOwner().nodePubKey)) {
@@ -281,6 +323,7 @@ internal sealed class MessageHolderViewState(
         background: BubbleBackground,
         replyMessageSenderName: (Message) -> String,
         accountOwner: () -> Contact,
+        previewProvider: suspend (link: MessageLinkPreview) -> LayoutState.Bubble.ContainerThird.LinkPreview?,
     ) : MessageHolderViewState(
         message,
         chat,
@@ -288,6 +331,7 @@ internal sealed class MessageHolderViewState(
         InitialHolderViewState.None,
         replyMessageSenderName,
         accountOwner,
+        previewProvider,
     )
 
     class Received(
@@ -297,6 +341,7 @@ internal sealed class MessageHolderViewState(
         initialHolder: InitialHolderViewState,
         replyMessageSenderName: (Message) -> String,
         accountOwner: () -> Contact,
+        previewProvider: suspend (link: MessageLinkPreview) -> LayoutState.Bubble.ContainerThird.LinkPreview?,
     ) : MessageHolderViewState(
         message,
         chat,
@@ -304,5 +349,6 @@ internal sealed class MessageHolderViewState(
         initialHolder,
         replyMessageSenderName,
         accountOwner,
+        previewProvider,
     )
 }
