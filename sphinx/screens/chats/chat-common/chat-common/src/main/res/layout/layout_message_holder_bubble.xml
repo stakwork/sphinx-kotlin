@@ -83,6 +83,11 @@
             layout="@layout/layout_message_type_podcast_boost"
             tools:visibility="gone" />
 
+        <include
+            android:id="@+id/include_message_type_bot_response"
+            layout="@layout/layout_message_type_bot_response"
+            tools:visibility="gone" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 

@@ -25,7 +25,19 @@ inline fun Message.retrieveTextToShow(): String? =
         if (isSphinxCallLink) {
             return null
         }
+        if (type.isBotRes()) {
+            return null
+        }
         decrypted.value
+    }
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun Message.retrieveBotResponseHtmlString(): String? =
+    messageContentDecrypted?.let { decrypted ->
+        if (type.isBotRes()) {
+            return decrypted.value
+        }
+        return null
     }
 
 @Suppress("NOTHING_TO_INLINE")
@@ -105,8 +117,6 @@ abstract class Message {
     abstract val seen: Seen
     abstract val senderAlias: SenderAlias?
     abstract val senderPic: PhotoUrl?
-//    abstract val mediaTerms: String?, // TODO: Ask Tomas what this field is for
-//    abstract val receipt: String?, // TODO: Ask Tomas what this field is for
     abstract val originalMUID: MessageMUID?
     abstract val replyUUID: ReplyUUID?
 

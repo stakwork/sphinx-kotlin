@@ -62,3 +62,11 @@ inline fun ViewBinding.getString(@StringRes stringRes: Int): String =
 inline fun ViewBinding.getColor(@ColorRes colorRes: Int): Int {
     return ContextCompat.getColor(root.context, colorRes)
 }
+
+@Suppress("NOTHING_TO_INLINE")
+@Throws(Resources.NotFoundException::class)
+inline fun ViewBinding.getColorHexCode(@ColorRes colorRes: Int): String {
+    return "#${Integer.toHexString(
+        ContextCompat.getColor(root.context, colorRes) and 0xffffff
+    )}"
+}

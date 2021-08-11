@@ -1,5 +1,7 @@
 package chat.sphinx.chat_common.ui.viewstate.messageholder
 
+import androidx.core.content.ContextCompat
+import chat.sphinx.chat_common.R
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
 import chat.sphinx.chat_common.ui.viewstate.selected.MenuItemState
 import chat.sphinx.wrapper_chat.Chat
@@ -12,6 +14,7 @@ import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message_media.MessageMedia
 import chat.sphinx.wrapper_message_media.isImage
+import com.giphy.sdk.ui.getPlaceholderColor
 
 internal inline val MessageHolderViewState.isReceived: Boolean
     get() = this is MessageHolderViewState.Received
@@ -35,7 +38,6 @@ internal sealed class MessageHolderViewState(
         val unsupportedMessageTypes: List<MessageType> by lazy {
             listOf(
                 MessageType.Attachment,
-                MessageType.BotRes,
                 MessageType.Invoice,
                 MessageType.Payment,
                 MessageType.GroupAction.TribeDelete,
@@ -102,6 +104,18 @@ internal sealed class MessageHolderViewState(
             message?.retrieveSphinxCallLink()?.let { callLink ->
                 LayoutState.Bubble.ContainerSecond.CallInvite(
                     !callLink.startAudioOnly
+                )
+            }
+        } else {
+            null
+        }
+    }
+
+    val bubbleBotResponse: LayoutState.Bubble.ContainerSecond.BotResponse? by lazy(LazyThreadSafetyMode.NONE) {
+        if (message.type.isBotRes()) {
+            message?.retrieveBotResponseHtmlString()?.let { html ->
+                LayoutState.Bubble.ContainerSecond.BotResponse(
+                    html
                 )
             }
         } else {
