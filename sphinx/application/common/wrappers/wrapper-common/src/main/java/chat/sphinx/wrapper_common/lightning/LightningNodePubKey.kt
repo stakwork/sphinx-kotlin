@@ -12,7 +12,7 @@ inline val String.isValidLightningNodePubKey: Boolean
     get() = isNotEmpty() && matches("^${LightningNodePubKey.REGEX}\$".toRegex())
 
 @JvmInline
-value class LightningNodePubKey(val value: String) {
+value class LightningNodePubKey(override val value: String): LightningNodeDescriptor {
 
     companion object {
 

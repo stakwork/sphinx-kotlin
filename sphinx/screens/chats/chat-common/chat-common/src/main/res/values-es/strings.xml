@@ -37,6 +37,8 @@
     <!-- Link Previews -->
     <string name="link_preview_add_contact_banner_label">Agregar Contacto</string>
     <string name="link_preview_see_tribe_banner_label">Ver Tribu</string>
+    <string name="link_preview_view_contact">Ver contacto</string>
+    <string name="link_preview_failed_to_load">No se pudo cargar la vista previa del enlace</string>
 
     <!-- Replies -->
     <string name="reply_message_media_content_description">Contenido del mensaje original</string>
@@ -87,6 +89,8 @@
     <string name="notify_boost_failure">Pago de Boost falló</string>
     <string name="side_effect_text_copied">Texto copiado al portapapeles</string>
     <string name="side_effect_call_link_copied">Enlace de llamada copiado al portapapeles</string>
+    <string name="side_effect_link_copied">Copiado %s</string>
+    <string name="side_effect_no_link_to_copy">Sin enlace para copiar</string>
 
     <!-- Send Attachment -->
     <string name="attachment_send_header_image">ENVIAR IMAGEN</string>

@@ -12,28 +12,35 @@ import androidx.navigation.NavArgs
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import chat.sphinx.chat_common.databinding.LayoutChatHeaderBinding
-import chat.sphinx.chat_common.databinding.LayoutMessageHolderBinding
+import app.cash.exhaustive.Exhaustive
+import chat.sphinx.chat_common.databinding.*
+import chat.sphinx.chat_common.model.NodeDescriptor
+import chat.sphinx.chat_common.model.TribeLink
 import chat.sphinx.chat_common.ui.ChatViewModel
 import chat.sphinx.chat_common.ui.isMessageSelected
 import chat.sphinx.chat_common.ui.viewstate.messageholder.*
 import chat.sphinx.chat_common.ui.viewstate.selected.SelectedMessageViewState
-import chat.sphinx.chat_common.util.SphinxUrlSpan
+import chat.sphinx.chat_common.util.*
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
+import chat.sphinx.concept_image_loader.ImageLoaderOptions
+import chat.sphinx.concept_image_loader.Transformation
+import chat.sphinx.join_tribe.R
+import chat.sphinx.kotlin_response.LoadResponse
+import chat.sphinx.kotlin_response.Response
 import chat.sphinx.wrapper_common.dashboard.ContactId
+import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.message.MessageId
-import chat.sphinx.wrapper_common.message.toSphinxCallLink
+import chat.sphinx.wrapper_common.tribe.TribeJoinLink
 import chat.sphinx.wrapper_message.Message
 import chat.sphinx.wrapper_message.MessageType
-import chat.sphinx.wrapper_message.toMessageType
 import chat.sphinx.wrapper_view.Px
 import io.matthewnelson.android_feature_screens.util.gone
-import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -209,8 +216,8 @@ internal class MessageListAdapter<ARGS : NavArgs>(
         private val binding: LayoutMessageHolderBinding
     ): RecyclerView.ViewHolder(binding.root) {
 
-        private val holderJobs: ArrayList<Job> = ArrayList(5)
-        private val disposables: ArrayList<Disposable> = ArrayList(3)
+        private val holderJobs: ArrayList<Job> = ArrayList(6)
+        private val disposables: ArrayList<Disposable> = ArrayList(4)
         private var currentViewState: MessageHolderViewState? = null
 
         private val selectedMessageLongClickListener: OnLongClickListener
@@ -304,6 +311,41 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                     }
                 }
             }
+
+            binding.includeMessageHolderBubble.apply {
+                includeMessageLinkPreviewContact.apply contact@ {
+                    textViewMessageLinkPreviewAddContactBanner.setOnClickListener {
+                        currentViewState?.messageLinkPreview?.let { preview ->
+                            if (preview is NodeDescriptor) {
+                                viewModel.handleContactTribeLinks(preview.nodeDescriptor.value)
+                            }
+                        }
+                    }
+                    root.setOnClickListener {
+                        currentViewState?.messageLinkPreview?.let { preview ->
+                            if (preview is NodeDescriptor) {
+                                viewModel.handleContactTribeLinks(preview.nodeDescriptor.value)
+                            }
+                        }
+                    }
+                }
+                includeMessageLinkPreviewTribe.apply tribe@ {
+                    textViewMessageLinkPreviewTribeSeeBanner.setOnClickListener {
+                        currentViewState?.messageLinkPreview?.let { preview ->
+                            if (preview is TribeLink) {
+                                viewModel.handleContactTribeLinks(preview.tribeJoinLink.value)
+                            }
+                        }
+                    }
+                    root.setOnClickListener {
+                        currentViewState?.messageLinkPreview?.let { preview ->
+                            if (preview is TribeLink) {
+                                viewModel.handleContactTribeLinks(preview.tribeJoinLink.value)
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         private fun processMemberRequest(contactId: ContactId, messageId: MessageId, type: MessageType.GroupAction) {
@@ -355,7 +397,7 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                 viewModel.memeServerTokenHandler,
                 recyclerViewWidth,
                 viewState,
-                onSphinxInteractionListener
+                onSphinxInteractionListener,
             )
 
         }

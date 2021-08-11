@@ -17,6 +17,10 @@ import chat.sphinx.camera_view_model_coordinator.request.CameraRequest
 import chat.sphinx.camera_view_model_coordinator.response.CameraResponse
 import chat.sphinx.chat_common.BuildConfig
 import chat.sphinx.chat_common.R
+import chat.sphinx.chat_common.model.MessageLinkPreview
+import chat.sphinx.chat_common.model.NodeDescriptor
+import chat.sphinx.chat_common.model.TribeLink
+import chat.sphinx.chat_common.model.UnspecifiedUrl
 import chat.sphinx.chat_common.navigation.ChatNavigator
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
 import chat.sphinx.chat_common.ui.viewstate.attachment.AttachmentSendViewState
@@ -24,9 +28,11 @@ import chat.sphinx.chat_common.ui.viewstate.footer.FooterViewState
 import chat.sphinx.chat_common.ui.viewstate.header.ChatHeaderViewState
 import chat.sphinx.chat_common.ui.viewstate.menu.ChatMenuViewState
 import chat.sphinx.chat_common.ui.viewstate.messageholder.BubbleBackground
+import chat.sphinx.chat_common.ui.viewstate.messageholder.LayoutState
 import chat.sphinx.chat_common.ui.viewstate.messageholder.MessageHolderViewState
 import chat.sphinx.chat_common.ui.viewstate.messagereply.MessageReplyViewState
 import chat.sphinx.chat_common.ui.viewstate.selected.SelectedMessageViewState
+import chat.sphinx.chat_common.util.*
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.concept_meme_server.MemeServerTokenHandler
@@ -48,9 +54,9 @@ import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.*
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessageUUID
+import chat.sphinx.wrapper_common.message.SphinxCallLink
 import chat.sphinx.wrapper_common.tribe.TribeJoinLink
 import chat.sphinx.wrapper_common.tribe.toTribeJoinLink
-import chat.sphinx.wrapper_common.message.SphinxCallLink
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_contact.avatarUrl
 import chat.sphinx.wrapper_message.*
@@ -67,6 +73,10 @@ import io.matthewnelson.android_feature_viewmodel.MotionLayoutViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
+import chat.sphinx.concept_link_preview.LinkPreviewHandler
+import chat.sphinx.concept_link_preview.model.HtmlPreviewTitle
+import chat.sphinx.concept_link_preview.model.TribePreviewName
+import chat.sphinx.concept_link_preview.model.toPreviewImageUrlOrNull
 import io.matthewnelson.concept_media_cache.MediaCacheHandler
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import io.matthewnelson.concept_views.viewstate.value
@@ -98,6 +108,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     protected val mediaCacheHandler: MediaCacheHandler,
     protected val savedStateHandle: SavedStateHandle,
     protected val cameraCoordinator: ViewModelCoordinator<CameraRequest, CameraResponse>,
+    protected val linkPreviewHandler: LinkPreviewHandler,
     protected val LOG: SphinxLogger,
 ): MotionLayoutViewModel<
         Nothing,
@@ -280,7 +291,8 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                                         }
                                     }
                                 },
-                                accountOwner = { owner }
+                                accountOwner = { owner },
+                                previewProvider = { handleLinkPreview(it) },
                             )
                         )
                     } else {
@@ -324,7 +336,8 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                                         }
                                     }
                                 },
-                                accountOwner = { owner }
+                                accountOwner = { owner },
+                                previewProvider = { link -> handleLinkPreview(link) },
                             )
                         )
                     }
@@ -338,6 +351,117 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         SharingStarted.WhileSubscribed(5_000),
         emptyList()
     )
+
+    private suspend fun handleLinkPreview(link: MessageLinkPreview): LayoutState.Bubble.ContainerThird.LinkPreview? {
+        var preview: LayoutState.Bubble.ContainerThird.LinkPreview? = null
+
+        viewModelScope.launch(mainImmediate) {
+            // TODO: Implement
+            @Exhaustive
+            when (link) {
+                is NodeDescriptor -> {
+
+                    val pubKey: LightningNodePubKey? = when (link.nodeDescriptor) {
+                        is LightningNodePubKey -> {
+                            link.nodeDescriptor
+                        }
+                        is VirtualLightningNodeAddress -> {
+                            link.nodeDescriptor.getPubKey()
+                        }
+                    }
+
+                    if (pubKey != null) {
+                        val existingContact: Contact? = contactRepository.getContactByPubKey(pubKey).firstOrNull()
+
+                        if (existingContact != null) {
+
+                            preview = LayoutState.Bubble.ContainerThird.LinkPreview.ContactPreview(
+                                alias = existingContact.alias,
+                                photoUrl = existingContact.photoUrl,
+                                showBanner = false,
+                                lightningNodeDescriptor = link.nodeDescriptor,
+                            )
+
+                        } else {
+
+                            preview = LayoutState.Bubble.ContainerThird.LinkPreview.ContactPreview(
+                                alias = null,
+                                photoUrl = null,
+                                showBanner = true,
+                                lightningNodeDescriptor = link.nodeDescriptor
+                            )
+
+                        }
+                    }
+
+                }
+                is TribeLink -> {
+                    try {
+                        val uuid = ChatUUID(link.tribeJoinLink.tribeUUID)
+
+                        val thisChat = getChat()
+                        if (thisChat.uuid == uuid) {
+
+                            preview = LayoutState.Bubble.ContainerThird.LinkPreview.TribeLinkPreview(
+                                name = TribePreviewName(thisChat.name?.value ?: ""),
+                                description = null,
+                                imageUrl = thisChat.photoUrl?.toPreviewImageUrlOrNull(),
+                                showBanner = true,
+                                joinLink = link.tribeJoinLink,
+                            )
+
+                        } else {
+                            val existingChat = chatRepository.getChatByUUID(uuid).firstOrNull()
+                            if (existingChat != null) {
+
+                                preview = LayoutState.Bubble.ContainerThird.LinkPreview.TribeLinkPreview(
+                                    name = TribePreviewName(existingChat.name?.value ?: ""),
+                                    description = null,
+                                    imageUrl = existingChat.photoUrl?.toPreviewImageUrlOrNull(),
+                                    showBanner = false,
+                                    joinLink = link.tribeJoinLink,
+                                )
+
+                            } else {
+
+                                val tribePreview = linkPreviewHandler.retrieveTribeLinkPreview(link.tribeJoinLink)
+
+                                if (tribePreview != null) {
+                                    preview = LayoutState.Bubble.ContainerThird.LinkPreview.TribeLinkPreview(
+                                        name = tribePreview.name,
+                                        description = tribePreview.description,
+                                        imageUrl = tribePreview.imageUrl,
+                                        showBanner = true,
+                                        joinLink = link.tribeJoinLink,
+                                    )
+                                } // else do nothing
+                            }
+                        }
+                    } catch (_: Exception) {
+                        // no - op
+                    }
+                }
+                is UnspecifiedUrl -> {
+
+                    val htmlPreview = linkPreviewHandler.retrieveHtmlPreview(link.url)
+
+                    if (htmlPreview != null) {
+                        preview = LayoutState.Bubble.ContainerThird.LinkPreview.HttpUrlPreview(
+                            title = htmlPreview.title,
+                            domainHost = htmlPreview.domainHost,
+                            description = htmlPreview.description,
+                            imageUrl = htmlPreview.imageUrl,
+                            favIconUrl = htmlPreview.favIconUrl,
+                            url = link.url
+                        )
+                    }
+
+                }
+            }
+        }.join()
+
+        return preview
+    }
 
     fun init() {
         // Prime our states immediately so they're already
@@ -555,6 +679,23 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                 submitSideEffect(
                     ChatSideEffect.CopyTextToClipboard(text)
                 )
+            }
+        }
+    }
+
+    fun copyMessageLink(message: Message) {
+        viewModelScope.launch(mainImmediate) {
+            message.retrieveTextToShow()?.let { text ->
+                val matcher = SphinxLinkify.SphinxPatterns.COPYABLE_LINKS.matcher(text)
+                if (matcher.find()) {
+                    submitSideEffect(
+                        ChatSideEffect.CopyLinkToClipboard(matcher.group())
+                    )
+                } else {
+                    submitSideEffect(
+                        ChatSideEffect.Notify(app.getString(R.string.side_effect_no_link_to_copy))
+                    )
+                }
             }
         }
     }
@@ -928,7 +1069,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 
         } ?: chatNavigator.toAddContactDetail(pubKey, routeHint)
     }
-    
+
     open suspend fun processMemberRequest(
         contactId: ContactId,
         messageId: MessageId,

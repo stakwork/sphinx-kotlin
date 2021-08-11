@@ -2,9 +2,11 @@ package chat.sphinx.chat_common.util
 
 import android.text.style.URLSpan
 import android.view.View
-import chat.sphinx.wrapper_common.lightning.isValidLightningNodePubKey
-import chat.sphinx.wrapper_common.lightning.isValidLightningPaymentRequest
-import chat.sphinx.wrapper_common.lightning.isValidVirtualNodeAddress
+import chat.sphinx.chat_common.databinding.LayoutMessageLinkPreviewContactBinding
+import chat.sphinx.chat_common.databinding.LayoutMessageLinkPreviewTribeBinding
+import chat.sphinx.chat_common.databinding.LayoutMessageLinkPreviewUrlBinding
+import chat.sphinx.wrapper_common.lightning.*
+import chat.sphinx.wrapper_common.tribe.TribeJoinLink
 import chat.sphinx.wrapper_common.tribe.isValidTribeJoinLink
 import java.util.concurrent.atomic.AtomicInteger
 

@@ -37,6 +37,8 @@
     <!-- Link Previews -->
     <string name="link_preview_add_contact_banner_label">Add Contact</string>
     <string name="link_preview_see_tribe_banner_label">See Tribe</string>
+    <string name="link_preview_view_contact">View Contact</string>
+    <string name="link_preview_failed_to_load">Failed to load link preview</string>
 
     <!-- Replies -->
     <string name="reply_message_media_content_description">Media content of the original message</string>
@@ -86,6 +88,8 @@
     <string name="notify_boost_failure">Boost payment failed</string>
     <string name="side_effect_text_copied">Text copied to clipboard</string>
     <string name="side_effect_call_link_copied">Call link copied to clipboard</string>
+    <string name="side_effect_link_copied">Copied %s</string>
+    <string name="side_effect_no_link_to_copy">No link to copy</string>
 
     <!-- Send Attachment -->
     <string name="attachment_send_header_image">SEND IMAGE</string>

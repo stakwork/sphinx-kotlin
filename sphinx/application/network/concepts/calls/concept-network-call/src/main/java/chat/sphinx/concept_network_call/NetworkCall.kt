@@ -31,12 +31,12 @@ inline fun NetworkCall.buildRequest(
 abstract class NetworkCall {
 
     /**
-    * GET
+     * GET
      *
      * @param [responseJsonClass] the class to serialize the response json into
      * @param [url] the url
      * @param [headers] any headers that need to be added to the request
-    * */
+     * */
     abstract fun <T: Any> get(
         url: String,
         responseJsonClass: Class<T>,

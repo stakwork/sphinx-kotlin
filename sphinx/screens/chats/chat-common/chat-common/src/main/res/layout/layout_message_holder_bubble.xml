@@ -126,7 +126,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:layout_constraintTop_toBottomOf="@+id/text_view_message_text"
-            tools:visibility="gone" />
+            tools:visibility="visible" />
 
 
         <!-- Tribe link preview  -->
@@ -157,6 +157,15 @@
         android:layout_height="wrap_content"
         app:layout_constraintTop_toBottomOf="@+id/layout_constraint_message_bubble_container_third">
 
+        <!-- Boost Details -->
+        <include
+            android:id="@+id/include_message_type_boost"
+            layout="@layout/layout_message_boost"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:visibility="visible" />
+
         <!-- Paid Message Information -->
         <include
             android:id="@+id/include_paid_message_received_details_holder"
@@ -166,17 +175,6 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:visibility="gone" />
-
-
-        <!-- Boost Details -->
-        <include
-            android:id="@+id/include_message_type_boost"
-            layout="@layout/layout_message_boost"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:visibility="visible" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
