@@ -13,6 +13,9 @@ import androidx.core.view.updateLayoutParams
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.chat_common.R
 import chat.sphinx.chat_common.databinding.LayoutMessageHolderBinding
+import chat.sphinx.chat_common.model.NodeDescriptor
+import chat.sphinx.chat_common.model.TribeLink
+import chat.sphinx.chat_common.model.UnspecifiedUrl
 import chat.sphinx.chat_common.util.SphinxLinkify
 import chat.sphinx.chat_common.util.SphinxUrlSpan
 import chat.sphinx.concept_image_loader.Disposable
@@ -25,6 +28,7 @@ import chat.sphinx.resources.getString
 import chat.sphinx.resources.setBackgroundRandomColor
 import chat.sphinx.resources.setTextColorExt
 import chat.sphinx.wrapper_chat.ChatType
+import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.lightning.*
 import chat.sphinx.wrapper_common.tribe.isValidTribeJoinLink
 import chat.sphinx.wrapper_common.tribe.toTribeJoinLink
@@ -39,6 +43,7 @@ import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import java.io.File
 import chat.sphinx.resources.R as common_R
@@ -143,7 +148,14 @@ internal fun LayoutMessageHolderBinding.setView(
             }
             setUnsupportedMessageTypeLayout(viewState.unsupportedMessageType)
             setBubbleMessageLayout(viewState.bubbleMessage, onSphinxInteractionListener)
-//            setBubbleMessageLinkPreviewLayout(previewHandler)
+            setBubbleMessageLinkPreviewLayout(
+                dispatchers,
+                holderJobs,
+                lifecycleScope,
+                viewState
+            ) { imageView, photoUrl ->
+
+            }
             setBubbleCallInvite(viewState.bubbleCallInvite)
             setBubbleDirectPaymentLayout(viewState.bubbleDirectPayment)
             setBubbleDirectPaymentLayout(viewState.bubbleDirectPayment)
@@ -498,8 +510,51 @@ internal inline fun LayoutMessageHolderBinding.setBubbleMessageLayout(
     }
 }
 
-//@MainThread
-//@Suppress("NOTHING_TO_INLINE")
+@MainThread
+@Suppress("NOTHING_TO_INLINE")
+internal inline fun LayoutMessageHolderBinding.setBubbleMessageLinkPreviewLayout(
+    dispatchers: CoroutineDispatchers,
+    holderJobs: ArrayList<Job>,
+    lifecycleScope: CoroutineScope,
+    viewState: MessageHolderViewState,
+    setImageUrl: (ImageView, PhotoUrl) -> Unit,
+) {
+    includeMessageHolderBubble.apply {
+        @Exhaustive
+        when (viewState.messageLinkPreview) {
+            null -> {
+                includeMessageLinkPreviewContact.root.gone
+                includeMessageLinkPreviewTribe.root.gone
+                includeMessageLinkPreviewUrl.root.gone
+            }
+            is NodeDescriptor -> {
+                includeMessageLinkPreviewTribe.root.gone
+                includeMessageLinkPreviewUrl.root.gone
+
+                includeMessageLinkPreviewContact.apply {
+                    root.visible
+                }
+            }
+            is TribeLink -> {
+                includeMessageLinkPreviewContact.root.gone
+                includeMessageLinkPreviewUrl.root.gone
+
+                includeMessageLinkPreviewTribe.apply {
+                    root.visible
+                }
+            }
+            is UnspecifiedUrl -> {
+                includeMessageLinkPreviewContact.root.gone
+                includeMessageLinkPreviewTribe.root.gone
+
+                includeMessageLinkPreviewUrl.apply {
+                    root.visible
+                }
+            }
+        }
+    }
+}
+
 //internal inline fun LayoutMessageHolderBinding.setBubbleMessageLinkPreviewLayout(
 //    previewHandler: SphinxUrlSpan.PreviewHandler?
 //) {

@@ -1,7 +1,6 @@
 package chat.sphinx.chat_common.ui.viewstate.messageholder
 
 import chat.sphinx.concept_link_preview.model.*
-import chat.sphinx.wrapper_chat.ChatName
 import chat.sphinx.wrapper_chat.ChatType
 import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.lightning.*
