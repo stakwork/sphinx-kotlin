@@ -18,6 +18,9 @@ import chat.sphinx.camera_view_model_coordinator.response.CameraResponse
 import chat.sphinx.chat_common.BuildConfig
 import chat.sphinx.chat_common.R
 import chat.sphinx.chat_common.model.MessageLinkPreview
+import chat.sphinx.chat_common.model.NodeDescriptor
+import chat.sphinx.chat_common.model.TribeLink
+import chat.sphinx.chat_common.model.UnspecifiedUrl
 import chat.sphinx.chat_common.navigation.ChatNavigator
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
 import chat.sphinx.chat_common.ui.viewstate.attachment.AttachmentSendViewState
@@ -71,6 +74,8 @@ import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import chat.sphinx.concept_link_preview.LinkPreviewHandler
+import chat.sphinx.concept_link_preview.model.TribePreviewName
+import chat.sphinx.concept_link_preview.model.toPreviewImageUrlOrNull
 import io.matthewnelson.concept_media_cache.MediaCacheHandler
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import io.matthewnelson.concept_views.viewstate.value
@@ -347,11 +352,92 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         emptyList()
     )
 
+//    fun getChatTribe(tribeJoinLink: TribeJoinLink): Flow<Chat?> {
+//        return chatRepository.getChatByUUID(ChatUUID(tribeJoinLink.tribeUUID))
+//    }
+//
+//    fun getTribeInfo(tribeJoinLink: TribeJoinLink): Flow<LoadResponse<TribeDto, ResponseError>> {
+//        return networkQueryChat.getTribeInfo(ChatHost(tribeJoinLink.tribeHost), ChatUUID(tribeJoinLink.tribeUUID))
+//    }
+//
+//    fun getContact(lightningNodePubKey: LightningNodePubKey): Flow<Contact?> {
+//        return contactRepository.getContactByPubKey(lightningNodePubKey)
+//    }
+//
+//    fun getUrlMetaData(url: String): Flow<LoadResponse<String, ResponseError>> {
+//        return networkQueryChat.getHtml(url)
+//    }
+
     private suspend fun handleLinkPreview(link: MessageLinkPreview): LayoutState.Bubble.ContainerThird.LinkPreview? {
         var preview: LayoutState.Bubble.ContainerThird.LinkPreview? = null
 
         viewModelScope.launch(mainImmediate) {
             // TODO: Implement
+            @Exhaustive
+            when (link) {
+                is NodeDescriptor -> {
+
+                    @Exhaustive
+                    when (val descriptor = link.nodeDescriptor) {
+                        is LightningNodePubKey -> {
+                            // TODO: Implement
+                        }
+                        is VirtualLightningNodeAddress -> {
+                            // TODO: Implement
+                        }
+                    }
+
+                }
+                is TribeLink -> {
+                    try {
+                        val uuid = ChatUUID(link.tribeJoinLink.tribeUUID)
+
+                        val thisChat = getChat()
+                        if (thisChat.uuid == uuid) {
+
+                            preview = LayoutState.Bubble.ContainerThird.LinkPreview.TribeLinkPreview(
+                                name = TribePreviewName(thisChat.name?.value ?: ""),
+                                description = null,
+                                imageUrl = thisChat.photoUrl?.toPreviewImageUrlOrNull(),
+                                showBanner = true,
+                                joinLink = link.tribeJoinLink,
+                            )
+
+                        } else {
+                            val existingChat = chatRepository.getChatByUUID(uuid).firstOrNull()
+                            if (existingChat != null) {
+
+                                preview = LayoutState.Bubble.ContainerThird.LinkPreview.TribeLinkPreview(
+                                    name = TribePreviewName(existingChat.name?.value ?: ""),
+                                    description = null,
+                                    imageUrl = existingChat.photoUrl?.toPreviewImageUrlOrNull(),
+                                    showBanner = true,
+                                    joinLink = link.tribeJoinLink,
+                                )
+
+                            } else {
+
+                                val tribePreview = linkPreviewHandler.retrieveTribeLinkPreview(link.tribeJoinLink)
+
+                                if (tribePreview != null) {
+                                    preview = LayoutState.Bubble.ContainerThird.LinkPreview.TribeLinkPreview(
+                                        name = tribePreview.name,
+                                        description = tribePreview.description,
+                                        imageUrl = tribePreview.imageUrl,
+                                        showBanner = true,
+                                        joinLink = link.tribeJoinLink,
+                                    )
+                                } // else do nothing
+                            }
+                        }
+                    } catch (_: Exception) {
+                        // no - op
+                    }
+                }
+                is UnspecifiedUrl -> {
+                    // TODO: Implement
+                }
+            }
         }.join()
 
         return preview
@@ -956,22 +1042,6 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 
         } ?: chatNavigator.toAddContactDetail(pubKey, routeHint)
     }
-
-//    fun getChatTribe(tribeJoinLink: TribeJoinLink): Flow<Chat?> {
-//        return chatRepository.getChatByUUID(ChatUUID(tribeJoinLink.tribeUUID))
-//    }
-//
-//    fun getTribeInfo(tribeJoinLink: TribeJoinLink): Flow<LoadResponse<TribeDto, ResponseError>> {
-//        return networkQueryChat.getTribeInfo(ChatHost(tribeJoinLink.tribeHost), ChatUUID(tribeJoinLink.tribeUUID))
-//    }
-//
-//    fun getContact(lightningNodePubKey: LightningNodePubKey): Flow<Contact?> {
-//        return contactRepository.getContactByPubKey(lightningNodePubKey)
-//    }
-//
-//    fun getUrlMetaData(url: String): Flow<LoadResponse<String, ResponseError>> {
-//        return networkQueryChat.getHtml(url)
-//    }
 
     open suspend fun processMemberRequest(
         contactId: ContactId,
