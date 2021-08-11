@@ -316,7 +316,10 @@ inline fun TransactionCallbacks.updateInviteStatus(
 }
 
 @Suppress("SpellCheckingInspection")
-fun TransactionCallbacks.upsertMessage(dto: MessageDto, queries: SphinxDatabaseQueries) {
+fun TransactionCallbacks.upsertMessage(
+    dto: MessageDto,
+    queries: SphinxDatabaseQueries
+) {
 
     val chatId: ChatId = dto.chat_id?.let {
         ChatId(it)
@@ -358,9 +361,8 @@ fun TransactionCallbacks.upsertMessage(dto: MessageDto, queries: SphinxDatabaseQ
                 MessageId(dto.id),
                 chatId,
                 dto.mediaKeyDecrypted?.toMediaKeyDecrypted(),
-                dto.mediaLocalFile,
+                dto.mediaLocalFile
             )
-
         }
     }
 }

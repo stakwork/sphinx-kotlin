@@ -588,6 +588,13 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         }
     }
 
+    fun resendMessage(message: Message) {
+        viewModelScope.launch(mainImmediate) {
+            val chat = getChat()
+            messageRepository.resendMessage(message, chat)
+        }
+    }
+
     @JvmSynthetic
     internal fun chatMenuOptionCamera() {
         viewModelScope.launch(mainImmediate) {

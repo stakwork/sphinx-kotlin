@@ -5,6 +5,7 @@ import chat.sphinx.concept_repository_message.model.SendPayment
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
+import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.Sat
@@ -28,6 +29,11 @@ interface MessageRepository {
     suspend fun readMessages(chatId: ChatId)
 
     fun sendMessage(sendMessage: SendMessage?)
+
+    fun resendMessage(
+        message: Message,
+        chat: Chat,
+    )
 
     fun sendPodcastBoost(
         chatId: ChatId,
