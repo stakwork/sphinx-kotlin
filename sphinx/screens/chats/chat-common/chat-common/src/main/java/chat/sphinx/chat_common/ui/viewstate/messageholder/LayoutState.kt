@@ -118,7 +118,7 @@ internal sealed class LayoutState private constructor() {
 
                     // Used only to anchor data for click listeners
                     val lightningNodeDescriptor: LightningNodeDescriptor
-                )
+                ): LinkPreview()
 
                 data class HttpUrlPreview(
                     val title: HtmlPreviewTitle?,

@@ -74,6 +74,7 @@ import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import chat.sphinx.concept_link_preview.LinkPreviewHandler
+import chat.sphinx.concept_link_preview.model.HtmlPreviewTitle
 import chat.sphinx.concept_link_preview.model.TribePreviewName
 import chat.sphinx.concept_link_preview.model.toPreviewImageUrlOrNull
 import io.matthewnelson.concept_media_cache.MediaCacheHandler
@@ -377,13 +378,36 @@ abstract class ChatViewModel<ARGS: NavArgs>(
             when (link) {
                 is NodeDescriptor -> {
 
-                    @Exhaustive
-                    when (val descriptor = link.nodeDescriptor) {
+                    val pubKey: LightningNodePubKey? = when (link.nodeDescriptor) {
                         is LightningNodePubKey -> {
-                            // TODO: Implement
+                            link.nodeDescriptor
                         }
                         is VirtualLightningNodeAddress -> {
-                            // TODO: Implement
+                            link.nodeDescriptor.getPubKey()
+                        }
+                    }
+
+                    if (pubKey != null) {
+                        val existingContact: Contact? = contactRepository.getContactByPubKey(pubKey).firstOrNull()
+
+                        if (existingContact != null) {
+
+                            preview = LayoutState.Bubble.ContainerThird.LinkPreview.ContactPreview(
+                                alias = existingContact.alias,
+                                photoUrl = existingContact.photoUrl,
+                                showBanner = false,
+                                lightningNodeDescriptor = link.nodeDescriptor,
+                            )
+
+                        } else {
+
+                            preview = LayoutState.Bubble.ContainerThird.LinkPreview.ContactPreview(
+                                alias = null,
+                                photoUrl = null,
+                                showBanner = true,
+                                lightningNodeDescriptor = link.nodeDescriptor
+                            )
+
                         }
                     }
 
@@ -435,7 +459,20 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                     }
                 }
                 is UnspecifiedUrl -> {
-                    // TODO: Implement
+
+                    val htmlPreview = linkPreviewHandler.retrieveHtmlPreview(link.url)
+
+                    if (htmlPreview != null) {
+                        preview = LayoutState.Bubble.ContainerThird.LinkPreview.HttpUrlPreview(
+                            title = htmlPreview.title,
+                            domainHost = htmlPreview.domainHost,
+                            description = htmlPreview.description,
+                            imageUrl = htmlPreview.imageUrl,
+                            favIconUrl = htmlPreview.favIconUrl,
+                            url = link.url
+                        )
+                    }
+
                 }
             }
         }.join()
