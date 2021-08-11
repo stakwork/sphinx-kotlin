@@ -514,8 +514,7 @@ internal inline fun LayoutMessageHolderBinding.setBubbleMessageLayout(
 }
 
 @MainThread
-@Suppress("NOTHING_TO_INLINE")
-internal inline fun LayoutMessageHolderBinding.setBubbleMessageLinkPreviewLayout(
+internal fun LayoutMessageHolderBinding.setBubbleMessageLinkPreviewLayout(
     dispatchers: CoroutineDispatchers,
     holderJobs: ArrayList<Job>,
     imageLoader: ImageLoader<ImageView>,
@@ -540,8 +539,9 @@ internal inline fun LayoutMessageHolderBinding.setBubbleMessageLinkPreviewLayout
 
                     // TODO: Fix Photo Url setting...
                     textViewMessageLinkPreviewContactPubkey.text = previewLink.nodeDescriptor.value
-//                    val drawable = AppCompatResources.getDrawable(root.context, R.drawable.ic_add_contact)
-//                    imageViewMessageLinkPreviewContactAvatar.setImageDrawable(drawable)
+                    imageViewMessageLinkPreviewContactAvatar.setImageDrawable(
+                        AppCompatResources.getDrawable(root.context, R.drawable.ic_add_contact)
+                    )
 
                     lifecycleScope.launch(dispatchers.mainImmediate) {
                         val state =
@@ -549,16 +549,20 @@ internal inline fun LayoutMessageHolderBinding.setBubbleMessageLinkPreviewLayout
 
                         if (state != null) {
                             textViewMessageLinkPreviewNewContactLabel.text = state.alias?.value ?: ""
-//                            state.photoUrl?.let { nnPhotoUrl ->
-//                                imageLoader.load(
-//                                    imageViewMessageLinkPreviewContactAvatar,
-//                                    nnPhotoUrl.value,
-//                                    ImageLoaderOptions.Builder()
-////                                        .placeholderResId(R.drawable.ic_add_contact)
-//                                        .transformation(Transformation.CircleCrop)
-//                                        .build(),
-//                                )
-//                            }/* ?: imageViewMessageLinkPreviewContactAvatar.setImageDrawable(drawable)*/
+                            state.photoUrl?.let { nnPhotoUrl ->
+                                launch {
+                                    imageLoader.load(
+                                        imageViewMessageLinkPreviewContactAvatar,
+                                        nnPhotoUrl.value,
+                                        ImageLoaderOptions.Builder()
+                                            .placeholderResId(R.drawable.ic_add_contact)
+                                            .transformation(Transformation.CircleCrop)
+                                            .build(),
+                                    )
+                                }.let { job ->
+                                    holderJobs.add(job)
+                                }
+                            }
                             textViewMessageLinkPreviewAddContactBanner.goneIfFalse(state.showBanner)
                         }
                     }.let { job ->
@@ -578,8 +582,9 @@ internal inline fun LayoutMessageHolderBinding.setBubbleMessageLinkPreviewLayout
                     textViewMessageLinkPreviewTribeDescription.gone
                     textViewMessageLinkPreviewTribeNameLabel.gone
                     textViewMessageLinkPreviewTribeSeeBanner.gone
-
-                    // TODO: Load Image
+                    imageViewMessageLinkPreviewTribe.setImageDrawable(
+                        AppCompatResources.getDrawable(root.context, R.drawable.ic_tribe)
+                    )
 
                     lifecycleScope.launch(dispatchers.mainImmediate) {
                         val state =
@@ -594,6 +599,22 @@ internal inline fun LayoutMessageHolderBinding.setBubbleMessageLinkPreviewLayout
                                 this@name.text = state.name.value
                                 this@name.visible
                             }
+
+                            state.imageUrl?.let { url ->
+                                launch {
+                                    imageLoader.load(
+                                        imageViewMessageLinkPreviewTribe,
+                                        url.value,
+                                        ImageLoaderOptions.Builder()
+                                            .placeholderResId(R.drawable.ic_tribe)
+                                            .transformation(Transformation.CircleCrop)
+                                            .build(),
+                                    )
+                                }.let { job ->
+                                    holderJobs.add(job)
+                                }
+                            }
+
                             textViewMessageLinkPreviewTribeSeeBanner.goneIfFalse(state.showBanner)
                         }
 
@@ -609,14 +630,62 @@ internal inline fun LayoutMessageHolderBinding.setBubbleMessageLinkPreviewLayout
                 includeMessageLinkPreviewTribe.root.gone
 
                 includeMessageLinkPreviewUrl.apply {
+
+                    // reset view
+                    textViewMessageLinkPreviewUrlDomain.gone
+                    textViewMessageLinkPreviewUrlDescription.gone
+                    textViewMessageLinkPreviewUrlTitle.gone
+                    imageViewMessageLinkPreviewUrlFavicon.gone
+                    imageViewMessageLinkPreviewUrlMainImage.gone
+
                     lifecycleScope.launch(dispatchers.mainImmediate) {
+                        progressBarLinkPreview.visible
+
                         val state =
                             viewState.retrieveLinkPreview() as? LayoutState.Bubble.ContainerThird.LinkPreview.HttpUrlPreview
 
                         if (state != null) {
+                            textViewMessageLinkPreviewUrlDomain.apply domain@ {
+                                this@domain.text = state.domainHost.value
+                                this@domain.visible
+                            }
+                            textViewMessageLinkPreviewUrlDescription.apply desc@ {
+                                this@desc.text = state.description?.value
+                                this@desc.goneIfTrue(state.description == null)
+                            }
+                            textViewMessageLinkPreviewUrlTitle.apply title@ {
+                                this@title.text = state.title?.value
+                                this@title.goneIfTrue( state.title == null)
+                            }
+                            imageViewMessageLinkPreviewUrlFavicon.apply favIcon@ {
+                                state.favIconUrl?.let { url ->
+                                    launch {
+                                        imageLoader.load(
+                                            imageView = this@favIcon,
+                                            url = url.value,
+                                        )
+                                    }.let { job ->
+                                        holderJobs.add(job)
+                                    }
+                                    this@favIcon.visible
+                                }
+                            }
+                            imageViewMessageLinkPreviewUrlMainImage.apply main@ {
+                                state.imageUrl?.let { url ->
+                                    launch {
+                                        imageLoader.load(
+                                            imageView = this@main,
+                                            url = url.value,
+                                        )
+                                    }.let { job ->
+                                        holderJobs.add(job)
+                                    }
+                                    this@main.visible
+                                }
+                            }
 
+                            progressBarLinkPreview.gone
                         }
-
                     }.let { job ->
                         holderJobs.add(job)
                     }
