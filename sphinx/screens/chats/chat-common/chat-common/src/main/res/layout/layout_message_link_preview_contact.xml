@@ -28,11 +28,12 @@
         android:background="@color/body">
 
         <View
+            android:id="@+id/view_link_preview_tribe_dashed_border"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_marginHorizontal="1dp"
             android:layout_marginVertical="3dp"
-            android:background="@drawable/background_rounded_corner_dashed_border_button" />
+            android:background="@drawable/background_sent_rounded_corner_dashed_border_button" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -47,8 +48,6 @@
             android:layout_width="@dimen/contact_link_preview_avatar_image_xy"
             android:layout_height="@dimen/contact_link_preview_avatar_image_xy"
             android:layout_marginVertical="@dimen/default_half_layout_margin"
-            android:layout_marginEnd="@dimen/default_inner_spacing_list_item_title"
-            android:tint="@color/secondaryTextSent"
             app:layout_constraintBottom_toTopOf="@id/text_view_message_link_preview_add_contact_banner"
             app:layout_constraintEnd_toStartOf="@id/text_view_message_link_preview_new_contact_label"
             app:layout_constraintStart_toStartOf="parent"
@@ -59,6 +58,7 @@
             android:id="@+id/text_view_message_link_preview_new_contact_label"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/default_inner_spacing_list_item_title"
             android:fontFamily="@font/roboto_medium"
             android:maxLines="2"
             android:text="@string/new_contact"

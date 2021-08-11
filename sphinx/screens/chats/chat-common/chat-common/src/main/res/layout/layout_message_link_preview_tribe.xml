@@ -28,11 +28,12 @@
         android:background="@color/body">
 
         <View
+            android:id="@+id/view_link_preview_tribe_dashed_border"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_marginHorizontal="1dp"
             android:layout_marginVertical="3dp"
-            android:background="@drawable/background_rounded_corner_dashed_border_button" />
+            android:background="@drawable/background_sent_rounded_corner_dashed_border_button" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -46,9 +47,7 @@
             android:id="@+id/image_view_message_link_preview_tribe"
             android:layout_width="@dimen/contact_link_preview_avatar_image_xy"
             android:layout_height="@dimen/contact_link_preview_avatar_image_xy"
-            android:layout_marginHorizontal="@dimen/default_small_layout_margin"
             android:layout_marginVertical="@dimen/default_half_layout_margin"
-            android:tint="@color/secondaryTextSent"
             app:layout_constraintBottom_toTopOf="@id/text_view_message_link_preview_tribe_see_banner"
             app:layout_constraintEnd_toStartOf="@id/text_view_message_link_preview_tribe_name_label"
             app:layout_constraintStart_toStartOf="parent"
@@ -75,7 +74,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:ellipsize="end"
-            android:maxLines="4"
+            android:maxLines="3"
             android:fontFamily="@font/roboto_regular"
             android:textColor="@color/secondaryTextSent"
             android:textSize="@dimen/chat_message_link_preview_pub_key_text_size"
@@ -83,6 +82,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="@id/text_view_message_link_preview_tribe_name_label"
             app:layout_constraintTop_toBottomOf="@id/text_view_message_link_preview_tribe_name_label"
+            app:layout_constraintBottom_toBottomOf="@+id/image_view_message_link_preview_tribe"
             tools:text="Trading bitcoin tips, TA exchanges, short/long ratio, trading strategies and more."
             tools:visibility="gone" />
 
@@ -100,6 +100,7 @@
             android:textColor="@android:color/white"
             android:textSize="@dimen/default_text_size_caption1"
             android:layout_marginTop="@dimen/default_layout_margin"
+            app:layout_constraintTop_toBottomOf="@id/image_view_message_link_preview_tribe"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"

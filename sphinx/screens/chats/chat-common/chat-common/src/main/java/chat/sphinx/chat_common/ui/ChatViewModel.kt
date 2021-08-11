@@ -435,7 +435,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                                     name = TribePreviewName(existingChat.name?.value ?: ""),
                                     description = null,
                                     imageUrl = existingChat.photoUrl?.toPreviewImageUrlOrNull(),
-                                    showBanner = true,
+                                    showBanner = false,
                                     joinLink = link.tribeJoinLink,
                                 )
 

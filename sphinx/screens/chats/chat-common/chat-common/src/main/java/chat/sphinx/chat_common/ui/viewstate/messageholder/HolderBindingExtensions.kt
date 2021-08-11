@@ -524,6 +524,11 @@ internal fun LayoutMessageHolderBinding.setBubbleMessageLinkPreviewLayout(
     includeMessageHolderBubble.apply {
         val previewLink = viewState.messageLinkPreview
 
+        val placeHolderAndTextColor = ContextCompat.getColor(
+            root.context,
+            if (viewState.isReceived) R.color.secondaryText else R.color.secondaryTextSent
+        )
+
         @Exhaustive
         when (previewLink) {
             null -> {
@@ -536,11 +541,19 @@ internal fun LayoutMessageHolderBinding.setBubbleMessageLinkPreviewLayout(
                 includeMessageLinkPreviewUrl.root.gone
 
                 includeMessageLinkPreviewContact.apply {
-
-                    // TODO: Fix Photo Url setting...
                     textViewMessageLinkPreviewContactPubkey.text = previewLink.nodeDescriptor.value
+                    textViewMessageLinkPreviewContactPubkey.setTextColor(placeHolderAndTextColor)
+
+                    imageViewMessageLinkPreviewQrInviteIcon.setColorFilter(placeHolderAndTextColor, android.graphics.PorterDuff.Mode.SRC_IN)
+
+                    imageViewMessageLinkPreviewContactAvatar.setColorFilter(placeHolderAndTextColor, android.graphics.PorterDuff.Mode.SRC_IN)
                     imageViewMessageLinkPreviewContactAvatar.setImageDrawable(
                         AppCompatResources.getDrawable(root.context, R.drawable.ic_add_contact)
+                    )
+
+                    viewLinkPreviewTribeDashedBorder.background = AppCompatResources.getDrawable(
+                        root.context,
+                        if (viewState.isReceived) R.drawable.background_received_rounded_corner_dashed_border_button else R.drawable.background_sent_rounded_corner_dashed_border_button
                     )
 
                     lifecycleScope.launch(dispatchers.mainImmediate) {
@@ -548,8 +561,11 @@ internal fun LayoutMessageHolderBinding.setBubbleMessageLinkPreviewLayout(
                             viewState.retrieveLinkPreview() as? LayoutState.Bubble.ContainerThird.LinkPreview.ContactPreview
 
                         if (state != null) {
-                            textViewMessageLinkPreviewNewContactLabel.text = state.alias?.value ?: ""
+                            textViewMessageLinkPreviewNewContactLabel.text = state.alias?.value ?: getString(R.string.new_contact)
                             state.photoUrl?.let { nnPhotoUrl ->
+
+                                imageViewMessageLinkPreviewContactAvatar.clearColorFilter()
+
                                 launch {
                                     imageLoader.load(
                                         imageViewMessageLinkPreviewContactAvatar,
@@ -563,6 +579,7 @@ internal fun LayoutMessageHolderBinding.setBubbleMessageLinkPreviewLayout(
                                     holderJobs.add(job)
                                 }
                             }
+                            layoutConstraintLinkPreviewContactDashedBorder.goneIfFalse(state.showBanner)
                             textViewMessageLinkPreviewAddContactBanner.goneIfFalse(state.showBanner)
                         }
                     }.let { job ->
@@ -582,8 +599,16 @@ internal fun LayoutMessageHolderBinding.setBubbleMessageLinkPreviewLayout(
                     textViewMessageLinkPreviewTribeDescription.gone
                     textViewMessageLinkPreviewTribeNameLabel.gone
                     textViewMessageLinkPreviewTribeSeeBanner.gone
+
+                    imageViewMessageLinkPreviewTribe.setColorFilter(placeHolderAndTextColor, android.graphics.PorterDuff.Mode.SRC_IN)
+
                     imageViewMessageLinkPreviewTribe.setImageDrawable(
                         AppCompatResources.getDrawable(root.context, R.drawable.ic_tribe)
+                    )
+
+                    viewLinkPreviewTribeDashedBorder.background = AppCompatResources.getDrawable(
+                        root.context,
+                        if (viewState.isReceived) R.drawable.background_received_rounded_corner_dashed_border_button else R.drawable.background_sent_rounded_corner_dashed_border_button
                     )
 
                     lifecycleScope.launch(dispatchers.mainImmediate) {
@@ -595,19 +620,23 @@ internal fun LayoutMessageHolderBinding.setBubbleMessageLinkPreviewLayout(
                                 this@desc.text = state.description?.value
                                 this@desc.goneIfTrue(state.description == null)
                             }
+                            textViewMessageLinkPreviewTribeDescription.setTextColor(placeHolderAndTextColor)
+
                             textViewMessageLinkPreviewTribeNameLabel.apply name@ {
                                 this@name.text = state.name.value
                                 this@name.visible
                             }
 
                             state.imageUrl?.let { url ->
+                                imageViewMessageLinkPreviewTribe.clearColorFilter()
+
                                 launch {
                                     imageLoader.load(
                                         imageViewMessageLinkPreviewTribe,
                                         url.value,
                                         ImageLoaderOptions.Builder()
                                             .placeholderResId(R.drawable.ic_tribe)
-                                            .transformation(Transformation.CircleCrop)
+                                            .transformation(Transformation.RoundedCorners(Px(5f),Px(5f),Px(5f),Px(5f)))
                                             .build(),
                                     )
                                 }.let { job ->
@@ -615,6 +644,7 @@ internal fun LayoutMessageHolderBinding.setBubbleMessageLinkPreviewLayout(
                                 }
                             }
 
+                            layoutConstraintLinkPreviewTribeDashedBorder.goneIfFalse(state.showBanner)
                             textViewMessageLinkPreviewTribeSeeBanner.goneIfFalse(state.showBanner)
                         }
 
