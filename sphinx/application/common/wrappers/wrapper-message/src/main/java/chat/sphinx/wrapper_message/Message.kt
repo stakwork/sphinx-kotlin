@@ -13,7 +13,7 @@ import chat.sphinx.wrapper_message_media.MessageMedia
 import chat.sphinx.wrapper_message_media.isImage
 
 @Suppress("NOTHING_TO_INLINE")
-inline fun Message.retrieveTextToShow(checkForJitsiLink: Boolean = true): String? =
+inline fun Message.retrieveTextToShow(): String? =
     messageContentDecrypted?.let { decrypted ->
         // TODO Handle podcast clips `clip::.....`
         if (giphyData != null) {
@@ -22,7 +22,7 @@ inline fun Message.retrieveTextToShow(checkForJitsiLink: Boolean = true): String
         if (podBoost != null) {
             return null
         }
-        if (checkForJitsiLink && isSphinxCallLink) {
+        if (isSphinxCallLink) {
             return null
         }
         decrypted.value
