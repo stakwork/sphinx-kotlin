@@ -217,6 +217,9 @@ abstract class SphinxRepository(
                             io
                         )?.join()
 
+                        val isAttachmentMessage = nnMessageDto.type.toMessageType().isAttachment()
+                        delay(if (isAttachmentMessage) 500L else 0L)
+
                         chatLock.withLock {
                             messageLock.withLock {
                                 contactLock.withLock {
@@ -1715,6 +1718,18 @@ abstract class SphinxRepository(
 
                         queries.transaction {
 
+                            if (media != null) {
+                                queries.messageMediaUpsert(
+                                    media.second,
+                                    media.third.mediaType,
+                                    MediaToken.PROVISIONAL_TOKEN,
+                                    provisionalId,
+                                    chatDbo.id,
+                                    MediaKeyDecrypted(media.first.value.joinToString("")),
+                                    media.third.file,
+                                )
+                            }
+
                             queries.messageUpsert(
                                 MessageStatus.Pending,
                                 Seen.True,
@@ -1921,7 +1936,7 @@ abstract class SphinxRepository(
 
             contact?.id?.let { nnContactId ->
                 // we know it's a conversation as the contactId is always sent
-                contact?.rsaPublicKey?.let { pubKey ->
+                contact.rsaPublicKey?.let { pubKey ->
 
                     val response = rsa.encrypt(
                         pubKey,
@@ -2025,13 +2040,10 @@ abstract class SphinxRepository(
                                             upsertContact(contactDto, queries)
                                         }
 
-                                        upsertMessage(
-                                            loadResponse.value,
-                                            queries
-                                        )
+                                        upsertMessage(loadResponse.value, queries)
 
                                         provisionalMessageId?.let { provId ->
-                                            queries.messageDeleteById(provId)
+                                            deleteMessageById(provId, queries)
                                         }
                                     }
                                 }
@@ -2043,16 +2055,13 @@ abstract class SphinxRepository(
         }
     }
 
-    override fun resendMessage(
-        message: Message,
-        chat: Chat,
-    ) {
+    override fun resendMessage(message: Message, chat: Chat) {
 
         applicationScope.launch(mainImmediate) {
             val queries = coreDB.getSphinxDatabaseQueries()
 
-            val pricePerMessage = chat?.pricePerMessage?.value ?: 0
-            val escrowAmount = chat?.escrowAmount?.value ?: 0
+            val pricePerMessage = chat.pricePerMessage?.value ?: 0
+            val escrowAmount = chat.escrowAmount?.value ?: 0
             val messagePrice = (pricePerMessage + escrowAmount).toSat() ?: Sat(0)
 
             val contact: Contact? = if (chat.type.isConversation()) {
@@ -2071,7 +2080,7 @@ abstract class SphinxRepository(
 
             val postMessageDto: PostMessageDto = try {
                 PostMessageDto(
-                    message.chatId?.value,
+                    message.chatId.value,
                     contact?.id?.value,
                     messagePrice.value,
                     message.replyUUID?.value,
@@ -2110,7 +2119,9 @@ abstract class SphinxRepository(
             if (message.id.isProvisionalMessage) {
                 messageLock.withLock {
                     withContext(io) {
-                        queries.messageDeleteById(message.id)
+                        queries.transaction {
+                            deleteMessageById(message.id, queries)
+                        }
                     }
                 }
             } else {

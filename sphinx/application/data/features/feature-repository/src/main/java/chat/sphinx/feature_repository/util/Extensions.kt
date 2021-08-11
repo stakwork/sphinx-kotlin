@@ -316,16 +316,31 @@ inline fun TransactionCallbacks.updateInviteStatus(
 }
 
 @Suppress("SpellCheckingInspection")
-fun TransactionCallbacks.upsertMessage(
-    dto: MessageDto,
-    queries: SphinxDatabaseQueries
-) {
+fun TransactionCallbacks.upsertMessage(dto: MessageDto, queries: SphinxDatabaseQueries) {
 
     val chatId: ChatId = dto.chat_id?.let {
         ChatId(it)
     } ?: dto.chat?.id?.let {
         ChatId(it)
     } ?: ChatId(ChatId.NULL_CHAT_ID.toLong())
+
+    dto.media_token?.let { mediaToken ->
+        dto.media_type?.let { mediaType ->
+
+            if (mediaToken.isEmpty() || mediaType.isEmpty()) return
+
+            queries.messageMediaUpsert(
+                dto.media_key?.toMediaKey(),
+                mediaType.toMediaType(),
+                MediaToken(mediaToken),
+                MessageId(dto.id),
+                chatId,
+                dto.mediaKeyDecrypted?.toMediaKeyDecrypted(),
+                dto.mediaLocalFile,
+            )
+
+        }
+    }
 
     queries.messageUpsert(
         dto.status.toMessageStatus(),
@@ -396,4 +411,13 @@ inline fun TransactionCallbacks.deleteContactById(
     queries.contactDeleteById(contactId)
     queries.inviteDeleteByContactId(contactId)
     queries.dashboardDeleteById(contactId)
+}
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun TransactionCallbacks.deleteMessageById(
+    messageId: MessageId,
+    queries: SphinxDatabaseQueries
+) {
+    queries.messageDeleteById(messageId)
+    queries.messageMediaDeleteById(messageId)
 }
