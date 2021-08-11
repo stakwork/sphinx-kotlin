@@ -373,6 +373,18 @@ abstract class ChatViewModel<ARGS: NavArgs>(
      * */
     @CallSuper
     open fun sendMessage(builder: SendMessage.Builder): SendMessage? {
+
+        val botPriceResponse = getBotPrice(builder.getText())
+
+        botPriceResponse.second?.let { errorMessage ->
+            viewModelScope.launch(mainImmediate) {
+                submitSideEffect(ChatSideEffect.Notify(errorMessage))
+            }
+            return null
+        }
+
+
+        builder.setBotPrice(botPriceResponse.first)
         val msg = builder.build()
         // TODO: if null figure out why and notify user via side effect
         messageRepository.sendMessage(msg)
@@ -929,6 +941,10 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     ) {}
 
     open suspend fun deleteTribe() {}
+
+    open fun getBotPrice(text: String?): Pair<Sat, String?> {
+        return Pair(Sat(0), null)
+    }
 
     override suspend fun onMotionSceneCompletion(value: Nothing) {
         // unused

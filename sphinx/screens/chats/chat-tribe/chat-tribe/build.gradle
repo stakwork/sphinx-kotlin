@@ -45,6 +45,6 @@ dependencies {
     implementation project(path: ':sphinx:activity:concepts:concept-view-model-coordinator')
 
     implementation deps.lottie.sdk
-
+    api deps.square.moshi
     kapt kaptDeps.google.hilt
 }

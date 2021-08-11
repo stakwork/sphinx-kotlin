@@ -94,6 +94,10 @@
     <string name="alert_confirm_exit_tribe_title">Exit Tribe</string>
     <string name="alert_confirm_exit_tribe_message">Are you sure you wat to exit and delete this tribe?</string>
 
+    <!-- Bots -->
+    <string name="amount_too_low">Amount too low</string>
+    <string name="amount_too_high">Amount too high</string>
+
     <!-- Menu -->
     <string name="attachments_menu_cancel" tools:ignore="ButtonCase">CANCEL</string>
     <string name="camera_attachment_option">Camera</string>

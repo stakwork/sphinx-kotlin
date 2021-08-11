@@ -1704,7 +1704,8 @@ abstract class SphinxRepository(
 
             val pricePerMessage = chat?.price_per_message?.value ?: 0
             val escrowAmount = chat?.escrow_amount?.value ?: 0
-            val messagePrice = (pricePerMessage + escrowAmount).toSat() ?: Sat(0)
+            val botCommandPrice = sendMessage.botPrice?.value ?: 0
+            val messagePrice = (pricePerMessage + escrowAmount + botCommandPrice).toSat() ?: Sat(0)
 
             val provisionalMessageId: MessageId? = chat?.let { chatDbo ->
                 // Build provisional message and insert
@@ -2481,7 +2482,7 @@ abstract class SphinxRepository(
         emit(response ?: Response.Error(ResponseError("")))
     }
 
-    override suspend fun updateTribeInfo(chat: Chat): PodcastDto? {
+    override suspend fun updateTribeInfo(chat: Chat): Pair<TribeDto?, PodcastDto?> {
         var owner: Contact? = accountOwner.value
 
         if (owner == null) {
@@ -2497,6 +2498,7 @@ abstract class SphinxRepository(
         }
 
         var podcastDto: PodcastDto? = null
+        var tribeDto: TribeDto? = null
 
         chat.host?.let { chatHost ->
             val chatUUID = chat.uuid
@@ -2515,17 +2517,17 @@ abstract class SphinxRepository(
                         is Response.Error -> {}
 
                         is Response.Success -> {
-                            val tribeDto = loadResponse.value
+                            val nnTribeDto = loadResponse.value
 
                             if (owner?.nodePubKey != chat.ownerPubKey) {
                                 val didChangeNameOrPhotoUrl = (
-                                        tribeDto.name != chat.name?.value ?: "" ||
-                                                tribeDto.img != chat.photoUrl?.value ?: ""
+                                        nnTribeDto.name != chat.name?.value ?: "" ||
+                                                nnTribeDto.img != chat.photoUrl?.value ?: ""
                                         )
 
                                 chatLock.withLock {
                                     queries.transaction {
-                                        updateChatTribeData(tribeDto, chat.id, queries)
+                                        updateChatTribeData(nnTribeDto, chat.id, queries)
                                     }
                                 }
 
@@ -2533,23 +2535,24 @@ abstract class SphinxRepository(
                                     networkQueryChat.updateTribe(
                                         chat.id,
                                         PostGroupDto(
-                                            tribeDto.name,
-                                            tribeDto.description,
-                                            img = tribeDto.img ?: "",
+                                            nnTribeDto.name,
+                                            nnTribeDto.description,
+                                            img = nnTribeDto.img ?: "",
                                         )
                                     ).collect {}
                                 }
 
                             }
 
-                            podcastDto = getPodcastFeed(chat, tribeDto)
+                            podcastDto = getPodcastFeed(chat, nnTribeDto)
+                            tribeDto = nnTribeDto
                         }
                     }
                 }
             }
         }
 
-        return podcastDto
+        return Pair(tribeDto, podcastDto)
     }
 
     private suspend fun getPodcastFeed(chat: Chat, tribe: TribeDto): PodcastDto? {

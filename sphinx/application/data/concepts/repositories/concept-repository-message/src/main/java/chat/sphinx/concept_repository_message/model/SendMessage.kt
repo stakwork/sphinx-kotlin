@@ -2,6 +2,7 @@ package chat.sphinx.concept_repository_message.model
 
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
+import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_message.GiphyData
 import chat.sphinx.wrapper_message.ReplyUUID
 
@@ -11,6 +12,7 @@ class SendMessage private constructor(
     val contactId: ContactId?,
     val replyUUID: ReplyUUID?,
     val text: String?,
+    val botPrice: Sat?,
     val giphyData: GiphyData? = null,
     val isBoost: Boolean = false
 ) {
@@ -21,6 +23,7 @@ class SendMessage private constructor(
         private var attachmentInfo: AttachmentInfo? = null
         private var replyUUID: ReplyUUID?           = null
         private var text: String?                   = null
+        private var botPrice: Sat?                  = null
         private var giphyData: GiphyData?           = null
         private var isBoost: Boolean                = false
 
@@ -31,6 +34,7 @@ class SendMessage private constructor(
             contactId = null
             replyUUID = null
             text = null
+            botPrice = null
             giphyData = null
             isBoost = false
         }
@@ -92,6 +96,12 @@ class SendMessage private constructor(
         }
 
         @Synchronized
+        fun setBotPrice(botPrice: Sat): Builder {
+            this.botPrice = botPrice
+            return this
+        }
+
+        @Synchronized
         fun setGiphyData(giphyData: GiphyData?): Builder {
             this.giphyData = giphyData
             return this
@@ -101,6 +111,10 @@ class SendMessage private constructor(
         fun setIsBoost(isBoost: Boolean): Builder {
             this.isBoost = isBoost
             return this
+        }
+
+        fun getText(): String? {
+            return text
         }
 
         @Synchronized
@@ -114,6 +128,7 @@ class SendMessage private constructor(
                     contactId,
                     replyUUID,
                     text,
+                    botPrice,
                     giphyData?.let { GiphyData(it.id, it.url, it.aspect_ratio, text) },
                     isBoost
                 )

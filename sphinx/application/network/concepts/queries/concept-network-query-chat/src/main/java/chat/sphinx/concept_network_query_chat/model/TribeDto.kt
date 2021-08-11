@@ -1,7 +1,10 @@
 package chat.sphinx.concept_network_query_chat.model
 
+import chat.sphinx.wrapper_chat.TribeInfo
+import chat.sphinx.wrapper_chat.toTribeBotsList
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
+import com.squareup.moshi.Moshi
 import java.io.File
 
 @JsonClass(generateAdapter = true)
@@ -23,6 +26,7 @@ data class TribeDto(
     val deleted: Any?,
     val app_url: String?,
     val feed_url: String?,
+    val bots: String?
 ) {
 
     var amount: Long? = null
@@ -54,4 +58,30 @@ data class TribeDto(
         this.host = host
         this.uuid = uuid
     }
+}
+
+fun TribeDto.toTribeInfo(moshi: Moshi): TribeInfo {
+
+    val botsList = bots?.toTribeBotsList(moshi) ?: mutableListOf()
+
+    return TribeInfo(
+        name,
+        description,
+        img,
+        tags.toList(),
+        group_key,
+        owner_pubkey,
+        owner_route_hint,
+        owner_alias,
+        price_to_join,
+        price_per_message,
+        escrow_amount,
+        escrow_millis,
+        unlisted,
+        private,
+        deleted,
+        app_url,
+        feed_url,
+        botsList
+    )
 }

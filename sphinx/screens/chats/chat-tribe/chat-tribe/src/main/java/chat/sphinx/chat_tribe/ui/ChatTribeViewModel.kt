@@ -9,11 +9,11 @@ import chat.sphinx.camera_view_model_coordinator.response.CameraResponse
 import chat.sphinx.chat_common.ui.ChatSideEffect
 import chat.sphinx.chat_common.ui.ChatViewModel
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
-import chat.sphinx.chat_common.ui.viewstate.messagereply.MessageReplyViewState
 import chat.sphinx.chat_tribe.R
 import chat.sphinx.chat_tribe.navigation.TribeChatNavigator
 import chat.sphinx.concept_meme_server.MemeServerTokenHandler
 import chat.sphinx.concept_network_query_chat.model.toPodcast
+import chat.sphinx.concept_network_query_chat.model.toTribeInfo
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_lightning.model.route.isRouteAvailable
 import chat.sphinx.concept_repository_chat.ChatRepository
@@ -41,6 +41,7 @@ import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_podcast.Podcast
 import chat.sphinx.wrapper_podcast.PodcastEpisode
+import com.squareup.moshi.Moshi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
@@ -72,6 +73,7 @@ internal class ChatTribeViewModel @Inject constructor(
     cameraViewModelCoordinator: ViewModelCoordinator<CameraRequest, CameraResponse>,
     LOG: SphinxLogger,
     private val mediaPlayerServiceController: MediaPlayerServiceController,
+    private val moshi: Moshi,
 ): ChatViewModel<ChatTribeFragmentArgs>(
     app,
     dispatchers,
@@ -108,6 +110,7 @@ internal class ChatTribeViewModel @Inject constructor(
         replay = 1,
     )
 
+    var tribeInfo: TribeInfo? = null
     var podcast: Podcast? = null
 
     override val headerInitialHolderSharedFlow: SharedFlow<InitialHolderViewState> = flow {
@@ -302,7 +305,8 @@ internal class ChatTribeViewModel @Inject constructor(
     private suspend fun loadTribeAndPodcastData() {
         chatRepository.getChatById(chatId).firstOrNull()?.let { chat ->
 
-            chatRepository.updateTribeInfo(chat)?.let { podcastDto ->
+            val response = chatRepository.updateTribeInfo(chat)
+            response.second?.let { podcastDto ->
                 podcast = podcastDto.toPodcast()
 
                 chatRepository.getChatById(chatId).firstOrNull()?.let { chat ->
@@ -323,6 +327,10 @@ internal class ChatTribeViewModel @Inject constructor(
                         podcast!!.getMetaData()
                     )
                 )
+            }
+
+            response.first?.let { tribeDto ->
+                tribeInfo = tribeDto.toTribeInfo(moshi)
             }
         }
 
@@ -459,6 +467,26 @@ internal class ChatTribeViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    override fun getBotPrice(text: String?): Pair<Sat, String?> {
+        var errorMessage: String? = null
+        var price = Sat(0)
+
+        tribeInfo?.let { nnTribeInfo ->
+            val botPriceResponse = nnTribeInfo.getBotPrice(text)
+            price = botPriceResponse.first
+
+            botPriceResponse.second?.let { botPriceError ->
+                if (botPriceError == TribeInfo.BotPriceError.AMOUNT_TOO_LOW) {
+                    errorMessage = app.getString(R.string.amount_too_low)
+                } else if (botPriceError == TribeInfo.BotPriceError.AMOUNT_TOO_HIGH) {
+                    errorMessage = app.getString(R.string.amount_too_high)
+                }
+            }
+        }
+
+        return Pair(price, errorMessage)
     }
 
     fun retrieveEpisodeDuration(episodeUrl: String): Long {

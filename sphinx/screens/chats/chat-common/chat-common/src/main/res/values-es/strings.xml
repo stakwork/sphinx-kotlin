@@ -95,6 +95,10 @@
     <string name="alert_confirm_exit_tribe_title">Abandonar Tribu</string>
     <string name="alert_confirm_exit_tribe_message">¿Estás seguro que deseas abandonar y eliminar la tribu?</string>
 
+    <!-- Bots -->
+    <string name="amount_too_low">Importe demasiado bajo</string>
+    <string name="amount_too_high">Importe demasiado alto</string>
+
     <!-- Menu -->
     <string name="attachments_menu_cancel">CANCELAR</string>
     <string name="camera_attachment_option" tools:ignore="Typos">Camara</string>
