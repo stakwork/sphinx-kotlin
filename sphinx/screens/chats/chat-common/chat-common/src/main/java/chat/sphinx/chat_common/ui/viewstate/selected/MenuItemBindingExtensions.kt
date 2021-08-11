@@ -119,6 +119,12 @@ internal inline fun LayoutSelectedMessageMenuItemBinding.setMenuItem(item: MenuI
                 textViewSelectedMessageMenuItem.text =
                     getString(R.string.selected_message_menu_item_save_file)
             }
+            is MenuItemState.Resend -> {
+                textViewSelectedMessageMenuItemIcon.text =
+                    getString(R.string.material_icon_name_message_action_resend)
+                textViewSelectedMessageMenuItem.text =
+                    getString(R.string.selected_message_menu_item_resend)
+            }
         }
     }
 }

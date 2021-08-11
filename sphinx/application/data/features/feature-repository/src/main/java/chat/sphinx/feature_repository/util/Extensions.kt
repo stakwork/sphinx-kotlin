@@ -363,6 +363,23 @@ fun TransactionCallbacks.upsertMessage(dto: MessageDto, queries: SphinxDatabaseQ
         dto.message_content?.toMessageContent(),
         dto.messageContentDecrypted?.toMessageContentDecrypted(),
     )
+
+    dto.media_token?.let { mediaToken ->
+        dto.media_type?.let { mediaType ->
+
+            if (mediaToken.isEmpty() || mediaType.isEmpty()) return
+
+            queries.messageMediaUpsert(
+                dto.media_key?.toMediaKey(),
+                mediaType.toMediaType(),
+                MediaToken(mediaToken),
+                MessageId(dto.id),
+                chatId,
+                dto.mediaKeyDecrypted?.toMediaKeyDecrypted(),
+                dto.mediaLocalFile
+            )
+        }
+    }
 }
 
 @Suppress("NOTHING_TO_INLINE")

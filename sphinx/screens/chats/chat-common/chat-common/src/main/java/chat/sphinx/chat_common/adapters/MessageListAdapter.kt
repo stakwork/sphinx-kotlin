@@ -239,7 +239,8 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                 }
 
                 onSphinxInteractionListener = object: SphinxUrlSpan.OnInteractionListener(
-                    selectedMessageLongClickListener) {
+                    selectedMessageLongClickListener
+                ) {
                     override fun onClick(url: String?) {
                         viewModel.handleContactTribeLinks(url)
                     }

@@ -1,6 +1,7 @@
 package chat.sphinx.chat_common.ui.viewstate.messageholder
 
 import android.view.Gravity
+import android.view.View
 import android.widget.ImageView
 import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
@@ -311,7 +312,6 @@ internal fun LayoutMessageHolderBinding.setBubbleBackground(
     holderWidth: Px,
 ) {
     if (viewState.background is BubbleBackground.Gone) {
-
         includeMessageHolderBubble.root.gone
         receivedBubbleArrow.gone
         sentBubbleArrow.gone
@@ -435,8 +435,10 @@ internal inline fun LayoutMessageHolderBinding.setStatusHeader(
 
             if (statusHeader.showSent) {
                 textViewMessageStatusSentTimestamp.text = statusHeader.timestamp
-                textViewMessageStatusSentBoltIcon.goneIfFalse(statusHeader.showBoltIcon)
                 textViewMessageStatusSentLockIcon.goneIfFalse(statusHeader.showLockIcon)
+                progressBarMessageStatusSending.goneIfFalse(statusHeader.showSendingIcon)
+                textViewMessageStatusSentBoltIcon.goneIfFalse(statusHeader.showBoltIcon)
+                layoutConstraintMessageStatusSentFailedContainer.goneIfFalse(statusHeader.showFailedContainer)
             } else {
                 textViewMessageStatusReceivedTimestamp.text = statusHeader.timestamp
                 textViewMessageStatusReceivedLockIcon.goneIfFalse(statusHeader.showLockIcon)
