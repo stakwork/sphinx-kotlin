@@ -60,7 +60,7 @@ internal class LinkPreviewCache private constructor() {
     }
 
     private fun updateCache(retriever: LinkPreviewDataRetriever) {
-        list[counter] = retriever
+        list.add(counter, retriever)
 
         if (counter < CACHE_SIZE - 1 /* last index */) {
             counter++
