@@ -42,6 +42,7 @@ import chat.sphinx.wrapper_message_media.MessageMedia
 import chat.sphinx.wrapper_view.Px
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
+import io.matthewnelson.android_feature_screens.util.goneIfTrue
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.CoroutineScope
@@ -558,6 +559,7 @@ internal inline fun LayoutMessageHolderBinding.setBubbleMessageLinkPreviewLayout
 //                                        .build(),
 //                                )
 //                            }/* ?: imageViewMessageLinkPreviewContactAvatar.setImageDrawable(drawable)*/
+                            textViewMessageLinkPreviewAddContactBanner.goneIfFalse(state.showBanner)
                         }
                     }.let { job ->
                         holderJobs.add(job)
@@ -571,12 +573,28 @@ internal inline fun LayoutMessageHolderBinding.setBubbleMessageLinkPreviewLayout
                 includeMessageLinkPreviewUrl.root.gone
 
                 includeMessageLinkPreviewTribe.apply {
+
+                    // reset view
+                    textViewMessageLinkPreviewTribeDescription.gone
+                    textViewMessageLinkPreviewTribeNameLabel.gone
+                    textViewMessageLinkPreviewTribeSeeBanner.gone
+
+                    // TODO: Load Image
+
                     lifecycleScope.launch(dispatchers.mainImmediate) {
                         val state =
                             viewState.retrieveLinkPreview() as? LayoutState.Bubble.ContainerThird.LinkPreview.TribeLinkPreview
 
                         if (state != null) {
-
+                            textViewMessageLinkPreviewTribeDescription.apply desc@ {
+                                this@desc.text = state.description?.value
+                                this@desc.goneIfTrue(state.description == null)
+                            }
+                            textViewMessageLinkPreviewTribeNameLabel.apply name@ {
+                                this@name.text = state.name.value
+                                this@name.visible
+                            }
+                            textViewMessageLinkPreviewTribeSeeBanner.goneIfFalse(state.showBanner)
                         }
 
                     }.let { job ->
@@ -598,7 +616,7 @@ internal inline fun LayoutMessageHolderBinding.setBubbleMessageLinkPreviewLayout
                         if (state != null) {
 
                         }
-                        
+
                     }.let { job ->
                         holderJobs.add(job)
                     }
