@@ -93,6 +93,9 @@ inline val Message.isReplyAllowed: Boolean
     get() = (type.isAttachment() || type.isMessage()) &&
             (uuid?.value ?: "").isNotEmpty()
 
+inline val Message.isResendAllowed: Boolean
+    get() = type.isMessage() && status.isFailed()
+
 //Paid types
 inline val Message.isPaidMessage: Boolean
     get() = type.isAttachment() && (messageMedia?.price?.value ?: 0L) > 0L

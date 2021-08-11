@@ -44,7 +44,7 @@
     <string name="last_message_description_payment_sent">Pago enviado: %s</string>
     <string name="last_message_description_payment_received">Pago recibido: %s</string>
 
-    <string name="last_message_description_sent">envíado</string>
+    <string name="last_message_description_sent">has enviado</string>
     <string name="last_message_description_an_audio_clip">un Clip de Audio</string>
     <string name="last_message_description_a_gif">un Gif</string>
     <string name="last_message_description_an_image">una Imagen</string>

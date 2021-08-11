@@ -434,6 +434,9 @@ abstract class ChatFragment<
                             is MenuItemState.SaveFile -> {
                                 // TODO: Implement
                             }
+                            is MenuItemState.Resend -> {
+                                viewModel.resendMessage(holderState.message)
+                            }
                         }
                     }
                 }
