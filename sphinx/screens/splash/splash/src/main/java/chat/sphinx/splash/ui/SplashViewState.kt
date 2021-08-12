@@ -1,6 +1,7 @@
 package chat.sphinx.splash.ui
 
 import androidx.constraintlayout.motion.widget.MotionLayout
+import chat.sphinx.splash.model.RedemptionCode
 import chat.sphinx.splash.R
 import io.matthewnelson.android_concept_views.MotionLayoutViewState
 import java.io.CharArrayWriter
@@ -44,7 +45,9 @@ internal sealed class SplashViewState: MotionLayoutViewState<SplashViewState>() 
         }
     }
 
-    class Transition_Set3_DecryptKeys(val toDecrypt: ByteArray): SplashViewState() {
+    class Transition_Set3_DecryptKeys(
+        val restoreCode: RedemptionCode.AccountRestoration
+    ): SplashViewState() {
 
         companion object {
             val START_SET_ID: Int
@@ -60,7 +63,7 @@ internal sealed class SplashViewState: MotionLayoutViewState<SplashViewState>() 
     }
 
     class Set3_DecryptKeys(
-        val toDecrypt: ByteArray,
+        val restoreCode: RedemptionCode.AccountRestoration,
         var inputLock: Boolean = false,
         val pinWriter: CharArrayWriter = CharArrayWriter(6)
     ): SplashViewState() {

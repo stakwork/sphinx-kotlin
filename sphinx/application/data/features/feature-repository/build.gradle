@@ -15,17 +15,22 @@ dependencies {
 
     api project(path: ':sphinx:application:data:concepts:concept-coredb')
     api project(path: ':sphinx:application:data:concepts:crypto:concept-crypto-rsa')
+
+    api project(path: ':sphinx:application:data:concepts:concept-meme-server')
     api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-chat')
     api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-contact')
     api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-dashboard')
     api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-lightning')
+    api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-media')
     api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-message')
 
+    api project(path: ':sphinx:application:network:concepts:queries:concept-network-query-meme-server')
     api project(path: ':sphinx:application:network:concepts:queries:concept-network-query-chat')
     api project(path: ':sphinx:application:network:concepts:queries:concept-network-query-contact')
     api project(path: ':sphinx:application:network:concepts:queries:concept-network-query-invite')
     api project(path: ':sphinx:application:network:concepts:queries:concept-network-query-lightning')
     api project(path: ':sphinx:application:network:concepts:queries:concept-network-query-message')
+
     api project(path: ':sphinx:application:network:concepts:concept-socket-io')
 
     // needed to override moshi's use of 1.4.31

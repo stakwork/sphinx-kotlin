@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="wrong_pin">PIN Incorrecto</string>
+    <string name="wrong_pin_one_more_attempt">Un intento más antes de ser bloqueado</string>
+    <string name="wrong_pin_pin_does_not_match">El PIN no concuerda</string>
+    <string name="header_enter_pin">Ingresa tu PIN</string>
+    <string name="header_confirm_pin">Confirma tu PIN</string>
+    <string name="header_reset_step_1">Ingresa tu nuevo PIN</string>
+    <string name="header_reset_step_2">Confirma tu nuevo PIN</string>
+
+    <string name="flow_response_decrypting_key">Validando PIN</string>
+    <string name="flow_response_encrypting_key_with_new_pin">Encriptando tus claves con tu nuevo PIN</string>
+    <string name="flow_response_generating_encrypting_key">Generando y encriptando tus claves</string>
+
+    <string name="enter_pin_encrypt">Ingresa tu PIN para encriptar las claves. ¡Recuérdalo! Lo necesitarás para restaurar tu cuenta en otro dispositivo</string>
+</resources>

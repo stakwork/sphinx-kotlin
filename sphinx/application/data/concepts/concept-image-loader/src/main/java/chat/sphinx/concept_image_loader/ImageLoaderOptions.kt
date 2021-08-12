@@ -2,11 +2,13 @@ package chat.sphinx.concept_image_loader
 
 import chat.sphinx.wrapper_view.Px
 
-class ImageLoaderOptions private constructor(
+@Suppress("DataClassPrivateConstructor")
+data class ImageLoaderOptions private constructor(
     val transformation: Transformation?,
     val transition: Transition,
     val errorResId: Int?,
     val placeholderResId: Int?,
+    val additionalHeaders: Map<String, String>,
 ) {
 
     class Builder {
@@ -14,6 +16,7 @@ class ImageLoaderOptions private constructor(
         private var transition: Transition = Transition.None
         private var errorResId: Int? = null
         private var placeholderResId: Int? = null
+        private val additionalHeaders: MutableMap<String, String> = LinkedHashMap(0)
 
         fun transformation(transformation: Transformation) = apply {
             this.transformation = transformation
@@ -31,11 +34,18 @@ class ImageLoaderOptions private constructor(
             this.placeholderResId = resourceId
         }
 
+        fun addHeader(key: String, value: String) = apply {
+            if (key.isNotEmpty() && value.isNotEmpty()) {
+                additionalHeaders[key] = value
+            }
+        }
+
         fun build() = ImageLoaderOptions(
             transformation,
             transition,
             errorResId,
-            placeholderResId
+            placeholderResId,
+            additionalHeaders,
         )
     }
 
@@ -43,7 +53,7 @@ class ImageLoaderOptions private constructor(
 
 sealed class Transformation {
 
-    class Blur(
+    data class Blur(
         val radius: Float = DEFAULT_RADIUS,
         val sampling: Float = DEFAULT_SAMPLING,
     ): Transformation() {
@@ -56,7 +66,7 @@ sealed class Transformation {
     object CircleCrop: Transformation()
     object GrayScale: Transformation()
 
-    class RoundedCorners(
+    data class RoundedCorners(
         val topLeft: Px = Px(0f),
         val topRight: Px = Px(0f),
         val bottomLeft: Px = Px(0f),
@@ -66,7 +76,7 @@ sealed class Transformation {
 
 sealed class Transition {
 
-    class CrossFade(
+    data class CrossFade(
         val durationMillis: Int = DEFAULT_DURATION,
         val preferExactIntrinsicSize: Boolean = false
     ): Transition() {

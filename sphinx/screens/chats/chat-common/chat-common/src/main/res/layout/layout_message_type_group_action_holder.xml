@@ -16,18 +16,18 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:visibility="visible" />
+        tools:visibility="gone" />
 
 
     <!--  Admin view for Approving/Rejecting a member join request.  -->
     <include
-        android:id="@+id/include_message_type_group_action_join_request_admin_view"
-        layout="@layout/layout_message_type_group_action_join_request_admin_view"
+        android:id="@+id/include_message_type_group_action_join_request"
+        layout="@layout/layout_message_type_group_action_join_request"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:visibility="gone" />
+        tools:visibility="visible" />
 
 
     <!--  Tells a member that they've been removed from a group.  -->

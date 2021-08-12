@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Menu -->
+    <string name="bottom_menu_profile_pic_option_camera">Camera</string>
+    <string name="bottom_menu_profile_pic_option_photo_library">Photo Library</string>
+</resources>

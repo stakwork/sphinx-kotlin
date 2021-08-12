@@ -90,9 +90,9 @@ internal class AddressBookListAdapter(
 
     override fun onStart(owner: LifecycleOwner) {
         super.onStart(owner)
+
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.collectViewState { viewState ->
-
                 if (addressBookContacts.isEmpty()) {
                     addressBookContacts.addAll(viewState.list)
                     this@AddressBookListAdapter.notifyDataSetChanged()
@@ -170,8 +170,10 @@ internal class AddressBookListAdapter(
                 // Image
                 addressBookContact.photoUrl.let { url ->
 
-                    layoutAddressBookInitialHolder.imageViewChatPicture.goneIfFalse(url != null)
-                    layoutAddressBookInitialHolder.textViewInitials.goneIfFalse(url == null)
+                    layoutAddressBookInitialHolder.apply {
+                        imageViewChatPicture.goneIfFalse(url != null)
+                        textViewInitials.goneIfFalse(url == null)
+                    }
 
                     if (url != null) {
                         onStopSupervisor.scope.launch(viewModel.mainImmediate) {

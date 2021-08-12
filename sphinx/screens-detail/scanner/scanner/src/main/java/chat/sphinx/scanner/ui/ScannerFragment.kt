@@ -103,7 +103,7 @@ internal class ScannerFragment: SideEffectFragment<
         binding.buttonScannerSave.setOnClickListener {
             val input = binding.codeEditText.text?.toString()
             if (input != null && input.isNotEmpty()) {
-                viewModel.processResponse(ScannerResponse(input))
+                viewModel.processResponse(ScannerResponse(input.trim()))
             }
         }
     }
@@ -115,6 +115,12 @@ internal class ScannerFragment: SideEffectFragment<
                 is ScannerViewState.LayoutVisibility -> {
                     includeScannerHeader.textViewDetailScreenHeaderNavBack.goneIfFalse(viewState.showBackButton)
                     editTextScannerInputContent.goneIfFalse(viewState.showBottomView)
+
+                    codeEditText.hint = if (viewState.scannerModeLabel.isNotEmpty()) {
+                        viewState.scannerModeLabel
+                    } else {
+                        getString(R.string.scanner_edit_text_hint)
+                    }
                 }
             }
         }
@@ -158,7 +164,7 @@ internal class ScannerFragment: SideEffectFragment<
                 // Unbind any bound use cases before rebinding
                 cameraProvider.unbindAll()
                 // Bind use cases to lifecycleOwner
-                cameraProvider.bindToLifecycle(this, cameraSelector, preview, imageAnalysis)
+                cameraProvider.bindToLifecycle(viewLifecycleOwner, cameraSelector, preview, imageAnalysis)
             } catch (e: Exception) {
 //                Log.e("PreviewUseCase", "Binding failed! :(", e)
             }
@@ -170,7 +176,7 @@ internal class ScannerFragment: SideEffectFragment<
             return
         }
 
-        viewModel.processResponse(ScannerResponse(code))
+        viewModel.processResponse(ScannerResponse(code.trim()))
     }
 
     class QRAnalyzer(private val barcodeListener: BarcodeListener) : ImageAnalysis.Analyzer {

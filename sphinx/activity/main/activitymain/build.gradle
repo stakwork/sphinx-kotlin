@@ -49,21 +49,27 @@ dependencies {
     api project(path: ':sphinx:screens:dashboard:dashboard')
     api project(path: ':sphinx:screens:onboard:onboard')
     api project(path: ':sphinx:screens:onboard:onboard-name')
+    api project(path: ':sphinx:screens:onboard:onboard-picture')
     api project(path: ':sphinx:screens:onboard:onboard-ready')
     api project(path: ':sphinx:screens:profile:profile')
     api project(path: ':sphinx:screens:splash:splash')
-    
+
     api project(path: ':sphinx:screens-detail:add-friend:add-friend')
+    api project(path: ':sphinx:screens-detail:camera:camera')
+    api project(path: ':sphinx:screens-detail:chat-detail:tribe-detail')
+    api project(path: ':sphinx:screens-detail:chat-detail:contact-detail')
     api project(path: ':sphinx:screens-detail:create-tribe:create-tribe')
+    api project(path: ':sphinx:screens-detail:invite-friend:invite-friend')
+    api project(path: ':sphinx:screens-detail:join-tribe:join-tribe')
     api project(path: ':sphinx:screens-detail:new-contact:new-contact')
+//    api project(path: ':sphinx:screens-detail:payments:payment-common:payment-common')
     api project(path: ':sphinx:screens-detail:payments:payment-receive:payment-receive')
     api project(path: ':sphinx:screens-detail:payments:payment-send:payment-send')
-    api project(path: ':sphinx:screens-detail:scanner:scanner')
+    api project(path: ':sphinx:screens-detail:podcast-player:podcast-player')
     api project(path: ':sphinx:screens-detail:qr-code:qr-code')
+    api project(path: ':sphinx:screens-detail:scanner:scanner')
     api project(path: ':sphinx:screens-detail:support-ticket:support-ticket')
     api project(path: ':sphinx:screens-detail:transactions:transactions')
-    api project(path: ':sphinx:screens-detail:join-tribe:join-tribe')
-//    api project(path: )
 
     implementation deps.chrisbanes.insetter
 

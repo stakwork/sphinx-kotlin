@@ -4,12 +4,16 @@ import android.content.Context
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.navArgs
+import app.cash.exhaustive.Exhaustive
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.insetter_activity.addStatusBarPadding
+import chat.sphinx.onboard_common.model.OnBoardInviterData
 import chat.sphinx.onboard_name.R
 import chat.sphinx.onboard_name.databinding.FragmentOnBoardNameBinding
+import chat.sphinx.onboard_name.navigation.inviterData
 import chat.sphinx.resources.SphinxToastUtils
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.navigation.CloseAppOnBackPress
@@ -17,7 +21,6 @@ import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.updateViewState
-import javax.annotation.meta.Exhaustive
 
 @AndroidEntryPoint
 internal class OnBoardNameFragment: SideEffectFragment<
@@ -28,6 +31,8 @@ internal class OnBoardNameFragment: SideEffectFragment<
         FragmentOnBoardNameBinding
         >(R.layout.fragment_on_board_name)
 {
+    private val args: OnBoardNameFragmentArgs by navArgs()
+    private val inviterData: OnBoardInviterData by lazy(LazyThreadSafetyMode.NONE) { args.inviterData }
     override val viewModel: OnBoardNameViewModel by viewModels()
     override val binding: FragmentOnBoardNameBinding by viewBinding(FragmentOnBoardNameBinding::bind)
 
@@ -45,7 +50,7 @@ internal class OnBoardNameFragment: SideEffectFragment<
 
             val name = binding.signUpNameEditText.text?.trim().toString()
 
-            viewModel.updateOwner(name)
+            viewModel.updateOwner(name, inviterData)
         }
     }
 
@@ -56,7 +61,7 @@ internal class OnBoardNameFragment: SideEffectFragment<
     }
 
     override suspend fun onSideEffectCollect(sideEffect: OnBoardNameSideEffect) {
-        // TODO("Not yet implemented")
+        sideEffect.execute(binding.root.context)
     }
 
     override suspend fun onViewStateFlowCollect(viewState: OnBoardNameViewState) {

@@ -1,5 +1,6 @@
 package chat.sphinx.feature_coredb.adapters.message
 
+import chat.sphinx.wrapper_common.message.MessageUUID
 import chat.sphinx.wrapper_message.*
 import com.squareup.sqldelight.ColumnAdapter
 

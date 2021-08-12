@@ -7,11 +7,11 @@ plugins {
 dependencies {
     api project(path: ':sphinx:application:common:kotlin-response')
     api project(path: ':sphinx:application:common:wrappers:wrapper-relay')
+    api project(path: ':sphinx:application:common:wrappers:wrapper-invite')
     implementation deps.kotlin.coroutinesCore
 
     // needed to override moshi's use of 1.4.31
     implementation deps.kotlin.reflect
     implementation deps.square.moshi
-    implementation project(path: ':sphinx:application:network:concepts:calls:concept-network-relay-call')
     kapt kaptDeps.square.moshiCodegen
 }

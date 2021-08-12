@@ -11,11 +11,6 @@ sealed class ChatHeaderViewState: ViewState<ChatHeaderViewState>() {
     data class Initialized(
         val chatHeaderName: String,
         val showLock: Boolean,
-
-        // For Tribes only. If `null`, will set view to GONE
-        val contributions: Sat?,
-
-        // Will be null for contacts w/o a chat
         val isMuted: ChatMuted?,
     ): ChatHeaderViewState()
 }

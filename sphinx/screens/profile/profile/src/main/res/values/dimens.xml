@@ -3,6 +3,7 @@
     <dimen name="profile_basic_info_holder_height">125dp</dimen>
     <dimen name="profile_picture_xy">86dp</dimen>
 
+    <dimen name="profile_header_height">75dp</dimen>
     <dimen name="profile_tabs_holder_height">30dp</dimen>
 
     <dimen name="profile_basic_info_form_height">325dp</dimen>
@@ -30,4 +31,7 @@
     <dimen name="profile_sync_devices_text_size">17sp</dimen>
     <dimen name="profile_backup_keys_text_size">17sp</dimen>
     <dimen name="profile_backup_keys_icon_text_size">22sp</dimen>
+
+    <dimen name="profile_uploading_picture_text_size">10sp</dimen>
+    <dimen name="profile_uploading_picture_progress_bar_xy">12dp</dimen>
 </resources>

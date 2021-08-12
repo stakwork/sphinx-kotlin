@@ -6,6 +6,7 @@ import android.app.Application
 import android.content.pm.ActivityInfo
 import android.os.Bundle
 import chat.sphinx.feature_coredb.CoreDBImpl
+import chat.sphinx.feature_sphinx_service.ApplicationServiceTracker
 import io.matthewnelson.android_feature_authentication_core.components.AuthenticationCoreManagerAndroid
 import io.matthewnelson.android_feature_authentication_core.components.AuthenticationManagerInitializerAndroid
 import io.matthewnelson.concept_authentication.state.AuthenticationState
@@ -15,6 +16,7 @@ import io.matthewnelson.crypto_common.clazzes.HashIterations
 
 class SphinxAuthenticationCoreManager(
     application: Application,
+    private val applicationServiceTracker: ApplicationServiceTracker,
     dispatchers: CoroutineDispatchers,
     encryptionKeyHandler: SphinxEncryptionKeyHandler,
     sphinxAuthenticationCoreStorage: SphinxAuthenticationCoreStorage,
@@ -45,5 +47,9 @@ class SphinxAuthenticationCoreManager(
     override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
         super.onActivityCreated(activity, savedInstanceState)
         activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+
+        if (applicationServiceTracker.taskIsRemoved) {
+            applicationServiceTracker.taskReturned()
+        }
     }
 }

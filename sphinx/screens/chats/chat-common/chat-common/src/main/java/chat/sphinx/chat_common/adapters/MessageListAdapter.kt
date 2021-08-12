@@ -2,28 +2,51 @@ package chat.sphinx.chat_common.adapters
 
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.OnLongClickListener
 import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavArgs
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import chat.sphinx.chat_common.databinding.LayoutMessageHolderBinding
+import app.cash.exhaustive.Exhaustive
+import chat.sphinx.chat_common.databinding.*
+import chat.sphinx.chat_common.model.NodeDescriptor
+import chat.sphinx.chat_common.model.TribeLink
 import chat.sphinx.chat_common.ui.ChatViewModel
+import chat.sphinx.chat_common.ui.isMessageSelected
 import chat.sphinx.chat_common.ui.viewstate.messageholder.*
+import chat.sphinx.chat_common.ui.viewstate.selected.SelectedMessageViewState
+import chat.sphinx.chat_common.util.*
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
+import chat.sphinx.concept_image_loader.ImageLoaderOptions
+import chat.sphinx.concept_image_loader.Transformation
+import chat.sphinx.join_tribe.R
+import chat.sphinx.kotlin_response.LoadResponse
+import chat.sphinx.kotlin_response.Response
+import chat.sphinx.wrapper_common.dashboard.ContactId
+import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
+import chat.sphinx.wrapper_common.message.MessageId
+import chat.sphinx.wrapper_common.tribe.TribeJoinLink
+import chat.sphinx.wrapper_message.Message
+import chat.sphinx.wrapper_message.MessageType
 import chat.sphinx.wrapper_view.Px
 import io.matthewnelson.android_feature_screens.util.gone
+import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 internal class MessageListAdapter<ARGS : NavArgs>(
     private val recyclerView: RecyclerView,
+    private val headerBinding: LayoutChatHeaderBinding,
     private val layoutManager: LinearLayoutManager,
     private val lifecycleOwner: LifecycleOwner,
     private val onStopSupervisor: OnStopSupervisor,
@@ -82,6 +105,7 @@ internal class MessageListAdapter<ARGS : NavArgs>(
 
     override fun onStart(owner: LifecycleOwner) {
         super.onStart(owner)
+
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.messageHolderViewStateFlow.collect { list ->
                 if (messages.isEmpty()) {
@@ -95,26 +119,35 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                             Diff(messages, list)
                         )
                     }.let { result ->
-
-                        val lastVisibleItemPositionBeforeDispatch = layoutManager.findLastVisibleItemPosition()
-                        val listSizeBeforeDispatch = messages.size - 1
-
-                        messages.clear()
-                        messages.addAll(list)
-                        result.dispatchUpdatesTo(this@MessageListAdapter)
-
-                        val listSizeAfterDispatch = messages.size - 1
-
-                        if (
-                                listSizeAfterDispatch > listSizeBeforeDispatch                  &&
-                                recyclerView.scrollState == RecyclerView.SCROLL_STATE_IDLE      &&
-                                lastVisibleItemPositionBeforeDispatch == listSizeBeforeDispatch
-                        ) {
-                            recyclerView.scrollToPosition(listSizeAfterDispatch)
-                        }
+                        scrollToBottomIfNeeded(callback = {
+                            messages.clear()
+                            messages.addAll(list)
+                            result.dispatchUpdatesTo(this@MessageListAdapter)
+                        })
                     }
                 }
             }
+        }
+    }
+
+    fun scrollToBottomIfNeeded(
+        callback: () -> Unit,
+        replyingToMessage: Boolean = false
+    ) {
+        val lastVisibleItemPositionBeforeDispatch = layoutManager.findLastVisibleItemPosition()
+        val listSizeBeforeDispatch = messages.size - 1
+
+        callback()
+
+        val listSizeAfterDispatch = messages.size - 1
+
+        if (
+            (!viewModel.isMessageSelected() || replyingToMessage)           &&
+            listSizeAfterDispatch >= listSizeBeforeDispatch                 &&
+            recyclerView.scrollState == RecyclerView.SCROLL_STATE_IDLE      &&
+            lastVisibleItemPositionBeforeDispatch == listSizeBeforeDispatch
+        ) {
+            recyclerView.scrollToPosition(listSizeAfterDispatch)
         }
     }
 
@@ -132,7 +165,8 @@ internal class MessageListAdapter<ARGS : NavArgs>(
         if (bottom != oldBottom) {
             val lastPosition = messages.size - 1
             if (
-                recyclerView.scrollState == RecyclerView.SCROLL_STATE_IDLE &&
+                !viewModel.isMessageSelected()                              &&
+                recyclerView.scrollState == RecyclerView.SCROLL_STATE_IDLE  &&
                 layoutManager.findLastVisibleItemPosition() == lastPosition
             ) {
                 recyclerView.scrollToPosition(lastPosition)
@@ -171,62 +205,201 @@ internal class MessageListAdapter<ARGS : NavArgs>(
     private val recyclerViewWidth: Px by lazy(LazyThreadSafetyMode.NONE) {
         Px(recyclerView.measuredWidth.toFloat())
     }
+    private val headerHeight: Px by lazy(LazyThreadSafetyMode.NONE) {
+        Px(headerBinding.root.measuredHeight.toFloat())
+    }
+    private val screenHeight: Px by lazy(LazyThreadSafetyMode.NONE) {
+        Px(recyclerView.rootView.measuredHeight.toFloat())
+    }
 
     inner class MessageViewHolder(
         private val binding: LayoutMessageHolderBinding
     ): RecyclerView.ViewHolder(binding.root) {
 
-        private val disposables: ArrayList<Disposable> = ArrayList(1)
+        private val holderJobs: ArrayList<Job> = ArrayList(6)
+        private val disposables: ArrayList<Disposable> = ArrayList(4)
+        private var currentViewState: MessageHolderViewState? = null
+
+        private val selectedMessageLongClickListener: OnLongClickListener
+
+        private val onSphinxInteractionListener: SphinxUrlSpan.OnInteractionListener
+
+        init {
+            binding.includeMessageHolderBubble.apply {
+                selectedMessageLongClickListener = OnLongClickListener { v ->
+                    SelectedMessageViewState.SelectedMessage.instantiate(
+                        messageHolderViewState = currentViewState,
+                        holderYPosTop = Px(binding.root.y),
+                        holderHeight = Px(binding.root.measuredHeight.toFloat()),
+                        holderWidth = Px(binding.root.measuredWidth.toFloat()),
+                        bubbleXPosStart = Px(v.x),
+                        bubbleWidth = Px(v.measuredWidth.toFloat()),
+                        bubbleHeight = Px(v.measuredHeight.toFloat()),
+                        headerHeight = headerHeight,
+                        statusHeaderHeight = Px(binding.includeMessageStatusHeader.root.measuredHeight.toFloat()),
+                        recyclerViewWidth = recyclerViewWidth,
+                        screenHeight = screenHeight,
+                    ).let { vs ->
+                        viewModel.updateSelectedMessageViewState(vs)
+                    }
+                    true
+                }
+
+                root.setOnLongClickListener(selectedMessageLongClickListener)
+
+                onSphinxInteractionListener = object: SphinxUrlSpan.OnInteractionListener(
+                    selectedMessageLongClickListener
+                ) {
+                    override fun onClick(url: String?) {
+                        viewModel.handleContactTribeLinks(url)
+                    }
+                }
+            }
+
+            binding.includeMessageHolderBubble.includeMessageTypeCallInvite.let { holder ->
+                holder.layoutConstraintCallInviteJoinByAudio.setOnClickListener {
+                    currentViewState?.message?.let { nnMessage ->
+                        joinCall(nnMessage, true)
+                    }
+                }
+
+                holder.layoutConstraintCallInviteJoinByVideo.setOnClickListener {
+                    currentViewState?.message?.let { nnMessage ->
+                        joinCall(nnMessage, false)
+                    }
+                }
+
+                holder.buttonCallInviteCopyLink.setOnClickListener {
+                    currentViewState?.message?.let { nnMessage ->
+                        viewModel.copyCallLink(nnMessage)
+                    }
+                }
+            }
+
+            binding.includeMessageTypeGroupActionHolder.let { holder ->
+                holder.includeMessageTypeGroupActionJoinRequest.apply {
+                    textViewGroupActionJoinRequestAcceptAction.setOnClickListener {
+                        currentViewState?.message?.let { nnMessage ->
+
+                            if (nnMessage.type is MessageType.GroupAction.MemberRequest) {
+                                processMemberRequest(
+                                    nnMessage.sender,
+                                    nnMessage.id,
+                                    MessageType.GroupAction.MemberApprove
+                                )
+                            }
+                        }
+                    }
+
+                    textViewGroupActionJoinRequestRejectAction.setOnClickListener {
+                        currentViewState?.message?.let { nnMessage ->
+
+                            if (nnMessage.type is MessageType.GroupAction.MemberRequest) {
+                                processMemberRequest(
+                                    nnMessage.sender,
+                                    nnMessage.id,
+                                    MessageType.GroupAction.MemberReject
+                                )
+                            }
+                        }
+                    }
+                }
+
+                holder.includeMessageTypeGroupActionMemberRemoval.apply {
+                    textViewGroupActionMemberRemovalDeleteGroup.setOnClickListener {
+                        deleteTribe()
+                    }
+                }
+            }
+
+            binding.includeMessageHolderBubble.apply {
+                includeMessageLinkPreviewContact.apply contact@ {
+                    textViewMessageLinkPreviewAddContactBanner.setOnClickListener {
+                        currentViewState?.messageLinkPreview?.let { preview ->
+                            if (preview is NodeDescriptor) {
+                                viewModel.handleContactTribeLinks(preview.nodeDescriptor.value)
+                            }
+                        }
+                    }
+                    root.setOnClickListener {
+                        currentViewState?.messageLinkPreview?.let { preview ->
+                            if (preview is NodeDescriptor) {
+                                viewModel.handleContactTribeLinks(preview.nodeDescriptor.value)
+                            }
+                        }
+                    }
+                }
+                includeMessageLinkPreviewTribe.apply tribe@ {
+                    textViewMessageLinkPreviewTribeSeeBanner.setOnClickListener {
+                        currentViewState?.messageLinkPreview?.let { preview ->
+                            if (preview is TribeLink) {
+                                viewModel.handleContactTribeLinks(preview.tribeJoinLink.value)
+                            }
+                        }
+                    }
+                    root.setOnClickListener {
+                        currentViewState?.messageLinkPreview?.let { preview ->
+                            if (preview is TribeLink) {
+                                viewModel.handleContactTribeLinks(preview.tribeJoinLink.value)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        private fun processMemberRequest(contactId: ContactId, messageId: MessageId, type: MessageType.GroupAction) {
+            onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                binding.includeMessageTypeGroupActionHolder.includeMessageTypeGroupActionJoinRequest.apply {
+                    layoutConstraintGroupActionJoinRequestProgressBarContainer.visible
+
+                    viewModel.processMemberRequest(
+                        contactId,
+                        messageId,
+                        type
+                    )
+
+                    layoutConstraintGroupActionJoinRequestProgressBarContainer.gone
+                }
+            }.let { job ->
+                holderJobs.add(job)
+            }
+        }
+
+        private fun deleteTribe() {
+            onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                binding.includeMessageTypeGroupActionHolder.includeMessageTypeGroupActionMemberRemoval.apply {
+                    layoutConstraintGroupActionMemberRemovalProgressBarContainer.visible
+
+                    viewModel.deleteTribe()
+
+                    layoutConstraintGroupActionMemberRemovalProgressBarContainer.gone
+                }
+            }.let { job ->
+                holderJobs.add(job)
+            }
+        }
+
+        private fun joinCall(message: Message, audioOnly: Boolean) {
+            viewModel.joinCall(message, audioOnly)
+        }
 
         fun bind(position: Int) {
-            val viewState = messages.elementAtOrNull(position) ?: return
-            disposables.forEach {
-                it.dispose()
-            }
-            disposables.clear()
+            val viewState = messages.elementAtOrNull(position).also { currentViewState = it } ?: return
 
-            binding.apply {
+            binding.setView(
+                lifecycleOwner.lifecycleScope,
+                holderJobs,
+                disposables,
+                viewModel.dispatchers,
+                imageLoader,
+                viewModel.imageLoaderDefaults,
+                viewModel.memeServerTokenHandler,
+                recyclerViewWidth,
+                viewState,
+                onSphinxInteractionListener,
+            )
 
-                onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-                    viewState.initialHolder.setInitialHolder(
-                        includeMessageHolderChatImageInitialHolder.textViewInitials,
-                        includeMessageHolderChatImageInitialHolder.imageViewChatPicture,
-                        includeMessageStatusHeader,
-                        imageLoader
-                    )?.also {
-                        disposables.add(it)
-                    }
-                }
-
-                setStatusHeader(viewState.statusHeader)
-                setDeletedMessageLayout(viewState.deletedMessage)
-                setBubbleBackground(viewState, recyclerViewWidth)
-                setGroupActionIndicatorLayout(viewState.groupActionIndicator)
-
-                if (viewState.background !is BubbleBackground.Gone) {
-                    setBubbleGiphy(viewState.bubbleGiphy) { imageView, url ->
-                        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-                            imageLoader.load(imageView, url)
-                                .also { disposables.add(it) }
-                        }
-                    }
-                    setUnsupportedMessageTypeLayout(viewState.unsupportedMessageType)
-                    setBubbleMessageLayout(viewState.bubbleMessage)
-                    setBubbleDirectPaymentLayout(viewState.bubbleDirectPayment)
-                    setBubblePaidMessageDetailsLayout(
-                        viewState.bubblePaidMessageDetails,
-                        viewState.background
-                    )
-                    setBubblePaidMessageSentStatusLayout(viewState.bubblePaidMessageSentStatus)
-                    setBubbleReactionBoosts(viewState.bubbleReactionBoosts) { imageView, url ->
-                        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-                            imageLoader.load(imageView, url.value, viewModel.imageLoaderDefaults)
-                                .also { disposables.add(it) }
-                        }
-                    }
-                    setBubbleReplyMessage(viewState.bubbleReplyMessage)
-                }
-            }
         }
 
     }

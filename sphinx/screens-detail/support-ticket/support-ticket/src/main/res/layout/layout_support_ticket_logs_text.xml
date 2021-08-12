@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_gravity="top"
+    android:layout_margin="@dimen/default_layout_margin"
+    android:paddingHorizontal="@dimen/default_half_layout_margin">
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_support_ticket_logs"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fontFamily="serif-monospace"
+            android:textColor="@color/text"
+            android:textSize="@dimen/support_logs_text_view_text_size"
+            tools:text="2021-07-12 22:24:54.326 10193-14374/? D/SocketIOManagerImpl: CONNECT_TIMEOUT: 20000
+2021-07-12 22:24:57.088 10193-14378/? D/SocketIOManagerImpl: RECONNECTING: 2
+2021-07-12 22:25:17.148 10193-14387/? E/SocketIOManagerImpl: CONNECT_ERROR:
+2021-07-12 22:25:17.166 10193-14387/? E/SocketIOManagerImpl: RECONNECT_ERROR:
+2021-07-12 22:25:17.167 10193-14387/? D/SocketIOManagerImpl: CONNECT_TIMEOUT: 20000
+2021-07-12 22:25:22.177 10193-14390/? D/SocketIOManagerImpl: RECONNECTING: 3
+2021-07-12 22:25:46.461 10193-14400/? E/SocketIOManagerImpl: CONNECT_ERROR:
+2021-07-12 22:25:46.486 10193-14400/? E/SocketIOManagerImpl: RECONNECT_ERROR:
+2021-07-12 22:25:46.487 10193-14400/? D/SocketIOManagerImpl: CONNECT_TIMEOUT: 20000
+2021-07-12 22:25:55.007 10193-14405/? D/SocketIOManagerImpl: RECONNECTING: 4
+2021-07-12 22:26:24.830 10193-14415/? E/SocketIOManagerImpl: CONNECT_ERROR:
+2021-07-12 22:26:24.836 10193-14415/? E/SocketIOManagerImpl: RECONNECT_ERROR:
+2021-07-12 22:26:24.836 10193-14415/? D/SocketIOManagerImpl: CONNECT_TIMEOUT: 20000
+2021-07-12 22:26:32.408 10193-14418/? D/SocketIOManagerImpl: RECONNECTING: 5
+2021-07-12 22:27:02.505 10193-14428/? E/SocketIOManagerImpl: CONNECT_ERROR:
+2021-07-12 22:27:02.510 10193-14428/? E/SocketIOManagerImpl: RECONNECT_ERROR:
+2021-07-12 22:27:02.511 10193-14428/? D/SocketIOManagerImpl: CONNECT_TIMEOUT: 20000
+2021-07-12 22:27:10.684 10193-14433/? D/SocketIOManagerImpl: RECONNECTING: 6
+2021-07-12 22:27:40.690 10193-14443/? E/SocketIOManagerImpl: CONNECT_ERROR:
+2021-07-12 22:27:40.711 10193-14443/? E/SocketIOManagerImpl: RECONNECT_ERROR:
+2021-07-12 22:27:40.712 10193-14443/? D/SocketIOManagerImpl: CONNECT_TIMEOUT: 20000" />
+
+    </androidx.core.widget.NestedScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

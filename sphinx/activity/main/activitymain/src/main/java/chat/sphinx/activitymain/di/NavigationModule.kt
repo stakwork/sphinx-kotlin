@@ -8,9 +8,11 @@ import chat.sphinx.activitymain.navigation.navigators.detail.*
 import chat.sphinx.activitymain.navigation.navigators.primary.*
 import chat.sphinx.add_friend.navigation.AddFriendNavigator
 import chat.sphinx.address_book.navigation.AddressBookNavigator
+import chat.sphinx.camera.navigation.CameraNavigator
 import chat.sphinx.chat_contact.navigation.ContactChatNavigator
 import chat.sphinx.chat_group.navigation.GroupChatNavigator
 import chat.sphinx.chat_tribe.navigation.TribeChatNavigator
+import chat.sphinx.contact_detail.navigation.ContactDetailNavigator
 import chat.sphinx.create_tribe.navigation.CreateTribeNavigator
 import chat.sphinx.dashboard.navigation.DashboardBottomNavBarNavigator
 import chat.sphinx.dashboard.navigation.DashboardNavDrawerNavigator
@@ -18,19 +20,23 @@ import chat.sphinx.dashboard.navigation.DashboardNavigator
 import chat.sphinx.hilt_qualifiers.AuthenticationDriver
 import chat.sphinx.hilt_qualifiers.DetailDriver
 import chat.sphinx.hilt_qualifiers.PrimaryDriver
+import chat.sphinx.invite_friend.navigation.InviteFriendNavigator
 import chat.sphinx.join_tribe.navigation.JoinTribeNavigator
 import chat.sphinx.new_contact.navigation.NewContactNavigator
 import chat.sphinx.onboard.navigation.OnBoardNavigator
 import chat.sphinx.onboard_name.navigation.OnBoardNameNavigator
+import chat.sphinx.onboard_picture.navigation.OnBoardPictureNavigator
 import chat.sphinx.onboard_ready.navigation.OnBoardReadyNavigator
-import chat.sphinx.profile.navigation.ProfileNavigator
 import chat.sphinx.payment_receive.navigation.PaymentReceiveNavigator
 import chat.sphinx.payment_send.navigation.PaymentSendNavigator
+import chat.sphinx.podcast_player.navigation.PodcastPlayerNavigator
+import chat.sphinx.profile.navigation.ProfileNavigator
 import chat.sphinx.qr_code.navigation.QRCodeNavigator
 import chat.sphinx.scanner.navigation.ScannerNavigator
 import chat.sphinx.splash.navigation.SplashNavigator
 import chat.sphinx.support_ticket.navigation.SupportTicketNavigator
 import chat.sphinx.transactions.navigation.TransactionsNavigator
+import chat.sphinx.tribe_detail.navigation.TribeDetailNavigator
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -133,6 +139,12 @@ internal object NavigationModule {
         onBoardNameNavigatorImpl
 
     @Provides
+    fun provideOnBoardPictureNavigator(
+        onBoardPictureNavigatorImpl: OnBoardPictureNavigatorImpl
+    ): OnBoardPictureNavigator =
+        onBoardPictureNavigatorImpl
+
+    @Provides
     fun provideOnBoardReadyNavigator(
         onBoardReadyNavigatorImpl: OnBoardReadyNavigatorImpl
     ): OnBoardReadyNavigator =
@@ -158,6 +170,12 @@ internal object NavigationModule {
         addFriendNavigatorImpl: AddFriendNavigatorImpl
     ): AddFriendNavigator =
         addFriendNavigatorImpl
+
+    @Provides
+    fun provideCameraNavigator(
+        cameraNavigatorImpl: CameraNavigatorImpl
+    ): CameraNavigator =
+        cameraNavigatorImpl
 
     @Provides
     fun provideCreateTribeNavigator(
@@ -218,4 +236,29 @@ internal object NavigationModule {
         joinTribeNavigatorImpl: JoinTribeNavigatorImpl
     ): JoinTribeNavigator =
         joinTribeNavigatorImpl
+
+    @Provides
+    fun provideTribeChatPodcastPlayerNavigator(
+        tribeChatPodcastPlayerNavigatorImpl: PodcastPlayerNavigatorImpl
+    ): PodcastPlayerNavigator =
+        tribeChatPodcastPlayerNavigatorImpl
+
+    @Provides
+    fun provideInviteFriendNavigator(
+        inviteFriendNavigatorImpl: InviteFriendNavigatorImpl
+    ): InviteFriendNavigator =
+        inviteFriendNavigatorImpl
+
+    @Provides
+    fun provideTribeDetailNavigator(
+        tribeDetailNavigatorImpl: TribeDetailNavigatorImpl
+    ): TribeDetailNavigator =
+        tribeDetailNavigatorImpl
+
+    @Provides
+    fun provideContactDetailNavigator(
+        contactDetailNavigatorImpl: ContactDetailNavigatorImpl
+    ): ContactDetailNavigator =
+        contactDetailNavigatorImpl
+
 }

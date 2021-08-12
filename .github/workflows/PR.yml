@@ -26,21 +26,13 @@ jobs:
           java-version: 1.8
 
       - name: Run Android Linter
-        run: ./gradlew lintDebug
-        
-      - name: Set Key Export Environment Variable
-        env:
-          SPHINX_CHAT_KEY_EXPORT: ${{ secrets.SPHINX_CHAT_KEY_EXPORT }}
-          
-      - name: Set Key Export Password Environment Variable
-        env:
-          SPHINX_CHAT_EXPORT_PASS: ${{ secrets.SPHINX_CHAT_EXPORT_PASS }}
+        run: ./gradlew :sphinx:application:sphinx:lintDebug
 
       - name: Run Unit Tests
-        run: ./gradlew testDebugUnitTest
+        run: ./gradlew :sphinx:application:sphinx:testDebugUnitTest
 
       - name: Assemble Debug APK
-        run: ./gradlew assembleDebug
+        run: ./gradlew :sphinx:application:sphinx:assembleDebug
 
       - name: Assemble Debug Test APK
-        run: ./gradlew assembleDebugAndroidTest
+        run: ./gradlew :sphinx:application:sphinx:assembleDebugAndroidTest

@@ -1,14 +1,24 @@
 package chat.sphinx.dashboard.ui
 
+import android.app.Application
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_background_login.BackgroundLoginHandler
+import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
+import chat.sphinx.concept_network_query_lightning.model.invoice.PayRequestDto
+import chat.sphinx.concept_repository_chat.ChatRepository
+import chat.sphinx.concept_repository_contact.ContactRepository
+import chat.sphinx.concept_network_query_version.NetworkQueryVersion
 import chat.sphinx.concept_repository_dashboard_android.RepositoryDashboardAndroid
 import chat.sphinx.concept_service_notification.PushNotificationRegistrar
 import chat.sphinx.concept_socket_io.SocketIOManager
 import chat.sphinx.concept_socket_io.SocketIOState
 import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
+import chat.sphinx.dashboard.R
 import chat.sphinx.dashboard.navigation.DashboardBottomNavBarNavigator
 import chat.sphinx.dashboard.navigation.DashboardNavDrawerNavigator
 import chat.sphinx.dashboard.navigation.DashboardNavigator
@@ -23,22 +33,26 @@ import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.scanner_view_model_coordinator.request.ScannerFilter
 import chat.sphinx.scanner_view_model_coordinator.request.ScannerRequest
 import chat.sphinx.scanner_view_model_coordinator.response.ScannerResponse
+import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.isConversation
-import chat.sphinx.wrapper_common.tribe.TribeJoinLink
-import chat.sphinx.wrapper_common.tribe.toTribeJoinLink
-import chat.sphinx.wrapper_common.tribe.isValidTribeJoinLink
+import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.dashboard.ContactId
+import chat.sphinx.wrapper_common.lightning.*
+import chat.sphinx.wrapper_common.tribe.TribeJoinLink
+import chat.sphinx.wrapper_common.tribe.isValidTribeJoinLink
+import chat.sphinx.wrapper_common.tribe.toTribeJoinLink
 import chat.sphinx.wrapper_contact.Contact
-import chat.sphinx.wrapper_contact.isConfirmed
+import chat.sphinx.wrapper_contact.isInviteContact
 import chat.sphinx.wrapper_contact.isTrue
+import chat.sphinx.wrapper_invite.Invite
 import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_message.Message
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.MotionLayoutViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
+import io.matthewnelson.build_config.BuildConfigVersionCode
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
-import io.matthewnelson.concept_views.sideeffect.SideEffect
 import io.matthewnelson.concept_views.viewstate.collect
 import io.matthewnelson.concept_views.viewstate.value
 import kotlinx.coroutines.*
@@ -48,6 +62,7 @@ import kotlinx.coroutines.sync.withLock
 import java.util.*
 import javax.inject.Inject
 import kotlin.collections.ArrayList
+
 
 internal suspend inline fun DashboardViewModel.collectChatViewState(
     crossinline action: suspend (value: ChatViewState) -> Unit
@@ -63,6 +78,7 @@ internal suspend inline fun DashboardViewModel.updateChatListFilter(filter: Chat
 
 @HiltViewModel
 internal class DashboardViewModel @Inject constructor(
+    private val app: Application,
     private val backgroundLoginHandler: BackgroundLoginHandler,
     handler: SavedStateHandle,
 
@@ -70,9 +86,15 @@ internal class DashboardViewModel @Inject constructor(
     val navBarNavigator: DashboardBottomNavBarNavigator,
     val navDrawerNavigator: DashboardNavDrawerNavigator,
 
+    private val buildConfigVersionCode: BuildConfigVersionCode,
     dispatchers: CoroutineDispatchers,
 
     private val repositoryDashboard: RepositoryDashboardAndroid<Any>,
+    private val contactRepository: ContactRepository,
+    private val chatRepository: ChatRepository,
+
+    private val networkQueryLightning: NetworkQueryLightning,
+    private val networkQueryVersion: NetworkQueryVersion,
 
     private val pushNotificationRegistrar: PushNotificationRegistrar,
 
@@ -80,8 +102,8 @@ internal class DashboardViewModel @Inject constructor(
     private val socketIOManager: SocketIOManager,
 ): MotionLayoutViewModel<
         Any,
-        Nothing,
-        SideEffect<Nothing>,
+        Context,
+        DashboardSideEffect,
         NavDrawerViewState
         >(dispatchers, NavDrawerViewState.Closed)
 {
@@ -99,25 +121,102 @@ internal class DashboardViewModel @Inject constructor(
                 ScannerRequest(
                     filter = object : ScannerFilter() {
                         override suspend fun checkData(data: String): Response<Any, String> {
-                            if (data.toTribeJoinLink() != null) {
-                                return Response.Success(Any())
+                            return when {
+                                data.isValidTribeJoinLink ||
+                                data.isValidLightningPaymentRequest ||
+                                data.isValidLightningNodePubKey ||
+                                data.isValidVirtualNodeAddress ->
+                                {
+                                    Response.Success(Any())
+                                }
+                                else -> {
+                                    Response.Error(app.getString(R.string.not_valid_invoice_or_tribe_link))
+                                }
                             }
-
-                            return Response.Error("QR code is not a Join Tribe link")
                         }
                     },
-                    showBottomView = true
+                    showBottomView = true,
+                    scannerModeLabel = app.getString(R.string.paste_invoice_of_tribe_link)
                 )
             )
+
             if (response is Response.Success) {
 
                 val code = response.value.value
 
-                if (code.isValidTribeJoinLink) {
-                    dashboardNavigator.toJoinTribeDetail(TribeJoinLink(code))
+                code.toTribeJoinLink()?.let { tribeJoinLink ->
+
+                    handleTribeJoinLink(tribeJoinLink)
+
+                } ?: code.toLightningNodePubKey()?.let { lightningNodePubKey ->
+
+                    handleContactLink(lightningNodePubKey, null)
+
+                } ?: code.toVirtualLightningNodeAddress()?.let { virtualNodeAddress ->
+
+                    virtualNodeAddress.getPubKey()?.let { lightningNodePubKey ->
+
+                        handleContactLink(
+                            lightningNodePubKey,
+                            virtualNodeAddress.getRouteHint()
+                        )
+
+                    }
+
+                } ?: code.toLightningPaymentRequestOrNull()?.let { lightningPaymentRequest ->
+                    try {
+                        val bolt11 = Bolt11.decode(lightningPaymentRequest)
+                        val amount = bolt11.getSatsAmount()
+
+                        if (amount != null) {
+                            submitSideEffect(
+                                DashboardSideEffect.AlertConfirmPayLightningPaymentRequest(
+                                    amount.value,
+                                    bolt11.getMemo()
+                                ) {
+                                    payLightningPaymentRequest(lightningPaymentRequest)
+                                }
+                            )
+                        } else {
+                            submitSideEffect(
+                                DashboardSideEffect.Notify(
+                                    app.getString(R.string.payment_request_missing_amount),
+                                    true
+                                )
+                            )
+                        }
+                    } catch (e: Exception) {}
                 }
             }
         }
+    }
+
+    private suspend fun handleTribeJoinLink(tribeJoinLink: TribeJoinLink) {
+        val chat: Chat? = try {
+            chatRepository.getChatByUUID(
+                ChatUUID(tribeJoinLink.tribeUUID)
+            ).firstOrNull()
+        } catch (e: IllegalArgumentException) {
+            null
+        }
+
+        if (chat != null) {
+            dashboardNavigator.toChatTribe(chat.id)
+        } else {
+            dashboardNavigator.toJoinTribeDetail(tribeJoinLink)
+        }
+    }
+
+    private suspend fun handleContactLink(pubKey: LightningNodePubKey, routeHint: LightningRouteHint?) {
+        contactRepository.getContactByPubKey(pubKey).firstOrNull()?.let { contact ->
+
+            chatRepository.getConversationByContactId(contact.id).firstOrNull()?.let { chat ->
+
+                dashboardNavigator.toChatContact(chat.id, contact.id)
+                
+            } ?: dashboardNavigator.toChatContact(null, contact.id)
+
+        } ?: dashboardNavigator.toAddContactDetail(pubKey, routeHint)
     }
 
 //    @Volatile
@@ -160,6 +259,23 @@ internal class DashboardViewModel @Inject constructor(
     suspend fun getAccountBalance(): StateFlow<NodeBalance?> =
         repositoryDashboard.getAccountBalance()
 
+    suspend fun getNewVersionAvailable(): Boolean {
+        var newVersionAvailable = false
+
+        networkQueryVersion.getAppVersions().collect { loadResponse ->
+            @Exhaustive
+            when (loadResponse) {
+                is LoadResponse.Loading -> {}
+                is Response.Error -> {}
+                is Response.Success -> {
+                    newVersionAvailable = loadResponse.value.kotlin > buildConfigVersionCode.value.toLong()
+                }
+            }
+        }
+
+        return newVersionAvailable
+    }
+
     private val _contactsStateFlow: MutableStateFlow<List<Contact>> by lazy {
         MutableStateFlow(emptyList())
     }
@@ -172,92 +288,7 @@ internal class DashboardViewModel @Inject constructor(
     init {
         viewModelScope.launch(mainImmediate) {
             repositoryDashboard.getAllContacts.distinctUntilChanged().collect { contacts ->
-                collectionLock.withLock {
-                    contactsCollectionInitialized = true
-
-                    if (contacts.isEmpty()) {
-                        return@withLock
-                    }
-
-                    val newList = ArrayList<Contact>(contacts.size)
-                    val contactIds = ArrayList<ContactId>(contacts.size)
-
-                    withContext(default) {
-                        for (contact in contacts) {
-                            if (contact.isOwner.isTrue()) {
-                                _accountOwnerStateFlow.value = contact
-                                continue
-                            }
-
-                            contactIds.add(contact.id)
-                            newList.add(contact)
-                        }
-                    }
-
-                    _contactsStateFlow.value = newList.toList()
-
-                    // Don't push update to chat view state, let it's collection do it.
-                    if (!chatsCollectionInitialized) {
-                        return@withLock
-                    }
-
-                    withContext(default) {
-                        val currentChats = currentChatViewState.list.toMutableList()
-                        val chatContactIds = mutableListOf<ContactId>()
-
-                        var updateChatViewState = false
-                        for (chat in currentChatViewState.list) {
-
-                            val contact: Contact? = when (chat) {
-                                is DashboardChat.Active.Conversation -> {
-                                    chat.contact
-                                }
-                                is DashboardChat.Active.GroupOrTribe -> {
-                                    null
-                                }
-                                is DashboardChat.Inactive.Conversation -> {
-                                    chat.contact
-                                }
-                            }
-
-                            contact?.let {
-                                chatContactIds.add(it.id)
-                                // if the id of the currently displayed chat is not contained
-                                // in the list collected here, it's either a new contact w/o
-                                // a chat, or a contact that was deleted which we need to remove
-                                // from the list of chats.
-
-                                if (!contactIds.contains(it.id)) {
-                                    //Contact deleted
-                                    updateChatViewState = true
-                                    currentChats.remove(chat)
-                                    chatContactIds.remove(it.id)
-                                }
-
-                                if (repositoryDashboard.updatedContactIds.contains(it.id)) {
-                                    //Contact updated
-                                    currentChats.remove(chat)
-                                    chatContactIds.remove(it.id)
-                                }
-                            }
-                        }
-
-                        for (contact in _contactsStateFlow.value) {
-                            if (contact.status.isConfirmed() && !chatContactIds.contains(contact.id)) {
-                                updateChatViewState = true
-
-                                currentChats.add(
-                                    DashboardChat.Inactive.Conversation(contact)
-                                )
-                            }
-                        }
-
-                        if (updateChatViewState) {
-                            chatViewStateContainer.updateDashboardChats(currentChats.toList())
-                            repositoryDashboard.updatedContactIds = mutableListOf()
-                        }
-                    }
-                }
+                updateChatListContacts(contacts)
             }
         }
 
@@ -296,6 +327,7 @@ internal class DashboardViewModel @Inject constructor(
                                     DashboardChat.Active.GroupOrTribe(
                                         chat,
                                         message,
+                                        accountOwnerStateFlow.value,
                                         repositoryDashboard.getUnseenMessagesByChatId(chat.id)
                                     )
                                 )
@@ -307,7 +339,22 @@ internal class DashboardViewModel @Inject constructor(
                         withContext(default) {
                             for (contact in _contactsStateFlow.value) {
 
-                                if (contact.status.isConfirmed() && !contactsAdded.contains(contact.id)) {
+                                if (!contactsAdded.contains(contact.id)) {
+                                    if (contact.isInviteContact()) {
+                                        var contactInvite: Invite? = null
+
+                                        contact.inviteId?.let { inviteId ->
+                                            contactInvite = withContext(io) {
+                                                repositoryDashboard.getInviteById(inviteId).firstOrNull()
+                                            }
+                                        }
+                                        if (contactInvite != null) {
+                                            newList.add(
+                                                DashboardChat.Inactive.Invite(contact, contactInvite)
+                                            )
+                                            continue
+                                        }
+                                    }
                                     newList.add(
                                         DashboardChat.Inactive.Conversation(contact)
                                     )
@@ -322,6 +369,13 @@ internal class DashboardViewModel @Inject constructor(
             }
         }
 
+        viewModelScope.launch(mainImmediate) {
+            delay(50L)
+            repositoryDashboard.getAllInvites.distinctUntilChanged().collect {
+                updateChatListContacts(_contactsStateFlow.value)
+            }
+        }
+
         // Prime it...
         viewModelScope.launch(mainImmediate) {
             try {
@@ -331,6 +385,139 @@ internal class DashboardViewModel @Inject constructor(
                     }
                 }
             } catch (e: Exception) {}
+        }
+    }
+
+    private fun payLightningPaymentRequest(lightningPaymentRequest: LightningPaymentRequest) {
+        viewModelScope.launch(mainImmediate) {
+            val payLightningPaymentRequestDto = PayRequestDto(lightningPaymentRequest.value)
+            networkQueryLightning.putLightningPaymentRequest(payLightningPaymentRequestDto).collect { loadResponse ->
+                @Exhaustive
+                when (loadResponse) {
+                    is LoadResponse.Loading -> {
+                        submitSideEffect(
+                            DashboardSideEffect.Notify(app.getString(R.string.attempting_payment_request), true)
+                        )
+                    }
+                    is Response.Error -> {
+                        submitSideEffect(
+                            DashboardSideEffect.Notify(app.getString(R.string.failed_to_pay_request), true)
+                        )
+                    }
+                    is Response.Success -> {
+                        submitSideEffect(
+                            DashboardSideEffect.Notify(app.getString(R.string.successfully_paid_invoice), true)
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    private suspend fun updateChatListContacts(contacts: List<Contact>) {
+        collectionLock.withLock {
+            contactsCollectionInitialized = true
+
+            if (contacts.isEmpty()) {
+                return@withLock
+            }
+
+            val newList = ArrayList<Contact>(contacts.size)
+            val contactIds = ArrayList<ContactId>(contacts.size)
+
+            withContext(default) {
+                for (contact in contacts) {
+                    if (contact.isOwner.isTrue()) {
+                        _accountOwnerStateFlow.value = contact
+                        continue
+                    }
+
+                    contactIds.add(contact.id)
+                    newList.add(contact)
+                }
+            }
+
+            _contactsStateFlow.value = newList.toList()
+
+            // Don't push update to chat view state, let it's collection do it.
+            if (!chatsCollectionInitialized) {
+                return@withLock
+            }
+
+            withContext(default) {
+                val currentChats = currentChatViewState.list.toMutableList()
+                val chatContactIds = mutableListOf<ContactId>()
+
+                var updateChatViewState = false
+                for (chat in currentChatViewState.list) {
+
+                    val contact: Contact? = when (chat) {
+                        is DashboardChat.Active.Conversation -> {
+                            chat.contact
+                        }
+                        is DashboardChat.Active.GroupOrTribe -> {
+                            null
+                        }
+                        is DashboardChat.Inactive.Conversation -> {
+                            chat.contact
+                        }
+                        is DashboardChat.Inactive.Invite -> {
+                            chat.contact
+                        }
+                    }
+
+                    contact?.let {
+                        chatContactIds.add(it.id)
+                        // if the id of the currently displayed chat is not contained
+                        // in the list collected here, it's either a new contact w/o
+                        // a chat, or a contact that was deleted which we need to remove
+                        // from the list of chats.
+
+                        if (!contactIds.contains(it.id)) {
+                            //Contact deleted
+                            updateChatViewState = true
+                            currentChats.remove(chat)
+                            chatContactIds.remove(it.id)
+                        }
+
+                        if (repositoryDashboard.updatedContactIds.contains(it.id)) {
+                            //Contact updated
+                            currentChats.remove(chat)
+                            chatContactIds.remove(it.id)
+                        }
+                    }
+                }
+
+                for (contact in _contactsStateFlow.value) {
+                    if (!chatContactIds.contains(contact.id)) {
+                        updateChatViewState = true
+
+                        if (contact.isInviteContact()) {
+                            var contactInvite: Invite? = null
+
+                            contact.inviteId?.let { inviteId ->
+                                contactInvite = withContext(io) {
+                                    repositoryDashboard.getInviteById(inviteId).firstOrNull()
+                                }
+                            }
+                            if (contactInvite != null) {
+                                currentChats.add(
+                                    DashboardChat.Inactive.Invite(contact, contactInvite)
+                                )
+                                continue
+                            }
+                        }
+                        currentChats.add(
+                            DashboardChat.Inactive.Conversation(contact)
+                        )
+                    }
+                }
+
+                if (updateChatViewState) {
+                    chatViewStateContainer.updateDashboardChats(currentChats.toList())
+                    repositoryDashboard.updatedContactIds = mutableListOf()
+                }
+            }
         }
     }
 
@@ -351,8 +538,8 @@ internal class DashboardViewModel @Inject constructor(
     val networkStateFlow: StateFlow<LoadResponse<Boolean, ResponseError>>
         get() = _networkStateFlow.asStateFlow()
 
-    private var pushNotificationRegistrationUpdated: Boolean = false
     private var jobNetworkRefresh: Job? = null
+    private var jobPushNotificationRegistration: Job? = null
     fun networkRefresh() {
         if (jobNetworkRefresh?.isActive == true) {
             return
@@ -389,15 +576,18 @@ internal class DashboardViewModel @Inject constructor(
                 jobNetworkRefresh?.cancel()
             }
 
-            if (!pushNotificationRegistrationUpdated) {
-                pushNotificationRegistrar.register().let { response ->
-                    @Exhaustive
-                    when (response) {
-                        is Response.Error -> {
-                            // TODO: Handle on the UI
-                        }
-                        is Response.Success -> {
-                            pushNotificationRegistrationUpdated = true
+            // must occur after contacts have been retrieved such that
+            // an account owner is available, otherwise it just suspends
+            // until it is.
+            if (jobPushNotificationRegistration == null) {
+                jobPushNotificationRegistration = launch(mainImmediate) {
+                    pushNotificationRegistrar.register().let { response ->
+                        @Exhaustive
+                        when (response) {
+                            is Response.Error -> {
+                                // TODO: Handle on the UI
+                            }
+                            is Response.Success -> {}
                         }
                     }
                 }
@@ -407,6 +597,42 @@ internal class DashboardViewModel @Inject constructor(
                 _networkStateFlow.value = response
             }
         }
+    }
+
+    suspend fun payForInvite(invite: Invite) {
+        getAccountBalance().firstOrNull()?.let { balance ->
+            if (balance.balance.value < (invite.price?.value ?: 0)) {
+                submitSideEffect(
+                    DashboardSideEffect.Notify(app.getString(R.string.pay_invite_balance_too_low))
+                )
+                return
+            }
+        }
+
+        submitSideEffect(
+            DashboardSideEffect.AlertConfirmPayInvite(invite.price?.value ?: 0) {
+                viewModelScope.launch(mainImmediate) {
+                    repositoryDashboard.payForInvite(invite)
+                }
+            }
+        )
+    }
+
+    suspend fun deleteInvite(invite: Invite) {
+        submitSideEffect(
+            DashboardSideEffect.AlertConfirmDeleteInvite() {
+                viewModelScope.launch(mainImmediate) {
+                    repositoryDashboard.deleteInvite(invite)
+                }
+            }
+        )
+    }
+
+    fun goToAppUpgrade() {
+        val i = Intent(Intent.ACTION_VIEW)
+        i.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        i.data = Uri.parse("https://github.com/stakwork/sphinx-kotlin/releases")
+        app.startActivity(i)
     }
 
     override suspend fun onMotionSceneCompletion(value: Any) {

@@ -32,13 +32,25 @@ inline fun Chat.hasPendingContacts(): Boolean =
     !pendingContactIds.isNullOrEmpty()
 
 @Suppress("NOTHING_TO_INLINE")
+inline fun Chat.getColorKey(): String {
+    return "chat-${id}-color"
+}
+
+@Suppress("NOTHING_TO_INLINE")
 inline fun Chat.isTribe(): Boolean =
     type.isTribe()
 
 @Suppress("NOTHING_TO_INLINE")
-inline fun Chat.getColorKey(): String {
-    return "chat-${id}-color"
-}
+inline fun Chat.isConversation(): Boolean =
+    type.isConversation()
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun Chat.isTribeOwnedByAccount(accountOwnerNodePubKey: LightningNodePubKey?): Boolean =
+    type.isTribe() && ownerPubKey == accountOwnerNodePubKey
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun Chat.isTribeNotOwnedByAccount(accountOwnerNodePubKey: LightningNodePubKey?): Boolean =
+    type.isTribe() && ownerPubKey != accountOwnerNodePubKey
 
 data class Chat(
     val id: ChatId,

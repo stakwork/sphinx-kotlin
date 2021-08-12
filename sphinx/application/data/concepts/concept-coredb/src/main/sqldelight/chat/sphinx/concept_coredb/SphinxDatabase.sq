@@ -24,6 +24,7 @@ import chat.sphinx.wrapper_common.lightning.LightningPaymentRequest;
 import chat.sphinx.wrapper_common.lightning.LightningRouteHint;
 import chat.sphinx.wrapper_common.lightning.Sat;
 import chat.sphinx.wrapper_common.message.MessageId;
+import chat.sphinx.wrapper_common.message.MessageUUID;
 import chat.sphinx.wrapper_contact.ContactAlias;
 import chat.sphinx.wrapper_contact.ContactStatus;
 import chat.sphinx.wrapper_contact.DeviceId;
@@ -36,14 +37,14 @@ import chat.sphinx.wrapper_message.MessageContentDecrypted;
 import chat.sphinx.wrapper_message.MessageMUID;
 import chat.sphinx.wrapper_message.MessageStatus;
 import chat.sphinx.wrapper_message.MessageType;
-import chat.sphinx.wrapper_message.MessageUUID;
 import chat.sphinx.wrapper_message.ReplyUUID;
 import chat.sphinx.wrapper_message.SenderAlias;
-import chat.sphinx.wrapper_message.media.MediaKey;
-import chat.sphinx.wrapper_message.media.MediaKeyDecrypted;
-import chat.sphinx.wrapper_message.media.MediaToken;
-import chat.sphinx.wrapper_message.media.MediaType;
+import chat.sphinx.wrapper_message_media.MediaKey;
+import chat.sphinx.wrapper_message_media.MediaKeyDecrypted;
+import chat.sphinx.wrapper_message_media.MediaToken;
+import chat.sphinx.wrapper_message_media.MediaType;
 import chat.sphinx.wrapper_rsa.RsaPublicKey;
+import java.io.File;
 import kotlin.collections.List;
 
 CREATE TABLE chatDbo(
@@ -88,6 +89,11 @@ FROM chatDbo;
 chatGetAllIds:
 SELECT id
 FROM chatDbo;
+
+chatGetAllByIds:
+SELECT *
+FROM chatDbo
+WHERE id IN :chat_ids;
 
 chatGetById:
 SELECT *
@@ -178,6 +184,11 @@ chatDeleteById:
 DELETE FROM chatDbo
 WHERE id = ?;
 
+chatUpdateMetaData:
+UPDATE chatDbo
+SET meta_data = :meta_data
+WHERE id = ?;
+
 chatUpdateSeen:
 UPDATE chatDbo
 SET seen = :seen
@@ -219,10 +230,22 @@ contactGetAll:
 SELECT *
 FROM contactDbo;
 
+contactGetAllByIds:
+SELECT *
+FROM contactDbo
+WHERE id IN :contact_ids;
+
 contactGetById:
 SELECT *
 FROM contactDbo
 WHERE id = ?;
+
+contactGetByPubKey:
+SELECT *
+FROM contactDbo
+WHERE node_pub_key = ?
+ORDER BY id
+LIMIT 1;
 
 contactGetOwner:
 SELECT *
@@ -294,6 +317,11 @@ UPDATE contactDbo
 SET invite_status = :invite_status
 WHERE invite_id = ?;
 
+contactUpdatePhotoUrl:
+UPDATE contactDbo
+SET photo_url = :photo_url
+WHERE id = ?;
+
 contactDeleteById:
 DELETE FROM contactDbo
 WHERE id = ?;
@@ -309,6 +337,10 @@ CREATE TABLE inviteDbo(
     created_at                  INTEGER         AS DateTime NOT NULL
 );
 
+inviteGetAll:
+SELECT *
+FROM inviteDbo;
+
 inviteGetById:
 SELECT *
 FROM inviteDbo
@@ -318,6 +350,11 @@ inviteGetByContactId:
 SELECT *
 FROM inviteDbo
 WHERE contact_id = ?;
+
+inviteUpdateStatus:
+UPDATE inviteDbo
+SET status = :status
+WHERE id = ?;
 
 inviteUpsert {
     UPDATE inviteDbo
@@ -481,16 +518,26 @@ AND (type = 29
     AND reply_uuid IN :reply_uuids
 );
 
+messageGetAllByUUID:
+SELECT *
+FROM messageDbo
+WHERE uuid IN :uuids;
+
 messageGetById:
 SELECT *
 FROM messageDbo
 WHERE id = ?;
 
+messageGetByUUID:
+SELECT *
+FROM messageDbo
+WHERE uuid = ?;
+
 messageGetToShowByUUID:
 SELECT *
 FROM messageDbo
 WHERE uuid = ?
-AND type IN(0, 5)
+AND type IN(0, 6)
 LIMIT 1;
 
 messageGetLowestProvisionalMessageId:
@@ -504,15 +551,22 @@ messageGetAllToShowByChatId:
 SELECT *
 FROM messageDbo
 WHERE chat_id = ?
-AND type IN(0, 2, 3, 5, 6, 14, 15, 25)
---     OR type = 2
---     OR type = 3
---     OR type = 5
---     OR type = 6
---     OR type = 14
---     OR type = 15
---     OR type = 25
---     OR type = 29
+AND (
+    type = 0 OR
+    type = 2 OR
+    type = 3 OR
+    type = 5 OR
+    type = 6 OR
+    type = 14 OR
+    type = 15 OR
+    type = 16 OR
+    type = 19 OR
+    type = 20 OR
+    type = 21 OR
+    type = 22 OR
+    type = 25 OR
+    (type = 29 AND reply_uuid IS NULL)
+)
 ORDER BY date DESC
 LIMIT 200;
 
@@ -522,6 +576,12 @@ FROM messageDbo
 WHERE sender != :ownerId
 AND seen = 0
 AND chat_id = ?;
+
+messageGetAmountSumForMessagesStartingWith:
+SELECT SUM(amount)
+FROM messageDbo
+WHERE (chat_id IS NULL OR chat_id = 0)
+AND (message_content LIKE :message_content);
 
 messageUpdateSeenByChatId:
 UPDATE messageDbo
@@ -547,7 +607,8 @@ messageUpsert {
         sender_alias = :sender_alias,
         sender_pic = :sender_pic,
         original_muid = :original_muid,
-        reply_uuid = :reply_uuid
+        reply_uuid = :reply_uuid,
+        type = :type
     WHERE id = :id;
 
     INSERT OR IGNORE INTO messageDbo(
@@ -608,7 +669,8 @@ CREATE TABLE messageMediaDbo(
     media_key                   TEXT            AS MediaKey,
     media_key_decrypted         TEXT            AS MediaKeyDecrypted,
     media_type                  TEXT            AS MediaType NOT NULL,
-    media_token                 TEXT            AS MediaToken NOT NULL
+    media_token                 TEXT            AS MediaToken NOT NULL,
+    local_file                  TEXT            AS File
 );
 
 messageMediaGetById:
@@ -619,6 +681,11 @@ WHERE id = ?;
 messageMediaUpdateMediaKeyDecrypted:
 UPDATE messageMediaDbo
 SET media_key_decrypted = :media_key_decrypted
+WHERE id = ?;
+
+messageMediaUpdateFile:
+UPDATE messageMediaDbo
+SET local_file = :local_file
 WHERE id = ?;
 
 messageMediaUpsert {
@@ -634,7 +701,8 @@ messageMediaUpsert {
         media_key,
         media_key_decrypted,
         media_type,
-        media_token
+        media_token,
+        local_file
     )
     VALUES(
         :id,
@@ -642,7 +710,8 @@ messageMediaUpsert {
         :media_key,
         :media_key_decrypted,
         :media_type,
-        :media_token
+        :media_token,
+        :local_file
     );
 }
 

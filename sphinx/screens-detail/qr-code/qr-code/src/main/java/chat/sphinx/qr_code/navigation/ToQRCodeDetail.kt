@@ -4,18 +4,26 @@ import androidx.navigation.NavController
 import chat.sphinx.detail_resources.DetailNavOptions
 import chat.sphinx.qr_code.R
 import chat.sphinx.qr_code.ui.QRCodeFragmentArgs
-import io.matthewnelson.android_feature_navigation.R as nav_R
 import io.matthewnelson.concept_navigation.NavigationRequest
+import io.matthewnelson.android_feature_navigation.R as nav_R
 
 class ToQRCodeDetail(
-    private val qrText: String
+    private val qrText: String,
+    private val viewTitle: String,
+    private val description: String? = null,
+    private val showBackArrow: Boolean? = null
 ): NavigationRequest<NavController>() {
     override fun navigate(controller: NavController) {
+        val builder = QRCodeFragmentArgs.Builder(
+            qrText,
+            viewTitle,
+            description ?: "",
+            showBackArrow ?: (controller.previousBackStackEntry != null)
+        )
+
         controller.navigate(
             R.id.qr_code_nav_graph,
-            QRCodeFragmentArgs.Builder(
-                qrText,
-                controller.previousBackStackEntry != null).build().toBundle(),
+            builder.build().toBundle(),
             if (controller.previousBackStackEntry == null) {
                 DetailNavOptions.defaultBuilt
             } else {

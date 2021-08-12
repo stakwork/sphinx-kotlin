@@ -10,6 +10,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import app.cash.exhaustive.Exhaustive
@@ -34,10 +35,10 @@ import chat.sphinx.wrapper_common.lightning.asFormattedString
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.navigation.CloseAppOnBackPress
 import io.matthewnelson.android_feature_screens.ui.motionlayout.MotionLayoutFragment
+import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.invisibleIfFalse
 import io.matthewnelson.android_feature_viewmodel.currentViewState
 import io.matthewnelson.android_feature_viewmodel.updateViewState
-import io.matthewnelson.concept_views.sideeffect.SideEffect
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -51,8 +52,8 @@ private inline fun FragmentDashboardBinding.searchBarClearFocus() {
 @AndroidEntryPoint
 internal class DashboardFragment : MotionLayoutFragment<
         Any,
-        Nothing,
-        SideEffect<Nothing>,
+        Context,
+        DashboardSideEffect,
         NavDrawerViewState,
         DashboardViewModel,
         FragmentDashboardBinding
@@ -77,7 +78,7 @@ internal class DashboardFragment : MotionLayoutFragment<
 
         viewModel.networkRefresh()
 
-//        findNavController().addOnDestinationChangedListener(CloseDrawerOnDestinationChange())
+        findNavController().addOnDestinationChangedListener(CloseDrawerOnDestinationChange())
 
         setupChats()
         setupDashboardHeader()
@@ -147,6 +148,10 @@ internal class DashboardFragment : MotionLayoutFragment<
             header.imageViewNavDrawerMenu.setOnClickListener {
                 viewModel.updateViewState(NavDrawerViewState.Open)
             }
+
+            header.textViewDashboardHeaderUpgradeApp.setOnClickListener {
+                viewModel.goToAppUpgrade()
+            }
         }
     }
 
@@ -214,6 +219,13 @@ internal class DashboardFragment : MotionLayoutFragment<
 
     override fun onStart() {
         super.onStart()
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            binding.layoutDashboardHeader.textViewDashboardHeaderUpgradeApp.goneIfFalse(
+                viewModel.getNewVersionAvailable()
+            )
+        }
+
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.getAccountBalance().collect { nodeBalance ->
                 if (nodeBalance == null) return@collect
@@ -324,6 +336,7 @@ internal class DashboardFragment : MotionLayoutFragment<
         return arrayOf(binding.layoutMotionDashboard)
     }
 
-    override suspend fun onSideEffectCollect(sideEffect: SideEffect<Nothing>) {}
-    override fun subscribeToSideEffectSharedFlow() {}
+    override suspend fun onSideEffectCollect(sideEffect: DashboardSideEffect) {
+        sideEffect.execute(binding.root.context)
+    }
 }

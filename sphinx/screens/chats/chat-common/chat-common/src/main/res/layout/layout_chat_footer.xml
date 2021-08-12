@@ -18,36 +18,32 @@
         android:textSize="21sp"
         android:textColor="@android:color/white"
         android:gravity="center"
-        android:backgroundTint="@color/blueTextAccent"
-        app:layout_constraintBottom_toBottomOf="@+id/scroll_view_chat_edit_text"
-        app:layout_constraintEnd_toStartOf="@+id/scroll_view_chat_edit_text"
+        android:backgroundTint="@color/primaryBlue"
+        android:clickable="true"
+        android:focusable="true"
+        app:layout_constraintBottom_toBottomOf="@+id/edit_text_chat_footer"
+        app:layout_constraintEnd_toStartOf="@+id/edit_text_chat_footer"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/scroll_view_chat_edit_text" />
+        app:layout_constraintTop_toTopOf="@+id/edit_text_chat_footer"
+         />
 
-    <androidx.core.widget.NestedScrollView
-        android:id="@+id/scroll_view_chat_edit_text"
+    <chat.sphinx.chat_common.ui.SphinxEditText
+        android:id="@+id/edit_text_chat_footer"
         android:layout_width="0dp"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:layout_marginHorizontal="@dimen/default_layout_margin"
         android:background="@drawable/background_message_text"
         android:backgroundTint="@color/lightDivider"
+        android:inputType="textMultiLine"
+        android:maxLines="4"
+        android:padding="@dimen/default_layout_margin"
+        android:textColor="@color/text"
+        android:textCursorDrawable="@drawable/cursor"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/text_view_chat_footer_send"
-        app:layout_constraintStart_toEndOf="@+id/text_view_chat_footer_attachment">
-
-        <androidx.appcompat.widget.AppCompatEditText
-            android:id="@+id/edit_text_chat_footer"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@null"
-            android:inputType="textMultiLine"
-            android:maxLines="4"
-            android:paddingHorizontal="@dimen/default_layout_margin"
-            android:paddingVertical="16dp"
-            android:textColor="@color/text"
-            android:textCursorDrawable="@drawable/cursor"
-            tools:text="line 1\nline 2\nline 3\nline 4\nline 5" />
-
-    </androidx.core.widget.NestedScrollView>
+        app:layout_constraintStart_toEndOf="@+id/text_view_chat_footer_attachment"
+        tools:text="Text which we have" />
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/text_view_chat_footer_send"
@@ -55,15 +51,15 @@
         android:layout_height="@dimen/chat_footer_send_button_xy"
         android:layout_marginEnd="@dimen/chat_footer_send_button_margin_horizontal"
         android:background="@drawable/button_background_white_rad_48"
-        android:backgroundTint="@color/blueTextAccent"
+        android:backgroundTint="@color/primaryBlue"
         android:fontFamily="@font/material_icons_regular"
         android:text="@string/material_icon_name_message_editor_send"
         android:textSize="19sp"
         android:textColor="@android:color/white"
         android:gravity="center"
-        app:layout_constraintBottom_toBottomOf="@+id/scroll_view_chat_edit_text"
+        app:layout_constraintBottom_toBottomOf="@+id/edit_text_chat_footer"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/scroll_view_chat_edit_text" />
+        app:layout_constraintTop_toTopOf="@+id/edit_text_chat_footer" />
 
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/image_view_chat_footer_microphone"
@@ -73,9 +69,9 @@
         android:src="@drawable/ic_baseline_mic_20"
         android:tint="@color/textInverted"
         android:visibility="invisible"
-        app:layout_constraintBottom_toBottomOf="@+id/scroll_view_chat_edit_text"
+        app:layout_constraintBottom_toBottomOf="@+id/edit_text_chat_footer"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/scroll_view_chat_edit_text"
+        app:layout_constraintTop_toTopOf="@+id/edit_text_chat_footer"
         tools:visibility="visible" />
 
 

@@ -4,20 +4,26 @@ import android.app.Application
 import android.graphics.Color
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import chat.sphinx.camera_view_model_coordinator.request.CameraRequest
+import chat.sphinx.camera_view_model_coordinator.response.CameraResponse
 import chat.sphinx.chat_common.ui.ChatViewModel
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
+import chat.sphinx.chat_contact.navigation.ContactChatNavigator
+import chat.sphinx.concept_meme_server.MemeServerTokenHandler
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_lightning.model.route.RouteSuccessProbabilityDto
 import chat.sphinx.concept_network_query_lightning.model.route.isRouteAvailable
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_message.MessageRepository
-import chat.sphinx.concept_repository_message.SendMessage
 import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.resources.getRandomHexCode
+import chat.sphinx.concept_repository_message.model.SendMessage
+import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
+import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.ChatName
 import chat.sphinx.wrapper_common.dashboard.ChatId
@@ -30,6 +36,8 @@ import chat.sphinx.wrapper_message.Message
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
+import chat.sphinx.concept_link_preview.LinkPreviewHandler
+import io.matthewnelson.concept_media_cache.MediaCacheHandler
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -50,27 +58,42 @@ internal inline val ChatContactFragmentArgs.contactId: ContactId
 internal class ChatContactViewModel @Inject constructor(
     app: Application,
     dispatchers: CoroutineDispatchers,
+    memeServerTokenHandler: MemeServerTokenHandler,
+    chatNavigator: ContactChatNavigator,
     chatRepository: ChatRepository,
     contactRepository: ContactRepository,
     messageRepository: MessageRepository,
     networkQueryLightning: NetworkQueryLightning,
-    savedStateHandle: SavedStateHandle,
     userColorsHelper: UserColorsHelper,
+    mediaCacheHandler: MediaCacheHandler,
+    savedStateHandle: SavedStateHandle,
+    cameraViewModelCoordinator: ViewModelCoordinator<CameraRequest, CameraResponse>,
+    linkPreviewHandler: LinkPreviewHandler,
+    LOG: SphinxLogger,
 ): ChatViewModel<ChatContactFragmentArgs>(
     app,
     dispatchers,
+    memeServerTokenHandler,
+    chatNavigator,
     chatRepository,
     contactRepository,
     messageRepository,
     networkQueryLightning,
+    userColorsHelper,
+    mediaCacheHandler,
     savedStateHandle,
-    userColorsHelper
+    cameraViewModelCoordinator,
+    linkPreviewHandler,
+    LOG,
 ) {
     override val args: ChatContactFragmentArgs by savedStateHandle.navArgs()
-    private var chatId: ChatId? = args.chatId
+    private var _chatId: ChatId? = args.chatId
+    override val chatId: ChatId?
+        get() = _chatId
+    override val contactId: ContactId = args.contactId
 
     private val contactSharedFlow: SharedFlow<Contact?> = flow {
-        emitAll(contactRepository.getContactById(args.contactId))
+        emitAll(contactRepository.getContactById(contactId))
     }.distinctUntilChanged().shareIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(2_000),
@@ -80,8 +103,8 @@ internal class ChatContactViewModel @Inject constructor(
     override val chatSharedFlow: SharedFlow<Chat?> = flow {
         chatId?.let { chatId ->
             emitAll(chatRepository.getChatById(chatId))
-        } ?: chatRepository.getConversationByContactId(args.contactId).collect { chat ->
-            chatId = chat?.id
+        } ?: chatRepository.getConversationByContactId(contactId).collect { chat ->
+            _chatId = chat?.id
             emit(chat)
         }
     }.distinctUntilChanged().shareIn(
@@ -225,7 +248,7 @@ internal class ChatContactViewModel @Inject constructor(
     }
 
     override fun readMessages() {
-        val idResolved: ChatId? = args.chatId ?: chatSharedFlow.replayCache.firstOrNull()?.id
+        val idResolved: ChatId? = chatId ?: chatSharedFlow.replayCache.firstOrNull()?.id
         if (idResolved != null) {
             viewModelScope.launch(mainImmediate) {
                 messageRepository.readMessages(idResolved)
@@ -234,7 +257,7 @@ internal class ChatContactViewModel @Inject constructor(
     }
 
     override fun sendMessage(builder: SendMessage.Builder): SendMessage? {
-        builder.setContactId(args.contactId)
+        builder.setContactId(contactId)
         builder.setChatId(chatId)
         return super.sendMessage(builder)
     }

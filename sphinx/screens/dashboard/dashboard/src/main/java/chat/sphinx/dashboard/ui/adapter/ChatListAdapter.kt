@@ -23,12 +23,17 @@ import chat.sphinx.resources.getRandomHexCode
 import chat.sphinx.resources.setInitialsColor
 import chat.sphinx.resources.setTextColorExt
 import chat.sphinx.resources.setTextFont
+import chat.sphinx.resources.*
 import chat.sphinx.wrapper_chat.*
 import chat.sphinx.wrapper_common.DateTime
+import chat.sphinx.wrapper_common.invite.*
+import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.util.getInitials
 import chat.sphinx.wrapper_message.*
+import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.invisibleIfFalse
+import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
@@ -36,7 +41,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.*
 import kotlin.collections.ArrayList
-
 
 internal class ChatListAdapter(
     private val recyclerView: RecyclerView,
@@ -105,6 +109,9 @@ internal class ChatListAdapter(
                         old.chat.isMuted            == new.chat.isMuted             &&
                         old.chat.seen               == new.chat.seen                &&
                         old.chat.photoUrl           == new.chat.photoUrl
+                    }
+                    old is DashboardChat.Inactive.Invite && new is DashboardChat.Inactive.Invite -> {
+                        old.invite?.status == new.invite?.status
                     }
                     old is DashboardChat.Inactive && new is DashboardChat.Inactive -> {
                         old.chatName == new.chatName
@@ -229,10 +236,28 @@ internal class ChatListAdapter(
                         }
                         is DashboardChat.Inactive.Conversation -> {
                             lifecycleOwner.lifecycleScope.launch {
-                                viewModel.dashboardNavigator.toChatContact(
-                                    null,
-                                    dashboardChat.contact.id
-                                )
+                                    viewModel.dashboardNavigator.toChatContact(
+                                        null,
+                                        dashboardChat.contact.id
+                                    )
+                                }
+                        }
+                        is DashboardChat.Inactive.Invite -> {
+                            dashboardChat.invite?.let { invite ->
+                                lifecycleOwner.lifecycleScope.launch {
+                                    if (invite.status.isReady() || invite.status.isDelivered()) {
+                                        viewModel.dashboardNavigator.toQRCodeDetail(
+                                            invite.inviteString.value,
+                                            binding.root.context.getString(
+                                                R.string.invite_qr_code_header_name
+                                            )
+                                        )
+                                    } else if (invite.status.isPaymentPending()) {
+                                        viewModel.payForInvite(invite)
+                                    } else if (invite.status.isExpired()) {
+                                        viewModel.deleteInvite(invite)
+                                    }
+                                }
                             }
                         }
                     }
@@ -252,27 +277,29 @@ internal class ChatListAdapter(
 
                 // Set Defaults
                 layoutConstraintChatHolderBorder.goneIfFalse(position != dashboardChats.lastIndex)
-                textViewChatHolderName.setTextColorExt(android.R.color.white)
+                textViewDashboardChatHolderName.setTextColorExt(android.R.color.white)
                 textViewChatHolderMessage.setTextColorExt(R.color.placeholderText)
                 textViewChatHolderMessage.setTextFont(R.font.roboto_regular)
-                textViewBadgeCount.invisibleIfFalse(false)
+                textViewDashboardChatHolderBadgeCount.invisibleIfFalse(false)
 
                 // Image
                 dashboardChat.photoUrl.let { url ->
 
-                    layoutDashboardChatInitialHolder.imageViewChatPicture.goneIfFalse(url != null)
-                    layoutDashboardChatInitialHolder.textViewInitials.goneIfFalse(url == null)
+                    includeDashboardChatHolderInitial.apply {
+                        imageViewChatPicture.goneIfFalse(url != null)
+                        textViewInitials.goneIfFalse(url == null)
+                    }
 
                     if (url != null) {
                         onStopSupervisor.scope.launch(viewModel.dispatchers.mainImmediate) {
                             imageLoader.load(
-                                layoutDashboardChatInitialHolder.imageViewChatPicture,
+                                includeDashboardChatHolderInitial.imageViewChatPicture,
                                 url.value,
                                 imageLoaderOptions
                             )
                         }
                     } else {
-                        layoutDashboardChatInitialHolder.textViewInitials.text =
+                        includeDashboardChatHolderInitial.textViewInitials.text =
                             dashboardChat.chatName?.getInitials() ?: ""
 
                         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
@@ -292,16 +319,18 @@ internal class ChatListAdapter(
                 }
 
                 // Name
-                val chatName = if (dashboardChat.chatName != null) {
+                val chatName = if (dashboardChat is DashboardChat.Inactive.Invite) {
+                    dashboardChat.getChatName(root.context)
+                } else if (dashboardChat.chatName != null) {
                     dashboardChat.chatName
                 } else {
                     // Should never make it here, but just in case...
-                    textViewChatHolderName.setTextColorExt(R.color.primaryRed)
+                    textViewDashboardChatHolderName.setTextColorExt(R.color.primaryRed)
                     textViewChatHolderCenteredName.setTextColorExt(R.color.primaryRed)
-                    "ERROR: NULL NAME"
+                    root.context.getString(R.string.null_name_error)
                 }
 
-                textViewChatHolderName.text = chatName
+                textViewDashboardChatHolderName.text = chatName
                 textViewChatHolderCenteredName.text = chatName
 
                 // Lock
@@ -309,25 +338,29 @@ internal class ChatListAdapter(
                 imageViewChatHolderLock.invisibleIfFalse(encryptedChat)
                 imageViewChatHolderCenteredLock.invisibleIfFalse(encryptedChat)
 
-                layoutConstraintDashboardChatMessageHolder.invisibleIfFalse(dashboardChat is DashboardChat.Active)
-                layoutConstraintDashboardChatNoMessageHolder.invisibleIfFalse(dashboardChat !is DashboardChat.Active)
+                val chatHasMessages = (dashboardChat as? DashboardChat.Active)?.message != null
+                val activeChatOrInvite = ((dashboardChat is DashboardChat.Active && chatHasMessages) || dashboardChat is DashboardChat.Inactive.Invite)
+                layoutConstraintDashboardChatHolderMessage.invisibleIfFalse(activeChatOrInvite)
+                layoutConstraintDashboardChatNoMessageHolder.invisibleIfFalse(!activeChatOrInvite)
 
                 // Time
                 textViewChatHolderTime.text = dashboardChat.getDisplayTime(today00)
 
                 // Message
-                val messageText = dashboardChat.getMessageText()
-                val hastUnseenMessages = dashboardChat.hasUnseenMessages()
+                val messageText = dashboardChat.getMessageText(root.context)
+                val hasUnseenMessages = dashboardChat.hasUnseenMessages()
 
-                if (messageText == DashboardChat.Active.DECRYPTION_ERROR) {
+                if (messageText == root.context.getString(R.string.decryption_error)) {
                     textViewChatHolderMessage.setTextColorExt(R.color.primaryRed)
                 } else {
-                    textViewChatHolderMessage.setTextColorExt(if (hastUnseenMessages) R.color.text else R.color.placeholderText)
+                    textViewChatHolderMessage.setTextColorExt(if (hasUnseenMessages) R.color.text else R.color.placeholderText)
                 }
 
-                textViewChatHolderMessage.setTextFont(if (hastUnseenMessages) R.font.roboto_bold else R.font.roboto_regular)
+                textViewChatHolderMessage.setTextFont(if (hasUnseenMessages) R.font.roboto_bold else R.font.roboto_regular)
 
                 textViewChatHolderMessage.text = messageText
+
+                handleInviteLayouts()
 
                 handleUnseenMessageCount()
 
@@ -340,11 +373,42 @@ internal class ChatListAdapter(
             }
         }
 
+        private fun handleInviteLayouts() {
+            dChat?.let { nnDashboardChat ->
+                binding.apply {
+                    textViewChatHolderMessageIcon.gone
+                    layoutConstraintDashboardChatHolderContact.visible
+                    layoutConstraintDashboardChatHolderInvite.gone
+                    layoutConstraintDashboardChatHolderInvitePrice.gone
+
+                    if (nnDashboardChat is DashboardChat.Inactive.Invite) {
+                        textViewChatHolderMessage.setTextFont(R.font.roboto_bold)
+                        textViewChatHolderMessage.setTextColorExt(R.color.text)
+
+                        layoutConstraintDashboardChatHolderContact.gone
+                        layoutConstraintDashboardChatHolderInvite.visible
+
+                        nnDashboardChat.getInviteIconAndColor()?.let { iconAndColor ->
+                            textViewChatHolderMessageIcon.visible
+                            textViewChatHolderMessageIcon.text = getString(iconAndColor.first)
+                            textViewChatHolderMessageIcon.setTextColor(getColor(iconAndColor.second))
+                        }
+
+                        nnDashboardChat.getInvitePrice()?.let { price ->
+                            val paymentPending = nnDashboardChat.invite?.status?.isPaymentPending() == true
+                            layoutConstraintDashboardChatHolderInvitePrice.goneIfFalse(paymentPending)
+                            textViewDashboardChatHolderInvitePrice.text = price.asFormattedString()
+                        }
+                    }
+                }
+            }
+        }
+
         private fun handleUnseenMessageCount() {
             dChat?.let { nnDashboardChat ->
                 badgeJob = onStopSupervisor.scope.launch(viewModel.mainImmediate) {
                     nnDashboardChat.unseenMessageFlow?.collect { unseen ->
-                        binding.textViewBadgeCount.apply {
+                        binding.textViewDashboardChatHolderBadgeCount.apply {
                             if (unseen != null && unseen > 0) {
                                 text = unseen.toString()
                             }

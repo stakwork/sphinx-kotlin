@@ -1,6 +1,7 @@
 plugins {
     id 'com.android.library'
     id 'dagger.hilt.android.plugin'
+    id 'androidx.navigation.safeargs'
     id 'kotlin-android'
     id 'kotlin-kapt'
 }
@@ -39,10 +40,11 @@ dependencies {
     implementation deps.google.hilt
 
     // Sphinx
-    implementation project(path: ':sphinx:application:common:resources')
     implementation project(path: ':sphinx:activity:insetter-activity')
     implementation project(path: ':sphinx:application:common:wrappers:wrapper-relay')
     implementation project(path: ':sphinx:application:data:concepts:concept-relay')
+    api project(path: ':sphinx:screens:onboard:onboard-common')
+    api project(path: ':sphinx:screens:onboard:onboard-resources')
 
     kapt kaptDeps.google.hilt
 

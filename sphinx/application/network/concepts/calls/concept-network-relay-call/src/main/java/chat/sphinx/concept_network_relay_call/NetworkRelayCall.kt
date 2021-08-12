@@ -57,13 +57,14 @@ abstract class NetworkRelayCall: NetworkCall() {
             > relayPut(
         responseJsonClass: Class<V>,
         relayEndpoint: String,
-        requestBodyJsonClass: Class<RequestBody>,
-        requestBody: RequestBody,
+        requestBodyJsonClass: Class<RequestBody>? = null,
+        requestBody: RequestBody? = null,
         mediaType: String? = "application/json",
         additionalHeaders: Map<String, String>? = null,
         relayData: Pair<AuthorizationToken, RelayUrl>? = null,
     ): Flow<LoadResponse<T, ResponseError>>
 
+    // TODO: Remove and replace all uses with post (DO NOT USE THIS METHOD FOR NEW CODE)
     /**
      * POST
      *
@@ -74,6 +75,7 @@ abstract class NetworkRelayCall: NetworkCall() {
      * @param [mediaType] the media type for the request body, defaults to "application/json"
      * @param [relayUrl] unauthenticated relay URL
      * */
+    @Deprecated(message = "do not use")
     abstract fun <
             T: Any,
             RequestBody: Any,

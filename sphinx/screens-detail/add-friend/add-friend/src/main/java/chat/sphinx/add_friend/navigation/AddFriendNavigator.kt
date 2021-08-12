@@ -8,9 +8,10 @@ import io.matthewnelson.concept_navigation.Navigator
 abstract class AddFriendNavigator(
     detailNavigationDriver: BaseNavigationDriver<NavController>
 ): Navigator<NavController>(detailNavigationDriver) {
-    abstract suspend fun toCreateInvitationDetail()
+    abstract suspend fun toInviteFriendDetail()
     abstract suspend fun toAddContactDetail()
     abstract suspend fun closeDetailScreen()
+
     suspend fun popBackStack() {
         navigationDriver.submitNavigationRequest(PopBackStack())
     }

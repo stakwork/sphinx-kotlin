@@ -85,9 +85,11 @@ dependencies {
     implementation project(path: ':sphinx:application:data:features:crypto:feature-crypto-rsa')
     implementation project(path: ':sphinx:application:data:features:image-loader:feature-image-loader-android')
     implementation project(path: ':sphinx:application:data:features:user-colors-helper')
+    implementation project(path: ':sphinx:application:data:features:feature-media-cache')
+    implementation project(path: ':sphinx:application:data:features:feature-meme-server')
     implementation project(path: ':sphinx:application:data:features:feature-relay')
     implementation project(path: ':sphinx:application:data:features:feature-repository-android')
-
+    implementation project(path: ':sphinx:application:network:features:feature-link-preview')
     implementation project(path: ':sphinx:application:network:features:feature-network-client')
     implementation project(path: ':sphinx:application:network:features:queries:feature-network-query-chat')
     implementation project(path: ':sphinx:application:network:features:queries:feature-network-query-contact')
@@ -95,11 +97,15 @@ dependencies {
     implementation project(path: ':sphinx:application:network:features:queries:feature-network-query-lightning')
     implementation project(path: ':sphinx:application:network:features:queries:feature-network-query-message')
     implementation project(path: ':sphinx:application:network:features:queries:feature-network-query-subscription')
+    implementation project(path: ':sphinx:application:network:features:queries:feature-network-query-meme-server')
+    implementation project(path: ':sphinx:application:network:features:queries:feature-network-query-version')
     implementation project(path: ':sphinx:application:network:features:feature-network-relay-call')
     implementation project(path: ':sphinx:application:network:features:feature-socket-io')
     implementation project(path: ':sphinx:application:network:features:tor:feature-network-tor')
 
     implementation project(path: ':sphinx:screens:splash:key-restore')
+
+    implementation project(path: ':sphinx:service:features:media-player:feature-service-media-player-android')
 
     // See `/sphinx/service/features/notifications/README.md`
     if (findProperty("SPHINX_COMPILE_PUSH_NOTIFICATION_TYPE") == "firebase") {

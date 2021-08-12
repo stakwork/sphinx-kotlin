@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="on_board_finish_button">Finish</string>
+    <string name="on_board_next_button">Next</string>
+
+    <string name="on_board_get_started_button">Get Started</string>
+    <string name="on_board_friend_message">A message from your friend…</string>
+
+    <string name="side_effect_create_inviter_failed">Failed to create inviter</string>
+    <string name="side_effect_get_contacts_failed">Failed to retrieve main contact</string>
+    <string name="side_effect_update_owner_failed">Failed to update main contact</string>
+    <string name="side_effect_generate_token_failed">Generate token failed</string>
+
+    <string name="sign_up_name_edit_text_hint">Set Your Name</string>
+    <string name="sign_up_name_text_view">Your Name</string>
+
+    <string name="sphinx_ready_label">"You\'re ready\nto use Sphinx!"</string>
+    <string name="sphinx_ready_balance_label">"You can send messages,\nspend %d sats, or receive\nup to %d sats."</string>
+    <string name="sphinx_ready_loading_balance">Loading node balance…</string>
+</resources>

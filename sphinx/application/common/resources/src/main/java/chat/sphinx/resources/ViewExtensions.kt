@@ -3,7 +3,17 @@ package chat.sphinx.resources
 import android.content.Context
 import android.graphics.Color
 import android.graphics.Typeface
+import android.graphics.*
+import android.os.Build
+import android.os.Handler
+import android.os.Looper
+import android.renderscript.Allocation
+import android.renderscript.Element
+import android.renderscript.RenderScript
+import android.renderscript.ScriptIntrinsicBlur
+import android.view.PixelCopy
 import android.view.View
+import android.view.Window
 import android.widget.TextView
 import androidx.annotation.ColorInt
 import androidx.annotation.ColorRes
@@ -64,5 +74,71 @@ inline fun View.setInitialsColor(
         this.background = drawable
     } else {
         this.setBackgroundColor(color ?: this.context.getRandomColor())
+    }
+}
+
+inline fun Bitmap.blur(context: Context, radius:Float = 10F): Bitmap?{
+    val bitmap = copy(config,true)
+
+    RenderScript.create(context).apply {
+        val input = Allocation.createFromBitmap(this,this@blur)
+        val output = Allocation.createFromBitmap(this,this@blur)
+
+        ScriptIntrinsicBlur.create(this, Element.U8_4(this)).apply {
+            setInput(input)
+
+            setRadius(radius)
+            forEach(output)
+
+            output.copyTo(bitmap)
+            destroy()
+        }
+    }
+    return bitmap
+}
+
+// https://stackoverflow.com/a/58315279
+@Suppress("NOTHING_TO_INLINE")
+inline fun View.takeScreenshot(
+    window: Window,
+    crossinline bitmapCallback: (Bitmap) -> Unit,
+    crossinline errorCallback: () -> Unit,
+) {
+    val width = measuredWidth
+    val height = measuredHeight
+    val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        val location = IntArray(2)
+        getLocationInWindow(location)
+        PixelCopy.request(
+            window,
+            Rect(location[0], location[1], location[0] + width, location[1] + height),
+            bitmap,
+            {
+                if (it == PixelCopy.SUCCESS) {
+                    bitmapCallback.invoke(bitmap)
+                } else {
+                    errorCallback.invoke()
+                }
+            },
+            Handler(Looper.getMainLooper())
+        )
+    } else {
+        val canvas = Canvas(bitmap)
+        val bgDrawable = background
+        if (bgDrawable != null) {
+            bgDrawable.draw(canvas)
+        } else {
+            canvas.drawColor(Color.WHITE)
+        }
+
+        try {
+            this.draw(canvas)
+            canvas.setBitmap(null)
+            bitmapCallback.invoke(bitmap)
+        } catch (e: Exception) {
+            errorCallback.invoke()
+        }
     }
 }

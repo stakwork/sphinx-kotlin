@@ -13,6 +13,7 @@ import chat.sphinx.feature_coredb.CoreDBImpl
 import chat.sphinx.feature_crypto_rsa.RSAAlgorithm
 import chat.sphinx.feature_crypto_rsa.RSAImpl
 import chat.sphinx.feature_relay.RelayDataHandlerImpl
+import chat.sphinx.feature_sphinx_service.ApplicationServiceTracker
 import chat.sphinx.key_restore.KeyRestore
 import dagger.Module
 import dagger.Provides
@@ -23,6 +24,7 @@ import io.matthewnelson.concept_authentication.data.AuthenticationStorage
 import io.matthewnelson.concept_authentication.state.AuthenticationStateManager
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_encryption_key.EncryptionKeyHandler
+import io.matthewnelson.concept_foreground_state.ForegroundStateManager
 import io.matthewnelson.feature_authentication_core.AuthenticationCoreManager
 import javax.inject.Singleton
 
@@ -45,6 +47,12 @@ object AuthenticationModule {
     fun provideAuthenticationStateManager(
         sphinxAuthenticationCoreManager: SphinxAuthenticationCoreManager
     ): AuthenticationStateManager =
+        sphinxAuthenticationCoreManager
+
+    @Provides
+    fun provideForegroundStateManager(
+        sphinxAuthenticationCoreManager: SphinxAuthenticationCoreManager
+    ): ForegroundStateManager =
         sphinxAuthenticationCoreManager
 
     @Provides
@@ -97,6 +105,7 @@ object AuthenticationModule {
     @Singleton
     fun provideSphinxAuthenticationCoreManager(
         application: Application,
+        applicationServiceTracker: ApplicationServiceTracker,
         dispatchers: CoroutineDispatchers,
         encryptionKeyHandler: SphinxEncryptionKeyHandler,
         sphinxAuthenticationCoreStorage: SphinxAuthenticationCoreStorage,
@@ -104,6 +113,7 @@ object AuthenticationModule {
     ): SphinxAuthenticationCoreManager =
         SphinxAuthenticationCoreManager(
             application,
+            applicationServiceTracker,
             dispatchers,
             encryptionKeyHandler,
             sphinxAuthenticationCoreStorage,

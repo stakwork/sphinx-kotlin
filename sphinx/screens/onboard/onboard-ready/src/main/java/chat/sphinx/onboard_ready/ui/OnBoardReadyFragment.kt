@@ -4,14 +4,18 @@ import android.content.Context
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.navArgs
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.insetter_activity.addStatusBarPadding
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
+import chat.sphinx.onboard_common.model.OnBoardInviterData
 import chat.sphinx.onboard_ready.R
 import chat.sphinx.onboard_ready.databinding.FragmentOnBoardReadyBinding
+import chat.sphinx.onboard_ready.navigation.inviterData
 import chat.sphinx.resources.SphinxToastUtils
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.navigation.CloseAppOnBackPress
@@ -33,6 +37,9 @@ internal class OnBoardReadyFragment: SideEffectFragment<
         FragmentOnBoardReadyBinding
         >(R.layout.fragment_on_board_ready)
 {
+    private val args: OnBoardReadyFragmentArgs by navArgs()
+    private val inviterData: OnBoardInviterData by lazy(LazyThreadSafetyMode.NONE) { args.inviterData }
+
     override val viewModel: OnBoardReadyViewModel by viewModels()
     override val binding: FragmentOnBoardReadyBinding by viewBinding(FragmentOnBoardReadyBinding::bind)
 
@@ -47,7 +54,7 @@ internal class OnBoardReadyFragment: SideEffectFragment<
 
         binding.balanceTextView.text = getString(R.string.sphinx_ready_loading_balance)
 
-        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+        lifecycleScope.launch(viewModel.mainImmediate) {
             viewModel.getBalances().collect { loadResponse ->
                 @Exhaustive
                 when (loadResponse) {
@@ -58,7 +65,7 @@ internal class OnBoardReadyFragment: SideEffectFragment<
                     }
                     is Response.Success -> {
                         val balance = loadResponse.value
-                        binding.balanceTextView.text = String.format(getString(R.string.sphinx_ready_balance_label), balance.localBalance.value, balance.remoteBalance.value)
+                        binding.balanceTextView.text = getString(R.string.sphinx_ready_balance_label, balance.localBalance.value, balance.remoteBalance.value)
                     }
                 }
             }
@@ -67,16 +74,17 @@ internal class OnBoardReadyFragment: SideEffectFragment<
         binding.buttonContinue.setOnClickListener {
             viewModel.updateViewState(OnBoardReadyViewState.Saving)
 
-            context?.getSharedPreferences("sphinx_temp_prefs", Context.MODE_PRIVATE)?.let { sharedPrefs ->
-                val nickname = sharedPrefs.getString("sphinx_temp_inviter_nickname", null)
-                val pubkey = sharedPrefs.getString("sphinx_temp_inviter_pubkey", null)
-                val routeHint = sharedPrefs.getString("sphinx_temp_inviter_route_hint", null)
+            val nickname = inviterData.nickname
+            val pubkey = inviterData.pubkey
+            val routeHint = inviterData.routeHint
+            val inviteString = inviterData.pin
 
-                if (nickname != null && pubkey != null) {
-                    viewModel.saveInviterAndFinish(nickname, pubkey, routeHint)
-                } else {
-                    viewModel.loadAndJoinDefaultTribeData()
-                }
+            if (nickname != null && pubkey != null) {
+                viewModel.saveInviterAndFinish(nickname, pubkey.value, routeHint, inviteString)
+            } else if (inviteString != null){
+                viewModel.finishInvite(inviteString)
+            } else {
+                viewModel.loadAndJoinDefaultTribeData()
             }
         }
     }
@@ -88,7 +96,7 @@ internal class OnBoardReadyFragment: SideEffectFragment<
     }
 
     override suspend fun onSideEffectCollect(sideEffect: OnBoardReadySideEffect) {
-        // TODO("Not yet implemented")
+        sideEffect.execute(binding.root.context)
     }
 
     override suspend fun onViewStateFlowCollect(viewState: OnBoardReadyViewState) {

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.motion.widget.MotionLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:elevation="@dimen/menu_bottom_default_elevation"
+    app:layoutDescription="@xml/motion_scene_menu_bottom">
+
+    <View
+        android:id="@+id/view_menu_bottom_input_lock"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/black" />
+
+    <include
+        android:id="@+id/include_layout_menu_bottom_options"
+        layout="@layout/layout_menu_bottom_options"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/default_layout_margin"
+        app:layout_constraintTop_toBottomOf="parent" />
+
+</androidx.constraintlayout.motion.widget.MotionLayout>

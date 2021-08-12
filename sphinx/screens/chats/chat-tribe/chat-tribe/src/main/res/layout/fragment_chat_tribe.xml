@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/deepNight"
+    android:background="@color/body"
     tools:context=".ui.ChatTribeFragment">
 
     <include
@@ -18,7 +18,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:background="@color/body"
-        app:layout_constraintBottom_toTopOf="@+id/include_chat_tribe_footer"
+        app:layout_constraintBottom_toTopOf="@+id/include_chat_tribe_message_reply"
         app:layout_constraintTop_toBottomOf="@+id/include_chat_tribe_header"
         tools:listitem="@layout/layout_message_holder" />
 
@@ -27,13 +27,62 @@
         android:layout_width="match_parent"
         android:layout_height="8dp"
         android:src="@drawable/bottom_bar_elevation_gradient"
-        app:layout_constraintBottom_toTopOf="@+id/include_chat_tribe_footer" />
+        app:layout_constraintBottom_toTopOf="@+id/include_chat_tribe_message_reply" />
+
+    <include
+        android:id="@+id/include_chat_tribe_message_reply"
+        layout="@layout/layout_message_reply"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/message_reply_holder_height"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@+id/include_podcast_player_footer" />
+
+    <include
+        android:id="@+id/include_podcast_player_footer"
+        layout="@layout/layout_podcast_player_footer"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/chat_footer_height"
+        app:layout_constraintBottom_toTopOf="@+id/include_chat_tribe_footer"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <include
         android:id="@+id/include_chat_tribe_footer"
         layout="@layout/layout_chat_footer"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toBottomOf="parent" />
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <include
+        android:id="@+id/include_chat_tribe_selected_message"
+        layout="@layout/layout_selected_message"
+        tools:visibility="gone" />
+
+    <include
+        android:id="@+id/include_chat_tribe_attachment_send_preview"
+        layout="@layout/layout_attachment_send_preview"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@+id/include_chat_tribe_footer"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:visibility="gone" />
+
+    <include
+        android:id="@+id/include_chat_tribe_menu"
+        layout="@layout/layout_chat_menu" />
+
+    <include
+        android:id="@+id/include_layout_menu_bottom_call"
+        layout="@layout/layout_menu_bottom"
+        tools:visibility="gone" />
+
+    <include
+        android:id="@id/include_layout_boost_fireworks"
+        layout="@layout/layout_boost_fireworks"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

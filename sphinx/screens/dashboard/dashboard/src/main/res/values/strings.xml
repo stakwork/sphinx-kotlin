@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="add_icon"></string>
+    <string name="join_tribe_link">Join Tribe Link</string>
     <string name="add_friend">Add Friend</string>
     <string name="create_tribe">Create Tribe</string>
     <string name="contacts">Contacts</string>
@@ -8,4 +9,66 @@
     <string name="support">Support</string>
     <string name="add_sats">ADD SATS</string>
     <string name="search">Search</string>
+
+    <string name="upgrade_app">UPGRADE APP</string>
+
+    <string name="not_valid_tribe_link">QR code is not a Join Tribe link</string>
+    <string name="invite_name">Invite: %s</string>
+    <string name="invite_qr_code_header_name">INVITE CODE</string>
+
+    <string name="alert_confirm_pay_invite_title">Pay Invite</string>
+    <string name="alert_confirm_pay_invite_message">Are you sure you want to pay %d sat for this invite?</string>
+    <string name="pay_invite_balance_too_low">"Can't pay invite. Balance is too low"</string>
+
+    <string name="alert_confirm_delete_invite_title">Delete Invite</string>
+    <string name="alert_confirm_delete_invite_message">Are you sure you want to delete this invite?</string>
+
+    <string name="paste_invoice_of_tribe_link">Paste Invoice or Join Tribe Link</string>
+    <string name="alert_confirm_pay_invoice_title">Pay Invoice</string>
+    <string name="alert_confirm_pay_invoice_message">Are you sure you want to pay scanned invoice?\n\nAmount: %d sat\n\nMemo: %s</string>
+
+    <string name="payment_request_missing_amount">Payment request is missing amount</string>
+    <string name="not_valid_invoice_or_tribe_link">QR code is not a lightning invoice or Join Tribe link</string>
+
+    <string name="attempting_payment_request">Attempting Payment Request</string>
+    <string name="failed_to_pay_request">Failed to pay request</string>
+    <string name="successfully_paid_invoice">Successfully paid invoice</string>
+
+    <string name="last_message_description_message_deleted">Message deleted</string>
+    <string name="last_message_description_you">You</string>
+    <string name="last_message_description_gif_shared">%sGIF shared</string>
+    <string name="last_message_description_boost">%sBoost %s</string>
+    <string name="last_message_description_call_invite">%sJoin Call</string>
+    <string name="last_message_description_invoice_sent">Invoice Sent: %s</string>
+    <string name="last_message_description_invoice_receive">Invoice Received: %s</string>
+    <string name="last_message_description_payment_sent">Payment Sent: %s</string>
+    <string name="last_message_description_payment_received">Payment Received: %s</string>
+
+    <string name="last_message_description_sent">sent</string>
+    <string name="last_message_description_an_audio_clip">an Audio Clip</string>
+    <string name="last_message_description_a_gif">a Gif</string>
+    <string name="last_message_description_an_image">an Image</string>
+    <string name="last_message_description_a_pdf">a PDF</string>
+    <string name="last_message_description_a_paid_message">a Paid Message</string>
+    <string name="last_message_description_an_attachment">an Attachment</string>
+    <string name="last_message_description_a_video">a Video</string>
+
+    <string name="last_message_description_has_join_tribe">%s has joined the tribe</string>
+    <string name="last_message_description_just_left_tribe">%s just left the tribe</string>
+    <string name="last_message_description_wants_to_join">%s wants to join the tribe</string>
+    <string name="last_message_description_declined_request_from">You have declined the request from %s</string>
+    <string name="last_message_description_approved_request_from">You have approved the request from %s</string>
+    <string name="last_message_description_admin_declined_request">The admin declined your request</string>
+    <string name="last_message_description_welcome_member">Welcome! You’re now a member</string>
+    <string name="last_message_description_group_kick">The admin has removed you from this group</string>
+    <string name="last_message_description_tribe_deleted">The admin deleted this tribe</string>
+
+    <string name="last_message_description_invite">Invite: %s</string>
+    <string name="last_message_description_looking_available_node">Looking for an available node for %s</string>
+    <string name="last_message_description_invite_ready">Ready! Tap to share. Expires in 24 hrs</string>
+    <string name="last_message_description_invite_signing_on">%s is signing on</string>
+    <string name="last_message_description_invite_tap_to_pay">Tap to pay and activate the invite</string>
+    <string name="last_message_description_invite_payment_sent">Payment sent. Waiting confirmation</string>
+    <string name="last_message_description_invite_signup_complete">Signup complete</string>
+    <string name="last_message_description_invite_expired">Expired</string>
 </resources>

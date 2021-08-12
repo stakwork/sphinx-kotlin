@@ -6,27 +6,221 @@ import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
 import androidx.annotation.MainThread
 import androidx.annotation.StringRes
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
 import androidx.core.view.updateLayoutParams
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.chat_common.R
-import chat.sphinx.resources.R as common_R
 import chat.sphinx.chat_common.databinding.LayoutMessageHolderBinding
-import chat.sphinx.resources.getString
-import chat.sphinx.resources.setBackgroundRandomColor
-import chat.sphinx.resources.setTextColorExt
+import chat.sphinx.chat_common.model.NodeDescriptor
+import chat.sphinx.chat_common.model.TribeLink
+import chat.sphinx.chat_common.model.UnspecifiedUrl
+import chat.sphinx.chat_common.util.SphinxLinkify
+import chat.sphinx.chat_common.util.SphinxUrlSpan
+import chat.sphinx.concept_image_loader.Disposable
+import chat.sphinx.concept_image_loader.ImageLoader
+import chat.sphinx.concept_image_loader.ImageLoaderOptions
+import chat.sphinx.concept_image_loader.Transformation
+import chat.sphinx.concept_meme_server.MemeServerTokenHandler
+import chat.sphinx.concept_network_client_crypto.CryptoHeader
+import chat.sphinx.concept_network_client_crypto.CryptoScheme
+import chat.sphinx.resources.*
 import chat.sphinx.wrapper_chat.ChatType
-import chat.sphinx.wrapper_common.lightning.asFormattedString
+import chat.sphinx.wrapper_common.lightning.*
+import chat.sphinx.wrapper_meme_server.headerKey
+import chat.sphinx.wrapper_meme_server.headerValue
 import chat.sphinx.wrapper_message.MessageType
+import chat.sphinx.wrapper_message_media.MessageMedia
 import chat.sphinx.wrapper_view.Px
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
+import io.matthewnelson.android_feature_screens.util.goneIfTrue
 import io.matthewnelson.android_feature_screens.util.visible
+import io.matthewnelson.concept_coroutines.CoroutineDispatchers
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import java.io.File
+import chat.sphinx.resources.R as common_R
+
+@MainThread
+@Suppress("NOTHING_TO_INLINE")
+internal fun LayoutMessageHolderBinding.setView(
+    lifecycleScope: CoroutineScope,
+    holderJobs: ArrayList<Job>,
+    disposables: ArrayList<Disposable>,
+    dispatchers: CoroutineDispatchers,
+    imageLoader: ImageLoader<ImageView>,
+    imageLoaderDefaults: ImageLoaderOptions,
+    memeServerTokenHandler: MemeServerTokenHandler,
+    recyclerViewWidth: Px,
+    viewState: MessageHolderViewState,
+    onSphinxInteractionListener: SphinxUrlSpan.OnInteractionListener? = null,
+) {
+    for (job in holderJobs) {
+        job.cancel()
+    }
+    holderJobs.clear()
+
+    for (disposable in disposables) {
+        disposable.dispose()
+    }
+    disposables.clear()
+
+    apply {
+        lifecycleScope.launch(dispatchers.mainImmediate) {
+            viewState.initialHolder.setInitialHolder(
+                includeMessageHolderChatImageInitialHolder.textViewInitials,
+                includeMessageHolderChatImageInitialHolder.imageViewChatPicture,
+                includeMessageStatusHeader,
+                imageLoader
+            )?.also {
+                disposables.add(it)
+            }
+        }.let { job ->
+            holderJobs.add(job)
+        }
+
+        setStatusHeader(viewState.statusHeader)
+        setDeletedMessageLayout(viewState.deletedMessage)
+        setBubbleBackground(viewState, recyclerViewWidth)
+        setGroupActionIndicatorLayout(viewState.groupActionIndicator)
+
+        if (viewState.background !is BubbleBackground.Gone) {
+            setBubbleImageAttachment(viewState.bubbleImageAttachment) { imageView, url, media ->
+                lifecycleScope.launch(dispatchers.mainImmediate) {
+
+                    val file: File? = media?.localFile
+
+                    val options: ImageLoaderOptions? = if (media != null) {
+                        val builder = ImageLoaderOptions.Builder()
+
+                        // TODO: Add error resource drawable
+//                        builder.errorResId()
+
+                        if (file == null) {
+                            media.host?.let { host ->
+                                memeServerTokenHandler.retrieveAuthenticationToken(host)
+                                    ?.let { token ->
+                                        builder.addHeader(token.headerKey, token.headerValue)
+
+                                        media.mediaKeyDecrypted?.value?.let { key ->
+                                            val header = CryptoHeader.Decrypt.Builder()
+                                                .setScheme(CryptoScheme.Decrypt.JNCryptor)
+                                                .setPassword(key)
+                                                .build()
+
+                                            builder.addHeader(header.key, header.value)
+                                        }
+                                    }
+                            }
+                        }
+
+                        builder.build()
+                    } else {
+                        null
+                    }
+
+                    val disposable: Disposable = if (file != null) {
+                        imageLoader.load(imageView, file, options)
+                    } else {
+                        imageLoader.load(imageView, url, options)
+                    }
+
+                    disposables.add(disposable)
+                    disposable.await()
+                }.let { job ->
+                    holderJobs.add(job)
+                    job.invokeOnCompletion {
+                        if (!job.isCancelled) {
+                            includeMessageHolderBubble.includeMessageTypeImageAttachment.apply {
+                                loadingImageProgressContainer.gone
+                            }
+                        }
+                    }
+                }
+            }
+            setUnsupportedMessageTypeLayout(viewState.unsupportedMessageType)
+            setBubbleMessageLayout(viewState.bubbleMessage, onSphinxInteractionListener)
+            setBubbleMessageLinkPreviewLayout(
+                dispatchers,
+                holderJobs,
+                imageLoader,
+                lifecycleScope,
+                viewState
+            )
+            setBubbleCallInvite(viewState.bubbleCallInvite)
+            setBubbleBotResponse(viewState.bubbleBotResponse)
+            setBubbleDirectPaymentLayout(viewState.bubbleDirectPayment)
+            setBubbleDirectPaymentLayout(viewState.bubbleDirectPayment)
+            setBubblePodcastBoost(viewState.bubblePodcastBoost)
+            setBubblePaidMessageDetailsLayout(
+                viewState.bubblePaidMessageDetails,
+                viewState.background
+            )
+            setBubblePaidMessageSentStatusLayout(viewState.bubblePaidMessageSentStatus)
+            setBubbleReactionBoosts(viewState.bubbleReactionBoosts) { imageView, url ->
+                lifecycleScope.launch(dispatchers.mainImmediate) {
+                    imageLoader.load(imageView, url.value, imageLoaderDefaults)
+                        .also { disposables.add(it) }
+                }.let { job ->
+                    holderJobs.add(job)
+                }
+            }
+            setBubbleReplyMessage(viewState.bubbleReplyMessage) { imageView, url, media ->
+                lifecycleScope.launch(dispatchers.mainImmediate) {
+
+                    val file: File? = media?.localFile
+
+                    val options: ImageLoaderOptions? = if (media != null) {
+                        val builder = ImageLoaderOptions.Builder()
+
+                        // TODO: Add error resource drawable
+//                        builder.errorResId()
+
+                        if (file == null) {
+                            media.host?.let { host ->
+                                memeServerTokenHandler.retrieveAuthenticationToken(host)
+                                    ?.let { token ->
+                                        builder.addHeader(token.headerKey, token.headerValue)
+
+                                        media.mediaKeyDecrypted?.value?.let { key ->
+                                            val header = CryptoHeader.Decrypt.Builder()
+                                                .setScheme(CryptoScheme.Decrypt.JNCryptor)
+                                                .setPassword(key)
+                                                .build()
+
+                                            builder.addHeader(header.key, header.value)
+                                        }
+                                    }
+                            }
+                        }
+
+                        builder.build()
+                    } else {
+                        null
+                    }
+
+                    val disposable: Disposable = if (file != null) {
+                        imageLoader.load(imageView, file, options)
+                    } else {
+                        imageLoader.load(imageView, url, options)
+                    }
+
+                    disposables.add(disposable)
+                    disposable.await()
+                }.let { job ->
+                    holderJobs.add(job)
+                }
+            }
+        }
+    }
+}
 
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun LayoutMessageHolderBinding.setUnsupportedMessageTypeLayout(
-    unsupportedMessage: LayoutState.Bubble.ContainerMiddle.UnsupportedMessageType?
+    unsupportedMessage: LayoutState.Bubble.ContainerThird.UnsupportedMessageType?
 ) {
     includeMessageHolderBubble.includeUnsupportedMessageTypePlaceholder.apply {
         if (unsupportedMessage == null) {
@@ -45,9 +239,6 @@ internal inline fun LayoutMessageHolderBinding.setUnsupportedMessageTypeLayout(
                 }
                 MessageType.Attachment -> {
                     getString(R.string.placeholder_display_name_message_type_attachment)
-                }
-                MessageType.BotRes -> {
-                    getString(R.string.placeholder_display_name_message_type_bot_response)
                 }
                 MessageType.Invoice -> {
                     getString(R.string.placeholder_display_name_message_type_invoice)
@@ -78,6 +269,7 @@ internal inline fun LayoutMessageHolderBinding.setUnsupportedMessageTypeLayout(
                 MessageType.QueryResponse,
                 MessageType.Repayment,
                 MessageType.Boost,
+                MessageType.BotRes,
                 MessageType.BotCmd,
                 MessageType.BotInstall,
                 is MessageType.Unknown -> {
@@ -99,19 +291,25 @@ internal inline fun LayoutMessageHolderBinding.setUnsupportedMessageTypeLayout(
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun LayoutMessageHolderBinding.setBubbleDirectPaymentLayout(
-    directPayment: LayoutState.Bubble.ContainerTop.DirectPayment?
+    directPayment: LayoutState.Bubble.ContainerSecond.DirectPayment?
 ) {
     includeMessageHolderBubble.includeMessageTypeDirectPayment.apply {
         if (directPayment == null) {
             root.gone
         } else {
             root.visible
+
             imageViewDirectPaymentSent.goneIfFalse(directPayment.showSent)
+            layoutConstraintDirectPaymentSentAmountLabels.goneIfFalse(directPayment.showSent)
+
             imageViewDirectPaymentReceived.goneIfFalse(directPayment.showReceived)
-            includeDirectPaymentAmountTextGroup.apply {
-                textViewSatsAmount.text = directPayment.amount.asFormattedString()
-                textViewSatsUnitLabel.text = directPayment.unitLabel
-            }
+            layoutConstraintDirectPaymentReceivedAmountLabels.goneIfFalse(directPayment.showReceived)
+
+            textViewSatsAmountReceived.text = directPayment.amount.asFormattedString()
+            textViewSatsUnitLabelReceived.text = directPayment.unitLabel
+
+            textViewSatsAmountSent.text = directPayment.amount.asFormattedString()
+            textViewSatsUnitLabelSent.text = directPayment.unitLabel
         }
     }
 }
@@ -123,7 +321,6 @@ internal fun LayoutMessageHolderBinding.setBubbleBackground(
     holderWidth: Px,
 ) {
     if (viewState.background is BubbleBackground.Gone) {
-
         includeMessageHolderBubble.root.gone
         receivedBubbleArrow.gone
         sentBubbleArrow.gone
@@ -184,14 +381,16 @@ internal fun LayoutMessageHolderBinding.setBubbleBackground(
         @Exhaustive
         when (viewState) {
             is MessageHolderViewState.Received -> {
+                val avatarImageSpace = root
+                    .context
+                    .resources
+                    .getDimensionPixelSize(R.dimen.message_holder_space_width_left)
+
                 spaceMessageHolderLeft.updateLayoutParams {
-                    width = root
-                        .context
-                        .resources
-                        .getDimensionPixelSize(R.dimen.message_holder_space_width_left)
+                    width = avatarImageSpace
                 }
                 spaceMessageHolderRight.updateLayoutParams {
-                    width = (holderWidth.value * BubbleBackground.SPACE_WIDTH_MULTIPLE).toInt()
+                    width = (holderWidth.value * BubbleBackground.SPACE_WIDTH_MULTIPLE).toInt() - (avatarImageSpace / 2)
                 }
             }
             is MessageHolderViewState.Sent -> {
@@ -250,8 +449,10 @@ internal inline fun LayoutMessageHolderBinding.setStatusHeader(
 
             if (statusHeader.showSent) {
                 textViewMessageStatusSentTimestamp.text = statusHeader.timestamp
-                textViewMessageStatusSentBoltIcon.goneIfFalse(statusHeader.showBoltIcon)
                 textViewMessageStatusSentLockIcon.goneIfFalse(statusHeader.showLockIcon)
+                progressBarMessageStatusSending.goneIfFalse(statusHeader.showSendingIcon)
+                textViewMessageStatusSentBoltIcon.goneIfFalse(statusHeader.showBoltIcon)
+                layoutConstraintMessageStatusSentFailedContainer.goneIfFalse(statusHeader.showFailedContainer)
             } else {
                 textViewMessageStatusReceivedTimestamp.text = statusHeader.timestamp
                 textViewMessageStatusReceivedLockIcon.goneIfFalse(statusHeader.showLockIcon)
@@ -287,7 +488,8 @@ internal inline fun LayoutMessageHolderBinding.setDeletedMessageLayout(
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun LayoutMessageHolderBinding.setBubbleMessageLayout(
-    message: LayoutState.Bubble.ContainerMiddle.Message?
+    message: LayoutState.Bubble.ContainerThird.Message?,
+    onSphinxInteractionListener: SphinxUrlSpan.OnInteractionListener?
 ) {
     includeMessageHolderBubble.textViewMessageText.apply {
         if (message == null) {
@@ -295,6 +497,269 @@ internal inline fun LayoutMessageHolderBinding.setBubbleMessageLayout(
         } else {
             visible
             text = message.text
+
+            if (onSphinxInteractionListener != null) {
+                SphinxLinkify.addLinks(this, SphinxLinkify.ALL, onSphinxInteractionListener)
+                setOnLongClickListener(onSphinxInteractionListener)
+            }
+        }
+    }
+}
+
+@MainThread
+internal fun LayoutMessageHolderBinding.setBubbleMessageLinkPreviewLayout(
+    dispatchers: CoroutineDispatchers,
+    holderJobs: ArrayList<Job>,
+    imageLoader: ImageLoader<ImageView>,
+    lifecycleScope: CoroutineScope,
+    viewState: MessageHolderViewState,
+) {
+    includeMessageHolderBubble.apply {
+        val previewLink = viewState.messageLinkPreview
+
+        val placeHolderAndTextColor = ContextCompat.getColor(
+            root.context,
+            if (viewState.isReceived) R.color.secondaryText else R.color.secondaryTextSent
+        )
+
+        @Exhaustive
+        when (previewLink) {
+            null -> {
+                includeMessageLinkPreviewContact.root.gone
+                includeMessageLinkPreviewTribe.root.gone
+                includeMessageLinkPreviewUrl.root.gone
+            }
+            is NodeDescriptor -> {
+                includeMessageLinkPreviewTribe.root.gone
+                includeMessageLinkPreviewUrl.root.gone
+
+                includeMessageLinkPreviewContact.apply {
+                    textViewMessageLinkPreviewContactPubkey.text = previewLink.nodeDescriptor.value
+                    textViewMessageLinkPreviewContactPubkey.setTextColor(placeHolderAndTextColor)
+
+                    imageViewMessageLinkPreviewQrInviteIcon.setColorFilter(placeHolderAndTextColor, android.graphics.PorterDuff.Mode.SRC_IN)
+
+                    imageViewMessageLinkPreviewContactAvatar.setColorFilter(placeHolderAndTextColor, android.graphics.PorterDuff.Mode.SRC_IN)
+                    imageViewMessageLinkPreviewContactAvatar.setImageDrawable(
+                        AppCompatResources.getDrawable(root.context, R.drawable.ic_add_contact)
+                    )
+
+                    viewLinkPreviewTribeDashedBorder.background = AppCompatResources.getDrawable(
+                        root.context,
+                        if (viewState.isReceived) R.drawable.background_received_rounded_corner_dashed_border_button else R.drawable.background_sent_rounded_corner_dashed_border_button
+                    )
+
+                    lifecycleScope.launch(dispatchers.mainImmediate) {
+                        val state =
+                            viewState.retrieveLinkPreview() as? LayoutState.Bubble.ContainerThird.LinkPreview.ContactPreview
+
+                        if (state != null) {
+                            textViewMessageLinkPreviewNewContactLabel.text = state.alias?.value ?: getString(R.string.new_contact)
+                            state.photoUrl?.let { nnPhotoUrl ->
+
+                                imageViewMessageLinkPreviewContactAvatar.clearColorFilter()
+
+                                launch {
+                                    imageLoader.load(
+                                        imageViewMessageLinkPreviewContactAvatar,
+                                        nnPhotoUrl.value,
+                                        ImageLoaderOptions.Builder()
+                                            .placeholderResId(R.drawable.ic_add_contact)
+                                            .transformation(Transformation.CircleCrop)
+                                            .build(),
+                                    )
+                                }.let { job ->
+                                    holderJobs.add(job)
+                                }
+                            }
+                            layoutConstraintLinkPreviewContactDashedBorder.goneIfFalse(state.showBanner)
+                            textViewMessageLinkPreviewAddContactBanner.goneIfFalse(state.showBanner)
+                        }
+                    }.let { job ->
+                        holderJobs.add(job)
+                    }
+
+                    root.visible
+                }
+            }
+            is TribeLink -> {
+                includeMessageLinkPreviewContact.root.gone
+                includeMessageLinkPreviewUrl.root.gone
+
+                includeMessageLinkPreviewTribe.apply {
+
+                    // reset view
+                    textViewMessageLinkPreviewTribeDescription.gone
+                    textViewMessageLinkPreviewTribeNameLabel.gone
+                    textViewMessageLinkPreviewTribeSeeBanner.gone
+
+                    imageViewMessageLinkPreviewTribe.setColorFilter(placeHolderAndTextColor, android.graphics.PorterDuff.Mode.SRC_IN)
+
+                    imageViewMessageLinkPreviewTribe.setImageDrawable(
+                        AppCompatResources.getDrawable(root.context, R.drawable.ic_tribe)
+                    )
+
+                    viewLinkPreviewTribeDashedBorder.background = AppCompatResources.getDrawable(
+                        root.context,
+                        if (viewState.isReceived) R.drawable.background_received_rounded_corner_dashed_border_button else R.drawable.background_sent_rounded_corner_dashed_border_button
+                    )
+
+                    lifecycleScope.launch(dispatchers.mainImmediate) {
+                        val state =
+                            viewState.retrieveLinkPreview() as? LayoutState.Bubble.ContainerThird.LinkPreview.TribeLinkPreview
+
+                        if (state != null) {
+                            textViewMessageLinkPreviewTribeDescription.apply desc@ {
+                                this@desc.text = state.description?.value
+                                this@desc.goneIfTrue(state.description == null)
+                            }
+                            textViewMessageLinkPreviewTribeDescription.setTextColor(placeHolderAndTextColor)
+
+                            textViewMessageLinkPreviewTribeNameLabel.apply name@ {
+                                this@name.text = state.name.value
+                                this@name.visible
+                            }
+
+                            state.imageUrl?.let { url ->
+                                imageViewMessageLinkPreviewTribe.clearColorFilter()
+
+                                launch {
+                                    imageLoader.load(
+                                        imageViewMessageLinkPreviewTribe,
+                                        url.value,
+                                        ImageLoaderOptions.Builder()
+                                            .placeholderResId(R.drawable.ic_tribe)
+                                            .transformation(Transformation.RoundedCorners(Px(5f),Px(5f),Px(5f),Px(5f)))
+                                            .build(),
+                                    )
+                                }.let { job ->
+                                    holderJobs.add(job)
+                                }
+                            }
+
+                            layoutConstraintLinkPreviewTribeDashedBorder.goneIfFalse(state.showBanner)
+                            textViewMessageLinkPreviewTribeSeeBanner.goneIfFalse(state.showBanner)
+                        }
+
+                    }.let { job ->
+                        holderJobs.add(job)
+                    }
+
+                    root.visible
+                }
+            }
+            is UnspecifiedUrl -> {
+                includeMessageLinkPreviewContact.root.gone
+                includeMessageLinkPreviewTribe.root.gone
+
+                includeMessageLinkPreviewUrl.apply {
+
+                    // reset view
+                    textViewMessageLinkPreviewUrlDomain.gone
+                    textViewMessageLinkPreviewUrlDescription.gone
+                    textViewMessageLinkPreviewUrlTitle.gone
+                    imageViewMessageLinkPreviewUrlFavicon.gone
+                    imageViewMessageLinkPreviewUrlMainImage.gone
+
+                    lifecycleScope.launch(dispatchers.mainImmediate) {
+                        progressBarLinkPreview.visible
+
+                        val state =
+                            viewState.retrieveLinkPreview() as? LayoutState.Bubble.ContainerThird.LinkPreview.HttpUrlPreview
+
+                        if (state != null) {
+                            textViewMessageLinkPreviewUrlDomain.apply domain@ {
+                                this@domain.text = state.domainHost.value
+                                this@domain.visible
+                            }
+                            textViewMessageLinkPreviewUrlDescription.apply desc@ {
+                                this@desc.text = state.description?.value
+                                this@desc.goneIfTrue(state.description == null)
+                            }
+                            textViewMessageLinkPreviewUrlTitle.apply title@ {
+                                this@title.text = state.title?.value
+                                this@title.goneIfTrue( state.title == null)
+                            }
+                            imageViewMessageLinkPreviewUrlFavicon.apply favIcon@ {
+                                state.favIconUrl?.let { url ->
+                                    launch {
+                                        imageLoader.load(
+                                            imageView = this@favIcon,
+                                            url = url.value,
+                                        )
+                                    }.let { job ->
+                                        holderJobs.add(job)
+                                    }
+                                    this@favIcon.visible
+                                }
+                            }
+                            imageViewMessageLinkPreviewUrlMainImage.apply main@ {
+                                state.imageUrl?.let { url ->
+                                    launch {
+                                        imageLoader.load(
+                                            imageView = this@main,
+                                            url = url.value,
+                                        )
+                                    }.let { job ->
+                                        holderJobs.add(job)
+                                    }
+                                    this@main.visible
+                                }
+                            }
+
+                            progressBarLinkPreview.gone
+                        }
+                    }.let { job ->
+                        holderJobs.add(job)
+                    }
+
+                    root.visible
+                }
+            }
+        }
+    }
+}
+
+@MainThread
+@Suppress("NOTHING_TO_INLINE")
+internal inline fun LayoutMessageHolderBinding.setBubbleCallInvite(
+    callInvite: LayoutState.Bubble.ContainerSecond.CallInvite?
+) {
+    includeMessageHolderBubble.includeMessageTypeCallInvite.apply {
+        if (callInvite == null) {
+            root.gone
+        } else {
+            root.visible
+            layoutConstraintCallInviteJoinByVideo.goneIfFalse(callInvite.videoButtonVisible)
+        }
+    }
+}
+
+@MainThread
+@Suppress("NOTHING_TO_INLINE")
+internal inline fun LayoutMessageHolderBinding.setBubbleBotResponse(
+    botResponse: LayoutState.Bubble.ContainerSecond.BotResponse?
+) {
+    includeMessageHolderBubble.includeMessageTypeBotResponse.apply {
+        if (botResponse == null) {
+            root.gone
+        } else {
+            root.visible
+
+            val textColorString = getColorHexCode(R.color.text)
+            val backgroundColorString = getColorHexCode(R.color.receivedMsgBG)
+
+            val htmlPrefix = "<head><meta name=\"viewport\" content=\"width=device-width, height=device-height, shrink-to-fit=YES\"></head><body style=\"font-family: 'Roboto', sans-serif; color: $textColorString; margin:0px !important; padding:0px!important; background: $backgroundColorString;\"><div id=\"bot-response-container\" style=\"background: $backgroundColorString;\">"
+            val htmlSuffix = "</div></body>"
+            val contentHtml = htmlPrefix + botResponse.html + htmlSuffix
+
+            webViewMessageTypeBotResponse.loadDataWithBaseURL(
+                null,
+                contentHtml,
+                "text/html",
+                "utf-8",
+                null
+            )
         }
     }
 }
@@ -302,7 +767,7 @@ internal inline fun LayoutMessageHolderBinding.setBubbleMessageLayout(
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun LayoutMessageHolderBinding.setBubblePaidMessageDetailsLayout(
-    paidDetails: LayoutState.Bubble.ContainerBottom.PaidMessageDetails?,
+    paidDetails: LayoutState.Bubble.ContainerFourth.PaidMessageDetails?,
     bubbleBackground: BubbleBackground
 ) {
     includeMessageHolderBubble.includePaidMessageReceivedDetailsHolder.apply {
@@ -380,7 +845,7 @@ internal inline fun LayoutMessageHolderBinding.setBubblePaidMessageDetailsLayout
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun LayoutMessageHolderBinding.setBubblePaidMessageSentStatusLayout(
-    paidSentStatus: LayoutState.Bubble.ContainerTop.PaidMessageSentStatus?
+    paidSentStatus: LayoutState.Bubble.ContainerSecond.PaidMessageSentStatus?
 ) {
     includeMessageHolderBubble.includePaidMessageSentStatusDetails.apply {
         if (paidSentStatus == null) {
@@ -411,17 +876,34 @@ internal inline fun LayoutMessageHolderBinding.setBubblePaidMessageSentStatusLay
 
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
-internal inline fun LayoutMessageHolderBinding.setBubbleGiphy(
-    giphy: LayoutState.Bubble.ContainerTop.Giphy?,
-    loadImage: (ImageView, String) -> Unit,
+internal inline fun LayoutMessageHolderBinding.setBubbleImageAttachment(
+    imageAttachment: LayoutState.Bubble.ContainerSecond.ImageAttachment?,
+    loadImage: (ImageView, String, MessageMedia?) -> Unit,
 ) {
     includeMessageHolderBubble.includeMessageTypeImageAttachment.apply {
-        if (giphy == null) {
+        if (imageAttachment == null) {
+            root.gone
+        } else {
+            root.visible
+            loadingImageProgressContainer.visible
+
+            loadImage(imageViewAttachmentImage, imageAttachment.url, imageAttachment.media)
+        }
+    }
+}
+
+@MainThread
+@Suppress("NOTHING_TO_INLINE")
+internal inline fun LayoutMessageHolderBinding.setBubblePodcastBoost(
+    podcastBoost: LayoutState.Bubble.ContainerSecond.PodcastBoost?
+) {
+    includeMessageHolderBubble.includeMessageTypePodcastBoost.apply {
+        if (podcastBoost == null) {
             root.gone
         } else {
             root.visible
 
-            loadImage(imageViewAttachmentImage, giphy.url)
+            textViewPodcastBoostAmount.text = podcastBoost.amount.asFormattedString()
         }
     }
 }
@@ -429,7 +911,7 @@ internal inline fun LayoutMessageHolderBinding.setBubbleGiphy(
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun LayoutMessageHolderBinding.setBubbleReactionBoosts(
-    boost: LayoutState.Bubble.ContainerBottom.Boost?,
+    boost: LayoutState.Bubble.ContainerFourth.Boost?,
     loadImage: (ImageView, SenderPhotoUrl) -> Unit,
 ) {
     includeMessageHolderBubble.includeMessageTypeBoost.apply {
@@ -553,14 +1035,14 @@ internal inline fun LayoutMessageHolderBinding.setGroupActionIndicatorLayout(
             }
             MessageType.GroupAction.MemberApprove -> {
                 if (groupActionDetails.isAdminView) {
-                    setGroupActionJoinRequestAdminLayout(groupActionDetails)
+                    setGroupActionJoinApprovedAdminLayout(groupActionDetails)
                 } else {
                     setGroupActionAnnouncementLayout(groupActionDetails)
                 }
             }
             MessageType.GroupAction.MemberReject -> {
                 if (groupActionDetails.isAdminView) {
-                    setGroupActionJoinRequestAdminLayout(groupActionDetails)
+                    setGroupActionJoinRejectedAdminLayout(groupActionDetails)
                 } else {
                     setGroupActionMemberRemovalLayout(groupActionDetails)
                 }
@@ -592,22 +1074,31 @@ internal inline fun LayoutMessageHolderBinding.setGroupActionIndicatorLayout(
 private inline fun LayoutMessageHolderBinding.setGroupActionAnnouncementLayout(
     groupActionDetails: LayoutState.GroupActionIndicator
 ) {
+    includeMessageTypeGroupActionHolder.includeMessageTypeGroupActionJoinRequest.root.gone
+
     includeMessageTypeGroupActionHolder.includeMessageTypeGroupActionAnnouncement.apply {
         root.visible
 
         val actionLabelText = when (groupActionDetails.actionType) {
             MessageType.GroupAction.Join -> {
                 if (groupActionDetails.chatType == ChatType.Tribe) {
-                    root.context.getString(R.string.group_join_announcement_tribe, groupActionDetails.subjectName)
+                    root.context.getString(R.string.tribe_join_announcement, groupActionDetails.subjectName)
                 } else {
-                    root.context.getString(R.string.group_join_announcement_group, groupActionDetails.subjectName)
+                    root.context.getString(R.string.group_join_announcement, groupActionDetails.subjectName)
                 }
             }
             MessageType.GroupAction.Leave -> {
                 if (groupActionDetails.chatType == ChatType.Tribe) {
-                    root.context.getString(R.string.group_leave_announcement_tribe, groupActionDetails.subjectName)
+                    root.context.getString(R.string.tribe_leave_announcement, groupActionDetails.subjectName)
                 } else {
-                    root.context.getString(R.string.group_leave_announcement_group, groupActionDetails.subjectName)
+                    root.context.getString(R.string.group_leave_announcement, groupActionDetails.subjectName)
+                }
+            }
+            MessageType.GroupAction.MemberApprove -> {
+                if (groupActionDetails.chatType == ChatType.Tribe) {
+                    root.context.getString(R.string.tribe_welcome_announcement_member_side)
+                } else {
+                    null
                 }
             }
             else -> {
@@ -616,7 +1107,7 @@ private inline fun LayoutMessageHolderBinding.setGroupActionAnnouncementLayout(
         }
 
         actionLabelText?.let {
-            textViewGroupActionLabel.text = it
+            textViewGroupActionAnnouncementLabel.text = it
         } ?: root.gone
     }
 }
@@ -629,10 +1120,60 @@ private inline fun LayoutMessageHolderBinding.setGroupActionAnnouncementLayout(
 private inline fun LayoutMessageHolderBinding.setGroupActionJoinRequestAdminLayout(
     groupActionDetails: LayoutState.GroupActionIndicator
 ) {
-    includeMessageTypeGroupActionHolder.includeMessageTypeGroupActionJoinRequestAdminView.apply {
+    includeMessageTypeGroupActionHolder.includeMessageTypeGroupActionAnnouncement.root.gone
+
+    includeMessageTypeGroupActionHolder.includeMessageTypeGroupActionJoinRequest.apply {
         root.visible
 
-        // TODO: Set text and wire up action button click handlers.
+        textViewGroupActionJoinRequestMessage.text = root.context.getString(R.string.tribe_request_admin_side, groupActionDetails.subjectName)
+
+        textViewGroupActionJoinRequestAcceptAction.isEnabled = true
+        textViewGroupActionJoinRequestAcceptAction.alpha = 1.0f
+
+        textViewGroupActionJoinRequestRejectAction.isEnabled = true
+        textViewGroupActionJoinRequestRejectAction.alpha = 1.0f
+    }
+}
+
+/**
+ * Presents a view for an admin to handle see rejected group membership requests
+ */
+@MainThread
+@Suppress("NOTHING_TO_INLINE")
+private inline fun LayoutMessageHolderBinding.setGroupActionJoinRejectedAdminLayout(
+    groupActionDetails: LayoutState.GroupActionIndicator
+) {
+    includeMessageTypeGroupActionHolder.includeMessageTypeGroupActionJoinRequest.apply {
+        root.visible
+
+        textViewGroupActionJoinRequestMessage.text = root.context.getString(R.string.tribe_request_rejected_admin_side, groupActionDetails.subjectName)
+
+        textViewGroupActionJoinRequestAcceptAction.isEnabled = false
+        textViewGroupActionJoinRequestAcceptAction.alpha = 0.2f
+
+        textViewGroupActionJoinRequestRejectAction.isEnabled = false
+        textViewGroupActionJoinRequestRejectAction.alpha = 1.0f
+    }
+}
+
+/**
+ * Presents a view for an admin to handle see group approved membership
+ */
+@MainThread
+@Suppress("NOTHING_TO_INLINE")
+private inline fun LayoutMessageHolderBinding.setGroupActionJoinApprovedAdminLayout(
+    groupActionDetails: LayoutState.GroupActionIndicator
+) {
+    includeMessageTypeGroupActionHolder.includeMessageTypeGroupActionJoinRequest.apply {
+        root.visible
+
+        textViewGroupActionJoinRequestMessage.text = root.context.getString(R.string.tribe_request_approved_admin_side, groupActionDetails.subjectName)
+
+        textViewGroupActionJoinRequestRejectAction.isEnabled = false
+        textViewGroupActionJoinRequestRejectAction.alpha = 0.2f
+
+        textViewGroupActionJoinRequestAcceptAction.isEnabled = false
+        textViewGroupActionJoinRequestAcceptAction.alpha = 1.0f
     }
 }
 
@@ -648,14 +1189,25 @@ private inline fun LayoutMessageHolderBinding.setGroupActionMemberRemovalLayout(
     includeMessageTypeGroupActionHolder.includeMessageTypeGroupActionMemberRemoval.apply {
         root.visible
 
-        // TODO: Set text and wire up action button click handler.
+        textViewGroupActionMemberRemovalMessage.text = root.context.getString(
+            when (groupActionDetails.actionType) {
+                is MessageType.GroupAction.Kick -> {
+                    R.string.tribe_kick_announcement_member_side
+                }
+                is MessageType.GroupAction.MemberReject -> {
+                    R.string.tribe_request_rejected_member_side
+                }
+                else -> R.string.tribe_deleted_announcement
+            }
+        )
     }
 }
 
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun LayoutMessageHolderBinding.setBubbleReplyMessage(
-    replyMessage: LayoutState.Bubble.ContainerTop.ReplyMessage?
+    replyMessage: LayoutState.Bubble.ContainerFirst.ReplyMessage?,
+    loadImage: (ImageView, String, MessageMedia?) -> Unit
 ) {
     includeMessageHolderBubble.includeMessageReply.apply {
         if (replyMessage == null) {
@@ -664,29 +1216,43 @@ internal inline fun LayoutMessageHolderBinding.setBubbleReplyMessage(
             root.visible
 
             imageViewReplyMediaImage.apply {
-//                @Exhaustive
-//                when (replyMessage.media) {
-//                    is MediaUrl -> {
-//                        visible
-//                    }
-//                    is MediaFile -> {
-//                        visible
-//                    }
-//                    null -> {
-//                        gone
-//                    }
-//                }
-                // TODO: handle attachment types and make visible
-                gone
+                if (replyMessage.url != null) {
+                    visible
+
+                    loadImage(this, replyMessage.url, replyMessage.media)
+                } else {
+                    gone
+                }
             }
             imageViewReplyTextOverlay.gone
 
             // Only used in the footer when replying to a message
             textViewReplyClose.gone
 
-            textViewReplyMessageLabel.text = replyMessage.text
+            viewReplyBarLeading.setBackgroundColor(root.context.getColor(R.color.lightPurple))
+
+            layoutConstraintMessageReplyDividerBottom.setBackgroundColor(root.context.getColor(
+                if (replyMessage.showReceived) {
+                    R.color.replyDividerReceived
+                } else {
+                    R.color.replyDividerSent
+                }
+            ))
+
+            textViewReplyMessageLabel.setTextColor(root.context.getColor(
+                if (replyMessage.showReceived) {
+                    R.color.washedOutReceivedText
+                } else {
+                    R.color.washedOutSentText
+                }
+            ))
+
             textViewReplySenderLabel.text = replyMessage.sender
+
             viewReplyBarLeading.setBackgroundRandomColor(null, replyMessage.senderColor)
+
+            textViewReplyMessageLabel.text = replyMessage.text
+            textViewReplyMessageLabel.goneIfFalse(replyMessage.text.isNotEmpty())
         }
     }
 }

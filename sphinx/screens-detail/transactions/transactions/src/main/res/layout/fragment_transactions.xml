@@ -14,10 +14,42 @@
         android:layout_height="@dimen/default_header_height"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <TextView
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_view_transactions"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/include_transactions_header"
+        tools:listitem="@layout/layout_transaction_holder" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/text_view_no_transactions"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/roboto_regular"
         android:gravity="center"
-        android:text="TRANSACTIONS" />
+        android:text="No transactions found"
+        android:textColor="@color/secondaryText"
+        android:textSize="@dimen/transactions_list_no_transactions_text_size"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ProgressBar
+        android:id="@+id/progress_bar_transactions_list"
+        style="?android:attr/progressBarStyle"
+        android:layout_width="@dimen/transactions_list_progress_bar_xy"
+        android:layout_height="@dimen/transactions_list_progress_bar_xy"
+        android:gravity="center"
+        android:visibility="gone"
+        android:indeterminateTint="@android:color/white"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:visibility="visible" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

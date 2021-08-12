@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <dimen name="default_tiny_layout_margin">2dp</dimen>
+    <dimen name="default_small_layout_margin">4dp</dimen>
     <dimen name="default_half_layout_margin">8dp</dimen>
     <dimen name="default_layout_margin">16dp</dimen>
     <dimen name="default_double_layout_margin">32dp</dimen>
@@ -9,6 +11,7 @@
     <dimen name="default_header_navigation_padding">16dp</dimen>
     <dimen name="default_header_navigation_margin_start">8dp</dimen>
     <dimen name="default_chat_initial_image_xy">46dp</dimen>
+    <dimen name="default_invite_qr_image_xy">40dp</dimen>
     <dimen name="default_message_action_image_xy">28dp</dimen>
     <dimen name="default_header_margin_horizontal">24dp</dimen>
     <dimen name="default_header_headline_margin_horizontal">12dp</dimen>
@@ -17,8 +20,9 @@
     <dimen name="default_elevation">8dp</dimen>
 
     <dimen name="default_text_size_back_arrow">21sp</dimen>
-    <dimen name="default_text_size_tap_target_material_icon">20sp</dimen>
+    <dimen name="default_text_size_tap_target_material_icon">17sp</dimen>
     <dimen name="default_header_text_size">14sp</dimen>
+    <dimen name="default_text_size_large_title_3">22sp</dimen>
     <dimen name="default_text_size_headline">17sp</dimen>
     <dimen name="default_text_size_body">12sp</dimen>
     <dimen name="default_text_size_action_button_label">12sp</dimen>
@@ -58,6 +62,12 @@
     <dimen name="default_progress_bar_xy">25dp</dimen>
     <dimen name="default_progress_bar_margin_left">10dp</dimen>
 
+    <dimen name="amount_pad_text_size">25sp</dimen>
+    <dimen name="pin_pad_text_size">27sp</dimen>
+    <dimen name="pin_pad_backspace_text_size">24sp</dimen>
     <dimen name="pin_help_text_view_size">15sp</dimen>
     <dimen name="pin_text_view_size">17sp</dimen>
+
+    <!-- Menu option input lock -->
+    <item name="options_menu_input_lock_alpha" type="dimen" format="float">.5</item>
 </resources>

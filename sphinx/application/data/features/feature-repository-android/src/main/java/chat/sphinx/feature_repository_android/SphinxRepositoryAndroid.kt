@@ -4,8 +4,11 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingSource
 import chat.sphinx.concept_coredb.CoreDB
 import chat.sphinx.concept_crypto_rsa.RSA
+import chat.sphinx.concept_meme_server.MemeServerTokenHandler
+import chat.sphinx.concept_network_query_meme_server.NetworkQueryMemeServer
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
 import chat.sphinx.concept_network_query_contact.NetworkQueryContact
+import chat.sphinx.concept_network_query_invite.NetworkQueryInvite
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_message.NetworkQueryMessage
 import chat.sphinx.concept_paging.PageSourceWrapper
@@ -19,35 +22,48 @@ import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.dashboard.InviteId
+import chat.sphinx.wrapper_contact.Contact
 import com.squareup.moshi.Moshi
 import com.squareup.sqldelight.android.paging3.QueryPagingSource
 import io.matthewnelson.concept_authentication.data.AuthenticationStorage
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.feature_authentication_core.AuthenticationCoreManager
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.StateFlow
 
 class SphinxRepositoryAndroid(
+    accountOwner: StateFlow<Contact?>,
+    applicationScope: CoroutineScope,
     authenticationCoreManager: AuthenticationCoreManager,
     authenticationStorage: AuthenticationStorage,
     coreDB: CoreDB,
     dispatchers: CoroutineDispatchers,
     moshi: Moshi,
+    memeServerTokenHandler: MemeServerTokenHandler,
+    networkQueryMemeServer: NetworkQueryMemeServer,
     networkQueryChat: NetworkQueryChat,
     networkQueryContact: NetworkQueryContact,
     networkQueryLightning: NetworkQueryLightning,
     networkQueryMessage: NetworkQueryMessage,
+    networkQueryInvite: NetworkQueryInvite,
     rsa: RSA,
     socketIOManager: SocketIOManager,
     LOG: SphinxLogger,
 ): SphinxRepository(
+    accountOwner,
+    applicationScope,
     authenticationCoreManager,
     authenticationStorage,
     coreDB,
     dispatchers,
     moshi,
+    memeServerTokenHandler,
+    networkQueryMemeServer,
     networkQueryChat,
     networkQueryContact,
     networkQueryLightning,
     networkQueryMessage,
+    networkQueryInvite,
     rsa,
     socketIOManager,
     LOG,

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/camera_header_height"
+    android:background="@drawable/background_detail_screen">
+
+    <!-- TODO: Import drawable resource files -->
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/text_view_camera_header_flash_icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/default_double_layout_margin"
+        android:fontFamily="@font/material_icons_regular"
+        android:textColor="@color/text"
+        android:textSize="25dp"
+        android:text="flash_on"
+        android:src="@drawable/sphinx_white_notification"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

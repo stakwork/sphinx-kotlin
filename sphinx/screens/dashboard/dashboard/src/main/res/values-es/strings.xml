@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="add_icon"></string>
+    <string name="join_tribe_link">Código QR de la tribu</string>
+    <string name="add_friend">Agregar Amigo</string>
+    <string name="create_tribe">Crear Tribu</string>
+    <string name="contacts">Contactos</string>
+    <string name="profile">Perfil</string>
+    <string name="support">Soporte</string>
+    <string name="add_sats">AGREGAR SATS</string>
+    <string name="search">Buscar</string>
+
+    <string name="upgrade_app">ACTUALIZAR</string>
+
+    <string name="not_valid_tribe_link">El código QR no es un código de tribu válido</string>
+    <string name="invite_name">Invitación: %s</string>
+    <string name="invite_qr_code_header_name">CÓDIGO DE INVITACIÓN</string>
+
+    <string name="alert_confirm_pay_invite_title">Pagar Invitación</string>
+    <string name="alert_confirm_pay_invite_message">¿Estás seguro que deseas pagar esta invitación?</string>
+    <string name="pay_invite_balance_too_low">"No se puede pagar por la invitación. El balance demasiado bajo"</string>
+
+    <string name="alert_confirm_delete_invite_title">Borrar Invitación</string>
+    <string name="alert_confirm_delete_invite_message">¿Estás seguro que deseas eliminar esta invitación?</string>
+
+    <string name="paste_invoice_of_tribe_link">Pega la solicitud de pago o el enlace de la tribu</string>
+    <string name="alert_confirm_pay_invoice_title">Pagar solicitud</string>
+    <string name="alert_confirm_pay_invoice_message">¿Estás seguro que deseas pagar esta solicitud?\n\nMonto: %d sat\n\nMemo: %s</string>
+
+    <string name="payment_request_missing_amount">Payment request is missing amount</string>
+    <string name="not_valid_invoice_or_tribe_link">Código QR no soportado</string>
+
+    <string name="attempting_payment_request">Procesando el pago de la solicitud</string>
+    <string name="failed_to_pay_request">No se pudo pagar la solicitud</string>
+    <string name="successfully_paid_invoice">Solicitud pagada con éxito</string>
+
+    <string name="last_message_description_message_deleted">Mensaje eliminado</string>
+    <string name="last_message_description_you">Tú</string>
+    <string name="last_message_description_gif_shared">%sGIF compartido</string>
+    <string name="last_message_description_boost">%sBoost %s</string>
+    <string name="last_message_description_call_invite">%sUnirse a la Llamada</string>
+    <string name="last_message_description_invoice_sent">Solicitud enviada: %s</string>
+    <string name="last_message_description_invoice_receive">Solicitud recibida: %s</string>
+    <string name="last_message_description_payment_sent">Pago enviado: %s</string>
+    <string name="last_message_description_payment_received">Pago recibido: %s</string>
+
+    <string name="last_message_description_sent">has enviado</string>
+    <string name="last_message_description_an_audio_clip">un Clip de Audio</string>
+    <string name="last_message_description_a_gif">un Gif</string>
+    <string name="last_message_description_an_image">una Imagen</string>
+    <string name="last_message_description_a_pdf">un PDF</string>
+    <string name="last_message_description_a_paid_message">un Mensaje Pago</string>
+    <string name="last_message_description_an_attachment">un Adjunto</string>
+    <string name="last_message_description_a_video">un Video</string>
+
+    <string name="last_message_description_has_join_tribe">%s se ha unido a la tribu</string>
+    <string name="last_message_description_just_left_tribe">%s ha abandonado la tribu</string>
+    <string name="last_message_description_wants_to_join">%s desea unirse a la tribu</string>
+    <string name="last_message_description_declined_request_from">Has denegado la solicitud de %s</string>
+    <string name="last_message_description_approved_request_from">Has aprobado la solicitud de %s</string>
+    <string name="last_message_description_admin_declined_request">El administrador ha denegado tu solicitud</string>
+    <string name="last_message_description_welcome_member">¡Bienvenido! Ya eres miembro de la tribu</string>
+    <string name="last_message_description_group_kick">El administrador te ha eliminado de esta tribu</string>
+    <string name="last_message_description_tribe_deleted">El administrador ha eliminado esta tribu</string>
+
+    <string name="last_message_description_invite">Invitación: %s</string>
+    <string name="last_message_description_looking_available_node">Buscando nodo disponible para %s</string>
+    <string name="last_message_description_invite_ready">¡Listo! Toca para compartir. Caduca en 24 horas</string>
+    <string name="last_message_description_invite_signing_on">%s se está registrando</string>
+    <string name="last_message_description_invite_tap_to_pay">Toca para pagar y actvar la invitación</string>
+    <string name="last_message_description_invite_payment_sent">Pago enviado, esperando confirmación</string>
+    <string name="last_message_description_invite_signup_complete">Registro completo</string>
+    <string name="last_message_description_invite_expired">Invitación caducada</string>
+</resources>

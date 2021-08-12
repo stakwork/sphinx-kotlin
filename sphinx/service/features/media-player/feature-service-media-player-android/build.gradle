@@ -1,0 +1,48 @@
+plugins {
+    id 'app.cash.exhaustive'
+    id 'com.android.library'
+    id 'dagger.hilt.android.plugin'
+    id 'kotlin-android'
+    id 'kotlin-kapt'
+}
+
+android {
+    compileSdkVersion versions.compileSdk
+    buildToolsVersion versions.buildTools
+
+    defaultConfig {
+        minSdkVersion versions.minSdk
+        targetSdkVersion versions.compileSdk
+        versionCode VERSION_CODE.toInteger()
+        versionName VERSION_NAME
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunnerArguments disableAnalytics: 'true'
+        consumerProguardFiles "consumer-rules.pro"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: "libs", include: ["*.jar"])
+    // KotlinAndroid
+    api project(path: ':kotlin:concepts:concept-foreground-state')
+
+    // Sphinx
+    api project(path: ':sphinx:application:common:logger')
+    api project(path: ':sphinx:application:common:resources')
+    api project(path: ':sphinx:application:common:wrappers:wrapper-podcast')
+    api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-media')
+    api project(path: ':sphinx:service:concepts:concept-service-media-player')
+    api project(path: ':sphinx:service:features:feature-sphinx-service')
+
+    implementation deps.google.hilt
+    kapt kaptDeps.google.hilt
+
+    implementation deps.androidx.media
+}

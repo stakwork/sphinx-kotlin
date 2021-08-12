@@ -8,12 +8,15 @@ import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_image_loader.*
 import chat.sphinx.concept_network_client.NetworkClientClearedListener
 import chat.sphinx.concept_network_client_cache.NetworkClientCache
+import chat.sphinx.logger.SphinxLogger
+import chat.sphinx.logger.e
 import coil.annotation.ExperimentalCoilApi
 import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
 import coil.decode.SvgDecoder
 import coil.fetch.VideoFrameFileFetcher
 import coil.fetch.VideoFrameUriFetcher
+import coil.request.ImageRequest
 import coil.transform.BlurTransformation
 import coil.transform.CircleCropTransformation
 import coil.transform.GrayscaleTransformation
@@ -23,15 +26,21 @@ import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import okhttp3.OkHttpClient
+import java.io.File
 
 class ImageLoaderAndroid(
     context: Context,
     private val dispatchers: CoroutineDispatchers,
-    private val networkClientCache: NetworkClientCache
+    private val networkClientCache: NetworkClientCache,
+    private val LOG: SphinxLogger,
 ) : ImageLoader<ImageView>(),
     NetworkClientClearedListener,
     CoroutineDispatchers by dispatchers
 {
+
+    companion object {
+        const val TAG = "ImageLoaderAndroid"
+    }
 
     private val appContext: Context = context.applicationContext
 
@@ -63,79 +72,29 @@ class ImageLoaderAndroid(
         return loadImpl(imageView, drawableResId, options)
     }
 
-    @OptIn(ExperimentalCoilApi::class)
+    override suspend fun load(
+        imageView: ImageView,
+        file: File,
+        options: ImageLoaderOptions?
+    ): Disposable {
+        return loadImpl(imageView, file, options)
+    }
+
+//    override suspend fun loadImmediate(
+//        imageView: ImageView,
+//        file: File,
+//        options: ImageLoaderOptions?
+//    ) {
+//        loadImmediateImpl(imageView, file, options)
+//    }
+
     private suspend fun loadImpl(
         imageView: ImageView,
         any: Any,
         options: ImageLoaderOptions?
     ): Disposable {
         loaderLock.withLock {
-            val request = coil.request.ImageRequest.Builder(appContext)
-                .data(any)
-                .dispatcher(io)
-                .target(imageView)
-
-            options?.let {
-                it.errorResId?.let { errorRes ->
-                    request.error(errorRes)
-                }
-                it.placeholderResId?.let { placeholderRes ->
-                    request.placeholder(placeholderRes)
-                }
-                it.transformation?.let { transform ->
-                    @Exhaustive
-                    when (transform) {
-                        is Transformation.Blur -> {
-                            request.transformations(
-                                BlurTransformation(
-                                    appContext,
-                                    transform.radius,
-                                    transform.sampling
-                                )
-                            )
-                        }
-                        is Transformation.CircleCrop -> {
-                            request.transformations(
-                                CircleCropTransformation()
-                            )
-                        }
-                        is Transformation.GrayScale -> {
-                            request.transformations(
-                                GrayscaleTransformation()
-                            )
-                        }
-                        is Transformation.RoundedCorners -> {
-                            request.transformations(
-                                RoundedCornersTransformation(
-                                    transform.topLeft.value,
-                                    transform.topRight.value,
-                                    transform.bottomLeft.value,
-                                    transform.bottomRight.value
-                                )
-                            )
-                        }
-                    }
-                }
-
-                it.transition.let { transition ->
-                    @Exhaustive
-                    when (transition) {
-                        is Transition.CrossFade -> {
-                            request.transition(
-                                CrossfadeTransition(
-                                    transition.durationMillis,
-                                    transition.preferExactIntrinsicSize
-                                )
-                            )
-                        }
-                        is Transition.None -> {
-                            request.transition(
-                                coil.transition.Transition.NONE
-                            )
-                        }
-                    }
-                }
-            }
+            val request = buildRequest(imageView, any, options)
 
             // Future-proofing:
             // Always retrieve the client, as Tor may be enabled but
@@ -146,6 +105,104 @@ class ImageLoaderAndroid(
 
             return DisposableAndroid(loader.enqueue(request.build()))
         }
+    }
+
+    private suspend fun loadImmediateImpl(
+        imageView: ImageView,
+        any: Any,
+        options: ImageLoaderOptions?
+    ) {
+        loaderLock.withLock {
+            val client = networkClientCache.getCachingClient()
+            retrieveLoader(client)
+        }.let { loader ->
+            val builder = buildRequest(imageView, any, options)
+            loader.execute(builder.build())
+        }
+    }
+
+    @OptIn(ExperimentalCoilApi::class)
+    private fun buildRequest(
+        imageView: ImageView,
+        any: Any,
+        options: ImageLoaderOptions?
+    ): ImageRequest.Builder {
+        val request = coil.request.ImageRequest.Builder(appContext)
+            .data(any)
+            .dispatcher(io)
+            .target(imageView)
+
+        options?.let {
+            it.errorResId?.let { errorRes ->
+                request.error(errorRes)
+            }
+            it.placeholderResId?.let { placeholderRes ->
+                request.placeholder(placeholderRes)
+            }
+            it.transformation?.let { transform ->
+                @Exhaustive
+                when (transform) {
+                    is Transformation.Blur -> {
+                        request.transformations(
+                            BlurTransformation(
+                                appContext,
+                                transform.radius,
+                                transform.sampling
+                            )
+                        )
+                    }
+                    is Transformation.CircleCrop -> {
+                        request.transformations(
+                            CircleCropTransformation()
+                        )
+                    }
+                    is Transformation.GrayScale -> {
+                        request.transformations(
+                            GrayscaleTransformation()
+                        )
+                    }
+                    is Transformation.RoundedCorners -> {
+                        request.transformations(
+                            RoundedCornersTransformation(
+                                transform.topLeft.value,
+                                transform.topRight.value,
+                                transform.bottomLeft.value,
+                                transform.bottomRight.value
+                            )
+                        )
+                    }
+                }
+            }
+
+            it.transition.let { transition ->
+                @Exhaustive
+                when (transition) {
+                    is Transition.CrossFade -> {
+                        request.transition(
+                            CrossfadeTransition(
+                                transition.durationMillis,
+                                transition.preferExactIntrinsicSize
+                            )
+                        )
+                    }
+                    is Transition.None -> {
+                        request.transition(
+                            coil.transition.Transition.NONE
+                        )
+                    }
+                }
+            }
+
+            for (entry in it.additionalHeaders.entries) {
+                try {
+                    request.addHeader(entry.key, entry.value)
+                } catch (e: Exception) {
+                    LOG.e(TAG, "Failed to add header to request", e)
+                }
+            }
+        }
+
+        return request
     }
 
     private fun retrieveLoader(okHttpClient: OkHttpClient): coil.ImageLoader =

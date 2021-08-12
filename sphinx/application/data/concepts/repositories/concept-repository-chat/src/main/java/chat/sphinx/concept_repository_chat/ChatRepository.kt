@@ -1,13 +1,18 @@
 package chat.sphinx.concept_repository_chat
 
+import chat.sphinx.concept_network_query_chat.model.ChatDto
+import chat.sphinx.concept_network_query_chat.model.PodcastDto
 import chat.sphinx.concept_network_query_chat.model.TribeDto
+import chat.sphinx.concept_repository_chat.model.CreateTribe
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.wrapper_chat.Chat
+import chat.sphinx.wrapper_chat.ChatAlias
 import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
+import chat.sphinx.wrapper_meme_server.PublicAttachmentInfo
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -33,6 +38,7 @@ interface ChatRepository {
     
     val networkRefreshChats: Flow<LoadResponse<Boolean, ResponseError>>
 
+    suspend fun getAllChatsByIds(chatIds: List<ChatId>): List<Chat>
     /**
      * Returns `true` if the user has muted the chat and there is a need
      * to notify them that they won't receive messages anymore.
@@ -48,5 +54,14 @@ interface ChatRepository {
         tribeDto: TribeDto,
     ): Flow<LoadResponse<Any, ResponseError>>
 
-    suspend fun updateTribeInfo(chat: Chat)
+    suspend fun updateTribeInfo(chat: Chat): PodcastDto?
+    suspend fun createTribe(createTribe: CreateTribe): Response<Any, ResponseError>
+    suspend fun updateTribe(chatId: ChatId, createTribe: CreateTribe): Response<Any, ResponseError>
+    suspend fun exitAndDeleteTribe(chat: Chat): Response<Boolean, ResponseError>
+
+    suspend fun updateChatProfileInfo(
+        chatId: ChatId,
+        alias: ChatAlias? = null,
+        profilePic: PublicAttachmentInfo? = null,
+    ): Response<ChatDto, ResponseError>
 }

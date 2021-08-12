@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <androidx.appcompat.widget.AppCompatEditText
+        android:id="@+id/text_view_support_ticket_message"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/background_support_message_text"
+        android:gravity="top"
+        android:maxLines="6"
+        android:lines="4"
+        android:paddingHorizontal="@dimen/default_layout_margin"
+        android:paddingVertical="@dimen/default_half_layout_margin"
+        android:layout_margin="@dimen/default_layout_margin"
+        android:textColor="@color/text"
+        android:textCursorDrawable="@drawable/cursor"
+        android:fontFamily="@font/roboto_regular"
+        android:textSize="@dimen/support_message_edit_text_text_size"
+        android:textColorHint="@color/placeholderText"
+        android:inputType="textMultiLine|textCapSentences"
+        app:layout_constraintTop_toTopOf="parent"
+        android:hint="@string/describe_your_problem_here"
+        tools:text="I have been having issues with this and that and thought I should let the devs know"/>
+
+    <include
+        android:id="@+id/include_support_ticket_log_text"
+        layout="@layout/layout_support_ticket_logs_text"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginHorizontal="@dimen/default_layout_margin"
+        android:layout_marginTop="@dimen/default_layout_margin"
+        android:layout_marginBottom="@dimen/default_double_layout_margin"
+        app:layout_constraintTop_toBottomOf="@+id/text_view_support_ticket_message"
+        app:layout_constraintBottom_toTopOf="@+id/layout_constraint_support_ticket_buttons"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"/>
+
+    <ProgressBar
+        android:id="@+id/progress_bar_support_ticket_logs"
+        android:layout_width="@dimen/support_progress_bar_xy"
+        android:layout_height="@dimen/support_progress_bar_xy"
+        style="?android:attr/progressBarStyle"
+        android:indeterminateTint="@android:color/white"
+        android:indeterminate="true"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="@+id/include_support_ticket_log_text"
+        app:layout_constraintBottom_toBottomOf="@+id/include_support_ticket_log_text"
+        app:layout_constraintEnd_toEndOf="@+id/include_support_ticket_log_text"
+        app:layout_constraintStart_toStartOf="@+id/include_support_ticket_log_text"
+        tools:visibility="visible"/>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_support_ticket_buttons"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/support_layout_constraint_buttons_height"
+        android:layout_marginHorizontal="@dimen/default_double_layout_margin"
+        android:layout_marginBottom="@dimen/default_layout_margin"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <include
+            android:id="@+id/include_button_send_message"
+            layout="@layout/layout_support_ticket_button_send_message"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/add_buttons_height"
+            android:layout_marginEnd="@dimen/default_layout_margin"
+            app:layout_constraintEnd_toStartOf="@+id/include_button_copy_logs"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"/>
+
+        <include
+            android:id="@+id/include_button_copy_logs"
+            layout="@layout/layout_support_ticket_button_copy_logs"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/add_buttons_height"
+            android:layout_marginStart="@dimen/default_layout_margin"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/include_button_send_message"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

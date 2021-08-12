@@ -1,15 +1,11 @@
 package chat.sphinx.feature_network_query_chat
 
-import UpdateChatRelayResponse
-import chat.sphinx.concept_network_query_chat.model.ChatDto
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
-import chat.sphinx.concept_network_query_chat.model.JoinTribeRelayResponse
-import chat.sphinx.concept_network_query_chat.model.PutChatDto
-import chat.sphinx.concept_network_query_chat.model.TribeDto
+import chat.sphinx.concept_network_query_chat.model.*
 import chat.sphinx.concept_network_relay_call.NetworkRelayCall
-import chat.sphinx.feature_network_query_chat.model.GetChatsRelayResponse
-import chat.sphinx.kotlin_response.ResponseError
+import chat.sphinx.feature_network_query_chat.model.*
 import chat.sphinx.kotlin_response.LoadResponse
+import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.wrapper_chat.ChatHost
 import chat.sphinx.wrapper_chat.ChatMuted
 import chat.sphinx.wrapper_chat.isTrue
@@ -17,7 +13,7 @@ import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
 
 class NetworkQueryChatImpl(
     private val networkRelayCall: NetworkRelayCall,
@@ -26,6 +22,8 @@ class NetworkQueryChatImpl(
     companion object {
         private const val ENDPOINT_CHAT = "/chat"
         private const val ENDPOINT_CHATS = "/chats"
+        private const val ENDPOINT_EDIT_CHAT = "$ENDPOINT_CHATS/%d"
+        private const val ENDPOINT_DELETE_CHAT = "$ENDPOINT_CHAT/%d"
         private const val ENDPOINT_MUTE_CHAT = "/chats/%d/%s"
         private const val MUTE_CHAT = "mute"
         private const val UN_MUTE_CHAT = "unmute"
@@ -34,8 +32,10 @@ class NetworkQueryChatImpl(
         private const val ENDPOINT_KICK = "/kick"
         private const val ENDPOINT_MEMBER = "/member"
         private const val ENDPOINT_TRIBE = "/tribe"
+        private const val ENDPOINT_STREAM_SATS = "/stream"
 
         private const val GET_TRIBE_INFO_URL = "https://%s/tribes/%s"
+        private const val GET_PODCAST_FEED_URL = "https://%s/podcast?url=%s"
     }
 
     ///////////
@@ -62,6 +62,27 @@ class NetworkQueryChatImpl(
             )
         }
 
+    override fun getTribeInfo(
+        host: ChatHost,
+        uuid: ChatUUID
+    ): Flow<LoadResponse<TribeDto, ResponseError>> =
+        networkRelayCall.get(
+            url = String.format(GET_TRIBE_INFO_URL, host.value, uuid.value),
+            responseJsonClass = TribeDto::class.java,
+        )
+
+    override fun getPodcastFeed(
+        host: ChatHost,
+        feedUrl: String
+    ): Flow<LoadResponse<PodcastDto, ResponseError>> =
+        networkRelayCall.get(
+            url = String.format(GET_PODCAST_FEED_URL, host.value, feedUrl),
+            responseJsonClass = PodcastDto::class.java,
+        )
+
+    ///////////
+    /// PUT ///
+    ///////////
     override fun updateChat(
         chatId: ChatId,
         putChatDto: PutChatDto,
@@ -69,9 +90,52 @@ class NetworkQueryChatImpl(
     ): Flow<LoadResponse<ChatDto, ResponseError>> =
         networkRelayCall.relayPut(
             responseJsonClass = UpdateChatRelayResponse::class.java,
-            relayEndpoint = String.format(ENDPOINT_EDIT_GROUP, chatId.value),
+            relayEndpoint = String.format(ENDPOINT_EDIT_CHAT, chatId.value),
             requestBodyJsonClass = PutChatDto::class.java,
             requestBody = putChatDto,
+            relayData = relayData
+        )
+
+//    app.put('/chat/:id', chats.addGroupMembers)
+//    app.put('/kick/:chat_id/:contact_id', chats.kickChatMember)
+//    app.put('/member/:contactId/:status/:messageId', chatTribes.approveOrRejectMember)
+    override fun updateTribe(
+        chatId: ChatId,
+        postGroupDto: PostGroupDto,
+        relayData: Pair<AuthorizationToken, RelayUrl>?
+    ): Flow<LoadResponse<ChatDto, ResponseError>> =
+        networkRelayCall.relayPut(
+            responseJsonClass = PostGroupRelayResponse::class.java,
+            relayEndpoint = String.format(ENDPOINT_EDIT_GROUP, chatId.value),
+            requestBodyJsonClass = PostGroupDto::class.java,
+            requestBody = postGroupDto,
+            relayData = relayData
+        )
+
+    ////////////
+    /// POST ///
+    ////////////
+    override fun createTribe(
+        postGroupDto: PostGroupDto,
+        relayData: Pair<AuthorizationToken, RelayUrl>?
+    ): Flow<LoadResponse<ChatDto?, ResponseError>> =
+        networkRelayCall.relayPost(
+            responseJsonClass = PostGroupRelayResponse::class.java,
+            relayEndpoint = ENDPOINT_GROUP,
+            requestBodyJsonClass = PostGroupDto::class.java,
+            requestBody = postGroupDto,
+            relayData = relayData
+        )
+
+    override fun streamSats(
+        postStreamSatsDto: PostStreamSatsDto,
+        relayData: Pair<AuthorizationToken, RelayUrl>?
+    ): Flow<LoadResponse<Any?, ResponseError>> =
+        networkRelayCall.relayPost(
+            responseJsonClass = StreamSatsRelayResponse::class.java,
+            relayEndpoint = ENDPOINT_STREAM_SATS,
+            requestBodyJsonClass = PostStreamSatsDto::class.java,
+            requestBody = postStreamSatsDto,
             relayData = relayData
         )
 
@@ -97,15 +161,6 @@ class NetworkQueryChatImpl(
             relayData = relayData
         )
 
-    override fun getTribeInfo(
-        host: ChatHost,
-        uuid: ChatUUID
-    ): Flow<LoadResponse<TribeDto, ResponseError>> =
-        networkRelayCall.get(
-            url = String.format(GET_TRIBE_INFO_URL, host.value, uuid.value),
-            responseJsonClass = TribeDto::class.java,
-        )
-
     override fun joinTribe(
         tribeDto: TribeDto,
         relayData: Pair<AuthorizationToken, RelayUrl>?
@@ -118,24 +173,14 @@ class NetworkQueryChatImpl(
             relayData = relayData
         )
 
-    ///////////
-    /// PUT ///
-    ///////////
-//    app.put('/chats/:id', chats.updateChat)
-//    app.put('/chat/:id', chats.addGroupMembers)
-//    app.put('/kick/:chat_id/:contact_id', chats.kickChatMember)
-//    app.put('/member/:contactId/:status/:messageId', chatTribes.approveOrRejectMember)
-//    app.put('/group/:id', chatTribes.editTribe)
-
-    ////////////
-    /// POST ///
-    ////////////
-//    app.post('/group', chats.createGroupChat)
-//    app.post('/chats/:chat_id/:mute_unmute', chats.mute)
-//    app.post('/tribe', chatTribes.joinTribe)
-
-    //////////////
-    /// DELETE ///
-    //////////////
-//    app.delete('/chat/:id', chats.deleteChat)
+    override suspend fun deleteChat(
+        chatId: ChatId,
+        relayData: Pair<AuthorizationToken, RelayUrl>?
+    ): Flow<LoadResponse<Map<String, Long>, ResponseError>> =
+        networkRelayCall.relayDelete(
+            responseJsonClass = DeleteChatRelayResponse::class.java,
+            relayEndpoint = String.format(ENDPOINT_DELETE_CHAT, chatId.value),
+            requestBody = null,
+            relayData = relayData,
+        )
 }

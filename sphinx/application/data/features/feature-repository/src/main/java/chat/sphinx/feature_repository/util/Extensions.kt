@@ -14,17 +14,20 @@ import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.dashboard.InviteId
 import chat.sphinx.wrapper_common.invite.InviteStatus
+import chat.sphinx.wrapper_common.invite.isPaymentPending
+import chat.sphinx.wrapper_common.invite.isProcessingPayment
 import chat.sphinx.wrapper_common.invite.toInviteStatus
 import chat.sphinx.wrapper_common.lightning.*
 import chat.sphinx.wrapper_common.message.MessageId
+import chat.sphinx.wrapper_common.message.toMessageUUID
 import chat.sphinx.wrapper_contact.*
 import chat.sphinx.wrapper_invite.InviteString
 import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_message.*
-import chat.sphinx.wrapper_message.media.MediaToken
-import chat.sphinx.wrapper_message.media.toMediaKey
-import chat.sphinx.wrapper_message.media.toMediaKeyDecrypted
-import chat.sphinx.wrapper_message.media.toMediaType
+import chat.sphinx.wrapper_message_media.MediaToken
+import chat.sphinx.wrapper_message_media.toMediaKey
+import chat.sphinx.wrapper_message_media.toMediaKeyDecrypted
+import chat.sphinx.wrapper_message_media.toMediaType
 import chat.sphinx.wrapper_rsa.RsaPublicKey
 import com.squareup.moshi.Moshi
 import com.squareup.sqldelight.TransactionCallbacks
@@ -258,18 +261,36 @@ inline fun TransactionCallbacks.upsertContact(dto: ContactDto, queries: SphinxDa
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun TransactionCallbacks.upsertInvite(dto: InviteDto, queries: SphinxDatabaseQueries) {
+
+    val inviteStatus = dto.status.toInviteStatus().let { dtoStatus ->
+        if (dtoStatus.isPaymentPending()) {
+
+            val invite = queries.inviteGetById(InviteId(dto.id)).executeAsOneOrNull()
+
+            if (invite?.status?.isProcessingPayment() == true) {
+                InviteStatus.ProcessingPayment
+            } else {
+                dtoStatus
+            }
+
+        } else {
+            dtoStatus
+        }
+    }
+
     queries.inviteUpsert(
         InviteString(dto.invite_string),
-        dto.invoice?.toLightningPaymentRequest(),
-        dto.status.toInviteStatus(),
+        dto.invoice?.toLightningPaymentRequestOrNull(),
+        inviteStatus,
         dto.price?.toSat(),
         InviteId(dto.id),
         ContactId(dto.contact_id),
         dto.created_at.toDateTime(),
     )
 
-    // TODO: Work out what status needs to be included to be shown on the dashboard
-//        when (it.status.toInviteStatus()) {
+// TODO: Work out what status needs to be included to be shown on the dashboard
+
+//        when (inviteStatus) {
 //            is InviteStatus.Complete -> TODO()
 //            is InviteStatus.Delivered -> TODO()
 //            is InviteStatus.Expired -> TODO()
@@ -285,6 +306,15 @@ inline fun TransactionCallbacks.upsertInvite(dto: InviteDto, queries: SphinxData
 //        )
 }
 
+@Suppress("NOTHING_TO_INLINE")
+inline fun TransactionCallbacks.updateInviteStatus(
+    inviteId: InviteId,
+    inviteStatus: InviteStatus,
+    queries: SphinxDatabaseQueries,
+) {
+    queries.inviteUpdateStatus(inviteStatus, inviteId)
+}
+
 @Suppress("SpellCheckingInspection")
 fun TransactionCallbacks.upsertMessage(dto: MessageDto, queries: SphinxDatabaseQueries) {
 
@@ -294,6 +324,24 @@ fun TransactionCallbacks.upsertMessage(dto: MessageDto, queries: SphinxDatabaseQ
         ChatId(it)
     } ?: ChatId(ChatId.NULL_CHAT_ID.toLong())
 
+    dto.media_token?.let { mediaToken ->
+        dto.media_type?.let { mediaType ->
+
+            if (mediaToken.isEmpty() || mediaType.isEmpty()) return
+
+            queries.messageMediaUpsert(
+                dto.media_key?.toMediaKey(),
+                mediaType.toMediaType(),
+                MediaToken(mediaToken),
+                MessageId(dto.id),
+                chatId,
+                dto.mediaKeyDecrypted?.toMediaKeyDecrypted(),
+                dto.mediaLocalFile,
+            )
+
+        }
+    }
+
     queries.messageUpsert(
         dto.status.toMessageStatus(),
         dto.seenActual.toSeen(),
@@ -301,15 +349,15 @@ fun TransactionCallbacks.upsertMessage(dto: MessageDto, queries: SphinxDatabaseQ
         dto.sender_pic?.toPhotoUrl(),
         dto.original_muid?.toMessageMUID(),
         dto.reply_uuid?.toReplyUUID(),
+        dto.type.toMessageType(),
         MessageId(dto.id),
         dto.uuid?.toMessageUUID(),
         chatId,
-        dto.type.toMessageType(),
         ContactId(dto.sender),
         dto.receiver?.let { ContactId(it) },
         Sat(dto.amount),
         dto.payment_hash?.toLightningPaymentHash(),
-        dto.payment_request?.toLightningPaymentRequest(),
+        dto.payment_request?.toLightningPaymentRequestOrNull(),
         dto.date.toDateTime(),
         dto.expiration_date?.toDateTime(),
         dto.message_content?.toMessageContent(),
@@ -327,9 +375,9 @@ fun TransactionCallbacks.upsertMessage(dto: MessageDto, queries: SphinxDatabaseQ
                 MediaToken(mediaToken),
                 MessageId(dto.id),
                 chatId,
-                dto.mediaKeyDecrypted?.toMediaKeyDecrypted()
+                dto.mediaKeyDecrypted?.toMediaKeyDecrypted(),
+                dto.mediaLocalFile
             )
-
         }
     }
 }
@@ -363,4 +411,13 @@ inline fun TransactionCallbacks.deleteContactById(
     queries.contactDeleteById(contactId)
     queries.inviteDeleteByContactId(contactId)
     queries.dashboardDeleteById(contactId)
+}
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun TransactionCallbacks.deleteMessageById(
+    messageId: MessageId,
+    queries: SphinxDatabaseQueries
+) {
+    queries.messageDeleteById(messageId)
+    queries.messageMediaDeleteById(messageId)
 }

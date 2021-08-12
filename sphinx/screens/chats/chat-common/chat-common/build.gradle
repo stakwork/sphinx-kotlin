@@ -2,6 +2,7 @@ plugins {
     id 'app.cash.exhaustive'
     id 'com.android.library'
     id 'kotlin-android'
+    id 'com.google.android.secrets-gradle-plugin' version '1.1.0'
 }
 
 android {
@@ -33,16 +34,43 @@ dependencies {
     api project(path: ':android:features:android-feature-screens')
 
     // Sphinx
+    api project(path: ':sphinx:application:common:menus:menu-bottom')
+
+    api project(path: ':sphinx:application:common:logger')
     api project(path: ':sphinx:application:common:resources')
+
+    api project(path: ':sphinx:application:common:wrappers:wrapper-common')
+
     api project(path: ':sphinx:application:data:concepts:concept-image-loader')
+    api project(path: ':sphinx:application:data:concepts:concept-media-cache')
+    api project(path: ':sphinx:application:data:concepts:concept-meme-server')
     api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-chat')
     api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-contact')
     api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-message')
+
+    implementation project(path: ':sphinx:application:network:concepts:clients:concept-network-client-crypto')
+
+    api project(path: ':sphinx:application:network:concepts:concept-link-preview')
     api project(path: ':sphinx:application:network:concepts:queries:concept-network-query-lightning')
     api project(path: ':sphinx:activity:insetter-activity')
     implementation project(path: ':sphinx:application:data:concepts:concept-user-colors-helper')
 
+    implementation project(path: ':sphinx:screens-detail:new-contact:new-contact')
+    implementation project(path: ':sphinx:screens-detail:join-tribe:join-tribe')
+
+    api project(path: ':sphinx:screens-detail:camera:camera-view-model-coordinator')
+
     api deps.androidx.recyclerView
-    implementation deps.androidx.lifecycle.hilt
+
     implementation deps.google.hilt
+    implementation deps.androidx.lifecycle.hilt
+    implementation deps.square.okio
+    implementation deps.giphy.sdk
+    implementation deps.jitsi.sdk
+}
+
+secrets {
+    // A properties file containing default secret values. This file can be checked in version
+    // control.
+    defaultPropertiesFileName = 'local.defaults.properties'
 }

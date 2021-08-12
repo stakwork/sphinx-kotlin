@@ -38,12 +38,20 @@ dependencies {
 
     // Sphinx
     implementation project(path: ':sphinx:activity:insetter-activity')
+
+    api project(path: ':sphinx:application:common:menus:menu-bottom-picture')
+    implementation project(path: ':sphinx:application:common:wrappers:wrapper-message-media')
+
     implementation project(path: ':sphinx:application:data:concepts:concept-background-login')
     implementation project(path: ':sphinx:application:data:concepts:concept-image-loader')
     implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-contact')
     implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-lightning')
     implementation project(path: ':sphinx:application:data:concepts:concept-relay')
+
+    implementation project(path: ':sphinx:application:network:concepts:tor:concept-network-tor')
+
     implementation project(path: ':sphinx:screens-detail:common:detail-resources')
+    implementation project(path: ':sphinx:screens-detail:camera:camera-view-model-coordinator')
 
     implementation deps.jncryptor
 

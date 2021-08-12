@@ -15,18 +15,73 @@
         android:layout_height="@dimen/default_header_height"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <ImageView
-        android:id="@+id/qr_code"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraint_qr_code_container"
         android:layout_width="match_parent"
-        android:layout_marginHorizontal="@dimen/default_double_layout_margin"
-        android:layout_height="0dp"
-        android:layout_marginTop="60dp"
-        app:layout_constraintTop_toBottomOf="@+id/include_qr_code_header"
-        app:layout_constraintDimensionRatio="1:1" />
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/default_double_layout_margin"
+        app:layout_constraintTop_toBottomOf="@+id/include_qr_code_header">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_qr_code_description"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/default_double_layout_margin"
+            android:textAlignment="center"
+            android:gravity="center"
+            android:textColor="@color/text"
+            android:fontFamily="@font/roboto_regular"
+            android:textSize="@dimen/text_view_qr_code_amount_text_size"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/qr_code"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:visibility="visible"
+            tools:text="" />
+
+        <ImageView
+            android:id="@+id/qr_code"
+            android:layout_width="match_parent"
+            android:layout_marginHorizontal="@dimen/default_double_layout_margin"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_height="0dp"
+            app:layout_constraintDimensionRatio="1:1" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layout_constraint_invoice_paid"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/background_invoice_paid"
+            android:paddingHorizontal="8dp"
+            android:paddingBottom="5dp"
+            android:visibility="gone"
+            android:alpha="0"
+            app:layout_constraintStart_toStartOf="@+id/qr_code"
+            app:layout_constraintEnd_toEndOf="@+id/qr_code"
+            app:layout_constraintTop_toTopOf="@+id/qr_code"
+            app:layout_constraintBottom_toBottomOf="@+id/qr_code">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAlignment="center"
+                android:gravity="center"
+                android:textColor="@color/primaryGreen"
+                android:fontFamily="@font/montserrat_bold"
+                android:textSize="@dimen/text_view_qr_code_invoice_paid_text_size"
+                android:text="@string/paid"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/qr_code_label"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textColor="@color/text"
         android:fontFamily="@font/roboto_regular"
@@ -34,9 +89,10 @@
         android:singleLine="false"
         android:layout_marginHorizontal="@dimen/default_double_layout_margin"
         android:layout_marginTop="30dp"
-        app:layout_constraintTop_toBottomOf="@+id/qr_code"
+        android:paddingHorizontal="@dimen/default_double_layout_margin"
+        app:layout_constraintTop_toBottomOf="@+id/constraint_qr_code_container"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="0dp"
@@ -68,7 +124,7 @@
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:orientation="vertical"
-            app:layout_constraintGuide_percent=".5" />
+            app:layout_constraintGuide_begin="176dp" />
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/button_qr_code_copy"

@@ -1,0 +1,13 @@
+<vector
+    android:height="500dp"
+    android:width="800dp"
+    android:viewportHeight="500"
+    android:viewportWidth="800"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <path android:fillColor="@color/oldSentMsgBG"
+        android:pathData="M100,0 L400,375 L700,0 L0,0z" />
+
+    <path android:fillColor="@color/messageOptionDivider"
+        android:pathData="M0,0 L400,500 L800,0 L700,0 L400,375 L100,0z" />
+</vector>

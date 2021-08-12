@@ -1,14 +1,29 @@
 package chat.sphinx.chat_common.ui.viewstate.messageholder
 
 import androidx.annotation.ColorInt
+import chat.sphinx.chat_common.model.MessageLinkPreview
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
+import chat.sphinx.chat_common.ui.viewstate.selected.MenuItemState
+import chat.sphinx.chat_common.util.SphinxLinkify
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.getColorKey
 import chat.sphinx.wrapper_chat.isConversation
-import chat.sphinx.wrapper_common.DateTime
+import chat.sphinx.wrapper_chat.isTribeOwnedByAccount
+import chat.sphinx.wrapper_common.chatTimeFormat
 import chat.sphinx.wrapper_common.lightning.Sat
+import chat.sphinx.wrapper_common.message.isProvisionalMessage
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_message.*
+import chat.sphinx.wrapper_message_media.MessageMedia
+import chat.sphinx.wrapper_message_media.isImage
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+
+// TODO: Remove
+inline val Message.isCopyLinkAllowed: Boolean
+    get() = retrieveTextToShow()?.let {
+        SphinxLinkify.SphinxPatterns.COPYABLE_LINKS.matcher(it).find()
+    } ?: false
 
 internal inline val MessageHolderViewState.isReceived: Boolean
     get() = this is MessageHolderViewState.Received
@@ -25,15 +40,15 @@ internal sealed class MessageHolderViewState(
     chat: Chat,
     val background: BubbleBackground,
     val initialHolder: InitialHolderViewState,
-    val messageSenderName: (Message) -> String,
-    val accountOwner: () -> Contact,
+    private val messageSenderName: (Message) -> String,
+    private val accountOwner: () -> Contact,
+    private val previewProvider: suspend (link: MessageLinkPreview) -> LayoutState.Bubble.ContainerThird.LinkPreview?,
 ) {
 
     companion object {
         val unsupportedMessageTypes: List<MessageType> by lazy {
             listOf(
                 MessageType.Attachment,
-                MessageType.BotRes,
                 MessageType.Invoice,
                 MessageType.Payment,
                 MessageType.GroupAction.TribeDelete,
@@ -41,9 +56,9 @@ internal sealed class MessageHolderViewState(
         }
     }
 
-    val unsupportedMessageType: LayoutState.Bubble.ContainerMiddle.UnsupportedMessageType? by lazy(LazyThreadSafetyMode.NONE) {
-        if (unsupportedMessageTypes.contains(message.type)) {
-            LayoutState.Bubble.ContainerMiddle.UnsupportedMessageType(
+    val unsupportedMessageType: LayoutState.Bubble.ContainerThird.UnsupportedMessageType? by lazy(LazyThreadSafetyMode.NONE) {
+        if (unsupportedMessageTypes.contains(message.type) && message.messageMedia?.mediaType?.isImage != true) {
+            LayoutState.Bubble.ContainerThird.UnsupportedMessageType(
                 messageType = message.type,
                 gravityStart = this is Received,
             )
@@ -58,9 +73,11 @@ internal sealed class MessageHolderViewState(
                 if (chat.type.isConversation()) null else message.senderAlias?.value,
                 senderColor,
                 this is Sent,
+                this is Sent && message.id.isProvisionalMessage && message.status.isPending(),
                 this is Sent && (message.status.isReceived() || message.status.isConfirmed()),
-                message.messageContentDecrypted != null,
-                DateTime.getFormathmma().format(message.date.value),
+                this is Sent && message.status.isFailed(),
+                message.messageContentDecrypted != null || message.messageMedia?.mediaKeyDecrypted != null,
+                message.date.chatTimeFormat(),
             )
         } else {
             null
@@ -71,39 +88,57 @@ internal sealed class MessageHolderViewState(
         if (message.status.isDeleted()) {
             LayoutState.DeletedMessage(
                 gravityStart = this is Received,
-                timestamp = DateTime.getFormathmma().format(message.date.value)
+                timestamp = message.date.chatTimeFormat()
             )
         } else {
             null
         }
     }
 
-    val bubbleDirectPayment: LayoutState.Bubble.ContainerTop.DirectPayment? by lazy(LazyThreadSafetyMode.NONE) {
+    val bubbleDirectPayment: LayoutState.Bubble.ContainerSecond.DirectPayment? by lazy(LazyThreadSafetyMode.NONE) {
         if (message.type.isDirectPayment()) {
-            LayoutState.Bubble.ContainerTop.DirectPayment(showSent = this is Sent, amount = message.amount)
+            LayoutState.Bubble.ContainerSecond.DirectPayment(showSent = this is Sent, amount = message.amount)
         } else {
             null
         }
     }
 
-    val bubbleMessage: LayoutState.Bubble.ContainerMiddle.Message? by lazy(LazyThreadSafetyMode.NONE) {
+    val bubbleMessage: LayoutState.Bubble.ContainerThird.Message? by lazy(LazyThreadSafetyMode.NONE) {
         message.retrieveTextToShow()?.let { text ->
             if (text.isNotEmpty()) {
-                LayoutState.Bubble.ContainerMiddle.Message(text = text)
+                LayoutState.Bubble.ContainerThird.Message(text = text)
             } else {
                 null
             }
         }
     }
 
-    val bubblePaidMessageDetails: LayoutState.Bubble.ContainerBottom.PaidMessageDetails? by lazy(LazyThreadSafetyMode.NONE) {
+    val bubbleCallInvite: LayoutState.Bubble.ContainerSecond.CallInvite? by lazy(LazyThreadSafetyMode.NONE) {
+        message.retrieveSphinxCallLink()?.let { callLink ->
+            LayoutState.Bubble.ContainerSecond.CallInvite(!callLink.startAudioOnly)
+        }
+    }
+
+    val bubbleBotResponse: LayoutState.Bubble.ContainerSecond.BotResponse? by lazy(LazyThreadSafetyMode.NONE) {
+        if (message.type.isBotRes()) {
+            message.retrieveBotResponseHtmlString()?.let { html ->
+                LayoutState.Bubble.ContainerSecond.BotResponse(
+                    html
+                )
+            }
+        } else {
+            null
+        }
+    }
+
+    val bubblePaidMessageDetails: LayoutState.Bubble.ContainerFourth.PaidMessageDetails? by lazy(LazyThreadSafetyMode.NONE) {
         if (!message.isPaidMessage) {
             null
         } else {
             val isPaymentPending = message.status.isPending()
 
             message.type.let { type ->
-                LayoutState.Bubble.ContainerBottom.PaidMessageDetails(
+                LayoutState.Bubble.ContainerFourth.PaidMessageDetails(
                     amount = message.amount,
                     purchaseType = if (type.isPurchase()) type else null,
                     isShowingReceivedMessage = this is Received,
@@ -116,12 +151,12 @@ internal sealed class MessageHolderViewState(
         }
     }
 
-    val bubblePaidMessageSentStatus: LayoutState.Bubble.ContainerTop.PaidMessageSentStatus? by lazy(LazyThreadSafetyMode.NONE) {
+    val bubblePaidMessageSentStatus: LayoutState.Bubble.ContainerSecond.PaidMessageSentStatus? by lazy(LazyThreadSafetyMode.NONE) {
         if (!message.isPaidMessage || this !is Sent) {
             null
         } else {
             message.type.let { type ->
-                LayoutState.Bubble.ContainerTop.PaidMessageSentStatus(
+                LayoutState.Bubble.ContainerSecond.PaidMessageSentStatus(
                     amount = message.amount,
                     purchaseType = if (type.isPurchase()) type else null,
                 )
@@ -129,19 +164,26 @@ internal sealed class MessageHolderViewState(
         }
     }
 
-    val bubbleGiphy: LayoutState.Bubble.ContainerTop.Giphy? by lazy(LazyThreadSafetyMode.NONE) {
-        message.giphyData?.let {
-            if (it.url.isNotEmpty()) {
-                LayoutState.Bubble.ContainerTop.Giphy(it.url.replace("giphy.gif", "200w.gif"))
-            } else {
-                null
-            }
+    val bubbleImageAttachment: LayoutState.Bubble.ContainerSecond.ImageAttachment? by lazy(LazyThreadSafetyMode.NONE) {
+        message.retrieveImageUrlAndMessageMedia()?.let { mediaData ->
+            LayoutState.Bubble.ContainerSecond.ImageAttachment(
+                mediaData.first,
+                mediaData.second
+            )
+        }
+    }
+
+    val bubblePodcastBoost: LayoutState.Bubble.ContainerSecond.PodcastBoost? by lazy(LazyThreadSafetyMode.NONE) {
+        message.podBoost?.let { podBoost ->
+            LayoutState.Bubble.ContainerSecond.PodcastBoost(
+                podBoost.amount,
+            )
         }
     }
 
     // don't use by lazy as this uses a for loop and needs to be initialized on a background
     // thread (so, while the MHVS is being created)
-    val bubbleReactionBoosts: LayoutState.Bubble.ContainerBottom.Boost? =
+    val bubbleReactionBoosts: LayoutState.Bubble.ContainerFourth.Boost? =
         message.reactions?.let { nnReactions ->
             if (nnReactions.isEmpty()) {
                 null
@@ -174,43 +216,112 @@ internal sealed class MessageHolderViewState(
 //                    }
 //                }
 
-                LayoutState.Bubble.ContainerBottom.Boost(
+                LayoutState.Bubble.ContainerFourth.Boost(
                     totalAmount = Sat(total),
                     senderPics = set,
                 )
             }
         }
 
-    val bubbleReplyMessage: LayoutState.Bubble.ContainerTop.ReplyMessage? by lazy {
+    val bubbleReplyMessage: LayoutState.Bubble.ContainerFirst.ReplyMessage? by lazy {
         message.replyMessage?.let { nnMessage ->
-            LayoutState.Bubble.ContainerTop.ReplyMessage(
+
+            var mediaUrl: String? = null
+            var messageMedia: MessageMedia? = null
+
+            nnMessage.retrieveImageUrlAndMessageMedia()?.let { mediaData ->
+                mediaUrl = mediaData.first
+                messageMedia = mediaData.second
+            }
+
+            LayoutState.Bubble.ContainerFirst.ReplyMessage(
+                showSent = this is Sent,
                 messageSenderName(nnMessage),
                 senderColor,
                 nnMessage.retrieveTextToShow() ?: "",
+                mediaUrl,
+                messageMedia
             )
         }
     }
 
     val groupActionIndicator: LayoutState.GroupActionIndicator? by lazy(LazyThreadSafetyMode.NONE) {
-        if (
-            !message.type.isGroupAction() ||
-            message.senderAlias == null
-        ) {
+        val type = message.type
+        if (!type.isGroupAction()) {
             null
         } else {
             LayoutState.GroupActionIndicator(
-                actionType = message.type as MessageType.GroupAction,
+                actionType = type,
                 isAdminView = if (chat.ownerPubKey == null || accountOwner().nodePubKey == null) {
                     false
                 } else {
                     chat.ownerPubKey == accountOwner().nodePubKey
                 },
                 chatType = chat.type,
-                subjectName = message.senderAlias!!.value
+                subjectName = message.senderAlias?.value ?: ""
             )
         }
     }
 
+    val messageLinkPreview: MessageLinkPreview? by lazy {
+        MessageLinkPreview.parse(bubbleMessage)
+    }
+
+    @Volatile
+    private var linkPreviewLayoutState: LayoutState.Bubble.ContainerThird.LinkPreview? = null
+    private val previewLock = Mutex()
+    suspend fun retrieveLinkPreview(): LayoutState.Bubble.ContainerThird.LinkPreview? {
+        return messageLinkPreview?.let { nnPreview ->
+            linkPreviewLayoutState ?: previewLock.withLock {
+                linkPreviewLayoutState ?: previewProvider.invoke(nnPreview)
+                    ?.also { linkPreviewLayoutState = it }
+            }
+        }
+    }
+
+    val selectionMenuItems: List<MenuItemState>? by lazy(LazyThreadSafetyMode.NONE) {
+        if (
+            background is BubbleBackground.Gone         ||
+            message.podBoost != null
+        ) {
+            null
+        } else {
+            // TODO: check message status
+
+            val list = ArrayList<MenuItemState>(4)
+
+            if (this is Received && message.isBoostAllowed) {
+                list.add(MenuItemState.Boost)
+            }
+
+            if (message.isCopyLinkAllowed) {
+                list.add(MenuItemState.CopyLink)
+            }
+
+            if (message.isCopyAllowed) {
+                list.add(MenuItemState.CopyText)
+            }
+
+            if (message.isReplyAllowed) {
+                list.add(MenuItemState.Reply)
+            }
+
+            if (message.isResendAllowed) {
+                list.add(MenuItemState.Resend)
+            }
+
+            if (this is Sent || chat.isTribeOwnedByAccount(accountOwner().nodePubKey)) {
+                list.add(MenuItemState.Delete)
+            }
+
+            if (list.isEmpty()) {
+                null
+            } else {
+                list.sortBy { it.sortPriority }
+                list
+            }
+        }
+    }
 
     class Sent(
         message: Message,
@@ -219,6 +330,7 @@ internal sealed class MessageHolderViewState(
         background: BubbleBackground,
         replyMessageSenderName: (Message) -> String,
         accountOwner: () -> Contact,
+        previewProvider: suspend (link: MessageLinkPreview) -> LayoutState.Bubble.ContainerThird.LinkPreview?,
     ) : MessageHolderViewState(
         message,
         senderColor,
@@ -227,6 +339,7 @@ internal sealed class MessageHolderViewState(
         InitialHolderViewState.None,
         replyMessageSenderName,
         accountOwner,
+        previewProvider,
     )
 
     class Received(
@@ -237,6 +350,7 @@ internal sealed class MessageHolderViewState(
         initialHolder: InitialHolderViewState,
         replyMessageSenderName: (Message) -> String,
         accountOwner: () -> Contact,
+        previewProvider: suspend (link: MessageLinkPreview) -> LayoutState.Bubble.ContainerThird.LinkPreview?,
     ) : MessageHolderViewState(
         message,
         senderColor,
@@ -245,5 +359,6 @@ internal sealed class MessageHolderViewState(
         initialHolder,
         replyMessageSenderName,
         accountOwner,
+        previewProvider,
     )
 }

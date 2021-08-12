@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="join_tribe_header_name">UNIRSE A LA TRIBU</string>
+    <string name="loading_tribe_text_view">Cargando información de la tribu...</string>
+    <string name="join_tribe_button">UNIRSE</string>
+
+    <string name="bottom_menu_tribe_profile_pic_header_text">Foto de Perfil de la tribu</string>
+    <string name="profile_picture">Foto de Perfil</string>
+    <string name="price_to_join_label">Precio para unirse:</string>
+    <string name="price_per_message_label">Precio por mensaje:</string>
+    <string name="amount_to_stake_label">Monto a retener:</string>
+    <string name="time_to_stake_label">Tiempo de retención (horas):</string>
+
+    <string name="alias_edit_text_label">Alias</string>
+    <string name="join_tribe_alias_empty">Alias es requerido</string>
+    <string name="invalid_tribe">tribu inválida</string>
+    <string name="error_joining">Ocurrió un error al unirse a la tribu. Por favor inténtalo luego</string>
+    <string name="failed_to_process_image">No se ha podido procesar la imagen</string>
+</resources>

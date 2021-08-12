@@ -51,6 +51,7 @@ internal class AddressBookFragment: BaseFragment<
         get() = binding.layoutAddressBookHeader.textViewAddressBookHeaderNavBack
 
     @Inject
+    @Suppress("ProtectedInFinal")
     protected lateinit var addressBookNavigator: AddressBookNavigator
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

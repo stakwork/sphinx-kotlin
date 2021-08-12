@@ -1,0 +1,17 @@
+plugins {
+    id 'app.cash.exhaustive'
+    id 'java-library'
+    id 'kotlin'
+}
+
+dependencies {
+    // KotlinAndroid
+    api project(path: ':kotlin:concepts:authentication:concept-authentication')
+    api project(path: ':kotlin:concepts:concept-coroutines')
+
+    // Sphinx
+    api project(path: ':sphinx:application:common:logger')
+    api project(path: ':sphinx:application:common:wrappers:wrapper-contact')
+    api project(path: ':sphinx:application:data:concepts:concept-meme-server')
+    api project(path: ':sphinx:application:network:concepts:queries:concept-network-query-meme-server')
+}

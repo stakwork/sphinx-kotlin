@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="@dimen/selected_message_menu_width"
+    android:layout_height="@dimen/selected_message_menu_item_height"
+    tools:visibility="visible">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_selected_message_menu_item_icon_container"
+        android:layout_width="@dimen/selected_message_menu_icon_width"
+        android:layout_height="match_parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <TextView
+            android:id="@+id/text_view_selected_message_menu_item_icon"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:textSize="@dimen/default_text_size_tap_target_material_icon"
+            android:gravity="center"
+            android:fontFamily="@font/material_icons_regular"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/image_view_selected_message_menu_item_icon"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="@dimen/selected_message_menu_icon_padding"
+            app:layout_constraintStart_toStartOf="parent"
+            tools:src="@drawable/ic_circular_boost_green"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/text_view_selected_message_menu_item"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:ellipsize="end"
+        android:gravity="center_vertical"
+        android:singleLine="true"
+        android:textColor="@color/text"
+        android:fontFamily="@font/roboto_regular"
+        android:textSize="@dimen/selected_message_menu_item_text_size"
+        app:layout_constraintStart_toEndOf="@+id/layout_constraint_selected_message_menu_item_icon_container"
+        tools:text="Boost" />
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/image_view_selected_message_menu_item_divider"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/messageOptionDivider"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -8,6 +8,7 @@ import chat.sphinx.concept_network_tor.SocksProxyAddress
 import chat.sphinx.concept_network_tor.TorManager
 import chat.sphinx.concept_network_tor.TorManagerListener
 import chat.sphinx.concept_network_tor.TorServiceState
+import chat.sphinx.feature_sphinx_service.ApplicationServiceTracker
 import chat.sphinx.concept_network_tor.TorState as KTorState
 import chat.sphinx.concept_network_tor.TorNetworkState as KTorNetworkState
 import chat.sphinx.logger.SphinxLogger
@@ -32,15 +33,18 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlin.system.exitProcess
 
 class TorManagerAndroid(
     application: Application,
+    private val applicationScope: CoroutineScope,
     private val authenticationStorage: AuthenticationStorage,
     buildConfigDebug: BuildConfigDebug,
     buildConfigVersionCode: BuildConfigVersionCode,
     private val dispatchers: CoroutineDispatchers,
     private val LOG: SphinxLogger,
-) : TorManager,
+) : ApplicationServiceTracker(),
+    TorManager,
     CoroutineDispatchers by dispatchers
 {
 
@@ -66,9 +70,11 @@ class TorManagerAndroid(
         override fun broadcastServiceLifecycleEvent(event: String, hashCode: Int) {
             when (event) {
                 BaseServiceConsts.ServiceLifecycleEvent.CREATED -> {
+                    onServiceCreated(mustComplete = true)
                     TorServiceState.OnCreate(hashCode)
                 }
                 BaseServiceConsts.ServiceLifecycleEvent.DESTROYED -> {
+                    onServiceDestroyed(mustComplete = true)
                     TorServiceState.OnDestroy(hashCode)
                 }
                 BaseServiceConsts.ServiceLifecycleEvent.ON_BIND -> {
@@ -78,6 +84,7 @@ class TorManagerAndroid(
                     TorServiceState.OnUnbind(hashCode)
                 }
                 BaseServiceConsts.ServiceLifecycleEvent.TASK_REMOVED -> {
+                    onTaskRemoved()
                     TorServiceState.OnTaskRemoved(hashCode)
                 }
                 else -> {
@@ -167,6 +174,38 @@ class TorManagerAndroid(
     override val torServiceStateFlow: StateFlow<TorServiceState>
         get() = broadcaster._torServiceStateFlow.asStateFlow()
 
+    ///////////////////////////////////
+    /// Application Service Tracker ///
+    ///////////////////////////////////
+    override fun onTaskRemoved() {
+        super.onTaskRemoved()
+        stopTorOrKillApp()
+    }
+
+    override fun onServiceDestroyed(mustComplete: Boolean) {
+        super.onServiceDestroyed(mustComplete)
+        stopTorOrKillApp()
+    }
+
+    private fun stopTorOrKillApp() {
+        // Tor is running
+        if (torServiceStateFlow.value !is TorServiceState.OnDestroy) {
+            if (taskIsRemoved && mustCompleteServicesCounter == 1) {
+                stopTor()
+            }
+
+            // If TorService is _not_ running, and another service that
+            // switched to Foreground in onTaskRemoved to complete its task
+            // was destroyed while application has been swiped out of recent
+            // apps tray has been destroyed
+        } else if (taskIsRemoved && mustCompleteServicesCounter == 0) {
+            exitProcess(0)
+        }
+    }
+
+    ///////////////////////////////////////
+    /// Tor Service Controller Wrappers ///
+    ///////////////////////////////////////
     override fun startTor() {
         TorServiceController.startTor()
     }
@@ -235,12 +274,6 @@ class TorManagerAndroid(
     }
 
     private val lock = Mutex()
-    private val supervisor: Job by lazy {
-        SupervisorJob()
-    }
-    private val torManagerScope: CoroutineScope by lazy {
-        CoroutineScope(supervisor + mainImmediate)
-    }
     private val requirementChangeLock = Mutex()
 
     override suspend fun setTorRequired(required: Boolean) {
@@ -250,7 +283,7 @@ class TorManagerAndroid(
             when (isTorRequiredCache) {
                 null -> {
 
-                    torManagerScope.launch {
+                    applicationScope.launch(mainImmediate) {
                         requirementChangeLock.withLock {
                             val persisted = authenticationStorage.getString(TOR_MANAGER_REQUIRED, null)
 
@@ -269,7 +302,7 @@ class TorManagerAndroid(
                     // no change, do nothing
                 }
                 else -> {
-                    torManagerScope.launch {
+                    applicationScope.launch(mainImmediate) {
                         requirementChangeLock.withLock {
                             authenticationStorage.putString(TOR_MANAGER_REQUIRED, requiredString)
                             isTorRequiredCache = required
@@ -307,7 +340,7 @@ class TorManagerAndroid(
     private inner class SphinxHooks: ServiceExecutionHooks() {
         override suspend fun executeOnCreateTorService(context: Context) {
             socksProxyAddressStateFlow.collect { address ->
-                torManagerScope.launch {
+                applicationScope.launch(mainImmediate) {
                     synchronizedListeners.dispatchSocksProxyAddressChange(address)
                 }.join()
             }
@@ -357,7 +390,7 @@ class TorManagerAndroid(
             .addTimeToDisableNetworkDelay(milliseconds = 4_000)
 //            .addTimeToRestartTorDelay()
 //            .addTimeToStopServiceDelay()
-//            .disableStopServiceOnTaskRemoved()
+            .disableStopServiceOnTaskRemoved()
             .setBuildConfigDebug(buildConfigDebug = buildConfigDebug.value)
             .setEventBroadcaster(eventBroadcaster = broadcaster)
             .setServiceExecutionHooks(executionHooks = SphinxHooks())

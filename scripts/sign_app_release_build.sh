@@ -29,8 +29,9 @@ BUILD_TOOLS_VERSION=$(cat $FILE | grep 'buildTools' | sed 's/ //g' | cut -d '"' 
 #echo "'$BUILD_TOOLS_VERSION'"
 
 # Get Min/Max SDK Version
-MIN_SDK_VERSION=$(cat $FILE | grep 'minSdk' | grep -o '[[:digit:]]*')
-MAX_SDK_VERSION=$(cat $FILE | grep 'compileSdk' | grep -o '[[:digit:]]*')
+MIN_SDK_VERSION=$(cat $FILE | grep 'minSdk' | sed 's/ //g' | cut -d ':' -f 2 | cut -d ',' -f 1)
+MAX_SDK_VERSION=$(cat $FILE | grep 'compileSdk' | sed 's/ //g' | cut -d ':' -f 2 | cut -d ',' -f 1)
+
 #echo "'$MIN_SDK_VERSION'"
 #echo "'$MAX_SDK_VERSION'"
 
@@ -69,8 +70,8 @@ for FILE in $UNSIGNED_APK_DIR_FILE_LIST; do
     "$ANDROID_SDK"/build-tools/"$BUILD_TOOLS_VERSION"/apksigner sign \
     --ks NONE \
     --ks-pass "pass:$YUBI_PIN" \
-    --min-sdk-version "$MIN_SDK_VERSION" \
-    --max-sdk-version "$MAX_SDK_VERSION" \
+    --min-sdk-version $MIN_SDK_VERSION \
+    --max-sdk-version $MAX_SDK_VERSION \
     --provider-class sun.security.pkcs11.SunPKCS11 \
     --provider-arg "$PKCS11_CFG" \
     --ks-type PKCS11 \

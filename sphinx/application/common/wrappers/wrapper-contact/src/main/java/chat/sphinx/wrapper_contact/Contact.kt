@@ -5,11 +5,31 @@ import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.dashboard.InviteId
 import chat.sphinx.wrapper_common.invite.InviteStatus
+import chat.sphinx.wrapper_common.isTrue
 import chat.sphinx.wrapper_common.lightning.LightningNodeAlias
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.LightningRouteHint
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_rsa.RsaPublicKey
+import java.net.MalformedURLException
+import java.net.URL
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun Contact.isInviteContact(): Boolean =
+    status.isPending() && inviteId != null
+
+inline val Contact.avatarUrl: URL?
+    get() {
+        return try {
+            if (photoUrl?.value != null) {
+                URL(photoUrl!!.value)
+            } else {
+                null
+            }
+        } catch (e: MalformedURLException) {
+            null
+        }
+    }
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun Contact.getColorKey(): String {

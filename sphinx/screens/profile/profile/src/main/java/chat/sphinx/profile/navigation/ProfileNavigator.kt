@@ -9,7 +9,7 @@ abstract class ProfileNavigator(
     navigationDriver: BaseNavigationDriver<NavController>
 ): Navigator<NavController>(navigationDriver)
 {
-    abstract suspend fun toQRCodeDetail(qrText: String)
+    abstract suspend fun toQRCodeDetail(qrText: String, viewTitle: String)
 
     suspend fun popBackStack() {
         navigationDriver.submitNavigationRequest(
