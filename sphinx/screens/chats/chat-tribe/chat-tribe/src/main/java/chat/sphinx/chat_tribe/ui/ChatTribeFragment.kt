@@ -43,6 +43,8 @@ internal class ChatTribeFragment: ChatFragment<
     override val binding: FragmentChatTribeBinding by viewBinding(FragmentChatTribeBinding::bind)
     private val podcastPlayerBinding: LayoutPodcastPlayerFooterBinding
         get() = binding.includePodcastPlayerFooter
+    private val boostAnimationBinding: LayoutBoostFireworksBinding
+        get() = binding.includeLayoutBoostFireworks
 
     override val footerBinding: LayoutChatFooterBinding
         get() = binding.includeChatTribeFooter
@@ -60,8 +62,6 @@ internal class ChatTribeFragment: ChatFragment<
         get() = binding.includeChatTribeMenu
     override val callMenuBinding: LayoutMenuBottomBinding
         get() = binding.includeLayoutMenuBottomCall
-    private val boostAnimationBinding: LayoutBoostFireworksBinding
-        get() = binding.includeLayoutBoostFireworks
     override val attachmentFullscreenBinding: LayoutAttachmentFullscreenBinding
         get() = binding.includeChatTribeAttachmentFullscreen
 
