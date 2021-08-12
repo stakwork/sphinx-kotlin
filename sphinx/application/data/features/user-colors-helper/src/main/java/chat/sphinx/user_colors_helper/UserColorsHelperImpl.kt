@@ -13,17 +13,23 @@ class UserColorsHelperImpl(
 
     private val appContext: Context = context.applicationContext
 
-    override suspend fun getHexCodeForKey(colorKey: String?, randomHexColorCode: String): String {
-        var hexColorCode: String? = null
+    private val colors: MutableMap<String, String> = mutableMapOf()
+
+    override suspend fun getHexCodeForKey(
+        colorKey: String?,
+        randomHexColorCode: String
+    ): String {
+
+        var colorHexCode: String? = null
 
         colorKey?.let { colorKey ->
+            colors[colorKey]?.let { colorHexCode ->
+                return colorHexCode
+            }
+
             withContext(dispatchers.io) {
                 appContext.getSharedPreferences("sphinx_colors", Context.MODE_PRIVATE).let { sharedPrefs ->
-                    sharedPrefs.getString(colorKey, null)?.let { savedHexCode ->
-                        hexColorCode = savedHexCode
-                    } ?: run {
-                        hexColorCode = randomHexColorCode
-
+                    colorHexCode = sharedPrefs.getString(colorKey, null) ?: run {
                         sharedPrefs?.edit()?.let { editor ->
                             editor.putString(colorKey, randomHexColorCode).let { editor ->
                                 if (!editor.commit()) {
@@ -31,10 +37,16 @@ class UserColorsHelperImpl(
                                 }
                             }
                         }
+                        randomHexColorCode
                     }
                 }
             }
+
+            colorHexCode?.let { nnColorHexCode ->
+                colors.put(colorKey, nnColorHexCode)
+            }
         }
-        return hexColorCode ?: randomHexColorCode
+
+        return colorHexCode ?: randomHexColorCode
     }
 }
