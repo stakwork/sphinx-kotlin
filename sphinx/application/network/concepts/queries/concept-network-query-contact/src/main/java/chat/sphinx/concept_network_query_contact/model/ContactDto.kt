@@ -26,6 +26,7 @@ data class ContactDto(
 //    val last_active: String?,
     val tip_amount: Long?,
     val invite: InviteDto?,
+    val pending: Boolean?,
 ) {
     @Transient
     val privatePhotoActual: Boolean =

@@ -1,9 +1,10 @@
 package chat.sphinx.concept_network_query_contact
 
 import chat.sphinx.concept_network_query_contact.model.*
-import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
+import chat.sphinx.kotlin_response.ResponseError
+import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
@@ -17,6 +18,13 @@ abstract class NetworkQueryContact {
     abstract fun getContacts(
         relayData: Pair<AuthorizationToken, RelayUrl>? = null
     ): Flow<LoadResponse<GetContactsResponse, ResponseError>>
+
+    abstract fun getTribeMembers(
+        chatId: ChatId,
+        offset: Int = 0,
+        limit: Int = 50,
+        relayData: Pair<AuthorizationToken, RelayUrl>? = null
+    ): Flow<LoadResponse<GetTribeMembersResponse, ResponseError>>
 
     ///////////
     /// PUT ///

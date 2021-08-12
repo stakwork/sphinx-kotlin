@@ -26,16 +26,14 @@ import chat.sphinx.resources.inputMethodManager
 import chat.sphinx.tribe.BottomMenuTribe
 import chat.sphinx.tribe_detail.R
 import chat.sphinx.tribe_detail.databinding.FragmentTribeDetailBinding
+import chat.sphinx.wrapper_chat.isTribeOwnedByAccount
 import chat.sphinx.wrapper_common.eeemmddhmma
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.visible
-import io.matthewnelson.android_feature_viewmodel.submitSideEffect
-import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_views.viewstate.collect
 import io.matthewnelson.concept_views.viewstate.value
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.annotation.meta.Exhaustive
 import javax.inject.Inject
@@ -210,6 +208,10 @@ internal class TribeDetailFragment: SideEffectFragment<
                     MenuBottomViewState.Open
                 )
             }
+
+            buttonAdminViewMembers.setOnClickListener {
+                viewModel.toTribeMemberList()
+            }
         }
     }
 
@@ -274,6 +276,13 @@ internal class TribeDetailFragment: SideEffectFragment<
                         seekBarSatsPerMinute.max = SLIDER_VALUES.size - 1
                         seekBarSatsPerMinute.progress = index
                         textViewPodcastSatsPerMinuteValue.text = closest.toString()
+                    }
+
+
+                    if (viewState.chat.isTribeOwnedByAccount(viewModel.getOwner().nodePubKey)) {
+                        buttonAdminViewMembers.visible
+                    } else {
+                        buttonAdminViewMembers.visible
                     }
                 }
             }

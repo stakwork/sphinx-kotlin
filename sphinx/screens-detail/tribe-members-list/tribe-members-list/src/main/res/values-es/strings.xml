@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tribe_members_list_header">MIEMBROS DE LA TRIBU</string>
+    <string name="loading_more">Cargando más...</string>
+</resources>

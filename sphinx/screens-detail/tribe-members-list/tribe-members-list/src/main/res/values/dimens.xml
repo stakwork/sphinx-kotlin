@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="tribe_member_button_xy">27dp</dimen>
+    <dimen name="tribe_member_picture_xy">44dp</dimen>
+    <dimen name="tribe_member_action_xy">38dp</dimen>
+</resources>

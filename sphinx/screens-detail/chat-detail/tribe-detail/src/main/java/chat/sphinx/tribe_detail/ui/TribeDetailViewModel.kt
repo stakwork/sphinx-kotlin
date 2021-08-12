@@ -2,8 +2,6 @@ package chat.sphinx.tribe_detail.ui
 
 import android.app.Application
 import android.content.Context
-import android.net.Uri
-import android.webkit.MimeTypeMap
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.camera_view_model_coordinator.request.CameraRequest
@@ -32,22 +30,16 @@ import chat.sphinx.wrapper_chat.ChatAlias
 import chat.sphinx.wrapper_chat.isTribeOwnedByAccount
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_contact.Contact
-import chat.sphinx.wrapper_io_utils.InputStreamProvider
 import chat.sphinx.wrapper_meme_server.PublicAttachmentInfo
-import chat.sphinx.wrapper_message_media.MediaType
-import chat.sphinx.wrapper_message_media.toMediaType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
-import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import java.io.InputStream
 import javax.annotation.meta.Exhaustive
 import javax.inject.Inject
 
@@ -330,6 +322,12 @@ internal class TribeDetailViewModel @Inject constructor(
         tribeMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Closed)
         viewModelScope.launch(mainImmediate) {
             navigator.toCreateTribeScreen(chatId)
+        }
+    }
+
+    fun toTribeMemberList() {
+        viewModelScope.launch(mainImmediate) {
+            navigator.toTribeMemberList(chatId)
         }
     }
 }

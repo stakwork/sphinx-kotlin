@@ -330,6 +330,34 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/constrain_layout_admin_view_tribe_members"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@+id/layout_constraint_profile_picture_container"
+            >
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/button_admin_view_members"
+                style="@style/MemberListButton"
+                android:layout_width="match_parent"
+                android:layout_height="62dp"
+                android:layout_marginStart="75dp"
+                android:layout_marginEnd="75dp"
+                android:text="Members List"
+                android:textSize="@dimen/add_buttons_text_size"
+                android:textColor="@android:color/white"
+                android:background="@drawable/button_background_white_rad_48"
+                android:backgroundTint="@color/primaryBlue"
+                android:layout_marginBottom="@dimen/default_layout_margin"
+                android:visibility="gone"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:visibility="visible"
+                />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 
