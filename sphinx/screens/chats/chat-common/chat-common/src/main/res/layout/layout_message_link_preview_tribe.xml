@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:minHeight="@dimen/tribe_link_preview_holder_min_height"
     android:visibility="gone"
     tools:background="@color/body"
     tools:visibility="visible">
@@ -38,6 +39,29 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/progress_bar_link_preview"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@+id/view_preview_divider"
+        app:layout_constraintBottom_toBottomOf="parent"
+        tools:visibility="gone">
+
+        <ProgressBar
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            style="?android:attr/progressBarStyle"
+            android:indeterminateTint="@android:color/white"
+            android:indeterminate="true"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_tribe_link_preview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:paddingVertical="@dimen/default_layout_margin"
@@ -83,8 +107,7 @@
             app:layout_constraintStart_toStartOf="@id/text_view_message_link_preview_tribe_name_label"
             app:layout_constraintTop_toBottomOf="@id/text_view_message_link_preview_tribe_name_label"
             app:layout_constraintBottom_toBottomOf="@+id/image_view_message_link_preview_tribe"
-            tools:text="Trading bitcoin tips, TA exchanges, short/long ratio, trading strategies and more."
-            tools:visibility="gone" />
+            tools:text="Trading bitcoin tips, TA exchanges, short/long ratio, trading strategies and more." />
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/text_view_message_link_preview_tribe_see_banner"
@@ -105,16 +128,6 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             tools:visibility="visible"/>
-
-        <androidx.constraintlayout.widget.Group
-            android:id="@+id/message_link_preview_group_tribe_name_and_description"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            app:constraint_referenced_ids="text_view_message_link_preview_tribe_description,text_view_message_link_preview_tribe_name_label"
-            app:layout_constraintBottom_toBottomOf="@id/image_view_message_link_preview_tribe"
-            app:layout_constraintEnd_toStartOf="parent"
-            app:layout_constraintStart_toEndOf="@id/image_view_message_link_preview_tribe"
-            app:layout_constraintTop_toTopOf="@id/image_view_message_link_preview_tribe" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
