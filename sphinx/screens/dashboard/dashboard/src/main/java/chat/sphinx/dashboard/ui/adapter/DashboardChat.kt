@@ -465,6 +465,10 @@ sealed class DashboardChat {
             override fun isEncrypted(): Boolean {
                 return false
             }
+
+            override fun getColorKey(): String? {
+                return getColorKeyFor(contact, null)
+            }
         }
     }
 }

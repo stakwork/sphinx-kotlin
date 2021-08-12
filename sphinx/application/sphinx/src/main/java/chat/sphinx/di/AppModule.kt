@@ -107,6 +107,7 @@ object AppModule {
     ): UserColorsHelper =
         userColorsHelperImpl
 
+    @Provides
     fun provideMediaCacheHandler(
         applicationScope: CoroutineScope,
         application: Application,
