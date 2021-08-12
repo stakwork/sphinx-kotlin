@@ -164,7 +164,13 @@ internal class ChatTribeViewModel @Inject constructor(
         return message.senderPic?.let { url ->
             InitialHolderViewState.Url(url)
         } ?: message.senderAlias?.let { alias ->
-            InitialHolderViewState.Initials(alias.value.getInitials(), Color.parseColor(userColorsHelper.getHexCodeForKey(message.getColorKey(), app.getRandomHexCode())))
+            InitialHolderViewState.Initials(
+                alias.value.getInitials(),
+                Color.parseColor(
+                    userColorsHelper.getHexCodeForKey(message.getColorKey(),
+                    app.getRandomHexCode())
+                )
+            )
         } ?: InitialHolderViewState.None
     }
 

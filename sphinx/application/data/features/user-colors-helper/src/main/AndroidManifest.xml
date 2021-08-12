@@ -1,5 +1,2 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="chat.sphinx.user_colors_helper">
-
-</manifest>
+<manifest package="chat.sphinx.user_colors_helper"/>

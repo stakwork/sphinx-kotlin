@@ -13,6 +13,8 @@ class UserColorsHelperImpl(
 
     private val appContext: Context = context.applicationContext
 
+    private val colorsSharedPreferences = appContext.getSharedPreferences("sphinx_colors", Context.MODE_PRIVATE)
+
     private val colors: MutableMap<String, String> = mutableMapOf()
 
     override suspend fun getHexCodeForKey(
@@ -28,7 +30,7 @@ class UserColorsHelperImpl(
             }
 
             withContext(dispatchers.io) {
-                appContext.getSharedPreferences("sphinx_colors", Context.MODE_PRIVATE).let { sharedPrefs ->
+                colorsSharedPreferences.let { sharedPrefs ->
                     colorHexCode = sharedPrefs.getString(colorKey, null) ?: run {
                         sharedPrefs?.edit()?.let { editor ->
                             editor.putString(colorKey, randomHexColorCode).let { editor ->
