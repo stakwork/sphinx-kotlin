@@ -179,7 +179,7 @@ internal class TribeMembersListViewModel @Inject constructor(
 
             lastInitial = contactInitial
 
-            if ((contact.pending is Boolean) && contact.pending == true) {
+            if (contact.pendingActual) {
                 if (tribeMemberHolderViewStates.hasNoPendingTribeMemberHeader()) {
                     tribeMemberHolderViewStates.add(
                         TribeMemberHolderViewState.PendingTribeMemberHeader

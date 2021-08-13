@@ -83,4 +83,18 @@ data class ContactDto(
                 false
             }
         }
+
+    @Transient
+    val pendingActual: Boolean =
+        when (pending) {
+            is Boolean -> {
+                pending
+            }
+            is Double -> {
+                pending.toInt() == 1
+            }
+            else -> {
+                false
+            }
+        }
 }
