@@ -91,9 +91,8 @@ internal class TribeMembersListViewModel @Inject constructor(
 
         viewModelScope.launch(mainImmediate) {
             loadTribeMembers()
+            loading = false
         }
-
-        loading = false
     }
 
     private suspend fun reloadTribeMembers() {
