@@ -4,10 +4,10 @@ import chat.sphinx.concept_network_query_contact.NetworkQueryContact
 import chat.sphinx.concept_network_query_contact.model.*
 import chat.sphinx.concept_network_relay_call.NetworkRelayCall
 import chat.sphinx.feature_network_query_contact.model.*
-import chat.sphinx.feature_network_query_contact.model.GetContactsRelayResponse
-import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
+import chat.sphinx.kotlin_response.ResponseError
+import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
@@ -21,6 +21,7 @@ class NetworkQueryContactImpl(
     companion object {
         private const val ENDPOINT_CONTACTS = "/contacts"
         private const val ENDPOINT_DELETE_CONTACT = "/contacts/%d"
+        private const val ENDPOINT_TRIBE_MEMBERS = "/contacts/%d"
         private const val ENDPOINT_GENERATE_TOKEN = "/contacts/tokens"
 
         private const val ENDPOINT_CREATE_INVITE = "/invites"
@@ -52,6 +53,18 @@ class NetworkQueryContactImpl(
                 useExtendedNetworkCallClient = true,
             )
         }
+
+    override fun getTribeMembers(
+        chatId: ChatId,
+        offset: Int,
+        limit: Int,
+        relayData: Pair<AuthorizationToken, RelayUrl>?
+    ): Flow<LoadResponse<GetTribeMembersResponse, ResponseError>> =
+        networkRelayCall.relayGet(
+            responseJsonClass = GetTribeMembersRelayResponse::class.java,
+            relayEndpoint = "${String.format(ENDPOINT_TRIBE_MEMBERS, chatId.value)}?offset=$offset&limit=$limit",
+            relayData = relayData
+        )
 
     ///////////
     /// PUT ///

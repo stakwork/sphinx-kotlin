@@ -528,6 +528,15 @@ SELECT *
 FROM messageDbo
 WHERE id = ?;
 
+messageLastMemberRequestGetByContactId:
+SELECT *
+FROM messageDbo
+WHERE sender = ?
+AND chat_id = :chat_id
+AND type = 19
+ORDER BY id DESC
+LIMIT 1;
+
 messageGetByUUID:
 SELECT *
 FROM messageDbo

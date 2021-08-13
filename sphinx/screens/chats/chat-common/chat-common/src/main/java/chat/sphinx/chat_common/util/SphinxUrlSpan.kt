@@ -2,11 +2,7 @@ package chat.sphinx.chat_common.util
 
 import android.text.style.URLSpan
 import android.view.View
-import chat.sphinx.chat_common.databinding.LayoutMessageLinkPreviewContactBinding
-import chat.sphinx.chat_common.databinding.LayoutMessageLinkPreviewTribeBinding
-import chat.sphinx.chat_common.databinding.LayoutMessageLinkPreviewUrlBinding
 import chat.sphinx.wrapper_common.lightning.*
-import chat.sphinx.wrapper_common.tribe.TribeJoinLink
 import chat.sphinx.wrapper_common.tribe.isValidTribeJoinLink
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -46,6 +42,7 @@ open class SphinxUrlSpan(
 
         override fun onLongClick(view: View): Boolean {
             longClickCounter.incrementAndGet()
+
             return onLongClickListener.onLongClick(view)
         }
     }

@@ -12,7 +12,6 @@ import androidx.navigation.NavArgs
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import app.cash.exhaustive.Exhaustive
 import chat.sphinx.chat_common.databinding.*
 import chat.sphinx.chat_common.model.NodeDescriptor
 import chat.sphinx.chat_common.model.TribeLink
@@ -23,15 +22,8 @@ import chat.sphinx.chat_common.ui.viewstate.selected.SelectedMessageViewState
 import chat.sphinx.chat_common.util.*
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
-import chat.sphinx.concept_image_loader.ImageLoaderOptions
-import chat.sphinx.concept_image_loader.Transformation
-import chat.sphinx.join_tribe.R
-import chat.sphinx.kotlin_response.LoadResponse
-import chat.sphinx.kotlin_response.Response
 import chat.sphinx.wrapper_common.dashboard.ContactId
-import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.message.MessageId
-import chat.sphinx.wrapper_common.tribe.TribeJoinLink
 import chat.sphinx.wrapper_message.Message
 import chat.sphinx.wrapper_message.MessageType
 import chat.sphinx.wrapper_view.Px
@@ -40,7 +32,6 @@ import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -220,21 +211,30 @@ internal class MessageListAdapter<ARGS : NavArgs>(
         private val disposables: ArrayList<Disposable> = ArrayList(4)
         private var currentViewState: MessageHolderViewState? = null
 
-        private val selectedMessageLongClickListener: OnLongClickListener
-
         private val onSphinxInteractionListener: SphinxUrlSpan.OnInteractionListener
 
         init {
             binding.includeMessageHolderBubble.apply {
-                selectedMessageLongClickListener = OnLongClickListener { v ->
+
+                val linkPreviewClickListener = View.OnClickListener {
+                    currentViewState?.messageLinkPreview?.let { preview ->
+                        if (preview is NodeDescriptor) {
+                            viewModel.handleContactTribeLinks(preview.nodeDescriptor.value)
+                        } else if (preview is TribeLink) {
+                            viewModel.handleContactTribeLinks(preview.tribeJoinLink.value)
+                        }
+                    }
+                }
+
+                val selectedMessageLongClickListener = OnLongClickListener { v ->
                     SelectedMessageViewState.SelectedMessage.instantiate(
                         messageHolderViewState = currentViewState,
                         holderYPosTop = Px(binding.root.y),
                         holderHeight = Px(binding.root.measuredHeight.toFloat()),
                         holderWidth = Px(binding.root.measuredWidth.toFloat()),
-                        bubbleXPosStart = Px(v.x),
-                        bubbleWidth = Px(v.measuredWidth.toFloat()),
-                        bubbleHeight = Px(v.measuredHeight.toFloat()),
+                        bubbleXPosStart = Px(root.x),
+                        bubbleWidth = Px(root.measuredWidth.toFloat()),
+                        bubbleHeight = Px(root.measuredHeight.toFloat()),
                         headerHeight = headerHeight,
                         statusHeaderHeight = Px(binding.includeMessageStatusHeader.root.measuredHeight.toFloat()),
                         recyclerViewWidth = recyclerViewWidth,
@@ -245,8 +245,6 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                     true
                 }
 
-                root.setOnLongClickListener(selectedMessageLongClickListener)
-
                 onSphinxInteractionListener = object: SphinxUrlSpan.OnInteractionListener(
                     selectedMessageLongClickListener
                 ) {
@@ -254,24 +252,39 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                         viewModel.handleContactTribeLinks(url)
                     }
                 }
-            }
 
-            binding.includeMessageHolderBubble.includeMessageTypeCallInvite.let { holder ->
-                holder.layoutConstraintCallInviteJoinByAudio.setOnClickListener {
-                    currentViewState?.message?.let { nnMessage ->
-                        joinCall(nnMessage, true)
-                    }
+                root.setOnLongClickListener(onSphinxInteractionListener)
+
+                SphinxLinkify.addLinks(textViewMessageText, SphinxLinkify.ALL, onSphinxInteractionListener)
+                textViewMessageText.setOnLongClickListener(onSphinxInteractionListener)
+
+                includeMessageLinkPreviewContact.apply contact@ {
+                    root.setOnLongClickListener(selectedMessageLongClickListener)
+                    root.setOnClickListener(linkPreviewClickListener)
                 }
 
-                holder.layoutConstraintCallInviteJoinByVideo.setOnClickListener {
-                    currentViewState?.message?.let { nnMessage ->
-                        joinCall(nnMessage, false)
-                    }
+                includeMessageLinkPreviewTribe.apply tribe@ {
+                    root.setOnLongClickListener(selectedMessageLongClickListener)
+                    root.setOnClickListener(linkPreviewClickListener)
                 }
 
-                holder.buttonCallInviteCopyLink.setOnClickListener {
-                    currentViewState?.message?.let { nnMessage ->
-                        viewModel.copyCallLink(nnMessage)
+                includeMessageTypeCallInvite.let { holder ->
+                    holder.layoutConstraintCallInviteJoinByAudio.setOnClickListener {
+                        currentViewState?.message?.let { nnMessage ->
+                            joinCall(nnMessage, true)
+                        }
+                    }
+
+                    holder.layoutConstraintCallInviteJoinByVideo.setOnClickListener {
+                        currentViewState?.message?.let { nnMessage ->
+                            joinCall(nnMessage, false)
+                        }
+                    }
+
+                    holder.buttonCallInviteCopyLink.setOnClickListener {
+                        currentViewState?.message?.let { nnMessage ->
+                            viewModel.copyCallLink(nnMessage)
+                        }
                     }
                 }
             }
@@ -308,41 +321,6 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                 holder.includeMessageTypeGroupActionMemberRemoval.apply {
                     textViewGroupActionMemberRemovalDeleteGroup.setOnClickListener {
                         deleteTribe()
-                    }
-                }
-            }
-
-            binding.includeMessageHolderBubble.apply {
-                includeMessageLinkPreviewContact.apply contact@ {
-                    textViewMessageLinkPreviewAddContactBanner.setOnClickListener {
-                        currentViewState?.messageLinkPreview?.let { preview ->
-                            if (preview is NodeDescriptor) {
-                                viewModel.handleContactTribeLinks(preview.nodeDescriptor.value)
-                            }
-                        }
-                    }
-                    root.setOnClickListener {
-                        currentViewState?.messageLinkPreview?.let { preview ->
-                            if (preview is NodeDescriptor) {
-                                viewModel.handleContactTribeLinks(preview.nodeDescriptor.value)
-                            }
-                        }
-                    }
-                }
-                includeMessageLinkPreviewTribe.apply tribe@ {
-                    textViewMessageLinkPreviewTribeSeeBanner.setOnClickListener {
-                        currentViewState?.messageLinkPreview?.let { preview ->
-                            if (preview is TribeLink) {
-                                viewModel.handleContactTribeLinks(preview.tribeJoinLink.value)
-                            }
-                        }
-                    }
-                    root.setOnClickListener {
-                        currentViewState?.messageLinkPreview?.let { preview ->
-                            if (preview is TribeLink) {
-                                viewModel.handleContactTribeLinks(preview.tribeJoinLink.value)
-                            }
-                        }
                     }
                 }
             }

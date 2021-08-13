@@ -1519,6 +1519,20 @@ abstract class SphinxRepository(
         )
     }
 
+    override fun getTribeLastMemberRequestByContactId(contactId: ContactId, chatId: ChatId, ): Flow<Message?> = flow {
+        val queries = coreDB.getSphinxDatabaseQueries()
+
+        emitAll(
+            queries.messageLastMemberRequestGetByContactId(contactId, chatId)
+                .asFlow()
+                .mapToOneOrNull(io)
+                .map { it?.let { messageDbo ->
+                    mapMessageDboAndDecryptContentIfNeeded(queries, messageDbo)
+                }}
+                .distinctUntilChanged()
+        )
+    }
+
     override fun getMessageByUUID(messageUUID: MessageUUID): Flow<Message?> = flow {
         val queries = coreDB.getSphinxDatabaseQueries()
         emitAll(
@@ -3294,6 +3308,51 @@ abstract class SphinxRepository(
                                             ChatId(loadResponse.value.chat.id),
                                             latestMessageUpdatedTimeMap,
                                             queries,
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }.join()
+
+        return response
+    }
+
+    override suspend fun kickMemberFromTribe(
+        chatId: ChatId,
+        contactId: ContactId
+    ): Response<Any, ResponseError> {
+        var response: Response<Any, ResponseError>  = Response.Error(ResponseError(("Failed to kick member from tribe")))
+
+        applicationScope.launch(mainImmediate) {
+            networkQueryChat.kickMemberFromChat(
+                chatId,
+                contactId
+            ).collect { loadResponse ->
+
+                when (loadResponse) {
+                    is LoadResponse.Loading -> {}
+
+                    is Response.Error -> {
+                        response = loadResponse
+                    }
+                    is Response.Success -> {
+                        response = loadResponse
+                        val queries = coreDB.getSphinxDatabaseQueries()
+
+                        chatLock.withLock {
+                            messageLock.withLock {
+                                withContext(io) {
+                                    queries.transaction {
+                                        upsertChat(
+                                            loadResponse.value,
+                                            moshi,
+                                            chatSeenMap,
+                                            queries,
+                                            null
                                         )
                                     }
                                 }

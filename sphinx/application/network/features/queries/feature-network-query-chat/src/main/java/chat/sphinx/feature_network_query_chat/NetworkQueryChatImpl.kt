@@ -11,6 +11,7 @@ import chat.sphinx.wrapper_chat.ChatMuted
 import chat.sphinx.wrapper_chat.isTrue
 import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.dashboard.ChatId
+import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
 import kotlinx.coroutines.flow.Flow
@@ -29,7 +30,7 @@ class NetworkQueryChatImpl(
         private const val UN_MUTE_CHAT = "unmute"
         private const val ENDPOINT_GROUP = "/group"
         private const val ENDPOINT_EDIT_GROUP = "/group/%d"
-        private const val ENDPOINT_KICK = "/kick"
+        private const val ENDPOINT_KICK = "/kick/%d/%d"
         private const val ENDPOINT_MEMBER = "/member"
         private const val ENDPOINT_TRIBE = "/tribe"
         private const val ENDPOINT_STREAM_SATS = "/stream"
@@ -96,8 +97,20 @@ class NetworkQueryChatImpl(
             relayData = relayData
         )
 
+    override fun kickMemberFromChat(
+        chatId: ChatId,
+        contactId: ContactId,
+        relayData: Pair<AuthorizationToken, RelayUrl>?
+    ): Flow<LoadResponse<ChatDto, ResponseError>>  =
+        networkRelayCall.relayPut(
+            responseJsonClass = UpdateChatRelayResponse::class.java,
+            relayEndpoint = String.format(ENDPOINT_KICK, chatId.value, contactId.value),
+            requestBodyJsonClass = Map::class.java,
+            requestBody = mapOf(Pair("", "")),
+            relayData = relayData
+        )
+
 //    app.put('/chat/:id', chats.addGroupMembers)
-//    app.put('/kick/:chat_id/:contact_id', chats.kickChatMember)
 //    app.put('/member/:contactId/:status/:messageId', chatTribes.approveOrRejectMember)
     override fun updateTribe(
         chatId: ChatId,
