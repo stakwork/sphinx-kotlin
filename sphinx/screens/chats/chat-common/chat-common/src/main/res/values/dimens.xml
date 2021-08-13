@@ -83,8 +83,9 @@
 
 
     <!-- Link Previews  -->
-    <dimen name="web_link_preview_holder_height">100dp</dimen>
-    <dimen name="contact_link_preview_holder_height">168dp</dimen>
+    <dimen name="web_link_preview_holder_min_height">70dp</dimen>
+    <dimen name="contact_link_preview_holder_min_height">100dp</dimen>
+    <dimen name="tribe_link_preview_holder_min_height">100dp</dimen>
     <dimen name="web_link_preview_image_xy">100dp</dimen>
     <dimen name="link_preview_action_button_height">40dp</dimen>
     <dimen name="contact_link_preview_avatar_image_xy">80dp</dimen>

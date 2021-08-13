@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:minHeight="@dimen/contact_link_preview_holder_min_height"
     android:visibility="gone"
     tools:visibility="visible"
     tools:background="@color/body">
@@ -38,6 +39,29 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/progress_bar_link_preview"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@+id/view_preview_divider"
+        app:layout_constraintBottom_toBottomOf="parent"
+        tools:visibility="gone">
+
+        <ProgressBar
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            style="?android:attr/progressBarStyle"
+            android:indeterminateTint="@android:color/white"
+            android:indeterminate="true"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_contact_link_preview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:paddingVertical="@dimen/default_layout_margin"
@@ -116,17 +140,6 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="1.0"
             app:layout_constraintStart_toStartOf="parent" />
-
-        <androidx.constraintlayout.widget.Group
-            android:id="@+id/message_link_contact_group_contact_label_text"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            app:constraint_referenced_ids="text_view_message_link_preview_contact_pubkey,text_view_message_link_preview_new_contact_label"
-            app:layout_constraintBottom_toBottomOf="@id/image_view_message_link_preview_contact_avatar"
-            app:layout_constraintEnd_toStartOf="@id/image_view_message_link_preview_qr_invite_icon"
-            app:layout_constraintHorizontal_bias="1.0"
-            app:layout_constraintStart_toEndOf="@id/image_view_message_link_preview_contact_avatar"
-            app:layout_constraintTop_toTopOf="@id/image_view_message_link_preview_contact_avatar" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
