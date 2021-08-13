@@ -72,11 +72,23 @@ internal fun LayoutMessageHolderBinding.setView(
 
     apply {
         lifecycleScope.launch(dispatchers.mainImmediate) {
+            val initialsColor = if (viewState.statusHeader != null) {
+                Color.parseColor(
+                    userColorsHelper.getHexCodeForKey(
+                        viewState.statusHeader!!.colorKey,
+                        root.context.getRandomHexCode()
+                    )
+                )
+            } else {
+                null
+            }
+
             viewState.initialHolder.setInitialHolder(
                 includeMessageHolderChatImageInitialHolder.textViewInitials,
                 includeMessageHolderChatImageInitialHolder.imageViewChatPicture,
                 includeMessageStatusHeader,
-                imageLoader
+                imageLoader,
+                initialsColor
             )?.also {
                 disposables.add(it)
             }
@@ -446,10 +458,12 @@ internal inline fun LayoutMessageHolderBinding.setStatusHeader(
                         visible
                         text = name
                         lifecycleScope.launch(dispatchers.mainImmediate) {
-                            Color.parseColor(
-                                userColorsHelper.getHexCodeForKey(
-                                    statusHeader.colorKey,
-                                    root.context.getRandomHexCode()
+                            textViewMessageStatusReceivedSenderName.setTextColor(
+                                Color.parseColor(
+                                    userColorsHelper.getHexCodeForKey(
+                                        statusHeader.colorKey,
+                                        root.context.getRandomHexCode()
+                                    )
                                 )
                             )
                         }.let { job ->

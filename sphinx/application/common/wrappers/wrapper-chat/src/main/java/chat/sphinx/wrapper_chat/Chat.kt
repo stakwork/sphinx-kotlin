@@ -33,7 +33,7 @@ inline fun Chat.hasPendingContacts(): Boolean =
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun Chat.getColorKey(): String {
-    return "chat-${id}-color"
+    return "chat-${id.value}-color"
 }
 
 @Suppress("NOTHING_TO_INLINE")

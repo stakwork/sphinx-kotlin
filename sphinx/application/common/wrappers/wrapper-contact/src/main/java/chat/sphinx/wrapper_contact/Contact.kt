@@ -33,7 +33,7 @@ inline val Contact.avatarUrl: URL?
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun Contact.getColorKey(): String {
-    return "contact-${id}-color"
+    return "contact-${id.value}-color"
 }
 
 data class Contact(

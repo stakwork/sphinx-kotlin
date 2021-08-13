@@ -9,10 +9,9 @@ import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
-import chat.sphinx.resources.setBackgroundRandomColor
+import chat.sphinx.resources.setInitialsColor
 import chat.sphinx.wrapper_common.PhotoUrl
 import io.matthewnelson.android_feature_screens.util.gone
-import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.visible
 
 /*
@@ -55,12 +54,15 @@ sealed class InitialHolderViewState {
             imageLoader: ImageLoader<ImageView>,
             @ColorInt color: Int?,
         ): Disposable? {
-            statusHeader.root.gone
             textViewInitials.visible
             imageViewPicture.gone
 
             textViewInitials.text = initials
-            textViewInitials.setBackgroundRandomColor(R.drawable.chat_initials_circle, color)
+
+            textViewInitials.setInitialsColor(
+                color,
+                R.drawable.chat_initials_circle
+            )
             return null
         }
     }
@@ -73,7 +75,6 @@ sealed class InitialHolderViewState {
             imageLoader: ImageLoader<ImageView>,
             @ColorInt color: Int?,
         ): Disposable {
-            statusHeader.root.gone
             textViewInitials.gone
             imageViewPicture.visible
 
