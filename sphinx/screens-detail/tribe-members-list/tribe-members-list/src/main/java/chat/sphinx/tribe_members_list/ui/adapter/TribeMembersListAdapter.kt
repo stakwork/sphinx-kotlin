@@ -108,7 +108,6 @@ internal class TribeMembersListAdapter(
             viewModel.collectViewState { viewState ->
                 if (viewState is TribeMembersListViewState.ListMode) {
                     if (!viewState.loading && viewState.list.isNotEmpty()) {
-
                         if (tribeMembers.isEmpty()) {
                             tribeMembers.addAll(viewState.list)
                         } else {
@@ -124,7 +123,6 @@ internal class TribeMembersListAdapter(
                             }
                         }
                         this@TribeMembersListAdapter.notifyDataSetChanged()
-
                     }
                 }
             }
@@ -183,11 +181,17 @@ internal class TribeMembersListAdapter(
                         }
                     }
                     is TribeMemberHolderViewState.PendingTribeMemberHeader -> {
-                        bindHeader(binding, "PENDING TRIBE MEMBERS")
+                        bindHeader(
+                            binding,
+                            binding.root.context.getString(R.string.pending_tribe_members_header)
+                        )
 
                     }
                     is TribeMemberHolderViewState.TribeMemberHeader -> {
-                        bindHeader(binding, "TRIBE MEMBERS")
+                        bindHeader(
+                            binding,
+                            binding.root.context.getString(R.string.tribe_members_list_header)
+                        )
                     }
                 }
             }

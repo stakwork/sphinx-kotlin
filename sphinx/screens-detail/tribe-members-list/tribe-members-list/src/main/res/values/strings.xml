@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="tribe_members_list_header">TRIBE MEMBERS</string>
+    <string name="pending_tribe_members_header">PENDING TRIBE MEMBERS</string>
     <string name="loading_more">Loading more...</string>
 </resources>
