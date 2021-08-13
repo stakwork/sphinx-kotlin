@@ -68,7 +68,6 @@ internal class FirebasePushNotificationRegistrar(
                     response
                 }
                 is Response.Success -> {
-                    response
                     contactRepository.updateOwnerDeviceId(DeviceId(response.value))
                 }
             }
