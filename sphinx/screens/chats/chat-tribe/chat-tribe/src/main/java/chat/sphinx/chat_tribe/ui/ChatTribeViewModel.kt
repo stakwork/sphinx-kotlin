@@ -19,7 +19,6 @@ import chat.sphinx.concept_network_query_lightning.model.route.isRouteAvailable
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_message.MessageRepository
-import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.resources.getRandomHexCode
 import chat.sphinx.wrapper_chat.getColorKey
 import chat.sphinx.concept_repository_message.model.SendMessage
@@ -77,7 +76,6 @@ internal class ChatTribeViewModel @Inject constructor(
     contactRepository: ContactRepository,
     messageRepository: MessageRepository,
     networkQueryLightning: NetworkQueryLightning,
-    userColorsHelper: UserColorsHelper,
     mediaCacheHandler: MediaCacheHandler,
     savedStateHandle: SavedStateHandle,
     cameraViewModelCoordinator: ViewModelCoordinator<CameraRequest, CameraResponse>,
@@ -93,7 +91,6 @@ internal class ChatTribeViewModel @Inject constructor(
     contactRepository,
     messageRepository,
     networkQueryLightning,
-    userColorsHelper,
     mediaCacheHandler,
     savedStateHandle,
     cameraViewModelCoordinator,
@@ -131,17 +128,17 @@ internal class ChatTribeViewModel @Inject constructor(
                     InitialHolderViewState.Url(it)
                 )
             } ?: chat?.name?.let {
-                val chatColor = Color.parseColor(
-                    userColorsHelper.getHexCodeForKey(
-                        chat.getColorKey(),
-                        app.getRandomHexCode()
-                    )
-                )
+//                val chatColor = Color.parseColor(
+//                    userColorsHelper.getHexCodeForKey(
+//                        chat.getColorKey(),
+//                        app.getRandomHexCode()
+//                    )
+//                )
 
                 emit(
                     InitialHolderViewState.Initials(
                         it.value.getInitials(),
-                        chatColor
+                        chat.getColorKey()
                     )
                 )
             } ?: emit(
@@ -164,13 +161,12 @@ internal class ChatTribeViewModel @Inject constructor(
         return message.senderPic?.let { url ->
             InitialHolderViewState.Url(url)
         } ?: message.senderAlias?.let { alias ->
-            InitialHolderViewState.Initials(
-                alias.value.getInitials(),
-                Color.parseColor(
-                    userColorsHelper.getHexCodeForKey(message.getColorKey(),
-                    app.getRandomHexCode())
-                )
-            )
+            InitialHolderViewState.Initials(alias.value.getInitials(), message.getColorKey())
+//                Color.parseColor(
+//                    userColorsHelper.getHexCodeForKey(message.getColorKey(),
+//                    app.getRandomHexCode())
+//                )
+//            )
         } ?: InitialHolderViewState.None
     }
 
@@ -470,18 +466,14 @@ internal class ChatTribeViewModel @Inject constructor(
 
                         messageRepository.sendPodcastBoost(chatId, nnPodcast)
 
-                        nnPodcast.value?.destinations?.let { destinations ->
-                            mediaPlayerServiceController.submitAction(
-                                UserAction.SendBoost(
-                                    chatId,
-                                    nnPodcast.id,
-                                    metaData,
-                                    destinations
-                                )
+                        mediaPlayerServiceController.submitAction(
+                            UserAction.SendBoost(
+                                chatId,
+                                nnPodcast.id,
+                                metaData,
+                                nnPodcast.value.destinations
                             )
-                        }
-
-
+                        )
                     }
                 }
             }

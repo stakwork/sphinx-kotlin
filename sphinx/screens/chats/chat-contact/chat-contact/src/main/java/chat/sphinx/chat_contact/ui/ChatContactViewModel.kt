@@ -1,7 +1,6 @@
 package chat.sphinx.chat_contact.ui
 
 import android.app.Application
-import android.graphics.Color
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.camera_view_model_coordinator.request.CameraRequest
@@ -16,11 +15,9 @@ import chat.sphinx.concept_network_query_lightning.model.route.isRouteAvailable
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_message.MessageRepository
-import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
-import chat.sphinx.resources.getRandomHexCode
 import chat.sphinx.concept_repository_message.model.SendMessage
 import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
 import chat.sphinx.logger.SphinxLogger
@@ -64,7 +61,6 @@ internal class ChatContactViewModel @Inject constructor(
     contactRepository: ContactRepository,
     messageRepository: MessageRepository,
     networkQueryLightning: NetworkQueryLightning,
-    userColorsHelper: UserColorsHelper,
     mediaCacheHandler: MediaCacheHandler,
     savedStateHandle: SavedStateHandle,
     cameraViewModelCoordinator: ViewModelCoordinator<CameraRequest, CameraResponse>,
@@ -79,7 +75,6 @@ internal class ChatContactViewModel @Inject constructor(
     contactRepository,
     messageRepository,
     networkQueryLightning,
-    userColorsHelper,
     mediaCacheHandler,
     savedStateHandle,
     cameraViewModelCoordinator,
@@ -121,17 +116,11 @@ internal class ChatContactViewModel @Inject constructor(
                         InitialHolderViewState.Url(photoUrl)
                     )
                 } ?: contact.alias?.let { alias ->
-                    val contactColor = Color.parseColor(
-                        userColorsHelper.getHexCodeForKey(
-                            contact.getColorKey(),
-                            app.getRandomHexCode()
-                        )
-                    )
 
                     emit(
                         InitialHolderViewState.Initials(
                             alias.value.getInitials(),
-                            contactColor
+                            contact.getColorKey()
                         )
                     )
                 } ?: emit(

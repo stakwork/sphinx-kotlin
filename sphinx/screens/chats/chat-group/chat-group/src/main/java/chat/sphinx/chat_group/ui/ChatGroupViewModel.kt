@@ -14,7 +14,6 @@ import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_message.MessageRepository
-import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.concept_repository_message.model.SendMessage
 import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
 import chat.sphinx.kotlin_response.LoadResponse
@@ -34,6 +33,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import chat.sphinx.concept_link_preview.LinkPreviewHandler
+import chat.sphinx.wrapper_message.getColorKey
 import io.matthewnelson.concept_media_cache.MediaCacheHandler
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -52,7 +52,6 @@ class ChatGroupViewModel @Inject constructor(
     contactRepository: ContactRepository,
     messageRepository: MessageRepository,
     networkQueryLightning: NetworkQueryLightning,
-    userColorsHelper: UserColorsHelper,
     mediaCacheHandler: MediaCacheHandler,
     savedStateHandle: SavedStateHandle,
     cameraViewModelCoordinator: ViewModelCoordinator<CameraRequest, CameraResponse>,
@@ -67,7 +66,6 @@ class ChatGroupViewModel @Inject constructor(
     contactRepository,
     messageRepository,
     networkQueryLightning,
-    userColorsHelper,
     mediaCacheHandler,
     savedStateHandle,
     cameraViewModelCoordinator,
@@ -94,17 +92,17 @@ class ChatGroupViewModel @Inject constructor(
                     InitialHolderViewState.Url(it)
                 )
             } ?: chat?.name?.let {
-                val chatColor = Color.parseColor(
-                    userColorsHelper.getHexCodeForKey(
-                        chat.getColorKey(),
-                        app.getRandomHexCode()
-                    )
-                )
+//                val chatColor = Color.parseColor(
+//                    userColorsHelper.getHexCodeForKey(
+//                        chat.getColorKey(),
+//                        app.getRandomHexCode()
+//                    )
+//                )
 
                 emit(
                     InitialHolderViewState.Initials(
                         it.value.getInitials(),
-                        chatColor
+                        chat.getColorKey()
                     )
                 )
             } ?: emit(
@@ -127,7 +125,7 @@ class ChatGroupViewModel @Inject constructor(
         return message.senderPic?.let { url ->
             InitialHolderViewState.Url(url)
         } ?: message.senderAlias?.let { alias ->
-            InitialHolderViewState.Initials(alias.value.getInitials(), app.getRandomColor())
+            InitialHolderViewState.Initials(alias.value.getInitials(), message.getColorKey())
         } ?: InitialHolderViewState.None
     }
 

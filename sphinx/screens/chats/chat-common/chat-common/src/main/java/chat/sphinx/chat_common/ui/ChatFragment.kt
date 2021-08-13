@@ -1,6 +1,7 @@
 package chat.sphinx.chat_common.ui
 
 import android.content.Context
+import android.graphics.Color
 import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
@@ -39,6 +40,7 @@ import chat.sphinx.concept_network_client_crypto.CryptoHeader
 import chat.sphinx.concept_network_client_crypto.CryptoScheme
 import chat.sphinx.concept_repository_message.model.AttachmentInfo
 import chat.sphinx.concept_repository_message.model.SendMessage
+import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.insetter_activity.addStatusBarPadding
@@ -52,6 +54,7 @@ import chat.sphinx.resources.*
 import chat.sphinx.wrapper_chat.isTrue
 import chat.sphinx.wrapper_meme_server.headerKey
 import chat.sphinx.wrapper_meme_server.headerValue
+import chat.sphinx.wrapper_message.getColorKey
 import chat.sphinx.wrapper_message.retrieveImageUrlAndMessageMedia
 import chat.sphinx.wrapper_message.retrieveTextToShow
 import chat.sphinx.wrapper_message.toReplyUUID
@@ -94,11 +97,12 @@ abstract class ChatFragment<
 
     protected abstract val menuEnablePayments: Boolean
 
+    protected abstract val userColorsHelper: UserColorsHelper
     protected abstract val imageLoader: ImageLoader<ImageView>
 
     private val sendMessageBuilder = SendMessage.Builder()
 
-    private val holderJobs: ArrayList<Job> = ArrayList(6)
+    private val holderJobs: ArrayList<Job> = ArrayList(8)
     private val disposables: ArrayList<Disposable> = ArrayList(4)
 
     override val chatFragmentContext: Context
@@ -456,7 +460,8 @@ abstract class ChatFragment<
             viewLifecycleOwner,
             onStopSupervisor,
             viewModel,
-            imageLoader
+            imageLoader,
+            userColorsHelper
         )
         recyclerView.apply {
             setHasFixedSize(false)
@@ -489,7 +494,12 @@ abstract class ChatFragment<
                                 text = viewState.initials
                                 setBackgroundRandomColor(
                                     R.drawable.chat_initials_circle,
-                                    viewState.color,
+                                    Color.parseColor(
+                                        userColorsHelper.getHexCodeForKey(
+                                            viewState.colorKey,
+                                            root.context.getRandomHexCode(),
+                                        )
+                                    ),
                                 )
                             }
 
@@ -569,6 +579,7 @@ abstract class ChatFragment<
                                 viewModel.memeServerTokenHandler,
                                 viewState.recyclerViewWidth,
                                 viewState.messageHolderViewState,
+                                userColorsHelper,
                             )
                             includeMessageStatusHeader.root.gone
                             includeMessageHolderChatImageInitialHolder.root.gone
@@ -785,7 +796,14 @@ abstract class ChatFragment<
 
                                 textViewReplySenderLabel.text = viewState.senderAlias
 
-                                viewReplyBarLeading.setBackgroundColor(getColor(R.color.lightPurple))
+                                viewReplyBarLeading.setBackgroundColor(
+                                    Color.parseColor(
+                                        userColorsHelper.getHexCodeForKey(
+                                            message.getColorKey(),
+                                            root.context.getRandomHexCode(),
+                                        )
+                                    )
+                                )
 
                                 message.retrieveImageUrlAndMessageMedia()?.let { mediaData ->
                                     val options: ImageLoaderOptions? = if (mediaData.second != null) {

@@ -1,6 +1,5 @@
 package chat.sphinx.chat_common.ui.viewstate.messageholder
 
-import androidx.annotation.ColorInt
 import chat.sphinx.concept_link_preview.model.*
 import chat.sphinx.wrapper_chat.ChatType
 import chat.sphinx.wrapper_common.PhotoUrl
@@ -14,19 +13,17 @@ internal sealed class LayoutState private constructor() {
 
     data class MessageStatusHeader(
         val senderName: String?,
-        @ColorInt val senderColor: Int?,
+        val colorKey: String,
         val showSent: Boolean,
         val showSendingIcon: Boolean,
         val showBoltIcon: Boolean,
         val showFailedContainer: Boolean,
         val showLockIcon: Boolean,
         val timestamp: String,
-//        @ColorInt val senderColor: Int?,
     ): LayoutState() {
         val showReceived: Boolean
             get() = !showSent
     }
-
 
     data class GroupActionIndicator(
         val actionType: MessageType.GroupAction,
@@ -34,7 +31,6 @@ internal sealed class LayoutState private constructor() {
         val isAdminView: Boolean,
         val subjectName: String?,
     ): LayoutState()
-
 
     data class DeletedMessage(
         val gravityStart: Boolean,
@@ -48,7 +44,7 @@ internal sealed class LayoutState private constructor() {
             data class ReplyMessage(
                 val showSent: Boolean,
                 val sender: String,
-                @ColorInt val senderColor: Int?,
+                val colorKey: String,
                 val text: String,
                 val url: String?,
                 val media: MessageMedia?,

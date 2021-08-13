@@ -24,7 +24,8 @@ sealed class InitialHolderViewState {
         textViewInitials: TextView,
         imageViewPicture: ImageView,
         statusHeader: LayoutMessageStatusHeaderBinding,
-        imageLoader: ImageLoader<ImageView>
+        imageLoader: ImageLoader<ImageView>,
+        @ColorInt color: Int? = null,
     ): Disposable?
 
     object None: InitialHolderViewState() {
@@ -33,6 +34,7 @@ sealed class InitialHolderViewState {
             imageViewPicture: ImageView,
             statusHeader: LayoutMessageStatusHeaderBinding,
             imageLoader: ImageLoader<ImageView>,
+            @ColorInt color: Int?,
         ): Disposable? {
             statusHeader.root.gone
             textViewInitials.gone
@@ -44,13 +46,14 @@ sealed class InitialHolderViewState {
 
     data class Initials(
         val initials: String,
-        @ColorInt val color: Int? = null
+        val colorKey: String,
     ): InitialHolderViewState() {
         override suspend fun setInitialHolder(
             textViewInitials: TextView,
             imageViewPicture: ImageView,
             statusHeader: LayoutMessageStatusHeaderBinding,
             imageLoader: ImageLoader<ImageView>,
+            @ColorInt color: Int?,
         ): Disposable? {
             statusHeader.root.gone
             textViewInitials.visible
@@ -67,7 +70,8 @@ sealed class InitialHolderViewState {
             textViewInitials: TextView,
             imageViewPicture: ImageView,
             statusHeader: LayoutMessageStatusHeaderBinding,
-            imageLoader: ImageLoader<ImageView>
+            imageLoader: ImageLoader<ImageView>,
+            @ColorInt color: Int?,
         ): Disposable {
             statusHeader.root.gone
             textViewInitials.gone
