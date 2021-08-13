@@ -253,12 +253,10 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                     }
                 }
 
-                if (onSphinxInteractionListener != null) {
-                    root.setOnLongClickListener(onSphinxInteractionListener)
+                root.setOnLongClickListener(onSphinxInteractionListener)
 
-                    SphinxLinkify.addLinks(textViewMessageText, SphinxLinkify.ALL, onSphinxInteractionListener)
-                    textViewMessageText.setOnLongClickListener(onSphinxInteractionListener)
-                }
+                SphinxLinkify.addLinks(textViewMessageText, SphinxLinkify.ALL, onSphinxInteractionListener)
+                textViewMessageText.setOnLongClickListener(onSphinxInteractionListener)
 
                 includeMessageLinkPreviewContact.apply contact@ {
                     root.setOnLongClickListener(selectedMessageLongClickListener)
