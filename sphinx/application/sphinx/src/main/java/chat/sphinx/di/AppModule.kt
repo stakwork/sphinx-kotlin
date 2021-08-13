@@ -6,10 +6,8 @@ import android.widget.ImageView
 import chat.sphinx.BuildConfig
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_network_client_cache.NetworkClientCache
-import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.feature_image_loader_android.ImageLoaderAndroid
 import chat.sphinx.logger.SphinxLogger
-import chat.sphinx.user_colors_helper.UserColorsHelperImpl
 import chat.sphinx.util.SphinxDispatchers
 import chat.sphinx.util.SphinxLoggerImpl
 import com.squareup.moshi.Moshi
@@ -92,20 +90,6 @@ object AppModule {
         imageLoaderAndroid: ImageLoaderAndroid
     ): ImageLoader<ImageView> =
         imageLoaderAndroid
-
-    @Provides
-    @Singleton
-    fun provideUserColorsImpl(
-        @ApplicationContext appContext: Context,
-        dispatchers: CoroutineDispatchers
-    ): UserColorsHelperImpl =
-        UserColorsHelperImpl(appContext, dispatchers)
-
-    @Provides
-    fun provideUserColors(
-        userColorsHelperImpl: UserColorsHelperImpl
-    ): UserColorsHelper =
-        userColorsHelperImpl
 
     @Provides
     fun provideMediaCacheHandler(

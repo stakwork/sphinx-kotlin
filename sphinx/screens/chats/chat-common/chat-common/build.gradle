@@ -34,6 +34,9 @@ dependencies {
     api project(path: ':android:features:android-feature-screens')
 
     // Sphinx
+    api project(path: ':sphinx:activity:insetter-activity')
+    api project(path: ':sphinx:activity:concepts:concept-user-colors-helper')
+
     api project(path: ':sphinx:application:common:menus:menu-bottom')
 
     api project(path: ':sphinx:application:common:logger')
@@ -52,8 +55,6 @@ dependencies {
 
     api project(path: ':sphinx:application:network:concepts:concept-link-preview')
     api project(path: ':sphinx:application:network:concepts:queries:concept-network-query-lightning')
-    api project(path: ':sphinx:activity:insetter-activity')
-    implementation project(path: ':sphinx:application:data:concepts:concept-user-colors-helper')
 
     implementation project(path: ':sphinx:screens-detail:new-contact:new-contact')
     implementation project(path: ':sphinx:screens-detail:join-tribe:join-tribe')

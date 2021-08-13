@@ -31,7 +31,7 @@ dependencies {
     api project(path: ':kotlin:concepts:concept-coroutines')
 
     // Sphinx
-    api project(path: ':sphinx:application:data:concepts:concept-user-colors-helper')
+    api project(path: ':sphinx:activity:concepts:concept-user-colors-helper')
 
     testImplementation project(path: ':kotlin:test:test-concept-coroutines')
 }

@@ -35,9 +35,8 @@ dependencies {
     api project(path: ':android:features:android-feature-activity')
 
     // Sphinx
-    implementation project(path: ':sphinx:screens-detail:common:detail-resources')
     implementation project(path: ':sphinx:activity:insetter-activity')
-
+    api project(path: ':sphinx:activity:features:user-colors-helper')
     api project(path: ':sphinx:activity:hilt-qualifiers')
 
     api project(path: ':sphinx:screens:add-sats:add-sats')
@@ -54,6 +53,7 @@ dependencies {
     api project(path: ':sphinx:screens:profile:profile')
     api project(path: ':sphinx:screens:splash:splash')
 
+    implementation project(path: ':sphinx:screens-detail:common:detail-resources')
     api project(path: ':sphinx:screens-detail:add-friend:add-friend')
     api project(path: ':sphinx:screens-detail:camera:camera')
     api project(path: ':sphinx:screens-detail:chat-detail:tribe-detail')

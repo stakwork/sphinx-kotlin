@@ -34,19 +34,21 @@ dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
 
     // Sphinx
-    api project(path: ':sphinx:screens:chats:chat-common:chat-common')
-    api project(path: ':sphinx:service:concepts:concept-service-media-player')
-    api project(path: ':sphinx:service:concepts:concept-service-media-player')
+    implementation project(path: ':sphinx:activity:concepts:concept-view-model-coordinator')
 
     implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-chat')
-    implementation project(path: ':sphinx:application:data:concepts:concept-user-colors-helper')
     implementation project(path: ':sphinx:application:common:resources')
+
+    api project(path: ':sphinx:screens:chats:chat-common:chat-common')
+
+    // TODO: Remove dependency on other screens
     implementation project(path: ':sphinx:screens-detail:chat-detail:tribe-detail')
     implementation project(path: ':sphinx:screens-detail:podcast-player:podcast-player')
 
+    api project(path: ':sphinx:service:concepts:concept-service-media-player')
+
     implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt
-    implementation project(path: ':sphinx:activity:concepts:concept-view-model-coordinator')
 
     implementation deps.lottie.sdk
 

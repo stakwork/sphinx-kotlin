@@ -88,6 +88,8 @@ include ':sphinx:application:network:features:tor:feature-network-tor'
 include ':sphinx:activity:hilt-qualifiers'
 include ':sphinx:activity:insetter-activity'
 include ':sphinx:activity:main:activitymain'
+include ':sphinx:activity:concepts:concept-user-colors-helper'
+include ':sphinx:activity:features:user-colors-helper'
 include ':sphinx:activity:concepts:concept-view-model-coordinator'
 include ':sphinx:activity:features:feature-view-model-coordinator'
 
@@ -268,5 +270,3 @@ project(':kotlin:test:test-k-openssl').projectDir =
 
 //include ':sample'
 //project(':sample').projectDir = file(new File(rootDir, 'kotlin-android/sample'))
-include ':sphinx:application:data:concepts:concept-user-colors-helper'
-include ':sphinx:application:data:features:user-colors-helper'
