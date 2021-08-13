@@ -132,6 +132,7 @@ include ':sphinx:screens-detail:scanner:scanner'
 include ':sphinx:screens-detail:scanner:scanner-view-model-coordinator'
 include ':sphinx:screens-detail:support-ticket:support-ticket'
 include ':sphinx:screens-detail:transactions:transactions'
+include ':sphinx:screens-detail:tribe-members-list:tribe-members-list'
 
 // Service
 include ':sphinx:service:concepts:concept-service-media-player'

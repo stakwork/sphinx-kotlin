@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/background_detail_screen"
+    tools:context=".ui.TribeMembersListFragment">
+
+    <include
+        android:id="@+id/include_tribe_members_list_header"
+        layout="@layout/layout_detail_screen_header"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/default_header_height"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_view_tribe_members_list"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/include_tribe_members_list_header"
+        tools:listitem="@layout/layout_tribe_member_holder" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/text_view_no_tribe_members_list"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/roboto_regular"
+        android:gravity="center"
+        android:text="No tribe members found"
+        android:textColor="@color/secondaryText"
+        android:textSize="@dimen/default_text_size_body"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ProgressBar
+        android:id="@+id/progress_bar_tribe_members_list"
+        style="?android:attr/progressBarStyle"
+        android:layout_width="@dimen/tribe_member_button_xy"
+        android:layout_height="@dimen/tribe_member_button_xy"
+        android:gravity="center"
+        android:visibility="gone"
+        android:indeterminateTint="@android:color/white"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:visibility="visible" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

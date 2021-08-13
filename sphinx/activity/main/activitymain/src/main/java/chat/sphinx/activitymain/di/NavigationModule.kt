@@ -37,6 +37,7 @@ import chat.sphinx.splash.navigation.SplashNavigator
 import chat.sphinx.support_ticket.navigation.SupportTicketNavigator
 import chat.sphinx.transactions.navigation.TransactionsNavigator
 import chat.sphinx.tribe_detail.navigation.TribeDetailNavigator
+import chat.sphinx.tribe_members_list.navigation.TribeMembersListNavigator
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -230,6 +231,12 @@ internal object NavigationModule {
         transactionsNavigatorImpl: TransactionsNavigatorImpl
     ): TransactionsNavigator =
         transactionsNavigatorImpl
+
+    @Provides
+    fun provideTribeMembersListNavigator(
+        tribeMembersListNavigatorImpl: TribeMembersListNavigatorImpl
+    ): TribeMembersListNavigator =
+        tribeMembersListNavigatorImpl
 
     @Provides
     fun provideJoinTribeNavigator(
