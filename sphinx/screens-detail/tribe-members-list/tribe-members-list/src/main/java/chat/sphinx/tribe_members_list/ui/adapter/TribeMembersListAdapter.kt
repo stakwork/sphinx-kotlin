@@ -235,7 +235,7 @@ internal class TribeMembersListAdapter(
                             imageViewMemberPicture,
                             photoUrl,
                             imageLoaderOptions
-                        )?.also {
+                        ).also {
                             disposable = it
                         }
                     }.let { job ->
@@ -304,13 +304,17 @@ internal class TribeMembersListAdapter(
     }
 
     fun removeAt(position: Int) {
-        val tribeMember = tribeMembers[position]
+        val tribeMember = tribeMembers.elementAtOrNull(position)
 
-        tribeMember.memberId?.toContactId()?.let {
+        tribeMember?.memberId?.toContactId()?.let {
             viewModel.kickMemberFromTribe(it)
-        }
 
-        notifyItemRemoved(position)
+            // TODO: use returned value from kickMemberFromTribe to remove the value via
+            //  updating of the current list state (don't remove from here within coroutine
+            //  as list could change, the list must be updated from the ViewModel after
+            //  iterating through the current list to find and remove.
+            notifyItemRemoved(position)
+        }
     }
 
     init {
