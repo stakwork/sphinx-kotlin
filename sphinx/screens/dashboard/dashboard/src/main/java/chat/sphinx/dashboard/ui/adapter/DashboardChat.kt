@@ -44,11 +44,7 @@ sealed class DashboardChat {
     abstract fun getColorKey(): String?
 
     fun getColorKeyFor(contact: Contact?, chat: Chat?): String? {
-        return contact?.let {
-            it.getColorKey()
-        } ?: chat?.let {
-            it.getColorKey()
-        } ?: null
+        return contact?.getColorKey() ?: chat?.getColorKey()
     }
 
     sealed class Active: DashboardChat() {

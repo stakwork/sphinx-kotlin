@@ -3,7 +3,11 @@ package chat.sphinx.user_colors_helper
 import android.content.Context
 import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+
+internal data class ColorHolder(val key: String, val color: String)
 
 class UserColorsHelperImpl(
     context: Context,
@@ -15,40 +19,65 @@ class UserColorsHelperImpl(
 
     private val colorsSharedPreferences = appContext.getSharedPreferences("sphinx_colors", Context.MODE_PRIVATE)
 
-    private val colors: MutableMap<String, String> = mutableMapOf()
+    companion object {
+        private const val CACHE_SIZE = 100
+
+        private val colors: MutableList<ColorHolder> = ArrayList(CACHE_SIZE)
+        private val lock = Mutex()
+        private var counter = 0
+    }
 
     override suspend fun getHexCodeForKey(
-        colorKey: String?,
+        colorKey: String,
         randomHexColorCode: String
     ): String {
+        return lock.withLock {
 
-        var colorHexCode: String? = null
+            val cachedColor: String? = withContext(dispatchers.default) {
+                for (color in colors) {
+                    if (color.key == colorKey) {
+                        return@withContext color.color
+                    }
+                }
 
-        colorKey?.let { colorKey ->
-            colors[colorKey]?.let { colorHexCode ->
-                return colorHexCode
+                null
             }
 
-            withContext(dispatchers.io) {
+            if (cachedColor != null) {
+                return cachedColor
+            }
+
+            val colorHexCode: String = withContext(dispatchers.io) {
                 colorsSharedPreferences.let { sharedPrefs ->
-                    colorHexCode = sharedPrefs.getString(colorKey, null) ?: run {
+                    sharedPrefs.getString(colorKey, null) ?: run {
                         sharedPrefs?.edit()?.let { editor ->
-                            editor.putString(colorKey, randomHexColorCode).let { editor ->
-                                if (!editor.commit()) {
-                                    editor.apply()
-                                }
+
+                            editor.putString(colorKey, randomHexColorCode)
+
+                            if (!editor.commit()) {
+                                editor.apply()
                             }
                         }
+
                         randomHexColorCode
                     }
                 }
             }
 
-            colorHexCode?.let { nnColorHexCode ->
-                colors.put(colorKey, nnColorHexCode)
-            }
-        }
+            updateColorHolderCache(ColorHolder(colorKey, colorHexCode))
 
-        return colorHexCode ?: randomHexColorCode
+            colorHexCode
+        }
     }
+
+    private suspend fun updateColorHolderCache(colorHolder: ColorHolder) {
+        colors.add(counter, colorHolder)
+
+        if (counter < CACHE_SIZE - 1 /* last index */) {
+            counter++
+        } else {
+            counter = 0
+        }
+    }
+
 }

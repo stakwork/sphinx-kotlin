@@ -305,12 +305,14 @@ internal class ChatListAdapter(
                         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
                             includeDashboardChatHolderInitial.textViewInitials
                                 .setInitialsColor(
-                                    Color.parseColor(
-                                        userColorsHelper.getHexCodeForKey(
-                                            dashboardChat.getColorKey(),
-                                            root.context.getRandomHexCode()
+                                    dashboardChat.getColorKey()?.let { colorKey ->
+                                        Color.parseColor(
+                                            userColorsHelper.getHexCodeForKey(
+                                                colorKey,
+                                                root.context.getRandomHexCode()
+                                            )
                                         )
-                                    ),
+                                    },
                                     R.drawable.chat_initials_circle
                                 )
                         }
