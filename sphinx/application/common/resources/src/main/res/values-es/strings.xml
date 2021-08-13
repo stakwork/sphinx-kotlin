@@ -89,4 +89,7 @@
     <string name="relay_url_http_negative_keep_http">http</string>
     <string name="relay_url_http_positive_change_to_https">https</string>
 
+    <!-- Tribe Member error messages -->
+    <string name="failed_to_approve_member">No se ha podido aprobar la solicitud</string>
+    <string name="failed_to_reject_member">No se ha podido denegar la solicitud</string>
 </resources>

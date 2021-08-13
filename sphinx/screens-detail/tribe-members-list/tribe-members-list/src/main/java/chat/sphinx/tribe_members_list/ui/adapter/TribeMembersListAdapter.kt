@@ -4,6 +4,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.appcompat.content.res.AppCompatResources
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.recyclerview.widget.DiffUtil
@@ -13,16 +14,21 @@ import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.concept_network_query_contact.model.ContactDto
+import chat.sphinx.kotlin_response.LoadResponse
+import chat.sphinx.kotlin_response.Response
 import chat.sphinx.tribe_members_list.R
 import chat.sphinx.tribe_members_list.databinding.LayoutTribeMemberHolderBinding
 import chat.sphinx.tribe_members_list.ui.TribeMembersListViewModel
 import chat.sphinx.tribe_members_list.ui.TribeMembersListViewState
 import chat.sphinx.tribe_members_list.ui.viewstate.TribeMemberHolderViewState
+import chat.sphinx.wrapper_common.dashboard.ContactId
+import chat.sphinx.wrapper_message.MessageType
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.collectViewState
 import io.matthewnelson.android_feature_viewmodel.currentViewState
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.*
@@ -151,6 +157,7 @@ internal class TribeMembersListAdapter(
         private val binding: LayoutTribeMemberHolderBinding
     ): RecyclerView.ViewHolder(binding.root) {
 
+        private val holderJobs: ArrayList<Job> = ArrayList(6)
         private var disposable: Disposable? = null
         private var tribeMemberHolderViewState: TribeMemberHolderViewState? = null
 
@@ -172,7 +179,7 @@ internal class TribeMembersListAdapter(
                     is TribeMemberHolderViewState.Pending -> {
                         if (contactDto != null) {
                             bindContactDetails(binding, contactDto)
-                            bindAdminFunctions(binding, contactDto)
+                            bindAdminFunctions(binding, contactDto, position)
                         }
                     }
                     is TribeMemberHolderViewState.PendingTribeMemberHeader -> {
@@ -214,16 +221,51 @@ internal class TribeMembersListAdapter(
             }
         }
 
-        private fun bindAdminFunctions(binding: LayoutTribeMemberHolderBinding, contactDto: ContactDto) {
+        private fun bindAdminFunctions(binding: LayoutTribeMemberHolderBinding, contactDto: ContactDto, position: Int) {
             binding.apply {
                 constraintLayoutTribeMemberRequestActions.visible
 
                 textViewTribeMemberRequestAcceptAction.setOnClickListener {
-                    // TODO: Accept member
+                    processMembershipRequest(
+                        layoutConstraintGroupActionJoinRequestProgressBarContainer,
+                        ContactId(contactDto.id),
+                        MessageType.GroupAction.MemberApprove,
+                        position
+                    )
                 }
                 textViewTribeMemberRequestRejectAction.setOnClickListener {
-                    // TODO: Reject member
+                    processMembershipRequest(
+                        layoutConstraintGroupActionJoinRequestProgressBarContainer,
+                        ContactId(contactDto.id),
+                        MessageType.GroupAction.MemberReject,
+                        position
+                    )
                 }
+            }
+        }
+
+        private fun processMembershipRequest(
+            layoutConstraintGroupActionJoinRequestProgressBarContainer : ConstraintLayout,
+            contactId: ContactId,
+            type: MessageType.GroupAction,
+            position: Int
+        ) {
+            onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                layoutConstraintGroupActionJoinRequestProgressBarContainer.visible
+
+                when (viewModel.processMemberRequest(contactId, type)) {
+                    LoadResponse.Loading -> { }
+                    is Response.Error -> {
+                        layoutConstraintGroupActionJoinRequestProgressBarContainer.gone
+                        viewModel.showFailedToProcessMemberMessage(type)
+                    }
+                    is Response.Success -> {
+                        tribeMembers.removeAt(position)
+                        this@TribeMembersListAdapter.notifyItemRemoved(position)
+                    }
+                }
+            }.let { job ->
+                holderJobs.add(job)
             }
         }
 

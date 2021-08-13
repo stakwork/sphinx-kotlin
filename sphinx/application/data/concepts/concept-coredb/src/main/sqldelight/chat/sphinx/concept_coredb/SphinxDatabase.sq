@@ -528,6 +528,11 @@ SELECT *
 FROM messageDbo
 WHERE id = ?;
 
+tribeMemberRequestMessageGetByContactId:
+SELECT *
+FROM messageDbo
+WHERE sender = ?;
+
 messageGetByUUID:
 SELECT *
 FROM messageDbo
