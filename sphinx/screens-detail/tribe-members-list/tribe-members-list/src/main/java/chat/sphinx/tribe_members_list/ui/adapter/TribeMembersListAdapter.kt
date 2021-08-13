@@ -283,6 +283,16 @@ internal class TribeMembersListAdapter(
         }
     }
 
+    fun removeAt(position: Int) {
+        val tribeMember = tribeMembers[position]
+
+        tribeMember.contactDto?.let {
+            viewModel.kickMemberFromTribe(it)
+        }
+
+        notifyItemRemoved(position)
+    }
+
     init {
         lifecycleOwner.lifecycle.addObserver(this)
     }

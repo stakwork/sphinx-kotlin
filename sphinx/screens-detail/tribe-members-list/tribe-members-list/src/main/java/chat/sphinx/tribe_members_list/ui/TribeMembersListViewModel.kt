@@ -5,7 +5,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_network_query_contact.NetworkQueryContact
 import chat.sphinx.concept_network_query_contact.model.ContactDto
-import chat.sphinx.concept_repository_contact.ContactRepository
+import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
@@ -45,10 +45,9 @@ internal class TribeMembersListViewModel @Inject constructor(
     private val app: Application,
     dispatchers: CoroutineDispatchers,
     val navigator: TribeMembersListNavigator,
-    private val contactRepository: ContactRepository,
     private val messageRepository: MessageRepository,
+    private val chatRepository: ChatRepository,
     private val networkQueryContact: NetworkQueryContact,
-//    private val networkQueryChat: NetworkQueryChat,
     savedStateHandle: SavedStateHandle,
 ): BaseViewModel<TribeMembersListViewState>(
     dispatchers,
@@ -185,6 +184,12 @@ internal class TribeMembersListViewModel @Inject constructor(
             } else if (type is MessageType.GroupAction.MemberReject) {
                 app.getString(R.string.failed_to_reject_member)
             }
+        }
+    }
+
+    fun kickMemberFromTribe(contactDto: ContactDto) {
+        viewModelScope.launch(mainImmediate) {
+            chatRepository.kickMemberFromTribe(ChatId(args.argChatId), ContactId(contactDto.id))
         }
     }
 }

@@ -64,4 +64,6 @@ interface ChatRepository {
         alias: ChatAlias? = null,
         profilePic: PublicAttachmentInfo? = null,
     ): Response<ChatDto, ResponseError>
+
+    suspend fun kickMemberFromTribe(chatId: ChatId, contactId: ContactId): Response<Any, ResponseError>
 }
