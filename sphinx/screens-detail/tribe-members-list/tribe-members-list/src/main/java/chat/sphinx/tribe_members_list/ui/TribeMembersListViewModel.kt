@@ -81,7 +81,7 @@ internal class TribeMembersListViewModel @Inject constructor(
         }
     }
 
-    suspend fun loadMoreTribeMembers() {
+    fun loadMoreTribeMembers() {
         if (loading) {
             return
         }
@@ -89,7 +89,9 @@ internal class TribeMembersListViewModel @Inject constructor(
         loading = true
         page += 1
 
-        loadTribeMembers()
+        viewModelScope.launch(mainImmediate) {
+            loadTribeMembers()
+        }
 
         loading = false
     }
@@ -172,15 +174,15 @@ internal class TribeMembersListViewModel @Inject constructor(
                 continue
             }
 
-            val contactInitial = contact.alias?.first().toString()
+            val contactInitial = contact.alias?.firstOrNull()?.toString() ?: ""
             val shouldShowInitial = contactInitial != lastInitial
 
             lastInitial = contactInitial
 
-            if (contact.pending == true) {
+            if ((contact.pending is Boolean) && contact.pending == true) {
                 if (tribeMemberHolderViewStates.hasNoPendingTribeMemberHeader()) {
                     tribeMemberHolderViewStates.add(
-                        TribeMemberHolderViewState.PendingTribeMemberHeader()
+                        TribeMemberHolderViewState.PendingTribeMemberHeader
                     )
                 }
                 tribeMemberHolderViewStates.add(
@@ -192,7 +194,7 @@ internal class TribeMembersListViewModel @Inject constructor(
             } else {
                 if (tribeMemberHolderViewStates.hasNoTribeMemberHeader()) {
                     tribeMemberHolderViewStates.add(
-                        TribeMemberHolderViewState.TribeMemberHeader()
+                        TribeMemberHolderViewState.TribeMemberHeader
                     )
                 }
                 tribeMemberHolderViewStates.add(
@@ -207,7 +209,7 @@ internal class TribeMembersListViewModel @Inject constructor(
 
         if (contacts.size >= itemsPerPage) {
             tribeMemberHolderViewStates.add(
-                TribeMemberHolderViewState.Loader()
+                TribeMemberHolderViewState.Loader
             )
         }
 
@@ -256,9 +258,9 @@ internal class TribeMembersListViewModel @Inject constructor(
         }
     }
 
-    fun kickMemberFromTribe(contactDto: ContactDto) {
+    fun kickMemberFromTribe(contactId: ContactId) {
         viewModelScope.launch(mainImmediate) {
-            chatRepository.kickMemberFromTribe(ChatId(args.argChatId), ContactId(contactDto.id))
+            chatRepository.kickMemberFromTribe(ChatId(args.argChatId), contactId)
         }
     }
 }

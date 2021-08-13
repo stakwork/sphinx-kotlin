@@ -69,7 +69,7 @@ internal class FirebasePushNotificationRegistrar(
                 }
                 is Response.Success -> {
                     response
-//                    contactRepository.updateOwnerDeviceId(DeviceId(response.value))
+                    contactRepository.updateOwnerDeviceId(DeviceId(response.value))
                 }
             }
         } ?: Response.Error(ResponseError("NotificationToken retrieved was null"))

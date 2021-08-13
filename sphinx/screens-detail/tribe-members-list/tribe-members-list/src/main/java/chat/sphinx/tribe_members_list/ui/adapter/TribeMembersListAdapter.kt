@@ -22,8 +22,11 @@ import chat.sphinx.tribe_members_list.databinding.LayoutTribeMemberHolderBinding
 import chat.sphinx.tribe_members_list.ui.TribeMembersListViewModel
 import chat.sphinx.tribe_members_list.ui.TribeMembersListViewState
 import chat.sphinx.tribe_members_list.ui.viewstate.TribeMemberHolderViewState
+import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.dashboard.ContactId
+import chat.sphinx.wrapper_common.dashboard.toContactId
 import chat.sphinx.wrapper_common.util.getInitials
+import chat.sphinx.wrapper_contact.ContactAlias
 import chat.sphinx.wrapper_message.MessageType
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
@@ -72,7 +75,7 @@ internal class TribeMembersListAdapter(
             val same: Boolean =  try {
                 oldList[oldItemPosition].let { old ->
                     newList[newItemPosition].let { new ->
-                        old.contactDto?.id == new.contactDto?.id
+                        old.memberId == new.memberId
                     }
                 }
             } catch (e: IndexOutOfBoundsException) {
@@ -140,10 +143,6 @@ internal class TribeMembersListAdapter(
         return tribeMembers.size
     }
 
-    fun getPendingTribeMembersCount(): Int {
-        return tribeMembers.count { tribeMember -> tribeMember.contactDto?.pending == true }
-    }
-
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TribeMemberViewHolder {
         val binding = LayoutTribeMemberHolderBinding.inflate(
             LayoutInflater.from(parent.context),
@@ -162,7 +161,7 @@ internal class TribeMembersListAdapter(
         private val binding: LayoutTribeMemberHolderBinding
     ): RecyclerView.ViewHolder(binding.root) {
 
-        private val holderJobs: ArrayList<Job> = ArrayList(6)
+        private val holderJobs: ArrayList<Job> = ArrayList(2)
         private var disposable: Disposable? = null
         private var tribeMemberHolderViewState: TribeMemberHolderViewState? = null
 
@@ -171,6 +170,12 @@ internal class TribeMembersListAdapter(
                 tribeMemberHolderViewState = null
                 return
             }
+
+            for (job in holderJobs) {
+                job.cancel()
+            }
+            holderJobs.clear()
+
             disposable?.dispose()
 
             tribeMemberHolderViewState?.apply {
@@ -179,14 +184,13 @@ internal class TribeMembersListAdapter(
                         bindLoader(binding)
                     }
                     is TribeMemberHolderViewState.Member -> {
-                        if (contactDto != null) {
-                            bindContactDetails(binding, contactDto, showInitial)
-                        }
+                        bindContactDetails(binding, memberAlias, memberPhotoUrl, showInitial)
                     }
                     is TribeMemberHolderViewState.Pending -> {
-                        if (contactDto != null) {
-                            bindContactDetails(binding, contactDto, showInitial)
-                            bindAdminFunctions(binding, contactDto, position)
+                        bindContactDetails(binding, memberAlias, memberPhotoUrl, showInitial)
+
+                        memberId?.let { nnMemberId ->
+                            bindAdminFunctions(binding, nnMemberId, position)
                         }
                     }
                     is TribeMemberHolderViewState.PendingTribeMemberHeader -> {
@@ -205,7 +209,8 @@ internal class TribeMembersListAdapter(
 
         private fun bindContactDetails(
             binding: LayoutTribeMemberHolderBinding,
-            contactDto: ContactDto,
+            alias: String?,
+            photoUrl: String?,
             shouldShowInitial: Boolean
         ) {
             binding.apply {
@@ -214,23 +219,27 @@ internal class TribeMembersListAdapter(
                 layoutConstraintTribeMemberHeaderContainer.gone
                 constraintLayoutTribeMemberRequestActions.gone
 
-                textViewMemberName.text = contactDto.alias
+                textViewMemberName.text = alias ?: ""
 
-                textViewMemberFirstInitial.text = contactDto.alias?.first().toString()
+                textViewMemberFirstInitial.text = alias?.firstOrNull()?.toString() ?: ""
                 textViewMemberFirstInitial.goneIfFalse(shouldShowInitial)
 
-                textViewMemberInitials.text = contactDto.alias?.getInitials() ?: ""
+                textViewMemberInitials.text = alias?.getInitials() ?: ""
                 textViewMemberInitials.setBackgroundRandomColor(chat.sphinx.resources.R.drawable.chat_initials_circle)
 
-                if (contactDto.photo_url?.isNotEmpty() == true) {
+                if (photoUrl != null && photoUrl.isNotEmpty()) {
                     imageViewMemberPicture.visible
 
                     onStopSupervisor.scope.launch(viewModel.mainImmediate) {
                         imageLoader.load(
                             imageViewMemberPicture,
-                            contactDto.photo_url!!,
+                            photoUrl,
                             imageLoaderOptions
-                        )
+                        )?.also {
+                            disposable = it
+                        }
+                    }.let { job ->
+                        holderJobs.add(job)
                     }
                 } else {
                     imageViewMemberPicture.gone
@@ -238,14 +247,14 @@ internal class TribeMembersListAdapter(
             }
         }
 
-        private fun bindAdminFunctions(binding: LayoutTribeMemberHolderBinding, contactDto: ContactDto, position: Int) {
+        private fun bindAdminFunctions(binding: LayoutTribeMemberHolderBinding, contactId: Long, position: Int) {
             binding.apply {
                 constraintLayoutTribeMemberRequestActions.visible
 
                 textViewTribeMemberRequestAcceptAction.setOnClickListener {
                     processMembershipRequest(
                         layoutConstraintGroupActionJoinRequestProgressBarContainer,
-                        ContactId(contactDto.id),
+                        ContactId(contactId),
                         MessageType.GroupAction.MemberApprove,
                         position
                     )
@@ -253,7 +262,7 @@ internal class TribeMembersListAdapter(
                 textViewTribeMemberRequestRejectAction.setOnClickListener {
                     processMembershipRequest(
                         layoutConstraintGroupActionJoinRequestProgressBarContainer,
-                        ContactId(contactDto.id),
+                        ContactId(contactId),
                         MessageType.GroupAction.MemberReject,
                         position
                     )
@@ -297,7 +306,7 @@ internal class TribeMembersListAdapter(
     fun removeAt(position: Int) {
         val tribeMember = tribeMembers[position]
 
-        tribeMember.contactDto?.let {
+        tribeMember.memberId?.toContactId()?.let {
             viewModel.kickMemberFromTribe(it)
         }
 
