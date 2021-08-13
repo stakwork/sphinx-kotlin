@@ -171,7 +171,9 @@ internal class TribeMembersListAdapter(
 
             tribeMemberHolderViewState?.apply {
                 when (this) {
-                    is TribeMemberHolderViewState.Loader -> { }
+                    is TribeMemberHolderViewState.Loader -> {
+                        bindLoader(binding)
+                    }
                     is TribeMemberHolderViewState.Member -> {
                         if (contactDto != null) {
                             bindContactDetails(binding, contactDto, showInitial)
@@ -184,20 +186,17 @@ internal class TribeMembersListAdapter(
                         }
                     }
                     is TribeMemberHolderViewState.PendingTribeMemberHeader -> {
-                        bindHeader(
-                            binding,
-                            binding.root.context.getString(R.string.pending_tribe_members_header)
-                        )
-
+                        bindHeader(binding, binding.root.context.getString(R.string.pending_tribe_members_header))
                     }
                     is TribeMemberHolderViewState.TribeMemberHeader -> {
-                        bindHeader(
-                            binding,
-                            binding.root.context.getString(R.string.tribe_members_list_header)
-                        )
+                        bindHeader(binding, binding.root.context.getString(R.string.tribe_members_list_header))
                     }
                 }
             }
+        }
+
+        private fun bindLoader(binding: LayoutTribeMemberHolderBinding) {
+            binding.includeLoadingMoreMembers.root.goneIfFalse(true)
         }
 
         private fun bindContactDetails(
@@ -207,6 +206,7 @@ internal class TribeMembersListAdapter(
         ) {
             binding.apply {
                 layoutConstraintTribeMemberContainer.visible
+                includeLoadingMoreMembers.root.gone
                 layoutConstraintTribeMemberHeaderContainer.gone
                 constraintLayoutTribeMemberRequestActions.gone
 
@@ -284,6 +284,7 @@ internal class TribeMembersListAdapter(
 
         private fun bindHeader(binding: LayoutTribeMemberHolderBinding, headerText: String) {
             binding.apply {
+                includeLoadingMoreMembers.root.gone
                 layoutConstraintTribeMemberContainer.gone
                 layoutConstraintTribeMemberHeaderContainer.visible
 

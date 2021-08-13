@@ -6,4 +6,8 @@
     <dimen name="tribe_member_button_xy">27dp</dimen>
     <dimen name="tribe_member_picture_xy">44dp</dimen>
     <dimen name="tribe_member_action_xy">38dp</dimen>
+
+    <dimen name="members_list_member_holder_height">63dp</dimen>
+    <dimen name="members_list_loading_more_text_size">15sp</dimen>
+    <dimen name="members_list_progress_bar_xy">25dp</dimen>
 </resources>
