@@ -1,5 +1,6 @@
 package chat.sphinx.tribe_members_list.ui
 
+import android.content.Context
 import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
@@ -19,14 +20,16 @@ import chat.sphinx.tribe_members_list.ui.adapter.SwipeHelper
 import chat.sphinx.tribe_members_list.ui.adapter.TribeMembersListAdapter
 import chat.sphinx.tribe_members_list.ui.adapter.TribeMembersListFooterAdapter
 import dagger.hilt.android.AndroidEntryPoint
-import io.matthewnelson.android_feature_screens.ui.base.BaseFragment
+import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.visible
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
-internal class TribeMembersListFragment: BaseFragment<
+internal class TribeMembersListFragment: SideEffectFragment<
+        Context,
+        TribeMembersListSideEffect,
         TribeMembersListViewState,
         TribeMembersListViewModel,
         FragmentTribeMembersListBinding
@@ -130,5 +133,9 @@ internal class TribeMembersListFragment: BaseFragment<
         }
 
         return button
+    }
+
+    override suspend fun onSideEffectCollect(sideEffect: TribeMembersListSideEffect) {
+        sideEffect.execute(requireActivity())
     }
 }

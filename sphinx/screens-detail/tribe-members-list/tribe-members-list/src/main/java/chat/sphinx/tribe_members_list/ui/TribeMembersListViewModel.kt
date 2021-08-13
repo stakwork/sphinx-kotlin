@@ -1,6 +1,7 @@
 package chat.sphinx.tribe_members_list.ui
 
 import android.app.Application
+import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_network_query_contact.NetworkQueryContact
@@ -18,7 +19,8 @@ import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_message.MessageType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
-import io.matthewnelson.android_feature_viewmodel.BaseViewModel
+import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
+import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.flow.collect
@@ -49,7 +51,11 @@ internal class TribeMembersListViewModel @Inject constructor(
     private val chatRepository: ChatRepository,
     private val networkQueryContact: NetworkQueryContact,
     savedStateHandle: SavedStateHandle,
-): BaseViewModel<TribeMembersListViewState>(
+): SideEffectViewModel<
+        Context,
+        TribeMembersListSideEffect,
+        TribeMembersListViewState
+        >(
     dispatchers,
     TribeMembersListViewState.ListMode(
         listOf(),
@@ -178,11 +184,18 @@ internal class TribeMembersListViewModel @Inject constructor(
 
     fun showFailedToProcessMemberMessage(type: MessageType.GroupAction) {
         viewModelScope.launch(mainImmediate) {
-            // TODO: submitSideEffect
             if (type is MessageType.GroupAction.MemberApprove) {
-                app.getString(R.string.failed_to_approve_member)
+                submitSideEffect(
+                    TribeMembersListSideEffect.Notify(
+                        app.getString(R.string.failed_to_approve_member)
+                    )
+                )
             } else if (type is MessageType.GroupAction.MemberReject) {
-                app.getString(R.string.failed_to_reject_member)
+                submitSideEffect(
+                    TribeMembersListSideEffect.Notify(
+                        app.getString(R.string.failed_to_reject_member)
+                    )
+                )
             }
         }
     }
