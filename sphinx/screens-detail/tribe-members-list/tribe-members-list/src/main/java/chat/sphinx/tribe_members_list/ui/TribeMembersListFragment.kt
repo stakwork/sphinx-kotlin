@@ -127,7 +127,7 @@ internal class TribeMembersListFragment: SideEffectFragment<
                 }
             })
         ContextCompat.getDrawable(requireContext(), R.drawable.ic_icon_delete)?.let {
-            button.addIcon(it, requireContext().resources.getDimension(R.dimen.recycler_view_holder_delete_button_width))
+            button.addIcon(it, requireContext().resources.getDimension(R.dimen.members_list_member_holder_height))
         }
 
         return button

@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_network_query_contact.NetworkQueryContact
 import chat.sphinx.concept_network_query_contact.model.ContactDto
 import chat.sphinx.concept_repository_chat.ChatRepository
+import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
@@ -16,6 +17,7 @@ import chat.sphinx.tribe_members_list.navigation.TribeMembersListNavigator
 import chat.sphinx.tribe_members_list.ui.viewstate.TribeMemberHolderViewState
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
+import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_message.MessageType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
@@ -23,6 +25,7 @@ import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.annotation.meta.Exhaustive
@@ -49,6 +52,7 @@ internal class TribeMembersListViewModel @Inject constructor(
     val navigator: TribeMembersListNavigator,
     private val messageRepository: MessageRepository,
     private val chatRepository: ChatRepository,
+    private val contactRepository: ContactRepository,
     private val networkQueryContact: NetworkQueryContact,
     savedStateHandle: SavedStateHandle,
 ): SideEffectViewModel<
@@ -113,7 +117,10 @@ internal class TribeMembersListViewModel @Inject constructor(
                     if (loadResponse.value.contacts.isNotEmpty()) {
                         updateViewState(
                             TribeMembersListViewState.ListMode(
-                                processMembers(loadResponse.value.contacts),
+                                processMembers(
+                                    loadResponse.value.contacts,
+                                    getOwner()
+                                ),
                                 false,
                                 firstPage
                             )
@@ -124,14 +131,41 @@ internal class TribeMembersListViewModel @Inject constructor(
         }
     }
 
+    private suspend fun getOwner(): Contact {
+        return contactRepository.accountOwner.value.let { contact ->
+            if (contact != null) {
+                contact
+            } else {
+                var resolvedOwner: Contact? = null
+                try {
+                    contactRepository.accountOwner.collect { ownerContact ->
+                        if (ownerContact != null) {
+                            resolvedOwner = ownerContact
+                            throw Exception()
+                        }
+                    }
+                } catch (e: Exception) {
+                }
+                delay(25L)
+
+                resolvedOwner!!
+            }
+        }
+    }
+
     private fun processMembers(
-        contacts: List<ContactDto>
+        contacts: List<ContactDto>,
+        owner: Contact
     ): List<TribeMemberHolderViewState> {
         val tribeMemberHolderViewStates = ArrayList<TribeMemberHolderViewState>(contacts.size)
 
         var lastInitial = ""
 
         for (contact in contacts) {
+            if (owner.id.value == contact.id) {
+                continue
+            }
+
             val contactInitial = contact.alias?.first().toString()
             val shouldShowInitial = contactInitial != lastInitial
 
