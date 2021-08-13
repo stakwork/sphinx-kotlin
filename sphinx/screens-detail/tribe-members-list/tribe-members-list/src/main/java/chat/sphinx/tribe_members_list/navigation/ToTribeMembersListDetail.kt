@@ -9,14 +9,21 @@ import chat.sphinx.wrapper_common.dashboard.ChatId
 import io.matthewnelson.concept_navigation.NavigationRequest
 
 class ToTribeMembersListDetail(
-    private val chatId: ChatId,
-    private val options: NavOptions = DetailNavOptions.defaultBuilt
+    private val chatId: ChatId
 ): NavigationRequest<NavController>() {
+
     override fun navigate(controller: NavController) {
         controller.navigate(
             R.id.tribe_members_list_nav_graph,
             TribeMembersListFragmentArgs.Builder(chatId.value).build().toBundle(),
-            options
+            if (controller.previousBackStackEntry == null) {
+                DetailNavOptions.defaultBuilt
+            } else {
+                DetailNavOptions.default
+                    .setEnterAnim(io.matthewnelson.android_feature_navigation.R.anim.slide_in_left)
+                    .setPopExitAnim(io.matthewnelson.android_feature_navigation.R.anim.slide_out_right)
+                    .build()
+            }
         )
     }
 }

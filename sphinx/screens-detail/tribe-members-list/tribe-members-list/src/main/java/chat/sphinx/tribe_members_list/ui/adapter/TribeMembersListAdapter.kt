@@ -16,14 +16,17 @@ import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.concept_network_query_contact.model.ContactDto
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
+import chat.sphinx.resources.setBackgroundRandomColor
 import chat.sphinx.tribe_members_list.R
 import chat.sphinx.tribe_members_list.databinding.LayoutTribeMemberHolderBinding
 import chat.sphinx.tribe_members_list.ui.TribeMembersListViewModel
 import chat.sphinx.tribe_members_list.ui.TribeMembersListViewState
 import chat.sphinx.tribe_members_list.ui.viewstate.TribeMemberHolderViewState
 import chat.sphinx.wrapper_common.dashboard.ContactId
+import chat.sphinx.wrapper_common.util.getInitials
 import chat.sphinx.wrapper_message.MessageType
 import io.matthewnelson.android_feature_screens.util.gone
+import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.collectViewState
 import io.matthewnelson.android_feature_viewmodel.currentViewState
@@ -171,12 +174,12 @@ internal class TribeMembersListAdapter(
                     is TribeMemberHolderViewState.Loader -> { }
                     is TribeMemberHolderViewState.Member -> {
                         if (contactDto != null) {
-                            bindContactDetails(binding, contactDto)
+                            bindContactDetails(binding, contactDto, showInitial)
                         }
                     }
                     is TribeMemberHolderViewState.Pending -> {
                         if (contactDto != null) {
-                            bindContactDetails(binding, contactDto)
+                            bindContactDetails(binding, contactDto, showInitial)
                             bindAdminFunctions(binding, contactDto, position)
                         }
                     }
@@ -197,16 +200,27 @@ internal class TribeMembersListAdapter(
             }
         }
 
-        private fun bindContactDetails(binding: LayoutTribeMemberHolderBinding, contactDto: ContactDto) {
+        private fun bindContactDetails(
+            binding: LayoutTribeMemberHolderBinding,
+            contactDto: ContactDto,
+            shouldShowInitial: Boolean
+        ) {
             binding.apply {
                 layoutConstraintTribeMemberContainer.visible
                 layoutConstraintTribeMemberHeaderContainer.gone
                 constraintLayoutTribeMemberRequestActions.gone
 
                 textViewMemberName.text = contactDto.alias
-                textViewNameGroup.text = contactDto.alias?.first().toString()
+
+                textViewMemberFirstInitial.text = contactDto.alias?.first().toString()
+                textViewMemberFirstInitial.goneIfFalse(shouldShowInitial)
+
+                textViewMemberInitials.text = contactDto.alias?.getInitials() ?: ""
+                textViewMemberInitials.setBackgroundRandomColor(chat.sphinx.resources.R.drawable.chat_initials_circle)
 
                 if (contactDto.photo_url?.isNotEmpty() == true) {
+                    imageViewMemberPicture.visible
+
                     onStopSupervisor.scope.launch(viewModel.mainImmediate) {
                         imageLoader.load(
                             imageViewMemberPicture,
@@ -215,12 +229,7 @@ internal class TribeMembersListAdapter(
                         )
                     }
                 } else {
-                    imageViewMemberPicture.setImageDrawable(
-                        AppCompatResources.getDrawable(
-                            binding.root.context,
-                            R.drawable.ic_profile_avatar_circle
-                        )
-                    )
+                    imageViewMemberPicture.gone
                 }
             }
         }

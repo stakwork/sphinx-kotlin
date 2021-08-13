@@ -129,7 +129,14 @@ internal class TribeMembersListViewModel @Inject constructor(
     ): List<TribeMemberHolderViewState> {
         val tribeMemberHolderViewStates = ArrayList<TribeMemberHolderViewState>(contacts.size)
 
+        var lastInitial = ""
+
         for (contact in contacts) {
+            val contactInitial = contact.alias?.first().toString()
+            val shouldShowInitial = contactInitial != lastInitial
+
+            lastInitial = contactInitial
+
             if (contact.pending == true) {
                 if (!tribeMemberHolderViewStates.hasNoPendingTribeMemberHeader()) {
                     tribeMemberHolderViewStates.add(
@@ -139,6 +146,7 @@ internal class TribeMembersListViewModel @Inject constructor(
                 tribeMemberHolderViewStates.add(
                     TribeMemberHolderViewState.Pending(
                         contact,
+                        shouldShowInitial
                     )
                 )
             } else {
@@ -150,13 +158,14 @@ internal class TribeMembersListViewModel @Inject constructor(
                 tribeMemberHolderViewStates.add(
                     TribeMemberHolderViewState.Member(
                         contact,
+                        shouldShowInitial
                     )
                 )
             }
 
         }
 
-        if (contacts.size == itemsPerPage) {
+        if (contacts.size >= itemsPerPage) {
             tribeMemberHolderViewStates.add(
                 TribeMemberHolderViewState.Loader()
             )

@@ -138,6 +138,9 @@ internal class TribeDetailFragment: SideEffectFragment<
             binding.layoutConstraintTribeDetailLayout
         )
         insetterActivity.addNavigationBarPadding(
+            binding.layoutConstraintAdminViewTribeMembers
+        )
+        insetterActivity.addNavigationBarPadding(
             binding.includeLayoutMenuBottomTribe.root
         )
         insetterActivity.addNavigationBarPadding(

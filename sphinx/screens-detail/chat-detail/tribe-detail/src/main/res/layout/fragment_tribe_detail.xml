@@ -330,36 +330,32 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/constrain_layout_admin_view_tribe_members"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:layout_constraintTop_toBottomOf="@+id/layout_constraint_profile_picture_container"
-            >
-
-            <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/button_admin_view_members"
-                style="@style/MemberListButton"
-                android:layout_width="match_parent"
-                android:layout_height="62dp"
-                android:layout_marginStart="75dp"
-                android:layout_marginEnd="75dp"
-                android:text="Members List"
-                android:textSize="@dimen/add_buttons_text_size"
-                android:textColor="@android:color/white"
-                android:background="@drawable/button_background_white_rad_48"
-                android:backgroundTint="@color/primaryBlue"
-                android:layout_marginBottom="@dimen/default_layout_margin"
-                android:visibility="gone"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:visibility="visible"
-                />
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_admin_view_tribe_members"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/default_layout_margin"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/button_admin_view_members"
+            style="@style/MemberListButton"
+            android:layout_width="@dimen/members_list_button_width"
+            android:layout_height="@dimen/members_list_button_height"
+            android:text="@string/tribe_members_list"
+            android:textSize="@dimen/members_list_button_text_size"
+            android:textColor="@android:color/white"
+            android:background="@drawable/button_background_white_rad_48"
+            android:backgroundTint="@color/primaryBlue"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:visibility="visible" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <include
         android:id="@+id/include_layout_menu_bottom_tribe"

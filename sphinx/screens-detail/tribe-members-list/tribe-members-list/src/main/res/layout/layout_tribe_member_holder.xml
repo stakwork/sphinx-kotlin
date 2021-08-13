@@ -9,90 +9,96 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/layout_constraint_tribe_member_header_container"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/textInverted"
+        android:layout_height="@dimen/members_list_header_height"
+        android:background="@color/addressBookHeader"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        >
+        app:layout_constraintTop_toTopOf="parent">
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/text_view_tribe_member_header"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/default_small_layout_margin"
-            android:layout_marginStart="@dimen/tribe_member_button_xy"
-            android:fontFamily="@font/roboto_regular"
+            android:layout_marginStart="@dimen/default_layout_margin"
+            android:fontFamily="@font/roboto_medium"
             android:gravity="start"
             android:textColor="@color/secondaryText"
-            android:textSize="@dimen/default_text_size_headline"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/text_view_tribe_member_header_count"
-            tools:text="Tribe Members"
-            />
-
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/text_view_tribe_member_header_count"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="@dimen/tribe_member_button_xy"
-            android:layout_marginVertical="@dimen/default_small_layout_margin"
-
-            android:fontFamily="@font/roboto_regular"
-            android:gravity="center"
-            android:textAlignment="center"
-            android:textColor="@color/secondaryText"
-            android:textSize="@dimen/default_text_size_headline"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            tools:text="1"
-            />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/layout_constraint_tribe_member_container"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingHorizontal="@dimen/default_header_headline_margin_horizontal"
-        android:paddingVertical="@dimen/default_header_headline_margin_vertical"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_tribe_member_header_container"
-        >
-
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/text_view_name_group"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:fontFamily="@font/roboto_regular"
-            android:gravity="center"
-            android:textAlignment="center"
-            android:textColor="@color/text"
-            android:textSize="@dimen/default_text_size_headline"
+            android:textSize="@dimen/members_list_header_text_size"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            tools:text="C" />
+            tools:text="TRIBE MEMBERS" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_tribe_member_container"
+        android:layout_width="match_parent"
+        android:layout_height="63dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_tribe_member_header_container">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layout_constraint_member_first_initial"
+            android:layout_width="45dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_view_member_first_initial"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/roboto_medium"
+                android:gravity="center"
+                android:textAlignment="center"
+                android:textColor="@color/secondaryText"
+                android:textSize="@dimen/default_text_size_headline"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                tools:text="C"
+                tools:visibility="visible"/>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_member_initials"
+            android:layout_width="@dimen/tribe_member_picture_xy"
+            android:layout_height="@dimen/tribe_member_picture_xy"
+            android:layout_centerInParent="true"
+            android:background="@drawable/chat_initials_circle"
+            android:fontFamily="@font/montserrat_regular"
+            android:gravity="center"
+            android:singleLine="true"
+            android:textColor="@android:color/white"
+            android:textSize="17sp"
+            android:layout_marginEnd="@dimen/default_layout_margin"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/layout_constraint_member_first_initial"
+            app:layout_constraintEnd_toStartOf="@+id/text_view_member_name"
+            tools:text="TT" />
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/image_view_member_picture"
             android:layout_width="@dimen/tribe_member_picture_xy"
             android:layout_height="@dimen/tribe_member_picture_xy"
             android:layout_centerInParent="true"
-            android:layout_marginStart="@dimen/default_half_layout_margin"
             android:src="@drawable/ic_profile_avatar_circle"
+            android:layout_marginEnd="@dimen/default_layout_margin"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/text_view_name_group"
-            app:layout_constraintEnd_toStartOf="@+id/text_view_member_name"/>
+            app:layout_constraintStart_toEndOf="@+id/layout_constraint_member_first_initial"
+            app:layout_constraintEnd_toStartOf="@+id/text_view_member_name"
+            tools:visibility="visible"/>
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/text_view_member_name"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_margin="@dimen/default_layout_margin"
+            android:layout_marginEnd="@dimen/default_layout_margin"
             android:fontFamily="@font/roboto_regular"
             android:gravity="start"
             android:textAlignment="textStart"
@@ -104,16 +110,24 @@
             app:layout_constraintEnd_toStartOf="@+id/constraint_layout_tribe_member_request_actions"
             tools:text="CypherPoet" />
 
+        <View
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:background="@color/lightDivider"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/text_view_member_name" />
+
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/constraint_layout_tribe_member_request_actions"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:visibility="gone"
+            android:layout_marginEnd="@dimen/default_layout_margin"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            tools:visibility="visible"
-            >
+            tools:visibility="visible">
 
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/text_view_tribe_member_request_accept_action"

@@ -21,6 +21,7 @@ import chat.sphinx.tribe_members_list.ui.adapter.TribeMembersListAdapter
 import chat.sphinx.tribe_members_list.ui.adapter.TribeMembersListFooterAdapter
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
+import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.visible
 import kotlinx.coroutines.launch
@@ -48,11 +49,8 @@ internal class TribeMembersListFragment: SideEffectFragment<
             textViewDetailScreenHeaderNavBack.visible
             textViewDetailScreenHeaderName.text = getString(R.string.tribe_members_list_header)
 
-            textViewDetailScreenClose.setOnClickListener {
-                lifecycleScope.launch(viewModel.mainImmediate) {
-                    viewModel.navigator.closeDetailScreen()
-                }
-            }
+            textViewDetailScreenClose.gone
+
             textViewDetailScreenHeaderNavBack.setOnClickListener {
                 lifecycleScope.launch(viewModel.mainImmediate) {
                     viewModel.navigator.popBackStack()

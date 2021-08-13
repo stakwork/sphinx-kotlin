@@ -3,7 +3,8 @@ package chat.sphinx.tribe_members_list.ui.viewstate
 import chat.sphinx.concept_network_query_contact.model.ContactDto
 
 internal sealed class TribeMemberHolderViewState(
-    val contactDto: ContactDto? = null
+    val contactDto: ContactDto? = null,
+    val showInitial: Boolean = false
 ) {
 
     class Loader : TribeMemberHolderViewState()
@@ -11,14 +12,18 @@ internal sealed class TribeMemberHolderViewState(
     class TribeMemberHeader : TribeMemberHolderViewState()
 
     class Pending(
-        contact: ContactDto
+        contact: ContactDto,
+        showInitial: Boolean
     ) : TribeMemberHolderViewState(
-        contact
+        contact,
+        showInitial
     )
 
     class Member(
-        contact: ContactDto
+        contact: ContactDto,
+        showInitial: Boolean
     ) : TribeMemberHolderViewState(
-        contact
+        contact,
+        showInitial
     )
 }
