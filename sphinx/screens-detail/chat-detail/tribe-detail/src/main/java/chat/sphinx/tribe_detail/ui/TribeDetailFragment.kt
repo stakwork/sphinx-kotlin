@@ -282,7 +282,7 @@ internal class TribeDetailFragment: SideEffectFragment<
                     if (viewState.chat.isTribeOwnedByAccount(viewModel.getOwner().nodePubKey)) {
                         buttonAdminViewMembers.visible
                     } else {
-                        buttonAdminViewMembers.visible
+                        buttonAdminViewMembers.gone
                     }
                 }
             }
