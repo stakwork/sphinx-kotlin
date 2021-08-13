@@ -19,7 +19,7 @@ import kotlinx.coroutines.flow.Flow
 interface MessageRepository {
     fun getAllMessagesToShowByChatId(chatId: ChatId): Flow<List<Message>>
     fun getMessageById(messageId: MessageId): Flow<Message?>
-    fun getTribeMembershipRequestMessageByContactId(contactId: ContactId): Flow<Message?>
+    fun getTribeLastMemberRequestByContactId(contactId: ContactId, chatId: ChatId, ): Flow<Message?>
     fun getMessageByUUID(messageUUID: MessageUUID): Flow<Message?>
     fun getPaymentsTotalFor(feedId: Long): Flow<Sat?>
 

@@ -110,6 +110,10 @@ internal class TribeMembersListAdapter(
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.collectViewState { viewState ->
                 if (viewState is TribeMembersListViewState.ListMode) {
+                    if (viewState.firstPage) {
+                        tribeMembers.clear()
+                    }
+
                     if (!viewState.loading && viewState.list.isNotEmpty()) {
                         if (tribeMembers.isEmpty()) {
                             tribeMembers.addAll(viewState.list)
@@ -272,10 +276,7 @@ internal class TribeMembersListAdapter(
                         layoutConstraintGroupActionJoinRequestProgressBarContainer.gone
                         viewModel.showFailedToProcessMemberMessage(type)
                     }
-                    is Response.Success -> {
-                        tribeMembers.removeAt(position)
-                        this@TribeMembersListAdapter.notifyItemRemoved(position)
-                    }
+                    is Response.Success -> {}
                 }
             }.let { job ->
                 holderJobs.add(job)

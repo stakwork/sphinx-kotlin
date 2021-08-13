@@ -1519,10 +1519,11 @@ abstract class SphinxRepository(
         )
     }
 
-    override fun getTribeMembershipRequestMessageByContactId(contactId: ContactId): Flow<Message?> = flow {
+    override fun getTribeLastMemberRequestByContactId(contactId: ContactId, chatId: ChatId, ): Flow<Message?> = flow {
         val queries = coreDB.getSphinxDatabaseQueries()
+
         emitAll(
-            queries.tribeMemberRequestMessageGetByContactId(contactId)
+            queries.messageLastMemberRequestGetByContactId(contactId, chatId)
                 .asFlow()
                 .mapToOneOrNull(io)
                 .map { it?.let { messageDbo ->

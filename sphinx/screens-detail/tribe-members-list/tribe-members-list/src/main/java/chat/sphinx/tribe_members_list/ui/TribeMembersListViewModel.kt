@@ -27,6 +27,7 @@ import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import javax.annotation.meta.Exhaustive
 import javax.inject.Inject
@@ -91,6 +92,11 @@ internal class TribeMembersListViewModel @Inject constructor(
         loadTribeMembers()
 
         loading = false
+    }
+
+    private suspend fun reloadTribeMembers() {
+        page = 0
+        loadTribeMembers()
     }
 
     private suspend fun loadTribeMembers() {
@@ -172,7 +178,7 @@ internal class TribeMembersListViewModel @Inject constructor(
             lastInitial = contactInitial
 
             if (contact.pending == true) {
-                if (!tribeMemberHolderViewStates.hasNoPendingTribeMemberHeader()) {
+                if (tribeMemberHolderViewStates.hasNoPendingTribeMemberHeader()) {
                     tribeMemberHolderViewStates.add(
                         TribeMemberHolderViewState.PendingTribeMemberHeader()
                     )
@@ -215,12 +221,19 @@ internal class TribeMembersListViewModel @Inject constructor(
         var response: LoadResponse<Any, ResponseError>  = Response.Error(ResponseError(("")))
 
         viewModelScope.launch(mainImmediate) {
-            messageRepository.getTribeMembershipRequestMessageByContactId(contactId).collect { message ->
-                message?.let {
-                    response = messageRepository.processMemberRequest(contactId, message.id, type)
-                }
+            val message = messageRepository.getTribeLastMemberRequestByContactId(
+                contactId,
+                ChatId(args.argChatId)
+            ).firstOrNull()
+
+            if (message != null) {
+                response = messageRepository.processMemberRequest(contactId, message.id, type)
             }
         }.join()
+
+        if (response is Response.Success) {
+            reloadTribeMembers()
+        }
 
         return response
     }
