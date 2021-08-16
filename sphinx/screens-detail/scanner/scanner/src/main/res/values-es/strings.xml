@@ -3,6 +3,7 @@
     <string name="scanner_header_name">ESCANEAR</string>
     <string name="scanner_bottom_content_label">O INGRESE MANUALMENTE</string>
     <string name="scanner_edit_text_hint">Código</string>
+    <string name="scanner_verify_button">VERIFICAR</string>
 
     <string name="scanner_notify_permissions_needed">Los permisos de cámara son requeridos para usar esta funcionalidad, por favor habilitalos en configuración</string>
 </resources>
