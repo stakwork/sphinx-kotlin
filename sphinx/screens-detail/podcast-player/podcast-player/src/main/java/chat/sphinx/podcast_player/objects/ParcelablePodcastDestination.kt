@@ -10,12 +10,14 @@ data class ParcelablePodcastDestination(
     val split: Long,
     val address: String,
     val type: String,
+    val customKey: String?,
+    val customValue: String?,
 ): Parcelable
 
 fun PodcastDestination.toParcelablePodcastDestination(): ParcelablePodcastDestination {
-    return ParcelablePodcastDestination(this.split, this.address, this.type)
+    return ParcelablePodcastDestination(this.split, this.address, this.type, this.customKey, this.customValue)
 }
 
 fun ParcelablePodcastDestination.toPodcastDestination(): PodcastDestination {
-    return PodcastDestination(this.split, this.address, this.type)
+    return PodcastDestination(this.split, this.address, this.type, this.customKey, this.customValue)
 }

@@ -8,8 +8,10 @@ data class PodcastDestinationDto(
     val split: Long,
     val address: String,
     val type: String,
+    val customKey: String?,
+    val customValue: String?,
 )
 
 fun PodcastDestinationDto.toPodcastDestination(): PodcastDestination {
-    return PodcastDestination(this.split, this.address, this.type)
+    return PodcastDestination(this.split, this.address, this.type, this.customKey, this.customValue)
 }

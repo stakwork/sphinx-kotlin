@@ -496,7 +496,13 @@ abstract class SphinxRepository(
 
             for (destination in destinations) {
                 destinationsArray.add(
-                    PostStreamSatsDestinationDto(destination.address, destination.type, destination.split.toDouble())
+                    PostStreamSatsDestinationDto(
+                        destination.address,
+                        destination.type,
+                        destination.split.toDouble(),
+                        destination.customKey,
+                        destination.customValue
+                    )
                 )
             }
 
