@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="edit_text_message_hint">メッセージ</string>
+    <string name="edit_text_optional_message_hint">メッセージ（省略可）</string>
+
+    <string name="chat_muted_message">チャットをミュートしました。このチャットの新着メッセージはプッシュ通知されません。</string>
+    <string name="chat_muted_waiting_on_network">ネットワーク待機中</string>
+    <string name="chat_tribe_contributed">投げ銭した総額: </string>
+    <string name="chat_tribe_earned">投げ銭された総額: </string>
+
+    <string name="unsupported_message_type_placeholder_text">%1$s: まだサポートされていません</string>
+    <string name="deleted_message_label_text">このメッセージは削除されました</string>
+    <string name="join_call_header_label_text">...でコールに参加</string>
+
+    <string name="failed_message">Failed Message</string>
+
+    <!--  Message type placeholder display names  -->
+    <string name="placeholder_display_name_message_type_attachment">添付メッセージ</string>
+    <string name="placeholder_display_name_message_type_bot_response">ボット返信メッセージ</string>
+    <string name="placeholder_display_name_message_type_invoice">インボイスメッセージ</string>
+    <string name="placeholder_display_name_message_type_payment">インボイス支払いメッセージ</string>
+    <string name="placeholder_display_name_message_type_tribe_delete">Tribe削除メッセージ</string>
+    <string name="placeholder_unsupported_message_type_default">サポートされていないメッセージタイプ</string>
+
+    <!-- Paid Message Details: Status Labels   -->
+    <string name="paid_message_details_status_label_pay">支払う</string>
+    <string name="paid_message_details_status_label_payment_accepted">支払いが完了しました</string>
+    <string name="paid_message_details_status_label_payment_denied">支払いできませんでした</string>
+    <string name="paid_message_details_status_label_processing_payment">支払い処理中</string>
+
+    <!-- Paid Message Overlays -->
+    <string name="paywall_overlay_label_text_message_received">satsを支払いメッセージを開封</string>
+    <string name="paywall_overlay_content_description_image_message_received">satsを支払い写真を見る</string>
+    <string name="paywall_overlay_content_description_video_message_received">satsを支払い動画を見る</string>
+
+
+    <!-- Link Previews -->
+    <string name="link_preview_add_contact_banner_label">友だちを追加</string>
+    <string name="link_preview_see_tribe_banner_label">Tribeを見る</string>
+
+    <!-- Replies -->
+    <string name="reply_message_media_content_description">元のメッセージのメディアコンテンツ</string>
+    <string name="reply_message_close_button_content_description">閉じる</string>
+
+    <!--  Purchase Status Labels: Paid Message Details  -->
+    <string name="purchase_status_label_paid_message_details_pending">承認待ち</string>
+    <string name="purchase_status_label_paid_message_details_accepted">支払いが完了しました</string>
+    <string name="purchase_status_label_paid_message_details_denied">支払いできませんでした</string>
+    <string name="purchase_status_label_paid_message_details_processing">支払い処理中</string>
+    <string name="purchase_status_label_paid_message_details_default">支払う</string>
+
+    <!--  Purchase Status Labels: Paid Message Sent Status  -->
+    <string name="purchase_status_label_paid_message_sent_status_pending">承認待ち</string>
+    <string name="purchase_status_label_paid_message_sent_status_accepted">完了しました</string>
+    <string name="purchase_status_label_paid_message_sent_status_denied">失敗しました</string>
+    <string name="purchase_status_label_paid_message_sent_status_processing">支払い処理中</string>
+    <string name="purchase_status_label_paid_message_sent_status_default">ハンドル名のないユーザー</string>
+
+
+    <!--  Group Action  -->
+    <string name="tribe_request_admin_side">%1$sがTribeに\n参加申請しました</string>
+    <string name="tribe_request_approved_admin_side">%1$sからの申請を\n承認しました</string>
+    <string name="tribe_request_rejected_admin_side">%1$sからの申請を\n却下しました</string>
+    <string name="tribe_request_rejected_member_side">Tribe参加申請が管理人により\n却下されました</string>
+    <string name="tribe_join_announcement">%1$sがTribeに参加しました</string>
+    <string name="group_join_announcement">%1$sがグループに参加しました</string>
+    <string name="tribe_leave_announcement">%1$sがTribeから抜けました</string>
+    <string name="group_leave_announcement">%1$sがグループから抜けました</string>
+    <string name="tribe_deleted_announcement">Tribeは管理人により\n削除されました</string>
+    <string name="group_kick_announcement_member_side">管理人によりグループから削除されました</string>
+    <string name="tribe_kick_announcement_member_side">管理人によりTribeから削除されました</string>
+    <string name="tribe_welcome_announcement_member_side">Tribeにようこそ！</string>
+    <string name="tribe_deleted_announcement_button_delete">Tribeを削除</string>
+
+    <!-- Selected Item Menu Labels -->
+    <string name="selected_message_menu_item_boost">投げ銭する</string>
+    <string name="selected_message_menu_item_copy_text">テキストをコピー</string>
+    <string name="selected_message_menu_item_copy_call_link">コールリンクをコピー</string>
+    <string name="selected_message_menu_item_copy_link">リンクをコピー</string>
+    <string name="selected_message_menu_item_delete">メッセージを削除</string>
+    <string name="selected_message_menu_item_reply">返信</string>
+    <string name="selected_message_menu_item_save_file">ファイルを保存</string>
+    <string name="selected_message_menu_item_resend">Resend</string>
+
+    <!-- Notify -->
+    <string name="notify_boost_failure">投げ銭に失敗しました</string>
+    <string name="side_effect_text_copied">テキストをクリップボードにコピーしました</string>
+    <string name="side_effect_call_link_copied">コールリンクをクリップボードにコピーしました</string>
+    <string name="side_effect_link_copied">Copied %s</string>
+    <string name="side_effect_no_link_to_copy">No link to copy</string>
+
+    <!-- Send Attachment -->
+    <string name="attachment_send_header_image">写真を送る</string>
+    <string name="attachment_send_header_video">動画を送る</string>
+    <string name="attachment_send_header_giphy">ミームを送る</string>
+
+    <!-- Exit Tribe -->
+    <string name="delete_own_tribe_not_supported">自分で作成したTribeは削除できません</string>
+    <string name="alert_confirm_exit_tribe_title">Tribeから抜ける</string>
+    <string name="alert_confirm_exit_tribe_message">Tribeから抜け、Tribeを削除してよいですか？</string>
+
+    <!-- Menu -->
+    <string name="attachments_menu_cancel" tools:ignore="ButtonCase">キャンセル</string>
+    <string name="camera_attachment_option">カメラで撮影</string>
+    <string name="library_attachment_option">アルバムから選ぶ</string>
+    <string name="gif_attachment_option">ミームを探す</string>
+    <string name="file_attachment_option">ファイルを送信</string>
+    <string name="paid_message_attachment_option">有料メッセージを作成</string>
+    <string name="request_attachment_option">送金をリクエスト</string>
+    <string name="send_attachment_option">送金する</string>
+    <string name="waiting_for_admin_approval">管理人の承認を待っています</string>
+    <string name="failed_to_delete_tribe">Tribeを削除できませんでした</string>
+
+    <string name="podcast_boost_label">投げ銭！</string>
+
+    <string name="bottom_menu_call_header_text">コール方法</string>
+    <string name="bottom_menu_call_option_audio">音声</string>
+    <string name="bottom_menu_call_option_video_or_audio">動画または音声</string>
+
+</resources>

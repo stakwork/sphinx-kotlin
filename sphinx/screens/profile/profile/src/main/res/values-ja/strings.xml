@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="profile_header_name">プロフィール</string>
+    <string name="profile_basic_tab">基本設定</string>
+    <string name="profile_advanced_tab">詳細設定</string>
+    <string name="profile_user_name">ユーザーネーム</string>
+    <string name="profile_address">Lightningノードの公開鍵</string>
+    <string name="profile_route_hint">ルートヒント</string>
+    <string name="profile_share_picture">プロフィール写真を友だちにシェア</string>
+    <string name="profile_tip">デフォルトの投げ銭金額</string>
+    <string name="profile_meeting_server">オンライン会議サーバー</string>
+    <string name="profile_sync_devices">複数の端末を同期</string>
+    <string name="profile_backup_keys">バックアップキーをバックアップ</string>
+    <string name="profile_server_url">サーバーURL</string>
+    <string name="profile_pin_timeout">PINコードの有効時間</string>
+    <string name="profile_pin_timeout_hours">12時間</string>
+    <string name="profile_change_pin">PINコードの変更</string>
+    <string name="profile_change_privacy_pin">プライバシーPINコードの変更</string>
+    <string name="profile_always_require_pin">起動時のPINコード入力を必須にする</string>
+    <string name="profile_export_keys_title_alert">バックアップキーをエクスポート</string>
+    <string name="profile_export_keys_pin_message">バックアップキーを暗号化するPINコードを入力してください。このPINコードは別の端末でアカウントを復元する時に必要です。</string>
+    <string name="profile_keys_copied_clipboard">バックアップキーをクリップボードにコピーします。アプリを削除する前に、この文字列とPINコードを保存してください。一方でも失くすとアプリ再インストール後にデータを復元できません。</string>
+    <string name="side_effect_backup_keys_exported">クリップボードにコピーしたバックアップキーをエクスポート</string>
+    <string name="side_effect_wrong_pin">PINコードが違います</string>
+    <string name="side_effect_backup_keys_failed">バックアップキーの生成と暗号化に失敗しました</string>
+    <string name="profile_qr_code_header_name">Lightningノードの公開鍵</string>
+    <string name="bottom_menu_profile_pic_header_text">プロフィール写真</string>
+    <string name="failed_to_process_image">写真をアップロードできませんでした</string>
+    <string name="image_uploaded_successfully">写真をアップロードしました</string>
+
+    <string name="empty_or_null_relay_url">New Relay URL can not be empty or null</string>
+    <string name="invalid_relay_url">New Relay URL is invalid</string>
+    <string name="relay_url_update_from_http_to_tor_not_implemented">Updating to an onion address is currently not supported.</string>
+    <string name="testing_new_relay_url">Testing new Relay URL…</string>
+    <string name="failed_updating_relay_url">New URL test failed, restoring previous setting…</string>
+    <string name="updating_relay_url_succeed">Relay URL successfully updated</string>
+</resources>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="add_friend_header_name">友だちを追加</string>
+    <string name="new_to_sphinx_button">Sphinxを使っていない友だち</string>
+    <string name="already_on_sphinx_button">Sphinxを使っている友だち</string>
+</resources>

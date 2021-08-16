@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="new_contact_header_name">友だちを追加</string>
+    <string name="new_contact_nickname_label">ニックネーム *</string>
+    <string name="new_contact_address_label">Lightningノードの公開鍵 *</string>
+    <string name="new_contact_route_hint_label">ルートヒント</string>
+    <string name="save_to_contacts_button">友だちリストに登録</string>
+    <string name="new_contact_nickname_address_empty">ニックネームとLightningノードの公開鍵は必須です</string>
+    <string name="new_contact_privacy_setting_help">プライバシー設定を有効にすると、この友だちはプライバシーPINコードでログインした時のみ友だちリストに表示されます。プライバシー設定を有効にするには、プロフィールの詳細設定でプライバシーPINコードを設定してください。</string>
+    <string name="new_contact_invalid_public_key_error">無効な公開鍵</string>
+    <string name="new_contact_invalid_route_hint_error">無効なルートヒント</string>
+</resources>

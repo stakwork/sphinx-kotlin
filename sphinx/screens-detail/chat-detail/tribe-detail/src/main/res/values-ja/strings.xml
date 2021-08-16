@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tribe_detail_header_name">Tribeの詳細</string>
+    <string name="qr_code_title">Tribe参加リンク</string>
+    <string name="podcast_sats_per_minute">ポッドキャスト: 毎分の課金額</string>
+    <string name="alias">ハンドルネーム</string>
+
+    <string name="bottom_menu_tribe_profile_pic_header_text">Tribeプロフィール写真</string>
+
+    <string name="tribe_created_on">作成日%s</string>
+    <string name="tribe_costs">1メッセージあたりの課金額: %d sat - ステーキング金額: %d sat</string>
+    <string name="profile_picture">プロフィール写真</string>
+
+    <string name="failed_to_update_profile_alias">Tribeハンドルネームを更新できませんでした</string>
+    <string name="failed_to_update_profile_pic">Tribeプロフィール写真を更新できませんでした</string>
+
+    <string name="alert_confirm_delete_tribe_heading">%sを削除</string>
+    <string name="alert_confirm_delete_tribe_message">Tribeを削除してよいですか？</string>
+    <string name="failed_to_delete_tribe">Tribeを削除できませんでした</string>
+
+    <string name="alert_confirm_exit_tribe_heading">%sから抜ける</string>
+    <string name="alert_confirm_exit_tribe_message">Tribeから抜けますか？</string>
+    <string name="failed_to_exit_tribe">Tribeから抜けられませんでした</string>
+
+    <string name="tribe_members_list">MEMBERS LIST</string>
+</resources>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="support_ticket_header_name">支援中心</string>
+    <string name="send_message">發送訊息</string>
+    <string name="copy_logs">複製紀錄 Logs</string>
+    <string name="describe_your_problem_here">說明您的問題…</string>
+    <string name="message_required">訊息不可無填</string>
+    <string name="fetch_logs_failed">log載入失敗</string>
+    <string name="logs_copied_to_clipboard">Logs 已複製上貼版</string>
+    <string name="no_logs_loaded">沒有 logs 可上傳</string>
+</resources>

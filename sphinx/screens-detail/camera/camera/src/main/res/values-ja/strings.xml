@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="camera_permissions_required">この機能を使うにはカメラ、マイク、スピーカーのアクセス許可が必要です。端末の設定で許可してください。</string>
+    <string name="camera_retake">撮り直す</string>
+    <string name="camera_use_photo">この写真を使う</string>
+    <string name="camera_cancel">キャンセル</string>
+</resources>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="on_board_welcome">ようこそ</string>
+    <string name="on_board_welcome_info_code">QRコードをスキャンするか\n接続コードを入力してください</string>
+    <string name="on_board_edit_text_hint_code">コードを入力してください</string>
+
+    <string name="side_effect_generate_token_failed">トークンが生成できませんでした</string>
+
+    <string name="on_board_welcome_info_decrypt">復号するためPINコードを入力</string>
+    <string name="on_board_edit_text_hint_decrypt">PINコードの入力</string>
+
+    <string name="side_effect_decryption_failure">復号できませんでした</string>
+    <string name="side_effect_empty_input">入力が必須です</string>
+    <string name="side_effect_pin_length">PINコードの長さが無効です</string>
+    <string name="side_effect_invalid_code">無効なコード</string>
+    <string name="side_effect_invalid_pin">無効なPINコード</string>
+    <string name="side_effect_feature_not_implemented">この機能はまだ実装されていません</string>
+</resources>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="address_book_header_name">友だちリスト</string>
+    <string name="search">検索</string>
+    <string name="add_icon"></string>
+    <string name="add_friend">友だちを追加</string>
+</resources>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="wrong_pin">PIN 錯誤</string>
+    <string name="wrong_pin_one_more_attempt">連續錯誤一次將被鎖卡</string>
+    <string name="wrong_pin_pin_does_not_match">PIN 不匹配</string>
+    <string name="header_enter_pin">輸入 PIN</string>
+    <string name="header_confirm_pin">確認 PIN</string>
+    <string name="header_reset_step_1">輸入新 PIN</string>
+    <string name="header_reset_step_2">確認新 PIN</string>
+
+    <string name="flow_response_decrypting_key">PIN 驗證中</string>
+    <string name="flow_response_encrypting_key_with_new_pin">使用新 PIN 重新加密</string>
+    <string name="flow_response_generating_encrypting_key">私鏈生成加密中</string>
+
+    <string name="enter_pin_encrypt">請輸入加密私鏈PIN. 您備份恢復將需要它</string>
+</resources>

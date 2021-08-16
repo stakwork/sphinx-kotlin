@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="on_board_finish_button">完了</string>
+    <string name="on_board_next_button">次へ</string>
+
+    <string name="on_board_get_started_button">初期設定を開始する</string>
+    <string name="on_board_friend_message">友だちからメッセージが届きました</string>
+
+    <string name="side_effect_create_inviter_failed">招待してくれた友だちを友だちリストに登録できませんでした</string>
+    <string name="side_effect_get_contacts_failed">アカウント情報を読み出せませんでした</string>
+    <string name="side_effect_update_owner_failed">アカウント情報を更新できませんでした</string>
+    <string name="side_effect_generate_token_failed">トークンを生成できませんでした</string>
+
+    <string name="sign_up_name_edit_text_hint">ユーザーネームを設定</string>
+    <string name="sign_up_name_text_view">ユーザーネーム</string>
+
+    <string name="sphinx_ready_label">Sphinxを\n使ってみよう</string>
+    <string name="sphinx_ready_balance_label">Lightningネットワークで\nメッセージとsatsを送受信\n（現在の上限は送金 %d sats、受金 %d sats</string>
+    <string name="sphinx_ready_loading_balance">sats残高を読み込み中</string>
+</resources>
