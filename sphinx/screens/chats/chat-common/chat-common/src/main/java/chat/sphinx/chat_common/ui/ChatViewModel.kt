@@ -542,6 +542,9 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         // invisible, so...
         chatSharedFlow.replayCache.firstOrNull()?.let { chat ->
             toggleChatMutedJob = viewModelScope.launch(mainImmediate) {
+
+                submitSideEffect(ChatSideEffect.ProduceHapticFeedback)
+
                 val response = chatRepository.toggleChatMuted(chat)
                 @Exhaustive
                 when (response) {
