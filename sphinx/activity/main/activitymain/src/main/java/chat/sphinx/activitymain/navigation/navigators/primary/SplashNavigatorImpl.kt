@@ -14,14 +14,17 @@ import javax.inject.Inject
 internal class SplashNavigatorImpl @Inject constructor(
     navigationDriver: PrimaryNavigationDriver
 ): SplashNavigator(navigationDriver) {
+
     override suspend fun toDashboardScreen(
         privateMode: Boolean,
         updateBackgroundLoginTime: Boolean,
+        deepLink: String?
     ) {
         navigationDriver.submitNavigationRequest(
             ToDashboardScreen(
                 popUpToId = R.id.main_primary_nav_graph,
                 updateBackgroundLoginTime = updateBackgroundLoginTime,
+                deepLink
             )
         )
     }

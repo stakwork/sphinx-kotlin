@@ -1,5 +1,7 @@
 package chat.sphinx.activitymain
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.constraintlayout.motion.widget.MotionLayout
@@ -14,13 +16,13 @@ import chat.sphinx.activitymain.ui.MainViewState
 import chat.sphinx.activitymain.ui.MotionLayoutNavigationActivity
 import chat.sphinx.insetter_activity.InsetPadding
 import chat.sphinx.insetter_activity.InsetterActivity
-import chat.sphinx.resources.R as R_common
 import dagger.hilt.android.AndroidEntryPoint
 import dev.chrisbanes.insetter.applyInsetter
 import io.matthewnelson.android_feature_navigation.requests.PopBackStack
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import chat.sphinx.resources.R as R_common
 
 @AndroidEntryPoint
 internal class MainActivity: MotionLayoutNavigationActivity<
@@ -83,6 +85,10 @@ internal class MainActivity: MotionLayoutNavigationActivity<
         WindowCompat.setDecorFitsSystemWindows(window, false)
         setTransitionListener(binding.layoutMotionMain)
 
+        intent.data?.let { intentData ->
+            handleDeepLink(intentData)
+        }
+
         binding.layoutConstraintMainStatusBar.applyInsetter {
             type(statusBars = true) {
                 padding()
@@ -99,6 +105,7 @@ internal class MainActivity: MotionLayoutNavigationActivity<
 
     override fun onStart() {
         super.onStart()
+
         // Authentication
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel
@@ -129,6 +136,22 @@ internal class MainActivity: MotionLayoutNavigationActivity<
                         }
                     }
                 }
+        }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+
+        intent.data?.let { intentData ->
+            handleDeepLink(intentData)
+        }
+    }
+
+    private fun handleDeepLink(data: Uri) {
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.handleDeepLink(
+                data.toString()
+            )
         }
     }
 

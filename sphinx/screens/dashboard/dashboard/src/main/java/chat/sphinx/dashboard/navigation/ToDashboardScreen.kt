@@ -10,7 +10,8 @@ import io.matthewnelson.concept_navigation.NavigationRequest
 
 class ToDashboardScreen(
     @IdRes private val popUpToId: Int?,
-    private val updateBackgroundLoginTime: Boolean = false
+    private val updateBackgroundLoginTime: Boolean = false,
+    private val deepLink: String? = null,
 ): NavigationRequest<NavController>() {
     override fun navigate(controller: NavController) {
         val options: NavOptions = popUpToId?.let {
@@ -19,9 +20,12 @@ class ToDashboardScreen(
                 .build()
         } ?: DefaultNavOptions.defaultAnimsBuilt
 
+        val args = DashboardFragmentArgs.Builder(updateBackgroundLoginTime)
+        args.argDeepLink = deepLink
+
         controller.navigate(
             R.id.dashboard_nav_graph,
-            DashboardFragmentArgs.Builder(updateBackgroundLoginTime).build().toBundle(),
+            args.build().toBundle(),
             options
         )
     }

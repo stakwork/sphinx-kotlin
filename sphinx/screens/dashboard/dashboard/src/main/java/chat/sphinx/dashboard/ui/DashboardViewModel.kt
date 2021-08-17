@@ -107,10 +107,25 @@ internal class DashboardViewModel @Inject constructor(
         NavDrawerViewState
         >(dispatchers, NavDrawerViewState.Closed)
 {
+
+    private val args: DashboardFragmentArgs by handler.navArgs()
+
     init {
-        if (handler.navArgs<DashboardFragmentArgs>().value.updateBackgroundLoginTime) {
+        if (args.updateBackgroundLoginTime) {
             viewModelScope.launch(default) {
                 backgroundLoginHandler.updateLoginTime()
+            }
+        }
+
+        viewModelScope.launch(default) {
+            handleDeepLinks()
+        }
+    }
+
+    private suspend fun handleDeepLinks() {
+        args.argDeepLink?.let { deepLink ->
+            deepLink.toTribeJoinLink()?.let { tribeJoinLink ->
+                handleTribeJoinLink(tribeJoinLink)
             }
         }
     }

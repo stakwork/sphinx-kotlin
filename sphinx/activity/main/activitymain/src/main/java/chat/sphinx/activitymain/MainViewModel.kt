@@ -1,5 +1,7 @@
 package chat.sphinx.activitymain
 
+import android.app.Application
+import android.content.Context
 import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.activitymain.navigation.drivers.AuthenticationNavigationDriver
@@ -22,6 +24,7 @@ import javax.inject.Inject
 internal class MainViewModel @Inject constructor(
     private val authenticationCoordinator: AuthenticationCoordinator,
     private val authenticationStateManager: AuthenticationStateManager,
+    private val app: Application,
     val authenticationDriver: AuthenticationNavigationDriver,
     val detailDriver: DetailNavigationDriver,
     dispatchers: CoroutineDispatchers,
@@ -46,6 +49,24 @@ internal class MainViewModel @Inject constructor(
                         )
                     }
                 }
+            }
+        }
+    }
+
+    suspend fun handleDeepLink(deepLink: String) {
+        if (authenticationStateManager.authenticationStateFlow.value == AuthenticationState.NotRequired) {
+            navigationDriver.toDashboardScreen(deepLink)
+        } else {
+            storeDeepLink(deepLink)
+        }
+    }
+
+    private fun storeDeepLink(deepLink: String) {
+        app.getSharedPreferences("deep_link", Context.MODE_PRIVATE).edit()?.let { editor ->
+            editor.putString("deep_link", deepLink)
+
+            if (!editor.commit()) {
+                editor.apply()
             }
         }
     }

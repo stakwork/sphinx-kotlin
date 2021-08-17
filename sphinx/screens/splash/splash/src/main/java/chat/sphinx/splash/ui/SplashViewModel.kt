@@ -1,5 +1,6 @@
 package chat.sphinx.splash.ui
 
+import android.app.Application
 import android.content.Context
 import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
@@ -44,12 +45,14 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
 internal class SplashViewModel @Inject constructor(
     private val authenticationCoordinator: AuthenticationCoordinator,
     private val backgroundLoginHandler: BackgroundLoginHandler,
+    private val app: Application,
     dispatchers: CoroutineDispatchers,
     private val keyRestore: KeyRestore,
     private val lightningRepository: LightningRepository,
@@ -103,10 +106,7 @@ internal class SplashViewModel @Inject constructor(
                         navigator.toOnBoardReadyScreen(onBoardStep)
                     }
                     null -> {
-                        navigator.toDashboardScreen(
-                            // No need as it was already updated
-                            updateBackgroundLoginTime = false
-                        )
+                        goToDashboard(false)
                     }
                 }
 
@@ -140,7 +140,7 @@ internal class SplashViewModel @Inject constructor(
                                         navigator.toOnBoardReadyScreen(onBoardStep)
                                     }
                                     null -> {
-                                        navigator.toDashboardScreen(updateBackgroundLoginTime = true)
+                                        goToDashboard(true)
                                     }
                                 }
                             }
@@ -173,6 +173,37 @@ internal class SplashViewModel @Inject constructor(
                         }
                     }
 
+                }
+            }
+
+            deleteDeepLink()
+        }
+    }
+
+    private suspend fun goToDashboard(updateBackgroundLoginTime: Boolean) {
+        navigator.toDashboardScreen(
+            updateBackgroundLoginTime = updateBackgroundLoginTime,
+            deepLink = getDeepLink()
+        )
+    }
+
+    private fun getDeepLink(): String? {
+        val deepLinkSharedPreferences = app.getSharedPreferences("deep_link", Context.MODE_PRIVATE)
+
+        return deepLinkSharedPreferences.let { sharedPrefs ->
+            sharedPrefs.getString("deep_link", null) ?: run {
+                null
+            }
+        }
+    }
+
+    private suspend fun deleteDeepLink() {
+        withContext(io) {
+            app.getSharedPreferences("deep_link", Context.MODE_PRIVATE).edit()?.let { editor ->
+                editor.remove("deep_link")
+
+                if (!editor.commit()) {
+                    editor.apply()
                 }
             }
         }
@@ -376,7 +407,7 @@ internal class SplashViewModel @Inject constructor(
                         viewState.pinWriter.append('0')
                     }
 
-                    navigator.toDashboardScreen(updateBackgroundLoginTime = true)
+                    goToDashboard(updateBackgroundLoginTime = true)
 
                 } ?: updateViewState(
                     SplashViewState.Set3_DecryptKeys(viewState.restoreCode)
