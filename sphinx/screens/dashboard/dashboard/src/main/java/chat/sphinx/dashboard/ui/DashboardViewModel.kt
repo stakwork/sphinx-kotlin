@@ -118,14 +118,22 @@ internal class DashboardViewModel @Inject constructor(
         }
 
         viewModelScope.launch(default) {
-            handleDeepLinks()
+            handleDeepLink()
         }
     }
 
-    private suspend fun handleDeepLinks() {
+    private fun handleDeepLink() {
         args.argDeepLink?.let { deepLink ->
-            deepLink.toTribeJoinLink()?.let { tribeJoinLink ->
-                handleTribeJoinLink(tribeJoinLink)
+            handleDeepLink(deepLink)
+        }
+    }
+
+    fun handleDeepLink(link: String?) {
+        viewModelScope.launch(mainImmediate) {
+            link?.let { nnLink ->
+                nnLink.toTribeJoinLink()?.let { tribeJoinLink ->
+                    handleTribeJoinLink(tribeJoinLink)
+                }
             }
         }
     }

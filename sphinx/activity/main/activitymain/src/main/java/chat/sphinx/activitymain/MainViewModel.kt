@@ -56,18 +56,6 @@ internal class MainViewModel @Inject constructor(
     suspend fun handleDeepLink(deepLink: String) {
         if (authenticationStateManager.authenticationStateFlow.value == AuthenticationState.NotRequired) {
             navigationDriver.toDashboardScreen(deepLink)
-        } else {
-            storeDeepLink(deepLink)
-        }
-    }
-
-    private fun storeDeepLink(deepLink: String) {
-        app.getSharedPreferences("deep_link", Context.MODE_PRIVATE).edit()?.let { editor ->
-            editor.putString("deep_link", deepLink)
-
-            if (!editor.commit()) {
-                editor.apply()
-            }
         }
     }
 }

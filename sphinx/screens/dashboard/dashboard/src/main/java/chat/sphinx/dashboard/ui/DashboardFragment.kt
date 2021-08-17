@@ -81,6 +81,14 @@ internal class DashboardFragment : MotionLayoutFragment<
         setupNavDrawer()
     }
 
+    override fun onResume() {
+        super.onResume()
+
+        val deepLink = activity?.intent?.dataString
+        viewModel.handleDeepLink(deepLink)
+        activity?.intent?.data = null
+    }
+
     private inner class BackPressHandler(context: Context): CloseAppOnBackPress(context) {
         override fun handleOnBackPressed() {
             if (viewModel.currentViewState is NavDrawerViewState.Open) {

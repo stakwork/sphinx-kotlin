@@ -85,10 +85,6 @@ internal class MainActivity: MotionLayoutNavigationActivity<
         WindowCompat.setDecorFitsSystemWindows(window, false)
         setTransitionListener(binding.layoutMotionMain)
 
-        intent.data?.let { intentData ->
-            handleDeepLink(intentData)
-        }
-
         binding.layoutConstraintMainStatusBar.applyInsetter {
             type(statusBars = true) {
                 padding()

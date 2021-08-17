@@ -106,7 +106,7 @@ internal class SplashViewModel @Inject constructor(
                         navigator.toOnBoardReadyScreen(onBoardStep)
                     }
                     null -> {
-                        goToDashboard(false)
+                        navigator.toDashboardScreen(updateBackgroundLoginTime = false)
                     }
                 }
 
@@ -140,7 +140,7 @@ internal class SplashViewModel @Inject constructor(
                                         navigator.toOnBoardReadyScreen(onBoardStep)
                                     }
                                     null -> {
-                                        goToDashboard(true)
+                                        navigator.toDashboardScreen(updateBackgroundLoginTime = true)
                                     }
                                 }
                             }
@@ -173,37 +173,6 @@ internal class SplashViewModel @Inject constructor(
                         }
                     }
 
-                }
-            }
-
-            deleteDeepLink()
-        }
-    }
-
-    private suspend fun goToDashboard(updateBackgroundLoginTime: Boolean) {
-        navigator.toDashboardScreen(
-            updateBackgroundLoginTime = updateBackgroundLoginTime,
-            deepLink = getDeepLink()
-        )
-    }
-
-    private fun getDeepLink(): String? {
-        val deepLinkSharedPreferences = app.getSharedPreferences("deep_link", Context.MODE_PRIVATE)
-
-        return deepLinkSharedPreferences.let { sharedPrefs ->
-            sharedPrefs.getString("deep_link", null) ?: run {
-                null
-            }
-        }
-    }
-
-    private suspend fun deleteDeepLink() {
-        withContext(io) {
-            app.getSharedPreferences("deep_link", Context.MODE_PRIVATE).edit()?.let { editor ->
-                editor.remove("deep_link")
-
-                if (!editor.commit()) {
-                    editor.apply()
                 }
             }
         }
@@ -407,7 +376,7 @@ internal class SplashViewModel @Inject constructor(
                         viewState.pinWriter.append('0')
                     }
 
-                    goToDashboard(updateBackgroundLoginTime = true)
+                    navigator.toDashboardScreen(updateBackgroundLoginTime = true)
 
                 } ?: updateViewState(
                     SplashViewState.Set3_DecryptKeys(viewState.restoreCode)
