@@ -84,9 +84,10 @@ internal class DashboardFragment : MotionLayoutFragment<
     override fun onResume() {
         super.onResume()
 
-        val deepLink = activity?.intent?.dataString
-        viewModel.handleDeepLink(deepLink)
-        activity?.intent?.data = null
+        activity?.intent?.dataString?.let { deepLink ->
+            viewModel.handleDeepLink(deepLink)
+            activity?.intent?.data = null
+        }
     }
 
     private inner class BackPressHandler(context: Context): CloseAppOnBackPress(context) {

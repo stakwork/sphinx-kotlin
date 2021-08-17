@@ -1,7 +1,6 @@
 package chat.sphinx.activitymain
 
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.constraintlayout.motion.widget.MotionLayout

@@ -1,7 +1,5 @@
 package chat.sphinx.activitymain
 
-import android.app.Application
-import android.content.Context
 import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.activitymain.navigation.drivers.AuthenticationNavigationDriver
@@ -24,7 +22,6 @@ import javax.inject.Inject
 internal class MainViewModel @Inject constructor(
     private val authenticationCoordinator: AuthenticationCoordinator,
     private val authenticationStateManager: AuthenticationStateManager,
-    private val app: Application,
     val authenticationDriver: AuthenticationNavigationDriver,
     val detailDriver: DetailNavigationDriver,
     dispatchers: CoroutineDispatchers,
