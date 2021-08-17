@@ -2,12 +2,9 @@ package chat.sphinx.chat_tribe.ui
 
 import android.animation.Animator
 import android.annotation.SuppressLint
-import android.os.Bundle
-import android.view.View
 import android.widget.ImageView
 import androidx.core.view.isGone
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import app.cash.exhaustive.Exhaustive
 import by.kirich1409.viewbindingdelegate.viewBinding
@@ -25,14 +22,12 @@ import chat.sphinx.resources.getString
 import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.lightning.asFormattedString
-import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_podcast.Podcast
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.concept_views.viewstate.collect
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -66,6 +61,11 @@ internal class ChatTribeFragment: ChatFragment<
     override val attachmentSendBinding: LayoutAttachmentSendPreviewBinding by viewBinding(
         LayoutAttachmentSendPreviewBinding::bind, R.id.include_chat_tribe_attachment_send_preview
     )
+
+    override val attachmentFullscreenBinding: LayoutAttachmentFullscreenBinding by viewBinding(
+        LayoutAttachmentFullscreenBinding::bind, R.id.include_chat_tribe_attachment_fullscreen
+    )
+
     override val menuBinding: LayoutChatMenuBinding by viewBinding(
         LayoutChatMenuBinding::bind, R.id.include_chat_tribe_menu
     )

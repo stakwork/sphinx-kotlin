@@ -35,6 +35,9 @@ import chat.sphinx.chat_common.ui.viewstate.selected.SelectedMessageViewState
 import chat.sphinx.chat_common.util.*
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
+import chat.sphinx.concept_link_preview.LinkPreviewHandler
+import chat.sphinx.concept_link_preview.model.TribePreviewName
+import chat.sphinx.concept_link_preview.model.toPreviewImageUrlOrNull
 import chat.sphinx.concept_meme_server.MemeServerTokenHandler
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_repository_chat.ChatRepository
@@ -73,10 +76,6 @@ import io.matthewnelson.android_feature_viewmodel.MotionLayoutViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
-import chat.sphinx.concept_link_preview.LinkPreviewHandler
-import chat.sphinx.concept_link_preview.model.HtmlPreviewTitle
-import chat.sphinx.concept_link_preview.model.TribePreviewName
-import chat.sphinx.concept_link_preview.model.toPreviewImageUrlOrNull
 import io.matthewnelson.concept_media_cache.MediaCacheHandler
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import io.matthewnelson.concept_views.viewstate.value
@@ -1080,5 +1079,13 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 
     override suspend fun onMotionSceneCompletion(value: Nothing) {
         // unused
+    }
+
+    fun saveFile(message: Message?) {
+        viewModelScope.launch(mainImmediate) {
+            submitSideEffect(
+                ChatSideEffect.Notify("Save File Functionality WIP")
+            )
+        }
     }
 }

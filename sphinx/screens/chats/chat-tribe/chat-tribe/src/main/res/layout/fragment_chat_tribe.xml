@@ -69,6 +69,15 @@
         app:layout_constraintTop_toTopOf="parent"
         tools:visibility="gone" />
 
+
+    <include
+        android:id="@+id/include_chat_tribe_attachment_fullscreen"
+        layout="@layout/layout_attachment_fullscreen"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:visibility="gone"
+        />
+
     <include
         android:id="@+id/include_chat_tribe_menu"
         layout="@layout/layout_chat_menu" />

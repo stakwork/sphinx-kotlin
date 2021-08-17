@@ -2,6 +2,9 @@ package chat.sphinx.chat_common.ui
 
 import android.content.Context
 import android.os.Bundle
+import android.view.GestureDetector
+import android.view.MotionEvent
+import android.view.ScaleGestureDetector
 import android.view.View
 import android.widget.ImageView
 import androidx.activity.OnBackPressedCallback
@@ -67,6 +70,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import kotlin.math.absoluteValue
 
 abstract class ChatFragment<
         VB: ViewBinding,
@@ -87,6 +91,7 @@ abstract class ChatFragment<
     protected abstract val selectedMessageBinding: LayoutSelectedMessageBinding
     protected abstract val selectedMessageHolderBinding: LayoutMessageHolderBinding
     protected abstract val attachmentSendBinding: LayoutAttachmentSendPreviewBinding
+    protected abstract val attachmentFullscreenBinding: LayoutAttachmentFullscreenBinding
     protected abstract val menuBinding: LayoutChatMenuBinding
     protected abstract val callMenuBinding: LayoutMenuBottomBinding
     protected abstract val recyclerView: RecyclerView
@@ -132,6 +137,7 @@ abstract class ChatFragment<
         setupHeader(insetterActivity)
         setupSelectedMessage()
         setupAttachmentSendPreview(insetterActivity)
+        setupAttachmentFullscreen(insetterActivity)
         setupRecyclerView()
     }
 
@@ -407,6 +413,59 @@ abstract class ChatFragment<
         }
     }
 
+    private fun setupAttachmentFullscreen(insetterActivity: InsetterActivity) {
+        attachmentFullscreenBinding.apply {
+
+            root.setOnClickListener { viewModel }
+
+            val gestureDetector = GestureDetector(chatFragmentContext, object: GestureDetector.SimpleOnGestureListener() {
+
+                override fun onScroll(
+                    e1: MotionEvent,
+                    e2: MotionEvent,
+                    distanceX: Float,
+                    distanceY: Float
+                ): Boolean {
+                    imageViewAttachmentFullscreen.animate()
+                        .translationX(imageViewAttachmentFullscreen.translationX-distanceX)
+                        .translationY(imageViewAttachmentFullscreen.translationY-distanceY)
+                        .setDuration(0L)
+                        .start()
+
+                    if (distanceY < -40f && distanceX.absoluteValue < 10) {
+                        imageViewAttachmentFullscreen.animate()
+                            .translationX(0f)
+                            .translationY(0f)
+                            .setDuration(0L)
+                            .start()
+
+                        root.gone
+                        return true
+                    }
+                    return false
+                }
+            })
+            val scaleGestureDetector = ScaleGestureDetector(chatFragmentContext, object: ScaleGestureDetector.SimpleOnScaleGestureListener() {
+                override fun onScale(detector: ScaleGestureDetector): Boolean {
+                    // TODO: Use animation to scale
+//                    imageViewAttachmentFullscreen.animate()
+//                        .scaleXBy(detector.scaleFactor)
+//                        .scaleYBy(detector.scaleFactor)
+//                        .setDuration(0L)
+//                        .start()
+
+                    return true
+                }
+            })
+            imageViewAttachmentFullscreen.setOnTouchListener { _, event ->
+                if (!gestureDetector.onTouchEvent(event)) {
+                    scaleGestureDetector.onTouchEvent(event)
+                }
+                return@setOnTouchListener true
+            }
+        }
+    }
+
     private fun onSelectedMessageMenuItemClick(index: Int) {
         viewModel.getSelectedMessageViewStateFlow().value.let { state ->
             if (state is SelectedMessageViewState.SelectedMessage) {
@@ -432,7 +491,7 @@ abstract class ChatFragment<
                                 viewModel.replyToMessage(holderState.message)
                             }
                             is MenuItemState.SaveFile -> {
-                                // TODO: Implement
+                                viewModel.saveFile(holderState.message)
                             }
                             is MenuItemState.Resend -> {
                                 viewModel.resendMessage(holderState.message)
@@ -451,6 +510,7 @@ abstract class ChatFragment<
         val messageListAdapter = MessageListAdapter(
             recyclerView,
             headerBinding,
+            attachmentFullscreenBinding,
             linearLayoutManager,
             viewLifecycleOwner,
             onStopSupervisor,

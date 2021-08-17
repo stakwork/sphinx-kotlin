@@ -39,6 +39,11 @@ internal class ChatGroupFragment: ChatFragment<
     override val attachmentSendBinding: LayoutAttachmentSendPreviewBinding by viewBinding(
         LayoutAttachmentSendPreviewBinding::bind, R.id.include_chat_group_attachment_send_preview
     )
+
+    override val attachmentFullscreenBinding: LayoutAttachmentFullscreenBinding by viewBinding(
+        LayoutAttachmentFullscreenBinding::bind, R.id.include_chat_group_attachment_fullscreen
+    )
+
     override val menuBinding: LayoutChatMenuBinding by viewBinding(
         LayoutChatMenuBinding::bind, R.id.include_chat_group_menu
     )

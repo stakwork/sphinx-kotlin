@@ -81,6 +81,9 @@ inline val Message.isBoostAllowed: Boolean
             !type.isDirectPayment() &&
             (uuid?.value ?: "").isNotEmpty()
 
+inline val Message.isMediaAttachment: Boolean
+    get() = type.canContainMedia
+
 inline val Message.isCopyAllowed: Boolean
     get() = (this.retrieveTextToShow() ?: "").isNotEmpty()
 
