@@ -138,16 +138,14 @@ internal class MainActivity: MotionLayoutNavigationActivity<
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
 
-        intent.data?.let { intentData ->
-            handleDeepLink(intentData)
+        intent.dataString?.let { deepLink ->
+            handleDeepLink(deepLink)
         }
     }
 
-    private fun handleDeepLink(data: Uri) {
+    private fun handleDeepLink(deepLink: String) {
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-            viewModel.handleDeepLink(
-                data.toString()
-            )
+            viewModel.handleDeepLink(deepLink)
         }
     }
 
