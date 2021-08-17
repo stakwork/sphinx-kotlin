@@ -12,6 +12,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.LayoutRes
 import androidx.constraintlayout.motion.widget.MotionLayout
+import androidx.core.view.isVisible
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
@@ -62,6 +63,7 @@ import chat.sphinx.wrapper_view.Dp
 import io.matthewnelson.android_feature_screens.ui.motionlayout.MotionLayoutFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
+import io.matthewnelson.android_feature_screens.util.goneIfTrue
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.currentViewState
 import io.matthewnelson.android_feature_viewmodel.updateViewState
@@ -70,7 +72,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
-import kotlin.math.absoluteValue
 
 abstract class ChatFragment<
         VB: ViewBinding,
@@ -418,52 +419,111 @@ abstract class ChatFragment<
 
             root.setOnClickListener { viewModel }
 
-            val gestureDetector = GestureDetector(chatFragmentContext, object: GestureDetector.SimpleOnGestureListener() {
+            layoutConstraintAttachmentFullscreenHeader.apply {
+                insetterActivity.addStatusBarPadding(this)
+                this.layoutParams.height = this.layoutParams.height + insetterActivity.statusBarInsetHeight.top
+                this.requestLayout()
+            }
 
-                override fun onScroll(
-                    e1: MotionEvent,
-                    e2: MotionEvent,
-                    distanceX: Float,
-                    distanceY: Float
-                ): Boolean {
-                    imageViewAttachmentFullscreen.animate()
-                        .translationX(imageViewAttachmentFullscreen.translationX-distanceX)
-                        .translationY(imageViewAttachmentFullscreen.translationY-distanceY)
-                        .setDuration(0L)
-                        .start()
+            textViewAttachmentFullscreenHeaderBack.setOnClickListener {
+                root.gone
+            }
 
-                    if (distanceY < -40f && distanceX.absoluteValue < 10) {
-                        imageViewAttachmentFullscreen.animate()
-                            .translationX(0f)
-                            .translationY(0f)
-                            .setDuration(0L)
-                            .start()
+            var scaleFactor = 1.0f;
 
-                        root.gone
-                        return true
-                    }
-                    return false
-                }
-            })
             val scaleGestureDetector = ScaleGestureDetector(chatFragmentContext, object: ScaleGestureDetector.SimpleOnScaleGestureListener() {
+
                 override fun onScale(detector: ScaleGestureDetector): Boolean {
-                    // TODO: Use animation to scale
-//                    imageViewAttachmentFullscreen.animate()
-//                        .scaleXBy(detector.scaleFactor)
-//                        .scaleYBy(detector.scaleFactor)
-//                        .setDuration(0L)
-//                        .start()
+                    scaleFactor = 1.0f.coerceAtLeast(scaleFactor * detector.scaleFactor)
+
+                    imageViewAttachmentFullscreen.scaleX = scaleFactor.rounded()
+                    imageViewAttachmentFullscreen.scaleY = scaleFactor.rounded()
 
                     return true
                 }
             })
-            imageViewAttachmentFullscreen.setOnTouchListener { _, event ->
-                if (!gestureDetector.onTouchEvent(event)) {
-                    scaleGestureDetector.onTouchEvent(event)
+
+            val gestureDetector = GestureDetector(chatFragmentContext, object: GestureDetector.SimpleOnGestureListener() {
+                override fun onScroll(
+                    e1: MotionEvent?,
+                    e2: MotionEvent?,
+                    distanceX: Float,
+                    distanceY: Float
+                ): Boolean {
+                    if (!scaleGestureDetector.isInProgress) {
+                        imageViewAttachmentFullscreen.apply {
+                            val scaledWidth = measuredWidth * scaleX
+
+                            val maximumTranslationX = (scaledWidth-measuredWidth)/2
+                            val minimumTranslationX = 0 - maximumTranslationX
+
+                            val measuredHeight = drawable.intrinsicHeight
+                            val scaledHeight = measuredHeight * scaleY
+
+                            val maximumTranslationY = (scaledHeight-measuredHeight)/2
+                            val minimumTranslationY = 0 - maximumTranslationY
+
+                            if (scaleX > 1.0f) {
+                                // We are in zoom mood so we need to be moving the image around
+                                translationX = (translationX - distanceX)
+                                    .coerceIn(minimumTranslationX, maximumTranslationX)
+                                translationY = (translationY - distanceY)
+                                    .coerceIn(minimumTranslationY, maximumTranslationY)
+                            }
+                        }
+
+                        return true
+                    }
+                    return false
                 }
-                return@setOnTouchListener true
+                /**
+                 * On Single tap toggle visibility of the header
+                 */
+                override fun onSingleTapConfirmed(e: MotionEvent?): Boolean {
+                    if (!scaleGestureDetector.isInProgress) {
+                        layoutConstraintAttachmentFullscreenHeader.goneIfTrue(
+                            layoutConstraintAttachmentFullscreenHeader.isVisible
+                        )
+                    }
+                    return true
+                }
+
+                /**
+                 * On Double Tap zoom in and out
+                 */
+                override fun onDoubleTap(e: MotionEvent?): Boolean {
+                    scaleFactor = if (scaleFactor == 1.0f) {
+                        2.0f
+                    } else {
+                        // When going back to the normal scale we should fix the translations
+                        imageViewAttachmentFullscreen.apply {
+                            translationX = 0.0f
+                            translationY = 0.0f
+                        }
+
+                        1.0f
+                    }
+
+                    imageViewAttachmentFullscreen.scaleX = scaleFactor.rounded()
+                    imageViewAttachmentFullscreen.scaleY = scaleFactor.rounded()
+                    return true
+                }
+            })
+
+            imageViewAttachmentFullscreen.setOnTouchListener { _, event ->
+                var result = scaleGestureDetector.onTouchEvent(event)
+                result = gestureDetector.onTouchEvent(event) || result
+                return@setOnTouchListener result
             }
+
         }
+    }
+
+    /**
+     * Used to round scale Factor in an attempt to limit the jitter
+     */
+    private fun Float.rounded(): Float {
+        return ((this*1000).toInt()/1000.0f)
     }
 
     private fun onSelectedMessageMenuItemClick(index: Int) {

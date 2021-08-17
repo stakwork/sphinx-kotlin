@@ -17,4 +17,26 @@
         app:layout_constraintTop_toTopOf="parent"
         tools:src="@drawable/image_not_available" />
 
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_attachment_fullscreen_header"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/default_header_height"
+        android:background="@color/imagePreviewBackground"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_attachment_fullscreen_header_back"
+            android:layout_width="@dimen/default_header_navigation_xy"
+            android:layout_height="@dimen/default_header_navigation_xy"
+            android:fontFamily="@font/material_icons_regular"
+            android:gravity="center"
+            android:text="@string/material_icon_name_nav_back"
+            android:textColor="@color/exo_white"
+            android:textSize="@dimen/default_text_size_back_arrow"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

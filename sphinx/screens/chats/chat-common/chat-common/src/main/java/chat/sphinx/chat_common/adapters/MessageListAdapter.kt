@@ -293,6 +293,11 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                     imageViewAttachmentImage.setOnClickListener {
                         attachmentFullscreenBinding.apply {
                             imageViewAttachmentFullscreen.setImageDrawable(imageViewAttachmentImage.drawable)
+                            imageViewAttachmentFullscreen.scaleX = 1.0f
+                            imageViewAttachmentFullscreen.scaleY = 1.0f
+                            imageViewAttachmentFullscreen.translationX = 0f
+                            imageViewAttachmentFullscreen.translationY = 0f
+
                         }
                         attachmentFullscreenBinding.root.visible
                     }
