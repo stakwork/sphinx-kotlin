@@ -12,7 +12,7 @@
     <string name="deleted_message_label_text">このメッセージは削除されました</string>
     <string name="join_call_header_label_text">...でコールに参加</string>
 
-    <string name="failed_message">Failed Message</string>
+    <string name="failed_message">送信に失敗したメッセージ</string>
 
     <!--  Message type placeholder display names  -->
     <string name="placeholder_display_name_message_type_attachment">添付メッセージ</string>
@@ -80,14 +80,14 @@
     <string name="selected_message_menu_item_delete">メッセージを削除</string>
     <string name="selected_message_menu_item_reply">返信</string>
     <string name="selected_message_menu_item_save_file">ファイルを保存</string>
-    <string name="selected_message_menu_item_resend">Resend</string>
+    <string name="selected_message_menu_item_resend">再送信</string>
 
     <!-- Notify -->
     <string name="notify_boost_failure">投げ銭に失敗しました</string>
     <string name="side_effect_text_copied">テキストをクリップボードにコピーしました</string>
     <string name="side_effect_call_link_copied">コールリンクをクリップボードにコピーしました</string>
-    <string name="side_effect_link_copied">Copied %s</string>
-    <string name="side_effect_no_link_to_copy">No link to copy</string>
+    <string name="side_effect_link_copied">%sをコピーしました</string>
+    <string name="side_effect_no_link_to_copy">コピーするリンクがありません</string>
 
     <!-- Send Attachment -->
     <string name="attachment_send_header_image">写真を送る</string>

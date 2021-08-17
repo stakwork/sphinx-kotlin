@@ -22,5 +22,5 @@
     <string name="alert_confirm_exit_tribe_message">Tribeから抜けますか？</string>
     <string name="failed_to_exit_tribe">Tribeから抜けられませんでした</string>
 
-    <string name="tribe_members_list">MEMBERS LIST</string>
+    <string name="tribe_members_list">メンバーリスト</string>
 </resources>
