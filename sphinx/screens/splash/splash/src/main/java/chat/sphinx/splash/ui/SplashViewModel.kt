@@ -1,6 +1,5 @@
 package chat.sphinx.splash.ui
 
-import android.app.Application
 import android.content.Context
 import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
@@ -104,7 +103,10 @@ internal class SplashViewModel @Inject constructor(
                         navigator.toOnBoardReadyScreen(onBoardStep)
                     }
                     null -> {
-                        navigator.toDashboardScreen(updateBackgroundLoginTime = false)
+                        navigator.toDashboardScreen(
+                            // No need as it was already updated
+                            updateBackgroundLoginTime = false
+                        )
                     }
                 }
 

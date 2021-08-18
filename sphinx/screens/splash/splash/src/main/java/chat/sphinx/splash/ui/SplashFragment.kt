@@ -48,7 +48,6 @@ internal class SplashFragment: MotionLayoutFragment<
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         viewModel.screenInit()
     }
 

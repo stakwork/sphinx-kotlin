@@ -1,6 +1,5 @@
 package chat.sphinx.activitymain
 
-import android.content.Intent
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.constraintlayout.motion.widget.MotionLayout
@@ -15,13 +14,13 @@ import chat.sphinx.activitymain.ui.MainViewState
 import chat.sphinx.activitymain.ui.MotionLayoutNavigationActivity
 import chat.sphinx.insetter_activity.InsetPadding
 import chat.sphinx.insetter_activity.InsetterActivity
+import chat.sphinx.resources.R as R_common
 import dagger.hilt.android.AndroidEntryPoint
 import dev.chrisbanes.insetter.applyInsetter
 import io.matthewnelson.android_feature_navigation.requests.PopBackStack
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
-import chat.sphinx.resources.R as R_common
 
 @AndroidEntryPoint
 internal class MainActivity: MotionLayoutNavigationActivity<
@@ -100,7 +99,6 @@ internal class MainActivity: MotionLayoutNavigationActivity<
 
     override fun onStart() {
         super.onStart()
-
         // Authentication
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel
