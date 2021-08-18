@@ -26,6 +26,7 @@ data class ContactDto(
 //    val last_active: String?,
     val tip_amount: Long?,
     val invite: InviteDto?,
+    val pending: Any?,
 ) {
     @Transient
     val privatePhotoActual: Boolean =
@@ -77,6 +78,20 @@ data class ContactDto(
             }
             is Double -> {
                 from_group.toInt() == 1
+            }
+            else -> {
+                false
+            }
+        }
+
+    @Transient
+    val pendingActual: Boolean =
+        when (pending) {
+            is Boolean -> {
+                pending
+            }
+            is Double -> {
+                pending.toInt() == 1
             }
             else -> {
                 false

@@ -97,7 +97,6 @@
         android:layout_height="wrap_content"
         app:layout_constraintTop_toBottomOf="@+id/layout_constraint_message_bubble_container_second">
 
-        <!-- Placeholder for unsupported Message Types -->
         <include
             android:id="@+id/include_unsupported_message_type_placeholder"
             layout="@layout/layout_unsupported_message_type_placeholder"
@@ -137,7 +136,6 @@
             android:layout_height="wrap_content"
             app:layout_constraintTop_toBottomOf="@+id/text_view_message_text"
             tools:visibility="gone" />
-
 
         <!-- Url link preview  -->
         <include

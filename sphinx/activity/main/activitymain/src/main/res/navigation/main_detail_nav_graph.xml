@@ -19,6 +19,7 @@
     <include app:graph="@navigation/support_ticket_nav_graph" />
     <include app:graph="@navigation/transactions_nav_graph" />
     <include app:graph="@navigation/tribe_detail_nav_graph" />
+    <include app:graph="@navigation/tribe_members_list_nav_graph" />
 
     <fragment
         android:id="@+id/navigation_detail_blank_fragment"

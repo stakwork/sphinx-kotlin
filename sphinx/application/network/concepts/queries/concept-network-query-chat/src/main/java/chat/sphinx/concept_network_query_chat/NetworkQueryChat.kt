@@ -7,6 +7,7 @@ import chat.sphinx.wrapper_chat.ChatHost
 import chat.sphinx.wrapper_chat.ChatMuted
 import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.dashboard.ChatId
+import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
 import kotlinx.coroutines.flow.Flow
@@ -40,8 +41,13 @@ abstract class NetworkQueryChat {
     ): Flow<LoadResponse<ChatDto, ResponseError>>
 
 //    app.put('/chat/:id', chats.addGroupMembers)
-//    app.put('/kick/:chat_id/:contact_id', chats.kickChatMember)
 //    app.put('/member/:contactId/:status/:messageId', chatTribes.approveOrRejectMember)
+
+    abstract fun kickMemberFromChat(
+        chatId: ChatId,
+        contactId: ContactId,
+        relayData: Pair<AuthorizationToken, RelayUrl>? = null
+    ): Flow<LoadResponse<ChatDto, ResponseError>>
 
     abstract fun updateTribe(
         chatId: ChatId,

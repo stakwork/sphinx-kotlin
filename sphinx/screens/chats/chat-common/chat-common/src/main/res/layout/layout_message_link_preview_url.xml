@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:minHeight="@dimen/web_link_preview_holder_min_height"
     android:visibility="gone"
     tools:visibility="visible"
     tools:background="@color/body">
@@ -19,9 +20,9 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/progress_bar_link_preview"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
+        android:layout_height="0dp"
         app:layout_constraintTop_toBottomOf="@+id/view_preview_divider"
+        app:layout_constraintBottom_toBottomOf="parent"
         tools:visibility="gone">
 
         <ProgressBar
@@ -33,13 +34,12 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            tools:visibility="visible"/>
+            app:layout_constraintEnd_toEndOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/constraint_layout_url_link_preview"
+        android:id="@+id/layout_constraint_url_link_preview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="2dp"

@@ -70,6 +70,7 @@ dependencies {
     api project(path: ':sphinx:screens-detail:scanner:scanner')
     api project(path: ':sphinx:screens-detail:support-ticket:support-ticket')
     api project(path: ':sphinx:screens-detail:transactions:transactions')
+    api project(path: ':sphinx:screens-detail:tribe-members-list:tribe-members-list')
 
     implementation deps.chrisbanes.insetter
 

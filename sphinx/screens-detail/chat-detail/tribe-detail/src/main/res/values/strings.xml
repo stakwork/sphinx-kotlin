@@ -21,4 +21,6 @@
     <string name="alert_confirm_exit_tribe_heading">Exit %s</string>
     <string name="alert_confirm_exit_tribe_message">Are you sure you want to exit the tribe?</string>
     <string name="failed_to_exit_tribe">Failed to exit tribe</string>
+
+    <string name="tribe_members_list">MEMBERS LIST</string>
 </resources>

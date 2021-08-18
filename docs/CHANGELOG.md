@@ -1,5 +1,10 @@
 # ChangeLog
 
+## Version 1.0.0-alpha18 (2021-08-13)
+ - Adds ability for Tribe Admin to view members, their status', and remove members
+ - Fixes issues related to long press action on messages
+ - Fixes issues related to link previews
+
 ## Version 1.0.0-alpha17 (2021-08-11)
  - Adds ability to resend failed messages
  - Adds previews for

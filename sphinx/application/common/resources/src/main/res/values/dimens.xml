@@ -70,4 +70,7 @@
 
     <!-- Menu option input lock -->
     <item name="options_menu_input_lock_alpha" type="dimen" format="float">.5</item>
+
+    <!-- Recycler View holder -->
+    <dimen name="recycler_view_holder_delete_button_width">85dp</dimen>
 </resources>

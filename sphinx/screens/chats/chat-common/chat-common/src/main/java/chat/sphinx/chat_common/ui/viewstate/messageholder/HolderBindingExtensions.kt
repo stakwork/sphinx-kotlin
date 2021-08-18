@@ -524,7 +524,6 @@ internal inline fun LayoutMessageHolderBinding.setBubbleMessageLayout(
 
             if (onSphinxInteractionListener != null) {
                 SphinxLinkify.addLinks(this, SphinxLinkify.ALL, onSphinxInteractionListener)
-                setOnLongClickListener(onSphinxInteractionListener)
             }
         }
     }
@@ -554,10 +553,14 @@ internal fun LayoutMessageHolderBinding.setBubbleMessageLinkPreviewLayout(
                 includeMessageLinkPreviewUrl.root.gone
             }
             is NodeDescriptor -> {
+
                 includeMessageLinkPreviewTribe.root.gone
                 includeMessageLinkPreviewUrl.root.gone
 
                 includeMessageLinkPreviewContact.apply {
+                    layoutConstraintContactLinkPreview.gone
+                    layoutConstraintLinkPreviewContactDashedBorder.gone
+
                     textViewMessageLinkPreviewContactPubkey.text = previewLink.nodeDescriptor.value
                     textViewMessageLinkPreviewContactPubkey.setTextColor(placeHolderAndTextColor)
 
@@ -574,6 +577,8 @@ internal fun LayoutMessageHolderBinding.setBubbleMessageLinkPreviewLayout(
                     )
 
                     lifecycleScope.launch(dispatchers.mainImmediate) {
+                        progressBarLinkPreview.visible
+
                         val state =
                             viewState.retrieveLinkPreview() as? LayoutState.Bubble.ContainerThird.LinkPreview.ContactPreview
 
@@ -599,6 +604,10 @@ internal fun LayoutMessageHolderBinding.setBubbleMessageLinkPreviewLayout(
                             layoutConstraintLinkPreviewContactDashedBorder.goneIfFalse(state.showBanner)
                             textViewMessageLinkPreviewAddContactBanner.goneIfFalse(state.showBanner)
                         }
+
+                        progressBarLinkPreview.gone
+                        layoutConstraintContactLinkPreview.visible
+
                     }.let { job ->
                         holderJobs.add(job)
                     }
@@ -613,6 +622,8 @@ internal fun LayoutMessageHolderBinding.setBubbleMessageLinkPreviewLayout(
                 includeMessageLinkPreviewTribe.apply {
 
                     // reset view
+                    layoutConstraintTribeLinkPreview.gone
+                    layoutConstraintLinkPreviewTribeDashedBorder.gone
                     textViewMessageLinkPreviewTribeDescription.gone
                     textViewMessageLinkPreviewTribeNameLabel.gone
                     textViewMessageLinkPreviewTribeSeeBanner.gone
@@ -629,6 +640,8 @@ internal fun LayoutMessageHolderBinding.setBubbleMessageLinkPreviewLayout(
                     )
 
                     lifecycleScope.launch(dispatchers.mainImmediate) {
+                        progressBarLinkPreview.visible
+
                         val state =
                             viewState.retrieveLinkPreview() as? LayoutState.Bubble.ContainerThird.LinkPreview.TribeLinkPreview
 
@@ -665,6 +678,9 @@ internal fun LayoutMessageHolderBinding.setBubbleMessageLinkPreviewLayout(
                             textViewMessageLinkPreviewTribeSeeBanner.goneIfFalse(state.showBanner)
                         }
 
+                        progressBarLinkPreview.gone
+                        layoutConstraintTribeLinkPreview.visible
+
                     }.let { job ->
                         holderJobs.add(job)
                     }
@@ -679,11 +695,13 @@ internal fun LayoutMessageHolderBinding.setBubbleMessageLinkPreviewLayout(
                 includeMessageLinkPreviewUrl.apply {
 
                     // reset view
+                    layoutConstraintUrlLinkPreview.gone
                     textViewMessageLinkPreviewUrlDomain.gone
                     textViewMessageLinkPreviewUrlDescription.gone
                     textViewMessageLinkPreviewUrlTitle.gone
                     imageViewMessageLinkPreviewUrlFavicon.gone
                     imageViewMessageLinkPreviewUrlMainImage.gone
+
 
                     lifecycleScope.launch(dispatchers.mainImmediate) {
                         progressBarLinkPreview.visible
@@ -732,6 +750,7 @@ internal fun LayoutMessageHolderBinding.setBubbleMessageLinkPreviewLayout(
                             }
 
                             progressBarLinkPreview.gone
+                            layoutConstraintUrlLinkPreview.visible
                         }
                     }.let { job ->
                         holderJobs.add(job)

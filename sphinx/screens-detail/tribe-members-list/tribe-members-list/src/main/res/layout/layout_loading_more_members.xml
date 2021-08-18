@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/members_list_member_holder_height"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@color/body">
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/text_view_transactions_list_loading_more"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/roboto_regular"
+        android:singleLine="true"
+        android:textColor="@color/secondaryText"
+        android:textSize="@dimen/members_list_loading_more_text_size"
+        android:text="@string/loading_more"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <ProgressBar
+        android:id="@+id/sign_up_name_progress_bar"
+        android:layout_width="@dimen/members_list_progress_bar_xy"
+        android:layout_height="@dimen/members_list_progress_bar_xy"
+        style="?android:attr/progressBarStyle"
+        android:indeterminateTint="@color/secondaryText"
+        android:indeterminate="true"
+        android:layout_marginEnd="@dimen/default_half_layout_margin"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/text_view_transactions_list_loading_more" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

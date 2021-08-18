@@ -111,8 +111,6 @@
     <string name="paid_message_attachment_option">Mensaje Pago</string>
     <string name="request_attachment_option">Solicitar</string>
     <string name="send_attachment_option">Enviar</string>
-    <string name="failed_to_approve_member">No se ha podido aprobar la solicitud</string>
-    <string name="failed_to_reject_member">No se ha podido denegar la solicitud</string>
     <string name="waiting_for_admin_approval">Esperando la aprobación del administrador</string>
     <string name="failed_to_delete_tribe">No se ha podido eliminar la tribu</string>
 
