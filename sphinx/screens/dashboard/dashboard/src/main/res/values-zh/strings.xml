@@ -71,4 +71,8 @@
     <string name="last_message_description_invite_payment_sent">已支付. 等待確認</string>
     <string name="last_message_description_invite_signup_complete">註冊完成</string>
     <string name="last_message_description_invite_expired">已失效</string>
+
+    <!-- Deep link authorize popup -->
+    <string name="dashboard_authorize_popup_title">Do you want to authorize with:</string>
+    <string name="dashboard_authorize_button">AUTHORIZE</string>
 </resources>
