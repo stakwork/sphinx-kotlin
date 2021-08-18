@@ -647,11 +647,8 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         }
     }
 
-    private inner class AttachmentFullscreenStateContainer: ViewStateContainer<AttachmentFullscreenViewState>(
-        AttachmentFullscreenViewState.Idle)
-
     private val attachmentFullscreenStateContainer: ViewStateContainer<AttachmentFullscreenViewState> by lazy {
-        AttachmentFullscreenStateContainer()
+        ViewStateContainer(AttachmentFullscreenViewState.Idle)
     }
 
     @JvmSynthetic
