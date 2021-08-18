@@ -1,9 +1,11 @@
 package chat.sphinx.chat_common.ui
 
 import android.app.Application
+import android.content.ContentValues
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
+import android.provider.MediaStore
 import android.util.Log
 import android.webkit.MimeTypeMap
 import androidx.annotation.CallSuper
@@ -87,12 +89,52 @@ import org.jitsi.meet.sdk.JitsiMeetActivity
 import org.jitsi.meet.sdk.JitsiMeetConferenceOptions
 import org.jitsi.meet.sdk.JitsiMeetUserInfo
 import java.io.File
+import java.io.FileInputStream
 import java.io.InputStream
 
 @JvmSynthetic
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun <ARGS: NavArgs> ChatViewModel<ARGS>.isMessageSelected(): Boolean =
     getSelectedMessageViewStateFlow().value is SelectedMessageViewState.SelectedMessage
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun MessageMedia.retrieveMediaStorageUri(): Uri {
+    return when {
+        this.mediaType.isImage -> {
+            MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+        }
+        this.mediaType.isAudio -> {
+            MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
+        }
+        this.mediaType.isVideo -> {
+            MediaStore.Video.Media.EXTERNAL_CONTENT_URI
+        }
+        else -> {
+            // Save to downloads
+            MediaStore.Downloads.getContentUri(MediaStore.VOLUME_EXTERNAL)
+        }
+    }
+}
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun MessageMedia.retrieveContentValues(message: Message): ContentValues {
+    return ContentValues().apply {
+        put(MediaStore.Images.Media.TITLE, message.id.value)
+        put(MediaStore.Images.Media.DISPLAY_NAME, message.senderAlias?.value)
+        put(MediaStore.Images.Media.MIME_TYPE, mediaType.value)
+
+    }
+}
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun Pair<String, MessageMedia?>.retrieveFileInputStream(): FileInputStream {
+    return if (second?.localFile != null) {
+        FileInputStream(second?.localFile)
+    } else {
+        FileInputStream(first)
+    }
+}
+
 
 abstract class ChatViewModel<ARGS: NavArgs>(
     protected val app: Application,
@@ -1098,9 +1140,36 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 
     fun saveFile(message: Message) {
         viewModelScope.launch(mainImmediate) {
-            submitSideEffect(
-                ChatSideEffect.Notify("TODO Save File Functionality")
-            )
+            if (message.isMediaAttachment) {
+                message.retrieveImageUrlAndMessageMedia()?.let { mediaUrlAndMessageMedia ->
+                    mediaUrlAndMessageMedia.second?.let { messageMedia ->
+                        val mediaStorageUri = messageMedia.retrieveMediaStorageUri()
+                        val mediaContentValues = messageMedia.retrieveContentValues(message)
+
+                        app.contentResolver.insert(mediaStorageUri, mediaContentValues)?.let { savedFileUri ->
+                            try {
+                                val inputStream = mediaUrlAndMessageMedia.retrieveFileInputStream()
+
+                                inputStream.use { messageAttachmentFile->
+                                    app.contentResolver.openOutputStream(savedFileUri).use { savedFileOutputStream ->
+                                        if (savedFileOutputStream != null) {
+                                            messageAttachmentFile.copyTo(savedFileOutputStream, 1024)
+
+                                            submitSideEffect(
+                                                ChatSideEffect.Notify(app.getString(R.string.saved_attachment_successfully))
+                                            )
+                                        }
+                                    }
+                                }
+                            } catch (e: Exception) {
+                                submitSideEffect(
+                                    ChatSideEffect.Notify(app.getString(R.string.failed_to_save_file))
+                                )
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 
