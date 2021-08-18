@@ -71,4 +71,8 @@
     <string name="last_message_description_invite_payment_sent">支払いました。承認を待っています。</string>
     <string name="last_message_description_invite_signup_complete">サインアップが完了しました</string>
     <string name="last_message_description_invite_expired">失効しました</string>
+
+    <!-- Deep link authorize popup -->
+    <string name="dashboard_authorize_popup_title">Do you want to authorize with:</string>
+    <string name="dashboard_authorize_button">AUTHORIZE</string>
 </resources>

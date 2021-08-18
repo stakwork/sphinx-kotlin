@@ -53,6 +53,7 @@ import chat.sphinx.wrapper_contact.isTrue
 import chat.sphinx.wrapper_invite.Invite
 import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_message.Message
+import chat.sphinx.wrapper_relay.RelayUrl
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.MotionLayoutViewModel
@@ -258,12 +259,16 @@ internal class DashboardViewModel @Inject constructor(
 
     fun authorizeExternal() {
         val deepLinkViewState = deepLinkPopupViewStateContainer.viewStateFlow.value
-        (deepLinkViewState as DeepLinkPopupViewState.ExternalAuthorizePopup)?.link.let { link ->
+        if (deepLinkViewState is DeepLinkPopupViewState.ExternalAuthorizePopup) {
+
             viewModelScope.launch(mainImmediate) {
+
+                val relayUrl: RelayUrl = relayDataHandler.retrieveRelayUrl() ?: return@launch
+
                 val response = repositoryDashboard.authorizeExternal(
-                    relayDataHandler.retrieveRelayUrl()?.value ?: "",
-                    link.host,
-                    link.challenge
+                    relayUrl.value,
+                    deepLinkViewState.link.host,
+                    deepLinkViewState.link.challenge
                 )
 
                 when (response) {
@@ -275,7 +280,9 @@ internal class DashboardViewModel @Inject constructor(
                     is Response.Success -> {
                         val i = Intent(Intent.ACTION_VIEW)
                         i.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                        i.data = Uri.parse("https://${link.host}?challenge=${link.challenge}")
+                        i.data = Uri.parse(
+                            "https://${deepLinkViewState.link.host}?challenge=${deepLinkViewState.link.challenge}"
+                        )
                         app.startActivity(i)
                     }
                 }

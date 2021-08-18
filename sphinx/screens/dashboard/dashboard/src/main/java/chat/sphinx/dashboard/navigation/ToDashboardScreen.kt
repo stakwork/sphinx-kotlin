@@ -12,7 +12,7 @@ class ToDashboardScreen(
     @IdRes private val popUpToId: Int?,
     private val updateBackgroundLoginTime: Boolean = false,
     private val deepLink: String? = null,
-    ): NavigationRequest<NavController>() {
+): NavigationRequest<NavController>() {
     override fun navigate(controller: NavController) {
         val options: NavOptions = popUpToId?.let {
             DefaultNavOptions.defaultAnims
