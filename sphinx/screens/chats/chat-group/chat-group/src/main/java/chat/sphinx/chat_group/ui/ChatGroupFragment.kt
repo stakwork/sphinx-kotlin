@@ -9,6 +9,7 @@ import chat.sphinx.chat_common.ui.ChatFragment
 import chat.sphinx.chat_group.R
 import chat.sphinx.chat_group.databinding.FragmentChatGroupBinding
 import chat.sphinx.concept_image_loader.ImageLoader
+import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.menu_bottom.databinding.LayoutMenuBottomBinding
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -61,8 +62,15 @@ internal class ChatGroupFragment: ChatFragment<
     override val viewModel: ChatGroupViewModel by viewModels()
 
     @Inject
-    protected lateinit var imageLoaderInj: ImageLoader<ImageView>
+    @Suppress("ProtectedInFinal", "PropertyName")
+    protected lateinit var _userColorsHelper: UserColorsHelper
+    override val userColorsHelper: UserColorsHelper
+        get() = _userColorsHelper
+
+    @Inject
+    @Suppress("ProtectedInFinal", "PropertyName")
+    protected lateinit var _imageLoader: ImageLoader<ImageView>
     override val imageLoader: ImageLoader<ImageView>
-        get() = imageLoaderInj
+        get() = _imageLoader
 
 }

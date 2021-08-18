@@ -46,13 +46,23 @@ import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_message.MessageRepository
+import chat.sphinx.kotlin_response.LoadResponse
+import chat.sphinx.kotlin_response.Response
+import chat.sphinx.kotlin_response.ResponseError
+import chat.sphinx.kotlin_response.message
+import chat.sphinx.wrapper_chat.Chat
+import chat.sphinx.wrapper_chat.ChatName
+import chat.sphinx.wrapper_chat.isConversation
+import chat.sphinx.wrapper_contact.Contact
+import chat.sphinx.wrapper_message.Message
+import chat.sphinx.wrapper_message.isDeleted
+import chat.sphinx.wrapper_message.isGroupAction
 import chat.sphinx.concept_repository_message.model.SendMessage
 import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
 import chat.sphinx.kotlin_response.*
 import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.logger.e
 import chat.sphinx.menu_bottom.ui.MenuBottomViewState
-import chat.sphinx.resources.getRandomColor
 import chat.sphinx.wrapper_chat.*
 import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.dashboard.ChatId
@@ -63,7 +73,6 @@ import chat.sphinx.wrapper_common.message.MessageUUID
 import chat.sphinx.wrapper_common.message.SphinxCallLink
 import chat.sphinx.wrapper_common.tribe.TribeJoinLink
 import chat.sphinx.wrapper_common.tribe.toTribeJoinLink
-import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_contact.avatarUrl
 import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message_media.*
@@ -78,6 +87,9 @@ import io.matthewnelson.android_feature_viewmodel.MotionLayoutViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
+import chat.sphinx.concept_link_preview.LinkPreviewHandler
+import chat.sphinx.concept_link_preview.model.TribePreviewName
+import chat.sphinx.concept_link_preview.model.toPreviewImageUrlOrNull
 import io.matthewnelson.concept_media_cache.MediaCacheHandler
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import io.matthewnelson.concept_views.viewstate.value
@@ -176,10 +188,6 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 
     val messageReplyViewStateContainer: ViewStateContainer<MessageReplyViewState> by lazy {
         ViewStateContainer(MessageReplyViewState.ReplyingDismissed)
-    }
-
-    protected val headerInitialsTextViewColor: Int by lazy {
-        app.getRandomColor()
     }
 
     val callMenuHandler: ViewStateContainer<MenuBottomViewState> by lazy {
@@ -303,6 +311,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 
             withContext(default) {
                 for (message in messages) {
+
                     if (message.sender == chat.contactIds.firstOrNull()) {
                         newList.add(
                             MessageHolderViewState.Sent(
@@ -583,6 +592,9 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         // invisible, so...
         chatSharedFlow.replayCache.firstOrNull()?.let { chat ->
             toggleChatMutedJob = viewModelScope.launch(mainImmediate) {
+
+                submitSideEffect(ChatSideEffect.ProduceHapticFeedback)
+
                 val response = chatRepository.toggleChatMuted(chat)
                 @Exhaustive
                 when (response) {

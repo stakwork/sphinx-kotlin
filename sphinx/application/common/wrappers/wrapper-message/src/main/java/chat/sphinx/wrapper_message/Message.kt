@@ -47,7 +47,6 @@ inline fun Message.retrieveImageUrlAndMessageMedia(): Pair<String, MessageMedia?
     if (this.type.isDirectPayment()) {
         return null
     }
-
     giphyData?.let { giphyData ->
         mediaData = giphyData.retrieveImageUrlAndMessageMedia()
     } ?: messageMedia?.let { media ->
@@ -73,6 +72,14 @@ inline fun Message.retrieveImageUrlAndMessageMedia(): Pair<String, MessageMedia?
 @Suppress("NOTHING_TO_INLINE")
 inline fun Message.retrieveSphinxCallLink(): SphinxCallLink? =
     messageContentDecrypted?.value?.toSphinxCallLink()
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun Message.getColorKey(): String {
+    senderAlias?.let { senderAlias ->
+        return "message-${sender.value}-${senderAlias.value}-color"
+    }
+    return "message-${sender.value}-color"
+}
 
 //Message Actions
 inline val Message.isBoostAllowed: Boolean

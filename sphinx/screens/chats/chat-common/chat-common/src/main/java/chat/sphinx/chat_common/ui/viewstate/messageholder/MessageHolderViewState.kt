@@ -68,6 +68,7 @@ internal sealed class MessageHolderViewState(
         if (background is BubbleBackground.First) {
             LayoutState.MessageStatusHeader(
                 if (chat.type.isConversation()) null else message.senderAlias?.value,
+                if (initialHolder is InitialHolderViewState.Initials) initialHolder.colorKey else message.getColorKey(),
                 this is Sent,
                 this is Sent && message.id.isProvisionalMessage && message.status.isPending(),
                 this is Sent && (message.status.isReceived() || message.status.isConfirmed()),
@@ -220,19 +221,21 @@ internal sealed class MessageHolderViewState(
         }
 
     val bubbleReplyMessage: LayoutState.Bubble.ContainerFirst.ReplyMessage? by lazy {
-        message.replyMessage?.let { nnMessage ->
+        message.replyMessage?.let { nnReplyMessage ->
+
             var mediaUrl: String? = null
             var messageMedia: MessageMedia? = null
 
-            nnMessage.retrieveImageUrlAndMessageMedia()?.let { mediaData ->
+            nnReplyMessage.retrieveImageUrlAndMessageMedia()?.let { mediaData ->
                 mediaUrl = mediaData.first
                 messageMedia = mediaData.second
             }
 
             LayoutState.Bubble.ContainerFirst.ReplyMessage(
                 showSent = this is Sent,
-                messageSenderName(nnMessage),
-                nnMessage.retrieveTextToShow() ?: "",
+                messageSenderName(nnReplyMessage),
+                nnReplyMessage.getColorKey(),
+                nnReplyMessage.retrieveTextToShow() ?: "",
                 mediaUrl,
                 messageMedia
             )

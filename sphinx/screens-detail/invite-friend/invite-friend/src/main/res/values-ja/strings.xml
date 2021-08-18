@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="invite_friend_header_name">友だちをSphinxに招待</string>
+
+    <string name="invite_friend_nickname_label">友だちにニックネームをつけてください</string>
+    <string name="invite_friend_message_label">メッセージを入力</string>
+    <string name="invite_friend_message_hint">Sphinx、使ってみて！</string>
+    <string name="invite_friend_create_invitation_button">招待コードを作成</string>
+    <string name="invite_friend_estimated_cost_text_view">招待コード作成費用</string>
+
+    <string name="invite_friend_nickname_empty">ニックネームは必須です</string>
+    <string name="invite_failed">招待コードを作成できませんでした 後ほど再度お試しください</string>
+</resources>

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="add_icon"></string>
+    <string name="join_tribe_link">Tribe参加リンク</string>
+    <string name="add_friend">友だちを追加</string>
+    <string name="create_tribe">Tribeを作る</string>
+    <string name="contacts">友だちリスト</string>
+    <string name="profile">プロフィール</string>
+    <string name="support">サポート</string>
+    <string name="add_sats">satsをチャージ</string>
+    <string name="search">検索</string>
+
+    <string name="upgrade_app">アプリを更新</string>
+
+    <string name="not_valid_tribe_link">QRコードはTribe参加リンクではありません</string>
+    <string name="invite_name">招待する: %s </string>
+    <string name="invite_qr_code_header_name">招待コード</string>
+
+    <string name="alert_confirm_pay_invite_title">招待コード作成費用を支払う</string>
+    <string name="alert_confirm_pay_invite_message">%d sats支払い、招待コードを作成しますか？</string>
+    <string name="pay_invite_balance_too_low">残高不足のため、招待コードを作成できませんでした</string>
+
+    <string name="alert_confirm_delete_invite_title">招待コードを削除</string>
+    <string name="alert_confirm_delete_invite_message">招待コードを削除してよいですか？</string>
+
+    <string name="paste_invoice_of_tribe_link">インボイスまたはTribe参加リンクを入力</string>
+    <string name="alert_confirm_pay_invoice_title">インボイスに支払いをする</string>
+    <string name="alert_confirm_pay_invoice_message">スキャンしたインボイスに支払いをしてよいですか？\n\n金額: %d sats\n\nメモ: %s</string>
+
+    <string name="payment_request_missing_amount">送金リクエストで金額が指定されていません</string>
+    <string name="not_valid_invoice_or_tribe_link">QRコードはLightningインボイス、Tribe参加リンクではありません</string>
+
+    <string name="attempting_payment_request">送金しています</string>
+    <string name="failed_to_pay_request">送金できませんでした</string>
+    <string name="successfully_paid_invoice">インボイスへの支払いが完了しました</string>
+
+    <string name="last_message_description_message_deleted">メッセージを削除しました</string>
+    <string name="last_message_description_you">あなた</string>
+    <string name="last_message_description_gif_shared">%sミームをシェアしました</string>
+    <string name="last_message_description_boost">%s投げ銭%s</string>
+    <string name="last_message_description_call_invite">%sコールに参加</string>
+    <string name="last_message_description_invoice_sent">送信したインボイス: %s</string>
+    <string name="last_message_description_invoice_receive">受信したインボイス: %s</string>
+    <string name="last_message_description_payment_sent">送金額: %s</string>
+    <string name="last_message_description_payment_received">受金額: %s</string>
+
+    <string name="last_message_description_sent">送信しました</string>
+    <string name="last_message_description_an_audio_clip">音声</string>
+    <string name="last_message_description_a_gif">ミーム</string>
+    <string name="last_message_description_an_image">写真</string>
+    <string name="last_message_description_a_pdf">PDF</string>
+    <string name="last_message_description_a_paid_message">有料メッセージ</string>
+    <string name="last_message_description_an_attachment">添付ファイル</string>
+    <string name="last_message_description_a_video">動画</string>
+
+    <string name="last_message_description_has_join_tribe">%sがTribeに参加しました</string>
+    <string name="last_message_description_just_left_tribe">%sがTribeから抜けました</string>
+    <string name="last_message_description_wants_to_join">%sがTribeに参加申請しました</string>
+    <string name="last_message_description_declined_request_from">%sの申請を却下しました</string>
+    <string name="last_message_description_approved_request_from">%sの申請を承認しました</string>
+    <string name="last_message_description_admin_declined_request">管理者が申請を却下しました</string>
+    <string name="last_message_description_welcome_member">Tribeにようこそ！</string>
+    <string name="last_message_description_group_kick">管理者があなたをグループから削除しました</string>
+    <string name="last_message_description_tribe_deleted">管理者がTribeを削除しました</string>
+
+    <string name="last_message_description_invite">招待: %s</string>
+    <string name="last_message_description_looking_available_node">%sのために利用可能なノードを探しています</string>
+    <string name="last_message_description_invite_ready">準備完了！タップして友だちにシェアしてください 有効期間は24時間です</string>
+    <string name="last_message_description_invite_signing_on">%sがサインインしています</string>
+    <string name="last_message_description_invite_tap_to_pay">タップして費用を支払い、招待コードを有効にする</string>
+    <string name="last_message_description_invite_payment_sent">支払いました。承認を待っています。</string>
+    <string name="last_message_description_invite_signup_complete">サインアップが完了しました</string>
+    <string name="last_message_description_invite_expired">失効しました</string>
+</resources>

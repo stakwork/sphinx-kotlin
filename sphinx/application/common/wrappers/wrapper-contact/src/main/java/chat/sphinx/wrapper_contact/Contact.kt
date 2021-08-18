@@ -31,6 +31,11 @@ inline val Contact.avatarUrl: URL?
         }
     }
 
+@Suppress("NOTHING_TO_INLINE")
+inline fun Contact.getColorKey(): String {
+    return "contact-${id.value}-color"
+}
+
 data class Contact(
     val id: ContactId,
     val routeHint: LightningRouteHint?,

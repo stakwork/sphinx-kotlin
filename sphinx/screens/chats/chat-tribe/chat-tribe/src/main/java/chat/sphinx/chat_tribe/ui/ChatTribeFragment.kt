@@ -16,6 +16,7 @@ import chat.sphinx.chat_tribe.databinding.LayoutPodcastPlayerFooterBinding
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
+import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.menu_bottom.databinding.LayoutMenuBottomBinding
 import chat.sphinx.resources.databinding.LayoutBoostFireworksBinding
 import chat.sphinx.resources.getString
@@ -87,9 +88,16 @@ internal class ChatTribeFragment: ChatFragment<
     override val viewModel: ChatTribeViewModel by viewModels()
 
     @Inject
-    protected lateinit var imageLoaderInj: ImageLoader<ImageView>
+    @Suppress("ProtectedInFinal", "PropertyName")
+    protected lateinit var _userColorsHelper: UserColorsHelper
+    override val userColorsHelper: UserColorsHelper
+        get() = _userColorsHelper
+
+    @Inject
+    @Suppress("ProtectedInFinal", "PropertyName")
+    protected lateinit var _imageLoader: ImageLoader<ImageView>
     override val imageLoader: ImageLoader<ImageView>
-        get() = imageLoaderInj
+        get() = _imageLoader
 
     private suspend fun setupBoostAnimation(
         photoUrl: PhotoUrl?,

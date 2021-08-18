@@ -22,6 +22,7 @@ import chat.sphinx.chat_common.ui.viewstate.selected.SelectedMessageViewState
 import chat.sphinx.chat_common.util.*
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
+import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_message.Message
@@ -43,6 +44,7 @@ internal class MessageListAdapter<ARGS : NavArgs>(
     private val onStopSupervisor: OnStopSupervisor,
     private val viewModel: ChatViewModel<ARGS>,
     private val imageLoader: ImageLoader<ImageView>,
+    private val userColorsHelper: UserColorsHelper,
 ) : RecyclerView.Adapter<MessageListAdapter<ARGS>.MessageViewHolder>(),
     DefaultLifecycleObserver,
     View.OnLayoutChangeListener
@@ -207,7 +209,7 @@ internal class MessageListAdapter<ARGS : NavArgs>(
         private val binding: LayoutMessageHolderBinding
     ): RecyclerView.ViewHolder(binding.root) {
 
-        private val holderJobs: ArrayList<Job> = ArrayList(6)
+        private val holderJobs: ArrayList<Job> = ArrayList(10)
         private val disposables: ArrayList<Disposable> = ArrayList(4)
         private var currentViewState: MessageHolderViewState? = null
 
@@ -384,6 +386,7 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                 viewModel.memeServerTokenHandler,
                 recyclerViewWidth,
                 viewState,
+                userColorsHelper,
                 onSphinxInteractionListener,
             )
 

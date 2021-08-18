@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="on_board_welcome">歡迎</string>
+    <string name="on_board_welcome_info_code">貼上連接條文\n或掃描 QR code</string>
+    <string name="on_board_edit_text_hint_code">輸入條碼…</string>
+
+    <string name="side_effect_generate_token_failed">產生驗證標記失敗</string>
+
+    <string name="on_board_welcome_info_decrypt">輸入 PIN\n解碼</string>
+    <string name="on_board_edit_text_hint_decrypt">輸入 PIN …</string>
+
+    <string name="side_effect_decryption_failure">解碼失敗</string>
+    <string name="side_effect_empty_input">輸入不可無填</string>
+    <string name="side_effect_pin_length">PIN 長短不對</string>
+    <string name="side_effect_invalid_code">無效 Code</string>
+    <string name="side_effect_invalid_pin">無效 PIN</string>
+    <string name="side_effect_feature_not_implemented">這功能還沒啟動</string>
+</resources>

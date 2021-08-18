@@ -5,6 +5,7 @@ import chat.sphinx.dashboard.R
 import chat.sphinx.dashboard.ui.adapter.DashboardChat.Active
 import chat.sphinx.dashboard.ui.adapter.DashboardChat.Inactive
 import chat.sphinx.wrapper_chat.Chat
+import chat.sphinx.wrapper_chat.getColorKey
 import chat.sphinx.wrapper_chat.isConversation
 import chat.sphinx.wrapper_chat.isTribeOwnedByAccount
 import chat.sphinx.wrapper_common.*
@@ -13,6 +14,7 @@ import chat.sphinx.wrapper_common.invite.InviteStatus
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_contact.Contact
+import chat.sphinx.wrapper_contact.getColorKey
 import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message_media.MediaType
 import kotlinx.coroutines.flow.Flow
@@ -38,6 +40,12 @@ sealed class DashboardChat {
     abstract fun hasUnseenMessages(): Boolean
 
     abstract fun isEncrypted(): Boolean
+
+    abstract fun getColorKey(): String?
+
+    fun getColorKeyFor(contact: Contact?, chat: Chat?): String? {
+        return contact?.getColorKey() ?: chat?.getColorKey()
+    }
 
     sealed class Active: DashboardChat() {
 
@@ -71,6 +79,10 @@ sealed class DashboardChat {
 
         override fun isEncrypted(): Boolean {
             return true
+        }
+
+        override fun getColorKey(): String? {
+            return getColorKeyFor(null, chat)
         }
 
         @ExperimentalStdlibApi
@@ -214,10 +226,10 @@ sealed class DashboardChat {
                     }
                 }
                 message.type.isGroupKick() -> {
-                    context.getString(R.string.last_message_description_group_kick,)
+                    context.getString(R.string.last_message_description_group_kick)
                 }
                 message.type.isTribeDelete() -> {
-                    context.getString(R.string.last_message_description_tribe_deleted,)
+                    context.getString(R.string.last_message_description_tribe_deleted)
                 }
                 message.type.isBoost() -> {
                     val amount: String = (message.podBoost?.amount ?: message.amount)
@@ -267,6 +279,9 @@ sealed class DashboardChat {
                 } ?: ""
             }
 
+            override fun getColorKey(): String? {
+                return getColorKeyFor(contact, chat)
+            }
         }
 
         class GroupOrTribe(
@@ -290,6 +305,10 @@ sealed class DashboardChat {
                 return message.senderAlias?.let { alias ->
                     alias.value + if (withColon) ": " else ""
                 } ?: ""
+            }
+
+            override fun getColorKey(): String? {
+                return getColorKeyFor(null, chat)
             }
 
         }
@@ -331,6 +350,10 @@ sealed class DashboardChat {
 
             override fun isEncrypted(): Boolean {
                 return !(contact.rsaPublicKey?.value?.isEmpty() ?: true)
+            }
+
+            override fun getColorKey(): String? {
+                return getColorKeyFor(contact, null)
             }
 
         }
@@ -437,6 +460,10 @@ sealed class DashboardChat {
 
             override fun isEncrypted(): Boolean {
                 return false
+            }
+
+            override fun getColorKey(): String? {
+                return getColorKeyFor(contact, null)
             }
         }
     }

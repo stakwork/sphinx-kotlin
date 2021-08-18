@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="share">分享</string>
+    <string name="copy">複製</string>
+    <string name="paid">已支付</string>
+    <string name="qr_code_notify_copied">%s 複製上貼版</string>
+</resources>

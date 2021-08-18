@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="scanner_header_name">スキャン</string>
+    <string name="scanner_bottom_content_label">またはマニュアル入力</string>
+    <string name="scanner_edit_text_hint">コード</string>
+    <string name="scanner_verify_button">確認する</string>
+
+    <string name="scanner_notify_permissions_needed">この機能を使うにはカメラのアクセス許可が必要です。端末の設定で許可してください。</string>
+</resources>

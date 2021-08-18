@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bottom_menu_profile_pic_option_camera">カメラ</string>
+    <string name="bottom_menu_profile_pic_option_photo_library">アルバム</string>
+</resources>
