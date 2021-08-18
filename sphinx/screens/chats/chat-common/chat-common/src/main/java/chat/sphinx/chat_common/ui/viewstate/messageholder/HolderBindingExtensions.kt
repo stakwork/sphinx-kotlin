@@ -72,15 +72,10 @@ internal fun LayoutMessageHolderBinding.setView(
 
     apply {
         lifecycleScope.launch(dispatchers.mainImmediate) {
-            val initialsColor = if (viewState.statusHeader != null) {
+            val initialsColor = viewState.statusHeader?.colorKey?.let { key ->
                 Color.parseColor(
-                    userColorsHelper.getHexCodeForKey(
-                        viewState.statusHeader!!.colorKey,
-                        root.context.getRandomHexCode()
-                    )
+                    userColorsHelper.getHexCodeForKey(key, root.context.getRandomHexCode())
                 )
-            } else {
-                null
             }
 
             viewState.initialHolder.setInitialHolder(
