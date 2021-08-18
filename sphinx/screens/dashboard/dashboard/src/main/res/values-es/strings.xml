@@ -17,7 +17,7 @@
     <string name="invite_qr_code_header_name">CÓDIGO DE INVITACIÓN</string>
 
     <string name="alert_confirm_pay_invite_title">Pagar Invitación</string>
-    <string name="alert_confirm_pay_invite_message">¿Estás seguro que deseas pagar esta invitación?</string>
+    <string name="alert_confirm_pay_invite_message">¿Estás seguro que deseas pagar %d sats por esta invitación?</string>
     <string name="pay_invite_balance_too_low">"No se puede pagar por la invitación. El balance demasiado bajo"</string>
 
     <string name="alert_confirm_delete_invite_title">Borrar Invitación</string>

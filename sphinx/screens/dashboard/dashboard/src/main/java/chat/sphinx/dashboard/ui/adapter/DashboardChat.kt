@@ -214,10 +214,10 @@ sealed class DashboardChat {
                     }
                 }
                 message.type.isGroupKick() -> {
-                    context.getString(R.string.last_message_description_group_kick,)
+                    context.getString(R.string.last_message_description_group_kick)
                 }
                 message.type.isTribeDelete() -> {
-                    context.getString(R.string.last_message_description_tribe_deleted,)
+                    context.getString(R.string.last_message_description_tribe_deleted)
                 }
                 message.type.isBoost() -> {
                     val amount: String = (message.podBoost?.amount ?: message.amount)
