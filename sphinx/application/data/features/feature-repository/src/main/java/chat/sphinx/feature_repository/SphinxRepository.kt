@@ -3086,7 +3086,10 @@ abstract class SphinxRepository(
         return response
     }
 
-    override suspend fun authorizeExternal(host: String, challenge: String): Response<Boolean, ResponseError> {
+    override suspend fun authorizeExternal(
+        host: String,
+        challenge: String
+    ): Response<Boolean, ResponseError> {
         var response: Response<Boolean, ResponseError> = Response.Success(true)
 
         applicationScope.launch(mainImmediate) {

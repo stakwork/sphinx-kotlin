@@ -34,13 +34,14 @@ value class ExternalAuthorizeLink(val value: String) {
         get() = getComponent(LINK_CHALLENGE) ?: ""
 
     fun getComponent(k: String): String? {
-        val components = value.replace("sphinx.chat://", "").split("&")
+        val components = value.replace("sphinx.chat://?", "").split("&")
         for (component in components) {
-            val subComponents = component.split("=")
-            val key:String? = if (subComponents.isNotEmpty()) subComponents.elementAtOrNull(0) else null
-            val value:String? = if (subComponents.size > 1) subComponents.elementAtOrNull(1) else null
+            val key:String? = component.substringBefore("=")
 
-            if (key == k) return value
+            if (key != null) {
+                val value: String? = component.replace("$key=", "")
+                if (key == k) return value
+            }
         }
         return null
     }
