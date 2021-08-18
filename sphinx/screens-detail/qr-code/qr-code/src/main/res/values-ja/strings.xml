@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="share">シェア</string>
+    <string name="copy">コピー</string>
+    <string name="paid">支払いました</string>
+    <string name="qr_code_notify_copied">%sをクリップボードにコピーしました</string>
+</resources>

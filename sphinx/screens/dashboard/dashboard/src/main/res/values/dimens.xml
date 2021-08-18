@@ -26,4 +26,15 @@
     <dimen name="dashboard_header_network_xy">24dp</dimen>
 
     <dimen name="recycler_view_holder_height">90dp</dimen>
+
+    <!-- Deep link authorize popup -->
+    <dimen name="dashboard_authorize_popup_width">240dp</dimen>
+    <dimen name="dashboard_authorize_popup_height">300dp</dimen>
+    <dimen name="dashboard_authorize_popup_verified_icon_margin_top">40sp</dimen>
+    <dimen name="dashboard_authorize_popup_verified_icon_text_size">40sp</dimen>
+    <dimen name="dashboard_authorize_popup_authorize_title_text_size">13sp</dimen>
+    <dimen name="dashboard_authorize_popup_authorize_name_text_size">14sp</dimen>
+    <dimen name="dashboard_authorize_popup_authorize_button_height">52dp</dimen>
+    <dimen name="dashboard_authorize_popup_authorize_button_text_size">12sp</dimen>
+    <dimen name="dashboard_authorize_popup_progress_bar_zy">32dp</dimen>
 </resources>

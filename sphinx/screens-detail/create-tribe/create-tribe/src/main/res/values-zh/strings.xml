@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="create_tribe_header_name">建立新 TRIBE</string>
+    <string name="edit_tribe_header_name">編輯 TRIBE</string>
+    <string name="create_tribe">建立 Tribe</string>
+    <string name="save">儲存</string>
+    <string name="add_icon"></string>
+
+    <string name="bottom_menu_tribe_pic_header_text">Tribe 圖片</string>
+
+    <string name="name_and_description_required">名稱和說明不可無填</string>
+    <string name="failed_to_create_tribe">建立 tribe 失敗</string>
+    <string name="failed_to_update_tribe">編輯 tribe 失敗</string>
+    <string name="failed_to_load_tribe">載入 tribe 失敗</string>
+    <string name="failed_to_process_image">團片上傳失敗</string>
+    <string name="list_on_tribes_sphinx_chat">開放 tribes.sphinx.chat 發布嗎?</string>
+    <string name="name">名稱 *</string>
+    <string name="image">圖片</string>
+    <string name="description">說明 *</string>
+    <string name="tags">Tags</string>
+    <string name="price_to_join_sats">加入費用</string>
+    <string name="price_per_message_sats">訊息費用</string>
+    <string name="amount_to_stake_sats">訂金</string>
+    <string name="time_to_stake_hours">訂金時期 (小時)</string>
+    <string name="app_url">App Url</string>
+    <string name="rss_feed_url">Feed URL</string>
+    <string name="approve_each_membership_request">需要許可每位會員邀請嗎?</string>
+</resources>

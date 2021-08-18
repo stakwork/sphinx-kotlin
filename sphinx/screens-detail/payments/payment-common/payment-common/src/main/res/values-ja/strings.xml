@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="payment_common_header_name">送金</string>
+
+    <string name="destination_key">公開鍵</string>
+    <string name="balance_too_low">残高が足りません</string>
+    <string name="add_message_hint">メッセージを入力</string>
+    <string name="confirm_button">確定</string>
+    <string name="continue_button">次へ</string>
+    <string name="error_processing_payment">送金できませんでした。後ほど再度お試しください。</string>
+    <string name="payment_sent">%2$sに%1$d sat 送金しました</string>
+
+    <string name="alert_confirm_payment_send_title">送金</string>
+    <string name="alert_confirm_payment_send_message">%2$sに%1$d sat 送金してよいですか？</string>
+</resources>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="invite_friend_header_name">邀請好友</string>
+
+    <string name="invite_friend_nickname_label">暱稱</string>
+    <string name="invite_friend_message_label">附加訊息...</string>
+    <string name="invite_friend_message_hint">歡迎來 Sphinx!</string>
+    <string name="invite_friend_create_invitation_button">建立邀請</string>
+    <string name="invite_friend_estimated_cost_text_view">估計費用</string>
+
+    <string name="invite_friend_nickname_empty">暱稱不可無填</string>
+    <string name="invite_failed">邀請失敗. 請稍後再試一次.</string>
+</resources>

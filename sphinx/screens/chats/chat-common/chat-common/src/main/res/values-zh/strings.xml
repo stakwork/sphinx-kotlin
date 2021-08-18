@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="edit_text_message_hint">訊息...</string>
+    <string name="edit_text_optional_message_hint">可選訊息...</string>
+
+    <string name="chat_muted_message"> 聊天室已靜音. Push 通知已關閉</string>
+    <string name="chat_muted_waiting_on_network">載入中....…</string>
+    <string name="chat_tribe_contributed">捐助:</string>
+    <string name="chat_tribe_earned">收款:</string>
+
+    <string name="unsupported_message_type_placeholder_text">%1$s: 向未使用</string>
+    <string name="deleted_message_label_text">訊息已刪除</string>
+    <string name="join_call_header_label_text">加入通話…</string>
+
+    <string name="failed_message">傳送訊息 失敗</string>
+
+    <!--  Message type placeholder display names  -->
+    <string name="placeholder_display_name_message_type_attachment">附加檔案 訊息</string>
+    <string name="placeholder_display_name_message_type_bot_response">Bot 回應</string>
+    <string name="placeholder_display_name_message_type_invoice">帳單 訊息</string>
+    <string name="placeholder_display_name_message_type_payment">支付 訊息</string>
+    <string name="placeholder_display_name_message_type_tribe_delete">Tribe 刪除訊息</string>
+    <string name="placeholder_unsupported_message_type_default">無法支援訊息</string>
+
+    <!-- Paid Message Details: Status Labels   -->
+    <string name="paid_message_details_status_label_pay">支付</string>
+    <string name="paid_message_details_status_label_payment_accepted">支付成功</string>
+    <string name="paid_message_details_status_label_payment_denied">支付失敗</string>
+    <string name="paid_message_details_status_label_processing_payment">支付中…</string>
+
+    <!-- Paid Message Overlays -->
+    <string name="paywall_overlay_label_text_message_received">解鎖訊息支付</string>
+    <string name="paywall_overlay_content_description_image_message_received">解鎖圖片支付</string>
+    <string name="paywall_overlay_content_description_video_message_received">解鎖影片支付</string>
+
+
+    <!-- Link Previews -->
+    <string name="link_preview_add_contact_banner_label">加好友</string>
+    <string name="link_preview_see_tribe_banner_label">顯示 Tribe</string>
+
+    <!-- Replies -->
+    <string name="reply_message_media_content_description">媒體內容</string>
+    <string name="reply_message_close_button_content_description">關閉</string>
+
+    <!--  Purchase Status Labels: Paid Message Details  -->
+    <string name="purchase_status_label_paid_message_details_pending">等待</string>
+    <string name="purchase_status_label_paid_message_details_accepted">支付成功</string>
+    <string name="purchase_status_label_paid_message_details_denied">支付失敗</string>
+    <string name="purchase_status_label_paid_message_details_processing">支付中</string>
+    <string name="purchase_status_label_paid_message_details_default">支付</string>
+
+    <!--  Purchase Status Labels: Paid Message Sent Status  -->
+    <string name="purchase_status_label_paid_message_sent_status_pending">等待</string>
+    <string name="purchase_status_label_paid_message_sent_status_accepted">成功</string>
+    <string name="purchase_status_label_paid_message_sent_status_denied">失敗</string>
+    <string name="purchase_status_label_paid_message_sent_status_processing">支付中…</string>
+    <string name="purchase_status_label_paid_message_sent_status_default">Unknown</string>
+
+
+    <!--  Group Action  -->
+    <string name="tribe_request_admin_side">%1$s \n 想加入 tribe</string>
+    <string name="tribe_request_approved_admin_side">你確認了 %l$s \n 的邀請</string>
+    <string name="tribe_request_rejected_admin_side">你拒絕了 %ls\n的邀請</string>
+    <string name="tribe_request_rejected_member_side">管理員\n拒絕了邀請</string>
+    <string name="tribe_join_announcement">%1$s 加入 tribe</string>
+    <string name="group_join_announcement">%1$s 加入群組</string>
+    <string name="tribe_leave_announcement">%1$s 已離開 tribe</string>
+    <string name="group_leave_announcement">%1$s 已離開群組</string>
+    <string name="tribe_deleted_announcement">管理員\n刪除了tribe</string>
+    <string name="group_kick_announcement_member_side">你被管理員移除了群組</string>
+    <string name="tribe_kick_announcement_member_side">你被管理員移除了 tribe</string>
+    <string name="tribe_welcome_announcement_member_side">歡迎! 你加入會員了</string>
+    <string name="tribe_deleted_announcement_button_delete">刪除 Tribe</string>
+
+    <!-- Selected Item Menu Labels -->
+    <string name="selected_message_menu_item_boost">Boost</string>
+    <string name="selected_message_menu_item_copy_text">複製貼文</string>
+    <string name="selected_message_menu_item_copy_call_link">複製通話連結 Link</string>
+    <string name="selected_message_menu_item_copy_link">複製 連結</string>
+    <string name="selected_message_menu_item_delete">刪除訊息</string>
+    <string name="selected_message_menu_item_reply">回應</string>
+    <string name="selected_message_menu_item_save_file">存檔</string>
+    <string name="selected_message_menu_item_resend">重新發送</string>
+
+    <!-- Notify -->
+    <string name="notify_boost_failure">Boost 支付失敗</string>
+    <string name="side_effect_text_copied">貼文已複製上貼版</string>
+    <string name="side_effect_call_link_copied">通話連接已複製上貼版 clipboard</string>
+    <string name="side_effect_link_copied">已複製 %s</string>
+    <string name="side_effect_no_link_to_copy">無連結複製</string>
+
+    <!-- Send Attachment -->
+    <string name="attachment_send_header_image">傳送圖片</string>
+    <string name="attachment_send_header_video">傳送影片</string>
+    <string name="attachment_send_header_giphy">傳送 GIPHY</string>
+
+    <!-- Exit Tribe -->
+    <string name="delete_own_tribe_not_supported">目前不支持刪除自己的tribe</string>
+    <string name="alert_confirm_exit_tribe_title">退出 Tribe</string>
+    <string name="alert_confirm_exit_tribe_message">你確定要刪除這個tribe 嗎?</string>
+
+    <!-- Menu -->
+    <string name="attachments_menu_cancel" tools:ignore="ButtonCase">取消</string>
+    <string name="camera_attachment_option">相機</string>
+    <string name="library_attachment_option">媒體庫存</string>
+    <string name="gif_attachment_option">Gif</string>
+    <string name="file_attachment_option">檔案</string>
+    <string name="paid_message_attachment_option">訊息傳單</string>
+    <string name="request_attachment_option">申請</string>
+    <string name="send_attachment_option">傳送</string>
+    <string name="waiting_for_admin_approval">等管理員驗證l</string>
+    <string name="failed_to_delete_tribe">無法刪除 Tribe</string>
+
+    <string name="podcast_boost_label">Boost!</string>
+
+    <string name="bottom_menu_call_header_text">通話選項</string>
+    <string name="bottom_menu_call_option_audio">語音</string>
+    <string name="bottom_menu_call_option_video_or_audio">映像 或 語音</string>
+</resources>

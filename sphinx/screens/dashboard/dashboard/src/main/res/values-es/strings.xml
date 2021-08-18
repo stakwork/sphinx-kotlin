@@ -17,7 +17,7 @@
     <string name="invite_qr_code_header_name">CÓDIGO DE INVITACIÓN</string>
 
     <string name="alert_confirm_pay_invite_title">Pagar Invitación</string>
-    <string name="alert_confirm_pay_invite_message">¿Estás seguro que deseas pagar esta invitación?</string>
+    <string name="alert_confirm_pay_invite_message">¿Estás seguro que deseas pagar %d sats por esta invitación?</string>
     <string name="pay_invite_balance_too_low">"No se puede pagar por la invitación. El balance demasiado bajo"</string>
 
     <string name="alert_confirm_delete_invite_title">Borrar Invitación</string>
@@ -71,4 +71,8 @@
     <string name="last_message_description_invite_payment_sent">Pago enviado, esperando confirmación</string>
     <string name="last_message_description_invite_signup_complete">Registro completo</string>
     <string name="last_message_description_invite_expired">Invitación caducada</string>
+
+    <!-- Deep link authorize popup -->
+    <string name="dashboard_authorize_popup_title">¿Quieres autorizar a:</string>
+    <string name="dashboard_authorize_button">AUTORIZAR</string>
 </resources>

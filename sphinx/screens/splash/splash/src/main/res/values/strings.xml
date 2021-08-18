@@ -7,7 +7,7 @@
     <string name="side_effect_generate_token_failed">Generate token failed</string>
 
     <string name="on_board_welcome_info_decrypt">Enter PIN\nto decrypt</string>
-    <string name="on_board_edit_text_hint_decrypt">Enter PIN …</string>
+    <string name="on_board_edit_text_hint_decrypt">Enter PIN…</string>
 
     <string name="side_effect_decryption_failure">Failed to decrypt</string>
     <string name="side_effect_empty_input">Input must not be empty</string>

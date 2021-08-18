@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="on_board_finish_button">完成</string>
+    <string name="on_board_next_button">下一步</string>
+
+    <string name="on_board_get_started_button">開始</string>
+    <string name="on_board_friend_message">好友送來的訊息…</string>
+
+    <string name="side_effect_create_inviter_failed">建立邀請失敗</string>
+    <string name="side_effect_get_contacts_failed">載入聯絡人失敗</string>
+    <string name="side_effect_update_owner_failed">編輯聯絡人失敗</string>
+    <string name="side_effect_generate_token_failed">產生驗證標記失敗</string>
+
+    <string name="sign_up_name_edit_text_hint">設定姓名</string>
+    <string name="sign_up_name_text_view">姓名</string>
+
+    <string name="sphinx_ready_label">"Sphinx\n可以開始用了！"</string>
+    <string name="sphinx_ready_balance_label">"你可以傳送訊息,\n 傳送 %d sats, 或收款 %d sats."</string>
+    <string name="sphinx_ready_loading_balance">餘額下載中...</string>
+</resources>

@@ -88,7 +88,6 @@ dependencies {
     implementation project(path: ':sphinx:application:data:features:feature-meme-server')
     implementation project(path: ':sphinx:application:data:features:feature-relay')
     implementation project(path: ':sphinx:application:data:features:feature-repository-android')
-
     implementation project(path: ':sphinx:application:network:features:feature-link-preview')
     implementation project(path: ':sphinx:application:network:features:feature-network-client')
     implementation project(path: ':sphinx:application:network:features:queries:feature-network-query-chat')
@@ -99,6 +98,7 @@ dependencies {
     implementation project(path: ':sphinx:application:network:features:queries:feature-network-query-subscription')
     implementation project(path: ':sphinx:application:network:features:queries:feature-network-query-meme-server')
     implementation project(path: ':sphinx:application:network:features:queries:feature-network-query-version')
+    implementation project(path: ':sphinx:application:network:features:queries:feature-network-query-authorize-external')
     implementation project(path: ':sphinx:application:network:features:feature-network-relay-call')
     implementation project(path: ':sphinx:application:network:features:feature-socket-io')
     implementation project(path: ':sphinx:application:network:features:tor:feature-network-tor')

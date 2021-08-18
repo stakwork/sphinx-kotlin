@@ -7,4 +7,6 @@ data class PostStreamSatsDestinationDto(
     val address: String,
     val type: String,
     val split: Double,
+    val custom_key: String?,
+    val custom_value: String?,
 )

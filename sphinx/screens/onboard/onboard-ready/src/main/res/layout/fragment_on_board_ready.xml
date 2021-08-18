@@ -18,10 +18,11 @@
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/ready_to_sphinx_text_view"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:layout_marginHorizontal="@dimen/default_layout_margin"
+            android:layout_marginHorizontal="@dimen/default_double_layout_margin"
+            android:maxLines="2"
             android:text="@string/sphinx_ready_label"
             android:textColor="@android:color/white"
             android:fontFamily="@font/roboto_light"
@@ -32,7 +33,7 @@
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/balance_text_view"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:gravity="center"
             android:layout_marginHorizontal="@dimen/default_layout_margin"

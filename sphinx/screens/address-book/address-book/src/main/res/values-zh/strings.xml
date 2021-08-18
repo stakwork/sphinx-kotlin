@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="address_book_header_name">聯絡簿</string>
+    <string name="search">查詢</string>
+    <string name="add_icon"></string>
+    <string name="add_friend">加好友</string>
+</resources>

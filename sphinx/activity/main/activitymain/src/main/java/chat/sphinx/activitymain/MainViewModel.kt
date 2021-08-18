@@ -6,6 +6,7 @@ import chat.sphinx.activitymain.navigation.drivers.AuthenticationNavigationDrive
 import chat.sphinx.activitymain.navigation.drivers.DetailNavigationDriver
 import chat.sphinx.activitymain.navigation.drivers.PrimaryNavigationDriver
 import chat.sphinx.activitymain.ui.MainViewState
+import chat.sphinx.dashboard.navigation.ToDashboardScreen
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_activity.NavigationViewModel
 import io.matthewnelson.android_feature_viewmodel.BaseViewModel
@@ -49,4 +50,17 @@ internal class MainViewModel @Inject constructor(
             }
         }
     }
+
+    suspend fun handleDeepLink(deepLink: String) {
+        if (authenticationStateManager.authenticationStateFlow.value == AuthenticationState.NotRequired) {
+            navigationDriver.submitNavigationRequest(
+                ToDashboardScreen(
+                    popUpToId = R.id.main_primary_nav_graph,
+                    updateBackgroundLoginTime = false,
+                    deepLink = deepLink
+                )
+            )
+        }
+    }
+
 }

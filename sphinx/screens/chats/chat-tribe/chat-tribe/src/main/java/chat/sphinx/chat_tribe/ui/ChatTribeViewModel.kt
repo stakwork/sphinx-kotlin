@@ -1,6 +1,7 @@
 package chat.sphinx.chat_tribe.ui
 
 import android.app.Application
+import android.graphics.Color
 import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
@@ -9,7 +10,6 @@ import chat.sphinx.camera_view_model_coordinator.response.CameraResponse
 import chat.sphinx.chat_common.ui.ChatSideEffect
 import chat.sphinx.chat_common.ui.ChatViewModel
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
-import chat.sphinx.chat_common.ui.viewstate.messagereply.MessageReplyViewState
 import chat.sphinx.chat_tribe.R
 import chat.sphinx.chat_tribe.navigation.TribeChatNavigator
 import chat.sphinx.concept_meme_server.MemeServerTokenHandler
@@ -19,6 +19,8 @@ import chat.sphinx.concept_network_query_lightning.model.route.isRouteAvailable
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_message.MessageRepository
+import chat.sphinx.resources.getRandomHexCode
+import chat.sphinx.wrapper_chat.getColorKey
 import chat.sphinx.concept_repository_message.model.SendMessage
 import chat.sphinx.concept_service_media.MediaPlayerServiceController
 import chat.sphinx.concept_service_media.MediaPlayerServiceState
@@ -30,7 +32,6 @@ import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.podcast_player.objects.toParcelablePodcast
 import chat.sphinx.podcast_player.ui.getMediaDuration
-import chat.sphinx.resources.getRandomColor
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.ChatName
 import chat.sphinx.wrapper_chat.isTribe
@@ -42,6 +43,8 @@ import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.lightning.unit
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.util.getInitials
+import chat.sphinx.wrapper_message.Message
+import chat.sphinx.wrapper_message.getColorKey
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_podcast.Podcast
@@ -125,10 +128,17 @@ internal class ChatTribeViewModel @Inject constructor(
                     InitialHolderViewState.Url(it)
                 )
             } ?: chat?.name?.let {
+//                val chatColor = Color.parseColor(
+//                    userColorsHelper.getHexCodeForKey(
+//                        chat.getColorKey(),
+//                        app.getRandomHexCode()
+//                    )
+//                )
+
                 emit(
                     InitialHolderViewState.Initials(
                         it.value.getInitials(),
-                        headerInitialsTextViewColor
+                        chat.getColorKey()
                     )
                 )
             } ?: emit(
@@ -151,7 +161,7 @@ internal class ChatTribeViewModel @Inject constructor(
         return message.senderPic?.let { url ->
             InitialHolderViewState.Url(url)
         } ?: message.senderAlias?.let { alias ->
-            InitialHolderViewState.Initials(alias.value.getInitials(), app.getRandomColor())
+            InitialHolderViewState.Initials(alias.value.getInitials(), message.getColorKey())
         } ?: InitialHolderViewState.None
     }
 
@@ -451,18 +461,14 @@ internal class ChatTribeViewModel @Inject constructor(
 
                         messageRepository.sendPodcastBoost(chatId, nnPodcast)
 
-                        nnPodcast.value?.destinations?.let { destinations ->
-                            mediaPlayerServiceController.submitAction(
-                                UserAction.SendBoost(
-                                    chatId,
-                                    nnPodcast.id,
-                                    metaData,
-                                    destinations
-                                )
+                        mediaPlayerServiceController.submitAction(
+                            UserAction.SendBoost(
+                                chatId,
+                                nnPodcast.id,
+                                metaData,
+                                nnPodcast.value.destinations
                             )
-                        }
-
-
+                        )
                     }
                 }
             }

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="menu_bottom_header_subtext">請選擇項目</string>
+    <string name="menu_bottom_dismiss">略過</string>
+    <string name="menu_bottom_cancel">取消</string>
+</resources>

@@ -39,10 +39,10 @@ internal sealed class  TribeDetailSideEffect: SideEffect<Context>()  {
         private val callback: () -> Unit
     ): TribeDetailSideEffect() {
 
-        override suspend fun execute(context: Context) {
-            val builder = AlertDialog.Builder(context)
-            builder.setTitle(String.format(context.getString(R.string.alert_confirm_delete_tribe_heading), chat.name?.value))
-            builder.setMessage(context.getString(R.string.alert_confirm_delete_tribe_message))
+        override suspend fun execute(value: Context) {
+            val builder = AlertDialog.Builder(value)
+            builder.setTitle(value.getString(R.string.alert_confirm_delete_tribe_heading, chat.name?.value ?: ""))
+            builder.setMessage(value.getString(R.string.alert_confirm_delete_tribe_message))
             builder.setNegativeButton(android.R.string.cancel) { _,_ -> }
             builder.setPositiveButton(android.R.string.ok) { _, _ ->
                 callback()
@@ -56,10 +56,10 @@ internal sealed class  TribeDetailSideEffect: SideEffect<Context>()  {
         private val callback: () -> Unit
     ): TribeDetailSideEffect() {
 
-        override suspend fun execute(context: Context) {
-            val builder = AlertDialog.Builder(context)
-            builder.setTitle(String.format(context.getString(R.string.alert_confirm_exit_tribe_heading), chat.name?.value))
-            builder.setMessage(context.getString(R.string.alert_confirm_exit_tribe_message))
+        override suspend fun execute(value: Context) {
+            val builder = AlertDialog.Builder(value)
+            builder.setTitle(value.getString(R.string.alert_confirm_exit_tribe_heading, chat.name?.value ?: ""))
+            builder.setMessage(value.getString(R.string.alert_confirm_exit_tribe_message))
             builder.setNegativeButton(android.R.string.cancel) { _,_ -> }
             builder.setPositiveButton(android.R.string.ok) { _, _ ->
                 callback()
