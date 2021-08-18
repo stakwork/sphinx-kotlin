@@ -10,4 +10,14 @@ internal class PrimaryNavigationDriver: NavigationDriver<NavController>(replayCa
     override suspend fun whenTrueExecuteRequest(request: NavigationRequest<NavController>): Boolean {
         return true
     }
+
+    suspend fun toDashboardScreen(deepLink: String) {
+        submitNavigationRequest(
+            ToDashboardScreen(
+                popUpToId = R.id.main_primary_nav_graph,
+                updateBackgroundLoginTime = false,
+                deepLink
+            )
+        )
+    }
 }

@@ -134,6 +134,20 @@ internal class MainActivity: MotionLayoutNavigationActivity<
         }
     }
 
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+
+        intent.dataString?.let { deepLink ->
+            handleDeepLink(deepLink)
+        }
+    }
+
+    private fun handleDeepLink(deepLink: String) {
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.handleDeepLink(deepLink)
+        }
+    }
+
     override suspend fun onViewStateFlowCollect(viewState: MainViewState) {
         when (viewState) {
             is MainViewState.DetailScreenActive -> {

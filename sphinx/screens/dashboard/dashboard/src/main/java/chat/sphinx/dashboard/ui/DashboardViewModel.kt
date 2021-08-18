@@ -125,6 +125,20 @@ internal class DashboardViewModel @Inject constructor(
                 backgroundLoginHandler.updateLoginTime()
             }
         }
+
+        handleDeepLink(args.argDeepLink)
+    }
+
+    fun handleDeepLink(deepLink: String?) {
+        viewModelScope.launch(mainImmediate) {
+            delay(100L)
+
+            deepLink?.toTribeJoinLink()?.let { tribeJoinLink ->
+                handleTribeJoinLink(tribeJoinLink)
+            } ?: deepLink?.toExternalAuthorizeLink()?.let { externalAuthorizeLink ->
+                handleExternalAuthorizeLink(externalAuthorizeLink)
+            }
+        }
     }
 
     fun toScanner() {
