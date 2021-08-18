@@ -5,6 +5,8 @@ import android.content.ActivityNotFoundException
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.view.HapticFeedbackConstants
+import androidx.fragment.app.FragmentActivity
 import chat.sphinx.chat_common.R
 import chat.sphinx.resources.SphinxToastUtils
 import io.matthewnelson.android_feature_toast_utils.show
@@ -76,6 +78,15 @@ sealed class ChatSideEffect: SideEffect<ChatSideEffectFragment>() {
                 callback()
             }
             builder.show()
+        }
+    }
+
+    object ProduceHapticFeedback: ChatSideEffect() {
+        override suspend fun execute(value: ChatSideEffectFragment) {
+            value.chatFragmentWindow?.decorView?.performHapticFeedback(
+                HapticFeedbackConstants.LONG_PRESS,
+                HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING
+            )
         }
     }
 

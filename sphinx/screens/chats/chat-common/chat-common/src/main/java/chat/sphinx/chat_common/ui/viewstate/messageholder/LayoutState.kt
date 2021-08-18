@@ -13,6 +13,7 @@ internal sealed class LayoutState private constructor() {
 
     data class MessageStatusHeader(
         val senderName: String?,
+        val colorKey: String,
         val showSent: Boolean,
         val showSendingIcon: Boolean,
         val showBoltIcon: Boolean,
@@ -24,14 +25,12 @@ internal sealed class LayoutState private constructor() {
             get() = !showSent
     }
 
-
     data class GroupActionIndicator(
         val actionType: MessageType.GroupAction,
         val chatType: ChatType?,
         val isAdminView: Boolean,
         val subjectName: String?,
     ): LayoutState()
-
 
     data class DeletedMessage(
         val gravityStart: Boolean,
@@ -45,6 +44,7 @@ internal sealed class LayoutState private constructor() {
             data class ReplyMessage(
                 val showSent: Boolean,
                 val sender: String,
+                val colorKey: String,
                 val text: String,
                 val url: String?,
                 val media: MessageMedia?,
@@ -96,7 +96,6 @@ internal sealed class LayoutState private constructor() {
             // FileAttachment
             // AudioAttachment
             // VideoAttachment
-
             // Invoice
         }
 

@@ -15,11 +15,11 @@ import chat.sphinx.concept_network_query_lightning.model.route.isRouteAvailable
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_message.MessageRepository
-import chat.sphinx.concept_repository_message.model.SendMessage
-import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
+import chat.sphinx.concept_repository_message.model.SendMessage
+import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
 import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.ChatName
@@ -28,6 +28,7 @@ import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.util.getInitials
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_contact.ContactAlias
+import chat.sphinx.wrapper_contact.getColorKey
 import chat.sphinx.wrapper_message.Message
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
@@ -115,10 +116,11 @@ internal class ChatContactViewModel @Inject constructor(
                         InitialHolderViewState.Url(photoUrl)
                     )
                 } ?: contact.alias?.let { alias ->
+
                     emit(
                         InitialHolderViewState.Initials(
                             alias.value.getInitials(),
-                            headerInitialsTextViewColor
+                            contact.getColorKey()
                         )
                     )
                 } ?: emit(

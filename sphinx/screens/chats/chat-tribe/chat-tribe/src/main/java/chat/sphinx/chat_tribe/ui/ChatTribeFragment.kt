@@ -2,12 +2,9 @@ package chat.sphinx.chat_tribe.ui
 
 import android.animation.Animator
 import android.annotation.SuppressLint
-import android.os.Bundle
-import android.view.View
 import android.widget.ImageView
 import androidx.core.view.isGone
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import app.cash.exhaustive.Exhaustive
 import by.kirich1409.viewbindingdelegate.viewBinding
@@ -19,20 +16,19 @@ import chat.sphinx.chat_tribe.databinding.LayoutPodcastPlayerFooterBinding
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
+import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.menu_bottom.databinding.LayoutMenuBottomBinding
 import chat.sphinx.resources.databinding.LayoutBoostFireworksBinding
 import chat.sphinx.resources.getString
 import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.lightning.asFormattedString
-import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_podcast.Podcast
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.concept_views.viewstate.collect
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -87,9 +83,16 @@ internal class ChatTribeFragment: ChatFragment<
     override val viewModel: ChatTribeViewModel by viewModels()
 
     @Inject
-    protected lateinit var imageLoaderInj: ImageLoader<ImageView>
+    @Suppress("ProtectedInFinal", "PropertyName")
+    protected lateinit var _userColorsHelper: UserColorsHelper
+    override val userColorsHelper: UserColorsHelper
+        get() = _userColorsHelper
+
+    @Inject
+    @Suppress("ProtectedInFinal", "PropertyName")
+    protected lateinit var _imageLoader: ImageLoader<ImageView>
     override val imageLoader: ImageLoader<ImageView>
-        get() = imageLoaderInj
+        get() = _imageLoader
 
     private suspend fun setupBoostAnimation(
         photoUrl: PhotoUrl?,
