@@ -2,9 +2,6 @@ package chat.sphinx.chat_common.ui
 
 import android.content.Context
 import android.os.Bundle
-import android.view.GestureDetector
-import android.view.MotionEvent
-import android.view.ScaleGestureDetector
 import android.view.View
 import android.widget.ImageView
 import androidx.activity.OnBackPressedCallback
@@ -12,7 +9,6 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.LayoutRes
 import androidx.constraintlayout.motion.widget.MotionLayout
-import androidx.core.view.isVisible
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
@@ -63,7 +59,6 @@ import chat.sphinx.wrapper_view.Dp
 import io.matthewnelson.android_feature_screens.ui.motionlayout.MotionLayoutFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
-import io.matthewnelson.android_feature_screens.util.goneIfTrue
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.currentViewState
 import io.matthewnelson.android_feature_viewmodel.updateViewState
@@ -429,93 +424,14 @@ abstract class ChatFragment<
                 root.gone
             }
 
-            var scaleFactor = 1.0f;
-
-            val scaleGestureDetector = ScaleGestureDetector(chatFragmentContext, object: ScaleGestureDetector.SimpleOnScaleGestureListener() {
-
-                override fun onScale(detector: ScaleGestureDetector): Boolean {
-                    scaleFactor = 1.0f.coerceAtLeast(scaleFactor * detector.scaleFactor)
-
-                    imageViewAttachmentFullscreen.scaleX = scaleFactor.rounded()
-                    imageViewAttachmentFullscreen.scaleY = scaleFactor.rounded()
-
-                    return true
+            imageViewAttachmentFullscreen.onSingleTapListener = object: SphinxFullscreenImageView.OnSingleTapListener {
+                override fun onSingleTapConfirmed() {
+                    // TODO: Add swipe gestures to close full screen so single taps can head the header
+//                    layoutConstraintAttachmentFullscreenHeader.goneIfTrue(
+//                        layoutConstraintAttachmentFullscreenHeader.isVisible
+//                    )
                 }
-            })
-
-            val gestureDetector = GestureDetector(chatFragmentContext, object: GestureDetector.SimpleOnGestureListener() {
-                override fun onScroll(
-                    e1: MotionEvent?,
-                    e2: MotionEvent?,
-                    distanceX: Float,
-                    distanceY: Float
-                ): Boolean {
-                    if (!scaleGestureDetector.isInProgress) {
-                        imageViewAttachmentFullscreen.apply {
-                            val scaledWidth = measuredWidth * scaleX
-
-                            val maximumTranslationX = (scaledWidth-measuredWidth)/2
-                            val minimumTranslationX = 0 - maximumTranslationX
-
-                            val measuredHeight = drawable.intrinsicHeight
-                            val scaledHeight = measuredHeight * scaleY
-
-                            val maximumTranslationY = (scaledHeight-measuredHeight)/2
-                            val minimumTranslationY = 0 - maximumTranslationY
-
-                            if (scaleX > 1.0f) {
-                                // We are in zoom mood so we need to be moving the image around
-                                translationX = (translationX - distanceX)
-                                    .coerceIn(minimumTranslationX, maximumTranslationX)
-                                translationY = (translationY - distanceY)
-                                    .coerceIn(minimumTranslationY, maximumTranslationY)
-                            }
-                        }
-
-                        return true
-                    }
-                    return false
-                }
-                /**
-                 * On Single tap toggle visibility of the header
-                 */
-                override fun onSingleTapConfirmed(e: MotionEvent?): Boolean {
-                    if (!scaleGestureDetector.isInProgress) {
-                        layoutConstraintAttachmentFullscreenHeader.goneIfTrue(
-                            layoutConstraintAttachmentFullscreenHeader.isVisible
-                        )
-                    }
-                    return true
-                }
-
-                /**
-                 * On Double Tap zoom in and out
-                 */
-                override fun onDoubleTap(e: MotionEvent?): Boolean {
-                    scaleFactor = if (scaleFactor == 1.0f) {
-                        2.0f
-                    } else {
-                        // When going back to the normal scale we should fix the translations
-                        imageViewAttachmentFullscreen.apply {
-                            translationX = 0.0f
-                            translationY = 0.0f
-                        }
-
-                        1.0f
-                    }
-
-                    imageViewAttachmentFullscreen.scaleX = scaleFactor.rounded()
-                    imageViewAttachmentFullscreen.scaleY = scaleFactor.rounded()
-                    return true
-                }
-            })
-
-            imageViewAttachmentFullscreen.setOnTouchListener { _, event ->
-                var result = scaleGestureDetector.onTouchEvent(event)
-                result = gestureDetector.onTouchEvent(event) || result
-                return@setOnTouchListener result
             }
-
         }
     }
 
