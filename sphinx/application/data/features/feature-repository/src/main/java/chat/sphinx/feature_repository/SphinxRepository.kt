@@ -21,7 +21,6 @@ import chat.sphinx.concept_network_query_message.model.MessageDto
 import chat.sphinx.concept_network_query_message.model.PostMessageDto
 import chat.sphinx.concept_network_query_message.model.PostPaymentDto
 import chat.sphinx.concept_network_query_verify_external.NetworkQueryAuthorizeExternal
-import chat.sphinx.concept_relay.RelayDataHandler
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_chat.model.CreateTribe
 import chat.sphinx.concept_repository_contact.ContactRepository
@@ -3108,7 +3107,7 @@ abstract class SphinxRepository(
         host: String,
         challenge: String
     ): Response<Boolean, ResponseError> {
-        var response: Response<Boolean, ResponseError> = Response.Success(true)
+        var response: Response<Boolean, ResponseError>? = null
 
         applicationScope.launch(mainImmediate) {
             networkQueryAuthorizeExternal.verifyExternal().collect { loadResponse ->
@@ -3122,39 +3121,39 @@ abstract class SphinxRepository(
                     is Response.Success -> {
 
                         val token = loadResponse.value.token
-                        var info = loadResponse.value.info
+                        val info = loadResponse.value.info
 
                         networkQueryAuthorizeExternal.signBase64(
                             AUTHORIZE_EXTERNAL_BASE_64
-                        ).collect {  loadResponse ->
+                        ).collect {  sigResponse ->
 
-                            when (loadResponse) {
+                            when (sigResponse) {
                                 is LoadResponse.Loading -> {}
 
                                 is Response.Error -> {
-                                    response = loadResponse
+                                    response = sigResponse
                                 }
 
                                 is Response.Success -> {
 
-                                    info.verificationSignature = loadResponse.value.sig
+                                    info.verificationSignature = sigResponse.value.sig
                                     info.url = relayUrl
 
                                     networkQueryAuthorizeExternal.authorizeExternal(
                                         host,
                                         challenge,
                                         token,
-                                        info
-                                    ).collect { loadResponse ->
-                                        when (loadResponse) {
+                                        info,
+                                    ).collect { authorizeResponse ->
+                                        when (authorizeResponse) {
                                             is LoadResponse.Loading -> {}
 
                                             is Response.Error -> {
-                                                response = loadResponse
+                                                response = authorizeResponse
                                             }
 
                                             is Response.Success -> {
-                                                LOG.d(TAG, "TEST")
+                                                response = Response.Success(true)
                                             }
                                         }
                                     }
@@ -3166,7 +3165,7 @@ abstract class SphinxRepository(
             }
         }.join()
 
-        return response
+        return response ?: Response.Error(ResponseError("Returned before completing"))
     }
 
     override suspend fun exitAndDeleteTribe(chat: Chat): Response<Boolean, ResponseError> {
