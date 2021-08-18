@@ -43,7 +43,7 @@ class SphinxFullscreenImageView : AppCompatImageView {
             distanceX: Float,
             distanceY: Float
         ): Boolean {
-            if (!scaleGestureDetector.isInProgress) {
+            if (!scaleGestureDetector.isInProgress && drawable != null) {
                 val scaledWidth = measuredWidth * scaleX
 
                 val maximumTranslationX = (scaledWidth-measuredWidth)/2
@@ -67,6 +67,7 @@ class SphinxFullscreenImageView : AppCompatImageView {
             }
             return false
         }
+
         /**
          * On Single tap toggle visibility of the header
          */

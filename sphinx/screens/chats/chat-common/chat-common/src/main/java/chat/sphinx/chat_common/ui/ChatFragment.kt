@@ -21,6 +21,7 @@ import chat.sphinx.chat_common.R
 import chat.sphinx.chat_common.adapters.MessageListAdapter
 import chat.sphinx.chat_common.databinding.*
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
+import chat.sphinx.chat_common.ui.viewstate.attachment.AttachmentFullscreenViewState
 import chat.sphinx.chat_common.ui.viewstate.attachment.AttachmentSendViewState
 import chat.sphinx.chat_common.ui.viewstate.footer.FooterViewState
 import chat.sphinx.chat_common.ui.viewstate.header.ChatHeaderViewState
@@ -141,7 +142,6 @@ abstract class ChatFragment<
         owner: LifecycleOwner,
         activity: FragmentActivity,
     ): OnBackPressedCallback(true) {
-
         init {
             activity.apply {
                 onBackPressedDispatcher.addCallback(
@@ -421,7 +421,9 @@ abstract class ChatFragment<
             }
 
             textViewAttachmentFullscreenHeaderBack.setOnClickListener {
-                root.gone
+                viewModel.updateAttachmentFullscreenViewState(
+                    AttachmentFullscreenViewState.Idle
+                )
             }
 
             imageViewAttachmentFullscreen.onSingleTapListener = object: SphinxFullscreenImageView.OnSingleTapListener {
@@ -486,7 +488,6 @@ abstract class ChatFragment<
         val messageListAdapter = MessageListAdapter(
             recyclerView,
             headerBinding,
-            attachmentFullscreenBinding,
             linearLayoutManager,
             viewLifecycleOwner,
             onStopSupervisor,
@@ -730,6 +731,59 @@ abstract class ChatFragment<
                 }
             }
         }
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.getAttachmentFullscreenViewStateFlow().collect { viewState ->
+                attachmentFullscreenBinding.apply {
+                    @Exhaustive
+                    when (viewState) {
+                        is AttachmentFullscreenViewState.Idle -> {
+                            root.gone
+                            imageViewAttachmentFullscreen.setImageDrawable(null)
+                        }
+                        is AttachmentFullscreenViewState.Fullscreen -> {
+                            imageViewAttachmentFullscreen.scaleX = 1.0f
+                            imageViewAttachmentFullscreen.scaleY = 1.0f
+                            imageViewAttachmentFullscreen.translationX = 0f
+                            imageViewAttachmentFullscreen.translationY = 0f
+
+                            if (viewState.media?.localFile != null) {
+                                imageLoader.load(
+                                    imageViewAttachmentFullscreen,
+                                    viewState.media.localFile!!
+                                )
+                            } else {
+
+                                val builder = ImageLoaderOptions.Builder()
+                                    .placeholderResId(R.drawable.gph_ic_loader)
+                                viewState.media?.host?.let { host ->
+                                    viewModel.memeServerTokenHandler.retrieveAuthenticationToken(host)?.let { token ->
+                                            builder.addHeader(token.headerKey, token.headerValue)
+
+                                            viewState.media.mediaKeyDecrypted?.value?.let { key ->
+                                                val header = CryptoHeader.Decrypt.Builder()
+                                                    .setScheme(CryptoScheme.Decrypt.JNCryptor)
+                                                    .setPassword(key)
+                                                    .build()
+
+                                                builder.addHeader(header.key, header.value)
+                                            }
+                                        }
+                                }
+                                imageLoader.load(
+                                    imageViewAttachmentFullscreen,
+                                    viewState.url,
+                                    builder.build()
+                                )
+                            }
+
+                            root.visible
+                        }
+                    }
+                }
+            }
+        }
+
 
         viewModel.readMessages()
     }

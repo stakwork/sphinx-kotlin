@@ -25,6 +25,7 @@ import chat.sphinx.chat_common.model.TribeLink
 import chat.sphinx.chat_common.model.UnspecifiedUrl
 import chat.sphinx.chat_common.navigation.ChatNavigator
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
+import chat.sphinx.chat_common.ui.viewstate.attachment.AttachmentFullscreenViewState
 import chat.sphinx.chat_common.ui.viewstate.attachment.AttachmentSendViewState
 import chat.sphinx.chat_common.ui.viewstate.footer.FooterViewState
 import chat.sphinx.chat_common.ui.viewstate.header.ChatHeaderViewState
@@ -689,6 +690,22 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         }
     }
 
+    private inner class AttachmentFullscreenStateContainer: ViewStateContainer<AttachmentFullscreenViewState>(
+        AttachmentFullscreenViewState.Idle)
+
+    private val attachmentFullscreenStateContainer: ViewStateContainer<AttachmentFullscreenViewState> by lazy {
+        AttachmentFullscreenStateContainer()
+    }
+
+    @JvmSynthetic
+    internal fun getAttachmentFullscreenViewStateFlow(): StateFlow<AttachmentFullscreenViewState> =
+        attachmentFullscreenStateContainer.viewStateFlow
+
+    @JvmSynthetic
+    internal fun updateAttachmentFullscreenViewState(viewState: AttachmentFullscreenViewState) {
+        attachmentFullscreenStateContainer.updateViewState(viewState)
+    }
+
     fun boostMessage(messageUUID: MessageUUID?) {
         if (messageUUID == null) return
 
@@ -1157,8 +1174,11 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         }
     }
 
-    fun showAttachmentImageFullscreen(url: String?) {
-
-        // TODO: Set view state for attachment fullscreen
+    fun showAttachmentImageFullscreen(message: Message) {
+        message.retrieveImageUrlAndMessageMedia()?.let {
+            updateAttachmentFullscreenViewState(
+                AttachmentFullscreenViewState.Fullscreen(it.first, it.second)
+            )
+        }
     }
 }

@@ -38,7 +38,6 @@ import kotlinx.coroutines.withContext
 internal class MessageListAdapter<ARGS : NavArgs>(
     private val recyclerView: RecyclerView,
     private val headerBinding: LayoutChatHeaderBinding,
-    private val attachmentFullscreenBinding: LayoutAttachmentFullscreenBinding,
     private val layoutManager: LinearLayoutManager,
     private val lifecycleOwner: LifecycleOwner,
     private val onStopSupervisor: OnStopSupervisor,
@@ -291,17 +290,9 @@ internal class MessageListAdapter<ARGS : NavArgs>(
 
                 includeMessageTypeImageAttachment.apply {
                     imageViewAttachmentImage.setOnClickListener {
-                        viewModel.showAttachmentImageFullscreen(currentViewState?.bubbleImageAttachment?.url)
-
-                        attachmentFullscreenBinding.apply {
-                            imageViewAttachmentFullscreen.setImageDrawable(imageViewAttachmentImage.drawable)
-                            imageViewAttachmentFullscreen.scaleX = 1.0f
-                            imageViewAttachmentFullscreen.scaleY = 1.0f
-                            imageViewAttachmentFullscreen.translationX = 0f
-                            imageViewAttachmentFullscreen.translationY = 0f
-
+                        currentViewState?.message?.let { message ->
+                            viewModel.showAttachmentImageFullscreen(message)
                         }
-                        attachmentFullscreenBinding.root.visible
                     }
                     imageViewAttachmentImage.setOnLongClickListener(selectedMessageLongClickListener)
                 }
