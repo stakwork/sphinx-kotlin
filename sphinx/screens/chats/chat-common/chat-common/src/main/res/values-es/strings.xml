@@ -97,6 +97,10 @@
     <string name="attachment_send_header_video">ENVIAR VIDEO</string>
     <string name="attachment_send_header_giphy">ENVIAR GIPHY</string>
 
+    <!-- Save Attachment -->
+    <string name="saved_attachment_successfully">Archivo adjunto guardado correctamente</string>
+    <string name="failed_to_save_file">No se pudo guardar el archivo</string>
+
     <!-- Exit Tribe -->
     <string name="delete_own_tribe_not_supported">Eliminar la tribu no esta soportado aún</string>
     <string name="alert_confirm_exit_tribe_title">Abandonar Tribu</string>

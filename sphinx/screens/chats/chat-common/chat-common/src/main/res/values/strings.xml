@@ -96,6 +96,10 @@
     <string name="attachment_send_header_video">SEND VIDEO</string>
     <string name="attachment_send_header_giphy">SEND GIPHY</string>
 
+    <!-- Save Attachment -->
+    <string name="saved_attachment_successfully">Saved attachment successfully</string>
+    <string name="failed_to_save_file">Failed to save file</string>
+
     <!-- Exit Tribe -->
     <string name="delete_own_tribe_not_supported">Delete own tribe is not supported yet</string>
     <string name="alert_confirm_exit_tribe_title">Exit Tribe</string>
@@ -118,5 +122,6 @@
     <string name="bottom_menu_call_header_text">Call Options</string>
     <string name="bottom_menu_call_option_audio">Audio</string>
     <string name="bottom_menu_call_option_video_or_audio">Video or Audio</string>
+
 
 </resources>

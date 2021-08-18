@@ -291,6 +291,8 @@ internal class MessageListAdapter<ARGS : NavArgs>(
 
                 includeMessageTypeImageAttachment.apply {
                     imageViewAttachmentImage.setOnClickListener {
+                        viewModel.showAttachmentImageFullscreen(currentViewState?.bubbleImageAttachment?.url)
+
                         attachmentFullscreenBinding.apply {
                             imageViewAttachmentFullscreen.setImageDrawable(imageViewAttachmentImage.drawable)
                             imageViewAttachmentFullscreen.scaleX = 1.0f
