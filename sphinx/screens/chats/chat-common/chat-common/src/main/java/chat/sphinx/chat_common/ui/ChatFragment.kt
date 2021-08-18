@@ -10,7 +10,6 @@ import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.LayoutRes
-import androidx.core.content.ContextCompat
 import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.LifecycleOwner
@@ -161,18 +160,21 @@ abstract class ChatFragment<
         }
 
         override fun handleOnBackPressed() {
-            val attachmentViewState = viewModel.getAttachmentSendViewStateFlow().value
-
+            val attachmentSendViewState = viewModel.getAttachmentSendViewStateFlow().value
+            val attachmentFullscreenViewState = viewModel.getAttachmentFullscreenViewStateFlow().value
             when {
                 viewModel.currentViewState is ChatMenuViewState.Open -> {
                     viewModel.updateViewState(ChatMenuViewState.Closed)
                 }
-                attachmentViewState is AttachmentSendViewState.Preview -> {
+                attachmentFullscreenViewState is AttachmentFullscreenViewState.Fullscreen -> {
+                    viewModel.updateAttachmentFullscreenViewState(AttachmentFullscreenViewState.Idle)
+                }
+                attachmentSendViewState is AttachmentSendViewState.Preview -> {
                     viewModel.updateAttachmentSendViewState(AttachmentSendViewState.Idle)
                     viewModel.updateFooterViewState(FooterViewState.Default)
-                    viewModel.deleteUnsentAttachment(attachmentViewState)
+                    viewModel.deleteUnsentAttachment(attachmentSendViewState)
                 }
-                attachmentViewState is AttachmentSendViewState.PreviewGiphy -> {
+                attachmentSendViewState is AttachmentSendViewState.PreviewGiphy -> {
                     viewModel.updateAttachmentSendViewState(AttachmentSendViewState.Idle)
                     viewModel.updateFooterViewState(FooterViewState.Default)
                 }
