@@ -90,6 +90,8 @@ include ':sphinx:application:network:features:tor:feature-network-tor'
 include ':sphinx:activity:hilt-qualifiers'
 include ':sphinx:activity:insetter-activity'
 include ':sphinx:activity:main:activitymain'
+include ':sphinx:activity:concepts:concept-user-colors-helper'
+include ':sphinx:activity:features:user-colors-helper'
 include ':sphinx:activity:concepts:concept-view-model-coordinator'
 include ':sphinx:activity:features:feature-view-model-coordinator'
 

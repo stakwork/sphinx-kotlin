@@ -1,5 +1,6 @@
 package chat.sphinx.chat_common.ui.viewstate.messageholder
 
+import android.graphics.Color
 import android.view.Gravity
 import android.widget.ImageView
 import androidx.annotation.ColorRes
@@ -24,6 +25,7 @@ import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.concept_meme_server.MemeServerTokenHandler
 import chat.sphinx.concept_network_client_crypto.CryptoHeader
 import chat.sphinx.concept_network_client_crypto.CryptoScheme
+import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.resources.*
 import chat.sphinx.wrapper_chat.ChatType
 import chat.sphinx.wrapper_common.lightning.*
@@ -55,6 +57,7 @@ internal fun LayoutMessageHolderBinding.setView(
     memeServerTokenHandler: MemeServerTokenHandler,
     recyclerViewWidth: Px,
     viewState: MessageHolderViewState,
+    userColorsHelper: UserColorsHelper,
     onSphinxInteractionListener: SphinxUrlSpan.OnInteractionListener? = null,
 ) {
     for (job in holderJobs) {
@@ -69,11 +72,18 @@ internal fun LayoutMessageHolderBinding.setView(
 
     apply {
         lifecycleScope.launch(dispatchers.mainImmediate) {
+            val initialsColor = viewState.statusHeader?.colorKey?.let { key ->
+                Color.parseColor(
+                    userColorsHelper.getHexCodeForKey(key, root.context.getRandomHexCode())
+                )
+            }
+
             viewState.initialHolder.setInitialHolder(
                 includeMessageHolderChatImageInitialHolder.textViewInitials,
                 includeMessageHolderChatImageInitialHolder.imageViewChatPicture,
                 includeMessageStatusHeader,
-                imageLoader
+                imageLoader,
+                initialsColor
             )?.also {
                 disposables.add(it)
             }
@@ -81,7 +91,13 @@ internal fun LayoutMessageHolderBinding.setView(
             holderJobs.add(job)
         }
 
-        setStatusHeader(viewState.statusHeader)
+        setStatusHeader(
+            viewState.statusHeader,
+            holderJobs,
+            dispatchers,
+            lifecycleScope,
+            userColorsHelper,
+        )
         setDeletedMessageLayout(viewState.deletedMessage)
         setBubbleBackground(viewState, recyclerViewWidth)
         setGroupActionIndicatorLayout(viewState.groupActionIndicator)
@@ -167,7 +183,13 @@ internal fun LayoutMessageHolderBinding.setView(
                     holderJobs.add(job)
                 }
             }
-            setBubbleReplyMessage(viewState.bubbleReplyMessage) { imageView, url, media ->
+            setBubbleReplyMessage(
+                viewState.bubbleReplyMessage,
+                holderJobs,
+                dispatchers,
+                lifecycleScope,
+                userColorsHelper,
+            ) { imageView, url, media ->
                 lifecycleScope.launch(dispatchers.mainImmediate) {
 
                     val file: File? = media?.localFile
@@ -411,7 +433,11 @@ internal fun LayoutMessageHolderBinding.setBubbleBackground(
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun LayoutMessageHolderBinding.setStatusHeader(
-    statusHeader: LayoutState.MessageStatusHeader?
+    statusHeader: LayoutState.MessageStatusHeader?,
+    holderJobs: ArrayList<Job>,
+    dispatchers: CoroutineDispatchers,
+    lifecycleScope: CoroutineScope,
+    userColorsHelper: UserColorsHelper,
 ) {
     includeMessageStatusHeader.apply {
         if (statusHeader == null) {
@@ -426,17 +452,18 @@ internal inline fun LayoutMessageHolderBinding.setStatusHeader(
                     } else {
                         visible
                         text = name
-
-                        /*
-                        * TODO: Devise a way to derive random color values for sender aliases
-                        *
-                        * See the current iOS implementation: https://github.com/stakwork/sphinx/blob/9ee30302bc95091bcc9562e07ada87d52d27a5ad/sphinx/Scenes/Chat/Helpers/ChatHelper.swift#L12
-                        *
-                        * See current extension functions:
-                        *   context.getRandomColor()
-                        *   setBackgroundRandomColor()
-                        * */
-                        setTextColorExt(common_R.color.lightPurple)
+                        lifecycleScope.launch(dispatchers.mainImmediate) {
+                            textViewMessageStatusReceivedSenderName.setTextColor(
+                                Color.parseColor(
+                                    userColorsHelper.getHexCodeForKey(
+                                        statusHeader.colorKey,
+                                        root.context.getRandomHexCode()
+                                    )
+                                )
+                            )
+                        }.let { job ->
+                            holderJobs.add(job)
+                        }
                     }
                 } ?: gone
             }
@@ -1223,6 +1250,10 @@ private inline fun LayoutMessageHolderBinding.setGroupActionMemberRemovalLayout(
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun LayoutMessageHolderBinding.setBubbleReplyMessage(
     replyMessage: LayoutState.Bubble.ContainerFirst.ReplyMessage?,
+    holderJobs: ArrayList<Job>,
+    dispatchers: CoroutineDispatchers,
+    lifecycleScope: CoroutineScope,
+    userColorsHelper: UserColorsHelper,
     loadImage: (ImageView, String, MessageMedia?) -> Unit
 ) {
     includeMessageHolderBubble.includeMessageReply.apply {
@@ -1264,6 +1295,20 @@ internal inline fun LayoutMessageHolderBinding.setBubbleReplyMessage(
             ))
 
             textViewReplySenderLabel.text = replyMessage.sender
+
+            lifecycleScope.launch(dispatchers.mainImmediate) {
+                viewReplyBarLeading.setBackgroundRandomColor(
+                    null,
+                    Color.parseColor(
+                        userColorsHelper.getHexCodeForKey(
+                            replyMessage.colorKey,
+                            root.context.getRandomHexCode(),
+                        )
+                    )
+                )
+            }.let { job ->
+                holderJobs.add(job)
+            }
 
             textViewReplyMessageLabel.text = replyMessage.text
             textViewReplyMessageLabel.goneIfFalse(replyMessage.text.isNotEmpty())

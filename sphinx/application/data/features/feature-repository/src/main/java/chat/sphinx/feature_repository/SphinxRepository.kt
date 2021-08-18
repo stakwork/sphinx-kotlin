@@ -501,7 +501,13 @@ abstract class SphinxRepository(
 
             for (destination in destinations) {
                 destinationsArray.add(
-                    PostStreamSatsDestinationDto(destination.address, destination.type, destination.split.toDouble())
+                    PostStreamSatsDestinationDto(
+                        destination.address,
+                        destination.type,
+                        destination.split.toDouble(),
+                        destination.customKey,
+                        destination.customValue
+                    )
                 )
             }
 
@@ -2518,28 +2524,40 @@ abstract class SphinxRepository(
         var response: Response<Boolean, ResponseError> = Response.Success(!chat.isMuted.isTrue())
 
         applicationScope.launch(mainImmediate) {
+            val queries = coreDB.getSphinxDatabaseQueries()
+            val currentMutedValue = chat.isMuted
+
+            chatLock.withLock {
+                withContext(io) {
+                    queries.transaction {
+                        updateChatMuted(
+                            chat.id,
+                            if (currentMutedValue.isTrue()) ChatMuted.False else ChatMuted.True,
+                            queries
+                        )
+                    }
+                }
+            }
+
             networkQueryChat.toggleMuteChat(chat.id, chat.isMuted).collect { loadResponse ->
                 when (loadResponse) {
                     is LoadResponse.Loading -> {}
                     is Response.Error -> {
                         response = loadResponse
-                    }
-                    is Response.Success -> {
-                        val queries = coreDB.getSphinxDatabaseQueries()
 
                         chatLock.withLock {
                             withContext(io) {
                                 queries.transaction {
                                     updateChatMuted(
                                         chat.id,
-                                        loadResponse.value.isMutedActual.toChatMuted(),
+                                        currentMutedValue,
                                         queries
                                     )
                                 }
                             }
                         }
-
                     }
+                    is Response.Success -> {}
                 }
             }
         }.join()

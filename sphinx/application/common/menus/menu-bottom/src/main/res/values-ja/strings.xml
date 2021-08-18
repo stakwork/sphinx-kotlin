@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="menu_bottom_header_subtext">オプションを選択してください</string>
+    <string name="menu_bottom_dismiss">却下</string>
+    <string name="menu_bottom_cancel">キャンセル</string>
+</resources>

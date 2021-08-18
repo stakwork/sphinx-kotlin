@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="support_ticket_header_name">サポート</string>
+    <string name="send_message">メッセージを送信</string>
+    <string name="copy_logs">ログをコピーする</string>
+    <string name="describe_your_problem_here">不具合の詳細を教えてください</string>
+    <string name="message_required">メッセージを入力してください</string>
+    <string name="fetch_logs_failed">ログを取得できませんでした</string>
+    <string name="logs_copied_to_clipboard">ログをクリップボードにコピーしました</string>
+    <string name="no_logs_loaded">ログがありません</string>
+</resources>

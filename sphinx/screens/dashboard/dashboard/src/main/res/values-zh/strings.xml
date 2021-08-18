@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="add_icon"></string>
+    <string name="join_tribe_link">加入 Tribe 連結</string>
+    <string name="add_friend">加好友</string>
+    <string name="create_tribe">新增 Tribe</string>
+    <string name="contacts">好友</string>
+    <string name="profile">個人檔案</string>
+    <string name="support">支援中心</string>
+    <string name="add_sats">加值 SATS</string>
+    <string name="search">查詢</string>
+
+    <string name="upgrade_app">軟件更新</string>
+
+    <string name="not_valid_tribe_link">QR code 不是 Tribe 連結</string>
+    <string name="invite_name">邀請: %s</string>
+    <string name="invite_qr_code_header_name">邀請條碼</string>
+
+    <string name="alert_confirm_pay_invite_title">邀請條碼付款</string>
+    <string name="alert_confirm_pay_invite_message">確認邀請條碼付款 %d sat?</string>
+    <string name="pay_invite_balance_too_low">"無法邀請條碼付款, 餘額不足"</string>
+
+    <string name="alert_confirm_delete_invite_title">刪除邀請</string>
+    <string name="alert_confirm_delete_invite_message">確認 刪除邀請?</string>
+
+    <string name="paste_invoice_of_tribe_link">貼上帳單 或 加入Tribe連結</string>
+    <string name="alert_confirm_pay_invoice_title">付款</string>
+    <string name="alert_confirm_pay_invoice_message">確定支付帳單??\n\n金額: %d sat\n\n附註: %s</string>
+
+    <string name="payment_request_missing_amount">帳單無填金額</string>
+    <string name="not_valid_invoice_or_tribe_link">QR code 不是閃電網路帳單 或 or 加入 Tribe 連結</string>
+
+    <string name="attempting_payment_request">支付帳單中</string>
+    <string name="failed_to_pay_request">無法支付</string>
+    <string name="successfully_paid_invoice">支付成功</string>
+
+    <string name="last_message_description_message_deleted">訊息刪除</string>
+    <string name="last_message_description_you">自己</string>
+    <string name="last_message_description_gif_shared">%s分享GIF</string>
+    <string name="last_message_description_boost">%sBoost %s</string>
+    <string name="last_message_description_call_invite">%s加入通話</string>
+    <string name="last_message_description_invoice_sent">帳單傳送: %s</string>
+    <string name="last_message_description_invoice_receive">帳單收到: %s</string>
+    <string name="last_message_description_payment_sent">已支付: %s</string>
+    <string name="last_message_description_payment_received">已收款: %s</string>
+
+    <string name="last_message_description_sent">已傳送</string>
+    <string name="last_message_description_an_audio_clip">語音檔</string>
+    <string name="last_message_description_a_gif">Gif</string>
+    <string name="last_message_description_an_image">圖片</string>
+    <string name="last_message_description_a_pdf">PDF</string>
+    <string name="last_message_description_a_paid_message">訊息傳單</string>
+    <string name="last_message_description_an_attachment">檔案</string>
+    <string name="last_message_description_a_video">影片</string>
+
+    <string name="last_message_description_has_join_tribe">%s 加入了 tribe</string>
+    <string name="last_message_description_just_left_tribe">%s 離開了 tribe</string>
+    <string name="last_message_description_wants_to_join">%s 想加入 tribe</string>
+    <string name="last_message_description_declined_request_from">你拒絕了%s的邀請 </string>
+    <string name="last_message_description_approved_request_from">你接受了%s的邀請</string>
+    <string name="last_message_description_admin_declined_request">管理員拒絕了你的邀請</string>
+    <string name="last_message_description_welcome_member">歡迎! 你是會員了</string>
+    <string name="last_message_description_group_kick">管理員把你從群組裡移除了</string>
+    <string name="last_message_description_tribe_deleted">管理員刪除了tribe</string>
+
+    <string name="last_message_description_invite">邀請: %s</string>
+    <string name="last_message_description_looking_available_node">%s 閃電節點查詢中</string>
+    <string name="last_message_description_invite_ready">準備好了! 點按即可分享. 24小時失效</string>
+    <string name="last_message_description_invite_signing_on">%s 已上線</string>
+    <string name="last_message_description_invite_tap_to_pay">點按即可支付和接受邀請</string>
+    <string name="last_message_description_invite_payment_sent">已支付. 等待確認</string>
+    <string name="last_message_description_invite_signup_complete">註冊完成</string>
+    <string name="last_message_description_invite_expired">已失效</string>
+</resources>

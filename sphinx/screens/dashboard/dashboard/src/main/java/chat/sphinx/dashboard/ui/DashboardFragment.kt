@@ -19,6 +19,7 @@ import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
+import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.dashboard.R
 import chat.sphinx.dashboard.databinding.FragmentDashboardBinding
 import chat.sphinx.dashboard.ui.adapter.ChatListAdapter
@@ -66,6 +67,10 @@ internal class DashboardFragment : MotionLayoutFragment<
     @Inject
     @Suppress("ProtectedInFinal")
     protected lateinit var imageLoader: ImageLoader<ImageView>
+
+    @Inject
+    @Suppress("ProtectedInFinal")
+    protected lateinit var userColorsHelper: UserColorsHelper
 
     override val viewModel: DashboardViewModel by viewModels()
     override val binding: FragmentDashboardBinding by viewBinding(FragmentDashboardBinding::bind)
@@ -118,7 +123,8 @@ internal class DashboardFragment : MotionLayoutFragment<
                 imageLoader,
                 viewLifecycleOwner,
                 onStopSupervisor,
-                viewModel
+                viewModel,
+                userColorsHelper
             )
 
             val chatListFooterAdapter = ChatListFooterAdapter(viewLifecycleOwner, viewModel)

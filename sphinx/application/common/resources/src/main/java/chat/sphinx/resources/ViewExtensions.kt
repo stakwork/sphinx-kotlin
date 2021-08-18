@@ -1,6 +1,8 @@
 package chat.sphinx.resources
 
 import android.content.Context
+import android.graphics.Color
+import android.graphics.Typeface
 import android.graphics.*
 import android.os.Build
 import android.os.Handler
@@ -15,8 +17,8 @@ import android.view.Window
 import android.widget.TextView
 import androidx.annotation.ColorInt
 import androidx.annotation.ColorRes
-import androidx.annotation.FontRes
 import androidx.annotation.DrawableRes
+import androidx.annotation.FontRes
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 
@@ -62,6 +64,19 @@ inline fun View.setBackgroundRandomColor(
 }
 
 @Suppress("NOTHING_TO_INLINE")
+inline fun View.setInitialsColor(
+    @ColorInt color: Int?,
+    @DrawableRes resId: Int?,
+) {
+    if (resId != null) {
+        val drawable = ContextCompat.getDrawable(this.context, resId)
+        drawable?.setTint(color ?: this.context.getRandomColor())
+        this.background = drawable
+    } else {
+        this.setBackgroundColor(color ?: this.context.getRandomColor())
+    }
+}
+
 inline fun Bitmap.blur(context: Context, radius:Float = 10F): Bitmap?{
     val bitmap = copy(config,true)
 

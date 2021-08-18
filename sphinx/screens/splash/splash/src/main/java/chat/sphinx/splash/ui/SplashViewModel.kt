@@ -300,12 +300,6 @@ internal class SplashViewModel @Inject constructor(
             )
         }
 
-        val step1: OnBoardStep.Step1_Welcome? = onBoardStepHandler.persistOnBoardStep1Data(
-            relayUrl,
-            authToken,
-            inviterData
-        )
-
         networkQueryContact.generateToken(relayUrl, authToken, password, nodePubKey).collect { loadResponse ->
             @Exhaustive
             when (loadResponse) {
@@ -315,6 +309,12 @@ internal class SplashViewModel @Inject constructor(
                     submitSideEffect(SplashSideEffect.GenerateTokenFailed)
                 }
                 is Response.Success -> {
+
+                    val step1: OnBoardStep.Step1_Welcome? = onBoardStepHandler.persistOnBoardStep1Data(
+                        relayUrl,
+                        authToken,
+                        inviterData
+                    )
 
                     if (step1 == null) {
                         updateViewState(SplashViewState.HideLoadingWheel)

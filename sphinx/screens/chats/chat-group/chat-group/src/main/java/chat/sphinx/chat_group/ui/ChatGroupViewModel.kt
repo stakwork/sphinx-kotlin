@@ -1,6 +1,7 @@
 package chat.sphinx.chat_group.ui
 
 import android.app.Application
+import android.graphics.Color
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.camera_view_model_coordinator.request.CameraRequest
@@ -20,8 +21,10 @@ import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.resources.getRandomColor
+import chat.sphinx.resources.getRandomHexCode
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.ChatName
+import chat.sphinx.wrapper_chat.getColorKey
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.util.getInitials
@@ -30,6 +33,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import chat.sphinx.concept_link_preview.LinkPreviewHandler
+import chat.sphinx.wrapper_message.getColorKey
 import io.matthewnelson.concept_media_cache.MediaCacheHandler
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -88,10 +92,17 @@ class ChatGroupViewModel @Inject constructor(
                     InitialHolderViewState.Url(it)
                 )
             } ?: chat?.name?.let {
+//                val chatColor = Color.parseColor(
+//                    userColorsHelper.getHexCodeForKey(
+//                        chat.getColorKey(),
+//                        app.getRandomHexCode()
+//                    )
+//                )
+
                 emit(
                     InitialHolderViewState.Initials(
                         it.value.getInitials(),
-                        headerInitialsTextViewColor
+                        chat.getColorKey()
                     )
                 )
             } ?: emit(
@@ -114,7 +125,7 @@ class ChatGroupViewModel @Inject constructor(
         return message.senderPic?.let { url ->
             InitialHolderViewState.Url(url)
         } ?: message.senderAlias?.let { alias ->
-            InitialHolderViewState.Initials(alias.value.getInitials(), app.getRandomColor())
+            InitialHolderViewState.Initials(alias.value.getInitials(), message.getColorKey())
         } ?: InitialHolderViewState.None
     }
 

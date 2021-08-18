@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bottom_menu_tribe_header_text">Tribe 選項</string>
+    <!-- Menu -->
+    <string name="bottom_menu_tribe_option_share_tribe">分享 Tribe QR code</string>
+    <string name="bottom_menu_tribe_option_delete_tribe">刪除 Tribe</string>
+    <string name="bottom_menu_tribe_option_exit_tribe">退出 Tribe</string>
+    <string name="bottom_menu_tribe_option_edit_tribe">編輯 Tribe</string>
+</resources>

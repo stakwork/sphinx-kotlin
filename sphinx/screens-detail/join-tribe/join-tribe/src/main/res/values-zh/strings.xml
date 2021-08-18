@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="join_tribe_header_name">加入 TRIBE</string>
+    <string name="loading_tribe_text_view">載入 Tribe 資料...</string>
+    <string name="join_tribe_button">加入 TRIBE</string>
+
+    <string name="bottom_menu_tribe_profile_pic_header_text">Tribe 圖片</string>
+    <string name="profile_picture">個人 Picture</string>
+    <string name="price_to_join_label">加入費用:</string>
+    <string name="price_per_message_label">訊息費用:</string>
+    <string name="amount_to_stake_label">訂金:</string>
+    <string name="time_to_stake_label">訂金時間 (小時):</string>
+
+    <string name="alias_edit_text_label">暱稱</string>
+    <string name="join_tribe_alias_empty">必須使用暱稱.</string>
+    <string name="invalid_tribe">無效 Tribe</string>
+    <string name="error_joining">加入tribe出現了錯誤. 請稍後再試一次</string>
+    <string name="failed_to_process_image">無法處理上傳圖片</string>
+</resources>

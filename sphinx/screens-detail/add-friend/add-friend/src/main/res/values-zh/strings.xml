@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="add_friend_header_name">加好友</string>
+    <string name="new_to_sphinx_button">Sphinx 新手</string>
+    <string name="already_on_sphinx_button">已加入 Sphinx</string>
+</resources>

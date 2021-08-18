@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="scanner_header_name">掃描</string>
+    <string name="scanner_bottom_content_label">直接輸入</string>
+    <string name="scanner_edit_text_hint">條碼</string>
+    <string name="scanner_verify_button">審核</string>
+
+    <string name="scanner_notify_permissions_needed">這功能需要用到相機和麥克風,請允許應用程式取用相機</string>
+</resources>

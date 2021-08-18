@@ -98,7 +98,7 @@
             style="@style/BaseButton"
             android:layout_width="@dimen/scanner_bottom_verify_button_width"
             android:layout_height="@dimen/scanner_bottom_verify_button_height"
-            android:text="VERIFY"
+            android:text="@string/scanner_verify_button"
             android:fontFamily="@font/montserrat_bold"
             android:textSize="@dimen/scanner_bottom_verify_button_text_size"
             android:textColor="@android:color/white"

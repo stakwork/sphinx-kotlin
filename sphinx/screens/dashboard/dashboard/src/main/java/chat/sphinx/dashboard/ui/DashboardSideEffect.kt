@@ -23,7 +23,7 @@ sealed class DashboardSideEffect: SideEffect<Context>() {
         private val callback: () -> Unit
     ): DashboardSideEffect() {
         override suspend fun execute(value: Context) {
-            val successMessage = String.format(value.getString(R.string.alert_confirm_pay_invite_message), amount)
+            val successMessage = value.getString(R.string.alert_confirm_pay_invite_message, amount)
 
             val builder = AlertDialog.Builder(value)
             builder.setTitle(value.getString(R.string.alert_confirm_pay_invite_title))
@@ -43,7 +43,7 @@ sealed class DashboardSideEffect: SideEffect<Context>() {
     ): DashboardSideEffect() {
         override suspend fun execute(value: Context) {
             val memo = if (memo.isEmpty()) "-" else memo
-            val successMessage = String.format(value.getString(R.string.alert_confirm_pay_invoice_message), amount, memo)
+            val successMessage = value.getString(R.string.alert_confirm_pay_invoice_message, amount, memo)
 
             val builder = AlertDialog.Builder(value)
             builder.setTitle(value.getString(R.string.alert_confirm_pay_invoice_title))
