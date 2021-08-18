@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tribe_detail_header_name">TRIBE 細節</string>
+    <string name="qr_code_title">加入 Tribe 連結</string>
+    <string name="podcast_sats_per_minute">播客: 每分 sats </string>
+    <string name="alias">暱稱</string>
+
+    <string name="bottom_menu_tribe_profile_pic_header_text">Tribe 圖片</string>
+
+    <string name="tribe_created_on">建立日期 %s</string>
+    <string name="tribe_costs">訊息費用: %d sat - 訂金: %d sat</string>
+    <string name="profile_picture">個人圖片</string>
+
+    <string name="failed_to_update_profile_alias">更新 Tribe暱稱 失敗</string>
+    <string name="failed_to_update_profile_pic">更新 Tribe圖片 失敗</string>
+
+    <string name="alert_confirm_delete_tribe_heading">刪除 %s</string>
+    <string name="alert_confirm_delete_tribe_message">確定刪除tribe 嗎?</string>
+    <string name="failed_to_delete_tribe">刪除Tribe失敗</string>
+
+    <string name="alert_confirm_exit_tribe_heading">退出 %s</string>
+    <string name="alert_confirm_exit_tribe_message">確定要退出Tribe 嗎?</string>
+    <string name="failed_to_exit_tribe">退出Tribe 失敗</string>
+
+    <string name="tribe_members_list">會員列表</string>
+</resources>

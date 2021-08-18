@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="join_tribe_header_name">Tribe参加リンク</string>
+    <string name="loading_tribe_text_view">Tribe情報を読み込み中</string>
+    <string name="join_tribe_button">Tribe参加リンク</string>
+
+    <string name="bottom_menu_tribe_profile_pic_header_text">Tribeプロフィール写真</string>
+    <string name="profile_picture">プロフィール写真</string>
+    <string name="price_to_join_label">参加費:</string>
+    <string name="price_per_message_label">1メッセージあたりの課金額:</string>
+    <string name="amount_to_stake_label">ステーキング金額:</string>
+    <string name="time_to_stake_label">ステーキング期間（時間）:</string>
+
+    <string name="alias_edit_text_label">ハンドルネーム</string>
+    <string name="join_tribe_alias_empty">ハンドルネームは必須です</string>
+    <string name="invalid_tribe">無効なTribe</string>
+    <string name="error_joining">エラーのためTribeに参加できませんでした。後ほど再度お試しください。</string>
+    <string name="failed_to_process_image">写真をアップロードできませんでした</string>
+</resources>

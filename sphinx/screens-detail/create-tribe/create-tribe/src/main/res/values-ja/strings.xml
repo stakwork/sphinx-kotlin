@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="create_tribe_header_name">新しいTribe</string>
+    <string name="edit_tribe_header_name">Tribeを編集</string>
+    <string name="create_tribe">Tribeを作成</string>
+    <string name="save">保存</string>
+    <string name="add_icon"></string>
+
+    <string name="bottom_menu_tribe_pic_header_text">Tribe写真</string>
+
+    <string name="name_and_description_required">名前と紹介文は必須です</string>
+    <string name="failed_to_create_tribe">Tribeを作成できませんでした</string>
+    <string name="failed_to_update_tribe">Tribeを更新できませんでした</string>
+    <string name="failed_to_load_tribe">Tribeを読み込めませんでした</string>
+    <string name="failed_to_process_image">写真をアップロードできませんでした</string>
+    <string name="list_on_tribes_sphinx_chat">tribes.sphinx.chat に掲載しますか？</string>
+    <string name="name">名前 *</string>
+    <string name="image">写真</string>
+    <string name="description">紹介文 *</string>
+    <string name="tags">タグ</string>
+    <string name="price_to_join_sats">参加費</string>
+    <string name="price_per_message_sats">1メッセージあたりの課金額</string>
+    <string name="amount_to_stake_sats">ステーキング金額</string>
+    <string name="time_to_stake_hours">ステーキング期間（時間）</string>
+    <string name="app_url">アプリURL</string>
+    <string name="rss_feed_url">フィードURL</string>
+    <string name="approve_each_membership_request">参加申請を１件ずつ承認しますか？</string>
+</resources>

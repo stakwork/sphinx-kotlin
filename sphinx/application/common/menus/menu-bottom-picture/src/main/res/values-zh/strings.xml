@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bottom_menu_profile_pic_option_camera">相機</string>
+    <string name="bottom_menu_profile_pic_option_photo_library">相簿</string>
+</resources>

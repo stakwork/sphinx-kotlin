@@ -101,7 +101,7 @@ internal class PaymentReceiveViewModel @Inject constructor(
                         paymentReceiveNavigator.toQRCodeDetail(
                             response.value.value,
                             app.getString(R.string.qr_code_title),
-                            String.format(app.getString(R.string.amount_n_sats), requestPayment.amount),
+                            app.getString(R.string.amount_n_sats, requestPayment.amount),
                             false
                         )
                         refreshViewState()

@@ -146,8 +146,8 @@ internal class PaymentSendViewModel @Inject constructor(
                 }
                 is Response.Success -> {
                     if (sendPaymentBuilder.isKeySendPayment) {
-                        val successMessage = String.format(
-                            app.getString(R.string.payment_sent),
+                        val successMessage = app.getString(
+                            R.string.payment_sent,
                             sendPayment?.amount ?: 0,
                             sendPayment?.destinationKey?.value ?: "Unknown"
                         )

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="wrong_pin">無効なPINコード</string>
+    <string name="wrong_pin_one_more_attempt">もう一度間違えるとアプリがロックされます</string>
+    <string name="wrong_pin_pin_does_not_match">PINコードが違います</string>
+    <string name="header_enter_pin">PINコードを入力</string>
+    <string name="header_confirm_pin">PINコードを確定</string>
+    <string name="header_reset_step_1">新しいPINコードを入力</string>
+    <string name="header_reset_step_2">新しいPINコードを確定</string>
+
+    <string name="flow_response_decrypting_key">PINコードを有効にしています</string>
+    <string name="flow_response_encrypting_key_with_new_pin">新しいPINコードでバックアップキーを暗号化しています</string>
+    <string name="flow_response_generating_encrypting_key">バックアップキーを生成、暗号化しています</string>
+
+    <string name="enter_pin_encrypt">バックアップキーを暗号化するPINコードを入力してください。このPINコードは別の端末でアカウントを復元する時に必要です。</string>
+</resources>
