@@ -88,7 +88,6 @@ dependencies {
     implementation project(path: ':sphinx:application:data:features:feature-meme-server')
     implementation project(path: ':sphinx:application:data:features:feature-relay')
     implementation project(path: ':sphinx:application:data:features:feature-repository-android')
-
     implementation project(path: ':sphinx:application:network:features:feature-link-preview')
     implementation project(path: ':sphinx:application:network:features:feature-network-client')
     implementation project(path: ':sphinx:application:network:features:queries:feature-network-query-chat')
