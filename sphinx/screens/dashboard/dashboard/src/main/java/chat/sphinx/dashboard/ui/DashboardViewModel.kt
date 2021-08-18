@@ -14,6 +14,7 @@ import chat.sphinx.concept_network_query_lightning.model.invoice.PayRequestDto
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_network_query_version.NetworkQueryVersion
+import chat.sphinx.concept_relay.RelayDataHandler
 import chat.sphinx.concept_repository_dashboard_android.RepositoryDashboardAndroid
 import chat.sphinx.concept_service_notification.PushNotificationRegistrar
 import chat.sphinx.concept_socket_io.SocketIOManager
@@ -103,6 +104,8 @@ internal class DashboardViewModel @Inject constructor(
     private val networkQueryVersion: NetworkQueryVersion,
 
     private val pushNotificationRegistrar: PushNotificationRegistrar,
+
+    private val relayDataHandler: RelayDataHandler,
 
     private val scannerCoordinator: ViewModelCoordinator<ScannerRequest, ScannerResponse>,
     private val socketIOManager: SocketIOManager,
@@ -243,7 +246,13 @@ internal class DashboardViewModel @Inject constructor(
         val deepLinkViewState = deepLinkPopupViewStateContainer.viewStateFlow.value
         (deepLinkViewState as DeepLinkPopupViewState.ExternalAuthorizePopup)?.link.let { link ->
             viewModelScope.launch(mainImmediate) {
-                when (val response = repositoryDashboard.authorizeExternal(link.host, link.challenge)) {
+                val response = repositoryDashboard.authorizeExternal(
+                    relayDataHandler.retrieveRelayUrl()?.value ?: "",
+                    link.host,
+                    link.challenge
+                )
+
+                when (response) {
                     is Response.Error -> {
                         submitSideEffect(
                             DashboardSideEffect.Notify(response.cause.message)

@@ -110,7 +110,6 @@ abstract class SphinxRepository(
     private val networkQueryMessage: NetworkQueryMessage,
     private val networkQueryInvite: NetworkQueryInvite,
     private val networkQueryAuthorizeExternal: NetworkQueryAuthorizeExternal,
-    private val relayDataHandler: RelayDataHandler,
     private val rsa: RSA,
     private val socketIOManager: SocketIOManager,
     protected val LOG: SphinxLogger,
@@ -3087,6 +3086,7 @@ abstract class SphinxRepository(
     }
 
     override suspend fun authorizeExternal(
+        relayUrl: String,
         host: String,
         challenge: String
     ): Response<Boolean, ResponseError> {
@@ -3120,7 +3120,7 @@ abstract class SphinxRepository(
                                 is Response.Success -> {
 
                                     info.verificationSignature = loadResponse.value.sig
-                                    info.url = relayDataHandler.retrieveRelayUrl()?.value
+                                    info.url = relayUrl
 
                                     networkQueryAuthorizeExternal.authorizeExternal(
                                         host,

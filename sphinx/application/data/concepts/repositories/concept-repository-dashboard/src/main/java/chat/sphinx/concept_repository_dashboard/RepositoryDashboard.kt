@@ -34,7 +34,11 @@ interface RepositoryDashboard {
     suspend fun payForInvite(invite: Invite)
     suspend fun deleteInvite(invite: Invite): Response<Any, ResponseError>
 
-    suspend fun authorizeExternal(host: String, challenge: String): Response<Boolean, ResponseError>
+    suspend fun authorizeExternal(
+        relayUrl: String,
+        host: String,
+        challenge: String
+    ): Response<Boolean, ResponseError>
 
     val networkRefreshBalance: Flow<LoadResponse<Boolean, ResponseError>>
     val networkRefreshContacts: Flow<LoadResponse<Boolean, ResponseError>>
