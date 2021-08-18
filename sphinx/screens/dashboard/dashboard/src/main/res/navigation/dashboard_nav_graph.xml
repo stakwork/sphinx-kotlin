@@ -9,9 +9,11 @@
         android:id="@+id/navigation_dashboard_fragment"
         android:name="chat.sphinx.dashboard.ui.DashboardFragment"
         tools:layout="@layout/fragment_dashboard" >
+
         <argument
             android:name="updateBackgroundLoginTime"
             app:argType="boolean" />
+
     </fragment>
 
 </navigation>
