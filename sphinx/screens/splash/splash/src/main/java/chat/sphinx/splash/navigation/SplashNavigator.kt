@@ -11,8 +11,7 @@ abstract class SplashNavigator(
 {
     abstract suspend fun toDashboardScreen(
         privateMode: Boolean = false,
-        updateBackgroundLoginTime: Boolean = false,
-        deepLink: String? = null
+        updateBackgroundLoginTime: Boolean = false
     )
 
     abstract suspend fun toOnBoardScreen(onBoardStep1: OnBoardStep.Step1_Welcome)

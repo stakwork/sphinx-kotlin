@@ -51,7 +51,6 @@ import javax.inject.Inject
 internal class SplashViewModel @Inject constructor(
     private val authenticationCoordinator: AuthenticationCoordinator,
     private val backgroundLoginHandler: BackgroundLoginHandler,
-    private val app: Application,
     dispatchers: CoroutineDispatchers,
     private val keyRestore: KeyRestore,
     private val lightningRepository: LightningRepository,

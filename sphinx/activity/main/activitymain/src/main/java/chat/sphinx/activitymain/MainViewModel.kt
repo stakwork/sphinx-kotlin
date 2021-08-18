@@ -49,10 +49,4 @@ internal class MainViewModel @Inject constructor(
             }
         }
     }
-
-    suspend fun handleDeepLink(deepLink: String) {
-        if (authenticationStateManager.authenticationStateFlow.value == AuthenticationState.NotRequired) {
-            navigationDriver.toDashboardScreen(deepLink)
-        }
-    }
 }

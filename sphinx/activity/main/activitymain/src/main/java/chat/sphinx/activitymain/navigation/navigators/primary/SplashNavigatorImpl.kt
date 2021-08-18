@@ -17,14 +17,12 @@ internal class SplashNavigatorImpl @Inject constructor(
 
     override suspend fun toDashboardScreen(
         privateMode: Boolean,
-        updateBackgroundLoginTime: Boolean,
-        deepLink: String?
+        updateBackgroundLoginTime: Boolean
     ) {
         navigationDriver.submitNavigationRequest(
             ToDashboardScreen(
                 popUpToId = R.id.main_primary_nav_graph,
-                updateBackgroundLoginTime = updateBackgroundLoginTime,
-                deepLink
+                updateBackgroundLoginTime = updateBackgroundLoginTime
             )
         )
     }

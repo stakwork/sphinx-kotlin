@@ -14,12 +14,6 @@
             android:name="updateBackgroundLoginTime"
             app:argType="boolean" />
 
-        <argument
-            android:name="arg_deepLink"
-            app:argType="string"
-            app:nullable="true"
-            android:defaultValue="@null"/>
-
     </fragment>
 
 </navigation>
