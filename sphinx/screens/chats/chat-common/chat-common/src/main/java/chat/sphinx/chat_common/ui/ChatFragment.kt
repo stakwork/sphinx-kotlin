@@ -162,6 +162,7 @@ abstract class ChatFragment<
         override fun handleOnBackPressed() {
             val attachmentSendViewState = viewModel.getAttachmentSendViewStateFlow().value
             val attachmentFullscreenViewState = viewModel.getAttachmentFullscreenViewStateFlow().value
+
             when {
                 viewModel.currentViewState is ChatMenuViewState.Open -> {
                     viewModel.updateViewState(ChatMenuViewState.Closed)
@@ -771,9 +772,8 @@ abstract class ChatFragment<
                                     viewState.media.localFile!!
                                 )
                             } else {
-
                                 val builder = ImageLoaderOptions.Builder()
-                                    .placeholderResId(R.drawable.gph_ic_loader)
+
                                 viewState.media?.host?.let { host ->
                                     viewModel.memeServerTokenHandler.retrieveAuthenticationToken(host)?.let { token ->
                                             builder.addHeader(token.headerKey, token.headerValue)
