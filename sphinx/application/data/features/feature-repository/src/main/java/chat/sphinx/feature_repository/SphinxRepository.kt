@@ -20,7 +20,7 @@ import chat.sphinx.concept_network_query_message.NetworkQueryMessage
 import chat.sphinx.concept_network_query_message.model.MessageDto
 import chat.sphinx.concept_network_query_message.model.PostMessageDto
 import chat.sphinx.concept_network_query_message.model.PostPaymentDto
-import chat.sphinx.concept_network_query_verify_external.NetworkQueryVerifyExternal
+import chat.sphinx.concept_network_query_verify_external.NetworkQueryAuthorizeExternal
 import chat.sphinx.concept_relay.RelayDataHandler
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_chat.model.CreateTribe
@@ -109,7 +109,7 @@ abstract class SphinxRepository(
     private val networkQueryLightning: NetworkQueryLightning,
     private val networkQueryMessage: NetworkQueryMessage,
     private val networkQueryInvite: NetworkQueryInvite,
-    private val networkQueryVerifyExternal: NetworkQueryVerifyExternal,
+    private val networkQueryAuthorizeExternal: NetworkQueryAuthorizeExternal,
     private val relayDataHandler: RelayDataHandler,
     private val rsa: RSA,
     private val socketIOManager: SocketIOManager,
@@ -3093,7 +3093,7 @@ abstract class SphinxRepository(
         var response: Response<Boolean, ResponseError> = Response.Success(true)
 
         applicationScope.launch(mainImmediate) {
-            networkQueryVerifyExternal.verifyExternal().collect { loadResponse ->
+            networkQueryAuthorizeExternal.verifyExternal().collect { loadResponse ->
                 when (loadResponse) {
                     is LoadResponse.Loading -> {}
 
@@ -3106,7 +3106,7 @@ abstract class SphinxRepository(
                         val token = loadResponse.value.token
                         var info = loadResponse.value.info
 
-                        networkQueryVerifyExternal.signBase64(
+                        networkQueryAuthorizeExternal.signBase64(
                             AUTHORIZE_EXTERNAL_BASE_64
                         ).collect {  loadResponse ->
 
@@ -3122,7 +3122,7 @@ abstract class SphinxRepository(
                                     info.verificationSignature = loadResponse.value.sig
                                     info.url = relayDataHandler.retrieveRelayUrl()?.value
 
-                                    networkQueryVerifyExternal.authorizeExternal(
+                                    networkQueryAuthorizeExternal.authorizeExternal(
                                         host,
                                         challenge,
                                         token,

@@ -47,10 +47,10 @@ import io.matthewnelson.concept_authentication.data.AuthenticationStorage
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_encryption_key.EncryptionKeyHandler
 import chat.sphinx.concept_link_preview.LinkPreviewHandler
-import chat.sphinx.concept_network_query_verify_external.NetworkQueryVerifyExternal
+import chat.sphinx.concept_network_query_verify_external.NetworkQueryAuthorizeExternal
 import io.matthewnelson.feature_authentication_core.AuthenticationCoreManager
 import chat.sphinx.feature_link_preview.LinkPreviewHandlerImpl
-import chat.sphinx.feature_network_query_verify_external.NetworkQueryVerifyExternalImpl
+import chat.sphinx.feature_network_query_verify_external.NetworkQueryAuthorizeExternalImpl
 import kotlinx.coroutines.CoroutineScope
 import javax.inject.Singleton
 
@@ -316,14 +316,14 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideNetworkQueryVerifyExternalImpl(
+    fun provideNetworkQueryAuthorizeExternalImpl(
         networkRelayCall: NetworkRelayCall
-    ): NetworkQueryVerifyExternalImpl =
-        NetworkQueryVerifyExternalImpl(networkRelayCall)
+    ): NetworkQueryAuthorizeExternalImpl =
+        NetworkQueryAuthorizeExternalImpl(networkRelayCall)
 
     @Provides
-    fun provideNetworkQueryVerifyExternal(
-        networkQueryVerifyExternalImpl: NetworkQueryVerifyExternalImpl
-    ): NetworkQueryVerifyExternal =
+    fun provideNetworkQueryAuthorizeExternal(
+        networkQueryVerifyExternalImpl: NetworkQueryAuthorizeExternalImpl
+    ): NetworkQueryAuthorizeExternal =
         networkQueryVerifyExternalImpl
 }

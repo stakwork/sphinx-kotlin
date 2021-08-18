@@ -9,7 +9,7 @@ import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
 import kotlinx.coroutines.flow.Flow
 
-abstract class NetworkQueryVerifyExternal {
+abstract class NetworkQueryAuthorizeExternal {
 
     abstract fun verifyExternal(
         relayData: Pair<AuthorizationToken, RelayUrl>? = null,

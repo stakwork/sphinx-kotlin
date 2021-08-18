@@ -1,11 +1,10 @@
 package chat.sphinx.feature_network_query_verify_external
 
-import chat.sphinx.concept_network_query_verify_external.NetworkQueryVerifyExternal
+import chat.sphinx.concept_network_query_verify_external.NetworkQueryAuthorizeExternal
 import chat.sphinx.concept_network_query_verify_external.model.SignBase64Dto
 import chat.sphinx.concept_network_query_verify_external.model.VerifyExternalDto
 import chat.sphinx.concept_network_query_verify_external.model.VerifyExternalInfoDto
 import chat.sphinx.concept_network_relay_call.NetworkRelayCall
-import chat.sphinx.concept_network_relay_call.RelayResponse
 import chat.sphinx.feature_network_query_verify_external.model.SignBase64RelayResponse
 import chat.sphinx.feature_network_query_verify_external.model.VerifyExternalRelayResponse
 import chat.sphinx.kotlin_response.LoadResponse
@@ -14,9 +13,9 @@ import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
 import kotlinx.coroutines.flow.Flow
 
-class NetworkQueryVerifyExternalImpl(
+class NetworkQueryAuthorizeExternalImpl(
     private val networkRelayCall: NetworkRelayCall,
-): NetworkQueryVerifyExternal() {
+): NetworkQueryAuthorizeExternal() {
 
     companion object {
         private const val ENDPOINT_VERIFY_EXTERNAL = "/verify_external"

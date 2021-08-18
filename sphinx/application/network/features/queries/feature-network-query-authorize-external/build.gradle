@@ -6,7 +6,7 @@ plugins {
 }
 
 dependencies {
-    api project(path: ':sphinx:application:network:concepts:queries:concept-network-query-verify-external')
+    api project(path: ':sphinx:application:network:concepts:queries:concept-network-query-authorize-external')
     api project(path: ':sphinx:application:network:concepts:calls:concept-network-relay-call')
 
     implementation deps.kotlin.coroutinesCore

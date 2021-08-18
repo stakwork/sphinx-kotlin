@@ -11,7 +11,7 @@ import chat.sphinx.concept_network_query_contact.NetworkQueryContact
 import chat.sphinx.concept_network_query_invite.NetworkQueryInvite
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_message.NetworkQueryMessage
-import chat.sphinx.concept_network_query_verify_external.NetworkQueryVerifyExternal
+import chat.sphinx.concept_network_query_verify_external.NetworkQueryAuthorizeExternal
 import chat.sphinx.concept_paging.PageSourceWrapper
 import chat.sphinx.concept_relay.RelayDataHandler
 import chat.sphinx.concept_repository_dashboard.DashboardItem
@@ -48,7 +48,7 @@ class SphinxRepositoryAndroid(
     networkQueryLightning: NetworkQueryLightning,
     networkQueryMessage: NetworkQueryMessage,
     networkQueryInvite: NetworkQueryInvite,
-    networkQueryVerifyExternal: NetworkQueryVerifyExternal,
+    networkQueryAuthorizeExternal: NetworkQueryAuthorizeExternal,
     relayDataHandler: RelayDataHandler,
     rsa: RSA,
     socketIOManager: SocketIOManager,
@@ -68,7 +68,7 @@ class SphinxRepositoryAndroid(
     networkQueryLightning,
     networkQueryMessage,
     networkQueryInvite,
-    networkQueryVerifyExternal,
+    networkQueryAuthorizeExternal,
     relayDataHandler,
     rsa,
     socketIOManager,
