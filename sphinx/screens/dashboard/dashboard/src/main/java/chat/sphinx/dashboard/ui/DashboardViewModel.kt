@@ -6,6 +6,7 @@ import android.content.Intent
 import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.fragment.navArgs
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_background_login.BackgroundLoginHandler
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
@@ -23,6 +24,7 @@ import chat.sphinx.dashboard.navigation.DashboardBottomNavBarNavigator
 import chat.sphinx.dashboard.navigation.DashboardNavDrawerNavigator
 import chat.sphinx.dashboard.navigation.DashboardNavigator
 import chat.sphinx.dashboard.ui.adapter.DashboardChat
+import chat.sphinx.dashboard.ui.viewstates.*
 import chat.sphinx.dashboard.ui.viewstates.ChatFilter
 import chat.sphinx.dashboard.ui.viewstates.ChatViewState
 import chat.sphinx.dashboard.ui.viewstates.ChatViewStateContainer
@@ -35,9 +37,12 @@ import chat.sphinx.scanner_view_model_coordinator.request.ScannerRequest
 import chat.sphinx.scanner_view_model_coordinator.response.ScannerResponse
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.isConversation
+import chat.sphinx.wrapper_common.ExternalAuthorizeLink
 import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.dashboard.ContactId
+import chat.sphinx.wrapper_common.isValidExternalAuthorizeLink
 import chat.sphinx.wrapper_common.lightning.*
+import chat.sphinx.wrapper_common.toExternalAuthorizeLink
 import chat.sphinx.wrapper_common.tribe.TribeJoinLink
 import chat.sphinx.wrapper_common.tribe.isValidTribeJoinLink
 import chat.sphinx.wrapper_common.tribe.toTribeJoinLink
@@ -53,6 +58,7 @@ import io.matthewnelson.android_feature_viewmodel.MotionLayoutViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.build_config.BuildConfigVersionCode
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
+import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import io.matthewnelson.concept_views.viewstate.collect
 import io.matthewnelson.concept_views.viewstate.value
 import kotlinx.coroutines.*
@@ -122,8 +128,12 @@ internal class DashboardViewModel @Inject constructor(
 
     fun handleDeepLink(deepLink: String?) {
         viewModelScope.launch(mainImmediate) {
+            delay(100L)
+
             deepLink?.toTribeJoinLink()?.let { tribeJoinLink ->
                 handleTribeJoinLink(tribeJoinLink)
+            } ?: deepLink?.toExternalAuthorizeLink()?.let { externalAuthorizeLink ->
+                handleExternalAuthorizeLink(externalAuthorizeLink)
             }
         }
     }
@@ -136,6 +146,7 @@ internal class DashboardViewModel @Inject constructor(
                         override suspend fun checkData(data: String): Response<Any, String> {
                             return when {
                                 data.isValidTribeJoinLink ||
+                                data.isValidExternalAuthorizeLink ||
                                 data.isValidLightningPaymentRequest ||
                                 data.isValidLightningNodePubKey ||
                                 data.isValidVirtualNodeAddress ->
@@ -160,6 +171,10 @@ internal class DashboardViewModel @Inject constructor(
                 code.toTribeJoinLink()?.let { tribeJoinLink ->
 
                     handleTribeJoinLink(tribeJoinLink)
+
+                } ?: code.toExternalAuthorizeLink()?.let { externalAuthorizeLink ->
+
+                    handleExternalAuthorizeLink(externalAuthorizeLink)
 
                 } ?: code.toLightningNodePubKey()?.let { lightningNodePubKey ->
 
@@ -232,6 +247,37 @@ internal class DashboardViewModel @Inject constructor(
         } ?: dashboardNavigator.toAddContactDetail(pubKey, routeHint)
     }
 
+    private fun handleExternalAuthorizeLink(link: ExternalAuthorizeLink) {
+        deepLinkPopupViewStateContainer.updateViewState(
+            DeepLinkPopupViewState.ExternalAuthorizePopup(link)
+        )
+    }
+
+    fun authorizeExternal() {
+        val deepLinkViewState = deepLinkPopupViewStateContainer.viewStateFlow.value
+        (deepLinkViewState as DeepLinkPopupViewState.ExternalAuthorizePopup)?.link.let { link ->
+            viewModelScope.launch(mainImmediate) {
+                when (val response = repositoryDashboard.authorizeExternal(link.host, link.challenge)) {
+                    is Response.Error -> {
+                        submitSideEffect(
+                            DashboardSideEffect.Notify(response.cause.message)
+                        )
+                    }
+                    is Response.Success -> {
+                        val i = Intent(Intent.ACTION_VIEW)
+                        i.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                        i.data = Uri.parse("https://${link.host}?challenge=${link.challenge}")
+                        app.startActivity(i)
+                    }
+                }
+
+                deepLinkPopupViewStateContainer.updateViewState(
+                    DeepLinkPopupViewState.PopupDismissed
+                )
+            }
+        }
+    }
+
 //    @Volatile
 //    private var pagerFlow: Flow<PagingData<DashboardItem>>? = null
 //    private val pagerFlowLock = Mutex()
@@ -257,6 +303,10 @@ internal class DashboardViewModel @Inject constructor(
 //
 //        emitAll(flow)
 //    }
+
+    val deepLinkPopupViewStateContainer: ViewStateContainer<DeepLinkPopupViewState> by lazy {
+        ViewStateContainer(DeepLinkPopupViewState.PopupDismissed)
+    }
 
     val chatViewStateContainer: ChatViewStateContainer by lazy {
         ChatViewStateContainer(dispatchers)

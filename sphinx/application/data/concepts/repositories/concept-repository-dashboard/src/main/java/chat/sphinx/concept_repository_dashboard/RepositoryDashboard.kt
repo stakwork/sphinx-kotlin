@@ -4,6 +4,7 @@ import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.wrapper_chat.Chat
+import chat.sphinx.wrapper_common.ExternalAuthorizeLink
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.dashboard.InviteId
@@ -32,6 +33,8 @@ interface RepositoryDashboard {
 
     suspend fun payForInvite(invite: Invite)
     suspend fun deleteInvite(invite: Invite): Response<Any, ResponseError>
+
+    suspend fun authorizeExternal(host: String, challenge: String): Response<Boolean, ResponseError>
 
     val networkRefreshBalance: Flow<LoadResponse<Boolean, ResponseError>>
     val networkRefreshContacts: Flow<LoadResponse<Boolean, ResponseError>>

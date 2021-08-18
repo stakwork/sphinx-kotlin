@@ -15,6 +15,12 @@
     -->
     <ConstraintSet android:id="@+id/motion_scene_dashboard_drawer_closed">
 
+        <Constraint android:id="@id/layout_dashboard_popup">
+            <PropertySet
+                app:applyMotionScene="false"
+                app:visibilityMode="ignore" />
+        </Constraint>
+
         <Constraint android:id="@+id/layout_dashboard_header">
             <Layout
                 android:layout_width="match_parent"
@@ -67,6 +73,12 @@
     <ConstraintSet
         android:id="@+id/motion_scene_dashboard_drawer_open"
         app:deriveConstraintsFrom="@+id/motion_scene_dashboard_drawer_closed">
+
+        <Constraint android:id="@id/layout_dashboard_popup">
+            <PropertySet
+                app:applyMotionScene="false"
+                app:visibilityMode="ignore" />
+        </Constraint>
 
         <Constraint android:id="@+id/layout_dashboard_header">
             <Layout

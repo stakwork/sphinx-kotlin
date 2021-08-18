@@ -20,6 +20,8 @@ import chat.sphinx.concept_network_query_message.NetworkQueryMessage
 import chat.sphinx.concept_network_query_message.model.MessageDto
 import chat.sphinx.concept_network_query_message.model.PostMessageDto
 import chat.sphinx.concept_network_query_message.model.PostPaymentDto
+import chat.sphinx.concept_network_query_verify_external.NetworkQueryVerifyExternal
+import chat.sphinx.concept_relay.RelayDataHandler
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_chat.model.CreateTribe
 import chat.sphinx.concept_repository_contact.ContactRepository
@@ -107,6 +109,8 @@ abstract class SphinxRepository(
     private val networkQueryLightning: NetworkQueryLightning,
     private val networkQueryMessage: NetworkQueryMessage,
     private val networkQueryInvite: NetworkQueryInvite,
+    private val networkQueryVerifyExternal: NetworkQueryVerifyExternal,
+    private val relayDataHandler: RelayDataHandler,
     private val rsa: RSA,
     private val socketIOManager: SocketIOManager,
     protected val LOG: SphinxLogger,
@@ -134,6 +138,8 @@ abstract class SphinxRepository(
 
         const val MEDIA_KEY_SIZE = 32
         const val MEDIA_PROVISIONAL_TOKEN = "Media_Provisional_Token"
+
+        const val AUTHORIZE_EXTERNAL_BASE_64 = "U3BoaW54IFZlcmlmaWNhdGlvbg=="
     }
 
     ////////////////
@@ -3077,6 +3083,68 @@ abstract class SphinxRepository(
 
             }
         }
+        return response
+    }
+
+    override suspend fun authorizeExternal(host: String, challenge: String): Response<Boolean, ResponseError> {
+        var response: Response<Boolean, ResponseError> = Response.Success(true)
+
+        applicationScope.launch(mainImmediate) {
+            networkQueryVerifyExternal.verifyExternal().collect { loadResponse ->
+                when (loadResponse) {
+                    is LoadResponse.Loading -> {}
+
+                    is Response.Error -> {
+                        response = loadResponse
+                    }
+
+                    is Response.Success -> {
+
+                        val token = loadResponse.value.token
+                        var info = loadResponse.value.info
+
+                        networkQueryVerifyExternal.signBase64(
+                            AUTHORIZE_EXTERNAL_BASE_64
+                        ).collect {  loadResponse ->
+
+                            when (loadResponse) {
+                                is LoadResponse.Loading -> {}
+
+                                is Response.Error -> {
+                                    response = loadResponse
+                                }
+
+                                is Response.Success -> {
+
+                                    info.verificationSignature = loadResponse.value.sig
+                                    info.url = relayDataHandler.retrieveRelayUrl()?.value
+
+                                    networkQueryVerifyExternal.authorizeExternal(
+                                        host,
+                                        challenge,
+                                        token,
+                                        info
+                                    ).collect { loadResponse ->
+                                        when (loadResponse) {
+                                            is LoadResponse.Loading -> {}
+
+                                            is Response.Error -> {
+                                                response = loadResponse
+                                            }
+
+                                            is Response.Success -> {
+                                                LOG.d(TAG, "TEST")
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }.join()
+
         return response
     }
 

@@ -71,4 +71,8 @@
     <string name="last_message_description_invite_payment_sent">Pago enviado, esperando confirmación</string>
     <string name="last_message_description_invite_signup_complete">Registro completo</string>
     <string name="last_message_description_invite_expired">Invitación caducada</string>
+
+    <!-- Deep link authorize popup -->
+    <string name="dashboard_authorize_popup_title">¿Quieres autorizar a:</string>
+    <string name="dashboard_authorize_button">AUTORIZAR</string>
 </resources>
