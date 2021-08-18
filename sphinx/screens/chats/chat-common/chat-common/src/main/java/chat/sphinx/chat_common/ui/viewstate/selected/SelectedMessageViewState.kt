@@ -1,5 +1,8 @@
 package chat.sphinx.chat_common.ui.viewstate.selected
 
+import android.graphics.drawable.Drawable
+import androidx.appcompat.widget.AppCompatImageView
+import androidx.core.widget.ImageViewCompat
 import chat.sphinx.chat_common.ui.viewstate.messageholder.MessageHolderViewState
 import chat.sphinx.wrapper_view.*
 import io.matthewnelson.concept_views.viewstate.ViewState
@@ -11,15 +14,13 @@ internal sealed class SelectedMessageViewState: ViewState<SelectedMessageViewSta
     @Suppress("DataClassPrivateConstructor")
     data class SelectedMessage private constructor(
         val messageHolderViewState: MessageHolderViewState,
-
-        /* The y position of the holder for the screen, not for the recycler view */
         val holderYPos: Px,
-
         val bubbleCenterXPos: Px,
         val bubbleHeight: Px,
         val statusHeaderHeight: Px,
         val recyclerViewWidth: Px,
         val showMenuTop: Boolean,
+        val imageView: AppCompatImageView? = null,
     ): SelectedMessageViewState() {
 
         companion object {
@@ -43,6 +44,8 @@ internal sealed class SelectedMessageViewState: ViewState<SelectedMessageViewSta
                 recyclerViewWidth: Px,
 
                 screenHeight: Px,
+
+                imageView: AppCompatImageView? = null,
             ): SelectedMessage? {
                 if (messageHolderViewState == null) {
                     return null
@@ -64,6 +67,7 @@ internal sealed class SelectedMessageViewState: ViewState<SelectedMessageViewSta
                     statusHeaderHeight,
                     recyclerViewWidth,
                     spaceTop.isGreaterThanOrEqualTo(spaceBottom),
+                    imageView
                 )
             }
 

@@ -1,8 +1,12 @@
 package chat.sphinx.chat_common.ui
 
+import android.R.attr.bitmap
 import android.app.Application
 import android.content.ContentValues
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
@@ -88,53 +92,13 @@ import kotlinx.coroutines.withContext
 import org.jitsi.meet.sdk.JitsiMeetActivity
 import org.jitsi.meet.sdk.JitsiMeetConferenceOptions
 import org.jitsi.meet.sdk.JitsiMeetUserInfo
-import java.io.File
-import java.io.FileInputStream
-import java.io.InputStream
+import java.io.*
+
 
 @JvmSynthetic
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun <ARGS: NavArgs> ChatViewModel<ARGS>.isMessageSelected(): Boolean =
     getSelectedMessageViewStateFlow().value is SelectedMessageViewState.SelectedMessage
-
-@Suppress("NOTHING_TO_INLINE")
-inline fun MessageMedia.retrieveMediaStorageUri(): Uri {
-    return when {
-        this.mediaType.isImage -> {
-            MediaStore.Images.Media.EXTERNAL_CONTENT_URI
-        }
-        this.mediaType.isAudio -> {
-            MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
-        }
-        this.mediaType.isVideo -> {
-            MediaStore.Video.Media.EXTERNAL_CONTENT_URI
-        }
-        else -> {
-            // Save to downloads
-            MediaStore.Downloads.getContentUri(MediaStore.VOLUME_EXTERNAL)
-        }
-    }
-}
-
-@Suppress("NOTHING_TO_INLINE")
-inline fun MessageMedia.retrieveContentValues(message: Message): ContentValues {
-    return ContentValues().apply {
-        put(MediaStore.Images.Media.TITLE, message.id.value)
-        put(MediaStore.Images.Media.DISPLAY_NAME, message.senderAlias?.value)
-        put(MediaStore.Images.Media.MIME_TYPE, mediaType.value)
-
-    }
-}
-
-@Suppress("NOTHING_TO_INLINE")
-inline fun Pair<String, MessageMedia?>.retrieveFileInputStream(): FileInputStream {
-    return if (second?.localFile != null) {
-        FileInputStream(second?.localFile)
-    } else {
-        FileInputStream(first)
-    }
-}
-
 
 abstract class ChatViewModel<ARGS: NavArgs>(
     protected val app: Application,
@@ -1138,33 +1102,39 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         // unused
     }
 
-    fun saveFile(message: Message) {
+    fun saveFile(
+        message: Message,
+        drawable: Drawable?
+    ) {
         viewModelScope.launch(mainImmediate) {
             if (message.isMediaAttachment) {
                 message.retrieveImageUrlAndMessageMedia()?.let { mediaUrlAndMessageMedia ->
                     mediaUrlAndMessageMedia.second?.let { messageMedia ->
-                        val mediaStorageUri = messageMedia.retrieveMediaStorageUri()
                         val mediaContentValues = messageMedia.retrieveContentValues(message)
 
-                        app.contentResolver.insert(mediaStorageUri, mediaContentValues)?.let { savedFileUri ->
-                            try {
-                                val inputStream = mediaUrlAndMessageMedia.retrieveFileInputStream()
+                        messageMedia.retrieveMediaStorageUri()?.let { mediaStorageUri ->
+                            app.contentResolver.insert(mediaStorageUri, mediaContentValues)?.let { savedFileUri ->
+                                val inputStream = drawable?.drawableToBitmap()?.toInputStream()?.let { drawableInputStream ->
+                                    drawableInputStream
+                                }
 
-                                inputStream.use { messageAttachmentFile->
-                                    app.contentResolver.openOutputStream(savedFileUri).use { savedFileOutputStream ->
-                                        if (savedFileOutputStream != null) {
-                                            messageAttachmentFile.copyTo(savedFileOutputStream, 1024)
+                                try {
+                                    inputStream?.use { messageAttachmentFile->
+                                        app.contentResolver.openOutputStream(savedFileUri).use { savedFileOutputStream ->
+                                            if (savedFileOutputStream != null) {
+                                                messageAttachmentFile.copyTo(savedFileOutputStream, 1024)
 
-                                            submitSideEffect(
-                                                ChatSideEffect.Notify(app.getString(R.string.saved_attachment_successfully))
-                                            )
+                                                submitSideEffect(
+                                                    ChatSideEffect.Notify(app.getString(R.string.saved_attachment_successfully))
+                                                )
+                                            }
                                         }
                                     }
+                                } catch (e: Exception) {
+                                    submitSideEffect(
+                                        ChatSideEffect.Notify(app.getString(R.string.failed_to_save_file))
+                                    )
                                 }
-                            } catch (e: Exception) {
-                                submitSideEffect(
-                                    ChatSideEffect.Notify(app.getString(R.string.failed_to_save_file))
-                                )
                             }
                         }
                     }
@@ -1180,4 +1150,39 @@ abstract class ChatViewModel<ARGS: NavArgs>(
             )
         }
     }
+}
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun MessageMedia.retrieveMediaStorageUri(): Uri? {
+    return when {
+        this.mediaType.isImage -> {
+            MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+        }
+        else -> {
+            null
+        }
+    }
+}
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun MessageMedia.retrieveContentValues(message: Message): ContentValues {
+    return ContentValues().apply {
+        put(MediaStore.Images.Media.TITLE, message.id.value)
+        put(MediaStore.Images.Media.DISPLAY_NAME, message.senderAlias?.value)
+        put(MediaStore.Images.Media.MIME_TYPE, mediaType.value.replace("jpg", "jpeg"))
+    }
+}
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun Drawable.drawableToBitmap(): Bitmap? {
+    val bitDw = this as BitmapDrawable
+    return bitDw.bitmap
+}
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun Bitmap.toInputStream(): InputStream? {
+    val stream = ByteArrayOutputStream()
+    compress(Bitmap.CompressFormat.JPEG, 100, stream)
+    val imageInByte: ByteArray = stream.toByteArray()
+    return ByteArrayInputStream(imageInByte)
 }

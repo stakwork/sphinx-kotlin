@@ -241,6 +241,7 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                         statusHeaderHeight = Px(binding.includeMessageStatusHeader.root.measuredHeight.toFloat()),
                         recyclerViewWidth = recyclerViewWidth,
                         screenHeight = screenHeight,
+                        imageView = includeMessageTypeImageAttachment.imageViewAttachmentImage
                     ).let { vs ->
                         viewModel.updateSelectedMessageViewState(vs)
                     }
