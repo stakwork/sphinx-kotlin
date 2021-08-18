@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Color
 import android.os.Bundle
 import android.view.View
+import android.view.Window
 import android.widget.ImageView
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.ActivityResultLauncher
@@ -107,6 +108,9 @@ abstract class ChatFragment<
 
     override val chatFragmentContext: Context
         get() = binding.root.context
+
+    override val chatFragmentWindow: Window?
+        get() = activity?.window
 
     private val bottomMenuCall: BottomMenu by lazy(LazyThreadSafetyMode.NONE) {
         BottomMenu(
