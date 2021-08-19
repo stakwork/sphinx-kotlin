@@ -527,6 +527,23 @@ abstract class ChatFragment<
 
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.headerInitialHolderSharedFlow.collect { viewState ->
+                headerInitialHolderLastViewState?.let {
+                    if (it == viewState) {
+                        return@collect
+                    }
+                }
+
+                headerInitialHolderLastViewState = viewState
+
+                for (job in headerInitialHolderViewStateJobs) {
+                    job.cancel()
+                }
+                headerInitialHolderViewStateJobs.clear()
+
+                for (disposable in headerInitialHolderViewStateDisposables) {
+                    disposable.dispose()
+                }
+                headerInitialHolderViewStateDisposables.clear()
 
                 headerBinding.layoutChatInitialHolder.apply {
                     @Exhaustive
@@ -551,19 +568,29 @@ abstract class ChatFragment<
                         is InitialHolderViewState.None -> {
                             textViewInitials.gone
                             imageViewChatPicture.visible
-                            imageLoader.load(
-                                imageViewChatPicture,
-                                R.drawable.ic_profile_avatar_circle,
-                            )
+                            lifecycleScope.launch(viewModel.mainImmediate) {
+                                val disposable = imageLoader.load(
+                                    imageViewChatPicture,
+                                    R.drawable.ic_profile_avatar_circle,
+                                )
+                                headerInitialHolderViewStateDisposables.add(disposable)
+                            }.let { job ->
+                                headerInitialHolderViewStateJobs.add(job)
+                            }
                         }
                         is InitialHolderViewState.Url -> {
                             textViewInitials.gone
                             imageViewChatPicture.visible
-                            imageLoader.load(
-                                imageViewChatPicture,
-                                viewState.photoUrl.value,
-                                viewModel.imageLoaderDefaults,
-                            )
+                            lifecycleScope.launch(viewModel.mainImmediate) {
+                                val disposable = imageLoader.load(
+                                    imageViewChatPicture,
+                                    viewState.photoUrl.value,
+                                    viewModel.imageLoaderDefaults,
+                                )
+                                headerInitialHolderViewStateDisposables.add(disposable)
+                            }.let { job ->
+                                headerInitialHolderViewStateJobs.add(job)
+                            }
                         }
                     }
                 }
@@ -699,6 +726,23 @@ abstract class ChatFragment<
 
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.getAttachmentSendViewStateFlow().collect { viewState ->
+                attachmentSendLastViewState?.let {
+                    if (it == viewState) {
+                        return@collect
+                    }
+                }
+
+                attachmentSendLastViewState = viewState
+
+                for (job in attachmentSendViewStateJobs) {
+                    job.cancel()
+                }
+                attachmentSendViewStateJobs.clear()
+                for (disposable in attachmentSendViewStateDisposables) {
+                    disposable.dispose()
+                }
+                attachmentSendViewStateDisposables.clear()
+
                 attachmentSendBinding.apply {
                     @Exhaustive
                     when (viewState) {
@@ -732,7 +776,13 @@ abstract class ChatFragment<
 
                             // will load almost immediately b/c it's a file, so
                             // no need to launch separate coroutine.
-                            imageLoader.load(imageViewAttachmentSendPreview, viewState.file)
+                            // TODO: hold job and disposable to be able to cancel
+                            lifecycleScope.launch(viewModel.mainImmediate) {
+                                val disposable = imageLoader.load(imageViewAttachmentSendPreview, viewState.file)
+                                attachmentSendViewStateDisposables.add(disposable)
+                            }.let { job ->
+                                attachmentSendViewStateJobs.add(job)
+                            }
                         }
                         is AttachmentSendViewState.PreviewGiphy -> {
 
@@ -743,7 +793,12 @@ abstract class ChatFragment<
                             root.visible
 
                             viewState.giphyData.retrieveImageUrlAndMessageMedia()?.let {
-                                imageLoader.load(imageViewAttachmentSendPreview, it.first)
+                                lifecycleScope.launch(viewModel.mainImmediate) {
+                                    val disposable = imageLoader.load(imageViewAttachmentSendPreview, it.first)
+                                    attachmentSendViewStateDisposables.add(disposable)
+                                }.let { job ->
+                                    attachmentSendViewStateJobs.add(job)
+                                }
                             }
                         }
                     }
@@ -753,6 +808,23 @@ abstract class ChatFragment<
 
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.getAttachmentFullscreenViewStateFlow().collect { viewState ->
+                fullscreenLastViewState?.let {
+                    if (it == viewState) {
+                        return@collect
+                    }
+                }
+
+                fullscreenLastViewState = viewState
+
+                for (job in fullScreenViewStateJobs) {
+                    job.cancel()
+                }
+                fullScreenViewStateJobs.clear()
+                for (disposable in fullScreenViewStateDisposables) {
+                    disposable.dispose()
+                }
+                fullScreenViewStateDisposables.clear()
+
                 attachmentFullscreenBinding.apply {
                     @Exhaustive
                     when (viewState) {
@@ -766,16 +838,24 @@ abstract class ChatFragment<
                             imageViewAttachmentFullscreen.translationX = 0f
                             imageViewAttachmentFullscreen.translationY = 0f
 
-                            if (viewState.media?.localFile != null) {
-                                imageLoader.load(
-                                    imageViewAttachmentFullscreen,
-                                    viewState.media.localFile!!
-                                )
-                            } else {
-                                val builder = ImageLoaderOptions.Builder()
+                            viewState.media?.localFile?.let { nnLocalFile ->
+                                lifecycleScope.launch(viewModel.mainImmediate) {
+                                    val disposable = imageLoader.load(
+                                        imageViewAttachmentFullscreen,
+                                        nnLocalFile
+                                    )
+                                    fullScreenViewStateDisposables.add(disposable)
+                                }.let { job ->
+                                    fullScreenViewStateJobs.add(job)
+                                }
+                            } ?: run {
+                                lifecycleScope.launch(viewModel.mainImmediate) {
+                                    val builder = ImageLoaderOptions.Builder()
 
-                                viewState.media?.host?.let { host ->
-                                    viewModel.memeServerTokenHandler.retrieveAuthenticationToken(host)?.let { token ->
+                                    viewState.media?.host?.let { host ->
+                                        viewModel.memeServerTokenHandler.retrieveAuthenticationToken(
+                                            host
+                                        )?.let { token ->
                                             builder.addHeader(token.headerKey, token.headerValue)
 
                                             viewState.media.mediaKeyDecrypted?.value?.let { key ->
@@ -787,12 +867,17 @@ abstract class ChatFragment<
                                                 builder.addHeader(header.key, header.value)
                                             }
                                         }
+                                    }
+
+                                    val disposable =imageLoader.load(
+                                        imageViewAttachmentFullscreen,
+                                        viewState.url,
+                                        builder.build()
+                                    )
+                                    fullScreenViewStateDisposables.add(disposable)
+                                }.let { job ->
+                                    fullScreenViewStateJobs.add(job)
                                 }
-                                imageLoader.load(
-                                    imageViewAttachmentFullscreen,
-                                    viewState.url,
-                                    builder.build()
-                                )
                             }
 
                             root.visible
@@ -805,6 +890,18 @@ abstract class ChatFragment<
 
         viewModel.readMessages()
     }
+
+    private var headerInitialHolderLastViewState: InitialHolderViewState? = null
+    private val headerInitialHolderViewStateJobs: MutableList<Job> = ArrayList(1)
+    private val headerInitialHolderViewStateDisposables: MutableList<Disposable> = ArrayList(1)
+
+    private var attachmentSendLastViewState: AttachmentSendViewState? = null
+    private val attachmentSendViewStateJobs: MutableList<Job> = ArrayList(1)
+    private val attachmentSendViewStateDisposables: MutableList<Disposable> = ArrayList(1)
+
+    private var fullscreenLastViewState: AttachmentFullscreenViewState? = null
+    private val fullScreenViewStateJobs: MutableList<Job> = ArrayList(1)
+    private val fullScreenViewStateDisposables: MutableList<Disposable> = ArrayList(1)
 
     override suspend fun onViewStateFlowCollect(viewState: ChatMenuViewState) {
         @Exhaustive
@@ -827,6 +924,11 @@ abstract class ChatFragment<
     override fun onViewCreatedRestoreMotionScene(viewState: ChatMenuViewState, binding: VB) {
         viewState.restoreMotionScene(menuBinding.root)
     }
+
+
+    private var messageReplyLastViewState: MessageReplyViewState? = null
+    private val messageReplyViewStateJobs: MutableList<Job> = ArrayList(1)
+    private val messageReplyViewStateDisposables: MutableList<Disposable> = ArrayList(1)
 
     override fun subscribeToViewStateFlow() {
         super.subscribeToViewStateFlow()
@@ -866,6 +968,23 @@ abstract class ChatFragment<
 
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.messageReplyViewStateContainer.collect { viewState ->
+                messageReplyLastViewState?.let {
+                    if (it == viewState) {
+                        return@collect
+                    }
+                }
+
+                messageReplyLastViewState = viewState
+
+                for (job in messageReplyViewStateJobs) {
+                    job.cancel()
+                }
+                messageReplyViewStateJobs.clear()
+                for (disposable in messageReplyViewStateDisposables) {
+                    disposable.dispose()
+                }
+                messageReplyViewStateDisposables.clear()
+
                 @Exhaustive
                 when (viewState) {
                     is MessageReplyViewState.ReplyingDismissed -> {
@@ -902,39 +1021,55 @@ abstract class ChatFragment<
                                 )
 
                                 message.retrieveImageUrlAndMessageMedia()?.let { mediaData ->
-                                    val options: ImageLoaderOptions? = if (mediaData.second != null) {
-                                        val builder = ImageLoaderOptions.Builder()
+                                    lifecycleScope.launch(viewModel.mainImmediate) {
+                                        val options: ImageLoaderOptions? =
+                                            if (mediaData.second != null) {
+                                                val builder = ImageLoaderOptions.Builder()
 
-                                        mediaData.second?.host?.let { host ->
-                                            viewModel.memeServerTokenHandler.retrieveAuthenticationToken(host)?.let { token ->
-                                                builder.addHeader(token.headerKey, token.headerValue)
+                                                mediaData.second?.host?.let { host ->
+                                                    viewModel.memeServerTokenHandler.retrieveAuthenticationToken(
+                                                        host
+                                                    )?.let { token ->
+                                                        builder.addHeader(
+                                                            token.headerKey,
+                                                            token.headerValue
+                                                        )
 
-                                                mediaData.second?.mediaKeyDecrypted?.value?.let { key ->
-                                                    val header = CryptoHeader.Decrypt.Builder()
-                                                        .setScheme(CryptoScheme.Decrypt.JNCryptor)
-                                                        .setPassword(key)
-                                                        .build()
+                                                        mediaData.second
+                                                            ?.mediaKeyDecrypted
+                                                            ?.value
+                                                            ?.let { key ->
+                                                                val header = CryptoHeader.Decrypt.Builder()
+                                                                    .setScheme(CryptoScheme.Decrypt.JNCryptor)
+                                                                    .setPassword(key)
+                                                                    .build()
 
-                                                    builder.addHeader(header.key, header.value)
+                                                                builder.addHeader(
+                                                                    header.key,
+                                                                    header.value
+                                                                )
+                                                            }
+                                                    }
                                                 }
-                                            }
-                                        }
 
-                                        builder.build()
-                                    } else {
-                                        null
+                                                builder.build()
+                                            } else {
+                                                null
+                                            }
+
+                                        val disposable = imageLoader.load(
+                                            imageViewReplyMediaImage,
+                                            mediaData.first,
+                                            options
+                                        )
+                                        messageReplyViewStateDisposables.add(disposable)
+                                    }.let { job ->
+                                        messageReplyViewStateJobs.add(job)
                                     }
 
-                                    imageLoader.load(
-                                        imageViewReplyMediaImage,
-                                        mediaData.first,
-                                        options
-                                    )
-
                                     imageViewReplyMediaImage.visible
-                                } ?: run {
-                                    imageViewReplyMediaImage.gone
-                                }
+
+                                } ?: imageViewReplyMediaImage.gone
 
                                 scrollToBottom(callback = {
                                     root.visible
@@ -954,5 +1089,13 @@ abstract class ChatFragment<
 
     override suspend fun onSideEffectCollect(sideEffect: ChatSideEffect) {
         sideEffect.execute(this)
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        messageReplyLastViewState = null
+        headerInitialHolderLastViewState = null
+        fullscreenLastViewState = null
+        attachmentSendLastViewState = null
     }
 }
