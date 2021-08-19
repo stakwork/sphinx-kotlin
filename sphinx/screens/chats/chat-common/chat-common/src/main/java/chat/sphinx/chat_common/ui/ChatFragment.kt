@@ -524,6 +524,197 @@ abstract class ChatFragment<
 
     override fun onStart() {
         super.onStart()
+        viewModel.readMessages()
+    }
+
+    override fun getMotionLayouts(): Array<MotionLayout> {
+        return arrayOf(menuBinding.root)
+    }
+
+    override fun onViewCreatedRestoreMotionScene(viewState: ChatMenuViewState, binding: VB) {
+        viewState.restoreMotionScene(menuBinding.root)
+    }
+
+    override suspend fun onViewStateFlowCollect(viewState: ChatMenuViewState) {
+        @Exhaustive
+        when (viewState) {
+            is ChatMenuViewState.Closed -> {
+                menuBinding.root.setTransitionDuration(250)
+            }
+            is ChatMenuViewState.Open -> {
+                menuBinding.root.setTransitionDuration(400)
+            }
+        }
+
+        viewState.transitionToEndSet(menuBinding.root)
+    }
+
+    private var messageReplyLastViewState: MessageReplyViewState? = null
+    private val messageReplyViewStateJobs: MutableList<Job> = ArrayList(1)
+    private val messageReplyViewStateDisposables: MutableList<Disposable> = ArrayList(1)
+
+    private var headerInitialHolderLastViewState: InitialHolderViewState? = null
+    private val headerInitialHolderViewStateJobs: MutableList<Job> = ArrayList(1)
+    private val headerInitialHolderViewStateDisposables: MutableList<Disposable> = ArrayList(1)
+
+    private var attachmentSendLastViewState: AttachmentSendViewState? = null
+    private val attachmentSendViewStateJobs: MutableList<Job> = ArrayList(1)
+    private val attachmentSendViewStateDisposables: MutableList<Disposable> = ArrayList(1)
+
+    private var fullscreenLastViewState: AttachmentFullscreenViewState? = null
+    private val fullScreenViewStateJobs: MutableList<Job> = ArrayList(1)
+    private val fullScreenViewStateDisposables: MutableList<Disposable> = ArrayList(1)
+
+    override fun subscribeToViewStateFlow() {
+        super.subscribeToViewStateFlow()
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.chatHeaderViewStateContainer.collect { viewState ->
+
+                @Exhaustive
+                when (viewState) {
+                    is ChatHeaderViewState.Idle -> {}
+                    is ChatHeaderViewState.Initialized -> {
+                        headerBinding.apply {
+
+                            textViewChatHeaderName.text = viewState.chatHeaderName
+                            textViewChatHeaderLock.goneIfFalse(viewState.showLock)
+
+                            imageViewChatHeaderMuted.apply {
+                                viewState.isMuted?.let { muted ->
+                                    if (muted.isTrue()) {
+                                        imageLoader.load(
+                                            headerBinding.imageViewChatHeaderMuted,
+                                            R.drawable.ic_baseline_notifications_off_24
+                                        )
+                                    } else {
+                                        imageLoader.load(
+                                            headerBinding.imageViewChatHeaderMuted,
+                                            R.drawable.ic_baseline_notifications_24
+                                        )
+                                    }
+                                } ?: gone
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.messageReplyViewStateContainer.collect { viewState ->
+                messageReplyLastViewState?.let {
+                    if (it == viewState) {
+                        return@collect
+                    }
+                }
+
+                messageReplyLastViewState = viewState
+
+                for (job in messageReplyViewStateJobs) {
+                    job.cancel()
+                }
+                messageReplyViewStateJobs.clear()
+                for (disposable in messageReplyViewStateDisposables) {
+                    disposable.dispose()
+                }
+                messageReplyViewStateDisposables.clear()
+
+                @Exhaustive
+                when (viewState) {
+                    is MessageReplyViewState.ReplyingDismissed -> {
+                        sendMessageBuilder.setReplyUUID(null)
+                        replyingMessageBinding.root.gone
+                    }
+
+                    is MessageReplyViewState.ReplyingToMessage -> {
+                        val message = viewState.message
+
+                        message.uuid?.value?.toReplyUUID().let { uuid ->
+                            sendMessageBuilder.setReplyUUID(uuid)
+
+                            replyingMessageBinding.apply {
+
+                                textViewReplyMessageLabel.apply {
+                                    textViewReplyMessageLabel.goneIfFalse(false)
+
+                                    message.retrieveTextToShow()?.let { messageText ->
+                                        textViewReplyMessageLabel.text = messageText
+                                        textViewReplyMessageLabel.goneIfFalse(messageText.isNotEmpty())
+                                    }
+                                }
+
+                                textViewReplySenderLabel.text = viewState.senderAlias
+
+                                viewReplyBarLeading.setBackgroundColor(
+                                    Color.parseColor(
+                                        userColorsHelper.getHexCodeForKey(
+                                            message.getColorKey(),
+                                            root.context.getRandomHexCode(),
+                                        )
+                                    )
+                                )
+
+                                message.retrieveImageUrlAndMessageMedia()?.let { mediaData ->
+                                    lifecycleScope.launch(viewModel.mainImmediate) {
+                                        val options: ImageLoaderOptions? =
+                                            if (mediaData.second != null) {
+                                                val builder = ImageLoaderOptions.Builder()
+
+                                                mediaData.second?.host?.let { host ->
+                                                    viewModel.memeServerTokenHandler.retrieveAuthenticationToken(
+                                                        host
+                                                    )?.let { token ->
+                                                        builder.addHeader(
+                                                            token.headerKey,
+                                                            token.headerValue
+                                                        )
+
+                                                        mediaData.second
+                                                            ?.mediaKeyDecrypted
+                                                            ?.value
+                                                            ?.let { key ->
+                                                                val header = CryptoHeader.Decrypt.Builder()
+                                                                    .setScheme(CryptoScheme.Decrypt.JNCryptor)
+                                                                    .setPassword(key)
+                                                                    .build()
+
+                                                                builder.addHeader(
+                                                                    header.key,
+                                                                    header.value
+                                                                )
+                                                            }
+                                                    }
+                                                }
+
+                                                builder.build()
+                                            } else {
+                                                null
+                                            }
+
+                                        val disposable = imageLoader.load(
+                                            imageViewReplyMediaImage,
+                                            mediaData.first,
+                                            options
+                                        )
+                                        messageReplyViewStateDisposables.add(disposable)
+                                    }.let { job ->
+                                        messageReplyViewStateJobs.add(job)
+                                    }
+
+                                    imageViewReplyMediaImage.visible
+
+                                } ?: imageViewReplyMediaImage.gone
+
+                                scrollToBottom(callback = {
+                                    root.visible
+                                }, true)
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.headerInitialHolderSharedFlow.collect { viewState ->
@@ -684,14 +875,14 @@ abstract class ChatFragment<
 
                                 this@menu.y = if (viewState.showMenuTop) {
                                     viewState.holderYPos.value -
-                                    (resources.getDimension(R.dimen.selected_message_menu_item_height) * (viewState.messageHolderViewState.selectionMenuItems?.size ?: 0)) +
-                                    viewState.statusHeaderHeight.value -
-                                    Dp(10F).toPx(context).value
+                                            (resources.getDimension(R.dimen.selected_message_menu_item_height) * (viewState.messageHolderViewState.selectionMenuItems?.size ?: 0)) +
+                                            viewState.statusHeaderHeight.value -
+                                            Dp(10F).toPx(context).value
                                 } else {
                                     viewState.holderYPos.value          +
-                                    viewState.bubbleHeight.value        +
-                                    viewState.statusHeaderHeight.value  +
-                                    Dp(10F).toPx(context).value
+                                            viewState.bubbleHeight.value        +
+                                            viewState.statusHeaderHeight.value  +
+                                            Dp(10F).toPx(context).value
                                 }
                                 val menuWidth = resources.getDimension(R.dimen.selected_message_menu_width)
 
@@ -776,7 +967,6 @@ abstract class ChatFragment<
 
                             // will load almost immediately b/c it's a file, so
                             // no need to launch separate coroutine.
-                            // TODO: hold job and disposable to be able to cancel
                             lifecycleScope.launch(viewModel.mainImmediate) {
                                 val disposable = imageLoader.load(imageViewAttachmentSendPreview, viewState.file)
                                 attachmentSendViewStateDisposables.add(disposable)
@@ -881,200 +1071,6 @@ abstract class ChatFragment<
                             }
 
                             root.visible
-                        }
-                    }
-                }
-            }
-        }
-
-
-        viewModel.readMessages()
-    }
-
-    private var headerInitialHolderLastViewState: InitialHolderViewState? = null
-    private val headerInitialHolderViewStateJobs: MutableList<Job> = ArrayList(1)
-    private val headerInitialHolderViewStateDisposables: MutableList<Disposable> = ArrayList(1)
-
-    private var attachmentSendLastViewState: AttachmentSendViewState? = null
-    private val attachmentSendViewStateJobs: MutableList<Job> = ArrayList(1)
-    private val attachmentSendViewStateDisposables: MutableList<Disposable> = ArrayList(1)
-
-    private var fullscreenLastViewState: AttachmentFullscreenViewState? = null
-    private val fullScreenViewStateJobs: MutableList<Job> = ArrayList(1)
-    private val fullScreenViewStateDisposables: MutableList<Disposable> = ArrayList(1)
-
-    override suspend fun onViewStateFlowCollect(viewState: ChatMenuViewState) {
-        @Exhaustive
-        when (viewState) {
-            is ChatMenuViewState.Closed -> {
-                menuBinding.root.setTransitionDuration(250)
-            }
-            is ChatMenuViewState.Open -> {
-                menuBinding.root.setTransitionDuration(400)
-            }
-        }
-
-        viewState.transitionToEndSet(menuBinding.root)
-    }
-
-    override fun getMotionLayouts(): Array<MotionLayout> {
-        return arrayOf(menuBinding.root)
-    }
-
-    override fun onViewCreatedRestoreMotionScene(viewState: ChatMenuViewState, binding: VB) {
-        viewState.restoreMotionScene(menuBinding.root)
-    }
-
-
-    private var messageReplyLastViewState: MessageReplyViewState? = null
-    private val messageReplyViewStateJobs: MutableList<Job> = ArrayList(1)
-    private val messageReplyViewStateDisposables: MutableList<Disposable> = ArrayList(1)
-
-    override fun subscribeToViewStateFlow() {
-        super.subscribeToViewStateFlow()
-
-        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-            viewModel.chatHeaderViewStateContainer.collect { viewState ->
-
-                @Exhaustive
-                when (viewState) {
-                    is ChatHeaderViewState.Idle -> {}
-                    is ChatHeaderViewState.Initialized -> {
-                        headerBinding.apply {
-
-                            textViewChatHeaderName.text = viewState.chatHeaderName
-                            textViewChatHeaderLock.goneIfFalse(viewState.showLock)
-
-                            imageViewChatHeaderMuted.apply {
-                                viewState.isMuted?.let { muted ->
-                                    if (muted.isTrue()) {
-                                        imageLoader.load(
-                                            headerBinding.imageViewChatHeaderMuted,
-                                            R.drawable.ic_baseline_notifications_off_24
-                                        )
-                                    } else {
-                                        imageLoader.load(
-                                            headerBinding.imageViewChatHeaderMuted,
-                                            R.drawable.ic_baseline_notifications_24
-                                        )
-                                    }
-                                } ?: gone
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-            viewModel.messageReplyViewStateContainer.collect { viewState ->
-                messageReplyLastViewState?.let {
-                    if (it == viewState) {
-                        return@collect
-                    }
-                }
-
-                messageReplyLastViewState = viewState
-
-                for (job in messageReplyViewStateJobs) {
-                    job.cancel()
-                }
-                messageReplyViewStateJobs.clear()
-                for (disposable in messageReplyViewStateDisposables) {
-                    disposable.dispose()
-                }
-                messageReplyViewStateDisposables.clear()
-
-                @Exhaustive
-                when (viewState) {
-                    is MessageReplyViewState.ReplyingDismissed -> {
-                        sendMessageBuilder.setReplyUUID(null)
-                        replyingMessageBinding.root.gone
-                    }
-
-                    is MessageReplyViewState.ReplyingToMessage -> {
-                        val message = viewState.message
-
-                        message.uuid?.value?.toReplyUUID().let { uuid ->
-                            sendMessageBuilder.setReplyUUID(uuid)
-
-                            replyingMessageBinding.apply {
-
-                                textViewReplyMessageLabel.apply {
-                                    textViewReplyMessageLabel.goneIfFalse(false)
-
-                                    message.retrieveTextToShow()?.let { messageText ->
-                                        textViewReplyMessageLabel.text = messageText
-                                        textViewReplyMessageLabel.goneIfFalse(messageText.isNotEmpty())
-                                    }
-                                }
-
-                                textViewReplySenderLabel.text = viewState.senderAlias
-
-                                viewReplyBarLeading.setBackgroundColor(
-                                    Color.parseColor(
-                                        userColorsHelper.getHexCodeForKey(
-                                            message.getColorKey(),
-                                            root.context.getRandomHexCode(),
-                                        )
-                                    )
-                                )
-
-                                message.retrieveImageUrlAndMessageMedia()?.let { mediaData ->
-                                    lifecycleScope.launch(viewModel.mainImmediate) {
-                                        val options: ImageLoaderOptions? =
-                                            if (mediaData.second != null) {
-                                                val builder = ImageLoaderOptions.Builder()
-
-                                                mediaData.second?.host?.let { host ->
-                                                    viewModel.memeServerTokenHandler.retrieveAuthenticationToken(
-                                                        host
-                                                    )?.let { token ->
-                                                        builder.addHeader(
-                                                            token.headerKey,
-                                                            token.headerValue
-                                                        )
-
-                                                        mediaData.second
-                                                            ?.mediaKeyDecrypted
-                                                            ?.value
-                                                            ?.let { key ->
-                                                                val header = CryptoHeader.Decrypt.Builder()
-                                                                    .setScheme(CryptoScheme.Decrypt.JNCryptor)
-                                                                    .setPassword(key)
-                                                                    .build()
-
-                                                                builder.addHeader(
-                                                                    header.key,
-                                                                    header.value
-                                                                )
-                                                            }
-                                                    }
-                                                }
-
-                                                builder.build()
-                                            } else {
-                                                null
-                                            }
-
-                                        val disposable = imageLoader.load(
-                                            imageViewReplyMediaImage,
-                                            mediaData.first,
-                                            options
-                                        )
-                                        messageReplyViewStateDisposables.add(disposable)
-                                    }.let { job ->
-                                        messageReplyViewStateJobs.add(job)
-                                    }
-
-                                    imageViewReplyMediaImage.visible
-
-                                } ?: imageViewReplyMediaImage.gone
-
-                                scrollToBottom(callback = {
-                                    root.visible
-                                }, true)
-                            }
                         }
                     }
                 }
