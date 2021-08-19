@@ -190,7 +190,7 @@
                             android:fontFamily="@font/roboto_regular"
                             app:backgroundTint="@android:color/transparent"
                             android:textSize="@dimen/default_form_edit_view_text_size"
-                            android:inputType="textVisiblePassword|textCapWords"
+                            android:inputType="textVisiblePassword|textCapSentences"
                             android:singleLine="true"
                             android:layout_marginLeft="@dimen/default_form_edit_text_left_margin"
                             app:layout_constraintTop_toBottomOf="@+id/text_view_tribe_description"
