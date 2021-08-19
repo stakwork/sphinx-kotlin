@@ -35,7 +35,6 @@ sealed class InitialHolderViewState {
             imageLoader: ImageLoader<ImageView>,
             @ColorInt color: Int?,
         ): Disposable? {
-            statusHeader.root.gone
             textViewInitials.gone
             imageViewPicture.gone
 
