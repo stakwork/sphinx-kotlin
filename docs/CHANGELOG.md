@@ -1,6 +1,6 @@
 # ChangeLog
 
-## Version 1.0.0-alpha19 (2021-08-18)
+## Version 1.0.0-alpha19 (2021-08-19)
  - Fixes issue with onboard where data was being persisted prior to successful token
    generation network request
  - Adds Japanese and Chinese translations
