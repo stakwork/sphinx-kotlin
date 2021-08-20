@@ -53,4 +53,10 @@
         android:layout_height="match_parent"
         app:layout_constraintEnd_toStartOf="parent" />
 
+    <include
+        android:id="@+id/layout_dashboard_popup"
+        layout="@layout/layout_dashboard_popup"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
 </androidx.constraintlayout.motion.widget.MotionLayout>

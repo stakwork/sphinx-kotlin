@@ -1,5 +1,16 @@
 # ChangeLog
 
+## Version 1.0.0-alpha19 (2021-08-19)
+ - Fixes issue with onboard where data was being persisted prior to successful token
+   generation network request
+ - Adds Japanese and Chinese translations
+ - Fixes string resource formatting issues
+ - Changes chat mute/unmute functionality to now switch immediately instead of waiting
+   for network response (will be set back upon network error)
+ - Fixes key export backup by removing formatting (now is a single line)
+ - Adds external authorization handling
+ - Adds persistence of color values for users/chats
+
 ## Version 1.0.0-alpha18 (2021-08-13)
  - Adds ability for Tribe Admin to view members, their status', and remove members
  - Fixes issues related to long press action on messages
