@@ -12,7 +12,6 @@ import chat.sphinx.camera.navigation.CameraNavigator
 import chat.sphinx.chat_contact.navigation.ContactChatNavigator
 import chat.sphinx.chat_group.navigation.GroupChatNavigator
 import chat.sphinx.chat_tribe.navigation.TribeChatNavigator
-import chat.sphinx.contact_detail.navigation.ContactDetailNavigator
 import chat.sphinx.create_tribe.navigation.CreateTribeNavigator
 import chat.sphinx.dashboard.navigation.DashboardBottomNavBarNavigator
 import chat.sphinx.dashboard.navigation.DashboardNavDrawerNavigator
@@ -268,11 +267,5 @@ internal object NavigationModule {
         tribeDetailNavigatorImpl: TribeDetailNavigatorImpl
     ): TribeDetailNavigator =
         tribeDetailNavigatorImpl
-
-    @Provides
-    fun provideContactDetailNavigator(
-        contactDetailNavigatorImpl: ContactDetailNavigatorImpl
-    ): ContactDetailNavigator =
-        contactDetailNavigatorImpl
 
 }

@@ -1,7 +1,6 @@
 package chat.sphinx.chat_tribe.ui
 
 import android.app.Application
-import android.graphics.Color
 import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
@@ -12,6 +11,7 @@ import chat.sphinx.chat_common.ui.ChatViewModel
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
 import chat.sphinx.chat_tribe.R
 import chat.sphinx.chat_tribe.navigation.TribeChatNavigator
+import chat.sphinx.concept_link_preview.LinkPreviewHandler
 import chat.sphinx.concept_meme_server.MemeServerTokenHandler
 import chat.sphinx.concept_network_query_chat.model.toPodcast
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
@@ -19,8 +19,6 @@ import chat.sphinx.concept_network_query_lightning.model.route.isRouteAvailable
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_message.MessageRepository
-import chat.sphinx.resources.getRandomHexCode
-import chat.sphinx.wrapper_chat.getColorKey
 import chat.sphinx.concept_repository_message.model.SendMessage
 import chat.sphinx.concept_service_media.MediaPlayerServiceController
 import chat.sphinx.concept_service_media.MediaPlayerServiceState
@@ -32,10 +30,7 @@ import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.podcast_player.objects.toParcelablePodcast
 import chat.sphinx.podcast_player.ui.getMediaDuration
-import chat.sphinx.wrapper_chat.Chat
-import chat.sphinx.wrapper_chat.ChatName
-import chat.sphinx.wrapper_chat.isTribe
-import chat.sphinx.wrapper_chat.isTribeOwnedByAccount
+import chat.sphinx.wrapper_chat.*
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.Sat
@@ -43,8 +38,6 @@ import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.lightning.unit
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.util.getInitials
-import chat.sphinx.wrapper_message.Message
-import chat.sphinx.wrapper_message.getColorKey
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_podcast.Podcast
@@ -53,7 +46,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
-import chat.sphinx.concept_link_preview.LinkPreviewHandler
 import io.matthewnelson.concept_media_cache.MediaCacheHandler
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import kotlinx.coroutines.delay
@@ -71,7 +63,7 @@ internal class ChatTribeViewModel @Inject constructor(
     app: Application,
     dispatchers: CoroutineDispatchers,
     memeServerTokenHandler: MemeServerTokenHandler,
-    chatNavigator: TribeChatNavigator,
+    private val tribeChatNavigator: TribeChatNavigator,
     chatRepository: ChatRepository,
     contactRepository: ContactRepository,
     messageRepository: MessageRepository,
@@ -86,7 +78,7 @@ internal class ChatTribeViewModel @Inject constructor(
     app,
     dispatchers,
     memeServerTokenHandler,
-    chatNavigator,
+    tribeChatNavigator,
     chatRepository,
     contactRepository,
     messageRepository,
@@ -482,7 +474,7 @@ internal class ChatTribeViewModel @Inject constructor(
     
     override fun goToChatDetailScreen() {
         viewModelScope.launch(mainImmediate) {
-            (chatNavigator as TribeChatNavigator).toTribeDetailScreen(chatId, podcast?.toParcelablePodcast())
+            tribeChatNavigator.toTribeDetailScreen(chatId, podcast?.toParcelablePodcast())
         }
     }
 }

@@ -6,7 +6,6 @@
 
     <include app:graph="@navigation/add_friend_nav_graph" />
     <include app:graph="@navigation/camera_nav_graph" />
-    <include app:graph="@navigation/contact_detail_nav_graph" />
     <include app:graph="@navigation/create_tribe_nav_graph" />
     <include app:graph="@navigation/edit_contact_nav_graph" />
     <include app:graph="@navigation/invite_friend_nav_graph" />

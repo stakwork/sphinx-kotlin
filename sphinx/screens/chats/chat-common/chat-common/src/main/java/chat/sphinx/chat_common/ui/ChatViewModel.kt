@@ -35,22 +35,14 @@ import chat.sphinx.chat_common.ui.viewstate.selected.SelectedMessageViewState
 import chat.sphinx.chat_common.util.*
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
+import chat.sphinx.concept_link_preview.LinkPreviewHandler
+import chat.sphinx.concept_link_preview.model.TribePreviewName
+import chat.sphinx.concept_link_preview.model.toPreviewImageUrlOrNull
 import chat.sphinx.concept_meme_server.MemeServerTokenHandler
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_message.MessageRepository
-import chat.sphinx.kotlin_response.LoadResponse
-import chat.sphinx.kotlin_response.Response
-import chat.sphinx.kotlin_response.ResponseError
-import chat.sphinx.kotlin_response.message
-import chat.sphinx.wrapper_chat.Chat
-import chat.sphinx.wrapper_chat.ChatName
-import chat.sphinx.wrapper_chat.isConversation
-import chat.sphinx.wrapper_contact.Contact
-import chat.sphinx.wrapper_message.Message
-import chat.sphinx.wrapper_message.isDeleted
-import chat.sphinx.wrapper_message.isGroupAction
 import chat.sphinx.concept_repository_message.model.SendMessage
 import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
 import chat.sphinx.kotlin_response.*
@@ -67,6 +59,7 @@ import chat.sphinx.wrapper_common.message.MessageUUID
 import chat.sphinx.wrapper_common.message.SphinxCallLink
 import chat.sphinx.wrapper_common.tribe.TribeJoinLink
 import chat.sphinx.wrapper_common.tribe.toTribeJoinLink
+import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_contact.avatarUrl
 import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message_media.MediaType
@@ -82,9 +75,6 @@ import io.matthewnelson.android_feature_viewmodel.MotionLayoutViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
-import chat.sphinx.concept_link_preview.LinkPreviewHandler
-import chat.sphinx.concept_link_preview.model.TribePreviewName
-import chat.sphinx.concept_link_preview.model.toPreviewImageUrlOrNull
 import io.matthewnelson.concept_media_cache.MediaCacheHandler
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import io.matthewnelson.concept_views.viewstate.value
@@ -1026,13 +1016,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         }
     }
 
-    open fun goToChatDetailScreen() {
-        chatId?.let { id ->
-            viewModelScope.launch(mainImmediate) {
-                chatNavigator.toChatDetail(id, contactId)
-            }
-        }
-    }
+    abstract fun goToChatDetailScreen()
 
     open fun handleContactTribeLinks(url: String?) {
         if (url != null) {
