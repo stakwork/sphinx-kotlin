@@ -56,7 +56,7 @@ dependencies {
     api project(path: ':sphinx:application:network:concepts:concept-link-preview')
     api project(path: ':sphinx:application:network:concepts:queries:concept-network-query-lightning')
 
-    implementation project(path: ':sphinx:screens-detail:new-contact:new-contact')
+    implementation project(path: ':sphinx:screens-detail:contact:new-contact')
     implementation project(path: ':sphinx:screens-detail:join-tribe:join-tribe')
 
     api project(path: ':sphinx:screens-detail:camera:camera-view-model-coordinator')

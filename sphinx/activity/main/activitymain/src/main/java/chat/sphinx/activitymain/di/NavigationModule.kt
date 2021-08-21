@@ -17,6 +17,7 @@ import chat.sphinx.create_tribe.navigation.CreateTribeNavigator
 import chat.sphinx.dashboard.navigation.DashboardBottomNavBarNavigator
 import chat.sphinx.dashboard.navigation.DashboardNavDrawerNavigator
 import chat.sphinx.dashboard.navigation.DashboardNavigator
+import chat.sphinx.edit_contact.navigation.EditContactNavigator
 import chat.sphinx.hilt_qualifiers.AuthenticationDriver
 import chat.sphinx.hilt_qualifiers.DetailDriver
 import chat.sphinx.hilt_qualifiers.PrimaryDriver
@@ -189,6 +190,12 @@ internal object NavigationModule {
         newContactNavigatorImpl: NewContactNavigatorImpl
     ): NewContactNavigator =
         newContactNavigatorImpl
+
+    @Provides
+    fun provideEditContactNavigator(
+        editContactNavigatorImpl: EditContactNavigatorImpl
+    ): EditContactNavigator =
+        editContactNavigatorImpl
 
     @Provides
     fun providePaymentReceiveNavigator(

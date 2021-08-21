@@ -840,6 +840,43 @@ abstract class SphinxRepository(
         return response
     }
 
+    override suspend fun updateContact(
+        contactId: ContactId,
+        alias: ContactAlias?,
+        routeHint: LightningRouteHint?
+    ): Response<Any, ResponseError> {
+        val queries = coreDB.getSphinxDatabaseQueries()
+        var response: Response<Any, ResponseError> = Response.Success(Any())
+
+        try {
+            networkQueryContact.updateContact(
+                contactId,
+                PutContactDto(
+                    alias = alias?.value,
+                    route_hint = routeHint?.value
+                )
+            ).collect { loadResponse ->
+                @Exhaustive
+                when (loadResponse) {
+                    is LoadResponse.Loading -> {}
+                    is Response.Error -> {
+                        response = loadResponse
+                    }
+                    is Response.Success -> {
+                        contactLock.withLock {
+                            queries.transaction {
+                                upsertContact(loadResponse.value, queries)
+                            }
+                        }
+                        LOG.d(TAG, "Contact has been successfully updated")
+                    }
+                }
+            }
+        } catch (e: Exception) {}
+
+        return response
+    }
+
     override suspend fun updateOwnerDeviceId(deviceId: DeviceId): Response<Any, ResponseError> {
         val queries = coreDB.getSphinxDatabaseQueries()
         var response: Response<Any, ResponseError> = Response.Success(Any())
