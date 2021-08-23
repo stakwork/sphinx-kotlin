@@ -1,6 +1,5 @@
 package chat.sphinx.chat_common.ui
 
-import android.R.attr.bitmap
 import android.app.Application
 import android.content.ContentValues
 import android.content.Intent
@@ -45,6 +44,7 @@ import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.concept_link_preview.LinkPreviewHandler
 import chat.sphinx.concept_link_preview.model.TribePreviewName
 import chat.sphinx.concept_link_preview.model.toPreviewImageUrlOrNull
+import chat.sphinx.concept_meme_input_stream.MemeInputStreamHandler
 import chat.sphinx.concept_meme_server.MemeServerTokenHandler
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_repository_chat.ChatRepository
@@ -70,6 +70,7 @@ import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_contact.avatarUrl
 import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message_media.*
+import chat.sphinx.wrapper_message_media.token.MediaHost
 import com.giphy.sdk.core.models.Media
 import com.giphy.sdk.ui.GPHContentType
 import com.giphy.sdk.ui.GPHSettings
@@ -113,6 +114,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     protected val savedStateHandle: SavedStateHandle,
     protected val cameraCoordinator: ViewModelCoordinator<CameraRequest, CameraResponse>,
     protected val linkPreviewHandler: LinkPreviewHandler,
+    private val memeInputStreamHandler: MemeInputStreamHandler,
     protected val LOG: SphinxLogger,
 ): MotionLayoutViewModel<
         Nothing,
@@ -1111,11 +1113,14 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 
                         messageMedia.retrieveMediaStorageUri()?.let { mediaStorageUri ->
                             app.contentResolver.insert(mediaStorageUri, mediaContentValues)?.let { savedFileUri ->
-                                val inputStream = drawable?.drawableToBitmap()?.toInputStream()?.let { drawableInputStream ->
-                                    drawableInputStream
-                                }
-
                                 try {
+                                    val inputStream = messageMedia.retrieveMediaInputStream(
+                                        drawable
+                                    ) ?: retrieveRemoteMediaInputStream(
+                                        url = mediaUrlAndMessageMedia.first,
+                                        mediaHost = messageMedia.host,
+                                        mediaKeyDecrypted = messageMedia.mediaKeyDecrypted
+                                    )
                                     inputStream?.use { messageAttachmentFile->
                                         app.contentResolver.openOutputStream(savedFileUri).use { savedFileOutputStream ->
                                             if (savedFileOutputStream != null) {
@@ -1127,10 +1132,19 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                                             }
                                         }
                                     }
+
                                 } catch (e: Exception) {
+                                    LOG.e(TAG, "Failed to store file: ", e)
+
                                     submitSideEffect(
                                         ChatSideEffect.Notify(app.getString(R.string.failed_to_save_file))
                                     )
+                                    try {
+                                        app.contentResolver.delete(savedFileUri, null, null)
+                                    } catch (fileE: Exception) {
+                                        LOG.e(TAG, "Failed to delete file: ", e)
+                                    }
+
                                 }
                             }
                         }
@@ -1138,6 +1152,23 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                 }
             }
         }
+    }
+
+    private suspend fun retrieveRemoteMediaInputStream(url: String, mediaHost: MediaHost?, mediaKeyDecrypted: MediaKeyDecrypted?): InputStream? {
+        return mediaHost?.let {
+            memeServerTokenHandler.retrieveAuthenticationToken(mediaHost)?.let { authenticationToken ->
+                mediaKeyDecrypted.let { mediaKeyDecrypted ->
+                    url.let { url ->
+                        memeInputStreamHandler.retrieveMediaInputStream(
+                            url,
+                            authenticationToken,
+                            mediaKeyDecrypted
+                        )
+                    }
+                }
+            }
+        }
+
     }
 
     fun showAttachmentImageFullscreen(message: Message) {
@@ -1150,13 +1181,39 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 }
 
 @Suppress("NOTHING_TO_INLINE")
+inline fun MessageMedia.retrieveMediaInputStream(drawable: Drawable?): InputStream? {
+    return when {
+        this.localFile != null -> {
+            localFile?.inputStream()
+        }
+        this.mediaType.isImage -> {
+            drawable?.drawableToBitmap()?.toInputStream()
+        }
+        else -> {
+            // Get remote file
+            null
+        }
+    }
+}
+
+@Suppress("NOTHING_TO_INLINE")
 inline fun MessageMedia.retrieveMediaStorageUri(): Uri? {
     return when {
         this.mediaType.isImage -> {
             MediaStore.Images.Media.EXTERNAL_CONTENT_URI
         }
+        this.mediaType.isVideo -> {
+            MediaStore.Video.Media.EXTERNAL_CONTENT_URI
+        }
+        this.mediaType.isAudio -> {
+            MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
+        }
         else -> {
-            null
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                MediaStore.Downloads.EXTERNAL_CONTENT_URI
+            } else {
+                null
+            }
         }
     }
 }
@@ -1172,8 +1229,13 @@ inline fun MessageMedia.retrieveContentValues(message: Message): ContentValues {
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun Drawable.drawableToBitmap(): Bitmap? {
-    val bitDw = this as BitmapDrawable
-    return bitDw.bitmap
+    return try {
+        // Gifs aren't BitmapDrawables
+        val bitDw = this as BitmapDrawable
+        bitDw.bitmap
+    } catch (e: Exception) {
+        null
+    }
 }
 
 @Suppress("NOTHING_TO_INLINE")

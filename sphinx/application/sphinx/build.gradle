@@ -116,6 +116,8 @@ dependencies {
     }
 
     implementation deps.google.hilt
+    implementation project(path: ':sphinx:application:network:concepts:concept-meme-input-stream')
+    implementation project(path: ':sphinx:application:network:features:feature-meme-input-stream')
     kapt kaptDeps.google.hilt
 
     implementation deps.sqlCipher
