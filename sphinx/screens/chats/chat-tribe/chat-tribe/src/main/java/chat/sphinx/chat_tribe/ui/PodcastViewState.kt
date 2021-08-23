@@ -64,7 +64,7 @@ internal inline fun PodcastViewState2.Available.adjustState(
     showLoading: Boolean? = null,
     showPlayButton: Boolean? = null,
     title: String? = null,
-    durationProgress: Int? = null,
+    playingProgress: Int? = null,
     clickPlayPause: OnClickCallback? = null,
     clickBoost: OnClickCallback? = null,
     clickFastForward: OnClickCallback? = null,
@@ -74,7 +74,7 @@ internal inline fun PodcastViewState2.Available.adjustState(
         showLoading = showLoading ?: this.showLoading,
         showPlayButton = showPlayButton ?: this.showPlayButton,
         title = title ?: this.title,
-        durationProgress = durationProgress ?: this.durationProgress,
+        playingProgress = playingProgress ?: this.playingProgress,
         clickPlayPause = clickPlayPause ?: this.clickPlayPause,
         clickBoost = clickBoost ?: this.clickBoost,
         clickFastForward = clickFastForward ?: this.clickFastForward,
@@ -104,14 +104,11 @@ internal sealed class PodcastViewState2: ViewState<PodcastViewState2>() {
         val showLoading: Boolean,
         val showPlayButton: Boolean,
         val title: String,
-        val durationProgress: Int,
+        val playingProgress: Int,
         override val clickPlayPause: OnClickCallback?,
         override val clickBoost: OnClickCallback?,
         override val clickFastForward: OnClickCallback?,
         override val clickTitle: OnClickCallback?,
         val podcast: Podcast,
-    ): PodcastViewState2() {
-        val showPauseButton: Boolean
-            get() = !showPlayButton
-    }
+    ): PodcastViewState2()
 }
