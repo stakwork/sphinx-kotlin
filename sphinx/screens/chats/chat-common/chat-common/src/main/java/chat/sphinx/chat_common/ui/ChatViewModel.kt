@@ -173,7 +173,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         ChatHeaderViewStateContainer()
     }
 
-    private suspend fun getChat(): Chat {
+    suspend fun getChat(): Chat {
         chatSharedFlow.replayCache.firstOrNull()?.let { chat ->
             return chat
         }

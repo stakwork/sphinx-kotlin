@@ -1,5 +1,6 @@
 package chat.sphinx.contact.ui
 
+import android.app.Application
 import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
@@ -7,6 +8,7 @@ import androidx.navigation.NavArgs
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_contact.model.ContactForm
 import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
+import chat.sphinx.contact.R
 import chat.sphinx.contact.navigation.ContactNavigator
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.scanner_view_model_coordinator.request.ScannerFilter
@@ -22,7 +24,7 @@ import kotlinx.coroutines.launch
 abstract class ContactViewModel<ARGS: NavArgs> (
     val navigator: ContactNavigator,
     dispatchers: CoroutineDispatchers,
-    savedStateHandle: SavedStateHandle,
+    private val app: Application,
     protected val contactRepository: ContactRepository,
     protected val scannerCoordinator: ViewModelCoordinator<ScannerRequest, ScannerResponse>
 ): SideEffectViewModel<
@@ -113,8 +115,8 @@ abstract class ContactViewModel<ARGS: NavArgs> (
         viewModelScope.launch(mainImmediate) {
             navigator.toQRCodeDetail(
                 nodePubKey,
-                "Contact Lightning Node Pub Key",
-                "This is the lightning node pub key belonging to the contact"
+                app.getString(R.string.public_key),
+                ""
             )
         }
 

@@ -13,4 +13,8 @@ sealed class ChatHeaderViewState: ViewState<ChatHeaderViewState>() {
         val showLock: Boolean,
         val isMuted: ChatMuted?,
     ): ChatHeaderViewState()
+
+    data class ContactUpdated(
+        val chatHeaderName: String
+    ): ChatHeaderViewState()
 }

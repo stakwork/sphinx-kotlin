@@ -2,6 +2,7 @@ package chat.sphinx.contact.ui
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.Color
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -16,15 +17,19 @@ import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.concept_repository_contact.model.ContactForm
+import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.contact.R
 import chat.sphinx.contact.databinding.LayoutContactBinding
 import chat.sphinx.detail_resources.databinding.LayoutDetailScreenHeaderBinding
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
+import chat.sphinx.resources.getRandomHexCode
+import chat.sphinx.resources.setBackgroundRandomColor
 import chat.sphinx.wrapper_common.lightning.getPubKey
 import chat.sphinx.wrapper_common.lightning.getRouteHint
 import chat.sphinx.wrapper_common.lightning.toLightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.toVirtualLightningNodeAddress
+import chat.sphinx.wrapper_common.util.getInitials
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
@@ -49,6 +54,7 @@ abstract class ContactFragment<
     abstract val headerBinding: LayoutDetailScreenHeaderBinding
     abstract val contactBinding: LayoutContactBinding
 
+    abstract val userColorsHelper: UserColorsHelper
     abstract val imageLoader: ImageLoader<ImageView>
 
     private val contactFormBuilder = ContactForm.Builder()
@@ -180,11 +186,28 @@ abstract class ContactFragment<
                     editTextContactRouteHint.setText(sideEffect.routeHint?.value ?: "")
                 }
             }
+
             is ContactSideEffect.ExistingContact -> {
                 contactBinding.apply {
                     editTextContactNickname.setText(sideEffect.nickname)
                     editTextContactAddress.setText(sideEffect.pubKey.value)
                     editTextContactRouteHint.setText(sideEffect.routeHint?.value ?: "")
+
+                    sideEffect.colorKey?.let { colorKey ->
+                        textViewInitials.apply {
+                            visible
+                            text = sideEffect.nickname?.getInitials() ?: ""
+                            setBackgroundRandomColor(
+                                R.drawable.chat_initials_circle,
+                                Color.parseColor(
+                                    userColorsHelper.getHexCodeForKey(
+                                        colorKey,
+                                        root.context.getRandomHexCode(),
+                                    )
+                                ),
+                            )
+                        }
+                    }
 
                     sideEffect.photoUrl?.let {
                         imageLoader.load(

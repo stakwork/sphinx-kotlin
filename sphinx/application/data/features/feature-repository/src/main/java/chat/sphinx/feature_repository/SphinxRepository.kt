@@ -869,6 +869,7 @@ abstract class SphinxRepository(
                     is Response.Success -> {
                         contactLock.withLock {
                             queries.transaction {
+                                updatedContactIds.add(ContactId(loadResponse.value.id))
                                 upsertContact(loadResponse.value, queries)
                             }
                         }

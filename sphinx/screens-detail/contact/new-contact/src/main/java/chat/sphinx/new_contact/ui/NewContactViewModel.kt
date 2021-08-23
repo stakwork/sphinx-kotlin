@@ -1,5 +1,6 @@
 package chat.sphinx.new_contact.ui
 
+import android.app.Application
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_repository_contact.ContactRepository
@@ -29,12 +30,13 @@ internal class NewContactViewModel @Inject constructor(
     newContactNavigator: NewContactNavigator,
     dispatchers: CoroutineDispatchers,
     savedStateHandle: SavedStateHandle,
+    app: Application,
     scannerCoordinator: ViewModelCoordinator<ScannerRequest, ScannerResponse>,
     contactRepository: ContactRepository
 ): ContactViewModel<NewContactFragmentArgs>(
     newContactNavigator,
     dispatchers,
-    savedStateHandle,
+    app,
     contactRepository,
     scannerCoordinator
 ) {

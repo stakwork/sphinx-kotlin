@@ -586,9 +586,23 @@ internal class DashboardViewModel @Inject constructor(
                                 continue
                             }
                         }
-                        currentChats.add(
-                            DashboardChat.Inactive.Conversation(contact)
-                        )
+
+                        var updatedContactChat: DashboardChat = DashboardChat.Inactive.Conversation(contact)
+
+                        for (chat in currentChatViewState.list) {
+                            if (chat is DashboardChat.Active.Conversation) {
+                                if (chat.contact.id == contact.id) {
+                                    updatedContactChat = DashboardChat.Active.Conversation(
+                                        chat.chat,
+                                        chat.message,
+                                        contact,
+                                        chat.unseenMessageFlow
+                                    )
+                                }
+                            }
+                        }
+
+                        currentChats.add(updatedContactChat)
                     }
                 }
 

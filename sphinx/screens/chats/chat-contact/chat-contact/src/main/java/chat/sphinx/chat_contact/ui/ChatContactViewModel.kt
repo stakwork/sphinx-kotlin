@@ -7,6 +7,7 @@ import chat.sphinx.camera_view_model_coordinator.request.CameraRequest
 import chat.sphinx.camera_view_model_coordinator.response.CameraResponse
 import chat.sphinx.chat_common.ui.ChatViewModel
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
+import chat.sphinx.chat_common.ui.viewstate.header.ChatHeaderViewState
 import chat.sphinx.chat_contact.navigation.ContactChatNavigator
 import chat.sphinx.concept_link_preview.LinkPreviewHandler
 import chat.sphinx.concept_meme_server.MemeServerTokenHandler
@@ -134,6 +135,22 @@ internal class ChatContactViewModel @Inject constructor(
         replay = 1
     )
 
+    val headerNameHolderSharedFlow: SharedFlow<ChatHeaderViewState> = flow {
+        contactSharedFlow.collect { contact ->
+            if (contact != null) {
+                emit(
+                    ChatHeaderViewState.ContactUpdated(
+                        chatHeaderName = contact.alias?.value ?: "",
+                    )
+                )
+            }
+        }
+    }.distinctUntilChanged().shareIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5_000),
+        replay = 1
+    )
+
     override suspend fun getChatNameIfNull(): ChatName? {
         contactSharedFlow.replayCache.firstOrNull()?.let { contact ->
             return contact.alias?.value?.let { ChatName(it) }
@@ -252,10 +269,8 @@ internal class ChatContactViewModel @Inject constructor(
     }
 
     override fun goToChatDetailScreen() {
-        chatId?.let { id ->
-            viewModelScope.launch(mainImmediate) {
-                contactChatNavigator.toChatDetail(contactId)
-            }
+        viewModelScope.launch(mainImmediate) {
+            contactChatNavigator.toChatDetail(contactId)
         }
     }
 }

@@ -70,6 +70,7 @@ sealed class ContactSideEffect: SideEffect<Context>() {
     data class ExistingContact(
         val nickname: String?,
         val photoUrl: PhotoUrl?,
+        val colorKey: String?,
         val pubKey: LightningNodePubKey,
         val routeHint: LightningRouteHint? = null
     ): ContactSideEffect() {

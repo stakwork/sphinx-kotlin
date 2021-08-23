@@ -1,5 +1,6 @@
 package chat.sphinx.edit_contact.ui
 
+import android.app.Application
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_repository_contact.ContactRepository
@@ -13,6 +14,7 @@ import chat.sphinx.kotlin_response.Response
 import chat.sphinx.scanner_view_model_coordinator.request.ScannerRequest
 import chat.sphinx.scanner_view_model_coordinator.response.ScannerResponse
 import chat.sphinx.wrapper_common.dashboard.ContactId
+import chat.sphinx.wrapper_contact.getColorKey
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
@@ -26,12 +28,13 @@ internal class EditContactViewModel @Inject constructor(
     editContactNavigator: EditContactNavigator,
     dispatchers: CoroutineDispatchers,
     savedStateHandle: SavedStateHandle,
+    app: Application,
     scannerCoordinator: ViewModelCoordinator<ScannerRequest, ScannerResponse>,
     contactRepository: ContactRepository
 ): ContactViewModel<EditContactFragmentArgs>(
     editContactNavigator,
     dispatchers,
-    savedStateHandle,
+    app,
     contactRepository,
     scannerCoordinator
 )
@@ -52,6 +55,7 @@ internal class EditContactViewModel @Inject constructor(
                             ContactSideEffect.ExistingContact(
                                 contact.alias?.value,
                                 contact.photoUrl,
+                                contact.getColorKey(),
                                 lightningNodePubKey,
                                 contact.routeHint
                             )
@@ -65,6 +69,7 @@ internal class EditContactViewModel @Inject constructor(
     override fun saveContact(contactForm: ContactForm) {
         viewModelScope.launch(mainImmediate) {
             viewStateContainer.updateViewState(ContactViewState.Saving)
+
             val loadResponse = contactRepository.updateContact(
                 contactId,
                 contactForm.contactAlias,

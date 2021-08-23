@@ -6,12 +6,19 @@ import androidx.recyclerview.widget.RecyclerView
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.chat_common.databinding.*
 import chat.sphinx.chat_common.ui.ChatFragment
+import chat.sphinx.chat_common.ui.viewstate.header.ChatHeaderViewState
 import chat.sphinx.chat_contact.R
 import chat.sphinx.chat_contact.databinding.FragmentChatContactBinding
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.menu_bottom.databinding.LayoutMenuBottomBinding
+import chat.sphinx.wrapper_chat.isTrue
 import dagger.hilt.android.AndroidEntryPoint
+import io.matthewnelson.android_feature_screens.util.gone
+import io.matthewnelson.android_feature_screens.util.goneIfFalse
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
+import javax.annotation.meta.Exhaustive
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -67,4 +74,26 @@ internal class ChatContactFragment: ChatFragment<
     protected lateinit var _imageLoader: ImageLoader<ImageView>
     override val imageLoader: ImageLoader<ImageView>
         get() = _imageLoader
+
+    override fun onStart() {
+        super.onStart()
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.headerNameHolderSharedFlow.collect { viewState ->
+                @Exhaustive
+                when (viewState) {
+                    is ChatHeaderViewState.Idle -> {}
+                    is ChatHeaderViewState.Initialized -> {}
+
+                    is ChatHeaderViewState.ContactUpdated -> {
+                        headerBinding.apply {
+                            textViewChatHeaderName.text = viewState.chatHeaderName
+                        }
+
+                    }
+                }
+
+            }
+        }
+    }
 }

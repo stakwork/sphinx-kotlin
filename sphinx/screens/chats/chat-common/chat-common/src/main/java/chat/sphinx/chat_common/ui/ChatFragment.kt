@@ -768,6 +768,7 @@ abstract class ChatFragment<
                             }
                         }
                     }
+                    is ChatHeaderViewState.ContactUpdated -> {}
                 }
             }
         }

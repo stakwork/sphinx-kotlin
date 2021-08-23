@@ -4,6 +4,7 @@ import android.widget.ImageView
 import androidx.fragment.app.viewModels
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.concept_image_loader.ImageLoader
+import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.contact.databinding.LayoutContactBinding
 import chat.sphinx.contact.ui.ContactFragment
 import chat.sphinx.detail_resources.databinding.LayoutDetailScreenHeaderBinding
@@ -35,6 +36,12 @@ internal class NewContactFragment: ContactFragment<
 
     override val imageLoader: ImageLoader<ImageView>
         get() = imageLoaderInj
+
+    @Inject
+    lateinit var userColorsHelperInj: UserColorsHelper
+
+    override val userColorsHelper: UserColorsHelper
+        get() = userColorsHelperInj
 
     override fun getHeaderText(): String = getString(R.string.new_contact_header_name)
 
