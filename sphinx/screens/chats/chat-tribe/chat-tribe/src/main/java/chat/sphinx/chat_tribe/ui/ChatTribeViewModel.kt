@@ -291,28 +291,28 @@ internal class ChatTribeViewModel @Inject constructor(
 //        super.onCleared()
 //        mediaPlayerServiceController.removeListener(this)
 //    }
-
-    private suspend fun getOwner(): Contact {
-        return contactRepository.accountOwner.value.let { contact ->
-            if (contact != null) {
-                contact
-            } else {
-                var resolvedOwner: Contact? = null
-                try {
-                    contactRepository.accountOwner.collect { ownerContact ->
-                        if (ownerContact != null) {
-                            resolvedOwner = ownerContact
-                            throw Exception()
-                        }
-                    }
-                } catch (e: Exception) {
-                }
-                delay(25L)
-
-                resolvedOwner!!
-            }
-        }
-    }
+//
+//    private suspend fun getOwner(): Contact {
+//        return contactRepository.accountOwner.value.let { contact ->
+//            if (contact != null) {
+//                contact
+//            } else {
+//                var resolvedOwner: Contact? = null
+//                try {
+//                    contactRepository.accountOwner.collect { ownerContact ->
+//                        if (ownerContact != null) {
+//                            resolvedOwner = ownerContact
+//                            throw Exception()
+//                        }
+//                    }
+//                } catch (e: Exception) {
+//                }
+//                delay(25L)
+//
+//                resolvedOwner!!
+//            }
+//        }
+//    }
 
     override suspend fun processMemberRequest(
         contactId: ContactId,

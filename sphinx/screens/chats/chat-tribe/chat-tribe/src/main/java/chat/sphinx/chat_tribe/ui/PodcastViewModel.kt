@@ -7,6 +7,7 @@ import app.cash.exhaustive.Exhaustive
 import chat.sphinx.chat_tribe.model.TribePodcastData
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
 import chat.sphinx.concept_network_query_chat.model.toPodcast
+import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.concept_service_media.MediaPlayerServiceController
 import chat.sphinx.concept_service_media.MediaPlayerServiceState
 import chat.sphinx.concept_service_media.UserAction
@@ -14,12 +15,16 @@ import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.podcast_player.ui.getMediaDuration
 import chat.sphinx.wrapper_common.lightning.Sat
+import chat.sphinx.wrapper_contact.Contact
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.BaseViewModel
 import io.matthewnelson.android_feature_viewmodel.currentViewState
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
+import io.matthewnelson.concept_views.viewstate.ViewStateContainer
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -29,12 +34,31 @@ import javax.inject.Inject
 internal class PodcastViewModel @Inject constructor(
     dispatchers: CoroutineDispatchers,
     handle: SavedStateHandle,
+    private val accountOwner: StateFlow<Contact?>,
+    private val messageRepository: MessageRepository,
     private val networkQueryChat: NetworkQueryChat,
     private val mediaPlayerServiceController: MediaPlayerServiceController,
-) : BaseViewModel<PodcastViewState2>(dispatchers, PodcastViewState2.NoPodcast),
+) : BaseViewModel<PodcastViewState>(dispatchers, PodcastViewState.NoPodcast),
     MediaPlayerServiceController.MediaServiceListener
 {
     private val args: ChatTribeFragmentArgs by handle.navArgs()
+
+    val boostAnimationViewStateContainer: ViewStateContainer<BoostAnimationViewState> by lazy {
+        ViewStateContainer(BoostAnimationViewState.Idle)
+    }
+
+    init {
+        viewModelScope.launch(mainImmediate) {
+            val owner = getOwner()
+
+            boostAnimationViewStateContainer.updateViewState(
+                BoostAnimationViewState.BoosAnimationInfo(
+                    owner.photoUrl,
+                    owner.tipAmount,
+                )
+            )
+        }
+    }
 
     override fun mediaServiceState(serviceState: MediaPlayerServiceState) {
         if (serviceState is MediaPlayerServiceState.ServiceActive.MediaState) {
@@ -44,7 +68,7 @@ internal class PodcastViewModel @Inject constructor(
         }
 
         val vs = currentViewState
-        if (vs !is PodcastViewState2.Available) {
+        if (vs !is PodcastViewState.Available) {
             return
         }
 
@@ -151,7 +175,7 @@ internal class PodcastViewModel @Inject constructor(
                                     podcast.setMetaData(data.metaData)
                                 }
 
-                                PodcastViewState2.Available(
+                                PodcastViewState.Available(
                                     showLoading = false,
                                     showPlayButton = !podcast.isPlaying,
                                     title = podcast.getCurrentEpisode().title,
@@ -160,7 +184,7 @@ internal class PodcastViewModel @Inject constructor(
 
                                         val vs = currentViewState
 
-                                        if (vs !is PodcastViewState2.Available) {
+                                        if (vs !is PodcastViewState.Available) {
                                             return@OnClickCallback
                                         }
 
@@ -201,12 +225,41 @@ internal class PodcastViewModel @Inject constructor(
                                         }
                                     },
                                     clickBoost = OnClickCallback {
-                                        // TODO: Implement
+                                        viewModelScope.launch(mainImmediate) {
+
+                                            val owner: Contact = getOwner()
+
+                                            owner.tipAmount?.let { tip ->
+                                                if (tip.value > 0) {
+
+                                                    val vs = currentViewState
+
+                                                    if (vs is PodcastViewState.Available) {
+                                                        val metaData = vs.podcast.getMetaData(tip)
+
+                                                        messageRepository.sendPodcastBoost(
+                                                            args.chatId,
+                                                            vs.podcast
+                                                        )
+
+                                                        mediaPlayerServiceController.submitAction(
+                                                            UserAction.SendBoost(
+                                                                args.chatId,
+                                                                vs.podcast.id,
+                                                                metaData,
+                                                                vs.podcast.value.destinations,
+                                                            )
+                                                        )
+                                                    }
+                                                }
+                                            }
+
+                                        }
                                     },
                                     clickFastForward = OnClickCallback {
                                         val vs = currentViewState
 
-                                        if (vs !is PodcastViewState2.Available) {
+                                        if (vs !is PodcastViewState.Available) {
                                             return@OnClickCallback
                                         }
 
@@ -239,6 +292,28 @@ internal class PodcastViewModel @Inject constructor(
                         }
                     }
                 }
+            }
+        }
+    }
+
+    private suspend fun getOwner(): Contact {
+        return accountOwner.value.let { contact ->
+            if (contact != null) {
+                contact
+            } else {
+                var resolvedOwner: Contact? = null
+                try {
+                    accountOwner.collect { ownerContact ->
+                        if (ownerContact != null) {
+                            resolvedOwner = ownerContact
+                            throw Exception()
+                        }
+                    }
+                } catch (e: Exception) {
+                }
+                delay(25L)
+
+                resolvedOwner!!
             }
         }
     }
