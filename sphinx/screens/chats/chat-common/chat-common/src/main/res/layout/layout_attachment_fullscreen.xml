@@ -9,6 +9,20 @@
     android:visibility="gone"
     tools:visibility="visible">
 
+    <ProgressBar
+        android:id="@+id/progress_bar_attachment_fullscreen"
+        style="?android:attr/progressBarStyle"
+        android:layout_width="@dimen/save_progress_bar_xy"
+        android:layout_height="@dimen/save_progress_bar_xy"
+        android:layout_marginStart="@dimen/save_progress_bar_margin_left"
+        android:indeterminate="true"
+        android:indeterminateTint="@android:color/white"
+        android:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <chat.sphinx.chat_common.ui.SphinxFullscreenImageView
         android:id="@+id/image_view_attachment_fullscreen"
         android:layout_width="match_parent"
