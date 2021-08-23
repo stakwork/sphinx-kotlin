@@ -2,9 +2,12 @@ package chat.sphinx.chat_tribe.ui
 
 import android.animation.Animator
 import android.annotation.SuppressLint
+import android.os.Bundle
+import android.view.View
 import android.widget.ImageView
 import androidx.core.view.isGone
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import app.cash.exhaustive.Exhaustive
 import by.kirich1409.viewbindingdelegate.viewBinding
@@ -13,6 +16,7 @@ import chat.sphinx.chat_common.ui.ChatFragment
 import chat.sphinx.chat_tribe.R
 import chat.sphinx.chat_tribe.databinding.FragmentChatTribeBinding
 import chat.sphinx.chat_tribe.databinding.LayoutPodcastPlayerFooterBinding
+import chat.sphinx.chat_tribe.model.TribePodcastData
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
@@ -29,6 +33,7 @@ import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.concept_views.viewstate.collect
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -72,6 +77,7 @@ internal class ChatTribeFragment: ChatFragment<
         get() = binding.recyclerViewMessages
 
     override val viewModel: ChatTribeViewModel by viewModels()
+    private val podcastViewModel: PodcastViewModel by viewModels()
 
     @Inject
     @Suppress("ProtectedInFinal", "PropertyName")
@@ -84,6 +90,25 @@ internal class ChatTribeFragment: ChatFragment<
     protected lateinit var _imageLoader: ImageLoader<ImageView>
     override val imageLoader: ImageLoader<ImageView>
         get() = _imageLoader
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        lifecycleScope.launch(viewModel.mainImmediate) {
+            try {
+                viewModel.podcastDataStateFlow.collect { data ->
+                    @Exhaustive
+                    when (data) {
+                        is TribePodcastData.Loading -> {}
+                        is TribePodcastData.Result -> {
+                            podcastViewModel.init(data)
+                            throw Exception()
+                        }
+                    }
+                }
+            } catch (_: Exception) {}
+        }
+    }
 
     private suspend fun setupBoostAnimation(
         photoUrl: PhotoUrl?,

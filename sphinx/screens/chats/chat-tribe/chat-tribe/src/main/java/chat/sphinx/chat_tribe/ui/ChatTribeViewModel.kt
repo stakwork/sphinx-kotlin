@@ -11,6 +11,7 @@ import chat.sphinx.chat_common.ui.ChatSideEffect
 import chat.sphinx.chat_common.ui.ChatViewModel
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
 import chat.sphinx.chat_tribe.R
+import chat.sphinx.chat_tribe.model.TribePodcastData
 import chat.sphinx.chat_tribe.navigation.TribeChatNavigator
 import chat.sphinx.concept_meme_server.MemeServerTokenHandler
 import chat.sphinx.concept_network_query_chat.model.toPodcast
@@ -20,7 +21,6 @@ import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.resources.getRandomHexCode
-import chat.sphinx.wrapper_chat.getColorKey
 import chat.sphinx.concept_repository_message.model.SendMessage
 import chat.sphinx.concept_service_media.MediaPlayerServiceController
 import chat.sphinx.concept_service_media.MediaPlayerServiceState
@@ -32,10 +32,6 @@ import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.podcast_player.objects.toParcelablePodcast
 import chat.sphinx.podcast_player.ui.getMediaDuration
-import chat.sphinx.wrapper_chat.Chat
-import chat.sphinx.wrapper_chat.ChatName
-import chat.sphinx.wrapper_chat.isTribe
-import chat.sphinx.wrapper_chat.isTribeOwnedByAccount
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.Sat
@@ -55,6 +51,8 @@ import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import chat.sphinx.concept_link_preview.LinkPreviewHandler
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
+import chat.sphinx.logger.e
+import chat.sphinx.wrapper_chat.*
 import io.matthewnelson.concept_media_cache.MediaCacheHandler
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import kotlinx.coroutines.delay
@@ -231,6 +229,14 @@ internal class ChatTribeViewModel @Inject constructor(
         }
     }
 
+    private val _podcastDataStateFlow: MutableStateFlow<TribePodcastData> by lazy {
+        MutableStateFlow(TribePodcastData.Loading)
+    }
+
+    val podcastDataStateFlow: StateFlow<TribePodcastData>
+        get() = _podcastDataStateFlow.asStateFlow()
+
+
     init {
         mediaPlayerServiceController.addListener(this)
 
@@ -249,6 +255,17 @@ internal class ChatTribeViewModel @Inject constructor(
             chatRepository.getChatById(chatId).firstOrNull()?.let { chat ->
 
                 chatRepository.updateTribeInfo(chat)?.let { podcastData ->
+
+                    podcastData.second.toFeedUrl()?.let { url ->
+                        _podcastDataStateFlow.value = TribePodcastData.Result.TribeData(
+                            podcastData.first,
+                            url,
+                            chat.metaData,
+                        )
+                    } ?: run {
+                        _podcastDataStateFlow.value = TribePodcastData.Result.NoPodcast
+                    }
+
                     networkQueryChat.getPodcastFeed(podcastData.first, podcastData.second).collect { response ->
                         @Exhaustive
                         when (response) {
@@ -275,7 +292,12 @@ internal class ChatTribeViewModel @Inject constructor(
                             }
                         }
                     }
+                } ?: run {
+                    _podcastDataStateFlow.value = TribePodcastData.Result.NoPodcast
                 }
+
+            } ?: run {
+                _podcastDataStateFlow.value = TribePodcastData.Result.NoPodcast
             }
 
             // TODO: Remove incorrect usage of always running flow collection
