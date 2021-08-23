@@ -2630,7 +2630,7 @@ abstract class SphinxRepository(
         emit(response ?: Response.Error(ResponseError("")))
     }
 
-    override suspend fun updateTribeInfo(chat: Chat): PodcastDto? {
+    override suspend fun updateTribeInfo(chat: Chat): Pair<ChatHost, String>? {
         var owner: Contact? = accountOwner.value
 
         if (owner == null) {
@@ -2645,7 +2645,7 @@ abstract class SphinxRepository(
             delay(25L)
         }
 
-        var podcastDto: PodcastDto? = null
+        var podcastData: Pair<ChatHost, String>? = null
 
         chat.host?.let { chatHost ->
             val chatUUID = chat.uuid
@@ -2691,31 +2691,9 @@ abstract class SphinxRepository(
 
                             }
 
-                            podcastDto = getPodcastFeed(chat, tribeDto)
-                        }
-                    }
-                }
-            }
-        }
-
-        return podcastDto
-    }
-
-    private suspend fun getPodcastFeed(chat: Chat, tribe: TribeDto): PodcastDto? {
-        var podcastDto: PodcastDto? = null
-
-        chat.host?.let { chatHost ->
-            tribe.feed_url?.let { feedUrl ->
-                if (feedUrl.isNotEmpty()) {
-                    networkQueryChat.getPodcastFeed(chatHost, feedUrl).collect { loadResponse ->
-                        when (loadResponse) {
-
-                            is LoadResponse.Loading -> {}
-                            is Response.Error -> {}
-
-                            is Response.Success -> {
-                                if (loadResponse.value.isValidPodcast()) {
-                                    podcastDto = loadResponse.value
+                            chat.host?.let { host ->
+                                tribeDto.feed_url?.let { feed ->
+                                    podcastData = Pair(host, feed)
                                 }
                             }
                         }
@@ -2724,7 +2702,7 @@ abstract class SphinxRepository(
             }
         }
 
-        return podcastDto
+        return podcastData
     }
 
     /*

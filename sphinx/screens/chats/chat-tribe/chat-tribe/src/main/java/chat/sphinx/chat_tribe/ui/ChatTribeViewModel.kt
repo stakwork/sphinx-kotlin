@@ -54,6 +54,7 @@ import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import chat.sphinx.concept_link_preview.LinkPreviewHandler
+import chat.sphinx.concept_network_query_chat.NetworkQueryChat
 import io.matthewnelson.concept_media_cache.MediaCacheHandler
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import kotlinx.coroutines.delay
@@ -81,6 +82,7 @@ internal class ChatTribeViewModel @Inject constructor(
     cameraViewModelCoordinator: ViewModelCoordinator<CameraRequest, CameraResponse>,
     linkPreviewHandler: LinkPreviewHandler,
     LOG: SphinxLogger,
+    private val networkQueryChat: NetworkQueryChat,
     private val mediaPlayerServiceController: MediaPlayerServiceController,
 ): ChatViewModel<ChatTribeFragmentArgs>(
     app,
@@ -244,7 +246,40 @@ internal class ChatTribeViewModel @Inject constructor(
         }
 
         viewModelScope.launch(mainImmediate) {
-            loadTribeAndPodcastData()
+            chatRepository.getChatById(chatId).firstOrNull()?.let { chat ->
+
+                chatRepository.updateTribeInfo(chat)?.let { podcastData ->
+                    networkQueryChat.getPodcastFeed(podcastData.first, podcastData.second).collect { response ->
+                        @Exhaustive
+                        when (response) {
+                            is LoadResponse.Loading -> {}
+                            is Response.Error -> {}
+                            is Response.Success -> {
+                                val pod = response.value.toPodcast()
+                                podcast = pod
+
+                                chat.metaData?.let { nnMetaData ->
+                                    pod.setMetaData(nnMetaData)
+                                }
+
+                                podcastViewStateContainer.updateViewState(
+                                    PodcastViewState.PodcastLoaded(pod)
+                                )
+
+                                mediaPlayerServiceController.submitAction(
+                                    UserAction.AdjustSatsPerMinute(
+                                        chatId,
+                                        pod.getMetaData()
+                                    )
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+            // TODO: Remove incorrect usage of always running flow collection
+            loadPodcastContributionsString()
         }
     }
 
@@ -315,36 +350,6 @@ internal class ChatTribeViewModel @Inject constructor(
                 }
             }
         }.join()
-    }
-
-    private suspend fun loadTribeAndPodcastData() {
-        chatRepository.getChatById(chatId).firstOrNull()?.let { chat ->
-
-            chatRepository.updateTribeInfo(chat)?.let { podcastDto ->
-                podcast = podcastDto.toPodcast()
-
-                chatRepository.getChatById(chatId).firstOrNull()?.let { chat ->
-                    chat.metaData?.let { metaData ->
-                        podcast?.setMetaData(metaData)
-                    }
-                }
-
-                podcastViewStateContainer.updateViewState(
-                    PodcastViewState.PodcastLoaded(
-                        podcast!!
-                    )
-                )
-
-                mediaPlayerServiceController.submitAction(
-                    UserAction.AdjustSatsPerMinute(
-                        args.chatId,
-                        podcast!!.getMetaData()
-                    )
-                )
-            }
-        }
-
-        loadPodcastContributionsString()
     }
 
     private suspend fun loadPodcastContributionsString() {
