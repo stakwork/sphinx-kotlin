@@ -173,6 +173,14 @@ internal class ChatTribeFragment: ChatFragment<
             }
         }
 
+        // TODO: Remove hackery (utilized now to update podcast object's sats per minute
+        //  value if it's changed from tribe detail screen)
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            podcastViewModel.satsPerMinuteStateFlow.collect {
+                /* no-op */
+            }
+        }
+
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             podcastViewModel.collectViewState { viewState ->
                 podcastPlayerBinding.apply {

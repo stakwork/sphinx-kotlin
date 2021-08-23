@@ -371,6 +371,27 @@ internal class PodcastViewModel @Inject constructor(
         }
     }
 
+    val satsPerMinuteStateFlow: StateFlow<Boolean> =
+        flow {
+            collectViewState { viewState ->
+                if (viewState is PodcastViewState.Available) {
+                    chatRepository.getChatById(args.chatId).collect { chat ->
+                        chat?.metaData?.let { nnMetaData ->
+                            val vs = currentViewState
+                            if (vs is PodcastViewState.Available) {
+                                vs.podcast.satsPerMinute = nnMetaData.satsPerMinute.value
+                            }
+                        }
+                        emit(true)
+                    }
+                }
+            }
+        }.stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(2_000),
+            true
+        )
+
     private suspend fun getOwner(): Contact {
         return accountOwner.value.let { contact ->
             if (contact != null) {
