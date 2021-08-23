@@ -275,6 +275,15 @@ internal class PodcastViewModel @Inject constructor(
                                                     vs.podcast.getMetaData()
                                                 )
                                             )
+
+                                            if (!vs.podcast.isPlaying) {
+                                                updateViewState(
+                                                    vs.adjustState(
+                                                        showPlayButton = true,
+                                                        playingProgress = vs.podcast.getPlayingProgress(::retrieveEpisodeDuration),
+                                                    )
+                                                )
+                                            }
                                         }
                                     },
                                     clickTitle = OnClickCallback {
