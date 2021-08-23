@@ -20,6 +20,7 @@ import chat.sphinx.concept_network_query_message.NetworkQueryMessage
 import chat.sphinx.concept_network_query_message.model.MessageDto
 import chat.sphinx.concept_network_query_message.model.PostMessageDto
 import chat.sphinx.concept_network_query_message.model.PostPaymentDto
+import chat.sphinx.concept_network_query_verify_external.NetworkQueryAuthorizeExternal
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_chat.model.CreateTribe
 import chat.sphinx.concept_repository_contact.ContactRepository
@@ -107,6 +108,7 @@ abstract class SphinxRepository(
     private val networkQueryLightning: NetworkQueryLightning,
     private val networkQueryMessage: NetworkQueryMessage,
     private val networkQueryInvite: NetworkQueryInvite,
+    private val networkQueryAuthorizeExternal: NetworkQueryAuthorizeExternal,
     private val rsa: RSA,
     private val socketIOManager: SocketIOManager,
     protected val LOG: SphinxLogger,
@@ -134,6 +136,8 @@ abstract class SphinxRepository(
 
         const val MEDIA_KEY_SIZE = 32
         const val MEDIA_PROVISIONAL_TOKEN = "Media_Provisional_Token"
+
+        const val AUTHORIZE_EXTERNAL_BASE_64 = "U3BoaW54IFZlcmlmaWNhdGlvbg=="
     }
 
     ////////////////
@@ -3133,6 +3137,72 @@ abstract class SphinxRepository(
             }
         }
         return response
+    }
+
+    override suspend fun authorizeExternal(
+        relayUrl: String,
+        host: String,
+        challenge: String
+    ): Response<Boolean, ResponseError> {
+        var response: Response<Boolean, ResponseError>? = null
+
+        applicationScope.launch(mainImmediate) {
+            networkQueryAuthorizeExternal.verifyExternal().collect { loadResponse ->
+                when (loadResponse) {
+                    is LoadResponse.Loading -> {}
+
+                    is Response.Error -> {
+                        response = loadResponse
+                    }
+
+                    is Response.Success -> {
+
+                        val token = loadResponse.value.token
+                        val info = loadResponse.value.info
+
+                        networkQueryAuthorizeExternal.signBase64(
+                            AUTHORIZE_EXTERNAL_BASE_64
+                        ).collect {  sigResponse ->
+
+                            when (sigResponse) {
+                                is LoadResponse.Loading -> {}
+
+                                is Response.Error -> {
+                                    response = sigResponse
+                                }
+
+                                is Response.Success -> {
+
+                                    info.verificationSignature = sigResponse.value.sig
+                                    info.url = relayUrl
+
+                                    networkQueryAuthorizeExternal.authorizeExternal(
+                                        host,
+                                        challenge,
+                                        token,
+                                        info,
+                                    ).collect { authorizeResponse ->
+                                        when (authorizeResponse) {
+                                            is LoadResponse.Loading -> {}
+
+                                            is Response.Error -> {
+                                                response = authorizeResponse
+                                            }
+
+                                            is Response.Success -> {
+                                                response = Response.Success(true)
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }.join()
+
+        return response ?: Response.Error(ResponseError("Returned before completing"))
     }
 
     override suspend fun exitAndDeleteTribe(chat: Chat): Response<Boolean, ResponseError> {

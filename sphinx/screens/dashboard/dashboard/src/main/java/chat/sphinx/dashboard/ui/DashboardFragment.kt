@@ -11,6 +11,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import app.cash.exhaustive.Exhaustive
@@ -23,6 +24,7 @@ import chat.sphinx.dashboard.R
 import chat.sphinx.dashboard.databinding.FragmentDashboardBinding
 import chat.sphinx.dashboard.ui.adapter.ChatListAdapter
 import chat.sphinx.dashboard.ui.adapter.ChatListFooterAdapter
+import chat.sphinx.dashboard.ui.viewstates.DeepLinkPopupViewState
 import chat.sphinx.dashboard.ui.viewstates.NavDrawerViewState
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
@@ -35,10 +37,13 @@ import chat.sphinx.wrapper_common.lightning.asFormattedString
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.navigation.CloseAppOnBackPress
 import io.matthewnelson.android_feature_screens.ui.motionlayout.MotionLayoutFragment
+import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.invisibleIfFalse
+import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.currentViewState
 import io.matthewnelson.android_feature_viewmodel.updateViewState
+import io.matthewnelson.concept_views.viewstate.collect
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -84,6 +89,16 @@ internal class DashboardFragment : MotionLayoutFragment<
         setupDashboardHeader()
         setupNavBar()
         setupNavDrawer()
+        setupPopup()
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        activity?.intent?.dataString?.let { deepLink ->
+            viewModel.handleDeepLink(deepLink)
+            activity?.intent?.data = null
+        }
     }
 
     private inner class BackPressHandler(context: Context): CloseAppOnBackPress(context) {
@@ -217,6 +232,21 @@ internal class DashboardFragment : MotionLayoutFragment<
         }
     }
 
+    private fun setupPopup() {
+        binding.layoutDashboardPopup.apply {
+            textViewDashboardPopupClose.setOnClickListener {
+                viewModel.deepLinkPopupViewStateContainer.updateViewState(
+                    DeepLinkPopupViewState.PopupDismissed
+                )
+            }
+
+            buttonAuthorize.setOnClickListener {
+                progressBarAuthorize.visible
+                viewModel.authorizeExternal()
+            }
+        }
+    }
+
     override fun onStart() {
         super.onStart()
 
@@ -323,6 +353,32 @@ internal class DashboardFragment : MotionLayoutFragment<
             }
         }
         viewState.transitionToEndSet(binding.layoutMotionDashboard)
+    }
+
+    override fun subscribeToViewStateFlow() {
+        super.subscribeToViewStateFlow()
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.deepLinkPopupViewStateContainer.collect { viewState ->
+                @Exhaustive
+                when (viewState) {
+                    is DeepLinkPopupViewState.PopupDismissed -> {
+                        binding.layoutDashboardPopup.apply {
+                            root.gone
+                            progressBarAuthorize.gone
+                        }
+                    }
+                    is DeepLinkPopupViewState.ExternalAuthorizePopup -> {
+                        binding.layoutDashboardPopup.apply {
+                            textViewDashboardPopupAuthorizeName.text = viewState.link.host
+
+                            layoutConstraintAuthorizePopup.visible
+                            root.visible
+                        }
+                    }
+                }
+            }
+        }
     }
 
     override fun onViewCreatedRestoreMotionScene(

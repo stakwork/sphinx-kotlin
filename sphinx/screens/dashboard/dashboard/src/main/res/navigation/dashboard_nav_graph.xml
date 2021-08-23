@@ -9,9 +9,17 @@
         android:id="@+id/navigation_dashboard_fragment"
         android:name="chat.sphinx.dashboard.ui.DashboardFragment"
         tools:layout="@layout/fragment_dashboard" >
+
         <argument
             android:name="updateBackgroundLoginTime"
             app:argType="boolean" />
+
+        <argument
+            android:name="arg_deepLink"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="@null"/>
+
     </fragment>
 
 </navigation>

@@ -1,5 +1,6 @@
 package chat.sphinx.activitymain
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.constraintlayout.motion.widget.MotionLayout
@@ -129,6 +130,20 @@ internal class MainActivity: MotionLayoutNavigationActivity<
                         }
                     }
                 }
+        }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+
+        intent.dataString?.let { deepLink ->
+            handleDeepLink(deepLink)
+        }
+    }
+
+    private fun handleDeepLink(deepLink: String) {
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.handleDeepLink(deepLink)
         }
     }
 
