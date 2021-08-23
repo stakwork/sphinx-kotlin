@@ -20,20 +20,22 @@ import chat.sphinx.menu_bottom.ui.MenuBottomViewState
 import chat.sphinx.menu_bottom_profile_pic.PictureMenuHandler
 import chat.sphinx.menu_bottom_profile_pic.PictureMenuViewModel
 import chat.sphinx.menu_bottom_profile_pic.UpdatingImageViewState
-import chat.sphinx.podcast_player.objects.toPodcast
 import chat.sphinx.tribe.TribeMenuHandler
 import chat.sphinx.tribe.TribeMenuViewModel
 import chat.sphinx.tribe_detail.R
 import chat.sphinx.tribe_detail.navigation.TribeDetailNavigator
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.ChatAlias
+import chat.sphinx.wrapper_chat.ChatMetaData
 import chat.sphinx.wrapper_chat.isTribeOwnedByAccount
 import chat.sphinx.wrapper_common.dashboard.ChatId
+import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_meme_server.PublicAttachmentInfo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
+import io.matthewnelson.android_feature_viewmodel.currentViewState
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
@@ -71,7 +73,6 @@ internal class TribeDetailViewModel @Inject constructor(
     private val args: TribeDetailFragmentArgs by savedStateHandle.navArgs()
 
     val chatId = args.chatId
-    val podcast = args.argPodcast?.toPodcast()
 
     val updatingImageViewStateContainer: ViewStateContainer<UpdatingImageViewState> by lazy {
         ViewStateContainer(UpdatingImageViewState.Idle)
@@ -94,7 +95,6 @@ internal class TribeDetailViewModel @Inject constructor(
                             TribeDetailViewState.TribeProfile(
                                 chat,
                                 getOwner(),
-                                podcast,
                             )
                         } else {
                             TribeDetailViewState.Idle
@@ -229,17 +229,28 @@ internal class TribeDetailViewModel @Inject constructor(
     }
 
     fun updateSatsPerMinute(sats: Long) {
-        podcast?.let { podcast ->
-            podcast.satsPerMinute = sats
+        val vs = currentViewState
+
+        if (vs !is TribeDetailViewState.TribeProfile) {
+            return
+        }
+
+        vs.chat.metaData?.let { nnMetaData ->
 
             viewModelScope.launch(mainImmediate) {
                 mediaPlayerServiceController.submitAction(
                     UserAction.AdjustSatsPerMinute(
                         args.chatId,
-                        podcast.getMetaData()
+                        ChatMetaData(
+                            nnMetaData.itemId,
+                            Sat(sats),
+                            nnMetaData.timeSeconds,
+                            nnMetaData.speed,
+                        )
                     )
                 )
             }
+
         }
     }
 

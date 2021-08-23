@@ -238,10 +238,7 @@ internal class ChatTribeViewModel @Inject constructor(
 
     override fun goToChatDetailScreen() {
         viewModelScope.launch(mainImmediate) {
-
-            // TODO: Remove unnecessary passing of podcast (metadata should be
-            //  retrieved on screen load)
-            (chatNavigator as TribeChatNavigator).toTribeDetailScreen(chatId, null)
+            (chatNavigator as TribeChatNavigator).toTribeDetailScreen(chatId)
         }
     }
 }
