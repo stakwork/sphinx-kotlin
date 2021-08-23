@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/imagePreviewBackground"
+    android:elevation="@dimen/selected_message_elevation"
+    android:visibility="gone"
+    tools:visibility="visible">
+
+    <ProgressBar
+        android:id="@+id/progress_bar_attachment_fullscreen"
+        style="?android:attr/progressBarStyle"
+        android:layout_width="@dimen/save_progress_bar_xy"
+        android:layout_height="@dimen/save_progress_bar_xy"
+        android:layout_marginStart="@dimen/save_progress_bar_margin_left"
+        android:indeterminate="true"
+        android:indeterminateTint="@android:color/white"
+        android:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <chat.sphinx.chat_common.ui.SphinxFullscreenImageView
+        android:id="@+id/image_view_attachment_fullscreen"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:src="@drawable/image_not_available" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_attachment_fullscreen_header"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/default_header_height"
+        android:background="@color/imagePreviewBackground"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_attachment_fullscreen_header_back"
+            android:layout_width="@dimen/default_header_navigation_xy"
+            android:layout_height="@dimen/default_header_navigation_xy"
+            android:fontFamily="@font/material_icons_regular"
+            android:gravity="center"
+            android:text="@string/material_icon_name_nav_back"
+            android:textColor="@color/exo_white"
+            android:textSize="@dimen/default_text_size_back_arrow"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

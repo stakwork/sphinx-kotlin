@@ -289,6 +289,15 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                         }
                     }
                 }
+
+                includeMessageTypeImageAttachment.apply {
+                    imageViewAttachmentImage.setOnClickListener {
+                        currentViewState?.message?.let { message ->
+                            viewModel.showAttachmentImageFullscreen(message)
+                        }
+                    }
+                    imageViewAttachmentImage.setOnLongClickListener(selectedMessageLongClickListener)
+                }
             }
 
             binding.includeMessageTypeGroupActionHolder.let { holder ->

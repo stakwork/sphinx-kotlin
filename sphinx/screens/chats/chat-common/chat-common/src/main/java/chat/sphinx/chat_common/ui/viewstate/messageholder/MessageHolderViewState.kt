@@ -291,6 +291,11 @@ internal sealed class MessageHolderViewState(
                 list.add(MenuItemState.Boost)
             }
 
+            // TODO: Implement functionality in ChatViewModel
+//            if (message.isMediaAttachment) {
+//                list.add(MenuItemState.SaveFile)
+//            }
+
             if (message.isCopyLinkAllowed) {
                 list.add(MenuItemState.CopyLink)
             }
