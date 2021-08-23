@@ -191,9 +191,6 @@ internal class ChatTribeViewModel @Inject constructor(
             } ?: run {
                 _podcastDataStateFlow.value = TribePodcastData.Result.NoPodcast
             }
-//
-//            // TODO: Remove incorrect usage of always running flow collection
-//            loadPodcastContributionsString()
         }
     }
 
@@ -238,28 +235,6 @@ internal class ChatTribeViewModel @Inject constructor(
             }
         }.join()
     }
-
-    // TODO: Move to PodcastViewModel
-//    private suspend fun loadPodcastContributionsString() {
-//        podcast?.id?.let { podcastId ->
-//            val owner: Contact = getOwner()
-//
-//            chatRepository.getChatById(chatId).firstOrNull()?.let { chat ->
-//                messageRepository.getPaymentsTotalFor(podcastId).collect { paymentsTotal ->
-//                    paymentsTotal?.let {
-//                        val isMyTribe = chat.isTribeOwnedByAccount(owner.nodePubKey)
-//                        val label = app.getString(if (isMyTribe) R.string.chat_tribe_earned else R.string.chat_tribe_contributed)
-//
-//                        podcastViewStateContainer.updateViewState(
-//                            PodcastViewState.PodcastContributionsLoaded(
-//                                label + " ${it.asFormattedString()} ${it.unit}"
-//                            )
-//                        )
-//                    }
-//                }
-//            }
-//        }
-//    }
 
     override fun goToChatDetailScreen() {
         viewModelScope.launch(mainImmediate) {

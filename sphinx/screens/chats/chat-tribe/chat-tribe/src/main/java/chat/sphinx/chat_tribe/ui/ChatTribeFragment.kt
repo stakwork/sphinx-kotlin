@@ -139,17 +139,6 @@ internal class ChatTribeFragment: ChatFragment<
         })
     }
 
-//    private fun configureContributions(contributions: String) {
-//        headerBinding.apply {
-//            textViewChatHeaderContributionsIcon.visible
-//            textViewChatHeaderContributions.apply {
-//                visible
-//                @SuppressLint("SetTextI18n")
-//                text = contributions
-//            }
-//        }
-//    }
-
     private val progressWidth: Px by lazy {
         Px(binding.root.measuredWidth.toFloat())
     }
@@ -214,6 +203,29 @@ internal class ChatTribeFragment: ChatFragment<
                             root.gone
                         }
                     }
+                }
+            }
+        }
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            podcastViewModel.contributionsViewStateContainer.collect { viewState ->
+                headerBinding.apply {
+
+                    @Exhaustive
+                    when (viewState) {
+                        is PodcastContributionsViewState.Contributions -> {
+                            textViewChatHeaderContributionsIcon.visible
+                            textViewChatHeaderContributions.apply string@ {
+                                this@string.visible
+                                this@string.text = viewState.text
+                            }
+                        }
+                        is PodcastContributionsViewState.None -> {
+                            textViewChatHeaderContributionsIcon.gone
+                            textViewChatHeaderContributions.gone
+                        }
+                    }
+
                 }
             }
         }

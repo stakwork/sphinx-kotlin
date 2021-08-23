@@ -1,13 +1,16 @@
 package chat.sphinx.chat_tribe.ui
 
+import android.app.Application
 import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
+import chat.sphinx.chat_tribe.R
 import chat.sphinx.chat_tribe.model.TribePodcastData
 import chat.sphinx.chat_tribe.navigation.TribeChatNavigator
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
 import chat.sphinx.concept_network_query_chat.model.toPodcast
+import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.concept_service_media.MediaPlayerServiceController
 import chat.sphinx.concept_service_media.MediaPlayerServiceState
@@ -16,18 +19,21 @@ import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.podcast_player.objects.toParcelablePodcast
 import chat.sphinx.podcast_player.ui.getMediaDuration
+import chat.sphinx.wrapper_chat.isTribeOwnedByAccount
 import chat.sphinx.wrapper_common.lightning.Sat
+import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_contact.Contact
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.BaseViewModel
+import io.matthewnelson.android_feature_viewmodel.collectViewState
 import io.matthewnelson.android_feature_viewmodel.currentViewState
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
+import io.matthewnelson.concept_views.viewstate.ViewState
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -36,8 +42,10 @@ import javax.inject.Inject
 internal class PodcastViewModel @Inject constructor(
     dispatchers: CoroutineDispatchers,
     handle: SavedStateHandle,
+    private val app: Application,
     private val accountOwner: StateFlow<Contact?>,
     private val navigator: TribeChatNavigator,
+    private val chatRepository: ChatRepository,
     private val messageRepository: MessageRepository,
     private val networkQueryChat: NetworkQueryChat,
     private val mediaPlayerServiceController: MediaPlayerServiceController,
@@ -48,6 +56,50 @@ internal class PodcastViewModel @Inject constructor(
 
     val boostAnimationViewStateContainer: ViewStateContainer<BoostAnimationViewState> by lazy {
         ViewStateContainer(BoostAnimationViewState.Idle)
+    }
+
+    private inner class PodcastContributionsViewStateContainer: ViewStateContainer<PodcastContributionsViewState>(PodcastContributionsViewState.None) {
+        override val viewStateFlow: StateFlow<PodcastContributionsViewState> =
+            flow {
+                collectViewState { podcastViewState ->
+                    @Exhaustive
+                    when (podcastViewState) {
+                        is PodcastViewState.NoPodcast -> {
+                            emit(PodcastContributionsViewState.None)
+                        }
+                        is PodcastViewState.Available -> {
+                            chatRepository.getChatById(args.chatId).firstOrNull()?.let { chat ->
+                                val owner = getOwner()
+
+                                messageRepository.getPaymentsTotalFor(podcastViewState.podcast.id).collect { paymentsTotal ->
+                                    if (paymentsTotal != null) {
+                                        val isMyTribe = chat.isTribeOwnedByAccount(owner.nodePubKey)
+                                        val label = app.getString(
+                                            if (isMyTribe) {
+                                                R.string.chat_tribe_earned
+                                            } else {
+                                                R.string.chat_tribe_contributed
+                                            }
+                                        )
+
+                                        emit(PodcastContributionsViewState.Contributions(
+                                            label + " ${paymentsTotal.asFormattedString(appendUnit = true)}"
+                                        ))
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }.stateIn(
+                viewModelScope,
+                SharingStarted.WhileSubscribed(2_000),
+                PodcastContributionsViewState.None
+            )
+    }
+
+    val contributionsViewStateContainer: ViewStateContainer<PodcastContributionsViewState> by lazy {
+        PodcastContributionsViewStateContainer()
     }
 
     init {
