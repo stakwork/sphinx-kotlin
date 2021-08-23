@@ -5,6 +5,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.chat_tribe.model.TribePodcastData
+import chat.sphinx.chat_tribe.navigation.TribeChatNavigator
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
 import chat.sphinx.concept_network_query_chat.model.toPodcast
 import chat.sphinx.concept_repository_message.MessageRepository
@@ -13,6 +14,7 @@ import chat.sphinx.concept_service_media.MediaPlayerServiceState
 import chat.sphinx.concept_service_media.UserAction
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
+import chat.sphinx.podcast_player.objects.toParcelablePodcast
 import chat.sphinx.podcast_player.ui.getMediaDuration
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_contact.Contact
@@ -35,6 +37,7 @@ internal class PodcastViewModel @Inject constructor(
     dispatchers: CoroutineDispatchers,
     handle: SavedStateHandle,
     private val accountOwner: StateFlow<Contact?>,
+    private val navigator: TribeChatNavigator,
     private val messageRepository: MessageRepository,
     private val networkQueryChat: NetworkQueryChat,
     private val mediaPlayerServiceController: MediaPlayerServiceController,
@@ -275,7 +278,18 @@ internal class PodcastViewModel @Inject constructor(
                                         }
                                     },
                                     clickTitle = OnClickCallback {
-                                        // TODO: Navigate to podcast details
+                                        val vs = currentViewState
+
+                                        if (vs !is PodcastViewState.Available) {
+                                            return@OnClickCallback
+                                        }
+
+                                        viewModelScope.launch(mainImmediate) {
+                                            navigator.toPodcastPlayerScreen(
+                                                args.chatId,
+                                                vs.podcast.toParcelablePodcast(),
+                                            )
+                                        }
                                     },
                                     podcast
 

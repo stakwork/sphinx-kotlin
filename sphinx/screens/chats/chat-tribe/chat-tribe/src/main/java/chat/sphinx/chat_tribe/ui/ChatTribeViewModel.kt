@@ -29,7 +29,6 @@ import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.util.getInitials
 import chat.sphinx.wrapper_message.Message
 import chat.sphinx.wrapper_message.getColorKey
-import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_message.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
@@ -38,7 +37,6 @@ import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import chat.sphinx.concept_link_preview.LinkPreviewHandler
 import chat.sphinx.wrapper_chat.*
 import io.matthewnelson.concept_media_cache.MediaCacheHandler
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.annotation.meta.Exhaustive
@@ -83,15 +81,6 @@ internal class ChatTribeViewModel @Inject constructor(
     override val contactId: ContactId?
         get() = null
 
-//    val podcastViewStateContainer: ViewStateContainer<PodcastViewState> by lazy {
-//        ViewStateContainer(PodcastViewState.Idle)
-//    }
-
-    // TODO: Move to PodcastViewModel
-//    val boostAnimationViewStateContainer: ViewStateContainer<BoostAnimationViewState> by lazy {
-//        ViewStateContainer(BoostAnimationViewState.Idle)
-//    }
-
     override val chatSharedFlow: SharedFlow<Chat?> = flow {
         emitAll(chatRepository.getChatById(chatId))
     }.distinctUntilChanged().shareIn(
@@ -99,8 +88,6 @@ internal class ChatTribeViewModel @Inject constructor(
         SharingStarted.WhileSubscribed(2_000),
         replay = 1,
     )
-
-//    var podcast: Podcast? = null
 
     override val headerInitialHolderSharedFlow: SharedFlow<InitialHolderViewState> = flow {
         chatSharedFlow.collect { chat ->
@@ -174,42 +161,6 @@ internal class ChatTribeViewModel @Inject constructor(
         return super.sendMessage(builder)
     }
 
-//    override fun mediaServiceState(serviceState: MediaPlayerServiceState) {
-//        if (serviceState is MediaPlayerServiceState.ServiceActive.MediaState) {
-//            if (serviceState.chatId != chatId) {
-//                return
-//            }
-//        }
-//
-//        podcast?.let { podcast ->
-//            @Exhaustive
-//            when (serviceState) {
-//                is MediaPlayerServiceState.ServiceActive.MediaState.Playing -> {
-//                    podcast.playingEpisodeUpdate(serviceState.episodeId, serviceState.currentTime, serviceState.episodeDuration.toLong())
-//                    podcastViewStateContainer.updateViewState(PodcastViewState.MediaStateUpdate(podcast))
-//                }
-//                is MediaPlayerServiceState.ServiceActive.MediaState.Paused -> {
-//                    podcast.pauseEpisodeUpdate()
-//                    podcastViewStateContainer.updateViewState(PodcastViewState.MediaStateUpdate(podcast))
-//                }
-//                is MediaPlayerServiceState.ServiceActive.MediaState.Ended -> {
-//                    podcast.endEpisodeUpdate(serviceState.episodeId, ::retrieveEpisodeDuration)
-//                    podcastViewStateContainer.updateViewState(PodcastViewState.MediaStateUpdate(podcast))
-//                }
-//                is MediaPlayerServiceState.ServiceActive.ServiceConnected -> {
-//                    setPaymentsDestinations()
-//                }
-//                is MediaPlayerServiceState.ServiceActive.ServiceLoading -> {
-//                    podcastViewStateContainer.updateViewState(PodcastViewState.ServiceLoading)
-//                }
-//                is MediaPlayerServiceState.ServiceInactive -> {
-//                    podcast.pauseEpisodeUpdate()
-//                    podcastViewStateContainer.updateViewState(PodcastViewState.ServiceInactive)
-//                }
-//            }
-//        }
-//    }
-
     private val _podcastDataStateFlow: MutableStateFlow<TribePodcastData> by lazy {
         MutableStateFlow(TribePodcastData.Loading)
     }
@@ -219,20 +170,6 @@ internal class ChatTribeViewModel @Inject constructor(
 
 
     init {
-//        mediaPlayerServiceController.addListener(this)
-
-        // TODO: Move to PodcastViewModel
-//        viewModelScope.launch(mainImmediate) {
-//            val owner = getOwner()
-//
-//            boostAnimationViewStateContainer.updateViewState(
-//                BoostAnimationViewState.BoosAnimationInfo(
-//                    owner.photoUrl,
-//                    owner.tipAmount
-//                )
-//            )
-//        }
-
         viewModelScope.launch(mainImmediate) {
             chatRepository.getChatById(chatId).firstOrNull()?.let { chat ->
 
@@ -247,33 +184,6 @@ internal class ChatTribeViewModel @Inject constructor(
                     } ?: run {
                         _podcastDataStateFlow.value = TribePodcastData.Result.NoPodcast
                     }
-
-//                    networkQueryChat.getPodcastFeed(podcastData.first, podcastData.second).collect { response ->
-//                        @Exhaustive
-//                        when (response) {
-//                            is LoadResponse.Loading -> {}
-//                            is Response.Error -> {}
-//                            is Response.Success -> {
-//                                val pod = response.value.toPodcast()
-//                                podcast = pod
-//
-//                                chat.metaData?.let { nnMetaData ->
-//                                    pod.setMetaData(nnMetaData)
-//                                }
-//
-//                                podcastViewStateContainer.updateViewState(
-//                                    PodcastViewState.PodcastLoaded(pod)
-//                                )
-//
-//                                mediaPlayerServiceController.submitAction(
-//                                    UserAction.AdjustSatsPerMinute(
-//                                        chatId,
-//                                        pod.getMetaData()
-//                                    )
-//                                )
-//                            }
-//                        }
-//                    }
                 } ?: run {
                     _podcastDataStateFlow.value = TribePodcastData.Result.NoPodcast
                 }
@@ -286,33 +196,6 @@ internal class ChatTribeViewModel @Inject constructor(
 //            loadPodcastContributionsString()
         }
     }
-
-//    override fun onCleared() {
-//        super.onCleared()
-//        mediaPlayerServiceController.removeListener(this)
-//    }
-//
-//    private suspend fun getOwner(): Contact {
-//        return contactRepository.accountOwner.value.let { contact ->
-//            if (contact != null) {
-//                contact
-//            } else {
-//                var resolvedOwner: Contact? = null
-//                try {
-//                    contactRepository.accountOwner.collect { ownerContact ->
-//                        if (ownerContact != null) {
-//                            resolvedOwner = ownerContact
-//                            throw Exception()
-//                        }
-//                    }
-//                } catch (e: Exception) {
-//                }
-//                delay(25L)
-//
-//                resolvedOwner!!
-//            }
-//        }
-//    }
 
     override suspend fun processMemberRequest(
         contactId: ContactId,
@@ -377,119 +260,7 @@ internal class ChatTribeViewModel @Inject constructor(
 //            }
 //        }
 //    }
-//
-//    fun goToPodcastPlayerScreen() {
-//        podcast?.let { podcast ->
-//            viewModelScope.launch(mainImmediate) {
-//                (chatNavigator as TribeChatNavigator).toPodcastPlayerScreen(chatId, podcast.toParcelablePodcast())
-//            }
-//        }
-//    }
-//
-//    fun playPausePodcast() {
-//        podcast?.let { podcast ->
-//            podcast.getCurrentEpisode().let { currentEpisode ->
-//                if (currentEpisode.playing) {
-//                    pauseEpisode(currentEpisode)
-//                } else {
-//                    playEpisode(currentEpisode, podcast.currentTime)
-//                }
-//            }
-//        }
-//    }
-//
-//    private fun playEpisode(episode: PodcastEpisode, startTime: Int) {
-//        viewModelScope.launch(mainImmediate) {
-//            podcast?.let { podcast ->
-//                withContext(io) {
-//                    podcast.didStartPlayingEpisode(episode, startTime, ::retrieveEpisodeDuration)
-//                }
-//
-//                mediaPlayerServiceController.submitAction(
-//                    UserAction.ServiceAction.Play(
-//                        chatId,
-//                        podcast.id,
-//                        episode.id,
-//                        episode.enclosureUrl,
-//                        Sat(podcast.satsPerMinute),
-//                        podcast.speed,
-//                        startTime,
-//                    )
-//                )
-//            }
-//        }
-//    }
-//
-//    private fun pauseEpisode(episode: PodcastEpisode) {
-//        viewModelScope.launch(mainImmediate) {
-//            podcast?.let { podcast ->
-//                podcast.didPausePlayingEpisode(episode)
-//
-//                mediaPlayerServiceController.submitAction(
-//                    UserAction.ServiceAction.Pause(chatId, episode.id)
-//                )
-//            }
-//        }
-//    }
-//
-//    fun seekTo(time: Int) {
-//        viewModelScope.launch(mainImmediate) {
-//            podcast?.let { podcast ->
-//                podcast.didSeekTo(podcast.currentTime + time)
-//
-//                val metaData = podcast.getMetaData()
-//
-//                mediaPlayerServiceController.submitAction(
-//                    UserAction.ServiceAction.Seek(chatId, metaData)
-//                )
-//            }
-//        }
-//    }
-//
-//    private fun setPaymentsDestinations() {
-//        viewModelScope.launch(mainImmediate) {
-//            podcast?.value?.destinations?.let { destinations ->
-//                mediaPlayerServiceController.submitAction(
-//                    UserAction.SetPaymentsDestinations(
-//                        args.chatId,
-//                        destinations
-//                    )
-//                )
-//            }
-//        }
-//    }
-//
-//    fun sendPodcastBoost() {
-//        viewModelScope.launch(mainImmediate) {
-//            val owner: Contact = getOwner()
-//
-//            owner.tipAmount?.let { tipAmount ->
-//                podcast?.let { nnPodcast ->
-//
-//                    if (tipAmount.value > 0) {
-//                        val metaData = nnPodcast.getMetaData(tipAmount)
-//
-//                        messageRepository.sendPodcastBoost(chatId, nnPodcast)
-//
-//                        mediaPlayerServiceController.submitAction(
-//                            UserAction.SendBoost(
-//                                chatId,
-//                                nnPodcast.id,
-//                                metaData,
-//                                nnPodcast.value.destinations
-//                            )
-//                        )
-//                    }
-//                }
-//            }
-//        }
-//    }
-//
-//    fun retrieveEpisodeDuration(episodeUrl: String): Long {
-//        val uri = Uri.parse(episodeUrl)
-//        return uri.getMediaDuration()
-//    }
-//
+
     override fun goToChatDetailScreen() {
         viewModelScope.launch(mainImmediate) {
 

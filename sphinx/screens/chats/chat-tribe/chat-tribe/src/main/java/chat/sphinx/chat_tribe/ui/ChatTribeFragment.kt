@@ -22,8 +22,6 @@ import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.menu_bottom.databinding.LayoutMenuBottomBinding
 import chat.sphinx.resources.databinding.LayoutBoostFireworksBinding
 import chat.sphinx.resources.getString
-import chat.sphinx.wrapper_common.PhotoUrl
-import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_view.Px
 import dagger.hilt.android.AndroidEntryPoint
@@ -123,7 +121,7 @@ internal class ChatTribeFragment: ChatFragment<
             textViewPlayPauseButton.setOnClickListener {
                 podcastViewModel.currentViewState.clickPlayPause?.invoke()
             }
-            root.setOnClickListener {
+            textViewEpisodeTitle.setOnClickListener {
                 podcastViewModel.currentViewState.clickTitle?.invoke()
             }
         }
@@ -141,27 +139,6 @@ internal class ChatTribeFragment: ChatFragment<
         })
     }
 
-//    private suspend fun setupBoostAnimation(
-//        photoUrl: PhotoUrl?,
-//        amount: Sat?
-//    ) {
-//        boostAnimationBinding.apply {
-//
-//            photoUrl?.let { photoUrl ->
-//                imageLoader.load(
-//                    imageViewProfilePicture,
-//                    photoUrl.value,
-//                    ImageLoaderOptions.Builder()
-//                        .placeholderResId(chat.sphinx.podcast_player.R.drawable.ic_profile_avatar_circle)
-//                        .transformation(Transformation.CircleCrop)
-//                        .build()
-//                )
-//            }
-//
-//            textViewSatsAmount.text = amount?.asFormattedString()
-//        }
-//    }
-//
 //    private fun configureContributions(contributions: String) {
 //        headerBinding.apply {
 //            textViewChatHeaderContributionsIcon.visible
@@ -172,85 +149,6 @@ internal class ChatTribeFragment: ChatFragment<
 //            }
 //        }
 //    }
-//
-//    private fun configurePodcastPlayer(podcast: Podcast) {
-//        podcastPlayerBinding.apply {
-//            if (root.isGone) {
-//                scrollToBottom(callback = {
-//                    root.goneIfFalse(true)
-//                })
-//            }
-//
-//            togglePlayPauseButton(podcast.isPlaying)
-//
-//            val currentEpisode = podcast.getCurrentEpisode()
-//            textViewEpisodeTitle.text = currentEpisode.title
-//
-//            setProgressBar(podcast)
-//        }
-//
-//        addPodcastOnClickListeners(podcast)
-//    }
-//
-//    private fun setProgressBar(podcast: Podcast) {
-//        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-//            val progress: Int = withContext(viewModel.io) {
-//                try {
-//                    podcast.getPlayingProgress(viewModel::retrieveEpisodeDuration)
-//                } catch (e: ArithmeticException) {
-//                    0
-//                }
-//            }
-//
-//            podcastPlayerBinding.apply {
-//                val progressWith =
-//                    progressBarContainer.measuredWidth.toDouble() * (progress.toDouble() / 100.0)
-//                progressBar.layoutParams.width = progressWith.toInt()
-//                progressBar.requestLayout()
-//            }
-//        }
-//    }
-//
-//    private fun toggleLoadingWheel(show: Boolean) {
-//        podcastPlayerBinding.apply {
-//            progressBarAudioLoading.goneIfFalse(show)
-//        }
-//    }
-//
-//    private fun togglePlayPauseButton(playing: Boolean) {
-//        podcastPlayerBinding.apply {
-//            textViewPlayPauseButton.text = getString(
-//                if (playing) R.string.material_icon_name_pause_button else R.string.material_icon_name_play_button
-//            )
-//        }
-//    }
-//
-//    private fun addPodcastOnClickListeners(podcast: Podcast) {
-//        podcastPlayerBinding.apply {
-//            textViewEpisodeTitle.setOnClickListener {
-//                viewModel.goToPodcastPlayerScreen()
-//            }
-//
-//            textViewPlayPauseButton.setOnClickListener {
-//                viewModel.playPausePodcast()
-//            }
-//
-//            textViewForward30Button.setOnClickListener {
-//                viewModel.seekTo(30000)
-//                setProgressBar(podcast)
-//            }
-//
-//            textViewBoostPodcastButton.setOnClickListener {
-//                viewModel.sendPodcastBoost()
-//
-//                boostAnimationBinding.apply {
-//                    root.visible
-//
-//                    lottieAnimationView.playAnimation()
-//                }
-//            }
-//        }
-//    }
 
     private val progressWidth: Px by lazy {
         Px(binding.root.measuredWidth.toFloat())
@@ -258,37 +156,6 @@ internal class ChatTribeFragment: ChatFragment<
 
     override fun subscribeToViewStateFlow() {
         super.subscribeToViewStateFlow()
-
-//        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-//            viewModel.podcastViewStateContainer.collect { viewState ->
-//                @Exhaustive
-//                when (viewState) {
-//                    is PodcastViewState.Idle -> {
-//                    }
-//
-//                    is PodcastViewState.PodcastLoaded -> {
-//                        configurePodcastPlayer(viewState.podcast)
-//                    }
-//
-//                    is PodcastViewState.PodcastContributionsLoaded -> {
-//                        configureContributions(viewState.contributions)
-//                    }
-//
-//                    is PodcastViewState.ServiceInactive -> {
-//                        togglePlayPauseButton(false)
-//                    }
-//
-//                    is PodcastViewState.ServiceLoading -> {
-//                        toggleLoadingWheel(true)
-//                    }
-//
-//                    is PodcastViewState.MediaStateUpdate -> {
-//                        toggleLoadingWheel(false)
-//                        configurePodcastPlayer(viewState.podcast)
-//                    }
-//                }
-//            }
-//        }
 
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             podcastViewModel.boostAnimationViewStateContainer.collect { viewState ->
