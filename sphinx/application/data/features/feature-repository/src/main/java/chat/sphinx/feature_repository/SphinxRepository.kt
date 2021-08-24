@@ -805,7 +805,7 @@ abstract class SphinxRepository(
         }
     }
 
-    override suspend fun connectWithContact(
+    override suspend fun connectToContact(
         contactAlias: ContactAlias,
         lightningNodePubKey: LightningNodePubKey,
         lightningRouteHint: LightningRouteHint?,

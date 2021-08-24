@@ -33,7 +33,7 @@ interface ContactRepository {
         photoUrl: PhotoUrl? = null
     ): Flow<LoadResponse<Any, ResponseError>>
 
-    suspend fun connectWithContact(
+    suspend fun connectToContact(
         contactAlias: ContactAlias,
         lightningNodePubKey: LightningNodePubKey,
         lightningRouteHint: LightningRouteHint?,

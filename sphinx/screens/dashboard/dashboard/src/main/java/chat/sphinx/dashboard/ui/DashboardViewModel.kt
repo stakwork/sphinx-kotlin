@@ -344,7 +344,7 @@ internal class DashboardViewModel @Inject constructor(
 
                 personInfo?.owner_pubkey?.toLightningNodePubKey()?.let { pubKey ->
                     personInfo?.owner_contact_key?.toContactKey()?.let { contactKey ->
-                        val response = contactRepository.connectWithContact(
+                        val response = contactRepository.connectToContact(
                             alias,
                             pubKey,
                             routeHint,
