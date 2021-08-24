@@ -257,7 +257,9 @@ internal class DashboardFragment : MotionLayoutFragment<
             buttonConnect.setOnClickListener {
                 progressBarConnect.visible
 
-                // TODO connect logic
+                viewModel.connectToContact(
+                    editTextDashboardPeoplePopupMessage.text.toString()
+                )
             }
         }
     }
@@ -379,7 +381,6 @@ internal class DashboardFragment : MotionLayoutFragment<
                 when (viewState) {
                     is DeepLinkPopupViewState.PopupDismissed -> {
                         binding.layoutDashboardPopup.apply {
-                            root.gone
 
                             layoutDashboardAuthorizePopup.apply {
                                 root.gone
@@ -390,13 +391,15 @@ internal class DashboardFragment : MotionLayoutFragment<
                                 root.gone
                                 progressBarConnect.gone
                             }
+
+                            root.gone
                         }
                     }
                     is DeepLinkPopupViewState.ExternalAuthorizePopup -> {
                         binding.layoutDashboardPopup.apply {
 
                             layoutDashboardAuthorizePopup.apply {
-                                textViewDashboardPopupAuthorizeName.text = viewState.link.host
+                                textViewDashboardPopupAuthorizeName.text = viewState.host
                                 layoutConstraintAuthorizePopup.visible
                                 root.visible
                             }
@@ -406,9 +409,13 @@ internal class DashboardFragment : MotionLayoutFragment<
                     }
                     is DeepLinkPopupViewState.LoadingPeopleConnectPopup -> {
                         binding.layoutDashboardPopup.apply {
+
                             layoutDashboardConnectPopup.apply {
                                 layoutConstraintDashboardConnectLoading.visible
+                                root.visible
                             }
+
+                            root.visible
                         }
                     }
                     is DeepLinkPopupViewState.PeopleConnectPopup -> {

@@ -9,7 +9,7 @@ sealed class DeepLinkPopupViewState: ViewState<DeepLinkPopupViewState>() {
     object PopupDismissed: DeepLinkPopupViewState()
 
     class ExternalAuthorizePopup(
-        val link: ExternalAuthorizeLink
+        val host: String
     ): DeepLinkPopupViewState()
 
     object LoadingPeopleConnectPopup: DeepLinkPopupViewState()

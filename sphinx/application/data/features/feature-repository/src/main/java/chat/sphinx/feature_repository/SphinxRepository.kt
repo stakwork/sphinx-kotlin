@@ -752,14 +752,18 @@ abstract class SphinxRepository(
         contactAlias: ContactAlias,
         lightningNodePubKey: LightningNodePubKey,
         lightningRouteHint: LightningRouteHint?,
+        contactKey: ContactKey?,
+        photoUrl: PhotoUrl?
     ): Flow<LoadResponse<Any, ResponseError>> = flow {
         val queries = coreDB.getSphinxDatabaseQueries()
 
         val postContactDto = PostContactDto(
             alias = contactAlias.value,
             public_key = lightningNodePubKey.value,
+            status = ContactStatus.CONFIRMED.absoluteValue,
             route_hint = lightningRouteHint?.value,
-            status = ContactStatus.CONFIRMED.absoluteValue
+            contact_key = contactKey?.value,
+            photo_url = photoUrl?.value
         )
 
         val sharedFlow: MutableSharedFlow<Response<Boolean, ResponseError>> =
@@ -799,6 +803,51 @@ abstract class SphinxRepository(
                 emit(response)
             }
         }
+    }
+
+    override suspend fun connectWithContact(
+        contactAlias: ContactAlias,
+        lightningNodePubKey: LightningNodePubKey,
+        lightningRouteHint: LightningRouteHint?,
+        contactKey: ContactKey,
+        message: String,
+        photoUrl: PhotoUrl?,
+        priceToMeet: Sat,
+    ): Response<ContactId?, ResponseError> {
+        var response: Response<ContactId?, ResponseError> = Response.Error(
+            ResponseError("Something went wrong, please try again later")
+        )
+
+        createContact(contactAlias, lightningNodePubKey, lightningRouteHint, contactKey, photoUrl).collect { loadResponse ->
+            @Exhaustive
+            when(loadResponse) {
+                is LoadResponse.Loading -> {}
+
+                is Response.Error -> {
+                    response = loadResponse
+                }
+                is Response.Success -> {
+                    val contact = getContactByPubKey(lightningNodePubKey).firstOrNull()
+
+                    response = if (contact != null) {
+                        val messageBuilder = SendMessage.Builder()
+                        messageBuilder.setText(message)
+                        messageBuilder.setContactId(contact.id)
+                        messageBuilder.setPriceToMeet(priceToMeet)
+
+                        sendMessage(messageBuilder.build())
+
+                        Response.Success(contact.id)
+                    } else {
+                        Response.Error(
+                            ResponseError("Contact not found")
+                        )
+                    }
+                }
+            }
+        }
+
+        return response
     }
 
     override suspend fun updateOwner(
@@ -1728,7 +1777,8 @@ abstract class SphinxRepository(
 
             val pricePerMessage = chat?.pricePerMessage?.value ?: 0
             val escrowAmount = chat?.escrowAmount?.value ?: 0
-            val messagePrice = (pricePerMessage + escrowAmount).toSat() ?: Sat(0)
+            val priceToMeet = sendMessage.priceToMeet?.value ?: 0
+            val messagePrice = (pricePerMessage + escrowAmount + priceToMeet).toSat() ?: Sat(0)
 
             val provisionalMessageId: MessageId? = chat?.let { chatDbo ->
                 // Build provisional message and insert

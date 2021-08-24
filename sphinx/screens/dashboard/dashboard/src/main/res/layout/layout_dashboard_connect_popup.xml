@@ -72,7 +72,7 @@
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/text_view_dashboard_people_popup_description"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:fontFamily="@font/roboto_regular"
             android:gravity="center"
@@ -84,7 +84,7 @@
             android:maxLines="3"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/text_view_dashboard_people_popup_price_to_meet"/>
+            app:layout_constraintTop_toBottomOf="@+id/text_view_dashboard_people_popup_price_to_meet" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/layout_constraint_dashboard_people_popup_message_container"
