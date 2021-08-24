@@ -75,4 +75,8 @@
     <!-- Deep link authorize popup -->
     <string name="dashboard_authorize_popup_title">¿Quieres autorizar a:</string>
     <string name="dashboard_authorize_button">AUTORIZAR</string>
+    <string name="dashboard_connect_button">CONECTAR</string>
+    <string name="dashboard_connect_price_to_meet">Precio para conectar: %s</string>
+    <string name="dashboard_connect_description_missing">Sin descriptión</string>
+    <string name="dashboard_connect_initial_message_hint">Mensaje inicial a %s</string>
 </resources>

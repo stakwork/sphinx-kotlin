@@ -1,6 +1,7 @@
 package chat.sphinx.dashboard.ui.viewstates
 
 import chat.sphinx.wrapper_common.ExternalAuthorizeLink
+import chat.sphinx.wrapper_common.PeopleConnectLink
 import io.matthewnelson.concept_views.viewstate.ViewState
 
 sealed class DeepLinkPopupViewState: ViewState<DeepLinkPopupViewState>() {
@@ -9,5 +10,14 @@ sealed class DeepLinkPopupViewState: ViewState<DeepLinkPopupViewState>() {
 
     class ExternalAuthorizePopup(
         val link: ExternalAuthorizeLink
+    ): DeepLinkPopupViewState()
+
+    object LoadingPeopleConnectPopup: DeepLinkPopupViewState()
+
+    class PeopleConnectPopup(
+        val alias: String?,
+        val photoUrl: String?,
+        val description: String?,
+        val priceToMeet: Long?
     ): DeepLinkPopupViewState()
 }

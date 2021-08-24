@@ -11,6 +11,7 @@ import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_background_login.BackgroundLoginHandler
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_lightning.model.invoice.PayRequestDto
+import chat.sphinx.concept_network_query_verify_external.NetworkQueryAuthorizeExternal
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_network_query_version.NetworkQueryVersion
@@ -38,12 +39,10 @@ import chat.sphinx.scanner_view_model_coordinator.request.ScannerRequest
 import chat.sphinx.scanner_view_model_coordinator.response.ScannerResponse
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.isConversation
-import chat.sphinx.wrapper_common.ExternalAuthorizeLink
+import chat.sphinx.wrapper_common.*
 import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.dashboard.ContactId
-import chat.sphinx.wrapper_common.isValidExternalAuthorizeLink
 import chat.sphinx.wrapper_common.lightning.*
-import chat.sphinx.wrapper_common.toExternalAuthorizeLink
 import chat.sphinx.wrapper_common.tribe.TribeJoinLink
 import chat.sphinx.wrapper_common.tribe.isValidTribeJoinLink
 import chat.sphinx.wrapper_common.tribe.toTribeJoinLink
@@ -103,6 +102,7 @@ internal class DashboardViewModel @Inject constructor(
 
     private val networkQueryLightning: NetworkQueryLightning,
     private val networkQueryVersion: NetworkQueryVersion,
+    private val networkQueryAuthorizeExternal: NetworkQueryAuthorizeExternal,
 
     private val pushNotificationRegistrar: PushNotificationRegistrar,
 
@@ -138,6 +138,8 @@ internal class DashboardViewModel @Inject constructor(
                 handleTribeJoinLink(tribeJoinLink)
             } ?: deepLink?.toExternalAuthorizeLink()?.let { externalAuthorizeLink ->
                 handleExternalAuthorizeLink(externalAuthorizeLink)
+            } ?: deepLink?.toPeopleConnectLink()?.let { peopleConnectLink ->
+                handlePeopleConnectLink(peopleConnectLink)
             }
         }
     }
@@ -151,6 +153,7 @@ internal class DashboardViewModel @Inject constructor(
                             return when {
                                 data.isValidTribeJoinLink ||
                                 data.isValidExternalAuthorizeLink ||
+                                data.isValidPeopleConnectLink ||
                                 data.isValidLightningPaymentRequest ||
                                 data.isValidLightningNodePubKey ||
                                 data.isValidVirtualNodeAddress ->
@@ -179,6 +182,10 @@ internal class DashboardViewModel @Inject constructor(
                 } ?: code.toExternalAuthorizeLink()?.let { externalAuthorizeLink ->
 
                     handleExternalAuthorizeLink(externalAuthorizeLink)
+
+                } ?: code.toPeopleConnectLink()?.let { peopleConnectLink ->
+
+                    handlePeopleConnectLink(peopleConnectLink)
 
                 } ?: code.toLightningNodePubKey()?.let { lightningNodePubKey ->
 
@@ -242,19 +249,66 @@ internal class DashboardViewModel @Inject constructor(
     private suspend fun handleContactLink(pubKey: LightningNodePubKey, routeHint: LightningRouteHint?) {
         contactRepository.getContactByPubKey(pubKey).firstOrNull()?.let { contact ->
 
-            chatRepository.getConversationByContactId(contact.id).firstOrNull()?.let { chat ->
-
-                dashboardNavigator.toChatContact(chat.id, contact.id)
-                
-            } ?: dashboardNavigator.toChatContact(null, contact.id)
+            goToContactChat(contact)
 
         } ?: dashboardNavigator.toAddContactDetail(pubKey, routeHint)
+    }
+
+    private suspend fun goToContactChat(contact: Contact) {
+        chatRepository.getConversationByContactId(contact.id).firstOrNull()?.let { chat ->
+
+            dashboardNavigator.toChatContact(chat.id, contact.id)
+
+        } ?: dashboardNavigator.toChatContact(null, contact.id)
     }
 
     private fun handleExternalAuthorizeLink(link: ExternalAuthorizeLink) {
         deepLinkPopupViewStateContainer.updateViewState(
             DeepLinkPopupViewState.ExternalAuthorizePopup(link)
         )
+    }
+
+    private suspend fun handlePeopleConnectLink(link: PeopleConnectLink) {
+        link.publicKey.toLightningNodePubKey()?.let { lightningNodePubKey ->
+            contactRepository.getContactByPubKey(lightningNodePubKey).firstOrNull()?.let { contact ->
+
+                goToContactChat(contact)
+
+            } ?: loadPeopleConnectPopup(link)
+        }
+    }
+
+    private suspend fun loadPeopleConnectPopup(link: PeopleConnectLink) {
+        deepLinkPopupViewStateContainer.updateViewState(
+            DeepLinkPopupViewState.LoadingPeopleConnectPopup
+        )
+
+        networkQueryAuthorizeExternal.getPersonInfo(link.host, link.publicKey).collect { loadResponse ->
+            @Exhaustive
+            when (loadResponse) {
+                is LoadResponse.Loading -> {}
+
+                is Response.Error -> {
+                    deepLinkPopupViewStateContainer.updateViewState(
+                        DeepLinkPopupViewState.PopupDismissed
+                    )
+                    submitSideEffect(
+                        DashboardSideEffect.Notify("Failed to retrieve person information")
+                    )
+                }
+                is Response.Success -> {
+                    deepLinkPopupViewStateContainer.updateViewState(
+                        DeepLinkPopupViewState.PeopleConnectPopup(
+                            loadResponse.value.owner_alias,
+                            loadResponse.value.img,
+                            loadResponse.value.description,
+                            loadResponse.value.price_to_meet
+                        )
+                    )
+                }
+            }
+        }
+
     }
 
     fun authorizeExternal() {

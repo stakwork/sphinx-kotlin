@@ -34,6 +34,7 @@ import chat.sphinx.kotlin_response.Response
 import chat.sphinx.resources.SphinxToastUtils
 import chat.sphinx.resources.inputMethodManager
 import chat.sphinx.wrapper_common.lightning.asFormattedString
+import chat.sphinx.wrapper_common.lightning.toSat
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.navigation.CloseAppOnBackPress
 import io.matthewnelson.android_feature_screens.ui.motionlayout.MotionLayoutFragment
@@ -89,7 +90,7 @@ internal class DashboardFragment : MotionLayoutFragment<
         setupDashboardHeader()
         setupNavBar()
         setupNavDrawer()
-        setupPopup()
+        setupPopups()
     }
 
     override fun onResume() {
@@ -232,8 +233,8 @@ internal class DashboardFragment : MotionLayoutFragment<
         }
     }
 
-    private fun setupPopup() {
-        binding.layoutDashboardPopup.apply {
+    private fun setupPopups() {
+        binding.layoutDashboardPopup.layoutDashboardAuthorizePopup.apply {
             textViewDashboardPopupClose.setOnClickListener {
                 viewModel.deepLinkPopupViewStateContainer.updateViewState(
                     DeepLinkPopupViewState.PopupDismissed
@@ -243,6 +244,20 @@ internal class DashboardFragment : MotionLayoutFragment<
             buttonAuthorize.setOnClickListener {
                 progressBarAuthorize.visible
                 viewModel.authorizeExternal()
+            }
+        }
+
+        binding.layoutDashboardPopup.layoutDashboardConnectPopup.apply {
+            textViewDashboardPopupClose.setOnClickListener {
+                viewModel.deepLinkPopupViewStateContainer.updateViewState(
+                    DeepLinkPopupViewState.PopupDismissed
+                )
+            }
+
+            buttonConnect.setOnClickListener {
+                progressBarConnect.visible
+
+                // TODO connect logic
             }
         }
     }
@@ -365,14 +380,70 @@ internal class DashboardFragment : MotionLayoutFragment<
                     is DeepLinkPopupViewState.PopupDismissed -> {
                         binding.layoutDashboardPopup.apply {
                             root.gone
-                            progressBarAuthorize.gone
+
+                            layoutDashboardAuthorizePopup.apply {
+                                root.gone
+                                progressBarAuthorize.gone
+                            }
+
+                            layoutDashboardConnectPopup.apply {
+                                root.gone
+                                progressBarConnect.gone
+                            }
                         }
                     }
                     is DeepLinkPopupViewState.ExternalAuthorizePopup -> {
                         binding.layoutDashboardPopup.apply {
-                            textViewDashboardPopupAuthorizeName.text = viewState.link.host
 
-                            layoutConstraintAuthorizePopup.visible
+                            layoutDashboardAuthorizePopup.apply {
+                                textViewDashboardPopupAuthorizeName.text = viewState.link.host
+                                layoutConstraintAuthorizePopup.visible
+                                root.visible
+                            }
+
+                            root.visible
+                        }
+                    }
+                    is DeepLinkPopupViewState.LoadingPeopleConnectPopup -> {
+                        binding.layoutDashboardPopup.apply {
+                            layoutDashboardConnectPopup.apply {
+                                layoutConstraintDashboardConnectLoading.visible
+                            }
+                        }
+                    }
+                    is DeepLinkPopupViewState.PeopleConnectPopup -> {
+                        binding.layoutDashboardPopup.apply {
+
+                            layoutDashboardConnectPopup.apply {
+                                val alias = viewState.alias ?: getString(R.string.unknown)
+                                textViewDashboardPeoplePopupName.text = alias
+
+                                editTextDashboardPeoplePopupMessage.hint = getString(R.string.dashboard_connect_initial_message_hint, alias)
+                                textViewDashboardPeoplePopupDescription.text = viewState.description ?: "No Description"
+
+                                val priceToMeet = (viewState.priceToMeet ?: 0).toSat()?.asFormattedString(appendUnit = true) ?: ""
+                                textViewDashboardPeoplePopupPriceToMeet.text = getString(R.string.dashboard_connect_price_to_meet, priceToMeet)
+
+                                viewState.photoUrl?.let { url ->
+                                    imageLoader.load(
+                                        imageViewProfilePicture,
+                                        url,
+                                        ImageLoaderOptions.Builder()
+                                            .placeholderResId(R.drawable.ic_profile_avatar_circle)
+                                            .transformation(Transformation.CircleCrop)
+                                            .build()
+                                    )
+                                } ?: imageViewProfilePicture.setImageDrawable(
+                                        ContextCompat.getDrawable(
+                                            binding.root.context,
+                                            R.drawable.ic_profile_avatar_circle
+                                        )
+                                    )
+
+                                layoutConstraintDashboardConnectLoading.gone
+                                root.visible
+                            }
+
                             root.visible
                         }
                     }
