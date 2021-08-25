@@ -4,6 +4,7 @@ import chat.sphinx.concept_network_client_crypto.CryptoHeader
 import chat.sphinx.concept_network_client_crypto.CryptoScheme
 import chat.sphinx.wrapper_meme_server.AuthenticationToken
 import chat.sphinx.wrapper_meme_server.headerKey
+import chat.sphinx.wrapper_meme_server.headerValue
 import chat.sphinx.wrapper_message_media.MediaKeyDecrypted
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.withContext
@@ -27,7 +28,7 @@ internal data class MemeInputStreamRetriever(
     ): InputStream? {
         val request = Request.Builder().apply {
             url(url)
-            addHeader(authenticationToken.headerKey, authenticationToken.value)
+            addHeader(authenticationToken.headerKey, authenticationToken.headerValue)
             mediaKeyDecrypted?.value?.let { key ->
                 val header = CryptoHeader.Decrypt.Builder()
                     .setScheme(CryptoScheme.Decrypt.JNCryptor)
