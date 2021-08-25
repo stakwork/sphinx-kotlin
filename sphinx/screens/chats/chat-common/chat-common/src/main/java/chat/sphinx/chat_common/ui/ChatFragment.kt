@@ -481,7 +481,10 @@ abstract class ChatFragment<
                                 viewModel.replyToMessage(holderState.message)
                             }
                             is MenuItemState.SaveFile -> {
-                                viewModel.saveFile(holderState.message)
+                                viewModel.saveFile(
+                                    holderState.message,
+                                    selectedMessageBinding.includeLayoutMessageHolderSelectedMessage.includeMessageHolderBubble.includeMessageTypeImageAttachment.imageViewAttachmentImage.drawable
+                                )
                             }
                             is MenuItemState.Resend -> {
                                 viewModel.resendMessage(holderState.message)
