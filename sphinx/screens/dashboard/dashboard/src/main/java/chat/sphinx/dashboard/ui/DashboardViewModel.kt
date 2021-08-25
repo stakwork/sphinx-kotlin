@@ -322,21 +322,28 @@ internal class DashboardViewModel @Inject constructor(
     }
 
     private var personInfo: PersonInfoDto? = null
-    fun connectToContact(
-        message: String?
-    ) {
+    fun connectToContact(message: String?) {
+
         viewModelScope.launch(mainImmediate) {
 
-            if (message == null || message.isEmpty()) {
-
+            if (message.isNullOrEmpty()) {
                 submitSideEffect(
                     DashboardSideEffect.Notify(
                         app.getString(R.string.dashboard_connect_message_empty)
                     )
                 )
 
-            } else if (personInfo != null) {
+                deepLinkPopupViewStateContainer.updateViewState(
+                    DeepLinkPopupViewState.PeopleConnectEmptyMessage
+                )
 
+                return@launch
+
+            }
+
+            var errorMessage = app.getString(R.string.dashboard_connect_generic_error)
+
+            if (personInfo != null) {
                 val alias = personInfo?.owner_alias?.toContactAlias() ?: ContactAlias(app.getString(R.string.unknown))
                 val priceToMeet = personInfo?.price_to_meet?.toSat() ?: Sat(0)
                 val routeHint = personInfo?.owner_route_hint?.toLightningRouteHint()
@@ -356,25 +363,27 @@ internal class DashboardViewModel @Inject constructor(
 
                         when (response) {
                             is Response.Error -> {
-                                submitSideEffect(
-                                    DashboardSideEffect.Notify(response.cause.message)
-                                )
+                                errorMessage = response.cause.message
                             }
                             is Response.Success -> {
                                 response.value?.let { contactId ->
                                     dashboardNavigator.toChatContact(null, contactId)
                                 }
+
+                                deepLinkPopupViewStateContainer.updateViewState(
+                                    DeepLinkPopupViewState.PopupDismissed
+                                )
+
+                                return@launch
                             }
                         }
                     }
                 }
-            } else {
-                submitSideEffect(
-                    DashboardSideEffect.Notify(
-                        app.getString(R.string.dashboard_connect_generic_error)
-                    )
-                )
             }
+
+            submitSideEffect(
+                DashboardSideEffect.Notify(errorMessage)
+            )
 
             deepLinkPopupViewStateContainer.updateViewState(
                 DeepLinkPopupViewState.PopupDismissed

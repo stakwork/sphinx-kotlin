@@ -418,6 +418,11 @@ internal class DashboardFragment : MotionLayoutFragment<
                             root.visible
                         }
                     }
+                    is DeepLinkPopupViewState.PeopleConnectEmptyMessage -> {
+                        binding.layoutDashboardPopup.layoutDashboardConnectPopup.apply {
+                            progressBarConnect.gone
+                        }
+                    }
                     is DeepLinkPopupViewState.PeopleConnectPopup -> {
                         binding.layoutDashboardPopup.apply {
 
