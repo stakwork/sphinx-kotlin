@@ -2,11 +2,13 @@ package chat.sphinx.contact.ui
 
 import android.app.Application
 import android.content.Context
-import androidx.lifecycle.SavedStateHandle
+import android.widget.ImageView
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavArgs
+import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_contact.model.ContactForm
+import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
 import chat.sphinx.contact.R
 import chat.sphinx.contact.navigation.ContactNavigator
@@ -26,13 +28,17 @@ abstract class ContactViewModel<ARGS: NavArgs> (
     dispatchers: CoroutineDispatchers,
     private val app: Application,
     protected val contactRepository: ContactRepository,
-    protected val scannerCoordinator: ViewModelCoordinator<ScannerRequest, ScannerResponse>
+    protected val scannerCoordinator: ViewModelCoordinator<ScannerRequest, ScannerResponse>,
+    val userColorsHelper: UserColorsHelper,
+    val imageLoader: ImageLoader<ImageView>
 ): SideEffectViewModel<
         Context,
         ContactSideEffect,
         ContactViewState
         >(dispatchers, ContactViewState.Idle)
 {
+    val contactFormBuilder = ContactForm.Builder()
+
     protected abstract val args: ARGS
 
     protected abstract val fromAddFriend: Boolean
@@ -78,7 +84,7 @@ abstract class ContactViewModel<ARGS: NavArgs> (
         }
     }
 
-    fun saveContact(contactFormBuilder: ContactForm.Builder) {
+    fun saveContact() {
         viewModelScope.launch {
             if (!contactFormBuilder.hasContactAlias) {
                 submitSideEffect(ContactSideEffect.Notify.NicknameAndAddressRequired)

@@ -1,10 +1,13 @@
 package chat.sphinx.new_contact.ui
 
 import android.app.Application
+import android.widget.ImageView
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_contact.model.ContactForm
+import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
 import chat.sphinx.contact.ui.ContactSideEffect
 import chat.sphinx.contact.ui.ContactViewModel
@@ -32,13 +35,17 @@ internal class NewContactViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     app: Application,
     scannerCoordinator: ViewModelCoordinator<ScannerRequest, ScannerResponse>,
-    contactRepository: ContactRepository
+    contactRepository: ContactRepository,
+    userColorsHelper: UserColorsHelper,
+    imageLoader: ImageLoader<ImageView>
 ): ContactViewModel<NewContactFragmentArgs>(
     newContactNavigator,
     dispatchers,
     app,
     contactRepository,
-    scannerCoordinator
+    scannerCoordinator,
+    userColorsHelper,
+    imageLoader,
 ) {
     override val args: NewContactFragmentArgs by savedStateHandle.navArgs()
 

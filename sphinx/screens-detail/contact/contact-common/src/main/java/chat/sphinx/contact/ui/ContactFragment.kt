@@ -7,17 +7,13 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
-import android.widget.ImageView
 import androidx.annotation.LayoutRes
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavArgs
 import androidx.viewbinding.ViewBinding
 import app.cash.exhaustive.Exhaustive
-import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
-import chat.sphinx.concept_repository_contact.model.ContactForm
-import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.contact.R
 import chat.sphinx.contact.databinding.LayoutContactBinding
 import chat.sphinx.detail_resources.databinding.LayoutDetailScreenHeaderBinding
@@ -53,11 +49,6 @@ abstract class ContactFragment<
 
     abstract val headerBinding: LayoutDetailScreenHeaderBinding
     abstract val contactBinding: LayoutContactBinding
-
-    abstract val userColorsHelper: UserColorsHelper
-    abstract val imageLoader: ImageLoader<ImageView>
-
-    private val contactFormBuilder = ContactForm.Builder()
 
     override suspend fun onViewStateFlowCollect(viewState: ContactViewState) {
         @Exhaustive
@@ -153,12 +144,12 @@ abstract class ContactFragment<
             })
 
             buttonSave.setOnClickListener {
-                contactFormBuilder.setContactAlias(editTextContactNickname.text.toString())
-                contactFormBuilder.setLightningNodePubKey(editTextContactAddress.text.toString())
-                contactFormBuilder.setLightningRouteHint(editTextContactRouteHint.text.toString())
+                viewModel.contactFormBuilder.setContactAlias(editTextContactNickname.text.toString())
+                viewModel.contactFormBuilder.setLightningNodePubKey(editTextContactAddress.text.toString())
+                viewModel.contactFormBuilder.setLightningRouteHint(editTextContactRouteHint.text.toString())
 
 
-                viewModel.saveContact(contactFormBuilder)
+                viewModel.saveContact()
             }
 
             (requireActivity() as InsetterActivity).addNavigationBarPadding(layoutConstraintContact)
@@ -200,7 +191,7 @@ abstract class ContactFragment<
                             setBackgroundRandomColor(
                                 R.drawable.chat_initials_circle,
                                 Color.parseColor(
-                                    userColorsHelper.getHexCodeForKey(
+                                    viewModel.userColorsHelper.getHexCodeForKey(
                                         colorKey,
                                         root.context.getRandomHexCode(),
                                     )
@@ -210,7 +201,7 @@ abstract class ContactFragment<
                     }
 
                     sideEffect.photoUrl?.let {
-                        imageLoader.load(
+                        viewModel.imageLoader.load(
                             imageViewProfilePicture,
                             sideEffect.photoUrl.value,
                             ImageLoaderOptions.Builder()
