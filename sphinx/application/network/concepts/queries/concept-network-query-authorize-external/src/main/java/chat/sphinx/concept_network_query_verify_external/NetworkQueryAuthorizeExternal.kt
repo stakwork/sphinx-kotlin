@@ -1,5 +1,6 @@
 package chat.sphinx.concept_network_query_verify_external
 
+import chat.sphinx.concept_network_query_verify_external.model.PersonInfoDto
 import chat.sphinx.concept_network_query_verify_external.model.SignBase64Dto
 import chat.sphinx.concept_network_query_verify_external.model.VerifyExternalDto
 import chat.sphinx.concept_network_query_verify_external.model.VerifyExternalInfoDto
@@ -26,4 +27,9 @@ abstract class NetworkQueryAuthorizeExternal {
         token: String,
         info: VerifyExternalInfoDto,
     ): Flow<LoadResponse<Any, ResponseError>>
+
+    abstract fun getPersonInfo(
+        host: String,
+        publicKey: String
+    ): Flow<LoadResponse<PersonInfoDto, ResponseError>>
 }
