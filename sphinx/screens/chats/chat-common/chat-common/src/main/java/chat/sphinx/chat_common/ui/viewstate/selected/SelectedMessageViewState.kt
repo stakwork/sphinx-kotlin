@@ -11,10 +11,7 @@ internal sealed class SelectedMessageViewState: ViewState<SelectedMessageViewSta
     @Suppress("DataClassPrivateConstructor")
     data class SelectedMessage private constructor(
         val messageHolderViewState: MessageHolderViewState,
-
-        /* The y position of the holder for the screen, not for the recycler view */
         val holderYPos: Px,
-
         val bubbleCenterXPos: Px,
         val bubbleHeight: Px,
         val statusHeaderHeight: Px,
@@ -63,7 +60,7 @@ internal sealed class SelectedMessageViewState: ViewState<SelectedMessageViewSta
                     bubbleHeight,
                     statusHeaderHeight,
                     recyclerViewWidth,
-                    spaceTop.isGreaterThanOrEqualTo(spaceBottom),
+                    spaceTop.isGreaterThanOrEqualTo(spaceBottom)
                 )
             }
 
