@@ -270,7 +270,7 @@ internal class ChatContactViewModel @Inject constructor(
 
     override fun goToChatDetailScreen() {
         viewModelScope.launch(mainImmediate) {
-            contactChatNavigator.toChatDetail(contactId)
+            contactChatNavigator.toEditContactDetail(contactId)
         }
     }
 }

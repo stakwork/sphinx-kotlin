@@ -9,5 +9,5 @@ abstract class ContactChatNavigator(
     navigationDriver: BaseNavigationDriver<NavController>
 ): ChatNavigator(navigationDriver)
 {
-    abstract suspend fun toChatDetail(contactId: ContactId? = null)
+    abstract suspend fun toEditContactDetail(contactId: ContactId)
 }

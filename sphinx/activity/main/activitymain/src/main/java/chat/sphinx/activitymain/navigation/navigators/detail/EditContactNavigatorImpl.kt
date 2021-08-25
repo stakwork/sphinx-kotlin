@@ -5,10 +5,9 @@ import chat.sphinx.edit_contact.navigation.EditContactNavigator
 import javax.inject.Inject
 
 internal class EditContactNavigatorImpl @Inject constructor(
-    val detailDriver: DetailNavigationDriver,
+    detailDriver: DetailNavigationDriver,
 ): EditContactNavigator(detailDriver) {
     override suspend fun closeDetailScreen() {
         (navigationDriver as DetailNavigationDriver).closeDetailScreen()
     }
-
 }

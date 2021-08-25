@@ -26,10 +26,8 @@ internal class ContactChatNavigatorImpl @Inject constructor(
         detailDriver.submitNavigationRequest(ToPaymentSendDetail(contactId, chatId))
     }
 
-    override suspend fun toChatDetail(contactId: ContactId?) {
-        contactId?.let {
-            detailDriver.submitNavigationRequest(ToEditContactDetail(contactId))
-        }
+    override suspend fun toEditContactDetail(contactId: ContactId) {
+        detailDriver.submitNavigationRequest(ToEditContactDetail(contactId))
     }
 
     override suspend fun toAddContactDetail(
