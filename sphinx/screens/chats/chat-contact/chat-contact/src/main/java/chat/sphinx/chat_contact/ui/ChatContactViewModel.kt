@@ -57,7 +57,7 @@ internal class ChatContactViewModel @Inject constructor(
     app: Application,
     dispatchers: CoroutineDispatchers,
     memeServerTokenHandler: MemeServerTokenHandler,
-    private val contactChatNavigator: ContactChatNavigator,
+    contactChatNavigator: ContactChatNavigator,
     chatRepository: ChatRepository,
     contactRepository: ContactRepository,
     messageRepository: MessageRepository,
@@ -270,7 +270,7 @@ internal class ChatContactViewModel @Inject constructor(
 
     override fun goToChatDetailScreen() {
         viewModelScope.launch(mainImmediate) {
-            contactChatNavigator.toEditContactDetail(contactId)
+            (chatNavigator as ContactChatNavigator).toEditContactDetail(contactId)
         }
     }
 }
