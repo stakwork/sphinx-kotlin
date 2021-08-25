@@ -14,6 +14,7 @@ import androidx.viewbinding.ViewBinding
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
+import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.contact.R
 import chat.sphinx.contact.databinding.LayoutContactBinding
 import chat.sphinx.detail_resources.databinding.LayoutDetailScreenHeaderBinding
@@ -46,9 +47,10 @@ abstract class ContactFragment<
         VB
         >(layoutId)
 {
-
     abstract val headerBinding: LayoutDetailScreenHeaderBinding
     abstract val contactBinding: LayoutContactBinding
+
+    abstract val userColorsHelper: UserColorsHelper
 
     override suspend fun onViewStateFlowCollect(viewState: ContactViewState) {
         @Exhaustive
@@ -191,7 +193,7 @@ abstract class ContactFragment<
                             setBackgroundRandomColor(
                                 R.drawable.chat_initials_circle,
                                 Color.parseColor(
-                                    viewModel.userColorsHelper.getHexCodeForKey(
+                                    userColorsHelper.getHexCodeForKey(
                                         colorKey,
                                         root.context.getRandomHexCode(),
                                     )

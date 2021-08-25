@@ -8,7 +8,6 @@ import androidx.navigation.NavArgs
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_contact.model.ContactForm
-import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
 import chat.sphinx.contact.R
 import chat.sphinx.contact.navigation.ContactNavigator
@@ -30,7 +29,6 @@ abstract class ContactViewModel<ARGS: NavArgs> (
     private val app: Application,
     protected val contactRepository: ContactRepository,
     protected val scannerCoordinator: ViewModelCoordinator<ScannerRequest, ScannerResponse>,
-    val userColorsHelper: UserColorsHelper,
     val imageLoader: ImageLoader<ImageView>
 ): SideEffectViewModel<
         Context,

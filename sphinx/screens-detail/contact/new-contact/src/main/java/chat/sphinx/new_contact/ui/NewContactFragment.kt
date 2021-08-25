@@ -2,12 +2,14 @@ package chat.sphinx.new_contact.ui
 
 import androidx.fragment.app.viewModels
 import by.kirich1409.viewbindingdelegate.viewBinding
+import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.contact.databinding.LayoutContactBinding
 import chat.sphinx.contact.ui.ContactFragment
 import chat.sphinx.detail_resources.databinding.LayoutDetailScreenHeaderBinding
 import chat.sphinx.new_contact.R
 import chat.sphinx.new_contact.databinding.FragmentNewContactBinding
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 internal class NewContactFragment: ContactFragment<
@@ -16,6 +18,12 @@ internal class NewContactFragment: ContactFragment<
         NewContactViewModel
         >(R.layout.fragment_new_contact)
 {
+
+    @Inject
+    lateinit var userColorsHelperInj: UserColorsHelper
+
+    override val userColorsHelper: UserColorsHelper
+        get() = userColorsHelperInj
 
     override val viewModel: NewContactViewModel by viewModels()
     override val binding: FragmentNewContactBinding by viewBinding(FragmentNewContactBinding::bind)
