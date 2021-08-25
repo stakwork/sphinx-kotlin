@@ -3,9 +3,6 @@ package chat.sphinx.chat_common.ui
 import android.app.Application
 import android.content.ContentValues
 import android.content.Intent
-import android.graphics.Bitmap
-import android.graphics.drawable.BitmapDrawable
-import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
@@ -70,7 +67,6 @@ import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_contact.avatarUrl
 import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message_media.*
-import chat.sphinx.wrapper_message_media.token.MediaHost
 import com.giphy.sdk.core.models.Media
 import com.giphy.sdk.ui.GPHContentType
 import com.giphy.sdk.ui.GPHSettings
@@ -1102,8 +1098,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     }
 
     fun saveFile(
-        message: Message,
-        drawable: Drawable?
+        message: Message
     ) {
         viewModelScope.launch(mainImmediate) {
             if (message.isMediaAttachment) {
@@ -1114,14 +1109,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                         messageMedia.retrieveMediaStorageUri()?.let { mediaStorageUri ->
                             app.contentResolver.insert(mediaStorageUri, mediaContentValues)?.let { savedFileUri ->
                                 try {
-                                    val inputStream = messageMedia.retrieveMediaInputStream(
-                                        drawable
-                                    ) ?: retrieveRemoteMediaInputStream(
-                                        url = mediaUrlAndMessageMedia.first,
-                                        mediaHost = messageMedia.host,
-                                        mediaKeyDecrypted = messageMedia.mediaKeyDecrypted
-                                    )
-                                    inputStream?.use { messageAttachmentFile->
+                                    retrieveRemoteMediaInputStream(mediaUrlAndMessageMedia.first, messageMedia)?.use { messageAttachmentFile->
                                         app.contentResolver.openOutputStream(savedFileUri).use { savedFileOutputStream ->
                                             if (savedFileOutputStream != null) {
                                                 messageAttachmentFile.copyTo(savedFileOutputStream, 1024)
@@ -1129,22 +1117,21 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                                                 submitSideEffect(
                                                     ChatSideEffect.Notify(app.getString(R.string.saved_attachment_successfully))
                                                 )
+                                                return@launch
                                             }
                                         }
                                     }
-
                                 } catch (e: Exception) {
                                     LOG.e(TAG, "Failed to store file: ", e)
+                                }
 
-                                    submitSideEffect(
-                                        ChatSideEffect.Notify(app.getString(R.string.failed_to_save_file))
-                                    )
-                                    try {
-                                        app.contentResolver.delete(savedFileUri, null, null)
-                                    } catch (fileE: Exception) {
-                                        LOG.e(TAG, "Failed to delete file: ", e)
-                                    }
-
+                                submitSideEffect(
+                                    ChatSideEffect.Notify(app.getString(R.string.failed_to_save_file))
+                                )
+                                try {
+                                    app.contentResolver.delete(savedFileUri, null, null)
+                                } catch (fileE: Exception) {
+                                    LOG.e(TAG, "Failed to delete file: ", fileE)
                                 }
                             }
                         }
@@ -1154,21 +1141,19 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         }
     }
 
-    private suspend fun retrieveRemoteMediaInputStream(url: String, mediaHost: MediaHost?, mediaKeyDecrypted: MediaKeyDecrypted?): InputStream? {
-        return mediaHost?.let {
+    private suspend fun retrieveRemoteMediaInputStream(
+        url: String,
+        messageMedia: MessageMedia
+    ): InputStream? {
+        return messageMedia.localFile?.inputStream() ?: messageMedia.host?.let { mediaHost ->
             memeServerTokenHandler.retrieveAuthenticationToken(mediaHost)?.let { authenticationToken ->
-                mediaKeyDecrypted.let { mediaKeyDecrypted ->
-                    url.let { url ->
-                        memeInputStreamHandler.retrieveMediaInputStream(
-                            url,
-                            authenticationToken,
-                            mediaKeyDecrypted
-                        )
-                    }
-                }
+                memeInputStreamHandler.retrieveMediaInputStream(
+                    url,
+                    authenticationToken,
+                    messageMedia.mediaKeyDecrypted
+                )
             }
         }
-
     }
 
     fun showAttachmentImageFullscreen(message: Message) {
@@ -1176,22 +1161,6 @@ abstract class ChatViewModel<ARGS: NavArgs>(
             updateAttachmentFullscreenViewState(
                 AttachmentFullscreenViewState.Fullscreen(it.first, it.second)
             )
-        }
-    }
-}
-
-@Suppress("NOTHING_TO_INLINE")
-inline fun MessageMedia.retrieveMediaInputStream(drawable: Drawable?): InputStream? {
-    return when {
-        this.localFile != null -> {
-            localFile?.inputStream()
-        }
-        this.mediaType.isImage -> {
-            drawable?.drawableToBitmap()?.toInputStream()
-        }
-        else -> {
-            // Get remote file
-            null
         }
     }
 }
@@ -1225,23 +1194,4 @@ inline fun MessageMedia.retrieveContentValues(message: Message): ContentValues {
         put(MediaStore.Images.Media.DISPLAY_NAME, message.senderAlias?.value)
         put(MediaStore.Images.Media.MIME_TYPE, mediaType.value.replace("jpg", "jpeg"))
     }
-}
-
-@Suppress("NOTHING_TO_INLINE")
-inline fun Drawable.drawableToBitmap(): Bitmap? {
-    return try {
-        // Gifs aren't BitmapDrawables
-        val bitDw = this as BitmapDrawable
-        bitDw.bitmap
-    } catch (e: Exception) {
-        null
-    }
-}
-
-@Suppress("NOTHING_TO_INLINE")
-inline fun Bitmap.toInputStream(): InputStream? {
-    val stream = ByteArrayOutputStream()
-    compress(Bitmap.CompressFormat.JPEG, 100, stream)
-    val imageInByte: ByteArray = stream.toByteArray()
-    return ByteArrayInputStream(imageInByte)
 }
