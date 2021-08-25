@@ -240,7 +240,7 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                         headerHeight = headerHeight,
                         statusHeaderHeight = Px(binding.includeMessageStatusHeader.root.measuredHeight.toFloat()),
                         recyclerViewWidth = recyclerViewWidth,
-                        screenHeight = screenHeight,
+                        screenHeight = screenHeight
                     ).let { vs ->
                         viewModel.updateSelectedMessageViewState(vs)
                     }
@@ -288,6 +288,15 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                             viewModel.copyCallLink(nnMessage)
                         }
                     }
+                }
+
+                includeMessageTypeImageAttachment.apply {
+                    imageViewAttachmentImage.setOnClickListener {
+                        currentViewState?.message?.let { message ->
+                            viewModel.showAttachmentImageFullscreen(message)
+                        }
+                    }
+                    imageViewAttachmentImage.setOnLongClickListener(selectedMessageLongClickListener)
                 }
             }
 

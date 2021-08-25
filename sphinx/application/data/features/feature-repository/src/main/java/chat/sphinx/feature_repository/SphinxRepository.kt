@@ -21,6 +21,7 @@ import chat.sphinx.concept_network_query_message.model.MessageDto
 import chat.sphinx.concept_network_query_message.model.PostMessageDto
 import chat.sphinx.concept_network_query_message.model.PostPaymentDto
 import chat.sphinx.concept_network_query_verify_external.NetworkQueryAuthorizeExternal
+import chat.sphinx.concept_network_query_verify_external.model.PersonInfoDto
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_chat.model.CreateTribe
 import chat.sphinx.concept_repository_contact.ContactRepository
@@ -751,14 +752,18 @@ abstract class SphinxRepository(
         contactAlias: ContactAlias,
         lightningNodePubKey: LightningNodePubKey,
         lightningRouteHint: LightningRouteHint?,
+        contactKey: ContactKey?,
+        photoUrl: PhotoUrl?
     ): Flow<LoadResponse<Any, ResponseError>> = flow {
         val queries = coreDB.getSphinxDatabaseQueries()
 
         val postContactDto = PostContactDto(
             alias = contactAlias.value,
             public_key = lightningNodePubKey.value,
+            status = ContactStatus.CONFIRMED.absoluteValue,
             route_hint = lightningRouteHint?.value,
-            status = ContactStatus.CONFIRMED.absoluteValue
+            contact_key = contactKey?.value,
+            photo_url = photoUrl?.value
         )
 
         val sharedFlow: MutableSharedFlow<Response<Boolean, ResponseError>> =
@@ -798,6 +803,60 @@ abstract class SphinxRepository(
                 emit(response)
             }
         }
+    }
+
+    override suspend fun connectToContact(
+        contactAlias: ContactAlias,
+        lightningNodePubKey: LightningNodePubKey,
+        lightningRouteHint: LightningRouteHint?,
+        contactKey: ContactKey,
+        message: String,
+        photoUrl: PhotoUrl?,
+        priceToMeet: Sat,
+    ): Response<ContactId?, ResponseError> {
+        var response: Response<ContactId?, ResponseError> = Response.Error(
+            ResponseError("Something went wrong, please try again later")
+        )
+
+        applicationScope.launch(mainImmediate) {
+            createContact(
+                contactAlias,
+                lightningNodePubKey,
+                lightningRouteHint,
+                contactKey,
+                photoUrl
+            ).collect { loadResponse ->
+                @Exhaustive
+                when (loadResponse) {
+                    is LoadResponse.Loading -> {
+                    }
+
+                    is Response.Error -> {
+                        response = loadResponse
+                    }
+                    is Response.Success -> {
+                        val contact = getContactByPubKey(lightningNodePubKey).firstOrNull()
+
+                        response = if (contact != null) {
+                            val messageBuilder = SendMessage.Builder()
+                            messageBuilder.setText(message)
+                            messageBuilder.setContactId(contact.id)
+                            messageBuilder.setPriceToMeet(priceToMeet)
+
+                            sendMessage(messageBuilder.build())
+
+                            Response.Success(contact.id)
+                        } else {
+                            Response.Error(
+                                ResponseError("Contact not found")
+                            )
+                        }
+                    }
+                }
+            }
+        }.join()
+
+        return response
     }
 
     override suspend fun updateOwner(
@@ -1770,7 +1829,8 @@ abstract class SphinxRepository(
 
             val pricePerMessage = chat?.pricePerMessage?.value ?: 0
             val escrowAmount = chat?.escrowAmount?.value ?: 0
-            val messagePrice = (pricePerMessage + escrowAmount).toSat() ?: Sat(0)
+            val priceToMeet = sendMessage.priceToMeet?.value ?: 0
+            val messagePrice = (pricePerMessage + escrowAmount + priceToMeet).toSat() ?: Sat(0)
 
             val provisionalMessageId: MessageId? = chat?.let { chatDbo ->
                 // Build provisional message and insert
@@ -2673,7 +2733,7 @@ abstract class SphinxRepository(
         emit(response ?: Response.Error(ResponseError("")))
     }
 
-    override suspend fun updateTribeInfo(chat: Chat): PodcastDto? {
+    override suspend fun updateTribeInfo(chat: Chat): Pair<ChatHost, String>? {
         var owner: Contact? = accountOwner.value
 
         if (owner == null) {
@@ -2688,7 +2748,7 @@ abstract class SphinxRepository(
             delay(25L)
         }
 
-        var podcastDto: PodcastDto? = null
+        var podcastData: Pair<ChatHost, String>? = null
 
         chat.host?.let { chatHost ->
             val chatUUID = chat.uuid
@@ -2734,31 +2794,9 @@ abstract class SphinxRepository(
 
                             }
 
-                            podcastDto = getPodcastFeed(chat, tribeDto)
-                        }
-                    }
-                }
-            }
-        }
-
-        return podcastDto
-    }
-
-    private suspend fun getPodcastFeed(chat: Chat, tribe: TribeDto): PodcastDto? {
-        var podcastDto: PodcastDto? = null
-
-        chat.host?.let { chatHost ->
-            tribe.feed_url?.let { feedUrl ->
-                if (feedUrl.isNotEmpty()) {
-                    networkQueryChat.getPodcastFeed(chatHost, feedUrl).collect { loadResponse ->
-                        when (loadResponse) {
-
-                            is LoadResponse.Loading -> {}
-                            is Response.Error -> {}
-
-                            is Response.Success -> {
-                                if (loadResponse.value.isValidPodcast()) {
-                                    podcastDto = loadResponse.value
+                            chat.host?.let { host ->
+                                tribeDto.feed_url?.let { feed ->
+                                    podcastData = Pair(host, feed)
                                 }
                             }
                         }
@@ -2767,7 +2805,7 @@ abstract class SphinxRepository(
             }
         }
 
-        return podcastDto
+        return podcastData
     }
 
     /*

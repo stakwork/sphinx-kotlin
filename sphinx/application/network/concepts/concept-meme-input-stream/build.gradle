@@ -1,0 +1,11 @@
+plugins {
+    id 'java-library'
+    id 'kotlin'
+}
+
+dependencies {
+    api project(path: ':sphinx:application:common:wrappers:wrapper-meme-server')
+    api project(path: ':sphinx:application:common:wrappers:wrapper-message-media')
+
+    implementation deps.square.okhttp
+}

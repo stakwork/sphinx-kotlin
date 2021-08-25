@@ -54,6 +54,7 @@ dependencies {
     implementation project(path: ':sphinx:application:network:concepts:clients:concept-network-client-crypto')
 
     api project(path: ':sphinx:application:network:concepts:concept-link-preview')
+    api project(path: ':sphinx:application:network:concepts:concept-meme-input-stream')
     api project(path: ':sphinx:application:network:concepts:queries:concept-network-query-lightning')
 
     implementation project(path: ':sphinx:screens-detail:contact:new-contact')

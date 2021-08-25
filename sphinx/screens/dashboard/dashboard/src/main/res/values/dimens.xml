@@ -37,4 +37,13 @@
     <dimen name="dashboard_authorize_popup_authorize_button_height">52dp</dimen>
     <dimen name="dashboard_authorize_popup_authorize_button_text_size">12sp</dimen>
     <dimen name="dashboard_authorize_popup_progress_bar_zy">32dp</dimen>
+
+    <dimen name="dashboard_connect_popup_width">260dp</dimen>
+    <dimen name="dashboard_connect_popup_height">420dp</dimen>
+    <dimen name="dashboard_connect_popup_profile_pic_xy">100dp</dimen>
+    <dimen name="dashboard_connect_popup_profile_pic_margin_top">30dp</dimen>
+    <dimen name="dashboard_connect_popup_name_text_size">17sp</dimen>
+    <dimen name="dashboard_connect_popup_price_text_size">12sp</dimen>
+    <dimen name="dashboard_connect_popup_description_text_size">14sp</dimen>
+    <dimen name="dashboard_connect_popup_form_edit_view_text_size">14sp</dimen>
 </resources>

@@ -9,6 +9,7 @@ import chat.sphinx.chat_common.ui.ChatViewModel
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
 import chat.sphinx.chat_group.navigation.GroupChatNavigator
 import chat.sphinx.concept_link_preview.LinkPreviewHandler
+import chat.sphinx.concept_meme_input_stream.MemeInputStreamHandler
 import chat.sphinx.concept_meme_server.MemeServerTokenHandler
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_repository_chat.ChatRepository
@@ -53,6 +54,7 @@ class ChatGroupViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     cameraViewModelCoordinator: ViewModelCoordinator<CameraRequest, CameraResponse>,
     linkPreviewHandler: LinkPreviewHandler,
+    memeInputStreamHandler: MemeInputStreamHandler,
     LOG: SphinxLogger,
 ): ChatViewModel<ChatGroupFragmentArgs>(
     app,
@@ -67,6 +69,7 @@ class ChatGroupViewModel @Inject constructor(
     savedStateHandle,
     cameraViewModelCoordinator,
     linkPreviewHandler,
+    memeInputStreamHandler,
     LOG,
 ) {
     override val args: ChatGroupFragmentArgs by savedStateHandle.navArgs()
