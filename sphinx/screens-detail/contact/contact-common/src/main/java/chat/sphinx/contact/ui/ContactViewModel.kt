@@ -21,6 +21,7 @@ import chat.sphinx.wrapper_common.lightning.*
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 abstract class ContactViewModel<ARGS: NavArgs> (
@@ -46,8 +47,13 @@ abstract class ContactViewModel<ARGS: NavArgs> (
 
     abstract fun initContactDetails()
 
+    private var scannerJob: Job? = null
     fun requestScanner() {
-        viewModelScope.launch(mainImmediate) {
+        if (scannerJob?.isActive == true) {
+            return
+        }
+
+        scannerJob = viewModelScope.launch(mainImmediate) {
             val response = scannerCoordinator.submitRequest(
                 ScannerRequest(
                     filter = object : ScannerFilter() {
@@ -84,8 +90,13 @@ abstract class ContactViewModel<ARGS: NavArgs> (
         }
     }
 
+    private var saveFileJob: Job? = null
     fun saveContact() {
-        viewModelScope.launch {
+        if (saveFileJob?.isActive == true) {
+            return
+        }
+
+        saveFileJob = viewModelScope.launch {
             if (!contactFormBuilder.hasContactAlias) {
                 submitSideEffect(ContactSideEffect.Notify.NicknameAndAddressRequired)
                 return@launch
