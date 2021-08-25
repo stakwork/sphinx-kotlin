@@ -403,18 +403,21 @@ internal class DashboardFragment : MotionLayoutFragment<
                         binding.layoutDashboardPopup.root.visible
                     }
                     is DeepLinkPopupViewState.PeopleConnectPopup -> {
+                        disposable?.dispose()
+                        imageJob?.cancel()
+
                         binding.layoutDashboardPopup.layoutDashboardConnectPopup.apply {
 
-                            val alias = viewState.personInfoDto.owner_alias ?: getString(R.string.unknown)
+                            val alias = viewState.alias
                             textViewDashboardPeoplePopupName.text = alias
 
                             editTextDashboardPeoplePopupMessage.hint = getString(R.string.dashboard_connect_initial_message_hint, alias)
-                            textViewDashboardPeoplePopupDescription.text = viewState.personInfoDto.description ?: "No Description"
+                            textViewDashboardPeoplePopupDescription.text = viewState.description
 
-                            val priceToMeet = (viewState.personInfoDto.price_to_meet ?: 0).toSat()?.asFormattedString(appendUnit = true) ?: ""
+                            val priceToMeet = (viewState.priceToMeet).toSat()?.asFormattedString(appendUnit = true) ?: ""
                             textViewDashboardPeoplePopupPriceToMeet.text = getString(R.string.dashboard_connect_price_to_meet, priceToMeet)
 
-                            viewState.personInfoDto.img?.let { url ->
+                            viewState.photoUrl?.let { url ->
 
                                 lifecycleScope.launch {
                                     imageLoader.load(
@@ -447,20 +450,17 @@ internal class DashboardFragment : MotionLayoutFragment<
                         binding.layoutDashboardPopup.layoutDashboardConnectPopup.progressBarConnect.visible
                     }
                     is DeepLinkPopupViewState.PopupDismissed -> {
-                        binding.layoutDashboardPopup.apply popup@ {
-
-                            this@popup.layoutDashboardAuthorizePopup.apply {
-                                root.gone
-                                progressBarAuthorize.gone
-                            }
-
-                            this@popup.layoutDashboardConnectPopup.apply {
-                                root.gone
-                                progressBarConnect.gone
-                            }
-
-                            this@popup.root.gone
+                        binding.layoutDashboardPopup.layoutDashboardAuthorizePopup.apply {
+                            root.gone
+                            progressBarAuthorize.gone
                         }
+
+                        binding.layoutDashboardPopup.layoutDashboardConnectPopup.apply {
+                            root.gone
+                            progressBarConnect.gone
+                        }
+
+                        binding.layoutDashboardPopup.root.gone
                     }
                 }
             }
@@ -480,12 +480,5 @@ internal class DashboardFragment : MotionLayoutFragment<
 
     override suspend fun onSideEffectCollect(sideEffect: DashboardSideEffect) {
         sideEffect.execute(binding.root.context)
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-
-        disposable = null
-        imageJob = null
     }
 }

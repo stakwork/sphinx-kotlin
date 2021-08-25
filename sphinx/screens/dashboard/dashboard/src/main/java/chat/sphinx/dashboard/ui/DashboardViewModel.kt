@@ -303,10 +303,13 @@ internal class DashboardViewModel @Inject constructor(
                 is Response.Success -> {
                     deepLinkPopupViewStateContainer.updateViewState(
                         DeepLinkPopupViewState.PeopleConnectPopup(
+                            loadResponse.value.owner_alias,
+                            loadResponse.value.description ?: app.getString(R.string.dashboard_connect_description_missing),
+                            loadResponse.value.price_to_meet ?: 0,
+                            loadResponse.value.img,
                             loadResponse.value
                         )
                     )
-
                 }
             }
         }

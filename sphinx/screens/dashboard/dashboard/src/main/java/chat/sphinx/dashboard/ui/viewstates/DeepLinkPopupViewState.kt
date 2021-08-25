@@ -19,6 +19,10 @@ sealed class DeepLinkPopupViewState: ViewState<DeepLinkPopupViewState>() {
     ): DeepLinkPopupViewState()
 
     class PeopleConnectPopup(
+        val alias: String,
+        val description: String,
+        val priceToMeet: Long,
+        val photoUrl: String?,
         val personInfoDto: PersonInfoDto,
     ): DeepLinkPopupViewState()
 }
