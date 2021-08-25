@@ -118,6 +118,7 @@ abstract class ContactViewModel<ARGS: NavArgs> (
         }
     }
 
+    protected var saveContactJob: Job? = null
     protected abstract fun saveContact(contactForm: ContactForm)
 
     fun isFromAddFriend(): Boolean {

@@ -24,6 +24,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -54,12 +55,16 @@ internal class NewContactViewModel @Inject constructor(
     override val contactId: ContactId?
         get() = null
 
+    private var initContactJob: Job? = null
     override fun initContactDetails() {
+        if (initContactJob?.isActive == true) {
+            return
+        }
 
         args.argPubKey?.toLightningNodePubKey()?.let { lightningNodePubKey ->
             val lightningRouteHint = args.argRouteHint?.toLightningRouteHint()
 
-            viewModelScope.launch(mainImmediate) {
+            initContactJob = viewModelScope.launch(mainImmediate) {
                 submitSideEffect(
                     ContactSideEffect.ContactInfo(
                         lightningNodePubKey,
@@ -71,7 +76,11 @@ internal class NewContactViewModel @Inject constructor(
     }
 
     override fun saveContact(contactForm: ContactForm) {
-        viewModelScope.launch(mainImmediate) {
+        if (saveContactJob?.isActive == true) {
+            return
+        }
+
+        saveContactJob = viewModelScope.launch(mainImmediate) {
             contactRepository.createContact(
                 contactForm.contactAlias,
                 contactForm.lightningNodePubKey,

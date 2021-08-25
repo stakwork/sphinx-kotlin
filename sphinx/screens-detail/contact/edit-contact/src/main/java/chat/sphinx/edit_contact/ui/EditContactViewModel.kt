@@ -22,7 +22,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -35,7 +35,7 @@ internal class EditContactViewModel @Inject constructor(
     scannerCoordinator: ViewModelCoordinator<ScannerRequest, ScannerResponse>,
     contactRepository: ContactRepository,
     userColorsHelper: UserColorsHelper,
-    imageLoader: ImageLoader<ImageView>
+    imageLoader: ImageLoader<ImageView>,
 ): ContactViewModel<EditContactFragmentArgs>(
     editContactNavigator,
     dispatchers,
@@ -55,7 +55,7 @@ internal class EditContactViewModel @Inject constructor(
 
     override fun initContactDetails() {
         viewModelScope.launch(mainImmediate) {
-            contactRepository.getContactById(contactId).collectLatest { contact ->
+            contactRepository.getContactById(contactId).firstOrNull().let { contact ->
                 if (contact != null) {
                     contact.nodePubKey?.let { lightningNodePubKey ->
                         submitSideEffect(
@@ -74,7 +74,11 @@ internal class EditContactViewModel @Inject constructor(
     }
 
     override fun saveContact(contactForm: ContactForm) {
-        viewModelScope.launch(mainImmediate) {
+        if (saveContactJob?.isActive == null) {
+            return
+        }
+
+        saveContactJob = viewModelScope.launch(mainImmediate) {
             viewStateContainer.updateViewState(ContactViewState.Saving)
 
             val loadResponse = contactRepository.updateContact(
