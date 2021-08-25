@@ -1,5 +1,11 @@
 # ChangeLog
 
+## Version 1.0.0-alpha20 (2021-08-25)
+ - Fixes to podcast functionality within the Tribe Chat screen
+ - Adds ability to view Images in full screen mode
+ - Adds ability to save images to gallery
+ - Adds ability to add a contact for a price
+
 ## Version 1.0.0-alpha19 (2021-08-19)
  - Fixes issue with onboard where data was being persisted prior to successful token
    generation network request
