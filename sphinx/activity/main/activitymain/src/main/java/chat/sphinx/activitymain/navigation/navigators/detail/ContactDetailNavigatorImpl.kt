@@ -2,6 +2,7 @@ package chat.sphinx.activitymain.navigation.navigators.detail
 
 import chat.sphinx.activitymain.navigation.drivers.DetailNavigationDriver
 import chat.sphinx.contact_detail.navigation.ContactDetailNavigator
+import chat.sphinx.subscription.navigation.ToSubscriptionDetail
 import javax.inject.Inject
 
 internal class ContactDetailNavigatorImpl @Inject constructor(
@@ -9,5 +10,9 @@ internal class ContactDetailNavigatorImpl @Inject constructor(
 ): ContactDetailNavigator(detailDriver) {
     override suspend fun closeDetailScreen() {
         (navigationDriver as DetailNavigationDriver).closeDetailScreen()
+    }
+
+    override suspend fun toSubscribeDetailScreen() {
+        navigationDriver.submitNavigationRequest(ToSubscriptionDetail())
     }
 }

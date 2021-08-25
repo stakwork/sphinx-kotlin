@@ -23,11 +23,11 @@ internal class ContactDetailFragment: BaseFragment<
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.includeContactDetailHeader.apply {
+        binding.apply {
             textViewDetailScreenHeaderName.text = getString(R.string.contact_detail_header_name)
-            textViewDetailScreenClose.setOnClickListener {
+            textViewDetailScreenSubscribe.setOnClickListener {
                 lifecycleScope.launch(viewModel.mainImmediate) {
-                    viewModel.navigator.closeDetailScreen()
+                    viewModel.navigator.toSubscribeDetailScreen()
                 }
             }
         }

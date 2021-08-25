@@ -8,4 +8,6 @@ abstract class ContactDetailNavigator(
     navigationDriver: BaseNavigationDriver<NavController>
 ): Navigator<NavController>(navigationDriver) {
     abstract suspend fun closeDetailScreen()
+
+    abstract suspend fun toSubscribeDetailScreen()
 }

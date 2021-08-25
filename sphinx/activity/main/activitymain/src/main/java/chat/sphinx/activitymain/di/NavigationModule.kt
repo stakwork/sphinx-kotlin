@@ -34,6 +34,7 @@ import chat.sphinx.profile.navigation.ProfileNavigator
 import chat.sphinx.qr_code.navigation.QRCodeNavigator
 import chat.sphinx.scanner.navigation.ScannerNavigator
 import chat.sphinx.splash.navigation.SplashNavigator
+import chat.sphinx.subscription.navigation.SubscriptionNavigator
 import chat.sphinx.support_ticket.navigation.SupportTicketNavigator
 import chat.sphinx.transactions.navigation.TransactionsNavigator
 import chat.sphinx.tribe_detail.navigation.TribeDetailNavigator
@@ -219,6 +220,12 @@ internal object NavigationModule {
         profileNavigatorImpl: ProfileNavigatorImpl
     ): ProfileNavigator =
         profileNavigatorImpl
+
+    @Provides
+    fun provideSubscriptionNavigator(
+        subscriptionNavigatorImpl: SubscriptionNavigatorImpl
+    ): SubscriptionNavigator =
+        subscriptionNavigatorImpl
 
     @Provides
     fun provideSupportTicketNavigator(
