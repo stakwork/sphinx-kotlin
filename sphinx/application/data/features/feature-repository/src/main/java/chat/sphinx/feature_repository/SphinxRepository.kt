@@ -850,7 +850,7 @@ abstract class SphinxRepository(
         routeHint: LightningRouteHint?
     ): Response<Any, ResponseError> {
         val queries = coreDB.getSphinxDatabaseQueries()
-        var response: Response<Any, ResponseError> = Response.Success(Any())
+        var response: Response<Any, ResponseError> = Response.Error(ResponseError("Failed to update contact"))
 
         try {
             networkQueryContact.updateContact(
@@ -877,7 +877,9 @@ abstract class SphinxRepository(
                     }
                 }
             }
-        } catch (e: Exception) {}
+        } catch (e: Exception) {
+            response = Response.Error(ResponseError(e.message.toString()))
+        }
 
         return response
     }
