@@ -41,18 +41,21 @@ class ContactForm private constructor(
             get() = lightningRouteHint.isNullOrEmpty() || lightningRouteHint?.toLightningRouteHint() != null
 
         @Synchronized
-        fun setContactAlias(alias: String?) {
+        fun setContactAlias(alias: String?): Builder {
             contactAlias = alias?.toContactAlias()
+            return this
         }
 
         @Synchronized
-        fun setLightningNodePubKey(lightningNodePubKey: String?) {
+        fun setLightningNodePubKey(lightningNodePubKey: String?): Builder {
             this.lightningNodePubKey = lightningNodePubKey?.toLightningNodePubKey()
+            return this
         }
 
         @Synchronized
-        fun setLightningRouteHint(lightningRouteHint: String?) {
+        fun setLightningRouteHint(lightningRouteHint: String?): Builder {
             this.lightningRouteHint = lightningRouteHint
+            return this
         }
 
         @Synchronized
