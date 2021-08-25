@@ -852,34 +852,37 @@ abstract class SphinxRepository(
         val queries = coreDB.getSphinxDatabaseQueries()
         var response: Response<Any, ResponseError> = Response.Error(ResponseError("Failed to update contact"))
 
-        try {
-            networkQueryContact.updateContact(
-                contactId,
-                PutContactDto(
-                    alias = alias?.value,
-                    route_hint = routeHint?.value
-                )
-            ).collect { loadResponse ->
-                @Exhaustive
-                when (loadResponse) {
-                    is LoadResponse.Loading -> {}
-                    is Response.Error -> {
-                        response = loadResponse
-                    }
-                    is Response.Success -> {
-                        contactLock.withLock {
-                            queries.transaction {
-                                updatedContactIds.add(ContactId(loadResponse.value.id))
-                                upsertContact(loadResponse.value, queries)
-                            }
+        applicationScope.launch(mainImmediate) {
+            try {
+                networkQueryContact.updateContact(
+                    contactId,
+                    PutContactDto(
+                        alias = alias?.value,
+                        route_hint = routeHint?.value
+                    )
+                ).collect { loadResponse ->
+                    @Exhaustive
+                    when (loadResponse) {
+                        is LoadResponse.Loading -> {}
+                        is Response.Error -> {
+                            response = loadResponse
                         }
-                        LOG.d(TAG, "Contact has been successfully updated")
+                        is Response.Success -> {
+                            contactLock.withLock {
+                                queries.transaction {
+                                    updatedContactIds.add(ContactId(loadResponse.value.id))
+                                    upsertContact(loadResponse.value, queries)
+                                }
+                            }
+                            LOG.d(TAG, "Contact has been successfully updated")
+                        }
                     }
                 }
+            } catch (e: Exception) {
+                response = Response.Error(ResponseError(e.message.toString()))
             }
-        } catch (e: Exception) {
-            response = Response.Error(ResponseError(e.message.toString()))
-        }
+        }.join()
+
 
         return response
     }
