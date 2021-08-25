@@ -6,6 +6,8 @@ import com.squareup.moshi.JsonClass
 data class PostContactDto(
     val alias: String,
     val public_key: String,
-    val route_hint: String?,
-    val status: Int
+    val status: Int,
+    val route_hint: String? = null,
+    val contact_key: String? = null,
+    val photo_url: String? = null,
 )

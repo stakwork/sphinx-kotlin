@@ -75,4 +75,13 @@
     <!-- Deep link authorize popup -->
     <string name="dashboard_authorize_popup_title">Do you want to authorize with:</string>
     <string name="dashboard_authorize_button">AUTHORIZE</string>
+    <string name="dashboard_authorize_generic_error">Something went wrong while authorizing external source, please try again later</string>
+
+    <string name="dashboard_connect_button">CONNECT</string>
+    <string name="dashboard_connect_price_to_meet">Price to meet: %s</string>
+    <string name="dashboard_connect_description_missing">No description</string>
+    <string name="dashboard_connect_initial_message_hint">Initial message to %s</string>
+    <string name="dashboard_connect_retrieve_person_data_error">Failed to retrieve person information</string>
+    <string name="dashboard_connect_message_empty">Message can not be empty</string>
+    <string name="dashboard_connect_generic_error">Something went wrong while connecting to user, please try again later</string>
 </resources>

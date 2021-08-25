@@ -2,6 +2,7 @@ package chat.sphinx.concept_repository_message.model
 
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
+import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_message.GiphyData
 import chat.sphinx.wrapper_message.ReplyUUID
 
@@ -11,8 +12,9 @@ class SendMessage private constructor(
     val contactId: ContactId?,
     val replyUUID: ReplyUUID?,
     val text: String?,
-    val giphyData: GiphyData? = null,
-    val isBoost: Boolean = false
+    val giphyData: GiphyData?,
+    val isBoost: Boolean,
+    val priceToMeet: Sat?
 ) {
 
     class Builder {
@@ -23,6 +25,7 @@ class SendMessage private constructor(
         private var text: String?                   = null
         private var giphyData: GiphyData?           = null
         private var isBoost: Boolean                = false
+        private var priceToMeet: Sat?               = null
 
         @Synchronized
         fun clear() {
@@ -33,6 +36,7 @@ class SendMessage private constructor(
             text = null
             giphyData = null
             isBoost = false
+            priceToMeet = null
         }
 
         @get:Synchronized
@@ -104,6 +108,12 @@ class SendMessage private constructor(
         }
 
         @Synchronized
+        fun setPriceToMeet(priceToMeet: Sat?): Builder {
+            this.priceToMeet = priceToMeet
+            return this
+        }
+
+        @Synchronized
         fun build(): SendMessage? =
             if (!isValid) {
                 null
@@ -115,7 +125,8 @@ class SendMessage private constructor(
                     replyUUID,
                     text,
                     giphyData?.let { GiphyData(it.id, it.url, it.aspect_ratio, text) },
-                    isBoost
+                    isBoost,
+                    priceToMeet
                 )
             }
     }

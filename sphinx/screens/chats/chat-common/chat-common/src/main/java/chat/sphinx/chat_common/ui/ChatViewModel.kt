@@ -1,9 +1,11 @@
 package chat.sphinx.chat_common.ui
 
 import android.app.Application
+import android.content.ContentValues
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
+import android.provider.MediaStore
 import android.util.Log
 import android.webkit.MimeTypeMap
 import androidx.annotation.CallSuper
@@ -23,6 +25,7 @@ import chat.sphinx.chat_common.model.TribeLink
 import chat.sphinx.chat_common.model.UnspecifiedUrl
 import chat.sphinx.chat_common.navigation.ChatNavigator
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
+import chat.sphinx.chat_common.ui.viewstate.attachment.AttachmentFullscreenViewState
 import chat.sphinx.chat_common.ui.viewstate.attachment.AttachmentSendViewState
 import chat.sphinx.chat_common.ui.viewstate.footer.FooterViewState
 import chat.sphinx.chat_common.ui.viewstate.header.ChatHeaderViewState
@@ -35,22 +38,15 @@ import chat.sphinx.chat_common.ui.viewstate.selected.SelectedMessageViewState
 import chat.sphinx.chat_common.util.*
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
+import chat.sphinx.concept_link_preview.LinkPreviewHandler
+import chat.sphinx.concept_link_preview.model.TribePreviewName
+import chat.sphinx.concept_link_preview.model.toPreviewImageUrlOrNull
+import chat.sphinx.concept_meme_input_stream.MemeInputStreamHandler
 import chat.sphinx.concept_meme_server.MemeServerTokenHandler
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_message.MessageRepository
-import chat.sphinx.kotlin_response.LoadResponse
-import chat.sphinx.kotlin_response.Response
-import chat.sphinx.kotlin_response.ResponseError
-import chat.sphinx.kotlin_response.message
-import chat.sphinx.wrapper_chat.Chat
-import chat.sphinx.wrapper_chat.ChatName
-import chat.sphinx.wrapper_chat.isConversation
-import chat.sphinx.wrapper_contact.Contact
-import chat.sphinx.wrapper_message.Message
-import chat.sphinx.wrapper_message.isDeleted
-import chat.sphinx.wrapper_message.isGroupAction
 import chat.sphinx.concept_repository_message.model.SendMessage
 import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
 import chat.sphinx.kotlin_response.*
@@ -67,10 +63,10 @@ import chat.sphinx.wrapper_common.message.MessageUUID
 import chat.sphinx.wrapper_common.message.SphinxCallLink
 import chat.sphinx.wrapper_common.tribe.TribeJoinLink
 import chat.sphinx.wrapper_common.tribe.toTribeJoinLink
+import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_contact.avatarUrl
 import chat.sphinx.wrapper_message.*
-import chat.sphinx.wrapper_message_media.MediaType
-import chat.sphinx.wrapper_message_media.toMediaType
+import chat.sphinx.wrapper_message_media.*
 import com.giphy.sdk.core.models.Media
 import com.giphy.sdk.ui.GPHContentType
 import com.giphy.sdk.ui.GPHSettings
@@ -82,9 +78,6 @@ import io.matthewnelson.android_feature_viewmodel.MotionLayoutViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
-import chat.sphinx.concept_link_preview.LinkPreviewHandler
-import chat.sphinx.concept_link_preview.model.TribePreviewName
-import chat.sphinx.concept_link_preview.model.toPreviewImageUrlOrNull
 import io.matthewnelson.concept_media_cache.MediaCacheHandler
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import io.matthewnelson.concept_views.viewstate.value
@@ -96,8 +89,8 @@ import kotlinx.coroutines.withContext
 import org.jitsi.meet.sdk.JitsiMeetActivity
 import org.jitsi.meet.sdk.JitsiMeetConferenceOptions
 import org.jitsi.meet.sdk.JitsiMeetUserInfo
-import java.io.File
-import java.io.InputStream
+import java.io.*
+
 
 @JvmSynthetic
 @Suppress("NOTHING_TO_INLINE")
@@ -117,6 +110,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     protected val savedStateHandle: SavedStateHandle,
     protected val cameraCoordinator: ViewModelCoordinator<CameraRequest, CameraResponse>,
     protected val linkPreviewHandler: LinkPreviewHandler,
+    private val memeInputStreamHandler: MemeInputStreamHandler,
     protected val LOG: SphinxLogger,
 ): MotionLayoutViewModel<
         Nothing,
@@ -657,6 +651,19 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         }
     }
 
+    private val attachmentFullscreenStateContainer: ViewStateContainer<AttachmentFullscreenViewState> by lazy {
+        ViewStateContainer(AttachmentFullscreenViewState.Idle)
+    }
+
+    @JvmSynthetic
+    internal fun getAttachmentFullscreenViewStateFlow(): StateFlow<AttachmentFullscreenViewState> =
+        attachmentFullscreenStateContainer.viewStateFlow
+
+    @JvmSynthetic
+    internal fun updateAttachmentFullscreenViewState(viewState: AttachmentFullscreenViewState) {
+        attachmentFullscreenStateContainer.updateViewState(viewState)
+    }
+
     fun boostMessage(messageUUID: MessageUUID?) {
         if (messageUUID == null) return
 
@@ -1088,5 +1095,103 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 
     override suspend fun onMotionSceneCompletion(value: Nothing) {
         // unused
+    }
+
+    fun saveFile(
+        message: Message
+    ) {
+        viewModelScope.launch(mainImmediate) {
+            if (message.isMediaAttachment) {
+                message.retrieveImageUrlAndMessageMedia()?.let { mediaUrlAndMessageMedia ->
+                    mediaUrlAndMessageMedia.second?.let { messageMedia ->
+                        val mediaContentValues = messageMedia.retrieveContentValues(message)
+
+                        messageMedia.retrieveMediaStorageUri()?.let { mediaStorageUri ->
+                            app.contentResolver.insert(mediaStorageUri, mediaContentValues)?.let { savedFileUri ->
+                                try {
+                                    retrieveRemoteMediaInputStream(mediaUrlAndMessageMedia.first, messageMedia)?.use { messageAttachmentFile->
+                                        app.contentResolver.openOutputStream(savedFileUri).use { savedFileOutputStream ->
+                                            if (savedFileOutputStream != null) {
+                                                messageAttachmentFile.copyTo(savedFileOutputStream, 1024)
+
+                                                submitSideEffect(
+                                                    ChatSideEffect.Notify(app.getString(R.string.saved_attachment_successfully))
+                                                )
+                                                return@launch
+                                            }
+                                        }
+                                    }
+                                } catch (e: Exception) {
+                                    LOG.e(TAG, "Failed to store file: ", e)
+                                }
+
+                                submitSideEffect(
+                                    ChatSideEffect.Notify(app.getString(R.string.failed_to_save_file))
+                                )
+                                try {
+                                    app.contentResolver.delete(savedFileUri, null, null)
+                                } catch (fileE: Exception) {
+                                    LOG.e(TAG, "Failed to delete file: ", fileE)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private suspend fun retrieveRemoteMediaInputStream(
+        url: String,
+        messageMedia: MessageMedia
+    ): InputStream? {
+        return messageMedia.localFile?.inputStream() ?: messageMedia.host?.let { mediaHost ->
+            memeServerTokenHandler.retrieveAuthenticationToken(mediaHost)?.let { authenticationToken ->
+                memeInputStreamHandler.retrieveMediaInputStream(
+                    url,
+                    authenticationToken,
+                    messageMedia.mediaKeyDecrypted
+                )
+            }
+        }
+    }
+
+    fun showAttachmentImageFullscreen(message: Message) {
+        message.retrieveImageUrlAndMessageMedia()?.let {
+            updateAttachmentFullscreenViewState(
+                AttachmentFullscreenViewState.Fullscreen(it.first, it.second)
+            )
+        }
+    }
+}
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun MessageMedia.retrieveMediaStorageUri(): Uri? {
+    return when {
+        this.mediaType.isImage -> {
+            MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+        }
+        this.mediaType.isVideo -> {
+            MediaStore.Video.Media.EXTERNAL_CONTENT_URI
+        }
+        this.mediaType.isAudio -> {
+            MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
+        }
+        else -> {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                MediaStore.Downloads.EXTERNAL_CONTENT_URI
+            } else {
+                null
+            }
+        }
+    }
+}
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun MessageMedia.retrieveContentValues(message: Message): ContentValues {
+    return ContentValues().apply {
+        put(MediaStore.Images.Media.TITLE, message.id.value)
+        put(MediaStore.Images.Media.DISPLAY_NAME, message.senderAlias?.value)
+        put(MediaStore.Images.Media.MIME_TYPE, mediaType.value.replace("jpg", "jpeg"))
     }
 }

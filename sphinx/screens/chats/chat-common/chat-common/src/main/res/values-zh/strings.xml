@@ -94,6 +94,10 @@
     <string name="attachment_send_header_video">傳送影片</string>
     <string name="attachment_send_header_giphy">傳送 GIPHY</string>
 
+    <!-- Save Attachment -->
+    <string name="saved_attachment_successfully">成功保存附件</string>
+    <string name="failed_to_save_file">無法保存文件</string>
+
     <!-- Exit Tribe -->
     <string name="delete_own_tribe_not_supported">目前不支持刪除自己的tribe</string>
     <string name="alert_confirm_exit_tribe_title">退出 Tribe</string>
