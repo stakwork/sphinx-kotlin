@@ -818,34 +818,43 @@ abstract class SphinxRepository(
             ResponseError("Something went wrong, please try again later")
         )
 
-        createContact(contactAlias, lightningNodePubKey, lightningRouteHint, contactKey, photoUrl).collect { loadResponse ->
-            @Exhaustive
-            when(loadResponse) {
-                is LoadResponse.Loading -> {}
+        applicationScope.launch(mainImmediate) {
+            createContact(
+                contactAlias,
+                lightningNodePubKey,
+                lightningRouteHint,
+                contactKey,
+                photoUrl
+            ).collect { loadResponse ->
+                @Exhaustive
+                when (loadResponse) {
+                    is LoadResponse.Loading -> {
+                    }
 
-                is Response.Error -> {
-                    response = loadResponse
-                }
-                is Response.Success -> {
-                    val contact = getContactByPubKey(lightningNodePubKey).firstOrNull()
+                    is Response.Error -> {
+                        response = loadResponse
+                    }
+                    is Response.Success -> {
+                        val contact = getContactByPubKey(lightningNodePubKey).firstOrNull()
 
-                    response = if (contact != null) {
-                        val messageBuilder = SendMessage.Builder()
-                        messageBuilder.setText(message)
-                        messageBuilder.setContactId(contact.id)
-                        messageBuilder.setPriceToMeet(priceToMeet)
+                        response = if (contact != null) {
+                            val messageBuilder = SendMessage.Builder()
+                            messageBuilder.setText(message)
+                            messageBuilder.setContactId(contact.id)
+                            messageBuilder.setPriceToMeet(priceToMeet)
 
-                        sendMessage(messageBuilder.build())
+                            sendMessage(messageBuilder.build())
 
-                        Response.Success(contact.id)
-                    } else {
-                        Response.Error(
-                            ResponseError("Contact not found")
-                        )
+                            Response.Success(contact.id)
+                        } else {
+                            Response.Error(
+                                ResponseError("Contact not found")
+                            )
+                        }
                     }
                 }
             }
-        }
+        }.join()
 
         return response
     }

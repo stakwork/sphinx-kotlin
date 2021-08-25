@@ -12,9 +12,9 @@ class SendMessage private constructor(
     val contactId: ContactId?,
     val replyUUID: ReplyUUID?,
     val text: String?,
-    val giphyData: GiphyData? = null,
-    val isBoost: Boolean = false,
-    val priceToMeet: Sat? = null
+    val giphyData: GiphyData?,
+    val isBoost: Boolean,
+    val priceToMeet: Sat?
 ) {
 
     class Builder {
@@ -25,7 +25,7 @@ class SendMessage private constructor(
         private var text: String?                   = null
         private var giphyData: GiphyData?           = null
         private var isBoost: Boolean                = false
-        private var priceToMeet: Sat?                       = null
+        private var priceToMeet: Sat?               = null
 
         @Synchronized
         fun clear() {
@@ -36,6 +36,7 @@ class SendMessage private constructor(
             text = null
             giphyData = null
             isBoost = false
+            priceToMeet = null
         }
 
         @get:Synchronized

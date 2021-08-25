@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import app.cash.exhaustive.Exhaustive
 import by.kirich1409.viewbindingdelegate.viewBinding
+import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
@@ -45,6 +46,7 @@ import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.currentViewState
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_views.viewstate.collect
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -242,7 +244,6 @@ internal class DashboardFragment : MotionLayoutFragment<
             }
 
             buttonAuthorize.setOnClickListener {
-                progressBarAuthorize.visible
                 viewModel.authorizeExternal()
             }
         }
@@ -255,10 +256,8 @@ internal class DashboardFragment : MotionLayoutFragment<
             }
 
             buttonConnect.setOnClickListener {
-                progressBarConnect.visible
-
                 viewModel.connectToContact(
-                    editTextDashboardPeoplePopupMessage.text.toString()
+                    editTextDashboardPeoplePopupMessage.text?.toString()
                 )
             }
         }
@@ -372,6 +371,9 @@ internal class DashboardFragment : MotionLayoutFragment<
         viewState.transitionToEndSet(binding.layoutMotionDashboard)
     }
 
+    private var disposable: Disposable? = null
+    private var imageJob: Job? = null
+
     override fun subscribeToViewStateFlow() {
         super.subscribeToViewStateFlow()
 
@@ -379,64 +381,42 @@ internal class DashboardFragment : MotionLayoutFragment<
             viewModel.deepLinkPopupViewStateContainer.collect { viewState ->
                 @Exhaustive
                 when (viewState) {
-                    is DeepLinkPopupViewState.PopupDismissed -> {
-                        binding.layoutDashboardPopup.apply {
-
-                            layoutDashboardAuthorizePopup.apply {
-                                root.gone
-                                progressBarAuthorize.gone
-                            }
-
-                            layoutDashboardConnectPopup.apply {
-                                root.gone
-                                progressBarConnect.gone
-                            }
-
-                            root.gone
-                        }
-                    }
                     is DeepLinkPopupViewState.ExternalAuthorizePopup -> {
-                        binding.layoutDashboardPopup.apply {
-
-                            layoutDashboardAuthorizePopup.apply {
-                                textViewDashboardPopupAuthorizeName.text = viewState.host
-                                layoutConstraintAuthorizePopup.visible
-                                root.visible
-                            }
-
+                        binding.layoutDashboardPopup.layoutDashboardAuthorizePopup.apply {
+                            textViewDashboardPopupAuthorizeName.text = viewState.link.host
+                            layoutConstraintAuthorizePopup.visible
                             root.visible
                         }
+                        binding.layoutDashboardPopup.root.visible
                     }
-                    is DeepLinkPopupViewState.LoadingPeopleConnectPopup -> {
-                        binding.layoutDashboardPopup.apply {
-
-                            layoutDashboardConnectPopup.apply {
-                                layoutConstraintDashboardConnectLoading.visible
-                                root.visible
-                            }
-
-                            root.visible
-                        }
+                    is DeepLinkPopupViewState.ExternalAuthorizePopupProcessing -> {
+                        binding.layoutDashboardPopup.layoutDashboardAuthorizePopup.progressBarAuthorize.visible
                     }
-                    is DeepLinkPopupViewState.PeopleConnectEmptyMessage -> {
+                    is DeepLinkPopupViewState.PeopleConnectPopupLoadingPersonInfo -> {
+                        disposable?.dispose()
+                        imageJob?.cancel()
+
                         binding.layoutDashboardPopup.layoutDashboardConnectPopup.apply {
-                            progressBarConnect.gone
+                            layoutConstraintDashboardConnectLoading.visible
+                            root.visible
                         }
+                        binding.layoutDashboardPopup.root.visible
                     }
                     is DeepLinkPopupViewState.PeopleConnectPopup -> {
-                        binding.layoutDashboardPopup.apply {
+                        binding.layoutDashboardPopup.layoutDashboardConnectPopup.apply {
 
-                            layoutDashboardConnectPopup.apply {
-                                val alias = viewState.alias ?: getString(R.string.unknown)
-                                textViewDashboardPeoplePopupName.text = alias
+                            val alias = viewState.personInfoDto.owner_alias ?: getString(R.string.unknown)
+                            textViewDashboardPeoplePopupName.text = alias
 
-                                editTextDashboardPeoplePopupMessage.hint = getString(R.string.dashboard_connect_initial_message_hint, alias)
-                                textViewDashboardPeoplePopupDescription.text = viewState.description ?: "No Description"
+                            editTextDashboardPeoplePopupMessage.hint = getString(R.string.dashboard_connect_initial_message_hint, alias)
+                            textViewDashboardPeoplePopupDescription.text = viewState.personInfoDto.description ?: "No Description"
 
-                                val priceToMeet = (viewState.priceToMeet ?: 0).toSat()?.asFormattedString(appendUnit = true) ?: ""
-                                textViewDashboardPeoplePopupPriceToMeet.text = getString(R.string.dashboard_connect_price_to_meet, priceToMeet)
+                            val priceToMeet = (viewState.personInfoDto.price_to_meet ?: 0).toSat()?.asFormattedString(appendUnit = true) ?: ""
+                            textViewDashboardPeoplePopupPriceToMeet.text = getString(R.string.dashboard_connect_price_to_meet, priceToMeet)
 
-                                viewState.photoUrl?.let { url ->
+                            viewState.personInfoDto.img?.let { url ->
+
+                                lifecycleScope.launch {
                                     imageLoader.load(
                                         imageViewProfilePicture,
                                         url,
@@ -444,19 +424,42 @@ internal class DashboardFragment : MotionLayoutFragment<
                                             .placeholderResId(R.drawable.ic_profile_avatar_circle)
                                             .transformation(Transformation.CircleCrop)
                                             .build()
-                                    )
-                                } ?: imageViewProfilePicture.setImageDrawable(
-                                        ContextCompat.getDrawable(
-                                            binding.root.context,
-                                            R.drawable.ic_profile_avatar_circle
-                                        )
-                                    )
+                                    ).also {
+                                        disposable = it
+                                    }
+                                }.let { job ->
+                                    imageJob = job
+                                }
 
-                                layoutConstraintDashboardConnectLoading.gone
-                                root.visible
+                            } ?: imageViewProfilePicture.setImageDrawable(
+                                ContextCompat.getDrawable(
+                                    binding.root.context,
+                                    R.drawable.ic_profile_avatar_circle
+                                )
+                            )
+
+                            layoutConstraintDashboardConnectLoading.gone
+                            root.visible
+                        }
+                        binding.layoutDashboardPopup.root.visible
+                    }
+                    is DeepLinkPopupViewState.PeopleConnectPopupProcessing -> {
+                        binding.layoutDashboardPopup.layoutDashboardConnectPopup.progressBarConnect.visible
+                    }
+                    is DeepLinkPopupViewState.PopupDismissed -> {
+                        binding.layoutDashboardPopup.apply popup@ {
+
+                            this@popup.layoutDashboardAuthorizePopup.apply {
+                                root.gone
+                                progressBarAuthorize.gone
                             }
 
-                            root.visible
+                            this@popup.layoutDashboardConnectPopup.apply {
+                                root.gone
+                                progressBarConnect.gone
+                            }
+
+                            this@popup.root.gone
                         }
                     }
                 }
@@ -477,5 +480,12 @@ internal class DashboardFragment : MotionLayoutFragment<
 
     override suspend fun onSideEffectCollect(sideEffect: DashboardSideEffect) {
         sideEffect.execute(binding.root.context)
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+
+        disposable = null
+        imageJob = null
     }
 }

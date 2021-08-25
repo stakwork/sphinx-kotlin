@@ -1,5 +1,6 @@
 package chat.sphinx.dashboard.ui.viewstates
 
+import chat.sphinx.concept_network_query_verify_external.model.PersonInfoDto
 import chat.sphinx.wrapper_common.ExternalAuthorizeLink
 import chat.sphinx.wrapper_common.PeopleConnectLink
 import io.matthewnelson.concept_views.viewstate.ViewState
@@ -8,18 +9,16 @@ sealed class DeepLinkPopupViewState: ViewState<DeepLinkPopupViewState>() {
 
     object PopupDismissed: DeepLinkPopupViewState()
 
+    object ExternalAuthorizePopupProcessing: DeepLinkPopupViewState()
+
+    object PeopleConnectPopupLoadingPersonInfo: DeepLinkPopupViewState()
+    object PeopleConnectPopupProcessing: DeepLinkPopupViewState()
+
     class ExternalAuthorizePopup(
-        val host: String
+        val link: ExternalAuthorizeLink
     ): DeepLinkPopupViewState()
 
-    object LoadingPeopleConnectPopup: DeepLinkPopupViewState()
-
-    object PeopleConnectEmptyMessage: DeepLinkPopupViewState()
-
     class PeopleConnectPopup(
-        val alias: String?,
-        val photoUrl: String?,
-        val description: String?,
-        val priceToMeet: Long?
+        val personInfoDto: PersonInfoDto,
     ): DeepLinkPopupViewState()
 }

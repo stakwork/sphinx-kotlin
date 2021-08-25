@@ -262,16 +262,12 @@ internal class DashboardViewModel @Inject constructor(
     }
 
     private fun handleExternalAuthorizeLink(link: ExternalAuthorizeLink) {
-        authorizeExternalLink = link
-
         deepLinkPopupViewStateContainer.updateViewState(
-            DeepLinkPopupViewState.ExternalAuthorizePopup(link.host)
+            DeepLinkPopupViewState.ExternalAuthorizePopup(link)
         )
     }
 
     private suspend fun handlePeopleConnectLink(link: PeopleConnectLink) {
-        personInfo = null
-
         link.publicKey.toLightningNodePubKey()?.let { lightningNodePubKey ->
             contactRepository.getContactByPubKey(lightningNodePubKey).firstOrNull()?.let { contact ->
 
@@ -283,7 +279,7 @@ internal class DashboardViewModel @Inject constructor(
 
     private suspend fun loadPeopleConnectPopup(link: PeopleConnectLink) {
         deepLinkPopupViewStateContainer.updateViewState(
-            DeepLinkPopupViewState.LoadingPeopleConnectPopup
+            DeepLinkPopupViewState.PeopleConnectPopupLoadingPersonInfo
         )
 
         networkQueryAuthorizeExternal.getPersonInfo(link.host, link.publicKey).collect { loadResponse ->
@@ -305,14 +301,9 @@ internal class DashboardViewModel @Inject constructor(
 
                 }
                 is Response.Success -> {
-                    personInfo = loadResponse.value
-
                     deepLinkPopupViewStateContainer.updateViewState(
                         DeepLinkPopupViewState.PeopleConnectPopup(
-                            loadResponse.value.owner_alias,
-                            loadResponse.value.img,
-                            loadResponse.value.description,
-                            loadResponse.value.price_to_meet
+                            loadResponse.value
                         )
                     )
 
@@ -321,8 +312,8 @@ internal class DashboardViewModel @Inject constructor(
         }
     }
 
-    private var personInfo: PersonInfoDto? = null
     fun connectToContact(message: String?) {
+        val viewState = deepLinkPopupViewStateContainer.viewStateFlow.value
 
         viewModelScope.launch(mainImmediate) {
 
@@ -333,24 +324,23 @@ internal class DashboardViewModel @Inject constructor(
                     )
                 )
 
-                deepLinkPopupViewStateContainer.updateViewState(
-                    DeepLinkPopupViewState.PeopleConnectEmptyMessage
-                )
-
                 return@launch
-
             }
+
+            deepLinkPopupViewStateContainer.updateViewState(
+                DeepLinkPopupViewState.PeopleConnectPopupProcessing
+            )
 
             var errorMessage = app.getString(R.string.dashboard_connect_generic_error)
 
-            if (personInfo != null) {
-                val alias = personInfo?.owner_alias?.toContactAlias() ?: ContactAlias(app.getString(R.string.unknown))
-                val priceToMeet = personInfo?.price_to_meet?.toSat() ?: Sat(0)
-                val routeHint = personInfo?.owner_route_hint?.toLightningRouteHint()
-                val photoUrl = personInfo?.img?.toPhotoUrl()
+            if (viewState is DeepLinkPopupViewState.PeopleConnectPopup) {
+                val alias = viewState.personInfoDto.owner_alias?.toContactAlias() ?: ContactAlias(app.getString(R.string.unknown))
+                val priceToMeet = viewState.personInfoDto.price_to_meet?.toSat() ?: Sat(0)
+                val routeHint = viewState.personInfoDto.owner_route_hint?.toLightningRouteHint()
+                val photoUrl = viewState.personInfoDto.img?.toPhotoUrl()
 
-                personInfo?.owner_pubkey?.toLightningNodePubKey()?.let { pubKey ->
-                    personInfo?.owner_contact_key?.toContactKey()?.let { contactKey ->
+                viewState.personInfoDto.owner_pubkey?.toLightningNodePubKey()?.let { pubKey ->
+                    viewState.personInfoDto.owner_contact_key?.toContactKey()?.let { contactKey ->
                         val response = contactRepository.connectToContact(
                             alias,
                             pubKey,
@@ -391,16 +381,23 @@ internal class DashboardViewModel @Inject constructor(
         }
     }
 
-    private var authorizeExternalLink: ExternalAuthorizeLink? = null
     fun authorizeExternal() {
+        val viewState = deepLinkPopupViewStateContainer.viewStateFlow.value
+
         viewModelScope.launch(mainImmediate) {
-            if (authorizeExternalLink != null) {
+
+            if (viewState is DeepLinkPopupViewState.ExternalAuthorizePopup) {
+
+                deepLinkPopupViewStateContainer.updateViewState(
+                    DeepLinkPopupViewState.ExternalAuthorizePopupProcessing
+                )
+
                 val relayUrl: RelayUrl = relayDataHandler.retrieveRelayUrl() ?: return@launch
 
                 val response = repositoryDashboard.authorizeExternal(
                     relayUrl.value,
-                    authorizeExternalLink!!.host,
-                    authorizeExternalLink!!.challenge
+                    viewState.link.host,
+                    viewState.link.challenge
                 )
 
                 when (response) {
@@ -413,11 +410,12 @@ internal class DashboardViewModel @Inject constructor(
                         val i = Intent(Intent.ACTION_VIEW)
                         i.flags = Intent.FLAG_ACTIVITY_NEW_TASK
                         i.data = Uri.parse(
-                            "https://${authorizeExternalLink!!.host}?challenge=${authorizeExternalLink!!.challenge}"
+                            "https://${viewState.link.host}?challenge=${viewState.link.challenge}"
                         )
                         app.startActivity(i)
                     }
                 }
+
             } else {
                 submitSideEffect(
                     DashboardSideEffect.Notify(
