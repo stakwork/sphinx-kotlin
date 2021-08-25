@@ -9,6 +9,7 @@ import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.ChatAlias
+import chat.sphinx.wrapper_chat.ChatHost
 import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
@@ -54,7 +55,7 @@ interface ChatRepository {
         tribeDto: TribeDto,
     ): Flow<LoadResponse<Any, ResponseError>>
 
-    suspend fun updateTribeInfo(chat: Chat): PodcastDto?
+    suspend fun updateTribeInfo(chat: Chat): Pair<ChatHost, String>?
     suspend fun createTribe(createTribe: CreateTribe): Response<Any, ResponseError>
     suspend fun updateTribe(chatId: ChatId, createTribe: CreateTribe): Response<Any, ResponseError>
     suspend fun exitAndDeleteTribe(chat: Chat): Response<Boolean, ResponseError>
