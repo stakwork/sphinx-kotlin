@@ -17,15 +17,15 @@ inline fun String.toMediaToken(): MediaToken? =
 //Media
 @Suppress("NOTHING_TO_INLINE")
 inline fun MediaToken.getHostFromMediaToken(): MediaHost? =
-    getMediaTokenElementWithIndex(0)?.toMediaHostOrNull()
+    getMediaTokenElementWithIndex(0, true)?.toMediaHostOrNull()
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun MediaToken.getMUIDFromMediaToken(): MediaMUID? =
-    getMediaTokenElementWithIndex(1)?.toMediaMUIDOrNull()
+    getMediaTokenElementWithIndex(1, false)?.toMediaMUIDOrNull()
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun MediaToken.getMediaAttributeWithName(name: String): String? {
-    getMediaTokenElementWithIndex(4)?.let { metaData ->
+    getMediaTokenElementWithIndex(4, true)?.let { metaData ->
         metaData.split("&").let { metaDataItems ->
             for (item in metaDataItems) {
                 if (item.contains("$name=")) {
@@ -38,11 +38,19 @@ inline fun MediaToken.getMediaAttributeWithName(name: String): String? {
 }
 
 @Suppress("NOTHING_TO_INLINE")
-inline fun MediaToken.getMediaTokenElementWithIndex(index: Int): String? {
+inline fun MediaToken.getMediaTokenElementWithIndex(
+    index: Int,
+    base64Decoded: Boolean
+): String? {
     value.split(".").filter { it.isNotBlank() }.let { splits ->
         if (splits.size > index) {
             val element = splits[index]
-            return element.decodeBase64ToArray()?.toString(charset("UTF-8"))
+
+            return if (base64Decoded) {
+                element.decodeBase64ToArray()?.toString(charset("UTF-8"))
+            }  else {
+                element
+            }
         }
     }
     return null

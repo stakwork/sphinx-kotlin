@@ -11,6 +11,7 @@ import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.*
 import chat.sphinx.wrapper_message_media.MessageMedia
 import chat.sphinx.wrapper_message_media.isImage
+import chat.sphinx.wrapper_message_media.token.MediaUrl
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun Message.retrieveTextToShow(): String? =
@@ -44,22 +45,24 @@ inline fun Message.retrieveBotResponseHtmlString(): String? =
 inline fun Message.retrieveImageUrlAndMessageMedia(): Pair<String, MessageMedia?>? {
     var mediaData: Pair<String, MessageMedia?>? = null
 
-    if (this.type.isDirectPayment()) {
-        return null
-    }
     giphyData?.let { giphyData ->
         mediaData = giphyData.retrieveImageUrlAndMessageMedia()
     } ?: messageMedia?.let { media ->
         if (media.mediaType.isImage && !isPaidMessage) {
 
-            // always prefer loading a file if it exists over loading a url
+            val url: MediaUrl? = if (this.type.isDirectPayment()) {
+                media.templateUrl
+            } else {
+                media.url
+            }
+
             if (media.localFile != null) {
                 mediaData = Pair(
-                    media.url?.value?.let { if (it.isEmpty()) null else it } ?: "http://127.0.0.1",
+                    url?.value?.let { if (it.isEmpty()) null else it } ?: "http://127.0.0.1",
                     media,
                 )
             } else {
-                media.url?.let { mediaUrl ->
+                url?.let { mediaUrl ->
                     mediaData = Pair(mediaUrl.value, media)
                 }
             }

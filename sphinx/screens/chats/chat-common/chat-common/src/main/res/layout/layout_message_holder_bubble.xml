@@ -36,13 +36,16 @@
         <include
             android:id="@+id/include_message_type_direct_payment"
             layout="@layout/layout_message_type_direct_payment"
-            tools:visibility="gone" />
+            tools:visibility="visible" />
 
         <!--  Image Attachment  -->
         <include
             android:id="@+id/include_message_type_image_attachment"
             layout="@layout/layout_message_type_attachment_image"
-            tools:visibility="gone" />
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@+id/include_message_type_direct_payment"
+            tools:visibility="visible" />
 
         <!--  File Attachment  -->
         <include
