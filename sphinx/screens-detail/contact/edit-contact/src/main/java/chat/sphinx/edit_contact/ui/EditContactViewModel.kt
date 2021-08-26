@@ -77,7 +77,7 @@ internal class EditContactViewModel @Inject constructor(
         lightningNodePubKey: LightningNodePubKey,
         lightningRouteHint: LightningRouteHint?
     ) {
-        if (saveContactJob?.isActive == null) {
+        if (saveContactJob?.isActive == true) {
             return
         }
 
