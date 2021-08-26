@@ -97,13 +97,6 @@ internal class ChatTribeViewModel @Inject constructor(
                     InitialHolderViewState.Url(it)
                 )
             } ?: chat?.name?.let {
-//                val chatColor = Color.parseColor(
-//                    userColorsHelper.getHexCodeForKey(
-//                        chat.getColorKey(),
-//                        app.getRandomHexCode()
-//                    )
-//                )
-
                 emit(
                     InitialHolderViewState.Initials(
                         it.value.getInitials(),

@@ -79,26 +79,4 @@ internal class ChatContactFragment: ChatFragment<
     protected lateinit var _imageLoader: ImageLoader<ImageView>
     override val imageLoader: ImageLoader<ImageView>
         get() = _imageLoader
-
-    override fun onStart() {
-        super.onStart()
-
-        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-            viewModel.headerNameHolderSharedFlow.collect { viewState ->
-                @Exhaustive
-                when (viewState) {
-                    is ChatHeaderViewState.Idle -> {}
-                    is ChatHeaderViewState.Initialized -> {}
-
-                    is ChatHeaderViewState.ContactUpdated -> {
-                        headerBinding.apply {
-                            textViewChatHeaderName.text = viewState.chatHeaderName
-                        }
-
-                    }
-                }
-
-            }
-        }
-    }
 }

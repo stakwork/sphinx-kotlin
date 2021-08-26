@@ -25,6 +25,7 @@ import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.wrapper_chat.Chat
+import chat.sphinx.wrapper_chat.ChatMuted
 import chat.sphinx.wrapper_chat.ChatName
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
@@ -138,12 +139,26 @@ internal class ChatContactViewModel @Inject constructor(
         replay = 1
     )
 
-    val headerNameHolderSharedFlow: SharedFlow<ChatHeaderViewState> = flow {
+    override val chatHeaderHolderSharedFlow: SharedFlow<ChatHeaderViewState> = flow {
         contactSharedFlow.collect { contact ->
-            if (contact != null) {
+            val chat = chatSharedFlow.firstOrNull()
+
+            emit(
+                ChatHeaderViewState.Initialized(
+                    chatHeaderName = contact?.alias?.value ?: "",
+                    contact?.rsaPublicKey != null,
+                    chat?.isMuted ?: ChatMuted.False
+                )
+            )
+        }
+
+        chatSharedFlow.collect { chat ->
+            if (chat != null) {
                 emit(
-                    ChatHeaderViewState.ContactUpdated(
-                        chatHeaderName = contact.alias?.value ?: "",
+                    ChatHeaderViewState.Initialized(
+                        chatHeaderName = chat.name?.value ?: getChatNameIfNull()?.value ?: "",
+                        chat != null,
+                        chat.isMuted
                     )
                 )
             }

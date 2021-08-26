@@ -149,33 +149,21 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 
     protected abstract suspend fun getChatNameIfNull(): ChatName?
 
-    private inner class ChatHeaderViewStateContainer: ViewStateContainer<ChatHeaderViewState>(ChatHeaderViewState.Idle) {
-        override val viewStateFlow: StateFlow<ChatHeaderViewState> = flow<ChatHeaderViewState> {
-            chatSharedFlow.collect { chat ->
-                emit(
-                    ChatHeaderViewState.Initialized(
-                        chatHeaderName = chat?.name?.value ?: getChatNameIfNull()?.value ?: "",
-                        showLock = chat != null,
-                        chat?.isMuted,
-                    )
+    open val chatHeaderHolderSharedFlow: SharedFlow<ChatHeaderViewState> = flow {
+        chatSharedFlow.collect { chat ->
+            emit(
+                ChatHeaderViewState.Initialized(
+                    chatHeaderName = chat?.name?.value ?: getChatNameIfNull()?.value ?: "",
+                    chat != null,
+                    chat?.isMuted ?: ChatMuted.False
                 )
-
-                chat?.let { nnChat ->
-                    if (nnChat.isPrivateTribe()) {
-                        handleDisabledFooterState(nnChat)
-                    }
-                }
-            }
-        }.stateIn(
-            viewModelScope,
-            SharingStarted.WhileSubscribed(5_000),
-            ChatHeaderViewState.Idle
-        )
-    }
-
-    val chatHeaderViewStateContainer: ViewStateContainer<ChatHeaderViewState> by lazy {
-        ChatHeaderViewStateContainer()
-    }
+            )
+        }
+    }.distinctUntilChanged().shareIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5_000),
+        replay = 1
+    )
 
     suspend fun getChat(): Chat {
         chatSharedFlow.replayCache.firstOrNull()?.let { chat ->
@@ -472,6 +460,9 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         val setupHeaderInitialHolderJob = viewModelScope.launch(mainImmediate) {
             headerInitialHolderSharedFlow.firstOrNull()
         }
+        val setupChatHeaderHolderJob = viewModelScope.launch(mainImmediate) {
+            chatHeaderHolderSharedFlow.firstOrNull()
+        }
         val setupViewStateContainerJob = viewModelScope.launch(mainImmediate) {
             viewStateContainer.viewStateFlow.firstOrNull()
         }
@@ -482,6 +473,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
             // them are still active. WhileSubscribed will take over.
             setupChatFlowJob.cancel()
             setupHeaderInitialHolderJob.cancel()
+            setupChatHeaderHolderJob.cancel()
             setupViewStateContainerJob.cancel()
         }
     }
