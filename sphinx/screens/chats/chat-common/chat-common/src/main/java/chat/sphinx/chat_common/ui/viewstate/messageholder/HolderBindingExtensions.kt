@@ -196,8 +196,13 @@ internal fun LayoutMessageHolderBinding.setView(
                     val options: ImageLoaderOptions? = if (media != null) {
                         val builder = ImageLoaderOptions.Builder()
 
-                        // TODO: Add error resource drawable
-//                        builder.errorResId()
+                        builder.errorResId(
+                            if (viewState is MessageHolderViewState.Sent) {
+                                R.drawable.sent_image_not_available
+                            } else {
+                                R.drawable.received_image_not_available
+                            }
+                        )
 
                         if (file == null) {
                             media.host?.let { host ->
