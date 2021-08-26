@@ -21,7 +21,6 @@ import chat.sphinx.concept_network_query_message.model.MessageDto
 import chat.sphinx.concept_network_query_message.model.PostMessageDto
 import chat.sphinx.concept_network_query_message.model.PostPaymentDto
 import chat.sphinx.concept_network_query_verify_external.NetworkQueryAuthorizeExternal
-import chat.sphinx.concept_network_query_verify_external.model.PersonInfoDto
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_chat.model.CreateTribe
 import chat.sphinx.concept_repository_contact.ContactRepository
@@ -938,6 +937,7 @@ abstract class SphinxRepository(
                     }
                 }
             } catch (e: Exception) {
+                LOG.e(TAG, "Failed to update contact", e)
                 response = Response.Error(ResponseError(e.message.toString()))
             }
         }.join()

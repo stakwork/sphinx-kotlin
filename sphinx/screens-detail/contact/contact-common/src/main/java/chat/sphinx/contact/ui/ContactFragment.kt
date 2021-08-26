@@ -146,12 +146,11 @@ abstract class ContactFragment<
             })
 
             buttonSave.setOnClickListener {
-                viewModel.contactFormBuilder.setContactAlias(editTextContactNickname.text.toString())
-                viewModel.contactFormBuilder.setLightningNodePubKey(editTextContactAddress.text.toString())
-                viewModel.contactFormBuilder.setLightningRouteHint(editTextContactRouteHint.text.toString())
-
-
-                viewModel.saveContact()
+                viewModel.saveContact(
+                    editTextContactNickname.text?.toString(),
+                    editTextContactAddress.text?.toString(),
+                    editTextContactRouteHint.text?.toString()
+                )
             }
 
             (requireActivity() as InsetterActivity).addNavigationBarPadding(layoutConstraintContact)

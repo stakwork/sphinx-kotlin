@@ -597,6 +597,7 @@ abstract class ChatFragment<
                             }
                         }
                     }
+                    is ChatHeaderViewState.ContactUpdated -> {}
                 }
             }
         }
@@ -1002,7 +1003,6 @@ abstract class ChatFragment<
                     if (it == viewState) {
                         return@collect
                     }
-                    is ChatHeaderViewState.ContactUpdated -> {}
                 }
 
                 fullscreenLastViewState = viewState

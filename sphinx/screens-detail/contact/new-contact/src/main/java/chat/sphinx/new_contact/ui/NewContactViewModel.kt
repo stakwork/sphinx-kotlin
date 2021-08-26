@@ -6,7 +6,6 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_repository_contact.ContactRepository
-import chat.sphinx.concept_repository_contact.model.ContactForm
 import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
 import chat.sphinx.contact.ui.ContactSideEffect
 import chat.sphinx.contact.ui.ContactViewModel
@@ -17,8 +16,11 @@ import chat.sphinx.new_contact.navigation.NewContactNavigator
 import chat.sphinx.scanner_view_model_coordinator.request.ScannerRequest
 import chat.sphinx.scanner_view_model_coordinator.response.ScannerResponse
 import chat.sphinx.wrapper_common.dashboard.ContactId
+import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
+import chat.sphinx.wrapper_common.lightning.LightningRouteHint
 import chat.sphinx.wrapper_common.lightning.toLightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.toLightningRouteHint
+import chat.sphinx.wrapper_contact.ContactAlias
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
@@ -72,16 +74,20 @@ internal class NewContactViewModel @Inject constructor(
         }
     }
 
-    override fun saveContact(contactForm: ContactForm) {
+    override fun saveContact(
+        contactAlias: ContactAlias,
+        lightningNodePubKey: LightningNodePubKey,
+        lightningRouteHint: LightningRouteHint?
+    ) {
         if (saveContactJob?.isActive == true) {
             return
         }
 
         saveContactJob = viewModelScope.launch(mainImmediate) {
             contactRepository.createContact(
-                contactForm.contactAlias,
-                contactForm.lightningNodePubKey,
-                contactForm.lightningRouteHint
+                contactAlias,
+                lightningNodePubKey,
+                lightningRouteHint
             ).collect { loadResponse ->
                 @app.cash.exhaustive.Exhaustive
                 when(loadResponse) {

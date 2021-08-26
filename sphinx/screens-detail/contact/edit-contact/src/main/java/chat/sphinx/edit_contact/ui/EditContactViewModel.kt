@@ -6,7 +6,6 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_repository_contact.ContactRepository
-import chat.sphinx.concept_repository_contact.model.ContactForm
 import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
 import chat.sphinx.contact.ui.ContactSideEffect
 import chat.sphinx.contact.ui.ContactViewModel
@@ -16,6 +15,9 @@ import chat.sphinx.kotlin_response.Response
 import chat.sphinx.scanner_view_model_coordinator.request.ScannerRequest
 import chat.sphinx.scanner_view_model_coordinator.response.ScannerResponse
 import chat.sphinx.wrapper_common.dashboard.ContactId
+import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
+import chat.sphinx.wrapper_common.lightning.LightningRouteHint
+import chat.sphinx.wrapper_contact.ContactAlias
 import chat.sphinx.wrapper_contact.getColorKey
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
@@ -70,7 +72,11 @@ internal class EditContactViewModel @Inject constructor(
         }
     }
 
-    override fun saveContact(contactForm: ContactForm) {
+    override fun saveContact(
+        contactAlias: ContactAlias,
+        lightningNodePubKey: LightningNodePubKey,
+        lightningRouteHint: LightningRouteHint?
+    ) {
         if (saveContactJob?.isActive == null) {
             return
         }
@@ -80,8 +86,8 @@ internal class EditContactViewModel @Inject constructor(
 
             val loadResponse = contactRepository.updateContact(
                 contactId,
-                contactForm.contactAlias,
-                contactForm.lightningRouteHint
+                contactAlias,
+                lightningRouteHint
             )
 
             when (loadResponse) {

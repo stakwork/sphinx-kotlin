@@ -7,7 +7,6 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavArgs
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_repository_contact.ContactRepository
-import chat.sphinx.concept_repository_contact.model.ContactForm
 import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
 import chat.sphinx.contact.R
 import chat.sphinx.contact.navigation.ContactNavigator
@@ -17,6 +16,7 @@ import chat.sphinx.scanner_view_model_coordinator.request.ScannerRequest
 import chat.sphinx.scanner_view_model_coordinator.response.ScannerResponse
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.*
+import chat.sphinx.wrapper_contact.ContactAlias
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
@@ -36,8 +36,6 @@ abstract class ContactViewModel<ARGS: NavArgs> (
         ContactViewState
         >(dispatchers, ContactViewState.Idle)
 {
-    val contactFormBuilder = ContactForm.Builder()
-
     protected abstract val args: ARGS
 
     protected abstract val fromAddFriend: Boolean
@@ -72,12 +70,10 @@ abstract class ContactViewModel<ARGS: NavArgs> (
                     ContactSideEffect.ContactInfo(lightningNodePubKey)
                 } ?: response.value.value.toVirtualLightningNodeAddress()?.let { virtualNodeAddress ->
                     virtualNodeAddress.getPubKey()?.let { lightningNodePubKey ->
-
                         ContactSideEffect.ContactInfo(
                             lightningNodePubKey,
                             virtualNodeAddress.getRouteHint()
                         )
-
                     }
                 }
 
@@ -88,36 +84,41 @@ abstract class ContactViewModel<ARGS: NavArgs> (
         }
     }
 
-    private var saveFileJob: Job? = null
-    fun saveContact() {
-        if (saveFileJob?.isActive == true) {
+    protected var saveContactJob: Job? = null
+    fun saveContact(contactAlias: String?, lightningNodePubKey: String?, lightningRouteHint: String?) {
+        if (saveContactJob?.isActive == true) {
             return
         }
 
-        saveFileJob = viewModelScope.launch {
-            if (!contactFormBuilder.hasContactAlias) {
+        saveContactJob = viewModelScope.launch {
+            if (contactAlias.isNullOrEmpty()) {
                 submitSideEffect(ContactSideEffect.Notify.NicknameAndAddressRequired)
                 return@launch
             }
 
-            if (!contactFormBuilder.hasLightningNodePubKey) {
+            if (lightningNodePubKey.isNullOrEmpty()) {
                 submitSideEffect(ContactSideEffect.Notify.InvalidLightningNodePublicKey)
                 return@launch
             }
 
-            if (!contactFormBuilder.hasValidLightningRouteHint) {
+            if (!lightningRouteHint.isNullOrEmpty() && lightningRouteHint.toLightningRouteHint() == null) {
                 submitSideEffect(ContactSideEffect.Notify.InvalidRouteHint)
                 return@launch
             }
 
-            contactFormBuilder.build()?.let { contactForm ->
-                saveContact(contactForm)
-            }
+            saveContact(
+                ContactAlias(contactAlias),
+                LightningNodePubKey(lightningNodePubKey),
+                lightningRouteHint?.toLightningRouteHint()
+            )
         }
     }
 
-    protected var saveContactJob: Job? = null
-    protected abstract fun saveContact(contactForm: ContactForm)
+    protected abstract fun saveContact(
+        contactAlias: ContactAlias,
+        lightningNodePubKey: LightningNodePubKey,
+        lightningRouteHint: LightningRouteHint?
+    )
 
     fun isFromAddFriend(): Boolean {
         return fromAddFriend
