@@ -3028,8 +3028,8 @@ abstract class SphinxRepository(
 
                 scope.launch(dispatcher) {
 
-                    val decrypted = decryptMessageContent(
-                        MessageContent(mediaKey)
+                    val decrypted = decryptMediaKey(
+                        MediaKey(mediaKey)
                     )
 
                     @Exhaustive
