@@ -95,6 +95,8 @@ internal class NewContactViewModel @Inject constructor(
                         viewStateContainer.updateViewState(ContactViewState.Saving)
                     }
                     is Response.Error -> {
+                        submitSideEffect(ContactSideEffect.Notify.FailedToSaveContact)
+
                         viewStateContainer.updateViewState(ContactViewState.Error)
                     }
                     is Response.Success -> {

@@ -54,9 +54,9 @@ sealed class ContactSideEffect: SideEffect<Context>() {
                 get() = R.string.new_contact_invalid_route_hint_error
         }
 
-        object FailedToUpdateContact : Notify() {
+        object FailedToSaveContact : Notify() {
             override val stringRes: Int
-                get() = R.string.new_contact_invalid_route_hint_error
+                get() = R.string.failed_to_update_contact
         }
     }
 
