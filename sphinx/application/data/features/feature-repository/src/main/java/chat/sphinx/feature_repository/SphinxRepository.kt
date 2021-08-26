@@ -908,7 +908,7 @@ abstract class SphinxRepository(
         routeHint: LightningRouteHint?
     ): Response<Any, ResponseError> {
         val queries = coreDB.getSphinxDatabaseQueries()
-        var response: Response<Any, ResponseError> = Response.Error(ResponseError("Failed to update contact"))
+        var response: Response<Any, ResponseError>? = null
 
         applicationScope.launch(mainImmediate) {
             try {
@@ -932,18 +932,20 @@ abstract class SphinxRepository(
                                     upsertContact(loadResponse.value, queries)
                                 }
                             }
+                            response = loadResponse
+
                             LOG.d(TAG, "Contact has been successfully updated")
                         }
                     }
                 }
             } catch (e: Exception) {
                 LOG.e(TAG, "Failed to update contact", e)
+
                 response = Response.Error(ResponseError(e.message.toString()))
             }
         }.join()
 
-
-        return response
+        return response ?: Response.Error(ResponseError("Failed to update contact"))
     }
 
     override suspend fun updateOwnerDeviceId(deviceId: DeviceId): Response<Any, ResponseError> {
