@@ -121,12 +121,16 @@ internal fun LayoutMessageHolderBinding.setView(
                                         builder.addHeader(token.headerKey, token.headerValue)
 
                                         media.mediaKeyDecrypted?.value?.let { key ->
-                                            val header = CryptoHeader.Decrypt.Builder()
-                                                .setScheme(CryptoScheme.Decrypt.JNCryptor)
-                                                .setPassword(key)
-                                                .build()
 
-                                            builder.addHeader(header.key, header.value)
+                                            if (key.isNotEmpty()) {
+                                                val header = CryptoHeader.Decrypt.Builder()
+                                                    .setScheme(CryptoScheme.Decrypt.JNCryptor)
+                                                    .setPassword(key)
+                                                    .build()
+
+                                                builder.addHeader(header.key, header.value)
+                                            }
+
                                         }
                                     }
                             }

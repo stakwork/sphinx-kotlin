@@ -1369,6 +1369,20 @@ abstract class SphinxRepository(
     private suspend fun decryptMessageContent(
         messageContent: MessageContent
     ): Response<UnencryptedByteArray, ResponseError> {
+        return decryptString(messageContent.value)
+    }
+
+    @OptIn(RawPasswordAccess::class)
+    private suspend fun decryptMediaKey(
+        mediaKey: MediaKey
+    ): Response<UnencryptedByteArray, ResponseError> {
+        return decryptString(mediaKey.value)
+    }
+
+    @OptIn(RawPasswordAccess::class)
+    private suspend fun decryptString(
+        value: String
+    ): Response<UnencryptedByteArray, ResponseError> {
         val privateKey: CharArray = authenticationCoreManager.getEncryptionKey()
             ?.privateKey
             ?.value
@@ -1378,7 +1392,7 @@ abstract class SphinxRepository(
 
         return rsa.decrypt(
             rsaPrivateKey = RsaPrivateKey(privateKey),
-            text = EncryptedString(messageContent.value),
+            text = EncryptedString(value),
             dispatcher = default
         )
     }
@@ -1457,7 +1471,7 @@ abstract class SphinxRepository(
                     mediaDbo.media_key_decrypted.let { decrypted ->
 
                         if (decrypted == null) {
-                            val response = decryptMessageContent(MessageContent(key.value))
+                            val response = decryptMediaKey(MediaKey(key.value))
 
                             @Exhaustive
                             when (response) {

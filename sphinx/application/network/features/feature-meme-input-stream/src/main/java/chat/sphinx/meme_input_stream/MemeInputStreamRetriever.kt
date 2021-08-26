@@ -30,12 +30,15 @@ internal data class MemeInputStreamRetriever(
             url(url)
             addHeader(authenticationToken.headerKey, authenticationToken.headerValue)
             mediaKeyDecrypted?.value?.let { key ->
-                val header = CryptoHeader.Decrypt.Builder()
-                    .setScheme(CryptoScheme.Decrypt.JNCryptor)
-                    .setPassword(key)
-                    .build()
+                
+                if (key.isNotEmpty()) {
+                    val header = CryptoHeader.Decrypt.Builder()
+                        .setScheme(CryptoScheme.Decrypt.JNCryptor)
+                        .setPassword(key)
+                        .build()
 
-                addHeader(header.key, header.value)
+                    addHeader(header.key, header.value)
+                }
             }
         }.build()
 

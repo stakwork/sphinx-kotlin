@@ -330,12 +330,12 @@ fun TransactionCallbacks.upsertMessage(dto: MessageDto, queries: SphinxDatabaseQ
             if (mediaToken.isEmpty() || mediaType.isEmpty()) return
 
             queries.messageMediaUpsert(
-                dto.media_key?.toMediaKey(),
+                (dto.media_key ?: "").toMediaKey(),
                 mediaType.toMediaType(),
                 MediaToken(mediaToken),
                 MessageId(dto.id),
                 chatId,
-                dto.mediaKeyDecrypted?.toMediaKeyDecrypted(),
+                (dto.mediaKeyDecrypted ?: "").toMediaKeyDecrypted(),
                 dto.mediaLocalFile,
             )
 
@@ -370,12 +370,12 @@ fun TransactionCallbacks.upsertMessage(dto: MessageDto, queries: SphinxDatabaseQ
             if (mediaToken.isEmpty() || mediaType.isEmpty()) return
 
             queries.messageMediaUpsert(
-                dto.media_key?.toMediaKey(),
+                (dto.media_key ?: "").toMediaKey(),
                 mediaType.toMediaType(),
                 MediaToken(mediaToken),
                 MessageId(dto.id),
                 chatId,
-                dto.mediaKeyDecrypted?.toMediaKeyDecrypted(),
+                (dto.mediaKeyDecrypted ?: "").toMediaKeyDecrypted(),
                 dto.mediaLocalFile
             )
         }
