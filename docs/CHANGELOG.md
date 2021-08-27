@@ -1,5 +1,10 @@
 # ChangeLog
 
+## Version 1.0.0-alpha21 (2021-08-27)
+ - Improvements to loading of messages that contain Images
+ - Improvements to Save Image functionality
+ - Adds ability to Edit a contact's details
+
 ## Version 1.0.0-alpha20 (2021-08-25)
  - Fixes to podcast functionality within the Tribe Chat screen
  - Adds ability to view Images in full screen mode
