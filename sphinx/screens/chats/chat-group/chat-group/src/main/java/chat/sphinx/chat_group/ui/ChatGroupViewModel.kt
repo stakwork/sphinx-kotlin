@@ -92,13 +92,6 @@ class ChatGroupViewModel @Inject constructor(
                     InitialHolderViewState.Url(it)
                 )
             } ?: chat?.name?.let {
-//                val chatColor = Color.parseColor(
-//                    userColorsHelper.getHexCodeForKey(
-//                        chat.getColorKey(),
-//                        app.getRandomHexCode()
-//                    )
-//                )
-
                 emit(
                     InitialHolderViewState.Initials(
                         it.value.getInitials(),
@@ -142,5 +135,9 @@ class ChatGroupViewModel @Inject constructor(
     override fun sendMessage(builder: SendMessage.Builder): SendMessage? {
         builder.setChatId(args.chatId)
         return super.sendMessage(builder)
+    }
+
+    override fun goToChatDetailScreen() {
+        // We do nothing because Chat Groups are being aren't supported anymore
     }
 }

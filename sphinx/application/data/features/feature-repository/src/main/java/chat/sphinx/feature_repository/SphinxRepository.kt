@@ -21,7 +21,6 @@ import chat.sphinx.concept_network_query_message.model.MessageDto
 import chat.sphinx.concept_network_query_message.model.PostMessageDto
 import chat.sphinx.concept_network_query_message.model.PostPaymentDto
 import chat.sphinx.concept_network_query_verify_external.NetworkQueryAuthorizeExternal
-import chat.sphinx.concept_network_query_verify_external.model.PersonInfoDto
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_chat.model.CreateTribe
 import chat.sphinx.concept_repository_contact.ContactRepository
@@ -901,6 +900,52 @@ abstract class SphinxRepository(
         } catch (e: Exception) {}
 
         return response
+    }
+
+    override suspend fun updateContact(
+        contactId: ContactId,
+        alias: ContactAlias?,
+        routeHint: LightningRouteHint?
+    ): Response<Any, ResponseError> {
+        val queries = coreDB.getSphinxDatabaseQueries()
+        var response: Response<Any, ResponseError>? = null
+
+        applicationScope.launch(mainImmediate) {
+            try {
+                networkQueryContact.updateContact(
+                    contactId,
+                    PutContactDto(
+                        alias = alias?.value,
+                        route_hint = routeHint?.value
+                    )
+                ).collect { loadResponse ->
+                    @Exhaustive
+                    when (loadResponse) {
+                        is LoadResponse.Loading -> {}
+                        is Response.Error -> {
+                            response = loadResponse
+                        }
+                        is Response.Success -> {
+                            contactLock.withLock {
+                                queries.transaction {
+                                    updatedContactIds.add(ContactId(loadResponse.value.id))
+                                    upsertContact(loadResponse.value, queries)
+                                }
+                            }
+                            response = loadResponse
+
+                            LOG.d(TAG, "Contact has been successfully updated")
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                LOG.e(TAG, "Failed to update contact", e)
+
+                response = Response.Error(ResponseError(e.message.toString()))
+            }
+        }.join()
+
+        return response ?: Response.Error(ResponseError("Failed to update contact"))
     }
 
     override suspend fun updateOwnerDeviceId(deviceId: DeviceId): Response<Any, ResponseError> {

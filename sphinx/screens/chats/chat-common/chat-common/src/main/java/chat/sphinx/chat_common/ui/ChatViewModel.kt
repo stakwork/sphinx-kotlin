@@ -84,11 +84,8 @@ import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_media_cache.MediaCacheHandler
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import io.matthewnelson.concept_views.viewstate.value
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.jitsi.meet.sdk.JitsiMeetActivity
 import org.jitsi.meet.sdk.JitsiMeetConferenceOptions
 import org.jitsi.meet.sdk.JitsiMeetUserInfo
@@ -153,22 +150,53 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     protected abstract suspend fun getChatNameIfNull(): ChatName?
 
     private inner class ChatHeaderViewStateContainer: ViewStateContainer<ChatHeaderViewState>(ChatHeaderViewState.Idle) {
-        override val viewStateFlow: StateFlow<ChatHeaderViewState> = flow<ChatHeaderViewState> {
-            chatSharedFlow.collect { chat ->
-                emit(
-                    ChatHeaderViewState.Initialized(
-                        chatHeaderName = chat?.name?.value ?: getChatNameIfNull()?.value ?: "",
-                        showLock = chat != null,
-                        chat?.isMuted,
-                    )
-                )
 
-                chat?.let { nnChat ->
-                    if (nnChat.isPrivateTribe()) {
-                        handleDisabledFooterState(nnChat)
+        private var contactCollectionJob: Job? = null
+        private var chatCollectionJob: Job? = null
+
+        override val viewStateFlow: StateFlow<ChatHeaderViewState> = flow<ChatHeaderViewState> {
+
+            contactId?.let { nnContactId ->
+                contactCollectionJob = viewModelScope.launch(mainImmediate) {
+                    // Ensure that chat collection sets state first before collecting the contact
+                    // as we must have present the current value for mute
+                    while (isActive && _viewStateFlow.value is ChatHeaderViewState.Idle) {
+                        delay(25L)
+                    }
+
+                    contactRepository.getContactById(nnContactId).collect { contact ->
+                        val currentState = _viewStateFlow.value
+                        if (contact != null && currentState is ChatHeaderViewState.Initialized) {
+                            _viewStateFlow.value = ChatHeaderViewState.Initialized(
+                                chatHeaderName = contact.alias?.value ?: "",
+                                showLock = currentState.showLock,
+                                isMuted = currentState.isMuted,
+                            )
+                        }
                     }
                 }
             }
+
+            chatCollectionJob = viewModelScope.launch {
+                chatSharedFlow.collect { chat ->
+
+                    _viewStateFlow.value = ChatHeaderViewState.Initialized(
+                        chatHeaderName = chat?.name?.value ?: getChatNameIfNull()?.value ?: "",
+                        showLock = chat != null,
+                        isMuted = chat?.isMuted,
+                    )
+                    chat?.let { nnChat ->
+                        if (nnChat.isPrivateTribe()) {
+                            handleDisabledFooterState(nnChat)
+                        }
+                    }
+                }
+            }
+
+            emitAll(_viewStateFlow)
+        }.onCompletion {
+            contactCollectionJob?.cancel()
+            chatCollectionJob?.cancel()
         }.stateIn(
             viewModelScope,
             SharingStarted.WhileSubscribed(5_000),
@@ -1036,13 +1064,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         }
     }
 
-    open fun goToChatDetailScreen() {
-        chatId?.let { id ->
-            viewModelScope.launch(mainImmediate) {
-                chatNavigator.toChatDetail(id, contactId)
-            }
-        }
-    }
+    abstract fun goToChatDetailScreen()
 
     open fun handleContactTribeLinks(url: String?) {
         if (url != null) {

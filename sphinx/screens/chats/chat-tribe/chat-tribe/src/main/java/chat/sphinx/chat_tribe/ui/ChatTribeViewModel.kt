@@ -49,7 +49,7 @@ internal class ChatTribeViewModel @Inject constructor(
     app: Application,
     dispatchers: CoroutineDispatchers,
     memeServerTokenHandler: MemeServerTokenHandler,
-    chatNavigator: TribeChatNavigator,
+    private val tribeChatNavigator: TribeChatNavigator,
     chatRepository: ChatRepository,
     contactRepository: ContactRepository,
     messageRepository: MessageRepository,
@@ -64,7 +64,7 @@ internal class ChatTribeViewModel @Inject constructor(
     app,
     dispatchers,
     memeServerTokenHandler,
-    chatNavigator,
+    tribeChatNavigator,
     chatRepository,
     contactRepository,
     messageRepository,
@@ -97,13 +97,6 @@ internal class ChatTribeViewModel @Inject constructor(
                     InitialHolderViewState.Url(it)
                 )
             } ?: chat?.name?.let {
-//                val chatColor = Color.parseColor(
-//                    userColorsHelper.getHexCodeForKey(
-//                        chat.getColorKey(),
-//                        app.getRandomHexCode()
-//                    )
-//                )
-
                 emit(
                     InitialHolderViewState.Initials(
                         it.value.getInitials(),

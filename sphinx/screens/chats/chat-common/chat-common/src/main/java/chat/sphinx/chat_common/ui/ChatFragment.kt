@@ -572,39 +572,6 @@ abstract class ChatFragment<
         super.subscribeToViewStateFlow()
 
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-            viewModel.chatHeaderViewStateContainer.collect { viewState ->
-
-                @Exhaustive
-                when (viewState) {
-                    is ChatHeaderViewState.Idle -> {}
-                    is ChatHeaderViewState.Initialized -> {
-                        headerBinding.apply {
-
-                            textViewChatHeaderName.text = viewState.chatHeaderName
-                            textViewChatHeaderLock.goneIfFalse(viewState.showLock)
-
-                            imageViewChatHeaderMuted.apply {
-                                viewState.isMuted?.let { muted ->
-                                    if (muted.isTrue()) {
-                                        imageLoader.load(
-                                            headerBinding.imageViewChatHeaderMuted,
-                                            R.drawable.ic_baseline_notifications_off_24
-                                        )
-                                    } else {
-                                        imageLoader.load(
-                                            headerBinding.imageViewChatHeaderMuted,
-                                            R.drawable.ic_baseline_notifications_24
-                                        )
-                                    }
-                                } ?: gone
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.messageReplyViewStateContainer.collect { viewState ->
                 messageReplyLastViewState?.let {
                     if (it == viewState) {
@@ -712,6 +679,39 @@ abstract class ChatFragment<
                                 scrollToBottom(callback = {
                                     root.visible
                                 }, true)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.chatHeaderViewStateContainer.collect { viewState ->
+
+                @Exhaustive
+                when (viewState) {
+                    is ChatHeaderViewState.Idle -> {}
+                    is ChatHeaderViewState.Initialized -> {
+                        headerBinding.apply {
+
+                            textViewChatHeaderName.text = viewState.chatHeaderName
+                            textViewChatHeaderLock.goneIfFalse(viewState.showLock)
+
+                            imageViewChatHeaderMuted.apply {
+                                viewState.isMuted?.let { muted ->
+                                    if (muted.isTrue()) {
+                                        imageLoader.load(
+                                            headerBinding.imageViewChatHeaderMuted,
+                                            R.drawable.ic_baseline_notifications_off_24
+                                        )
+                                    } else {
+                                        imageLoader.load(
+                                            headerBinding.imageViewChatHeaderMuted,
+                                            R.drawable.ic_baseline_notifications_24
+                                        )
+                                    }
+                                } ?: gone
                             }
                         }
                     }

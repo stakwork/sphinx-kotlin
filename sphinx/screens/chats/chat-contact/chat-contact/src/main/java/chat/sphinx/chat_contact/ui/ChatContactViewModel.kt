@@ -7,6 +7,7 @@ import chat.sphinx.camera_view_model_coordinator.request.CameraRequest
 import chat.sphinx.camera_view_model_coordinator.response.CameraResponse
 import chat.sphinx.chat_common.ui.ChatViewModel
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
+import chat.sphinx.chat_common.ui.viewstate.header.ChatHeaderViewState
 import chat.sphinx.chat_contact.navigation.ContactChatNavigator
 import chat.sphinx.concept_link_preview.LinkPreviewHandler
 import chat.sphinx.concept_meme_input_stream.MemeInputStreamHandler
@@ -24,6 +25,7 @@ import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.wrapper_chat.Chat
+import chat.sphinx.wrapper_chat.ChatMuted
 import chat.sphinx.wrapper_chat.ChatName
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
@@ -57,7 +59,7 @@ internal class ChatContactViewModel @Inject constructor(
     app: Application,
     dispatchers: CoroutineDispatchers,
     memeServerTokenHandler: MemeServerTokenHandler,
-    chatNavigator: ContactChatNavigator,
+    contactChatNavigator: ContactChatNavigator,
     chatRepository: ChatRepository,
     contactRepository: ContactRepository,
     messageRepository: MessageRepository,
@@ -72,7 +74,7 @@ internal class ChatContactViewModel @Inject constructor(
     app,
     dispatchers,
     memeServerTokenHandler,
-    chatNavigator,
+    contactChatNavigator,
     chatRepository,
     contactRepository,
     messageRepository,
@@ -252,5 +254,11 @@ internal class ChatContactViewModel @Inject constructor(
         builder.setContactId(contactId)
         builder.setChatId(chatId)
         return super.sendMessage(builder)
+    }
+
+    override fun goToChatDetailScreen() {
+        viewModelScope.launch(mainImmediate) {
+            (chatNavigator as ContactChatNavigator).toEditContactDetail(contactId)
+        }
     }
 }

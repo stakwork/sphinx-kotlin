@@ -1,0 +1,270 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_constraint_contact"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/background_detail_screen"
+    tools:context="chat.sphinx.contact.ui.ContactFragment">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_nickname_content"
+        android:layout_width="match_parent"
+        android:layout_height="85dp"
+        android:layout_marginStart="@dimen/default_form_horizontal_margin"
+        android:layout_marginEnd="@dimen/default_form_horizontal_margin"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_contact_nickname"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/new_contact_nickname_label"
+            android:textColor="@color/secondaryText"
+            android:fontFamily="@font/roboto_regular"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            android:textSize="@dimen/default_form_text_view_text_size"
+            android:singleLine="true" />
+
+        <androidx.appcompat.widget.AppCompatEditText
+            android:id="@+id/edit_text_contact_nickname"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/text"
+            android:fontFamily="@font/roboto_regular"
+            app:backgroundTint="@android:color/transparent"
+            app:layout_constraintTop_toBottomOf="@+id/text_view_contact_nickname"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            android:textSize="@dimen/default_form_edit_view_text_size"
+            android:inputType="textVisiblePassword|textCapWords"
+            android:layout_marginLeft="@dimen/default_edit_text_left_margin"
+            android:singleLine="true"
+            tools:text= "Testing"/>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layout_constraint_new_contact_nickname_bottom_border"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/lightDivider"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/text_view_contact_nickname" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layout_constraint_existing_contact_profile_picture"
+            android:layout_width="@dimen/default_form_scan_icon_container_width"
+            android:layout_height="match_parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_view_initials"
+                android:layout_width="@dimen/default_chat_initial_image_xy"
+                android:layout_height="@dimen/default_chat_initial_image_xy"
+                android:layout_centerInParent="true"
+                android:background="@drawable/chat_initials_circle"
+                android:fontFamily="@font/montserrat_regular"
+                android:gravity="center"
+                android:singleLine="true"
+                android:textColor="@android:color/white"
+                android:textSize="17sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="TT" />
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/image_view_profile_picture"
+                android:layout_width="@dimen/default_chat_initial_image_xy"
+                android:layout_height="@dimen/default_chat_initial_image_xy"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_address_content"
+        android:layout_width="match_parent"
+        android:layout_height="85dp"
+        android:layout_marginStart="@dimen/default_form_horizontal_margin"
+        android:layout_marginEnd="@dimen/default_form_horizontal_margin"
+        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_nickname_content">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_contact_address"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/new_contact_address_label"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            android:textColor="@color/secondaryText"
+            android:fontFamily="@font/roboto_regular"
+            android:textSize="@dimen/default_form_text_view_text_size"
+            android:singleLine="true" />
+
+        <androidx.appcompat.widget.AppCompatEditText
+            android:id="@+id/edit_text_contact_address"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:textColor="@color/text"
+            android:fontFamily="@font/roboto_regular"
+            app:backgroundTint="@android:color/transparent"
+            app:layout_constraintTop_toBottomOf="@+id/text_view_contact_address"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/layout_constraint_new_contact_scan_button"
+            android:textSize="@dimen/default_form_edit_view_text_size"
+            android:inputType="textVisiblePassword"
+            android:layout_marginLeft="@dimen/default_edit_text_left_margin"
+            android:singleLine="true"
+            tools:text= "Testing" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layout_constraint_new_contact_address_bottom_border"
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:background="@color/lightDivider"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/layout_constraint_new_contact_scan_button"
+            app:layout_constraintStart_toStartOf="@+id/text_view_contact_address" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layout_constraint_new_contact_scan_button"
+            android:layout_width="@dimen/default_form_scan_icon_container_width"
+            android:layout_height="match_parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            >
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/scan_address_button"
+                android:layout_width="@dimen/default_form_scan_icon_width"
+                android:layout_height="@dimen/default_form_scan_icon_height"
+                app:layout_constraintEnd_toEndOf="@+id/layout_constraint_new_contact_scan_button"
+                app:layout_constraintBottom_toBottomOf="parent"
+                android:background="@drawable/ic_scan_icon"
+                android:backgroundTint="@color/secondaryText"
+                android:layout_marginBottom="@dimen/default_form_scan_icon_bottom_margin"
+                />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/button_qr_code"
+                android:layout_width="@dimen/default_invite_qr_image_xy"
+                android:layout_height="@dimen/default_invite_qr_image_xy"
+                app:layout_constraintEnd_toEndOf="@+id/layout_constraint_new_contact_scan_button"
+                app:layout_constraintBottom_toBottomOf="parent"
+                android:background="@drawable/ic_qr_code"
+                android:backgroundTint="@color/secondaryText"
+                android:layout_marginBottom="@dimen/default_form_scan_icon_bottom_margin"
+                android:visibility="visible"
+                />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_profile_basic_container_route_hint_content"
+        android:layout_width="match_parent"
+        android:layout_height="85dp"
+        android:layout_marginStart="@dimen/default_form_horizontal_margin"
+        android:layout_marginEnd="@dimen/default_form_horizontal_margin"
+        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_address_content">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_contact_route_hint"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/new_contact_route_hint_label"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            android:textColor="@color/secondaryText"
+            android:fontFamily="@font/roboto_regular"
+            android:textSize="@dimen/default_form_text_view_text_size"
+            android:singleLine="true" />
+
+        <androidx.appcompat.widget.AppCompatEditText
+            android:id="@+id/edit_text_contact_route_hint"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/text"
+            android:fontFamily="@font/roboto_regular"
+            app:backgroundTint="@android:color/transparent"
+            app:layout_constraintTop_toBottomOf="@+id/text_view_contact_route_hint"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            android:inputType="textVisiblePassword"
+            android:textSize="@dimen/default_form_edit_view_size"
+            android:layout_marginLeft="@dimen/default_edit_text_left_margin"
+            android:singleLine="true" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layout_constraint_new_contact_route_hint_bottom_border"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/lightDivider"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/text_view_contact_route_hint" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <include
+        android:id="@+id/layout_group_pin_view"
+        layout="@layout/layout_group_pin_view"
+        android:layout_width="match_parent"
+        android:layout_height="65dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginStart="@dimen/default_form_horizontal_margin"
+        android:layout_marginEnd="@dimen/default_form_horizontal_margin"
+        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_profile_basic_container_route_hint_content" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_save_content"
+        android:layout_width="@dimen/save_to_contacts_button_width"
+        android:layout_height="@dimen/save_contact_button_height"
+        android:layout_marginBottom="@dimen/save_to_contacts_button_bottom_margin"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/button_save"
+            style="@style/RoundedBlueButton"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:textSize="@dimen/save_to_contacts_button_text_size"
+            android:textColor="@android:color/white"
+            android:background="@drawable/button_background_white_rad_48"
+            android:backgroundTint="@color/primaryBlue"
+            tools:text="SAVE"/>
+
+        <ProgressBar
+            android:layout_width="@dimen/save_progress_bar_xy"
+            android:layout_height="@dimen/save_progress_bar_xy"
+            android:layout_marginLeft="@dimen/save_progress_bar_margin_left"
+            android:id="@+id/progress_bar_contact_save"
+            style="?android:attr/progressBarStyle"
+            android:indeterminateTint="@android:color/white"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:indeterminate="true"
+            android:visibility="gone" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
