@@ -7,7 +7,6 @@ import chat.sphinx.chat_contact.navigation.ToChatContactScreen
 import chat.sphinx.chat_group.navigation.ToChatGroupScreen
 import chat.sphinx.chat_tribe.navigation.ToChatTribeScreen
 import chat.sphinx.chat_tribe.navigation.TribeChatNavigator
-import chat.sphinx.contact_detail.navigation.ToContactDetailScreen
 import chat.sphinx.join_tribe.navigation.ToJoinTribeDetail
 import chat.sphinx.new_contact.navigation.ToNewContactDetail
 import chat.sphinx.payment_send.navigation.ToPaymentSendDetail
@@ -35,12 +34,8 @@ internal class TribeChatNavigatorImpl @Inject constructor(
         detailDriver.submitNavigationRequest(ToPodcastPlayerScreen(chatId, podcast))
     }
 
-    override suspend fun toChatDetail(chatId: ChatId, contactId: ContactId?) {
-        detailDriver.submitNavigationRequest(ToContactDetailScreen(chatId, contactId))
-    }
-
-    override suspend fun toTribeDetailScreen(chatId: ChatId, podcast: ParcelablePodcast?) {
-        detailDriver.submitNavigationRequest(ToTribeDetailScreen(chatId, podcast))
+    override suspend fun toTribeDetailScreen(chatId: ChatId) {
+        detailDriver.submitNavigationRequest(ToTribeDetailScreen(chatId))
     }
 
     override suspend fun toAddContactDetail(

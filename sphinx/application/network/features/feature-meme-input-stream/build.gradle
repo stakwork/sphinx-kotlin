@@ -1,0 +1,15 @@
+plugins {
+    id 'app.cash.exhaustive'
+    id 'java-library'
+    id 'kotlin'
+}
+
+dependencies {
+    // KotlinAndroid
+    api project(path: ':kotlin:concepts:concept-coroutines')
+
+    // Sphinx
+    api project(path: ':sphinx:application:network:concepts:concept-meme-input-stream')
+    implementation project(path: ':sphinx:application:network:concepts:clients:concept-network-client-cache')
+    implementation project(path: ':sphinx:application:network:concepts:clients:concept-network-client-crypto')
+}

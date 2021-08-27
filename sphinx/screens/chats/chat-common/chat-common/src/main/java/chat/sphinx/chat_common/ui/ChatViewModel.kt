@@ -1,9 +1,14 @@
 package chat.sphinx.chat_common.ui
 
 import android.app.Application
+import android.content.ContentValues
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Build
+import android.provider.MediaStore
 import android.util.Log
 import android.webkit.MimeTypeMap
 import androidx.annotation.CallSuper
@@ -39,6 +44,7 @@ import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.concept_link_preview.LinkPreviewHandler
 import chat.sphinx.concept_link_preview.model.TribePreviewName
 import chat.sphinx.concept_link_preview.model.toPreviewImageUrlOrNull
+import chat.sphinx.concept_meme_input_stream.MemeInputStreamHandler
 import chat.sphinx.concept_meme_server.MemeServerTokenHandler
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_repository_chat.ChatRepository
@@ -78,16 +84,13 @@ import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_media_cache.MediaCacheHandler
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import io.matthewnelson.concept_views.viewstate.value
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.jitsi.meet.sdk.JitsiMeetActivity
 import org.jitsi.meet.sdk.JitsiMeetConferenceOptions
 import org.jitsi.meet.sdk.JitsiMeetUserInfo
-import java.io.File
-import java.io.InputStream
+import java.io.*
+
 
 @JvmSynthetic
 @Suppress("NOTHING_TO_INLINE")
@@ -107,6 +110,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     protected val savedStateHandle: SavedStateHandle,
     protected val cameraCoordinator: ViewModelCoordinator<CameraRequest, CameraResponse>,
     protected val linkPreviewHandler: LinkPreviewHandler,
+    private val memeInputStreamHandler: MemeInputStreamHandler,
     protected val LOG: SphinxLogger,
 ): MotionLayoutViewModel<
         Nothing,
@@ -146,22 +150,53 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     protected abstract suspend fun getChatNameIfNull(): ChatName?
 
     private inner class ChatHeaderViewStateContainer: ViewStateContainer<ChatHeaderViewState>(ChatHeaderViewState.Idle) {
-        override val viewStateFlow: StateFlow<ChatHeaderViewState> = flow<ChatHeaderViewState> {
-            chatSharedFlow.collect { chat ->
-                emit(
-                    ChatHeaderViewState.Initialized(
-                        chatHeaderName = chat?.name?.value ?: getChatNameIfNull()?.value ?: "",
-                        showLock = chat != null,
-                        chat?.isMuted,
-                    )
-                )
 
-                chat?.let { nnChat ->
-                    if (nnChat.isPrivateTribe()) {
-                        handleDisabledFooterState(nnChat)
+        private var contactCollectionJob: Job? = null
+        private var chatCollectionJob: Job? = null
+
+        override val viewStateFlow: StateFlow<ChatHeaderViewState> = flow<ChatHeaderViewState> {
+
+            contactId?.let { nnContactId ->
+                contactCollectionJob = viewModelScope.launch(mainImmediate) {
+                    // Ensure that chat collection sets state first before collecting the contact
+                    // as we must have present the current value for mute
+                    while (isActive && _viewStateFlow.value is ChatHeaderViewState.Idle) {
+                        delay(25L)
+                    }
+
+                    contactRepository.getContactById(nnContactId).collect { contact ->
+                        val currentState = _viewStateFlow.value
+                        if (contact != null && currentState is ChatHeaderViewState.Initialized) {
+                            _viewStateFlow.value = ChatHeaderViewState.Initialized(
+                                chatHeaderName = contact.alias?.value ?: "",
+                                showLock = currentState.showLock,
+                                isMuted = currentState.isMuted,
+                            )
+                        }
                     }
                 }
             }
+
+            chatCollectionJob = viewModelScope.launch {
+                chatSharedFlow.collect { chat ->
+
+                    _viewStateFlow.value = ChatHeaderViewState.Initialized(
+                        chatHeaderName = chat?.name?.value ?: getChatNameIfNull()?.value ?: "",
+                        showLock = chat != null,
+                        isMuted = chat?.isMuted,
+                    )
+                    chat?.let { nnChat ->
+                        if (nnChat.isPrivateTribe()) {
+                            handleDisabledFooterState(nnChat)
+                        }
+                    }
+                }
+            }
+
+            emitAll(_viewStateFlow)
+        }.onCompletion {
+            contactCollectionJob?.cancel()
+            chatCollectionJob?.cancel()
         }.stateIn(
             viewModelScope,
             SharingStarted.WhileSubscribed(5_000),
@@ -1029,13 +1064,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         }
     }
 
-    open fun goToChatDetailScreen() {
-        chatId?.let { id ->
-            viewModelScope.launch(mainImmediate) {
-                chatNavigator.toChatDetail(id, contactId)
-            }
-        }
-    }
+    abstract fun goToChatDetailScreen()
 
     open fun handleContactTribeLinks(url: String?) {
         if (url != null) {
@@ -1093,11 +1122,68 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         // unused
     }
 
-    fun saveFile(message: Message) {
+    fun saveFile(
+        message: Message,
+        drawable: Drawable?
+    ) {
         viewModelScope.launch(mainImmediate) {
-            submitSideEffect(
-                ChatSideEffect.Notify("TODO Save File Functionality")
-            )
+            if (message.isMediaAttachment) {
+                message.retrieveImageUrlAndMessageMedia()?.let { mediaUrlAndMessageMedia ->
+                    mediaUrlAndMessageMedia.second?.let { messageMedia ->
+                        val mediaContentValues = messageMedia.retrieveContentValues(message)
+
+                        messageMedia.retrieveMediaStorageUri()?.let { mediaStorageUri ->
+                            app.contentResolver.insert(mediaStorageUri, mediaContentValues)?.let { savedFileUri ->
+                                val inputStream = drawable?.drawableToBitmap()?.toInputStream() ?: retrieveRemoteMediaInputStream(
+                                    mediaUrlAndMessageMedia.first,
+                                    messageMedia
+                                )
+
+                                try {
+                                    inputStream?.use { nnInputStream ->
+                                        app.contentResolver.openOutputStream(savedFileUri).use { savedFileOutputStream ->
+                                            if (savedFileOutputStream != null) {
+                                                nnInputStream.copyTo(savedFileOutputStream, 1024)
+
+                                                submitSideEffect(
+                                                    ChatSideEffect.Notify(app.getString(R.string.saved_attachment_successfully))
+                                                )
+                                                return@launch
+                                            }
+                                        }
+                                    }
+                                } catch (e: Exception) {
+                                    LOG.e(TAG, "Failed to store file: ", e)
+                                }
+
+                                submitSideEffect(
+                                    ChatSideEffect.Notify(app.getString(R.string.failed_to_save_file))
+                                )
+                                try {
+                                    app.contentResolver.delete(savedFileUri, null, null)
+                                } catch (fileE: Exception) {
+                                    LOG.e(TAG, "Failed to delete file: ", fileE)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private suspend fun retrieveRemoteMediaInputStream(
+        url: String,
+        messageMedia: MessageMedia
+    ): InputStream? {
+        return messageMedia.localFile?.inputStream() ?: messageMedia.host?.let { mediaHost ->
+            memeServerTokenHandler.retrieveAuthenticationToken(mediaHost)?.let { authenticationToken ->
+                memeInputStreamHandler.retrieveMediaInputStream(
+                    url,
+                    authenticationToken,
+                    messageMedia.mediaKeyDecrypted
+                )
+            }
         }
     }
 
@@ -1109,3 +1195,54 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         }
     }
 }
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun MessageMedia.retrieveMediaStorageUri(): Uri? {
+    return when {
+        this.mediaType.isImage -> {
+            MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+        }
+        this.mediaType.isVideo -> {
+            MediaStore.Video.Media.EXTERNAL_CONTENT_URI
+        }
+        this.mediaType.isAudio -> {
+            MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
+        }
+        else -> {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                MediaStore.Downloads.EXTERNAL_CONTENT_URI
+            } else {
+                null
+            }
+        }
+    }
+}
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun MessageMedia.retrieveContentValues(message: Message): ContentValues {
+    return ContentValues().apply {
+        put(MediaStore.Images.Media.TITLE, message.id.value)
+        put(MediaStore.Images.Media.DISPLAY_NAME, message.senderAlias?.value)
+        put(MediaStore.Images.Media.MIME_TYPE, mediaType.value.replace("jpg", "jpeg"))
+    }
+}
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun Drawable.drawableToBitmap(): Bitmap? {
+    return try {
+        val bitDw = this as BitmapDrawable
+        bitDw.bitmap
+    } catch (e: Exception) {
+        null
+    }
+}
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun Bitmap.toInputStream(): InputStream? {
+    val stream = ByteArrayOutputStream()
+    compress(Bitmap.CompressFormat.JPEG, 100, stream)
+    val imageInByte: ByteArray = stream.toByteArray()
+    return ByteArrayInputStream(imageInByte)
+}
+
+

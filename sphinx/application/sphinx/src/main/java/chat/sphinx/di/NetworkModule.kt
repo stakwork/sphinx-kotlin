@@ -2,29 +2,34 @@ package chat.sphinx.di
 
 import android.app.Application
 import android.content.Context
+import chat.sphinx.concept_link_preview.LinkPreviewHandler
+import chat.sphinx.concept_meme_input_stream.MemeInputStreamHandler
 import chat.sphinx.concept_network_call.NetworkCall
 import chat.sphinx.concept_network_client.NetworkClient
 import chat.sphinx.concept_network_client_cache.NetworkClientCache
-import chat.sphinx.concept_network_query_meme_server.NetworkQueryMemeServer
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
 import chat.sphinx.concept_network_query_contact.NetworkQueryContact
 import chat.sphinx.concept_network_query_invite.NetworkQueryInvite
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
+import chat.sphinx.concept_network_query_meme_server.NetworkQueryMemeServer
 import chat.sphinx.concept_network_query_message.NetworkQueryMessage
 import chat.sphinx.concept_network_query_subscription.NetworkQuerySubscription
+import chat.sphinx.concept_network_query_verify_external.NetworkQueryAuthorizeExternal
 import chat.sphinx.concept_network_query_version.NetworkQueryVersion
 import chat.sphinx.concept_network_relay_call.NetworkRelayCall
 import chat.sphinx.concept_network_tor.TorManager
 import chat.sphinx.concept_relay.RelayDataHandler
 import chat.sphinx.concept_socket_io.SocketIOManager
+import chat.sphinx.feature_link_preview.LinkPreviewHandlerImpl
 import chat.sphinx.feature_network_client.NetworkClientImpl
-import chat.sphinx.feature_network_query_meme_server.NetworkQueryMemeServerImpl
 import chat.sphinx.feature_network_query_chat.NetworkQueryChatImpl
 import chat.sphinx.feature_network_query_contact.NetworkQueryContactImpl
 import chat.sphinx.feature_network_query_invite.NetworkQueryInviteImpl
 import chat.sphinx.feature_network_query_lightning.NetworkQueryLightningImpl
+import chat.sphinx.feature_network_query_meme_server.NetworkQueryMemeServerImpl
 import chat.sphinx.feature_network_query_message.NetworkQueryMessageImpl
 import chat.sphinx.feature_network_query_subscription.NetworkQuerySubscriptionImpl
+import chat.sphinx.feature_network_query_verify_external.NetworkQueryAuthorizeExternalImpl
 import chat.sphinx.feature_network_query_version.NetworkQueryVersionImpl
 import chat.sphinx.feature_network_relay_call.NetworkRelayCallImpl
 import chat.sphinx.feature_network_tor.TorManagerAndroid
@@ -32,6 +37,7 @@ import chat.sphinx.feature_relay.RelayDataHandlerImpl
 import chat.sphinx.feature_socket_io.SocketIOManagerImpl
 import chat.sphinx.feature_sphinx_service.ApplicationServiceTracker
 import chat.sphinx.logger.SphinxLogger
+import chat.sphinx.meme_input_stream.MemeInputStreamHandlerImpl
 import chat.sphinx.wrapper_meme_server.AuthenticationToken
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import coil.util.CoilUtils
@@ -46,11 +52,7 @@ import io.matthewnelson.build_config.BuildConfigVersionCode
 import io.matthewnelson.concept_authentication.data.AuthenticationStorage
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_encryption_key.EncryptionKeyHandler
-import chat.sphinx.concept_link_preview.LinkPreviewHandler
-import chat.sphinx.concept_network_query_verify_external.NetworkQueryAuthorizeExternal
 import io.matthewnelson.feature_authentication_core.AuthenticationCoreManager
-import chat.sphinx.feature_link_preview.LinkPreviewHandlerImpl
-import chat.sphinx.feature_network_query_verify_external.NetworkQueryAuthorizeExternalImpl
 import kotlinx.coroutines.CoroutineScope
 import javax.inject.Singleton
 
@@ -208,6 +210,13 @@ object NetworkModule {
         networkQueryChat: NetworkQueryChat,
     ): LinkPreviewHandler =
         LinkPreviewHandlerImpl(dispatchers, networkClient, networkQueryChat)
+
+    @Provides
+    fun provideMemeInputStreamHandler(
+        dispatchers: CoroutineDispatchers,
+        networkClientCache: NetworkClientCache,
+    ): MemeInputStreamHandler =
+        MemeInputStreamHandlerImpl(dispatchers, networkClientCache)
 
     @Provides
     @Singleton

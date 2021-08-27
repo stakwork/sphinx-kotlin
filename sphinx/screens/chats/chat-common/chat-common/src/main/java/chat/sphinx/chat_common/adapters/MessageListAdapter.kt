@@ -240,7 +240,7 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                         headerHeight = headerHeight,
                         statusHeaderHeight = Px(binding.includeMessageStatusHeader.root.measuredHeight.toFloat()),
                         recyclerViewWidth = recyclerViewWidth,
-                        screenHeight = screenHeight,
+                        screenHeight = screenHeight
                     ).let { vs ->
                         viewModel.updateSelectedMessageViewState(vs)
                     }

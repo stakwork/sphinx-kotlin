@@ -67,6 +67,12 @@ abstract class MessageMedia {
         host?.toMediaUrl(mediaToken)
     }
 
+    val templateUrl: MediaUrl? by lazy {
+        muid?.let { nnMUID ->
+            host?.toTemplateUrl(nnMUID)
+        } ?: null
+    }
+
     @Suppress("SpellCheckingInspection")
     val muid: MediaMUID? by lazy {
         mediaToken.getMUIDFromMediaToken()

@@ -2,6 +2,7 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <string name="edit_text_message_hint">Mensaje…</string>
     <string name="edit_text_optional_message_hint">Mensaje opcional…</string>
+    <string name="text_view_loading_attachment">Cargando/Desencriptando...</string>
 
     <string name="chat_muted_message">La conversación está ahora silenciada. No recibirás notificaciones para las mensajes entrantes en esta conversación</string>
     <string name="chat_muted_waiting_on_network">Esperando conexión…</string>
@@ -94,6 +95,10 @@
     <string name="attachment_send_header_image">ENVIAR IMAGEN</string>
     <string name="attachment_send_header_video">ENVIAR VIDEO</string>
     <string name="attachment_send_header_giphy">ENVIAR GIPHY</string>
+
+    <!-- Save Attachment -->
+    <string name="saved_attachment_successfully">Archivo adjunto guardado correctamente</string>
+    <string name="failed_to_save_file">No se pudo guardar el archivo</string>
 
     <!-- Exit Tribe -->
     <string name="delete_own_tribe_not_supported">Eliminar la tribu no esta soportado aún</string>

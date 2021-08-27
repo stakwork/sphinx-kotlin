@@ -12,11 +12,11 @@ import chat.sphinx.camera.navigation.CameraNavigator
 import chat.sphinx.chat_contact.navigation.ContactChatNavigator
 import chat.sphinx.chat_group.navigation.GroupChatNavigator
 import chat.sphinx.chat_tribe.navigation.TribeChatNavigator
-import chat.sphinx.contact_detail.navigation.ContactDetailNavigator
 import chat.sphinx.create_tribe.navigation.CreateTribeNavigator
 import chat.sphinx.dashboard.navigation.DashboardBottomNavBarNavigator
 import chat.sphinx.dashboard.navigation.DashboardNavDrawerNavigator
 import chat.sphinx.dashboard.navigation.DashboardNavigator
+import chat.sphinx.edit_contact.navigation.EditContactNavigator
 import chat.sphinx.hilt_qualifiers.AuthenticationDriver
 import chat.sphinx.hilt_qualifiers.DetailDriver
 import chat.sphinx.hilt_qualifiers.PrimaryDriver
@@ -192,6 +192,12 @@ internal object NavigationModule {
         newContactNavigatorImpl
 
     @Provides
+    fun provideEditContactNavigator(
+        editContactNavigatorImpl: EditContactNavigatorImpl
+    ): EditContactNavigator =
+        editContactNavigatorImpl
+
+    @Provides
     fun providePaymentReceiveNavigator(
         paymentReceiveNavigatorImpl: PaymentReceiveNavigatorImpl
     ): PaymentReceiveNavigator =
@@ -268,11 +274,5 @@ internal object NavigationModule {
         tribeDetailNavigatorImpl: TribeDetailNavigatorImpl
     ): TribeDetailNavigator =
         tribeDetailNavigatorImpl
-
-    @Provides
-    fun provideContactDetailNavigator(
-        contactDetailNavigatorImpl: ContactDetailNavigatorImpl
-    ): ContactDetailNavigator =
-        contactDetailNavigatorImpl
 
 }

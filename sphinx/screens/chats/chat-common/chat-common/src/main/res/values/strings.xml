@@ -2,6 +2,7 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <string name="edit_text_message_hint">Message...</string>
     <string name="edit_text_optional_message_hint">Optional Message...</string>
+    <string name="text_view_loading_attachment">Loading/Decrypting...</string>
 
     <string name="chat_muted_message"> Chat is now muted. You won\'t get push notifications for incoming messages on this chat</string>
     <string name="chat_muted_waiting_on_network">Waiting on network…</string>
@@ -93,6 +94,10 @@
     <string name="attachment_send_header_image">SEND IMAGE</string>
     <string name="attachment_send_header_video">SEND VIDEO</string>
     <string name="attachment_send_header_giphy">SEND GIPHY</string>
+
+    <!-- Save Attachment -->
+    <string name="saved_attachment_successfully">Saved attachment successfully</string>
+    <string name="failed_to_save_file">Failed to save file</string>
 
     <!-- Exit Tribe -->
     <string name="delete_own_tribe_not_supported">Delete own tribe is not supported yet</string>

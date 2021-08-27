@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/edit_contact_nav_graph"
+    app:startDestination="@+id/navigation_edit_contact_fragment">
+
+    <fragment
+        android:id="@+id/navigation_edit_contact_fragment"
+        android:name="chat.sphinx.edit_contact.ui.EditContactFragment"
+        tools:layout="@layout/fragment_edit_contact">
+
+        <argument
+            android:name="argContactId"
+            app:argType="long"/>
+
+    </fragment>
+
+</navigation>

@@ -7,7 +7,7 @@ import chat.sphinx.chat_contact.navigation.ContactChatNavigator
 import chat.sphinx.chat_contact.navigation.ToChatContactScreen
 import chat.sphinx.chat_group.navigation.ToChatGroupScreen
 import chat.sphinx.chat_tribe.navigation.ToChatTribeScreen
-import chat.sphinx.contact_detail.navigation.ToContactDetailScreen
+import chat.sphinx.edit_contact.navigation.ToEditContactDetail
 import chat.sphinx.join_tribe.navigation.ToJoinTribeDetail
 import chat.sphinx.new_contact.navigation.ToNewContactDetail
 import chat.sphinx.payment_send.navigation.ToPaymentSendDetail
@@ -26,8 +26,8 @@ internal class ContactChatNavigatorImpl @Inject constructor(
         detailDriver.submitNavigationRequest(ToPaymentSendDetail(contactId, chatId))
     }
 
-    override suspend fun toChatDetail(chatId: ChatId, contactId: ContactId?) {
-        detailDriver.submitNavigationRequest(ToContactDetailScreen(chatId, contactId))
+    override suspend fun toEditContactDetail(contactId: ContactId) {
+        detailDriver.submitNavigationRequest(ToEditContactDetail(contactId))
     }
 
     override suspend fun toAddContactDetail(
