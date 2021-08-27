@@ -41,6 +41,7 @@ import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.File
 import chat.sphinx.resources.R as common_R
@@ -111,8 +112,13 @@ internal fun LayoutMessageHolderBinding.setView(
                     val options: ImageLoaderOptions? = if (media != null) {
                         val builder = ImageLoaderOptions.Builder()
 
-                        // TODO: Add error resource drawable
-//                        builder.errorResId()
+                        builder.errorResId(
+                            if (viewState is MessageHolderViewState.Sent) {
+                                R.drawable.sent_image_not_available
+                            } else {
+                                R.drawable.received_image_not_available
+                            }
+                        )
 
                         if (file == null) {
                             media.host?.let { host ->
@@ -147,13 +153,6 @@ internal fun LayoutMessageHolderBinding.setView(
                     disposable.await()
                 }.let { job ->
                     holderJobs.add(job)
-                    job.invokeOnCompletion {
-                        if (!job.isCancelled) {
-                            includeMessageHolderBubble.includeMessageTypeImageAttachment.apply {
-                                loadingImageProgressContainer.gone
-                            }
-                        }
-                    }
                 }
             }
             setUnsupportedMessageTypeLayout(viewState.unsupportedMessageType)
@@ -197,8 +196,13 @@ internal fun LayoutMessageHolderBinding.setView(
                     val options: ImageLoaderOptions? = if (media != null) {
                         val builder = ImageLoaderOptions.Builder()
 
-                        // TODO: Add error resource drawable
-//                        builder.errorResId()
+                        builder.errorResId(
+                            if (viewState is MessageHolderViewState.Sent) {
+                                R.drawable.sent_image_not_available
+                            } else {
+                                R.drawable.received_image_not_available
+                            }
+                        )
 
                         if (file == null) {
                             media.host?.let { host ->
@@ -928,7 +932,6 @@ internal inline fun LayoutMessageHolderBinding.setBubbleImageAttachment(
             root.gone
         } else {
             root.visible
-            loadingImageProgressContainer.visible
 
             loadImage(imageViewAttachmentImage, imageAttachment.url, imageAttachment.media)
         }

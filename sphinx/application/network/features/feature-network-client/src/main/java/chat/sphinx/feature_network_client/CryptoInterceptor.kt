@@ -91,6 +91,10 @@ class CryptoInterceptor: Interceptor {
                 when (scheme) {
                     CryptoScheme.Decrypt.JNCryptor -> {
 
+                        if (password.isEmpty()) {
+                            return response
+                        }
+
                         val stream = AES256JNCryptorInputStream(
                             responseBody.byteStream(),
                             password.toCharArray()
