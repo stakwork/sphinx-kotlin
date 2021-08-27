@@ -17,7 +17,7 @@ import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.contact.R
 import chat.sphinx.contact.databinding.LayoutContactBinding
-import chat.sphinx.detail_resources.databinding.LayoutDetailScreenHeaderBinding
+import chat.sphinx.contact.databinding.LayoutContactDetailScreenHeaderBinding
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.resources.getRandomHexCode
@@ -47,7 +47,7 @@ abstract class ContactFragment<
         VB
         >(layoutId)
 {
-    abstract val headerBinding: LayoutDetailScreenHeaderBinding
+    abstract val headerBinding: LayoutContactDetailScreenHeaderBinding
     abstract val contactBinding: LayoutContactBinding
 
     abstract val userColorsHelper: UserColorsHelper
@@ -87,7 +87,15 @@ abstract class ContactFragment<
                 }
             }
 
+            textViewDetailScreenClose.goneIfTrue(viewModel.isExistingContact())
             textViewDetailScreenClose.setOnClickListener {
+                lifecycleScope.launch(viewModel.mainImmediate) {
+                    viewModel.navigator.closeDetailScreen()
+                }
+            }
+
+            textViewDetailScreenSubscribe.goneIfFalse(viewModel.isExistingContact())
+            textViewDetailScreenSubscribe.setOnClickListener {
                 lifecycleScope.launch(viewModel.mainImmediate) {
                     viewModel.navigator.closeDetailScreen()
                 }

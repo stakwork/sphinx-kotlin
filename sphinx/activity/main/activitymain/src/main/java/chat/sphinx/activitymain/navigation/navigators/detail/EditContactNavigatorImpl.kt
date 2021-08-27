@@ -3,6 +3,8 @@ package chat.sphinx.activitymain.navigation.navigators.detail
 import chat.sphinx.activitymain.navigation.drivers.DetailNavigationDriver
 import chat.sphinx.edit_contact.navigation.EditContactNavigator
 import chat.sphinx.qr_code.navigation.ToQRCodeDetail
+import chat.sphinx.subscription.navigation.ToSubscriptionDetail
+import chat.sphinx.wrapper_common.dashboard.ContactId
 import javax.inject.Inject
 
 internal class EditContactNavigatorImpl @Inject constructor(
@@ -20,6 +22,12 @@ internal class EditContactNavigatorImpl @Inject constructor(
                 description,
                 true
             )
+        )
+    }
+
+    override suspend fun toSubscribeDetailScreen(contactId: ContactId) {
+        navigationDriver.submitNavigationRequest(
+            ToSubscriptionDetail()
         )
     }
 }

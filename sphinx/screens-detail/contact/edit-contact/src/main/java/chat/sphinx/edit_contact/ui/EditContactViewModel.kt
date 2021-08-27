@@ -72,6 +72,10 @@ internal class EditContactViewModel @Inject constructor(
         }
     }
 
+    suspend fun toSubscriptionDetailScreen() {
+        (navigator as EditContactNavigator).toSubscribeDetailScreen(contactId)
+    }
+
     override fun saveContact(
         contactAlias: ContactAlias,
         lightningNodePubKey: LightningNodePubKey,
