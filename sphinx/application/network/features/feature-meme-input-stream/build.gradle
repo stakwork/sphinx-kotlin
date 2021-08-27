@@ -10,6 +10,6 @@ dependencies {
 
     // Sphinx
     api project(path: ':sphinx:application:network:concepts:concept-meme-input-stream')
-    api project(path: ':sphinx:application:network:concepts:clients:concept-network-client')
+    implementation project(path: ':sphinx:application:network:concepts:clients:concept-network-client-cache')
     implementation project(path: ':sphinx:application:network:concepts:clients:concept-network-client-crypto')
 }

@@ -214,9 +214,9 @@ object NetworkModule {
     @Provides
     fun provideMemeInputStreamHandler(
         dispatchers: CoroutineDispatchers,
-        networkClient: NetworkClient,
+        networkClientCache: NetworkClientCache,
     ): MemeInputStreamHandler =
-        MemeInputStreamHandlerImpl(dispatchers, networkClient)
+        MemeInputStreamHandlerImpl(dispatchers, networkClientCache)
 
     @Provides
     @Singleton

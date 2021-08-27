@@ -3,6 +3,9 @@ package chat.sphinx.chat_common.ui
 import android.app.Application
 import android.content.ContentValues
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
@@ -1098,7 +1101,8 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     }
 
     fun saveFile(
-        message: Message
+        message: Message,
+        drawable: Drawable?
     ) {
         viewModelScope.launch(mainImmediate) {
             if (message.isMediaAttachment) {
@@ -1108,11 +1112,16 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 
                         messageMedia.retrieveMediaStorageUri()?.let { mediaStorageUri ->
                             app.contentResolver.insert(mediaStorageUri, mediaContentValues)?.let { savedFileUri ->
+                                val inputStream = drawable?.drawableToBitmap()?.toInputStream() ?: retrieveRemoteMediaInputStream(
+                                    mediaUrlAndMessageMedia.first,
+                                    messageMedia
+                                )
+
                                 try {
-                                    retrieveRemoteMediaInputStream(mediaUrlAndMessageMedia.first, messageMedia)?.use { messageAttachmentFile->
+                                    inputStream?.use { nnInputStream ->
                                         app.contentResolver.openOutputStream(savedFileUri).use { savedFileOutputStream ->
                                             if (savedFileOutputStream != null) {
-                                                messageAttachmentFile.copyTo(savedFileOutputStream, 1024)
+                                                nnInputStream.copyTo(savedFileOutputStream, 1024)
 
                                                 submitSideEffect(
                                                     ChatSideEffect.Notify(app.getString(R.string.saved_attachment_successfully))
@@ -1195,3 +1204,23 @@ inline fun MessageMedia.retrieveContentValues(message: Message): ContentValues {
         put(MediaStore.Images.Media.MIME_TYPE, mediaType.value.replace("jpg", "jpeg"))
     }
 }
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun Drawable.drawableToBitmap(): Bitmap? {
+    return try {
+        val bitDw = this as BitmapDrawable
+        bitDw.bitmap
+    } catch (e: Exception) {
+        null
+    }
+}
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun Bitmap.toInputStream(): InputStream? {
+    val stream = ByteArrayOutputStream()
+    compress(Bitmap.CompressFormat.JPEG, 100, stream)
+    val imageInByte: ByteArray = stream.toByteArray()
+    return ByteArrayInputStream(imageInByte)
+}
+
+
