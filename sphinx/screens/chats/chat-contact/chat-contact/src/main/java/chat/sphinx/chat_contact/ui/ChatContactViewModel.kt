@@ -139,36 +139,6 @@ internal class ChatContactViewModel @Inject constructor(
         replay = 1
     )
 
-    override val chatHeaderHolderSharedFlow: SharedFlow<ChatHeaderViewState> = flow {
-        contactSharedFlow.collect { contact ->
-            val chat = chatSharedFlow.firstOrNull()
-
-            emit(
-                ChatHeaderViewState.Initialized(
-                    chatHeaderName = contact?.alias?.value ?: "",
-                    contact?.rsaPublicKey != null,
-                    chat?.isMuted ?: ChatMuted.False
-                )
-            )
-        }
-
-        chatSharedFlow.collect { chat ->
-            if (chat != null) {
-                emit(
-                    ChatHeaderViewState.Initialized(
-                        chatHeaderName = chat.name?.value ?: getChatNameIfNull()?.value ?: "",
-                        chat != null,
-                        chat.isMuted
-                    )
-                )
-            }
-        }
-    }.distinctUntilChanged().shareIn(
-        viewModelScope,
-        SharingStarted.WhileSubscribed(5_000),
-        replay = 1
-    )
-
     override suspend fun getChatNameIfNull(): ChatName? {
         contactSharedFlow.replayCache.firstOrNull()?.let { contact ->
             return contact.alias?.value?.let { ChatName(it) }

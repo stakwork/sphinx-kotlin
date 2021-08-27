@@ -684,7 +684,7 @@ abstract class ChatFragment<
         }
 
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-            viewModel.chatHeaderHolderSharedFlow.collect { viewState ->
+            viewModel.chatHeaderViewStateContainer.collect { viewState ->
 
                 @Exhaustive
                 when (viewState) {
