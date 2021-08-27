@@ -43,15 +43,6 @@ sealed class CryptoHeader(val key: String, val value: String) {
 
     }
 
-    init {
-        require(key.isNotEmpty()) {
-            "HeaderEncrypt.key cannot be empty"
-        }
-        require(value.isNotEmpty()) {
-            "HeaderEncrypt.value cannot be empty"
-        }
-    }
-
     companion object {
         @Suppress("ObjectPropertyName")
         private const val _17 = 17

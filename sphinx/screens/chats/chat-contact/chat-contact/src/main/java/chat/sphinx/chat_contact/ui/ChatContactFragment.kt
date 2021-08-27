@@ -6,12 +6,19 @@ import androidx.recyclerview.widget.RecyclerView
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.chat_common.databinding.*
 import chat.sphinx.chat_common.ui.ChatFragment
+import chat.sphinx.chat_common.ui.viewstate.header.ChatHeaderViewState
 import chat.sphinx.chat_contact.R
 import chat.sphinx.chat_contact.databinding.FragmentChatContactBinding
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.menu_bottom.databinding.LayoutMenuBottomBinding
+import chat.sphinx.wrapper_chat.isTrue
 import dagger.hilt.android.AndroidEntryPoint
+import io.matthewnelson.android_feature_screens.util.gone
+import io.matthewnelson.android_feature_screens.util.goneIfFalse
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
+import javax.annotation.meta.Exhaustive
 import javax.inject.Inject
 
 @AndroidEntryPoint

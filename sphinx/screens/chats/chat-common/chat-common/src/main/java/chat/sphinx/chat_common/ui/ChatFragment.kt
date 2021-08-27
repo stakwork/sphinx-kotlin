@@ -481,7 +481,10 @@ abstract class ChatFragment<
                                 viewModel.replyToMessage(holderState.message)
                             }
                             is MenuItemState.SaveFile -> {
-                                viewModel.saveFile(holderState.message)
+                                viewModel.saveFile(
+                                    holderState.message,
+                                    selectedMessageBinding.includeLayoutMessageHolderSelectedMessage.includeMessageHolderBubble.includeMessageTypeImageAttachment.imageViewAttachmentImage.drawable
+                                )
                             }
                             is MenuItemState.Resend -> {
                                 viewModel.resendMessage(holderState.message)
@@ -567,39 +570,6 @@ abstract class ChatFragment<
 
     override fun subscribeToViewStateFlow() {
         super.subscribeToViewStateFlow()
-
-        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-            viewModel.chatHeaderViewStateContainer.collect { viewState ->
-
-                @Exhaustive
-                when (viewState) {
-                    is ChatHeaderViewState.Idle -> {}
-                    is ChatHeaderViewState.Initialized -> {
-                        headerBinding.apply {
-
-                            textViewChatHeaderName.text = viewState.chatHeaderName
-                            textViewChatHeaderLock.goneIfFalse(viewState.showLock)
-
-                            imageViewChatHeaderMuted.apply {
-                                viewState.isMuted?.let { muted ->
-                                    if (muted.isTrue()) {
-                                        imageLoader.load(
-                                            headerBinding.imageViewChatHeaderMuted,
-                                            R.drawable.ic_baseline_notifications_off_24
-                                        )
-                                    } else {
-                                        imageLoader.load(
-                                            headerBinding.imageViewChatHeaderMuted,
-                                            R.drawable.ic_baseline_notifications_24
-                                        )
-                                    }
-                                } ?: gone
-                            }
-                        }
-                    }
-                }
-            }
-        }
 
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.messageReplyViewStateContainer.collect { viewState ->
@@ -709,6 +679,39 @@ abstract class ChatFragment<
                                 scrollToBottom(callback = {
                                     root.visible
                                 }, true)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.chatHeaderViewStateContainer.collect { viewState ->
+
+                @Exhaustive
+                when (viewState) {
+                    is ChatHeaderViewState.Idle -> {}
+                    is ChatHeaderViewState.Initialized -> {
+                        headerBinding.apply {
+
+                            textViewChatHeaderName.text = viewState.chatHeaderName
+                            textViewChatHeaderLock.goneIfFalse(viewState.showLock)
+
+                            imageViewChatHeaderMuted.apply {
+                                viewState.isMuted?.let { muted ->
+                                    if (muted.isTrue()) {
+                                        imageLoader.load(
+                                            headerBinding.imageViewChatHeaderMuted,
+                                            R.drawable.ic_baseline_notifications_off_24
+                                        )
+                                    } else {
+                                        imageLoader.load(
+                                            headerBinding.imageViewChatHeaderMuted,
+                                            R.drawable.ic_baseline_notifications_24
+                                        )
+                                    }
+                                } ?: gone
                             }
                         }
                     }

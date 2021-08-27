@@ -2,6 +2,7 @@ package chat.sphinx.meme_input_stream
 
 import chat.sphinx.concept_meme_input_stream.MemeInputStreamHandler
 import chat.sphinx.concept_network_client.NetworkClient
+import chat.sphinx.concept_network_client_cache.NetworkClientCache
 import chat.sphinx.wrapper_meme_server.AuthenticationToken
 import chat.sphinx.wrapper_message_media.MediaKeyDecrypted
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
@@ -10,7 +11,7 @@ import java.io.InputStream
 
 class MemeInputStreamHandlerImpl(
     private val dispatchers: CoroutineDispatchers,
-    private val networkClient: NetworkClient,
+    private val networkClientCache: NetworkClientCache,
 ) : MemeInputStreamHandler() {
 
     override suspend fun retrieveMediaInputStream(
@@ -23,7 +24,7 @@ class MemeInputStreamHandlerImpl(
                 httpUrl,
                 authenticationToken,
                 mediaKeyDecrypted
-            ).getMemeInputStream(dispatchers, networkClient.getClient())
+            ).getMemeInputStream(dispatchers, networkClientCache.getCachingClient())
         }
     }
 }

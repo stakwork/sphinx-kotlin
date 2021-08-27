@@ -21,7 +21,6 @@ import chat.sphinx.concept_network_query_message.model.MessageDto
 import chat.sphinx.concept_network_query_message.model.PostMessageDto
 import chat.sphinx.concept_network_query_message.model.PostPaymentDto
 import chat.sphinx.concept_network_query_verify_external.NetworkQueryAuthorizeExternal
-import chat.sphinx.concept_network_query_verify_external.model.PersonInfoDto
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_chat.model.CreateTribe
 import chat.sphinx.concept_repository_contact.ContactRepository
@@ -903,6 +902,52 @@ abstract class SphinxRepository(
         return response
     }
 
+    override suspend fun updateContact(
+        contactId: ContactId,
+        alias: ContactAlias?,
+        routeHint: LightningRouteHint?
+    ): Response<Any, ResponseError> {
+        val queries = coreDB.getSphinxDatabaseQueries()
+        var response: Response<Any, ResponseError>? = null
+
+        applicationScope.launch(mainImmediate) {
+            try {
+                networkQueryContact.updateContact(
+                    contactId,
+                    PutContactDto(
+                        alias = alias?.value,
+                        route_hint = routeHint?.value
+                    )
+                ).collect { loadResponse ->
+                    @Exhaustive
+                    when (loadResponse) {
+                        is LoadResponse.Loading -> {}
+                        is Response.Error -> {
+                            response = loadResponse
+                        }
+                        is Response.Success -> {
+                            contactLock.withLock {
+                                queries.transaction {
+                                    updatedContactIds.add(ContactId(loadResponse.value.id))
+                                    upsertContact(loadResponse.value, queries)
+                                }
+                            }
+                            response = loadResponse
+
+                            LOG.d(TAG, "Contact has been successfully updated")
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                LOG.e(TAG, "Failed to update contact", e)
+
+                response = Response.Error(ResponseError(e.message.toString()))
+            }
+        }.join()
+
+        return response ?: Response.Error(ResponseError("Failed to update contact"))
+    }
+
     override suspend fun updateOwnerDeviceId(deviceId: DeviceId): Response<Any, ResponseError> {
         val queries = coreDB.getSphinxDatabaseQueries()
         var response: Response<Any, ResponseError> = Response.Success(Any())
@@ -1369,6 +1414,20 @@ abstract class SphinxRepository(
     private suspend fun decryptMessageContent(
         messageContent: MessageContent
     ): Response<UnencryptedByteArray, ResponseError> {
+        return decryptString(messageContent.value)
+    }
+
+    @OptIn(RawPasswordAccess::class)
+    private suspend fun decryptMediaKey(
+        mediaKey: MediaKey
+    ): Response<UnencryptedByteArray, ResponseError> {
+        return decryptString(mediaKey.value)
+    }
+
+    @OptIn(RawPasswordAccess::class)
+    private suspend fun decryptString(
+        value: String
+    ): Response<UnencryptedByteArray, ResponseError> {
         val privateKey: CharArray = authenticationCoreManager.getEncryptionKey()
             ?.privateKey
             ?.value
@@ -1378,7 +1437,7 @@ abstract class SphinxRepository(
 
         return rsa.decrypt(
             rsaPrivateKey = RsaPrivateKey(privateKey),
-            text = EncryptedString(messageContent.value),
+            text = EncryptedString(value),
             dispatcher = default
         )
     }
@@ -1457,7 +1516,7 @@ abstract class SphinxRepository(
                     mediaDbo.media_key_decrypted.let { decrypted ->
 
                         if (decrypted == null) {
-                            val response = decryptMessageContent(MessageContent(key.value))
+                            val response = decryptMediaKey(MediaKey(key.value))
 
                             @Exhaustive
                             when (response) {
@@ -3014,8 +3073,8 @@ abstract class SphinxRepository(
 
                 scope.launch(dispatcher) {
 
-                    val decrypted = decryptMessageContent(
-                        MessageContent(mediaKey)
+                    val decrypted = decryptMediaKey(
+                        MediaKey(mediaKey)
                     )
 
                     @Exhaustive

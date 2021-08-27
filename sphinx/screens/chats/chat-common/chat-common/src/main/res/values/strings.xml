@@ -2,6 +2,7 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <string name="edit_text_message_hint">Message...</string>
     <string name="edit_text_optional_message_hint">Optional Message...</string>
+    <string name="text_view_loading_attachment">Loading/Decrypting...</string>
 
     <string name="chat_muted_message"> Chat is now muted. You won\'t get push notifications for incoming messages on this chat</string>
     <string name="chat_muted_waiting_on_network">Waiting on network…</string>

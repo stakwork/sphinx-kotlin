@@ -2,17 +2,7 @@ package chat.sphinx.wrapper_message_media
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun String.toMediaKey(): MediaKey? =
-    try {
-        MediaKey(this)
-    } catch (e: IllegalArgumentException) {
-        null
-    }
+    MediaKey(this)
 
 @JvmInline
-value class MediaKey(val value: String) {
-    init {
-        require(value.isNotEmpty()) {
-            "MediaKey cannot be empty"
-        }
-    }
-}
+value class MediaKey(val value: String)

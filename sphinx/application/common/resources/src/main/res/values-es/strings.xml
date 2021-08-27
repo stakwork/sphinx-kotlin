@@ -11,6 +11,7 @@
     <string name="unknown">Desconocido</string>
     <string name="decryption_error">ERROR DE DECRIPTACIÓN...</string>
     <string name="null_name_error">ERROR: NOMBRE VACÍO</string>
+    <string name="public_key">Clave Pública</string>
 
     <!--  Number Pad   -->
     <string name="_1">1</string>
