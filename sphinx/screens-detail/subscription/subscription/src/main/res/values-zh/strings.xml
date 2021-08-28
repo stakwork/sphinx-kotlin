@@ -1,4 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="subscription_header_name">定期訂閱</string>
+    <string name="amount">數量</string>
+    <string name="custom_amount">自定義金額：</string>
+    <string name="_500_sats">500 sats</string>
+    <string name="_1000_sats">1000 sats</string>
+    <string name="_2000_sats">2000 sats</string>
+    <string name="time_interval">時間間隔</string>
+    <string name="daily">日常的</string>
+    <string name="weekly">每週</string>
+    <string name="monthly">每月</string>
+    <string name="end_rule">結束規則</string>
+    <string name="make">製作</string>
+    <string name="payments">付款</string>
+    <string name="pay_until">支付至</string>
 </resources>

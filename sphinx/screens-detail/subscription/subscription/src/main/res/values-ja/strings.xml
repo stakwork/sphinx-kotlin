@@ -1,4 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="subscription_header_name">定期購読の繰り返し</string>
+    <string name="amount">額</string>
+    <string name="custom_amount">カスタム金額：</string>
+    <string name="_500_sats">500 sats</string>
+    <string name="_1000_sats">1000 sats</string>
+    <string name="_2000_sats">2000 sats</string>
+    <string name="time_interval">時間間隔</string>
+    <string name="daily">毎日</string>
+    <string name="weekly">毎週</string>
+    <string name="monthly">毎月</string>
+    <string name="end_rule">エンドルール</string>
+    <string name="make">作る</string>
+    <string name="payments">支払い</string>
+    <string name="pay_until">まで支払う</string>
 </resources>

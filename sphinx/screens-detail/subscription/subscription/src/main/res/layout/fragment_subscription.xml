@@ -2,6 +2,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_constraint_subscription"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/background_detail_screen"
@@ -22,7 +23,7 @@
         app:layout_constraintTop_toBottomOf="@+id/include_subscription_header"
         >
         <androidx.appcompat.widget.AppCompatTextView
-            android:text="Amount"
+            android:text="@string/amount"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/default_layout_margin"
@@ -41,65 +42,79 @@
         app:layout_constraintTop_toBottomOf="@+id/layout_constraint_amount_header"
         >
 
-        <RadioGroup
+        <chat.sphinx.subscription.ui.widgets.SphinxRadioGroup
             android:id="@+id/radio_group_amount"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/layout_constraint_custom_amount"
+            app:layout_constraintEnd_toEndOf="parent"
             >
             <RadioButton
                 android:id="@+id/radio_button_500_sats"
-                android:text="500 sats"
+                android:text="@string/_500_sats"
                 android:textColor="@color/secondaryText"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                />
             <RadioButton
                 android:id="@+id/radio_button_1000_sats"
-                android:text="1000 sats"
+                android:text="@string/_1000_sats"
                 android:textColor="@color/secondaryText"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toBottomOf="@+id/radio_button_500_sats"
+                app:layout_constraintStart_toStartOf="parent"
+                />
             <RadioButton
                 android:id="@+id/radio_button_2000_sats"
-                android:text="2000 sats"
+                android:text="@string/_2000_sats"
                 android:textColor="@color/secondaryText"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toBottomOf="@+id/radio_button_1000_sats"
+                app:layout_constraintStart_toStartOf="parent"
+                />
             <RadioButton
                 android:id="@+id/radio_button_custom_amount"
-                android:text="Custom amount:"
+                android:text="@string/custom_amount"
                 android:textColor="@color/secondaryText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
-        </RadioGroup>
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/layout_constraint_custom_amount"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/edit_text_background"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent">
-
-            <androidx.appcompat.widget.AppCompatEditText
-                android:id="@+id/edit_text_custom_amount"
-                android:layout_width="100dp"
-                android:layout_height="35dp"
-                android:inputType="textPersonName|textCapWords"
-                android:singleLine="true"
-                android:textColor="@color/text"
-                android:fontFamily="@font/roboto_regular"
-                android:backgroundTint="@android:color/transparent"
-                android:textCursorDrawable="@drawable/cursor"
-                android:gravity="center"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/layout_constraint_custom_amount"
+                app:layout_constraintTop_toBottomOf="@+id/radio_button_2000_sats"
                 />
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/layout_constraint_custom_amount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/edit_text_background"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent">
+
+                <androidx.appcompat.widget.AppCompatEditText
+                    android:id="@+id/edit_text_custom_amount"
+                    android:layout_width="100dp"
+                    android:layout_height="40dp"
+                    android:inputType="number"
+                    android:singleLine="true"
+                    android:textColor="@color/text"
+                    android:fontFamily="@font/roboto_regular"
+                    android:backgroundTint="@android:color/transparent"
+                    android:textCursorDrawable="@drawable/cursor"
+                    android:gravity="center"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    tools:text="600"
+                    />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </chat.sphinx.subscription.ui.widgets.SphinxRadioGroup>
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -110,7 +125,7 @@
         app:layout_constraintTop_toBottomOf="@+id/layout_constraint_amount_container"
         >
         <androidx.appcompat.widget.AppCompatTextView
-            android:text="TIME INTERVAL"
+            android:text="@string/time_interval"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/default_layout_margin"
@@ -130,6 +145,7 @@
         >
 
         <RadioGroup
+            android:id="@+id/radio_group_time_interval"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:layout_constraintTop_toTopOf="parent"
@@ -140,19 +156,19 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textColor="@color/secondaryText"
-                android:text="Daily"/>
+                android:text="@string/daily"/>
             <RadioButton
                 android:id="@+id/radio_button_weekly"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textColor="@color/secondaryText"
-                android:text="Weekly"/>
+                android:text="@string/weekly"/>
             <RadioButton
                 android:id="@+id/radio_button_monthly"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textColor="@color/secondaryText"
-                android:text="Monthly"/>
+                android:text="@string/monthly"/>
         </RadioGroup>
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -164,7 +180,7 @@
         app:layout_constraintTop_toBottomOf="@+id/layout_constraint_time_interval_container"
         >
         <androidx.appcompat.widget.AppCompatTextView
-            android:text="END RULE"
+            android:text="@string/end_rule"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/default_layout_margin"
@@ -181,97 +197,113 @@
         android:layout_height="wrap_content"
         app:layout_constraintTop_toBottomOf="@+id/layout_constraint_end_rule_header"
         >
-        <RadioGroup
+        <chat.sphinx.subscription.ui.widgets.SphinxRadioGroup
             android:id="@+id/radio_group_end_rule"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             >
             <RadioButton
                 android:id="@+id/radio_button_make"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_margin="10dp"
+                android:layout_margin="16dp"
                 android:textColor="@color/secondaryText"
-                android:text="Make"
+                android:text="@string/make"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/layout_constraint_make_quantity"
                 >
             </RadioButton>
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/layout_constraint_make_quantity"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/default_half_layout_margin"
+                android:layout_marginEnd="@dimen/default_layout_margin"
+                android:background="@drawable/edit_text_background"
+                app:layout_constraintTop_toTopOf="@+id/radio_button_make"
+                app:layout_constraintBottom_toBottomOf="@+id/radio_button_make"
+
+                app:layout_constraintEnd_toStartOf="@+id/text_view_payments">
+
+                <androidx.appcompat.widget.AppCompatEditText
+                    android:id="@+id/edit_text_make_quantity"
+                    android:layout_width="100dp"
+                    android:layout_height="35dp"
+                    android:inputType="number"
+                    android:singleLine="true"
+                    android:textColor="@color/text"
+                    android:fontFamily="@font/roboto_regular"
+                    android:backgroundTint="@android:color/transparent"
+                    android:textCursorDrawable="@drawable/cursor"
+                    android:gravity="center"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_view_payments"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/default_layout_margin"
+                android:textColor="@color/secondaryText"
+                android:text="@string/payments"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintBottom_toBottomOf="@+id/layout_constraint_make_quantity"
+                app:layout_constraintTop_toTopOf="@+id/layout_constraint_make_quantity"
+                />
             <RadioButton
                 android:id="@+id/radio_button_until"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_margin="10dp"
+                android:layout_margin="16dp"
                 android:textColor="@color/secondaryText"
-                android:text="Pay until"
-                />
-        </RadioGroup>
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/layout_constraint_make_quantity"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/default_half_layout_margin"
-            android:layout_marginEnd="@dimen/default_layout_margin"
-            android:background="@drawable/edit_text_background"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/text_view_payments">
-
-            <androidx.appcompat.widget.AppCompatEditText
-                android:id="@+id/edit_text_make_quantity"
-                android:layout_width="100dp"
-                android:layout_height="35dp"
-                android:inputType="textPersonName|textCapWords"
-                android:singleLine="true"
-                android:textColor="@color/text"
-                android:fontFamily="@font/roboto_regular"
-                android:backgroundTint="@android:color/transparent"
-                android:textCursorDrawable="@drawable/cursor"
-                android:gravity="center"
+                android:text="@string/pay_until"
+                app:layout_constraintTop_toBottomOf="@+id/radio_button_make"
+                app:layout_constraintEnd_toStartOf="@+id/layout_constraint_pay_until"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
                 />
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/layout_constraint_pay_until"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/default_layout_margin"
+                android:paddingStart="10dp"
+                android:background="@drawable/edit_text_background"
+                app:layout_constraintBottom_toBottomOf="@+id/radio_button_until"
+                app:layout_constraintTop_toTopOf="@+id/radio_button_until"
+                app:layout_constraintEnd_toEndOf="parent"
+                >
 
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/text_view_payments"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="@dimen/default_layout_margin"
-            android:textColor="@color/secondaryText"
-            android:text="Payments"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintBottom_toBottomOf="@+id/layout_constraint_make_quantity"
-            app:layout_constraintTop_toTopOf="@+id/layout_constraint_make_quantity"
-            />
+                <androidx.appcompat.widget.AppCompatEditText
+                    android:id="@+id/edit_text_pay_until"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:minWidth="120dp"
+                    android:inputType="date"
+                    android:singleLine="true"
+                    android:clickable="false"
+                    android:cursorVisible="false"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:textColor="@color/text"
+                    android:fontFamily="@font/roboto_regular"
+                    android:backgroundTint="@android:color/transparent"
+                    android:textCursorDrawable="@drawable/cursor"
+                    android:gravity="center"
+                    android:drawableStart="@drawable/ic_calendar"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    />
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/layout_constraint_pay_until"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/default_half_layout_margin"
-            android:paddingStart="10dp"
-            android:background="@drawable/edit_text_background"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent">
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
-            <androidx.appcompat.widget.AppCompatEditText
-                android:id="@+id/edit_text_pay_until"
-                android:layout_width="100dp"
-                android:layout_height="35dp"
-                android:inputType="textPersonName|textCapWords"
-                android:singleLine="true"
-                android:textColor="@color/text"
-                android:fontFamily="@font/roboto_regular"
-                android:backgroundTint="@android:color/transparent"
-                android:textCursorDrawable="@drawable/cursor"
-                android:gravity="center"
-                android:drawableStart="@drawable/ic_calendar"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                />
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
+        </chat.sphinx.subscription.ui.widgets.SphinxRadioGroup>
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout

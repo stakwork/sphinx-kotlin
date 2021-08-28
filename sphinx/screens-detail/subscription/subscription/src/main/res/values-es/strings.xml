@@ -1,4 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="subscription_header_name">SUBSCRIPCIÓN RECURRENTE</string>
+    <string name="amount">Monto</string>
+    <string name="custom_amount">Custom amount:</string>
+    <string name="_500_sats">500 sats</string>
+    <string name="_1000_sats">1000 sats</string>
+    <string name="_2000_sats">2000 sats</string>
+    <string name="time_interval">INTERVALO DE TIEMPO</string>
+    <string name="daily">Cotidiano</string>
+    <string name="weekly">Semanalmente</string>
+    <string name="monthly">Mensual</string>
+    <string name="end_rule">REGLA FINAL</string>
+    <string name="make">Hacer</string>
+    <string name="payments">Pagos</string>
+    <string name="pay_until">Paga hasta</string>
 </resources>
