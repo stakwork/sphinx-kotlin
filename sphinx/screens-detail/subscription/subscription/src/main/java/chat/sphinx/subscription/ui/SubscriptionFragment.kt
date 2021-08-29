@@ -3,7 +3,6 @@ package chat.sphinx.subscription.ui
 import android.app.DatePickerDialog
 import android.os.Bundle
 import android.view.View
-import android.widget.DatePicker
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import by.kirich1409.viewbindingdelegate.viewBinding
@@ -16,9 +15,7 @@ import io.matthewnelson.android_feature_screens.ui.base.BaseFragment
 import io.matthewnelson.android_feature_screens.util.visible
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Date
-import java.util.Locale
+import java.util.*
 
 @AndroidEntryPoint
 internal class SubscriptionFragment: BaseFragment<
@@ -71,55 +68,55 @@ internal class SubscriptionFragment: BaseFragment<
 
             }
 
-            radioButtonCustomAmount.setOnCheckedChangeListener { _, isChecked ->
-                editTextCustomAmount.isEnabled = isChecked
-            }
+            radioGroupAmount.setOnCheckedChangeListenerWithInputInteraction(
+                radioButtonCustomAmount, editTextCustomAmount
+            )
 
-            radioButtonMake.setOnCheckedChangeListener { _, isChecked ->
-                editTextMakeQuantity.isEnabled = isChecked
-            }
+            radioGroupEndRule.setOnCheckedChangeListenerWithInputInteraction(
+                radioButtonMake, editTextMakeQuantity
+            )
 
-            radioButtonUntil.setOnCheckedChangeListener { _, isChecked ->
-                editTextPayUntil.isEnabled = isChecked
-            }
+            radioGroupEndRule.setOnCheckedChangeListenerWithDatePickerInputInteraction(
+                radioButtonUntil, editTextPayUntil
+            )
 
             buttonSave.setOnClickListener {
 
-                val amount: Int? = when {
-                    radioGroupAmount.checkedRadioButtonId == R.id.radio_button_500_sats -> {
+                val amount: Int? = when (radioGroupAmount.checkedRadioButtonId) {
+                    R.id.radio_button_500_sats -> {
                         500
                     }
-                    radioGroupAmount.checkedRadioButtonId == R.id.radio_button_1000_sats -> {
+                    R.id.radio_button_1000_sats -> {
                         1000
                     }
-                    radioGroupAmount.checkedRadioButtonId == R.id.radio_button_2000_sats -> {
+                    R.id.radio_button_2000_sats -> {
                         2000
                     }
-                    radioGroupAmount.checkedRadioButtonId == R.id.radio_button_custom_amount -> {
+                    R.id.radio_button_custom_amount -> {
                         editTextCustomAmount.text?.toString()?.toIntOrNull()
                     }
                     else -> null
                 }
 
-                val cron: String? = when {
-                    radioGroupTimeInterval.checkedRadioButtonId == R.id.radio_button_daily -> {
+                val cron: String? = when (radioGroupTimeInterval.checkedRadioButtonId) {
+                    R.id.radio_button_daily -> {
                         "daily"
                     }
-                    radioGroupTimeInterval.checkedRadioButtonId == R.id.radio_button_weekly -> {
+                    R.id.radio_button_weekly -> {
                         "weekly"
                     }
-                    radioGroupTimeInterval.checkedRadioButtonId == R.id.radio_button_monthly -> {
+                    R.id.radio_button_monthly -> {
                         "monthly"
                     }
                     else -> null
                 }
 
-                val endDate: Date? = when {
-                    radioGroupEndRule.checkedRadioButtonId == R.id.radio_button_make -> {
+                val endDate: Date? = when (radioGroupEndRule.checkedRadioButtonId) {
+                    R.id.radio_button_make -> {
                         // TODO: Calculate depending on the timeInterval
                         Calendar.getInstance().time
                     }
-                    radioGroupEndRule.checkedRadioButtonId == R.id.radio_button_until -> {
+                    R.id.radio_button_until -> {
                         // TODO: Load editTextPayUntil.text into date
                         Calendar.getInstance().time
                     }

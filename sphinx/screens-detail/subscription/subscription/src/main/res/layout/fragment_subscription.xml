@@ -144,7 +144,7 @@
         app:layout_constraintTop_toBottomOf="@+id/layout_constraint_time_interval_header"
         >
 
-        <RadioGroup
+        <chat.sphinx.subscription.ui.widgets.SphinxRadioGroup
             android:id="@+id/radio_group_time_interval"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -156,20 +156,26 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textColor="@color/secondaryText"
-                android:text="@string/daily"/>
+                android:text="@string/daily"
+                app:layout_constraintTop_toTopOf="parent"
+                />
             <RadioButton
                 android:id="@+id/radio_button_weekly"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textColor="@color/secondaryText"
-                android:text="@string/weekly"/>
+                android:text="@string/weekly"
+                app:layout_constraintTop_toBottomOf="@+id/radio_button_daily"
+                />
             <RadioButton
                 android:id="@+id/radio_button_monthly"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textColor="@color/secondaryText"
-                android:text="@string/monthly"/>
-        </RadioGroup>
+                android:text="@string/monthly"
+                app:layout_constraintTop_toBottomOf="@+id/radio_button_weekly"
+                />
+        </chat.sphinx.subscription.ui.widgets.SphinxRadioGroup>
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -231,7 +237,7 @@
                 <androidx.appcompat.widget.AppCompatEditText
                     android:id="@+id/edit_text_make_quantity"
                     android:layout_width="100dp"
-                    android:layout_height="35dp"
+                    android:layout_height="40dp"
                     android:inputType="number"
                     android:singleLine="true"
                     android:textColor="@color/text"

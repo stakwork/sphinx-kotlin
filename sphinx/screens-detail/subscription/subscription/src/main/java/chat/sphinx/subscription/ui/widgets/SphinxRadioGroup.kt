@@ -1,20 +1,20 @@
 package chat.sphinx.subscription.ui.widgets
 
 import android.content.Context
-import kotlin.jvm.JvmOverloads
-import androidx.constraintlayout.widget.ConstraintLayout
-import android.widget.CompoundButton
-import android.view.ViewGroup.OnHierarchyChangeListener
-import android.view.ViewGroup
-import android.widget.RadioButton
-import android.widget.RadioGroup
-import chat.sphinx.subscription.ui.widgets.SphinxRadioGroup
-import android.view.accessibility.AccessibilityNodeInfo
 import android.text.TextUtils
-import android.content.res.TypedArray
 import android.util.AttributeSet
 import android.view.View
+import android.view.ViewGroup
+import android.view.accessibility.AccessibilityNodeInfo
+import android.view.inputmethod.InputMethodManager
+import android.widget.CompoundButton
+import android.widget.EditText
+import android.widget.RadioButton
+import android.widget.RadioGroup
 import androidx.annotation.IdRes
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContextCompat
+import chat.sphinx.subscription.ui.widgets.SphinxRadioGroup
 
 class SphinxRadioGroup @JvmOverloads constructor(
     context: Context,
@@ -48,7 +48,6 @@ class SphinxRadioGroup @JvmOverloads constructor(
 
     // Indicates whether the child was set from resources or dynamically, so it can be used
     // to sanitize autofill requests.
-    private val mInitialCheckedId = NO_ID
     private fun init() {
         mChildOnCheckedChangeListener = CheckedStateTracker()
         mPassThroughListener = PassThroughHierarchyChangeListener()
@@ -124,12 +123,6 @@ class SphinxRadioGroup @JvmOverloads constructor(
         if (mOnCheckedChangeListener != null) {
             mOnCheckedChangeListener!!.onCheckedChanged(this, checkedRadioButtonId)
         }
-        //        if (changed) {
-//            final AutofillManager afm = context.getSystemService(AutofillManager.class);
-//            if (afm != null) {
-//                afm.notifyValueChanged(this);
-//            }
-//        }
     }
 
     private fun setCheckedStateForView(viewId: Int, checked: Boolean) {
@@ -184,7 +177,7 @@ class SphinxRadioGroup @JvmOverloads constructor(
         fun onCheckedChanged(group: SphinxRadioGroup?, @IdRes checkedId: Int)
     }
 
-    private inner class CheckedStateTracker : CompoundButton.OnCheckedChangeListener {
+    private abstract inner class AbstractCheckedStateTracker : CompoundButton.OnCheckedChangeListener {
         override fun onCheckedChanged(buttonView: CompoundButton, isChecked: Boolean) {
             // prevents from infinite recursion
             if (mProtectFromCheckedChange) {
@@ -197,6 +190,47 @@ class SphinxRadioGroup @JvmOverloads constructor(
             mProtectFromCheckedChange = false
             val id = buttonView.id
             setCheckedId(id)
+        }
+    }
+
+    private inner class CheckedStateTracker : AbstractCheckedStateTracker(){
+        override fun onCheckedChanged(buttonView: CompoundButton, isChecked: Boolean) {
+            super.onCheckedChanged(buttonView, isChecked)
+
+            if (isChecked) {
+                // Hide soft keyboard
+                context?.let {
+                    val inputMethodManager = ContextCompat.getSystemService(it, InputMethodManager::class.java)
+                    inputMethodManager?.hideSoftInputFromWindow(buttonView.windowToken, 0)
+                }
+            }
+        }
+    }
+
+    private inner class CheckedStateWithEditTextTracker(val editText: EditText) : AbstractCheckedStateTracker() {
+        override fun onCheckedChanged(buttonView: CompoundButton, isChecked: Boolean) {
+            super.onCheckedChanged(buttonView, isChecked)
+
+            editText.isEnabled = isChecked
+            if (editText.isEnabled) {
+                editText.requestFocus()
+                context?.let {
+                    val inputMethodManager = ContextCompat.getSystemService(it, InputMethodManager::class.java)
+                    inputMethodManager?.showSoftInput(editText, InputMethodManager.SHOW_IMPLICIT)
+                }
+            }
+        }
+    }
+
+    private inner class CheckedStateWithDatePickerTracker(val editText: EditText) : AbstractCheckedStateTracker() {
+        override fun onCheckedChanged(buttonView: CompoundButton, isChecked: Boolean) {
+            super.onCheckedChanged(buttonView, isChecked)
+
+            editText.isEnabled = isChecked
+            if (editText.isEnabled) {
+                editText.requestFocus()
+                editText.callOnClick()
+            }
         }
     }
 
@@ -248,7 +282,7 @@ class SphinxRadioGroup @JvmOverloads constructor(
     }
 
     private val visibleChildWithTextCount: Int
-        private get() {
+        get() {
             var count = 0
             for (i in 0 until childCount) {
                 if (getChildAt(i) is RadioButton) {
@@ -283,38 +317,19 @@ class SphinxRadioGroup @JvmOverloads constructor(
         return button.visibility == VISIBLE && !TextUtils.isEmpty(button.text)
     }
 
-    companion object {
-        private val LOG_TAG = RadioGroup::class.java.simpleName
-    }
-    /**
-     * {@inheritDoc}
-     */
-    /**
-     * {@inheritDoc}
-     */
-    /**
-     * {@inheritDoc}
-     */
     /**
      * {@inheritDoc}
      */
     init {
         importantForAccessibility = IMPORTANT_FOR_ACCESSIBILITY_YES
-
-        // retrieve selected radio button as requested by the user in the
-        // XML layout file
-        var attributes: TypedArray
-        //        attributes = context.obtainStyledAttributes(attrs, com.android.internal.R.styleable.RadioGroup, com.android.internal.R.attr.radioButtonStyle, 0);
-//        saveAttributeDataForStyleable(context, com.android.internal.R.styleable.RadioGroup, attrs, attributes, com.android.internal.R.attr.radioButtonStyle, 0);
-
-//        int value = attributes.getResourceId(R.styleable.RadioGroup_checkedButton, View.NO_ID);
-//        if (value != View.NO_ID) {
-//            mCheckedId = value;
-//            mInitialCheckedId = value;
-//        }
-//        final int index = attributes.getInt(com.android.internal.R.styleable.RadioGroup_orientation, VERTICAL);
-
-//        attributes.recycle();
         init()
+    }
+
+    fun setOnCheckedChangeListenerWithInputInteraction(radioButton: RadioButton, editText: EditText) {
+        radioButton.setOnCheckedChangeListener(CheckedStateWithEditTextTracker(editText))
+    }
+
+    fun setOnCheckedChangeListenerWithDatePickerInputInteraction(radioButton: RadioButton, editText: EditText) {
+        radioButton.setOnCheckedChangeListener(CheckedStateWithDatePickerTracker(editText))
     }
 }
