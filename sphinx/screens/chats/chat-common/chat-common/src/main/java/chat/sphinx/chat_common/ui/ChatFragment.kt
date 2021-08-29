@@ -11,6 +11,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.LayoutRes
 import androidx.constraintlayout.motion.widget.MotionLayout
+import androidx.core.view.isVisible
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
@@ -64,6 +65,7 @@ import chat.sphinx.wrapper_view.Dp
 import io.matthewnelson.android_feature_screens.ui.motionlayout.MotionLayoutFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
+import io.matthewnelson.android_feature_screens.util.goneIfTrue
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.currentViewState
 import io.matthewnelson.android_feature_viewmodel.updateViewState
@@ -440,10 +442,25 @@ abstract class ChatFragment<
 
             imageViewAttachmentFullscreen.onSingleTapListener = object: SphinxFullscreenImageView.OnSingleTapListener {
                 override fun onSingleTapConfirmed() {
-                    // TODO: Add swipe gestures to close full screen so single taps can head the header
-//                    layoutConstraintAttachmentFullscreenHeader.goneIfTrue(
-//                        layoutConstraintAttachmentFullscreenHeader.isVisible
-//                    )
+                    layoutConstraintAttachmentFullscreenHeader.goneIfTrue(
+                        layoutConstraintAttachmentFullscreenHeader.isVisible
+                    )
+                }
+            }
+
+            imageViewAttachmentFullscreen.onCloseViewHandler = object: SphinxFullscreenImageView.OnCloseViewHandler() {
+                override fun onCloseView() {
+                    imageViewAttachmentFullscreen.animate()
+                        .scaleY(0f)
+                        .scaleX(0f)
+                        .setDuration(200L)
+                        .withEndAction {
+                            viewModel.updateAttachmentFullscreenViewState(
+                                AttachmentFullscreenViewState.Idle
+                            )
+                        }
+                        .start()
+
                 }
             }
         }
@@ -1026,10 +1043,7 @@ abstract class ChatFragment<
                             imageViewAttachmentFullscreen.setImageDrawable(null)
                         }
                         is AttachmentFullscreenViewState.Fullscreen -> {
-                            imageViewAttachmentFullscreen.scaleX = 1.0f
-                            imageViewAttachmentFullscreen.scaleY = 1.0f
-                            imageViewAttachmentFullscreen.translationX = 0f
-                            imageViewAttachmentFullscreen.translationY = 0f
+                            imageViewAttachmentFullscreen.resetInteractionProperties()
 
                             viewState.media?.localFile?.let { nnLocalFile ->
                                 lifecycleScope.launch(viewModel.mainImmediate) {
