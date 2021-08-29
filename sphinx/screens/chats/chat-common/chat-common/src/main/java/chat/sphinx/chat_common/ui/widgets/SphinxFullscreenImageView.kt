@@ -1,4 +1,4 @@
-package chat.sphinx.chat_common.ui
+package chat.sphinx.chat_common.ui.widgets
 
 import android.content.Context
 import android.util.AttributeSet
