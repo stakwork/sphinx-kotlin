@@ -1,6 +1,7 @@
 package chat.sphinx.subscription.ui
 
 import android.app.DatePickerDialog
+import android.content.Context
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.viewModels
@@ -12,13 +13,16 @@ import chat.sphinx.subscription.R
 import chat.sphinx.subscription.databinding.FragmentSubscriptionBinding
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.base.BaseFragment
+import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.visible
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 
 @AndroidEntryPoint
-internal class SubscriptionFragment: BaseFragment<
+internal class SubscriptionFragment: SideEffectFragment<
+        Context,
+        SubscriptionSideEffect,
         SubscriptionViewState,
         SubscriptionViewModel,
         FragmentSubscriptionBinding
@@ -135,5 +139,9 @@ internal class SubscriptionFragment: BaseFragment<
 
     override suspend fun onViewStateFlowCollect(viewState: SubscriptionViewState) {
 //        TODO("Not yet implemented")
+    }
+
+    override suspend fun onSideEffectCollect(sideEffect: SubscriptionSideEffect) {
+        sideEffect.execute(requireActivity())
     }
 }
