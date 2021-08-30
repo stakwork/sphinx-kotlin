@@ -42,7 +42,7 @@ inline fun MediaToken.getMediaTokenElementWithIndex(
     index: Int,
     base64Decoded: Boolean
 ): String? {
-    value.split(".").filter { it.isNotBlank() }.let { splits ->
+    value.split(".").let { splits ->
         if (splits.size > index) {
             val element = splits[index]
 

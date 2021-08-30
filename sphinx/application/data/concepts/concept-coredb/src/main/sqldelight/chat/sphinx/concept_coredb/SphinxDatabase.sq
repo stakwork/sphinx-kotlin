@@ -518,6 +518,13 @@ AND (type = 29
     AND reply_uuid IN :reply_uuids
 );
 
+messageGetAllPurchaseItemByUUID:
+SELECT *
+FROM messageDbo
+WHERE chat_id = :chat_id
+AND type IN (7, 8, 9)
+AND reply_uuid IN :reply_uuids;
+
 messageGetAllByUUID:
 SELECT *
 FROM messageDbo

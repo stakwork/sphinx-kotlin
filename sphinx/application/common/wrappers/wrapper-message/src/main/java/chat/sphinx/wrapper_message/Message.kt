@@ -48,7 +48,13 @@ inline fun Message.retrieveImageUrlAndMessageMedia(): Pair<String, MessageMedia?
     giphyData?.let { giphyData ->
         mediaData = giphyData.retrieveImageUrlAndMessageMedia()
     } ?: messageMedia?.let { media ->
-        if (media.mediaType.isImage && !isPaidMessage) {
+        if (media.mediaType.isImage) {
+
+            val purchaseAcceptItem: Message? = if (isPaidMessage) {
+                retrievePurchaseAcceptItem()
+            } else {
+                null
+            }
 
             val url: MediaUrl? = if (this.type.isDirectPayment()) {
                 media.templateUrl
@@ -56,20 +62,79 @@ inline fun Message.retrieveImageUrlAndMessageMedia(): Pair<String, MessageMedia?
                 media.url
             }
 
+            val messageMedia: MessageMedia? = if (isPaidMessage) {
+                purchaseAcceptItem?.messageMedia ?: media
+            } else {
+                media
+            }
+
             if (media.localFile != null) {
                 mediaData = Pair(
                     url?.value?.let { if (it.isEmpty()) null else it } ?: "http://127.0.0.1",
-                    media,
+                    messageMedia,
                 )
             } else {
                 url?.let { mediaUrl ->
-                    mediaData = Pair(mediaUrl.value, media)
+                    mediaData = Pair(mediaUrl.value, messageMedia)
                 }
             }
-
         }
     }
     return mediaData
+}
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun Message.retrievePurchaseAcceptItem(): Message? {
+    purchaseItems?.let { nnPurchaseItems ->
+        if (nnPurchaseItems.isNotEmpty()) {
+            for (item in nnPurchaseItems) {
+                if (item.type.isPurchaseAccepted()) {
+                    return item
+                }
+            }
+        }
+    }
+    return null
+}
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun Message.retrievePurchaseStatus(): PurchaseStatus? {
+
+    if (!isPaidMessage) {
+        return null
+    }
+
+    var purchaseItem : Message? = null
+    var purchaseAcceptItem : Message? = null
+    var purchaseDenyItem : Message? = null
+
+    purchaseItems?.let { nnPurchaseItems ->
+        if (nnPurchaseItems.isNotEmpty()) {
+            for (item in nnPurchaseItems) {
+                if (item.type.isPurchase()) {
+                    purchaseItem = item
+                }
+
+                if (item.type.isPurchaseAccepted()) {
+                    purchaseAcceptItem = item
+                }
+
+                if (item.type.isPurchaseDenied()) {
+                    purchaseDenyItem = item
+                }
+            }
+        }
+    }
+
+    purchaseAcceptItem?.let {
+        return PurchaseStatus.Accepted
+    } ?: purchaseDenyItem?.let {
+        return PurchaseStatus.Denied
+    } ?: purchaseItem?.let {
+        return PurchaseStatus.Processing
+    }
+
+    return PurchaseStatus.Pending
 }
 
 @Suppress("NOTHING_TO_INLINE")
@@ -138,6 +203,7 @@ abstract class Message {
     abstract val podBoost: PodBoost?
     abstract val giphyData: GiphyData?
     abstract val reactions: List<Message>?
+    abstract val purchaseItems: List<Message>?
     abstract val replyMessage: Message?
 
     override fun equals(other: Any?): Boolean {
@@ -170,6 +236,12 @@ abstract class Message {
                     reactions.let { b ->
                         (a.isNullOrEmpty() && b.isNullOrEmpty()) ||
                         (a?.containsAll(b ?: emptyList()) == true && b?.containsAll(a) == true)
+                    }
+                }                                                                   &&
+                other.purchaseItems.let { a ->
+                    purchaseItems.let { b ->
+                        (a.isNullOrEmpty() && b.isNullOrEmpty()) ||
+                                (a?.containsAll(b ?: emptyList()) == true && b?.containsAll(a) == true)
                     }
                 }                                                                   &&
                 other.replyMessage                  == replyMessage
@@ -209,20 +281,21 @@ abstract class Message {
         result = _31 * result + podBoost.hashCode()
         result = _31 * result + giphyData.hashCode()
         reactions?.forEach { result = _31 * result + it.hashCode() }
+        purchaseItems?.forEach { result = _31 * result + it.hashCode() }
         result = _31 * result + replyMessage.hashCode()
         return result
     }
 
     override fun toString(): String {
-        return "Message(id=$id,uuid=$uuid,chatId=$chatId,type=$type,sender=$sender,"        +
-                "receiver=$receiver,amount=$amount,paymentHash=$paymentHash,"               +
-                "paymentRequest=$paymentRequest,date=$date,expirationDate=$expirationDate," +
-                "messageContent=$messageContent,status=$status,seen=$seen,"                 +
-                "senderAlias=$senderAlias,senderPic=$senderPic,originalMUID=$originalMUID," +
-                "replyUUID=$replyUUID,messageContentDecrypted=$messageContentDecrypted,"    +
-                "messageDecryptionError=$messageDecryptionError,"                           +
-                "messageDecryptionException=$messageDecryptionException,"                   +
-                "messageMedia=$messageMedia,podBoost=$podBoost,giphyData=$giphyData,"       +
-                "reactions=$reactions,replyMessage=$replyMessage)"
+        return "Message(id=$id,uuid=$uuid,chatId=$chatId,type=$type,sender=$sender,"            +
+                "receiver=$receiver,amount=$amount,paymentHash=$paymentHash,"                   +
+                "paymentRequest=$paymentRequest,date=$date,expirationDate=$expirationDate,"     +
+                "messageContent=$messageContent,status=$status,seen=$seen,"                     +
+                "senderAlias=$senderAlias,senderPic=$senderPic,originalMUID=$originalMUID,"     +
+                "replyUUID=$replyUUID,messageContentDecrypted=$messageContentDecrypted,"        +
+                "messageDecryptionError=$messageDecryptionError,"                               +
+                "messageDecryptionException=$messageDecryptionException,"                       +
+                "messageMedia=$messageMedia,podBoost=$podBoost,giphyData=$giphyData,"           +
+                "reactions=$reactions,purchaseItems=$purchaseItems,replyMessage=$replyMessage)"
     }
 }

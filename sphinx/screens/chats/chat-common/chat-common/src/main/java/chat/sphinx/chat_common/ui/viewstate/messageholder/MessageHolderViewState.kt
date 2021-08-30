@@ -128,21 +128,14 @@ internal sealed class MessageHolderViewState(
         }
     }
 
-    val bubblePaidMessageDetails: LayoutState.Bubble.ContainerFourth.PaidMessageDetails? by lazy(LazyThreadSafetyMode.NONE) {
-        if (!message.isPaidMessage) {
+    val bubblePaidMessageReceivedDetails: LayoutState.Bubble.ContainerFourth.PaidMessageReceivedDetails? by lazy(LazyThreadSafetyMode.NONE) {
+        if (!message.isPaidMessage || this is Sent) {
             null
         } else {
-            val isPaymentPending = message.status.isPending()
-
-            message.type.let { type ->
-                LayoutState.Bubble.ContainerFourth.PaidMessageDetails(
-                    amount = message.amount,
-                    purchaseType = if (type.isPurchase()) type else null,
-                    isShowingReceivedMessage = this is Received,
-                    showPaymentAcceptedIcon = type.isPurchaseAccepted(),
-                    showPaymentProgressWheel = type.isPurchaseProcessing(),
-                    showSendPaymentIcon = this !is Sent && !isPaymentPending,
-                    showPaymentReceivedIcon = this is Sent && !isPaymentPending,
+            message.retrievePurchaseStatus()?.let { purchaseStatus ->
+                LayoutState.Bubble.ContainerFourth.PaidMessageReceivedDetails(
+                    amount = message.messageMedia?.price ?: Sat(0),
+                    purchaseStatus = purchaseStatus
                 )
             }
         }
@@ -152,10 +145,10 @@ internal sealed class MessageHolderViewState(
         if (!message.isPaidMessage || this !is Sent) {
             null
         } else {
-            message.type.let { type ->
+            message.retrievePurchaseStatus()?.let { purchaseStatus ->
                 LayoutState.Bubble.ContainerSecond.PaidMessageSentStatus(
-                    amount = message.amount,
-                    purchaseType = if (type.isPurchase()) type else null,
+                    amount = message.messageMedia?.price ?: Sat(0),
+                    purchaseStatus = purchaseStatus
                 )
             }
         }
@@ -165,7 +158,8 @@ internal sealed class MessageHolderViewState(
         message.retrieveImageUrlAndMessageMedia()?.let { mediaData ->
             LayoutState.Bubble.ContainerSecond.ImageAttachment(
                 mediaData.first,
-                mediaData.second
+                mediaData.second,
+                (this is Received && message.isPaidMessage && message.retrievePurchaseAcceptItem() == null)
             )
         }
     }

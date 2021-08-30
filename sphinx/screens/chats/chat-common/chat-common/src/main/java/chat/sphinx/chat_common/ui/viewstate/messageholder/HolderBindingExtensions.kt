@@ -6,7 +6,6 @@ import android.widget.ImageView
 import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
 import androidx.annotation.MainThread
-import androidx.annotation.StringRes
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
 import androidx.core.view.updateLayoutParams
@@ -32,6 +31,7 @@ import chat.sphinx.wrapper_common.lightning.*
 import chat.sphinx.wrapper_meme_server.headerKey
 import chat.sphinx.wrapper_meme_server.headerValue
 import chat.sphinx.wrapper_message.MessageType
+import chat.sphinx.wrapper_message.PurchaseStatus
 import chat.sphinx.wrapper_message_media.MessageMedia
 import chat.sphinx.wrapper_view.Px
 import io.matthewnelson.android_feature_screens.util.gone
@@ -41,7 +41,6 @@ import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.File
 import chat.sphinx.resources.R as common_R
@@ -169,8 +168,8 @@ internal fun LayoutMessageHolderBinding.setView(
             setBubbleDirectPaymentLayout(viewState.bubbleDirectPayment)
             setBubbleDirectPaymentLayout(viewState.bubbleDirectPayment)
             setBubblePodcastBoost(viewState.bubblePodcastBoost)
-            setBubblePaidMessageDetailsLayout(
-                viewState.bubblePaidMessageDetails,
+            setBubblePaidMessageReceivedDetailsLayout(
+                viewState.bubblePaidMessageReceivedDetails,
                 viewState.background
             )
             setBubblePaidMessageSentStatusLayout(viewState.bubblePaidMessageSentStatus)
@@ -813,8 +812,8 @@ internal inline fun LayoutMessageHolderBinding.setBubbleBotResponse(
 
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
-internal inline fun LayoutMessageHolderBinding.setBubblePaidMessageDetailsLayout(
-    paidDetails: LayoutState.Bubble.ContainerFourth.PaidMessageDetails?,
+internal inline fun LayoutMessageHolderBinding.setBubblePaidMessageReceivedDetailsLayout(
+    paidDetails: LayoutState.Bubble.ContainerFourth.PaidMessageReceivedDetails?,
     bubbleBackground: BubbleBackground
 ) {
     includeMessageHolderBubble.includePaidMessageReceivedDetailsHolder.apply {
@@ -825,8 +824,8 @@ internal inline fun LayoutMessageHolderBinding.setBubblePaidMessageDetailsLayout
             root.clipToOutline = true
 
             @ColorRes
-            val backgroundTintResId = if (paidDetails.purchaseType is MessageType.Purchase.Denied) {
-                R.color.badgeRed
+            val backgroundTintResId = if (paidDetails.purchaseStatus is PurchaseStatus.Denied) {
+                R.color.primaryRed
             } else {
                 R.color.primaryGreen
             }
@@ -834,56 +833,69 @@ internal inline fun LayoutMessageHolderBinding.setBubblePaidMessageDetailsLayout
             @DrawableRes
             val backgroundDrawableResId: Int? = when (bubbleBackground) {
                 BubbleBackground.First.Grouped -> {
-                    if (paidDetails.isShowingReceivedMessage) {
-                        R.drawable.background_paid_message_details_bubble_footer_received_first
-                    } else {
-                        R.drawable.background_paid_message_details_bubble_footer_sent_first
-                    }
+                    R.drawable.background_paid_message_details_bubble_footer_received_first
                 }
                 BubbleBackground.First.Isolated,
                 BubbleBackground.Last -> {
-                    if (paidDetails.isShowingReceivedMessage) {
-                        R.drawable.background_paid_message_details_bubble_footer_received_last
-                    } else {
-                        R.drawable.background_paid_message_details_bubble_footer_sent_last
-                    }
+                    R.drawable.background_paid_message_details_bubble_footer_received_last
                 }
                 BubbleBackground.Middle -> {
-                    if (paidDetails.isShowingReceivedMessage) {
-                        R.drawable.background_paid_message_details_bubble_footer_received_middle
-                    } else {
-                        R.drawable.background_paid_message_details_bubble_footer_sent_middle
-                    }
+                    R.drawable.background_paid_message_details_bubble_footer_received_middle
                 }
                 else -> {
                     null
                 }
             }
 
-            @StringRes
-            val statusTextResID = when (paidDetails.purchaseType) {
-                MessageType.Purchase.Accepted -> {
-                    R.string.purchase_status_label_paid_message_details_accepted
+            val statusText: String = when (paidDetails.purchaseStatus) {
+                PurchaseStatus.Processing -> {
+                    getString(R.string.purchase_status_label_paid_message_details_processing)
                 }
-                MessageType.Purchase.Denied -> {
-                    R.string.purchase_status_label_paid_message_details_denied
+                PurchaseStatus.Accepted -> {
+                    getString(R.string.purchase_status_label_paid_message_details_accepted)
                 }
-                MessageType.Purchase.Processing -> {
-                    R.string.purchase_status_label_paid_message_details_processing
+                PurchaseStatus.Denied -> {
+                    getString(R.string.purchase_status_label_paid_message_details_denied)
                 }
-                null -> {
-                    R.string.purchase_status_label_paid_message_details_default
+                else -> {
+                    getString(R.string.purchase_status_label_paid_message_details_default)
+                }
+            }
+
+            val statusIcon: String = when (paidDetails.purchaseStatus) {
+                PurchaseStatus.Accepted -> {
+                    getString(R.string.material_icon_name_payment_accepted)
+                }
+                PurchaseStatus.Denied -> {
+                    getString(R.string.material_icon_name_payment_denied)
+                }
+                else -> {
+                    ""
                 }
             }
 
             backgroundDrawableResId?.let { root.setBackgroundResource(it) }
             root.backgroundTintList = ContextCompat.getColorStateList(root.context, backgroundTintResId)
 
-            imageViewPaidMessageReceivedIcon.goneIfFalse(paidDetails.showPaymentReceivedIcon)
-            imageViewPaidMessageSentIcon.goneIfFalse(paidDetails.showSendPaymentIcon)
-            textViewPaymentAcceptedIcon.goneIfFalse(paidDetails.showPaymentAcceptedIcon)
-            progressBarPaidMessage.goneIfFalse(paidDetails.showPaymentProgressWheel)
-            textViewPaidMessageStatusLabel.text = getString(statusTextResID)
+            textViewPaymentStatusIcon.text = statusIcon
+            textViewPaymentStatusIcon.goneIfFalse(
+                paidDetails.purchaseStatus is PurchaseStatus.Accepted ||
+                        paidDetails.purchaseStatus is PurchaseStatus.Denied
+            )
+
+            progressBarPaidMessage.goneIfFalse(paidDetails.purchaseStatus is PurchaseStatus.Processing)
+
+            textViewPaidMessageStatusLabel.goneIfFalse(
+                paidDetails.purchaseStatus is PurchaseStatus.Processing ||
+                        paidDetails.purchaseStatus is PurchaseStatus.Accepted ||
+                        paidDetails.purchaseStatus is PurchaseStatus.Denied
+            )
+            textViewPaidMessageStatusLabel.text = statusText
+
+            buttonPayAttachment.goneIfFalse(paidDetails.purchaseStatus is PurchaseStatus.Pending)
+            textViewPayMessageLabel.goneIfFalse(paidDetails.purchaseStatus is PurchaseStatus.Pending)
+            imageViewPayMessageIcon.goneIfFalse(paidDetails.purchaseStatus is PurchaseStatus.Pending)
+
             textViewPaidMessageAmountToPayLabel.text = paidDetails.amountText
         }
     }
@@ -900,18 +912,21 @@ internal inline fun LayoutMessageHolderBinding.setBubblePaidMessageSentStatusLay
         } else {
             root.visible
 
-            val statusTextResID = when (paidSentStatus.purchaseType) {
-                MessageType.Purchase.Accepted -> {
-                    R.string.purchase_status_label_paid_message_sent_status_accepted
+            val statusTextResID = when (paidSentStatus.purchaseStatus) {
+                PurchaseStatus.Pending -> {
+                    R.string.purchase_status_label_paid_message_sent_status_pending
                 }
-                MessageType.Purchase.Denied -> {
-                    R.string.purchase_status_label_paid_message_sent_status_denied
-                }
-                MessageType.Purchase.Processing -> {
+                PurchaseStatus.Processing -> {
                     R.string.purchase_status_label_paid_message_sent_status_processing
                 }
+                PurchaseStatus.Accepted -> {
+                    R.string.purchase_status_label_paid_message_sent_status_accepted
+                }
+                PurchaseStatus.Denied -> {
+                    R.string.purchase_status_label_paid_message_sent_status_denied
+                }
                 null -> {
-                    R.string.purchase_status_label_paid_message_sent_status_default
+                    R.string.purchase_status_label_paid_message_sent_status_pending
                 }
             }
 
@@ -933,7 +948,11 @@ internal inline fun LayoutMessageHolderBinding.setBubbleImageAttachment(
         } else {
             root.visible
 
-            loadImage(imageViewAttachmentImage, imageAttachment.url, imageAttachment.media)
+            if (imageAttachment.showPaidOverlay) {
+                layoutConstraintPaidImageOverlay.visible
+            } else {
+                loadImage(imageViewAttachmentImage, imageAttachment.url, imageAttachment.media)
+            }
         }
     }
 }

@@ -1447,6 +1447,7 @@ abstract class SphinxRepository(
         queries: SphinxDatabaseQueries,
         messageDbo: MessageDbo,
         reactions: List<Message>? = null,
+        purchaseItems: List<Message>? = null,
         replyMessage: ReplyUUID? = null,
     ): Message {
 
@@ -1596,9 +1597,13 @@ abstract class SphinxRepository(
                         val reactionsMap: MutableMap<MessageUUID, ArrayList<Message>> =
                             LinkedHashMap(listMessageDbo.size)
 
+                        val purchaseItemsMap: MutableMap<MessageUUID, ArrayList<Message>> =
+                            LinkedHashMap(listMessageDbo.size)
+
                         for (dbo in listMessageDbo) {
                             dbo.uuid?.let { uuid ->
                                 reactionsMap[uuid] = ArrayList(0)
+                                purchaseItemsMap[uuid] = ArrayList(0)
                             }
                         }
 
@@ -1618,6 +1623,20 @@ abstract class SphinxRepository(
                                         }
                                     }
                                 }
+
+                            queries.messageGetAllPurchaseItemByUUID(
+                                chatId,
+                                chunkedIds,
+                            ).executeAsList()
+                                .let { response ->
+                                    response.forEach { dbo ->
+                                        dbo.reply_uuid?.let { uuid ->
+                                            purchaseItemsMap[MessageUUID(uuid.value)]?.add(
+                                                mapMessageDboAndDecryptContentIfNeeded(queries, dbo)
+                                            )
+                                        }
+                                    }
+                                }
                         }
 
                         listMessageDbo.reversed().map { dbo ->
@@ -1625,6 +1644,7 @@ abstract class SphinxRepository(
                                 queries,
                                 dbo,
                                 dbo.uuid?.let { reactionsMap[it] },
+                                dbo.uuid?.let { purchaseItemsMap[it] },
                                 dbo.reply_uuid,
                             )
                         }
