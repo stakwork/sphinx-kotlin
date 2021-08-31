@@ -3638,16 +3638,73 @@ abstract class SphinxRepository(
 
     override suspend fun restartSubscription(
         subscriptionId: SubscriptionId
-    ): Response<Subscription, ResponseError> {
-        var response: Response<Subscription, ResponseError>  = Response.Error(ResponseError(("Failed to restart subscription")))
+    ): Response<Any, ResponseError> {
+        var response: Response<SubscriptionDto, ResponseError>  = Response.Error(ResponseError(("Failed to restart subscription")))
 
+        applicationScope.launch(mainImmediate) {
+
+            networkQuerySubscription.putRestartSubscription(
+                subscriptionId
+            ).collect { loadResponse ->
+                when (loadResponse) {
+                    LoadResponse.Loading -> { }
+                    is Response.Error -> {
+                        response = loadResponse
+                    }
+                    is Response.Success -> {
+                        response = loadResponse
+                        val queries = coreDB.getSphinxDatabaseQueries()
+
+                        subscriptionLock.withLock {
+                            withContext(io) {
+                                queries.transaction {
+                                    upsertSubscription(
+                                        loadResponse.value,
+                                        queries
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }.join()
         return response
     }
 
     override suspend fun pauseSubscription(
         subscriptionId: SubscriptionId
-    ): Response<Subscription, ResponseError> {
-        var response: Response<Subscription, ResponseError>  = Response.Error(ResponseError(("Failed to pause subscription")))
+    ): Response<Any, ResponseError> {
+        var response: Response<SubscriptionDto, ResponseError>  = Response.Error(ResponseError(("Failed to pause subscription")))
+
+        applicationScope.launch(mainImmediate) {
+
+            networkQuerySubscription.putPauseSubscription(
+                subscriptionId
+            ).collect { loadResponse ->
+                when (loadResponse) {
+                    LoadResponse.Loading -> { }
+                    is Response.Error -> {
+                        response = loadResponse
+                    }
+                    is Response.Success -> {
+                        response = loadResponse
+                        val queries = coreDB.getSphinxDatabaseQueries()
+
+                        subscriptionLock.withLock {
+                            withContext(io) {
+                                queries.transaction {
+                                    upsertSubscription(
+                                        loadResponse.value,
+                                        queries
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }.join()
 
         return response
     }
@@ -3656,6 +3713,31 @@ abstract class SphinxRepository(
         subscriptionId: SubscriptionId
     ): Response<Any, ResponseError> {
         var response: Response<Any, ResponseError>  = Response.Error(ResponseError(("Failed to delete subscription")))
+
+        applicationScope.launch(mainImmediate) {
+            networkQuerySubscription.deleteSubscription(
+                subscriptionId
+            ).collect { loadResponse ->
+                when (loadResponse) {
+                    LoadResponse.Loading -> { }
+                    is Response.Error -> {
+                        response = loadResponse
+                    }
+                    is Response.Success -> {
+                        response = loadResponse
+                        val queries = coreDB.getSphinxDatabaseQueries()
+
+                        subscriptionLock.withLock {
+                            withContext(io) {
+                                queries.transaction {
+                                    deleteSubscriptionById(subscriptionId, queries)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }.join()
 
         return response
     }

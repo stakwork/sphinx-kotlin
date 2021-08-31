@@ -444,3 +444,11 @@ inline fun TransactionCallbacks.upsertSubscription(subscriptionDto: Subscription
         paused = subscriptionDto.paused == 1,
     )
 }
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun TransactionCallbacks.deleteSubscriptionById(
+    subscriptionId: SubscriptionId,
+    queries: SphinxDatabaseQueries
+) {
+    queries.subscriptionDeleteById(subscriptionId)
+}

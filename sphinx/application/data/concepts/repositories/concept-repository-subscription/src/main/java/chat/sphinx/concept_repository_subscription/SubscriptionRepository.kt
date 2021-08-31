@@ -27,15 +27,15 @@ interface SubscriptionRepository {
 
     suspend fun updateSubscription(
         subscription: Subscription
-    ): Response<Subscription, ResponseError>
+    ): Response<Any, ResponseError>
 
     suspend fun restartSubscription(
         subscriptionId: SubscriptionId
-    ): Response<Subscription, ResponseError>
+    ): Response<Any, ResponseError>
 
     suspend fun pauseSubscription(
         subscriptionId: SubscriptionId
-    ): Response<Subscription, ResponseError>
+    ): Response<Any, ResponseError>
 
     suspend fun deleteSubscription(
         subscriptionId: SubscriptionId
