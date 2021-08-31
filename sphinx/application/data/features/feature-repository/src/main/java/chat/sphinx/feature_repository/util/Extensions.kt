@@ -322,21 +322,19 @@ fun TransactionCallbacks.upsertMessage(dto: MessageDto, queries: SphinxDatabaseQ
     } ?: ChatId(ChatId.NULL_CHAT_ID.toLong())
 
     dto.media_token?.let { mediaToken ->
-        dto.media_type?.let { mediaType ->
 
-            if (mediaToken.isEmpty() || mediaType.isEmpty()) return
+        if (mediaToken.isEmpty()) return
 
-            queries.messageMediaUpsert(
-                (dto.media_key ?: "").toMediaKey(),
-                mediaType.toMediaType(),
-                MediaToken(mediaToken),
-                MessageId(dto.id),
-                chatId,
-                dto.mediaKeyDecrypted?.toMediaKeyDecrypted(),
-                dto.mediaLocalFile,
-            )
+        queries.messageMediaUpsert(
+            (dto.media_key ?: "").toMediaKey(),
+            (dto.media_type ?: "").toMediaType(),
+            MediaToken(mediaToken),
+            MessageId(dto.id),
+            chatId,
+            dto.mediaKeyDecrypted?.toMediaKeyDecrypted(),
+            dto.mediaLocalFile,
+        )
 
-        }
     }
 
     queries.messageUpsert(
@@ -363,20 +361,19 @@ fun TransactionCallbacks.upsertMessage(dto: MessageDto, queries: SphinxDatabaseQ
     )
 
     dto.media_token?.let { mediaToken ->
-        dto.media_type?.let { mediaType ->
 
-            if (mediaToken.isEmpty() || mediaType.isEmpty()) return
+        if (mediaToken.isEmpty()) return
 
-            queries.messageMediaUpsert(
-                (dto.media_key ?: "").toMediaKey(),
-                mediaType.toMediaType(),
-                MediaToken(mediaToken),
-                MessageId(dto.id),
-                chatId,
-                dto.mediaKeyDecrypted?.toMediaKeyDecrypted(),
-                dto.mediaLocalFile
-            )
-        }
+        queries.messageMediaUpsert(
+            (dto.media_key ?: "").toMediaKey(),
+            (dto.media_type ?: "").toMediaType(),
+            MediaToken(mediaToken),
+            MessageId(dto.id),
+            chatId,
+            dto.mediaKeyDecrypted?.toMediaKeyDecrypted(),
+            dto.mediaLocalFile
+        )
+
     }
 }
 

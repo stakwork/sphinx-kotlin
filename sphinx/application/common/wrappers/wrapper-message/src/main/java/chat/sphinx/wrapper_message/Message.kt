@@ -59,14 +59,10 @@ inline fun Message.retrieveImageUrlAndMessageMedia(): Pair<String, MessageMedia?
             val url: MediaUrl? = if (this.type.isDirectPayment()) {
                 media.templateUrl
             } else {
-                media.url
+                purchaseAcceptItem?.messageMedia?.url ?: media.url
             }
 
-            val messageMedia: MessageMedia? = if (isPaidMessage) {
-                purchaseAcceptItem?.messageMedia ?: media
-            } else {
-                media
-            }
+            val messageMedia: MessageMedia? = purchaseAcceptItem?.messageMedia ?: media
 
             if (media.localFile != null) {
                 mediaData = Pair(
