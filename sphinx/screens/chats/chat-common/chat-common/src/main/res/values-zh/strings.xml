@@ -95,6 +95,8 @@
     <string name="attachment_send_header_video">傳送影片</string>
     <string name="attachment_send_header_giphy">傳送 GIPHY</string>
 
+    <string name="attachment_price_label">費: </string>
+
     <!-- Save Attachment -->
     <string name="saved_attachment_successfully">成功保存附件</string>
     <string name="failed_to_save_file">無法保存文件</string>

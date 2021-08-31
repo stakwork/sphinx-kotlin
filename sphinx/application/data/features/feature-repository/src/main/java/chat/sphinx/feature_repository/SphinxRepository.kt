@@ -2007,6 +2007,7 @@ abstract class SphinxRepository(
                     mediaKeyMap,
                     postMemeServerDto?.mime,
                     postMemeServerDto?.muid,
+                    sendMessage.messagePrice?.value,
                     sendMessage.isBoost
                 )
             } catch (e: IllegalArgumentException) {
@@ -2252,6 +2253,7 @@ abstract class SphinxRepository(
                     null,
                     message.messageMedia?.mediaType?.value,
                     message.messageMedia?.muid?.value,
+                    null,
                     false
                 )
             } catch (e: IllegalArgumentException) {

@@ -95,6 +95,8 @@
     <string name="attachment_send_header_video">SEND VIDEO</string>
     <string name="attachment_send_header_giphy">SEND GIPHY</string>
 
+    <string name="attachment_price_label">Price: </string>
+
     <!-- Save Attachment -->
     <string name="saved_attachment_successfully">Saved attachment successfully</string>
     <string name="failed_to_save_file">Failed to save file</string>

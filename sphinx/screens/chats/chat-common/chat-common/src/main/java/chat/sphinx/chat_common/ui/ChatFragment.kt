@@ -53,6 +53,7 @@ import chat.sphinx.menu_bottom.ui.BottomMenu
 import chat.sphinx.menu_bottom.ui.MenuBottomViewState
 import chat.sphinx.resources.*
 import chat.sphinx.wrapper_chat.isTrue
+import chat.sphinx.wrapper_common.lightning.toSat
 import chat.sphinx.wrapper_meme_server.headerKey
 import chat.sphinx.wrapper_meme_server.headerValue
 import chat.sphinx.wrapper_message.getColorKey
@@ -277,6 +278,10 @@ abstract class ChatFragment<
 
                 sendMessageBuilder.setText(editTextChatFooter.text?.toString())
 
+                sendMessageBuilder.setMessagePrice(
+                    attachmentSendBinding.editTextMessagePrice.text?.toString()?.toLongOrNull()?.toSat()
+                )
+
                 val attachmentViewState = viewModel.getAttachmentSendViewStateFlow().value
 
                 @Exhaustive
@@ -307,6 +312,7 @@ abstract class ChatFragment<
 
                     sendMessageBuilder.clear()
                     editTextChatFooter.setText("")
+                    attachmentSendBinding.editTextMessagePrice.setText("")
 
                     viewModel.messageReplyViewStateContainer.updateViewState(MessageReplyViewState.ReplyingDismissed)
                 }
@@ -408,6 +414,8 @@ abstract class ChatFragment<
             }
 
             textViewAttachmentSendHeaderClose.setOnClickListener {
+                editTextMessagePrice.setText("")
+
                 val vs = viewModel.getAttachmentSendViewStateFlow().value
                 if (vs is AttachmentSendViewState.Preview) {
                     viewModel.deleteUnsentAttachment(vs)

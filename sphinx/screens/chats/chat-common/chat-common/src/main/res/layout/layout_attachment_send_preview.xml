@@ -55,4 +55,64 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/layout_constraint_chat_attachment_send_header" />
 
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/button_background_white_rad_48"
+        android:backgroundTint="@color/primaryGreen"
+        android:layout_margin="@dimen/default_layout_margin"
+        android:padding="@dimen/default_small_layout_margin"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_chat_attachment_send_header">
+
+        <TextView
+            android:id="@+id/text_view_attachment_price"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/roboto_medium"
+            android:textSize="@dimen/chat_message_attachment_price_text_size"
+            android:textColor="@android:color/white"
+            android:layout_marginStart="@dimen/default_half_layout_margin"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/layout_constraint_price_container"
+            android:text="@string/attachment_price_label" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layout_constraint_price_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minWidth="@dimen/chat_message_attachment_price_edit_text_min_width"
+            android:background="@drawable/button_background_white_rad_48"
+            android:backgroundTint="@color/whiteSemiTransparent"
+            android:layout_marginStart="@dimen/default_half_layout_margin"
+            app:layout_constraintStart_toEndOf="@+id/text_view_attachment_price"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent">
+
+            <androidx.appcompat.widget.AppCompatEditText
+                android:id="@+id/edit_text_message_price"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:inputType="number"
+                android:singleLine="true"
+                android:textColor="@color/textInverted"
+                android:textSize="@dimen/chat_message_attachment_price_edit_text_text_size"
+                android:fontFamily="@font/roboto_medium"
+                android:backgroundTint="@android:color/transparent"
+                android:textCursorDrawable="@drawable/cursor"
+                android:gravity="center"
+                android:hint="0"
+                android:textColorHint="@color/secondaryText"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>
