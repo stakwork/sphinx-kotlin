@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="subscription_header_name">定期訂閱</string>
+    <string name="subscription_header_name">再次發生的</string>
     <string name="amount">數量</string>
     <string name="custom_amount">自定義金額：</string>
     <string name="_500_sats">500 sats</string>
@@ -14,4 +14,16 @@
     <string name="make">製作</string>
     <string name="payments">付款</string>
     <string name="pay_until">支付至</string>
+    <string name="delete_subscription">刪除訂閱</string>
+    <string name="are_you_sure_you_want_to_delete_subscription">您確定要刪除此訂閱嗎</string>
+    <string name="amount_is_required">金額為必填項</string>
+    <string name="time_interval_is_required">需要時間間隔</string>
+    <string name="please_set_either_the_number_of_payments_to_make_or_end_date">請設置付款次數或結束日期</string>
+    <string name="failed_to_save_subscription">無法保存訂閱</string>
+    <string name="saved_subscription_successfully">已成功保存訂閱</string>
+    <string name="deleting_subscription">刪除訂閱</string>
+    <string name="failed_to_pause_subscription">未能暫停訂閱</string>
+    <string name="successfully_paused_subscription">已成功暫停訂閱</string>
+    <string name="failed_to_restart_subscription">重新開始訂閱失敗</string>
+    <string name="successfully_restarted_subscription">成功重啟訂閱</string>
 </resources>

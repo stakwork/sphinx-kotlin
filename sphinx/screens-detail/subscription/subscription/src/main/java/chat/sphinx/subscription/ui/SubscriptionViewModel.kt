@@ -1,11 +1,13 @@
 package chat.sphinx.subscription.ui
 
+import android.app.Application
 import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_subscription.SubscriptionRepository
 import chat.sphinx.kotlin_response.Response
+import chat.sphinx.subscription.R
 import chat.sphinx.subscription.navigation.SubscriptionNavigator
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.Sat
@@ -25,6 +27,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 internal class SubscriptionViewModel @Inject constructor(
+    val app: Application,
     dispatchers: CoroutineDispatchers,
     savedStateHandle: SavedStateHandle,
     private val contactRepository: ContactRepository,
@@ -46,7 +49,7 @@ internal class SubscriptionViewModel @Inject constructor(
 
     fun saveSubscription(
         amount: Sat?,
-        cron: String?,
+        interval: String?,
         endDate: Date?,
         endNumber: Long?
     ) {
@@ -55,16 +58,16 @@ internal class SubscriptionViewModel @Inject constructor(
             if (amount == null) {
                 submitSideEffect(
                     SubscriptionSideEffect.Notify(
-                        "Amount is required"
+                        app.getString(R.string.amount_is_required)
                     )
                 )
                 return@launch
             }
 
-            if (cron == null) {
+            if (interval == null) {
                 submitSideEffect(
                     SubscriptionSideEffect.Notify(
-                        "Time Interval is required"
+                        app.getString(R.string.time_interval_is_required)
                     )
                 )
                 return@launch
@@ -73,7 +76,7 @@ internal class SubscriptionViewModel @Inject constructor(
             if (endNumber == null && endDate == null) {
                 submitSideEffect(
                     SubscriptionSideEffect.Notify(
-                        "Please set either the number of payments to make or end date"
+                        app.getString(R.string.please_set_either_the_number_of_payments_to_make_or_end_date)
                     )
                 )
                 return@launch
@@ -83,7 +86,7 @@ internal class SubscriptionViewModel @Inject constructor(
                 val loadResponse = if (subscription == null) {
                     subscriptionRepository.createSubscription(
                         amount = amount,
-                        interval = "daily",
+                        interval = interval,
                         contactId = ContactId(args.argContactId),
                         chatId = null,
                         endDate = null, // TODO: Fix this
@@ -93,7 +96,7 @@ internal class SubscriptionViewModel @Inject constructor(
                     subscriptionRepository.updateSubscription(
                         Subscription(
                             id = subscription.id,
-                            cron = Cron(cron),
+                            cron = Cron(interval),
                             amount = amount,
                             end_number = subscription.end_number,
                             count = subscription.count,
@@ -111,12 +114,12 @@ internal class SubscriptionViewModel @Inject constructor(
                 when (loadResponse) {
                     is Response.Error -> {
                         submitSideEffect(
-                            SubscriptionSideEffect.Notify("Failed to save subscription")
+                            SubscriptionSideEffect.Notify(app.getString(R.string.failed_to_save_subscription))
                         )
                     }
                     is Response.Success -> {
                         submitSideEffect(
-                            SubscriptionSideEffect.Notify("Saved subscription successfully")
+                            SubscriptionSideEffect.Notify(app.getString(R.string.saved_subscription_successfully))
                         )
                     }
                 }
@@ -130,7 +133,7 @@ internal class SubscriptionViewModel @Inject constructor(
                 SubscriptionSideEffect.AlertConfirmDeleteSubscription() {
                     viewModelScope.launch(mainImmediate) {
                         submitSideEffect(
-                            SubscriptionSideEffect.Notify("Deleting subscription")
+                            SubscriptionSideEffect.Notify(app.getString(R.string.deleting_subscription))
                         )
                     }
                 }
@@ -143,18 +146,18 @@ internal class SubscriptionViewModel @Inject constructor(
             subscriptionRepository.getSubscriptionByContactId(ContactId(args.argContactId)).firstOrNull().let { subscription ->
                 if (subscription == null) {
                     submitSideEffect(
-                        SubscriptionSideEffect.Notify("Failed to pause subscription")
+                        SubscriptionSideEffect.Notify(app.getString(R.string.failed_to_pause_subscription))
                     )
                 } else {
                     when (subscriptionRepository.pauseSubscription(subscription.id)) {
                         is Response.Error -> {
                             submitSideEffect(
-                                SubscriptionSideEffect.Notify("Failed to pause subscription")
+                                SubscriptionSideEffect.Notify(app.getString(R.string.failed_to_pause_subscription))
                             )
                         }
                         is Response.Success -> {
                             submitSideEffect(
-                                SubscriptionSideEffect.Notify("Successfully paused subscription")
+                                SubscriptionSideEffect.Notify(app.getString(R.string.successfully_paused_subscription))
                             )
                             // TODO: Set subscription to viewState...
 //                            updateViewState(
@@ -176,18 +179,18 @@ internal class SubscriptionViewModel @Inject constructor(
             subscriptionRepository.getSubscriptionByContactId(ContactId(args.argContactId)).firstOrNull().let { subscription ->
                 if (subscription == null) {
                     submitSideEffect(
-                        SubscriptionSideEffect.Notify("Failed to restart subscription")
+                        SubscriptionSideEffect.Notify(app.getString(R.string.failed_to_restart_subscription))
                     )
                 } else {
                     when (subscriptionRepository.pauseSubscription(subscription.id)) {
                         is Response.Error -> {
                             submitSideEffect(
-                                SubscriptionSideEffect.Notify("Failed to restart subscription")
+                                SubscriptionSideEffect.Notify(app.getString(R.string.failed_to_restart_subscription))
                             )
                         }
                         is Response.Success -> {
                             submitSideEffect(
-                                SubscriptionSideEffect.Notify("Successfully restarted subscription")
+                                SubscriptionSideEffect.Notify(app.getString(R.string.successfully_restarted_subscription))
                             )
                             // TODO: Set subscription to viewState
 //                            updateViewState(
