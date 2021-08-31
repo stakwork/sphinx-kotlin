@@ -1,5 +1,6 @@
 package chat.sphinx.concept_network_query_subscription
 
+import chat.sphinx.concept_network_query_subscription.model.PostSubscriptionDto
 import chat.sphinx.concept_network_query_subscription.model.SubscriptionDto
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.ResponseError
@@ -54,7 +55,7 @@ abstract class NetworkQuerySubscription {
     ////////////
 //    app.post('/subscriptions', subcriptions.createSubscription)
     abstract fun postSubscription(
-        subscriptionDto: SubscriptionDto,
+        postSubscriptionDto: PostSubscriptionDto,
         relayData: Pair<AuthorizationToken, RelayUrl>? = null
     ): Flow<LoadResponse<SubscriptionDto, ResponseError>>
 

@@ -20,6 +20,9 @@ import chat.sphinx.concept_network_query_message.NetworkQueryMessage
 import chat.sphinx.concept_network_query_message.model.MessageDto
 import chat.sphinx.concept_network_query_message.model.PostMessageDto
 import chat.sphinx.concept_network_query_message.model.PostPaymentDto
+import chat.sphinx.concept_network_query_subscription.NetworkQuerySubscription
+import chat.sphinx.concept_network_query_subscription.model.PostSubscriptionDto
+import chat.sphinx.concept_network_query_subscription.model.SubscriptionDto
 import chat.sphinx.concept_network_query_verify_external.NetworkQueryAuthorizeExternal
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_chat.model.CreateTribe
@@ -114,6 +117,7 @@ abstract class SphinxRepository(
     private val networkQueryMessage: NetworkQueryMessage,
     private val networkQueryInvite: NetworkQueryInvite,
     private val networkQueryAuthorizeExternal: NetworkQueryAuthorizeExternal,
+    private val networkQuerySubscription: NetworkQuerySubscription,
     private val rsa: RSA,
     private val socketIOManager: SocketIOManager,
     protected val LOG: SphinxLogger,
@@ -3583,9 +3587,44 @@ abstract class SphinxRepository(
         chatId: ChatId?,
         endDate: String?,
         endNumber: EndNumber?
-    ): Response<Subscription, ResponseError> {
-        var response: Response<Subscription, ResponseError>  = Response.Error(ResponseError(("Failed to create subscription")))
+    ): Response<Any, ResponseError> {
+        var response: Response<SubscriptionDto, ResponseError>  = Response.Error(ResponseError(("Failed to create subscription")))
 
+        applicationScope.launch(mainImmediate) {
+
+            networkQuerySubscription.postSubscription(
+                PostSubscriptionDto(
+                    amount = amount.value,
+                    contact_id = contactId.value,
+                    chat_id = chatId?.value,
+                    interval = interval,
+                    end_number = endNumber?.value,
+                    end_date = endDate
+                )
+            ).collect { loadResponse ->
+                when (loadResponse) {
+                    LoadResponse.Loading -> { }
+                    is Response.Error -> {
+                        response = loadResponse
+                    }
+                    is Response.Success -> {
+                        response = loadResponse
+                        val queries = coreDB.getSphinxDatabaseQueries()
+
+                        subscriptionLock.withLock {
+                            withContext(io) {
+                                queries.transaction {
+                                    upsertSubscription(
+                                        loadResponse.value,
+                                        queries
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }.join()
         return response
     }
 

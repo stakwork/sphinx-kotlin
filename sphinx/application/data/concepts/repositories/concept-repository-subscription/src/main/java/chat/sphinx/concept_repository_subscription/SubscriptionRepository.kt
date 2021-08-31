@@ -23,7 +23,7 @@ interface SubscriptionRepository {
         chatId: ChatId?,
         endDate: String?,
         endNumber: EndNumber?
-    ): Response<Subscription, ResponseError>
+    ): Response<Any, ResponseError>
 
     suspend fun updateSubscription(
         subscription: Subscription
