@@ -172,7 +172,7 @@ internal class SubscriptionFragment: SideEffectFragment<
                     buttonSave.text = getString(R.string.subscribe)
                 }
             }
-            is SubscriptionViewState.CreatedSubscription -> {
+            is SubscriptionViewState.CloseSubscriptionDetail -> {
                 lifecycleScope.launch {
                     viewModel.navigator.closeDetailScreen()
                 }

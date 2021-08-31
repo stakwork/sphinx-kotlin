@@ -127,7 +127,7 @@ internal class SubscriptionViewModel @Inject constructor(
                     }
                     is Response.Success -> {
                         updateViewState(
-                            SubscriptionViewState.CreatedSubscription
+                            SubscriptionViewState.CloseSubscriptionDetail
                         )
                     }
                 }
@@ -140,9 +140,26 @@ internal class SubscriptionViewModel @Inject constructor(
             submitSideEffect(
                 SubscriptionSideEffect.AlertConfirmDeleteSubscription() {
                     viewModelScope.launch(mainImmediate) {
-                        submitSideEffect(
-                            SubscriptionSideEffect.Notify(app.getString(R.string.deleting_subscription))
-                        )
+                        subscriptionRepository.getActiveSubscriptionByContactId(ContactId(args.argContactId)).firstOrNull().let { subscription ->
+                            if (subscription == null) {
+                                updateViewState(
+                                    SubscriptionViewState.CloseSubscriptionDetail
+                                )
+                            } else {
+                                when(subscriptionRepository.deleteSubscription(subscription.id)) {
+                                    is Response.Error -> {
+                                        submitSideEffect(
+                                            SubscriptionSideEffect.Notify(app.getString(R.string.failed_to_delete_subscription))
+                                        )
+                                    }
+                                    is Response.Success -> {
+                                        updateViewState(
+                                            SubscriptionViewState.CloseSubscriptionDetail
+                                        )
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             )

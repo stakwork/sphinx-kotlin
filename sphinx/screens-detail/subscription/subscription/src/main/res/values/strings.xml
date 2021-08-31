@@ -28,4 +28,5 @@
     <string name="successfully_restarted_subscription">Successfully restarted subscription</string>
     <string name="subscribe">Subscribe</string>
     <string name="update_subscription">Update Subscription</string>
+    <string name="failed_to_delete_subscription">Failed to delete subscription</string>
 </resources>

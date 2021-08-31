@@ -33,9 +33,6 @@ abstract class NetworkQuerySubscription {
     ///////////
     /// PUT ///
     ///////////
-//    app.put('/subscription/:id', subcriptions.editSubscription)
-//    app.put('/subscription/:id/pause', subcriptions.pauseSubscription)
-//    app.put('/subscription/:id/restart', subcriptions.restartSubscription)
     abstract fun putSubscription(
         subscriptionId: SubscriptionId,
         putSubscriptionDto: PutSubscriptionDto,

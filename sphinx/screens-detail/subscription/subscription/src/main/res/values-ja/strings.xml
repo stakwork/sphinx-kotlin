@@ -26,4 +26,7 @@
     <string name="successfully_paused_subscription">サブスクリプションを正常に一時停止しました</string>
     <string name="failed_to_restart_subscription">サブスクリプションの再開に失敗しました</string>
     <string name="successfully_restarted_subscription">サブスクリプションが正常に再開されました</string>
+    <string name="subscribe">申し込む</string>
+    <string name="update_subscription">サブスクリプションの更新</string>
+    <string name="failed_to_delete_subscription">サブスクリプションの削除に失敗しました</string>
 </resources>

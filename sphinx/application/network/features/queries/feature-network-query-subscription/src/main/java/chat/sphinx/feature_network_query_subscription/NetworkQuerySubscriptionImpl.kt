@@ -5,6 +5,7 @@ import chat.sphinx.concept_network_query_subscription.model.PostSubscriptionDto
 import chat.sphinx.concept_network_query_subscription.model.PutSubscriptionDto
 import chat.sphinx.concept_network_query_subscription.model.SubscriptionDto
 import chat.sphinx.concept_network_relay_call.NetworkRelayCall
+import chat.sphinx.feature_network_query_subscription.model.DeleteSubscriptionRelayResponse
 import chat.sphinx.feature_network_query_subscription.model.GetSubscriptionsRelayResponse
 import chat.sphinx.feature_network_query_subscription.model.SubscriptionRelayResponse
 import chat.sphinx.kotlin_response.LoadResponse
@@ -131,7 +132,7 @@ class NetworkQuerySubscriptionImpl(
         relayData: Pair<AuthorizationToken, RelayUrl>?
     ): Flow<LoadResponse<Any, ResponseError>> =
         networkRelayCall.relayDelete(
-            responseJsonClass = SubscriptionRelayResponse::class.java,
+            responseJsonClass = DeleteSubscriptionRelayResponse::class.java,
             relayEndpoint = "$ENDPOINT_SUBSCRIPTION/${subscriptionId.value}",
             requestBody = null,
             relayData = relayData

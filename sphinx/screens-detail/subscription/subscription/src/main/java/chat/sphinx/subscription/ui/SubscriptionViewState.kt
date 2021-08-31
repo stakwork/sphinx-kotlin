@@ -6,7 +6,7 @@ import io.matthewnelson.concept_views.viewstate.ViewState
 internal sealed class SubscriptionViewState: ViewState<SubscriptionViewState>() {
     object Idle: SubscriptionViewState()
 
-    object CreatedSubscription: SubscriptionViewState()
+    object CloseSubscriptionDetail: SubscriptionViewState()
 
     class SubscriptionLoaded(
         val subscription: Subscription

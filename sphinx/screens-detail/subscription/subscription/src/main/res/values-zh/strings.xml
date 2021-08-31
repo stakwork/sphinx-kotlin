@@ -26,4 +26,7 @@
     <string name="successfully_paused_subscription">已成功暫停訂閱</string>
     <string name="failed_to_restart_subscription">重新開始訂閱失敗</string>
     <string name="successfully_restarted_subscription">成功重啟訂閱</string>
+    <string name="subscribe">訂閱</string>
+    <string name="update_subscription">更新訂閱</string>
+    <string name="failed_to_delete_subscription">刪除訂閱失敗</string>
 </resources>
