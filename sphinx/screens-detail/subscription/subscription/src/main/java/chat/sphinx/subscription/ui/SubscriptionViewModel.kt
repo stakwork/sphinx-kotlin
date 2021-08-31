@@ -9,9 +9,9 @@ import chat.sphinx.concept_repository_subscription.SubscriptionRepository
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.subscription.R
 import chat.sphinx.subscription.navigation.SubscriptionNavigator
+import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.Sat
-import chat.sphinx.wrapper_common.subscription.Cron
 import chat.sphinx.wrapper_common.subscription.EndNumber
 import chat.sphinx.wrapper_subscription.Subscription
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -42,15 +42,28 @@ internal class SubscriptionViewModel @Inject constructor(
     private val args: SubscriptionFragmentArgs by savedStateHandle.navArgs()
 
     fun initSubscription() {
-        updateViewState(
-            SubscriptionViewState.Idle
-        )
+        viewModelScope.launch(mainImmediate) {
+            subscriptionRepository.getActiveSubscriptionByContactId(ContactId(args.argContactId)).firstOrNull().let { subscription ->
+                if (subscription == null) {
+                    updateViewState(
+                        SubscriptionViewState.Idle
+                    )
+                } else {
+                    updateViewState(
+                        SubscriptionViewState.SubscriptionLoaded(
+                            subscription
+                        )
+                    )
+                }
+            }
+        }
+
     }
 
     fun saveSubscription(
         amount: Sat?,
         interval: String?,
-        endDate: Date?,
+        endDate: DateTime?,
         endNumber: Long?
     ) {
         viewModelScope.launch(mainImmediate) {
@@ -82,7 +95,7 @@ internal class SubscriptionViewModel @Inject constructor(
                 return@launch
             }
 
-            subscriptionRepository.getSubscriptionByContactId(
+            subscriptionRepository.getActiveSubscriptionByContactId(
                 ContactId(args.argContactId)
             ).firstOrNull().let { subscription ->
                 val loadResponse = if (subscription == null) {
@@ -91,25 +104,18 @@ internal class SubscriptionViewModel @Inject constructor(
                         interval = interval,
                         contactId = ContactId(args.argContactId),
                         chatId = null,
-                        endDate = null, // TODO: Fix this
+                        endDate = endDate?.let { DateTime.getFormatMMMddyyyy().format(it) },
                         endNumber = endNumber?.let { EndNumber(it) }
                     )
                 } else {
                     subscriptionRepository.updateSubscription(
-                        Subscription(
-                            id = subscription.id,
-                            cron = Cron(interval),
-                            amount = amount,
-                            end_number = subscription.end_number,
-                            count = subscription.count,
-                            end_date = subscription.end_date,
-                            ended = subscription.ended,
-                            paused = subscription.paused,
-                            created_at = subscription.created_at,
-                            updated_at = subscription.updated_at,
-                            chat_id = subscription.chat_id,
-                            contact_id = subscription.contact_id
-                        )
+                        id = subscription.id,
+                        amount = amount,
+                        interval = interval,
+                        contactId = ContactId(args.argContactId),
+                        chatId = subscription.chat_id,
+                        endDate = endDate?.let { DateTime.getFormatMMMddyyyy().format(it.value) },
+                        endNumber = endNumber?.let { EndNumber(it) }
                     )
                 }
 
@@ -120,8 +126,8 @@ internal class SubscriptionViewModel @Inject constructor(
                         )
                     }
                     is Response.Success -> {
-                        submitSideEffect(
-                            SubscriptionSideEffect.Notify(app.getString(R.string.saved_subscription_successfully))
+                        updateViewState(
+                            SubscriptionViewState.CreatedSubscription
                         )
                     }
                 }
@@ -145,7 +151,7 @@ internal class SubscriptionViewModel @Inject constructor(
 
     fun pauseSubscription() {
         viewModelScope.launch(mainImmediate) {
-            subscriptionRepository.getSubscriptionByContactId(ContactId(args.argContactId)).firstOrNull().let { subscription ->
+            subscriptionRepository.getActiveSubscriptionByContactId(ContactId(args.argContactId)).firstOrNull().let { subscription ->
                 if (subscription == null) {
                     submitSideEffect(
                         SubscriptionSideEffect.Notify(app.getString(R.string.failed_to_pause_subscription))
@@ -161,45 +167,64 @@ internal class SubscriptionViewModel @Inject constructor(
                             submitSideEffect(
                                 SubscriptionSideEffect.Notify(app.getString(R.string.successfully_paused_subscription))
                             )
-                            // TODO: Set subscription to viewState...
-//                            updateViewState(
-//                                SubscriptionViewState.Subscription(
-//
-//                                )
-//                            )
+                            updateViewState(
+                                SubscriptionViewState.SubscriptionLoaded(
+                                    Subscription(
+                                        id = subscription.id,
+                                        subscription.cron,
+                                        subscription.amount,
+                                        subscription.end_number,
+                                        subscription.count,
+                                        subscription.end_date,
+                                        subscription.ended,
+                                        paused = true,
+                                        subscription.created_at,
+                                        subscription.updated_at,
+                                        subscription.chat_id,
+                                        subscription.contact_id
+                                    )
+                                )
+                            )
                         }
                     }
                 }
             }
-
-
         }
     }
 
     fun restartSubscription() {
         viewModelScope.launch(mainImmediate) {
-            subscriptionRepository.getSubscriptionByContactId(ContactId(args.argContactId)).firstOrNull().let { subscription ->
+            subscriptionRepository.getActiveSubscriptionByContactId(ContactId(args.argContactId)).firstOrNull().let { subscription ->
                 if (subscription == null) {
                     submitSideEffect(
                         SubscriptionSideEffect.Notify(app.getString(R.string.failed_to_restart_subscription))
                     )
                 } else {
-                    when (subscriptionRepository.pauseSubscription(subscription.id)) {
+                    when (subscriptionRepository.restartSubscription(subscription.id)) {
                         is Response.Error -> {
                             submitSideEffect(
                                 SubscriptionSideEffect.Notify(app.getString(R.string.failed_to_restart_subscription))
                             )
                         }
                         is Response.Success -> {
-                            submitSideEffect(
-                                SubscriptionSideEffect.Notify(app.getString(R.string.successfully_restarted_subscription))
+                            updateViewState(
+                                SubscriptionViewState.SubscriptionLoaded(
+                                    Subscription(
+                                        id = subscription.id,
+                                        subscription.cron,
+                                        subscription.amount,
+                                        subscription.end_number,
+                                        subscription.count,
+                                        subscription.end_date,
+                                        subscription.ended,
+                                        paused = false,
+                                        subscription.created_at,
+                                        subscription.updated_at,
+                                        subscription.chat_id,
+                                        subscription.contact_id
+                                    )
+                                )
                             )
-                            // TODO: Set subscription to viewState
-//                            updateViewState(
-//                                SubscriptionViewState.Subscription(
-//
-//                                )
-//                            )
                         }
                     }
                 }

@@ -22,6 +22,7 @@ import chat.sphinx.concept_network_query_message.model.PostMessageDto
 import chat.sphinx.concept_network_query_message.model.PostPaymentDto
 import chat.sphinx.concept_network_query_subscription.NetworkQuerySubscription
 import chat.sphinx.concept_network_query_subscription.model.PostSubscriptionDto
+import chat.sphinx.concept_network_query_subscription.model.PutSubscriptionDto
 import chat.sphinx.concept_network_query_subscription.model.SubscriptionDto
 import chat.sphinx.concept_network_query_verify_external.NetworkQueryAuthorizeExternal
 import chat.sphinx.concept_repository_chat.ChatRepository
@@ -3580,6 +3581,16 @@ abstract class SphinxRepository(
         )
     }
 
+    override suspend fun getActiveSubscriptionByContactId(contactId: ContactId): Flow<Subscription?> = flow {
+        emitAll(
+            coreDB.getSphinxDatabaseQueries().activeSubscriptionGetByContactId(contactId)
+                .asFlow()
+                .mapToOneOrNull(io)
+                .map { it?.let { subscriptionDboPresenterMapper.mapFrom(it) } }
+                .distinctUntilChanged()
+        )
+    }
+
     override suspend fun createSubscription(
         amount: Sat,
         interval: String,
@@ -3591,7 +3602,6 @@ abstract class SphinxRepository(
         var response: Response<SubscriptionDto, ResponseError>  = Response.Error(ResponseError(("Failed to create subscription")))
 
         applicationScope.launch(mainImmediate) {
-
             networkQuerySubscription.postSubscription(
                 PostSubscriptionDto(
                     amount = amount.value,
@@ -3629,9 +3639,52 @@ abstract class SphinxRepository(
     }
 
     override suspend fun updateSubscription(
-        subscription: Subscription
-    ): Response<Subscription, ResponseError> {
-        var response: Response<Subscription, ResponseError>  = Response.Error(ResponseError(("Failed to update subsccription")))
+        id: SubscriptionId,
+        amount: Sat,
+        interval: String,
+        contactId: ContactId,
+        chatId: ChatId?,
+        endDate: String?,
+        endNumber: EndNumber?
+    ): Response<Any, ResponseError> {
+        var response: Response<SubscriptionDto, ResponseError>  = Response.Error(ResponseError(("Failed to update subscription")))
+
+        applicationScope.launch(mainImmediate) {
+
+            networkQuerySubscription.putSubscription(
+                id,
+                PutSubscriptionDto(
+                    amount = amount.value,
+                    contact_id = contactId.value,
+                    chat_id = chatId?.value,
+                    interval = interval,
+                    end_number = endNumber?.value,
+                    end_date = endDate
+                )
+            ).collect { loadResponse ->
+                when (loadResponse) {
+                    LoadResponse.Loading -> { }
+                    is Response.Error -> {
+                        response = loadResponse
+                    }
+                    is Response.Success -> {
+                        response = loadResponse
+                        val queries = coreDB.getSphinxDatabaseQueries()
+
+                        subscriptionLock.withLock {
+                            withContext(io) {
+                                queries.transaction {
+                                    upsertSubscription(
+                                        loadResponse.value,
+                                        queries
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }.join()
 
         return response
     }

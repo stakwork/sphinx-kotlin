@@ -16,6 +16,10 @@ interface SubscriptionRepository {
         contactId: ContactId
     ): Flow<Subscription?>
 
+    suspend fun getActiveSubscriptionByContactId(
+        contactId: ContactId
+    ): Flow<Subscription?>
+
     suspend fun createSubscription(
         amount: Sat,
         interval: String,
@@ -26,7 +30,13 @@ interface SubscriptionRepository {
     ): Response<Any, ResponseError>
 
     suspend fun updateSubscription(
-        subscription: Subscription
+        id: SubscriptionId,
+        amount: Sat,
+        interval: String,
+        contactId: ContactId,
+        chatId: ChatId?,
+        endDate: String?,
+        endNumber: EndNumber?
     ): Response<Any, ResponseError>
 
     suspend fun restartSubscription(

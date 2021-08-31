@@ -95,6 +95,7 @@ value class DateTime(val value: Date) {
         private const val FORMAT_EEE_DD = "EEE dd"
         private const val FORMAT_EEE_MM_DD_H_MM_A = "EEE MMM dd, h:mm a"
         private const val FORMAT_DD_MMM_HH_MM = "dd MMM, HH:mm"
+        private const val FORMAT_MMM_DD_YYYY = "MMM dd, yyyy"
 
         private const val SIX_DAYS_IN_MILLISECONDS = 518_400_000L
 
@@ -239,6 +240,21 @@ value class DateTime(val value: Date) {
                     .also {
                         it.timeZone = TimeZone.getDefault()
                         formatEEEdd = it
+                    }
+            }
+
+        @Volatile
+        private var formatMMMddyyyy: SimpleDateFormat? = null
+        fun getFormatMMMddyyyy(): SimpleDateFormat =
+            formatMMMddyyyy?.also {
+                it.timeZone = TimeZone.getDefault()
+            } ?: synchronized(this) {
+                formatMMMddyyyy?.also {
+                    it.timeZone = TimeZone.getDefault()
+                } ?: SimpleDateFormat(FORMAT_MMM_DD_YYYY, Locale.getDefault())
+                    .also {
+                        it.timeZone = TimeZone.getDefault()
+                        formatMMMddyyyy = it
                     }
             }
     }

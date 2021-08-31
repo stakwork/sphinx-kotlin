@@ -415,7 +415,6 @@
             style="@style/RoundedBlueButton"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:text="Subscribe"
             android:textSize="@dimen/default_header_text_size"
             android:textColor="@android:color/white"
             android:background="@drawable/button_background_white_rad_48"

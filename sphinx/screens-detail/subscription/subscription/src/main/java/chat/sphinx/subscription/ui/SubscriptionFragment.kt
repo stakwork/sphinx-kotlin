@@ -11,7 +11,9 @@ import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.subscription.R
 import chat.sphinx.subscription.databinding.FragmentSubscriptionBinding
+import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_common.lightning.Sat
+import chat.sphinx.wrapper_common.toDateTime
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
@@ -31,6 +33,8 @@ internal class SubscriptionFragment: SideEffectFragment<
 {
     override val viewModel: SubscriptionViewModel by viewModels()
     override val binding: FragmentSubscriptionBinding by viewBinding(FragmentSubscriptionBinding::bind)
+
+    private val calendar = Calendar.getInstance()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -61,8 +65,6 @@ internal class SubscriptionFragment: SideEffectFragment<
                     viewModel.restartSubscription()
                 }
             }
-
-            val calendar = Calendar.getInstance()
 
             editTextPayUntil.setOnClickListener {
                 this@SubscriptionFragment.context?.let { context ->
@@ -133,7 +135,7 @@ internal class SubscriptionFragment: SideEffectFragment<
                 }
 
                 var endNumber: Long? = null
-                val endDate: Date? = when (radioGroupEndRule.checkedRadioButtonId) {
+                val endDate: DateTime? = when (radioGroupEndRule.checkedRadioButtonId) {
                     R.id.radio_button_make -> {
                         editTextMakeQuantity.text?.toString()?.let {
                             endNumber = it.toLongOrNull()
@@ -141,8 +143,7 @@ internal class SubscriptionFragment: SideEffectFragment<
                         null
                     }
                     R.id.radio_button_until -> {
-                        // TODO: Load editTextPayUntil.text into date
-                        Calendar.getInstance().time
+                        calendar.timeInMillis.toDateTime()
                     }
                     else -> null
                 }
@@ -162,12 +163,18 @@ internal class SubscriptionFragment: SideEffectFragment<
 
     override suspend fun onViewStateFlowCollect(viewState: SubscriptionViewState) {
         when(viewState) {
-            SubscriptionViewState.Idle -> {
+            is SubscriptionViewState.Idle -> {
                 // Setup for new subscription
                 binding.apply {
                     progressBarSubscriptionSave.gone
                     textViewDetailSubscriptionDelete.gone
                     layoutConstraintSubscriptionEnablement.gone
+                    buttonSave.text = getString(R.string.subscribe)
+                }
+            }
+            is SubscriptionViewState.CreatedSubscription -> {
+                lifecycleScope.launch {
+                    viewModel.navigator.closeDetailScreen()
                 }
             }
             is SubscriptionViewState.SubscriptionLoaded -> {
@@ -175,6 +182,7 @@ internal class SubscriptionFragment: SideEffectFragment<
                     progressBarSubscriptionSave.gone
                     textViewDetailSubscriptionDelete.visible
                     layoutConstraintSubscriptionEnablement.visible
+                    buttonSave.text = getString(R.string.update_subscription)
 
                     switchSubscriptionEnablement.isChecked = !viewState.subscription.ended && !viewState.subscription.paused
 
@@ -197,11 +205,11 @@ internal class SubscriptionFragment: SideEffectFragment<
 
                     // Populate Time Interval
                     when  {
-                        viewState.subscription.cron.value.startsWith("* * *") -> {
+                        viewState.subscription.cron.value.endsWith("* * *") -> {
                             // Daily...
                             radioButtonDaily.isChecked = true
                         }
-                        viewState.subscription.cron.value.startsWith("* *") -> {
+                        viewState.subscription.cron.value.endsWith("* *") -> {
                             // Monthly
                             radioButtonMonthly.isChecked = true
                         }

@@ -2,6 +2,7 @@ package chat.sphinx.feature_network_query_subscription
 
 import chat.sphinx.concept_network_query_subscription.NetworkQuerySubscription
 import chat.sphinx.concept_network_query_subscription.model.PostSubscriptionDto
+import chat.sphinx.concept_network_query_subscription.model.PutSubscriptionDto
 import chat.sphinx.concept_network_query_subscription.model.SubscriptionDto
 import chat.sphinx.concept_network_relay_call.NetworkRelayCall
 import chat.sphinx.feature_network_query_subscription.model.GetSubscriptionsRelayResponse
@@ -70,19 +71,16 @@ class NetworkQuerySubscriptionImpl(
     ///////////
     /// PUT ///
     ///////////
-//    app.put('/subscription/:id', subcriptions.editSubscription)
-//    app.put('/subscription/:id/pause', subcriptions.pauseSubscription)
-//    app.put('/subscription/:id/restart', subcriptions.restartSubscription)
-
     override fun putSubscription(
         subscriptionId: SubscriptionId,
+        putSubscriptionDto: PutSubscriptionDto,
         relayData: Pair<AuthorizationToken, RelayUrl>?
     ): Flow<LoadResponse<SubscriptionDto, ResponseError>> =
         networkRelayCall.relayPut(
             responseJsonClass = SubscriptionRelayResponse::class.java,
             relayEndpoint = "$ENDPOINT_SUBSCRIPTION/${subscriptionId.value}",
-            requestBodyJsonClass = Map::class.java,
-            requestBody = mapOf(Pair("", "")),
+            requestBodyJsonClass = PutSubscriptionDto::class.java,
+            requestBody = putSubscriptionDto,
             relayData = relayData
         )
 

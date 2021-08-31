@@ -440,8 +440,8 @@ inline fun TransactionCallbacks.upsertSubscription(subscriptionDto: Subscription
         end_number = subscriptionDto.end_number?.let { EndNumber(it.toLong()) },
         created_at = subscriptionDto.created_at.toDateTime(),
         updated_at = subscriptionDto.updated_at.toDateTime(),
-        ended = subscriptionDto.ended == 1,
-        paused = subscriptionDto.paused == 1,
+        ended = subscriptionDto.endedActual,
+        paused = subscriptionDto.pausedActual,
     )
 }
 
