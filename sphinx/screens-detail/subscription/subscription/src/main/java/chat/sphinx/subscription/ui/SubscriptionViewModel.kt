@@ -82,7 +82,9 @@ internal class SubscriptionViewModel @Inject constructor(
                 return@launch
             }
 
-            subscriptionRepository.getSubscriptionByContactId(ContactId(args.argContactId)).firstOrNull().let { subscription ->
+            subscriptionRepository.getSubscriptionByContactId(
+                ContactId(args.argContactId)
+            ).firstOrNull().let { subscription ->
                 val loadResponse = if (subscription == null) {
                     subscriptionRepository.createSubscription(
                         amount = amount,

@@ -27,7 +27,7 @@ internal class EditContactNavigatorImpl @Inject constructor(
 
     override suspend fun toSubscribeDetailScreen(contactId: ContactId) {
         navigationDriver.submitNavigationRequest(
-            ToSubscriptionDetail()
+            ToSubscriptionDetail(contactId)
         )
     }
 }
