@@ -759,7 +759,12 @@ WHERE id = ?;
 subscriptionGetByContactId:
 SELECT *
 FROM subscriptionDbo
-WHERE contact_id = ?;
+WHERE ended = 0 AND contact_id = ?;
+
+activeSubscriptionGetByContactId:
+SELECT *
+FROM subscriptionDbo
+WHERE ended = 0 AND contact_id = ?;
 
 subscriptionGetByChatId:
 SELECT *
