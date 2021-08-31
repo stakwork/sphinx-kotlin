@@ -68,6 +68,7 @@ import chat.sphinx.wrapper_meme_server.PublicAttachmentInfo
 import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message_media.*
 import chat.sphinx.wrapper_message_media.token.MediaHost
+import chat.sphinx.wrapper_message_media.token.MediaMUID
 import chat.sphinx.wrapper_podcast.Podcast
 import chat.sphinx.wrapper_podcast.PodcastDestination
 import chat.sphinx.wrapper_relay.AuthorizationToken
@@ -1575,6 +1576,7 @@ abstract class SphinxRepository(
         }
 
         message._reactions = reactions
+        message._purchaseItems = purchaseItems
 
         replyMessage?.value?.toMessageUUID()?.let { uuid ->
             queries.messageGetToShowByUUID(uuid).executeAsOneOrNull()?.let { replyDbo ->
@@ -1597,17 +1599,21 @@ abstract class SphinxRepository(
                         val reactionsMap: MutableMap<MessageUUID, ArrayList<Message>> =
                             LinkedHashMap(listMessageDbo.size)
 
-                        val purchaseItemsMap: MutableMap<MessageUUID, ArrayList<Message>> =
+                        val purchaseItemsMap: MutableMap<MessageMUID, ArrayList<Message>> =
                             LinkedHashMap(listMessageDbo.size)
 
                         for (dbo in listMessageDbo) {
                             dbo.uuid?.let { uuid ->
                                 reactionsMap[uuid] = ArrayList(0)
-                                purchaseItemsMap[uuid] = ArrayList(0)
+                            }
+                            dbo.muid?.let { muid ->
+                                purchaseItemsMap[muid] = ArrayList(0)
                             }
                         }
 
                         val replyUUIDs = reactionsMap.keys.map { ReplyUUID(it.value) }
+
+                        val purchaseItemsMUIDs = purchaseItemsMap.keys.map { MessageMUID(it.value) }
 
                         replyUUIDs.chunked(500).forEach { chunkedIds ->
                             queries.messageGetAllReactionsByUUID(
@@ -1623,15 +1629,17 @@ abstract class SphinxRepository(
                                         }
                                     }
                                 }
+                        }
 
-                            queries.messageGetAllPurchaseItemByUUID(
+                        purchaseItemsMUIDs.chunked(500).forEach { chunkedMUIDs ->
+                            queries.messageGetAllPurchaseItemsByMUID(
                                 chatId,
-                                chunkedIds,
+                                chunkedMUIDs,
                             ).executeAsList()
                                 .let { response ->
                                     response.forEach { dbo ->
-                                        dbo.reply_uuid?.let { uuid ->
-                                            purchaseItemsMap[MessageUUID(uuid.value)]?.add(
+                                        dbo.muid?.let { muid ->
+                                            purchaseItemsMap[muid]?.add(
                                                 mapMessageDboAndDecryptContentIfNeeded(queries, dbo)
                                             )
                                         }
@@ -1644,7 +1652,7 @@ abstract class SphinxRepository(
                                 queries,
                                 dbo,
                                 dbo.uuid?.let { reactionsMap[it] },
-                                dbo.uuid?.let { purchaseItemsMap[it] },
+                                dbo.muid?.let { purchaseItemsMap[it] },
                                 dbo.reply_uuid,
                             )
                         }
@@ -1919,6 +1927,7 @@ abstract class SphinxRepository(
                                 null,
                                 message?.second,
                                 message?.first,
+                                null
                             )
 
                             if (media != null) {

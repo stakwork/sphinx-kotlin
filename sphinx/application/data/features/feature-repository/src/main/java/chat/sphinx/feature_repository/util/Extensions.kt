@@ -24,10 +24,7 @@ import chat.sphinx.wrapper_contact.*
 import chat.sphinx.wrapper_invite.InviteString
 import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_message.*
-import chat.sphinx.wrapper_message_media.MediaToken
-import chat.sphinx.wrapper_message_media.toMediaKey
-import chat.sphinx.wrapper_message_media.toMediaKeyDecrypted
-import chat.sphinx.wrapper_message_media.toMediaType
+import chat.sphinx.wrapper_message_media.*
 import chat.sphinx.wrapper_rsa.RsaPublicKey
 import com.squareup.moshi.Moshi
 import com.squareup.sqldelight.TransactionCallbacks
@@ -362,6 +359,7 @@ fun TransactionCallbacks.upsertMessage(dto: MessageDto, queries: SphinxDatabaseQ
         dto.expiration_date?.toDateTime(),
         dto.message_content?.toMessageContent(),
         dto.messageContentDecrypted?.toMessageContentDecrypted(),
+        dto.media_token?.toMediaToken()?.getMUIDFromMediaToken()?.value?.toMessageMUID()
     )
 
     dto.media_token?.let { mediaToken ->
