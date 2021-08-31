@@ -31,6 +31,8 @@ interface MessageRepository {
 
     fun sendMessage(sendMessage: SendMessage?)
 
+    suspend fun payAttachment(message: Message) : Response<Any, ResponseError>
+
     fun resendMessage(
         message: Message,
         chat: Chat,

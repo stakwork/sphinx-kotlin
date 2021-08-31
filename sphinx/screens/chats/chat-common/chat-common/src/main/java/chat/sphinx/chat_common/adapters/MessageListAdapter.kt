@@ -24,9 +24,11 @@ import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.wrapper_common.dashboard.ContactId
+import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_message.Message
 import chat.sphinx.wrapper_message.MessageType
+import chat.sphinx.wrapper_message.PurchaseStatus
 import chat.sphinx.wrapper_view.Px
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.visible
@@ -209,7 +211,7 @@ internal class MessageListAdapter<ARGS : NavArgs>(
         private val binding: LayoutMessageHolderBinding
     ): RecyclerView.ViewHolder(binding.root) {
 
-        private val holderJobs: ArrayList<Job> = ArrayList(10)
+        private val holderJobs: ArrayList<Job> = ArrayList(11)
         private val disposables: ArrayList<Disposable> = ArrayList(4)
         private var currentViewState: MessageHolderViewState? = null
 
@@ -298,6 +300,17 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                     }
                     imageViewAttachmentImage.setOnLongClickListener(selectedMessageLongClickListener)
                 }
+
+                includePaidMessageReceivedDetailsHolder.apply {
+                    buttonPayAttachment.setOnClickListener {
+                        currentViewState?.let { viewState ->
+                            viewState.message?.let { message ->
+                                payAttachment(message, viewState)
+                            }
+                        }
+                    }
+                    buttonPayAttachment.setOnLongClickListener(selectedMessageLongClickListener)
+                }
             }
 
             binding.includeMessageTypeGroupActionHolder.let { holder ->
@@ -334,6 +347,20 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                         deleteTribe()
                     }
                 }
+            }
+        }
+
+        private fun payAttachment(message: Message, viewState: MessageHolderViewState) {
+            onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+
+                binding.setBubblePaidMessageReceivedDetailsProcessingLayout(viewState)
+
+                if (!viewModel.payAttachment(message)) {
+                    binding.setBubblePaidMessageReceivedDetailsFailedLayout(viewState)
+                }
+
+            }.let { job ->
+                holderJobs.add(job)
             }
         }
 

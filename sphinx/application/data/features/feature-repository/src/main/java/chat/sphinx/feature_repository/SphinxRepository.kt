@@ -2669,6 +2669,51 @@ abstract class SphinxRepository(
         return response ?: Response.Error(ResponseError(""))
     }
 
+    override suspend fun payAttachment(message: Message) : Response<Any, ResponseError> {
+        var response: Response<Any, ResponseError> = Response.Error(ResponseError("Failed to pay for attachment"))
+
+        applicationScope.launch(mainImmediate) {
+            val queries = coreDB.getSphinxDatabaseQueries()
+
+            message.messageMedia?.mediaToken?.let { mediaToken ->
+                mediaToken.getPriceFromMediaToken()?.let { price ->
+
+                    networkQueryMessage.payAttachment(
+                        message.chatId,
+                        message.sender,
+                        price,
+                        mediaToken
+                    ).collect { loadResponse ->
+                        @Exhaustive
+                        when (loadResponse) {
+                            is LoadResponse.Loading -> {}
+
+                            is Response.Error -> {
+                                response = Response.Error(
+                                    ResponseError(loadResponse.message, loadResponse.exception)
+                                )
+                            }
+                            is Response.Success -> {
+                                response = loadResponse
+
+                                messageLock.withLock {
+                                    withContext(io) {
+                                        queries.transaction {
+                                            upsertMessage(loadResponse.value, queries)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                }
+            }
+        }.join()
+
+        return response
+    }
+
     override suspend fun toggleChatMuted(chat: Chat): Response<Boolean, ResponseError> {
         var response: Response<Boolean, ResponseError> = Response.Success(!chat.isMuted.isTrue())
 

@@ -812,6 +812,37 @@ internal inline fun LayoutMessageHolderBinding.setBubbleBotResponse(
 
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
+internal inline fun LayoutMessageHolderBinding.setBubblePaidMessageReceivedDetailsProcessingLayout(
+    currentViewState: MessageHolderViewState
+) {
+    setBubblePaidMessageReceivedDetailsLayout(currentViewState, PurchaseStatus.Processing)
+}
+
+@MainThread
+@Suppress("NOTHING_TO_INLINE")
+internal inline fun LayoutMessageHolderBinding.setBubblePaidMessageReceivedDetailsFailedLayout(
+    currentViewState: MessageHolderViewState
+) {
+    setBubblePaidMessageReceivedDetailsLayout(currentViewState, PurchaseStatus.Pending)
+}
+
+@MainThread
+@Suppress("NOTHING_TO_INLINE")
+internal inline fun LayoutMessageHolderBinding.setBubblePaidMessageReceivedDetailsLayout(
+    currentViewState: MessageHolderViewState,
+    purchaseStatus: PurchaseStatus
+) {
+    setBubblePaidMessageReceivedDetailsLayout(
+        LayoutState.Bubble.ContainerFourth.PaidMessageReceivedDetails(
+            amount = currentViewState.message.messageMedia?.price ?: Sat(0),
+            purchaseStatus = purchaseStatus
+        ),
+        currentViewState.background
+    )
+}
+
+@MainThread
+@Suppress("NOTHING_TO_INLINE")
 internal inline fun LayoutMessageHolderBinding.setBubblePaidMessageReceivedDetailsLayout(
     paidDetails: LayoutState.Bubble.ContainerFourth.PaidMessageReceivedDetails?,
     bubbleBackground: BubbleBackground
@@ -821,7 +852,6 @@ internal inline fun LayoutMessageHolderBinding.setBubblePaidMessageReceivedDetai
             root.gone
         } else {
             root.visible
-            root.clipToOutline = true
 
             @ColorRes
             val backgroundTintResId = if (paidDetails.purchaseStatus is PurchaseStatus.Denied) {

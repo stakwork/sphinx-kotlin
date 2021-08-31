@@ -1194,6 +1194,23 @@ abstract class ChatViewModel<ARGS: NavArgs>(
             )
         }
     }
+
+    fun payAttachment(message: Message): Boolean {
+        var success = true
+
+        viewModelScope.launch(mainImmediate) {
+            when (val response = messageRepository.payAttachment(message)) {
+                is Response.Error -> {
+                    success = false
+
+                    submitSideEffect(ChatSideEffect.Notify(response.cause.message))
+                }
+                is Response.Success -> {}
+            }
+        }
+
+        return success
+    }
 }
 
 @Suppress("NOTHING_TO_INLINE")
