@@ -8,19 +8,106 @@
     android:background="@drawable/background_detail_screen"
     tools:context=".ui.SubscriptionFragment">
 
-    <include
-        android:id="@+id/include_subscription_header"
-        layout="@layout/layout_detail_screen_header"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_subscription_header"
         android:layout_width="match_parent"
         android:layout_height="@dimen/default_header_height"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        >
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_detail_screen_header_nav_back"
+            android:layout_width="@dimen/default_header_navigation_xy"
+            android:layout_height="@dimen/default_header_navigation_xy"
+            android:fontFamily="@font/material_icons_regular"
+            android:gravity="center"
+            android:text="@string/material_icon_name_nav_back"
+            android:textColor="@color/washedOutReceivedText"
+            android:textSize="@dimen/default_text_size_back_arrow"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_detail_subscription_delete"
+            android:layout_width="@dimen/default_header_navigation_xy"
+            android:layout_height="@dimen/default_header_navigation_xy"
+            android:fontFamily="@font/material_icons_regular"
+            android:gravity="center"
+            android:text="@string/material_icon_name_message_action_delete"
+            android:textColor="@color/primaryRed"
+            android:textSize="@dimen/default_text_size_back_arrow"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/layout_constraint_subscription_enablement"
+            tools:visibility="visible"
+            />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layout_constraint_subscription_enablement"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/default_layout_margin"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            tools:visibility="visible"
+            >
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_view_subscription_enable"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/text"
+                android:fontFamily="@font/roboto_regular"
+                android:textSize="@dimen/default_text_size_headline"
+                android:singleLine="true"
+                android:text="Active"
+                android:layout_marginEnd="@dimen/default_layout_margin"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/switch_subscription_enablement"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/switch_subscription_enablement"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:theme="@style/CustomSwitch"
+                android:thumb="@drawable/switch_thumb_selector"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:track="@drawable/switch_track_selector" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_detail_screen_header_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/default_header_headline_margin_horizontal"
+            android:fontFamily="@font/montserrat_bold"
+            android:paddingEnd="4dp"
+            android:singleLine="true"
+            android:textAllCaps="true"
+            android:textColor="@color/primaryText"
+            android:textSize="@dimen/default_header_text_size"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/text_view_detail_subscription_delete"
+            app:layout_constraintStart_toEndOf="@+id/text_view_detail_screen_header_nav_back"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="DETAIL SCREEN" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/layout_constraint_amount_header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/body"
-        app:layout_constraintTop_toBottomOf="@+id/include_subscription_header"
+        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_subscription_header"
         >
         <androidx.appcompat.widget.AppCompatTextView
             android:text="@string/amount"
@@ -82,10 +169,9 @@
                 android:id="@+id/radio_button_custom_amount"
                 android:text="@string/custom_amount"
                 android:textColor="@color/secondaryText"
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/layout_constraint_custom_amount"
                 app:layout_constraintTop_toBottomOf="@+id/radio_button_2000_sats"
                 />
 
@@ -93,9 +179,12 @@
                 android:id="@+id/layout_constraint_custom_amount"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/default_layout_margin"
+
                 android:background="@drawable/edit_text_background"
+                app:layout_constraintTop_toTopOf="@+id/radio_button_custom_amount"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent">
+                app:layout_constraintStart_toEndOf="@+id/radio_button_custom_amount">
 
                 <androidx.appcompat.widget.AppCompatEditText
                     android:id="@+id/edit_text_custom_amount"
@@ -212,14 +301,13 @@
             >
             <RadioButton
                 android:id="@+id/radio_button_make"
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="16dp"
                 android:textColor="@color/secondaryText"
                 android:text="@string/make"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/layout_constraint_make_quantity"
                 >
             </RadioButton>
             <androidx.constraintlayout.widget.ConstraintLayout
@@ -228,10 +316,11 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/default_half_layout_margin"
                 android:layout_marginEnd="@dimen/default_layout_margin"
+                android:layout_marginStart="@dimen/default_layout_margin"
                 android:background="@drawable/edit_text_background"
                 app:layout_constraintTop_toTopOf="@+id/radio_button_make"
                 app:layout_constraintBottom_toBottomOf="@+id/radio_button_make"
-
+                app:layout_constraintStart_toEndOf="@+id/radio_button_make"
                 app:layout_constraintEnd_toStartOf="@+id/text_view_payments">
 
                 <androidx.appcompat.widget.AppCompatEditText
@@ -258,7 +347,7 @@
                 android:layout_margin="@dimen/default_layout_margin"
                 android:textColor="@color/secondaryText"
                 android:text="@string/payments"
-                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/layout_constraint_make_quantity"
                 app:layout_constraintBottom_toBottomOf="@+id/layout_constraint_make_quantity"
                 app:layout_constraintTop_toTopOf="@+id/layout_constraint_make_quantity"
                 />
@@ -270,7 +359,6 @@
                 android:textColor="@color/secondaryText"
                 android:text="@string/pay_until"
                 app:layout_constraintTop_toBottomOf="@+id/radio_button_make"
-                app:layout_constraintEnd_toStartOf="@+id/layout_constraint_pay_until"
                 app:layout_constraintStart_toStartOf="parent"
                 />
 
@@ -279,11 +367,12 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="@dimen/default_layout_margin"
+                android:layout_marginStart="@dimen/default_layout_margin"
                 android:paddingStart="10dp"
                 android:background="@drawable/edit_text_background"
+                app:layout_constraintStart_toEndOf="@+id/radio_button_until"
                 app:layout_constraintBottom_toBottomOf="@+id/radio_button_until"
                 app:layout_constraintTop_toTopOf="@+id/radio_button_until"
-                app:layout_constraintEnd_toEndOf="parent"
                 >
 
                 <androidx.appcompat.widget.AppCompatEditText
@@ -334,17 +423,17 @@
             />
 
         <ProgressBar
+            android:id="@+id/progress_bar_subscription_save"
             android:layout_width="@dimen/default_progress_bar_xy"
             android:layout_height="@dimen/default_progress_bar_xy"
             android:layout_marginLeft="@dimen/default_progress_bar_margin_left"
-            android:id="@+id/progress_bar_contact_save"
             style="?android:attr/progressBarStyle"
             android:indeterminateTint="@android:color/white"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             android:indeterminate="true"
-            android:visibility="gone" />
+            />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

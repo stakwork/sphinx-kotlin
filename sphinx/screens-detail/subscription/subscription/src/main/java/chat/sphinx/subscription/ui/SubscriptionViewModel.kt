@@ -16,6 +16,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
+import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
@@ -36,6 +37,12 @@ internal class SubscriptionViewModel @Inject constructor(
         >(dispatchers, SubscriptionViewState.Idle)
 {
     private val args: SubscriptionFragmentArgs by savedStateHandle.navArgs()
+
+    fun initSubscription() {
+        updateViewState(
+            SubscriptionViewState.Idle
+        )
+    }
 
     fun saveSubscription(
         amount: Sat?,
@@ -63,7 +70,6 @@ internal class SubscriptionViewModel @Inject constructor(
                 return@launch
             }
 
-            // TODO: Can't have both endNumber and EndDate null...
             if (endNumber == null && endDate == null) {
                 submitSideEffect(
                     SubscriptionSideEffect.Notify(
@@ -112,6 +118,84 @@ internal class SubscriptionViewModel @Inject constructor(
                         submitSideEffect(
                             SubscriptionSideEffect.Notify("Saved subscription successfully")
                         )
+                    }
+                }
+            }
+        }
+    }
+
+    fun deleteSubscription() {
+        viewModelScope.launch(mainImmediate) {
+            submitSideEffect(
+                SubscriptionSideEffect.AlertConfirmDeleteSubscription() {
+                    viewModelScope.launch(mainImmediate) {
+                        submitSideEffect(
+                            SubscriptionSideEffect.Notify("Deleting subscription")
+                        )
+                    }
+                }
+            )
+        }
+    }
+
+    fun pauseSubscription() {
+        viewModelScope.launch(mainImmediate) {
+            subscriptionRepository.getSubscriptionByContactId(ContactId(args.argContactId)).firstOrNull().let { subscription ->
+                if (subscription == null) {
+                    submitSideEffect(
+                        SubscriptionSideEffect.Notify("Failed to pause subscription")
+                    )
+                } else {
+                    when (subscriptionRepository.pauseSubscription(subscription.id)) {
+                        is Response.Error -> {
+                            submitSideEffect(
+                                SubscriptionSideEffect.Notify("Failed to pause subscription")
+                            )
+                        }
+                        is Response.Success -> {
+                            submitSideEffect(
+                                SubscriptionSideEffect.Notify("Successfully paused subscription")
+                            )
+                            // TODO: Set subscription to viewState...
+//                            updateViewState(
+//                                SubscriptionViewState.Subscription(
+//
+//                                )
+//                            )
+                        }
+                    }
+                }
+            }
+
+
+        }
+    }
+
+    fun restartSubscription() {
+        viewModelScope.launch(mainImmediate) {
+            subscriptionRepository.getSubscriptionByContactId(ContactId(args.argContactId)).firstOrNull().let { subscription ->
+                if (subscription == null) {
+                    submitSideEffect(
+                        SubscriptionSideEffect.Notify("Failed to restart subscription")
+                    )
+                } else {
+                    when (subscriptionRepository.pauseSubscription(subscription.id)) {
+                        is Response.Error -> {
+                            submitSideEffect(
+                                SubscriptionSideEffect.Notify("Failed to restart subscription")
+                            )
+                        }
+                        is Response.Success -> {
+                            submitSideEffect(
+                                SubscriptionSideEffect.Notify("Successfully restarted subscription")
+                            )
+                            // TODO: Set subscription to viewState
+//                            updateViewState(
+//                                SubscriptionViewState.Subscription(
+//
+//                                )
+//                            )
+                        }
                     }
                 }
             }

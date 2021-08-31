@@ -14,6 +14,7 @@ import chat.sphinx.subscription.databinding.FragmentSubscriptionBinding
 import chat.sphinx.wrapper_common.lightning.Sat
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
+import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.visible
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -33,20 +34,34 @@ internal class SubscriptionFragment: SideEffectFragment<
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.includeSubscriptionHeader.apply {
+
+        binding.apply {
             textViewDetailScreenHeaderName.text = getString(R.string.subscription_header_name)
-            textViewDetailScreenClose.setOnClickListener {
-                lifecycleScope.launch { viewModel.navigator.closeDetailScreen() }
-            }
+
             textViewDetailScreenHeaderNavBack.apply {
                 visible
                 setOnClickListener {
                     lifecycleScope.launch { viewModel.navigator.popBackStack() }
                 }
             }
-        }
 
-        binding.apply {
+            textViewDetailSubscriptionDelete.setOnClickListener {
+                viewModel.deleteSubscription()
+            }
+
+            switchSubscriptionEnablement.setOnClickListener {
+                // Toggle checked status
+                switchSubscriptionEnablement.isChecked = !switchSubscriptionEnablement.isChecked
+
+                if (switchSubscriptionEnablement.isChecked) {
+                    // We are about to pause the subscription ask for confirmation
+                    viewModel.pauseSubscription()
+                } else {
+                    // We should restart the subscription
+                    viewModel.restartSubscription()
+                }
+            }
+
             val calendar = Calendar.getInstance()
 
             editTextPayUntil.setOnClickListener {
@@ -141,10 +156,75 @@ internal class SubscriptionFragment: SideEffectFragment<
             }
             (requireActivity() as InsetterActivity).addNavigationBarPadding(layoutConstraintSubscription)
         }
+
+        viewModel.initSubscription()
     }
 
     override suspend fun onViewStateFlowCollect(viewState: SubscriptionViewState) {
-//        TODO("Not yet implemented")
+        when(viewState) {
+            SubscriptionViewState.Idle -> {
+                // Setup for new subscription
+                binding.apply {
+                    progressBarSubscriptionSave.gone
+                    textViewDetailSubscriptionDelete.gone
+                    layoutConstraintSubscriptionEnablement.gone
+                }
+            }
+            is SubscriptionViewState.SubscriptionLoaded -> {
+                binding.apply {
+                    progressBarSubscriptionSave.gone
+                    textViewDetailSubscriptionDelete.visible
+                    layoutConstraintSubscriptionEnablement.visible
+
+                    switchSubscriptionEnablement.isChecked = !viewState.subscription.ended && !viewState.subscription.paused
+
+                    // Populate Amount
+                    when (viewState.subscription.amount.value) {
+                        500L -> {
+                            radioButton500Sats.isChecked = true
+                        }
+                        1000L -> {
+                            radioButton1000Sats.isChecked = true
+                        }
+                        2000L -> {
+                            radioButton2000Sats.isChecked = true
+                        }
+                        else -> {
+                            radioButtonCustomAmount.isChecked = true
+                            editTextCustomAmount.setText(viewState.subscription.amount.toString())
+                        }
+                    }
+
+                    // Populate Time Interval
+                    when  {
+                        viewState.subscription.cron.value.startsWith("* * *") -> {
+                            // Daily...
+                            radioButtonDaily.isChecked = true
+                        }
+                        viewState.subscription.cron.value.startsWith("* *") -> {
+                            // Monthly
+                            radioButtonMonthly.isChecked = true
+                        }
+                        else -> {
+                            // Weekly
+                            radioButtonWeekly.isChecked = true
+                        }
+                    }
+
+                    // Populate End Rule
+                    when {
+                        viewState.subscription.end_number != null -> {
+                            radioButtonMake.isChecked = true
+                            editTextMakeQuantity.setText(viewState.subscription.end_number?.value.toString())
+                        }
+                        viewState.subscription.end_date != null -> {
+                            radioButtonUntil.isChecked = true
+                            editTextPayUntil.setText(viewState.subscription.end_date.toString())
+                        }
+                    }
+                }
+            }
+        }
     }
 
     override suspend fun onSideEffectCollect(sideEffect: SubscriptionSideEffect) {
