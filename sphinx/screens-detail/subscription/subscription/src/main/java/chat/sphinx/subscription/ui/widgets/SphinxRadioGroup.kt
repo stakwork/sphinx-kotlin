@@ -10,7 +10,6 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.CompoundButton
 import android.widget.EditText
 import android.widget.RadioButton
-import android.widget.RadioGroup
 import androidx.annotation.IdRes
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
@@ -118,7 +117,6 @@ class SphinxRadioGroup @JvmOverloads constructor(
     }
 
     private fun setCheckedId(@IdRes id: Int) {
-        val changed = id != checkedRadioButtonId
         checkedRadioButtonId = id
         if (mOnCheckedChangeListener != null) {
             mOnCheckedChangeListener!!.onCheckedChanged(this, checkedRadioButtonId)
@@ -157,7 +155,7 @@ class SphinxRadioGroup @JvmOverloads constructor(
     }
 
     override fun getAccessibilityClassName(): CharSequence {
-        return RadioGroup::class.java.name
+        return this::class.java.name
     }
 
     /**

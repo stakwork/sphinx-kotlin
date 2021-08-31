@@ -11,8 +11,8 @@ import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.subscription.R
 import chat.sphinx.subscription.databinding.FragmentSubscriptionBinding
+import chat.sphinx.wrapper_common.lightning.Sat
 import dagger.hilt.android.AndroidEntryPoint
-import io.matthewnelson.android_feature_screens.ui.base.BaseFragment
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.visible
 import kotlinx.coroutines.launch
@@ -86,18 +86,20 @@ internal class SubscriptionFragment: SideEffectFragment<
 
             buttonSave.setOnClickListener {
 
-                val amount: Int? = when (radioGroupAmount.checkedRadioButtonId) {
+                val amount: Sat? = when (radioGroupAmount.checkedRadioButtonId) {
                     R.id.radio_button_500_sats -> {
-                        500
+                        Sat(500)
                     }
                     R.id.radio_button_1000_sats -> {
-                        1000
+                        Sat(1000)
                     }
                     R.id.radio_button_2000_sats -> {
-                        2000
+                        Sat(2000)
                     }
                     R.id.radio_button_custom_amount -> {
-                        editTextCustomAmount.text?.toString()?.toIntOrNull()
+                        editTextCustomAmount.text?.toString()?.toLongOrNull()?.let {
+                            Sat(it)
+                        }
                     }
                     else -> null
                 }
@@ -115,10 +117,13 @@ internal class SubscriptionFragment: SideEffectFragment<
                     else -> null
                 }
 
+                var endNumber: Long? = null
                 val endDate: Date? = when (radioGroupEndRule.checkedRadioButtonId) {
                     R.id.radio_button_make -> {
-                        // TODO: Calculate depending on the timeInterval
-                        Calendar.getInstance().time
+                        editTextMakeQuantity.text?.toString()?.let {
+                            endNumber = it.toLongOrNull()
+                        }
+                        null
                     }
                     R.id.radio_button_until -> {
                         // TODO: Load editTextPayUntil.text into date
@@ -130,7 +135,8 @@ internal class SubscriptionFragment: SideEffectFragment<
                 viewModel.saveSubscription(
                     amount,
                     cron,
-                    endDate
+                    endDate,
+                    endNumber
                 )
             }
             (requireActivity() as InsetterActivity).addNavigationBarPadding(layoutConstraintSubscription)

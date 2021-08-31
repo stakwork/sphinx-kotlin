@@ -50,6 +50,7 @@ include ':sphinx:application:data:concepts:repositories:concept-repository-dashb
 include ':sphinx:application:data:concepts:repositories:concept-repository-lightning'
 include ':sphinx:application:data:concepts:repositories:concept-repository-media'
 include ':sphinx:application:data:concepts:repositories:concept-repository-message'
+include ':sphinx:application:data:concepts:repositories:concept-repository-subscription'
 include ':sphinx:application:data:features:feature-repository'
 include ':sphinx:application:data:features:feature-repository-android'
 

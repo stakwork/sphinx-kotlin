@@ -1,8 +1,8 @@
 package chat.sphinx.concept_network_query_subscription
 
 import chat.sphinx.concept_network_query_subscription.model.SubscriptionDto
-import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.kotlin_response.LoadResponse
+import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.subscription.SubscriptionId
 import chat.sphinx.wrapper_relay.AuthorizationToken
@@ -34,14 +34,35 @@ abstract class NetworkQuerySubscription {
 //    app.put('/subscription/:id', subcriptions.editSubscription)
 //    app.put('/subscription/:id/pause', subcriptions.pauseSubscription)
 //    app.put('/subscription/:id/restart', subcriptions.restartSubscription)
+    abstract fun putSubscription(
+        subscriptionId: SubscriptionId,
+        relayData: Pair<AuthorizationToken, RelayUrl>? = null
+    ): Flow<LoadResponse<SubscriptionDto, ResponseError>>
+
+    abstract fun putPauseSubscription(
+        subscriptionId: SubscriptionId,
+        relayData: Pair<AuthorizationToken, RelayUrl>? = null
+    ): Flow<LoadResponse<SubscriptionDto, ResponseError>>
+
+    abstract fun putRestartSubscription(
+        subscriptionId: SubscriptionId,
+        relayData: Pair<AuthorizationToken, RelayUrl>? = null
+    ): Flow<LoadResponse<SubscriptionDto, ResponseError>>
 
     ////////////
     /// POST ///
     ////////////
 //    app.post('/subscriptions', subcriptions.createSubscription)
+    abstract fun postSubscription(
+        subscriptionDto: SubscriptionDto,
+        relayData: Pair<AuthorizationToken, RelayUrl>? = null
+    ): Flow<LoadResponse<SubscriptionDto, ResponseError>>
 
     //////////////
     /// DELETE ///
     //////////////
-//    app.delete('/subscription/:id', subcriptions.deleteSubscription)
+    abstract fun deleteSubscription(
+        subscriptionId: SubscriptionId,
+        relayData: Pair<AuthorizationToken, RelayUrl>? = null
+    ): Flow<LoadResponse<Any, ResponseError>>
 }

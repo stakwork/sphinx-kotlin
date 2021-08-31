@@ -32,6 +32,7 @@ import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.concept_repository_message.model.AttachmentInfo
 import chat.sphinx.concept_repository_message.model.SendMessage
 import chat.sphinx.concept_repository_message.model.SendPayment
+import chat.sphinx.concept_repository_subscription.SubscriptionRepository
 import chat.sphinx.concept_socket_io.SocketIOManager
 import chat.sphinx.concept_socket_io.SphinxSocketIOMessage
 import chat.sphinx.concept_socket_io.SphinxSocketIOMessageListener
@@ -41,6 +42,7 @@ import chat.sphinx.feature_repository.mappers.contact.ContactDboPresenterMapper
 import chat.sphinx.feature_repository.mappers.invite.InviteDboPresenterMapper
 import chat.sphinx.feature_repository.mappers.mapListFrom
 import chat.sphinx.feature_repository.mappers.message.MessageDboPresenterMapper
+import chat.sphinx.feature_repository.mappers.subscription.SubscriptionDboPresenterMapper
 import chat.sphinx.feature_repository.model.MessageDboWrapper
 import chat.sphinx.feature_repository.model.MessageMediaDboWrapper
 import chat.sphinx.feature_repository.util.*
@@ -59,6 +61,8 @@ import chat.sphinx.wrapper_common.dashboard.toChatId
 import chat.sphinx.wrapper_common.invite.InviteStatus
 import chat.sphinx.wrapper_common.lightning.*
 import chat.sphinx.wrapper_common.message.*
+import chat.sphinx.wrapper_common.subscription.EndNumber
+import chat.sphinx.wrapper_common.subscription.SubscriptionId
 import chat.sphinx.wrapper_contact.*
 import chat.sphinx.wrapper_invite.Invite
 import chat.sphinx.wrapper_io_utils.InputStreamProvider
@@ -74,6 +78,7 @@ import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
 import chat.sphinx.wrapper_rsa.RsaPrivateKey
 import chat.sphinx.wrapper_rsa.RsaPublicKey
+import chat.sphinx.wrapper_subscription.Subscription
 import com.squareup.moshi.Moshi
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
@@ -116,6 +121,7 @@ abstract class SphinxRepository(
     ContactRepository,
     LightningRepository,
     MessageRepository,
+    SubscriptionRepository,
     RepositoryDashboard,
     RepositoryMedia,
     CoroutineDispatchers by dispatchers,
@@ -3547,6 +3553,70 @@ abstract class SphinxRepository(
                 }
             }
         }.join()
+
+        return response
+    }
+
+    /***
+     * Subscriptions
+     */
+
+    private val subscriptionLock = Mutex()
+    private val subscriptionDboPresenterMapper: SubscriptionDboPresenterMapper by lazy {
+        SubscriptionDboPresenterMapper(dispatchers)
+    }
+
+    override suspend fun getSubscriptionByContactId(contactId: ContactId): Flow<Subscription?> = flow {
+        emitAll(
+            coreDB.getSphinxDatabaseQueries().subscriptionGetByContactId(contactId)
+                .asFlow()
+                .mapToOneOrNull(io)
+                .map { it?.let { subscriptionDboPresenterMapper.mapFrom(it) } }
+                .distinctUntilChanged()
+        )
+    }
+
+    override suspend fun createSubscription(
+        amount: Sat,
+        interval: String,
+        contactId: ContactId,
+        chatId: ChatId?,
+        endDate: String?,
+        endNumber: EndNumber?
+    ): Response<Subscription, ResponseError> {
+        var response: Response<Subscription, ResponseError>  = Response.Error(ResponseError(("Failed to create subscription")))
+
+        return response
+    }
+
+    override suspend fun updateSubscription(
+        subscription: Subscription
+    ): Response<Subscription, ResponseError> {
+        var response: Response<Subscription, ResponseError>  = Response.Error(ResponseError(("Failed to update subsccription")))
+
+        return response
+    }
+
+    override suspend fun restartSubscription(
+        subscriptionId: SubscriptionId
+    ): Response<Subscription, ResponseError> {
+        var response: Response<Subscription, ResponseError>  = Response.Error(ResponseError(("Failed to restart subscription")))
+
+        return response
+    }
+
+    override suspend fun pauseSubscription(
+        subscriptionId: SubscriptionId
+    ): Response<Subscription, ResponseError> {
+        var response: Response<Subscription, ResponseError>  = Response.Error(ResponseError(("Failed to pause subscription")))
+
+        return response
+    }
+
+    override suspend fun deleteSubscription(
+        subscriptionId: SubscriptionId
+    ): Response<Any, ResponseError> {
+        var response: Response<Any, ResponseError>  = Response.Error(ResponseError(("Failed to delete subscription")))
 
         return response
     }
