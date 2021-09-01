@@ -15,7 +15,7 @@
     <string name="payments">Payments</string>
     <string name="pay_until">Pay until</string>
     <string name="delete_subscription">Delete subscription</string>
-    <string name="are_you_sure_you_want_to_delete_subscription">Are you sure you want to delete this subscription</string>
+    <string name="are_you_sure_you_want_to_delete_subscription">Are you sure you want to delete this subscription?</string>
     <string name="amount_is_required">Amount is required</string>
     <string name="time_interval_is_required">Time Interval is required</string>
     <string name="please_set_either_the_number_of_payments_to_make_or_end_date">Please set either the number of payments to make or end date</string>
