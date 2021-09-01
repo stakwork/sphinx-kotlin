@@ -1127,7 +1127,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         drawable: Drawable?
     ) {
         viewModelScope.launch(mainImmediate) {
-            if (message.isMediaAttachment) {
+            if (message.isMediaAttachmentAvailable) {
                 message.retrieveImageUrlAndMessageMedia()?.let { mediaUrlAndMessageMedia ->
                     mediaUrlAndMessageMedia.second?.let { messageMedia ->
                         val mediaContentValues = messageMedia.retrieveContentValues(message)

@@ -292,7 +292,7 @@ internal sealed class MessageHolderViewState(
                 list.add(MenuItemState.Boost)
             }
 
-            if (message.isMediaAttachment) {
+            if (message.isMediaAttachmentAvailable) {
                 list.add(MenuItemState.SaveFile)
             }
 
