@@ -39,7 +39,6 @@ dependencies {
     implementation project(path: ':sphinx:application:common:wrappers:wrapper-common')
     implementation project(path: ':sphinx:screens-detail:common:detail-resources')
     implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-subscription')
-    implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-contact')
 
     implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt
