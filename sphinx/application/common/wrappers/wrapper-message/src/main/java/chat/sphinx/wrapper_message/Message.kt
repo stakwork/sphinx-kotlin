@@ -51,7 +51,13 @@ inline fun Message.retrieveImageUrlAndMessageMedia(): Pair<String, MessageMedia?
         if (media.mediaType.isImage) {
 
             val purchaseAcceptItem: Message? = if (isPaidMessage) {
-                retrievePurchaseAcceptItem()
+                val item = retrievePurchaseItemOfType(MessageType.Purchase.Accepted)
+
+                if (item?.messageMedia?.mediaKey?.value.isNullOrEmpty()) {
+                    null
+                } else {
+                    item
+                }
             } else {
                 null
             }
@@ -80,11 +86,11 @@ inline fun Message.retrieveImageUrlAndMessageMedia(): Pair<String, MessageMedia?
 }
 
 @Suppress("NOTHING_TO_INLINE")
-inline fun Message.retrievePurchaseAcceptItem(): Message? {
+inline fun Message.retrievePurchaseItemOfType(purchaseType: MessageType.Purchase): Message? {
     purchaseItems?.let { nnPurchaseItems ->
         if (nnPurchaseItems.isNotEmpty()) {
             for (item in nnPurchaseItems) {
-                if (item.type.isPurchaseAccepted()) {
+                if (item.type == purchaseType) {
                     return item
                 }
             }
@@ -107,7 +113,7 @@ inline fun Message.retrievePurchaseStatus(): PurchaseStatus? {
     purchaseItems?.let { nnPurchaseItems ->
         if (nnPurchaseItems.isNotEmpty()) {
             for (item in nnPurchaseItems) {
-                if (item.type.isPurchase()) {
+                if (item.type.isPurchaseProcessing()) {
                     purchaseItem = item
                 }
 
