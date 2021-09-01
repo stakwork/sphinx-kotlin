@@ -95,7 +95,10 @@
     <string name="attachment_send_header_video">傳送影片</string>
     <string name="attachment_send_header_giphy">傳送 GIPHY</string>
 
+    <!-- Pay Attachment -->
     <string name="attachment_price_label">費: </string>
+    <string name="alert_confirm_pay_attachment_title">Confirm Purchase</string>
+    <string name="alert_confirm_pay_attachment_message">Are you sure you want to purchase this item?</string>
 
     <!-- Save Attachment -->
     <string name="saved_attachment_successfully">成功保存附件</string>

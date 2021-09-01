@@ -95,7 +95,10 @@
     <string name="attachment_send_header_video">SEND VIDEO</string>
     <string name="attachment_send_header_giphy">SEND GIPHY</string>
 
+    <!-- Pay Attachment -->
     <string name="attachment_price_label">Price: </string>
+    <string name="alert_confirm_pay_attachment_title">Confirm Purchase</string>
+    <string name="alert_confirm_pay_attachment_message">Are you sure you want to purchase this item?</string>
 
     <!-- Save Attachment -->
     <string name="saved_attachment_successfully">Saved attachment successfully</string>

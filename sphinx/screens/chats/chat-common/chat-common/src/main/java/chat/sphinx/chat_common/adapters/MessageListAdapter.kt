@@ -352,13 +352,7 @@ internal class MessageListAdapter<ARGS : NavArgs>(
 
         private fun payAttachment(message: Message, viewState: MessageHolderViewState) {
             onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-
-                binding.setBubblePaidMessageReceivedDetailsProcessingLayout(viewState)
-
-                if (!viewModel.payAttachment(message)) {
-                    binding.setBubblePaidMessageReceivedDetailsFailedLayout(viewState)
-                }
-
+                viewModel.payAttachment(message)
             }.let { job ->
                 holderJobs.add(job)
             }

@@ -1195,22 +1195,24 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         }
     }
 
+    private var payAttachmentJob: Job? = null
+    suspend fun payAttachment(message: Message) {
+        if (payAttachmentJob?.isActive == true) {
+            return
+        }
 
-    suspend fun payAttachment(message: Message): Boolean {
-        var success = true
-
-        viewModelScope.launch(mainImmediate) {
-            when (val response = messageRepository.payAttachment(message)) {
-                is Response.Error -> {
-                    success = false
-                    
-                    submitSideEffect(ChatSideEffect.Notify(response.cause.message))
+        payAttachmentJob = viewModelScope.launch(mainImmediate) {
+            submitSideEffect(ChatSideEffect.AlertConfirmPayAttachment {
+                viewModelScope.launch(mainImmediate) {
+                    when (val response = messageRepository.payAttachment(message)) {
+                        is Response.Error -> {
+                            submitSideEffect(ChatSideEffect.Notify(response.cause.message))
+                        }
+                        is Response.Success -> {}
+                    }
                 }
-                is Response.Success -> {}
-            }
-        }.join()
-
-        return success
+            })
+        }
     }
 }
 
