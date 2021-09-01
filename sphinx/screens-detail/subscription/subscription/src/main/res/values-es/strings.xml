@@ -27,6 +27,6 @@
     <string name="failed_to_restart_subscription">No se pudo reiniciar la suscripción</string>
     <string name="successfully_restarted_subscription">Suscripción reiniciada correctamente</string>
     <string name="subscribe">Suscribir</string>
-    <string name="update_subscription">Actualizar suscripción</string>
+    <string name="update_subscription">Actualizar</string>
     <string name="failed_to_delete_subscription">No se pudo borrar la suscripción</string>
 </resources>

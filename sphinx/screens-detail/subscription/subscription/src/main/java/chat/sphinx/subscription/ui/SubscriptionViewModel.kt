@@ -93,6 +93,8 @@ internal class SubscriptionViewModel @Inject constructor(
                 return@launch
             }
 
+            updateViewState(SubscriptionViewState.SavingSubscription)
+
             subscriptionRepository.getActiveSubscriptionByContactId(
                 ContactId(args.argContactId)
             ).firstOrNull().let { subscription ->
@@ -122,11 +124,10 @@ internal class SubscriptionViewModel @Inject constructor(
                         submitSideEffect(
                             SubscriptionSideEffect.Notify(app.getString(R.string.failed_to_save_subscription))
                         )
+                        updateViewState(SubscriptionViewState.SavingSubscriptionFailed)
                     }
                     is Response.Success -> {
-                        updateViewState(
-                            SubscriptionViewState.CloseSubscriptionDetail
-                        )
+                        navigator.popBackStack()
                     }
                 }
             }
@@ -140,9 +141,7 @@ internal class SubscriptionViewModel @Inject constructor(
                     viewModelScope.launch(mainImmediate) {
                         subscriptionRepository.getActiveSubscriptionByContactId(ContactId(args.argContactId)).firstOrNull().let { subscription ->
                             if (subscription == null) {
-                                updateViewState(
-                                    SubscriptionViewState.CloseSubscriptionDetail
-                                )
+                                navigator.popBackStack()
                             } else {
                                 when(subscriptionRepository.deleteSubscription(subscription.id)) {
                                     is Response.Error -> {
@@ -151,9 +150,7 @@ internal class SubscriptionViewModel @Inject constructor(
                                         )
                                     }
                                     is Response.Success -> {
-                                        updateViewState(
-                                            SubscriptionViewState.CloseSubscriptionDetail
-                                        )
+                                        navigator.popBackStack()
                                     }
                                 }
                             }

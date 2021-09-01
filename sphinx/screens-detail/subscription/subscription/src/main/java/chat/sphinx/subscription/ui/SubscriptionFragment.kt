@@ -174,11 +174,6 @@ internal class SubscriptionFragment: SideEffectFragment<
                     buttonSave.text = getString(R.string.subscribe)
                 }
             }
-            is SubscriptionViewState.CloseSubscriptionDetail -> {
-                lifecycleScope.launch {
-                    viewModel.navigator.closeDetailScreen()
-                }
-            }
             is SubscriptionViewState.SubscriptionLoaded -> {
                 binding.apply {
                     progressBarSubscriptionSave.gone
@@ -246,6 +241,12 @@ internal class SubscriptionFragment: SideEffectFragment<
                         }
                     }
                 }
+            }
+            is SubscriptionViewState.SavingSubscription -> {
+                binding.progressBarSubscriptionSave.visible
+            }
+            is SubscriptionViewState.SavingSubscriptionFailed -> {
+                binding.progressBarSubscriptionSave.gone
             }
         }
     }
