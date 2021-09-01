@@ -6,6 +6,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_repository_contact.ContactRepository
+import chat.sphinx.concept_repository_subscription.SubscriptionRepository
 import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
 import chat.sphinx.contact.ui.ContactSideEffect
 import chat.sphinx.contact.ui.ContactViewModel
@@ -35,12 +36,14 @@ internal class EditContactViewModel @Inject constructor(
     app: Application,
     scannerCoordinator: ViewModelCoordinator<ScannerRequest, ScannerResponse>,
     contactRepository: ContactRepository,
+    subscriptionRepository: SubscriptionRepository,
     imageLoader: ImageLoader<ImageView>,
 ): ContactViewModel<EditContactFragmentArgs>(
     editContactNavigator,
     dispatchers,
     app,
     contactRepository,
+    subscriptionRepository,
     scannerCoordinator,
     imageLoader
 )
@@ -57,13 +60,19 @@ internal class EditContactViewModel @Inject constructor(
             contactRepository.getContactById(contactId).firstOrNull().let { contact ->
                 if (contact != null) {
                     contact.nodePubKey?.let { lightningNodePubKey ->
+
+                        val subscription = subscriptionRepository.getActiveSubscriptionByContactId(
+                            contactId
+                        ).firstOrNull()
+
                         submitSideEffect(
                             ContactSideEffect.ExistingContact(
                                 contact.alias?.value,
                                 contact.photoUrl,
                                 contact.getColorKey(),
                                 lightningNodePubKey,
-                                contact.routeHint
+                                contact.routeHint,
+                                subscription != null
                             )
                         )
                     }

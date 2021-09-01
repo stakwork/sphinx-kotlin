@@ -35,6 +35,7 @@ dependencies {
     api project(path: ':sphinx:activity:insetter-activity')
     api project(path: ':sphinx:application:data:concepts:concept-image-loader')
     api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-contact')
+    api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-subscription')
     api project(path: ':sphinx:screens-detail:common:detail-resources')
     api project(path: ':sphinx:application:common:resources')
     api project(path: ':sphinx:screens-detail:scanner:scanner-view-model-coordinator')

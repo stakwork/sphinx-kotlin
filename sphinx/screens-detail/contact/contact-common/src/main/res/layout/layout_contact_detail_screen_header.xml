@@ -20,22 +20,6 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/text_view_detail_screen_subscribe"
-        android:layout_width="wrap_content"
-        android:layout_height="50dp"
-        android:fontFamily="@font/roboto_regular"
-        android:gravity="center"
-        android:text="subscribe"
-        android:textColor="@color/primaryText"
-        android:textSize="14dp"
-        android:background="@drawable/button_background_white_rad_48"
-        android:backgroundTint="@color/primaryBlue"
-        android:paddingHorizontal="20dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/text_view_detail_screen_header_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -47,8 +31,8 @@
         android:textColor="@color/primaryText"
         android:textSize="@dimen/default_header_text_size"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/text_view_detail_screen_subscribe"
-        app:layout_constraintStart_toEndOf="@+id/text_view_detail_screen_header_nav_back"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="DETAIL SCREEN" />
 
@@ -64,5 +48,23 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/text_view_detail_screen_subscribe"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/edit_contact_header_subscribe_button_height"
+        android:fontFamily="@font/roboto_regular"
+        android:gravity="center"
+        android:textColor="@color/primaryText"
+        android:textSize="@dimen/edit_contact_header_subscribe_button_text_size"
+        android:background="@drawable/button_background_white_rad_48"
+        android:backgroundTint="@color/primaryBlue"
+        android:paddingHorizontal="@dimen/default_layout_margin"
+        android:layout_marginStart="@dimen/default_half_layout_margin"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:text="@string/edit_contact_header_subscribe_button"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

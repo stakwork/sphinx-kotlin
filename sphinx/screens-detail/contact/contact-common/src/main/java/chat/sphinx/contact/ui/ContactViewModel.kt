@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavArgs
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_repository_contact.ContactRepository
+import chat.sphinx.concept_repository_subscription.SubscriptionRepository
 import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
 import chat.sphinx.contact.R
 import chat.sphinx.contact.navigation.ContactNavigator
@@ -20,6 +21,7 @@ import chat.sphinx.wrapper_contact.ContactAlias
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
+import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
@@ -28,6 +30,7 @@ abstract class ContactViewModel<ARGS: NavArgs> (
     dispatchers: CoroutineDispatchers,
     private val app: Application,
     protected val contactRepository: ContactRepository,
+    protected val subscriptionRepository: SubscriptionRepository,
     protected val scannerCoordinator: ViewModelCoordinator<ScannerRequest, ScannerResponse>,
     val imageLoader: ImageLoader<ImageView>
 ): SideEffectViewModel<
@@ -119,14 +122,6 @@ abstract class ContactViewModel<ARGS: NavArgs> (
         lightningNodePubKey: LightningNodePubKey,
         lightningRouteHint: LightningRouteHint?
     )
-
-    fun isFromAddFriend(): Boolean {
-        return fromAddFriend
-    }
-
-    fun isExistingContact(): Boolean {
-        return contactId != null
-    }
 
     fun toQrCodeLightningNodePubKey(nodePubKey: String) {
         viewModelScope.launch(mainImmediate) {
