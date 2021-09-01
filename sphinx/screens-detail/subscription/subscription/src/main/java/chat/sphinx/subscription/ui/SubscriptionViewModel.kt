@@ -4,7 +4,6 @@ import android.app.Application
 import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_subscription.SubscriptionRepository
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.subscription.R
@@ -30,7 +29,6 @@ internal class SubscriptionViewModel @Inject constructor(
     val app: Application,
     dispatchers: CoroutineDispatchers,
     savedStateHandle: SavedStateHandle,
-    private val contactRepository: ContactRepository,
     private val subscriptionRepository: SubscriptionRepository,
     val navigator: SubscriptionNavigator
 ): SideEffectViewModel<
@@ -104,7 +102,7 @@ internal class SubscriptionViewModel @Inject constructor(
                         interval = interval,
                         contactId = ContactId(args.argContactId),
                         chatId = null,
-                        endDate = endDate?.let { DateTime.getFormatMMMddyyyy().format(it) },
+                        endDate = endDate?.let { DateTime.getFormatMMMddyyyy().format(it.value) },
                         endNumber = endNumber?.let { EndNumber(it) }
                     )
                 } else {
