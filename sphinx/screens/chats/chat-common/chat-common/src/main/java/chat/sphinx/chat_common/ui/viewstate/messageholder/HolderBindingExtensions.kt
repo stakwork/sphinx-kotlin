@@ -877,23 +877,16 @@ internal inline fun LayoutMessageHolderBinding.setBubblePaidMessageReceivedDetai
             root.backgroundTintList = ContextCompat.getColorStateList(root.context, backgroundTintResId)
 
             textViewPaymentStatusIcon.text = statusIcon
-            textViewPaymentStatusIcon.goneIfFalse(
-                paidDetails.purchaseStatus.isPurchaseAccepted() ||
-                        paidDetails.purchaseStatus.isPurchaseDenied()
-            )
+            textViewPaymentStatusIcon.goneIfFalse(paidDetails.showStatusIcon)
 
-            progressBarPaidMessage.goneIfFalse(paidDetails.purchaseStatus.isPurchaseProcessing())
+            progressBarPaidMessage.goneIfFalse(paidDetails.showProcessingProgressBar)
 
-            textViewPaidMessageStatusLabel.goneIfFalse(
-                paidDetails.purchaseStatus.isPurchaseProcessing() ||
-                        paidDetails.purchaseStatus.isPurchaseAccepted() ||
-                        paidDetails.purchaseStatus.isPurchaseDenied()
-            )
+            textViewPaidMessageStatusLabel.goneIfFalse(paidDetails.showStatusLabel)
             textViewPaidMessageStatusLabel.text = statusText
 
-            buttonPayAttachment.goneIfFalse(paidDetails.purchaseStatus.isPurchasePending())
-            textViewPayMessageLabel.goneIfFalse(paidDetails.purchaseStatus.isPurchasePending())
-            imageViewPayMessageIcon.goneIfFalse(paidDetails.purchaseStatus.isPurchasePending())
+            buttonPayAttachment.goneIfFalse(paidDetails.showPayElements)
+            textViewPayMessageLabel.goneIfFalse(paidDetails.showPayElements)
+            imageViewPayMessageIcon.goneIfFalse(paidDetails.showPayElements)
 
             textViewPaidMessageAmountToPayLabel.text = paidDetails.amountText
         }

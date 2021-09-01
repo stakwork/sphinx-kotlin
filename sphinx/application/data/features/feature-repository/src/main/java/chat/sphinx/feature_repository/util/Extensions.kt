@@ -359,22 +359,6 @@ fun TransactionCallbacks.upsertMessage(dto: MessageDto, queries: SphinxDatabaseQ
         dto.messageContentDecrypted?.toMessageContentDecrypted(),
         dto.media_token?.toMediaToken()?.getMUIDFromMediaToken()?.value?.toMessageMUID()
     )
-
-    dto.media_token?.let { mediaToken ->
-
-        if (mediaToken.isEmpty()) return
-
-        queries.messageMediaUpsert(
-            (dto.media_key ?: "").toMediaKey(),
-            (dto.media_type ?: "").toMediaType(),
-            MediaToken(mediaToken),
-            MessageId(dto.id),
-            chatId,
-            dto.mediaKeyDecrypted?.toMediaKeyDecrypted(),
-            dto.mediaLocalFile
-        )
-
-    }
 }
 
 @Suppress("NOTHING_TO_INLINE")

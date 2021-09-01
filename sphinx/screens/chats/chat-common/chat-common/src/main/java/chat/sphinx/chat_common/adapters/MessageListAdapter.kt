@@ -211,7 +211,7 @@ internal class MessageListAdapter<ARGS : NavArgs>(
         private val binding: LayoutMessageHolderBinding
     ): RecyclerView.ViewHolder(binding.root) {
 
-        private val holderJobs: ArrayList<Job> = ArrayList(11)
+        private val holderJobs: ArrayList<Job> = ArrayList(10)
         private val disposables: ArrayList<Disposable> = ArrayList(4)
         private var currentViewState: MessageHolderViewState? = null
 
@@ -303,9 +303,9 @@ internal class MessageListAdapter<ARGS : NavArgs>(
 
                 includePaidMessageReceivedDetailsHolder.apply {
                     buttonPayAttachment.setOnClickListener {
-                        currentViewState?.let { viewState ->
-                            viewState.message?.let { message ->
-                                payAttachment(message, viewState)
+                        currentViewState?.message?.let { message ->
+                            onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                                viewModel.payAttachment(message)
                             }
                         }
                     }
@@ -347,14 +347,6 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                         deleteTribe()
                     }
                 }
-            }
-        }
-
-        private fun payAttachment(message: Message, viewState: MessageHolderViewState) {
-            onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-                viewModel.payAttachment(message)
-            }.let { job ->
-                holderJobs.add(job)
             }
         }
 

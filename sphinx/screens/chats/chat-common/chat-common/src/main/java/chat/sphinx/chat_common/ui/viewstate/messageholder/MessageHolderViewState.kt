@@ -135,7 +135,14 @@ internal sealed class MessageHolderViewState(
             message.retrievePurchaseStatus()?.let { purchaseStatus ->
                 LayoutState.Bubble.ContainerFourth.PaidMessageReceivedDetails(
                     amount = message.messageMedia?.price ?: Sat(0),
-                    purchaseStatus = purchaseStatus
+                    purchaseStatus = purchaseStatus,
+                    showStatusIcon = purchaseStatus.isPurchaseAccepted() ||
+                            purchaseStatus.isPurchaseDenied(),
+                    showProcessingProgressBar = purchaseStatus.isPurchaseProcessing(),
+                    showStatusLabel = purchaseStatus.isPurchaseProcessing() ||
+                            purchaseStatus.isPurchaseAccepted() ||
+                            purchaseStatus.isPurchaseDenied(),
+                    showPayElements = purchaseStatus.isPurchasePending()
                 )
             }
         }

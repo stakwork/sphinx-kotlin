@@ -1201,8 +1201,8 @@ abstract class ChatViewModel<ARGS: NavArgs>(
             return
         }
 
-        payAttachmentJob = viewModelScope.launch(mainImmediate) {
-            submitSideEffect(ChatSideEffect.AlertConfirmPayAttachment {
+        submitSideEffect(ChatSideEffect.AlertConfirmPayAttachment {
+            payAttachmentJob = viewModelScope.launch(mainImmediate) {
                 viewModelScope.launch(mainImmediate) {
                     when (val response = messageRepository.payAttachment(message)) {
                         is Response.Error -> {
@@ -1211,8 +1211,8 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                         is Response.Success -> {}
                     }
                 }
-            })
-        }
+            }
+        })
     }
 }
 
