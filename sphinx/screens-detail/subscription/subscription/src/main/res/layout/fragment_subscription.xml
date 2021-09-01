@@ -169,6 +169,8 @@
                         android:textColor="@color/secondaryText"
                         android:layout_width="match_parent"
                         android:layout_height="@dimen/subscription_form_field_height"
+                        android:paddingStart="@dimen/default_half_layout_margin"
+                        style="@style/CustomRadioButtonStyle"
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintStart_toStartOf="parent" />
 
@@ -178,6 +180,8 @@
                         android:textColor="@color/secondaryText"
                         android:layout_width="match_parent"
                         android:layout_height="@dimen/subscription_form_field_height"
+                        android:paddingStart="@dimen/default_half_layout_margin"
+                        style="@style/CustomRadioButtonStyle"
                         app:layout_constraintTop_toBottomOf="@+id/radio_button_500_sats"
                         app:layout_constraintStart_toStartOf="parent" />
 
@@ -187,6 +191,8 @@
                         android:textColor="@color/secondaryText"
                         android:layout_width="match_parent"
                         android:layout_height="@dimen/subscription_form_field_height"
+                        android:paddingStart="@dimen/default_half_layout_margin"
+                        style="@style/CustomRadioButtonStyle"
                         app:layout_constraintTop_toBottomOf="@+id/radio_button_1000_sats"
                         app:layout_constraintStart_toStartOf="parent" />
 
@@ -196,6 +202,8 @@
                         android:textColor="@color/secondaryText"
                         android:layout_width="wrap_content"
                         android:layout_height="@dimen/subscription_form_field_height"
+                        android:paddingStart="@dimen/default_half_layout_margin"
+                        style="@style/CustomRadioButtonStyle"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@+id/radio_button_2000_sats" />
 
@@ -284,6 +292,8 @@
                         android:layout_height="@dimen/subscription_form_field_height"
                         android:textColor="@color/secondaryText"
                         android:text="@string/daily"
+                        android:paddingStart="@dimen/default_half_layout_margin"
+                        style="@style/CustomRadioButtonStyle"
                         app:layout_constraintTop_toTopOf="parent" />
 
                     <RadioButton
@@ -292,6 +302,8 @@
                         android:layout_height="@dimen/subscription_form_field_height"
                         android:textColor="@color/secondaryText"
                         android:text="@string/weekly"
+                        android:paddingStart="@dimen/default_half_layout_margin"
+                        style="@style/CustomRadioButtonStyle"
                         app:layout_constraintTop_toBottomOf="@+id/radio_button_daily" />
 
                     <RadioButton
@@ -300,6 +312,8 @@
                         android:layout_height="@dimen/subscription_form_field_height"
                         android:textColor="@color/secondaryText"
                         android:text="@string/monthly"
+                        android:paddingStart="@dimen/default_half_layout_margin"
+                        style="@style/CustomRadioButtonStyle"
                         app:layout_constraintTop_toBottomOf="@+id/radio_button_weekly" />
 
                 </chat.sphinx.subscription.ui.widgets.SphinxRadioGroup>
@@ -361,6 +375,8 @@
                         android:layout_height="@dimen/subscription_form_big_field_height"
                         android:textColor="@color/secondaryText"
                         android:text="@string/make"
+                        android:paddingStart="@dimen/default_half_layout_margin"
+                        style="@style/CustomRadioButtonStyle"
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintStart_toStartOf="parent"/>
 
@@ -409,6 +425,8 @@
                         android:layout_height="@dimen/subscription_form_big_field_height"
                         android:textColor="@color/secondaryText"
                         android:text="@string/pay_until"
+                        android:paddingStart="@dimen/default_half_layout_margin"
+                        style="@style/CustomRadioButtonStyle"
                         app:layout_constraintTop_toBottomOf="@+id/radio_button_make"
                         app:layout_constraintStart_toStartOf="parent" />
 
