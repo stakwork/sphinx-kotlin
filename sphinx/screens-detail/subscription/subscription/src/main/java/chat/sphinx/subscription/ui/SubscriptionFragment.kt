@@ -69,7 +69,7 @@ internal class SubscriptionFragment: SideEffectFragment<
                 }
             }
 
-            editTextPayUntil.setOnClickListener {
+            editTextSubscriptionPayUntil.setOnClickListener {
                 val datePickerDialog = DatePickerDialog(
                     root.context,
                     { _, year, month, dayOfMonth ->
@@ -77,7 +77,7 @@ internal class SubscriptionFragment: SideEffectFragment<
                         calendar.set(Calendar.MONTH, month)
                         calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth)
 
-                        editTextPayUntil.setText(
+                        editTextSubscriptionPayUntil.setText(
                             DateTime.getFormatMMMddyyyy(
                                 TimeZone.getTimeZone(DateTime.UTC)
                             ).format(calendar.time)
@@ -91,60 +91,60 @@ internal class SubscriptionFragment: SideEffectFragment<
                 datePickerDialog.show()
             }
 
-            radioGroupAmount.setOnCheckedChangeListenerWithInputInteraction(
-                radioButtonCustomAmount, editTextCustomAmount
+            radioGroupSubscriptionAmount.setOnCheckedChangeListenerWithInputInteraction(
+                radioButtonSubscriptionAmountCustom, editTextSubscriptionCustomAmount
             )
 
-            radioGroupEndRule.setOnCheckedChangeListenerWithInputInteraction(
-                radioButtonMake, editTextMakeQuantity
+            radioGroupSubscriptionEndRule.setOnCheckedChangeListenerWithInputInteraction(
+                radioButtonSubscriptionMakeQuantity, editTextSubscriptionMakeQuantity
             )
 
-            radioGroupEndRule.setOnCheckedChangeListenerWithDatePickerInputInteraction(
-                radioButtonUntil, editTextPayUntil
+            radioGroupSubscriptionEndRule.setOnCheckedChangeListenerWithDatePickerInputInteraction(
+                radioButtonSubscriptionPayUntil, editTextSubscriptionPayUntil
             )
 
-            buttonSave.setOnClickListener {
+            buttonSubscriptionSave.setOnClickListener {
 
-                val amount: Sat? = when (radioGroupAmount.checkedRadioButtonId) {
-                    R.id.radio_button_500_sats -> {
+                val amount: Sat? = when (radioGroupSubscriptionAmount.checkedRadioButtonId) {
+                    R.id.radio_button_subscription_amount_500_sats -> {
                         Sat(500)
                     }
-                    R.id.radio_button_1000_sats -> {
+                    R.id.radio_button_subscription_amount_1000_sats -> {
                         Sat(1000)
                     }
-                    R.id.radio_button_2000_sats -> {
+                    R.id.radio_button_subscription_amount_2000_sats -> {
                         Sat(2000)
                     }
-                    R.id.radio_button_custom_amount -> {
-                        editTextCustomAmount.text?.toString()?.toLongOrNull()?.let {
+                    R.id.radio_button_subscription_amount_custom -> {
+                        editTextSubscriptionCustomAmount.text?.toString()?.toLongOrNull()?.let {
                             Sat(it)
                         }
                     }
                     else -> null
                 }
 
-                val cron: String? = when (radioGroupTimeInterval.checkedRadioButtonId) {
-                    R.id.radio_button_daily -> {
+                val cron: String? = when (radioGroupSubscriptionTimeInterval.checkedRadioButtonId) {
+                    R.id.radio_button_subscription_daily -> {
                         "daily"
                     }
-                    R.id.radio_button_weekly -> {
+                    R.id.radio_button_subscription_weekly -> {
                         "weekly"
                     }
-                    R.id.radio_button_monthly -> {
+                    R.id.radio_button_subscription_monthly -> {
                         "monthly"
                     }
                     else -> null
                 }
 
                 var endNumber: Long? = null
-                val endDate: DateTime? = when (radioGroupEndRule.checkedRadioButtonId) {
-                    R.id.radio_button_make -> {
-                        editTextMakeQuantity.text?.toString()?.let {
+                val endDate: DateTime? = when (radioGroupSubscriptionEndRule.checkedRadioButtonId) {
+                    R.id.radio_button_subscription_make_quantity -> {
+                        editTextSubscriptionMakeQuantity.text?.toString()?.let {
                             endNumber = it.toLongOrNull()
                         }
                         null
                     }
-                    R.id.radio_button_until -> {
+                    R.id.radio_button_subscription_pay_until -> {
                         calendar.timeInMillis.toDateTime()
                     }
                     else -> null
@@ -171,7 +171,7 @@ internal class SubscriptionFragment: SideEffectFragment<
                     progressBarSubscriptionSave.gone
                     textViewDetailSubscriptionDelete.gone
                     layoutConstraintSubscriptionEnablement.gone
-                    buttonSave.text = getString(R.string.subscribe)
+                    buttonSubscriptionSave.text = getString(R.string.subscribe)
                 }
             }
             is SubscriptionViewState.SubscriptionLoaded -> {
@@ -179,25 +179,25 @@ internal class SubscriptionFragment: SideEffectFragment<
                     progressBarSubscriptionSave.gone
                     textViewDetailSubscriptionDelete.visible
                     layoutConstraintSubscriptionEnablement.visible
-                    buttonSave.text = getString(R.string.update_subscription)
+                    buttonSubscriptionSave.text = getString(R.string.update_subscription)
 
                     switchSubscriptionEnablement.isChecked = !viewState.subscription.ended && !viewState.subscription.paused
 
                     // Populate Amount
                     when (viewState.subscription.amount.value) {
                         500L -> {
-                            radioButton500Sats.isChecked = true
+                            radioButtonSubscriptionAmount500Sats.isChecked = true
                         }
                         1000L -> {
-                            radioButton1000Sats.isChecked = true
+                            radioButtonSubscriptionAmount1000Sats.isChecked = true
                         }
                         2000L -> {
-                            radioButton2000Sats.isChecked = true
+                            radioButtonSubscriptionAmount2000Sats.isChecked = true
                         }
                         else -> {
-                            radioButtonCustomAmount.isChecked = true
+                            radioButtonSubscriptionAmountCustom.isChecked = true
 
-                            editTextCustomAmount.setText(
+                            editTextSubscriptionCustomAmount.setText(
                                 viewState.subscription.amount.value.toString()
                             )
                         }
@@ -207,31 +207,31 @@ internal class SubscriptionFragment: SideEffectFragment<
                     when  {
                         viewState.subscription.cron.value.endsWith("* * *") -> {
                             // Daily...
-                            radioButtonDaily.isChecked = true
+                            radioButtonSubscriptionDaily.isChecked = true
                         }
                         viewState.subscription.cron.value.endsWith("* *") -> {
                             // Monthly
-                            radioButtonMonthly.isChecked = true
+                            radioButtonSubscriptionMonthly.isChecked = true
                         }
                         else -> {
                             // Weekly
-                            radioButtonWeekly.isChecked = true
+                            radioButtonSubscriptionWeekly.isChecked = true
                         }
                     }
 
                     // Populate End Rule
                     when {
                         viewState.subscription.end_number != null -> {
-                            radioButtonMake.isChecked = true
+                            radioButtonSubscriptionMakeQuantity.isChecked = true
 
-                            editTextMakeQuantity.setText(
+                            editTextSubscriptionMakeQuantity.setText(
                                 viewState.subscription.end_number!!.value.toString()
                             )
                         }
                         viewState.subscription.end_date != null -> {
-                            radioButtonUntil.isChecked = true
+                            radioButtonSubscriptionPayUntil.isChecked = true
 
-                            editTextPayUntil.setText(
+                            editTextSubscriptionPayUntil.setText(
                                 DateTime.getFormatMMMddyyyy(
                                     TimeZone.getTimeZone(DateTime.UTC)
                                 ).format(viewState.subscription.end_date!!.value)
