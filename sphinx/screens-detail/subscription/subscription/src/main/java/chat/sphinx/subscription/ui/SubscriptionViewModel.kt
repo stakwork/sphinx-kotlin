@@ -102,7 +102,7 @@ internal class SubscriptionViewModel @Inject constructor(
                         interval = interval,
                         contactId = ContactId(args.argContactId),
                         chatId = null,
-                        endDate = endDate?.let { DateTime.getFormatMMMddyyyy().format(it.value) },
+                        endDate = endDate?.let { DateTime.getFormatMMMddyyyy(TimeZone.getTimeZone("UTC")).format(it.value) },
                         endNumber = endNumber?.let { EndNumber(it) }
                     )
                 } else {
@@ -112,7 +112,7 @@ internal class SubscriptionViewModel @Inject constructor(
                         interval = interval,
                         contactId = ContactId(args.argContactId),
                         chatId = subscription.chat_id,
-                        endDate = endDate?.let { DateTime.getFormatMMMddyyyy().format(it.value) },
+                        endDate = endDate?.let { DateTime.getFormatMMMddyyyy(TimeZone.getTimeZone("UTC")).format(it.value) },
                         endNumber = endNumber?.let { EndNumber(it) }
                     )
                 }

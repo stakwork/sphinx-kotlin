@@ -250,15 +250,15 @@ value class DateTime(val value: Date) {
 
         @Volatile
         private var formatMMMddyyyy: SimpleDateFormat? = null
-        fun getFormatMMMddyyyy(): SimpleDateFormat =
+        fun getFormatMMMddyyyy(timeZone: TimeZone = TimeZone.getDefault()): SimpleDateFormat =
             formatMMMddyyyy?.also {
-                it.timeZone = TimeZone.getDefault()
+                it.timeZone = timeZone
             } ?: synchronized(this) {
                 formatMMMddyyyy?.also {
-                    it.timeZone = TimeZone.getDefault()
+                    it.timeZone = timeZone
                 } ?: SimpleDateFormat(FORMAT_MMM_DD_YYYY, Locale.getDefault())
                     .also {
-                        it.timeZone = TimeZone.getDefault()
+                        it.timeZone = timeZone
                         formatMMMddyyyy = it
                     }
             }

@@ -40,6 +40,8 @@ internal class SubscriptionFragment: SideEffectFragment<
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        calendar.timeZone = TimeZone.getTimeZone(DateTime.UTC)
+
         binding.apply {
             textViewDetailScreenHeaderName.text = getString(R.string.subscription_header_name)
 
@@ -68,26 +70,25 @@ internal class SubscriptionFragment: SideEffectFragment<
             }
 
             editTextPayUntil.setOnClickListener {
-                this@SubscriptionFragment.context?.let { context ->
-                    val datePickerDialog = DatePickerDialog(
-                        context,
-                        { _, year, month, dayOfMonth ->
-                            calendar.set(Calendar.YEAR, year)
-                            calendar.set(Calendar.MONTH, month)
-                            calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth)
+                val datePickerDialog = DatePickerDialog(
+                    root.context,
+                    { _, year, month, dayOfMonth ->
+                        calendar.set(Calendar.YEAR, year)
+                        calendar.set(Calendar.MONTH, month)
+                        calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth)
 
-                            editTextPayUntil.setText(
-                                DateTime.getFormatMMMddyyyy().format(calendar.time)
-                            )
-                        },
-                        calendar.get(Calendar.YEAR),
-                        calendar.get(Calendar.MONTH),
-                        calendar.get(Calendar.DAY_OF_MONTH),
-                    )
-                    datePickerDialog.datePicker.minDate = Date().time
-                    datePickerDialog.show()
-                }
-
+                        editTextPayUntil.setText(
+                            DateTime.getFormatMMMddyyyy(
+                                TimeZone.getTimeZone(DateTime.UTC)
+                            ).format(calendar.time)
+                        )
+                    },
+                    calendar.get(Calendar.YEAR),
+                    calendar.get(Calendar.MONTH),
+                    calendar.get(Calendar.DAY_OF_MONTH),
+                )
+                datePickerDialog.datePicker.minDate = Date().time
+                datePickerDialog.show()
             }
 
             radioGroupAmount.setOnCheckedChangeListenerWithInputInteraction(
@@ -236,9 +237,9 @@ internal class SubscriptionFragment: SideEffectFragment<
                             radioButtonUntil.isChecked = true
 
                             editTextPayUntil.setText(
-                                DateTime.getFormatMMMddyyyy().format(
-                                    viewState.subscription.end_date!!.value
-                                )
+                                DateTime.getFormatMMMddyyyy(
+                                    TimeZone.getTimeZone(DateTime.UTC)
+                                ).format(viewState.subscription.end_date!!.value)
                             )
 
                             calendar.time = viewState.subscription.end_date!!.value
