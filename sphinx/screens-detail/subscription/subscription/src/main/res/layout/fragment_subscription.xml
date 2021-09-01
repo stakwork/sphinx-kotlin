@@ -27,16 +27,18 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <androidx.appcompat.widget.AppCompatTextView
+        <androidx.appcompat.widget.AppCompatImageButton
             android:id="@+id/text_view_detail_subscription_delete"
             android:layout_width="@dimen/default_header_navigation_xy"
             android:layout_height="@dimen/default_header_navigation_xy"
-            android:fontFamily="@font/material_icons_regular"
             android:gravity="center"
-            android:text="@string/material_icon_name_message_action_delete"
-            android:textColor="@color/primaryRed"
             android:textSize="@dimen/default_text_size_back_arrow"
             android:visibility="gone"
+            android:src="@drawable/ic_icon_delete"
+            android:padding="@dimen/default_layout_margin"
+            android:tint="@color/text"
+            android:background="@android:color/transparent"
+            android:layout_marginEnd="@dimen/default_half_layout_margin"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/layout_constraint_subscription_enablement"
@@ -62,7 +64,7 @@
                 android:textSize="@dimen/default_text_size_headline"
                 android:singleLine="true"
                 android:text="Active"
-                android:layout_marginEnd="@dimen/default_layout_margin"
+                android:layout_marginEnd="@dimen/default_half_layout_margin"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/switch_subscription_enablement"
                 app:layout_constraintBottom_toBottomOf="parent"
@@ -218,6 +220,7 @@
                             android:backgroundTint="@android:color/transparent"
                             android:textCursorDrawable="@drawable/cursor"
                             android:gravity="center"
+                            android:enabled="false"
                             app:layout_constraintStart_toStartOf="parent"
                             app:layout_constraintBottom_toBottomOf="parent"
                             tools:text="600" />
@@ -383,6 +386,7 @@
                             android:backgroundTint="@android:color/transparent"
                             android:textCursorDrawable="@drawable/cursor"
                             android:gravity="center"
+                            android:enabled="false"
                             app:layout_constraintStart_toStartOf="parent"
                             app:layout_constraintBottom_toBottomOf="parent" />
 
@@ -424,7 +428,7 @@
                             android:id="@+id/edit_text_pay_until"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:minWidth="120dp"
+                            android:minWidth="170dp"
                             android:inputType="date"
                             android:singleLine="true"
                             android:clickable="false"
@@ -437,6 +441,7 @@
                             android:textCursorDrawable="@drawable/cursor"
                             android:gravity="center"
                             android:drawableStart="@drawable/ic_calendar"
+                            android:enabled="false"
                             app:layout_constraintStart_toStartOf="parent"
                             app:layout_constraintBottom_toBottomOf="parent" />
 

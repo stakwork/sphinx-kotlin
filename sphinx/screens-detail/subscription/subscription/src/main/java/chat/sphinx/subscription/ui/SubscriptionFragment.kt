@@ -14,6 +14,7 @@ import chat.sphinx.subscription.databinding.FragmentSubscriptionBinding
 import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.toDateTime
+import chat.sphinx.wrapper_common.toDateTimeWithFormat
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
@@ -76,14 +77,14 @@ internal class SubscriptionFragment: SideEffectFragment<
                             calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth)
 
                             editTextPayUntil.setText(
-                                SimpleDateFormat("dd/MM/yyyy", Locale.US).format(calendar.time)
+                                DateTime.getFormatMMMddyyyy().format(calendar.time)
                             )
                         },
                         calendar.get(Calendar.YEAR),
                         calendar.get(Calendar.MONTH),
                         calendar.get(Calendar.DAY_OF_MONTH),
                     )
-                    datePickerDialog.datePicker.minDate = calendar.timeInMillis
+                    datePickerDialog.datePicker.minDate = Date().time
                     datePickerDialog.show()
                 }
 
@@ -228,15 +229,19 @@ internal class SubscriptionFragment: SideEffectFragment<
                             radioButtonMake.isChecked = true
 
                             editTextMakeQuantity.setText(
-                                viewState.subscription.end_number?.value.toString()
+                                viewState.subscription.end_number!!.value.toString()
                             )
                         }
                         viewState.subscription.end_date != null -> {
                             radioButtonUntil.isChecked = true
 
                             editTextPayUntil.setText(
-                                viewState.subscription.end_date?.toString()
+                                DateTime.getFormatMMMddyyyy().format(
+                                    viewState.subscription.end_date!!.value
+                                )
                             )
+
+                            calendar.time = viewState.subscription.end_date!!.value
                         }
                     }
                 }

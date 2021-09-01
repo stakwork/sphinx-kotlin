@@ -210,12 +210,15 @@ class SphinxRadioGroup @JvmOverloads constructor(
             super.onCheckedChanged(buttonView, isChecked)
 
             editText.isEnabled = isChecked
-            if (editText.isEnabled) {
+
+            if (editText.isEnabled && buttonView.isPressed) {
                 editText.requestFocus()
                 context?.let {
                     val inputMethodManager = ContextCompat.getSystemService(it, InputMethodManager::class.java)
                     inputMethodManager?.showSoftInput(editText, InputMethodManager.SHOW_IMPLICIT)
                 }
+            } else {
+                editText.setText("")
             }
         }
     }
@@ -225,9 +228,12 @@ class SphinxRadioGroup @JvmOverloads constructor(
             super.onCheckedChanged(buttonView, isChecked)
 
             editText.isEnabled = isChecked
-            if (editText.isEnabled) {
+
+            if (editText.isEnabled && buttonView.isPressed) {
                 editText.requestFocus()
                 editText.callOnClick()
+            } else {
+                editText.setText("")
             }
         }
     }

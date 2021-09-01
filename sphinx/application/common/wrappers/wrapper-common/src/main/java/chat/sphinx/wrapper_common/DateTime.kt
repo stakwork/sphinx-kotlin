@@ -16,6 +16,11 @@ inline fun String.toDateTime(): DateTime =
     DateTime(DateTime.getFormatRelay().parse(this))
 
 @Suppress("NOTHING_TO_INLINE")
+@Throws(ParseException::class)
+inline fun String.toDateTimeWithFormat(format: SimpleDateFormat): DateTime =
+    DateTime(format.parse(this))
+
+@Suppress("NOTHING_TO_INLINE")
 inline fun Long.toDateTime(): DateTime =
     DateTime(Date(this))
 
