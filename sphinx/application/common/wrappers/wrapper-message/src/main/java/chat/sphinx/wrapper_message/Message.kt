@@ -169,6 +169,11 @@ inline val Message.isResendAllowed: Boolean
 inline val Message.isPaidMessage: Boolean
     get() = type.isAttachment() && (messageMedia?.price?.value ?: 0L) > 0L
 
+inline val Message.isPaidPendingMessage: Boolean
+    get() = type.isAttachment() &&
+            (messageMedia?.price?.value ?: 0L) > 0L &&
+            (retrievePurchaseStatus()?.isPurchaseAccepted() != true)
+
 inline val Message.isSphinxCallLink: Boolean
     get() = type.isMessage() && (messageContentDecrypted?.value?.isValidSphinxCallLink == true)
 

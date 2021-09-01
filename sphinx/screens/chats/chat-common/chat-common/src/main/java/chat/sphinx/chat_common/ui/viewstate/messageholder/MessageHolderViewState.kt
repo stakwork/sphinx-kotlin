@@ -159,7 +159,7 @@ internal sealed class MessageHolderViewState(
             LayoutState.Bubble.ContainerSecond.ImageAttachment(
                 mediaData.first,
                 mediaData.second,
-                (this is Received && message.isPaidMessage && message.retrievePurchaseAcceptItem() == null)
+                (this is Received && message.isPaidPendingMessage)
             )
         }
     }

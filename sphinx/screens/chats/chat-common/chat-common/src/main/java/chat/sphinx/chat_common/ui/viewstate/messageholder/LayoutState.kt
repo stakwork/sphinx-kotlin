@@ -170,7 +170,7 @@ internal sealed class LayoutState private constructor() {
 
             data class PaidMessageReceivedDetails(
                 val amount: Sat,
-                val purchaseStatus: PurchaseStatus?,
+                val purchaseStatus: PurchaseStatus,
             ): ContainerFourth() {
                 val amountText: String
                     get() = amount.asFormattedString(appendUnit = true)

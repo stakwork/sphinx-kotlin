@@ -15,6 +15,7 @@ import chat.sphinx.chat_common.databinding.LayoutMessageHolderBinding
 import chat.sphinx.chat_common.model.NodeDescriptor
 import chat.sphinx.chat_common.model.TribeLink
 import chat.sphinx.chat_common.model.UnspecifiedUrl
+import chat.sphinx.chat_common.ui.viewstate.messageholder.isReceived
 import chat.sphinx.chat_common.util.SphinxLinkify
 import chat.sphinx.chat_common.util.SphinxUrlSpan
 import chat.sphinx.concept_image_loader.Disposable
@@ -30,8 +31,7 @@ import chat.sphinx.wrapper_chat.ChatType
 import chat.sphinx.wrapper_common.lightning.*
 import chat.sphinx.wrapper_meme_server.headerKey
 import chat.sphinx.wrapper_meme_server.headerValue
-import chat.sphinx.wrapper_message.MessageType
-import chat.sphinx.wrapper_message.PurchaseStatus
+import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message_media.MessageMedia
 import chat.sphinx.wrapper_view.Px
 import io.matthewnelson.android_feature_screens.util.gone
@@ -909,22 +909,22 @@ internal inline fun LayoutMessageHolderBinding.setBubblePaidMessageReceivedDetai
 
             textViewPaymentStatusIcon.text = statusIcon
             textViewPaymentStatusIcon.goneIfFalse(
-                paidDetails.purchaseStatus is PurchaseStatus.Accepted ||
-                        paidDetails.purchaseStatus is PurchaseStatus.Denied
+                paidDetails.purchaseStatus.isPurchaseAccepted() ||
+                        paidDetails.purchaseStatus.isPurchaseDenied()
             )
 
-            progressBarPaidMessage.goneIfFalse(paidDetails.purchaseStatus is PurchaseStatus.Processing)
+            progressBarPaidMessage.goneIfFalse(paidDetails.purchaseStatus.isPurchaseProcessing())
 
             textViewPaidMessageStatusLabel.goneIfFalse(
-                paidDetails.purchaseStatus is PurchaseStatus.Processing ||
-                        paidDetails.purchaseStatus is PurchaseStatus.Accepted ||
-                        paidDetails.purchaseStatus is PurchaseStatus.Denied
+                paidDetails.purchaseStatus.isPurchaseProcessing() ||
+                        paidDetails.purchaseStatus.isPurchaseAccepted() ||
+                        paidDetails.purchaseStatus.isPurchaseDenied()
             )
             textViewPaidMessageStatusLabel.text = statusText
 
-            buttonPayAttachment.goneIfFalse(paidDetails.purchaseStatus is PurchaseStatus.Pending)
-            textViewPayMessageLabel.goneIfFalse(paidDetails.purchaseStatus is PurchaseStatus.Pending)
-            imageViewPayMessageIcon.goneIfFalse(paidDetails.purchaseStatus is PurchaseStatus.Pending)
+            buttonPayAttachment.goneIfFalse(paidDetails.purchaseStatus.isPurchasePending())
+            textViewPayMessageLabel.goneIfFalse(paidDetails.purchaseStatus.isPurchasePending())
+            imageViewPayMessageIcon.goneIfFalse(paidDetails.purchaseStatus.isPurchasePending())
 
             textViewPaidMessageAmountToPayLabel.text = paidDetails.amountText
         }
@@ -981,6 +981,8 @@ internal inline fun LayoutMessageHolderBinding.setBubbleImageAttachment(
             if (imageAttachment.showPaidOverlay) {
                 layoutConstraintPaidImageOverlay.visible
             } else {
+                layoutConstraintPaidImageOverlay.gone
+
                 loadImage(imageViewAttachmentImage, imageAttachment.url, imageAttachment.media)
             }
         }
