@@ -199,7 +199,10 @@ internal class SubscriptionFragment: SideEffectFragment<
                         }
                         else -> {
                             radioButtonCustomAmount.isChecked = true
-                            editTextCustomAmount.setText(viewState.subscription.amount.toString())
+
+                            editTextCustomAmount.setText(
+                                viewState.subscription.amount.value.toString()
+                            )
                         }
                     }
 
@@ -223,11 +226,17 @@ internal class SubscriptionFragment: SideEffectFragment<
                     when {
                         viewState.subscription.end_number != null -> {
                             radioButtonMake.isChecked = true
-                            editTextMakeQuantity.setText(viewState.subscription.end_number?.value.toString())
+
+                            editTextMakeQuantity.setText(
+                                viewState.subscription.end_number?.value.toString()
+                            )
                         }
                         viewState.subscription.end_date != null -> {
                             radioButtonUntil.isChecked = true
-                            editTextPayUntil.setText(viewState.subscription.end_date.toString())
+
+                            editTextPayUntil.setText(
+                                viewState.subscription.end_date?.toString()
+                            )
                         }
                     }
                 }
