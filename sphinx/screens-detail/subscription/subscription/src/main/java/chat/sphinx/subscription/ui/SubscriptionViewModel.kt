@@ -19,9 +19,9 @@ import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.firstOrNull
+import io.matthewnelson.concept_views.viewstate.ViewStateContainer
+import io.matthewnelson.concept_views.viewstate.value
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.util.*
 import javax.inject.Inject
@@ -47,34 +47,54 @@ internal class SubscriptionViewModel @Inject constructor(
         const val MONTHLY_INTERVAL: String = "MONTHLY"
     }
 
-    fun initSubscription() {
-        viewModelScope.launch(mainImmediate) {
-            subscriptionRepository.getActiveSubscriptionByContactId(ContactId(args.argContactId)).distinctUntilChanged().collect { subscription ->
-                if (subscription == null) {
-                    updateViewState(
-                        SubscriptionViewState.Idle
-                    )
-                } else {
-                    val timeInterval = if (subscription.cron.value.endsWith("* * *")) {
-                        DAILY_INTERVAL
-                    } else if (subscription.cron.value.endsWith("* *")) {
-                        MONTHLY_INTERVAL
-                    } else {
-                        WEEKLY_INTERVAL
-                    }
+    private val subscriptionSharedFlow: SharedFlow<Subscription?> = flow {
+        emitAll(subscriptionRepository.getActiveSubscriptionByContactId(ContactId(args.argContactId)))
+    }.shareIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(2_000),
+        replay = 1,
+    )
 
-                    updateViewState(
-                        SubscriptionViewState.SubscriptionLoaded(
-                            isActive = !subscription.paused,
-                            amount = subscription.amount.value,
-                            timeInterval = timeInterval,
-                            endNumber = subscription.endNumber?.value,
-                            endDate = subscription.endDate
-                        )
+    private inner class SubscriptionViewStateContainer: ViewStateContainer<SubscriptionViewState>(SubscriptionViewState.Idle) {
+        override val viewStateFlow: StateFlow<SubscriptionViewState> by lazy {
+            flow {
+                subscriptionSharedFlow.collect { subscription ->
+                    emit(
+                        if (subscription != null) {
+                            val timeInterval = if (subscription.cron.value.endsWith("* * *")) {
+                                DAILY_INTERVAL
+                            } else if (subscription.cron.value.endsWith("* *")) {
+                                MONTHLY_INTERVAL
+                            } else {
+                                WEEKLY_INTERVAL
+                            }
+
+                            SubscriptionViewState.SubscriptionLoaded(
+                                isActive = !subscription.paused,
+                                amount = subscription.amount.value,
+                                timeInterval = timeInterval,
+                                endNumber = subscription.endNumber?.value,
+                                endDate = subscription.endDate
+                            )
+                        } else {
+                            SubscriptionViewState.Idle
+                        }
                     )
                 }
-            }
+            }.stateIn(
+                viewModelScope,
+                SharingStarted.WhileSubscribed(5_000),
+                SubscriptionViewState.Idle,
+            )
         }
+    }
+
+    override val viewStateContainer: ViewStateContainer<SubscriptionViewState> by lazy {
+        SubscriptionViewStateContainer()
+    }
+
+    val savingSubscriptionViewStateContainer: ViewStateContainer<SavingSubscriptionViewState> by lazy {
+        ViewStateContainer(SavingSubscriptionViewState.Idle)
     }
 
     fun saveSubscription(
@@ -112,7 +132,9 @@ internal class SubscriptionViewModel @Inject constructor(
                 return@launch
             }
 
-            updateViewState(SubscriptionViewState.SavingSubscription)
+            savingSubscriptionViewStateContainer.updateViewState(
+                SavingSubscriptionViewState.SavingSubscription
+            )
 
             subscriptionRepository.getActiveSubscriptionByContactId(
                 ContactId(args.argContactId)
@@ -143,7 +165,9 @@ internal class SubscriptionViewModel @Inject constructor(
                         submitSideEffect(
                             SubscriptionSideEffect.Notify(app.getString(R.string.failed_to_save_subscription))
                         )
-                        updateViewState(SubscriptionViewState.SavingSubscriptionFailed)
+                        savingSubscriptionViewStateContainer.updateViewState(
+                            SavingSubscriptionViewState.SavingSubscriptionFailed
+                        )
                     }
                     is Response.Success -> {
                         navigator.popBackStack()

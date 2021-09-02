@@ -4,6 +4,7 @@ import android.app.DatePickerDialog
 import android.content.Context
 import android.os.Bundle
 import android.view.View
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import by.kirich1409.viewbindingdelegate.viewBinding
@@ -12,16 +13,21 @@ import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.subscription.R
 import chat.sphinx.subscription.databinding.FragmentSubscriptionBinding
 import chat.sphinx.wrapper_common.DateTime
+import chat.sphinx.wrapper_common.eeemmddhmma
 import chat.sphinx.wrapper_common.lightning.Sat
+import chat.sphinx.wrapper_common.lightning.asFormattedString
+import chat.sphinx.wrapper_common.lightning.toSat
 import chat.sphinx.wrapper_common.toDateTime
 import chat.sphinx.wrapper_common.toDateTimeWithFormat
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.visible
+import io.matthewnelson.concept_views.viewstate.collect
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
+import javax.annotation.meta.Exhaustive
 
 @AndroidEntryPoint
 internal class SubscriptionFragment: SideEffectFragment<
@@ -160,8 +166,6 @@ internal class SubscriptionFragment: SideEffectFragment<
             }
             (requireActivity() as InsetterActivity).addNavigationBarPadding(layoutConstraintSubscription)
         }
-
-        viewModel.initSubscription()
     }
 
     override suspend fun onViewStateFlowCollect(viewState: SubscriptionViewState) {
@@ -238,11 +242,24 @@ internal class SubscriptionFragment: SideEffectFragment<
                     }
                 }
             }
-            is SubscriptionViewState.SavingSubscription -> {
-                binding.progressBarSubscriptionSave.visible
-            }
-            is SubscriptionViewState.SavingSubscriptionFailed -> {
-                binding.progressBarSubscriptionSave.gone
+        }
+    }
+
+    override fun subscribeToViewStateFlow() {
+        super.subscribeToViewStateFlow()
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.savingSubscriptionViewStateContainer.collect { viewState ->
+                @Exhaustive
+                when (viewState) {
+                    is SavingSubscriptionViewState.Idle -> {}
+                    is SavingSubscriptionViewState.SavingSubscription -> {
+                        binding.progressBarSubscriptionSave.visible
+                    }
+                    is SavingSubscriptionViewState.SavingSubscriptionFailed -> {
+                        binding.progressBarSubscriptionSave.gone
+                    }
+                }
             }
         }
     }
