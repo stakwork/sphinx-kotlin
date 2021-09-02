@@ -8,4 +8,6 @@
     <string name="new_contact_invalid_public_key_error">Invalid Public Key</string>
     <string name="new_contact_invalid_route_hint_error">Invalid Route Hint</string>
     <string name="failed_to_update_contact">Failed to save contact</string>
+    <string name="edit_contact_header_subscribe_button">Subscribe</string>
+    <string name="edit_contact_header_subscribed_button">Subscribed</string>
 </resources>

@@ -20,6 +20,10 @@ import chat.sphinx.concept_network_query_message.NetworkQueryMessage
 import chat.sphinx.concept_network_query_message.model.MessageDto
 import chat.sphinx.concept_network_query_message.model.PostMessageDto
 import chat.sphinx.concept_network_query_message.model.PostPaymentDto
+import chat.sphinx.concept_network_query_subscription.NetworkQuerySubscription
+import chat.sphinx.concept_network_query_subscription.model.PostSubscriptionDto
+import chat.sphinx.concept_network_query_subscription.model.PutSubscriptionDto
+import chat.sphinx.concept_network_query_subscription.model.SubscriptionDto
 import chat.sphinx.concept_network_query_verify_external.NetworkQueryAuthorizeExternal
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_chat.model.CreateTribe
@@ -32,6 +36,7 @@ import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.concept_repository_message.model.AttachmentInfo
 import chat.sphinx.concept_repository_message.model.SendMessage
 import chat.sphinx.concept_repository_message.model.SendPayment
+import chat.sphinx.concept_repository_subscription.SubscriptionRepository
 import chat.sphinx.concept_socket_io.SocketIOManager
 import chat.sphinx.concept_socket_io.SphinxSocketIOMessage
 import chat.sphinx.concept_socket_io.SphinxSocketIOMessageListener
@@ -41,6 +46,7 @@ import chat.sphinx.feature_repository.mappers.contact.ContactDboPresenterMapper
 import chat.sphinx.feature_repository.mappers.invite.InviteDboPresenterMapper
 import chat.sphinx.feature_repository.mappers.mapListFrom
 import chat.sphinx.feature_repository.mappers.message.MessageDboPresenterMapper
+import chat.sphinx.feature_repository.mappers.subscription.SubscriptionDboPresenterMapper
 import chat.sphinx.feature_repository.model.MessageDboWrapper
 import chat.sphinx.feature_repository.model.MessageMediaDboWrapper
 import chat.sphinx.feature_repository.util.*
@@ -59,6 +65,8 @@ import chat.sphinx.wrapper_common.dashboard.toChatId
 import chat.sphinx.wrapper_common.invite.InviteStatus
 import chat.sphinx.wrapper_common.lightning.*
 import chat.sphinx.wrapper_common.message.*
+import chat.sphinx.wrapper_common.subscription.EndNumber
+import chat.sphinx.wrapper_common.subscription.SubscriptionId
 import chat.sphinx.wrapper_contact.*
 import chat.sphinx.wrapper_invite.Invite
 import chat.sphinx.wrapper_io_utils.InputStreamProvider
@@ -75,6 +83,7 @@ import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
 import chat.sphinx.wrapper_rsa.RsaPrivateKey
 import chat.sphinx.wrapper_rsa.RsaPublicKey
+import chat.sphinx.wrapper_subscription.Subscription
 import com.squareup.moshi.Moshi
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
@@ -110,6 +119,7 @@ abstract class SphinxRepository(
     private val networkQueryMessage: NetworkQueryMessage,
     private val networkQueryInvite: NetworkQueryInvite,
     private val networkQueryAuthorizeExternal: NetworkQueryAuthorizeExternal,
+    private val networkQuerySubscription: NetworkQuerySubscription,
     private val rsa: RSA,
     private val socketIOManager: SocketIOManager,
     protected val LOG: SphinxLogger,
@@ -117,6 +127,7 @@ abstract class SphinxRepository(
     ContactRepository,
     LightningRepository,
     MessageRepository,
+    SubscriptionRepository,
     RepositoryDashboard,
     RepositoryMedia,
     CoroutineDispatchers by dispatchers,
@@ -3625,5 +3636,235 @@ abstract class SphinxRepository(
         }.join()
 
         return response
+    }
+
+    /***
+     * Subscriptions
+     */
+
+    private val subscriptionLock = Mutex()
+    private val subscriptionDboPresenterMapper: SubscriptionDboPresenterMapper by lazy {
+        SubscriptionDboPresenterMapper(dispatchers)
+    }
+
+    override fun getActiveSubscriptionByContactId(contactId: ContactId): Flow<Subscription?> = flow {
+        emitAll(
+            coreDB.getSphinxDatabaseQueries().subscriptionGetLastActiveByContactId(contactId)
+                .asFlow()
+                .mapToOneOrNull(io)
+                .map { it?.let { subscriptionDboPresenterMapper.mapFrom(it) } }
+                .distinctUntilChanged()
+        )
+    }
+
+    override suspend fun createSubscription(
+        amount: Sat,
+        interval: String,
+        contactId: ContactId,
+        chatId: ChatId?,
+        endDate: String?,
+        endNumber: EndNumber?
+    ): Response<Any, ResponseError> {
+        var response: Response<SubscriptionDto, ResponseError>? = null
+
+        applicationScope.launch(mainImmediate) {
+            networkQuerySubscription.postSubscription(
+                PostSubscriptionDto(
+                    amount = amount.value,
+                    contact_id = contactId.value,
+                    chat_id = chatId?.value,
+                    interval = interval,
+                    end_number = endNumber?.value,
+                    end_date = endDate
+                )
+            ).collect { loadResponse ->
+                @Exhaustive
+                when (loadResponse) {
+                    is LoadResponse.Loading -> {}
+                    is Response.Error -> {
+                        response = loadResponse
+                    }
+                    is Response.Success -> {
+                        response = loadResponse
+                        val queries = coreDB.getSphinxDatabaseQueries()
+
+                        subscriptionLock.withLock {
+                            withContext(io) {
+                                queries.transaction {
+                                    upsertSubscription(
+                                        loadResponse.value,
+                                        queries
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }.join()
+
+        return response ?: Response.Error(ResponseError(("Failed to create subscription")))
+    }
+
+    override suspend fun updateSubscription(
+        id: SubscriptionId,
+        amount: Sat,
+        interval: String,
+        contactId: ContactId,
+        chatId: ChatId?,
+        endDate: String?,
+        endNumber: EndNumber?
+    ): Response<Any, ResponseError> {
+        var response: Response<SubscriptionDto, ResponseError>? = null
+
+        applicationScope.launch(mainImmediate) {
+
+            networkQuerySubscription.putSubscription(
+                id,
+                PutSubscriptionDto(
+                    amount = amount.value,
+                    contact_id = contactId.value,
+                    chat_id = chatId?.value,
+                    interval = interval,
+                    end_number = endNumber?.value,
+                    end_date = endDate
+                )
+            ).collect { loadResponse ->
+                @Exhaustive
+                when (loadResponse) {
+                    is LoadResponse.Loading -> {}
+                    is Response.Error -> {
+                        response = loadResponse
+                    }
+                    is Response.Success -> {
+                        response = loadResponse
+                        val queries = coreDB.getSphinxDatabaseQueries()
+
+                        subscriptionLock.withLock {
+                            withContext(io) {
+                                queries.transaction {
+                                    upsertSubscription(
+                                        loadResponse.value,
+                                        queries
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }.join()
+
+        return response ?: Response.Error(ResponseError(("Failed to update subscription")))
+    }
+
+    override suspend fun restartSubscription(
+        subscriptionId: SubscriptionId
+    ): Response<Any, ResponseError> {
+        var response: Response<SubscriptionDto, ResponseError>? = null
+
+        applicationScope.launch(mainImmediate) {
+
+            networkQuerySubscription.putRestartSubscription(
+                subscriptionId
+            ).collect { loadResponse ->
+                @Exhaustive
+                when (loadResponse) {
+                    is LoadResponse.Loading -> {}
+                    is Response.Error -> {
+                        response = loadResponse
+                    }
+                    is Response.Success -> {
+                        response = loadResponse
+                        val queries = coreDB.getSphinxDatabaseQueries()
+
+                        subscriptionLock.withLock {
+                            withContext(io) {
+                                queries.transaction {
+                                    upsertSubscription(
+                                        loadResponse.value,
+                                        queries
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }.join()
+
+        return response ?: Response.Error(ResponseError(("Failed to restart subscription")))
+    }
+
+    override suspend fun pauseSubscription(
+        subscriptionId: SubscriptionId
+    ): Response<Any, ResponseError> {
+        var response: Response<SubscriptionDto, ResponseError>? = null
+
+        applicationScope.launch(mainImmediate) {
+
+            networkQuerySubscription.putPauseSubscription(
+                subscriptionId
+            ).collect { loadResponse ->
+                @Exhaustive
+                when (loadResponse) {
+                    is LoadResponse.Loading -> {}
+                    is Response.Error -> {
+                        response = loadResponse
+                    }
+                    is Response.Success -> {
+                        response = loadResponse
+                        val queries = coreDB.getSphinxDatabaseQueries()
+
+                        subscriptionLock.withLock {
+                            withContext(io) {
+                                queries.transaction {
+                                    upsertSubscription(
+                                        loadResponse.value,
+                                        queries
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }.join()
+
+        return response ?: Response.Error(ResponseError(("Failed to pause subscription")))
+    }
+
+    override suspend fun deleteSubscription(
+        subscriptionId: SubscriptionId
+    ): Response<Any, ResponseError> {
+        var response: Response<Any, ResponseError>? = null
+
+        applicationScope.launch(mainImmediate) {
+            networkQuerySubscription.deleteSubscription(
+                subscriptionId
+            ).collect { loadResponse ->
+                @Exhaustive
+                when (loadResponse) {
+                    is LoadResponse.Loading -> {}
+                    is Response.Error -> {
+                        response = loadResponse
+                    }
+                    is Response.Success -> {
+                        response = loadResponse
+                        val queries = coreDB.getSphinxDatabaseQueries()
+
+                        subscriptionLock.withLock {
+                            withContext(io) {
+                                queries.transaction {
+                                    deleteSubscriptionById(subscriptionId, queries)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }.join()
+
+        return response ?: Response.Error(ResponseError(("Failed to delete subscription")))
     }
 }

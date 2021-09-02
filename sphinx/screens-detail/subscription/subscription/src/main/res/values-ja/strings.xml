@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="subscription_header_name">繰り返し</string>
+    <string name="amount">額</string>
+    <string name="custom_amount">カスタム金額：</string>
+    <string name="_500_sats">500 sats</string>
+    <string name="_1000_sats">1000 sats</string>
+    <string name="_2000_sats">2000 sats</string>
+    <string name="time_interval">時間間隔</string>
+    <string name="daily">毎日</string>
+    <string name="weekly">毎週</string>
+    <string name="monthly">毎月</string>
+    <string name="end_rule">エンドルール</string>
+    <string name="make">作る</string>
+    <string name="payments">支払い</string>
+    <string name="pay_until">まで支払う</string>
+    <string name="delete_subscription">サブスクリプションを削除する</string>
+    <string name="are_you_sure_you_want_to_delete_subscription">このサブスクリプションを削除してもよろしいですか</string>
+    <string name="amount_is_required">金額が必要です</string>
+    <string name="time_interval_is_required">時間間隔が必要です</string>
+    <string name="please_set_either_the_number_of_payments_to_make_or_end_date">お支払い回数または終了日を設定してください</string>
+    <string name="failed_to_save_subscription">サブスクリプションの保存に失敗しました</string>
+    <string name="saved_subscription_successfully">サブスクリプションを正常に保存しました</string>
+    <string name="deleting_subscription">サブスクリプションの削除</string>
+    <string name="failed_to_pause_subscription">サブスクリプションの一時停止に失敗しました</string>
+    <string name="successfully_paused_subscription">サブスクリプションを正常に一時停止しました</string>
+    <string name="failed_to_restart_subscription">サブスクリプションの再開に失敗しました</string>
+    <string name="successfully_restarted_subscription">サブスクリプションが正常に再開されました</string>
+    <string name="subscribe">申し込む</string>
+    <string name="update_subscription">サブスクリプションの更新</string>
+    <string name="failed_to_delete_subscription">サブスクリプションの削除に失敗しました</string>
+</resources>

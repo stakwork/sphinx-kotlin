@@ -8,6 +8,7 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
 import androidx.annotation.LayoutRes
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavArgs
 import androidx.viewbinding.ViewBinding
@@ -17,7 +18,7 @@ import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.contact.R
 import chat.sphinx.contact.databinding.LayoutContactBinding
-import chat.sphinx.detail_resources.databinding.LayoutDetailScreenHeaderBinding
+import chat.sphinx.contact.databinding.LayoutContactDetailScreenHeaderBinding
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.resources.getRandomHexCode
@@ -47,7 +48,7 @@ abstract class ContactFragment<
         VB
         >(layoutId)
 {
-    abstract val headerBinding: LayoutDetailScreenHeaderBinding
+    abstract val headerBinding: LayoutContactDetailScreenHeaderBinding
     abstract val contactBinding: LayoutContactBinding
 
     abstract val userColorsHelper: UserColorsHelper
@@ -78,7 +79,6 @@ abstract class ContactFragment<
             textViewDetailScreenHeaderName.text = getHeaderText()
 
             textViewDetailScreenHeaderNavBack.apply {
-                goneIfFalse(viewModel.isFromAddFriend())
                 
                 setOnClickListener {
                     lifecycleScope.launch(viewModel.mainImmediate) {
@@ -88,6 +88,12 @@ abstract class ContactFragment<
             }
 
             textViewDetailScreenClose.setOnClickListener {
+                lifecycleScope.launch(viewModel.mainImmediate) {
+                    viewModel.navigator.closeDetailScreen()
+                }
+            }
+
+            textViewDetailScreenSubscribe.setOnClickListener {
                 lifecycleScope.launch(viewModel.mainImmediate) {
                     viewModel.navigator.closeDetailScreen()
                 }
@@ -102,16 +108,9 @@ abstract class ContactFragment<
                 }
             }
 
-            editTextContactAddress.isEnabled = !viewModel.isExistingContact()
-
-            scanAddressButton.goneIfTrue(viewModel.isExistingContact())
             scanAddressButton.setOnClickListener {
                 viewModel.requestScanner()
             }
-
-            buttonQrCode.goneIfFalse(viewModel.isExistingContact())
-
-            layoutConstraintExistingContactProfilePicture.goneIfFalse(viewModel.isExistingContact())
 
             editTextContactAddress.addTextChangedListener(object : TextWatcher {
                 override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
@@ -180,7 +179,30 @@ abstract class ContactFragment<
             }
 
             is ContactSideEffect.ExistingContact -> {
+                headerBinding.apply {
+                    textViewDetailScreenHeaderNavBack.gone
+
+                    textViewDetailScreenSubscribe.visible
+
+                    textViewDetailScreenSubscribe.text = if (sideEffect.subscribed) {
+                        getString(R.string.edit_contact_header_subscribed_button)
+                    } else {
+                        getString(R.string.edit_contact_header_subscribe_button)
+                    }
+
+                    textViewDetailScreenSubscribe.backgroundTintList = if (sideEffect.subscribed) {
+                        ContextCompat.getColorStateList(root.context, R.color.secondaryText)
+                    } else {
+                        ContextCompat.getColorStateList(root.context, R.color.primaryBlue)
+                    }
+                }
+
                 contactBinding.apply {
+                    editTextContactAddress.isEnabled = false
+
+                    scanAddressButton.gone
+                    buttonQrCode.visible
+
                     editTextContactNickname.setText(sideEffect.nickname)
                     editTextContactAddress.setText(sideEffect.pubKey.value)
                     editTextContactRouteHint.setText(sideEffect.routeHint?.value ?: "")
@@ -200,6 +222,8 @@ abstract class ContactFragment<
                             )
                         }
                     }
+
+                    layoutConstraintExistingContactProfilePicture.visible
 
                     sideEffect.photoUrl?.let {
                         viewModel.imageLoader.load(

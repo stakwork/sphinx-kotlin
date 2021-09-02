@@ -1,0 +1,509 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_constraint_subscription"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/background_detail_screen"
+    tools:context=".ui.SubscriptionFragment">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_subscription_header"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/default_header_height"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_detail_screen_header_nav_back"
+            android:layout_width="@dimen/default_header_navigation_xy"
+            android:layout_height="@dimen/default_header_navigation_xy"
+            android:fontFamily="@font/material_icons_regular"
+            android:gravity="center"
+            android:text="@string/material_icon_name_nav_back"
+            android:textColor="@color/washedOutReceivedText"
+            android:textSize="@dimen/default_text_size_back_arrow"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatImageButton
+            android:id="@+id/text_view_detail_subscription_delete"
+            android:layout_width="@dimen/default_header_navigation_xy"
+            android:layout_height="@dimen/default_header_navigation_xy"
+            android:gravity="center"
+            android:textSize="@dimen/default_text_size_back_arrow"
+            android:visibility="gone"
+            android:src="@drawable/ic_icon_delete"
+            android:padding="@dimen/default_layout_margin"
+            android:tint="@color/text"
+            android:background="@android:color/transparent"
+            android:layout_marginEnd="@dimen/default_half_layout_margin"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/layout_constraint_subscription_enablement"
+            tools:visibility="visible" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layout_constraint_subscription_enablement"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/default_layout_margin"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            tools:visibility="visible">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_view_subscription_enable"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/text"
+                android:fontFamily="@font/roboto_regular"
+                android:textSize="@dimen/default_text_size_headline"
+                android:singleLine="true"
+                android:text="Active"
+                android:layout_marginEnd="@dimen/default_half_layout_margin"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/switch_subscription_enablement"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/switch_subscription_enablement"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:theme="@style/CustomSwitch"
+                android:thumb="@drawable/switch_thumb_selector"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:track="@drawable/switch_track_selector" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_detail_screen_header_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/montserrat_bold"
+            android:paddingEnd="4dp"
+            android:singleLine="true"
+            android:textAllCaps="true"
+            android:textColor="@color/primaryText"
+            android:textSize="@dimen/default_header_text_size"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/text_view_detail_screen_header_nav_back"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="DETAIL SCREEN" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginBottom="@dimen/default_layout_margin"
+        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_subscription_header"
+        app:layout_constraintBottom_toTopOf="@+id/layout_constraint_subscription_save">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/layout_constraint_subscription_amount_section_header"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/subscription_form_header_height"
+                android:background="@color/addressBookHeader"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/lightDivider"
+                    app:layout_constraintTop_toTopOf="parent"></View>
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:text="@string/amount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="@dimen/default_layout_margin"
+                    android:gravity="center"
+                    android:textColor="@color/secondaryText"
+                    android:fontFamily="@font/montserrat_regular"
+                    android:textSize="10sp"
+                    android:textAllCaps="true"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/lightDivider"
+                    app:layout_constraintBottom_toBottomOf="parent"></View>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/layout_constraint_subscription_amount_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/default_layout_margin"
+                android:paddingTop="@dimen/subscription_form_section_top_padding"
+                android:paddingBottom="@dimen/subscription_form_section_bottom_padding"
+                app:layout_constraintTop_toBottomOf="@+id/layout_constraint_subscription_amount_section_header">
+
+                <chat.sphinx.subscription.ui.widgets.SphinxRadioGroup
+                    android:id="@+id/radio_group_subscription_amount"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent">
+
+                    <RadioButton
+                        android:id="@+id/radio_button_subscription_amount_500_sats"
+                        android:text="@string/_500_sats"
+                        android:textColor="@color/secondaryText"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/subscription_form_field_height"
+                        android:paddingStart="@dimen/default_half_layout_margin"
+                        style="@style/CustomRadioButtonStyle"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintStart_toStartOf="parent" />
+
+                    <RadioButton
+                        android:id="@+id/radio_button_subscription_amount_1000_sats"
+                        android:text="@string/_1000_sats"
+                        android:textColor="@color/secondaryText"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/subscription_form_field_height"
+                        android:paddingStart="@dimen/default_half_layout_margin"
+                        style="@style/CustomRadioButtonStyle"
+                        app:layout_constraintTop_toBottomOf="@+id/radio_button_subscription_amount_500_sats"
+                        app:layout_constraintStart_toStartOf="parent" />
+
+                    <RadioButton
+                        android:id="@+id/radio_button_subscription_amount_2000_sats"
+                        android:text="@string/_2000_sats"
+                        android:textColor="@color/secondaryText"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/subscription_form_field_height"
+                        android:paddingStart="@dimen/default_half_layout_margin"
+                        style="@style/CustomRadioButtonStyle"
+                        app:layout_constraintTop_toBottomOf="@+id/radio_button_subscription_amount_1000_sats"
+                        app:layout_constraintStart_toStartOf="parent" />
+
+                    <RadioButton
+                        android:id="@+id/radio_button_subscription_amount_custom"
+                        android:text="@string/custom_amount"
+                        android:textColor="@color/secondaryText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="@dimen/subscription_form_field_height"
+                        android:paddingStart="@dimen/default_half_layout_margin"
+                        style="@style/CustomRadioButtonStyle"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/radio_button_subscription_amount_2000_sats" />
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/layout_constraint_subscription_custom_amount"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/default_layout_margin"
+                        android:background="@drawable/edit_text_background"
+                        app:layout_constraintTop_toTopOf="@+id/radio_button_subscription_amount_custom"
+                        app:layout_constraintBottom_toBottomOf="@+id/radio_button_subscription_amount_custom"
+                        app:layout_constraintStart_toEndOf="@+id/radio_button_subscription_amount_custom">
+
+                        <androidx.appcompat.widget.AppCompatEditText
+                            android:id="@+id/edit_text_subscription_custom_amount"
+                            android:layout_width="100dp"
+                            android:layout_height="wrap_content"
+                            android:inputType="number"
+                            android:singleLine="true"
+                            android:textColor="@color/text"
+                            android:fontFamily="@font/roboto_regular"
+                            android:backgroundTint="@android:color/transparent"
+                            android:textCursorDrawable="@drawable/cursor"
+                            android:gravity="center"
+                            android:enabled="false"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            tools:text="600" />
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+                </chat.sphinx.subscription.ui.widgets.SphinxRadioGroup>
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/layout_constraint_subscription_time_interval_section_header"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/subscription_form_header_height"
+                android:background="@color/addressBookHeader"
+                app:layout_constraintTop_toBottomOf="@+id/layout_constraint_subscription_amount_container">
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/lightDivider"
+                    app:layout_constraintTop_toTopOf="parent"></View>
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:text="@string/time_interval"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="@dimen/default_layout_margin"
+                    android:gravity="center"
+                    android:textColor="@color/secondaryText"
+                    android:fontFamily="@font/montserrat_regular"
+                    android:textSize="10sp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/lightDivider"
+                    app:layout_constraintBottom_toBottomOf="parent"></View>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/layout_constraint_subscription_time_interval_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/default_layout_margin"
+                android:paddingTop="@dimen/subscription_form_section_top_padding"
+                android:paddingBottom="@dimen/subscription_form_section_bottom_padding"
+                app:layout_constraintTop_toBottomOf="@+id/layout_constraint_subscription_time_interval_section_header">
+
+                <chat.sphinx.subscription.ui.widgets.SphinxRadioGroup
+                    android:id="@+id/radio_group_subscription_time_interval"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent">
+
+                    <RadioButton
+                        android:id="@+id/radio_button_subscription_daily"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/subscription_form_field_height"
+                        android:textColor="@color/secondaryText"
+                        android:text="@string/daily"
+                        android:paddingStart="@dimen/default_half_layout_margin"
+                        style="@style/CustomRadioButtonStyle"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <RadioButton
+                        android:id="@+id/radio_button_subscription_weekly"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/subscription_form_field_height"
+                        android:textColor="@color/secondaryText"
+                        android:text="@string/weekly"
+                        android:paddingStart="@dimen/default_half_layout_margin"
+                        style="@style/CustomRadioButtonStyle"
+                        app:layout_constraintTop_toBottomOf="@+id/radio_button_subscription_daily" />
+
+                    <RadioButton
+                        android:id="@+id/radio_button_subscription_monthly"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/subscription_form_field_height"
+                        android:textColor="@color/secondaryText"
+                        android:text="@string/monthly"
+                        android:paddingStart="@dimen/default_half_layout_margin"
+                        style="@style/CustomRadioButtonStyle"
+                        app:layout_constraintTop_toBottomOf="@+id/radio_button_subscription_weekly" />
+
+                </chat.sphinx.subscription.ui.widgets.SphinxRadioGroup>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/layout_constraint_subscription_end_rule_section_header"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/subscription_form_header_height"
+                android:background="@color/addressBookHeader"
+                app:layout_constraintTop_toBottomOf="@+id/layout_constraint_subscription_time_interval_container">
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/lightDivider"
+                    app:layout_constraintTop_toTopOf="parent"></View>
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:text="@string/end_rule"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="@dimen/default_layout_margin"
+                    android:gravity="center"
+                    android:textColor="@color/secondaryText"
+                    android:fontFamily="@font/montserrat_regular"
+                    android:textSize="10sp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/lightDivider"
+                    app:layout_constraintBottom_toBottomOf="parent"></View>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/layout_constraint_subscription_end_rule_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/default_layout_margin"
+                android:paddingTop="@dimen/subscription_form_section_top_padding"
+                android:paddingBottom="@dimen/subscription_form_section_bottom_padding"
+                app:layout_constraintTop_toBottomOf="@+id/layout_constraint_subscription_end_rule_section_header">
+
+                <chat.sphinx.subscription.ui.widgets.SphinxRadioGroup
+                    android:id="@+id/radio_group_subscription_end_rule"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent">
+
+                    <RadioButton
+                        android:id="@+id/radio_button_subscription_make_quantity"
+                        android:layout_width="wrap_content"
+                        android:layout_height="@dimen/subscription_form_big_field_height"
+                        android:textColor="@color/secondaryText"
+                        android:text="@string/make"
+                        android:paddingStart="@dimen/default_half_layout_margin"
+                        style="@style/CustomRadioButtonStyle"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"/>
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/layout_constraint_subscription_make_quantity"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/default_layout_margin"
+                        android:background="@drawable/edit_text_background"
+                        app:layout_constraintTop_toTopOf="@+id/radio_button_subscription_make_quantity"
+                        app:layout_constraintBottom_toBottomOf="@+id/radio_button_subscription_make_quantity"
+                        app:layout_constraintStart_toEndOf="@+id/radio_button_subscription_make_quantity"
+                        app:layout_constraintEnd_toStartOf="@+id/text_view_payments">
+
+                        <androidx.appcompat.widget.AppCompatEditText
+                            android:id="@+id/edit_text_subscription_make_quantity"
+                            android:layout_width="100dp"
+                            android:layout_height="wrap_content"
+                            android:inputType="number"
+                            android:singleLine="true"
+                            android:textColor="@color/text"
+                            android:fontFamily="@font/roboto_regular"
+                            android:backgroundTint="@android:color/transparent"
+                            android:textCursorDrawable="@drawable/cursor"
+                            android:gravity="center"
+                            android:enabled="false"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintBottom_toBottomOf="parent" />
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/text_view_subscription_payments"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="@dimen/default_layout_margin"
+                        android:textColor="@color/secondaryText"
+                        android:text="@string/payments"
+                        app:layout_constraintStart_toEndOf="@+id/layout_constraint_subscription_make_quantity"
+                        app:layout_constraintBottom_toBottomOf="@+id/layout_constraint_subscription_make_quantity"
+                        app:layout_constraintTop_toTopOf="@+id/layout_constraint_subscription_make_quantity" />
+
+                    <RadioButton
+                        android:id="@+id/radio_button_subscription_pay_until"
+                        android:layout_width="0dp"
+                        android:layout_height="@dimen/subscription_form_big_field_height"
+                        android:textColor="@color/secondaryText"
+                        android:text="@string/pay_until"
+                        android:paddingStart="@dimen/default_half_layout_margin"
+                        style="@style/CustomRadioButtonStyle"
+                        app:layout_constraintTop_toBottomOf="@+id/radio_button_subscription_make_quantity"
+                        app:layout_constraintStart_toStartOf="parent" />
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/layout_constraint_subscription_pay_until"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="@dimen/default_layout_margin"
+                        android:layout_marginStart="@dimen/default_layout_margin"
+                        android:paddingStart="10dp"
+                        android:background="@drawable/edit_text_background"
+                        app:layout_constraintStart_toEndOf="@+id/radio_button_subscription_pay_until"
+                        app:layout_constraintBottom_toBottomOf="@+id/radio_button_subscription_pay_until"
+                        app:layout_constraintTop_toTopOf="@+id/radio_button_subscription_pay_until">
+
+                        <androidx.appcompat.widget.AppCompatEditText
+                            android:id="@+id/edit_text_subscription_pay_until"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:minWidth="170dp"
+                            android:inputType="date"
+                            android:singleLine="true"
+                            android:clickable="false"
+                            android:cursorVisible="false"
+                            android:focusable="false"
+                            android:focusableInTouchMode="false"
+                            android:textColor="@color/text"
+                            android:fontFamily="@font/roboto_regular"
+                            android:backgroundTint="@android:color/transparent"
+                            android:textCursorDrawable="@drawable/cursor"
+                            android:gravity="center"
+                            android:drawableStart="@drawable/ic_calendar"
+                            android:enabled="false"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintBottom_toBottomOf="parent" />
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
+                </chat.sphinx.subscription.ui.widgets.SphinxRadioGroup>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_subscription_save"
+        android:layout_width="230dp"
+        android:layout_height="52dp"
+        android:layout_marginBottom="33dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/button_subscription_save"
+            style="@style/RoundedBlueButton"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:textSize="@dimen/default_header_text_size"
+            android:textColor="@android:color/white"
+            android:background="@drawable/button_background_white_rad_48"
+            android:backgroundTint="@color/primaryBlue" />
+
+        <ProgressBar
+            android:id="@+id/progress_bar_subscription_save"
+            android:layout_width="@dimen/default_progress_bar_xy"
+            android:layout_height="@dimen/default_progress_bar_xy"
+            android:layout_marginLeft="@dimen/default_progress_bar_margin_left"
+            style="?android:attr/progressBarStyle"
+            android:indeterminateTint="@android:color/white"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:indeterminate="true" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

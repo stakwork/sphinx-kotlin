@@ -58,6 +58,7 @@
             android:id="@+id/layout_constraint_existing_contact_profile_picture"
             android:layout_width="@dimen/default_form_scan_icon_container_width"
             android:layout_height="match_parent"
+            android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintEnd_toEndOf="parent">
@@ -168,7 +169,7 @@
                 android:background="@drawable/ic_qr_code"
                 android:backgroundTint="@color/secondaryText"
                 android:layout_marginBottom="@dimen/default_form_scan_icon_bottom_margin"
-                android:visibility="visible"
+                android:visibility="gone"
                 />
 
         </androidx.constraintlayout.widget.ConstraintLayout>

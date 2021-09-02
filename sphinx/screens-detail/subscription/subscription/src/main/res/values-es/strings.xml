@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="subscription_header_name">PAGOS RECURRENTES</string>
+    <string name="amount">Monto</string>
+    <string name="custom_amount">Monto:</string>
+    <string name="_500_sats">500 sats</string>
+    <string name="_1000_sats">1000 sats</string>
+    <string name="_2000_sats">2000 sats</string>
+    <string name="time_interval">INTERVALO DE TIEMPO</string>
+    <string name="daily">Diariament</string>
+    <string name="weekly">Semanalmente</string>
+    <string name="monthly">Mensualmente</string>
+    <string name="end_rule">FINALIZACIÓN</string>
+    <string name="make">Realizar</string>
+    <string name="payments">Pagos</string>
+    <string name="pay_until">Pagar hasta</string>
+    <string name="delete_subscription">Eliminar suscripción</string>
+    <string name="are_you_sure_you_want_to_delete_subscription">¿Está seguro de que desea eliminar esta suscripción?</string>
+    <string name="amount_is_required">Monto requerido</string>
+    <string name="time_interval_is_required">Intervalo de tiempo requerido</string>
+    <string name="please_set_either_the_number_of_payments_to_make_or_end_date">Establezca la cantidad de pagos a realizar o la fecha de finalización</string>
+    <string name="failed_to_save_subscription">No se pudo guardar la suscripción</string>
+    <string name="saved_subscription_successfully">Suscripción guardada correctamente</string>
+    <string name="deleting_subscription">Eliminando suscripción</string>
+    <string name="failed_to_pause_subscription">No se pudo pausar la suscripción</string>
+    <string name="successfully_paused_subscription">Suscripción pausada con éxito</string>
+    <string name="failed_to_restart_subscription">No se pudo reiniciar la suscripción</string>
+    <string name="successfully_restarted_subscription">Suscripción reiniciada correctamente</string>
+    <string name="subscribe">Suscribir</string>
+    <string name="update_subscription">Actualizar</string>
+    <string name="failed_to_delete_subscription">No se pudo borrar la suscripción</string>
+</resources>

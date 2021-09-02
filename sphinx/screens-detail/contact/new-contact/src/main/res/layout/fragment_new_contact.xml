@@ -10,7 +10,7 @@
 
     <include
         android:id="@+id/include_new_contact_header"
-        layout="@layout/layout_detail_screen_header"
+        layout="@layout/layout_contact_detail_screen_header"
         android:layout_width="match_parent"
         android:layout_height="@dimen/default_header_height"
         app:layout_constraintTop_toTopOf="parent" />

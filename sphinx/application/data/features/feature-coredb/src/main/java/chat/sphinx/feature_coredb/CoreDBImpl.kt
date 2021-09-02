@@ -6,19 +6,21 @@ import chat.sphinx.conceptcoredb.*
 import chat.sphinx.feature_coredb.adapters.chat.*
 import chat.sphinx.feature_coredb.adapters.common.*
 import chat.sphinx.feature_coredb.adapters.contact.*
-import chat.sphinx.feature_coredb.adapters.contact.ContactAliasAdapter
-import chat.sphinx.feature_coredb.adapters.contact.ContactOwnerAdapter
-import chat.sphinx.feature_coredb.adapters.contact.LightningNodeAliasAdapter
-import chat.sphinx.feature_coredb.adapters.contact.LightningRouteHintAdapter
-import chat.sphinx.feature_coredb.adapters.contact.PrivatePhotoAdapter
 import chat.sphinx.feature_coredb.adapters.invite.InviteStringAdapter
-import chat.sphinx.feature_coredb.adapters.media.*
+import chat.sphinx.feature_coredb.adapters.media.MediaKeyAdapter
+import chat.sphinx.feature_coredb.adapters.media.MediaKeyDecryptedAdapter
+import chat.sphinx.feature_coredb.adapters.media.MediaTokenAdapter
+import chat.sphinx.feature_coredb.adapters.media.MediaTypeAdapter
 import chat.sphinx.feature_coredb.adapters.message.*
+import chat.sphinx.feature_coredb.adapters.subscription.CronAdapter
+import chat.sphinx.feature_coredb.adapters.subscription.EndNumberAdapter
+import chat.sphinx.feature_coredb.adapters.subscription.SubscriptionCountAdapter
 import com.squareup.moshi.Moshi
 import com.squareup.sqldelight.db.SqlDriver
 import io.matthewnelson.concept_encryption_key.EncryptionKey
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.collect
 
 abstract class CoreDBImpl(private val moshi: Moshi): CoreDB() {
 
@@ -145,6 +147,18 @@ abstract class CoreDBImpl(private val moshi: Moshi): CoreDB() {
                     media_tokenAdapter = MediaTokenAdapter(),
                     local_fileAdapter = FileAdapter.getInstance(),
                 ),
+                subscriptionDboAdapter = SubscriptionDbo.Adapter(
+                    idAdapter = SubscriptionIdAdapter.getInstance(),
+                    cronAdapter = CronAdapter(),
+                    amountAdapter = SatAdapter.getInstance(),
+                    end_numberAdapter = EndNumberAdapter(),
+                    countAdapter = SubscriptionCountAdapter(),
+                    end_dateAdapter = DateTimeAdapter.getInstance(),
+                    created_atAdapter = DateTimeAdapter.getInstance(),
+                    updated_atAdapter = DateTimeAdapter.getInstance(),
+                    chat_idAdapter = ChatIdAdapter.getInstance(),
+                    contact_idAdapter = ContactIdAdapter.getInstance()
+                )
             ).sphinxDatabaseQueries
         }
     }
