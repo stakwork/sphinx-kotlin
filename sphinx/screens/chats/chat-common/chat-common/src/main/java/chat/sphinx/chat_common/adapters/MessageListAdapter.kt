@@ -304,9 +304,7 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                 includePaidMessageReceivedDetailsHolder.apply {
                     buttonPayAttachment.setOnClickListener {
                         currentViewState?.message?.let { message ->
-                            onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-                                viewModel.payAttachment(message)
-                            }
+                            viewModel.payAttachment(message)
                         }
                     }
                     buttonPayAttachment.setOnLongClickListener(selectedMessageLongClickListener)
