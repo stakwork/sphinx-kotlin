@@ -11,6 +11,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.LayoutRes
 import androidx.constraintlayout.motion.widget.MotionLayout
+import androidx.core.view.isVisible
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
@@ -34,6 +35,7 @@ import chat.sphinx.chat_common.ui.viewstate.selected.MenuItemState
 import chat.sphinx.chat_common.ui.viewstate.selected.SelectedMessageViewState
 import chat.sphinx.chat_common.ui.viewstate.selected.setMenuColor
 import chat.sphinx.chat_common.ui.viewstate.selected.setMenuItems
+import chat.sphinx.chat_common.ui.widgets.SphinxFullscreenImageView
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
@@ -53,6 +55,7 @@ import chat.sphinx.menu_bottom.ui.BottomMenu
 import chat.sphinx.menu_bottom.ui.MenuBottomViewState
 import chat.sphinx.resources.*
 import chat.sphinx.wrapper_chat.isTrue
+import chat.sphinx.wrapper_common.lightning.toSat
 import chat.sphinx.wrapper_meme_server.headerKey
 import chat.sphinx.wrapper_meme_server.headerValue
 import chat.sphinx.wrapper_message.getColorKey
@@ -64,6 +67,7 @@ import chat.sphinx.wrapper_view.Dp
 import io.matthewnelson.android_feature_screens.ui.motionlayout.MotionLayoutFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
+import io.matthewnelson.android_feature_screens.util.goneIfTrue
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.currentViewState
 import io.matthewnelson.android_feature_viewmodel.updateViewState
@@ -277,6 +281,10 @@ abstract class ChatFragment<
 
                 sendMessageBuilder.setText(editTextChatFooter.text?.toString())
 
+                sendMessageBuilder.setMessagePrice(
+                    attachmentSendBinding.editTextMessagePrice.text?.toString()?.toLongOrNull()?.toSat()
+                )
+
                 val attachmentViewState = viewModel.getAttachmentSendViewStateFlow().value
 
                 @Exhaustive
@@ -307,6 +315,7 @@ abstract class ChatFragment<
 
                     sendMessageBuilder.clear()
                     editTextChatFooter.setText("")
+                    attachmentSendBinding.editTextMessagePrice.setText("")
 
                     viewModel.messageReplyViewStateContainer.updateViewState(MessageReplyViewState.ReplyingDismissed)
                 }
@@ -408,6 +417,8 @@ abstract class ChatFragment<
             }
 
             textViewAttachmentSendHeaderClose.setOnClickListener {
+                editTextMessagePrice.setText("")
+
                 val vs = viewModel.getAttachmentSendViewStateFlow().value
                 if (vs is AttachmentSendViewState.Preview) {
                     viewModel.deleteUnsentAttachment(vs)
@@ -440,10 +451,25 @@ abstract class ChatFragment<
 
             imageViewAttachmentFullscreen.onSingleTapListener = object: SphinxFullscreenImageView.OnSingleTapListener {
                 override fun onSingleTapConfirmed() {
-                    // TODO: Add swipe gestures to close full screen so single taps can head the header
-//                    layoutConstraintAttachmentFullscreenHeader.goneIfTrue(
-//                        layoutConstraintAttachmentFullscreenHeader.isVisible
-//                    )
+                    layoutConstraintAttachmentFullscreenHeader.goneIfTrue(
+                        layoutConstraintAttachmentFullscreenHeader.isVisible
+                    )
+                }
+            }
+
+            imageViewAttachmentFullscreen.onCloseViewHandler = object: SphinxFullscreenImageView.OnCloseViewHandler() {
+                override fun onCloseView() {
+                    imageViewAttachmentFullscreen.animate()
+                        .scaleY(0f)
+                        .scaleX(0f)
+                        .setDuration(200L)
+                        .withEndAction {
+                            viewModel.updateAttachmentFullscreenViewState(
+                                AttachmentFullscreenViewState.Idle
+                            )
+                        }
+                        .start()
+
                 }
             }
         }
@@ -1026,10 +1052,7 @@ abstract class ChatFragment<
                             imageViewAttachmentFullscreen.setImageDrawable(null)
                         }
                         is AttachmentFullscreenViewState.Fullscreen -> {
-                            imageViewAttachmentFullscreen.scaleX = 1.0f
-                            imageViewAttachmentFullscreen.scaleY = 1.0f
-                            imageViewAttachmentFullscreen.translationX = 0f
-                            imageViewAttachmentFullscreen.translationY = 0f
+                            imageViewAttachmentFullscreen.resetInteractionProperties()
 
                             viewState.media?.localFile?.let { nnLocalFile ->
                                 lifecycleScope.launch(viewModel.mainImmediate) {

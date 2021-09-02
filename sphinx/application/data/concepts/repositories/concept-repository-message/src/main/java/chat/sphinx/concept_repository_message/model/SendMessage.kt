@@ -14,6 +14,7 @@ class SendMessage private constructor(
     val text: String?,
     val giphyData: GiphyData?,
     val isBoost: Boolean,
+    val messagePrice: Sat?,
     val priceToMeet: Sat?
 ) {
 
@@ -25,6 +26,7 @@ class SendMessage private constructor(
         private var text: String?                   = null
         private var giphyData: GiphyData?           = null
         private var isBoost: Boolean                = false
+        private var messagePrice: Sat?              = null
         private var priceToMeet: Sat?               = null
 
         @Synchronized
@@ -36,6 +38,7 @@ class SendMessage private constructor(
             text = null
             giphyData = null
             isBoost = false
+            messagePrice = null
             priceToMeet = null
         }
 
@@ -114,6 +117,12 @@ class SendMessage private constructor(
         }
 
         @Synchronized
+        fun setMessagePrice(messagePrice: Sat?): Builder {
+            this.messagePrice = messagePrice
+            return this
+        }
+
+        @Synchronized
         fun build(): SendMessage? =
             if (!isValid) {
                 null
@@ -126,6 +135,7 @@ class SendMessage private constructor(
                     text,
                     giphyData?.let { GiphyData(it.id, it.url, it.aspect_ratio, text) },
                     isBoost,
+                    messagePrice,
                     priceToMeet
                 )
             }

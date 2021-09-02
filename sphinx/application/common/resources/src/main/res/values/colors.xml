@@ -51,6 +51,7 @@
     <color name="imagePreviewBackground">#B3000000</color>
 
     <color name="primaryGreen">#49C998</color>
+    <color name="whiteSemiTransparent">#B3FFFFFF</color>
     <color name="greenBorder">#2EB379</color>
 
     <color name="primaryRed">#ED7474</color>

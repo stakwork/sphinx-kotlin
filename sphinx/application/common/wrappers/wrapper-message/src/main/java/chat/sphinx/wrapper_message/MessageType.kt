@@ -33,16 +33,6 @@ inline fun MessageType.isAttachment(): Boolean =
 
 @OptIn(ExperimentalContracts::class)
 @Suppress("NOTHING_TO_INLINE")
-inline fun MessageType.isPurchase(): Boolean {
-    contract {
-        returns(true) implies (this@isPurchase is MessageType.Purchase)
-    }
-
-    return this is MessageType.Purchase
-}
-
-@OptIn(ExperimentalContracts::class)
-@Suppress("NOTHING_TO_INLINE")
 inline fun MessageType.isGroupAction(): Boolean {
     contract {
         returns(true) implies (this@isGroupAction is MessageType.GroupAction)

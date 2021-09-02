@@ -76,6 +76,7 @@ import chat.sphinx.wrapper_meme_server.PublicAttachmentInfo
 import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message_media.*
 import chat.sphinx.wrapper_message_media.token.MediaHost
+import chat.sphinx.wrapper_message_media.token.MediaMUID
 import chat.sphinx.wrapper_podcast.Podcast
 import chat.sphinx.wrapper_podcast.PodcastDestination
 import chat.sphinx.wrapper_relay.AuthorizationToken
@@ -1458,6 +1459,7 @@ abstract class SphinxRepository(
         queries: SphinxDatabaseQueries,
         messageDbo: MessageDbo,
         reactions: List<Message>? = null,
+        purchaseItems: List<Message>? = null,
         replyMessage: ReplyUUID? = null,
     ): Message {
 
@@ -1585,6 +1587,7 @@ abstract class SphinxRepository(
         }
 
         message._reactions = reactions
+        message._purchaseItems = purchaseItems
 
         replyMessage?.value?.toMessageUUID()?.let { uuid ->
             queries.messageGetToShowByUUID(uuid).executeAsOneOrNull()?.let { replyDbo ->
@@ -1607,13 +1610,21 @@ abstract class SphinxRepository(
                         val reactionsMap: MutableMap<MessageUUID, ArrayList<Message>> =
                             LinkedHashMap(listMessageDbo.size)
 
+                        val purchaseItemsMap: MutableMap<MessageMUID, ArrayList<Message>> =
+                            LinkedHashMap(listMessageDbo.size)
+
                         for (dbo in listMessageDbo) {
                             dbo.uuid?.let { uuid ->
                                 reactionsMap[uuid] = ArrayList(0)
                             }
+                            dbo.muid?.let { muid ->
+                                purchaseItemsMap[muid] = ArrayList(0)
+                            }
                         }
 
                         val replyUUIDs = reactionsMap.keys.map { ReplyUUID(it.value) }
+
+                        val purchaseItemsMUIDs = purchaseItemsMap.keys.map { MessageMUID(it.value) }
 
                         replyUUIDs.chunked(500).forEach { chunkedIds ->
                             queries.messageGetAllReactionsByUUID(
@@ -1631,11 +1642,28 @@ abstract class SphinxRepository(
                                 }
                         }
 
+                        purchaseItemsMUIDs.chunked(500).forEach { chunkedMUIDs ->
+                            queries.messageGetAllPurchaseItemsByMUID(
+                                chatId,
+                                chunkedMUIDs,
+                            ).executeAsList()
+                                .let { response ->
+                                    response.forEach { dbo ->
+                                        dbo.muid?.let { muid ->
+                                            purchaseItemsMap[muid]?.add(
+                                                mapMessageDboAndDecryptContentIfNeeded(queries, dbo)
+                                            )
+                                        }
+                                    }
+                                }
+                        }
+
                         listMessageDbo.reversed().map { dbo ->
                             mapMessageDboAndDecryptContentIfNeeded(
                                 queries,
                                 dbo,
                                 dbo.uuid?.let { reactionsMap[it] },
+                                dbo.muid?.let { purchaseItemsMap[it] },
                                 dbo.reply_uuid,
                             )
                         }
@@ -1910,6 +1938,7 @@ abstract class SphinxRepository(
                                 null,
                                 message?.second,
                                 message?.first,
+                                null
                             )
 
                             if (media != null) {
@@ -1998,6 +2027,7 @@ abstract class SphinxRepository(
                     mediaKeyMap,
                     postMemeServerDto?.mime,
                     postMemeServerDto?.muid,
+                    sendMessage.messagePrice?.value,
                     sendMessage.isBoost
                 )
             } catch (e: IllegalArgumentException) {
@@ -2243,6 +2273,7 @@ abstract class SphinxRepository(
                     null,
                     message.messageMedia?.mediaType?.value,
                     message.messageMedia?.muid?.value,
+                    null,
                     false
                 )
             } catch (e: IllegalArgumentException) {
@@ -2647,6 +2678,51 @@ abstract class SphinxRepository(
         }.join()
 
         return response ?: Response.Error(ResponseError(""))
+    }
+
+    override suspend fun payAttachment(message: Message) : Response<Any, ResponseError> {
+        var response: Response<Any, ResponseError> = Response.Error(ResponseError("Failed to pay for attachment"))
+
+        applicationScope.launch(mainImmediate) {
+            val queries = coreDB.getSphinxDatabaseQueries()
+
+            message.messageMedia?.mediaToken?.let { mediaToken ->
+                mediaToken.getPriceFromMediaToken()?.let { price ->
+
+                    networkQueryMessage.payAttachment(
+                        message.chatId,
+                        message.sender,
+                        price,
+                        mediaToken
+                    ).collect { loadResponse ->
+                        @Exhaustive
+                        when (loadResponse) {
+                            is LoadResponse.Loading -> {}
+
+                            is Response.Error -> {
+                                response = Response.Error(
+                                    ResponseError(loadResponse.message, loadResponse.exception)
+                                )
+                            }
+                            is Response.Success -> {
+                                response = loadResponse
+
+                                messageLock.withLock {
+                                    withContext(io) {
+                                        queries.transaction {
+                                            upsertMessage(loadResponse.value, queries)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                }
+            }
+        }.join()
+
+        return response
     }
 
     override suspend fun toggleChatMuted(chat: Chat): Response<Boolean, ResponseError> {

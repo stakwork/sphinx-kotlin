@@ -95,6 +95,11 @@
     <string name="attachment_send_header_video">動画を送る</string>
     <string name="attachment_send_header_giphy">ミームを送る</string>
 
+    <!-- Pay Attachment -->
+    <string name="attachment_price_label">課金額: </string>
+    <string name="alert_confirm_pay_attachment_title">Confirm Purchase</string>
+    <string name="alert_confirm_pay_attachment_message">Are you sure you want to purchase this item?</string>
+
     <!-- Save Attachment -->
     <string name="saved_attachment_successfully">添付ファイルを正常に保存しました</string>
     <string name="failed_to_save_file">ファイルの保存に失敗しました</string>

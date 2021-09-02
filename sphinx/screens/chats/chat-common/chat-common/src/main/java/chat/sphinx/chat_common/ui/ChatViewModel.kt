@@ -1127,7 +1127,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         drawable: Drawable?
     ) {
         viewModelScope.launch(mainImmediate) {
-            if (message.isMediaAttachment) {
+            if (message.isMediaAttachmentAvailable) {
                 message.retrieveImageUrlAndMessageMedia()?.let { mediaUrlAndMessageMedia ->
                     mediaUrlAndMessageMedia.second?.let { messageMedia ->
                         val mediaContentValues = messageMedia.retrieveContentValues(message)
@@ -1192,6 +1192,39 @@ abstract class ChatViewModel<ARGS: NavArgs>(
             updateAttachmentFullscreenViewState(
                 AttachmentFullscreenViewState.Fullscreen(it.first, it.second)
             )
+        }
+    }
+
+    // TODO: Re-work to track messageID + job such that multiple paid messages can
+    //  be fired at a time, but only once for that particular message until a response
+    //  is had. Current implementation requires 1 Paid message confirmation to complete
+    //  before allowing another one to be fired off.
+    private var payAttachmentJob: Job? = null
+    fun payAttachment(message: Message) {
+        if (payAttachmentJob?.isActive == true) {
+            return
+        }
+
+
+        val sideEffect = ChatSideEffect.AlertConfirmPayAttachment {
+            payAttachmentJob = viewModelScope.launch(mainImmediate) {
+
+                @Exhaustive
+                when (val response = messageRepository.payAttachment(message)) {
+                    is Response.Error -> {
+                        submitSideEffect(ChatSideEffect.Notify(response.cause.message))
+                    }
+                    is Response.Success -> {
+                        // give time for DB to push new data to render to screen
+                        // to inhibit firing of another payAttachment
+                        delay(100L)
+                    }
+                }
+            }
+        }
+
+        viewModelScope.launch(mainImmediate) {
+            submitSideEffect(sideEffect)
         }
     }
 }

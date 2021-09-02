@@ -511,7 +511,8 @@ CREATE TABLE messageDbo(
     sender_alias                TEXT            AS SenderAlias,
     sender_pic                  TEXT            AS PhotoUrl,
     original_muid               TEXT            AS MessageMUID,
-    reply_uuid                  TEXT            AS ReplyUUID
+    reply_uuid                  TEXT            AS ReplyUUID,
+    muid                        TEXT            AS MessageMUID
 );
 
 messageGetAllReactionsByUUID:
@@ -521,6 +522,13 @@ WHERE chat_id = :chat_id
 AND (type = 29
     AND reply_uuid IN :reply_uuids
 );
+
+messageGetAllPurchaseItemsByMUID:
+SELECT *
+FROM messageDbo
+WHERE chat_id = :chat_id
+AND type IN (7, 8, 9)
+AND muid IN :muids;
 
 messageGetAllByUUID:
 SELECT *
@@ -643,7 +651,8 @@ messageUpsert {
         sender_alias,
         sender_pic,
         original_muid,
-        reply_uuid
+        reply_uuid,
+        muid
     )
     VALUES (
         :id,
@@ -664,7 +673,8 @@ messageUpsert {
         :sender_alias,
         :sender_pic,
         :original_muid,
-        :reply_uuid
+        :reply_uuid,
+        :muid
     );
 }
 

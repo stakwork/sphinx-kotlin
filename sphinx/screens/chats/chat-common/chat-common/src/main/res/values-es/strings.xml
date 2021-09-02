@@ -96,6 +96,11 @@
     <string name="attachment_send_header_video">ENVIAR VIDEO</string>
     <string name="attachment_send_header_giphy">ENVIAR GIPHY</string>
 
+    <!-- Pay Attachment -->
+    <string name="attachment_price_label">Precio: </string>
+    <string name="alert_confirm_pay_attachment_title">Confirmar Compra</string>
+    <string name="alert_confirm_pay_attachment_message">¿Estas seguro de que quieres comprar este artículo?</string>
+
     <!-- Save Attachment -->
     <string name="saved_attachment_successfully">Archivo adjunto guardado correctamente</string>
     <string name="failed_to_save_file">No se pudo guardar el archivo</string>

@@ -14,6 +14,10 @@
     <dimen name="chat_message_inner_padding">8dp</dimen>
     <dimen name="chat_message_rounded_corner_radius">9dp</dimen>
 
+    <dimen name="chat_message_attachment_price_text_size">12sp</dimen>
+    <dimen name="chat_message_attachment_price_edit_text_min_width">50dp</dimen>
+    <dimen name="chat_message_attachment_price_edit_text_text_size">14sp</dimen>
+
     <dimen name="chat_header_headline_text_size">16sp</dimen>
     <dimen name="chat_header_phone_text_size">25sp</dimen>
     <dimen name="chat_message_text_size">17sp</dimen>

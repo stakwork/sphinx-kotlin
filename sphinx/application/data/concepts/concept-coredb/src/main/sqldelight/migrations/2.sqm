@@ -6,6 +6,7 @@ import chat.sphinx.wrapper_common.subscription.Cron;
 import chat.sphinx.wrapper_common.subscription.EndNumber;
 import chat.sphinx.wrapper_common.subscription.SubscriptionCount;
 import chat.sphinx.wrapper_common.subscription.SubscriptionId;
+import chat.sphinx.wrapper_message.MessageMUID;
 
 CREATE TABLE subscriptionDbo(
     id                          INTEGER         AS SubscriptionId NOT NULL PRIMARY KEY,
@@ -21,3 +22,5 @@ CREATE TABLE subscriptionDbo(
     chat_id                     INTEGER         AS ChatId NOT NULL,
     contact_id                  INTEGER         AS ContactId NOT NULL
 );
+
+ALTER TABLE messageDbo ADD COLUMN muid TEXT AS MessageMUID;
