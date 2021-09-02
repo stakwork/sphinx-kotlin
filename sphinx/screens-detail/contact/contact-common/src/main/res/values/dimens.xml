@@ -9,4 +9,7 @@
     <dimen name="save_to_contacts_button_width">230dp</dimen>
     <dimen name="save_progress_bar_xy">25dp</dimen>
     <dimen name="save_progress_bar_margin_left">10dp</dimen>
+
+    <dimen name="edit_contact_header_subscribe_button_height">30dp</dimen>
+    <dimen name="edit_contact_header_subscribe_button_text_size">14sp</dimen>
 </resources>

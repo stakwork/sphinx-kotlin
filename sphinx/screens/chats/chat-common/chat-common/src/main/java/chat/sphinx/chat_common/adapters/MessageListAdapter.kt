@@ -24,9 +24,11 @@ import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.wrapper_common.dashboard.ContactId
+import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_message.Message
 import chat.sphinx.wrapper_message.MessageType
+import chat.sphinx.wrapper_message.PurchaseStatus
 import chat.sphinx.wrapper_view.Px
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.visible
@@ -297,6 +299,15 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                         }
                     }
                     imageViewAttachmentImage.setOnLongClickListener(selectedMessageLongClickListener)
+                }
+
+                includePaidMessageReceivedDetailsHolder.apply {
+                    buttonPayAttachment.setOnClickListener {
+                        currentViewState?.message?.let { message ->
+                            viewModel.payAttachment(message)
+                        }
+                    }
+                    buttonPayAttachment.setOnLongClickListener(selectedMessageLongClickListener)
                 }
             }
 

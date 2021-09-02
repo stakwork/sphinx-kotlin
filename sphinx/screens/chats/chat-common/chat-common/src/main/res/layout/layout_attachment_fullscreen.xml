@@ -23,7 +23,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <chat.sphinx.chat_common.ui.SphinxFullscreenImageView
+    <chat.sphinx.chat_common.ui.widgets.SphinxFullscreenImageView
         android:id="@+id/image_view_attachment_fullscreen"
         android:layout_width="match_parent"
         android:layout_height="0dp"

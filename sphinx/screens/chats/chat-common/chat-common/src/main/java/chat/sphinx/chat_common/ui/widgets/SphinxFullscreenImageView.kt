@@ -1,4 +1,4 @@
-package chat.sphinx.chat_common.ui
+package chat.sphinx.chat_common.ui.widgets
 
 import android.content.Context
 import android.util.AttributeSet
@@ -6,6 +6,7 @@ import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.ScaleGestureDetector
 import androidx.appcompat.widget.AppCompatImageView
+import kotlin.math.absoluteValue
 
 fun Float.rounded(): Float {
     return ((this*1000).toInt()/1000.0f)
@@ -21,11 +22,11 @@ class SphinxFullscreenImageView : AppCompatImageView {
     )
 
     var onSingleTapListener: OnSingleTapListener? = null
+    var onCloseViewHandler: OnCloseViewHandler? = null
 
-    private var scaleFactor = 1.0f;
+    private var scaleFactor = 1.0f
 
     private val scaleGestureDetector = ScaleGestureDetector(context, object: ScaleGestureDetector.SimpleOnScaleGestureListener() {
-
         override fun onScale(detector: ScaleGestureDetector): Boolean {
             scaleFactor = 1.0f.coerceAtLeast(scaleFactor * detector.scaleFactor)
 
@@ -61,6 +62,13 @@ class SphinxFullscreenImageView : AppCompatImageView {
                         .coerceIn(minimumTranslationX, maximumTranslationX)
                     translationY = (translationY - distanceY)
                         .coerceIn(minimumTranslationY, maximumTranslationY)
+                } else {
+                    // Enable user to swipe to close the image...
+                    translationY -= distanceY
+
+                    if (translationY.absoluteValue > 300) {
+                        onCloseViewHandler?.performClose()
+                    }
                 }
 
                 return true
@@ -102,10 +110,44 @@ class SphinxFullscreenImageView : AppCompatImageView {
         fun onSingleTapConfirmed()
     }
 
+    abstract class OnCloseViewHandler {
+        var isInProgress = false
 
-    override fun onTouchEvent(event: MotionEvent?): Boolean {
+        fun performClose() {
+            isInProgress = true
+            onCloseView()
+        }
+
+        protected abstract fun onCloseView()
+    }
+
+
+    override fun onTouchEvent(event: MotionEvent): Boolean {
+        if (onCloseViewHandler?.isInProgress == true) {
+            // We don't handle any touch events when closing
+            return true
+        }
         var result = scaleGestureDetector.onTouchEvent(event)
         result = gestureDetector.onTouchEvent(event) || result
+
+        if ( event.action == MotionEvent.ACTION_UP && scaleFactor == 1.0f) {
+            if (translationY.absoluteValue > 0) {
+                // When user stops scrolling the image
+                animate()
+                    .translationY(0f)
+                    .setDuration(300L)
+                    .start()
+            }
+        }
         return super.onTouchEvent(event) || result
+    }
+
+    fun resetInteractionProperties() {
+        scaleX = 1.0f
+        scaleY = 1.0f
+        translationX = 0f
+        translationY = 0f
+
+        onCloseViewHandler?.isInProgress = false
     }
 }

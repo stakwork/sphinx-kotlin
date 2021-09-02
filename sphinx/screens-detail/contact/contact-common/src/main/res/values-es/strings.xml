@@ -8,4 +8,6 @@
     <string name="new_contact_invalid_public_key_error">Clave Pública inválida</string>
     <string name="new_contact_invalid_route_hint_error">Pista de Ruta inválida</string>
     <string name="failed_to_update_contact">No se pudo guardar el contacto</string>
+    <string name="edit_contact_header_subscribe_button">Suscribirse</string>
+    <string name="edit_contact_header_subscribed_button">Suscripto</string>
 </resources>

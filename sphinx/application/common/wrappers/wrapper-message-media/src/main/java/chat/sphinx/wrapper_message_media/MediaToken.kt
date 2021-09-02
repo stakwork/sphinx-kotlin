@@ -1,5 +1,7 @@
 package chat.sphinx.wrapper_message_media
 
+import chat.sphinx.wrapper_common.lightning.Sat
+import chat.sphinx.wrapper_common.lightning.toSat
 import chat.sphinx.wrapper_message_media.token.MediaHost
 import chat.sphinx.wrapper_message_media.token.MediaMUID
 import chat.sphinx.wrapper_message_media.token.toMediaHostOrNull
@@ -24,6 +26,13 @@ inline fun MediaToken.getMUIDFromMediaToken(): MediaMUID? =
     getMediaTokenElementWithIndex(1, false)?.toMediaMUIDOrNull()
 
 @Suppress("NOTHING_TO_INLINE")
+inline fun MediaToken.getPriceFromMediaToken(): Sat =
+    getMediaAttributeWithName(MediaToken.AMT)
+        ?.toLongOrNull()
+        ?.toSat()
+        ?: Sat(0)
+
+@Suppress("NOTHING_TO_INLINE")
 inline fun MediaToken.getMediaAttributeWithName(name: String): String? {
     getMediaTokenElementWithIndex(4, true)?.let { metaData ->
         metaData.split("&").let { metaDataItems ->
@@ -42,7 +51,7 @@ inline fun MediaToken.getMediaTokenElementWithIndex(
     index: Int,
     base64Decoded: Boolean
 ): String? {
-    value.split(".").filter { it.isNotBlank() }.let { splits ->
+    value.split(".").let { splits ->
         if (splits.size > index) {
             val element = splits[index]
 
@@ -61,6 +70,8 @@ value class MediaToken(val value: String) {
 
     companion object {
         val PROVISIONAL_TOKEN = MediaToken("ProvisionalMediaToken")
+
+        const val AMT = "amt"
     }
 
     init {

@@ -1,5 +1,11 @@
 # ChangeLog
 
+## Version 1.0.0-alpha22 (2021-09-02)
+ - Adds ability to send an image with a price
+ - Adds ability to receive and pay for an image with a price
+ - Adds swipe to close feature when viewing full screen images
+ - Adds ability to create and modify subscriptions (recurring payments) for contacts
+
 ## Version 1.0.0-alpha21 (2021-08-27)
  - Improvements to loading of messages that contain Images
  - Improvements to Save Image functionality

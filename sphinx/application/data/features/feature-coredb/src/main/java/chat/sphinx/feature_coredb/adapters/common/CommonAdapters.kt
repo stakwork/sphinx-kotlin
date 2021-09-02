@@ -9,6 +9,7 @@ import chat.sphinx.wrapper_common.lightning.LightningPaymentHash
 import chat.sphinx.wrapper_common.lightning.LightningPaymentRequest
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.MessageId
+import chat.sphinx.wrapper_common.subscription.SubscriptionId
 import com.squareup.sqldelight.ColumnAdapter
 import java.io.File
 
@@ -315,5 +316,26 @@ internal class SeenAdapter private constructor(): ColumnAdapter<Seen, Long> {
 
     override fun encode(value: Seen): Long {
         return value.value.toLong()
+    }
+}
+
+internal class SubscriptionIdAdapter private constructor(): ColumnAdapter<SubscriptionId, Long> {
+
+    companion object {
+        @Volatile
+        private var instance: SubscriptionIdAdapter? = null
+        fun getInstance(): SubscriptionIdAdapter =
+            instance ?: synchronized(this) {
+                instance ?: SubscriptionIdAdapter()
+                    .also { instance = it }
+            }
+    }
+
+    override fun decode(databaseValue: Long): SubscriptionId {
+        return SubscriptionId(databaseValue)
+    }
+
+    override fun encode(value: SubscriptionId): Long {
+        return value.value
     }
 }

@@ -27,7 +27,7 @@
         app:layout_constraintTop_toTopOf="@+id/edit_text_chat_footer"
          />
 
-    <chat.sphinx.chat_common.ui.SphinxEditText
+    <chat.sphinx.chat_common.ui.widgets.SphinxEditText
         android:id="@+id/edit_text_chat_footer"
         android:layout_width="0dp"
         android:layout_height="wrap_content"

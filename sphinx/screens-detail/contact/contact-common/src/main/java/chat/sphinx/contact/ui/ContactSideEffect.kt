@@ -72,7 +72,8 @@ sealed class ContactSideEffect: SideEffect<Context>() {
         val photoUrl: PhotoUrl?,
         val colorKey: String?,
         val pubKey: LightningNodePubKey,
-        val routeHint: LightningRouteHint? = null
+        val routeHint: LightningRouteHint? = null,
+        val subscribed: Boolean
     ): ContactSideEffect() {
         override suspend fun execute(value: Context) {}
     }

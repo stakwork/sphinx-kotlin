@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="subscription_header_name">RECURRING</string>
+    <string name="amount">Amount</string>
+    <string name="_500_sats">500 sats</string>
+    <string name="_1000_sats">1000 sats</string>
+    <string name="_2000_sats">2000 sats</string>
+    <string name="custom_amount">Custom amount:</string>
+    <string name="time_interval">TIME INTERVAL</string>
+    <string name="daily">Daily</string>
+    <string name="weekly">Weekly</string>
+    <string name="monthly">Monthly</string>
+    <string name="end_rule">END RULE</string>
+    <string name="make">Make</string>
+    <string name="payments">Payments</string>
+    <string name="pay_until">Pay until</string>
+    <string name="delete_subscription">Delete subscription</string>
+    <string name="are_you_sure_you_want_to_delete_subscription">Are you sure you want to delete this subscription?</string>
+    <string name="amount_is_required">Amount is required</string>
+    <string name="time_interval_is_required">Time Interval is required</string>
+    <string name="please_set_either_the_number_of_payments_to_make_or_end_date">Please set either the number of payments to make or end date</string>
+    <string name="failed_to_save_subscription">Failed to save subscription</string>
+    <string name="saved_subscription_successfully">Saved subscription successfully</string>
+    <string name="deleting_subscription">Deleting subscription</string>
+    <string name="failed_to_pause_subscription">Failed to pause subscription</string>
+    <string name="successfully_paused_subscription">Successfully paused subscription</string>
+    <string name="failed_to_restart_subscription">Failed to restart subscription</string>
+    <string name="successfully_restarted_subscription">Successfully restarted subscription</string>
+    <string name="subscribe">Subscribe</string>
+    <string name="update_subscription">Update</string>
+    <string name="failed_to_delete_subscription">Failed to delete subscription</string>
+</resources>

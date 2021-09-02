@@ -4,8 +4,8 @@ import androidx.fragment.app.viewModels
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.contact.databinding.LayoutContactBinding
+import chat.sphinx.contact.databinding.LayoutContactDetailScreenHeaderBinding
 import chat.sphinx.contact.ui.ContactFragment
-import chat.sphinx.detail_resources.databinding.LayoutDetailScreenHeaderBinding
 import chat.sphinx.new_contact.R
 import chat.sphinx.new_contact.databinding.FragmentNewContactBinding
 import dagger.hilt.android.AndroidEntryPoint
@@ -28,9 +28,10 @@ internal class NewContactFragment: ContactFragment<
     override val viewModel: NewContactViewModel by viewModels()
     override val binding: FragmentNewContactBinding by viewBinding(FragmentNewContactBinding::bind)
 
-    override val headerBinding: LayoutDetailScreenHeaderBinding by viewBinding(
-        LayoutDetailScreenHeaderBinding::bind, R.id.include_new_contact_header
+    override val headerBinding: LayoutContactDetailScreenHeaderBinding by viewBinding(
+        LayoutContactDetailScreenHeaderBinding::bind, R.id.include_new_contact_header
     )
+
     override val contactBinding: LayoutContactBinding by viewBinding(
         LayoutContactBinding::bind, R.id.include_new_contact_layout
     )

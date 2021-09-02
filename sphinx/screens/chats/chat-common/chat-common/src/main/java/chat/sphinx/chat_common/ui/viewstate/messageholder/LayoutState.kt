@@ -7,6 +7,7 @@ import chat.sphinx.wrapper_common.lightning.*
 import chat.sphinx.wrapper_common.tribe.TribeJoinLink
 import chat.sphinx.wrapper_contact.ContactAlias
 import chat.sphinx.wrapper_message.MessageType
+import chat.sphinx.wrapper_message.PurchaseStatus
 import chat.sphinx.wrapper_message_media.MessageMedia
 
 internal sealed class LayoutState private constructor() {
@@ -59,7 +60,7 @@ internal sealed class LayoutState private constructor() {
 
             data class PaidMessageSentStatus(
                 val amount: Sat,
-                val purchaseType: MessageType.Purchase?,
+                val purchaseStatus: PurchaseStatus?,
             ): ContainerSecond() {
                 val amountText: String
                     get() = amount.asFormattedString(appendUnit = true)
@@ -79,6 +80,7 @@ internal sealed class LayoutState private constructor() {
             data class ImageAttachment(
                 val url: String,
                 val media: MessageMedia?,
+                val showPaidOverlay: Boolean
             ): ContainerSecond()
 
             data class PodcastBoost(
@@ -166,14 +168,13 @@ internal sealed class LayoutState private constructor() {
                     }
             }
 
-            data class PaidMessageDetails(
+            data class PaidMessageReceivedDetails(
                 val amount: Sat,
-                val purchaseType: MessageType.Purchase?,
-                val isShowingReceivedMessage: Boolean,
-                val showPaymentAcceptedIcon: Boolean,
-                val showPaymentProgressWheel: Boolean,
-                val showSendPaymentIcon: Boolean,
-                val showPaymentReceivedIcon: Boolean,
+                val purchaseStatus: PurchaseStatus,
+                val showStatusIcon: Boolean,
+                val showProcessingProgressBar: Boolean,
+                val showStatusLabel: Boolean,
+                val showPayElements: Boolean,
             ): ContainerFourth() {
                 val amountText: String
                     get() = amount.asFormattedString(appendUnit = true)

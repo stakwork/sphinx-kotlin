@@ -151,7 +151,6 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/layout_constraint_message_bubble_container_forth"
         android:layout_width="match_parent"
@@ -172,10 +171,10 @@
             android:id="@+id/include_paid_message_received_details_holder"
             layout="@layout/layout_paid_message_received"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="@dimen/paid_attachment_view_height"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:visibility="gone" />
+            app:layout_constraintTop_toBottomOf="@+id/include_message_type_boost"
+            tools:visibility="visible" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
