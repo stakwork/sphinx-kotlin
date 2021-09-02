@@ -24,4 +24,5 @@ inline fun SphinxDatabaseQueries.upsertMessage(dbo: MessageDbo): Unit =
         dbo.expiration_date,
         dbo.message_content,
         dbo.message_content_decrypted,
+        dbo.muid
     )

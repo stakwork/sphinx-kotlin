@@ -96,6 +96,12 @@ class MessageDboWrapper(val messageDbo: MessageDbo): Message() {
 
     @Volatile
     @Suppress("PropertyName")
+    var _purchaseItems: List<Message>? = null
+    override val purchaseItems: List<Message>?
+        get() = _purchaseItems
+
+    @Volatile
+    @Suppress("PropertyName")
     var _replyMessage: Message? = null
     override val replyMessage: Message?
         get() = _replyMessage
