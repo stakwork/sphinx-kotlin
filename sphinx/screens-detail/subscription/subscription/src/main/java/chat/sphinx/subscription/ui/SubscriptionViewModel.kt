@@ -12,15 +12,12 @@ import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.subscription.EndNumber
-import chat.sphinx.wrapper_subscription.Subscription
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
-import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
-import io.matthewnelson.concept_views.viewstate.value
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.util.*
@@ -47,18 +44,10 @@ internal class SubscriptionViewModel @Inject constructor(
         const val MONTHLY_INTERVAL: String = "MONTHLY"
     }
 
-    private val subscriptionSharedFlow: SharedFlow<Subscription?> = flow {
-        emitAll(subscriptionRepository.getActiveSubscriptionByContactId(ContactId(args.argContactId)))
-    }.shareIn(
-        viewModelScope,
-        SharingStarted.WhileSubscribed(2_000),
-        replay = 1,
-    )
-
     private inner class SubscriptionViewStateContainer: ViewStateContainer<SubscriptionViewState>(SubscriptionViewState.Idle) {
         override val viewStateFlow: StateFlow<SubscriptionViewState> by lazy {
             flow {
-                subscriptionSharedFlow.collect { subscription ->
+                subscriptionRepository.getActiveSubscriptionByContactId(ContactId(args.argContactId)).collect { subscription ->
                     emit(
                         if (subscription != null) {
                             val timeInterval = if (subscription.cron.value.endsWith("* * *")) {
