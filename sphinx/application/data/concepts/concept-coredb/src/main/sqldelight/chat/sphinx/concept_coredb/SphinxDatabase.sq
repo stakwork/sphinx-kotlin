@@ -763,7 +763,7 @@ WHERE ended = 0 AND contact_id = ?
 ORDER BY id DESC
 LIMIT 1;
 
-subscriptionGetByChatId:
+subscriptionGetAllByChatId:
 SELECT *
 FROM subscriptionDbo
 WHERE chat_id = ?;

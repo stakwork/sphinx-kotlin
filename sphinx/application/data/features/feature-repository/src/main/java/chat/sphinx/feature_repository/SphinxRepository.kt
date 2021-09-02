@@ -3655,7 +3655,7 @@ abstract class SphinxRepository(
             ).collect { loadResponse ->
                 @Exhaustive
                 when (loadResponse) {
-                    LoadResponse.Loading -> { }
+                    is LoadResponse.Loading -> {}
                     is Response.Error -> {
                         response = loadResponse
                     }
@@ -3691,8 +3691,9 @@ abstract class SphinxRepository(
             networkQuerySubscription.putRestartSubscription(
                 subscriptionId
             ).collect { loadResponse ->
+                @Exhaustive
                 when (loadResponse) {
-                    LoadResponse.Loading -> { }
+                    is LoadResponse.Loading -> {}
                     is Response.Error -> {
                         response = loadResponse
                     }
@@ -3728,8 +3729,9 @@ abstract class SphinxRepository(
             networkQuerySubscription.putPauseSubscription(
                 subscriptionId
             ).collect { loadResponse ->
+                @Exhaustive
                 when (loadResponse) {
-                    LoadResponse.Loading -> { }
+                    is LoadResponse.Loading -> {}
                     is Response.Error -> {
                         response = loadResponse
                     }
@@ -3764,8 +3766,9 @@ abstract class SphinxRepository(
             networkQuerySubscription.deleteSubscription(
                 subscriptionId
             ).collect { loadResponse ->
+                @Exhaustive
                 when (loadResponse) {
-                    LoadResponse.Loading -> { }
+                    is LoadResponse.Loading -> {}
                     is Response.Error -> {
                         response = loadResponse
                     }
