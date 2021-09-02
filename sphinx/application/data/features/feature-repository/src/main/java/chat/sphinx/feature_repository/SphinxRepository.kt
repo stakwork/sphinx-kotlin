@@ -3589,7 +3589,7 @@ abstract class SphinxRepository(
         endDate: String?,
         endNumber: EndNumber?
     ): Response<Any, ResponseError> {
-        var response: Response<SubscriptionDto, ResponseError>  = Response.Error(ResponseError(("Failed to create subscription")))
+        var response: Response<SubscriptionDto, ResponseError>? = null
 
         applicationScope.launch(mainImmediate) {
             networkQuerySubscription.postSubscription(
@@ -3626,7 +3626,8 @@ abstract class SphinxRepository(
                 }
             }
         }.join()
-        return response
+
+        return response ?: Response.Error(ResponseError(("Failed to create subscription")))
     }
 
     override suspend fun updateSubscription(
