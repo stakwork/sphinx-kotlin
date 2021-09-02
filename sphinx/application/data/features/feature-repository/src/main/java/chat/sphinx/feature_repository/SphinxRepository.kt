@@ -3571,7 +3571,7 @@ abstract class SphinxRepository(
         SubscriptionDboPresenterMapper(dispatchers)
     }
 
-    override suspend fun getActiveSubscriptionByContactId(contactId: ContactId): Flow<Subscription?> = flow {
+    override fun getActiveSubscriptionByContactId(contactId: ContactId): Flow<Subscription?> = flow {
         emitAll(
             coreDB.getSphinxDatabaseQueries().subscriptionGetLastActiveByContactId(contactId)
                 .asFlow()
