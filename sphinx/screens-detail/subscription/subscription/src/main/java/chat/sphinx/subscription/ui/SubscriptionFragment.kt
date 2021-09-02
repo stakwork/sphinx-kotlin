@@ -43,11 +43,12 @@ internal class SubscriptionFragment: SideEffectFragment<
         calendar.timeZone = TimeZone.getTimeZone(DateTime.UTC)
 
         binding.apply {
+
             textViewDetailScreenHeaderName.text = getString(R.string.subscription_header_name)
 
-            textViewDetailScreenHeaderNavBack.apply {
-                visible
-                setOnClickListener {
+            textViewDetailScreenHeaderNavBack.apply navBack@ {
+                this@navBack.visible
+                this@navBack.setOnClickListener {
                     lifecycleScope.launch { viewModel.navigator.popBackStack() }
                 }
             }
@@ -125,13 +126,13 @@ internal class SubscriptionFragment: SideEffectFragment<
 
                 val cron: String? = when (radioGroupSubscriptionTimeInterval.checkedRadioButtonId) {
                     R.id.radio_button_subscription_daily -> {
-                        "daily"
+                        SubscriptionViewModel.DAILY_INTERVAL
                     }
                     R.id.radio_button_subscription_weekly -> {
-                        "weekly"
+                        SubscriptionViewModel.WEEKLY_INTERVAL
                     }
                     R.id.radio_button_subscription_monthly -> {
-                        "monthly"
+                        SubscriptionViewModel.MONTHLY_INTERVAL
                     }
                     else -> null
                 }
@@ -181,10 +182,9 @@ internal class SubscriptionFragment: SideEffectFragment<
                     layoutConstraintSubscriptionEnablement.visible
                     buttonSubscriptionSave.text = getString(R.string.update_subscription)
 
-                    switchSubscriptionEnablement.isChecked = !viewState.subscription.ended && !viewState.subscription.paused
+                    switchSubscriptionEnablement.isChecked = viewState.isActive
 
-                    // Populate Amount
-                    when (viewState.subscription.amount.value) {
+                    when (viewState.amount) {
                         500L -> {
                             radioButtonSubscriptionAmount500Sats.isChecked = true
                         }
@@ -198,46 +198,42 @@ internal class SubscriptionFragment: SideEffectFragment<
                             radioButtonSubscriptionAmountCustom.isChecked = true
 
                             editTextSubscriptionCustomAmount.setText(
-                                viewState.subscription.amount.value.toString()
+                                viewState.amount.toString()
                             )
                         }
                     }
 
-                    // Populate Time Interval
-                    when  {
-                        viewState.subscription.cron.value.endsWith("* * *") -> {
-                            // Daily...
+                    when (viewState.timeInterval)  {
+                        SubscriptionViewModel.DAILY_INTERVAL -> {
                             radioButtonSubscriptionDaily.isChecked = true
                         }
-                        viewState.subscription.cron.value.endsWith("* *") -> {
-                            // Monthly
+                        SubscriptionViewModel.MONTHLY_INTERVAL -> {
                             radioButtonSubscriptionMonthly.isChecked = true
                         }
-                        else -> {
-                            // Weekly
+                        SubscriptionViewModel.WEEKLY_INTERVAL -> {
                             radioButtonSubscriptionWeekly.isChecked = true
                         }
                     }
 
                     // Populate End Rule
                     when {
-                        viewState.subscription.end_number != null -> {
+                        viewState.endNumber != null -> {
                             radioButtonSubscriptionMakeQuantity.isChecked = true
 
                             editTextSubscriptionMakeQuantity.setText(
-                                viewState.subscription.end_number!!.value.toString()
+                                viewState.endNumber!!.toString()
                             )
                         }
-                        viewState.subscription.end_date != null -> {
+                        viewState.endDate != null -> {
                             radioButtonSubscriptionPayUntil.isChecked = true
 
                             editTextSubscriptionPayUntil.setText(
                                 DateTime.getFormatMMMddyyyy(
                                     TimeZone.getTimeZone(DateTime.UTC)
-                                ).format(viewState.subscription.end_date!!.value)
+                                ).format(viewState.endDate!!.value)
                             )
 
-                            calendar.time = viewState.subscription.end_date!!.value
+                            calendar.time = viewState.endDate!!.value
                         }
                     }
                 }

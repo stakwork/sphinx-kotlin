@@ -5,10 +5,10 @@ import chat.sphinx.subscription.navigation.SubscriptionNavigator
 import javax.inject.Inject
 
 internal class SubscriptionNavigatorImpl @Inject constructor(
-    private val detailDriver: DetailNavigationDriver,
+    detailDriver: DetailNavigationDriver,
 ): SubscriptionNavigator(detailDriver) {
 
     override suspend fun closeDetailScreen() {
-        detailDriver.closeDetailScreen()
+        (navigationDriver as DetailNavigationDriver).closeDetailScreen()
     }
 }

@@ -756,15 +756,12 @@ SELECT *
 FROM subscriptionDbo
 WHERE id = ?;
 
-subscriptionGetByContactId:
+subscriptionGetLastActiveByContactId:
 SELECT *
 FROM subscriptionDbo
-WHERE ended = 0 AND contact_id = ?;
-
-activeSubscriptionGetByContactId:
-SELECT *
-FROM subscriptionDbo
-WHERE ended = 0 AND contact_id = ?;
+WHERE ended = 0 AND contact_id = ?
+ORDER BY id DESC
+LIMIT 1;
 
 subscriptionGetByChatId:
 SELECT *
@@ -777,8 +774,7 @@ FROM subscriptionDbo;
 
 subscriptionUpsert {
     UPDATE subscriptionDbo
-    SET id = :id,
-        cron = :cron,
+    SET cron = :cron,
         amount = :amount,
         end_number = :end_number,
         count = :count,
@@ -834,3 +830,7 @@ subscriptionUpdateEnded:
 UPDATE subscriptionDbo
 SET ended = :ended
 WHERE id = ?;
+
+subscriptionDeleteByContactId:
+DELETE FROM subscriptionDbo
+WHERE contact_id = ?;

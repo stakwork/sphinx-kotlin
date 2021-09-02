@@ -13,13 +13,13 @@ data class Subscription(
     val id: SubscriptionId,
     val cron: Cron,
     val amount: Sat,
-    val end_number: EndNumber?,
+    val endNumber: EndNumber?,
     val count: SubscriptionCount,
-    val end_date: DateTime?,
+    val endDate: DateTime?,
     val ended: Boolean,
     val paused: Boolean,
-    val created_at: DateTime,
-    val updated_at: DateTime,
-    val chat_id: ChatId,
-    val contact_id: ContactId
+    val createdAt: DateTime,
+    val updatedAt: DateTime,
+    val chatId: ChatId,
+    val contactId: ContactId
 )

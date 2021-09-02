@@ -19,6 +19,8 @@ import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import java.util.*
@@ -39,23 +41,40 @@ internal class SubscriptionViewModel @Inject constructor(
 {
     private val args: SubscriptionFragmentArgs by savedStateHandle.navArgs()
 
+    companion object {
+        const val DAILY_INTERVAL: String = "daily"
+        const val WEEKLY_INTERVAL: String = "weekly"
+        const val MONTHLY_INTERVAL: String = "MONTHLY"
+    }
+
     fun initSubscription() {
         viewModelScope.launch(mainImmediate) {
-            subscriptionRepository.getActiveSubscriptionByContactId(ContactId(args.argContactId)).firstOrNull().let { subscription ->
+            subscriptionRepository.getActiveSubscriptionByContactId(ContactId(args.argContactId)).distinctUntilChanged().collect { subscription ->
                 if (subscription == null) {
                     updateViewState(
                         SubscriptionViewState.Idle
                     )
                 } else {
+                    val timeInterval = if (subscription.cron.value.endsWith("* * *")) {
+                        DAILY_INTERVAL
+                    } else if (subscription.cron.value.endsWith("* *")) {
+                        MONTHLY_INTERVAL
+                    } else {
+                        WEEKLY_INTERVAL
+                    }
+
                     updateViewState(
                         SubscriptionViewState.SubscriptionLoaded(
-                            subscription
+                            isActive = !subscription.paused,
+                            amount = subscription.amount.value,
+                            timeInterval = timeInterval,
+                            endNumber = subscription.endNumber?.value,
+                            endDate = subscription.endDate
                         )
                     )
                 }
             }
         }
-
     }
 
     fun saveSubscription(
@@ -113,7 +132,7 @@ internal class SubscriptionViewModel @Inject constructor(
                         amount = amount,
                         interval = interval,
                         contactId = ContactId(args.argContactId),
-                        chatId = subscription.chat_id,
+                        chatId = subscription.chatId,
                         endDate = endDate?.let { DateTime.getFormatMMMddyyyy(TimeZone.getTimeZone("UTC")).format(it.value) },
                         endNumber = endNumber?.let { EndNumber(it) }
                     )
@@ -179,24 +198,6 @@ internal class SubscriptionViewModel @Inject constructor(
                             submitSideEffect(
                                 SubscriptionSideEffect.Notify(app.getString(R.string.successfully_paused_subscription))
                             )
-                            updateViewState(
-                                SubscriptionViewState.SubscriptionLoaded(
-                                    Subscription(
-                                        id = subscription.id,
-                                        subscription.cron,
-                                        subscription.amount,
-                                        subscription.end_number,
-                                        subscription.count,
-                                        subscription.end_date,
-                                        subscription.ended,
-                                        paused = true,
-                                        subscription.created_at,
-                                        subscription.updated_at,
-                                        subscription.chat_id,
-                                        subscription.contact_id
-                                    )
-                                )
-                            )
                         }
                     }
                 }
@@ -218,26 +219,7 @@ internal class SubscriptionViewModel @Inject constructor(
                                 SubscriptionSideEffect.Notify(app.getString(R.string.failed_to_restart_subscription))
                             )
                         }
-                        is Response.Success -> {
-                            updateViewState(
-                                SubscriptionViewState.SubscriptionLoaded(
-                                    Subscription(
-                                        id = subscription.id,
-                                        subscription.cron,
-                                        subscription.amount,
-                                        subscription.end_number,
-                                        subscription.count,
-                                        subscription.end_date,
-                                        subscription.ended,
-                                        paused = false,
-                                        subscription.created_at,
-                                        subscription.updated_at,
-                                        subscription.chat_id,
-                                        subscription.contact_id
-                                    )
-                                )
-                            )
-                        }
+                        is Response.Success -> {}
                     }
                 }
             }

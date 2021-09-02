@@ -416,6 +416,7 @@ inline fun TransactionCallbacks.deleteContactById(
     queries.contactDeleteById(contactId)
     queries.inviteDeleteByContactId(contactId)
     queries.dashboardDeleteById(contactId)
+    queries.subscriptionDeleteByContactId(contactId)
 }
 
 @Suppress("NOTHING_TO_INLINE")

@@ -35,15 +35,15 @@ internal class SubscriptionDboPresenterMapper(
                 id,
                 cron,
                 amount,
-                end_number,
+                endNumber,
                 count,
-                end_date,
+                endDate,
                 ended,
                 paused,
-                created_at,
-                updated_at,
-                chat_id,
-                contact_id
+                createdAt,
+                updatedAt,
+                chatId,
+                contactId
             )
         }
     }

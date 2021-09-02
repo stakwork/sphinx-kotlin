@@ -3571,19 +3571,9 @@ abstract class SphinxRepository(
         SubscriptionDboPresenterMapper(dispatchers)
     }
 
-    override suspend fun getSubscriptionByContactId(contactId: ContactId): Flow<Subscription?> = flow {
-        emitAll(
-            coreDB.getSphinxDatabaseQueries().subscriptionGetByContactId(contactId)
-                .asFlow()
-                .mapToOneOrNull(io)
-                .map { it?.let { subscriptionDboPresenterMapper.mapFrom(it) } }
-                .distinctUntilChanged()
-        )
-    }
-
     override suspend fun getActiveSubscriptionByContactId(contactId: ContactId): Flow<Subscription?> = flow {
         emitAll(
-            coreDB.getSphinxDatabaseQueries().activeSubscriptionGetByContactId(contactId)
+            coreDB.getSphinxDatabaseQueries().subscriptionGetLastActiveByContactId(contactId)
                 .asFlow()
                 .mapToOneOrNull(io)
                 .map { it?.let { subscriptionDboPresenterMapper.mapFrom(it) } }
@@ -3612,8 +3602,9 @@ abstract class SphinxRepository(
                     end_date = endDate
                 )
             ).collect { loadResponse ->
+                @Exhaustive
                 when (loadResponse) {
-                    LoadResponse.Loading -> { }
+                    is LoadResponse.Loading -> {}
                     is Response.Error -> {
                         response = loadResponse
                     }
@@ -3647,7 +3638,7 @@ abstract class SphinxRepository(
         endDate: String?,
         endNumber: EndNumber?
     ): Response<Any, ResponseError> {
-        var response: Response<SubscriptionDto, ResponseError>  = Response.Error(ResponseError(("Failed to update subscription")))
+        var response: Response<SubscriptionDto, ResponseError>? = null
 
         applicationScope.launch(mainImmediate) {
 
@@ -3662,6 +3653,7 @@ abstract class SphinxRepository(
                     end_date = endDate
                 )
             ).collect { loadResponse ->
+                @Exhaustive
                 when (loadResponse) {
                     LoadResponse.Loading -> { }
                     is Response.Error -> {
@@ -3686,13 +3678,13 @@ abstract class SphinxRepository(
             }
         }.join()
 
-        return response
+        return response ?: Response.Error(ResponseError(("Failed to update subscription")))
     }
 
     override suspend fun restartSubscription(
         subscriptionId: SubscriptionId
     ): Response<Any, ResponseError> {
-        var response: Response<SubscriptionDto, ResponseError>  = Response.Error(ResponseError(("Failed to restart subscription")))
+        var response: Response<SubscriptionDto, ResponseError>? = null
 
         applicationScope.launch(mainImmediate) {
 
@@ -3722,13 +3714,14 @@ abstract class SphinxRepository(
                 }
             }
         }.join()
-        return response
+
+        return response ?: Response.Error(ResponseError(("Failed to restart subscription")))
     }
 
     override suspend fun pauseSubscription(
         subscriptionId: SubscriptionId
     ): Response<Any, ResponseError> {
-        var response: Response<SubscriptionDto, ResponseError>  = Response.Error(ResponseError(("Failed to pause subscription")))
+        var response: Response<SubscriptionDto, ResponseError>? = null
 
         applicationScope.launch(mainImmediate) {
 
@@ -3759,13 +3752,13 @@ abstract class SphinxRepository(
             }
         }.join()
 
-        return response
+        return response ?: Response.Error(ResponseError(("Failed to pause subscription")))
     }
 
     override suspend fun deleteSubscription(
         subscriptionId: SubscriptionId
     ): Response<Any, ResponseError> {
-        var response: Response<Any, ResponseError>  = Response.Error(ResponseError(("Failed to delete subscription")))
+        var response: Response<Any, ResponseError>? = null
 
         applicationScope.launch(mainImmediate) {
             networkQuerySubscription.deleteSubscription(
@@ -3792,6 +3785,6 @@ abstract class SphinxRepository(
             }
         }.join()
 
-        return response
+        return response ?: Response.Error(ResponseError(("Failed to delete subscription")))
     }
 }

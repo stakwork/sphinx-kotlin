@@ -4,7 +4,7 @@ package chat.sphinx.wrapper_common.subscription
 value class Cron(val value: String) {
     init {
         require(value.isNotEmpty()) {
-            "SubscriptionCount cannot be empty"
+            "Subscription Cron cannot be empty"
         }
     }
 }

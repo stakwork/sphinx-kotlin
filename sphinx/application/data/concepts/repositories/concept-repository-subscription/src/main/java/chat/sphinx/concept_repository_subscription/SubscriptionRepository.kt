@@ -12,10 +12,6 @@ import kotlinx.coroutines.flow.Flow
 
 
 interface SubscriptionRepository {
-    suspend fun getSubscriptionByContactId(
-        contactId: ContactId
-    ): Flow<Subscription?>
-
     suspend fun getActiveSubscriptionByContactId(
         contactId: ContactId
     ): Flow<Subscription?>
