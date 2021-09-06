@@ -2,7 +2,7 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <string name="edit_text_message_hint">メッセージ</string>
     <string name="edit_text_optional_message_hint">メッセージ（省略可）</string>
-    <string name="text_view_loading_attachment">Loading/Decrypting...</string>
+    <string name="text_view_loading_attachment">データを読み込み復号しています</string>
 
     <string name="chat_muted_message">チャットをミュートしました。このチャットの新着メッセージはプッシュ通知されません。</string>
     <string name="chat_muted_waiting_on_network">ネットワーク待機中</string>
@@ -97,12 +97,12 @@
 
     <!-- Pay Attachment -->
     <string name="attachment_price_label">課金額: </string>
-    <string name="alert_confirm_pay_attachment_title">Confirm Purchase</string>
-    <string name="alert_confirm_pay_attachment_message">Are you sure you want to purchase this item?</string>
+    <string name="alert_confirm_pay_attachment_title">購入する</string>
+    <string name="alert_confirm_pay_attachment_message">このアイテムを購入しますか？</string>
 
     <!-- Save Attachment -->
-    <string name="saved_attachment_successfully">添付ファイルを正常に保存しました</string>
-    <string name="failed_to_save_file">ファイルの保存に失敗しました</string>
+    <string name="saved_attachment_successfully">添付ファイルを保存しました</string>
+    <string name="failed_to_save_file">ファイルを保存できませんでした</string>
 
     <!-- Exit Tribe -->
     <string name="delete_own_tribe_not_supported">自分で作成したTribeは削除できません</string>

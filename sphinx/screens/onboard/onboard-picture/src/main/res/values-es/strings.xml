@@ -2,4 +2,5 @@
 <resources>
     <string name="on_board_picture_bottom_menu_header">Foto de Perfil</string>
     <string name="on_board_picture_side_effect_upload_failure">No se ha podido cargar la imagen</string>
+    <string name="on_board_select_picture">Seleccionar Imagen</string>
 </resources>
