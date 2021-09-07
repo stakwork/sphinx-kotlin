@@ -80,7 +80,7 @@
     <string name="dashboard_connect_button">連接</string>
     <string name="dashboard_connect_price_to_meet">會合費用: %s</string>
     <string name="dashboard_connect_description_missing">無細節</string>
-    <string name="dashboard_connect_initial_message_hint">首次訊息 %s</string>
+    <string name="dashboard_connect_initial_message_hint">%s的首次訊息</string>
     <string name="dashboard_connect_retrieve_person_data_error">個人資訊下載失敗</string>
     <string name="dashboard_connect_message_empty">訊息不可無填</string>
     <string name="dashboard_connect_generic_error">聯絡人連結失敗，請稍後再試</string>
