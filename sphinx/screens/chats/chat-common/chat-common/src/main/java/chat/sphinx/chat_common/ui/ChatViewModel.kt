@@ -297,7 +297,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         var date = groupingDate ?: message.date
 
         val shouldAvoidGroupingWithPrevious = (previousMessage?.shouldAvoidGrouping() ?: true) || message.shouldAvoidGrouping()
-        val isGroupedBySenderWithPrevious = previousMessage?.hasSameSenderThanMessage(message) ?: true
+        val isGroupedBySenderWithPrevious = previousMessage?.hasSameSenderThanMessage(message) ?: false
         val isGroupedByDateWithPrevious = message.date.getMinutesDifferenceWithDateTime(date) < groupingMinutesLimit
 
         val groupedWithPrevious = (!shouldAvoidGroupingWithPrevious && isGroupedBySenderWithPrevious && isGroupedByDateWithPrevious)
@@ -305,8 +305,8 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         date = if (groupedWithPrevious) date else message.date
 
         val shouldAvoidGroupingWithNext = (nextMessage?.shouldAvoidGrouping() ?: true) || message.shouldAvoidGrouping()
-        val isGroupedBySenderWithNext = nextMessage?.hasSameSenderThanMessage(message) ?: true
-        val isGroupedByDateWithNext = if (nextMessage != null) nextMessage.date.getMinutesDifferenceWithDateTime(date) < groupingMinutesLimit else true
+        val isGroupedBySenderWithNext = nextMessage?.hasSameSenderThanMessage(message) ?: false
+        val isGroupedByDateWithNext = if (nextMessage != null) nextMessage.date.getMinutesDifferenceWithDateTime(date) < groupingMinutesLimit else false
 
         val groupedWithNext = (!shouldAvoidGroupingWithNext && isGroupedBySenderWithNext && isGroupedByDateWithNext)
 

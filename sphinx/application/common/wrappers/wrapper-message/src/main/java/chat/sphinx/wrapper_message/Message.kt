@@ -162,15 +162,8 @@ inline fun Message.hasSameSenderThanMessage(message: Message): Boolean {
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun Message.shouldAvoidGrouping(): Boolean {
-    val isFailedMessage = this.status.isFailed()
-    val isDeletedMessage = this.status.isDeleted()
-
-    val isInvoice = this.type.isInvoice()
-    val isPayment = this.type.isPayment()
-    val isGroupAction = this.type.isGroupAction()
-
-    return isFailedMessage || isDeletedMessage ||
-            isInvoice || isPayment || isGroupAction
+    return status.isPending() || status.isFailed() || status.isDeleted() ||
+            type.isInvoice() || type.isPayment() || type.isGroupAction()
 }
 
 //Message Actions
