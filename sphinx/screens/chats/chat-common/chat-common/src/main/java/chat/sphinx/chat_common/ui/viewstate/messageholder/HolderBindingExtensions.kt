@@ -942,8 +942,12 @@ internal inline fun LayoutMessageHolderBinding.setBubbleImageAttachment(
 
             if (imageAttachment.showPaidOverlay) {
                 layoutConstraintPaidImageOverlay.visible
+
+                imageViewAttachmentImage.gone
             } else {
                 layoutConstraintPaidImageOverlay.gone
+
+                imageViewAttachmentImage.visible
 
                 loadImage(imageViewAttachmentImage, imageAttachment.url, imageAttachment.media)
             }
