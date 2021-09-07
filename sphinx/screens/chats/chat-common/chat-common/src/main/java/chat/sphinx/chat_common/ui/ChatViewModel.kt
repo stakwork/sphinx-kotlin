@@ -286,11 +286,11 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         }
     }
 
-    private fun getBubbleBackgroundType(
-        groupingDate: DateTime?,
+    private fun getBubbleBackgroundForMessage(
         message: Message,
         previousMessage: Message?,
-        nextMessage: Message?
+        nextMessage: Message?,
+        groupingDate: DateTime?,
     ): Pair<DateTime?, BubbleBackground> {
 
         val groupingMinutesLimit = 5.0
@@ -345,14 +345,14 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                     val previousMessage: Message? = if (index > 0) messages[index - 1] else null
                     val nextMessage: Message? = if (index < messages.size - 1) messages[index + 1] else null
 
-                    val bubbleBackground = getBubbleBackgroundType(
-                        groupingDate,
+                    val groupingDateAndBubbleBackground = getBubbleBackgroundForMessage(
                         message,
                         previousMessage,
-                        nextMessage
+                        nextMessage,
+                        groupingDate
                     )
 
-                    groupingDate = bubbleBackground.first
+                    groupingDate = groupingDateAndBubbleBackground.first
 
                     if (message.sender == chat.contactIds.firstOrNull()) {
                         newList.add(
@@ -367,7 +367,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                                         BubbleBackground.Gone(setSpacingEqual = true)
                                     }
                                     else -> {
-                                        bubbleBackground.second
+                                        groupingDateAndBubbleBackground.second
                                     }
                                 },
                                 replyMessageSenderName = { replyMessage ->
@@ -403,7 +403,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                                         BubbleBackground.Gone(setSpacingEqual = true)
                                     }
                                     else -> {
-                                        bubbleBackground.second
+                                        groupingDateAndBubbleBackground.second
                                     }
                                 },
                                 initialHolder = when {
