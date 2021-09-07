@@ -1,8 +1,11 @@
 package chat.sphinx.chat_common.ui
 
+import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
 import android.graphics.Color
 import android.os.Bundle
+import android.view.MotionEvent
 import android.view.View
 import android.view.Window
 import android.widget.ImageView
@@ -11,7 +14,9 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.LayoutRes
 import androidx.constraintlayout.motion.widget.MotionLayout
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
+import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
@@ -36,6 +41,7 @@ import chat.sphinx.chat_common.ui.viewstate.selected.SelectedMessageViewState
 import chat.sphinx.chat_common.ui.viewstate.selected.setMenuColor
 import chat.sphinx.chat_common.ui.viewstate.selected.setMenuItems
 import chat.sphinx.chat_common.ui.widgets.SphinxFullscreenImageView
+import chat.sphinx.chat_common.util.SphinxMediaRecorder
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
@@ -70,12 +76,14 @@ import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.goneIfTrue
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.currentViewState
+import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_views.viewstate.collect
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import java.io.IOException
 
 abstract class ChatFragment<
         VB: ViewBinding,
@@ -129,6 +137,24 @@ abstract class ChatFragment<
         registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
             viewModel.handleActivityResultUri(uri)
         }
+
+    private val requestPermissionLauncher by lazy(LazyThreadSafetyMode.NONE) {
+        registerForActivityResult(
+            ActivityResultContracts.RequestPermission()
+        ) { granted ->
+            if (granted) {
+                startRecording()
+            } else {
+                lifecycleScope.launch(viewModel.mainImmediate) {
+                    viewModel.submitSideEffect(
+                        ChatSideEffect.Notify("Recording permissions required")
+                    )
+                }
+            }
+        }
+    }
+
+    private var recorder: SphinxMediaRecorder? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -321,6 +347,23 @@ abstract class ChatFragment<
                 }
             }
 
+            imageViewChatFooterMicrophone.setOnLongClickListener {
+                if (isRecordingPermissionsGranted()) {
+                    startRecording()
+                } else {
+                    requestPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+                }
+                return@setOnLongClickListener true
+            }
+
+            imageViewChatFooterMicrophone.setOnTouchListener { v, event ->
+                v.onTouchEvent(event)
+                if (event.action == MotionEvent.ACTION_UP && recorder?.isRecording() == true) {
+                    sendRecording()
+                }
+                return@setOnTouchListener true
+            }
+
             textViewChatFooterAttachment.setOnClickListener {
                 lifecycleScope.launch(viewModel.mainImmediate) {
                     editTextChatFooter.let { editText ->
@@ -337,6 +380,10 @@ abstract class ChatFragment<
             }
 
             editTextChatFooter.onCommitContentListener = viewModel.onIMEContent
+            editTextChatFooter.addTextChangedListener { editable ->
+                textViewChatFooterSend.goneIfTrue(editable.isNullOrEmpty())
+                imageViewChatFooterMicrophone.goneIfFalse(editable.isNullOrEmpty())
+            }
         }
 
         replyingMessageBinding.apply {
@@ -932,6 +979,9 @@ abstract class ChatFragment<
             viewModel.getFooterViewStateFlow().collect { viewState ->
                 footerBinding.apply {
                     editTextChatFooter.hint = getString(viewState.hintTextStringId)
+
+                    editTextChatFooter.goneIfTrue(viewState.recordingEnabled)
+                    layoutConstraintChatFooterRecordingActions.goneIfFalse(viewState.recordingEnabled)
                     imageViewChatFooterMicrophone.goneIfFalse(viewState.showRecordAudioIcon)
                     textViewChatFooterSend.goneIfFalse(viewState.showSendIcon)
                     textViewChatFooterAttachment.goneIfFalse(viewState.showMenuIcon)
@@ -1120,4 +1170,56 @@ abstract class ChatFragment<
         fullscreenLastViewState = null
         attachmentSendLastViewState = null
     }
+
+    private fun isRecordingPermissionsGranted() = arrayOf(Manifest.permission.RECORD_AUDIO).all {
+        ContextCompat.checkSelfPermission(
+            requireContext(), it
+        ) == PackageManager.PERMISSION_GRANTED
+    }
+
+    private fun startRecording() {
+        recorder = SphinxMediaRecorder(viewModel.mediaCacheHandler).apply {
+            try {
+                startAudioRecording()
+            } catch (e: IOException) {
+                lifecycleScope.launch(viewModel.mainImmediate) {
+                    viewModel.submitSideEffect(
+                        ChatSideEffect.Notify("Failed to start recording")
+                    )
+                }
+            }
+            viewModel.updateFooterViewState(
+                FooterViewState.RecordAudioAttachment
+            )
+        }
+    }
+
+    private fun sendRecording() {
+        recorder?.stopAudioRecording()
+        recorder?.recordingTempFile?.let {
+            sendMessageBuilder.setAttachmentInfo(
+                AttachmentInfo(
+                    file = it,
+                    mediaType = MediaType.Audio("audio/m4a"),
+                    isLocalFile = true,
+                )
+            )
+
+            viewModel.sendMessage(sendMessageBuilder)?.let {
+                // if it did not return null that means it was valid
+                viewModel.updateFooterViewState(FooterViewState.Default)
+
+                sendMessageBuilder.clear()
+                viewModel.messageReplyViewStateContainer.updateViewState(MessageReplyViewState.ReplyingDismissed)
+            }
+        }
+        recorder = null
+    }
+
+    override fun onStop() {
+        super.onStop()
+        recorder?.release()
+        recorder = null
+    }
+
 }

@@ -106,7 +106,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     protected val contactRepository: ContactRepository,
     protected val messageRepository: MessageRepository,
     protected val networkQueryLightning: NetworkQueryLightning,
-    protected val mediaCacheHandler: MediaCacheHandler,
+    val mediaCacheHandler: MediaCacheHandler,
     protected val savedStateHandle: SavedStateHandle,
     protected val cameraCoordinator: ViewModelCoordinator<CameraRequest, CameraResponse>,
     protected val linkPreviewHandler: LinkPreviewHandler,
