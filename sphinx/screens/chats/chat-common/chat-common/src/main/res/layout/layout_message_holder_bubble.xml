@@ -124,7 +124,7 @@
             android:id="@+id/text_view_paid_message_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/roboto_bold"
+            android:fontFamily="@font/roboto_italic"
             android:textSize="@dimen/chat_paid_message_notice_text_size"
             android:textColor="@color/textMessages"
             android:paddingHorizontal="@dimen/default_layout_margin"

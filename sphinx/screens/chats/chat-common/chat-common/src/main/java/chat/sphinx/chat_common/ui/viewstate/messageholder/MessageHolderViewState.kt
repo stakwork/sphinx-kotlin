@@ -117,8 +117,10 @@ internal sealed class MessageHolderViewState(
 
     val bubblePaidMessage: LayoutState.Bubble.ContainerThird.PaidMessage? by lazy(LazyThreadSafetyMode.NONE) {
         message.retrievePurchaseStatus()?.let { purchaseStatus ->
-            if (message.retrieveTextToShow() != null || !message.isPaidTextMessage || this is Sent) {
+            if (message.retrieveTextToShow() != null || !message.isPaidTextMessage) {
                 null
+            } else if (this is Sent) {
+                LayoutState.Bubble.ContainerThird.PaidMessage(null)
             } else {
                 LayoutState.Bubble.ContainerThird.PaidMessage(
                     purchaseStatus = purchaseStatus,

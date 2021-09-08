@@ -579,11 +579,12 @@ internal inline fun LayoutMessageHolderBinding.setBubblePaidMessageLayout(
                     getString(R.string.paid_message_loading)
                 }
                 else -> {
-                    ""
+                    getString(R.string.paid_message_loading)
                 }
             }
 
-            if (paidMessageViewStats.purchaseStatus.isPurchaseAccepted()) {
+            if (paidMessageViewStats.purchaseStatus == null || paidMessageViewStats.purchaseStatus?.isPurchaseAccepted()) {
+
                 lifecycleScope.launch(dispatchers.mainImmediate) {
                     setBubbleMessageLayout(
                         viewState.retrievePaidTextMessageContent(),
