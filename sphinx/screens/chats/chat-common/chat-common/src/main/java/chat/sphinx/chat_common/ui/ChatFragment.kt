@@ -868,13 +868,9 @@ abstract class ChatFragment<
                                 imageLoader,
                                 viewModel.imageLoaderDefaults,
                                 viewModel.memeServerTokenHandler,
-                                viewModel.memeInputStreamHandler,
                                 viewState.recyclerViewWidth,
                                 viewState.messageHolderViewState,
                                 userColorsHelper,
-                                updatePaidTextMessageContent = { messageId, messageContentDecrypted ->
-                                    viewModel.updatePaidTextMessageContent(messageId, messageContentDecrypted)
-                                }
                             )
                             includeMessageStatusHeader.root.gone
                             includeMessageHolderChatImageInitialHolder.root.gone

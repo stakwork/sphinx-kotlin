@@ -113,9 +113,7 @@ internal sealed class LayoutState private constructor() {
             ): ContainerThird()
 
             data class PaidMessage(
-                val purchaseStatus: PurchaseStatus,
-                val url: String,
-                val media: MessageMedia?
+                val purchaseStatus: PurchaseStatus
             ): ContainerThird()
 
             sealed class LinkPreview private constructor(): ContainerThird() {

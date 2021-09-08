@@ -60,12 +60,10 @@ internal fun LayoutMessageHolderBinding.setView(
     imageLoader: ImageLoader<ImageView>,
     imageLoaderDefaults: ImageLoaderOptions,
     memeServerTokenHandler: MemeServerTokenHandler,
-    memeInputStreamHandler: MemeInputStreamHandler,
     recyclerViewWidth: Px,
     viewState: MessageHolderViewState,
     userColorsHelper: UserColorsHelper,
     onSphinxInteractionListener: SphinxUrlSpan.OnInteractionListener? = null,
-    updatePaidTextMessageContent: (messageId: MessageId, messageContentDecrypted: MessageContentDecrypted) -> Unit
 ) {
     for (job in holderJobs) {
         job.cancel()
@@ -163,35 +161,13 @@ internal fun LayoutMessageHolderBinding.setView(
             }
             setUnsupportedMessageTypeLayout(viewState.unsupportedMessageType)
             setBubbleMessageLayout(viewState.bubbleMessage, onSphinxInteractionListener)
-            setBubblePaidMessageLayout(viewState.bubblePaidMessage) { url, media ->
-                lifecycleScope.launch(dispatchers.mainImmediate) {
-
-                    media?.host?.let { host ->
-                        media?.mediaKeyDecrypted?.let { mediaKeyDecrypted ->
-                            memeServerTokenHandler.retrieveAuthenticationToken(host)?.let { token ->
-
-                                val inputStream = memeInputStreamHandler.retrieveMediaInputStream(
-                                    url,
-                                    token,
-                                    mediaKeyDecrypted
-                                )
-
-                                val text = inputStream?.bufferedReader().use { it?.readText() }
-
-                                text?.toMessageContentDecrypted()?.let { messageContentDecrypted ->
-                                    updatePaidTextMessageContent(
-                                        viewState.message.id,
-                                        messageContentDecrypted
-                                    )
-                                }
-                            }
-                        }
-                    }
-
-                }.let { job ->
-                    holderJobs.add(job)
-                }
-            }
+            setBubblePaidMessageLayout(
+                dispatchers,
+                holderJobs,
+                lifecycleScope,
+                viewState,
+                onSphinxInteractionListener
+            )
             setBubbleMessageLinkPreviewLayout(
                 dispatchers,
                 holderJobs,
@@ -558,6 +534,8 @@ internal inline fun LayoutMessageHolderBinding.setBubbleMessageLayout(
         if (message == null) {
             gone
         } else {
+            includeMessageHolderBubble.textViewPaidMessageText.gone
+
             visible
             text = message.text
 
@@ -571,15 +549,23 @@ internal inline fun LayoutMessageHolderBinding.setBubbleMessageLayout(
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun LayoutMessageHolderBinding.setBubblePaidMessageLayout(
-    message: LayoutState.Bubble.ContainerThird.PaidMessage?,
-    loadText: (String, MessageMedia?) -> Unit,
+    dispatchers: CoroutineDispatchers,
+    holderJobs: ArrayList<Job>,
+    lifecycleScope: CoroutineScope,
+    viewState: MessageHolderViewState,
+    onSphinxInteractionListener: SphinxUrlSpan.OnInteractionListener?
 ) {
     includeMessageHolderBubble.textViewPaidMessageText.apply {
-        if (message == null) {
+        val paidMessageViewStats = viewState.bubblePaidMessage
+
+        if (paidMessageViewStats == null) {
             gone
         } else {
+            includeMessageHolderBubble.textViewMessageText.gone
+
             visible
-            text = when (message.purchaseStatus) {
+
+            text = when (paidMessageViewStats.purchaseStatus) {
                 is PurchaseStatus.Pending -> {
                     getString(R.string.paid_message_pay_to_unlock)
                 }
@@ -597,8 +583,15 @@ internal inline fun LayoutMessageHolderBinding.setBubblePaidMessageLayout(
                 }
             }
 
-            if (message.purchaseStatus.isPurchaseAccepted()) {
-                loadText(message.url, message.media)
+            if (paidMessageViewStats.purchaseStatus.isPurchaseAccepted()) {
+                lifecycleScope.launch(dispatchers.mainImmediate) {
+                    setBubbleMessageLayout(
+                        viewState.retrievePaidTextMessageContent(),
+                        onSphinxInteractionListener
+                    )
+                }.let { job ->
+                    holderJobs.add(job)
+                }
             }
         }
     }

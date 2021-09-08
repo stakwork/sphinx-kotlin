@@ -49,7 +49,6 @@ internal class ChatTribeViewModel @Inject constructor(
     app: Application,
     dispatchers: CoroutineDispatchers,
     memeServerTokenHandler: MemeServerTokenHandler,
-    memeInputStreamHandler: MemeInputStreamHandler,
     private val tribeChatNavigator: TribeChatNavigator,
     chatRepository: ChatRepository,
     contactRepository: ContactRepository,
@@ -59,12 +58,12 @@ internal class ChatTribeViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     cameraViewModelCoordinator: ViewModelCoordinator<CameraRequest, CameraResponse>,
     linkPreviewHandler: LinkPreviewHandler,
+    memeInputStreamHandler: MemeInputStreamHandler,
     LOG: SphinxLogger,
 ): ChatViewModel<ChatTribeFragmentArgs>(
     app,
     dispatchers,
     memeServerTokenHandler,
-    memeInputStreamHandler,
     tribeChatNavigator,
     chatRepository,
     contactRepository,
@@ -74,6 +73,7 @@ internal class ChatTribeViewModel @Inject constructor(
     savedStateHandle,
     cameraViewModelCoordinator,
     linkPreviewHandler,
+    memeInputStreamHandler,
     LOG,
 )
 {

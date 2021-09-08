@@ -395,14 +395,10 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                 imageLoader,
                 viewModel.imageLoaderDefaults,
                 viewModel.memeServerTokenHandler,
-                viewModel.memeInputStreamHandler,
                 recyclerViewWidth,
                 viewState,
                 userColorsHelper,
-                onSphinxInteractionListener,
-                updatePaidTextMessageContent = { messageId, messageContentDecrypted ->
-                    viewModel.updatePaidTextMessageContent(messageId, messageContentDecrypted)
-                }
+                onSphinxInteractionListener
             )
 
         }

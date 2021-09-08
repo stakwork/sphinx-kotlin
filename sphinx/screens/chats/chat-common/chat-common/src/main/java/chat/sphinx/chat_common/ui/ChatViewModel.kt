@@ -101,7 +101,6 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     protected val app: Application,
     dispatchers: CoroutineDispatchers,
     val memeServerTokenHandler: MemeServerTokenHandler,
-    val memeInputStreamHandler: MemeInputStreamHandler,
     val chatNavigator: ChatNavigator,
     protected val chatRepository: ChatRepository,
     protected val contactRepository: ContactRepository,
@@ -111,6 +110,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     protected val savedStateHandle: SavedStateHandle,
     protected val cameraCoordinator: ViewModelCoordinator<CameraRequest, CameraResponse>,
     protected val linkPreviewHandler: LinkPreviewHandler,
+    private val memeInputStreamHandler: MemeInputStreamHandler,
     protected val LOG: SphinxLogger,
 ): MotionLayoutViewModel<
         Nothing,
@@ -323,6 +323,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                                 },
                                 accountOwner = { owner },
                                 previewProvider = { handleLinkPreview(it) },
+                                paidTextMessageContentProvider = { message -> handlePaidTextMessageContent(message) },
                             )
                         )
                     } else {
@@ -368,6 +369,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                                 },
                                 accountOwner = { owner },
                                 previewProvider = { link -> handleLinkPreview(link) },
+                                paidTextMessageContentProvider = { message -> handlePaidTextMessageContent(message) },
                             )
                         )
                     }
@@ -493,7 +495,46 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         return preview
     }
 
-    fun updatePaidTextMessageContent(messageId: MessageId, messageContentDecrypted: MessageContentDecrypted) {
+    private suspend fun handlePaidTextMessageContent(message: Message): LayoutState.Bubble.ContainerThird.Message? {
+        var messageLayoutState: LayoutState.Bubble.ContainerThird.Message? = null
+
+        viewModelScope.launch(mainImmediate) {
+            message?.retrieveSphinxTextUrlAndMessageMedia()?.let { urlAndMedia ->
+                urlAndMedia.second?.host?.let { host ->
+                    urlAndMedia.second?.mediaKeyDecrypted?.let { mediaKeyDecrypted ->
+                        memeServerTokenHandler.retrieveAuthenticationToken(host)?.let { token ->
+
+                            val inputStream = memeInputStreamHandler.retrieveMediaInputStream(
+                                urlAndMedia.first,
+                                token,
+                                mediaKeyDecrypted
+                            )
+
+                            val text = inputStream?.bufferedReader().use { it?.readText() }
+
+                            text?.let { nnText ->
+                                messageLayoutState = LayoutState.Bubble.ContainerThird.Message(text = nnText)
+
+                                nnText.toMessageContentDecrypted()?.let { messageContentDecrypted ->
+                                    updatePaidTextMessageContent(
+                                        message.id,
+                                        messageContentDecrypted
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }.join()
+
+        return messageLayoutState
+    }
+
+    private fun updatePaidTextMessageContent(
+        messageId: MessageId,
+        messageContentDecrypted: MessageContentDecrypted
+    ) {
         messageRepository.updateMessageContentDecrypted(
             messageId,
             messageContentDecrypted

@@ -41,6 +41,7 @@ internal sealed class MessageHolderViewState(
     private val messageSenderName: (Message) -> String,
     private val accountOwner: () -> Contact,
     private val previewProvider: suspend (link: MessageLinkPreview) -> LayoutState.Bubble.ContainerThird.LinkPreview?,
+    private val paidTextMessageContentProvider: suspend (message: Message) -> LayoutState.Bubble.ContainerThird.Message?
 ) {
 
     companion object {
@@ -119,13 +120,9 @@ internal sealed class MessageHolderViewState(
             if (message.retrieveTextToShow() != null || !message.isPaidTextMessage || this is Sent) {
                 null
             } else {
-                message.retrieveSphinxTextUrlAndMessageMedia()?.let { mediaData ->
-                    LayoutState.Bubble.ContainerThird.PaidMessage(
-                        purchaseStatus = purchaseStatus,
-                        url = mediaData.first,
-                        media = mediaData.second
-                    )
-                }
+                LayoutState.Bubble.ContainerThird.PaidMessage(
+                    purchaseStatus = purchaseStatus,
+                )
             }
         }
     }
@@ -297,6 +294,13 @@ internal sealed class MessageHolderViewState(
         }
     }
 
+    private val paidTextMessageContentLock = Mutex()
+    suspend fun retrievePaidTextMessageContent(): LayoutState.Bubble.ContainerThird.Message? {
+        return bubbleMessage ?: paidTextMessageContentLock.withLock {
+            paidTextMessageContentProvider.invoke(message)
+        }
+    }
+
     val selectionMenuItems: List<MenuItemState>? by lazy(LazyThreadSafetyMode.NONE) {
         if (
             background is BubbleBackground.Gone         ||
@@ -352,6 +356,7 @@ internal sealed class MessageHolderViewState(
         replyMessageSenderName: (Message) -> String,
         accountOwner: () -> Contact,
         previewProvider: suspend (link: MessageLinkPreview) -> LayoutState.Bubble.ContainerThird.LinkPreview?,
+        paidTextMessageContentProvider: suspend (message: Message) -> LayoutState.Bubble.ContainerThird.Message?,
     ) : MessageHolderViewState(
         message,
         chat,
@@ -360,6 +365,7 @@ internal sealed class MessageHolderViewState(
         replyMessageSenderName,
         accountOwner,
         previewProvider,
+        paidTextMessageContentProvider,
     )
 
     class Received(
@@ -370,6 +376,7 @@ internal sealed class MessageHolderViewState(
         replyMessageSenderName: (Message) -> String,
         accountOwner: () -> Contact,
         previewProvider: suspend (link: MessageLinkPreview) -> LayoutState.Bubble.ContainerThird.LinkPreview?,
+        paidTextMessageContentProvider: suspend (message: Message) -> LayoutState.Bubble.ContainerThird.Message?,
     ) : MessageHolderViewState(
         message,
         chat,
@@ -378,5 +385,6 @@ internal sealed class MessageHolderViewState(
         replyMessageSenderName,
         accountOwner,
         previewProvider,
+        paidTextMessageContentProvider,
     )
 }
