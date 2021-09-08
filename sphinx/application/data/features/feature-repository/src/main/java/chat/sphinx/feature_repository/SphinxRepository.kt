@@ -854,7 +854,9 @@ abstract class SphinxRepository(
                             messageBuilder.setContactId(contact.id)
                             messageBuilder.setPriceToMeet(priceToMeet)
 
-                            sendMessage(messageBuilder.build())
+                            sendMessage(
+                                messageBuilder.build().first
+                            )
 
                             Response.Success(contact.id)
                         } else {
@@ -1976,7 +1978,13 @@ abstract class SphinxRepository(
                 }
             }
 
-            val remoteTextMap: Map<String, String>? = getRemoteTextMap(
+            val isPaidTextMessage =
+                sendMessage.attachmentInfo?.mediaType?.isSphinxText == true &&
+                sendMessage.messagePrice?.value ?: 0 > 0
+
+            val messageContent: String? = if (isPaidTextMessage) null else message?.second?.value
+
+            val remoteTextMap: Map<String, String>? = if (isPaidTextMessage) null else getRemoteTextMap(
                 UnencryptedString(message?.first?.value ?: ""),
                 contact,
                 chat
@@ -2039,7 +2047,7 @@ abstract class SphinxRepository(
                     sendMessage.contactId?.value,
                     messagePrice.value,
                     sendMessage.replyUUID?.value,
-                    message?.second?.value,
+                    messageContent,
                     remoteTextMap,
                     mediaKeyMap,
                     postMemeServerDto?.mime,
@@ -2653,7 +2661,9 @@ abstract class SphinxRepository(
                     sendMessageBuilder.setText(message)
                     sendMessageBuilder.setIsBoost(true)
 
-                    sendMessage(sendMessageBuilder.build())
+                    sendMessage(
+                        sendMessageBuilder.build().first
+                    )
                 }
             }
         }

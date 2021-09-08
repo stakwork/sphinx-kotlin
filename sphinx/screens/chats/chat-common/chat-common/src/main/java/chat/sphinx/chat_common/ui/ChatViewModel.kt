@@ -2,6 +2,7 @@ package chat.sphinx.chat_common.ui
 
 import android.app.Application
 import android.content.ContentValues
+import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
@@ -90,6 +91,9 @@ import org.jitsi.meet.sdk.JitsiMeetActivity
 import org.jitsi.meet.sdk.JitsiMeetConferenceOptions
 import org.jitsi.meet.sdk.JitsiMeetUserInfo
 import java.io.*
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
+import kotlin.coroutines.suspendCoroutine
 
 
 @JvmSynthetic
@@ -569,6 +573,24 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 
     abstract fun readMessages()
 
+    fun createPaidMessageFile(text: String?): File? {
+        if (text.isNullOrEmpty()) {
+            return null
+        }
+
+        return try {
+            val output = mediaCacheHandler.createPaidTextFile()
+            FileOutputStream(output).use { it.write(text.toByteArray(Charsets.UTF_8)) }
+            output
+        } catch (e: IOException) {
+            null
+        }
+    }
+
+    /**
+     * Builds the [SendMessage] and returns it (or null if it was invalid),
+     * then passes it off to the [MessageRepository] for processing.
+     * */
     /**
      * Builds the [SendMessage] and returns it (or null if it was invalid),
      * then passes it off to the [MessageRepository] for processing.
@@ -576,11 +598,36 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     @CallSuper
     open fun sendMessage(builder: SendMessage.Builder): SendMessage? {
         val msg = builder.build()
-        // TODO: if null figure out why and notify user via side effect
-        messageRepository.sendMessage(msg)
-        return msg
+
+        msg?.second?.let { validationError ->
+            val errorMessageRes = when (validationError) {
+                SendMessage.Builder.ValidationError.EMPTY_PRICE -> {
+                    R.string.send_message_empty_price_error
+                }
+                SendMessage.Builder.ValidationError.EMPTY_CONTENT -> {
+                    R.string.send_message_empty_content_error
+                }
+                SendMessage.Builder.ValidationError.EMPTY_DESTINATION -> {
+                    R.string.send_message_empty_destination_error
+                }
+            }
+
+            viewModelScope.launch(mainImmediate) {
+                submitSideEffect(ChatSideEffect.Notify(
+                    app.getString(errorMessageRes)
+                ))
+            }
+
+        } ?: msg.first?.let { message ->
+            messageRepository.sendMessage(message)
+        }
+
+        return msg.first
     }
 
+    /**
+     * Remotely and locally Deletes a [Message] through the [MessageRepository]
+     */
     /**
      * Remotely and locally Deletes a [Message] through the [MessageRepository]
      */
@@ -676,31 +723,31 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 
     private inner class AttachmentSendStateContainer: ViewStateContainer<AttachmentSendViewState>(AttachmentSendViewState.Idle) {
         override fun updateViewState(viewState: AttachmentSendViewState) {
-            if (viewState is AttachmentSendViewState.Preview) {
-
-                // Only delete the previous file in the event that a new pic is chosen
-                // to send when one is currently being previewed.
-                val current = viewStateFlow.value
-                if (current is AttachmentSendViewState.Preview) {
-                    if (current.file.path != viewState.file.path) {
-                        try {
-                            current.file.delete()
-                        } catch (e: Exception) {
-
-                        }
-                    }
+            val oldPreviewFile: File? = when (val current = viewStateFlow.value) {
+                is AttachmentSendViewState.Preview -> {
+                    current.file
                 }
-            } else if (viewState is AttachmentSendViewState.PreviewGiphy) {
+                else -> {
+                    null
+                }
+            }
 
+            val previewFile: File? = when (viewState) {
+                is AttachmentSendViewState.Preview -> {
+                    viewState.file
+                }
+                else -> {
+                    null
+                }
+            }
+
+            if (oldPreviewFile != null && oldPreviewFile.path != previewFile?.path) {
                 // Only delete the previous file in the event that a new pic is chosen
                 // to send when one is currently being previewed.
-                val current = viewStateFlow.value
-                if (current is AttachmentSendViewState.Preview) {
-                    try {
-                        current.file.delete()
-                    } catch (e: Exception) {
+                try {
+                    oldPreviewFile.delete()
+                } catch (e: Exception) {
 
-                    }
                 }
             }
 
@@ -939,11 +986,11 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 
     @JvmSynthetic
     internal fun chatMenuOptionPaidMessage() {
-        viewModelScope.launch(mainImmediate) {
-            submitSideEffect(
-                ChatSideEffect.Notify("Paid message editor not implemented yet")
-            )
-        }
+        updateAttachmentSendViewState(
+            AttachmentSendViewState.PreviewPaidMessage(null)
+        )
+
+        updateViewState(ChatMenuViewState.Closed)
     }
 
     @JvmSynthetic

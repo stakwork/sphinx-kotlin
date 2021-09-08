@@ -5,6 +5,8 @@ import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_message.GiphyData
 import chat.sphinx.wrapper_message.ReplyUUID
+import chat.sphinx.wrapper_message_media.isSphinxText
+import java.io.File
 
 class SendMessage private constructor(
     val attachmentInfo: AttachmentInfo?,
@@ -29,6 +31,10 @@ class SendMessage private constructor(
         private var messagePrice: Sat?              = null
         private var priceToMeet: Sat?               = null
 
+        enum class ValidationError {
+            EMPTY_PRICE, EMPTY_DESTINATION, EMPTY_CONTENT
+        }
+
         @Synchronized
         fun clear() {
             attachmentInfo = null
@@ -42,27 +48,42 @@ class SendMessage private constructor(
             priceToMeet = null
         }
 
-        @get:Synchronized
-        val isValid: Boolean
-            get() = (
-                        attachmentInfo?.file?.let {
-                            try {
-                                if (!it.exists() || !it.isFile) {
-                                    return false
-                                }
+        @Synchronized
+        fun isValid(): Pair<Boolean, ValidationError?> {
+            if (chatId == null && contactId == null) {
+                return Pair(false, ValidationError.EMPTY_DESTINATION)
+            }
 
-                                it
-                            } catch (e: Exception) {
-                                return false
-                            }
-                        }                                   != null     ||
-                        !text.isNullOrEmpty()                           ||
-                        giphyData != null
-                    )                                                   &&
-                    (
-                        chatId                              != null     ||
-                        contactId                           != null
-                    )
+            val file: File? = attachmentInfo?.file?.let {
+                try {
+                    if (!it.exists() || !it.isFile) {
+                        null
+                    }
+
+                    it
+                } catch (e: Exception) {
+                    null
+                }
+            }
+
+            when {
+                (file == null) -> {
+                    if (text.isNullOrEmpty() || giphyData == null) {
+                        return Pair(false, ValidationError.EMPTY_CONTENT)
+                    }
+                }
+                else -> {
+                    val isPaidTextMessage = attachmentInfo?.mediaType?.isSphinxText == true
+                    val messagePrice = messagePrice?.value ?: 0
+
+                    if (isPaidTextMessage && messagePrice == 0.toLong()) {
+                        return Pair(false, ValidationError.EMPTY_PRICE)
+                    }
+                }
+            }
+
+            return Pair(true, null)
+        }
 
         @Synchronized
         fun setAttachmentInfo(attachmentInfo: AttachmentInfo?): Builder {
@@ -123,21 +144,26 @@ class SendMessage private constructor(
         }
 
         @Synchronized
-        fun build(): SendMessage? =
-            if (!isValid) {
-                null
+        fun build(): Pair<SendMessage?, ValidationError?> {
+            val isValid = isValid()
+
+            if (!isValid.first) {
+                return Pair(null, isValid.second)
             } else {
-                SendMessage(
-                    attachmentInfo,
-                    chatId,
-                    contactId,
-                    replyUUID,
-                    text,
-                    giphyData?.let { GiphyData(it.id, it.url, it.aspect_ratio, text) },
-                    isBoost,
-                    messagePrice,
-                    priceToMeet
+                return Pair(
+                    SendMessage(
+                        attachmentInfo,
+                        chatId,
+                        contactId,
+                        replyUUID,
+                        text,
+                        giphyData?.let { GiphyData(it.id, it.url, it.aspect_ratio, text) },
+                        isBoost,
+                        messagePrice,
+                        priceToMeet
+                    ), null
                 )
             }
+        }
     }
 }

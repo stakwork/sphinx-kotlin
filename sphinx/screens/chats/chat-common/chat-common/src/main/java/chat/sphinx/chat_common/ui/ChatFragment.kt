@@ -3,6 +3,8 @@ package chat.sphinx.chat_common.ui
 import android.content.Context
 import android.graphics.Color
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.View
 import android.view.Window
 import android.widget.ImageView
@@ -55,6 +57,7 @@ import chat.sphinx.menu_bottom.ui.BottomMenu
 import chat.sphinx.menu_bottom.ui.MenuBottomViewState
 import chat.sphinx.resources.*
 import chat.sphinx.wrapper_chat.isTrue
+import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.lightning.toSat
 import chat.sphinx.wrapper_meme_server.headerKey
 import chat.sphinx.wrapper_meme_server.headerValue
@@ -76,6 +79,11 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 
 abstract class ChatFragment<
         VB: ViewBinding,
@@ -143,6 +151,7 @@ abstract class ChatFragment<
         val insetterActivity = (requireActivity() as InsetterActivity)
         setupMenu(insetterActivity)
         setupFooter(insetterActivity)
+        setupAttachmentPriceView()
         setupHeader(insetterActivity)
         setupSelectedMessage()
         setupAttachmentSendPreview(insetterActivity)
@@ -179,7 +188,7 @@ abstract class ChatFragment<
                     viewModel.updateFooterViewState(FooterViewState.Default)
                     viewModel.deleteUnsentAttachment(attachmentSendViewState)
                 }
-                attachmentSendViewState is AttachmentSendViewState.PreviewGiphy -> {
+                attachmentSendViewState is AttachmentSendViewState.PreviewGiphy || attachmentSendViewState is AttachmentSendViewState.PreviewPaidMessage -> {
                     viewModel.updateAttachmentSendViewState(AttachmentSendViewState.Idle)
                     viewModel.updateFooterViewState(FooterViewState.Default)
                 }
@@ -304,6 +313,17 @@ abstract class ChatFragment<
                     is AttachmentSendViewState.PreviewGiphy -> {
                         sendMessageBuilder.setGiphyData(attachmentViewState.giphyData)
                     }
+                    is AttachmentSendViewState.PreviewPaidMessage -> {
+                        viewModel.createPaidMessageFile(editTextChatFooter.text?.toString())?.let { file ->
+                            sendMessageBuilder.setAttachmentInfo(
+                                AttachmentInfo(
+                                    file = file,
+                                    mediaType = MediaType.Text,
+                                    isLocalFile = true,
+                                )
+                            )
+                        }
+                    }
                 }
 
                 viewModel.sendMessage(sendMessageBuilder)?.let {
@@ -336,6 +356,24 @@ abstract class ChatFragment<
                 }
             }
 
+            editTextChatFooter.addTextChangedListener(object : TextWatcher {
+                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+                }
+
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                }
+
+                override fun afterTextChanged(s: Editable?) {
+                    if (viewModel.getAttachmentSendViewStateFlow().value is AttachmentSendViewState.PreviewPaidMessage) {
+
+                        viewModel.updateAttachmentSendViewState(
+                            AttachmentSendViewState.PreviewPaidMessage(s.toString())
+                        )
+
+                    }
+                }
+            })
+
             editTextChatFooter.onCommitContentListener = viewModel.onIMEContent
         }
 
@@ -347,6 +385,27 @@ abstract class ChatFragment<
 
             root.setBackgroundColor(getColor(R.color.headerBG))
         }
+    }
+
+    private fun setupAttachmentPriceView() {
+        attachmentSendBinding.editTextMessagePrice.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+            }
+
+            override fun afterTextChanged(s: Editable?) {
+                if (viewModel.getAttachmentSendViewStateFlow().value is AttachmentSendViewState.PreviewPaidMessage) {
+
+                    viewModel.updateAttachmentSendViewState(
+                        AttachmentSendViewState.PreviewPaidMessage(
+                            footerBinding.editTextChatFooter.text?.toString()
+                        )
+                    )
+                }
+            }
+        })
     }
 
     private fun setupHeader(insetterActivity: InsetterActivity) {
@@ -424,7 +483,7 @@ abstract class ChatFragment<
                     viewModel.deleteUnsentAttachment(vs)
                     viewModel.updateFooterViewState(FooterViewState.Default)
                     viewModel.updateAttachmentSendViewState(AttachmentSendViewState.Idle)
-                } else if (vs is AttachmentSendViewState.PreviewGiphy) {
+                } else if (vs is AttachmentSendViewState.PreviewGiphy || vs is AttachmentSendViewState.PreviewPaidMessage) {
                     viewModel.updateFooterViewState(FooterViewState.Default)
                     viewModel.updateAttachmentSendViewState(AttachmentSendViewState.Idle)
                 }
@@ -1019,6 +1078,21 @@ abstract class ChatFragment<
                                     attachmentSendViewStateJobs.add(job)
                                 }
                             }
+                        }
+                        is AttachmentSendViewState.PreviewPaidMessage -> {
+                            textViewAttachmentSendHeaderName.apply {
+                                text = getString(R.string.attachment_send_header_paid_message)
+                            }
+
+                            includePaidTextMessageSendPreview.apply {
+                                textViewPaidMessagePreviewText.text = viewState.text ?: footerBinding.editTextChatFooter.text
+
+                                textViewPaidMessagePreviewPrice.text = attachmentSendBinding.editTextMessagePrice.text?.toString()?.toLongOrNull()?.toSat()?.asFormattedString(appendUnit = true) ?: "0 sats"
+
+                                root.visible
+                            }
+
+                            root.visible
                         }
                     }
                 }
