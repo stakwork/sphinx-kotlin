@@ -3,6 +3,7 @@ package chat.sphinx.chat_common.ui.viewstate.messageholder
 import android.graphics.Color
 import android.view.Gravity
 import android.widget.ImageView
+import android.widget.TextView
 import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
 import androidx.annotation.MainThread
@@ -12,6 +13,7 @@ import androidx.core.view.updateLayoutParams
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.chat_common.R
 import chat.sphinx.chat_common.databinding.LayoutMessageHolderBinding
+import chat.sphinx.chat_common.model.MessageLinkPreview
 import chat.sphinx.chat_common.model.NodeDescriptor
 import chat.sphinx.chat_common.model.TribeLink
 import chat.sphinx.chat_common.model.UnspecifiedUrl
@@ -22,6 +24,7 @@ import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
+import chat.sphinx.concept_meme_input_stream.MemeInputStreamHandler
 import chat.sphinx.concept_meme_server.MemeServerTokenHandler
 import chat.sphinx.concept_network_client_crypto.CryptoHeader
 import chat.sphinx.concept_network_client_crypto.CryptoScheme
@@ -29,6 +32,7 @@ import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.resources.*
 import chat.sphinx.wrapper_chat.ChatType
 import chat.sphinx.wrapper_common.lightning.*
+import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_meme_server.headerKey
 import chat.sphinx.wrapper_meme_server.headerValue
 import chat.sphinx.wrapper_message.*
@@ -45,6 +49,7 @@ import kotlinx.coroutines.launch
 import java.io.File
 import chat.sphinx.resources.R as common_R
 
+
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
 internal fun LayoutMessageHolderBinding.setView(
@@ -55,10 +60,12 @@ internal fun LayoutMessageHolderBinding.setView(
     imageLoader: ImageLoader<ImageView>,
     imageLoaderDefaults: ImageLoaderOptions,
     memeServerTokenHandler: MemeServerTokenHandler,
+    memeInputStreamHandler: MemeInputStreamHandler,
     recyclerViewWidth: Px,
     viewState: MessageHolderViewState,
     userColorsHelper: UserColorsHelper,
     onSphinxInteractionListener: SphinxUrlSpan.OnInteractionListener? = null,
+    updatePaidTextMessageContent: (messageId: MessageId, messageContentDecrypted: MessageContentDecrypted) -> Unit
 ) {
     for (job in holderJobs) {
         job.cancel()
@@ -156,6 +163,35 @@ internal fun LayoutMessageHolderBinding.setView(
             }
             setUnsupportedMessageTypeLayout(viewState.unsupportedMessageType)
             setBubbleMessageLayout(viewState.bubbleMessage, onSphinxInteractionListener)
+            setBubblePaidMessageLayout(viewState.bubblePaidMessage) { url, media ->
+                lifecycleScope.launch(dispatchers.mainImmediate) {
+
+                    media?.host?.let { host ->
+                        media?.mediaKeyDecrypted?.let { mediaKeyDecrypted ->
+                            memeServerTokenHandler.retrieveAuthenticationToken(host)?.let { token ->
+
+                                val inputStream = memeInputStreamHandler.retrieveMediaInputStream(
+                                    url,
+                                    token,
+                                    mediaKeyDecrypted
+                                )
+
+                                val text = inputStream?.bufferedReader().use { it?.readText() }
+
+                                text?.toMessageContentDecrypted()?.let { messageContentDecrypted ->
+                                    updatePaidTextMessageContent(
+                                        viewState.message.id,
+                                        messageContentDecrypted
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                }.let { job ->
+                    holderJobs.add(job)
+                }
+            }
             setBubbleMessageLinkPreviewLayout(
                 dispatchers,
                 holderJobs,
@@ -527,6 +563,42 @@ internal inline fun LayoutMessageHolderBinding.setBubbleMessageLayout(
 
             if (onSphinxInteractionListener != null) {
                 SphinxLinkify.addLinks(this, SphinxLinkify.ALL, onSphinxInteractionListener)
+            }
+        }
+    }
+}
+
+@MainThread
+@Suppress("NOTHING_TO_INLINE")
+internal inline fun LayoutMessageHolderBinding.setBubblePaidMessageLayout(
+    message: LayoutState.Bubble.ContainerThird.PaidMessage?,
+    loadText: (String, MessageMedia?) -> Unit,
+) {
+    includeMessageHolderBubble.textViewPaidMessageText.apply {
+        if (message == null) {
+            gone
+        } else {
+            visible
+            text = when (message.purchaseStatus) {
+                is PurchaseStatus.Pending -> {
+                    getString(R.string.paid_message_pay_to_unlock)
+                }
+                is PurchaseStatus.Processing -> {
+                    getString(R.string.paid_message_loading)
+                }
+                is PurchaseStatus.Denied -> {
+                    getString(R.string.paid_message_unable_to_load)
+                }
+                is PurchaseStatus.Accepted -> {
+                    getString(R.string.paid_message_loading)
+                }
+                else -> {
+                    ""
+                }
+            }
+
+            if (message.purchaseStatus.isPurchaseAccepted()) {
+                loadText(message.url, message.media)
             }
         }
     }

@@ -59,6 +59,7 @@ internal class ChatContactViewModel @Inject constructor(
     app: Application,
     dispatchers: CoroutineDispatchers,
     memeServerTokenHandler: MemeServerTokenHandler,
+    memeInputStreamHandler: MemeInputStreamHandler,
     contactChatNavigator: ContactChatNavigator,
     chatRepository: ChatRepository,
     contactRepository: ContactRepository,
@@ -68,12 +69,12 @@ internal class ChatContactViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     cameraViewModelCoordinator: ViewModelCoordinator<CameraRequest, CameraResponse>,
     linkPreviewHandler: LinkPreviewHandler,
-    memeInputStreamHandler: MemeInputStreamHandler,
     LOG: SphinxLogger,
 ): ChatViewModel<ChatContactFragmentArgs>(
     app,
     dispatchers,
     memeServerTokenHandler,
+    memeInputStreamHandler,
     contactChatNavigator,
     chatRepository,
     contactRepository,
@@ -83,7 +84,6 @@ internal class ChatContactViewModel @Inject constructor(
     savedStateHandle,
     cameraViewModelCoordinator,
     linkPreviewHandler,
-    memeInputStreamHandler,
     LOG,
 ) {
     override val args: ChatContactFragmentArgs by savedStateHandle.navArgs()

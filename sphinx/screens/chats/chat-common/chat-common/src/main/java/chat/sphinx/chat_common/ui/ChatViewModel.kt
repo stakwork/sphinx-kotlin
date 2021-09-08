@@ -101,6 +101,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     protected val app: Application,
     dispatchers: CoroutineDispatchers,
     val memeServerTokenHandler: MemeServerTokenHandler,
+    val memeInputStreamHandler: MemeInputStreamHandler,
     val chatNavigator: ChatNavigator,
     protected val chatRepository: ChatRepository,
     protected val contactRepository: ContactRepository,
@@ -110,7 +111,6 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     protected val savedStateHandle: SavedStateHandle,
     protected val cameraCoordinator: ViewModelCoordinator<CameraRequest, CameraResponse>,
     protected val linkPreviewHandler: LinkPreviewHandler,
-    private val memeInputStreamHandler: MemeInputStreamHandler,
     protected val LOG: SphinxLogger,
 ): MotionLayoutViewModel<
         Nothing,
@@ -491,6 +491,13 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         }.join()
 
         return preview
+    }
+
+    fun updatePaidTextMessageContent(messageId: MessageId, messageContentDecrypted: MessageContentDecrypted) {
+        messageRepository.updateMessageContentDecrypted(
+            messageId,
+            messageContentDecrypted
+        )
     }
 
     fun init() {

@@ -14,6 +14,7 @@ import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message_media.MessageMedia
 import chat.sphinx.wrapper_message_media.isImage
+import chat.sphinx.wrapper_message_media.isSphinxText
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
@@ -54,7 +55,10 @@ internal sealed class MessageHolderViewState(
     }
 
     val unsupportedMessageType: LayoutState.Bubble.ContainerThird.UnsupportedMessageType? by lazy(LazyThreadSafetyMode.NONE) {
-        if (unsupportedMessageTypes.contains(message.type) && message.messageMedia?.mediaType?.isImage != true) {
+        if (
+            unsupportedMessageTypes.contains(message.type) &&
+            message.messageMedia?.mediaType?.isImage != true && message.messageMedia?.mediaType?.isSphinxText != true
+        ) {
             LayoutState.Bubble.ContainerThird.UnsupportedMessageType(
                 messageType = message.type,
                 gravityStart = this is Received,
@@ -106,6 +110,22 @@ internal sealed class MessageHolderViewState(
                 LayoutState.Bubble.ContainerThird.Message(text = text)
             } else {
                 null
+            }
+        }
+    }
+
+    val bubblePaidMessage: LayoutState.Bubble.ContainerThird.PaidMessage? by lazy(LazyThreadSafetyMode.NONE) {
+        message.retrievePurchaseStatus()?.let { purchaseStatus ->
+            if (message.retrieveTextToShow() != null || !message.isPaidTextMessage || this is Sent) {
+                null
+            } else {
+                message.retrieveSphinxTextUrlAndMessageMedia()?.let { mediaData ->
+                    LayoutState.Bubble.ContainerThird.PaidMessage(
+                        purchaseStatus = purchaseStatus,
+                        url = mediaData.first,
+                        media = mediaData.second
+                    )
+                }
             }
         }
     }

@@ -211,7 +211,7 @@ internal class MessageListAdapter<ARGS : NavArgs>(
         private val binding: LayoutMessageHolderBinding
     ): RecyclerView.ViewHolder(binding.root) {
 
-        private val holderJobs: ArrayList<Job> = ArrayList(10)
+        private val holderJobs: ArrayList<Job> = ArrayList(11)
         private val disposables: ArrayList<Disposable> = ArrayList(4)
         private var currentViewState: MessageHolderViewState? = null
 
@@ -395,10 +395,14 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                 imageLoader,
                 viewModel.imageLoaderDefaults,
                 viewModel.memeServerTokenHandler,
+                viewModel.memeInputStreamHandler,
                 recyclerViewWidth,
                 viewState,
                 userColorsHelper,
                 onSphinxInteractionListener,
+                updatePaidTextMessageContent = { messageId, messageContentDecrypted ->
+                    viewModel.updatePaidTextMessageContent(messageId, messageContentDecrypted)
+                }
             )
 
         }

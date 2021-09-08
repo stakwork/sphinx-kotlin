@@ -45,6 +45,7 @@ class ChatGroupViewModel @Inject constructor(
     app: Application,
     dispatchers: CoroutineDispatchers,
     memeServerTokenHandler: MemeServerTokenHandler,
+    memeInputStreamHandler: MemeInputStreamHandler,
     chatNavigator: GroupChatNavigator,
     chatRepository: ChatRepository,
     contactRepository: ContactRepository,
@@ -54,12 +55,12 @@ class ChatGroupViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     cameraViewModelCoordinator: ViewModelCoordinator<CameraRequest, CameraResponse>,
     linkPreviewHandler: LinkPreviewHandler,
-    memeInputStreamHandler: MemeInputStreamHandler,
     LOG: SphinxLogger,
 ): ChatViewModel<ChatGroupFragmentArgs>(
     app,
     dispatchers,
     memeServerTokenHandler,
+    memeInputStreamHandler,
     chatNavigator,
     chatRepository,
     contactRepository,
@@ -69,7 +70,6 @@ class ChatGroupViewModel @Inject constructor(
     savedStateHandle,
     cameraViewModelCoordinator,
     linkPreviewHandler,
-    memeInputStreamHandler,
     LOG,
 ) {
     override val args: ChatGroupFragmentArgs by savedStateHandle.navArgs()

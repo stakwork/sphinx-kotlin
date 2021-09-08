@@ -1492,7 +1492,6 @@ abstract class SphinxRepository(
                             ?.let { decryptedContent ->
 
                                 messageLock.withLock {
-
                                     withContext(io) {
                                         queries.transaction {
                                             queries.messageUpdateContentDecrypted(
@@ -1501,7 +1500,6 @@ abstract class SphinxRepository(
                                             )
                                         }
                                     }
-
                                 }
 
                                 message._messageContentDecrypted = decryptedContent
@@ -1718,6 +1716,25 @@ abstract class SphinxRepository(
             .messageGetAllByUUID(messageUUIDs)
             .executeAsList()
             .map { messageDboPresenterMapper.mapFrom(it) }
+    }
+
+    override fun updateMessageContentDecrypted(
+        messageId: MessageId,
+        messageContentDecrypted: MessageContentDecrypted
+    ) {
+        applicationScope.launch(io) {
+            val queries = coreDB.getSphinxDatabaseQueries()
+            messageLock.withLock {
+                withContext(io) {
+                    queries.transaction {
+                        queries.messageUpdateContentDecrypted(
+                            messageContentDecrypted,
+                            messageId
+                        )
+                    }
+                }
+            }
+        }
     }
 
     @Suppress("RemoveExplicitTypeArguments")

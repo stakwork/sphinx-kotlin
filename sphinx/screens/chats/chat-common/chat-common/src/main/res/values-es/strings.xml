@@ -97,6 +97,9 @@
     <string name="attachment_send_header_giphy">ENVIAR GIPHY</string>
 
     <!-- Pay Attachment -->
+    <string name="paid_message_pay_to_unlock">PAGA PARA DESBLOQUEAR</string>
+    <string name="paid_message_loading">CARGANDO MENSAJE...</string>
+    <string name="paid_message_unable_to_load">ERROR AL CARGAR EL MENSAJE</string>
     <string name="attachment_price_label">Precio: </string>
     <string name="alert_confirm_pay_attachment_title">Confirmar Compra</string>
     <string name="alert_confirm_pay_attachment_message">¿Estas seguro de que quieres comprar este artículo?</string>
