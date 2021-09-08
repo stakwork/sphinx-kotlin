@@ -10,6 +10,7 @@ import chat.sphinx.wrapper_common.lightning.LightningPaymentRequest
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.*
 import chat.sphinx.wrapper_message_media.MessageMedia
+import chat.sphinx.wrapper_message_media.isAudio
 import chat.sphinx.wrapper_message_media.isImage
 import chat.sphinx.wrapper_message_media.token.MediaUrl
 
@@ -50,6 +51,47 @@ inline fun Message.retrieveImageUrlAndMessageMedia(): Pair<String, MessageMedia?
     } ?: messageMedia?.let { media ->
         if (media.mediaType.isImage) {
 
+            val purchaseAcceptItem: Message? = if (isPaidMessage) {
+                val item = retrievePurchaseItemOfType(MessageType.Purchase.Accepted)
+
+                if (item?.messageMedia?.mediaKey?.value.isNullOrEmpty()) {
+                    null
+                } else {
+                    item
+                }
+            } else {
+                null
+            }
+
+            val url: MediaUrl? = if (this.type.isDirectPayment()) {
+                media.templateUrl
+            } else {
+                purchaseAcceptItem?.messageMedia?.url ?: media.url
+            }
+
+            val messageMedia: MessageMedia? = purchaseAcceptItem?.messageMedia ?: media
+
+            if (media.localFile != null) {
+                mediaData = Pair(
+                    url?.value?.let { if (it.isEmpty()) null else it } ?: "http://127.0.0.1",
+                    messageMedia,
+                )
+            } else {
+                url?.let { mediaUrl ->
+                    mediaData = Pair(mediaUrl.value, messageMedia)
+                }
+            }
+        }
+    }
+    return mediaData
+}
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun Message.retrieveAudioUrlAndMessageMedia(): Pair<String, MessageMedia?>? {
+    var mediaData: Pair<String, MessageMedia?>? = null
+
+    messageMedia?.let { media ->
+        if (media.mediaType.isAudio) {
             val purchaseAcceptItem: Message? = if (isPaidMessage) {
                 val item = retrievePurchaseItemOfType(MessageType.Purchase.Accepted)
 

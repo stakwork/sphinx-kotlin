@@ -1,6 +1,8 @@
 package chat.sphinx.chat_common.ui.viewstate.messageholder
 
 import android.graphics.Color
+import android.media.MediaPlayer
+import android.os.CountDownTimer
 import android.view.Gravity
 import android.widget.ImageView
 import androidx.annotation.ColorRes
@@ -12,16 +14,18 @@ import androidx.core.view.updateLayoutParams
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.chat_common.R
 import chat.sphinx.chat_common.databinding.LayoutMessageHolderBinding
+import chat.sphinx.chat_common.databinding.LayoutMessageTypeAttachmentAudioBinding
 import chat.sphinx.chat_common.model.NodeDescriptor
 import chat.sphinx.chat_common.model.TribeLink
 import chat.sphinx.chat_common.model.UnspecifiedUrl
-import chat.sphinx.chat_common.ui.viewstate.messageholder.isReceived
+import chat.sphinx.chat_common.ui.retrieveRemoteMediaInputStream
 import chat.sphinx.chat_common.util.SphinxLinkify
 import chat.sphinx.chat_common.util.SphinxUrlSpan
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
+import chat.sphinx.concept_meme_input_stream.MemeInputStreamHandler
 import chat.sphinx.concept_meme_server.MemeServerTokenHandler
 import chat.sphinx.concept_network_client_crypto.CryptoHeader
 import chat.sphinx.concept_network_client_crypto.CryptoScheme
@@ -39,10 +43,12 @@ import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.goneIfTrue
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
+import io.matthewnelson.concept_media_cache.MediaCacheHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import java.io.File
+import java.io.IOException
 import chat.sphinx.resources.R as common_R
 
 @MainThread
@@ -55,6 +61,8 @@ internal fun LayoutMessageHolderBinding.setView(
     imageLoader: ImageLoader<ImageView>,
     imageLoaderDefaults: ImageLoaderOptions,
     memeServerTokenHandler: MemeServerTokenHandler,
+    memeInputStreamHandler: MemeInputStreamHandler,
+    mediaCacheHandler: MediaCacheHandler,
     recyclerViewWidth: Px,
     viewState: MessageHolderViewState,
     userColorsHelper: UserColorsHelper,
@@ -154,6 +162,92 @@ internal fun LayoutMessageHolderBinding.setView(
                     holderJobs.add(job)
                 }
             }
+            setBubbleAudioAttachment(viewState.bubbleAudioAttachment) { layoutMessageAudioAttachment, url, media ->
+                lifecycleScope.launch(dispatchers.mainImmediate) {
+                    layoutMessageAudioAttachment.apply {
+                        val file: File? = media?.localFile
+
+                        val mediaPlayer = MediaPlayer().apply {
+                            try {
+                                progressBarAttachmentAudioFileLoading.visible
+                                textViewAttachmentPlayPauseButton.gone
+                                textViewAttachmentAudioFailure.gone
+                                if (file != null) {
+                                    setDataSource(file.absolutePath)
+                                } else {
+
+                                    val inputStream = media?.retrieveRemoteMediaInputStream(
+                                        url,
+                                        memeServerTokenHandler,
+                                        memeInputStreamHandler
+                                    )
+
+                                    if (inputStream != null) {
+                                        // TODO: Determine extension from media.mediaType
+                                        val tmpAudioFile = mediaCacheHandler.createAudioFile(".tmp")
+                                        mediaCacheHandler.copyTo(inputStream, tmpAudioFile)
+                                        setDataSource(
+                                            tmpAudioFile.absolutePath
+                                        )
+                                    } else {
+                                        setDataSource(
+                                            url
+                                        )
+                                    }
+                                }
+                                setOnPreparedListener {
+                                    seekBarAttachmentAudio.max = duration
+                                    textViewAttachmentAudioRemainingDuration.text = duration.toLong().toTimestamp()
+                                    progressBarAttachmentAudioFileLoading.gone
+                                    textViewAttachmentPlayPauseButton.visible
+                                }
+                                setOnErrorListener { mp, what, extra ->
+                                    progressBarAttachmentAudioFileLoading.gone
+                                    textViewAttachmentAudioFailure.visible
+
+                                    return@setOnErrorListener true
+                                }
+
+                                prepareAsync()
+                            } catch (e: IOException) {
+                                progressBarAttachmentAudioFileLoading.gone
+                                textViewAttachmentAudioFailure.visible
+                            }
+                        }
+
+                        var timer: CountDownTimer? = null
+                        textViewAttachmentPlayPauseButton.setOnClickListener {
+                            if (mediaPlayer.isPlaying) {
+                                mediaPlayer.pause()
+                                timer?.cancel()
+                                timer = null
+                            } else {
+                                mediaPlayer.start()
+                                val remainingTime = mediaPlayer.duration - seekBarAttachmentAudio.progress
+                                timer = object: CountDownTimer(remainingTime.toLong(), 100) {
+                                    override fun onTick(millisUntilFinished: Long) {
+                                        textViewAttachmentAudioRemainingDuration.text = millisUntilFinished.toTimestamp()
+                                        seekBarAttachmentAudio.progress = mediaPlayer.currentPosition
+                                    }
+
+                                    override fun onFinish() {
+                                        textViewAttachmentAudioRemainingDuration.text = mediaPlayer.duration.toLong().toTimestamp()
+                                        seekBarAttachmentAudio.progress = 0
+                                    }
+                                }
+                                timer?.start()
+                            }
+                        }
+                    }
+
+
+                }.let { job ->
+                    holderJobs.add(job)
+                }
+
+
+
+            }
             setUnsupportedMessageTypeLayout(viewState.unsupportedMessageType)
             setBubbleMessageLayout(viewState.bubbleMessage, onSphinxInteractionListener)
             setBubbleMessageLinkPreviewLayout(
@@ -242,6 +336,13 @@ internal fun LayoutMessageHolderBinding.setView(
     }
 }
 
+@Suppress("NOTHING_TO_INLINE")
+internal inline fun Long.toTimestamp(): String {
+    val minutes = this / 1000 / 60
+    val seconds = this / 1000 % 60
+
+    return "${"%02d".format(minutes)}:${"%02d".format(seconds)}"
+}
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun LayoutMessageHolderBinding.setUnsupportedMessageTypeLayout(
@@ -947,6 +1048,26 @@ internal inline fun LayoutMessageHolderBinding.setBubbleImageAttachment(
 
                 loadImage(imageViewAttachmentImage, imageAttachment.url, imageAttachment.media)
             }
+        }
+    }
+}
+
+@MainThread
+@Suppress("NOTHING_TO_INLINE")
+internal inline fun LayoutMessageHolderBinding.setBubbleAudioAttachment(
+    audioAttachment: LayoutState.Bubble.ContainerSecond.AudioAttachment?,
+    loadAudio: (LayoutMessageTypeAttachmentAudioBinding, String, MessageMedia?) -> Unit,
+) {
+    includeMessageHolderBubble.includeMessageTypeAudioAttachment.apply {
+        if (audioAttachment == null) {
+            root.gone
+        } else {
+            root.visible
+            loadAudio(
+                this,
+                audioAttachment.url,
+                audioAttachment.media
+            )
         }
     }
 }

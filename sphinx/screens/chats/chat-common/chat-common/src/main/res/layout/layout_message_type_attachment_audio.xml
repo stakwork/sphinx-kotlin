@@ -6,8 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="@dimen/message_type_audio_attachment_height"
     android:visibility="gone"
-    tools:layout_height="@dimen/message_type_audio_attachment_height"
-    tools:layout_width="300dp"
+    tools:background="@color/body"
     tools:visibility="visible">
 
 
@@ -15,6 +14,7 @@
         android:id="@+id/layout_constraint_attachment_audio_play_button_group"
         android:layout_width="50dp"
         android:layout_height="62dp"
+        android:layout_marginStart="@dimen/default_layout_margin"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/seek_bar_attachment_audio"
         app:layout_constraintHorizontal_bias="0.5"
@@ -22,18 +22,36 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/button_attachment_audio_icon_play_pause_button"
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_attachment_audio_failure"
             android:layout_width="@dimen/audio_button_play_pause_width"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/material_icons_regular"
             android:gravity="center"
+            android:fontFamily="@font/material_icons_regular"
+            android:text="@string/material_icon_name_error"
+            android:textColor="@color/badgeRed"
+            android:textSize="40sp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:visibility="visible"/>
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_attachment_play_pause_button"
+            android:layout_width="@dimen/audio_button_play_pause_width"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:fontFamily="@font/material_icons_regular"
             android:text="@string/material_icon_name_play_button"
-            android:textSize="@dimen/icon_play_pause_button_text_size"
-            app:layout_constraintBottom_toBottomOf="@id/layout_constraint_attachment_audio_play_button_group"
-            app:layout_constraintEnd_toEndOf="@id/layout_constraint_attachment_audio_play_button_group"
-            app:layout_constraintStart_toStartOf="@id/layout_constraint_attachment_audio_play_button_group"
-            app:layout_constraintTop_toTopOf="@id/layout_constraint_attachment_audio_play_button_group" />
+            android:textColor="@color/primaryBlue"
+            android:textSize="40sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"  />
+
 
         <ProgressBar
             android:id="@+id/progress_bar_attachment_audio_file_loading"
@@ -42,20 +60,19 @@
             android:indeterminate="true"
             android:indeterminateTint="@color/primaryText"
             android:visibility="gone"
-            app:layout_constraintBottom_toBottomOf="@id/button_attachment_audio_icon_play_pause_button"
-            app:layout_constraintEnd_toEndOf="@id/button_attachment_audio_icon_play_pause_button"
-            app:layout_constraintStart_toStartOf="@id/button_attachment_audio_icon_play_pause_button"
-            app:layout_constraintTop_toTopOf="@id/button_attachment_audio_icon_play_pause_button"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
             tools:visibility="visible" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-
     <SeekBar
         android:id="@+id/seek_bar_attachment_audio"
-        android:layout_width="130dp"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="@dimen/default_layout_margin"
+        android:layout_marginHorizontal="@dimen/default_small_layout_margin"
         android:progressTint="@color/receivedIcon"
         android:thumbTint="@color/receivedIcon"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -69,6 +86,7 @@
         android:id="@+id/text_view_attachment_audio_remaining_duration"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/default_layout_margin"
         android:fontFamily="@font/roboto_regular"
         android:textSize="14sp"
         app:layout_constraintBottom_toBottomOf="parent"

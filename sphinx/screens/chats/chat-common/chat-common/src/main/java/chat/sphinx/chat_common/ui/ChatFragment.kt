@@ -868,6 +868,8 @@ abstract class ChatFragment<
                                 imageLoader,
                                 viewModel.imageLoaderDefaults,
                                 viewModel.memeServerTokenHandler,
+                                viewModel.memeInputStreamHandler,
+                                viewModel.mediaCacheHandler,
                                 viewState.recyclerViewWidth,
                                 viewState.messageHolderViewState,
                                 userColorsHelper,

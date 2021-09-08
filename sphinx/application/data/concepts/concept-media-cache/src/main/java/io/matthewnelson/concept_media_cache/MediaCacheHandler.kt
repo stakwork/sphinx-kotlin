@@ -4,6 +4,7 @@ import java.io.File
 import java.io.InputStream
 
 abstract class MediaCacheHandler {
+    abstract fun createAudioFile(extension: String): File
     abstract fun createImageFile(extension: String): File
     abstract fun createVideoFile(extension: String): File
 

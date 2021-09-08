@@ -3,7 +3,10 @@ package chat.sphinx.chat_common.ui.viewstate.messageholder
 import chat.sphinx.concept_link_preview.model.*
 import chat.sphinx.wrapper_chat.ChatType
 import chat.sphinx.wrapper_common.PhotoUrl
-import chat.sphinx.wrapper_common.lightning.*
+import chat.sphinx.wrapper_common.lightning.LightningNodeDescriptor
+import chat.sphinx.wrapper_common.lightning.Sat
+import chat.sphinx.wrapper_common.lightning.asFormattedString
+import chat.sphinx.wrapper_common.lightning.unit
 import chat.sphinx.wrapper_common.tribe.TribeJoinLink
 import chat.sphinx.wrapper_contact.ContactAlias
 import chat.sphinx.wrapper_message.MessageType
@@ -76,6 +79,12 @@ internal sealed class LayoutState private constructor() {
                 val unitLabel: String
                     get() = amount.unit
             }
+
+            data class AudioAttachment(
+                val url: String,
+                val media: MessageMedia?,
+                val showPaidOverlay: Boolean
+            ): ContainerSecond()
 
             data class ImageAttachment(
                 val url: String,

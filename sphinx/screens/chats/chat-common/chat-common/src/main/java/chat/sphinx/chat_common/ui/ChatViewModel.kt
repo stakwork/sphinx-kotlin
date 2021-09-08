@@ -106,11 +106,11 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     protected val contactRepository: ContactRepository,
     protected val messageRepository: MessageRepository,
     protected val networkQueryLightning: NetworkQueryLightning,
-    protected val mediaCacheHandler: MediaCacheHandler,
+    val mediaCacheHandler: MediaCacheHandler,
     protected val savedStateHandle: SavedStateHandle,
     protected val cameraCoordinator: ViewModelCoordinator<CameraRequest, CameraResponse>,
     protected val linkPreviewHandler: LinkPreviewHandler,
-    private val memeInputStreamHandler: MemeInputStreamHandler,
+    val memeInputStreamHandler: MemeInputStreamHandler,
     protected val LOG: SphinxLogger,
 ): MotionLayoutViewModel<
         Nothing,
@@ -1134,9 +1134,10 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 
                         messageMedia.retrieveMediaStorageUri()?.let { mediaStorageUri ->
                             app.contentResolver.insert(mediaStorageUri, mediaContentValues)?.let { savedFileUri ->
-                                val inputStream = drawable?.drawableToBitmap()?.toInputStream() ?: retrieveRemoteMediaInputStream(
+                                val inputStream = drawable?.drawableToBitmap()?.toInputStream() ?: messageMedia.retrieveRemoteMediaInputStream(
                                     mediaUrlAndMessageMedia.first,
-                                    messageMedia
+                                    memeServerTokenHandler,
+                                    memeInputStreamHandler
                                 )
 
                                 try {
@@ -1168,21 +1169,6 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                         }
                     }
                 }
-            }
-        }
-    }
-
-    private suspend fun retrieveRemoteMediaInputStream(
-        url: String,
-        messageMedia: MessageMedia
-    ): InputStream? {
-        return messageMedia.localFile?.inputStream() ?: messageMedia.host?.let { mediaHost ->
-            memeServerTokenHandler.retrieveAuthenticationToken(mediaHost)?.let { authenticationToken ->
-                memeInputStreamHandler.retrieveMediaInputStream(
-                    url,
-                    authenticationToken,
-                    messageMedia.mediaKeyDecrypted
-                )
             }
         }
     }
@@ -1260,6 +1246,23 @@ inline fun MessageMedia.retrieveContentValues(message: Message): ContentValues {
     }
 }
 
+
+@Suppress("NOTHING_TO_INLINE")
+suspend inline fun MessageMedia.retrieveRemoteMediaInputStream(
+    url: String,
+    memeServerTokenHandler: MemeServerTokenHandler,
+    memeInputStreamHandler: MemeInputStreamHandler
+): InputStream? {
+    return localFile?.inputStream() ?: host?.let { mediaHost ->
+        memeServerTokenHandler.retrieveAuthenticationToken(mediaHost)?.let { authenticationToken ->
+            memeInputStreamHandler.retrieveMediaInputStream(
+                url,
+                authenticationToken,
+                mediaKeyDecrypted
+            )
+        }
+    }
+}
 @Suppress("NOTHING_TO_INLINE")
 inline fun Drawable.drawableToBitmap(): Bitmap? {
     return try {
