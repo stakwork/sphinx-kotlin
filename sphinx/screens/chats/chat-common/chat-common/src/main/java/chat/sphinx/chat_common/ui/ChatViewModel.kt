@@ -723,31 +723,31 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 
     private inner class AttachmentSendStateContainer: ViewStateContainer<AttachmentSendViewState>(AttachmentSendViewState.Idle) {
         override fun updateViewState(viewState: AttachmentSendViewState) {
-            val oldPreviewFile: File? = when (val current = viewStateFlow.value) {
-                is AttachmentSendViewState.Preview -> {
-                    current.file
-                }
-                else -> {
-                    null
-                }
-            }
+            if (viewState is AttachmentSendViewState.Preview) {
 
-            val previewFile: File? = when (viewState) {
-                is AttachmentSendViewState.Preview -> {
-                    viewState.file
-                }
-                else -> {
-                    null
-                }
-            }
-
-            if (oldPreviewFile != null && oldPreviewFile.path != previewFile?.path) {
                 // Only delete the previous file in the event that a new pic is chosen
                 // to send when one is currently being previewed.
-                try {
-                    oldPreviewFile.delete()
-                } catch (e: Exception) {
+                val current = viewStateFlow.value
+                if (current is AttachmentSendViewState.Preview) {
+                    if (current.file?.path != viewState.file?.path) {
+                        try {
+                            current.file?.delete()
+                        } catch (e: Exception) {
 
+                        }
+                    }
+                }
+            } else if (viewState is AttachmentSendViewState.PreviewGiphy) {
+
+                // Only delete the previous file in the event that a new pic is chosen
+                // to send when one is currently being previewed.
+                val current = viewStateFlow.value
+                if (current is AttachmentSendViewState.Preview) {
+                    try {
+                        current.file?.delete()
+                    } catch (e: Exception) {
+
+                    }
                 }
             }
 
@@ -772,7 +772,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     internal fun deleteUnsentAttachment(viewState: AttachmentSendViewState.Preview) {
         viewModelScope.launch(io) {
             try {
-                viewState.file.delete()
+                viewState.file?.delete()
             } catch (e: Exception) {}
         }
     }
@@ -897,7 +897,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                     updateViewState(ChatMenuViewState.Closed)
 
                     updateAttachmentSendViewState(
-                        AttachmentSendViewState.Preview(response.value.value, mediaType)
+                        AttachmentSendViewState.Preview(response.value.value, null, mediaType)
                     )
 
                     updateFooterViewState(FooterViewState.Attachment)
@@ -987,9 +987,8 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     @JvmSynthetic
     internal fun chatMenuOptionPaidMessage() {
         updateAttachmentSendViewState(
-            AttachmentSendViewState.PreviewPaidMessage(null)
+            AttachmentSendViewState.Preview(null, null, MediaType.Text)
         )
-
         updateViewState(ChatMenuViewState.Closed)
     }
 
@@ -1028,7 +1027,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                     }
 
                     updateAttachmentSendViewState(
-                        AttachmentSendViewState.Preview(response.value.value, mediaType)
+                        AttachmentSendViewState.Preview(response.value.value, null, mediaType)
                     )
 
                     updateFooterViewState(FooterViewState.Attachment)
@@ -1073,7 +1072,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                                     updateViewState(ChatMenuViewState.Closed)
                                     updateFooterViewState(FooterViewState.Attachment)
                                     attachmentSendStateContainer.updateViewState(
-                                        AttachmentSendViewState.Preview(newFile, mType)
+                                        AttachmentSendViewState.Preview(newFile, null, mType)
                                     )
                                 } catch (e: Exception) {
                                     newFile.delete()

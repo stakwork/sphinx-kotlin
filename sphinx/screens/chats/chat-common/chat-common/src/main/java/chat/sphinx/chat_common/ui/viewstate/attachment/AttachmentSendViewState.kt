@@ -9,9 +9,11 @@ internal sealed class AttachmentSendViewState: ViewState<AttachmentSendViewState
 
     object Idle: AttachmentSendViewState()
 
-    data class Preview(val file: File, val type: MediaType): AttachmentSendViewState()
+    data class Preview(
+        val file: File?,
+        val text: String?,
+        val type: MediaType
+    ): AttachmentSendViewState()
 
     data class PreviewGiphy(val giphyData: GiphyData): AttachmentSendViewState()
-
-    data class PreviewPaidMessage(val text: String?): AttachmentSendViewState()
 }
