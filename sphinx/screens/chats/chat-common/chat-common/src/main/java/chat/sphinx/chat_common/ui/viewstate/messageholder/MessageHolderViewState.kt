@@ -120,32 +120,20 @@ internal sealed class MessageHolderViewState(
     val bubblePaidMessage: LayoutState.Bubble.ContainerThird.PaidMessage? by lazy(LazyThreadSafetyMode.NONE) {
         if (message.retrieveTextToShow() != null || !message.isPaidTextMessage) {
             null
-        } else if (this is Sent) {
-            LayoutState.Bubble.ContainerThird.PaidMessage(
-                R.string.paid_message_loading
-            )
         } else {
-            message.retrievePurchaseStatus()?.let { purchaseStatus ->
+            val purchaseStatus = message.retrievePurchaseStatus()
+
+            if (this is Sent) {
                 LayoutState.Bubble.ContainerThird.PaidMessage(
-                    previewTextRes = when (purchaseStatus) {
-                        is PurchaseStatus.Pending -> {
-                            R.string.paid_message_pay_to_unlock
-                        }
-                        is PurchaseStatus.Processing -> {
-                            R.string.paid_message_loading
-                        }
-                        is PurchaseStatus.Denied -> {
-                            R.string.paid_message_unable_to_load
-                        }
-                        is PurchaseStatus.Accepted -> {
-                            R.string.paid_message_loading
-                        }
-                        else -> {
-                            R.string.paid_message_loading
-                        }
-                    }
+                    true,
+                    purchaseStatus
                 )
-            } ?: null
+            } else {
+                LayoutState.Bubble.ContainerThird.PaidMessage(
+                    false,
+                    purchaseStatus
+                )
+            }
         }
     }
 
@@ -319,7 +307,7 @@ internal sealed class MessageHolderViewState(
     private val paidTextMessageContentLock = Mutex()
     suspend fun retrievePaidTextMessageContent(): LayoutState.Bubble.ContainerThird.Message? {
         return bubbleMessage ?: paidTextMessageContentLock.withLock {
-            paidTextAttachmentContentProvider.invoke(message)
+            bubbleMessage ?: paidTextAttachmentContentProvider.invoke(message)
         }
     }
 

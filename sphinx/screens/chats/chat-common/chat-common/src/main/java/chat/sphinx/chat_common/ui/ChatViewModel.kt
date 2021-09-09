@@ -514,13 +514,17 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                                 mediaKeyDecrypted
                             )
 
-                            val text = inputStream?.bufferedReader().use { it?.readText() }
+                            var text: String? = null
+
+                            viewModelScope.launch(io) {
+                                text = inputStream?.bufferedReader().use { it?.readText() }
+                            }.join()
 
                             text?.let { nnText ->
                                 messageLayoutState = LayoutState.Bubble.ContainerThird.Message(text = nnText)
 
                                 nnText.toMessageContentDecrypted()?.let { messageContentDecrypted ->
-                                    updatePaidTextMessageContent(
+                                    messageRepository.updateMessageContentDecrypted(
                                         message.id,
                                         messageContentDecrypted
                                     )
@@ -533,16 +537,6 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         }.join()
 
         return messageLayoutState
-    }
-
-    private fun updatePaidTextMessageContent(
-        messageId: MessageId,
-        messageContentDecrypted: MessageContentDecrypted
-    ) {
-        messageRepository.updateMessageContentDecrypted(
-            messageId,
-            messageContentDecrypted
-        )
     }
 
     fun init() {
@@ -573,18 +567,21 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 
     abstract fun readMessages()
 
-    fun createPaidMessageFile(text: String?): File? {
+    suspend fun createPaidMessageFile(text: String?): File? {
         if (text.isNullOrEmpty()) {
             return null
         }
 
-        return try {
-            val output = mediaCacheHandler.createPaidTextFile()
-            FileOutputStream(output).use { it.write(text.toByteArray(Charsets.UTF_8)) }
-            output
+        var file: File? = null
+
+        try {
+            val output = mediaCacheHandler.createPaidTextFile("txt")
+            file = mediaCacheHandler.copyTo(text.byteInputStream(), output)
         } catch (e: IOException) {
             null
         }
+
+        return file
     }
 
     /**

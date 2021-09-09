@@ -289,63 +289,64 @@ abstract class ChatFragment<
             insetterActivity.addNavigationBarPadding(root)
 
             textViewChatFooterSend.setOnClickListener {
+                lifecycleScope.launch(viewModel.mainImmediate) {
+                    sendMessageBuilder.setText(editTextChatFooter.text?.toString())
 
-                sendMessageBuilder.setText(editTextChatFooter.text?.toString())
+                    sendMessageBuilder.setMessagePrice(
+                        attachmentSendBinding.editTextMessagePrice.text?.toString()?.toLongOrNull()?.toSat()
+                    )
 
-                sendMessageBuilder.setMessagePrice(
-                    attachmentSendBinding.editTextMessagePrice.text?.toString()?.toLongOrNull()?.toSat()
-                )
+                    val attachmentViewState = viewModel.getAttachmentSendViewStateFlow().value
 
-                val attachmentViewState = viewModel.getAttachmentSendViewStateFlow().value
-
-                @Exhaustive
-                when (attachmentViewState) {
-                    is AttachmentSendViewState.Idle -> {
-                        sendMessageBuilder.setAttachmentInfo(null)
-                    }
-                    is AttachmentSendViewState.Preview -> {
-                        if (attachmentViewState.type.isImage) {
-                            attachmentViewState.file?.let { nnFile ->
-                                sendMessageBuilder.setAttachmentInfo(
-                                    AttachmentInfo(
-                                        file = nnFile,
-                                        mediaType = attachmentViewState.type,
-                                        isLocalFile = true,
+                    @Exhaustive
+                    when (attachmentViewState) {
+                        is AttachmentSendViewState.Idle -> {
+                            sendMessageBuilder.setAttachmentInfo(null)
+                        }
+                        is AttachmentSendViewState.Preview -> {
+                            if (attachmentViewState.type.isImage) {
+                                attachmentViewState.file?.let { nnFile ->
+                                    sendMessageBuilder.setAttachmentInfo(
+                                        AttachmentInfo(
+                                            file = nnFile,
+                                            mediaType = attachmentViewState.type,
+                                            isLocalFile = true,
+                                        )
                                     )
-                                )
-                            }
-                        } else if (attachmentViewState.type.isSphinxText) {
+                                }
+                            } else if (attachmentViewState.type.isSphinxText) {
 
-                            val text = attachmentViewState.paidMessage?.first ?: editTextChatFooter.text?.toString()
+                                val text = attachmentViewState.paidMessage?.first ?: editTextChatFooter.text?.toString()
 
-                            viewModel.createPaidMessageFile(text)?.let { file ->
-                                sendMessageBuilder.setAttachmentInfo(
-                                    AttachmentInfo(
-                                        file = file,
-                                        mediaType = MediaType.Text,
-                                        isLocalFile = true,
+                                viewModel.createPaidMessageFile(text)?.let { file ->
+                                    sendMessageBuilder.setAttachmentInfo(
+                                        AttachmentInfo(
+                                            file = file,
+                                            mediaType = MediaType.Text,
+                                            isLocalFile = true,
+                                        )
                                     )
-                                )
+                                }
                             }
                         }
-                    }
-                    is AttachmentSendViewState.PreviewGiphy -> {
-                        sendMessageBuilder.setGiphyData(attachmentViewState.giphyData)
-                    }
-                }
-
-                viewModel.sendMessage(sendMessageBuilder)?.let {
-                    // if it did not return null that means it was valid
-                    if (attachmentViewState !is AttachmentSendViewState.Idle) {
-                        viewModel.updateAttachmentSendViewState(AttachmentSendViewState.Idle)
-                        viewModel.updateFooterViewState(FooterViewState.Default)
+                        is AttachmentSendViewState.PreviewGiphy -> {
+                            sendMessageBuilder.setGiphyData(attachmentViewState.giphyData)
+                        }
                     }
 
-                    sendMessageBuilder.clear()
-                    editTextChatFooter.setText("")
-                    attachmentSendBinding.editTextMessagePrice.setText("")
+                    viewModel.sendMessage(sendMessageBuilder)?.let {
+                        // if it did not return null that means it was valid
+                        if (attachmentViewState !is AttachmentSendViewState.Idle) {
+                            viewModel.updateAttachmentSendViewState(AttachmentSendViewState.Idle)
+                            viewModel.updateFooterViewState(FooterViewState.Default)
+                        }
 
-                    viewModel.messageReplyViewStateContainer.updateViewState(MessageReplyViewState.ReplyingDismissed)
+                        sendMessageBuilder.clear()
+                        editTextChatFooter.setText("")
+                        attachmentSendBinding.editTextMessagePrice.setText("")
+
+                        viewModel.messageReplyViewStateContainer.updateViewState(MessageReplyViewState.ReplyingDismissed)
+                    }
                 }
             }
 

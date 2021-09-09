@@ -6,7 +6,7 @@ import java.io.InputStream
 abstract class MediaCacheHandler {
     abstract fun createImageFile(extension: String): File
     abstract fun createVideoFile(extension: String): File
-    abstract fun createPaidTextFile(): File
+    abstract fun createPaidTextFile(extension: String): File
 
     abstract suspend fun copyTo(from: File, to: File): File
     abstract suspend fun copyTo(from: InputStream, to: File): File

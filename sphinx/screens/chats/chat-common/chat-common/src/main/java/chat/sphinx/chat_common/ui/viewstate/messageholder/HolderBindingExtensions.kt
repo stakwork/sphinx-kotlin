@@ -565,7 +565,27 @@ internal inline fun LayoutMessageHolderBinding.setBubblePaidMessageLayout(
 
             visible
 
-            text = getString(paidMessageViewStats.previewTextRes)
+            text = if (paidMessageViewStats.showSent) {
+                getString(R.string.paid_message_loading)
+            } else {
+                when (paidMessageViewStats.purchaseStatus) {
+                    is PurchaseStatus.Pending -> {
+                        getString(R.string.paid_message_pay_to_unlock)
+                    }
+                    is PurchaseStatus.Processing -> {
+                        getString(R.string.paid_message_loading)
+                    }
+                    is PurchaseStatus.Denied -> {
+                        getString(R.string.paid_message_unable_to_load)
+                    }
+                    is PurchaseStatus.Accepted -> {
+                        getString(R.string.paid_message_loading)
+                    }
+                    else -> {
+                        getString(R.string.paid_message_loading)
+                    }
+                }
+            }
 
             lifecycleScope.launch(dispatchers.mainImmediate) {
                 setBubbleMessageLayout(
