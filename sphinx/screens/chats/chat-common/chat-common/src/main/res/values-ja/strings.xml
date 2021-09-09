@@ -103,7 +103,7 @@
     <!-- Pay Attachment -->
     <string name="paid_message_pay_to_unlock">PAY TO UNLOCK MESSAGE</string>
     <string name="paid_message_loading">LOADING MESSAGE...</string>
-    <string name="paid_message_unable_to_load">CAN\'T LOAD MESSAGE DATA</string>
+    <string name="paid_message_unable_to_load">UNABLE TO LOAD MESSAGE DATA</string>
     <string name="attachment_price_label">課金額: </string>
     <string name="alert_confirm_pay_attachment_title">Confirm Purchase</string>
     <string name="alert_confirm_pay_attachment_message">Are you sure you want to purchase this item?</string>
