@@ -316,7 +316,7 @@ abstract class ChatFragment<
                             }
                         } else if (attachmentViewState.type.isSphinxText) {
 
-                            val text = attachmentViewState.text ?: editTextChatFooter.text?.toString()
+                            val text = attachmentViewState.paidMessage?.first ?: editTextChatFooter.text?.toString()
 
                             viewModel.createPaidMessageFile(text)?.let { file ->
                                 sendMessageBuilder.setAttachmentInfo(
@@ -373,15 +373,17 @@ abstract class ChatFragment<
                     val sendAttachmentViewState = viewModel.getAttachmentSendViewStateFlow().value
 
                     if (sendAttachmentViewState is AttachmentSendViewState.Preview && sendAttachmentViewState.type.isSphinxText) {
+                        s?.toString()?.let { text ->
+                            val price = attachmentSendBinding.editTextMessagePrice.text?.toString()?.toLongOrNull() ?: 0
 
-                        viewModel.updateAttachmentSendViewState(
-                            AttachmentSendViewState.Preview(
-                                null,
-                                s?.toString(),
-                                sendAttachmentViewState.type
+                            viewModel.updateAttachmentSendViewState(
+                                AttachmentSendViewState.Preview(
+                                    null,
+                                    sendAttachmentViewState.type,
+                                    Pair(text, price),
+                                )
                             )
-                        )
-
+                        }
                     }
                 }
             })
@@ -409,14 +411,17 @@ abstract class ChatFragment<
                 val sendAttachmentViewState = viewModel.getAttachmentSendViewStateFlow().value
 
                 if (sendAttachmentViewState is AttachmentSendViewState.Preview && sendAttachmentViewState.type.isSphinxText) {
+                    footerBinding.editTextChatFooter.text?.toString()?.let { text ->
+                        val price = s?.toString()?.toLongOrNull() ?: 0
 
-                    viewModel.updateAttachmentSendViewState(
-                        AttachmentSendViewState.Preview(
-                            null,
-                            footerBinding.editTextChatFooter.text?.toString(),
-                            sendAttachmentViewState.type
+                        viewModel.updateAttachmentSendViewState(
+                            AttachmentSendViewState.Preview(
+                                null,
+                                sendAttachmentViewState.type,
+                                Pair(text, price),
+                            )
                         )
-                    )
+                    }
                 }
             }
         })
@@ -1084,9 +1089,11 @@ abstract class ChatFragment<
                             } else if (viewState.type == MediaType.Text) {
 
                                 includePaidTextMessageSendPreview.apply {
-                                    textViewPaidMessagePreviewText.text = footerBinding.editTextChatFooter.text
+                                    textViewPaidMessagePreviewText.text = viewState?.paidMessage?.first ?: footerBinding.editTextChatFooter.text
 
-                                    textViewPaidMessagePreviewPrice.text = attachmentSendBinding.editTextMessagePrice.text?.toString()?.toLongOrNull()?.toSat()?.asFormattedString(appendUnit = true) ?: "0 sats"
+                                    textViewPaidMessagePreviewPrice.text =
+                                        (viewState?.paidMessage?.second ?: attachmentSendBinding.editTextMessagePrice.text?.toString()?.toLongOrNull())
+                                        ?.toSat()?.asFormattedString(appendUnit = true) ?: "0 sats"
 
                                     root.visible
                                 }

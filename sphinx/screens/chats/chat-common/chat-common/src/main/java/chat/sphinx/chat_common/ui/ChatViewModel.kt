@@ -897,7 +897,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                     updateViewState(ChatMenuViewState.Closed)
 
                     updateAttachmentSendViewState(
-                        AttachmentSendViewState.Preview(response.value.value, null, mediaType)
+                        AttachmentSendViewState.Preview(response.value.value, mediaType, null)
                     )
 
                     updateFooterViewState(FooterViewState.Attachment)
@@ -987,7 +987,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     @JvmSynthetic
     internal fun chatMenuOptionPaidMessage() {
         updateAttachmentSendViewState(
-            AttachmentSendViewState.Preview(null, null, MediaType.Text)
+            AttachmentSendViewState.Preview(null, MediaType.Text, null)
         )
         updateViewState(ChatMenuViewState.Closed)
     }
@@ -1027,7 +1027,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                     }
 
                     updateAttachmentSendViewState(
-                        AttachmentSendViewState.Preview(response.value.value, null, mediaType)
+                        AttachmentSendViewState.Preview(response.value.value, mediaType, null)
                     )
 
                     updateFooterViewState(FooterViewState.Attachment)
@@ -1072,7 +1072,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                                     updateViewState(ChatMenuViewState.Closed)
                                     updateFooterViewState(FooterViewState.Attachment)
                                     attachmentSendStateContainer.updateViewState(
-                                        AttachmentSendViewState.Preview(newFile, null, mType)
+                                        AttachmentSendViewState.Preview(newFile, mType, null)
                                     )
                                 } catch (e: Exception) {
                                     newFile.delete()
