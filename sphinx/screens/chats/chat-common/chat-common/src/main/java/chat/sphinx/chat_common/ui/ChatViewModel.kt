@@ -503,7 +503,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         var messageLayoutState: LayoutState.Bubble.ContainerThird.Message? = null
 
         viewModelScope.launch(mainImmediate) {
-            message?.retrieveSphinxTextUrlAndMessageMedia()?.let { urlAndMedia ->
+            message?.retrieveTextAttachmentUrlAndMessageMedia()?.let { urlAndMedia ->
                 urlAndMedia.second?.host?.let { host ->
                     urlAndMedia.second?.mediaKeyDecrypted?.let { mediaKeyDecrypted ->
                         memeServerTokenHandler.retrieveAuthenticationToken(host)?.let { token ->

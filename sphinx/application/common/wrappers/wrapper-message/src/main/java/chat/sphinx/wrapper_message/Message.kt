@@ -43,7 +43,7 @@ inline fun Message.retrieveBotResponseHtmlString(): String? =
     }
 
 @Suppress("NOTHING_TO_INLINE")
-inline fun Message.retrieveSphinxTextUrlAndMessageMedia(): Pair<String, MessageMedia?>? {
+inline fun Message.retrieveTextAttachmentUrlAndMessageMedia(): Pair<String, MessageMedia?>? {
     var mediaData: Pair<String, MessageMedia?>? = null
 
     messageMedia?.let { media ->
@@ -91,9 +91,9 @@ inline fun Message.retrieveUrlAndMessageMedia(): Pair<String, MessageMedia?>? {
             purchaseAcceptItem?.messageMedia?.url ?: media.url
         }
 
-        val messageMedia: MessageMedia? = purchaseAcceptItem?.messageMedia ?: media
+        val messageMedia: MessageMedia = purchaseAcceptItem?.messageMedia ?: media
 
-        if (media.localFile != null) {
+        if (messageMedia.localFile != null) {
             mediaData = Pair(
                 url?.value?.let { if (it.isEmpty()) null else it } ?: "http://127.0.0.1",
                 messageMedia,

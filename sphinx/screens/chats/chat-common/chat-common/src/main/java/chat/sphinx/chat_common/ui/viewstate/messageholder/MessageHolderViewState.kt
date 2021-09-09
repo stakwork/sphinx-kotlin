@@ -1,9 +1,11 @@
 package chat.sphinx.chat_common.ui.viewstate.messageholder
 
+import chat.sphinx.chat_common.R
 import chat.sphinx.chat_common.model.MessageLinkPreview
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
 import chat.sphinx.chat_common.ui.viewstate.selected.MenuItemState
 import chat.sphinx.chat_common.util.SphinxLinkify
+import chat.sphinx.resources.getString
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.isConversation
 import chat.sphinx.wrapper_chat.isTribeOwnedByAccount
@@ -41,7 +43,7 @@ internal sealed class MessageHolderViewState(
     private val messageSenderName: (Message) -> String,
     private val accountOwner: () -> Contact,
     private val previewProvider: suspend (link: MessageLinkPreview) -> LayoutState.Bubble.ContainerThird.LinkPreview?,
-    private val paidTextMessageContentProvider: suspend (message: Message) -> LayoutState.Bubble.ContainerThird.Message?
+    private val textAttachmentContentProvider: suspend (message: Message) -> LayoutState.Bubble.ContainerThird.Message?
 ) {
 
     companion object {
@@ -116,16 +118,34 @@ internal sealed class MessageHolderViewState(
     }
 
     val bubblePaidMessage: LayoutState.Bubble.ContainerThird.PaidMessage? by lazy(LazyThreadSafetyMode.NONE) {
-        message.retrievePurchaseStatus()?.let { purchaseStatus ->
-            if (message.retrieveTextToShow() != null || !message.isPaidTextMessage) {
-                null
-            } else if (this is Sent) {
-                LayoutState.Bubble.ContainerThird.PaidMessage(null)
-            } else {
+        if (message.retrieveTextToShow() != null || !message.isPaidTextMessage) {
+            null
+        } else if (this is Sent) {
+            LayoutState.Bubble.ContainerThird.PaidMessage(
+                R.string.paid_message_loading
+            )
+        } else {
+            message.retrievePurchaseStatus()?.let { purchaseStatus ->
                 LayoutState.Bubble.ContainerThird.PaidMessage(
-                    purchaseStatus = purchaseStatus,
+                    previewTextRes = when (purchaseStatus) {
+                        is PurchaseStatus.Pending -> {
+                            R.string.paid_message_pay_to_unlock
+                        }
+                        is PurchaseStatus.Processing -> {
+                            R.string.paid_message_loading
+                        }
+                        is PurchaseStatus.Denied -> {
+                            R.string.paid_message_unable_to_load
+                        }
+                        is PurchaseStatus.Accepted -> {
+                            R.string.paid_message_loading
+                        }
+                        else -> {
+                            R.string.paid_message_loading
+                        }
+                    }
                 )
-            }
+            } ?: null
         }
     }
 
@@ -299,7 +319,7 @@ internal sealed class MessageHolderViewState(
     private val paidTextMessageContentLock = Mutex()
     suspend fun retrievePaidTextMessageContent(): LayoutState.Bubble.ContainerThird.Message? {
         return bubbleMessage ?: paidTextMessageContentLock.withLock {
-            paidTextMessageContentProvider.invoke(message)
+            textAttachmentContentProvider.invoke(message)
         }
     }
 
