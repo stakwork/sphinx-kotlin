@@ -1027,6 +1027,7 @@ abstract class ChatFragment<
                     when (viewState) {
                         is AttachmentSendViewState.Idle -> {
                             root.gone
+                            includePaidTextMessageSendPreview.root.gone
                             imageViewAttachmentSendPreview.setImageDrawable(null)
                         }
                         is AttachmentSendViewState.Preview -> {
