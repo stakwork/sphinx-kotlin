@@ -43,7 +43,7 @@ inline fun Message.retrieveBotResponseHtmlString(): String? =
     }
 
 @Suppress("NOTHING_TO_INLINE")
-inline fun Message.retrieveTextAttachmentUrlAndMessageMedia(): Pair<String, MessageMedia?>? {
+inline fun Message.retrievePaidTextAttachmentUrlAndMessageMedia(): Pair<String, MessageMedia?>? {
     var mediaData: Pair<String, MessageMedia?>? = null
 
     messageMedia?.let { media ->
