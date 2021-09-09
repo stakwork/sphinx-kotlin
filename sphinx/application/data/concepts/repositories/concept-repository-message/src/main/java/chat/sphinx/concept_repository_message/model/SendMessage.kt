@@ -68,7 +68,7 @@ class SendMessage private constructor(
 
             when {
                 (file == null) -> {
-                    if (text.isNullOrEmpty() || giphyData == null) {
+                    if (text.isNullOrEmpty() && giphyData == null) {
                         return Pair(false, ValidationError.EMPTY_CONTENT)
                     }
                 }
