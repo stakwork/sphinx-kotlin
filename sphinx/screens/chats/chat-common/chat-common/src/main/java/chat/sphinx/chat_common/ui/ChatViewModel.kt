@@ -2,7 +2,6 @@ package chat.sphinx.chat_common.ui
 
 import android.app.Application
 import android.content.ContentValues
-import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
@@ -58,9 +57,11 @@ import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.logger.e
 import chat.sphinx.menu_bottom.ui.MenuBottomViewState
 import chat.sphinx.wrapper_chat.*
+import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
+import chat.sphinx.wrapper_common.getMinutesDifferenceWithDateTime
 import chat.sphinx.wrapper_common.lightning.*
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessageUUID
@@ -91,9 +92,8 @@ import org.jitsi.meet.sdk.JitsiMeetActivity
 import org.jitsi.meet.sdk.JitsiMeetConferenceOptions
 import org.jitsi.meet.sdk.JitsiMeetUserInfo
 import java.io.*
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
-import kotlin.coroutines.suspendCoroutine
+import java.util.*
+import kotlin.collections.ArrayList
 
 
 @JvmSynthetic
@@ -285,6 +285,48 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         }
     }
 
+    private fun getBubbleBackgroundForMessage(
+        message: Message,
+        previousMessage: Message?,
+        nextMessage: Message?,
+        groupingDate: DateTime?,
+    ): Pair<DateTime?, BubbleBackground> {
+
+        val groupingMinutesLimit = 5.0
+        var date = groupingDate ?: message.date
+
+        val shouldAvoidGroupingWithPrevious = (previousMessage?.shouldAvoidGrouping() ?: true) || message.shouldAvoidGrouping()
+        val isGroupedBySenderWithPrevious = previousMessage?.hasSameSenderThanMessage(message) ?: false
+        val isGroupedByDateWithPrevious = message.date.getMinutesDifferenceWithDateTime(date) < groupingMinutesLimit
+
+        val groupedWithPrevious = (!shouldAvoidGroupingWithPrevious && isGroupedBySenderWithPrevious && isGroupedByDateWithPrevious)
+
+        date = if (groupedWithPrevious) date else message.date
+
+        val shouldAvoidGroupingWithNext = (nextMessage?.shouldAvoidGrouping() ?: true) || message.shouldAvoidGrouping()
+        val isGroupedBySenderWithNext = nextMessage?.hasSameSenderThanMessage(message) ?: false
+        val isGroupedByDateWithNext = if (nextMessage != null) nextMessage.date.getMinutesDifferenceWithDateTime(date) < groupingMinutesLimit else false
+
+        val groupedWithNext = (!shouldAvoidGroupingWithNext && isGroupedBySenderWithNext && isGroupedByDateWithNext)
+
+        when {
+            (!groupedWithPrevious && !groupedWithNext) -> {
+                return Pair(date, BubbleBackground.First.Isolated)
+            }
+            (groupedWithPrevious && !groupedWithNext) -> {
+                return Pair(date, BubbleBackground.Last)
+            }
+            (!groupedWithPrevious && groupedWithNext) -> {
+                return Pair(date, BubbleBackground.First.Grouped)
+            }
+            (groupedWithPrevious && groupedWithNext) -> {
+                return Pair(date, BubbleBackground.Middle)
+            }
+        }
+
+        return Pair(date, BubbleBackground.First.Isolated)
+    }
+
     internal val messageHolderViewStateFlow: StateFlow<List<MessageHolderViewState>> = flow {
         val chat = getChat()
         val chatName = getChatNameIfNull()
@@ -294,7 +336,22 @@ abstract class ChatViewModel<ARGS: NavArgs>(
             val newList = ArrayList<MessageHolderViewState>(messages.size)
 
             withContext(default) {
-                for (message in messages) {
+
+                var groupingDate: DateTime? = null
+
+                for ((index, message) in messages.withIndex()) {
+
+                    val previousMessage: Message? = if (index > 0) messages[index - 1] else null
+                    val nextMessage: Message? = if (index < messages.size - 1) messages[index + 1] else null
+
+                    val groupingDateAndBubbleBackground = getBubbleBackgroundForMessage(
+                        message,
+                        previousMessage,
+                        nextMessage,
+                        groupingDate
+                    )
+
+                    groupingDate = groupingDateAndBubbleBackground.first
 
                     if (message.sender == chat.contactIds.firstOrNull()) {
                         newList.add(
@@ -309,7 +366,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                                         BubbleBackground.Gone(setSpacingEqual = true)
                                     }
                                     else -> {
-                                        BubbleBackground.First.Isolated
+                                        groupingDateAndBubbleBackground.second
                                     }
                                 },
                                 replyMessageSenderName = { replyMessage ->
@@ -346,7 +403,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                                         BubbleBackground.Gone(setSpacingEqual = true)
                                     }
                                     else -> {
-                                        BubbleBackground.First.Isolated
+                                        groupingDateAndBubbleBackground.second
                                     }
                                 },
                                 initialHolder = when {

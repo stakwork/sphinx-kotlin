@@ -174,6 +174,21 @@ inline fun Message.getColorKey(): String {
     return "message-${sender.value}-color"
 }
 
+@Suppress("NOTHING_TO_INLINE")
+inline fun Message.hasSameSenderThanMessage(message: Message): Boolean {
+    val hasSameSenderId = this.sender.value == message.sender.value
+    val hasSameSenderAlias = (this.senderAlias?.value ?: "") == (message.senderAlias?.value ?: "")
+    val hasSameSenderPicture = (this.senderPic?.value ?: "") == (message.senderPic?.value ?: "")
+
+    return hasSameSenderId && hasSameSenderAlias && hasSameSenderPicture
+}
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun Message.shouldAvoidGrouping(): Boolean {
+    return status.isPending() || status.isFailed() || status.isDeleted() ||
+            type.isInvoice() || type.isPayment() || type.isGroupAction()
+}
+
 //Message Actions
 inline val Message.isBoostAllowed: Boolean
     get() = status.isReceived() &&

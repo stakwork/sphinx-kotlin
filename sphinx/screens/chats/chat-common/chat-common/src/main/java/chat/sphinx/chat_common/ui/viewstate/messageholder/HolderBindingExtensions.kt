@@ -457,8 +457,12 @@ internal inline fun LayoutMessageHolderBinding.setStatusHeader(
     includeMessageStatusHeader.apply {
         if (statusHeader == null) {
             root.gone
+
+            includeMessageHolderChatImageInitialHolder.root.gone
         } else {
             root.visible
+
+            includeMessageHolderChatImageInitialHolder.root.visible
 
             textViewMessageStatusReceivedSenderName.apply {
                 statusHeader.senderName?.let { name ->
