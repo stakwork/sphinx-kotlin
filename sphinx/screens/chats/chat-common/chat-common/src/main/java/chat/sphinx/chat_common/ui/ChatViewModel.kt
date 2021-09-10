@@ -92,7 +92,6 @@ import org.jitsi.meet.sdk.JitsiMeetActivity
 import org.jitsi.meet.sdk.JitsiMeetConferenceOptions
 import org.jitsi.meet.sdk.JitsiMeetUserInfo
 import java.io.*
-import java.lang.Math.abs
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -385,6 +384,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                                 },
                                 accountOwner = { owner },
                                 previewProvider = { handleLinkPreview(it) },
+                                paidTextMessageContentProvider = { message -> handlePaidTextMessageContent(message) },
                             )
                         )
                     } else {
@@ -430,6 +430,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                                 },
                                 accountOwner = { owner },
                                 previewProvider = { link -> handleLinkPreview(link) },
+                                paidTextMessageContentProvider = { message -> handlePaidTextMessageContent(message) },
                             )
                         )
                     }
@@ -555,6 +556,46 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         return preview
     }
 
+    private suspend fun handlePaidTextMessageContent(message: Message): LayoutState.Bubble.ContainerThird.Message? {
+        var messageLayoutState: LayoutState.Bubble.ContainerThird.Message? = null
+
+        viewModelScope.launch(mainImmediate) {
+            message?.retrievePaidTextAttachmentUrlAndMessageMedia()?.let { urlAndMedia ->
+                urlAndMedia.second?.host?.let { host ->
+                    urlAndMedia.second?.mediaKeyDecrypted?.let { mediaKeyDecrypted ->
+                        memeServerTokenHandler.retrieveAuthenticationToken(host)?.let { token ->
+
+                            val inputStream = memeInputStreamHandler.retrieveMediaInputStream(
+                                urlAndMedia.first,
+                                token,
+                                mediaKeyDecrypted
+                            )
+
+                            var text: String? = null
+
+                            viewModelScope.launch(io) {
+                                text = inputStream?.bufferedReader().use { it?.readText() }
+                            }.join()
+
+                            text?.let { nnText ->
+                                messageLayoutState = LayoutState.Bubble.ContainerThird.Message(text = nnText)
+
+                                nnText.toMessageContentDecrypted()?.let { messageContentDecrypted ->
+                                    messageRepository.updateMessageContentDecrypted(
+                                        message.id,
+                                        messageContentDecrypted
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }.join()
+
+        return messageLayoutState
+    }
+
     fun init() {
         // Prime our states immediately so they're already
         // updated by the time the Fragment's onStart is called
@@ -583,6 +624,27 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 
     abstract fun readMessages()
 
+    suspend fun createPaidMessageFile(text: String?): File? {
+        if (text.isNullOrEmpty()) {
+            return null
+        }
+
+        var file: File? = null
+
+        try {
+            val output = mediaCacheHandler.createPaidTextFile("txt")
+            file = mediaCacheHandler.copyTo(text.byteInputStream(), output)
+        } catch (e: IOException) {
+            null
+        }
+
+        return file
+    }
+
+    /**
+     * Builds the [SendMessage] and returns it (or null if it was invalid),
+     * then passes it off to the [MessageRepository] for processing.
+     * */
     /**
      * Builds the [SendMessage] and returns it (or null if it was invalid),
      * then passes it off to the [MessageRepository] for processing.
@@ -590,11 +652,36 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     @CallSuper
     open fun sendMessage(builder: SendMessage.Builder): SendMessage? {
         val msg = builder.build()
-        // TODO: if null figure out why and notify user via side effect
-        messageRepository.sendMessage(msg)
-        return msg
+
+        msg?.second?.let { validationError ->
+            val errorMessageRes = when (validationError) {
+                SendMessage.Builder.ValidationError.EMPTY_PRICE -> {
+                    R.string.send_message_empty_price_error
+                }
+                SendMessage.Builder.ValidationError.EMPTY_CONTENT -> {
+                    R.string.send_message_empty_content_error
+                }
+                SendMessage.Builder.ValidationError.EMPTY_DESTINATION -> {
+                    R.string.send_message_empty_destination_error
+                }
+            }
+
+            viewModelScope.launch(mainImmediate) {
+                submitSideEffect(ChatSideEffect.Notify(
+                    app.getString(errorMessageRes)
+                ))
+            }
+
+        } ?: msg.first?.let { message ->
+            messageRepository.sendMessage(message)
+        }
+
+        return msg.first
     }
 
+    /**
+     * Remotely and locally Deletes a [Message] through the [MessageRepository]
+     */
     /**
      * Remotely and locally Deletes a [Message] through the [MessageRepository]
      */
@@ -696,9 +783,9 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                 // to send when one is currently being previewed.
                 val current = viewStateFlow.value
                 if (current is AttachmentSendViewState.Preview) {
-                    if (current.file.path != viewState.file.path) {
+                    if (current.file?.path != viewState.file?.path) {
                         try {
-                            current.file.delete()
+                            current.file?.delete()
                         } catch (e: Exception) {
 
                         }
@@ -711,7 +798,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                 val current = viewStateFlow.value
                 if (current is AttachmentSendViewState.Preview) {
                     try {
-                        current.file.delete()
+                        current.file?.delete()
                     } catch (e: Exception) {
 
                     }
@@ -739,7 +826,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     internal fun deleteUnsentAttachment(viewState: AttachmentSendViewState.Preview) {
         viewModelScope.launch(io) {
             try {
-                viewState.file.delete()
+                viewState.file?.delete()
             } catch (e: Exception) {}
         }
     }
@@ -864,7 +951,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                     updateViewState(ChatMenuViewState.Closed)
 
                     updateAttachmentSendViewState(
-                        AttachmentSendViewState.Preview(response.value.value, mediaType)
+                        AttachmentSendViewState.Preview(response.value.value, mediaType, null)
                     )
 
                     updateFooterViewState(FooterViewState.Attachment)
@@ -953,11 +1040,10 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 
     @JvmSynthetic
     internal fun chatMenuOptionPaidMessage() {
-        viewModelScope.launch(mainImmediate) {
-            submitSideEffect(
-                ChatSideEffect.Notify("Paid message editor not implemented yet")
-            )
-        }
+        updateAttachmentSendViewState(
+            AttachmentSendViewState.Preview(null, MediaType.Text, null)
+        )
+        updateViewState(ChatMenuViewState.Closed)
     }
 
     @JvmSynthetic
@@ -995,7 +1081,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                     }
 
                     updateAttachmentSendViewState(
-                        AttachmentSendViewState.Preview(response.value.value, mediaType)
+                        AttachmentSendViewState.Preview(response.value.value, mediaType, null)
                     )
 
                     updateFooterViewState(FooterViewState.Attachment)
@@ -1040,7 +1126,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                                     updateViewState(ChatMenuViewState.Closed)
                                     updateFooterViewState(FooterViewState.Attachment)
                                     attachmentSendStateContainer.updateViewState(
-                                        AttachmentSendViewState.Preview(newFile, mType)
+                                        AttachmentSendViewState.Preview(newFile, mType, null)
                                     )
                                 } catch (e: Exception) {
                                     newFile.delete()
