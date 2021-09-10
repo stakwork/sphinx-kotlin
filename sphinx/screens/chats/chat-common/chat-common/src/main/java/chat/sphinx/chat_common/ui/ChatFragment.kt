@@ -3,6 +3,8 @@ package chat.sphinx.chat_common.ui
 import android.content.Context
 import android.graphics.Color
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.View
 import android.view.Window
 import android.widget.ImageView
@@ -55,6 +57,7 @@ import chat.sphinx.menu_bottom.ui.BottomMenu
 import chat.sphinx.menu_bottom.ui.MenuBottomViewState
 import chat.sphinx.resources.*
 import chat.sphinx.wrapper_chat.isTrue
+import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.lightning.toSat
 import chat.sphinx.wrapper_meme_server.headerKey
 import chat.sphinx.wrapper_meme_server.headerValue
@@ -63,6 +66,8 @@ import chat.sphinx.wrapper_message.retrieveImageUrlAndMessageMedia
 import chat.sphinx.wrapper_message.retrieveTextToShow
 import chat.sphinx.wrapper_message.toReplyUUID
 import chat.sphinx.wrapper_message_media.MediaType
+import chat.sphinx.wrapper_message_media.isImage
+import chat.sphinx.wrapper_message_media.isSphinxText
 import chat.sphinx.wrapper_view.Dp
 import io.matthewnelson.android_feature_screens.ui.motionlayout.MotionLayoutFragment
 import io.matthewnelson.android_feature_screens.util.gone
@@ -76,6 +81,11 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 
 abstract class ChatFragment<
         VB: ViewBinding,
@@ -143,6 +153,7 @@ abstract class ChatFragment<
         val insetterActivity = (requireActivity() as InsetterActivity)
         setupMenu(insetterActivity)
         setupFooter(insetterActivity)
+        setupAttachmentPriceView()
         setupHeader(insetterActivity)
         setupSelectedMessage()
         setupAttachmentSendPreview(insetterActivity)
@@ -278,46 +289,64 @@ abstract class ChatFragment<
             insetterActivity.addNavigationBarPadding(root)
 
             textViewChatFooterSend.setOnClickListener {
+                lifecycleScope.launch(viewModel.mainImmediate) {
+                    sendMessageBuilder.setText(editTextChatFooter.text?.toString())
 
-                sendMessageBuilder.setText(editTextChatFooter.text?.toString())
+                    sendMessageBuilder.setMessagePrice(
+                        attachmentSendBinding.editTextMessagePrice.text?.toString()?.toLongOrNull()?.toSat()
+                    )
 
-                sendMessageBuilder.setMessagePrice(
-                    attachmentSendBinding.editTextMessagePrice.text?.toString()?.toLongOrNull()?.toSat()
-                )
+                    val attachmentViewState = viewModel.getAttachmentSendViewStateFlow().value
 
-                val attachmentViewState = viewModel.getAttachmentSendViewStateFlow().value
+                    @Exhaustive
+                    when (attachmentViewState) {
+                        is AttachmentSendViewState.Idle -> {
+                            sendMessageBuilder.setAttachmentInfo(null)
+                        }
+                        is AttachmentSendViewState.Preview -> {
+                            if (attachmentViewState.type.isImage) {
+                                attachmentViewState.file?.let { nnFile ->
+                                    sendMessageBuilder.setAttachmentInfo(
+                                        AttachmentInfo(
+                                            file = nnFile,
+                                            mediaType = attachmentViewState.type,
+                                            isLocalFile = true,
+                                        )
+                                    )
+                                }
+                            } else if (attachmentViewState.type.isSphinxText) {
 
-                @Exhaustive
-                when (attachmentViewState) {
-                    is AttachmentSendViewState.Idle -> {
-                        sendMessageBuilder.setAttachmentInfo(null)
+                                val text = attachmentViewState.paidMessage?.first ?: editTextChatFooter.text?.toString()
+
+                                viewModel.createPaidMessageFile(text)?.let { file ->
+                                    sendMessageBuilder.setAttachmentInfo(
+                                        AttachmentInfo(
+                                            file = file,
+                                            mediaType = MediaType.Text,
+                                            isLocalFile = true,
+                                        )
+                                    )
+                                }
+                            }
+                        }
+                        is AttachmentSendViewState.PreviewGiphy -> {
+                            sendMessageBuilder.setGiphyData(attachmentViewState.giphyData)
+                        }
                     }
-                    is AttachmentSendViewState.Preview -> {
-                        sendMessageBuilder.setAttachmentInfo(
-                            AttachmentInfo(
-                                file = attachmentViewState.file,
-                                mediaType = attachmentViewState.type,
-                                isLocalFile = true,
-                            )
-                        )
-                    }
-                    is AttachmentSendViewState.PreviewGiphy -> {
-                        sendMessageBuilder.setGiphyData(attachmentViewState.giphyData)
-                    }
-                }
 
-                viewModel.sendMessage(sendMessageBuilder)?.let {
-                    // if it did not return null that means it was valid
-                    if (attachmentViewState !is AttachmentSendViewState.Idle) {
-                        viewModel.updateAttachmentSendViewState(AttachmentSendViewState.Idle)
-                        viewModel.updateFooterViewState(FooterViewState.Default)
+                    viewModel.sendMessage(sendMessageBuilder)?.let {
+                        // if it did not return null that means it was valid
+                        if (attachmentViewState !is AttachmentSendViewState.Idle) {
+                            viewModel.updateAttachmentSendViewState(AttachmentSendViewState.Idle)
+                            viewModel.updateFooterViewState(FooterViewState.Default)
+                        }
+
+                        sendMessageBuilder.clear()
+                        editTextChatFooter.setText("")
+                        attachmentSendBinding.editTextMessagePrice.setText("")
+
+                        viewModel.messageReplyViewStateContainer.updateViewState(MessageReplyViewState.ReplyingDismissed)
                     }
-
-                    sendMessageBuilder.clear()
-                    editTextChatFooter.setText("")
-                    attachmentSendBinding.editTextMessagePrice.setText("")
-
-                    viewModel.messageReplyViewStateContainer.updateViewState(MessageReplyViewState.ReplyingDismissed)
                 }
             }
 
@@ -336,6 +365,30 @@ abstract class ChatFragment<
                 }
             }
 
+            editTextChatFooter.addTextChangedListener(object : TextWatcher {
+                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+
+                override fun afterTextChanged(s: Editable?) {
+                    val sendAttachmentViewState = viewModel.getAttachmentSendViewStateFlow().value
+
+                    if (sendAttachmentViewState is AttachmentSendViewState.Preview && sendAttachmentViewState.type.isSphinxText) {
+                        s?.toString()?.let { text ->
+                            val price = attachmentSendBinding.editTextMessagePrice.text?.toString()?.toLongOrNull() ?: 0
+
+                            viewModel.updateAttachmentSendViewState(
+                                AttachmentSendViewState.Preview(
+                                    null,
+                                    sendAttachmentViewState.type,
+                                    Pair(text, price),
+                                )
+                            )
+                        }
+                    }
+                }
+            })
+
             editTextChatFooter.onCommitContentListener = viewModel.onIMEContent
         }
 
@@ -347,6 +400,32 @@ abstract class ChatFragment<
 
             root.setBackgroundColor(getColor(R.color.headerBG))
         }
+    }
+
+    private fun setupAttachmentPriceView() {
+        attachmentSendBinding.editTextMessagePrice.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+
+            override fun afterTextChanged(s: Editable?) {
+                val sendAttachmentViewState = viewModel.getAttachmentSendViewStateFlow().value
+
+                if (sendAttachmentViewState is AttachmentSendViewState.Preview && sendAttachmentViewState.type.isSphinxText) {
+                    footerBinding.editTextChatFooter.text?.toString()?.let { text ->
+                        val price = s?.toString()?.toLongOrNull() ?: 0
+
+                        viewModel.updateAttachmentSendViewState(
+                            AttachmentSendViewState.Preview(
+                                null,
+                                sendAttachmentViewState.type,
+                                Pair(text, price),
+                            )
+                        )
+                    }
+                }
+            }
+        })
     }
 
     private fun setupHeader(insetterActivity: InsetterActivity) {
@@ -968,6 +1047,7 @@ abstract class ChatFragment<
                     when (viewState) {
                         is AttachmentSendViewState.Idle -> {
                             root.gone
+                            includePaidTextMessageSendPreview.root.gone
                             imageViewAttachmentSendPreview.setImageDrawable(null)
                         }
                         is AttachmentSendViewState.Preview -> {
@@ -987,21 +1067,41 @@ abstract class ChatFragment<
                                     is MediaType.Video -> {
                                         text = getString(R.string.attachment_send_header_video)
                                     }
-                                    is MediaType.Text,
+                                    is MediaType.Text -> {
+                                        text = getString(R.string.attachment_send_header_paid_message)
+                                    }
                                     is MediaType.Unknown -> {}
                                 }
                             }
 
-                            root.visible
+                            if (viewState.type is MediaType.Image) {
 
-                            // will load almost immediately b/c it's a file, so
-                            // no need to launch separate coroutine.
-                            lifecycleScope.launch(viewModel.mainImmediate) {
-                                val disposable = imageLoader.load(imageViewAttachmentSendPreview, viewState.file)
-                                attachmentSendViewStateDisposables.add(disposable)
-                            }.let { job ->
-                                attachmentSendViewStateJobs.add(job)
+                                // will load almost immediately b/c it's a file, so
+                                // no need to launch separate coroutine.
+                                viewState.file?.let { nnFile ->
+                                    lifecycleScope.launch(viewModel.mainImmediate) {
+                                        val disposable = imageLoader.load(imageViewAttachmentSendPreview, nnFile)
+                                        attachmentSendViewStateDisposables.add(disposable)
+                                    }.let { job ->
+                                        attachmentSendViewStateJobs.add(job)
+                                    }
+                                }
+
+                            } else if (viewState.type == MediaType.Text) {
+
+                                includePaidTextMessageSendPreview.apply {
+                                    textViewPaidMessagePreviewText.text = viewState?.paidMessage?.first ?: footerBinding.editTextChatFooter.text
+
+                                    textViewPaidMessagePreviewPrice.text =
+                                        (viewState?.paidMessage?.second ?: attachmentSendBinding.editTextMessagePrice.text?.toString()?.toLongOrNull())
+                                        ?.toSat()?.asFormattedString(appendUnit = true) ?: "0 sats"
+
+                                    root.visible
+                                }
+
                             }
+
+                            root.visible
                         }
                         is AttachmentSendViewState.PreviewGiphy -> {
 
