@@ -2,4 +2,5 @@
 <resources>
     <string name="on_board_picture_bottom_menu_header">プロファイル写真</string>
     <string name="on_board_picture_side_effect_upload_failure">写真をアップロードできませんでした</string>
+    <string name="on_board_select_picture">写真を選択</string>
 </resources>
