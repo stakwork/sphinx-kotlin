@@ -1,5 +1,10 @@
 # ChangeLog
 
+## Version 1.0.0-alpha23 (2021-09-10)
+ - Adds message grouping
+ - Adds ability to send/receive paid text messages
+ - Fixes for paid images
+
 ## Version 1.0.0-alpha22 (2021-09-02)
  - Adds ability to send an image with a price
  - Adds ability to receive and pay for an image with a price

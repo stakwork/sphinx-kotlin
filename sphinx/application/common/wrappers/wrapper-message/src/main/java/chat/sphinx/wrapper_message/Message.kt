@@ -11,6 +11,7 @@ import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.*
 import chat.sphinx.wrapper_message_media.MessageMedia
 import chat.sphinx.wrapper_message_media.isImage
+import chat.sphinx.wrapper_message_media.isSphinxText
 import chat.sphinx.wrapper_message_media.token.MediaUrl
 
 @Suppress("NOTHING_TO_INLINE")
@@ -42,6 +43,18 @@ inline fun Message.retrieveBotResponseHtmlString(): String? =
     }
 
 @Suppress("NOTHING_TO_INLINE")
+inline fun Message.retrievePaidTextAttachmentUrlAndMessageMedia(): Pair<String, MessageMedia?>? {
+    var mediaData: Pair<String, MessageMedia?>? = null
+
+    messageMedia?.let { media ->
+        if (media.mediaType.isSphinxText) {
+            mediaData = retrieveUrlAndMessageMedia()
+        }
+    }
+    return mediaData
+}
+
+@Suppress("NOTHING_TO_INLINE")
 inline fun Message.retrieveImageUrlAndMessageMedia(): Pair<String, MessageMedia?>? {
     var mediaData: Pair<String, MessageMedia?>? = null
 
@@ -49,39 +62,49 @@ inline fun Message.retrieveImageUrlAndMessageMedia(): Pair<String, MessageMedia?
         mediaData = giphyData.retrieveImageUrlAndMessageMedia()
     } ?: messageMedia?.let { media ->
         if (media.mediaType.isImage) {
+            mediaData = retrieveUrlAndMessageMedia()
+        }
+    }
+    return mediaData
+}
 
-            val purchaseAcceptItem: Message? = if (isPaidMessage) {
-                val item = retrievePurchaseItemOfType(MessageType.Purchase.Accepted)
+@Suppress("NOTHING_TO_INLINE")
+inline fun Message.retrieveUrlAndMessageMedia(): Pair<String, MessageMedia?>? {
+    var mediaData: Pair<String, MessageMedia?>? = null
 
-                if (item?.messageMedia?.mediaKey?.value.isNullOrEmpty()) {
-                    null
-                } else {
-                    item
-                }
-            } else {
+    messageMedia?.let { media ->
+        val purchaseAcceptItem: Message? = if (isPaidMessage) {
+            val item = retrievePurchaseItemOfType(MessageType.Purchase.Accepted)
+
+            if (item?.messageMedia?.mediaKey?.value.isNullOrEmpty()) {
                 null
-            }
-
-            val url: MediaUrl? = if (this.type.isDirectPayment()) {
-                media.templateUrl
             } else {
-                purchaseAcceptItem?.messageMedia?.url ?: media.url
+                item
             }
+        } else {
+            null
+        }
 
-            val messageMedia: MessageMedia? = purchaseAcceptItem?.messageMedia ?: media
+        val url: MediaUrl? = if (this.type.isDirectPayment()) {
+            media.templateUrl
+        } else {
+            purchaseAcceptItem?.messageMedia?.url ?: media.url
+        }
 
-            if (media.localFile != null) {
-                mediaData = Pair(
-                    url?.value?.let { if (it.isEmpty()) null else it } ?: "http://127.0.0.1",
-                    messageMedia,
-                )
-            } else {
-                url?.let { mediaUrl ->
-                    mediaData = Pair(mediaUrl.value, messageMedia)
-                }
+        val messageMedia: MessageMedia = purchaseAcceptItem?.messageMedia ?: media
+
+        if (messageMedia.localFile != null) {
+            mediaData = Pair(
+                url?.value?.let { if (it.isEmpty()) null else it } ?: "http://127.0.0.1",
+                messageMedia,
+            )
+        } else {
+            url?.let { mediaUrl ->
+                mediaData = Pair(mediaUrl.value, messageMedia)
             }
         }
     }
+
     return mediaData
 }
 
@@ -151,6 +174,21 @@ inline fun Message.getColorKey(): String {
     return "message-${sender.value}-color"
 }
 
+@Suppress("NOTHING_TO_INLINE")
+inline fun Message.hasSameSenderThanMessage(message: Message): Boolean {
+    val hasSameSenderId = this.sender.value == message.sender.value
+    val hasSameSenderAlias = (this.senderAlias?.value ?: "") == (message.senderAlias?.value ?: "")
+    val hasSameSenderPicture = (this.senderPic?.value ?: "") == (message.senderPic?.value ?: "")
+
+    return hasSameSenderId && hasSameSenderAlias && hasSameSenderPicture
+}
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun Message.shouldAvoidGrouping(): Boolean {
+    return status.isPending() || status.isFailed() || status.isDeleted() ||
+            type.isInvoice() || type.isPayment() || type.isGroupAction()
+}
+
 //Message Actions
 inline val Message.isBoostAllowed: Boolean
     get() = status.isReceived() &&
@@ -180,6 +218,9 @@ inline val Message.isPaidPendingMessage: Boolean
     get() = type.isAttachment() &&
             (messageMedia?.price?.value ?: 0L) > 0L &&
             (retrievePurchaseStatus()?.isPurchaseAccepted() != true)
+
+inline val Message.isPaidTextMessage: Boolean
+    get() = type.isAttachment() && messageMedia?.mediaType?.isSphinxText == true && (messageMedia?.price?.value ?: 0L) > 0L
 
 inline val Message.isSphinxCallLink: Boolean
     get() = type.isMessage() && (messageContentDecrypted?.value?.isValidSphinxCallLink == true)

@@ -81,6 +81,13 @@ inline fun DateTime.after(dateTime: DateTime): Boolean =
 inline fun DateTime.before(dateTime: DateTime): Boolean =
     value.before(dateTime.value)
 
+@Suppress("NOTHING_TO_INLINE")
+inline fun DateTime.getMinutesDifferenceWithDateTime(dateTime: DateTime): Double {
+    val diff: Long = this.time - dateTime.time
+    val seconds = diff.toDouble() / 1000
+    return seconds / 60
+}
+
 /**
  * DateTime format from Relay: 2021-02-26T10:48:20.025Z
  *

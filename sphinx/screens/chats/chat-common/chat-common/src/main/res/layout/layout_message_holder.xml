@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginHorizontal="@dimen/default_layout_margin"
-    android:layout_marginVertical="4dp"
+    android:layout_marginVertical="2dp"
     android:elevation="@dimen/default_elevation">
 
     <!-- Group Action Indicator  -->
@@ -22,6 +22,7 @@
     <include
         android:id="@+id/include_message_holder_chat_image_initial_holder"
         layout="@layout/layout_chat_image_small_initial_holder"
+        android:layout_marginTop="@dimen/default_half_layout_margin"
         android:layout_width="@dimen/message_holder_in_photo_holder_xy"
         android:layout_height="@dimen/message_holder_in_photo_holder_xy"
         app:layout_constraintTop_toTopOf="parent"
@@ -34,6 +35,7 @@
         layout="@layout/layout_message_status_header"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/default_half_layout_margin"
         app:layout_constraintEnd_toEndOf="@id/include_message_holder_bubble"
         app:layout_constraintStart_toStartOf="@id/include_message_holder_bubble"
         app:layout_constraintTop_toTopOf="parent"

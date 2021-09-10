@@ -120,6 +120,19 @@
             tools:text="Contrary to popular belief"
             tools:visibility="visible" />
 
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_paid_message_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/roboto_italic"
+            android:textSize="@dimen/chat_paid_message_notice_text_size"
+            android:textColor="@color/textMessages"
+            android:paddingHorizontal="@dimen/default_layout_margin"
+            android:paddingVertical="@dimen/default_inner_spacing_list_item_title"
+            android:visibility="gone"
+            app:layout_constraintTop_toBottomOf="@+id/include_unsupported_message_type_placeholder"
+            tools:text="@string/paid_message_pay_to_unlock"
+            tools:visibility="gone" />
 
         <!-- Contact link preview  -->
         <include
