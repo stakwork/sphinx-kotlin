@@ -870,6 +870,7 @@ abstract class ChatFragment<
                                 viewModel.memeServerTokenHandler,
                                 viewModel.memeInputStreamHandler,
                                 viewModel.mediaCacheHandler,
+                                viewModel.messageMediaPlayer,
                                 viewState.recyclerViewWidth,
                                 viewState.messageHolderViewState,
                                 userColorsHelper,
@@ -1109,6 +1110,19 @@ abstract class ChatFragment<
     override fun onPause() {
         super.onPause()
         viewModel.readMessages()
+    }
+
+    override fun onStop() {
+        super.onStop()
+
+        if (viewModel.messageMediaPlayer.isPlaying) {
+            viewModel.messageMediaPlayer.stop()
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        viewModel.messageMediaPlayer.release()
     }
 
     override suspend fun onSideEffectCollect(sideEffect: ChatSideEffect) {

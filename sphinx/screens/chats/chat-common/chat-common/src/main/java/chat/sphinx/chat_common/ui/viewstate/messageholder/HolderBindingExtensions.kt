@@ -19,6 +19,7 @@ import chat.sphinx.chat_common.model.NodeDescriptor
 import chat.sphinx.chat_common.model.TribeLink
 import chat.sphinx.chat_common.model.UnspecifiedUrl
 import chat.sphinx.chat_common.ui.retrieveRemoteMediaInputStream
+import chat.sphinx.chat_common.util.MessageMediaPlayer
 import chat.sphinx.chat_common.util.SphinxLinkify
 import chat.sphinx.chat_common.util.SphinxUrlSpan
 import chat.sphinx.concept_image_loader.Disposable
@@ -63,6 +64,7 @@ internal fun LayoutMessageHolderBinding.setView(
     memeServerTokenHandler: MemeServerTokenHandler,
     memeInputStreamHandler: MemeInputStreamHandler,
     mediaCacheHandler: MediaCacheHandler,
+    messageMediaPlayer: MessageMediaPlayer,
     recyclerViewWidth: Px,
     viewState: MessageHolderViewState,
     userColorsHelper: UserColorsHelper,
@@ -165,17 +167,14 @@ internal fun LayoutMessageHolderBinding.setView(
             setBubbleAudioAttachment(viewState.bubbleAudioAttachment) { layoutMessageAudioAttachment, url, media ->
                 lifecycleScope.launch(dispatchers.mainImmediate) {
                     layoutMessageAudioAttachment.apply {
-                        val file: File? = media?.localFile
+                        var filePath: String? = media?.localFile?.absolutePath
 
-                        val mediaPlayer = MediaPlayer().apply {
+                        MediaPlayer().apply {
                             try {
                                 progressBarAttachmentAudioFileLoading.visible
                                 textViewAttachmentPlayPauseButton.gone
                                 textViewAttachmentAudioFailure.gone
-                                if (file != null) {
-                                    setDataSource(file.absolutePath)
-                                } else {
-
+                                if (filePath == null) {
                                     val inputStream = media?.retrieveRemoteMediaInputStream(
                                         url,
                                         memeServerTokenHandler,
@@ -186,56 +185,93 @@ internal fun LayoutMessageHolderBinding.setView(
                                         // TODO: Determine extension from media.mediaType
                                         val tmpAudioFile = mediaCacheHandler.createAudioFile(".tmp")
                                         mediaCacheHandler.copyTo(inputStream, tmpAudioFile)
-                                        setDataSource(
-                                            tmpAudioFile.absolutePath
-                                        )
-                                    } else {
-                                        setDataSource(
-                                            url
-                                        )
+                                        // TODO: Update mediaMessage local file
+                                        filePath = tmpAudioFile.absolutePath
                                     }
                                 }
-                                setOnPreparedListener {
-                                    seekBarAttachmentAudio.max = duration
-                                    textViewAttachmentAudioRemainingDuration.text = duration.toLong().toTimestamp()
-                                    progressBarAttachmentAudioFileLoading.gone
-                                    textViewAttachmentPlayPauseButton.visible
-                                }
-                                setOnErrorListener { mp, what, extra ->
+                                if (filePath != null) {
+                                    setDataSource(
+                                        filePath
+                                    )
+                                    setOnPreparedListener {
+                                        seekBarAttachmentAudio.max = duration
+                                        textViewAttachmentAudioRemainingDuration.text = duration.toLong().toTimestamp()
+                                        progressBarAttachmentAudioFileLoading.gone
+                                        textViewAttachmentPlayPauseButton.visible
+
+                                        // Finished loading the media...
+                                        release()
+                                    }
+                                    setOnErrorListener { mp, what, extra ->
+                                        progressBarAttachmentAudioFileLoading.gone
+                                        textViewAttachmentAudioFailure.visible
+
+                                        return@setOnErrorListener true
+                                    }
+
+                                    prepareAsync()
+                                } else {
                                     progressBarAttachmentAudioFileLoading.gone
                                     textViewAttachmentAudioFailure.visible
-
-                                    return@setOnErrorListener true
                                 }
 
-                                prepareAsync()
                             } catch (e: IOException) {
                                 progressBarAttachmentAudioFileLoading.gone
                                 textViewAttachmentAudioFailure.visible
                             }
                         }
 
-                        var timer: CountDownTimer? = null
                         textViewAttachmentPlayPauseButton.setOnClickListener {
-                            if (mediaPlayer.isPlaying) {
-                                mediaPlayer.pause()
-                                timer?.cancel()
-                                timer = null
+                            filePath?.let { audioFilePath ->
+                                if (messageMediaPlayer.filePath != audioFilePath) {
+                                    progressBarAttachmentAudioFileLoading.visible
+                                    textViewAttachmentPlayPauseButton.gone
+                                    textViewAttachmentAudioFailure.gone
+                                    messageMediaPlayer.reset()
+
+                                    messageMediaPlayer.apply {
+                                        try {
+                                            load(audioFilePath)
+
+                                            seekBarAttachmentAudio.max = duration
+                                            textViewAttachmentAudioRemainingDuration.text = duration.toLong().toTimestamp()
+                                            progressBarAttachmentAudioFileLoading.gone
+                                            textViewAttachmentPlayPauseButton.visible
+
+                                            start()
+                                        } catch (e: IOException) {
+                                            progressBarAttachmentAudioFileLoading.gone
+                                            textViewAttachmentAudioFailure.visible
+                                        }
+
+                                    }
+                                }
+                            }
+
+
+                            if (messageMediaPlayer.isPlaying) {
+                                messageMediaPlayer.pause()
+                                messageMediaPlayer.countDownTimer?.cancel()
+                                messageMediaPlayer.countDownTimer = null
                             } else {
-                                mediaPlayer.start()
-                                val remainingTime = mediaPlayer.duration - seekBarAttachmentAudio.progress
-                                timer = object: CountDownTimer(remainingTime.toLong(), 100) {
+                                messageMediaPlayer.start()
+                                val remainingTime = messageMediaPlayer.duration - seekBarAttachmentAudio.progress
+                                messageMediaPlayer.countDownTimer = object: CountDownTimer(remainingTime.toLong(), 100) {
                                     override fun onTick(millisUntilFinished: Long) {
-                                        textViewAttachmentAudioRemainingDuration.text = millisUntilFinished.toTimestamp()
-                                        seekBarAttachmentAudio.progress = mediaPlayer.currentPosition
+                                        lifecycleScope.launch(dispatchers.mainImmediate) {
+                                            textViewAttachmentAudioRemainingDuration.text = millisUntilFinished.toTimestamp()
+                                            seekBarAttachmentAudio.progress = messageMediaPlayer.currentPosition
+                                        }
                                     }
 
                                     override fun onFinish() {
-                                        textViewAttachmentAudioRemainingDuration.text = mediaPlayer.duration.toLong().toTimestamp()
-                                        seekBarAttachmentAudio.progress = 0
+                                        lifecycleScope.launch(dispatchers.mainImmediate) {
+                                            textViewAttachmentAudioRemainingDuration.text = messageMediaPlayer.duration.toLong().toTimestamp()
+                                            seekBarAttachmentAudio.progress = 0
+                                        }
                                     }
                                 }
-                                timer?.start()
+                                messageMediaPlayer.countDownTimer?.start()
                             }
                         }
                     }

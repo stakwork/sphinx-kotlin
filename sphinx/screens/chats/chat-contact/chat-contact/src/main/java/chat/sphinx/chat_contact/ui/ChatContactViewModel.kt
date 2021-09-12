@@ -7,7 +7,7 @@ import chat.sphinx.camera_view_model_coordinator.request.CameraRequest
 import chat.sphinx.camera_view_model_coordinator.response.CameraResponse
 import chat.sphinx.chat_common.ui.ChatViewModel
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
-import chat.sphinx.chat_common.ui.viewstate.header.ChatHeaderViewState
+import chat.sphinx.chat_common.util.MessageMediaPlayer
 import chat.sphinx.chat_contact.navigation.ContactChatNavigator
 import chat.sphinx.concept_link_preview.LinkPreviewHandler
 import chat.sphinx.concept_meme_input_stream.MemeInputStreamHandler
@@ -25,7 +25,6 @@ import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.wrapper_chat.Chat
-import chat.sphinx.wrapper_chat.ChatMuted
 import chat.sphinx.wrapper_chat.ChatName
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
@@ -65,6 +64,7 @@ internal class ChatContactViewModel @Inject constructor(
     messageRepository: MessageRepository,
     networkQueryLightning: NetworkQueryLightning,
     mediaCacheHandler: MediaCacheHandler,
+    mesageMediaPlayer: MessageMediaPlayer,
     savedStateHandle: SavedStateHandle,
     cameraViewModelCoordinator: ViewModelCoordinator<CameraRequest, CameraResponse>,
     linkPreviewHandler: LinkPreviewHandler,
@@ -80,6 +80,7 @@ internal class ChatContactViewModel @Inject constructor(
     messageRepository,
     networkQueryLightning,
     mediaCacheHandler,
+    mesageMediaPlayer,
     savedStateHandle,
     cameraViewModelCoordinator,
     linkPreviewHandler,
