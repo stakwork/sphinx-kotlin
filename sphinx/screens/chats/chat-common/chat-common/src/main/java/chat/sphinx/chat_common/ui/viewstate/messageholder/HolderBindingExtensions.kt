@@ -287,12 +287,12 @@ internal fun LayoutMessageHolderBinding.setView(
 
                                 if (messageMediaPlayer.isPlaying) {
                                     messageMediaPlayer.pause()
-                                    textViewAttachmentPlayPauseButton.text = "play_arrow"
+                                    textViewAttachmentPlayPauseButton.text = getString(R.string.material_icon_name_play_button)
                                     messageMediaPlayer.countDownTimer?.cancel()
                                     messageMediaPlayer.countDownTimer = null
                                 } else {
                                     messageMediaPlayer.start()
-                                    textViewAttachmentPlayPauseButton.text = "pause"
+                                    textViewAttachmentPlayPauseButton.text = getString(R.string.material_icon_name_pause_button)
                                     val remainingTime = messageMediaPlayer.duration - seekBarAttachmentAudio.progress
                                     messageMediaPlayer.countDownTimer = object: CountDownTimer(remainingTime.toLong(), 100) {
                                         override fun onTick(millisUntilFinished: Long) {
@@ -304,6 +304,7 @@ internal fun LayoutMessageHolderBinding.setView(
 
                                         override fun onFinish() {
                                             lifecycleScope.launch(dispatchers.mainImmediate) {
+                                                textViewAttachmentPlayPauseButton.text = getString(R.string.material_icon_name_play_button)
                                                 textViewAttachmentAudioRemainingDuration.text = messageMediaPlayer.duration.toLong().toTimestamp()
                                                 seekBarAttachmentAudio.progress = 0
                                             }
