@@ -871,6 +871,7 @@ abstract class ChatFragment<
                                 viewModel.memeInputStreamHandler,
                                 viewModel.mediaCacheHandler,
                                 viewModel.messageMediaPlayer,
+                                viewModel.repositoryMedia,
                                 viewState.recyclerViewWidth,
                                 viewState.messageHolderViewState,
                                 userColorsHelper,

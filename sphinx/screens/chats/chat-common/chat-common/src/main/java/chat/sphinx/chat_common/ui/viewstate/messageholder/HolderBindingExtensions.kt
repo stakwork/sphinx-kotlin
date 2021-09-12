@@ -30,6 +30,7 @@ import chat.sphinx.concept_meme_input_stream.MemeInputStreamHandler
 import chat.sphinx.concept_meme_server.MemeServerTokenHandler
 import chat.sphinx.concept_network_client_crypto.CryptoHeader
 import chat.sphinx.concept_network_client_crypto.CryptoScheme
+import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.resources.*
 import chat.sphinx.wrapper_chat.ChatType
@@ -65,6 +66,7 @@ internal fun LayoutMessageHolderBinding.setView(
     memeInputStreamHandler: MemeInputStreamHandler,
     mediaCacheHandler: MediaCacheHandler,
     messageMediaPlayer: MessageMediaPlayer,
+    repositoryMedia: RepositoryMedia,
     recyclerViewWidth: Px,
     viewState: MessageHolderViewState,
     userColorsHelper: UserColorsHelper,
@@ -173,10 +175,13 @@ internal fun LayoutMessageHolderBinding.setView(
                                 memeInputStreamHandler
                             )?.let { inputStream ->
                                 // TODO: Determine extension from media.mediaType
-                                val tmpAudioFile = mediaCacheHandler.createAudioFile(".tmp")
-                                mediaCacheHandler.copyTo(inputStream, tmpAudioFile)
-                                // TODO: Update mediaMessage local file
-                                tmpAudioFile.absolutePath
+                                val localAudioFile = mediaCacheHandler.createAudioFile(".m4a")
+                                mediaCacheHandler.copyTo(inputStream, localAudioFile)
+                                repositoryMedia.updateLocalFile(
+                                    localAudioFile,
+                                    viewState.message.id
+                                )
+                                localAudioFile.absolutePath
                             }
 
                         if (filePath == null) {
@@ -184,33 +189,63 @@ internal fun LayoutMessageHolderBinding.setView(
                             progressBarAttachmentAudioFileLoading.gone
                             textViewAttachmentAudioFailure.visible
                         } else {
-                            MediaPlayer().apply {
-                                try {
-                                    setDataSource(
-                                        filePath
-                                    )
-                                    setOnPreparedListener {
-                                        seekBarAttachmentAudio.max = duration
-                                        textViewAttachmentAudioRemainingDuration.text = duration.toLong().toTimestamp()
-                                        progressBarAttachmentAudioFileLoading.gone
-                                        textViewAttachmentPlayPauseButton.visible
+                            if (messageMediaPlayer.filePath == filePath) {
+                                // The messageMediaPlayer is playing this specific file
+                                seekBarAttachmentAudio.max = messageMediaPlayer.duration
+                                seekBarAttachmentAudio.progress = messageMediaPlayer.currentPosition
+                                textViewAttachmentAudioRemainingDuration.text = messageMediaPlayer.duration.toLong().toTimestamp()
+                                progressBarAttachmentAudioFileLoading.gone
+                                textViewAttachmentPlayPauseButton.visible
 
-                                        // Finished loading the media...
-                                        release()
+                                val remainingTime = messageMediaPlayer.duration - seekBarAttachmentAudio.progress
+                                messageMediaPlayer.countDownTimer = object: CountDownTimer(remainingTime.toLong(), 100) {
+                                    override fun onTick(millisUntilFinished: Long) {
+                                        lifecycleScope.launch(dispatchers.mainImmediate) {
+                                            textViewAttachmentAudioRemainingDuration.text = millisUntilFinished.toTimestamp()
+                                            seekBarAttachmentAudio.progress = messageMediaPlayer.currentPosition
+                                        }
                                     }
-                                    setOnErrorListener { mp, what, extra ->
+
+                                    override fun onFinish() {
+                                        lifecycleScope.launch(dispatchers.mainImmediate) {
+                                            textViewAttachmentAudioRemainingDuration.text = messageMediaPlayer.duration.toLong().toTimestamp()
+                                            seekBarAttachmentAudio.progress = 0
+                                        }
+                                    }
+                                }
+                                messageMediaPlayer.countDownTimer?.start()
+                            } else {
+                                // Load the audio file and forget it
+                                MediaPlayer().apply {
+                                    try {
+                                        setDataSource(
+                                            filePath
+                                        )
+                                        setOnPreparedListener {
+
+                                            seekBarAttachmentAudio.max = duration
+                                            textViewAttachmentAudioRemainingDuration.text = duration.toLong().toTimestamp()
+                                            progressBarAttachmentAudioFileLoading.gone
+                                            textViewAttachmentPlayPauseButton.visible
+
+                                            // Finished loading the media...
+                                            release()
+                                        }
+                                        setOnErrorListener { mp, what, extra ->
+                                            progressBarAttachmentAudioFileLoading.gone
+                                            textViewAttachmentAudioFailure.visible
+
+                                            return@setOnErrorListener true
+                                        }
+
+                                        prepareAsync()
+
+                                    } catch (e: IOException) {
                                         progressBarAttachmentAudioFileLoading.gone
                                         textViewAttachmentAudioFailure.visible
-
-                                        return@setOnErrorListener true
                                     }
-
-                                    prepareAsync()
-
-                                } catch (e: IOException) {
-                                    progressBarAttachmentAudioFileLoading.gone
-                                    textViewAttachmentAudioFailure.visible
                                 }
+
                             }
 
 
@@ -252,10 +287,12 @@ internal fun LayoutMessageHolderBinding.setView(
 
                                 if (messageMediaPlayer.isPlaying) {
                                     messageMediaPlayer.pause()
+                                    textViewAttachmentPlayPauseButton.text = "play_arrow"
                                     messageMediaPlayer.countDownTimer?.cancel()
                                     messageMediaPlayer.countDownTimer = null
                                 } else {
                                     messageMediaPlayer.start()
+                                    textViewAttachmentPlayPauseButton.text = "pause"
                                     val remainingTime = messageMediaPlayer.duration - seekBarAttachmentAudio.progress
                                     messageMediaPlayer.countDownTimer = object: CountDownTimer(remainingTime.toLong(), 100) {
                                         override fun onTick(millisUntilFinished: Long) {

@@ -76,7 +76,6 @@ import chat.sphinx.wrapper_meme_server.PublicAttachmentInfo
 import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message_media.*
 import chat.sphinx.wrapper_message_media.token.MediaHost
-import chat.sphinx.wrapper_message_media.token.MediaMUID
 import chat.sphinx.wrapper_podcast.Podcast
 import chat.sphinx.wrapper_podcast.PodcastDestination
 import chat.sphinx.wrapper_relay.AuthorizationToken
@@ -99,6 +98,7 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import okio.base64.encodeBase64
+import java.io.File
 import java.io.InputStream
 import java.text.ParseException
 import kotlin.math.absoluteValue
@@ -3866,5 +3866,23 @@ abstract class SphinxRepository(
         }.join()
 
         return response ?: Response.Error(ResponseError(("Failed to delete subscription")))
+    }
+
+    override suspend fun updateLocalFile(localFile: File, messageId: MessageId) {
+        applicationScope.launch(mainImmediate) {
+            val queries = coreDB.getSphinxDatabaseQueries()
+
+            subscriptionLock.withLock {
+                withContext(io) {
+                    queries.transaction {
+                        updateMessageMediaLocalFile(
+                            localFile,
+                            messageId,
+                            queries
+                        )
+                    }
+                }
+            }
+        }
     }
 }

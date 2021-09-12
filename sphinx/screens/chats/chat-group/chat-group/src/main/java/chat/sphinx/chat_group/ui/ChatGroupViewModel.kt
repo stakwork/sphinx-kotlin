@@ -15,6 +15,7 @@ import chat.sphinx.concept_meme_server.MemeServerTokenHandler
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
+import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.concept_repository_message.model.SendMessage
 import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
@@ -47,6 +48,7 @@ class ChatGroupViewModel @Inject constructor(
     dispatchers: CoroutineDispatchers,
     memeServerTokenHandler: MemeServerTokenHandler,
     chatNavigator: GroupChatNavigator,
+    repositoryMedia: RepositoryMedia,
     chatRepository: ChatRepository,
     contactRepository: ContactRepository,
     messageRepository: MessageRepository,
@@ -63,6 +65,7 @@ class ChatGroupViewModel @Inject constructor(
     dispatchers,
     memeServerTokenHandler,
     chatNavigator,
+    repositoryMedia,
     chatRepository,
     contactRepository,
     messageRepository,

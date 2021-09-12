@@ -33,6 +33,7 @@ import chat.sphinx.wrapper_message_media.*
 import chat.sphinx.wrapper_rsa.RsaPublicKey
 import com.squareup.moshi.Moshi
 import com.squareup.sqldelight.TransactionCallbacks
+import java.io.File
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun BalanceDto.toNodeBalanceOrNull(): NodeBalance? =
@@ -431,4 +432,21 @@ inline fun TransactionCallbacks.deleteSubscriptionById(
     queries: SphinxDatabaseQueries
 ) {
     queries.subscriptionDeleteById(subscriptionId)
+}
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun TransactionCallbacks.updateMessageMediaLocalFile(
+    localFile: File,
+    messageId: MessageId,
+    queries: SphinxDatabaseQueries
+): Boolean {
+    return if (localFile.exists()) {
+        queries.messageMediaUpdateFile(
+            local_file = localFile,
+            messageId
+        )
+        true
+    } else {
+        false
+    }
 }

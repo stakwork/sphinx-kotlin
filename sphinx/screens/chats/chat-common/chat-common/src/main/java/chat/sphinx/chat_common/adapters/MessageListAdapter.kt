@@ -396,6 +396,7 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                 viewModel.memeInputStreamHandler,
                 viewModel.mediaCacheHandler,
                 viewModel.messageMediaPlayer,
+                viewModel.repositoryMedia,
                 recyclerViewWidth,
                 viewState,
                 userColorsHelper,

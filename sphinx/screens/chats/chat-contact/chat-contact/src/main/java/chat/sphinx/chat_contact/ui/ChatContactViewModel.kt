@@ -17,6 +17,7 @@ import chat.sphinx.concept_network_query_lightning.model.route.RouteSuccessProba
 import chat.sphinx.concept_network_query_lightning.model.route.isRouteAvailable
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
+import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.concept_repository_message.model.SendMessage
 import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
@@ -59,6 +60,7 @@ internal class ChatContactViewModel @Inject constructor(
     dispatchers: CoroutineDispatchers,
     memeServerTokenHandler: MemeServerTokenHandler,
     contactChatNavigator: ContactChatNavigator,
+    repositoryMedia: RepositoryMedia,
     chatRepository: ChatRepository,
     contactRepository: ContactRepository,
     messageRepository: MessageRepository,
@@ -75,6 +77,7 @@ internal class ChatContactViewModel @Inject constructor(
     dispatchers,
     memeServerTokenHandler,
     contactChatNavigator,
+    repositoryMedia,
     chatRepository,
     contactRepository,
     messageRepository,

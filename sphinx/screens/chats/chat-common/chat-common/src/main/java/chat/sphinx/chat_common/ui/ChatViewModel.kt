@@ -49,6 +49,7 @@ import chat.sphinx.concept_meme_server.MemeServerTokenHandler
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
+import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.concept_repository_message.model.SendMessage
 import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
@@ -102,6 +103,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     dispatchers: CoroutineDispatchers,
     val memeServerTokenHandler: MemeServerTokenHandler,
     val chatNavigator: ChatNavigator,
+    val repositoryMedia: RepositoryMedia,
     protected val chatRepository: ChatRepository,
     protected val contactRepository: ContactRepository,
     protected val messageRepository: MessageRepository,
@@ -1264,6 +1266,7 @@ suspend inline fun MessageMedia.retrieveRemoteMediaInputStream(
         }
     }
 }
+
 @Suppress("NOTHING_TO_INLINE")
 inline fun Drawable.drawableToBitmap(): Bitmap? {
     return try {
