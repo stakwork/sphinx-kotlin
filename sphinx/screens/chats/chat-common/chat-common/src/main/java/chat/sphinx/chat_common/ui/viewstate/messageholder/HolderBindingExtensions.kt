@@ -167,29 +167,25 @@ internal fun LayoutMessageHolderBinding.setView(
             setBubbleAudioAttachment(viewState.bubbleAudioAttachment) { layoutMessageAudioAttachment, url, media ->
                 lifecycleScope.launch(dispatchers.mainImmediate) {
                     layoutMessageAudioAttachment.apply {
-                        var filePath: String? = media?.localFile?.absolutePath
+                        val filePath: String? = media?.localFile?.absolutePath ?: media?.retrieveRemoteMediaInputStream(
+                                url,
+                                memeServerTokenHandler,
+                                memeInputStreamHandler
+                            )?.let { inputStream ->
+                                // TODO: Determine extension from media.mediaType
+                                val tmpAudioFile = mediaCacheHandler.createAudioFile(".tmp")
+                                mediaCacheHandler.copyTo(inputStream, tmpAudioFile)
+                                // TODO: Update mediaMessage local file
+                                tmpAudioFile.absolutePath
+                            }
 
-                        MediaPlayer().apply {
-                            try {
-                                progressBarAttachmentAudioFileLoading.visible
-                                textViewAttachmentPlayPauseButton.gone
-                                textViewAttachmentAudioFailure.gone
-                                if (filePath == null) {
-                                    val inputStream = media?.retrieveRemoteMediaInputStream(
-                                        url,
-                                        memeServerTokenHandler,
-                                        memeInputStreamHandler
-                                    )
-
-                                    if (inputStream != null) {
-                                        // TODO: Determine extension from media.mediaType
-                                        val tmpAudioFile = mediaCacheHandler.createAudioFile(".tmp")
-                                        mediaCacheHandler.copyTo(inputStream, tmpAudioFile)
-                                        // TODO: Update mediaMessage local file
-                                        filePath = tmpAudioFile.absolutePath
-                                    }
-                                }
-                                if (filePath != null) {
+                        if (filePath == null) {
+                            // Filed to load a file
+                            progressBarAttachmentAudioFileLoading.gone
+                            textViewAttachmentAudioFailure.visible
+                        } else {
+                            MediaPlayer().apply {
+                                try {
                                     setDataSource(
                                         filePath
                                     )
@@ -210,20 +206,16 @@ internal fun LayoutMessageHolderBinding.setView(
                                     }
 
                                     prepareAsync()
-                                } else {
+
+                                } catch (e: IOException) {
                                     progressBarAttachmentAudioFileLoading.gone
                                     textViewAttachmentAudioFailure.visible
                                 }
-
-                            } catch (e: IOException) {
-                                progressBarAttachmentAudioFileLoading.gone
-                                textViewAttachmentAudioFailure.visible
                             }
-                        }
 
-                        textViewAttachmentPlayPauseButton.setOnClickListener {
-                            filePath?.let { audioFilePath ->
-                                if (messageMediaPlayer.filePath != audioFilePath) {
+
+                            textViewAttachmentPlayPauseButton.setOnClickListener {
+                                if (messageMediaPlayer.filePath != filePath) {
                                     progressBarAttachmentAudioFileLoading.visible
                                     textViewAttachmentPlayPauseButton.gone
                                     textViewAttachmentAudioFailure.gone
@@ -231,14 +223,24 @@ internal fun LayoutMessageHolderBinding.setView(
 
                                     messageMediaPlayer.apply {
                                         try {
-                                            load(audioFilePath)
+                                            setOnPreparedListener {
+                                                seekBarAttachmentAudio.max = duration
+                                                textViewAttachmentAudioRemainingDuration.text = duration.toLong().toTimestamp()
+                                                progressBarAttachmentAudioFileLoading.gone
+                                                textViewAttachmentPlayPauseButton.visible
 
-                                            seekBarAttachmentAudio.max = duration
-                                            textViewAttachmentAudioRemainingDuration.text = duration.toLong().toTimestamp()
-                                            progressBarAttachmentAudioFileLoading.gone
-                                            textViewAttachmentPlayPauseButton.visible
+                                                start()
+                                            }
 
-                                            start()
+                                            setOnErrorListener { mp, what, extra ->
+                                                progressBarAttachmentAudioFileLoading.gone
+                                                textViewAttachmentAudioFailure.visible
+
+                                                return@setOnErrorListener true
+                                            }
+                                            load(filePath)
+
+
                                         } catch (e: IOException) {
                                             progressBarAttachmentAudioFileLoading.gone
                                             textViewAttachmentAudioFailure.visible
@@ -246,34 +248,35 @@ internal fun LayoutMessageHolderBinding.setView(
 
                                     }
                                 }
-                            }
 
 
-                            if (messageMediaPlayer.isPlaying) {
-                                messageMediaPlayer.pause()
-                                messageMediaPlayer.countDownTimer?.cancel()
-                                messageMediaPlayer.countDownTimer = null
-                            } else {
-                                messageMediaPlayer.start()
-                                val remainingTime = messageMediaPlayer.duration - seekBarAttachmentAudio.progress
-                                messageMediaPlayer.countDownTimer = object: CountDownTimer(remainingTime.toLong(), 100) {
-                                    override fun onTick(millisUntilFinished: Long) {
-                                        lifecycleScope.launch(dispatchers.mainImmediate) {
-                                            textViewAttachmentAudioRemainingDuration.text = millisUntilFinished.toTimestamp()
-                                            seekBarAttachmentAudio.progress = messageMediaPlayer.currentPosition
+                                if (messageMediaPlayer.isPlaying) {
+                                    messageMediaPlayer.pause()
+                                    messageMediaPlayer.countDownTimer?.cancel()
+                                    messageMediaPlayer.countDownTimer = null
+                                } else {
+                                    messageMediaPlayer.start()
+                                    val remainingTime = messageMediaPlayer.duration - seekBarAttachmentAudio.progress
+                                    messageMediaPlayer.countDownTimer = object: CountDownTimer(remainingTime.toLong(), 100) {
+                                        override fun onTick(millisUntilFinished: Long) {
+                                            lifecycleScope.launch(dispatchers.mainImmediate) {
+                                                textViewAttachmentAudioRemainingDuration.text = millisUntilFinished.toTimestamp()
+                                                seekBarAttachmentAudio.progress = messageMediaPlayer.currentPosition
+                                            }
+                                        }
+
+                                        override fun onFinish() {
+                                            lifecycleScope.launch(dispatchers.mainImmediate) {
+                                                textViewAttachmentAudioRemainingDuration.text = messageMediaPlayer.duration.toLong().toTimestamp()
+                                                seekBarAttachmentAudio.progress = 0
+                                            }
                                         }
                                     }
-
-                                    override fun onFinish() {
-                                        lifecycleScope.launch(dispatchers.mainImmediate) {
-                                            textViewAttachmentAudioRemainingDuration.text = messageMediaPlayer.duration.toLong().toTimestamp()
-                                            seekBarAttachmentAudio.progress = 0
-                                        }
-                                    }
+                                    messageMediaPlayer.countDownTimer?.start()
                                 }
-                                messageMediaPlayer.countDownTimer?.start()
                             }
                         }
+
                     }
 
 
@@ -1099,6 +1102,10 @@ internal inline fun LayoutMessageHolderBinding.setBubbleAudioAttachment(
             root.gone
         } else {
             root.visible
+            progressBarAttachmentAudioFileLoading.visible
+            textViewAttachmentPlayPauseButton.gone
+            textViewAttachmentAudioFailure.gone
+
             loadAudio(
                 this,
                 audioAttachment.url,
