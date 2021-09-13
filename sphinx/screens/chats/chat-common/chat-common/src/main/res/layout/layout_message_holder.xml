@@ -36,8 +36,8 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/default_half_layout_margin"
-        app:layout_constraintEnd_toEndOf="@id/include_message_holder_bubble"
-        app:layout_constraintStart_toStartOf="@id/include_message_holder_bubble"
+        app:layout_constraintEnd_toStartOf="@+id/sent_bubble_arrow"
+        app:layout_constraintStart_toEndOf="@+id/received_bubble_arrow"
         app:layout_constraintTop_toTopOf="parent"
         tools:visibility="visible" />
 
