@@ -1,5 +1,6 @@
 package chat.sphinx.chat_common.ui
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Color
 import android.os.Bundle
@@ -13,17 +14,20 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.LayoutRes
 import androidx.constraintlayout.motion.widget.MotionLayout
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavArgs
+import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.chat_common.R
 import chat.sphinx.chat_common.adapters.MessageListAdapter
+import chat.sphinx.chat_common.adapters.MessageListFooterAdapter
 import chat.sphinx.chat_common.databinding.*
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
 import chat.sphinx.chat_common.ui.viewstate.attachment.AttachmentFullscreenViewState
@@ -31,7 +35,9 @@ import chat.sphinx.chat_common.ui.viewstate.attachment.AttachmentSendViewState
 import chat.sphinx.chat_common.ui.viewstate.footer.FooterViewState
 import chat.sphinx.chat_common.ui.viewstate.header.ChatHeaderViewState
 import chat.sphinx.chat_common.ui.viewstate.menu.ChatMenuViewState
+import chat.sphinx.chat_common.ui.viewstate.messageholder.setBubbleBackground
 import chat.sphinx.chat_common.ui.viewstate.messageholder.setView
+import chat.sphinx.chat_common.ui.viewstate.messageholder.setViewsFixedWidth
 import chat.sphinx.chat_common.ui.viewstate.messagereply.MessageReplyViewState
 import chat.sphinx.chat_common.ui.viewstate.selected.MenuItemState
 import chat.sphinx.chat_common.ui.viewstate.selected.SelectedMessageViewState
@@ -70,10 +76,7 @@ import chat.sphinx.wrapper_message_media.isImage
 import chat.sphinx.wrapper_message_media.isSphinxText
 import chat.sphinx.wrapper_view.Dp
 import io.matthewnelson.android_feature_screens.ui.motionlayout.MotionLayoutFragment
-import io.matthewnelson.android_feature_screens.util.gone
-import io.matthewnelson.android_feature_screens.util.goneIfFalse
-import io.matthewnelson.android_feature_screens.util.goneIfTrue
-import io.matthewnelson.android_feature_screens.util.visible
+import io.matthewnelson.android_feature_screens.util.*
 import io.matthewnelson.android_feature_viewmodel.currentViewState
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_views.viewstate.collect
@@ -474,6 +477,7 @@ abstract class ChatFragment<
                 }
             }
         }
+//        selectedMessageHolderBinding.root.setBackgroundColor(ContextCompat.getColor(binding.root.context, R.color.badgeRed))
         selectedMessageHolderBinding.includeMessageHolderBubble.root.setOnClickListener {
             viewModel
         }
@@ -610,10 +614,11 @@ abstract class ChatFragment<
             imageLoader,
             userColorsHelper
         )
+        val footerAdapter = MessageListFooterAdapter()
         recyclerView.apply {
             setHasFixedSize(false)
             layoutManager = linearLayoutManager
-            adapter = messageListAdapter
+            adapter = ConcatAdapter(messageListAdapter, footerAdapter)
             itemAnimator = null
         }
     }
@@ -933,7 +938,13 @@ abstract class ChatFragment<
                         }
 
                         selectedMessageHolderBinding.apply {
-                            root.y = viewState.holderYPos.value + viewState.statusHeaderHeight.value
+                            root.y = viewState.holderYPos.value
+
+                            setViewsFixedWidth(
+                                viewState.messageHolderViewState,
+                                viewState.recyclerViewWidth
+                            )
+
                             setView(
                                 lifecycleScope,
                                 holderJobs,
@@ -946,8 +957,9 @@ abstract class ChatFragment<
                                 viewState.messageHolderViewState,
                                 userColorsHelper,
                             )
+
+                            includeMessageHolderChatImageInitialHolder.root.invisible
                             includeMessageStatusHeader.root.gone
-                            includeMessageHolderChatImageInitialHolder.root.gone
                         }
 
                         selectedMessageBinding.apply message@ {
@@ -978,13 +990,11 @@ abstract class ChatFragment<
 
                                 this@menu.y = if (viewState.showMenuTop) {
                                     viewState.holderYPos.value -
-                                            (resources.getDimension(R.dimen.selected_message_menu_item_height) * (viewState.messageHolderViewState.selectionMenuItems?.size ?: 0)) +
-                                            viewState.statusHeaderHeight.value -
+                                            (resources.getDimension(R.dimen.selected_message_menu_item_height) * (viewState.messageHolderViewState.selectionMenuItems?.size ?: 0)) -
                                             Dp(10F).toPx(context).value
                                 } else {
-                                    viewState.holderYPos.value          +
-                                            viewState.bubbleHeight.value        +
-                                            viewState.statusHeaderHeight.value  +
+                                    viewState.holderYPos.value +
+                                            viewState.bubbleHeight.value +
                                             Dp(10F).toPx(context).value
                                 }
                                 val menuWidth = resources.getDimension(R.dimen.selected_message_menu_width)

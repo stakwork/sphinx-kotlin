@@ -44,12 +44,6 @@
     <dimen name="group_action_message_padding_vertical">4dp</dimen>
     <dimen name="group_request_message_button_xy">27dp</dimen>
 
-
-    <!-- message_holder_in_photo_holder_xy + 8dp -->
-    <dimen name="message_holder_space_width_left">44dp</dimen>
-    <dimen name="message_holder_space_width_right">6dp</dimen>
-
-
     <!-- Message type heights  -->
     <dimen name="message_type_boost_height">50dp</dimen>
     <dimen name="message_type_direct_payment_height">46dp</dimen>
@@ -71,6 +65,9 @@
     <dimen name="message_type_call_invite_holder_height_large">212dp</dimen>
     <dimen name="message_type_call_invite_holder_height_small">160dp</dimen>
     <dimen name="message_type_call_invite_join_button_height">38dp</dimen>
+
+    <dimen name="message_type_boost_min_width">150dp</dimen>
+    <dimen name="message_views_fixed_min_width">200dp</dimen>
 
     <!-- Images -->
     <dimen name="loading_image_progress_xy">50dp</dimen>

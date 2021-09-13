@@ -8,6 +8,7 @@ import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
 import androidx.annotation.MainThread
 import androidx.appcompat.content.res.AppCompatResources
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.view.updateLayoutParams
 import app.cash.exhaustive.Exhaustive
@@ -38,15 +39,13 @@ import chat.sphinx.wrapper_meme_server.headerValue
 import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message_media.MessageMedia
 import chat.sphinx.wrapper_view.Px
-import io.matthewnelson.android_feature_screens.util.gone
-import io.matthewnelson.android_feature_screens.util.goneIfFalse
-import io.matthewnelson.android_feature_screens.util.goneIfTrue
-import io.matthewnelson.android_feature_screens.util.visible
+import io.matthewnelson.android_feature_screens.util.*
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import java.io.File
+import java.lang.Double.max
 import chat.sphinx.resources.R as common_R
 
 
@@ -103,8 +102,13 @@ internal fun LayoutMessageHolderBinding.setView(
             lifecycleScope,
             userColorsHelper,
         )
-        setDeletedMessageLayout(viewState.deletedMessage)
         setBubbleBackground(viewState, recyclerViewWidth)
+
+        if (!viewState.viewsWidthSet) {
+            setViewsFixedWidth(viewState, recyclerViewWidth)
+        }
+
+        setDeletedMessageLayout(viewState.deletedMessage)
         setGroupActionIndicatorLayout(viewState.groupActionIndicator)
 
         if (viewState.background !is BubbleBackground.Gone) {
@@ -314,6 +318,9 @@ internal inline fun LayoutMessageHolderBinding.setUnsupportedMessageTypeLayout(
                     // render a unique message for?
                     getString(R.string.placeholder_unsupported_message_type_default)
                 }
+                else -> {
+                    ""
+                }
             }
 
             textViewPlaceholderMessage.text = root.context.getString(
@@ -359,12 +366,11 @@ internal fun LayoutMessageHolderBinding.setBubbleBackground(
 ) {
     if (viewState.background is BubbleBackground.Gone) {
         includeMessageHolderBubble.root.gone
-        receivedBubbleArrow.gone
-        sentBubbleArrow.gone
-
+        receivedBubbleArrow.invisible
+        sentBubbleArrow.invisible
     } else {
-        receivedBubbleArrow.goneIfFalse(viewState.showReceivedBubbleArrow)
-        sentBubbleArrow.goneIfFalse(viewState.showSentBubbleArrow)
+        receivedBubbleArrow.invisibleIfFalse(viewState.showReceivedBubbleArrow)
+        sentBubbleArrow.invisibleIfFalse(viewState.showSentBubbleArrow)
 
         includeMessageHolderBubble.root.apply {
             visible
@@ -397,6 +403,9 @@ internal fun LayoutMessageHolderBinding.setBubbleBackground(
                     /* will never make it here as this is already checked for */
                     null
                 }
+                else -> {
+                    null
+                }
             }
 
             resId?.let { setBackgroundResource(it) }
@@ -404,45 +413,60 @@ internal fun LayoutMessageHolderBinding.setBubbleBackground(
     }
 
     // Set background spacing
-    if (viewState.background is BubbleBackground.Gone && viewState.background.setSpacingEqual) {
-
-        val defaultMargins = root
-            .context
-            .resources
-            .getDimensionPixelSize(common_R.dimen.default_layout_margin)
-
-        spaceMessageHolderLeft.updateLayoutParams { width = defaultMargins }
-        spaceMessageHolderRight.updateLayoutParams { width = defaultMargins }
-
-    } else {
+    if (viewState.background !is BubbleBackground.Gone) {
         @Exhaustive
         when (viewState) {
             is MessageHolderViewState.Received -> {
-                val avatarImageSpace = root
-                    .context
-                    .resources
-                    .getDimensionPixelSize(R.dimen.message_holder_space_width_left)
-
-                spaceMessageHolderLeft.updateLayoutParams {
-                    width = avatarImageSpace
-                }
-                spaceMessageHolderRight.updateLayoutParams {
-                    width = (holderWidth.value * BubbleBackground.SPACE_WIDTH_MULTIPLE).toInt() - (avatarImageSpace / 2)
+                includeMessageHolderBubble.root.updateLayoutParams<ConstraintLayout.LayoutParams> {
+                    startToEnd = receivedBubbleArrow.id
+                    endToStart = -1
                 }
             }
             is MessageHolderViewState.Sent -> {
-                spaceMessageHolderLeft.updateLayoutParams {
-                    width = (holderWidth.value * BubbleBackground.SPACE_WIDTH_MULTIPLE).toInt()
-                }
-                spaceMessageHolderRight.updateLayoutParams {
-                    width = root
-                        .context
-                        .resources
-                        .getDimensionPixelSize(R.dimen.message_holder_space_width_right)
+                includeMessageHolderBubble.root.updateLayoutParams<ConstraintLayout.LayoutParams> {
+                    startToEnd = -1
+                    endToStart = sentBubbleArrow.id
                 }
             }
         }
     }
+}
+
+@MainThread
+internal fun LayoutMessageHolderBinding.setViewsFixedWidth(
+    viewState: MessageHolderViewState,
+    holderWidth: Px,
+) {
+    val viewsFixedMinWidth = root.context.resources
+        .getDimensionPixelSize(R.dimen.message_views_fixed_min_width)
+    val viewsFixedWidth = (viewsFixedMinWidth.toDouble()
+        .coerceAtLeast(holderWidth.value * 0.7)).toInt()
+
+    includeMessageHolderBubble.apply {
+        textViewPaidMessageText.maxWidth = viewsFixedWidth
+        textViewMessageText.maxWidth = viewsFixedWidth
+
+        includePaidMessageSentStatusDetails.root.updateLayoutParams { width = viewsFixedWidth }
+        includePaidMessageReceivedDetailsHolder.root.updateLayoutParams { width = viewsFixedWidth }
+
+        includeMessageReply.root.updateLayoutParams { width = viewsFixedWidth }
+
+        includeMessageTypeDirectPayment.root.updateLayoutParams { width = viewsFixedWidth }
+        includeMessageTypeImageAttachment.root.updateLayoutParams { width = viewsFixedWidth }
+        includeMessageTypeFileAttachment.root.updateLayoutParams { width = viewsFixedWidth }
+        includeMessageTypeAudioAttachment.root.updateLayoutParams { width = viewsFixedWidth }
+        includeMessageTypeVideoAttachment.root.updateLayoutParams { width = viewsFixedWidth }
+        includeMessageTypeCallInvite.root.updateLayoutParams { width = viewsFixedWidth }
+        includeMessageTypeInvoice.root.updateLayoutParams { width = viewsFixedWidth }
+        includeMessageTypeBotResponse.root.updateLayoutParams { width = viewsFixedWidth }
+        includeMessageTypeBoost.root.updateLayoutParams { width = viewsFixedWidth }
+
+        includeMessageLinkPreviewContact.root.updateLayoutParams { width = viewsFixedWidth }
+        includeMessageLinkPreviewTribe.root.updateLayoutParams { width = viewsFixedWidth }
+        includeMessageLinkPreviewUrl.root.updateLayoutParams { width = viewsFixedWidth }
+    }
+
+    viewState.viewsWidthSet = true
 }
 
 @MainThread
@@ -458,7 +482,7 @@ internal inline fun LayoutMessageHolderBinding.setStatusHeader(
         if (statusHeader == null) {
             root.gone
 
-            includeMessageHolderChatImageInitialHolder.root.gone
+            includeMessageHolderChatImageInitialHolder.root.invisible
         } else {
             root.visible
 
@@ -988,7 +1012,7 @@ internal inline fun LayoutMessageHolderBinding.setBubblePaidMessageSentStatusLay
                 PurchaseStatus.Denied -> {
                     R.string.purchase_status_label_paid_message_sent_status_denied
                 }
-                null -> {
+                else -> {
                     R.string.purchase_status_label_paid_message_sent_status_pending
                 }
             }

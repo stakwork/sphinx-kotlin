@@ -43,7 +43,7 @@ internal sealed class MessageHolderViewState(
     private val messageSenderName: (Message) -> String,
     private val accountOwner: () -> Contact,
     private val previewProvider: suspend (link: MessageLinkPreview) -> LayoutState.Bubble.ContainerThird.LinkPreview?,
-    private val paidTextAttachmentContentProvider: suspend (message: Message) -> LayoutState.Bubble.ContainerThird.Message?
+    private val paidTextAttachmentContentProvider: suspend (message: Message) -> LayoutState.Bubble.ContainerThird.Message?,
 ) {
 
     companion object {
@@ -56,6 +56,8 @@ internal sealed class MessageHolderViewState(
             )
         }
     }
+
+    var viewsWidthSet: Boolean = false
 
     val unsupportedMessageType: LayoutState.Bubble.ContainerThird.UnsupportedMessageType? by lazy(LazyThreadSafetyMode.NONE) {
         if (
