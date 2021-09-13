@@ -4,7 +4,6 @@ import android.graphics.Color
 import android.media.MediaPlayer
 import android.view.Gravity
 import android.widget.ImageView
-import android.widget.TextView
 import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
 import androidx.annotation.MainThread
@@ -15,7 +14,6 @@ import app.cash.exhaustive.Exhaustive
 import chat.sphinx.chat_common.R
 import chat.sphinx.chat_common.databinding.LayoutMessageHolderBinding
 import chat.sphinx.chat_common.databinding.LayoutMessageTypeAttachmentAudioBinding
-import chat.sphinx.chat_common.model.MessageLinkPreview
 import chat.sphinx.chat_common.model.NodeDescriptor
 import chat.sphinx.chat_common.model.TribeLink
 import chat.sphinx.chat_common.model.UnspecifiedUrl
@@ -36,7 +34,6 @@ import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.resources.*
 import chat.sphinx.wrapper_chat.ChatType
 import chat.sphinx.wrapper_common.lightning.*
-import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_meme_server.headerKey
 import chat.sphinx.wrapper_meme_server.headerValue
 import chat.sphinx.wrapper_message.*
@@ -210,17 +207,23 @@ internal fun LayoutMessageHolderBinding.setView(
                             textViewAttachmentAudioFailure.visible
                         } else {
                             if (messageMediaPlayer.filePath == filePath) {
-                                // The messageMediaPlayer is playing this specific file
+                                // The messageMediaPlayer has loaded this specific file
                                 seekBarAttachmentAudio.max = messageMediaPlayer.duration
                                 seekBarAttachmentAudio.progress = messageMediaPlayer.currentPosition
                                 textViewAttachmentAudioRemainingDuration.text = messageMediaPlayer.duration.toLong().toTimestamp()
                                 progressBarAttachmentAudioFileLoading.gone
                                 textViewAttachmentPlayPauseButton.visible
 
-                                messageMediaPlayer.initPlayProgressInfoUpdateWithTimer(
-                                    seekBarAttachmentAudio.progress,
-                                    onPlayProgressInfoUpdateListener
-                                )
+                                if (messageMediaPlayer.isPlaying) {
+                                    textViewAttachmentPlayPauseButton.text = getString(R.string.material_icon_name_pause_button)
+                                    messageMediaPlayer.initPlayProgressInfoUpdateWithTimer(
+                                        seekBarAttachmentAudio.progress,
+                                        onPlayProgressInfoUpdateListener
+                                    )
+                                } else {
+                                    textViewAttachmentPlayPauseButton.text = getString(R.string.material_icon_name_play_button)
+                                }
+
                             } else {
                                 // Load the audio file and forget it
                                 MediaPlayer().apply {
