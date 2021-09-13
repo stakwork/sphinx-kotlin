@@ -2,12 +2,11 @@ package chat.sphinx.chat_common.util
 
 import android.media.MediaPlayer
 import android.os.CountDownTimer
-import chat.sphinx.chat_common.databinding.LayoutMessageTypeAttachmentAudioBinding
-import kotlinx.coroutines.CoroutineScope
 
 class MessageMediaPlayer: MediaPlayer() {
     var filePath: String? = null
-    var countDownTimer: CountDownTimer? = null
+
+    private var countDownTimer: CountDownTimer? = null
 
     fun load(filePath: String) {
         this.filePath = filePath
@@ -19,20 +18,40 @@ class MessageMediaPlayer: MediaPlayer() {
 
     override fun reset() {
         super.reset()
-        countDownTimer?.cancel()
-        // TODO: Reset the UI as well...
+
+        cancelCountDownTimer()
     }
-    companion object {
-        fun setBubbleAudioAttachment(
-            lifecycleScope: CoroutineScope,
-            mediaMessageTypeAttachmentAudioBinding: LayoutMessageTypeAttachmentAudioBinding,
-            layoutMessageAudioAttachment: LayoutMessageTypeAttachmentAudioBinding,
-            audioFilePath: String
-        ) {
 
-            layoutMessageAudioAttachment.apply {
+    override fun pause() {
+        super.pause()
 
+        cancelCountDownTimer()
+    }
+
+    fun initPlayProgressInfoUpdateWithTimer(progress: Int, onPlayProgressInfoUpdateListener: OnPlayProgressInfoUpdateListener) {
+        cancelCountDownTimer()
+
+        val remainingTime = duration - progress
+        countDownTimer = object: CountDownTimer(remainingTime.toLong(), 100) {
+            override fun onTick(millisUntilFinished: Long) {
+                onPlayProgressInfoUpdateListener.onPlayProgressUpdate(millisUntilFinished)
+            }
+
+            override fun onFinish() {
+                onPlayProgressInfoUpdateListener.onFinish()
             }
         }
+        countDownTimer?.start()
+    }
+
+    private fun cancelCountDownTimer() {
+        countDownTimer?.cancel()
+        countDownTimer = null
+    }
+
+    interface OnPlayProgressInfoUpdateListener  {
+        fun onPlayProgressUpdate(millisUntilFinished: Long)
+
+        fun onFinish()
     }
 }

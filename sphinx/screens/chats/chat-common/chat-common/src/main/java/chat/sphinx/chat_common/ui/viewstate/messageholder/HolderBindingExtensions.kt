@@ -2,7 +2,6 @@ package chat.sphinx.chat_common.ui.viewstate.messageholder
 
 import android.graphics.Color
 import android.media.MediaPlayer
-import android.os.CountDownTimer
 import android.view.Gravity
 import android.widget.ImageView
 import androidx.annotation.ColorRes
@@ -169,6 +168,23 @@ internal fun LayoutMessageHolderBinding.setView(
             setBubbleAudioAttachment(viewState.bubbleAudioAttachment) { layoutMessageAudioAttachment, url, media ->
                 lifecycleScope.launch(dispatchers.mainImmediate) {
                     layoutMessageAudioAttachment.apply {
+                        val onPlayProgressInfoUpdateListener = object: MessageMediaPlayer.OnPlayProgressInfoUpdateListener {
+                            override fun onPlayProgressUpdate(millisUntilFinished: Long) {
+                                lifecycleScope.launch(dispatchers.mainImmediate) {
+                                    textViewAttachmentAudioRemainingDuration.text = millisUntilFinished.toTimestamp()
+                                    seekBarAttachmentAudio.progress = messageMediaPlayer.currentPosition
+                                }
+                            }
+
+                            override fun onFinish() {
+                                lifecycleScope.launch(dispatchers.mainImmediate) {
+                                    textViewAttachmentAudioRemainingDuration.text = messageMediaPlayer.duration.toLong().toTimestamp()
+                                    seekBarAttachmentAudio.progress = 0
+                                }
+                            }
+
+                        }
+
                         val filePath: String? = media?.localFile?.absolutePath ?: media?.retrieveRemoteMediaInputStream(
                                 url,
                                 memeServerTokenHandler,
@@ -197,23 +213,10 @@ internal fun LayoutMessageHolderBinding.setView(
                                 progressBarAttachmentAudioFileLoading.gone
                                 textViewAttachmentPlayPauseButton.visible
 
-                                val remainingTime = messageMediaPlayer.duration - seekBarAttachmentAudio.progress
-                                messageMediaPlayer.countDownTimer = object: CountDownTimer(remainingTime.toLong(), 100) {
-                                    override fun onTick(millisUntilFinished: Long) {
-                                        lifecycleScope.launch(dispatchers.mainImmediate) {
-                                            textViewAttachmentAudioRemainingDuration.text = millisUntilFinished.toTimestamp()
-                                            seekBarAttachmentAudio.progress = messageMediaPlayer.currentPosition
-                                        }
-                                    }
-
-                                    override fun onFinish() {
-                                        lifecycleScope.launch(dispatchers.mainImmediate) {
-                                            textViewAttachmentAudioRemainingDuration.text = messageMediaPlayer.duration.toLong().toTimestamp()
-                                            seekBarAttachmentAudio.progress = 0
-                                        }
-                                    }
-                                }
-                                messageMediaPlayer.countDownTimer?.start()
+                                messageMediaPlayer.initPlayProgressInfoUpdateWithTimer(
+                                    seekBarAttachmentAudio.progress,
+                                    onPlayProgressInfoUpdateListener
+                                )
                             } else {
                                 // Load the audio file and forget it
                                 MediaPlayer().apply {
@@ -222,7 +225,6 @@ internal fun LayoutMessageHolderBinding.setView(
                                             filePath
                                         )
                                         setOnPreparedListener {
-
                                             seekBarAttachmentAudio.max = duration
                                             textViewAttachmentAudioRemainingDuration.text = duration.toLong().toTimestamp()
                                             progressBarAttachmentAudioFileLoading.gone
@@ -288,29 +290,13 @@ internal fun LayoutMessageHolderBinding.setView(
                                 if (messageMediaPlayer.isPlaying) {
                                     messageMediaPlayer.pause()
                                     textViewAttachmentPlayPauseButton.text = getString(R.string.material_icon_name_play_button)
-                                    messageMediaPlayer.countDownTimer?.cancel()
-                                    messageMediaPlayer.countDownTimer = null
                                 } else {
-                                    messageMediaPlayer.start()
                                     textViewAttachmentPlayPauseButton.text = getString(R.string.material_icon_name_pause_button)
-                                    val remainingTime = messageMediaPlayer.duration - seekBarAttachmentAudio.progress
-                                    messageMediaPlayer.countDownTimer = object: CountDownTimer(remainingTime.toLong(), 100) {
-                                        override fun onTick(millisUntilFinished: Long) {
-                                            lifecycleScope.launch(dispatchers.mainImmediate) {
-                                                textViewAttachmentAudioRemainingDuration.text = millisUntilFinished.toTimestamp()
-                                                seekBarAttachmentAudio.progress = messageMediaPlayer.currentPosition
-                                            }
-                                        }
-
-                                        override fun onFinish() {
-                                            lifecycleScope.launch(dispatchers.mainImmediate) {
-                                                textViewAttachmentPlayPauseButton.text = getString(R.string.material_icon_name_play_button)
-                                                textViewAttachmentAudioRemainingDuration.text = messageMediaPlayer.duration.toLong().toTimestamp()
-                                                seekBarAttachmentAudio.progress = 0
-                                            }
-                                        }
-                                    }
-                                    messageMediaPlayer.countDownTimer?.start()
+                                    messageMediaPlayer.start()
+                                    messageMediaPlayer.initPlayProgressInfoUpdateWithTimer(
+                                        seekBarAttachmentAudio.progress,
+                                        onPlayProgressInfoUpdateListener
+                                    )
                                 }
                             }
                         }
