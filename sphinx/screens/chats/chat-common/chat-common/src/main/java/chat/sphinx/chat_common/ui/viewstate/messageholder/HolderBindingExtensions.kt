@@ -4,6 +4,7 @@ import android.graphics.Color
 import android.media.MediaPlayer
 import android.view.Gravity
 import android.widget.ImageView
+import android.widget.TextView
 import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
 import androidx.annotation.MainThread
@@ -14,6 +15,7 @@ import app.cash.exhaustive.Exhaustive
 import chat.sphinx.chat_common.R
 import chat.sphinx.chat_common.databinding.LayoutMessageHolderBinding
 import chat.sphinx.chat_common.databinding.LayoutMessageTypeAttachmentAudioBinding
+import chat.sphinx.chat_common.model.MessageLinkPreview
 import chat.sphinx.chat_common.model.NodeDescriptor
 import chat.sphinx.chat_common.model.TribeLink
 import chat.sphinx.chat_common.model.UnspecifiedUrl
@@ -34,6 +36,7 @@ import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.resources.*
 import chat.sphinx.wrapper_chat.ChatType
 import chat.sphinx.wrapper_common.lightning.*
+import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_meme_server.headerKey
 import chat.sphinx.wrapper_meme_server.headerValue
 import chat.sphinx.wrapper_message.*
@@ -51,6 +54,7 @@ import kotlinx.coroutines.launch
 import java.io.File
 import java.io.IOException
 import chat.sphinx.resources.R as common_R
+
 
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
@@ -313,6 +317,13 @@ internal fun LayoutMessageHolderBinding.setView(
             }
             setUnsupportedMessageTypeLayout(viewState.unsupportedMessageType)
             setBubbleMessageLayout(viewState.bubbleMessage, onSphinxInteractionListener)
+            setBubblePaidMessageLayout(
+                dispatchers,
+                holderJobs,
+                lifecycleScope,
+                viewState,
+                onSphinxInteractionListener
+            )
             setBubbleMessageLinkPreviewLayout(
                 dispatchers,
                 holderJobs,
@@ -609,8 +620,12 @@ internal inline fun LayoutMessageHolderBinding.setStatusHeader(
     includeMessageStatusHeader.apply {
         if (statusHeader == null) {
             root.gone
+
+            includeMessageHolderChatImageInitialHolder.root.gone
         } else {
             root.visible
+
+            includeMessageHolderChatImageInitialHolder.root.visible
 
             textViewMessageStatusReceivedSenderName.apply {
                 statusHeader.senderName?.let { name ->
@@ -686,11 +701,66 @@ internal inline fun LayoutMessageHolderBinding.setBubbleMessageLayout(
         if (message == null) {
             gone
         } else {
+            includeMessageHolderBubble.textViewPaidMessageText.gone
+
             visible
             text = message.text
 
             if (onSphinxInteractionListener != null) {
                 SphinxLinkify.addLinks(this, SphinxLinkify.ALL, onSphinxInteractionListener)
+            }
+        }
+    }
+}
+
+@MainThread
+@Suppress("NOTHING_TO_INLINE")
+internal inline fun LayoutMessageHolderBinding.setBubblePaidMessageLayout(
+    dispatchers: CoroutineDispatchers,
+    holderJobs: ArrayList<Job>,
+    lifecycleScope: CoroutineScope,
+    viewState: MessageHolderViewState,
+    onSphinxInteractionListener: SphinxUrlSpan.OnInteractionListener?
+) {
+    includeMessageHolderBubble.textViewPaidMessageText.apply {
+        val paidMessageViewStats = viewState.bubblePaidMessage
+
+        if (paidMessageViewStats == null) {
+            gone
+        } else {
+            includeMessageHolderBubble.textViewMessageText.gone
+
+            visible
+
+            text = if (paidMessageViewStats.showSent) {
+                getString(R.string.paid_message_loading)
+            } else {
+                when (paidMessageViewStats.purchaseStatus) {
+                    is PurchaseStatus.Pending -> {
+                        getString(R.string.paid_message_pay_to_unlock)
+                    }
+                    is PurchaseStatus.Processing -> {
+                        getString(R.string.paid_message_loading)
+                    }
+                    is PurchaseStatus.Denied -> {
+                        getString(R.string.paid_message_unable_to_load)
+                    }
+                    is PurchaseStatus.Accepted -> {
+                        getString(R.string.paid_message_loading)
+                    }
+                    else -> {
+                        getString(R.string.paid_message_loading)
+                    }
+                }
+            }
+
+            lifecycleScope.launch(dispatchers.mainImmediate) {
+                setBubbleMessageLayout(
+                    viewState.retrievePaidTextMessageContent(),
+                    onSphinxInteractionListener
+                )
+            }.let { job ->
+                holderJobs.add(job)
             }
         }
     }
@@ -1106,8 +1176,12 @@ internal inline fun LayoutMessageHolderBinding.setBubbleImageAttachment(
 
             if (imageAttachment.showPaidOverlay) {
                 layoutConstraintPaidImageOverlay.visible
+
+                imageViewAttachmentImage.gone
             } else {
                 layoutConstraintPaidImageOverlay.gone
+
+                imageViewAttachmentImage.visible
 
                 loadImage(imageViewAttachmentImage, imageAttachment.url, imageAttachment.media)
             }

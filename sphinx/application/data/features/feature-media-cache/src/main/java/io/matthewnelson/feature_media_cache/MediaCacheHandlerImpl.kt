@@ -33,12 +33,14 @@ class MediaCacheHandlerImpl(
         const val AUDIO_CACHE_DIR = "sphinx_audio_cache"
         const val IMAGE_CACHE_DIR = "sphinx_image_cache"
         const val VIDEO_CACHE_DIR = "sphinx_video_cache"
+        const val PAID_TEXT_CACHE_DIR = "sphinx_paid_text_cache"
 
         const val DATE_FORMAT = "yyy_MM_dd_HH_mm_ss_SSS"
 
         const val AUD = "AUD"
         const val IMG = "IMG"
         const val VID = "VID"
+        const val TXT = "TXT"
 
         private val cacheDirLock = Object()
     }
@@ -61,6 +63,12 @@ class MediaCacheHandlerImpl(
         }
     }
 
+    private val paidTextCache: File by lazy {
+        File(cacheDir, PAID_TEXT_CACHE_DIR).also {
+            it.mkdirs()
+        }
+    }
+
     override fun createAudioFile(extension: String): File =
         createFileImpl(audioCache, AUD, extension)
 
@@ -69,6 +77,9 @@ class MediaCacheHandlerImpl(
 
     override fun createVideoFile(extension: String): File =
         createFileImpl(videoCache, VID, extension)
+
+    override fun createPaidTextFile(extension: String): File =
+        createFileImpl(paidTextCache, TXT, extension)
 
     private fun createFileImpl(cacheDir: File, prefix: String, extension: String): File {
         if (!cacheDir.exists()) {
