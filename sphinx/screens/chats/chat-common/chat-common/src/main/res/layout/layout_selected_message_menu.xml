@@ -61,22 +61,82 @@
         android:layout_height="3.5dp"
         app:layout_constraintBottom_toBottomOf="parent" />
 
-    <androidx.appcompat.widget.AppCompatImageView
-        android:id="@+id/image_view_selected_message_menu_arrow_top"
-        android:layout_width="8dp"
-        android:layout_height="5dp"
-        android:background="@drawable/selected_received_message_top_arrow"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_selected_message_menu_arrow_top_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
+        app:layout_constraintTop_toTopOf="parent">
 
-    <androidx.appcompat.widget.AppCompatImageView
-        android:id="@+id/image_view_selected_message_menu_arrow_bottom"
-        android:layout_width="8dp"
-        android:layout_height="5dp"
-        android:background="@drawable/selected_received_message_bottom_arrow"
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/image_view_selected_message_menu_arrow_top_center"
+            android:layout_width="@dimen/selected_message_menu_arrow_width"
+            android:layout_height="@dimen/selected_message_menu_arrow_height"
+            android:background="@drawable/selected_received_message_top_arrow"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/image_view_selected_message_menu_arrow_top_right"
+            android:layout_width="@dimen/selected_message_menu_arrow_width"
+            android:layout_height="@dimen/selected_message_menu_arrow_height"
+            android:layout_marginRight="@dimen/selected_message_menu_arrow_right_end_margin"
+            android:background="@drawable/selected_received_message_top_arrow"
+            android:visibility="visible"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/image_view_selected_message_menu_arrow_top_left"
+            android:layout_width="@dimen/selected_message_menu_arrow_width"
+            android:layout_height="@dimen/selected_message_menu_arrow_height"
+            android:layout_marginLeft="@dimen/selected_message_menu_arrow_left_start_margin"
+            android:background="@drawable/selected_received_message_top_arrow"
+            android:visibility="visible"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_selected_message_menu_arrow_bottom_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"/>
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/image_view_selected_message_menu_arrow_bottom_center"
+            android:layout_width="@dimen/selected_message_menu_arrow_width"
+            android:layout_height="@dimen/selected_message_menu_arrow_height"
+            android:background="@drawable/selected_received_message_bottom_arrow"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/image_view_selected_message_menu_arrow_bottom_right"
+            android:layout_width="@dimen/selected_message_menu_arrow_width"
+            android:layout_height="@dimen/selected_message_menu_arrow_height"
+            android:layout_marginRight="@dimen/selected_message_menu_arrow_right_end_margin"
+            android:background="@drawable/selected_received_message_bottom_arrow"
+            android:visibility="visible"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/image_view_selected_message_menu_arrow_bottom_left"
+            android:layout_width="@dimen/selected_message_menu_arrow_width"
+            android:layout_height="@dimen/selected_message_menu_arrow_height"
+            android:layout_marginLeft="@dimen/selected_message_menu_arrow_left_start_margin"
+            android:background="@drawable/selected_received_message_bottom_arrow"
+            android:visibility="visible"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
