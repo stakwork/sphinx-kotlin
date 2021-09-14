@@ -6,7 +6,6 @@
     android:layout_height="@dimen/message_type_file_attachment_height"
     android:visibility="gone"
     tools:layout_height="@dimen/message_type_file_attachment_height"
-    tools:layout_width="300dp"
     tools:visibility="visible">
 
 

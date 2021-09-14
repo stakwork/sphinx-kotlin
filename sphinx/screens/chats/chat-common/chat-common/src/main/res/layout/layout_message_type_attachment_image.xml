@@ -7,7 +7,6 @@
     android:minHeight="@dimen/message_type_image_attachment_min_height"
     android:padding="2dp"
     android:visibility="gone"
-    tools:layout_width="300dp"
     tools:visibility="visible">
 
     <androidx.constraintlayout.widget.ConstraintLayout

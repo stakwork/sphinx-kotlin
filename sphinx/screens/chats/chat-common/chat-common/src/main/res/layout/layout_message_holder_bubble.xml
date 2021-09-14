@@ -17,7 +17,7 @@
         <include
             android:id="@+id/include_message_reply"
             layout="@layout/layout_message_reply"
-            android:layout_width="300dp"
+            android:layout_width="@dimen/message_views_fixed_min_width"
             android:layout_height="wrap_content"
             tools:visibility="visible" />
 
@@ -34,7 +34,7 @@
         <include
             android:id="@+id/include_paid_message_sent_status_details"
             layout="@layout/layout_paid_message_sent"
-            android:layout_width="300dp"
+            android:layout_width="@dimen/message_views_fixed_min_width"
             android:layout_height="wrap_content"
             tools:visibility="gone" />
 
@@ -42,24 +42,24 @@
         <include
             android:id="@+id/include_message_type_direct_payment"
             layout="@layout/layout_message_type_direct_payment"
-            android:layout_width="300dp"
+            android:layout_width="@dimen/message_views_fixed_min_width"
             android:layout_height="wrap_content"
-            tools:visibility="visible" />
+            tools:visibility="gone" />
 
         <!--  Image Attachment  -->
         <include
             android:id="@+id/include_message_type_image_attachment"
             layout="@layout/layout_message_type_attachment_image"
-            android:layout_width="300dp"
+            android:layout_width="@dimen/message_views_fixed_min_width"
             android:layout_height="wrap_content"
             app:layout_constraintTop_toBottomOf="@+id/include_message_type_direct_payment"
-            tools:visibility="visible" />
+            tools:visibility="gone" />
 
         <!--  File Attachment  -->
         <include
             android:id="@+id/include_message_type_file_attachment"
             layout="@layout/layout_message_type_attachment_file"
-            android:layout_width="300dp"
+            android:layout_width="@dimen/message_views_fixed_min_width"
             android:layout_height="wrap_content"
             tools:visibility="gone" />
 
@@ -67,16 +67,16 @@
         <include
             android:id="@+id/include_message_type_audio_attachment"
             layout="@layout/layout_message_type_attachment_audio"
-            android:layout_width="300dp"
+            android:layout_width="@dimen/message_views_fixed_min_width"
             android:layout_height="wrap_content"
-            tools:visibility="gone" />
+            tools:visibility="visible" />
 
 
         <!--  Video Attachment  -->
         <include
             android:id="@+id/include_message_type_video_attachment"
             layout="@layout/layout_message_type_attachment_video"
-            android:layout_width="300dp"
+            android:layout_width="@dimen/message_views_fixed_min_width"
             android:layout_height="wrap_content"
             tools:visibility="gone" />
 
@@ -85,7 +85,7 @@
         <include
             android:id="@+id/include_message_type_call_invite"
             layout="@layout/layout_message_type_call_invite"
-            android:layout_width="300dp"
+            android:layout_width="@dimen/message_views_fixed_min_width"
             android:layout_height="wrap_content"
             tools:visibility="gone" />
 
@@ -94,7 +94,7 @@
         <include
             android:id="@+id/include_message_type_invoice"
             layout="@layout/layout_message_type_invoice"
-            android:layout_width="300dp"
+            android:layout_width="@dimen/message_views_fixed_min_width"
             android:layout_height="wrap_content"
             tools:visibility="gone" />
 
@@ -110,7 +110,7 @@
         <include
             android:id="@+id/include_message_type_bot_response"
             layout="@layout/layout_message_type_bot_response"
-            android:layout_width="300dp"
+            android:layout_width="@dimen/message_views_fixed_min_width"
             android:layout_height="wrap_content"
             tools:visibility="gone" />
 
@@ -137,7 +137,7 @@
             style="@style/chat_message_body_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:maxWidth="300dp"
+            android:maxWidth="@dimen/message_views_fixed_min_width"
             android:paddingHorizontal="@dimen/default_layout_margin"
             android:paddingVertical="@dimen/default_inner_spacing_list_item_title"
             android:visibility="gone"
@@ -150,7 +150,7 @@
             android:id="@+id/text_view_paid_message_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:maxWidth="300dp"
+            android:maxWidth="@dimen/message_views_fixed_min_width"
             android:fontFamily="@font/roboto_italic"
             android:textSize="@dimen/chat_paid_message_notice_text_size"
             android:textColor="@color/textMessages"
@@ -166,7 +166,7 @@
         <include
             android:id="@+id/include_message_link_preview_contact"
             layout="@layout/layout_message_link_preview_contact"
-            android:layout_width="300dp"
+            android:layout_width="@dimen/message_views_fixed_min_width"
             android:layout_height="wrap_content"
             app:layout_constraintTop_toBottomOf="@+id/text_view_message_text"
             tools:visibility="gone" />
@@ -176,7 +176,7 @@
         <include
             android:id="@+id/include_message_link_preview_tribe"
             layout="@layout/layout_message_link_preview_tribe"
-            android:layout_width="300dp"
+            android:layout_width="@dimen/message_views_fixed_min_width"
             android:layout_height="wrap_content"
             app:layout_constraintTop_toBottomOf="@+id/text_view_message_text"
             tools:visibility="gone" />
@@ -185,7 +185,7 @@
         <include
             android:id="@+id/include_message_link_preview_url"
             layout="@layout/layout_message_link_preview_url"
-            android:layout_width="300dp"
+            android:layout_width="@dimen/message_views_fixed_min_width"
             android:layout_height="wrap_content"
             app:layout_constraintTop_toBottomOf="@+id/text_view_message_text"
             tools:visibility="visible" />
@@ -203,7 +203,7 @@
         <include
             android:id="@+id/include_message_type_boost"
             layout="@layout/layout_message_boost"
-            android:layout_width="300dp"
+            android:layout_width="@dimen/message_views_fixed_min_width"
             android:layout_height="wrap_content"
             app:layout_constraintTop_toTopOf="parent"
             tools:visibility="gone" />
@@ -212,7 +212,7 @@
         <include
             android:id="@+id/include_paid_message_received_details_holder"
             layout="@layout/layout_paid_message_received"
-            android:layout_width="300dp"
+            android:layout_width="@dimen/message_views_fixed_min_width"
             android:layout_height="@dimen/paid_attachment_view_height"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/include_message_type_boost"
