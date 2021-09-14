@@ -477,7 +477,6 @@ abstract class ChatFragment<
                 }
             }
         }
-//        selectedMessageHolderBinding.root.setBackgroundColor(ContextCompat.getColor(binding.root.context, R.color.badgeRed))
         selectedMessageHolderBinding.includeMessageHolderBubble.root.setOnClickListener {
             viewModel
         }
