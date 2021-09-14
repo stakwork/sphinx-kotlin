@@ -173,6 +173,7 @@ internal fun LayoutMessageHolderBinding.setView(
                             override fun onPlayProgressUpdate(millisUntilFinished: Long) {
                                 lifecycleScope.launch(dispatchers.mainImmediate) {
                                     textViewAttachmentAudioRemainingDuration.text = millisUntilFinished.toTimestamp()
+                                    textViewAttachmentPlayPauseButton.text = getString(R.string.material_icon_name_pause_button)
                                     seekBarAttachmentAudio.progress = messageMediaPlayer.currentPosition
                                 }
                             }
@@ -180,7 +181,11 @@ internal fun LayoutMessageHolderBinding.setView(
                             override fun onFinish() {
                                 lifecycleScope.launch(dispatchers.mainImmediate) {
                                     textViewAttachmentAudioRemainingDuration.text = messageMediaPlayer.duration.toLong().toTimestamp()
+                                    textViewAttachmentPlayPauseButton.text = getString(R.string.material_icon_name_play_button)
                                     seekBarAttachmentAudio.progress = 0
+
+                                    messageMediaPlayer.pause()
+                                    messageMediaPlayer.seekTo(0)
                                 }
                             }
 
@@ -216,6 +221,7 @@ internal fun LayoutMessageHolderBinding.setView(
 
                                 if (messageMediaPlayer.isPlaying) {
                                     textViewAttachmentPlayPauseButton.text = getString(R.string.material_icon_name_pause_button)
+
                                     messageMediaPlayer.initPlayProgressInfoUpdateWithTimer(
                                         seekBarAttachmentAudio.progress,
                                         onPlayProgressInfoUpdateListener
@@ -260,8 +266,8 @@ internal fun LayoutMessageHolderBinding.setView(
 
                             textViewAttachmentPlayPauseButton.setOnClickListener {
                                 if (messageMediaPlayer.filePath != filePath) {
+
                                     progressBarAttachmentAudioFileLoading.visible
-                                    textViewAttachmentPlayPauseButton.gone
                                     textViewAttachmentAudioFailure.gone
                                     messageMediaPlayer.reset()
 
@@ -309,14 +315,9 @@ internal fun LayoutMessageHolderBinding.setView(
                         }
 
                     }
-
-
                 }.let { job ->
                     holderJobs.add(job)
                 }
-
-
-
             }
             setUnsupportedMessageTypeLayout(viewState.unsupportedMessageType)
             setBubbleMessageLayout(viewState.bubbleMessage, onSphinxInteractionListener)
@@ -1203,6 +1204,8 @@ internal inline fun LayoutMessageHolderBinding.setBubbleAudioAttachment(
             root.gone
         } else {
             root.visible
+
+            seekBarAttachmentAudio.progress = 0
             progressBarAttachmentAudioFileLoading.visible
             textViewAttachmentPlayPauseButton.gone
             textViewAttachmentAudioFailure.gone

@@ -9,56 +9,64 @@
     tools:background="@color/body"
     tools:visibility="visible">
 
+    <SeekBar
+        android:id="@+id/seek_bar_attachment_audio"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:progressTint="@color/receivedIcon"
+        android:thumbTint="@color/receivedIcon"
+        android:layout_marginHorizontal="@dimen/audio_message_seek_bar_margin_horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:progress="20" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/layout_constraint_attachment_audio_play_button_group"
-        android:layout_width="50dp"
-        android:layout_height="62dp"
-        android:layout_marginStart="@dimen/default_layout_margin"
+        android:layout_width="@dimen/audio_button_play_pause_width"
+        android:layout_height="match_parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/seek_bar_attachment_audio"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintHorizontal_chainStyle="packed"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/text_view_attachment_audio_failure"
-            android:layout_width="@dimen/audio_button_play_pause_width"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center"
             android:fontFamily="@font/material_icons_regular"
             android:text="@string/material_icon_name_error"
             android:textColor="@color/badgeRed"
-            android:textSize="40sp"
+            android:textSize="@dimen/audio_button_play_pause_text_size"
             android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            tools:visibility="visible"/>
+            tools:visibility="gone"/>
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/text_view_attachment_play_pause_button"
             android:layout_width="@dimen/audio_button_play_pause_width"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:gravity="center"
             android:fontFamily="@font/material_icons_regular"
             android:text="@string/material_icon_name_play_button"
-            android:textColor="@color/primaryBlue"
-            android:textSize="40sp"
+            android:textColor="@color/text"
+            android:textSize="@dimen/audio_button_play_pause_text_size"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"  />
-
+            app:layout_constraintTop_toTopOf="parent"
+            tools:visibility="visible" />
 
         <ProgressBar
             android:id="@+id/progress_bar_attachment_audio_file_loading"
-            android:layout_width="@dimen/audio_button_play_pause_width"
-            android:layout_height="@dimen/audio_button_play_pause_width"
+            android:layout_width="@dimen/audio_message_progress_bar_xy"
+            android:layout_height="@dimen/audio_message_progress_bar_xy"
             android:indeterminate="true"
-            android:indeterminateTint="@color/primaryText"
+            android:indeterminateTint="@color/text"
             android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -68,33 +76,28 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <SeekBar
-        android:id="@+id/seek_bar_attachment_audio"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="@dimen/default_small_layout_margin"
-        android:progressTint="@color/receivedIcon"
-        android:thumbTint="@color/receivedIcon"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/text_view_attachment_audio_remaining_duration"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/layout_constraint_attachment_audio_play_button_group"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:progress="20" />
-
-    <TextView
-        android:id="@+id/text_view_attachment_audio_remaining_duration"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="@dimen/default_layout_margin"
-        android:fontFamily="@font/roboto_regular"
-        android:textSize="14sp"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_attachment_audio_progress"
+        android:layout_width="@dimen/audio_button_play_pause_width"
+        android:layout_height="match_parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/seek_bar_attachment_audio"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:text="21:00" />
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/text_view_attachment_audio_remaining_duration"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/roboto_regular"
+            android:textSize="@dimen/audio_button_duration_text_size"
+            android:textColor="@color/text"
+            android:text="00:00"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
