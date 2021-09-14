@@ -439,8 +439,12 @@ internal fun LayoutMessageHolderBinding.setViewsFixedWidth(
 ) {
     val viewsFixedMinWidth = root.context.resources
         .getDimensionPixelSize(R.dimen.message_views_fixed_min_width)
-    val viewsFixedWidth = (viewsFixedMinWidth.toDouble()
-        .coerceAtLeast(holderWidth.value * 0.7)).toInt()
+    val viewsFixedMaxWidth = root.context.resources
+        .getDimensionPixelSize(R.dimen.message_views_fixed_max_width)
+
+    var viewsFixedWidth:Int = (holderWidth.value * 0.7).toInt()
+    viewsFixedWidth = viewsFixedWidth.coerceAtLeast(viewsFixedMinWidth)
+    viewsFixedWidth = viewsFixedWidth.coerceAtMost(viewsFixedMaxWidth)
 
     includeMessageHolderBubble.apply {
         textViewPaidMessageText.maxWidth = viewsFixedWidth

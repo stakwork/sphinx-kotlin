@@ -6,7 +6,6 @@
     android:layout_height="wrap_content"
     android:visibility="gone"
     tools:background="@color/receivedMsgBG"
-    tools:layout_width="200dp"
     tools:padding="@dimen/default_layout_margin"
     tools:visibility="visible">
 

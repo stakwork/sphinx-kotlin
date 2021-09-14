@@ -72,6 +72,7 @@
 
     <dimen name="message_type_boost_min_width">150dp</dimen>
     <dimen name="message_views_fixed_min_width">200dp</dimen>
+    <dimen name="message_views_fixed_max_width">350dp</dimen>
 
     <!-- Images -->
     <dimen name="loading_image_progress_xy">50dp</dimen>
