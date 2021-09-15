@@ -933,7 +933,8 @@ abstract class ChatFragment<
                         }
 
                         selectedMessageHolderBinding.apply {
-                            root.y = viewState.holderYPos.value + viewState.statusHeaderHeight.value
+                            root.y = viewState.holderYPos.value
+
                             setView(
                                 lifecycleScope,
                                 holderJobs,
@@ -978,13 +979,11 @@ abstract class ChatFragment<
 
                                 this@menu.y = if (viewState.showMenuTop) {
                                     viewState.holderYPos.value -
-                                            (resources.getDimension(R.dimen.selected_message_menu_item_height) * (viewState.messageHolderViewState.selectionMenuItems?.size ?: 0)) +
-                                            viewState.statusHeaderHeight.value -
+                                            (resources.getDimension(R.dimen.selected_message_menu_item_height) * (viewState.messageHolderViewState.selectionMenuItems?.size ?: 0)) -
                                             Dp(10F).toPx(context).value
                                 } else {
                                     viewState.holderYPos.value          +
                                             viewState.bubbleHeight.value        +
-                                            viewState.statusHeaderHeight.value  +
                                             Dp(10F).toPx(context).value
                                 }
                                 val menuWidth = resources.getDimension(R.dimen.selected_message_menu_width)
