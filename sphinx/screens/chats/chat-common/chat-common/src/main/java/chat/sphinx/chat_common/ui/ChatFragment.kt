@@ -622,11 +622,12 @@ abstract class ChatFragment<
         }
     }
 
-    protected fun scrollToBottom(
+    private fun scrollToBottom(
         callback: () -> Unit,
         replyingToMessage: Boolean = false
     ) {
-        (recyclerView.adapter as MessageListAdapter<*>).scrollToBottomIfNeeded(callback, replyingToMessage)
+        ((recyclerView.adapter as ConcatAdapter).adapters.first() as MessageListAdapter<*>)
+            .scrollToBottomIfNeeded(callback, replyingToMessage)
     }
 
     override fun onStart() {
