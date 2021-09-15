@@ -446,8 +446,7 @@ internal fun LayoutMessageHolderBinding.setViewsFixedWidth(
         includePaidMessageReceivedDetailsHolder.root.updateLayoutParams { width = viewsFixedWidth }
 
         includeMessageReply.root.updateLayoutParams { width = viewsFixedWidth }
-
-        includeMessageTypeDirectPayment.root.updateLayoutParams { width = viewsFixedWidth }
+        
         includeMessageTypeImageAttachment.root.updateLayoutParams { width = viewsFixedWidth }
         includeMessageTypeFileAttachment.root.updateLayoutParams { width = viewsFixedWidth }
         includeMessageTypeAudioAttachment.root.updateLayoutParams { width = viewsFixedWidth }
