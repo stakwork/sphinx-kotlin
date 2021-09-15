@@ -36,8 +36,8 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/default_half_layout_margin"
-        app:layout_constraintEnd_toEndOf="@id/include_message_holder_bubble"
-        app:layout_constraintStart_toStartOf="@id/include_message_holder_bubble"
+        app:layout_constraintEnd_toStartOf="@+id/sent_bubble_arrow"
+        app:layout_constraintStart_toEndOf="@+id/received_bubble_arrow"
         app:layout_constraintTop_toTopOf="parent"
         tools:visibility="visible" />
 
@@ -49,6 +49,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:layout_width="@dimen/message_holder_space_width_left"
+        tools:layout_height="@dimen/message_holder_space_width_left"
         tools:visibility="visible" />
 
     <!-- width is programmatically set depending on sender -->
@@ -58,7 +59,8 @@
         android:layout_height="0dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:layout_width="80dp"
+        tools:layout_width="@dimen/message_holder_space_width_right"
+        tools:layout_height="@dimen/message_holder_space_width_right"
         tools:visibility="visible" />
 
 
@@ -86,8 +88,9 @@
         android:id="@+id/received_bubble_arrow"
         android:layout_width="4dp"
         android:layout_height="10dp"
+        android:layout_marginStart="40dp"
         android:src="@drawable/received_bubble_arrow"
-        app:layout_constraintEnd_toStartOf="@+id/include_message_holder_bubble"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/include_message_holder_bubble"
         tools:visibility="visible" />
 
@@ -96,7 +99,7 @@
         android:layout_width="6dp"
         android:layout_height="10dp"
         android:src="@drawable/sent_bubble_arrow"
-        app:layout_constraintStart_toEndOf="@+id/include_message_holder_bubble"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/include_message_holder_bubble"
         tools:visibility="visible" />
 

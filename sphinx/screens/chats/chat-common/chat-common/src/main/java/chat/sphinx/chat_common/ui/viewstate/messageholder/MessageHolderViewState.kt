@@ -107,6 +107,16 @@ internal sealed class MessageHolderViewState(
         }
     }
 
+    val bubbleOnlyMessage: LayoutState.Bubble.ContainerThird.Message? by lazy(LazyThreadSafetyMode.NONE) {
+        message.retrieveTextToShow()?.let { text ->
+            if (message.isOnlyTextMessage && text.isNotEmpty()) {
+                LayoutState.Bubble.ContainerThird.Message(text = text)
+            } else {
+                null
+            }
+        }
+    }
+
     val bubbleMessage: LayoutState.Bubble.ContainerThird.Message? by lazy(LazyThreadSafetyMode.NONE) {
         message.retrieveTextToShow()?.let { text ->
             if (text.isNotEmpty()) {
