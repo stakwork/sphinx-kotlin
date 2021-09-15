@@ -26,16 +26,19 @@ import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.wrapper_chat.*
+import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.util.getInitials
+import chat.sphinx.wrapper_contact.ContactAlias
 import chat.sphinx.wrapper_message.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_media_cache.MediaCacheHandler
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.annotation.meta.Exhaustive
@@ -113,7 +116,7 @@ internal class ChatTribeViewModel @Inject constructor(
         replay = 1,
     )
 
-    override suspend fun getChatNameIfNull(): ChatName? {
+    override suspend fun getChatInfo(): Triple<ChatName?, PhotoUrl?, String>? {
         return null
     }
 

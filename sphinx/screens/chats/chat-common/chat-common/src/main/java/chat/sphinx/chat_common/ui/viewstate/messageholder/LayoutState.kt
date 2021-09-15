@@ -156,7 +156,7 @@ internal sealed class LayoutState private constructor() {
 
             data class Boost(
                 private val totalAmount: Sat,
-                val senderPics: Set<BoostReactionImageHolder>
+                val senders: Set<BoostSenderHolder>
             ): ContainerFourth() {
                 val amountText: String
                     get() = totalAmount.asFormattedString()
@@ -166,8 +166,8 @@ internal sealed class LayoutState private constructor() {
 
                 // will be gone if null is returned
                 val numberUniqueBoosters: Int?
-                    get() = if (senderPics.size > 1) {
-                        senderPics.size
+                    get() = if (senders.size > 1) {
+                        senders.size
                     } else {
                         null
                     }
@@ -188,12 +188,8 @@ internal sealed class LayoutState private constructor() {
     }
 }
 
-// TODO: TEMPORARY!!! until Initial holder can be refactored...
-
-@JvmInline
-value class SenderPhotoUrl(val value: String): BoostReactionImageHolder
-
-@JvmInline
-value class SenderInitials(val value: String): BoostReactionImageHolder
-
-sealed interface BoostReactionImageHolder
+data class BoostSenderHolder(
+    val photoUrl: PhotoUrl?,
+    val alias: ContactAlias?,
+    val colorKey: String,
+)
