@@ -102,11 +102,8 @@ internal fun LayoutMessageHolderBinding.setView(
             lifecycleScope,
             userColorsHelper,
         )
-        setBubbleBackground(viewState, recyclerViewWidth)
-
-        if (!viewState.viewsWidthSet) {
-            setViewsFixedWidth(viewState, recyclerViewWidth)
-        }
+        setBubbleBackground(viewState)
+        setViewsFixedWidth(recyclerViewWidth)
 
         setDeletedMessageLayout(viewState.deletedMessage)
         setGroupActionIndicatorLayout(viewState.groupActionIndicator)
@@ -362,7 +359,6 @@ internal inline fun LayoutMessageHolderBinding.setBubbleDirectPaymentLayout(
 @MainThread
 internal fun LayoutMessageHolderBinding.setBubbleBackground(
     viewState: MessageHolderViewState,
-    holderWidth: Px,
 ) {
     if (viewState.background is BubbleBackground.Gone) {
         includeMessageHolderBubble.root.gone
@@ -403,9 +399,6 @@ internal fun LayoutMessageHolderBinding.setBubbleBackground(
                     /* will never make it here as this is already checked for */
                     null
                 }
-                else -> {
-                    null
-                }
             }
 
             resId?.let { setBackgroundResource(it) }
@@ -434,7 +427,6 @@ internal fun LayoutMessageHolderBinding.setBubbleBackground(
 
 @MainThread
 internal fun LayoutMessageHolderBinding.setViewsFixedWidth(
-    viewState: MessageHolderViewState,
     holderWidth: Px,
 ) {
     val viewsFixedMinWidth = root.context.resources
@@ -463,14 +455,11 @@ internal fun LayoutMessageHolderBinding.setViewsFixedWidth(
         includeMessageTypeCallInvite.root.updateLayoutParams { width = viewsFixedWidth }
         includeMessageTypeInvoice.root.updateLayoutParams { width = viewsFixedWidth }
         includeMessageTypeBotResponse.root.updateLayoutParams { width = viewsFixedWidth }
-        includeMessageTypeBoost.root.updateLayoutParams { width = viewsFixedWidth }
 
         includeMessageLinkPreviewContact.root.updateLayoutParams { width = viewsFixedWidth }
         includeMessageLinkPreviewTribe.root.updateLayoutParams { width = viewsFixedWidth }
         includeMessageLinkPreviewUrl.root.updateLayoutParams { width = viewsFixedWidth }
     }
-
-    viewState.viewsWidthSet = true
 }
 
 @MainThread

@@ -939,11 +939,6 @@ abstract class ChatFragment<
                         selectedMessageHolderBinding.apply {
                             root.y = viewState.holderYPos.value
 
-                            setViewsFixedWidth(
-                                viewState.messageHolderViewState,
-                                viewState.recyclerViewWidth
-                            )
-
                             setView(
                                 lifecycleScope,
                                 holderJobs,

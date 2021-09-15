@@ -2,7 +2,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
+    android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:paddingVertical="@dimen/default_list_row_padding_vertical"
     android:paddingStart="@dimen/default_list_row_padding_vertical"
@@ -24,13 +24,14 @@
     <include
         android:id="@+id/include_boost_amount_text_group"
         layout="@layout/layout_text_sats_amount"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="0dp"
         android:layout_marginHorizontal="@dimen/default_half_layout_margin"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/include_boost_reactions_group"
         app:layout_constraintStart_toEndOf="@+id/image_view_boost_message_icon"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="2 000"/>
 
     <!-- Boost Reactions -->
     <include

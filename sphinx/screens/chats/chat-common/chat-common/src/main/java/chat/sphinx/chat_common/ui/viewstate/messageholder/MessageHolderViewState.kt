@@ -57,8 +57,6 @@ internal sealed class MessageHolderViewState(
         }
     }
 
-    var viewsWidthSet: Boolean = false
-
     val unsupportedMessageType: LayoutState.Bubble.ContainerThird.UnsupportedMessageType? by lazy(LazyThreadSafetyMode.NONE) {
         if (
             unsupportedMessageTypes.contains(message.type) &&

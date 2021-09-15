@@ -203,10 +203,10 @@
         <include
             android:id="@+id/include_message_type_boost"
             layout="@layout/layout_message_boost"
-            android:layout_width="@dimen/message_views_fixed_max_width"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:layout_constraintTop_toTopOf="parent"
-            tools:visibility="gone" />
+            tools:visibility="visible" />
 
         <!-- Paid Message Information -->
         <include
