@@ -974,13 +974,13 @@ abstract class ChatFragment<
                                 spaceSelectedMessageMenuArrowBottom.goneIfFalse(viewState.showMenuTop)
                                 layoutConstraintSelectedMessageMenuArrowBottomContainer.goneIfFalse(viewState.showMenuTop)
 
-                                imageViewSelectedMessageMenuArrowBottomCenter.goneIfFalse(false)
-                                imageViewSelectedMessageMenuArrowBottomRight.goneIfFalse(false)
-                                imageViewSelectedMessageMenuArrowBottomLeft.goneIfFalse(false)
+                                imageViewSelectedMessageMenuArrowBottomCenter.gone
+                                imageViewSelectedMessageMenuArrowBottomRight.gone
+                                imageViewSelectedMessageMenuArrowBottomLeft.gone
 
-                                imageViewSelectedMessageMenuArrowTopCenter.goneIfFalse(false)
-                                imageViewSelectedMessageMenuArrowTopRight.goneIfFalse(false)
-                                imageViewSelectedMessageMenuArrowTopLeft.goneIfFalse(false)
+                                imageViewSelectedMessageMenuArrowTopCenter.gone
+                                imageViewSelectedMessageMenuArrowTopRight.gone
+                                imageViewSelectedMessageMenuArrowTopLeft.gone
                             }
 
                             this@message.includeLayoutSelectedMessageMenu.apply menu@ {
