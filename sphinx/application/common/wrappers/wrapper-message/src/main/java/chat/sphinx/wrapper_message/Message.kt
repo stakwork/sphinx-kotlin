@@ -189,10 +189,6 @@ inline fun Message.shouldAvoidGrouping(): Boolean {
             type.isInvoice() || type.isPayment() || type.isGroupAction()
 }
 
-inline val Message.isOnlyTextMessage: Boolean
-    get() = type.isMessage() &&
-            reactions?.isEmpty() == true
-
 //Message Actions
 inline val Message.isBoostAllowed: Boolean
     get() = status.isReceived() &&

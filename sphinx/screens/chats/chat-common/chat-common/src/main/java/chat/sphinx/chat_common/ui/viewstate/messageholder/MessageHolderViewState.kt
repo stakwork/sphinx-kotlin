@@ -26,6 +26,12 @@ inline val Message.isCopyLinkAllowed: Boolean
         SphinxLinkify.SphinxPatterns.COPYABLE_LINKS.matcher(it).find()
     } ?: false
 
+inline val Message.shouldAdaptBubbleWidth: Boolean
+    get() = type.isMessage() &&
+            replyUUID == null &&
+            !isCopyLinkAllowed &&
+            !status.isDeleted()
+
 internal inline val MessageHolderViewState.isReceived: Boolean
     get() = this is MessageHolderViewState.Received
 
@@ -104,16 +110,6 @@ internal sealed class MessageHolderViewState(
             LayoutState.Bubble.ContainerSecond.DirectPayment(showSent = this is Sent, amount = message.amount)
         } else {
             null
-        }
-    }
-
-    val bubbleOnlyMessage: LayoutState.Bubble.ContainerThird.Message? by lazy(LazyThreadSafetyMode.NONE) {
-        message.retrieveTextToShow()?.let { text ->
-            if (message.isOnlyTextMessage && text.isNotEmpty()) {
-                LayoutState.Bubble.ContainerThird.Message(text = text)
-            } else {
-                null
-            }
         }
     }
 

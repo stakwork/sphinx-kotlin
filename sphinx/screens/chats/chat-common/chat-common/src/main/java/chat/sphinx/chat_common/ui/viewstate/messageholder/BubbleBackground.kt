@@ -3,7 +3,7 @@ package chat.sphinx.chat_common.ui.viewstate.messageholder
 internal sealed class BubbleBackground {
 
     companion object {
-        const val SPACE_WIDTH_MULTIPLE: Float = 0.3F
+        const val SPACE_WIDTH_MULTIPLE: Float = 0.15F
     }
 
     /**

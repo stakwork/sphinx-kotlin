@@ -1,9 +1,6 @@
 package chat.sphinx.chat_common.ui.viewstate.messageholder
 
 import android.graphics.Color
-import android.graphics.Rect
-import android.text.Layout
-import android.text.StaticLayout
 import android.view.Gravity
 import android.widget.ImageView
 import androidx.annotation.ColorRes
@@ -45,7 +42,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import java.io.File
-import kotlin.math.floor
+import java.util.Collections.max
 import chat.sphinx.resources.R as common_R
 
 
@@ -401,11 +398,8 @@ internal fun LayoutMessageHolderBinding.setBubbleBackground(
         }
     }
 
-    val defaultMargins = root
-        .context
-        .resources
+    val defaultMargins = root.context.resources
         .getDimensionPixelSize(common_R.dimen.default_layout_margin)
-
 
     if (viewState.background is BubbleBackground.Gone && viewState.background.setSpacingEqual) {
 
@@ -413,23 +407,33 @@ internal fun LayoutMessageHolderBinding.setBubbleBackground(
         spaceMessageHolderRight.updateLayoutParams { width = defaultMargins }
 
     } else {
-        val holderWidth = recyclerWidth.value - (defaultMargins * 2)
-
-        val adaptedBubbleWidth: Int? = viewState.bubbleOnlyMessage?.text?.let { text ->
-            (includeMessageHolderBubble.textViewMessageText.paint.measureText(text) + (defaultMargins * 2)).toInt()
-        } ?: viewState.bubblePodcastBoost?.let {
-            root.context.resources.getDimensionPixelSize(R.dimen.message_type_boost_width)
-        }
-
-        val defaultReceivedLeftMargin = root
-            .context
-            .resources
+        val defaultReceivedLeftMargin = root.context.resources
             .getDimensionPixelSize(R.dimen.message_holder_space_width_left)
 
-        val defaultSentRightMargin = root
-            .context
-            .resources
+        val defaultSentRightMargin = root.context.resources
             .getDimensionPixelSize(R.dimen.message_holder_space_width_right)
+
+        val holderWidth = recyclerWidth.value - (defaultMargins * 2)
+        val bubbleFixedWidth = (holderWidth - defaultReceivedLeftMargin - defaultSentRightMargin - (holderWidth * BubbleBackground.SPACE_WIDTH_MULTIPLE)).toInt()
+
+        val messageReactionsWidth = viewState.bubbleReactionBoosts?.let {
+            root.context.resources.getDimensionPixelSize(R.dimen.message_type_boost_width)
+        } ?: 0
+
+        var bubbleWidth: Int = (viewState.bubbleMessage?.text?.let { text ->
+            if (viewState.message.shouldAdaptBubbleWidth) {
+                (includeMessageHolderBubble.textViewMessageText.paint.measureText(text) + (defaultMargins * 2)).toInt()
+            } else {
+                bubbleFixedWidth
+            }
+        } ?: viewState.bubblePodcastBoost?.let {
+            root.context.resources.getDimensionPixelSize(R.dimen.message_type_podcast_boost_width)
+        } ?: bubbleFixedWidth)
+
+        bubbleWidth = bubbleWidth
+            .coerceAtLeast(messageReactionsWidth)
+            .coerceAtMost(bubbleFixedWidth)
+
 
         @Exhaustive
         when (viewState) {
@@ -438,24 +442,12 @@ internal fun LayoutMessageHolderBinding.setBubbleBackground(
                     width = defaultReceivedLeftMargin
                 }
                 spaceMessageHolderRight.updateLayoutParams {
-                    val defaultRightMargin = floor((holderWidth * BubbleBackground.SPACE_WIDTH_MULTIPLE) - defaultReceivedLeftMargin).toInt()
-
-                    width = if (adaptedBubbleWidth != null) {
-                        (holderWidth - defaultReceivedLeftMargin - adaptedBubbleWidth).toInt().coerceAtLeast(defaultRightMargin)
-                    } else {
-                        defaultRightMargin
-                    }
+                    width = (holderWidth - defaultReceivedLeftMargin - bubbleWidth).toInt()
                 }
             }
             is MessageHolderViewState.Sent -> {
                 spaceMessageHolderLeft.updateLayoutParams {
-                    val defaultLeftMargin = floor((holderWidth * BubbleBackground.SPACE_WIDTH_MULTIPLE) - defaultSentRightMargin).toInt()
-
-                    width = if (adaptedBubbleWidth != null) {
-                        (holderWidth - defaultSentRightMargin - adaptedBubbleWidth).toInt().coerceAtLeast(defaultLeftMargin)
-                    } else {
-                        defaultLeftMargin
-                    }
+                    width = (holderWidth - defaultSentRightMargin - bubbleWidth).toInt()
                 }
                 spaceMessageHolderRight.updateLayoutParams {
                     width = defaultSentRightMargin
