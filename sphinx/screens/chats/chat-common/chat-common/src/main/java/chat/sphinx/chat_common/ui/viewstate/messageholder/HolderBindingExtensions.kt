@@ -99,6 +99,7 @@ internal fun LayoutMessageHolderBinding.setView(
             lifecycleScope,
             userColorsHelper,
         )
+        setBubbleBackground(viewState, recyclerViewWidth)
         setDeletedMessageLayout(viewState.deletedMessage)
         setGroupActionIndicatorLayout(viewState.groupActionIndicator)
 
@@ -246,7 +247,6 @@ internal fun LayoutMessageHolderBinding.setView(
                 }
             }
         }
-        setBubbleBackground(viewState, recyclerViewWidth)
     }
 }
 
