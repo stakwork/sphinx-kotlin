@@ -969,27 +969,55 @@ abstract class ChatFragment<
 
                             this@message.includeLayoutSelectedMessageMenu.apply {
                                 spaceSelectedMessageMenuArrowTop.goneIfFalse(!viewState.showMenuTop)
-                                imageViewSelectedMessageMenuArrowTop.goneIfFalse(!viewState.showMenuTop)
+                                layoutConstraintSelectedMessageMenuArrowTopContainer.goneIfFalse(!viewState.showMenuTop)
 
                                 spaceSelectedMessageMenuArrowBottom.goneIfFalse(viewState.showMenuTop)
-                                imageViewSelectedMessageMenuArrowBottom.goneIfFalse(viewState.showMenuTop)
+                                layoutConstraintSelectedMessageMenuArrowBottomContainer.goneIfFalse(viewState.showMenuTop)
+
+                                imageViewSelectedMessageMenuArrowBottomCenter.goneIfFalse(false)
+                                imageViewSelectedMessageMenuArrowBottomRight.goneIfFalse(false)
+                                imageViewSelectedMessageMenuArrowBottomLeft.goneIfFalse(false)
+
+                                imageViewSelectedMessageMenuArrowTopCenter.goneIfFalse(false)
+                                imageViewSelectedMessageMenuArrowTopRight.goneIfFalse(false)
+                                imageViewSelectedMessageMenuArrowTopLeft.goneIfFalse(false)
                             }
 
-                            this@message.includeLayoutSelectedMessageMenu.root.apply menu@ {
+                            this@message.includeLayoutSelectedMessageMenu.apply menu@ {
 
-                                this@menu.y = if (viewState.showMenuTop) {
+                                this@menu.root.y = if (viewState.showMenuTop) {
                                     viewState.holderYPos.value -
                                             (resources.getDimension(R.dimen.selected_message_menu_item_height) * (viewState.messageHolderViewState.selectionMenuItems?.size ?: 0)) -
-                                            Dp(10F).toPx(context).value
+                                            Dp(10F).toPx(root.context).value
                                 } else {
-                                    viewState.holderYPos.value          +
-                                            viewState.bubbleHeight.value        +
-                                            Dp(10F).toPx(context).value
+                                    viewState.holderYPos.value +
+                                            viewState.bubbleHeight.value +
+                                            Dp(10F).toPx(root.context).value
                                 }
-                                val menuWidth = resources.getDimension(R.dimen.selected_message_menu_width)
 
-                                // TODO: Handle small bubbles better
-                                this@menu.x = viewState.bubbleCenterXPos.value - (menuWidth / 2F)
+                                val menuWidth = resources.getDimension(R.dimen.selected_message_menu_width)
+                                var menuXPos = viewState.bubbleCenterXPos.value - (menuWidth / 2F)
+
+                                when {
+                                    (menuXPos + menuWidth > viewState.recyclerViewWidth.value) -> {
+                                        menuXPos = viewState.recyclerViewWidth.value - menuWidth - Dp(16F).toPx(root.context).value
+
+                                        this@menu.imageViewSelectedMessageMenuArrowBottomRight.visible
+                                        this@menu.imageViewSelectedMessageMenuArrowTopRight.visible
+                                    }
+                                    (menuXPos < 0F) -> {
+                                        menuXPos = Dp(16F).toPx(root.context).value
+
+                                        this@menu.imageViewSelectedMessageMenuArrowBottomLeft.visible
+                                        this@menu.imageViewSelectedMessageMenuArrowTopLeft.visible
+                                    }
+                                    else -> {
+                                        this@menu.imageViewSelectedMessageMenuArrowBottomCenter.visible
+                                        this@menu.imageViewSelectedMessageMenuArrowTopCenter.visible
+                                    }
+                                }
+
+                                this@menu.root.x = menuXPos
                             }
                             this@message.setMenuColor(viewState.messageHolderViewState)
                             this@message.setMenuItems(viewState.messageHolderViewState.selectionMenuItems)
