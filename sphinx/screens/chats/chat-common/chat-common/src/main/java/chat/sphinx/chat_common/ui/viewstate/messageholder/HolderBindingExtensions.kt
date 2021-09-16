@@ -36,6 +36,7 @@ import chat.sphinx.wrapper_chat.ChatType
 import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.lightning.*
 import chat.sphinx.wrapper_common.message.MessageId
+import chat.sphinx.wrapper_common.thumbnailUrl
 import chat.sphinx.wrapper_common.util.getInitials
 import chat.sphinx.wrapper_meme_server.headerKey
 import chat.sphinx.wrapper_meme_server.headerValue
@@ -1139,7 +1140,7 @@ internal inline fun LayoutMessageHolderBinding.setReactionBoost(
 
             imageHolderBinding.apply {
 
-                boostSenderHolder?.photoUrl?.let { photoUrl ->
+                boostSenderHolder?.photoUrl?.thumbnailUrl?.let { photoUrl ->
                     textViewInitials.gone
                     imageViewChatPicture.visible
                     loadImage(imageViewChatPicture, photoUrl.value)

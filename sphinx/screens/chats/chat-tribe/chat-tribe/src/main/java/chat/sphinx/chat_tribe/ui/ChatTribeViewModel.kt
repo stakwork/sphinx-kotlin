@@ -30,6 +30,7 @@ import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.message.MessageId
+import chat.sphinx.wrapper_common.thumbnailUrl
 import chat.sphinx.wrapper_common.util.getInitials
 import chat.sphinx.wrapper_contact.ContactAlias
 import chat.sphinx.wrapper_message.*
@@ -124,7 +125,7 @@ internal class ChatTribeViewModel @Inject constructor(
         message: Message
     ): InitialHolderViewState {
         return message.senderPic?.let { url ->
-            InitialHolderViewState.Url(url)
+            InitialHolderViewState.Url(url.thumbnailUrl)
         } ?: message.senderAlias?.let { alias ->
             InitialHolderViewState.Initials(alias.value.getInitials(), message.getColorKey())
         } ?: InitialHolderViewState.None

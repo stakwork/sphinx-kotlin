@@ -27,6 +27,7 @@ import chat.sphinx.wrapper_chat.getColorKey
 import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
+import chat.sphinx.wrapper_common.thumbnailUrl
 import chat.sphinx.wrapper_common.util.getInitials
 import chat.sphinx.wrapper_message.Message
 import chat.sphinx.wrapper_message.getColorKey
@@ -117,7 +118,7 @@ class ChatGroupViewModel @Inject constructor(
         message: Message
     ): InitialHolderViewState {
         return message.senderPic?.let { url ->
-            InitialHolderViewState.Url(url)
+            InitialHolderViewState.Url(url.thumbnailUrl)
         } ?: message.senderAlias?.let { alias ->
             InitialHolderViewState.Initials(alias.value.getInitials(), message.getColorKey())
         } ?: InitialHolderViewState.None
