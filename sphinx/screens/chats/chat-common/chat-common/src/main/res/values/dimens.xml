@@ -35,6 +35,8 @@
     <dimen name="audio_button_play_pause_width">60dp</dimen>
     <dimen name="video_attachment_play_pause_button_xy">50dp</dimen>
     <dimen name="image_holder_boost_reaction_xy">26dp</dimen>
+    <dimen name="image_holder_boost_reaction_2_margin_start">13dp</dimen>
+    <dimen name="image_holder_boost_reaction_3_margin_start">26dp</dimen>
     <dimen name="icon_container_message_payment_direction_xy">26dp</dimen>
     <dimen name="material_icon_text_size_message_payment_status">20sp</dimen>
     <dimen name="loading_wheel_message_payment_processing_xy">20dp</dimen>
