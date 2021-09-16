@@ -18,12 +18,14 @@ import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavArgs
+import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.chat_common.R
 import chat.sphinx.chat_common.adapters.MessageListAdapter
+import chat.sphinx.chat_common.adapters.MessageListFooterAdapter
 import chat.sphinx.chat_common.databinding.*
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
 import chat.sphinx.chat_common.ui.viewstate.attachment.AttachmentFullscreenViewState
@@ -610,19 +612,22 @@ abstract class ChatFragment<
             imageLoader,
             userColorsHelper
         )
+        val footerAdapter = MessageListFooterAdapter()
         recyclerView.apply {
             setHasFixedSize(false)
             layoutManager = linearLayoutManager
-            adapter = messageListAdapter
+            adapter = ConcatAdapter(messageListAdapter, footerAdapter)
             itemAnimator = null
         }
     }
 
-    protected fun scrollToBottom(
+    private fun scrollToBottom(
         callback: () -> Unit,
         replyingToMessage: Boolean = false
     ) {
-        (recyclerView.adapter as MessageListAdapter<*>).scrollToBottomIfNeeded(callback, replyingToMessage)
+        (recyclerView.adapter as ConcatAdapter).adapters.firstOrNull()?.let { messagesListAdapter ->
+            (messagesListAdapter as MessageListAdapter<*>).scrollToBottomIfNeeded(callback, replyingToMessage)
+        }
     }
 
     override fun onStart() {
