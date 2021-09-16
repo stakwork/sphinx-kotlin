@@ -262,6 +262,8 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                 SphinxLinkify.addLinks(textViewMessageText, SphinxLinkify.ALL, onSphinxInteractionListener)
                 textViewMessageText.setOnLongClickListener(onSphinxInteractionListener)
 
+                includeMessageTypeBotResponse.webViewMessageTypeBotResponse.setOnLongClickListener(onSphinxInteractionListener)
+
                 includeMessageLinkPreviewContact.apply contact@ {
                     root.setOnLongClickListener(selectedMessageLongClickListener)
                     root.setOnClickListener(linkPreviewClickListener)
