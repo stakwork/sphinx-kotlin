@@ -3,7 +3,6 @@ package chat.sphinx.chat_common.ui.viewstate.messageholder
 import android.graphics.Color
 import android.view.Gravity
 import android.widget.ImageView
-import android.widget.TextView
 import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
 import androidx.annotation.MainThread
@@ -14,18 +13,15 @@ import androidx.core.view.updateLayoutParams
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.chat_common.R
 import chat.sphinx.chat_common.databinding.LayoutMessageHolderBinding
-import chat.sphinx.chat_common.model.MessageLinkPreview
 import chat.sphinx.chat_common.model.NodeDescriptor
 import chat.sphinx.chat_common.model.TribeLink
 import chat.sphinx.chat_common.model.UnspecifiedUrl
-import chat.sphinx.chat_common.ui.viewstate.messageholder.isReceived
 import chat.sphinx.chat_common.util.SphinxLinkify
 import chat.sphinx.chat_common.util.SphinxUrlSpan
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
-import chat.sphinx.concept_meme_input_stream.MemeInputStreamHandler
 import chat.sphinx.concept_meme_server.MemeServerTokenHandler
 import chat.sphinx.concept_network_client_crypto.CryptoHeader
 import chat.sphinx.concept_network_client_crypto.CryptoScheme
@@ -52,6 +48,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import java.io.File
+import java.util.Collections.max
 import chat.sphinx.resources.R as common_R
 
 
@@ -108,8 +105,8 @@ internal fun LayoutMessageHolderBinding.setView(
             lifecycleScope,
             userColorsHelper,
         )
-        setDeletedMessageLayout(viewState.deletedMessage)
         setBubbleBackground(viewState, recyclerViewWidth)
+        setDeletedMessageLayout(viewState.deletedMessage)
         setGroupActionIndicatorLayout(viewState.groupActionIndicator)
 
         if (viewState.background !is BubbleBackground.Gone) {
@@ -366,13 +363,12 @@ internal inline fun LayoutMessageHolderBinding.setBubbleDirectPaymentLayout(
 @MainThread
 internal fun LayoutMessageHolderBinding.setBubbleBackground(
     viewState: MessageHolderViewState,
-    holderWidth: Px,
+    recyclerWidth: Px,
 ) {
     if (viewState.background is BubbleBackground.Gone) {
         includeMessageHolderBubble.root.gone
         receivedBubbleArrow.gone
         sentBubbleArrow.gone
-
     } else {
         receivedBubbleArrow.goneIfFalse(viewState.showReceivedBubbleArrow)
         sentBubbleArrow.goneIfFalse(viewState.showSentBubbleArrow)
@@ -414,42 +410,59 @@ internal fun LayoutMessageHolderBinding.setBubbleBackground(
         }
     }
 
-    // Set background spacing
-    if (viewState.background is BubbleBackground.Gone && viewState.background.setSpacingEqual) {
+    val defaultMargins = root.context.resources
+        .getDimensionPixelSize(common_R.dimen.default_layout_margin)
 
-        val defaultMargins = root
-            .context
-            .resources
-            .getDimensionPixelSize(common_R.dimen.default_layout_margin)
+    if (viewState.background is BubbleBackground.Gone && viewState.background.setSpacingEqual) {
 
         spaceMessageHolderLeft.updateLayoutParams { width = defaultMargins }
         spaceMessageHolderRight.updateLayoutParams { width = defaultMargins }
 
     } else {
+        val defaultReceivedLeftMargin = root.context.resources
+            .getDimensionPixelSize(R.dimen.message_holder_space_width_left)
+
+        val defaultSentRightMargin = root.context.resources
+            .getDimensionPixelSize(R.dimen.message_holder_space_width_right)
+
+        val holderWidth = recyclerWidth.value - (defaultMargins * 2)
+        val bubbleFixedWidth = (holderWidth - defaultReceivedLeftMargin - defaultSentRightMargin - (holderWidth * BubbleBackground.SPACE_WIDTH_MULTIPLE)).toInt()
+
+        val messageReactionsWidth = viewState.bubbleReactionBoosts?.let {
+            root.context.resources.getDimensionPixelSize(R.dimen.message_type_boost_width)
+        } ?: 0
+
+        var bubbleWidth: Int = (viewState.bubbleMessage?.text?.let { text ->
+            if (viewState.message.shouldAdaptBubbleWidth) {
+                (includeMessageHolderBubble.textViewMessageText.paint.measureText(text) + (defaultMargins * 2)).toInt()
+            } else {
+                bubbleFixedWidth
+            }
+        } ?: viewState.bubblePodcastBoost?.let {
+            root.context.resources.getDimensionPixelSize(R.dimen.message_type_podcast_boost_width)
+        } ?: bubbleFixedWidth)
+
+        bubbleWidth = bubbleWidth
+            .coerceAtLeast(messageReactionsWidth)
+            .coerceAtMost(bubbleFixedWidth)
+
+
         @Exhaustive
         when (viewState) {
             is MessageHolderViewState.Received -> {
-                val avatarImageSpace = root
-                    .context
-                    .resources
-                    .getDimensionPixelSize(R.dimen.message_holder_space_width_left)
-
                 spaceMessageHolderLeft.updateLayoutParams {
-                    width = avatarImageSpace
+                    width = defaultReceivedLeftMargin
                 }
                 spaceMessageHolderRight.updateLayoutParams {
-                    width = (holderWidth.value * BubbleBackground.SPACE_WIDTH_MULTIPLE).toInt() - (avatarImageSpace / 2)
+                    width = (holderWidth - defaultReceivedLeftMargin - bubbleWidth).toInt()
                 }
             }
             is MessageHolderViewState.Sent -> {
                 spaceMessageHolderLeft.updateLayoutParams {
-                    width = (holderWidth.value * BubbleBackground.SPACE_WIDTH_MULTIPLE).toInt()
+                    width = (holderWidth - defaultSentRightMargin - bubbleWidth).toInt()
                 }
                 spaceMessageHolderRight.updateLayoutParams {
-                    width = root
-                        .context
-                        .resources
-                        .getDimensionPixelSize(R.dimen.message_holder_space_width_right)
+                    width = defaultSentRightMargin
                 }
             }
         }
