@@ -220,10 +220,13 @@ internal sealed class MessageHolderViewState(
             } else {
                 val set: MutableSet<BoostSenderHolder> = LinkedHashSet(0)
                 var total: Long = 0
+                var boostedByOwner = false
                 val owner = accountOwner()
 
                 for (reaction in nnReactions) {
                     if (reaction.sender == owner.id) {
+                        boostedByOwner = true
+
                         set.add(BoostSenderHolder(
                             owner.photoUrl,
                             owner.alias,
@@ -250,8 +253,10 @@ internal sealed class MessageHolderViewState(
                 }
 
                 LayoutState.Bubble.ContainerFourth.Boost(
-                    totalAmount = Sat(total),
+                    showSent = (this is Sent),
+                    boostedByOwner = boostedByOwner,
                     senders = set,
+                    totalAmount = Sat(total),
                 )
             }
         }

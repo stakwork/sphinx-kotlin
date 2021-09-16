@@ -155,8 +155,10 @@ internal sealed class LayoutState private constructor() {
         sealed class ContainerFourth private constructor(): Bubble() {
 
             data class Boost(
+                val showSent: Boolean,
+                val boostedByOwner: Boolean,
+                val senders: Set<BoostSenderHolder>,
                 private val totalAmount: Sat,
-                val senders: Set<BoostSenderHolder>
             ): ContainerFourth() {
                 val amountText: String
                     get() = totalAmount.asFormattedString()

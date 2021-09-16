@@ -1069,14 +1069,43 @@ internal inline fun LayoutMessageHolderBinding.setBubbleReactionBoosts(
         } else {
             root.visible
 
+            val activeIcon = boost.boostedByOwner || boost.showSent
+
+            imageViewBoostMessageIcon.setImageDrawable(
+                AppCompatResources.getDrawable(root.context,
+                    if (activeIcon) {
+                        R.drawable.ic_boost_green
+                    } else {
+                        R.drawable.ic_boost_grey
+                    }
+                )
+            )
+
             includeBoostAmountTextGroup.apply {
+                val textSizeInPixels = root.context.resources.getDimension(
+                    if (boost.showSent) {
+                        R.dimen.default_text_size_small_headline
+                    } else {
+                        R.dimen.default_text_size_sub_headline
+                    }
+                )
+                textViewSatsAmount.textSize = Px(textSizeInPixels).toSp(root.context).value
+
+                textViewSatsAmount.setTextFont(
+                    if (boost.showSent) {
+                        R.font.roboto_medium
+                    } else {
+                        R.font.roboto_regular
+                    }
+                )
+
                 textViewSatsAmount.text = boost.amountText
                 textViewSatsUnitLabel.text = boost.amountUnitLabel
             }
 
             includeBoostReactionsGroup.apply {
 
-                setReactionBoost(
+                setReactionBoostSender(
                     boost.senders.elementAtOrNull(0),
                     layoutConstraintBoostReactionImageHolder1,
                     includeBoostReactionImageHolder1,
@@ -1087,7 +1116,7 @@ internal inline fun LayoutMessageHolderBinding.setBubbleReactionBoosts(
                     loadImage,
                 )
 
-                setReactionBoost(
+                setReactionBoostSender(
                     boost.senders.elementAtOrNull(1),
                     layoutConstraintBoostReactionImageHolder2,
                     includeBoostReactionImageHolder2,
@@ -1098,7 +1127,7 @@ internal inline fun LayoutMessageHolderBinding.setBubbleReactionBoosts(
                     loadImage,
                 )
 
-                setReactionBoost(
+                setReactionBoostSender(
                     boost.senders.elementAtOrNull(2),
                     layoutConstraintBoostReactionImageHolder3,
                     includeBoostReactionImageHolder3,
@@ -1122,7 +1151,7 @@ internal inline fun LayoutMessageHolderBinding.setBubbleReactionBoosts(
 
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
-internal inline fun LayoutMessageHolderBinding.setReactionBoost(
+internal inline fun LayoutMessageHolderBinding.setReactionBoostSender(
     boostSenderHolder: BoostSenderHolder?,
     container: ConstraintLayout,
     imageHolderBinding: LayoutChatImageSmallInitialHolderBinding,
