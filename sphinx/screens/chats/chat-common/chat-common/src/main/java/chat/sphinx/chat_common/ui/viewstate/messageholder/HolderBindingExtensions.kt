@@ -1169,27 +1169,27 @@ internal inline fun LayoutMessageHolderBinding.setReactionBoostSender(
 
             imageHolderBinding.apply {
 
+                textViewInitials.visible
+                textViewInitials.text = (boostSenderHolder.alias?.value ?: root.context.getString(R.string.unknown)).getInitials()
+                imageViewChatPicture.gone
+
+                lifecycleScope.launch(dispatchers.mainImmediate) {
+                    textViewInitials.setBackgroundRandomColor(
+                        R.drawable.chat_initials_circle,
+                        Color.parseColor(
+                            userColorsHelper.getHexCodeForKey(
+                                boostSenderHolder.colorKey,
+                                root.context.getRandomHexCode(),
+                            )
+                        ))
+                }.let { job ->
+                    holderJobs.add(job)
+                }
+
                 boostSenderHolder?.photoUrl?.thumbnailUrl?.let { photoUrl ->
                     textViewInitials.gone
                     imageViewChatPicture.visible
                     loadImage(imageViewChatPicture, photoUrl.value)
-                } ?: run {
-                    textViewInitials.visible
-                    textViewInitials.text = (boostSenderHolder.alias?.value ?: root.context.getString(R.string.unknown)).getInitials()
-                    imageViewChatPicture.gone
-
-                    lifecycleScope.launch(dispatchers.mainImmediate) {
-                        textViewInitials.setBackgroundRandomColor(
-                            R.drawable.chat_initials_circle,
-                            Color.parseColor(
-                                userColorsHelper.getHexCodeForKey(
-                                    boostSenderHolder.colorKey,
-                                    root.context.getRandomHexCode(),
-                                )
-                            ))
-                    }.let { job ->
-                        holderJobs.add(job)
-                    }
                 }
             }
         }
