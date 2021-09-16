@@ -233,14 +233,13 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                 val selectedMessageLongClickListener = OnLongClickListener { v ->
                     SelectedMessageViewState.SelectedMessage.instantiate(
                         messageHolderViewState = currentViewState,
-                        holderYPosTop = Px(binding.root.y),
+                        holderYPosTop = Px(binding.root.y + binding.includeMessageHolderBubble.root.y),
                         holderHeight = Px(binding.root.measuredHeight.toFloat()),
                         holderWidth = Px(binding.root.measuredWidth.toFloat()),
                         bubbleXPosStart = Px(root.x),
                         bubbleWidth = Px(root.measuredWidth.toFloat()),
                         bubbleHeight = Px(root.measuredHeight.toFloat()),
                         headerHeight = headerHeight,
-                        statusHeaderHeight = Px(binding.includeMessageStatusHeader.root.measuredHeight.toFloat()),
                         recyclerViewWidth = recyclerViewWidth,
                         screenHeight = screenHeight
                     ).let { vs ->
