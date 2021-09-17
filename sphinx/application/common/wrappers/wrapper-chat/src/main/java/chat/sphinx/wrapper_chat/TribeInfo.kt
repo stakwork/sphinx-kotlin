@@ -53,32 +53,35 @@ class TribeInfo(
                     continue
                 }
 
-                for (command in bot.commands) {
-                    val theCommand = textComponents[1]
+                run breaker@{
+                    bot.commands.forEach { command ->
+                        val theCommand = textComponents[1]
 
-                    if (command.command != "*" && theCommand != command.command) {
-                        continue
-                    }
-
-                    if (command.price != null && command.price > 0) {
-                        price = Sat(command.price)
-                    } else if (command.priceIndex != null && command.priceIndex > 0) {
-
-                        if (textComponents.size - 1 < command.priceIndex) {
-                            continue
+                        if (command.command != "*" && theCommand != command.command) {
+                            return@forEach
                         }
 
-                        val amount = textComponents[command.priceIndex.toInt()].toIntOrNull() ?: 0
+                        if (command.price != null && command.price > 0) {
+                            price = Sat(command.price)
+                        } else if (command.priceIndex != null && command.priceIndex > 0) {
 
-                        if (command.minPrice != null && command.minPrice > 0 && amount < command.minPrice) {
-                            failureMessage = BotPriceError.AMOUNT_TOO_LOW
-                            break
+                            if (textComponents.size - 1 < command.priceIndex) {
+                                return@forEach
+                            }
+
+                            textComponents[command.priceIndex.toInt()].toIntOrNull()
+                                ?.let { amount ->
+                                    if (command.minPrice != null && command.minPrice > 0 && amount < command.minPrice) {
+                                        failureMessage = BotPriceError.AMOUNT_TOO_LOW
+                                        return@breaker
+                                    }
+                                    if (command.maxPrice != null && command.maxPrice > 0 && amount > command.maxPrice) {
+                                        failureMessage = BotPriceError.AMOUNT_TOO_HIGH
+                                        return@breaker
+                                    }
+                                    price = Sat(amount.toLong())
+                                }
                         }
-                        if (command.maxPrice != null && command.maxPrice > 0 && amount > command.maxPrice) {
-                            failureMessage = BotPriceError.AMOUNT_TOO_HIGH
-                            break
-                        }
-                        price = Sat(amount.toLong())
                     }
                 }
             }
