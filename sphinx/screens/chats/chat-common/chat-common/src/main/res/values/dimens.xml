@@ -35,6 +35,8 @@
     <dimen name="audio_button_play_pause_width">60dp</dimen>
     <dimen name="video_attachment_play_pause_button_xy">50dp</dimen>
     <dimen name="image_holder_boost_reaction_xy">26dp</dimen>
+    <dimen name="image_holder_boost_reaction_2_margin_start">13dp</dimen>
+    <dimen name="image_holder_boost_reaction_3_margin_start">26dp</dimen>
     <dimen name="icon_container_message_payment_direction_xy">26dp</dimen>
     <dimen name="material_icon_text_size_message_payment_status">20sp</dimen>
     <dimen name="loading_wheel_message_payment_processing_xy">20dp</dimen>
@@ -48,10 +50,12 @@
     <!-- message_holder_in_photo_holder_xy + 8dp -->
     <dimen name="message_holder_space_width_left">44dp</dimen>
     <dimen name="message_holder_space_width_right">6dp</dimen>
-
+    <dimen name="message_holder_text_view_padding_end">14dp</dimen>
 
     <!-- Message type heights  -->
     <dimen name="message_type_boost_height">50dp</dimen>
+    <dimen name="message_type_podcast_boost_width">180dp</dimen>
+    <dimen name="message_type_boost_width">220dp</dimen>
     <dimen name="message_type_direct_payment_height">46dp</dimen>
     <dimen name="message_type_image_attachment_min_height">170dp</dimen>
     <dimen name="message_type_file_attachment_height">60dp</dimen>
@@ -107,6 +111,10 @@
     <dimen name="selected_message_menu_icon_padding">8dp</dimen>
     <dimen name="selected_message_menu_item_height">40dp</dimen>
     <dimen name="selected_message_menu_item_text_size">12sp</dimen>
+    <dimen name="selected_message_menu_arrow_width">8dp</dimen>
+    <dimen name="selected_message_menu_arrow_height">5dp</dimen>
+    <dimen name="selected_message_menu_arrow_left_start_margin">48dp</dimen>
+    <dimen name="selected_message_menu_arrow_right_end_margin">20dp</dimen>
 
     <!-- Menu -->
     <dimen name="options_menu_option_height">50dp</dimen>

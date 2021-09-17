@@ -56,8 +56,10 @@ import chat.sphinx.kotlin_response.*
 import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.logger.e
 import chat.sphinx.menu_bottom.ui.MenuBottomViewState
+import chat.sphinx.resources.getRandomHexCode
 import chat.sphinx.wrapper_chat.*
 import chat.sphinx.wrapper_common.DateTime
+import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
@@ -68,8 +70,7 @@ import chat.sphinx.wrapper_common.message.MessageUUID
 import chat.sphinx.wrapper_common.message.SphinxCallLink
 import chat.sphinx.wrapper_common.tribe.TribeJoinLink
 import chat.sphinx.wrapper_common.tribe.toTribeJoinLink
-import chat.sphinx.wrapper_contact.Contact
-import chat.sphinx.wrapper_contact.avatarUrl
+import chat.sphinx.wrapper_contact.*
 import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message_media.*
 import com.giphy.sdk.core.models.Media
@@ -151,7 +152,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 
     abstract val headerInitialHolderSharedFlow: SharedFlow<InitialHolderViewState>
 
-    protected abstract suspend fun getChatNameIfNull(): ChatName?
+    protected abstract suspend fun getChatInfo(): Triple<ChatName?, PhotoUrl?, String>?
 
     private inner class ChatHeaderViewStateContainer: ViewStateContainer<ChatHeaderViewState>(ChatHeaderViewState.Idle) {
 
@@ -185,7 +186,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                 chatSharedFlow.collect { chat ->
 
                     _viewStateFlow.value = ChatHeaderViewState.Initialized(
-                        chatHeaderName = chat?.name?.value ?: getChatNameIfNull()?.value ?: "",
+                        chatHeaderName = chat?.name?.value ?: getChatInfo()?.first?.value ?: "",
                         showLock = chat != null,
                         isMuted = chat?.isMuted,
                     )
@@ -329,7 +330,12 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 
     internal val messageHolderViewStateFlow: StateFlow<List<MessageHolderViewState>> = flow {
         val chat = getChat()
-        val chatName = getChatNameIfNull()
+
+        val chatInfo = getChatInfo()
+        val chatName = chatInfo?.first
+        val chatPhotoUrl = chatInfo?.second
+        val chatColorKey = chatInfo?.third ?: app.getRandomHexCode()
+
         val owner = getOwner()
 
         messageRepository.getAllMessagesToShowByChatId(chat.id).distinctUntilChanged().collect { messages ->
@@ -369,16 +375,30 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                                         groupingDateAndBubbleBackground.second
                                     }
                                 },
-                                replyMessageSenderName = { replyMessage ->
+                                messageSenderInfo = { message ->
                                     when {
-                                        replyMessage.sender == chat.contactIds.firstOrNull() -> {
-                                            contactRepository.accountOwner.value?.alias?.value ?: ""
+                                        message.sender == chat.contactIds.firstOrNull() -> {
+                                            val accountOwner = contactRepository.accountOwner.value
+
+                                            Triple(
+                                                accountOwner?.photoUrl,
+                                                accountOwner?.alias,
+                                                accountOwner?.getColorKey() ?: ""
+                                            )
                                         }
                                         chat.type.isConversation() -> {
-                                            chatName?.value ?: ""
+                                            Triple(
+                                                chatPhotoUrl,
+                                                chatName?.value?.toContactAlias(),
+                                                chatColorKey
+                                            )
                                         }
                                         else -> {
-                                            replyMessage.senderAlias?.value ?: ""
+                                            Triple(
+                                                message.senderPic,
+                                                message.senderAlias?.value?.toContactAlias(),
+                                                message.getColorKey()
+                                            )
                                         }
                                     }
                                 },
@@ -415,16 +435,30 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                                         getInitialHolderViewStateForReceivedMessage(message)
                                     }
                                 },
-                                replyMessageSenderName = { replyMessage ->
+                                messageSenderInfo = { message ->
                                     when {
-                                        replyMessage.sender == chat.contactIds.firstOrNull() -> {
-                                            contactRepository.accountOwner.value?.alias?.value ?: ""
+                                        message.sender == chat.contactIds.firstOrNull() -> {
+                                            val accountOwner = contactRepository.accountOwner.value
+
+                                            Triple(
+                                                accountOwner?.photoUrl,
+                                                accountOwner?.alias,
+                                                accountOwner?.getColorKey() ?: ""
+                                            )
                                         }
                                         chat.type.isConversation() -> {
-                                            chatName?.value ?: ""
+                                            Triple(
+                                                chatPhotoUrl,
+                                                chatName?.value?.toContactAlias(),
+                                                chatColorKey
+                                            )
                                         }
                                         else -> {
-                                            replyMessage.senderAlias?.value ?: ""
+                                            Triple(
+                                                message.senderPic,
+                                                message.senderAlias?.value?.toContactAlias(),
+                                                message.getColorKey()
+                                            )
                                         }
                                     }
                                 },
@@ -905,7 +939,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                         contactRepository.accountOwner.value?.alias?.value ?: ""
                     }
                     chat.type.isConversation() -> {
-                        getChatNameIfNull()?.value ?: ""
+                        getChatInfo()?.first?.value ?: ""
                     }
                     else -> {
                         message.senderAlias?.value ?: ""

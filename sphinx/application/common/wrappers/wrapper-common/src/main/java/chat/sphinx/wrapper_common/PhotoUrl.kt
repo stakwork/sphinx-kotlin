@@ -8,6 +8,10 @@ inline fun String.toPhotoUrl(): PhotoUrl? =
         null
     }
 
+@Suppress("NOTHING_TO_INLINE")
+inline val PhotoUrl.thumbnailUrl: PhotoUrl
+    get() = PhotoUrl(this.value + "?thumb=true")
+
 @JvmInline
 value class PhotoUrl(val value: String) {
     init {

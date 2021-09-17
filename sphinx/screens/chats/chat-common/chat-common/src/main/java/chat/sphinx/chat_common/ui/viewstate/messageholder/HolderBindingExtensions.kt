@@ -3,36 +3,37 @@ package chat.sphinx.chat_common.ui.viewstate.messageholder
 import android.graphics.Color
 import android.view.Gravity
 import android.widget.ImageView
-import android.widget.TextView
 import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
 import androidx.annotation.MainThread
 import androidx.appcompat.content.res.AppCompatResources
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.view.updateLayoutParams
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.chat_common.R
 import chat.sphinx.chat_common.databinding.LayoutMessageHolderBinding
-import chat.sphinx.chat_common.model.MessageLinkPreview
 import chat.sphinx.chat_common.model.NodeDescriptor
 import chat.sphinx.chat_common.model.TribeLink
 import chat.sphinx.chat_common.model.UnspecifiedUrl
-import chat.sphinx.chat_common.ui.viewstate.messageholder.isReceived
 import chat.sphinx.chat_common.util.SphinxLinkify
 import chat.sphinx.chat_common.util.SphinxUrlSpan
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
-import chat.sphinx.concept_meme_input_stream.MemeInputStreamHandler
 import chat.sphinx.concept_meme_server.MemeServerTokenHandler
 import chat.sphinx.concept_network_client_crypto.CryptoHeader
 import chat.sphinx.concept_network_client_crypto.CryptoScheme
 import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.resources.*
+import chat.sphinx.resources.databinding.LayoutChatImageSmallInitialHolderBinding
 import chat.sphinx.wrapper_chat.ChatType
+import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.lightning.*
 import chat.sphinx.wrapper_common.message.MessageId
+import chat.sphinx.wrapper_common.thumbnailUrl
+import chat.sphinx.wrapper_common.util.getInitials
 import chat.sphinx.wrapper_meme_server.headerKey
 import chat.sphinx.wrapper_meme_server.headerValue
 import chat.sphinx.wrapper_message.*
@@ -47,6 +48,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import java.io.File
+import java.util.Collections.max
 import chat.sphinx.resources.R as common_R
 
 
@@ -103,8 +105,8 @@ internal fun LayoutMessageHolderBinding.setView(
             lifecycleScope,
             userColorsHelper,
         )
-        setDeletedMessageLayout(viewState.deletedMessage)
         setBubbleBackground(viewState, recyclerViewWidth)
+        setDeletedMessageLayout(viewState.deletedMessage)
         setGroupActionIndicatorLayout(viewState.groupActionIndicator)
 
         if (viewState.background !is BubbleBackground.Gone) {
@@ -185,9 +187,15 @@ internal fun LayoutMessageHolderBinding.setView(
                 viewState.background
             )
             setBubblePaidMessageSentStatusLayout(viewState.bubblePaidMessageSentStatus)
-            setBubbleReactionBoosts(viewState.bubbleReactionBoosts) { imageView, url ->
+            setBubbleReactionBoosts(
+                viewState.bubbleReactionBoosts,
+                holderJobs,
+                dispatchers,
+                lifecycleScope,
+                userColorsHelper
+            ) { imageView, url ->
                 lifecycleScope.launch(dispatchers.mainImmediate) {
-                    imageLoader.load(imageView, url.value, imageLoaderDefaults)
+                    imageLoader.load(imageView, url, imageLoaderDefaults)
                         .also { disposables.add(it) }
                 }.let { job ->
                     holderJobs.add(job)
@@ -355,13 +363,12 @@ internal inline fun LayoutMessageHolderBinding.setBubbleDirectPaymentLayout(
 @MainThread
 internal fun LayoutMessageHolderBinding.setBubbleBackground(
     viewState: MessageHolderViewState,
-    holderWidth: Px,
+    recyclerWidth: Px,
 ) {
     if (viewState.background is BubbleBackground.Gone) {
         includeMessageHolderBubble.root.gone
         receivedBubbleArrow.gone
         sentBubbleArrow.gone
-
     } else {
         receivedBubbleArrow.goneIfFalse(viewState.showReceivedBubbleArrow)
         sentBubbleArrow.goneIfFalse(viewState.showSentBubbleArrow)
@@ -403,42 +410,59 @@ internal fun LayoutMessageHolderBinding.setBubbleBackground(
         }
     }
 
-    // Set background spacing
-    if (viewState.background is BubbleBackground.Gone && viewState.background.setSpacingEqual) {
+    val defaultMargins = root.context.resources
+        .getDimensionPixelSize(common_R.dimen.default_layout_margin)
 
-        val defaultMargins = root
-            .context
-            .resources
-            .getDimensionPixelSize(common_R.dimen.default_layout_margin)
+    if (viewState.background is BubbleBackground.Gone && viewState.background.setSpacingEqual) {
 
         spaceMessageHolderLeft.updateLayoutParams { width = defaultMargins }
         spaceMessageHolderRight.updateLayoutParams { width = defaultMargins }
 
     } else {
+        val defaultReceivedLeftMargin = root.context.resources
+            .getDimensionPixelSize(R.dimen.message_holder_space_width_left)
+
+        val defaultSentRightMargin = root.context.resources
+            .getDimensionPixelSize(R.dimen.message_holder_space_width_right)
+
+        val holderWidth = recyclerWidth.value - (defaultMargins * 2)
+        val bubbleFixedWidth = (holderWidth - defaultReceivedLeftMargin - defaultSentRightMargin - (holderWidth * BubbleBackground.SPACE_WIDTH_MULTIPLE)).toInt()
+
+        val messageReactionsWidth = viewState.bubbleReactionBoosts?.let {
+            root.context.resources.getDimensionPixelSize(R.dimen.message_type_boost_width)
+        } ?: 0
+
+        var bubbleWidth: Int = (viewState.bubbleMessage?.text?.let { text ->
+            if (viewState.message.shouldAdaptBubbleWidth) {
+                (includeMessageHolderBubble.textViewMessageText.paint.measureText(text) + (defaultMargins * 2)).toInt()
+            } else {
+                bubbleFixedWidth
+            }
+        } ?: viewState.bubblePodcastBoost?.let {
+            root.context.resources.getDimensionPixelSize(R.dimen.message_type_podcast_boost_width)
+        } ?: bubbleFixedWidth)
+
+        bubbleWidth = bubbleWidth
+            .coerceAtLeast(messageReactionsWidth)
+            .coerceAtMost(bubbleFixedWidth)
+
+
         @Exhaustive
         when (viewState) {
             is MessageHolderViewState.Received -> {
-                val avatarImageSpace = root
-                    .context
-                    .resources
-                    .getDimensionPixelSize(R.dimen.message_holder_space_width_left)
-
                 spaceMessageHolderLeft.updateLayoutParams {
-                    width = avatarImageSpace
+                    width = defaultReceivedLeftMargin
                 }
                 spaceMessageHolderRight.updateLayoutParams {
-                    width = (holderWidth.value * BubbleBackground.SPACE_WIDTH_MULTIPLE).toInt() - (avatarImageSpace / 2)
+                    width = (holderWidth - defaultReceivedLeftMargin - bubbleWidth).toInt()
                 }
             }
             is MessageHolderViewState.Sent -> {
                 spaceMessageHolderLeft.updateLayoutParams {
-                    width = (holderWidth.value * BubbleBackground.SPACE_WIDTH_MULTIPLE).toInt()
+                    width = (holderWidth - defaultSentRightMargin - bubbleWidth).toInt()
                 }
                 spaceMessageHolderRight.updateLayoutParams {
-                    width = root
-                        .context
-                        .resources
-                        .getDimensionPixelSize(R.dimen.message_holder_space_width_right)
+                    width = defaultSentRightMargin
                 }
             }
         }
@@ -1046,7 +1070,11 @@ internal inline fun LayoutMessageHolderBinding.setBubblePodcastBoost(
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun LayoutMessageHolderBinding.setBubbleReactionBoosts(
     boost: LayoutState.Bubble.ContainerFourth.Boost?,
-    loadImage: (ImageView, SenderPhotoUrl) -> Unit,
+    holderJobs: ArrayList<Job>,
+    dispatchers: CoroutineDispatchers,
+    lifecycleScope: CoroutineScope,
+    userColorsHelper: UserColorsHelper,
+    loadImage: (ImageView, String) -> Unit,
 ) {
     includeMessageHolderBubble.includeMessageTypeBoost.apply {
         if (boost == null) {
@@ -1054,94 +1082,127 @@ internal inline fun LayoutMessageHolderBinding.setBubbleReactionBoosts(
         } else {
             root.visible
 
-//            imageViewBoostMessageIcon
+            val activeIcon = boost.boostedByOwner || boost.showSent
+
+            imageViewBoostMessageIcon.setImageDrawable(
+                AppCompatResources.getDrawable(root.context,
+                    if (activeIcon) {
+                        R.drawable.ic_boost_green
+                    } else {
+                        R.drawable.ic_boost_grey
+                    }
+                )
+            )
+
             includeBoostAmountTextGroup.apply {
+                val textSizeInPixels = root.context.resources.getDimension(
+                    if (boost.showSent) {
+                        R.dimen.default_text_size_small_headline
+                    } else {
+                        R.dimen.default_text_size_sub_headline
+                    }
+                )
+                textViewSatsAmount.textSize = Px(textSizeInPixels).toSp(root.context).value
+
+                textViewSatsAmount.setTextFont(
+                    if (boost.showSent) {
+                        R.font.roboto_medium
+                    } else {
+                        R.font.roboto_regular
+                    }
+                )
+
                 textViewSatsAmount.text = boost.amountText
                 textViewSatsUnitLabel.text = boost.amountUnitLabel
             }
 
             includeBoostReactionsGroup.apply {
 
-                includeBoostReactionImageHolder1.apply {
-                    boost.senderPics.elementAtOrNull(0).let { holder ->
-                        if (holder == null) {
-                            root.gone
-                        } else {
-                            root.visible
+                setReactionBoostSender(
+                    boost.senders.elementAtOrNull(0),
+                    layoutConstraintBoostReactionImageHolder1,
+                    includeBoostReactionImageHolder1,
+                    holderJobs,
+                    dispatchers,
+                    lifecycleScope,
+                    userColorsHelper,
+                    loadImage,
+                )
 
-                            @Exhaustive
-                            when (holder) {
-                                is SenderInitials -> {
-                                    textViewInitials.visible
-                                    textViewInitials.text = holder.value
-                                    textViewInitials.setBackgroundRandomColor(R.drawable.chat_initials_circle)
-                                    imageViewChatPicture.gone
-                                }
-                                is SenderPhotoUrl -> {
-                                    textViewInitials.gone
-                                    imageViewChatPicture.visible
-                                    loadImage(imageViewChatPicture, holder)
-                                }
-                            }
-                        }
-                    }
-                }
+                setReactionBoostSender(
+                    boost.senders.elementAtOrNull(1),
+                    layoutConstraintBoostReactionImageHolder2,
+                    includeBoostReactionImageHolder2,
+                    holderJobs,
+                    dispatchers,
+                    lifecycleScope,
+                    userColorsHelper,
+                    loadImage,
+                )
 
-                includeBoostReactionImageHolder2.apply {
-                    boost.senderPics.elementAtOrNull(1).let { holder ->
-                        if (holder == null) {
-                            root.gone
-                        } else {
-                            root.visible
-
-                            @Exhaustive
-                            when (holder) {
-                                is SenderInitials -> {
-                                    textViewInitials.visible
-                                    textViewInitials.text = holder.value
-                                    textViewInitials.setBackgroundRandomColor(R.drawable.chat_initials_circle)
-                                    imageViewChatPicture.gone
-                                }
-                                is SenderPhotoUrl -> {
-                                    textViewInitials.gone
-                                    imageViewChatPicture.visible
-                                    loadImage(imageViewChatPicture, holder)
-                                }
-                            }
-                        }
-                    }
-                }
-
-                includeBoostReactionImageHolder3.apply {
-                    boost.senderPics.elementAtOrNull(2).let { holder ->
-                        if (holder == null) {
-                            root.gone
-                        } else {
-                            root.visible
-
-                            @Exhaustive
-                            when (holder) {
-                                is SenderInitials -> {
-                                    textViewInitials.visible
-                                    textViewInitials.text = holder.value
-                                    textViewInitials.setBackgroundRandomColor(R.drawable.chat_initials_circle)
-                                    imageViewChatPicture.gone
-                                }
-                                is SenderPhotoUrl -> {
-                                    textViewInitials.gone
-                                    imageViewChatPicture.visible
-                                    loadImage(imageViewChatPicture, holder)
-                                }
-                            }
-                        }
-                    }
-                }
+                setReactionBoostSender(
+                    boost.senders.elementAtOrNull(2),
+                    layoutConstraintBoostReactionImageHolder3,
+                    includeBoostReactionImageHolder3,
+                    holderJobs,
+                    dispatchers,
+                    lifecycleScope,
+                    userColorsHelper,
+                    loadImage,
+                )
 
                 textViewBoostReactionCount.apply {
                     boost.numberUniqueBoosters?.let { count ->
                         visible
                         text = count.toString()
                     } ?: gone
+                }
+            }
+        }
+    }
+}
+
+@MainThread
+@Suppress("NOTHING_TO_INLINE")
+internal inline fun LayoutMessageHolderBinding.setReactionBoostSender(
+    boostSenderHolder: BoostSenderHolder?,
+    container: ConstraintLayout,
+    imageHolderBinding: LayoutChatImageSmallInitialHolderBinding,
+    holderJobs: ArrayList<Job>,
+    dispatchers: CoroutineDispatchers,
+    lifecycleScope: CoroutineScope,
+    userColorsHelper: UserColorsHelper,
+    loadImage: (ImageView, String) -> Unit,
+) {
+    container.let { imageHolderContainer ->
+        if (boostSenderHolder == null) {
+            imageHolderContainer.gone
+        } else {
+            imageHolderContainer.visible
+
+            imageHolderBinding.apply {
+
+                textViewInitials.visible
+                textViewInitials.text = (boostSenderHolder.alias?.value ?: root.context.getString(R.string.unknown)).getInitials()
+                imageViewChatPicture.gone
+
+                lifecycleScope.launch(dispatchers.mainImmediate) {
+                    textViewInitials.setBackgroundRandomColor(
+                        R.drawable.chat_initials_circle,
+                        Color.parseColor(
+                            userColorsHelper.getHexCodeForKey(
+                                boostSenderHolder.colorKey,
+                                root.context.getRandomHexCode(),
+                            )
+                        ))
+                }.let { job ->
+                    holderJobs.add(job)
+                }
+
+                boostSenderHolder?.photoUrl?.thumbnailUrl?.let { photoUrl ->
+                    textViewInitials.gone
+                    imageViewChatPicture.visible
+                    loadImage(imageViewChatPicture, photoUrl.value)
                 }
             }
         }

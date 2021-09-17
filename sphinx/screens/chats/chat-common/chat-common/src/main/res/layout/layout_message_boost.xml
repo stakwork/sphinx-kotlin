@@ -38,6 +38,7 @@
         layout="@layout/layout_message_boost_reaction_group"
         android:layout_width="0dp"
         android:layout_height="match_parent"
+        android:layout_marginStart="@dimen/default_half_layout_margin"
         app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
