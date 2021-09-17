@@ -1,5 +1,11 @@
 # ChangeLog
 
+## Version 1.0.0-alpha24 (2021-09-17)
+ - Adds ability to reply to Bot responses
+ - Selected message menu improvements
+ - Adds variability of message bubble size depending on content
+ - Message Boost UI improvements
+
 ## Version 1.0.0-alpha23 (2021-09-10)
  - Adds message grouping
  - Adds ability to send/receive paid text messages
