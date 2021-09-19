@@ -5,8 +5,9 @@ import android.os.CountDownTimer
 
 class MessageMediaPlayer: MediaPlayer() {
     var filePath: String? = null
-
+    var onPlayProgressInfoUpdateListener: OnPlayProgressInfoUpdateListener? = null
     private var countDownTimer: CountDownTimer? = null
+
 
     fun load(filePath: String) {
         this.filePath = filePath
@@ -18,27 +19,32 @@ class MessageMediaPlayer: MediaPlayer() {
 
     override fun reset() {
         super.reset()
-
+        onPlayProgressInfoUpdateListener = null
         cancelCountDownTimer()
     }
 
     override fun pause() {
         super.pause()
-
+        onPlayProgressInfoUpdateListener?.onPause()
         cancelCountDownTimer()
     }
 
-    fun initPlayProgressInfoUpdateWithTimer(progress: Int, onPlayProgressInfoUpdateListener: OnPlayProgressInfoUpdateListener) {
+    override fun start() {
+        super.start()
+        onPlayProgressInfoUpdateListener?.onPlay()
+    }
+
+    fun initPlayProgressInfoUpdateWithTimer(progress: Int) {
         cancelCountDownTimer()
 
         val remainingTime = duration - progress
         countDownTimer = object: CountDownTimer(remainingTime.toLong(), 100) {
             override fun onTick(millisUntilFinished: Long) {
-                onPlayProgressInfoUpdateListener.onPlayProgressUpdate(millisUntilFinished)
+                onPlayProgressInfoUpdateListener?.onPlayProgressUpdate(millisUntilFinished)
             }
 
             override fun onFinish() {
-                onPlayProgressInfoUpdateListener.onFinish()
+                onPlayProgressInfoUpdateListener?.onFinish()
             }
         }
         countDownTimer?.start()
@@ -53,5 +59,9 @@ class MessageMediaPlayer: MediaPlayer() {
         fun onPlayProgressUpdate(millisUntilFinished: Long)
 
         fun onFinish()
+
+        fun onPause()
+
+        fun onPlay()
     }
 }

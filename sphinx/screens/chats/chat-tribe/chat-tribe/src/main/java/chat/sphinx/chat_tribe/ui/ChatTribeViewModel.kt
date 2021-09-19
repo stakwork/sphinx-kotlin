@@ -236,7 +236,7 @@ internal class ChatTribeViewModel @Inject constructor(
         }.join()
     }
 
-    override fun goToChatDetailScreen() {
+    override fun navigateToChatDetailScreen() {
         viewModelScope.launch(mainImmediate) {
             (chatNavigator as TribeChatNavigator).toTribeDetailScreen(chatId)
         }

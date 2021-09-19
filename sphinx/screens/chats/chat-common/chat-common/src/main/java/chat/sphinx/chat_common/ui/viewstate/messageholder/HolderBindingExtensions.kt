@@ -189,6 +189,20 @@ internal fun LayoutMessageHolderBinding.setView(
                                 }
                             }
 
+                            override fun onPause() {
+                                lifecycleScope.launch(dispatchers.mainImmediate) {
+                                    textViewAttachmentPlayPauseButton.text = getString(R.string.material_icon_name_play_button)
+                                }
+                            }
+
+                            override fun onPlay() {
+                                lifecycleScope.launch(dispatchers.mainImmediate) {
+                                    textViewAttachmentPlayPauseButton.text = getString(R.string.material_icon_name_pause_button)
+                                    messageMediaPlayer.initPlayProgressInfoUpdateWithTimer(
+                                        seekBarAttachmentAudio.progress
+                                    )
+                                }
+                            }
                         }
 
                         val filePath: String? = media?.localFile?.absolutePath ?: media?.retrieveRemoteMediaInputStream(
@@ -219,13 +233,9 @@ internal fun LayoutMessageHolderBinding.setView(
                                 progressBarAttachmentAudioFileLoading.gone
                                 textViewAttachmentPlayPauseButton.visible
 
+                                messageMediaPlayer.onPlayProgressInfoUpdateListener = onPlayProgressInfoUpdateListener
                                 if (messageMediaPlayer.isPlaying) {
-                                    textViewAttachmentPlayPauseButton.text = getString(R.string.material_icon_name_pause_button)
-
-                                    messageMediaPlayer.initPlayProgressInfoUpdateWithTimer(
-                                        seekBarAttachmentAudio.progress,
-                                        onPlayProgressInfoUpdateListener
-                                    )
+                                    onPlayProgressInfoUpdateListener.onPlay()
                                 } else {
                                     textViewAttachmentPlayPauseButton.text = getString(R.string.material_icon_name_play_button)
                                 }
@@ -274,6 +284,7 @@ internal fun LayoutMessageHolderBinding.setView(
                                     messageMediaPlayer.apply {
                                         try {
                                             setOnPreparedListener {
+                                                messageMediaPlayer.onPlayProgressInfoUpdateListener = onPlayProgressInfoUpdateListener
                                                 seekBarAttachmentAudio.max = duration
                                                 textViewAttachmentAudioRemainingDuration.text = duration.toLong().toTimestamp()
                                                 progressBarAttachmentAudioFileLoading.gone
@@ -302,14 +313,8 @@ internal fun LayoutMessageHolderBinding.setView(
 
                                 if (messageMediaPlayer.isPlaying) {
                                     messageMediaPlayer.pause()
-                                    textViewAttachmentPlayPauseButton.text = getString(R.string.material_icon_name_play_button)
                                 } else {
-                                    textViewAttachmentPlayPauseButton.text = getString(R.string.material_icon_name_pause_button)
                                     messageMediaPlayer.start()
-                                    messageMediaPlayer.initPlayProgressInfoUpdateWithTimer(
-                                        seekBarAttachmentAudio.progress,
-                                        onPlayProgressInfoUpdateListener
-                                    )
                                 }
                             }
                         }

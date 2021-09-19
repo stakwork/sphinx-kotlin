@@ -1215,7 +1215,14 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         }
     }
 
-    abstract fun goToChatDetailScreen()
+    fun goToChatDetailScreen() {
+        if (messageMediaPlayer.isPlaying) {
+            messageMediaPlayer.pause()
+        }
+        navigateToChatDetailScreen()
+    }
+
+    protected abstract fun navigateToChatDetailScreen()
 
     open fun handleContactTribeLinks(url: String?) {
         if (url != null) {

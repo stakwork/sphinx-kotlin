@@ -143,7 +143,7 @@ class ChatGroupViewModel @Inject constructor(
         return super.sendMessage(builder)
     }
 
-    override fun goToChatDetailScreen() {
+    override fun navigateToChatDetailScreen() {
         // We do nothing because Chat Groups are being aren't supported anymore
     }
 }
