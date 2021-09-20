@@ -135,7 +135,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     protected abstract val chatId: ChatId?
     protected abstract val contactId: ContactId?
 
-    internal val messageMediaPlayer: MessageMediaPlayer = MessageMediaPlayer()
+    internal val messageMediaPlayer: MessageMediaPlayer = MessageMediaPlayer(app)
 
     val imageLoaderDefaults by lazy {
         ImageLoaderOptions.Builder()
