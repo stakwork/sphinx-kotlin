@@ -1372,6 +1372,11 @@ abstract class ChatViewModel<ARGS: NavArgs>(
             submitSideEffect(sideEffect)
         }
     }
+
+    override fun onCleared() {
+        super.onCleared()
+        messageMediaPlayer.release()
+    }
 }
 
 @Suppress("NOTHING_TO_INLINE")

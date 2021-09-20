@@ -1216,11 +1216,6 @@ abstract class ChatFragment<
         }
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        viewModel.messageMediaPlayer.release()
-    }
-
     override suspend fun onSideEffectCollect(sideEffect: ChatSideEffect) {
         sideEffect.execute(this)
     }
