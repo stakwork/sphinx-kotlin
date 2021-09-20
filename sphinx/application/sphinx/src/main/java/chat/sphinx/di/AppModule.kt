@@ -4,7 +4,6 @@ import android.app.Application
 import android.content.Context
 import android.widget.ImageView
 import chat.sphinx.BuildConfig
-import chat.sphinx.chat_common.util.MessageMediaPlayer
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_network_client_cache.NetworkClientCache
 import chat.sphinx.feature_image_loader_android.ImageLoaderAndroid
@@ -103,6 +102,4 @@ object AppModule {
             application.cacheDir,
             dispatchers,
         )
-    @Provides
-    fun provideMessageMediaPlayer(): MessageMediaPlayer = MessageMediaPlayer()
 }
