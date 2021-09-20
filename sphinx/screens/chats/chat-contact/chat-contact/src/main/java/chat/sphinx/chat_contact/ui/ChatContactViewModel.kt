@@ -7,7 +7,6 @@ import chat.sphinx.camera_view_model_coordinator.request.CameraRequest
 import chat.sphinx.camera_view_model_coordinator.response.CameraResponse
 import chat.sphinx.chat_common.ui.ChatViewModel
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
-import chat.sphinx.chat_common.util.MessageMediaPlayer
 import chat.sphinx.chat_contact.navigation.ContactChatNavigator
 import chat.sphinx.concept_link_preview.LinkPreviewHandler
 import chat.sphinx.concept_meme_input_stream.MemeInputStreamHandler
@@ -66,7 +65,6 @@ internal class ChatContactViewModel @Inject constructor(
     messageRepository: MessageRepository,
     networkQueryLightning: NetworkQueryLightning,
     mediaCacheHandler: MediaCacheHandler,
-    mesageMediaPlayer: MessageMediaPlayer,
     savedStateHandle: SavedStateHandle,
     cameraViewModelCoordinator: ViewModelCoordinator<CameraRequest, CameraResponse>,
     linkPreviewHandler: LinkPreviewHandler,
@@ -83,7 +81,6 @@ internal class ChatContactViewModel @Inject constructor(
     messageRepository,
     networkQueryLightning,
     mediaCacheHandler,
-    mesageMediaPlayer,
     savedStateHandle,
     cameraViewModelCoordinator,
     linkPreviewHandler,

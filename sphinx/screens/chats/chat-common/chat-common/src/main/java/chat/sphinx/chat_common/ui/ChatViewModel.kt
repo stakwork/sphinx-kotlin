@@ -113,7 +113,6 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     protected val messageRepository: MessageRepository,
     protected val networkQueryLightning: NetworkQueryLightning,
     val mediaCacheHandler: MediaCacheHandler,
-    val messageMediaPlayer: MessageMediaPlayer,
     protected val savedStateHandle: SavedStateHandle,
     protected val cameraCoordinator: ViewModelCoordinator<CameraRequest, CameraResponse>,
     protected val linkPreviewHandler: LinkPreviewHandler,
@@ -134,6 +133,8 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     protected abstract val args: ARGS
     protected abstract val chatId: ChatId?
     protected abstract val contactId: ContactId?
+
+    internal val messageMediaPlayer: MessageMediaPlayer = MessageMediaPlayer()
 
     val imageLoaderDefaults by lazy {
         ImageLoaderOptions.Builder()

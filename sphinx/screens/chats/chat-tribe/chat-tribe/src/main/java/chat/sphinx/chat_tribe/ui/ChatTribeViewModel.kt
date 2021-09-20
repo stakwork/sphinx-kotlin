@@ -8,7 +8,6 @@ import chat.sphinx.camera_view_model_coordinator.response.CameraResponse
 import chat.sphinx.chat_common.ui.ChatSideEffect
 import chat.sphinx.chat_common.ui.ChatViewModel
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
-import chat.sphinx.chat_common.util.MessageMediaPlayer
 import chat.sphinx.chat_tribe.R
 import chat.sphinx.chat_tribe.model.TribePodcastData
 import chat.sphinx.chat_tribe.navigation.TribeChatNavigator
@@ -58,7 +57,6 @@ internal class ChatTribeViewModel @Inject constructor(
     messageRepository: MessageRepository,
     networkQueryLightning: NetworkQueryLightning,
     mediaCacheHandler: MediaCacheHandler,
-    messageMediaPlayer: MessageMediaPlayer,
     savedStateHandle: SavedStateHandle,
     cameraViewModelCoordinator: ViewModelCoordinator<CameraRequest, CameraResponse>,
     linkPreviewHandler: LinkPreviewHandler,
@@ -75,7 +73,6 @@ internal class ChatTribeViewModel @Inject constructor(
     messageRepository,
     networkQueryLightning,
     mediaCacheHandler,
-    messageMediaPlayer,
     savedStateHandle,
     cameraViewModelCoordinator,
     linkPreviewHandler,
