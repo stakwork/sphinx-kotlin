@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="payment_template_recycler_view_height">85dp</dimen>
+    <dimen name="payment_template_recycler_view_item_width">78dp</dimen>
+    <dimen name="payment_template_recycler_view_item_image_xy">56dp</dimen>
+</resources>

@@ -2,6 +2,7 @@ package chat.sphinx.payment_send.ui
 
 import android.app.Application
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_lightning.LightningRepository
@@ -21,7 +22,9 @@ import chat.sphinx.scanner_view_model_coordinator.response.ScannerResponse
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
+import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.lightning.toLightningNodePubKey
+import chat.sphinx.wrapper_common.lightning.toSat
 import chat.sphinx.wrapper_lightning.NodeBalance
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
@@ -114,12 +117,20 @@ internal class PaymentSendViewModel @Inject constructor(
     }
 
     fun sendContactPayment(message: String? = null) {
+
         sendPaymentBuilder.setChatId(args.chatId)
         sendPaymentBuilder.setContactId(args.contactId)
         sendPaymentBuilder.setText(message)
 
         if (sendPaymentBuilder.isContactPayment) {
-            sendPayment()
+            viewModelScope.launch {
+                paymentSendNavigator.toPaymentTemplateDetail(
+                    args.contactId,
+                    args.chatId,
+                    Sat(sendPaymentBuilder.paymentAmount),
+                    message ?: "",
+                )
+            }
         } else {
             requestScanner()
         }
@@ -145,17 +156,16 @@ internal class PaymentSendViewModel @Inject constructor(
                     viewStateContainer.updateViewState(PaymentSendViewState.PaymentFailed)
                 }
                 is Response.Success -> {
-                    if (sendPaymentBuilder.isKeySendPayment) {
-                        val successMessage = app.getString(
-                            R.string.payment_sent,
-                            sendPayment?.amount ?: 0,
-                            sendPayment?.destinationKey?.value ?: "Unknown"
-                        )
+                    val successMessage = app.getString(
+                        R.string.payment_sent,
+                        sendPayment?.amount ?: 0,
+                        sendPayment?.destinationKey?.value ?: "Unknown"
+                    )
 
-                        submitSideEffect(
-                            PaymentSideEffect.Notify(successMessage)
-                        )
-                    }
+                    submitSideEffect(
+                        PaymentSideEffect.Notify(successMessage)
+                    )
+
                     navigator.closeDetailScreen()
                 }
             }
