@@ -209,7 +209,7 @@ internal class MessageListAdapter<ARGS : NavArgs>(
         private val binding: LayoutMessageHolderBinding
     ): RecyclerView.ViewHolder(binding.root) {
 
-        private val holderJobs: ArrayList<Job> = ArrayList(11)
+        private val holderJobs: ArrayList<Job> = ArrayList(14)
         private val disposables: ArrayList<Disposable> = ArrayList(4)
         private var currentViewState: MessageHolderViewState? = null
 
@@ -231,14 +231,13 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                 val selectedMessageLongClickListener = OnLongClickListener { v ->
                     SelectedMessageViewState.SelectedMessage.instantiate(
                         messageHolderViewState = currentViewState,
-                        holderYPosTop = Px(binding.root.y),
+                        holderYPosTop = Px(binding.root.y + binding.includeMessageHolderBubble.root.y),
                         holderHeight = Px(binding.root.measuredHeight.toFloat()),
                         holderWidth = Px(binding.root.measuredWidth.toFloat()),
                         bubbleXPosStart = Px(root.x),
                         bubbleWidth = Px(root.measuredWidth.toFloat()),
                         bubbleHeight = Px(root.measuredHeight.toFloat()),
                         headerHeight = headerHeight,
-                        statusHeaderHeight = Px(binding.includeMessageStatusHeader.root.measuredHeight.toFloat()),
                         recyclerViewWidth = recyclerViewWidth,
                         screenHeight = screenHeight
                     ).let { vs ->
@@ -259,6 +258,8 @@ internal class MessageListAdapter<ARGS : NavArgs>(
 
                 SphinxLinkify.addLinks(textViewMessageText, SphinxLinkify.ALL, onSphinxInteractionListener)
                 textViewMessageText.setOnLongClickListener(onSphinxInteractionListener)
+
+                includeMessageTypeBotResponse.webViewMessageTypeBotResponse.setOnLongClickListener(onSphinxInteractionListener)
 
                 includeMessageLinkPreviewContact.apply contact@ {
                     root.setOnLongClickListener(selectedMessageLongClickListener)

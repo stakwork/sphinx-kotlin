@@ -5,55 +5,81 @@
     android:layout_width="wrap_content"
     android:layout_height="@dimen/message_boost_height">
 
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline_boost_reaction_images"
-        android:layout_width="match_parent"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_boost_reaction_images_holder"
+        android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        app:layout_constraintGuide_percent="0.5" />
+        app:layout_constraintStart_toStartOf="parent">
 
-    <include
-        android:id="@+id/include_boost_reaction_image_holder_1"
-        layout="@layout/layout_chat_image_small_initial_holder"
-        android:layout_width="@dimen/image_holder_boost_reaction_xy"
-        android:layout_height="@dimen/image_holder_boost_reaction_xy"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/guideline_boost_reaction_images"
-        app:layout_constraintTop_toTopOf="parent" />
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layout_constraint_boost_reaction_image_holder_3"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:paddingStart="@dimen/image_holder_boost_reaction_3_margin_start"
+            tools:visibility="visible"
+            app:layout_constraintStart_toStartOf="parent">
 
-    <include
-        android:id="@+id/include_boost_reaction_image_holder_2"
-        layout="@layout/layout_chat_image_small_initial_holder"
-        android:layout_width="@dimen/image_holder_boost_reaction_xy"
-        android:layout_height="@dimen/image_holder_boost_reaction_xy"
-        app:layout_constraintEnd_toEndOf="@id/guideline_boost_reaction_images"
-        app:layout_constraintStart_toStartOf="@id/guideline_boost_reaction_images" />
+            <include
+                android:id="@+id/include_boost_reaction_image_holder_3"
+                layout="@layout/layout_chat_image_small_initial_holder"
+                android:layout_width="@dimen/image_holder_boost_reaction_xy"
+                android:layout_height="@dimen/image_holder_boost_reaction_xy"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
-    <include
-        android:id="@+id/include_boost_reaction_image_holder_3"
-        layout="@layout/layout_chat_image_small_initial_holder"
-        android:layout_width="@dimen/image_holder_boost_reaction_xy"
-        android:layout_height="@dimen/image_holder_boost_reaction_xy"
-        android:layout_marginEnd="12dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/text_view_boost_reaction_count"
-        app:layout_constraintStart_toEndOf="@id/guideline_boost_reaction_images"
-        app:layout_constraintTop_toTopOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!-- Count Label if more than 3 boosters -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layout_constraint_boost_reaction_image_holder_2"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:paddingStart="@dimen/image_holder_boost_reaction_2_margin_start"
+            tools:visibility="visible"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <include
+                android:id="@+id/include_boost_reaction_image_holder_2"
+                layout="@layout/layout_chat_image_small_initial_holder"
+                android:layout_width="@dimen/image_holder_boost_reaction_xy"
+                android:layout_height="@dimen/image_holder_boost_reaction_xy"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layout_constraint_boost_reaction_image_holder_1"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <include
+                android:id="@+id/include_boost_reaction_image_holder_1"
+                layout="@layout/layout_chat_image_small_initial_holder"
+                android:layout_width="@dimen/image_holder_boost_reaction_xy"
+                android:layout_height="@dimen/image_holder_boost_reaction_xy"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/text_view_boost_reaction_count"
         android:layout_width="0dp"
         android:layout_height="@dimen/message_boost_height"
-        android:layout_marginStart="@dimen/message_boost_height"
+        android:layout_marginStart="@dimen/default_small_layout_margin"
         android:gravity="center_vertical"
         android:paddingStart="4dp"
         android:textColor="@color/secondaryTextSent"
         android:textSize="@dimen/default_text_size_sub_headline"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@id/guideline_boost_reaction_images"
+        app:layout_constraintStart_toEndOf="@id/layout_constraint_boost_reaction_images_holder"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="21"
         tools:visibility="visible" />

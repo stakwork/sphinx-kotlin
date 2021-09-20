@@ -9,10 +9,15 @@ import chat.sphinx.resources.getString
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.isConversation
 import chat.sphinx.wrapper_chat.isTribeOwnedByAccount
+import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.chatTimeFormat
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.isProvisionalMessage
+import chat.sphinx.wrapper_common.util.getInitials
 import chat.sphinx.wrapper_contact.Contact
+import chat.sphinx.wrapper_contact.ContactAlias
+import chat.sphinx.wrapper_contact.getColorKey
+import chat.sphinx.wrapper_contact.toContactAlias
 import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message_media.MessageMedia
 import chat.sphinx.wrapper_message_media.isAudio
@@ -26,6 +31,12 @@ inline val Message.isCopyLinkAllowed: Boolean
     get() = retrieveTextToShow()?.let {
         SphinxLinkify.SphinxPatterns.COPYABLE_LINKS.matcher(it).find()
     } ?: false
+
+inline val Message.shouldAdaptBubbleWidth: Boolean
+    get() = type.isMessage() &&
+            replyUUID == null &&
+            !isCopyLinkAllowed &&
+            !status.isDeleted()
 
 internal inline val MessageHolderViewState.isReceived: Boolean
     get() = this is MessageHolderViewState.Received
@@ -41,7 +52,7 @@ internal sealed class MessageHolderViewState(
     chat: Chat,
     val background: BubbleBackground,
     val initialHolder: InitialHolderViewState,
-    private val messageSenderName: (Message) -> String,
+    private val messageSenderInfo: (Message) -> Triple<PhotoUrl?, ContactAlias?, String>,
     private val accountOwner: () -> Contact,
     private val previewProvider: suspend (link: MessageLinkPreview) -> LayoutState.Bubble.ContainerThird.LinkPreview?,
     private val paidTextAttachmentContentProvider: suspend (message: Message) -> LayoutState.Bubble.ContainerThird.Message?
@@ -224,37 +235,45 @@ internal sealed class MessageHolderViewState(
             if (nnReactions.isEmpty()) {
                 null
             } else {
-                val set: MutableSet<BoostReactionImageHolder> = LinkedHashSet(1)
+                val set: MutableSet<BoostSenderHolder> = LinkedHashSet(0)
                 var total: Long = 0
+                var boostedByOwner = false
+                val owner = accountOwner()
+
                 for (reaction in nnReactions) {
-//                    if (chatType?.isConversation() != true) {
-//                        reaction.senderPic?.value?.let { url ->
-//                            set.add(SenderPhotoUrl(url))
-//                        } ?: reaction.senderAlias?.value?.let { alias ->
-//                            set.add(SenderInitials(alias.getInitials()))
-//                        }
-//                    }
+                    if (reaction.sender == owner.id) {
+                        boostedByOwner = true
+
+                        set.add(BoostSenderHolder(
+                            owner.photoUrl,
+                            owner.alias,
+                            owner.getColorKey()
+                        ))
+                    } else {
+                        if (chat.type.isConversation()) {
+                            val senderInfo = messageSenderInfo(reaction)
+
+                            set.add(BoostSenderHolder(
+                                senderInfo.first,
+                                senderInfo.second,
+                                senderInfo.third
+                            ))
+                        } else {
+                            set.add(BoostSenderHolder(
+                                reaction.senderPic,
+                                reaction.senderAlias?.value?.toContactAlias(),
+                                reaction.getColorKey()
+                            ))
+                        }
+                    }
                     total += reaction.amount.value
                 }
 
-//                if (chatType?.isConversation() == true) {
-//
-//                    // TODO: Use Account Owner Initial Holder depending on sent/received
-//                    @Exhaustive
-//                    when (initialHolder) {
-//                        is InitialHolderViewState.Initials -> {
-//                            set.add(SenderInitials(initialHolder.initials))
-//                        }
-//                        is InitialHolderViewState.None -> {}
-//                        is InitialHolderViewState.Url -> {
-//                            set.add(SenderPhotoUrl(initialHolder.photoUrl.value))
-//                        }
-//                    }
-//                }
-
                 LayoutState.Bubble.ContainerFourth.Boost(
+                    showSent = (this is Sent),
+                    boostedByOwner = boostedByOwner,
+                    senders = set,
                     totalAmount = Sat(total),
-                    senderPics = set,
                 )
             }
         }
@@ -272,7 +291,7 @@ internal sealed class MessageHolderViewState(
 
             LayoutState.Bubble.ContainerFirst.ReplyMessage(
                 showSent = this is Sent,
-                messageSenderName(nnReplyMessage),
+                messageSenderInfo(nnReplyMessage)?.second?.value ?: "",
                 nnReplyMessage.getColorKey(),
                 nnReplyMessage.retrieveTextToShow() ?: "",
                 mediaUrl,
@@ -374,7 +393,7 @@ internal sealed class MessageHolderViewState(
         message: Message,
         chat: Chat,
         background: BubbleBackground,
-        replyMessageSenderName: (Message) -> String,
+        messageSenderInfo: (Message) -> Triple<PhotoUrl?, ContactAlias?, String>,
         accountOwner: () -> Contact,
         previewProvider: suspend (link: MessageLinkPreview) -> LayoutState.Bubble.ContainerThird.LinkPreview?,
         paidTextMessageContentProvider: suspend (message: Message) -> LayoutState.Bubble.ContainerThird.Message?,
@@ -383,7 +402,7 @@ internal sealed class MessageHolderViewState(
         chat,
         background,
         InitialHolderViewState.None,
-        replyMessageSenderName,
+        messageSenderInfo,
         accountOwner,
         previewProvider,
         paidTextMessageContentProvider,
@@ -394,7 +413,7 @@ internal sealed class MessageHolderViewState(
         chat: Chat,
         background: BubbleBackground,
         initialHolder: InitialHolderViewState,
-        replyMessageSenderName: (Message) -> String,
+        messageSenderInfo: (Message) -> Triple<PhotoUrl?, ContactAlias?, String>,
         accountOwner: () -> Contact,
         previewProvider: suspend (link: MessageLinkPreview) -> LayoutState.Bubble.ContainerThird.LinkPreview?,
         paidTextMessageContentProvider: suspend (message: Message) -> LayoutState.Bubble.ContainerThird.Message?,
@@ -403,7 +422,7 @@ internal sealed class MessageHolderViewState(
         chat,
         background,
         initialHolder,
-        replyMessageSenderName,
+        messageSenderInfo,
         accountOwner,
         previewProvider,
         paidTextMessageContentProvider,

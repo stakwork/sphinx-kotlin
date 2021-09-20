@@ -25,6 +25,7 @@ import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.ChatName
 import chat.sphinx.wrapper_chat.getColorKey
+import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.util.getInitials
@@ -111,7 +112,7 @@ class ChatGroupViewModel @Inject constructor(
         replay = 1,
     )
 
-    override suspend fun getChatNameIfNull(): ChatName? {
+    override suspend fun getChatInfo(): Triple<ChatName?, PhotoUrl?, String>? {
         return null
     }
 

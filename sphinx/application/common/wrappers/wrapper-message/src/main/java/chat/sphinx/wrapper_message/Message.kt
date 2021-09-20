@@ -246,7 +246,7 @@ inline val Message.isCopyAllowed: Boolean
     get() = (this.retrieveTextToShow() ?: "").isNotEmpty()
 
 inline val Message.isReplyAllowed: Boolean
-    get() = (type.isAttachment() || type.isMessage()) &&
+    get() = (type.isAttachment() || type.isMessage() || type.isBotRes()) &&
             (uuid?.value ?: "").isNotEmpty()
 
 inline val Message.isResendAllowed: Boolean
