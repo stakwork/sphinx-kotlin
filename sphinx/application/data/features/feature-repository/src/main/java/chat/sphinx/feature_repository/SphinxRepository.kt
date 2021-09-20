@@ -3895,7 +3895,7 @@ abstract class SphinxRepository(
         return response ?: Response.Error(ResponseError(("Failed to delete subscription")))
     }
 
-    override suspend fun updateLocalFile(localFile: File, messageId: MessageId) {
+    override fun updateLocalFile(localFile: File, messageId: MessageId) {
         applicationScope.launch(mainImmediate) {
             val queries = coreDB.getSphinxDatabaseQueries()
 
