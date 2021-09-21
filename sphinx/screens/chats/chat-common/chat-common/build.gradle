@@ -1,7 +1,9 @@
 plugins {
     id 'app.cash.exhaustive'
     id 'com.android.library'
+    id 'dagger.hilt.android.plugin'
     id 'kotlin-android'
+    id 'kotlin-kapt'
     id 'com.google.android.secrets-gradle-plugin' version '1.1.0'
 }
 
@@ -64,6 +66,9 @@ dependencies {
     api project(path: ':sphinx:screens-detail:camera:camera-view-model-coordinator')
 
     api deps.androidx.lifecycle.hilt
+    implementation deps.google.hilt
+    kapt kaptDeps.google.hilt
+
     api deps.androidx.recyclerView
 
     implementation deps.square.okio
