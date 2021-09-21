@@ -7,7 +7,7 @@ import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import javax.inject.Inject
 
 @HiltViewModel
-class MediaPlayerViewModel @Inject constructor(
+internal class MediaPlayerViewModel @Inject constructor(
     dispatchers: CoroutineDispatchers
 ): BaseViewModel<MediaPlayerViewState>(dispatchers, MediaPlayerViewState.Idle)
 {

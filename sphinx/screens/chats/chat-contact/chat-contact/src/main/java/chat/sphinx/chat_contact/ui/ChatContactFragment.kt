@@ -6,7 +6,6 @@ import androidx.recyclerview.widget.RecyclerView
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.chat_common.databinding.*
 import chat.sphinx.chat_common.ui.ChatFragment
-import chat.sphinx.chat_common.ui.MediaPlayerViewModel
 import chat.sphinx.chat_contact.R
 import chat.sphinx.chat_contact.databinding.FragmentChatContactBinding
 import chat.sphinx.concept_image_loader.ImageLoader
@@ -73,6 +72,4 @@ internal class ChatContactFragment: ChatFragment<
     protected lateinit var _imageLoader: ImageLoader<ImageView>
     override val imageLoader: ImageLoader<ImageView>
         get() = _imageLoader
-
-    override val mediaPlayerViewModel: MediaPlayerViewModel by viewModels()
 }

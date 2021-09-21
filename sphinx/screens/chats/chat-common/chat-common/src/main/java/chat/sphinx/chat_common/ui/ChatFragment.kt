@@ -15,6 +15,7 @@ import androidx.annotation.LayoutRes
 import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.core.view.isVisible
 import androidx.fragment.app.FragmentActivity
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavArgs
@@ -113,7 +114,7 @@ abstract class ChatFragment<
     protected abstract val userColorsHelper: UserColorsHelper
     protected abstract val imageLoader: ImageLoader<ImageView>
 
-    protected abstract val mediaPlayerViewModel: MediaPlayerViewModel
+    private val mediaPlayerViewModel: MediaPlayerViewModel by viewModels()
 
     private val sendMessageBuilder = SendMessage.Builder()
 
