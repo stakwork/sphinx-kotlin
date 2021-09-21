@@ -63,6 +63,7 @@ dependencies {
 
     api project(path: ':sphinx:screens-detail:camera:camera-view-model-coordinator')
 
+    api deps.androidx.lifecycle.hilt
     api deps.androidx.recyclerView
 
     implementation deps.square.okio

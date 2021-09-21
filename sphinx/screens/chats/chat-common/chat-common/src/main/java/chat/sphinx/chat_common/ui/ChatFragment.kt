@@ -87,7 +87,7 @@ import kotlinx.coroutines.launch
 abstract class ChatFragment<
         VB: ViewBinding,
         ARGS: NavArgs,
-        VM: ChatViewModel<ARGS>,
+        VM: ChatViewModel<ARGS>
         >(@LayoutRes layoutId: Int): MotionLayoutFragment<
         Nothing,
         ChatSideEffectFragment,
@@ -112,6 +112,8 @@ abstract class ChatFragment<
 
     protected abstract val userColorsHelper: UserColorsHelper
     protected abstract val imageLoader: ImageLoader<ImageView>
+
+    protected abstract val mediaPlayerViewModel: MediaPlayerViewModel
 
     private val sendMessageBuilder = SendMessage.Builder()
 
@@ -609,6 +611,7 @@ abstract class ChatFragment<
             viewLifecycleOwner,
             onStopSupervisor,
             viewModel,
+            mediaPlayerViewModel,
             imageLoader,
             userColorsHelper
         )
@@ -945,6 +948,7 @@ abstract class ChatFragment<
                                 holderJobs,
                                 disposables,
                                 viewModel.dispatchers,
+                                mediaPlayerViewModel,
                                 imageLoader,
                                 viewModel.imageLoaderDefaults,
                                 viewModel.memeServerTokenHandler,
