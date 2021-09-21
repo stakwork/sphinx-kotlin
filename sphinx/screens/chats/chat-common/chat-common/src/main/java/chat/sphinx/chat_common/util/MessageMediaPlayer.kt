@@ -149,10 +149,9 @@ class MessageMediaPlayer(
                 AudioManager.AUDIOFOCUS_LOSS,
                 AudioManager.AUDIOFOCUS_LOSS_TRANSIENT,
                 AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK -> {
-                    pause()
-                }
-                AudioManager.AUDIOFOCUS_GAIN -> {
-                    super.start()
+                    if (isPlaying) {
+                        pause()
+                    }
                 }
             }
         }
