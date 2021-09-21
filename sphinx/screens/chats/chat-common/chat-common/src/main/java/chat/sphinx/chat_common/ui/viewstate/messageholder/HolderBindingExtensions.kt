@@ -75,6 +75,7 @@ internal fun LayoutMessageHolderBinding.setView(
     recyclerViewWidth: Px,
     viewState: MessageHolderViewState,
     userColorsHelper: UserColorsHelper,
+    onPlayProgressInfoUpdateListener: MessageMediaPlayer.OnPlayProgressInfoUpdateListener? = null,
     onSphinxInteractionListener: SphinxUrlSpan.OnInteractionListener? = null,
 ) {
     for (job in holderJobs) {
@@ -174,48 +175,6 @@ internal fun LayoutMessageHolderBinding.setView(
             setBubbleAudioAttachment(viewState.bubbleAudioAttachment) { layoutMessageAudioAttachment, url, media ->
                 lifecycleScope.launch(dispatchers.mainImmediate) {
                     layoutMessageAudioAttachment.apply {
-                        val onPlayProgressInfoUpdateListener = object: MessageMediaPlayer.OnPlayProgressInfoUpdateListener {
-                            override fun onPlayProgressUpdate(millisUntilFinished: Long) {
-                                lifecycleScope.launch(dispatchers.mainImmediate) {
-                                    textViewAttachmentAudioRemainingDuration.text = millisUntilFinished.toTimestamp()
-                                    textViewAttachmentPlayPauseButton.text = getString(R.string.material_icon_name_pause_button)
-                                    seekBarAttachmentAudio.progress = messageMediaPlayer.currentPosition
-                                    messageMediaPlayer.filePath?.let { filePath ->
-                                        mediaPlayerViewModel.updateCurrentPosition(
-                                            filePath,
-                                            messageMediaPlayer.currentPosition
-                                        )
-                                    }
-
-                                }
-                            }
-
-                            override fun onFinish() {
-                                lifecycleScope.launch(dispatchers.mainImmediate) {
-                                    textViewAttachmentAudioRemainingDuration.text = messageMediaPlayer.duration.toLong().toTimestamp()
-                                    textViewAttachmentPlayPauseButton.text = getString(R.string.material_icon_name_play_button)
-                                    seekBarAttachmentAudio.progress = 0
-
-                                    messageMediaPlayer.pause()
-                                    messageMediaPlayer.seekTo(0)
-                                }
-                            }
-
-                            override fun onPause() {
-                                lifecycleScope.launch(dispatchers.mainImmediate) {
-                                    textViewAttachmentPlayPauseButton.text = getString(R.string.material_icon_name_play_button)
-                                }
-                            }
-
-                            override fun onPlay() {
-                                lifecycleScope.launch(dispatchers.mainImmediate) {
-                                    textViewAttachmentPlayPauseButton.text = getString(R.string.material_icon_name_pause_button)
-                                    messageMediaPlayer.initPlayProgressInfoUpdateWithTimer(
-                                        seekBarAttachmentAudio.progress
-                                    )
-                                }
-                            }
-                        }
 
                         val filePath: String? = media?.localFile?.absolutePath ?: media?.retrieveRemoteMediaInputStream(
                                 url,
@@ -247,7 +206,7 @@ internal fun LayoutMessageHolderBinding.setView(
 
                                 messageMediaPlayer.onPlayProgressInfoUpdateListener = onPlayProgressInfoUpdateListener
                                 if (messageMediaPlayer.isPlaying) {
-                                    onPlayProgressInfoUpdateListener.onPlay()
+                                    onPlayProgressInfoUpdateListener?.onPlay()
                                 } else {
                                     textViewAttachmentPlayPauseButton.text = getString(R.string.material_icon_name_play_button)
                                 }

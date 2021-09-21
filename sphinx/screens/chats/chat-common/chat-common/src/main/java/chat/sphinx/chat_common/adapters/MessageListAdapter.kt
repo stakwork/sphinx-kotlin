@@ -12,6 +12,7 @@ import androidx.navigation.NavArgs
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import chat.sphinx.chat_common.R
 import chat.sphinx.chat_common.databinding.*
 import chat.sphinx.chat_common.model.NodeDescriptor
 import chat.sphinx.chat_common.model.TribeLink
@@ -24,6 +25,7 @@ import chat.sphinx.chat_common.util.*
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_user_colors_helper.UserColorsHelper
+import chat.sphinx.resources.getString
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_message.Message
@@ -216,7 +218,7 @@ internal class MessageListAdapter<ARGS : NavArgs>(
         private var currentViewState: MessageHolderViewState? = null
 
         private val onSphinxInteractionListener: SphinxUrlSpan.OnInteractionListener
-
+        private val onPlayProgressInfoUpdateListener: MessageMediaPlayer.OnPlayProgressInfoUpdateListener
         init {
             binding.includeMessageHolderBubble.apply {
 
@@ -310,6 +312,56 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                     }
                     buttonPayAttachment.setOnLongClickListener(selectedMessageLongClickListener)
                 }
+
+                includeMessageTypeAudioAttachment.apply {
+                    onPlayProgressInfoUpdateListener = object: MessageMediaPlayer.OnPlayProgressInfoUpdateListener {
+                        override fun onPlayProgressUpdate(millisUntilFinished: Long) {
+                            onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                                textViewAttachmentAudioRemainingDuration.text = millisUntilFinished.toTimestamp()
+                                textViewAttachmentPlayPauseButton.text = getString(R.string.material_icon_name_pause_button)
+                                seekBarAttachmentAudio.progress = viewModel.messageMediaPlayer.currentPosition
+                                viewModel.messageMediaPlayer.filePath?.let { filePath ->
+                                    mediaPlayerViewModel.updateCurrentPosition(
+                                        filePath,
+                                        viewModel.messageMediaPlayer.currentPosition
+                                    )
+                                }
+
+                            }
+                        }
+
+                        override fun onFinish() {
+                            onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                                textViewAttachmentAudioRemainingDuration.text = viewModel.messageMediaPlayer.duration.toLong().toTimestamp()
+                                textViewAttachmentPlayPauseButton.text = getString(R.string.material_icon_name_play_button)
+                                seekBarAttachmentAudio.progress = 0
+
+                                viewModel.messageMediaPlayer.pause()
+                                viewModel.messageMediaPlayer.seekTo(0)
+                                viewModel.messageMediaPlayer.filePath?.let { filePath ->
+                                    mediaPlayerViewModel.updateCurrentPosition(filePath, 0)
+                                }
+                            }
+                        }
+
+                        override fun onPause() {
+                            onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                                textViewAttachmentPlayPauseButton.text = getString(R.string.material_icon_name_play_button)
+                            }
+                        }
+
+                        override fun onPlay() {
+                            onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                                textViewAttachmentPlayPauseButton.text = getString(R.string.material_icon_name_pause_button)
+                                viewModel.messageMediaPlayer.initPlayProgressInfoUpdateWithTimer(
+                                    seekBarAttachmentAudio.progress
+                                )
+                            }
+                        }
+                    }
+
+                }
+
             }
 
             binding.includeMessageTypeGroupActionHolder.let { holder ->
@@ -404,6 +456,7 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                 recyclerViewWidth,
                 viewState,
                 userColorsHelper,
+                onPlayProgressInfoUpdateListener,
                 onSphinxInteractionListener
             )
 
