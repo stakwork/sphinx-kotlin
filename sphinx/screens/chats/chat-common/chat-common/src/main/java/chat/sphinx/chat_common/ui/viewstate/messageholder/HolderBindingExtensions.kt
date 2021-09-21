@@ -1,7 +1,6 @@
 package chat.sphinx.chat_common.ui.viewstate.messageholder
 
 import android.graphics.Color
-import android.media.MediaPlayer
 import android.view.Gravity
 import android.widget.ImageView
 import androidx.annotation.ColorRes
@@ -181,6 +180,13 @@ internal fun LayoutMessageHolderBinding.setView(
                                     textViewAttachmentAudioRemainingDuration.text = millisUntilFinished.toTimestamp()
                                     textViewAttachmentPlayPauseButton.text = getString(R.string.material_icon_name_pause_button)
                                     seekBarAttachmentAudio.progress = messageMediaPlayer.currentPosition
+                                    messageMediaPlayer.filePath?.let { filePath ->
+                                        mediaPlayerViewModel.updateCurrentPosition(
+                                            filePath,
+                                            messageMediaPlayer.currentPosition
+                                        )
+                                    }
+
                                 }
                             }
 
@@ -232,7 +238,7 @@ internal fun LayoutMessageHolderBinding.setView(
                             textViewAttachmentAudioFailure.visible
                         } else {
                             if (messageMediaPlayer.filePath == filePath) {
-                                // The messageMediaPlayer has loaded this specific file
+                                // The messageMediaPlayer has loaded this specific file already
                                 seekBarAttachmentAudio.max = messageMediaPlayer.duration
                                 seekBarAttachmentAudio.progress = messageMediaPlayer.currentPosition
                                 textViewAttachmentAudioRemainingDuration.text = messageMediaPlayer.duration.toLong().toTimestamp()
@@ -247,36 +253,7 @@ internal fun LayoutMessageHolderBinding.setView(
                                 }
 
                             } else {
-                                // Load the audio file and forget it
-                                MediaPlayer().apply {
-                                    try {
-                                        setDataSource(
-                                            filePath
-                                        )
-                                        setOnPreparedListener {
-                                            seekBarAttachmentAudio.max = duration
-                                            textViewAttachmentAudioRemainingDuration.text = duration.toLong().toTimestamp()
-                                            progressBarAttachmentAudioFileLoading.gone
-                                            textViewAttachmentPlayPauseButton.visible
-
-                                            // Finished loading the media...
-                                            release()
-                                        }
-                                        setOnErrorListener { mp, what, extra ->
-                                            progressBarAttachmentAudioFileLoading.gone
-                                            textViewAttachmentAudioFailure.visible
-
-                                            return@setOnErrorListener true
-                                        }
-
-                                        prepareAsync()
-
-                                    } catch (e: IOException) {
-                                        progressBarAttachmentAudioFileLoading.gone
-                                        textViewAttachmentAudioFailure.visible
-                                    }
-                                }
-
+                               mediaPlayerViewModel.loadMedia(filePath, layoutMessageAudioAttachment)
                             }
 
                             textViewAttachmentPlayPauseButton.setOnClickListener {
@@ -289,6 +266,11 @@ internal fun LayoutMessageHolderBinding.setView(
                                     messageMediaPlayer.apply {
                                         try {
                                             setOnPreparedListener {
+                                                mediaPlayerViewModel.getCurrentPosition(filePath)?.let { currentPosition ->
+                                                    messageMediaPlayer.seekTo(currentPosition)
+                                                    seekBarAttachmentAudio.progress = currentPosition
+                                                }
+
                                                 messageMediaPlayer.onPlayProgressInfoUpdateListener = onPlayProgressInfoUpdateListener
                                                 seekBarAttachmentAudio.max = duration
                                                 textViewAttachmentAudioRemainingDuration.text = duration.toLong().toTimestamp()
