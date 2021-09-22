@@ -4,6 +4,7 @@ import java.io.File
 
 internal data class AudioMessageState(
     val file: File,
+    val playState: AudioPlayState,
     val durationSeconds: Long,
     val currentSeconds: Long
 ) {

@@ -3,6 +3,7 @@ package chat.sphinx.chat_common.ui
 import android.media.MediaMetadataRetriever
 import androidx.lifecycle.ViewModel
 import chat.sphinx.chat_common.ui.viewstate.audio.AudioMessageState
+import chat.sphinx.chat_common.ui.viewstate.audio.AudioPlayState
 import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.logger.e
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -39,9 +40,9 @@ internal class AudioPlayerViewModel @Inject constructor(
             metaDataRetriever.release()
         }
 
-        suspend fun getOrCreate(file: File): StateFlow<AudioMessageState>? =
+        suspend fun getOrCreate(file: File): MutableStateFlow<AudioMessageState>? =
             lock.withLock {
-                map[file]?.asStateFlow() ?: run {
+                map[file] ?: run {
 
                     val durationSeconds: Long = try {
 
@@ -61,13 +62,14 @@ internal class AudioPlayerViewModel @Inject constructor(
                     val state = MutableStateFlow(
                         AudioMessageState(
                             file,
+                            AudioPlayState.Paused,
                             durationSeconds,
                             0L
                         )
                     )
 
                     map[file] = state
-                    state.asStateFlow()
+                    state
                 }
             }
     }
@@ -75,7 +77,7 @@ internal class AudioPlayerViewModel @Inject constructor(
     private val audioStateCache = AudioStateCache()
 
     override suspend fun getAudioState(file: File): StateFlow<AudioMessageState>? {
-        return audioStateCache.getOrCreate(file)
+        return audioStateCache.getOrCreate(file)?.asStateFlow()
     }
 
     override fun onCleared() {
