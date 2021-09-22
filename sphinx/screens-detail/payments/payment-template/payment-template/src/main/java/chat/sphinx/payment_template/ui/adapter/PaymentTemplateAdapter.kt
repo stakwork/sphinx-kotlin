@@ -32,6 +32,11 @@ internal class PaymentTemplateAdapter(
     private val viewModel: PaymentTemplateViewModel,
 ): RecyclerView.Adapter<PaymentTemplateAdapter.PaymentTemplateViewHolder>(), DefaultLifecycleObserver {
 
+    companion object {
+        const val PADDING_ITEMS_COUNT: Int = 2
+        const val NO_TEMPLATE_ITEMS_COUNT: Int = 1
+    }
+
     private var paymentTemplates = ArrayList<PaymentTemplate>()
 
     fun setItems(newItems: List<PaymentTemplate>) {
@@ -40,7 +45,7 @@ internal class PaymentTemplateAdapter(
     }
 
     override fun getItemCount(): Int {
-        return paymentTemplates.size + 3
+        return paymentTemplates.size + PADDING_ITEMS_COUNT + NO_TEMPLATE_ITEMS_COUNT
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PaymentTemplateAdapter.PaymentTemplateViewHolder {
@@ -98,7 +103,7 @@ internal class PaymentTemplateAdapter(
                         onStopSupervisor.scope.launch(viewModel.dispatchers.mainImmediate) {
                             imageLoader.load(
                                 imageViewTemplate,
-                                R.drawable.ic_no_template,
+                                -1,
                                 ImageLoaderOptions.Builder().build()
                             )
                         }
