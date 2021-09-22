@@ -115,6 +115,7 @@ abstract class ChatFragment<
     protected abstract val imageLoader: ImageLoader<ImageView>
 
     private val mediaPlayerViewModel: MediaPlayerViewModel by viewModels()
+    private val audioPlayerViewModel: AudioPlayerViewModel by viewModels()
 
     private val sendMessageBuilder = SendMessage.Builder()
 
@@ -612,6 +613,7 @@ abstract class ChatFragment<
             viewLifecycleOwner,
             onStopSupervisor,
             viewModel,
+            audioPlayerViewModel,
             mediaPlayerViewModel,
             imageLoader,
             userColorsHelper
@@ -949,6 +951,7 @@ abstract class ChatFragment<
                                 holderJobs,
                                 disposables,
                                 viewModel.dispatchers,
+                                audioPlayerViewModel,
                                 mediaPlayerViewModel,
                                 imageLoader,
                                 viewModel.imageLoaderDefaults,

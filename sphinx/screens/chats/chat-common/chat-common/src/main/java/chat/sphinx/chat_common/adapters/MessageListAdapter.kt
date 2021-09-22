@@ -16,6 +16,7 @@ import chat.sphinx.chat_common.R
 import chat.sphinx.chat_common.databinding.*
 import chat.sphinx.chat_common.model.NodeDescriptor
 import chat.sphinx.chat_common.model.TribeLink
+import chat.sphinx.chat_common.ui.AudioPlayerController
 import chat.sphinx.chat_common.ui.ChatViewModel
 import chat.sphinx.chat_common.ui.MediaPlayerViewModel
 import chat.sphinx.chat_common.ui.isMessageSelected
@@ -46,6 +47,7 @@ internal class MessageListAdapter<ARGS : NavArgs>(
     private val lifecycleOwner: LifecycleOwner,
     private val onStopSupervisor: OnStopSupervisor,
     private val viewModel: ChatViewModel<ARGS>,
+    private val audioPlayerController: AudioPlayerController,
     private val mediaPlayerViewModel: MediaPlayerViewModel,
     private val imageLoader: ImageLoader<ImageView>,
     private val userColorsHelper: UserColorsHelper,
@@ -445,6 +447,7 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                 holderJobs,
                 disposables,
                 viewModel.dispatchers,
+                audioPlayerController,
                 mediaPlayerViewModel,
                 imageLoader,
                 viewModel.imageLoaderDefaults,

@@ -17,6 +17,7 @@ import chat.sphinx.chat_common.databinding.LayoutMessageTypeAttachmentAudioBindi
 import chat.sphinx.chat_common.model.NodeDescriptor
 import chat.sphinx.chat_common.model.TribeLink
 import chat.sphinx.chat_common.model.UnspecifiedUrl
+import chat.sphinx.chat_common.ui.AudioPlayerController
 import chat.sphinx.chat_common.ui.MediaPlayerViewModel
 import chat.sphinx.chat_common.ui.retrieveRemoteMediaInputStream
 import chat.sphinx.chat_common.util.MessageMediaPlayer
@@ -64,6 +65,7 @@ internal fun LayoutMessageHolderBinding.setView(
     holderJobs: ArrayList<Job>,
     disposables: ArrayList<Disposable>,
     dispatchers: CoroutineDispatchers,
+    audioPlayerController: AudioPlayerController,
     mediaPlayerViewModel: MediaPlayerViewModel,
     imageLoader: ImageLoader<ImageView>,
     imageLoaderDefaults: ImageLoaderOptions,
