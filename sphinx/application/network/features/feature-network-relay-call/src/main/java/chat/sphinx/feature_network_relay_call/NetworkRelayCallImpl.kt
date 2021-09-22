@@ -17,6 +17,8 @@ import chat.sphinx.logger.e
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
 import com.squareup.moshi.Moshi
+import com.squareup.moshi.Types
+import com.squareup.moshi.adapter
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
@@ -132,7 +134,26 @@ class NetworkRelayCallImpl(
         } catch (e: Exception) {
             emit(handleException(LOG, GET, url, e))
         }
+    }
 
+    override fun <T: Any> getList(
+        url: String,
+        responseJsonClass: Class<T>,
+        headers: Map<String, String>?,
+        useExtendedNetworkCallClient: Boolean,
+    ): Flow<LoadResponse<List<T>, ResponseError>> = flow {
+
+        emit(LoadResponse.Loading)
+
+        try {
+            val requestBuilder = buildRequest(url, headers)
+
+            val response = callList(responseJsonClass, requestBuilder.build(), useExtendedNetworkCallClient)
+
+            emit(Response.Success(response))
+        } catch (e: Exception) {
+            emit(handleException(LOG, GET, url, e))
+        }
     }
 
     override fun <T: Any, V: Any> put(
@@ -279,6 +300,55 @@ class NetworkRelayCallImpl(
 
         return withContext(default) {
             moshi.adapter(responseJsonClass).fromJson(body.source())
+        } ?: throw IOException(
+            """
+                Failed to convert Json to ${responseJsonClass.simpleName}
+                NetworkResponse: $networkResponse
+            """.trimIndent()
+        )
+    }
+
+    override suspend fun <T: Any> callList(
+        responseJsonClass: Class<T>,
+        request: Request,
+        useExtendedNetworkCallClient: Boolean
+    ): List<T> {
+        // TODO: Make less horrible. Needed for the `/contacts` endpoint for users who
+        //  have a large number of contacts as Relay needs more time than the default
+        //  client's settings. Replace once the `aa/contacts` endpoint gets pagination.
+        val client = if (useExtendedNetworkCallClient) {
+            extendedClientLock.withLock {
+                extendedNetworkCallClient ?: networkClient.getClient().newBuilder()
+                    .connectTimeout(120, TimeUnit.SECONDS)
+                    .readTimeout(45, TimeUnit.SECONDS)
+                    .writeTimeout(45, TimeUnit.SECONDS)
+                    .build()
+                    .also { extendedNetworkCallClient = it }
+            }
+        } else {
+            networkClient.getClient()
+        }
+
+        val networkResponse = withContext(io) {
+            client.newCall(request).execute()
+        }
+
+        if (!networkResponse.isSuccessful) {
+            networkResponse.body?.close()
+            throw IOException(networkResponse.toString())
+        }
+
+        val body = networkResponse.body ?: throw NullPointerException(
+            """
+                NetworkResponse.body returned null
+                NetworkResponse: $networkResponse
+            """.trimIndent()
+        )
+
+        val listMyData = Types.newParameterizedType(List::class.java, responseJsonClass)
+
+        return withContext(default) {
+            moshi.adapter<List<T>>(listMyData).fromJson(body.source())
         } ?: throw IOException(
             """
                 Failed to convert Json to ${responseJsonClass.simpleName}

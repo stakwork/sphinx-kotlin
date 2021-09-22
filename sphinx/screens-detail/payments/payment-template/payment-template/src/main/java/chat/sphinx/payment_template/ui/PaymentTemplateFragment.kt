@@ -17,14 +17,16 @@ import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.payment_template.R
 import chat.sphinx.payment_template.databinding.FragmentPaymentTemplateBinding
-import chat.sphinx.payment_template.ui.adapter.PaymentTemplate
 import chat.sphinx.payment_template.ui.adapter.PaymentTemplateAdapter
 import chat.sphinx.payment_template.ui.viewstate.PaymentTemplateViewState
+import chat.sphinx.payment_template.ui.viewstate.TemplateImagesViewState
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.visible
+import io.matthewnelson.concept_views.viewstate.collect
 import kotlinx.coroutines.launch
+import javax.annotation.meta.Exhaustive
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -81,14 +83,17 @@ internal class PaymentTemplateFragment: SideEffectFragment<
     private fun sendPayment() {
         binding.recyclerViewPaymentTemplate.apply {
             snapHelper.findSnapView(layoutManager)?.let { centerView ->
-                val position = this.getChildAdapterPosition(centerView)
-            }
+                layoutManager?.getPosition(centerView)?.let { position ->
 
-            viewModel.sendPayment()
+                }
+//                viewModel.sendPayment()
+            }
         }
     }
 
+    private var snapPosition = RecyclerView.NO_POSITION
     private val snapHelper: SnapHelper = LinearSnapHelper()
+
     private fun setupPaymentTemplateRecycler() {
         binding.recyclerViewPaymentTemplate.apply {
             val paymentTemplateAdapter = PaymentTemplateAdapter(
@@ -103,18 +108,35 @@ internal class PaymentTemplateFragment: SideEffectFragment<
 
             snapHelper.attachToRecyclerView(this)
 
-            paymentTemplateAdapter.setItems(arrayListOf(
-                PaymentTemplate(),
-                PaymentTemplate(),
-                PaymentTemplate(),
-                PaymentTemplate(),
-                PaymentTemplate(),
-                PaymentTemplate(),
-                PaymentTemplate(),
-                PaymentTemplate(),
-                PaymentTemplate(),
-                PaymentTemplate())
-            )
+            addOnScrollListener(object : RecyclerView.OnScrollListener() {
+                override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                    super.onScrolled(recyclerView, dx, dy)
+
+                    snapHelper.findSnapView(layoutManager)?.let { centerView ->
+                        layoutManager?.getPosition(centerView)?.let { position ->
+                            if (snapPosition != position) {
+                                changeSelectedTemplate(position)
+                            }
+                        }
+                    }
+                }
+            })
+        }
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.loadTemplateImages()
+        }
+    }
+
+    private fun changeSelectedTemplate(position: Int) {
+        binding.apply {
+            val viewHolder = recyclerViewPaymentTemplate.findViewHolderForAdapterPosition(position)
+            if (viewHolder is PaymentTemplateAdapter.PaymentTemplateViewHolder) {
+                val image = viewHolder.binding.imageViewTemplate.drawable
+                imageViewSelectedPaymentTemplate.setImageDrawable(image)
+
+                viewModel.selectTemplate(position)
+            }
         }
     }
 
@@ -137,6 +159,30 @@ internal class PaymentTemplateFragment: SideEffectFragment<
             }
             is PaymentTemplateViewState.PaymentFailed -> {
                 binding.progressBarConfirm.gone
+            }
+        }
+    }
+
+    override fun subscribeToViewStateFlow() {
+        super.subscribeToViewStateFlow()
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.templateImagesViewStateContainer.collect { viewState ->
+                @Exhaustive
+                when (viewState) {
+                    is TemplateImagesViewState.LoadingTemplateImages -> {
+                        binding.layoutConstraintProgressBarLoadingTemplates.visible
+                    }
+                    is TemplateImagesViewState.TemplateImages -> {
+                        binding.layoutConstraintProgressBarLoadingTemplates.gone
+
+                        if (binding.recyclerViewPaymentTemplate.adapter is PaymentTemplateAdapter) {
+
+                            (binding.recyclerViewPaymentTemplate.adapter as PaymentTemplateAdapter)
+                                .setItems(viewState.templates)
+                        }
+                    }
+                }
             }
         }
     }

@@ -9,6 +9,7 @@
         android:layout_width="@dimen/payment_template_recycler_view_item_image_xy"
         android:layout_height="@dimen/payment_template_recycler_view_item_image_xy"
         android:src="@drawable/ic_no_template"
+        android:background="@color/primaryGreen"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"

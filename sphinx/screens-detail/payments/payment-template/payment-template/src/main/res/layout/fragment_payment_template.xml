@@ -152,4 +152,28 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_progress_bar_loading_templates"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="@+id/recycler_view_payment_template"
+        app:layout_constraintTop_toTopOf="@+id/image_view_selected_payment_template"
+        android:background="@drawable/background_detail_screen">
+
+        <ProgressBar
+            android:layout_width="@dimen/payment_template_images_progress_bar_xy"
+            android:layout_height="@dimen/payment_template_images_progress_bar_xy"
+            android:layout_marginLeft="@dimen/default_half_layout_margin"
+            style="?android:attr/progressBarStyle"
+            android:indeterminateTint="@color/mainBottomIcons"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:indeterminate="true"
+            android:visibility="visible" />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -5,14 +5,17 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.*
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
-import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.payment_template.R
 import chat.sphinx.payment_template.databinding.LayoutPaymentTemplateHolderBinding
 import chat.sphinx.payment_template.ui.PaymentTemplateViewModel
+import chat.sphinx.wrapper_common.payment.PaymentTemplate
+import chat.sphinx.wrapper_meme_server.headerKey
+import chat.sphinx.wrapper_meme_server.headerValue
+import chat.sphinx.wrapper_meme_server.toAuthenticationToken
+import chat.sphinx.wrapper_message_media.token.MediaHost
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
@@ -26,21 +29,7 @@ internal class PaymentTemplateAdapter(
     private val viewModel: PaymentTemplateViewModel,
 ): RecyclerView.Adapter<PaymentTemplateAdapter.PaymentTemplateViewHolder>(), DefaultLifecycleObserver {
 
-    private val paymentTemplates = ArrayList<PaymentTemplate>()
-
-    override fun onStart(owner: LifecycleOwner) {
-        super.onStart(owner)
-
-        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-//            viewModel.collectChatViewState { viewState ->
-//
-//                if (dashboardChats.isEmpty()) {
-//                    dashboardChats.addAll(viewState.list)
-//                    this@PaymentTemplateAdapter.notifyDataSetChanged()
-//                }
-//            }
-        }
-    }
+    private var paymentTemplates = ArrayList<PaymentTemplate>()
 
     fun setItems(newItems: List<PaymentTemplate>) {
         paymentTemplates.addAll(newItems)
@@ -66,18 +55,8 @@ internal class PaymentTemplateAdapter(
     }
 
     inner class PaymentTemplateViewHolder(
-        private val binding: LayoutPaymentTemplateHolderBinding
+        val binding: LayoutPaymentTemplateHolderBinding
     ): RecyclerView.ViewHolder(binding.root), DefaultLifecycleObserver {
-
-        private var paymentTemplate: PaymentTemplate? = null
-
-        init {
-            binding.root.setOnClickListener {
-                paymentTemplate?.let { nnPaymentTemplate ->
-
-                }
-            }
-        }
 
         fun bind(position: Int) {
             binding.apply {
@@ -93,11 +72,23 @@ internal class PaymentTemplateAdapter(
 
                     imageViewTemplate.visible
 
-                    val paymentT: PaymentTemplate = paymentTemplates.getOrNull(position - 1) ?: let {
-                        paymentTemplate = null
+                    val paymentTemplate: PaymentTemplate = paymentTemplates.getOrNull(position - 1) ?: let {
                         return
                     }
-                    paymentTemplate = paymentT
+
+                    paymentTemplate.getTemplateUrl(MediaHost.DEFAULT.value)?.let { url ->
+                        paymentTemplate.token.toAuthenticationToken()?.let { token ->
+                            onStopSupervisor.scope.launch(viewModel.dispatchers.mainImmediate) {
+                                imageLoader.load(
+                                    imageViewTemplate,
+                                    url,
+                                    ImageLoaderOptions.Builder().addHeader(
+                                        token.headerKey, token.headerValue
+                                    ).build()
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }

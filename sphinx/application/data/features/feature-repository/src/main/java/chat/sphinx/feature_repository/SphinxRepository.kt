@@ -65,6 +65,7 @@ import chat.sphinx.wrapper_common.dashboard.toChatId
 import chat.sphinx.wrapper_common.invite.InviteStatus
 import chat.sphinx.wrapper_common.lightning.*
 import chat.sphinx.wrapper_common.message.*
+import chat.sphinx.wrapper_common.payment.PaymentTemplate
 import chat.sphinx.wrapper_common.subscription.EndNumber
 import chat.sphinx.wrapper_common.subscription.SubscriptionId
 import chat.sphinx.wrapper_contact.*
@@ -3891,6 +3892,43 @@ abstract class SphinxRepository(
                 }
             }
         }.join()
+
+        return response ?: Response.Error(ResponseError(("Failed to delete subscription")))
+    }
+
+    override suspend fun getPaymentTemplates(): Response<List<PaymentTemplate>, ResponseError> {
+        var response: Response<List<PaymentTemplate>, ResponseError>? = null
+
+        val memeServerHost = MediaHost.DEFAULT
+
+        val token = memeServerTokenHandler.retrieveAuthenticationToken(memeServerHost)
+            ?: throw RuntimeException("MemeServerAuthenticationToken retrieval failure")
+
+        networkQueryMemeServer.getPaymentTemplates(token, moshi = moshi).collect { loadResponse ->
+            @Exhaustive
+            when (loadResponse) {
+                is LoadResponse.Loading -> {}
+                is Response.Error -> {
+                    response = loadResponse
+                }
+                is Response.Success -> {
+                    var templates = ArrayList<PaymentTemplate>()
+
+                    for (ptDto in loadResponse.value) {
+                        templates.add(
+                            PaymentTemplate(
+                                ptDto.muid,
+                                ptDto.width,
+                                ptDto.height,
+                                token.value
+                            )
+                        )
+                    }
+
+                    response = Response.Success(templates)
+                }
+            }
+        }
 
         return response ?: Response.Error(ResponseError(("Failed to delete subscription")))
     }

@@ -7,19 +7,22 @@ import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.concept_repository_message.model.SendPayment
 import chat.sphinx.kotlin_response.Response
-import chat.sphinx.payment_common.ui.PaymentSideEffect
-import chat.sphinx.payment_common.ui.viewstate.send.PaymentSendViewState
 import chat.sphinx.payment_template.R
 import chat.sphinx.payment_template.navigation.PaymentTemplateNavigator
 import chat.sphinx.payment_template.ui.viewstate.PaymentTemplateViewState
+import chat.sphinx.payment_template.ui.viewstate.TemplateImagesViewState
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.Sat
+import chat.sphinx.wrapper_common.payment.PaymentTemplate
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
+import io.matthewnelson.concept_views.viewstate.ViewStateContainer
+import io.matthewnelson.concept_views.viewstate.value
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -59,6 +62,39 @@ internal class PaymentTemplateViewModel @Inject constructor(
     private val sendPaymentBuilder = SendPayment.Builder()
 
     private val args: PaymentTemplateFragmentArgs by savedStateHandle.navArgs()
+
+    val templateImagesViewStateContainer: ViewStateContainer<TemplateImagesViewState> by lazy {
+        ViewStateContainer(TemplateImagesViewState.LoadingTemplateImages)
+    }
+
+    suspend fun loadTemplateImages() {
+        templateImagesViewStateContainer.updateViewState(TemplateImagesViewState.LoadingTemplateImages)
+
+        when (val response = messageRepository.getPaymentTemplates()) {
+            is Response.Error -> {
+                templateImagesViewStateContainer.updateViewState(
+                    TemplateImagesViewState.TemplateImages(listOf())
+                )
+            }
+            is Response.Success -> {
+                templateImagesViewStateContainer.updateViewState(
+                    TemplateImagesViewState.TemplateImages(response.value)
+                )
+            }
+        }
+    }
+
+    fun selectTemplate(position: Int) {
+        if (templateImagesViewStateContainer.value is TemplateImagesViewState.TemplateImages) {
+            val templates = (templateImagesViewStateContainer.value as TemplateImagesViewState.TemplateImages).templates
+
+            if (position == 0) {
+
+            } else {
+//                val template = templates[position - 1]
+            }
+        }
+    }
 
     fun sendPayment() {
         sendPaymentBuilder.setChatId(args.chatId)
