@@ -117,7 +117,6 @@ internal class PaymentSendViewModel @Inject constructor(
     }
 
     fun sendContactPayment(message: String? = null) {
-
         sendPaymentBuilder.setChatId(args.chatId)
         sendPaymentBuilder.setContactId(args.contactId)
         sendPaymentBuilder.setText(message)

@@ -3,15 +3,18 @@ package chat.sphinx.payment_template.ui.adapter
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.ImageView
+import androidx.core.content.ContextCompat
 import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.*
 import androidx.recyclerview.widget.RecyclerView
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
+import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.payment_template.R
 import chat.sphinx.payment_template.databinding.LayoutPaymentTemplateHolderBinding
 import chat.sphinx.payment_template.ui.PaymentTemplateViewModel
 import chat.sphinx.wrapper_common.payment.PaymentTemplate
+import chat.sphinx.wrapper_meme_server.AuthenticationToken
 import chat.sphinx.wrapper_meme_server.headerKey
 import chat.sphinx.wrapper_meme_server.headerValue
 import chat.sphinx.wrapper_meme_server.toAuthenticationToken
@@ -37,7 +40,7 @@ internal class PaymentTemplateAdapter(
     }
 
     override fun getItemCount(): Int {
-        return paymentTemplates.size + 2
+        return paymentTemplates.size + 3
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PaymentTemplateAdapter.PaymentTemplateViewHolder {
@@ -61,9 +64,12 @@ internal class PaymentTemplateAdapter(
         fun bind(position: Int) {
             binding.apply {
                 val itemWidth = recyclerView.context.resources.getDimension(R.dimen.payment_template_recycler_view_item_width).toInt()
-                val paddingItemWidth = ((recyclerView.width - itemWidth) / 2).toInt()
+                val paddingItemWidth = ((recyclerView.width - itemWidth) / 2)
 
-                if (position == 0 || position == paymentTemplates.size + 1) {
+                val isStartPaddingItem = position == 0
+                val isEndPaddingItem = position == paymentTemplates.size + 2
+
+                if (isStartPaddingItem || isEndPaddingItem) {
                     root.updateLayoutParams { width = paddingItemWidth }
 
                     imageViewTemplate.gone
@@ -72,21 +78,29 @@ internal class PaymentTemplateAdapter(
 
                     imageViewTemplate.visible
 
-                    val paymentTemplate: PaymentTemplate = paymentTemplates.getOrNull(position - 1) ?: let {
-                        return
-                    }
+                    paymentTemplates.getOrNull(position - 2)?.let { paymentTemplate ->
+                        paymentTemplate.getTemplateUrl(MediaHost.DEFAULT.value)?.let { url ->
 
-                    paymentTemplate.getTemplateUrl(MediaHost.DEFAULT.value)?.let { url ->
-                        paymentTemplate.token.toAuthenticationToken()?.let { token ->
+                            val token = AuthenticationToken(paymentTemplate.token)
+
                             onStopSupervisor.scope.launch(viewModel.dispatchers.mainImmediate) {
                                 imageLoader.load(
                                     imageViewTemplate,
                                     url,
-                                    ImageLoaderOptions.Builder().addHeader(
-                                        token.headerKey, token.headerValue
-                                    ).build()
+                                    ImageLoaderOptions.Builder()
+                                        .transformation(Transformation.CircleCrop)
+                                        .addHeader(token.headerKey, token.headerValue)
+                                        .build()
                                 )
                             }
+                        }
+                    } ?: run {
+                        onStopSupervisor.scope.launch(viewModel.dispatchers.mainImmediate) {
+                            imageLoader.load(
+                                imageViewTemplate,
+                                R.drawable.ic_no_template,
+                                ImageLoaderOptions.Builder().build()
+                            )
                         }
                     }
                 }

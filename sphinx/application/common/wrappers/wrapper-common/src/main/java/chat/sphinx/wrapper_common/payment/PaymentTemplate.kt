@@ -8,7 +8,15 @@ class PaymentTemplate(
 ) {
 
     fun getTemplateUrl(mediaHost: String): String? {
-        return "$mediaHost/template/$muid"
+        return "https://$mediaHost/template/$muid"
+    }
+
+    fun getDimensions(): String? {
+        return "${width}x${height}"
+    }
+
+    fun getMediaType(): String? {
+        return "image/png"
     }
 
 }

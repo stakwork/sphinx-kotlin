@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
@@ -13,13 +14,19 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SnapHelper
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.concept_image_loader.ImageLoader
+import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.payment_template.R
 import chat.sphinx.payment_template.databinding.FragmentPaymentTemplateBinding
 import chat.sphinx.payment_template.ui.adapter.PaymentTemplateAdapter
 import chat.sphinx.payment_template.ui.viewstate.PaymentTemplateViewState
+import chat.sphinx.payment_template.ui.viewstate.SelectedTemplateViewState
 import chat.sphinx.payment_template.ui.viewstate.TemplateImagesViewState
+import chat.sphinx.wrapper_meme_server.AuthenticationToken
+import chat.sphinx.wrapper_meme_server.headerKey
+import chat.sphinx.wrapper_meme_server.headerValue
+import chat.sphinx.wrapper_message_media.token.MediaHost
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
@@ -72,7 +79,7 @@ internal class PaymentTemplateFragment: SideEffectFragment<
             textViewMessage.text = args.argMessage
 
             buttonConfirm.setOnClickListener {
-                sendPayment()
+                viewModel.sendPayment()
             }
         }
 
@@ -80,20 +87,7 @@ internal class PaymentTemplateFragment: SideEffectFragment<
         setupFragmentLayout()
     }
 
-    private fun sendPayment() {
-        binding.recyclerViewPaymentTemplate.apply {
-            snapHelper.findSnapView(layoutManager)?.let { centerView ->
-                layoutManager?.getPosition(centerView)?.let { position ->
-
-                }
-//                viewModel.sendPayment()
-            }
-        }
-    }
-
     private var snapPosition = RecyclerView.NO_POSITION
-    private val snapHelper: SnapHelper = LinearSnapHelper()
-
     private fun setupPaymentTemplateRecycler() {
         binding.recyclerViewPaymentTemplate.apply {
             val paymentTemplateAdapter = PaymentTemplateAdapter(
@@ -106,6 +100,7 @@ internal class PaymentTemplateFragment: SideEffectFragment<
             layoutManager = LinearLayoutManager(context, RecyclerView.HORIZONTAL, false)
             adapter = paymentTemplateAdapter
 
+            val snapHelper: SnapHelper = LinearSnapHelper()
             snapHelper.attachToRecyclerView(this)
 
             addOnScrollListener(object : RecyclerView.OnScrollListener() {
@@ -115,7 +110,8 @@ internal class PaymentTemplateFragment: SideEffectFragment<
                     snapHelper.findSnapView(layoutManager)?.let { centerView ->
                         layoutManager?.getPosition(centerView)?.let { position ->
                             if (snapPosition != position) {
-                                changeSelectedTemplate(position)
+                                //Subtracting padding and no template items to position
+                                viewModel.selectTemplate(position - 2)
                             }
                         }
                     }
@@ -125,18 +121,6 @@ internal class PaymentTemplateFragment: SideEffectFragment<
 
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.loadTemplateImages()
-        }
-    }
-
-    private fun changeSelectedTemplate(position: Int) {
-        binding.apply {
-            val viewHolder = recyclerViewPaymentTemplate.findViewHolderForAdapterPosition(position)
-            if (viewHolder is PaymentTemplateAdapter.PaymentTemplateViewHolder) {
-                val image = viewHolder.binding.imageViewTemplate.drawable
-                imageViewSelectedPaymentTemplate.setImageDrawable(image)
-
-                viewModel.selectTemplate(position)
-            }
         }
     }
 
@@ -176,10 +160,43 @@ internal class PaymentTemplateFragment: SideEffectFragment<
                     is TemplateImagesViewState.TemplateImages -> {
                         binding.layoutConstraintProgressBarLoadingTemplates.gone
 
-                        if (binding.recyclerViewPaymentTemplate.adapter is PaymentTemplateAdapter) {
+                        (binding.recyclerViewPaymentTemplate.adapter as PaymentTemplateAdapter)
+                            .setItems(viewState.templates)
 
-                            (binding.recyclerViewPaymentTemplate.adapter as PaymentTemplateAdapter)
-                                .setItems(viewState.templates)
+                        binding.recyclerViewPaymentTemplate.apply {
+                            val itemWidth = context
+                                .resources
+                                .getDimension(R.dimen.payment_template_recycler_view_item_width).toInt()
+
+                            scrollBy(itemWidth,0)
+                        }
+                    }
+                }
+            }
+        }
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.selectedTemplateViewStateContainer.collect { viewState ->
+                @Exhaustive
+                when (viewState) {
+                    is SelectedTemplateViewState.Idle -> {
+                        binding.imageViewSelectedPaymentTemplate.setImageDrawable(
+                            ContextCompat.getDrawable(binding.root.context, R.drawable.ic_no_template_with_padding)
+                        )
+                    }
+                    is SelectedTemplateViewState.SelectedTemplate -> {
+                        val template = viewState.template
+
+                        template.getTemplateUrl(MediaHost.DEFAULT.value)?.let { url ->
+                            val token = AuthenticationToken(template.token)
+
+                            imageLoader.load(
+                                binding.imageViewSelectedPaymentTemplate,
+                                url,
+                                ImageLoaderOptions.Builder()
+                                    .addHeader(token.headerKey, token.headerValue)
+                                    .build()
+                            )
                         }
                     }
                 }

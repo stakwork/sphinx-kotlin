@@ -2466,7 +2466,9 @@ abstract class SphinxRepository(
                     text = encryptedText?.value,
                     remote_text = encryptedRemoteText?.value,
                     destination_key = sendPayment.destinationKey?.value,
-
+                    muid = sendPayment.paymentTemplate?.muid,
+                    dimensions = sendPayment.paymentTemplate?.getDimensions(),
+                    media_type = sendPayment.paymentTemplate?.getMediaType()
                 )
             } catch (e: IllegalArgumentException) {
                 response = Response.Error(

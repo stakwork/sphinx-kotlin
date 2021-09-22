@@ -10,6 +10,7 @@ import chat.sphinx.kotlin_response.Response
 import chat.sphinx.payment_template.R
 import chat.sphinx.payment_template.navigation.PaymentTemplateNavigator
 import chat.sphinx.payment_template.ui.viewstate.PaymentTemplateViewState
+import chat.sphinx.payment_template.ui.viewstate.SelectedTemplateViewState
 import chat.sphinx.payment_template.ui.viewstate.TemplateImagesViewState
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
@@ -67,6 +68,10 @@ internal class PaymentTemplateViewModel @Inject constructor(
         ViewStateContainer(TemplateImagesViewState.LoadingTemplateImages)
     }
 
+    val selectedTemplateViewStateContainer: ViewStateContainer<SelectedTemplateViewState> by lazy {
+        ViewStateContainer(SelectedTemplateViewState.Idle)
+    }
+
     suspend fun loadTemplateImages() {
         templateImagesViewStateContainer.updateViewState(TemplateImagesViewState.LoadingTemplateImages)
 
@@ -86,12 +91,22 @@ internal class PaymentTemplateViewModel @Inject constructor(
 
     fun selectTemplate(position: Int) {
         if (templateImagesViewStateContainer.value is TemplateImagesViewState.TemplateImages) {
-            val templates = (templateImagesViewStateContainer.value as TemplateImagesViewState.TemplateImages).templates
 
-            if (position == 0) {
+            (templateImagesViewStateContainer.value as TemplateImagesViewState.TemplateImages)
+                .templates
+                .getOrNull(position)?.let { template ->
 
-            } else {
-//                val template = templates[position - 1]
+                sendPaymentBuilder.setPaymentTemplate(template)
+
+                selectedTemplateViewStateContainer.updateViewState(
+                    SelectedTemplateViewState.SelectedTemplate(template)
+                )
+            } ?: run {
+                sendPaymentBuilder.setPaymentTemplate(null)
+
+                selectedTemplateViewStateContainer.updateViewState(
+                    SelectedTemplateViewState.Idle
+                )
             }
         }
     }
@@ -115,16 +130,6 @@ internal class PaymentTemplateViewModel @Inject constructor(
                     viewStateContainer.updateViewState(PaymentTemplateViewState.PaymentFailed)
                 }
                 is Response.Success -> {
-//                    val successMessage = app.getString(
-//                        R.string.payment_sent,
-//                        sendPayment?.amount ?: 0,
-//                        sendPayment?.destinationKey?.value ?: "Unknown"
-//                    )
-//
-//                    submitSideEffect(
-//                        PaymentSideEffect.Notify(successMessage)
-//                    )
-
                     navigator.closeDetailScreen()
                 }
             }

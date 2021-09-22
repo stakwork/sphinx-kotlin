@@ -94,9 +94,8 @@
         android:id="@+id/image_view_selected_payment_template"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginHorizontal="@dimen/default_layout_margin"
-        android:layout_marginVertical="@dimen/default_double_layout_margin"
-        android:src="@drawable/ic_no_template"
+        android:layout_marginVertical="@dimen/default_layout_margin"
+        android:src="@drawable/ic_no_template_with_padding"
         android:scaleType="centerInside"
         app:layout_constraintBottom_toTopOf="@+id/recycler_view_payment_template"
         app:layout_constraintTop_toBottomOf="@+id/layout_constraint_message"></androidx.appcompat.widget.AppCompatImageView>
@@ -106,9 +105,16 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/payment_template_recycler_view_height"
         android:layout_marginVertical="@dimen/default_layout_margin"
-        app:layout_constraintBottom_toTopOf="@+id/layout_constraint_confirm_button">
+        app:layout_constraintBottom_toTopOf="@+id/layout_constraint_confirm_button"/>
 
-    </androidx.recyclerview.widget.RecyclerView>
+    <androidx.appcompat.widget.AppCompatImageView
+        android:layout_width="@dimen/payment_template_selected_image_circle_xy"
+        android:layout_height="@dimen/payment_template_selected_image_circle_xy"
+        android:src="@drawable/selected_template_circle"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="@+id/recycler_view_payment_template"
+        app:layout_constraintTop_toTopOf="@+id/recycler_view_payment_template"></androidx.appcompat.widget.AppCompatImageView>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/layout_constraint_confirm_button"
@@ -158,7 +164,8 @@
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="@+id/recycler_view_payment_template"
         app:layout_constraintTop_toTopOf="@+id/image_view_selected_payment_template"
-        android:background="@drawable/background_detail_screen">
+        android:background="@drawable/background_detail_screen"
+        tools:visibility="gone">
 
         <ProgressBar
             android:layout_width="@dimen/payment_template_images_progress_bar_xy"
