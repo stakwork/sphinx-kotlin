@@ -110,7 +110,7 @@ internal class PaymentTemplateFragment: SideEffectFragment<
                     snapHelper.findSnapView(layoutManager)?.let { centerView ->
                         layoutManager?.getPosition(centerView)?.let { position ->
                             if (snapPosition != position) {
-                                //Subtracting padding and no template items to position
+                                //Subtracting padding item and no template item from position
                                 viewModel.selectTemplate(position - 2)
                             }
                         }
@@ -160,15 +160,15 @@ internal class PaymentTemplateFragment: SideEffectFragment<
                     is TemplateImagesViewState.TemplateImages -> {
                         binding.layoutConstraintProgressBarLoadingTemplates.gone
 
-                        (binding.recyclerViewPaymentTemplate.adapter as PaymentTemplateAdapter)
-                            .setItems(viewState.templates)
-
                         binding.recyclerViewPaymentTemplate.apply {
-                            val itemWidth = context
-                                .resources
-                                .getDimension(R.dimen.payment_template_recycler_view_item_width).toInt()
 
-                            scrollBy(itemWidth,0)
+                            (adapter as PaymentTemplateAdapter).setItems(viewState.templates)
+
+                            //scrolling to first template item
+                            scrollBy(
+                                context.resources.getDimension(R.dimen.payment_template_recycler_view_item_width).toInt(),
+                                0
+                            )
                         }
                     }
                 }

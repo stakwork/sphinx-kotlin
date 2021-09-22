@@ -10,7 +10,7 @@
         android:layout_height="@dimen/payment_template_recycler_view_item_image_xy"
         android:scaleType="centerCrop"
         android:background="@drawable/circular_button"
-        android:backgroundTint="#1Affffff"
+        android:backgroundTint="@color/templateCircleBackground"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"

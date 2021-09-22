@@ -63,11 +63,12 @@ internal class PaymentTemplateAdapter(
     }
 
     inner class PaymentTemplateViewHolder(
-        val binding: LayoutPaymentTemplateHolderBinding
+        private val binding: LayoutPaymentTemplateHolderBinding
     ): RecyclerView.ViewHolder(binding.root), DefaultLifecycleObserver {
 
         fun bind(position: Int) {
             binding.apply {
+
                 val itemWidth = recyclerView.context.resources.getDimension(R.dimen.payment_template_recycler_view_item_width).toInt()
                 val paddingItemWidth = ((recyclerView.width - itemWidth) / 2)
 
