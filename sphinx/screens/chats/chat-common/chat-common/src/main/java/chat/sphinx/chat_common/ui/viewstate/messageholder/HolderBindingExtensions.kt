@@ -1192,6 +1192,7 @@ internal inline fun LayoutMessageHolderBinding.setBubbleAudioAttachment(
                         setAudioAttachmentLayoutForState(state)
                     } ?: setAudioAttachmentLayoutForState(
                         AudioMessageState(
+                            null,
                             AudioPlayState.Error,
                             1L,
                             0L,
@@ -1204,7 +1205,12 @@ internal inline fun LayoutMessageHolderBinding.setBubbleAudioAttachment(
             is LayoutState.Bubble.ContainerSecond.AudioAttachment.FileUnavailable -> {
                 root.visible
                 setAudioAttachmentLayoutForState(
-                    AudioMessageState(AudioPlayState.Loading, 1L, 0L)
+                    AudioMessageState(
+                        null,
+                        AudioPlayState.Loading,
+                        1L,
+                        0L
+                    )
                 )
             }
         }

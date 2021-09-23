@@ -314,6 +314,11 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                 }
 
                 includeMessageTypeAudioAttachment.apply {
+                    textViewAttachmentPlayPauseButton.setOnClickListener {
+                        audioPlayerController.togglePlayPause(
+                            currentViewState?.bubbleAudioAttachment
+                        )
+                    }
 //                    onPlayProgressInfoUpdateListener = object: MessageMediaPlayer.OnPlayProgressInfoUpdateListener {
 //                        override fun onPlayProgressUpdate(millisUntilFinished: Long) {
 //                            onStopSupervisor.scope.launch(viewModel.mainImmediate) {
