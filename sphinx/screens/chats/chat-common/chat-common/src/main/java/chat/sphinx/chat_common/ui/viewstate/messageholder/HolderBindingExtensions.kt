@@ -18,22 +18,17 @@ import chat.sphinx.chat_common.model.NodeDescriptor
 import chat.sphinx.chat_common.model.TribeLink
 import chat.sphinx.chat_common.model.UnspecifiedUrl
 import chat.sphinx.chat_common.ui.AudioPlayerController
-import chat.sphinx.chat_common.ui.MediaPlayerViewModel
-import chat.sphinx.chat_common.ui.retrieveRemoteMediaInputStream
 import chat.sphinx.chat_common.ui.viewstate.audio.AudioMessageState
 import chat.sphinx.chat_common.ui.viewstate.audio.AudioPlayState
-import chat.sphinx.chat_common.util.MessageMediaPlayer
 import chat.sphinx.chat_common.util.SphinxLinkify
 import chat.sphinx.chat_common.util.SphinxUrlSpan
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
-import chat.sphinx.concept_meme_input_stream.MemeInputStreamHandler
 import chat.sphinx.concept_meme_server.MemeServerTokenHandler
 import chat.sphinx.concept_network_client_crypto.CryptoHeader
 import chat.sphinx.concept_network_client_crypto.CryptoScheme
-import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.resources.*
 import chat.sphinx.resources.databinding.LayoutChatImageSmallInitialHolderBinding
@@ -51,12 +46,10 @@ import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.goneIfTrue
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
-import io.matthewnelson.concept_media_cache.MediaCacheHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import java.io.File
-import java.io.IOException
 import chat.sphinx.resources.R as common_R
 
 
@@ -1196,8 +1189,8 @@ internal inline fun LayoutMessageHolderBinding.setBubbleAudioAttachment(
                 root.visible
                 lifecycleScope.launch(dispatchers.mainImmediate) {
                     audioPlayerController.getAudioState(audioAttachment.file)?.value?.let { state ->
-                        setAudioAttachmentForState(state)
-                    } ?: setAudioAttachmentForState(
+                        setAudioAttachmentLayoutForState(state)
+                    } ?: setAudioAttachmentLayoutForState(
                         AudioMessageState(
                             AudioPlayState.Error,
                             1L,
@@ -1210,7 +1203,9 @@ internal inline fun LayoutMessageHolderBinding.setBubbleAudioAttachment(
             }
             is LayoutState.Bubble.ContainerSecond.AudioAttachment.FileUnavailable -> {
                 root.visible
-                setAudioAttachmentForState(AudioMessageState(AudioPlayState.Loading, 1L, 0L))
+                setAudioAttachmentLayoutForState(
+                    AudioMessageState(AudioPlayState.Loading, 1L, 0L)
+                )
             }
         }
 
@@ -1219,7 +1214,9 @@ internal inline fun LayoutMessageHolderBinding.setBubbleAudioAttachment(
 
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
-internal inline fun LayoutMessageTypeAttachmentAudioBinding.setAudioAttachmentForState(state: AudioMessageState) {
+internal inline fun LayoutMessageTypeAttachmentAudioBinding.setAudioAttachmentLayoutForState(
+    state: AudioMessageState
+) {
 
     seekBarAttachmentAudio.progress = state.progress.toInt()
     textViewAttachmentAudioRemainingDuration.text = state.remainingSeconds.toTimestamp()

@@ -12,7 +12,6 @@ import androidx.navigation.NavArgs
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import chat.sphinx.chat_common.R
 import chat.sphinx.chat_common.databinding.*
 import chat.sphinx.chat_common.model.NodeDescriptor
 import chat.sphinx.chat_common.model.TribeLink
@@ -26,7 +25,6 @@ import chat.sphinx.chat_common.util.*
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_user_colors_helper.UserColorsHelper
-import chat.sphinx.resources.getString
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_message.Message
@@ -213,7 +211,7 @@ internal class MessageListAdapter<ARGS : NavArgs>(
 
     inner class MessageViewHolder(
         private val binding: LayoutMessageHolderBinding
-    ): RecyclerView.ViewHolder(binding.root) {
+    ): RecyclerView.ViewHolder(binding.root), DefaultLifecycleObserver {
 
         private val holderJobs: ArrayList<Job> = ArrayList(14)
         private val disposables: ArrayList<Disposable> = ArrayList(4)
@@ -441,6 +439,7 @@ internal class MessageListAdapter<ARGS : NavArgs>(
 
         fun bind(position: Int) {
             val viewState = messages.elementAtOrNull(position).also { currentViewState = it } ?: return
+            audioAttachmentJob?.cancel()
 
             binding.setView(
                 lifecycleOwner.lifecycleScope,
@@ -463,9 +462,36 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                 onSphinxInteractionListener
             )
 
-            // TODO: Implement observation if not null
-            viewState.bubbleAudioAttachment
+            observeAudioAttachmentState()
+        }
 
+        private var audioAttachmentJob: Job? = null
+        override fun onStart(owner: LifecycleOwner) {
+            super.onStart(owner)
+            audioAttachmentJob?.let { job ->
+                if (!job.isActive) {
+                    observeAudioAttachmentState()
+                }
+            }
+        }
+
+        private fun observeAudioAttachmentState() {
+            currentViewState?.bubbleAudioAttachment?.let { audioAttachment ->
+                if (audioAttachment is LayoutState.Bubble.ContainerSecond.AudioAttachment.FileAvailable) {
+                    audioAttachmentJob?.cancel()
+                    audioAttachmentJob = onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                        audioPlayerController.getAudioState(audioAttachment.file)?.collect { audioState ->
+                            binding.includeMessageHolderBubble
+                                .includeMessageTypeAudioAttachment
+                                .setAudioAttachmentLayoutForState(audioState)
+                        }
+                    }
+                }
+            }
+        }
+
+        init {
+            lifecycleOwner.lifecycle.addObserver(this)
         }
 
     }
