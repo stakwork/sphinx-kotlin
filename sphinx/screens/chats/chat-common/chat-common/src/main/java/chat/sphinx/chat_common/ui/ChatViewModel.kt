@@ -409,6 +409,9 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                                 accountOwner = { owner },
                                 previewProvider = { handleLinkPreview(it) },
                                 paidTextMessageContentProvider = { message -> handlePaidTextMessageContent(message) },
+                                onBindDownloadAudio = {
+                                    // TODO: Implement
+                                }
                             )
                         )
                     } else {
@@ -469,6 +472,9 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                                 accountOwner = { owner },
                                 previewProvider = { link -> handleLinkPreview(link) },
                                 paidTextMessageContentProvider = { message -> handlePaidTextMessageContent(message) },
+                                onBindDownloadAudio = {
+                                    // TODO: Implement
+                                }
                             )
                         )
                     }

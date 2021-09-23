@@ -12,6 +12,7 @@ import chat.sphinx.wrapper_contact.ContactAlias
 import chat.sphinx.wrapper_message.MessageType
 import chat.sphinx.wrapper_message.PurchaseStatus
 import chat.sphinx.wrapper_message_media.MessageMedia
+import java.io.File
 
 internal sealed class LayoutState private constructor() {
 
@@ -80,11 +81,12 @@ internal sealed class LayoutState private constructor() {
                     get() = amount.unit
             }
 
-            data class AudioAttachment(
-                val url: String,
-                val media: MessageMedia?,
-                val showPaidOverlay: Boolean
-            ): ContainerSecond()
+            sealed class AudioAttachment: ContainerSecond() {
+
+                data class FileAvailable(val file: File): AudioAttachment()
+
+                data class FileUnavailable(val showPaidOverlay: Boolean): AudioAttachment()
+            }
 
             data class ImageAttachment(
                 val url: String,

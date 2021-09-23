@@ -1,11 +1,9 @@
 package chat.sphinx.chat_common.ui.viewstate.messageholder
 
-import chat.sphinx.chat_common.R
 import chat.sphinx.chat_common.model.MessageLinkPreview
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
 import chat.sphinx.chat_common.ui.viewstate.selected.MenuItemState
 import chat.sphinx.chat_common.util.SphinxLinkify
-import chat.sphinx.resources.getString
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.isConversation
 import chat.sphinx.wrapper_chat.isTribeOwnedByAccount
@@ -13,7 +11,6 @@ import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.chatTimeFormat
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.isProvisionalMessage
-import chat.sphinx.wrapper_common.util.getInitials
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_contact.ContactAlias
 import chat.sphinx.wrapper_contact.getColorKey
@@ -55,7 +52,8 @@ internal sealed class MessageHolderViewState(
     private val messageSenderInfo: (Message) -> Triple<PhotoUrl?, ContactAlias?, String>,
     private val accountOwner: () -> Contact,
     private val previewProvider: suspend (link: MessageLinkPreview) -> LayoutState.Bubble.ContainerThird.LinkPreview?,
-    private val paidTextAttachmentContentProvider: suspend (message: Message) -> LayoutState.Bubble.ContainerThird.Message?
+    private val paidTextAttachmentContentProvider: suspend (message: Message) -> LayoutState.Bubble.ContainerThird.Message?,
+    private val onBindDownloadAudio: () -> Unit,
 ) {
 
     companion object {
@@ -201,13 +199,35 @@ internal sealed class MessageHolderViewState(
     }
 
     val bubbleAudioAttachment: LayoutState.Bubble.ContainerSecond.AudioAttachment? by lazy(LazyThreadSafetyMode.NONE) {
-        message.retrieveAudioUrlAndMessageMedia()?.let { mediaData ->
-            LayoutState.Bubble.ContainerSecond.AudioAttachment(
-                mediaData.first,
-                mediaData.second,
-                (this is Received && message.isPaidPendingMessage)
-            )
+        message.messageMedia?.let { nnMessageMedia ->
+            if (nnMessageMedia.mediaType.isAudio) {
+
+                nnMessageMedia.localFile?.let { nnFile ->
+
+                    LayoutState.Bubble.ContainerSecond.AudioAttachment.FileAvailable(nnFile)
+
+                } ?: run {
+                    val pendingPayment = this is Received && message.isPaidPendingMessage
+
+                    // will only be called once when value is lazily initialized upon binding
+                    // data to view.
+                    if (!pendingPayment) {
+                        onBindDownloadAudio.invoke()
+                    }
+
+                    LayoutState.Bubble.ContainerSecond.AudioAttachment.FileUnavailable(pendingPayment)
+                }
+            } else {
+                null
+            }
         }
+//        message.retrieveAudioUrlAndMessageMedia()?.let { mediaData ->
+//            LayoutState.Bubble.ContainerSecond.AudioAttachment(
+//                mediaData.first,
+//                mediaData.second,
+//                (this is Received && message.isPaidPendingMessage)
+//            )
+//        }
     }
 
     val bubbleImageAttachment: LayoutState.Bubble.ContainerSecond.ImageAttachment? by lazy(LazyThreadSafetyMode.NONE) {
@@ -397,6 +417,7 @@ internal sealed class MessageHolderViewState(
         accountOwner: () -> Contact,
         previewProvider: suspend (link: MessageLinkPreview) -> LayoutState.Bubble.ContainerThird.LinkPreview?,
         paidTextMessageContentProvider: suspend (message: Message) -> LayoutState.Bubble.ContainerThird.Message?,
+        onBindDownloadAudio: () -> Unit,
     ) : MessageHolderViewState(
         message,
         chat,
@@ -406,6 +427,7 @@ internal sealed class MessageHolderViewState(
         accountOwner,
         previewProvider,
         paidTextMessageContentProvider,
+        onBindDownloadAudio,
     )
 
     class Received(
@@ -417,6 +439,7 @@ internal sealed class MessageHolderViewState(
         accountOwner: () -> Contact,
         previewProvider: suspend (link: MessageLinkPreview) -> LayoutState.Bubble.ContainerThird.LinkPreview?,
         paidTextMessageContentProvider: suspend (message: Message) -> LayoutState.Bubble.ContainerThird.Message?,
+        onBindDownloadAudio: () -> Unit,
     ) : MessageHolderViewState(
         message,
         chat,
@@ -426,5 +449,6 @@ internal sealed class MessageHolderViewState(
         accountOwner,
         previewProvider,
         paidTextMessageContentProvider,
+        onBindDownloadAudio,
     )
 }
