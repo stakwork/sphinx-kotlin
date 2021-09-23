@@ -98,7 +98,6 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import okio.base64.encodeBase64
-import java.io.File
 import java.io.InputStream
 import java.text.ParseException
 import kotlin.math.absoluteValue
@@ -1675,16 +1674,17 @@ abstract class SphinxRepository(
 
     override fun getMessageById(messageId: MessageId): Flow<Message?> = flow {
         val queries = coreDB.getSphinxDatabaseQueries()
-        emitAll(
-            queries.messageGetById(messageId)
-                .asFlow()
-                .mapToOneOrNull(io)
-                .map { it?.let { messageDbo ->
-                    mapMessageDboAndDecryptContentIfNeeded(queries, messageDbo)
-                }}
-                .distinctUntilChanged()
-        )
+        emitAll(getMessageByIdImpl(messageId, queries))
     }
+
+    private fun getMessageByIdImpl(messageId: MessageId, queries: SphinxDatabaseQueries): Flow<Message?> =
+        queries.messageGetById(messageId)
+            .asFlow()
+            .mapToOneOrNull(io)
+            .map { it?.let { messageDbo ->
+                mapMessageDboAndDecryptContentIfNeeded(queries, messageDbo)
+            }}
+            .distinctUntilChanged()
 
     override fun getTribeLastMemberRequestByContactId(contactId: ContactId, chatId: ChatId, ): Flow<Message?> = flow {
         val queries = coreDB.getSphinxDatabaseQueries()
@@ -3895,18 +3895,50 @@ abstract class SphinxRepository(
         return response ?: Response.Error(ResponseError(("Failed to delete subscription")))
     }
 
-    override fun updateLocalFile(localFile: File, messageId: MessageId) {
+    private val downloadLockMap = SynchronizedMap<MessageId, Pair<Int, Mutex>>()
+    override fun downloadMediaIfApplicable(messageId: MessageId) {
         applicationScope.launch(mainImmediate) {
-            val queries = coreDB.getSphinxDatabaseQueries()
+            val downloadLock: Mutex = downloadLockMap.withLock { map ->
+                val localLock: Pair<Int, Mutex>? = map[messageId]
 
-            subscriptionLock.withLock {
-                withContext(io) {
-                    queries.transaction {
-                        updateMessageMediaLocalFile(
-                            localFile,
-                            messageId,
-                            queries
-                        )
+                if (localLock != null) {
+                    map[messageId] = Pair(localLock.first + 1, localLock.second)
+                    localLock.second
+                } else {
+                    Pair(1, Mutex()).let { pair ->
+                        map[messageId] = pair
+                        pair.second
+                    }
+                }
+            }
+
+            downloadLock.withLock {
+                val queries = coreDB.getSphinxDatabaseQueries()
+
+                val message: Message? = getMessageByIdImpl(messageId, queries).firstOrNull()
+                val media = message?.messageMedia
+
+                if (
+                    message != null                 &&
+                    media != null                   &&
+                    media.localFile == null         &&
+                    !message.status.isDeleted()     &&
+                    !message.isPaidPendingMessage
+                ) {
+                    // TODO: Download media and update MessageMedia table with file path
+
+                    // hold onto lock until table change propagates to UI
+                    delay(200L)
+                }
+
+                // remove lock from map if only subscriber
+                downloadLockMap.withLock { map ->
+                    map[messageId]?.let { pair ->
+                        if (pair.first <= 1) {
+                            map.remove(messageId)
+                        } else {
+                            map[messageId] = Pair(pair.first - 1, pair.second)
+                        }
                     }
                 }
             }

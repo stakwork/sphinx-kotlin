@@ -53,7 +53,7 @@ internal sealed class MessageHolderViewState(
     private val accountOwner: () -> Contact,
     private val previewProvider: suspend (link: MessageLinkPreview) -> LayoutState.Bubble.ContainerThird.LinkPreview?,
     private val paidTextAttachmentContentProvider: suspend (message: Message) -> LayoutState.Bubble.ContainerThird.Message?,
-    private val onBindDownloadAudio: () -> Unit,
+    private val onBindDownloadMedia: () -> Unit,
 ) {
 
     companion object {
@@ -212,7 +212,7 @@ internal sealed class MessageHolderViewState(
                     // will only be called once when value is lazily initialized upon binding
                     // data to view.
                     if (!pendingPayment) {
-                        onBindDownloadAudio.invoke()
+                        onBindDownloadMedia.invoke()
                     }
 
                     LayoutState.Bubble.ContainerSecond.AudioAttachment.FileUnavailable(pendingPayment)
@@ -417,7 +417,7 @@ internal sealed class MessageHolderViewState(
         accountOwner: () -> Contact,
         previewProvider: suspend (link: MessageLinkPreview) -> LayoutState.Bubble.ContainerThird.LinkPreview?,
         paidTextMessageContentProvider: suspend (message: Message) -> LayoutState.Bubble.ContainerThird.Message?,
-        onBindDownloadAudio: () -> Unit,
+        onBindDownloadMedia: () -> Unit,
     ) : MessageHolderViewState(
         message,
         chat,
@@ -427,7 +427,7 @@ internal sealed class MessageHolderViewState(
         accountOwner,
         previewProvider,
         paidTextMessageContentProvider,
-        onBindDownloadAudio,
+        onBindDownloadMedia,
     )
 
     class Received(
@@ -439,7 +439,7 @@ internal sealed class MessageHolderViewState(
         accountOwner: () -> Contact,
         previewProvider: suspend (link: MessageLinkPreview) -> LayoutState.Bubble.ContainerThird.LinkPreview?,
         paidTextMessageContentProvider: suspend (message: Message) -> LayoutState.Bubble.ContainerThird.Message?,
-        onBindDownloadAudio: () -> Unit,
+        onBindDownloadMedia: () -> Unit,
     ) : MessageHolderViewState(
         message,
         chat,
@@ -449,6 +449,6 @@ internal sealed class MessageHolderViewState(
         accountOwner,
         previewProvider,
         paidTextMessageContentProvider,
-        onBindDownloadAudio,
+        onBindDownloadMedia,
     )
 }

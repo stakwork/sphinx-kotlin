@@ -12,7 +12,7 @@ interface RepositoryMedia {
     fun getChatById(chatId: ChatId): Flow<Chat?>
     fun updateChatMetaData(chatId: ChatId, metaData: ChatMetaData)
 
-    fun updateLocalFile(localFile: File, messageId: MessageId)
+    fun downloadMediaIfApplicable(messageId: MessageId)
 
     fun streamPodcastPayments(
         chatId: ChatId,

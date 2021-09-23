@@ -108,16 +108,16 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     dispatchers: CoroutineDispatchers,
     val memeServerTokenHandler: MemeServerTokenHandler,
     val chatNavigator: ChatNavigator,
-    val repositoryMedia: RepositoryMedia,
+    private val repositoryMedia: RepositoryMedia,
     protected val chatRepository: ChatRepository,
     protected val contactRepository: ContactRepository,
     protected val messageRepository: MessageRepository,
     protected val networkQueryLightning: NetworkQueryLightning,
-    val mediaCacheHandler: MediaCacheHandler,
+    protected val mediaCacheHandler: MediaCacheHandler,
     protected val savedStateHandle: SavedStateHandle,
     protected val cameraCoordinator: ViewModelCoordinator<CameraRequest, CameraResponse>,
     protected val linkPreviewHandler: LinkPreviewHandler,
-    val memeInputStreamHandler: MemeInputStreamHandler,
+    private val memeInputStreamHandler: MemeInputStreamHandler,
     protected val LOG: SphinxLogger,
 ): MotionLayoutViewModel<
         Nothing,
@@ -409,8 +409,8 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                                 accountOwner = { owner },
                                 previewProvider = { handleLinkPreview(it) },
                                 paidTextMessageContentProvider = { message -> handlePaidTextMessageContent(message) },
-                                onBindDownloadAudio = {
-                                    // TODO: Implement
+                                onBindDownloadMedia = {
+                                    repositoryMedia.downloadMediaIfApplicable(message.id)
                                 }
                             )
                         )
@@ -472,8 +472,9 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                                 accountOwner = { owner },
                                 previewProvider = { link -> handleLinkPreview(link) },
                                 paidTextMessageContentProvider = { message -> handlePaidTextMessageContent(message) },
-                                onBindDownloadAudio = {
-                                    // TODO: Implement
+                                onBindDownloadMedia = {
+
+                                    repositoryMedia.downloadMediaIfApplicable(message.id)
                                 }
                             )
                         )
