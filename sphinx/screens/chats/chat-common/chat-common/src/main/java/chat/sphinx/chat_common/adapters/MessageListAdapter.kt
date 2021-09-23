@@ -480,7 +480,7 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                 if (audioAttachment is LayoutState.Bubble.ContainerSecond.AudioAttachment.FileAvailable) {
                     audioAttachmentJob?.cancel()
                     audioAttachmentJob = onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-                        audioPlayerController.getAudioState(audioAttachment.file)?.collect { audioState ->
+                        audioPlayerController.getAudioState(audioAttachment)?.collect { audioState ->
                             binding.includeMessageHolderBubble
                                 .includeMessageTypeAudioAttachment
                                 .setAudioAttachmentLayoutForState(audioState)

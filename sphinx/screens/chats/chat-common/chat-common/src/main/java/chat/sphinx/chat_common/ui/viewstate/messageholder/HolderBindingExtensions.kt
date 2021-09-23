@@ -1188,7 +1188,7 @@ internal inline fun LayoutMessageHolderBinding.setBubbleAudioAttachment(
             is LayoutState.Bubble.ContainerSecond.AudioAttachment.FileAvailable -> {
                 root.visible
                 lifecycleScope.launch(dispatchers.mainImmediate) {
-                    audioPlayerController.getAudioState(audioAttachment.file)?.value?.let { state ->
+                    audioPlayerController.getAudioState(audioAttachment)?.value?.let { state ->
                         setAudioAttachmentLayoutForState(state)
                     } ?: setAudioAttachmentLayoutForState(
                         AudioMessageState(

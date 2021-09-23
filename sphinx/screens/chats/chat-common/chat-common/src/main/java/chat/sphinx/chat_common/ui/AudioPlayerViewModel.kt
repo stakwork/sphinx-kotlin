@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.chat_common.ui.viewstate.audio.AudioMessageState
 import chat.sphinx.chat_common.ui.viewstate.audio.AudioPlayState
+import chat.sphinx.chat_common.ui.viewstate.messageholder.LayoutState
 import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.logger.e
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -20,7 +21,9 @@ import java.io.File
 import javax.inject.Inject
 
 internal interface AudioPlayerController {
-    suspend fun getAudioState(file: File): StateFlow<AudioMessageState>?
+    suspend fun getAudioState(
+        audioAttachment: LayoutState.Bubble.ContainerSecond.AudioAttachment.FileAvailable
+    ): StateFlow<AudioMessageState>?
 }
 
 @HiltViewModel
@@ -88,8 +91,10 @@ internal class AudioPlayerViewModel @Inject constructor(
 
     private val audioStateCache = AudioStateCache()
 
-    override suspend fun getAudioState(file: File): StateFlow<AudioMessageState>? {
-        return audioStateCache.getOrCreate(file)?.asStateFlow()
+    override suspend fun getAudioState(
+        audioAttachment: LayoutState.Bubble.ContainerSecond.AudioAttachment.FileAvailable
+    ): StateFlow<AudioMessageState>? {
+        return audioStateCache.getOrCreate(audioAttachment.file)?.asStateFlow()
     }
 
     override fun onCleared() {
