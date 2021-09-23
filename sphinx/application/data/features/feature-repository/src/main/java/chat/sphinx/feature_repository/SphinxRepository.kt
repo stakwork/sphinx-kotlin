@@ -3906,31 +3906,34 @@ abstract class SphinxRepository(
         val token = memeServerTokenHandler.retrieveAuthenticationToken(memeServerHost)
             ?: throw RuntimeException("MemeServerAuthenticationToken retrieval failure")
 
-        networkQueryMemeServer.getPaymentTemplates(token, moshi = moshi).collect { loadResponse ->
-            @Exhaustive
-            when (loadResponse) {
-                is LoadResponse.Loading -> {}
-                is Response.Error -> {
-                    response = loadResponse
-                }
-                is Response.Success -> {
-                    var templates = ArrayList<PaymentTemplate>()
-
-                    for (ptDto in loadResponse.value) {
-                        templates.add(
-                            PaymentTemplate(
-                                ptDto.muid,
-                                ptDto.width,
-                                ptDto.height,
-                                token.value
-                            )
-                        )
+        try {
+            networkQueryMemeServer.getPaymentTemplates(token, moshi = moshi).collect { loadResponse ->
+                @Exhaustive
+                when (loadResponse) {
+                    is LoadResponse.Loading -> {
                     }
+                    is Response.Error -> {
+                        response = loadResponse
+                    }
+                    is Response.Success -> {
+                        var templates = ArrayList<PaymentTemplate>()
 
-                    response = Response.Success(templates)
+                        for (ptDto in loadResponse.value) {
+                            templates.add(
+                                PaymentTemplate(
+                                    ptDto.muid,
+                                    ptDto.width,
+                                    ptDto.height,
+                                    token.value
+                                )
+                            )
+                        }
+
+                        response = Response.Success(templates)
+                    }
                 }
             }
-        }
+        } catch (e: Exception) {}
 
         return response ?: Response.Error(ResponseError(("Failed to delete subscription")))
     }

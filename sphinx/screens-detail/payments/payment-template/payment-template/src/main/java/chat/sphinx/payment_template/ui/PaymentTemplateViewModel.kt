@@ -90,12 +90,11 @@ internal class PaymentTemplateViewModel @Inject constructor(
     }
 
     fun selectTemplate(position: Int) {
-        if (templateImagesViewStateContainer.value is TemplateImagesViewState.TemplateImages) {
+        val templateImagesViewState = templateImagesViewStateContainer.value
 
-            (templateImagesViewStateContainer.value as TemplateImagesViewState.TemplateImages)
-                .templates
-                .getOrNull(position)?.let { template ->
+        if (templateImagesViewState is TemplateImagesViewState.TemplateImages) {
 
+            templateImagesViewState.templates.getOrNull(position)?.let { template ->
                 sendPaymentBuilder.setPaymentTemplate(template)
 
                 selectedTemplateViewStateContainer.updateViewState(

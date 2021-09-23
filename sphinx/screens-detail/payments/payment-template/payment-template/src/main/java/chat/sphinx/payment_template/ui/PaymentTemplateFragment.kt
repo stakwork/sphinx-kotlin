@@ -110,6 +110,7 @@ internal class PaymentTemplateFragment: SideEffectFragment<
                     snapHelper.findSnapView(layoutManager)?.let { centerView ->
                         layoutManager?.getPosition(centerView)?.let { position ->
                             if (snapPosition != position) {
+                                snapPosition = position
                                 //Subtracting padding item and no template item from position
                                 viewModel.selectTemplate(position - 2)
                             }

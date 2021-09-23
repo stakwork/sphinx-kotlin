@@ -7,15 +7,15 @@ class PaymentTemplate(
     val token: String
 ) {
 
-    fun getTemplateUrl(mediaHost: String): String? {
+    fun getTemplateUrl(mediaHost: String): String {
         return "https://$mediaHost/template/$muid"
     }
 
-    fun getDimensions(): String? {
+    fun getDimensions(): String {
         return "${width}x${height}"
     }
 
-    fun getMediaType(): String? {
+    fun getMediaType(): String {
         return "image/png"
     }
 

@@ -135,7 +135,7 @@ class NetworkRelayCallImpl(
             emit(handleException(LOG, GET, url, e))
         }
     }
-
+    
     override fun <T: Any> getList(
         url: String,
         responseJsonClass: Class<T>,
@@ -308,6 +308,7 @@ class NetworkRelayCallImpl(
         )
     }
 
+    @Throws(NullPointerException::class, IOException::class)
     override suspend fun <T: Any> callList(
         responseJsonClass: Class<T>,
         request: Request,
