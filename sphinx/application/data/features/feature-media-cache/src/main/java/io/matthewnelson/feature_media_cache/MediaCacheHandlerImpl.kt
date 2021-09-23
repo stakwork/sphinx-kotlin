@@ -7,6 +7,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import okio.*
 import java.io.File
+import java.io.IOException
 import java.io.InputStream
 import java.text.SimpleDateFormat
 import java.util.*
@@ -112,10 +113,16 @@ class MediaCacheHandlerImpl(
     private fun copyToImpl(from: Source, to: BufferedSink): Job {
         return applicationScope.launch(io) {
             from.use {
-                to.writeAll(it)
                 try {
-                    to.close()
-                } catch (e: Exception) {}
+                    to.writeAll(it)
+                } catch (e: IOException) {
+                } finally {
+
+                    try {
+                        to.close()
+                    } catch (e: IOException) {}
+
+                }
             }
         }
     }
