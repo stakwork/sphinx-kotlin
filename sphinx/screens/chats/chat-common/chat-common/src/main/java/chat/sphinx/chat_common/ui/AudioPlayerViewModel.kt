@@ -2,6 +2,7 @@ package chat.sphinx.chat_common.ui
 
 import android.media.MediaMetadataRetriever
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import chat.sphinx.chat_common.ui.viewstate.audio.AudioMessageState
 import chat.sphinx.chat_common.ui.viewstate.audio.AudioPlayState
 import chat.sphinx.logger.SphinxLogger
@@ -11,6 +12,7 @@ import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -40,38 +42,49 @@ internal class AudioPlayerViewModel @Inject constructor(
             metaDataRetriever.release()
         }
 
-        suspend fun getOrCreate(file: File): MutableStateFlow<AudioMessageState>? =
-            lock.withLock {
-                map[file] ?: run {
+        suspend fun getOrCreate(file: File): MutableStateFlow<AudioMessageState>? {
+            var response: MutableStateFlow<AudioMessageState>? = null
 
-                    val durationSeconds: Long = try {
+            viewModelScope.launch(mainImmediate) {
 
-                        metaDataRetriever.setDataSource(file.path)
+                lock.withLock {
 
-                        withContext(io) {
-                            metaDataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)
-                                ?.toLongOrNull()
-                                ?.div(1000)
-                                ?: 1L
+                    map[file]?.let { state -> response = state } ?: run {
+
+                        // create new stateful object
+                        val durationSeconds: Long? = try {
+
+                            metaDataRetriever.setDataSource(file.path)
+
+                            withContext(io) {
+                                metaDataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)
+                                    ?.toLongOrNull()
+                                    ?.div(1000)
+                                    ?: 1L
+                            }
+                        } catch (e: IllegalArgumentException) {
+                            LOG.e(TAG, "Failed to create AudioMessageState", e)
+                            null
                         }
-                    } catch (e: IllegalArgumentException) {
-                        LOG.e(TAG, "Failed to create AudioMessageState", e)
-                        return null
+
+                        if (durationSeconds != null) {
+                            val state = MutableStateFlow(
+                                AudioMessageState(
+                                    AudioPlayState.Paused,
+                                    durationSeconds,
+                                    0L
+                                )
+                            )
+
+                            map[file] = state
+                            response = state
+                        }
                     }
-
-                    val state = MutableStateFlow(
-                        AudioMessageState(
-                            file,
-                            AudioPlayState.Paused,
-                            durationSeconds,
-                            0L
-                        )
-                    )
-
-                    map[file] = state
-                    state
                 }
-            }
+            }.join()
+
+            return response
+        }
     }
 
     private val audioStateCache = AudioStateCache()
