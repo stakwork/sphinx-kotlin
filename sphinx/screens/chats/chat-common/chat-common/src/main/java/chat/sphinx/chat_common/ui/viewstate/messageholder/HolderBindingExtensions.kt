@@ -20,6 +20,8 @@ import chat.sphinx.chat_common.model.UnspecifiedUrl
 import chat.sphinx.chat_common.ui.AudioPlayerController
 import chat.sphinx.chat_common.ui.MediaPlayerViewModel
 import chat.sphinx.chat_common.ui.retrieveRemoteMediaInputStream
+import chat.sphinx.chat_common.ui.viewstate.audio.AudioMessageState
+import chat.sphinx.chat_common.ui.viewstate.audio.AudioPlayState
 import chat.sphinx.chat_common.util.MessageMediaPlayer
 import chat.sphinx.chat_common.util.SphinxLinkify
 import chat.sphinx.chat_common.util.SphinxUrlSpan
@@ -174,6 +176,13 @@ internal fun LayoutMessageHolderBinding.setView(
                     holderJobs.add(job)
                 }
             }
+            setBubbleAudioAttachment(
+                viewState.bubbleAudioAttachment,
+                audioPlayerController,
+                dispatchers,
+                holderJobs,
+                lifecycleScope
+            )
 //            setBubbleAudioAttachment(viewState.bubbleAudioAttachment) { layoutMessageAudioAttachment, url, media ->
 //                lifecycleScope.launch(dispatchers.mainImmediate) {
 //                    layoutMessageAudioAttachment.apply {
@@ -1164,6 +1173,84 @@ internal inline fun LayoutMessageHolderBinding.setBubbleImageAttachment(
 
                 loadImage(imageViewAttachmentImage, imageAttachment.url, imageAttachment.media)
             }
+        }
+    }
+}
+
+@MainThread
+@Suppress("NOTHING_TO_INLINE")
+internal inline fun LayoutMessageHolderBinding.setBubbleAudioAttachment(
+    audioAttachment: LayoutState.Bubble.ContainerSecond.AudioAttachment?,
+    audioPlayerController: AudioPlayerController,
+    dispatchers: CoroutineDispatchers,
+    holderJobs: ArrayList<Job>,
+    lifecycleScope: CoroutineScope,
+) {
+    includeMessageHolderBubble.includeMessageTypeAudioAttachment.apply {
+        @Exhaustive
+        when (audioAttachment) {
+            null -> {
+                root.gone
+            }
+            is LayoutState.Bubble.ContainerSecond.AudioAttachment.FileAvailable -> {
+                root.visible
+                lifecycleScope.launch(dispatchers.mainImmediate) {
+                    audioPlayerController.getAudioState(audioAttachment.file)?.value?.let { state ->
+                        setAudioAttachmentForState(state)
+                    } ?: setAudioAttachmentForState(
+                        AudioMessageState(
+                            AudioPlayState.Error,
+                            1L,
+                            0L,
+                        )
+                    )
+                }.let { job ->
+                    holderJobs.add(job)
+                }
+            }
+            is LayoutState.Bubble.ContainerSecond.AudioAttachment.FileUnavailable -> {
+                root.visible
+                setAudioAttachmentForState(AudioMessageState(AudioPlayState.Loading, 1L, 0L))
+            }
+        }
+
+    }
+}
+
+@MainThread
+@Suppress("NOTHING_TO_INLINE")
+internal inline fun LayoutMessageTypeAttachmentAudioBinding.setAudioAttachmentForState(state: AudioMessageState) {
+
+    seekBarAttachmentAudio.progress = state.progress.toInt()
+    textViewAttachmentAudioRemainingDuration.text = state.remainingSeconds.toTimestamp()
+
+
+    @Exhaustive
+    when (state.playState) {
+        AudioPlayState.Error -> {
+            textViewAttachmentAudioFailure.visible
+            textViewAttachmentPlayPauseButton.gone
+            progressBarAttachmentAudioFileLoading.gone
+        }
+        AudioPlayState.Loading -> {
+            textViewAttachmentAudioFailure.gone
+            textViewAttachmentPlayPauseButton.gone
+            progressBarAttachmentAudioFileLoading.visible
+        }
+        AudioPlayState.Paused -> {
+            progressBarAttachmentAudioFileLoading.gone
+            textViewAttachmentAudioFailure.gone
+
+            textViewAttachmentPlayPauseButton.text = getString(R.string.material_icon_name_play_button)
+            textViewAttachmentPlayPauseButton.visible
+        }
+        AudioPlayState.Playing -> {
+            progressBarAttachmentAudioFileLoading.gone
+            textViewAttachmentAudioFailure.gone
+
+            textViewAttachmentPlayPauseButton.text = getString(R.string.material_icon_name_pause_button)
+            textViewAttachmentPlayPauseButton.visible
+
         }
     }
 }

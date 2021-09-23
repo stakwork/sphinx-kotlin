@@ -52,26 +52,25 @@ internal class AudioPlayerViewModel @Inject constructor(
                     map[file]?.let { state -> response = state } ?: run {
 
                         // create new stateful object
-                        val durationSeconds: Long? = try {
+                        val durationMillis: Long? = try {
 
                             metaDataRetriever.setDataSource(file.path)
 
                             withContext(io) {
                                 metaDataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)
                                     ?.toLongOrNull()
-                                    ?.div(1000)
-                                    ?: 1L
+                                    ?: 1000L
                             }
                         } catch (e: IllegalArgumentException) {
                             LOG.e(TAG, "Failed to create AudioMessageState", e)
                             null
                         }
 
-                        if (durationSeconds != null) {
+                        if (durationMillis != null) {
                             val state = MutableStateFlow(
                                 AudioMessageState(
                                     AudioPlayState.Paused,
-                                    durationSeconds,
+                                    durationMillis,
                                     0L
                                 )
                             )
