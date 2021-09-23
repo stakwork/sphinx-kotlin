@@ -16,7 +16,6 @@ class MessageMediaPlayer(
     var onPlayProgressInfoUpdateListener: OnPlayProgressInfoUpdateListener? = null
     private var countDownTimer: CountDownTimer? = null
 
-
     fun load(filePath: String) {
         this.filePath = filePath
         setDataSource(
@@ -25,16 +24,20 @@ class MessageMediaPlayer(
         prepare()
     }
 
-    override fun reset() {
-        super.reset()
+    private fun clear() {
         onPlayProgressInfoUpdateListener = null
         cancelCountDownTimer()
         abandonAudioFocus()
     }
 
+    override fun reset() {
+        super.reset()
+        clear()
+    }
+
     override fun release() {
         super.release()
-        abandonAudioFocus()
+        clear()
     }
 
     override fun pause() {
