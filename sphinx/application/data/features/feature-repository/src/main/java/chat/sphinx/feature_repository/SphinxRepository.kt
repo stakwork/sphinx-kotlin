@@ -3990,7 +3990,12 @@ abstract class SphinxRepository(
                                 mediaCacheHandler.copyTo(stream, streamToFile)
                                 messageLock.withLock {
                                     withContext(io) {
-                                        queries.messageMediaUpdateFile(streamToFile, messageId)
+                                        queries.transaction {
+                                            queries.messageMediaUpdateFile(streamToFile, messageId)
+
+                                            // to proc table change so new file path is pushed to UI
+                                            queries.messageUpdateContentDecrypted(message.messageContentDecrypted, messageId)
+                                        }
                                     }
                                 }
 
