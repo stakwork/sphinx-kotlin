@@ -9,7 +9,7 @@ internal data class AudioMessageState(
     val progress: Long
         get() = try {
             // duration could be 0
-            currentMillis / durationMillis
+            ((currentMillis.toFloat() / durationMillis.toFloat()) * 100).toLong()
         } catch (e: ArithmeticException) {
             0L
         }
