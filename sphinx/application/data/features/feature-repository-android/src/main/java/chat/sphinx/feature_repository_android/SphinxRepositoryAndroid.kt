@@ -4,6 +4,7 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingSource
 import chat.sphinx.concept_coredb.CoreDB
 import chat.sphinx.concept_crypto_rsa.RSA
+import chat.sphinx.concept_meme_input_stream.MemeInputStreamHandler
 import chat.sphinx.concept_meme_server.MemeServerTokenHandler
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
 import chat.sphinx.concept_network_query_contact.NetworkQueryContact
@@ -29,6 +30,7 @@ import com.squareup.moshi.Moshi
 import com.squareup.sqldelight.android.paging3.QueryPagingSource
 import io.matthewnelson.concept_authentication.data.AuthenticationStorage
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
+import io.matthewnelson.concept_media_cache.MediaCacheHandler
 import io.matthewnelson.feature_authentication_core.AuthenticationCoreManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
@@ -41,6 +43,8 @@ class SphinxRepositoryAndroid(
     coreDB: CoreDB,
     dispatchers: CoroutineDispatchers,
     moshi: Moshi,
+    mediaCacheHandler: MediaCacheHandler,
+    memeInputStreamHandler: MemeInputStreamHandler,
     memeServerTokenHandler: MemeServerTokenHandler,
     networkQueryMemeServer: NetworkQueryMemeServer,
     networkQueryChat: NetworkQueryChat,
@@ -61,6 +65,8 @@ class SphinxRepositoryAndroid(
     coreDB,
     dispatchers,
     moshi,
+    mediaCacheHandler,
+    memeInputStreamHandler,
     memeServerTokenHandler,
     networkQueryMemeServer,
     networkQueryChat,

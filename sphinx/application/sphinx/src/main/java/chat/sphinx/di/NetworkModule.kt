@@ -212,6 +212,7 @@ object NetworkModule {
         LinkPreviewHandlerImpl(dispatchers, networkClient, networkQueryChat)
 
     @Provides
+    @Singleton
     fun provideMemeInputStreamHandler(
         dispatchers: CoroutineDispatchers,
         networkClientCache: NetworkClientCache,

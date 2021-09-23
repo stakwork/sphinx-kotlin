@@ -3,6 +3,7 @@ package chat.sphinx.feature_repository
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_coredb.CoreDB
 import chat.sphinx.concept_crypto_rsa.RSA
+import chat.sphinx.concept_meme_input_stream.MemeInputStreamHandler
 import chat.sphinx.concept_meme_server.MemeServerTokenHandler
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
 import chat.sphinx.concept_network_query_chat.model.*
@@ -89,6 +90,7 @@ import com.squareup.sqldelight.runtime.coroutines.mapToList
 import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
 import io.matthewnelson.concept_authentication.data.AuthenticationStorage
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
+import io.matthewnelson.concept_media_cache.MediaCacheHandler
 import io.matthewnelson.crypto_common.annotations.RawPasswordAccess
 import io.matthewnelson.crypto_common.annotations.UnencryptedDataAccess
 import io.matthewnelson.crypto_common.clazzes.*
@@ -98,6 +100,7 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import okio.base64.encodeBase64
+import java.io.File
 import java.io.InputStream
 import java.text.ParseException
 import kotlin.math.absoluteValue
@@ -110,6 +113,8 @@ abstract class SphinxRepository(
     protected val coreDB: CoreDB,
     private val dispatchers: CoroutineDispatchers,
     private val moshi: Moshi,
+    private val mediaCacheHandler: MediaCacheHandler,
+    private val memeInputStreamHandler: MemeInputStreamHandler,
     private val memeServerTokenHandler: MemeServerTokenHandler,
     private val networkQueryMemeServer: NetworkQueryMemeServer,
     private val networkQueryChat: NetworkQueryChat,
@@ -3917,18 +3922,85 @@ abstract class SphinxRepository(
 
                 val message: Message? = getMessageByIdImpl(messageId, queries).firstOrNull()
                 val media = message?.messageMedia
+                val host = media?.host
+                val url = media?.url
 
                 if (
                     message != null                 &&
                     media != null                   &&
+                    host != null                    &&
+                    url != null                     &&
                     media.localFile == null         &&
                     !message.status.isDeleted()     &&
                     !message.isPaidPendingMessage
                 ) {
-                    // TODO: Download media and update MessageMedia table with file path
+                    val streamToFile: File? = when (val type = media.mediaType) {
+                        is MediaType.Audio -> {
+                            type.value.split("/").lastOrNull()?.let { fileType ->
+                                when {
+                                    fileType.contains("m4a", ignoreCase = true) -> {
+                                        mediaCacheHandler.createAudioFile("m4a")
+                                    }
+                                    fileType.contains("mp3", ignoreCase = true) -> {
+                                        mediaCacheHandler.createAudioFile("mp3")
+                                    }
+                                    fileType.contains("mp4", ignoreCase = true) -> {
+                                        mediaCacheHandler.createAudioFile("mp4")
+                                    }
+                                    fileType.contains("mpeg", ignoreCase = true) -> {
+                                        mediaCacheHandler.createAudioFile("mpeg")
+                                    }
+                                    else -> {
+                                        null
+                                    }
+                                }
+                            }
+                        }
+                        is MediaType.Image -> {
+                            // use image loader
+                            null
+                        }
+                        is MediaType.Pdf -> {
+                            // TODO: Implement
+                            null
+                        }
+                        is MediaType.Text -> {
+                            // TODO: Implement
+                            null
+                        }
+                        is MediaType.Video -> {
+                            // TODO: Implement (use download service via controller)
+                            null
+                        }
+                        is MediaType.Unknown -> {
+                            LOG.w(TAG, "Unknown MediaType for MessageMedia $messageId")
+                            null
+                        }
+                    }
 
-                    // hold onto lock until table change propagates to UI
-                    delay(200L)
+                    if (streamToFile != null) {
+
+                        memeServerTokenHandler.retrieveAuthenticationToken(host)?.let { token ->
+
+                            memeInputStreamHandler.retrieveMediaInputStream(
+                                url.value,
+                                token,
+                                media.mediaKeyDecrypted,
+                            )?.let { stream ->
+                                mediaCacheHandler.copyTo(stream, streamToFile)
+                                messageLock.withLock {
+                                    withContext(io) {
+                                        queries.messageMediaUpdateFile(streamToFile, messageId)
+                                    }
+                                }
+
+                                // hold downloadLock until table change propagates to UI
+                                delay(200L)
+
+                            } ?: streamToFile.delete()
+
+                        } ?: streamToFile.delete()
+                    }
                 }
 
                 // remove lock from map if only subscriber
