@@ -225,7 +225,7 @@ internal class CreateTribeViewModel @Inject constructor(
                             }
                         }
                     } else {
-                        when(chatRepository.updateTribe(chatId!!, it)) {
+                        when(chatRepository.updateTribe(chatId, it)) {
                             is Response.Error -> {
                                 submitSideEffect(CreateTribeSideEffect.FailedToUpdateTribe)
                             }

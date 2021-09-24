@@ -63,10 +63,7 @@ import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.lightning.toSat
 import chat.sphinx.wrapper_meme_server.headerKey
 import chat.sphinx.wrapper_meme_server.headerValue
-import chat.sphinx.wrapper_message.getColorKey
-import chat.sphinx.wrapper_message.retrieveImageUrlAndMessageMedia
-import chat.sphinx.wrapper_message.retrieveTextToShow
-import chat.sphinx.wrapper_message.toReplyUUID
+import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message_media.MediaType
 import chat.sphinx.wrapper_message_media.isImage
 import chat.sphinx.wrapper_message_media.isSphinxText
@@ -87,7 +84,7 @@ import kotlinx.coroutines.launch
 abstract class ChatFragment<
         VB: ViewBinding,
         ARGS: NavArgs,
-        VM: ChatViewModel<ARGS>,
+        VM: ChatViewModel<ARGS>
         >(@LayoutRes layoutId: Int): MotionLayoutFragment<
         Nothing,
         ChatSideEffectFragment,
@@ -711,11 +708,20 @@ abstract class ChatFragment<
                             replyingMessageBinding.apply {
 
                                 textViewReplyMessageLabel.apply {
-                                    textViewReplyMessageLabel.goneIfFalse(false)
+                                    textViewReplyMessageLabel.gone
+                                    textViewReplyTextOverlay.gone
 
-                                    message.retrieveTextToShow()?.let { messageText ->
-                                        textViewReplyMessageLabel.text = messageText
-                                        textViewReplyMessageLabel.goneIfFalse(messageText.isNotEmpty())
+                                    if (message.isAudioMessage) {
+                                        textViewReplyMessageLabel.text = getString(R.string.media_type_label_audio)
+                                        textViewReplyMessageLabel.visible
+
+                                        textViewReplyTextOverlay.text = getString(R.string.material_icon_name_volume_up)
+                                        textViewReplyTextOverlay.visible
+                                    } else {
+                                        message.retrieveTextToShow()?.let { messageText ->
+                                            textViewReplyMessageLabel.text = messageText
+                                            textViewReplyMessageLabel.goneIfFalse(messageText.isNotEmpty())
+                                        }
                                     }
                                 }
 
@@ -945,6 +951,7 @@ abstract class ChatFragment<
                                 holderJobs,
                                 disposables,
                                 viewModel.dispatchers,
+                                viewModel.audioPlayerController,
                                 imageLoader,
                                 viewModel.imageLoaderDefaults,
                                 viewModel.memeServerTokenHandler,
@@ -1117,10 +1124,10 @@ abstract class ChatFragment<
                             } else if (viewState.type == MediaType.Text) {
 
                                 includePaidTextMessageSendPreview.apply {
-                                    textViewPaidMessagePreviewText.text = viewState?.paidMessage?.first ?: footerBinding.editTextChatFooter.text
+                                    textViewPaidMessagePreviewText.text = viewState.paidMessage?.first ?: footerBinding.editTextChatFooter.text
 
                                     textViewPaidMessagePreviewPrice.text =
-                                        (viewState?.paidMessage?.second ?: attachmentSendBinding.editTextMessagePrice.text?.toString()?.toLongOrNull())
+                                        (viewState.paidMessage?.second ?: attachmentSendBinding.editTextMessagePrice.text?.toString()?.toLongOrNull())
                                         ?.toSat()?.asFormattedString(appendUnit = true) ?: "0 sats"
 
                                     root.visible
@@ -1234,6 +1241,11 @@ abstract class ChatFragment<
     override fun onPause() {
         super.onPause()
         viewModel.readMessages()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        viewModel.audioPlayerController.pauseMediaIfPlaying()
     }
 
     override suspend fun onSideEffectCollect(sideEffect: ChatSideEffect) {

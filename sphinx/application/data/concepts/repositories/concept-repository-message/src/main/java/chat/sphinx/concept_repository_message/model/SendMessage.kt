@@ -56,11 +56,11 @@ class SendMessage private constructor(
 
             val file: File? = attachmentInfo?.file?.let {
                 try {
-                    if (!it.exists() || !it.isFile) {
+                    if (it.exists() && it.isFile) {
+                        it
+                    } else {
                         null
                     }
-
-                    it
                 } catch (e: Exception) {
                     null
                 }
