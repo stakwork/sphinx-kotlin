@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="payment_template_recycler_view_height">85dp</dimen>
+    <dimen name="payment_template_recycler_view_item_width">78dp</dimen>
+    <dimen name="payment_template_recycler_view_item_image_xy">56dp</dimen>
+    <dimen name="payment_template_selected_image_circle_xy">66dp</dimen>
+    <dimen name="payment_template_images_progress_bar_xy">50dp</dimen>
+    <dimen name="payment_template_image_corner_radius">28dp</dimen>
+</resources>

@@ -45,6 +45,20 @@ abstract class NetworkCall {
     ): Flow<LoadResponse<T, ResponseError>>
 
     /**
+     * GET
+     *
+     * @param [responseJsonClass] the class to serialize the response json as a List of
+     * @param [url] the url
+     * @param [headers] any headers that need to be added to the request
+     * */
+    abstract fun <T: Any> getList(
+        url: String,
+        responseJsonClass: Class<T>,
+        headers: Map<String, String>? = null,
+        useExtendedNetworkCallClient: Boolean = false,
+    ): Flow<LoadResponse<List<T>, ResponseError>>
+
+    /**
      * PUT
      *
      * @param [responseJsonClass] the class to serialize the response json into
@@ -107,5 +121,12 @@ abstract class NetworkCall {
         request: Request,
         useExtendedNetworkCallClient: Boolean = false
     ): T
+
+    @Throws(NullPointerException::class, IOException::class)
+    abstract suspend fun <T: Any> callList(
+        responseJsonClass: Class<T>,
+        request: Request,
+        useExtendedNetworkCallClient: Boolean = false
+    ): List<T>
 
 }

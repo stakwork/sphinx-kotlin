@@ -1104,6 +1104,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                 audioPlayerController.pauseMediaIfPlaying()
                 chatNavigator.toPaymentSendDetail(id, chatId)
             }
+            updateViewState(ChatMenuViewState.Closed)
         }
     }
 

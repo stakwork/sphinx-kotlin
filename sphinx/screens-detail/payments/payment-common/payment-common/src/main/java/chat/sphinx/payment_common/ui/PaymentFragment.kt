@@ -103,7 +103,7 @@ abstract class PaymentFragment<
         }
     }
 
-    protected fun setupNumberPad() {
+    private fun setupNumberPad() {
         amountPadBinding.let { numberPad ->
             numberPad.button0.setOnClickListener { addAmountCharacter('0') }
             numberPad.button1.setOnClickListener { addAmountCharacter( '1') }
