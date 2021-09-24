@@ -3914,7 +3914,7 @@ abstract class SphinxRepository(
                     }
 
                     is Response.Success -> {
-                        var templates = ArrayList<PaymentTemplate>()
+                        var templates = ArrayList<PaymentTemplate>(loadResponse.value.size)
 
                         for (ptDto in loadResponse.value) {
                             templates.add(
