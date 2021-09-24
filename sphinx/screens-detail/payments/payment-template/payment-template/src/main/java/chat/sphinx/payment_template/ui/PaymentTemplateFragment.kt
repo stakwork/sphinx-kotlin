@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.LinearSnapHelper
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SnapHelper
 import by.kirich1409.viewbindingdelegate.viewBinding
+import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.insetter_activity.InsetterActivity
@@ -32,6 +33,7 @@ import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.concept_views.viewstate.collect
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import javax.annotation.meta.Exhaustive
 import javax.inject.Inject
@@ -54,6 +56,9 @@ internal class PaymentTemplateFragment: SideEffectFragment<
     override val binding: FragmentPaymentTemplateBinding by viewBinding(
         FragmentPaymentTemplateBinding::bind
     )
+
+    private var currentTemplateViewStateJob: Job? = null
+    private var currentTemplateViewStateDisposable: Disposable? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -93,7 +98,7 @@ internal class PaymentTemplateFragment: SideEffectFragment<
             val paymentTemplateAdapter = PaymentTemplateAdapter(
                 this,
                 imageLoader,
-                onStopSupervisor,
+                viewLifecycleOwner,
                 viewModel,
             )
 
@@ -120,9 +125,7 @@ internal class PaymentTemplateFragment: SideEffectFragment<
             })
         }
 
-        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-            viewModel.loadTemplateImages()
-        }
+        viewModel.loadTemplateImages()
     }
 
     private fun setupFragmentLayout() {
@@ -183,12 +186,20 @@ internal class PaymentTemplateFragment: SideEffectFragment<
 
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.selectedTemplateViewStateContainer.collect { viewState ->
+
+                currentTemplateViewStateJob?.cancel()
+                currentTemplateViewStateDisposable?.dispose()
+
                 @Exhaustive
                 when (viewState) {
                     is SelectedTemplateViewState.Idle -> {
-                        binding.imageViewSelectedPaymentTemplate.setImageDrawable(
-                            ContextCompat.getDrawable(binding.root.context, R.drawable.ic_no_template_with_padding)
-                        )
+                        lifecycleScope.launch(viewModel.mainImmediate) {
+                            binding.imageViewSelectedPaymentTemplate.setImageDrawable(
+                                ContextCompat.getDrawable(binding.root.context, R.drawable.ic_no_template_with_padding)
+                            )
+                        }.let { job ->
+                            currentTemplateViewStateJob = job
+                        }
                     }
                     is SelectedTemplateViewState.SelectedTemplate -> {
                         val template = viewState.template
@@ -196,13 +207,17 @@ internal class PaymentTemplateFragment: SideEffectFragment<
                         template.getTemplateUrl(MediaHost.DEFAULT.value)?.let { url ->
                             val token = AuthenticationToken(template.token)
 
-                            imageLoader.load(
-                                binding.imageViewSelectedPaymentTemplate,
-                                url,
-                                ImageLoaderOptions.Builder()
-                                    .addHeader(token.headerKey, token.headerValue)
-                                    .build()
-                            )
+                            lifecycleScope.launch(viewModel.mainImmediate) {
+                                imageLoader.load(
+                                    binding.imageViewSelectedPaymentTemplate,
+                                    url,
+                                    ImageLoaderOptions.Builder()
+                                        .addHeader(token.headerKey, token.headerValue)
+                                        .build()
+                                ).also { currentTemplateViewStateDisposable = it }
+                            }.let { job ->
+                                currentTemplateViewStateJob = job
+                            }
                         }
                     }
                 }
