@@ -17,9 +17,9 @@ import chat.sphinx.chat_common.databinding.LayoutMessageTypeAttachmentAudioBindi
 import chat.sphinx.chat_common.model.NodeDescriptor
 import chat.sphinx.chat_common.model.TribeLink
 import chat.sphinx.chat_common.model.UnspecifiedUrl
-import chat.sphinx.chat_common.ui.AudioPlayerController
 import chat.sphinx.chat_common.ui.viewstate.audio.AudioMessageState
 import chat.sphinx.chat_common.ui.viewstate.audio.AudioPlayState
+import chat.sphinx.chat_common.util.AudioPlayerController
 import chat.sphinx.chat_common.util.SphinxLinkify
 import chat.sphinx.chat_common.util.SphinxUrlSpan
 import chat.sphinx.concept_image_loader.Disposable

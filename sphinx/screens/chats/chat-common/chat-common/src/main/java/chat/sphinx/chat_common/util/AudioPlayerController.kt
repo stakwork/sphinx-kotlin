@@ -1,18 +1,14 @@
-package chat.sphinx.chat_common.ui
+package chat.sphinx.chat_common.util
 
 import android.app.Application
 import android.media.MediaMetadataRetriever
 import android.media.MediaPlayer
-import android.net.Uri
 import androidx.core.net.toUri
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import chat.sphinx.chat_common.ui.viewstate.audio.AudioMessageState
 import chat.sphinx.chat_common.ui.viewstate.audio.AudioPlayState
 import chat.sphinx.chat_common.ui.viewstate.messageholder.LayoutState
 import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.logger.e
-import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,8 +17,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.io.File
-import java.io.IOException
-import javax.inject.Inject
 
 internal interface AudioPlayerController {
     suspend fun getAudioState(
@@ -30,14 +24,16 @@ internal interface AudioPlayerController {
     ): StateFlow<AudioMessageState>?
 
     fun togglePlayPause(audioAttachment: LayoutState.Bubble.ContainerSecond.AudioAttachment?)
+
+    fun pauseMediaIfPlaying()
 }
 
-@HiltViewModel
-internal class AudioPlayerViewModel @Inject constructor(
+internal class AudioPlayerControllerImpl(
     private val app: Application,
+    private val viewModelScope: CoroutineScope,
     dispatchers: CoroutineDispatchers,
     private val LOG: SphinxLogger,
-): ViewModel(), AudioPlayerController, CoroutineDispatchers by dispatchers {
+): AudioPlayerController, CoroutineDispatchers by dispatchers {
 
     companion object {
         const val TAG = "AudioPlayerViewModel"
@@ -329,14 +325,13 @@ internal class AudioPlayerViewModel @Inject constructor(
     /**
      * For when user navigates away from screen or sends application to background
      * */
-    fun pauseMediaIfPlaying() {
+    override fun pauseMediaIfPlaying() {
         viewModelScope.launch(mainImmediate) {
             mediaPlayerHolder.pauseIfPlaying()
         }
     }
 
-    override fun onCleared() {
-        super.onCleared()
+    fun onCleared() {
         audioStateCache.releaseMetaDataRetriever()
         mediaPlayerHolder.releaseMediaPlayer()
     }

@@ -15,7 +15,6 @@ import androidx.recyclerview.widget.RecyclerView
 import chat.sphinx.chat_common.databinding.*
 import chat.sphinx.chat_common.model.NodeDescriptor
 import chat.sphinx.chat_common.model.TribeLink
-import chat.sphinx.chat_common.ui.AudioPlayerController
 import chat.sphinx.chat_common.ui.ChatViewModel
 import chat.sphinx.chat_common.ui.isMessageSelected
 import chat.sphinx.chat_common.ui.viewstate.messageholder.*
@@ -44,7 +43,6 @@ internal class MessageListAdapter<ARGS : NavArgs>(
     private val lifecycleOwner: LifecycleOwner,
     private val onStopSupervisor: OnStopSupervisor,
     private val viewModel: ChatViewModel<ARGS>,
-    private val audioPlayerController: AudioPlayerController,
     private val imageLoader: ImageLoader<ImageView>,
     private val userColorsHelper: UserColorsHelper,
 ) : RecyclerView.Adapter<MessageListAdapter<ARGS>.MessageViewHolder>(),
@@ -312,7 +310,7 @@ internal class MessageListAdapter<ARGS : NavArgs>(
 
                 includeMessageTypeAudioAttachment.apply {
                     textViewAttachmentPlayPauseButton.setOnClickListener {
-                        audioPlayerController.togglePlayPause(
+                        viewModel.audioPlayerController.togglePlayPause(
                             currentViewState?.bubbleAudioAttachment
                         )
                     }
@@ -402,7 +400,7 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                 holderJobs,
                 disposables,
                 viewModel.dispatchers,
-                audioPlayerController,
+                viewModel.audioPlayerController,
                 imageLoader,
                 viewModel.imageLoaderDefaults,
                 viewModel.memeServerTokenHandler,
@@ -430,7 +428,7 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                 if (audioAttachment is LayoutState.Bubble.ContainerSecond.AudioAttachment.FileAvailable) {
                     audioAttachmentJob?.cancel()
                     audioAttachmentJob = onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-                        audioPlayerController.getAudioState(audioAttachment)?.collect { audioState ->
+                        viewModel.audioPlayerController.getAudioState(audioAttachment)?.collect { audioState ->
                             binding.includeMessageHolderBubble
                                 .includeMessageTypeAudioAttachment
                                 .setAudioAttachmentLayoutForState(audioState)

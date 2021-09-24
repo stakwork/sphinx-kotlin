@@ -15,7 +15,6 @@ import androidx.annotation.LayoutRes
 import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.core.view.isVisible
 import androidx.fragment.app.FragmentActivity
-import androidx.fragment.app.viewModels
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavArgs
@@ -41,6 +40,7 @@ import chat.sphinx.chat_common.ui.viewstate.selected.SelectedMessageViewState
 import chat.sphinx.chat_common.ui.viewstate.selected.setMenuColor
 import chat.sphinx.chat_common.ui.viewstate.selected.setMenuItems
 import chat.sphinx.chat_common.ui.widgets.SphinxFullscreenImageView
+import chat.sphinx.chat_common.util.AudioPlayerControllerImpl
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
@@ -113,8 +113,6 @@ abstract class ChatFragment<
 
     protected abstract val userColorsHelper: UserColorsHelper
     protected abstract val imageLoader: ImageLoader<ImageView>
-
-    private val audioPlayerViewModel: AudioPlayerViewModel by viewModels()
 
     private val sendMessageBuilder = SendMessage.Builder()
 
@@ -612,7 +610,6 @@ abstract class ChatFragment<
             viewLifecycleOwner,
             onStopSupervisor,
             viewModel,
-            audioPlayerViewModel,
             imageLoader,
             userColorsHelper
         )
@@ -949,7 +946,7 @@ abstract class ChatFragment<
                                 holderJobs,
                                 disposables,
                                 viewModel.dispatchers,
-                                audioPlayerViewModel,
+                                viewModel.audioPlayerController,
                                 imageLoader,
                                 viewModel.imageLoaderDefaults,
                                 viewModel.memeServerTokenHandler,
@@ -1122,10 +1119,10 @@ abstract class ChatFragment<
                             } else if (viewState.type == MediaType.Text) {
 
                                 includePaidTextMessageSendPreview.apply {
-                                    textViewPaidMessagePreviewText.text = viewState?.paidMessage?.first ?: footerBinding.editTextChatFooter.text
+                                    textViewPaidMessagePreviewText.text = viewState.paidMessage?.first ?: footerBinding.editTextChatFooter.text
 
                                     textViewPaidMessagePreviewPrice.text =
-                                        (viewState?.paidMessage?.second ?: attachmentSendBinding.editTextMessagePrice.text?.toString()?.toLongOrNull())
+                                        (viewState.paidMessage?.second ?: attachmentSendBinding.editTextMessagePrice.text?.toString()?.toLongOrNull())
                                         ?.toSat()?.asFormattedString(appendUnit = true) ?: "0 sats"
 
                                     root.visible
@@ -1243,7 +1240,7 @@ abstract class ChatFragment<
 
     override fun onStop() {
         super.onStop()
-        audioPlayerViewModel.pauseMediaIfPlaying()
+        viewModel.audioPlayerController.pauseMediaIfPlaying()
     }
 
     override suspend fun onSideEffectCollect(sideEffect: ChatSideEffect) {

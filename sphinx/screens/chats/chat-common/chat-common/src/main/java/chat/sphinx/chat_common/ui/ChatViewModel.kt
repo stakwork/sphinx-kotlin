@@ -1102,6 +1102,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     internal fun chatMenuOptionPaymentSend() {
         contactId?.let { id ->
             viewModelScope.launch(mainImmediate) {
+                audioPlayerController.pauseMediaIfPlaying()
                 chatNavigator.toPaymentSendDetail(id, chatId)
             }
         }
@@ -1255,7 +1256,17 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         }
     }
 
+    internal val audioPlayerController: AudioPlayerController by lazy {
+        AudioPlayerControllerImpl(
+            app,
+            viewModelScope,
+            dispatchers,
+            LOG,
+        )
+    }
+
     fun goToChatDetailScreen() {
+        audioPlayerController.pauseMediaIfPlaying()
         navigateToChatDetailScreen()
     }
 
@@ -1292,17 +1303,21 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     private suspend fun handleTribeLink(tribeJoinLink: TribeJoinLink) {
         chatRepository.getChatByUUID(ChatUUID(tribeJoinLink.tribeUUID)).firstOrNull()?.let { chat ->
             chatNavigator.toChat(chat, null)
-        } ?: chatNavigator.toJoinTribeDetail(tribeJoinLink)
+        } ?: chatNavigator.toJoinTribeDetail(tribeJoinLink).also {
+            audioPlayerController.pauseMediaIfPlaying()
+        }
     }
 
     private suspend fun handleContactLink(pubKey: LightningNodePubKey, routeHint: LightningRouteHint?) {
         contactRepository.getContactByPubKey(pubKey).firstOrNull()?.let { contact ->
 
-            chatRepository.getConversationByContactId(contact.id).collect { chat ->
+            chatRepository.getConversationByContactId(contact.id).firstOrNull().let { chat ->
                 chatNavigator.toChat(chat, contact.id)
             }
 
-        } ?: chatNavigator.toAddContactDetail(pubKey, routeHint)
+        } ?: chatNavigator.toAddContactDetail(pubKey, routeHint).also {
+            audioPlayerController.pauseMediaIfPlaying()
+        }
     }
 
     open suspend fun processMemberRequest(
@@ -1407,6 +1422,11 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         viewModelScope.launch(mainImmediate) {
             submitSideEffect(sideEffect)
         }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        (audioPlayerController as AudioPlayerControllerImpl).onCleared()
     }
 }
 
