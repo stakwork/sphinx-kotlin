@@ -314,6 +314,7 @@ internal sealed class MessageHolderViewState(
                 messageSenderInfo(nnReplyMessage).second?.value ?: "",
                 nnReplyMessage.getColorKey(),
                 nnReplyMessage.retrieveTextToShow() ?: "",
+                nnReplyMessage.isAudioMessage,
                 mediaUrl,
                 messageMedia
             )

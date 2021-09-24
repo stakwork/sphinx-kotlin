@@ -51,6 +51,7 @@ internal sealed class LayoutState private constructor() {
                 val sender: String,
                 val colorKey: String,
                 val text: String,
+                val isAudio: Boolean,
                 val url: String?,
                 val media: MessageMedia?,
             ): ContainerFirst() {

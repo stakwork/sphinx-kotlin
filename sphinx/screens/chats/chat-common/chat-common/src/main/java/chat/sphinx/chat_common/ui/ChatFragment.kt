@@ -40,7 +40,6 @@ import chat.sphinx.chat_common.ui.viewstate.selected.SelectedMessageViewState
 import chat.sphinx.chat_common.ui.viewstate.selected.setMenuColor
 import chat.sphinx.chat_common.ui.viewstate.selected.setMenuItems
 import chat.sphinx.chat_common.ui.widgets.SphinxFullscreenImageView
-import chat.sphinx.chat_common.util.AudioPlayerControllerImpl
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
@@ -64,10 +63,7 @@ import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.lightning.toSat
 import chat.sphinx.wrapper_meme_server.headerKey
 import chat.sphinx.wrapper_meme_server.headerValue
-import chat.sphinx.wrapper_message.getColorKey
-import chat.sphinx.wrapper_message.retrieveImageUrlAndMessageMedia
-import chat.sphinx.wrapper_message.retrieveTextToShow
-import chat.sphinx.wrapper_message.toReplyUUID
+import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message_media.MediaType
 import chat.sphinx.wrapper_message_media.isImage
 import chat.sphinx.wrapper_message_media.isSphinxText
@@ -713,10 +709,19 @@ abstract class ChatFragment<
 
                                 textViewReplyMessageLabel.apply {
                                     textViewReplyMessageLabel.goneIfFalse(false)
+                                    textViewReplyTextOverlay.goneIfFalse(false)
 
-                                    message.retrieveTextToShow()?.let { messageText ->
-                                        textViewReplyMessageLabel.text = messageText
-                                        textViewReplyMessageLabel.goneIfFalse(messageText.isNotEmpty())
+                                    if (message.isAudioMessage) {
+                                        textViewReplyMessageLabel.text = getString(R.string.media_type_label_audio)
+                                        textViewReplyMessageLabel.goneIfFalse(true)
+
+                                        textViewReplyTextOverlay.text = getString(R.string.material_icon_name_volume_up)
+                                        textViewReplyTextOverlay.goneIfFalse(true)
+                                    } else {
+                                        message.retrieveTextToShow()?.let { messageText ->
+                                            textViewReplyMessageLabel.text = messageText
+                                            textViewReplyMessageLabel.goneIfFalse(messageText.isNotEmpty())
+                                        }
                                     }
                                 }
 

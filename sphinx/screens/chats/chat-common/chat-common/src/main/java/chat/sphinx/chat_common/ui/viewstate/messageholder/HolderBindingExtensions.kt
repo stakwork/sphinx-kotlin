@@ -1527,7 +1527,7 @@ internal inline fun LayoutMessageHolderBinding.setBubbleReplyMessage(
                     gone
                 }
             }
-            imageViewReplyTextOverlay.gone
+            textViewReplyTextOverlay.gone
 
             // Only used in the footer when replying to a message
             textViewReplyClose.gone
@@ -1566,8 +1566,16 @@ internal inline fun LayoutMessageHolderBinding.setBubbleReplyMessage(
                 holderJobs.add(job)
             }
 
-            textViewReplyMessageLabel.text = replyMessage.text
-            textViewReplyMessageLabel.goneIfFalse(replyMessage.text.isNotEmpty())
+            if (replyMessage.isAudio) {
+                textViewReplyTextOverlay.text = getString(R.string.material_icon_name_volume_up)
+                textViewReplyTextOverlay.visible
+
+                textViewReplyMessageLabel.text = getString(R.string.media_type_label_audio)
+                textViewReplyMessageLabel.goneIfFalse(true)
+            } else {
+                textViewReplyMessageLabel.text = replyMessage.text
+                textViewReplyMessageLabel.goneIfFalse(replyMessage.text.isNotEmpty())
+            }
         }
     }
 }
