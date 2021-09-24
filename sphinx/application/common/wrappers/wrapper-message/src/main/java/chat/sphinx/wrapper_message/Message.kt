@@ -10,6 +10,7 @@ import chat.sphinx.wrapper_common.lightning.LightningPaymentRequest
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.*
 import chat.sphinx.wrapper_message_media.MessageMedia
+import chat.sphinx.wrapper_message_media.isAudio
 import chat.sphinx.wrapper_message_media.isImage
 import chat.sphinx.wrapper_message_media.isSphinxText
 import chat.sphinx.wrapper_message_media.token.MediaUrl
@@ -224,6 +225,9 @@ inline val Message.isPaidTextMessage: Boolean
 
 inline val Message.isSphinxCallLink: Boolean
     get() = type.isMessage() && (messageContentDecrypted?.value?.isValidSphinxCallLink == true)
+
+inline val Message.isAudioMessage: Boolean
+    get() = type.isAttachment() && messageMedia?.mediaType?.isAudio == true
 
 abstract class Message {
     abstract val id: MessageId

@@ -13,9 +13,13 @@ import androidx.core.view.updateLayoutParams
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.chat_common.R
 import chat.sphinx.chat_common.databinding.LayoutMessageHolderBinding
+import chat.sphinx.chat_common.databinding.LayoutMessageTypeAttachmentAudioBinding
 import chat.sphinx.chat_common.model.NodeDescriptor
 import chat.sphinx.chat_common.model.TribeLink
 import chat.sphinx.chat_common.model.UnspecifiedUrl
+import chat.sphinx.chat_common.ui.viewstate.audio.AudioMessageState
+import chat.sphinx.chat_common.ui.viewstate.audio.AudioPlayState
+import chat.sphinx.chat_common.util.AudioPlayerController
 import chat.sphinx.chat_common.util.SphinxLinkify
 import chat.sphinx.chat_common.util.SphinxUrlSpan
 import chat.sphinx.concept_image_loader.Disposable
@@ -29,9 +33,7 @@ import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.resources.*
 import chat.sphinx.resources.databinding.LayoutChatImageSmallInitialHolderBinding
 import chat.sphinx.wrapper_chat.ChatType
-import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.lightning.*
-import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.thumbnailUrl
 import chat.sphinx.wrapper_common.util.getInitials
 import chat.sphinx.wrapper_meme_server.headerKey
@@ -48,7 +50,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import java.io.File
-import java.util.Collections.max
 import chat.sphinx.resources.R as common_R
 
 
@@ -59,6 +60,7 @@ internal fun LayoutMessageHolderBinding.setView(
     holderJobs: ArrayList<Job>,
     disposables: ArrayList<Disposable>,
     dispatchers: CoroutineDispatchers,
+    audioPlayerController: AudioPlayerController,
     imageLoader: ImageLoader<ImageView>,
     imageLoaderDefaults: ImageLoaderOptions,
     memeServerTokenHandler: MemeServerTokenHandler,
@@ -161,6 +163,13 @@ internal fun LayoutMessageHolderBinding.setView(
                     holderJobs.add(job)
                 }
             }
+            setBubbleAudioAttachment(
+                viewState.bubbleAudioAttachment,
+                audioPlayerController,
+                dispatchers,
+                holderJobs,
+                lifecycleScope
+            )
             setUnsupportedMessageTypeLayout(viewState.unsupportedMessageType)
             setBubbleMessageLayout(viewState.bubbleMessage, onSphinxInteractionListener)
             setBubblePaidMessageLayout(
@@ -262,6 +271,13 @@ internal fun LayoutMessageHolderBinding.setView(
     }
 }
 
+@Suppress("NOTHING_TO_INLINE")
+internal inline fun Long.toTimestamp(): String {
+    val minutes = this / 1000 / 60
+    val seconds = this / 1000 % 60
+
+    return "${"%02d".format(minutes)}:${"%02d".format(seconds)}"
+}
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun LayoutMessageHolderBinding.setUnsupportedMessageTypeLayout(
@@ -1052,6 +1068,94 @@ internal inline fun LayoutMessageHolderBinding.setBubbleImageAttachment(
 
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
+internal inline fun LayoutMessageHolderBinding.setBubbleAudioAttachment(
+    audioAttachment: LayoutState.Bubble.ContainerSecond.AudioAttachment?,
+    audioPlayerController: AudioPlayerController,
+    dispatchers: CoroutineDispatchers,
+    holderJobs: ArrayList<Job>,
+    lifecycleScope: CoroutineScope,
+) {
+    includeMessageHolderBubble.includeMessageTypeAudioAttachment.apply {
+        @Exhaustive
+        when (audioAttachment) {
+            null -> {
+                root.gone
+            }
+            is LayoutState.Bubble.ContainerSecond.AudioAttachment.FileAvailable -> {
+                root.visible
+                lifecycleScope.launch(dispatchers.mainImmediate) {
+                    audioPlayerController.getAudioState(audioAttachment)?.value?.let { state ->
+                        setAudioAttachmentLayoutForState(state)
+                    } ?: setAudioAttachmentLayoutForState(
+                        AudioMessageState(
+                            null,
+                            AudioPlayState.Error,
+                            1L,
+                            0L,
+                        )
+                    )
+                }.let { job ->
+                    holderJobs.add(job)
+                }
+            }
+            is LayoutState.Bubble.ContainerSecond.AudioAttachment.FileUnavailable -> {
+                root.visible
+                setAudioAttachmentLayoutForState(
+                    AudioMessageState(
+                        null,
+                        AudioPlayState.Loading,
+                        1L,
+                        0L
+                    )
+                )
+            }
+        }
+
+    }
+}
+
+@MainThread
+@Suppress("NOTHING_TO_INLINE")
+internal inline fun LayoutMessageTypeAttachmentAudioBinding.setAudioAttachmentLayoutForState(
+    state: AudioMessageState
+) {
+
+    seekBarAttachmentAudio.progress = state.progress.toInt()
+    textViewAttachmentAudioRemainingDuration.text = state.remainingSeconds.toTimestamp()
+
+
+    @Exhaustive
+    when (state.playState) {
+        AudioPlayState.Error -> {
+            textViewAttachmentAudioFailure.visible
+            textViewAttachmentPlayPauseButton.gone
+            progressBarAttachmentAudioFileLoading.gone
+        }
+        AudioPlayState.Loading -> {
+            textViewAttachmentAudioFailure.gone
+            textViewAttachmentPlayPauseButton.gone
+            progressBarAttachmentAudioFileLoading.visible
+        }
+        AudioPlayState.Paused -> {
+            progressBarAttachmentAudioFileLoading.gone
+            textViewAttachmentAudioFailure.gone
+
+            textViewAttachmentPlayPauseButton.text = getString(R.string.material_icon_name_play_button)
+            textViewAttachmentPlayPauseButton.visible
+        }
+        AudioPlayState.Playing -> {
+            progressBarAttachmentAudioFileLoading.gone
+            textViewAttachmentAudioFailure.gone
+
+            textViewAttachmentPlayPauseButton.text = getString(R.string.material_icon_name_pause_button)
+            textViewAttachmentPlayPauseButton.visible
+
+        }
+    }
+}
+
+@MainThread
+@Suppress("NOTHING_TO_INLINE")
 internal inline fun LayoutMessageHolderBinding.setBubblePodcastBoost(
     podcastBoost: LayoutState.Bubble.ContainerSecond.PodcastBoost?
 ) {
@@ -1199,7 +1303,7 @@ internal inline fun LayoutMessageHolderBinding.setReactionBoostSender(
                     holderJobs.add(job)
                 }
 
-                boostSenderHolder?.photoUrl?.thumbnailUrl?.let { photoUrl ->
+                boostSenderHolder.photoUrl?.thumbnailUrl?.let { photoUrl ->
                     textViewInitials.gone
                     imageViewChatPicture.visible
                     loadImage(imageViewChatPicture, photoUrl.value)
@@ -1423,7 +1527,7 @@ internal inline fun LayoutMessageHolderBinding.setBubbleReplyMessage(
                     gone
                 }
             }
-            imageViewReplyTextOverlay.gone
+            textViewReplyTextOverlay.gone
 
             // Only used in the footer when replying to a message
             textViewReplyClose.gone
@@ -1462,8 +1566,16 @@ internal inline fun LayoutMessageHolderBinding.setBubbleReplyMessage(
                 holderJobs.add(job)
             }
 
-            textViewReplyMessageLabel.text = replyMessage.text
-            textViewReplyMessageLabel.goneIfFalse(replyMessage.text.isNotEmpty())
+            if (replyMessage.isAudio) {
+                textViewReplyTextOverlay.text = getString(R.string.material_icon_name_volume_up)
+                textViewReplyTextOverlay.visible
+
+                textViewReplyMessageLabel.text = getString(R.string.media_type_label_audio)
+                textViewReplyMessageLabel.goneIfFalse(true)
+            } else {
+                textViewReplyMessageLabel.text = replyMessage.text
+                textViewReplyMessageLabel.goneIfFalse(replyMessage.text.isNotEmpty())
+            }
         }
     }
 }

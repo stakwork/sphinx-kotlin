@@ -183,7 +183,7 @@ internal class TribeDetailFragment: SideEffectFragment<
                         fromUser: Boolean
                     ) {
 
-                        SLIDER_VALUES[progress]?.let {
+                        SLIDER_VALUES[progress].let {
                             textViewPodcastSatsPerMinuteValue.text = it.toString()
                         }
                     }
@@ -192,7 +192,7 @@ internal class TribeDetailFragment: SideEffectFragment<
 
                     override fun onStopTrackingTouch(seekBar: SeekBar?) {
                         seekBar?.let {
-                            SLIDER_VALUES[seekBar.progress]?.let {
+                            SLIDER_VALUES[seekBar.progress].let {
                                 viewModel.updateSatsPerMinute(it.toLong())
                             }
                         }

@@ -18,6 +18,7 @@ import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_lightning.model.route.isRouteAvailable
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
+import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.concept_repository_message.model.SendMessage
 import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
@@ -53,6 +54,7 @@ internal class ChatTribeViewModel @Inject constructor(
     dispatchers: CoroutineDispatchers,
     memeServerTokenHandler: MemeServerTokenHandler,
     private val tribeChatNavigator: TribeChatNavigator,
+    repositoryMedia: RepositoryMedia,
     chatRepository: ChatRepository,
     contactRepository: ContactRepository,
     messageRepository: MessageRepository,
@@ -68,6 +70,7 @@ internal class ChatTribeViewModel @Inject constructor(
     dispatchers,
     memeServerTokenHandler,
     tribeChatNavigator,
+    repositoryMedia,
     chatRepository,
     contactRepository,
     messageRepository,
@@ -233,7 +236,7 @@ internal class ChatTribeViewModel @Inject constructor(
         }.join()
     }
 
-    override fun goToChatDetailScreen() {
+    override fun navigateToChatDetailScreen() {
         viewModelScope.launch(mainImmediate) {
             (chatNavigator as TribeChatNavigator).toTribeDetailScreen(chatId)
         }

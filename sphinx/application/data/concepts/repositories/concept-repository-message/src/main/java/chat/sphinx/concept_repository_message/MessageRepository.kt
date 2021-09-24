@@ -11,6 +11,7 @@ import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessageUUID
+import chat.sphinx.wrapper_common.payment.PaymentTemplate
 import chat.sphinx.wrapper_message.Message
 import chat.sphinx.wrapper_message.MessageContentDecrypted
 import chat.sphinx.wrapper_message.MessageType
@@ -47,6 +48,8 @@ interface MessageRepository {
     )
 
     suspend fun deleteMessage(message: Message) : Response<Any, ResponseError>
+
+    suspend fun getPaymentTemplates() : Response<List<PaymentTemplate>, ResponseError>
 
     suspend fun sendPayment(
         sendPayment: SendPayment?

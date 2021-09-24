@@ -92,6 +92,7 @@ object AppModule {
         imageLoaderAndroid
 
     @Provides
+    @Singleton
     fun provideMediaCacheHandler(
         applicationScope: CoroutineScope,
         application: Application,

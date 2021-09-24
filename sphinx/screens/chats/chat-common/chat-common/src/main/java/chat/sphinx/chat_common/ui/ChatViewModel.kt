@@ -49,6 +49,7 @@ import chat.sphinx.concept_meme_server.MemeServerTokenHandler
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
+import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.concept_repository_message.model.SendMessage
 import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
@@ -107,6 +108,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     dispatchers: CoroutineDispatchers,
     val memeServerTokenHandler: MemeServerTokenHandler,
     val chatNavigator: ChatNavigator,
+    private val repositoryMedia: RepositoryMedia,
     protected val chatRepository: ChatRepository,
     protected val contactRepository: ContactRepository,
     protected val messageRepository: MessageRepository,
@@ -375,9 +377,9 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                                         groupingDateAndBubbleBackground.second
                                     }
                                 },
-                                messageSenderInfo = { message ->
+                                messageSenderInfo = { messageCallback ->
                                     when {
-                                        message.sender == chat.contactIds.firstOrNull() -> {
+                                        messageCallback.sender == chat.contactIds.firstOrNull() -> {
                                             val accountOwner = contactRepository.accountOwner.value
 
                                             Triple(
@@ -395,16 +397,21 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                                         }
                                         else -> {
                                             Triple(
-                                                message.senderPic,
-                                                message.senderAlias?.value?.toContactAlias(),
-                                                message.getColorKey()
+                                                messageCallback.senderPic,
+                                                messageCallback.senderAlias?.value?.toContactAlias(),
+                                                messageCallback.getColorKey()
                                             )
                                         }
                                     }
                                 },
                                 accountOwner = { owner },
                                 previewProvider = { handleLinkPreview(it) },
-                                paidTextMessageContentProvider = { message -> handlePaidTextMessageContent(message) },
+                                paidTextMessageContentProvider = {
+                                        messageCallback -> handlePaidTextMessageContent(messageCallback)
+                                 },
+                                onBindDownloadMedia = {
+                                    repositoryMedia.downloadMediaIfApplicable(message.id)
+                                }
                             )
                         )
                     } else {
@@ -435,9 +442,9 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                                         getInitialHolderViewStateForReceivedMessage(message)
                                     }
                                 },
-                                messageSenderInfo = { message ->
+                                messageSenderInfo = { messageCallback ->
                                     when {
-                                        message.sender == chat.contactIds.firstOrNull() -> {
+                                        messageCallback.sender == chat.contactIds.firstOrNull() -> {
                                             val accountOwner = contactRepository.accountOwner.value
 
                                             Triple(
@@ -455,16 +462,21 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                                         }
                                         else -> {
                                             Triple(
-                                                message.senderPic,
-                                                message.senderAlias?.value?.toContactAlias(),
-                                                message.getColorKey()
+                                                messageCallback.senderPic,
+                                                messageCallback.senderAlias?.value?.toContactAlias(),
+                                                messageCallback.getColorKey()
                                             )
                                         }
                                     }
                                 },
                                 accountOwner = { owner },
                                 previewProvider = { link -> handleLinkPreview(link) },
-                                paidTextMessageContentProvider = { message -> handlePaidTextMessageContent(message) },
+                                paidTextMessageContentProvider = { messageCallback ->
+                                    handlePaidTextMessageContent(messageCallback)
+                                 },
+                                onBindDownloadMedia = {
+                                    repositoryMedia.downloadMediaIfApplicable(message.id)
+                                }
                             )
                         )
                     }
@@ -594,7 +606,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         var messageLayoutState: LayoutState.Bubble.ContainerThird.Message? = null
 
         viewModelScope.launch(mainImmediate) {
-            message?.retrievePaidTextAttachmentUrlAndMessageMedia()?.let { urlAndMedia ->
+            message.retrievePaidTextAttachmentUrlAndMessageMedia()?.let { urlAndMedia ->
                 urlAndMedia.second?.host?.let { host ->
                     urlAndMedia.second?.mediaKeyDecrypted?.let { mediaKeyDecrypted ->
                         memeServerTokenHandler.retrieveAuthenticationToken(host)?.let { token ->
@@ -663,16 +675,12 @@ abstract class ChatViewModel<ARGS: NavArgs>(
             return null
         }
 
-        var file: File? = null
-
-        try {
+        return try {
             val output = mediaCacheHandler.createPaidTextFile("txt")
-            file = mediaCacheHandler.copyTo(text.byteInputStream(), output)
+            mediaCacheHandler.copyTo(text.byteInputStream(), output)
         } catch (e: IOException) {
             null
         }
-
-        return file
     }
 
     /**
@@ -687,7 +695,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     open fun sendMessage(builder: SendMessage.Builder): SendMessage? {
         val msg = builder.build()
 
-        msg?.second?.let { validationError ->
+        msg.second?.let { validationError ->
             val errorMessageRes = when (validationError) {
                 SendMessage.Builder.ValidationError.EMPTY_PRICE -> {
                     R.string.send_message_empty_price_error
@@ -1093,8 +1101,10 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     internal fun chatMenuOptionPaymentSend() {
         contactId?.let { id ->
             viewModelScope.launch(mainImmediate) {
+                audioPlayerController.pauseMediaIfPlaying()
                 chatNavigator.toPaymentSendDetail(id, chatId)
             }
+            updateViewState(ChatMenuViewState.Closed)
         }
     }
 
@@ -1246,7 +1256,21 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         }
     }
 
-    abstract fun goToChatDetailScreen()
+    internal val audioPlayerController: AudioPlayerController by lazy {
+        AudioPlayerControllerImpl(
+            app,
+            viewModelScope,
+            dispatchers,
+            LOG,
+        )
+    }
+
+    fun goToChatDetailScreen() {
+        audioPlayerController.pauseMediaIfPlaying()
+        navigateToChatDetailScreen()
+    }
+
+    protected abstract fun navigateToChatDetailScreen()
 
     open fun handleContactTribeLinks(url: String?) {
         if (url != null) {
@@ -1279,17 +1303,21 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     private suspend fun handleTribeLink(tribeJoinLink: TribeJoinLink) {
         chatRepository.getChatByUUID(ChatUUID(tribeJoinLink.tribeUUID)).firstOrNull()?.let { chat ->
             chatNavigator.toChat(chat, null)
-        } ?: chatNavigator.toJoinTribeDetail(tribeJoinLink)
+        } ?: chatNavigator.toJoinTribeDetail(tribeJoinLink).also {
+            audioPlayerController.pauseMediaIfPlaying()
+        }
     }
 
     private suspend fun handleContactLink(pubKey: LightningNodePubKey, routeHint: LightningRouteHint?) {
         contactRepository.getContactByPubKey(pubKey).firstOrNull()?.let { contact ->
 
-            chatRepository.getConversationByContactId(contact.id).collect { chat ->
+            chatRepository.getConversationByContactId(contact.id).firstOrNull().let { chat ->
                 chatNavigator.toChat(chat, contact.id)
             }
 
-        } ?: chatNavigator.toAddContactDetail(pubKey, routeHint)
+        } ?: chatNavigator.toAddContactDetail(pubKey, routeHint).also {
+            audioPlayerController.pauseMediaIfPlaying()
+        }
     }
 
     open suspend fun processMemberRequest(
@@ -1316,9 +1344,10 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 
                         messageMedia.retrieveMediaStorageUri()?.let { mediaStorageUri ->
                             app.contentResolver.insert(mediaStorageUri, mediaContentValues)?.let { savedFileUri ->
-                                val inputStream = drawable?.drawableToBitmap()?.toInputStream() ?: retrieveRemoteMediaInputStream(
+                                val inputStream = drawable?.drawableToBitmap()?.toInputStream() ?: messageMedia.retrieveRemoteMediaInputStream(
                                     mediaUrlAndMessageMedia.first,
-                                    messageMedia
+                                    memeServerTokenHandler,
+                                    memeInputStreamHandler
                                 )
 
                                 try {
@@ -1350,21 +1379,6 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                         }
                     }
                 }
-            }
-        }
-    }
-
-    private suspend fun retrieveRemoteMediaInputStream(
-        url: String,
-        messageMedia: MessageMedia
-    ): InputStream? {
-        return messageMedia.localFile?.inputStream() ?: messageMedia.host?.let { mediaHost ->
-            memeServerTokenHandler.retrieveAuthenticationToken(mediaHost)?.let { authenticationToken ->
-                memeInputStreamHandler.retrieveMediaInputStream(
-                    url,
-                    authenticationToken,
-                    messageMedia.mediaKeyDecrypted
-                )
             }
         }
     }
@@ -1409,6 +1423,11 @@ abstract class ChatViewModel<ARGS: NavArgs>(
             submitSideEffect(sideEffect)
         }
     }
+
+    override fun onCleared() {
+        super.onCleared()
+        (audioPlayerController as AudioPlayerControllerImpl).onCleared()
+    }
 }
 
 @Suppress("NOTHING_TO_INLINE")
@@ -1439,6 +1458,24 @@ inline fun MessageMedia.retrieveContentValues(message: Message): ContentValues {
         put(MediaStore.Images.Media.TITLE, message.id.value)
         put(MediaStore.Images.Media.DISPLAY_NAME, message.senderAlias?.value)
         put(MediaStore.Images.Media.MIME_TYPE, mediaType.value.replace("jpg", "jpeg"))
+    }
+}
+
+
+@Suppress("NOTHING_TO_INLINE")
+suspend inline fun MessageMedia.retrieveRemoteMediaInputStream(
+    url: String,
+    memeServerTokenHandler: MemeServerTokenHandler,
+    memeInputStreamHandler: MemeInputStreamHandler
+): InputStream? {
+    return localFile?.inputStream() ?: host?.let { mediaHost ->
+        memeServerTokenHandler.retrieveAuthenticationToken(mediaHost)?.let { authenticationToken ->
+            memeInputStreamHandler.retrieveMediaInputStream(
+                url,
+                authenticationToken,
+                mediaKeyDecrypted
+            )
+        }
     }
 }
 

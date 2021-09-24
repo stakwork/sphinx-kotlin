@@ -33,6 +33,10 @@
     <dimen name="background_message_holder_default_padding_top">12dp</dimen>
     <dimen name="message_holder_in_photo_holder_xy">32dp</dimen>
     <dimen name="audio_button_play_pause_width">60dp</dimen>
+    <dimen name="audio_message_progress_bar_xy">30dp</dimen>
+    <dimen name="audio_message_seek_bar_margin_horizontal">48dp</dimen>
+    <dimen name="audio_button_play_pause_text_size">25sp</dimen>
+    <dimen name="audio_button_duration_text_size">14sp</dimen>
     <dimen name="video_attachment_play_pause_button_xy">50dp</dimen>
     <dimen name="image_holder_boost_reaction_xy">26dp</dimen>
     <dimen name="image_holder_boost_reaction_2_margin_start">13dp</dimen>

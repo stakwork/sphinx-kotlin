@@ -2,6 +2,7 @@ package chat.sphinx.di
 
 import android.content.Context
 import chat.sphinx.concept_crypto_rsa.RSA
+import chat.sphinx.concept_meme_input_stream.MemeInputStreamHandler
 import chat.sphinx.concept_meme_server.MemeServerTokenHandler
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
 import chat.sphinx.concept_network_query_contact.NetworkQueryContact
@@ -37,6 +38,7 @@ import dagger.hilt.components.SingletonComponent
 import io.matthewnelson.build_config.BuildConfigDebug
 import io.matthewnelson.concept_authentication.data.AuthenticationStorage
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
+import io.matthewnelson.concept_media_cache.MediaCacheHandler
 import io.matthewnelson.feature_authentication_core.AuthenticationCoreManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.*
@@ -119,6 +121,8 @@ object RepositoryModule {
         coreDBImpl: CoreDBImpl,
         dispatchers: CoroutineDispatchers,
         moshi: Moshi,
+        mediaCacheHandler: MediaCacheHandler,
+        memeInputStreamHandler: MemeInputStreamHandler,
         memeServerTokenHandler: MemeServerTokenHandler,
         networkQueryMemeServer: NetworkQueryMemeServer,
         networkQueryChat: NetworkQueryChat,
@@ -140,6 +144,8 @@ object RepositoryModule {
             coreDBImpl,
             dispatchers,
             moshi,
+            mediaCacheHandler,
+            memeInputStreamHandler,
             memeServerTokenHandler,
             networkQueryMemeServer,
             networkQueryChat,
