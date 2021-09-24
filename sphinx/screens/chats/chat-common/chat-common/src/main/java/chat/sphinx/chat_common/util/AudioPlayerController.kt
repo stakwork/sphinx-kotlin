@@ -1,9 +1,16 @@
 package chat.sphinx.chat_common.util
 
 import android.app.Application
+import android.content.Context
+import android.media.AudioAttributes
+import android.media.AudioManager
 import android.media.MediaMetadataRetriever
 import android.media.MediaPlayer
+import android.telephony.TelephonyManager
 import androidx.core.net.toUri
+import androidx.media.AudioAttributesCompat
+import androidx.media.AudioFocusRequestCompat
+import androidx.media.AudioManagerCompat
 import chat.sphinx.chat_common.ui.viewstate.audio.AudioMessageState
 import chat.sphinx.chat_common.ui.viewstate.audio.AudioPlayState
 import chat.sphinx.chat_common.ui.viewstate.messageholder.LayoutState
@@ -33,7 +40,10 @@ internal class AudioPlayerControllerImpl(
     private val viewModelScope: CoroutineScope,
     dispatchers: CoroutineDispatchers,
     private val LOG: SphinxLogger,
-): AudioPlayerController, CoroutineDispatchers by dispatchers {
+) : AudioPlayerController,
+    AudioManager.OnAudioFocusChangeListener,
+    CoroutineDispatchers by dispatchers
+{
 
     companion object {
         const val TAG = "AudioPlayerViewModel"
@@ -95,6 +105,7 @@ internal class AudioPlayerControllerImpl(
 
     private inner class MediaPlayerHolder {
         private var currentAudio: Pair<File, MutableStateFlow<AudioMessageState>>? = null
+
         private val mediaPlayer = MediaPlayer().also {
             it.setOnCompletionListener { mp ->
                 currentAudio?.let { nnCurrent ->
@@ -107,6 +118,12 @@ internal class AudioPlayerControllerImpl(
                     )
                 }
             }
+            it.setAudioAttributes(
+                AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_MEDIA)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
+                    .build()
+            )
         }
         private val publicMethodLock = Mutex()
 
@@ -150,7 +167,7 @@ internal class AudioPlayerControllerImpl(
                                         mp.seekTo(state.value.currentMillis.toInt())
 
                                         viewModelScope.launch(mainImmediate) {
-                                            if (true /* TODO: Request Audio Focus */) {
+                                            if (requestAudioFocus()) {
                                                 playCurrent()
                                             } else {
                                                 pauseCurrent()
@@ -173,7 +190,6 @@ internal class AudioPlayerControllerImpl(
                         }
                     } ?: run {
                         currentAudio = Pair(nnFile, state)
-                        // TODO: Register audio focus listener
 
                         state.value = AudioMessageState(
                             state.value.file,
@@ -191,7 +207,7 @@ internal class AudioPlayerControllerImpl(
                                     mp.seekTo(state.value.currentMillis.toInt())
 
                                     viewModelScope.launch(mainImmediate) {
-                                        if (true /* TODO: Request Audio Focus */) {
+                                        if (requestAudioFocus()) {
                                             playCurrent()
                                         } else {
                                             pauseCurrent()
@@ -294,6 +310,10 @@ internal class AudioPlayerControllerImpl(
     private val audioStateCache = AudioStateCache()
     private val mediaPlayerHolder = MediaPlayerHolder()
 
+    //////////////////
+    /// Controller ///
+    //////////////////
+
     override suspend fun getAudioState(
         audioAttachment: LayoutState.Bubble.ContainerSecond.AudioAttachment.FileAvailable
     ): StateFlow<AudioMessageState>? {
@@ -331,7 +351,76 @@ internal class AudioPlayerControllerImpl(
         }
     }
 
+    ///////////////////////////
+    /// AudioFocus Listener ///
+    ///////////////////////////
+
+    private inline val audioManager: AudioManager?
+        get() = app
+            .applicationContext
+            .getSystemService(Context.AUDIO_SERVICE) as? AudioManager
+
+    private val attributes: AudioAttributesCompat by lazy {
+        AudioAttributesCompat.Builder()
+            .setUsage(AudioAttributesCompat.USAGE_MEDIA)
+            .setContentType(AudioAttributesCompat.CONTENT_TYPE_SPEECH)
+            .build()
+    }
+
+    private val request: AudioFocusRequestCompat by lazy {
+        AudioFocusRequestCompat.Builder(AudioManagerCompat.AUDIOFOCUS_GAIN)
+            .setAudioAttributes(attributes)
+            .setOnAudioFocusChangeListener(this)
+            .setWillPauseWhenDucked(true)
+            .build()
+    }
+
+    private val telephonyManager: TelephonyManager?
+        get() = app
+            .applicationContext
+            .getSystemService(Context.TELEPHONY_SERVICE) as? TelephonyManager
+
+    private fun requestAudioFocus(): Boolean {
+        audioManager?.let { manager ->
+            return when (AudioManagerCompat.requestAudioFocus(manager, request)) {
+                AudioManager.AUDIOFOCUS_REQUEST_FAILED -> {
+                    false
+                }
+                AudioManager.AUDIOFOCUS_REQUEST_GRANTED -> {
+                    true
+                }
+                else -> {
+                    false
+                }
+            }
+        }
+
+        return false
+    }
+
+    override fun onAudioFocusChange(focusChange: Int) {
+
+        val callState = telephonyManager?.callState ?: TelephonyManager.CALL_STATE_IDLE
+
+        when {
+            focusChange == AudioManager.AUDIOFOCUS_LOSS                 ||
+            callState != TelephonyManager.CALL_STATE_IDLE                   -> {
+                pauseMediaIfPlaying()
+            }
+            focusChange == AudioManager.AUDIOFOCUS_GAIN                     -> {
+                // no-op
+            }
+            focusChange == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT           -> {
+                pauseMediaIfPlaying()
+            }
+            focusChange == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK  -> {
+                pauseMediaIfPlaying()
+            }
+        }
+    }
+
     fun onCleared() {
+        audioManager?.let { manager -> AudioManagerCompat.abandonAudioFocusRequest(manager, request) }
         audioStateCache.releaseMetaDataRetriever()
         mediaPlayerHolder.releaseMediaPlayer()
     }
