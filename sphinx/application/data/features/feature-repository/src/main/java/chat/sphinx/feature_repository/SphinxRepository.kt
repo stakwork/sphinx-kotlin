@@ -2090,7 +2090,7 @@ abstract class SphinxRepository(
         return if (unencryptedString != null) {
             contact?.id?.let { nnContactId ->
                 // we know it's a conversation as the contactId is always sent
-                contact?.rsaPublicKey?.let { pubKey ->
+                contact.rsaPublicKey?.let { pubKey ->
 
                     val response = rsa.encrypt(
                         pubKey,
@@ -2719,7 +2719,7 @@ abstract class SphinxRepository(
             val queries = coreDB.getSphinxDatabaseQueries()
 
             message.messageMedia?.mediaToken?.let { mediaToken ->
-                mediaToken.getPriceFromMediaToken()?.let { price ->
+                mediaToken.getPriceFromMediaToken().let { price ->
 
                     networkQueryMessage.payAttachment(
                         message.chatId,
@@ -3542,16 +3542,14 @@ abstract class SphinxRepository(
                             LOG.e(TAG, "Failed to create tribe: ", loadResponse.exception)
                         }
                         is Response.Success -> {
-                            loadResponse.value?.let { chatDto ->
-                                response = Response.Success(chatDto)
-                                val queries = coreDB.getSphinxDatabaseQueries()
+                            response = Response.Success(loadResponse.value)
+                            val queries = coreDB.getSphinxDatabaseQueries()
 
-                                chatLock.withLock {
-                                    messageLock.withLock {
-                                        withContext(io) {
-                                            queries.transaction {
-                                                upsertChat(chatDto, moshi, chatSeenMap, queries, null)
-                                            }
+                            chatLock.withLock {
+                                messageLock.withLock {
+                                    withContext(io) {
+                                        queries.transaction {
+                                            upsertChat(loadResponse.value, moshi, chatSeenMap, queries, null)
                                         }
                                     }
                                 }

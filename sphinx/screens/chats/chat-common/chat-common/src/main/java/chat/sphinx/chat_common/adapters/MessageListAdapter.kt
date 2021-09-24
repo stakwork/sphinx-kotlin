@@ -227,7 +227,7 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                     }
                 }
 
-                val selectedMessageLongClickListener = OnLongClickListener { v ->
+                val selectedMessageLongClickListener = OnLongClickListener {
                     SelectedMessageViewState.SelectedMessage.instantiate(
                         messageHolderViewState = currentViewState,
                         holderYPosTop = Px(binding.root.y + binding.includeMessageHolderBubble.root.y),

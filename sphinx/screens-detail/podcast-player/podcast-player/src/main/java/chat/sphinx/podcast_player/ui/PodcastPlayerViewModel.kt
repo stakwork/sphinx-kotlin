@@ -111,7 +111,7 @@ internal class PodcastPlayerViewModel @Inject constructor(
         viewModelScope.launch(mainImmediate) {
             chatRepository.getChatById(args.chatId).firstOrNull()?.let { chat ->
                 chat.metaData?.let { metaData ->
-                    podcast?.setMetaData(metaData)
+                    podcast.setMetaData(metaData)
                 }
             }
             viewStateContainer.updateViewState(PodcastPlayerViewState.PodcastLoaded(podcast))
@@ -205,7 +205,7 @@ internal class PodcastPlayerViewModel @Inject constructor(
 
     private fun setPaymentsDestinations() {
         viewModelScope.launch(mainImmediate) {
-            podcast?.value?.destinations?.let { destinations ->
+            podcast.value.destinations.let { destinations ->
                 mediaPlayerServiceController.submitAction(
                     UserAction.SetPaymentsDestinations(
                         args.chatId,
@@ -219,14 +219,14 @@ internal class PodcastPlayerViewModel @Inject constructor(
     fun sendPodcastBoost() {
         viewModelScope.launch(mainImmediate) {
             getOwner().tipAmount?.let { tipAmount ->
-                podcast?.let { nnPodcast ->
+                podcast.let { nnPodcast ->
 
                     if (tipAmount.value > 0) {
                         val metaData = nnPodcast.getMetaData(tipAmount)
 
                         messageRepository.sendPodcastBoost(args.chatId, nnPodcast)
 
-                        nnPodcast.value?.destinations?.let { destinations ->
+                        nnPodcast.value.destinations.let { destinations ->
                             mediaPlayerServiceController.submitAction(
                                 UserAction.SendBoost(
                                     args.chatId,

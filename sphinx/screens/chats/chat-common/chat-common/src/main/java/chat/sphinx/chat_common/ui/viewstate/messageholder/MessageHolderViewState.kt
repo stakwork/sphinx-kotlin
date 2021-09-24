@@ -311,7 +311,7 @@ internal sealed class MessageHolderViewState(
 
             LayoutState.Bubble.ContainerFirst.ReplyMessage(
                 showSent = this is Sent,
-                messageSenderInfo(nnReplyMessage)?.second?.value ?: "",
+                messageSenderInfo(nnReplyMessage).second?.value ?: "",
                 nnReplyMessage.getColorKey(),
                 nnReplyMessage.retrieveTextToShow() ?: "",
                 mediaUrl,

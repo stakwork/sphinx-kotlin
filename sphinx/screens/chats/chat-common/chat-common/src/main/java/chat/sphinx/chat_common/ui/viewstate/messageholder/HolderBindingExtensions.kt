@@ -1303,7 +1303,7 @@ internal inline fun LayoutMessageHolderBinding.setReactionBoostSender(
                     holderJobs.add(job)
                 }
 
-                boostSenderHolder?.photoUrl?.thumbnailUrl?.let { photoUrl ->
+                boostSenderHolder.photoUrl?.thumbnailUrl?.let { photoUrl ->
                     textViewInitials.gone
                     imageViewChatPicture.visible
                     loadImage(imageViewChatPicture, photoUrl.value)

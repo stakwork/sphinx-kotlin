@@ -377,9 +377,9 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                                         groupingDateAndBubbleBackground.second
                                     }
                                 },
-                                messageSenderInfo = { message ->
+                                messageSenderInfo = { messageCallback ->
                                     when {
-                                        message.sender == chat.contactIds.firstOrNull() -> {
+                                        messageCallback.sender == chat.contactIds.firstOrNull() -> {
                                             val accountOwner = contactRepository.accountOwner.value
 
                                             Triple(
@@ -397,16 +397,18 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                                         }
                                         else -> {
                                             Triple(
-                                                message.senderPic,
-                                                message.senderAlias?.value?.toContactAlias(),
-                                                message.getColorKey()
+                                                messageCallback.senderPic,
+                                                messageCallback.senderAlias?.value?.toContactAlias(),
+                                                messageCallback.getColorKey()
                                             )
                                         }
                                     }
                                 },
                                 accountOwner = { owner },
                                 previewProvider = { handleLinkPreview(it) },
-                                paidTextMessageContentProvider = { message -> handlePaidTextMessageContent(message) },
+                                paidTextMessageContentProvider = {
+                                        messageCallback -> handlePaidTextMessageContent(messageCallback)
+                                 },
                                 onBindDownloadMedia = {
                                     repositoryMedia.downloadMediaIfApplicable(message.id)
                                 }
@@ -440,9 +442,9 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                                         getInitialHolderViewStateForReceivedMessage(message)
                                     }
                                 },
-                                messageSenderInfo = { message ->
+                                messageSenderInfo = { messageCallback ->
                                     when {
-                                        message.sender == chat.contactIds.firstOrNull() -> {
+                                        messageCallback.sender == chat.contactIds.firstOrNull() -> {
                                             val accountOwner = contactRepository.accountOwner.value
 
                                             Triple(
@@ -460,18 +462,19 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                                         }
                                         else -> {
                                             Triple(
-                                                message.senderPic,
-                                                message.senderAlias?.value?.toContactAlias(),
-                                                message.getColorKey()
+                                                messageCallback.senderPic,
+                                                messageCallback.senderAlias?.value?.toContactAlias(),
+                                                messageCallback.getColorKey()
                                             )
                                         }
                                     }
                                 },
                                 accountOwner = { owner },
                                 previewProvider = { link -> handleLinkPreview(link) },
-                                paidTextMessageContentProvider = { message -> handlePaidTextMessageContent(message) },
+                                paidTextMessageContentProvider = { messageCallback ->
+                                    handlePaidTextMessageContent(messageCallback)
+                                 },
                                 onBindDownloadMedia = {
-
                                     repositoryMedia.downloadMediaIfApplicable(message.id)
                                 }
                             )
@@ -603,7 +606,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         var messageLayoutState: LayoutState.Bubble.ContainerThird.Message? = null
 
         viewModelScope.launch(mainImmediate) {
-            message?.retrievePaidTextAttachmentUrlAndMessageMedia()?.let { urlAndMedia ->
+            message.retrievePaidTextAttachmentUrlAndMessageMedia()?.let { urlAndMedia ->
                 urlAndMedia.second?.host?.let { host ->
                     urlAndMedia.second?.mediaKeyDecrypted?.let { mediaKeyDecrypted ->
                         memeServerTokenHandler.retrieveAuthenticationToken(host)?.let { token ->
@@ -672,16 +675,12 @@ abstract class ChatViewModel<ARGS: NavArgs>(
             return null
         }
 
-        var file: File? = null
-
-        try {
+        return try {
             val output = mediaCacheHandler.createPaidTextFile("txt")
-            file = mediaCacheHandler.copyTo(text.byteInputStream(), output)
+            mediaCacheHandler.copyTo(text.byteInputStream(), output)
         } catch (e: IOException) {
             null
         }
-
-        return file
     }
 
     /**
@@ -696,7 +695,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     open fun sendMessage(builder: SendMessage.Builder): SendMessage? {
         val msg = builder.build()
 
-        msg?.second?.let { validationError ->
+        msg.second?.let { validationError ->
             val errorMessageRes = when (validationError) {
                 SendMessage.Builder.ValidationError.EMPTY_PRICE -> {
                     R.string.send_message_empty_price_error

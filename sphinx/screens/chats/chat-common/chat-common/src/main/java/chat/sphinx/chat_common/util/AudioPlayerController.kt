@@ -107,7 +107,7 @@ internal class AudioPlayerControllerImpl(
         private var currentAudio: Pair<File, MutableStateFlow<AudioMessageState>>? = null
 
         private val mediaPlayer = MediaPlayer().also {
-            it.setOnCompletionListener { mp ->
+            it.setOnCompletionListener {
                 currentAudio?.let { nnCurrent ->
                     dispatchStateJob?.cancel()
                     nnCurrent.second.value = AudioMessageState(

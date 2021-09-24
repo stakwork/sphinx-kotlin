@@ -204,30 +204,30 @@ object SphinxLinkify {
         url: String, prefixes: Array<String?>,
         matcher: Matcher, filter: TransformFilter?
     ): String {
-        var url = url
+        var localUrl = url
         if (filter != null) {
-            url = filter.transformUrl(matcher, url)
+            localUrl = filter.transformUrl(matcher, localUrl)
         }
         var hasPrefix = false
         for (i in prefixes.indices) {
-            if (url.regionMatches(0, prefixes[i]!!, 0, prefixes[i]!!.length, ignoreCase = true)) {
+            if (localUrl.regionMatches(0, prefixes[i]!!, 0, prefixes[i]!!.length, ignoreCase = true)) {
                 hasPrefix = true
 
                 // Fix capitalization if necessary
-                if (!url.regionMatches(
+                if (!localUrl.regionMatches(
                         0,
                         prefixes[i]!!, 0, prefixes[i]!!.length, ignoreCase = false
                     )
                 ) {
-                    url = prefixes[i].toString() + url.substring(prefixes[i]!!.length)
+                    localUrl = prefixes[i].toString() + localUrl.substring(prefixes[i]!!.length)
                 }
                 break
             }
         }
         if (!hasPrefix && prefixes.size > 0) {
-            url = prefixes[0].toString() + url
+            localUrl = prefixes[0].toString() + localUrl
         }
-        return url
+        return localUrl
     }
 
     private fun gatherLinks(

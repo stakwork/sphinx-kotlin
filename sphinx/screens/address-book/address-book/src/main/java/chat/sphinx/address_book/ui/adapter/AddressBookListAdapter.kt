@@ -101,7 +101,7 @@ internal class AddressBookListAdapter(
 
                     withContext(viewModel.dispatchers.default) {
                         DiffUtil.calculateDiff(diff)
-                    }.let { result ->
+                    }.let {
 
                         if (!diff.sameList) {
                             addressBookContacts.clear()
