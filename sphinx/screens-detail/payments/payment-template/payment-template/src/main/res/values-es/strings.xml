@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="payment_template_header_name">IMAGEN DEL PAGO</string>
+    <string name="text_view_message_place_holder">Mensaje vacío</string>
+</resources>

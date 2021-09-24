@@ -92,6 +92,7 @@ internal class ScannerFragment: SideEffectFragment<
 
         binding.includeScannerHeader.apply {
             textViewDetailScreenHeaderName.text = getString(R.string.scanner_header_name)
+
             textViewDetailScreenClose.setOnClickListener {
                 viewModel.goBack(BackType.CloseDetailScreen)
             }

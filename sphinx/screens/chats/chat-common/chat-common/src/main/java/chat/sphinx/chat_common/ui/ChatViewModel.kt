@@ -1095,6 +1095,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
             viewModelScope.launch(mainImmediate) {
                 chatNavigator.toPaymentSendDetail(id, chatId)
             }
+            updateViewState(ChatMenuViewState.Closed)
         }
     }
 

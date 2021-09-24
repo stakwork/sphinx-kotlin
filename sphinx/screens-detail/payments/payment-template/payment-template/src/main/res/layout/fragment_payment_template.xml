@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_constraint_payment_template"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/background_detail_screen"
+    tools:context=".ui.PaymentTemplateFragment">
+
+    <include
+        android:id="@+id/include_payment_template_header"
+        layout="@layout/layout_detail_screen_header"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/default_header_height"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_amount"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/default_layout_margin"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/include_payment_template_header"
+        tools:background="@drawable/background_detail_screen">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_amount"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:hint="0"
+            android:singleLine="true"
+            android:textColor="@color/primaryText"
+            android:textColorHint="@color/placeholderTextInverted"
+            android:textSize="@dimen/amount_edit_text_text_size"
+            android:fontFamily="@font/roboto_regular"
+            android:backgroundTint="@android:color/transparent"
+            android:layout_marginHorizontal="70dp"
+            android:gravity="center"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/roboto_light"
+            android:textSize="@dimen/amount_sat_text_view_text_size"
+            android:textColor="@color/secondaryText"
+            android:text="@string/sat"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/text_view_amount"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_message"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/default_layout_margin"
+        android:layout_marginHorizontal="@dimen/default_layout_margin"
+        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_amount"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_message"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@null"
+            android:inputType="textMultiLine"
+            android:hint="@string/text_view_message_place_holder"
+            android:textColor="@color/primaryText"
+            android:textColorHint="@color/placeholderTextInverted"
+            android:textSize="@dimen/message_edit_text_text_size"
+            android:fontFamily="@font/roboto_regular"
+            android:backgroundTint="@android:color/transparent"
+            android:textCursorDrawable="@drawable/cursor"
+            android:gravity="center"
+            android:maxLength="200"
+            android:maxLines="4"
+            android:text=""
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/image_view_selected_payment_template"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginVertical="@dimen/default_layout_margin"
+        android:src="@drawable/ic_no_template_with_padding"
+        android:scaleType="centerInside"
+        app:layout_constraintBottom_toTopOf="@+id/recycler_view_payment_template"
+        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_message"></androidx.appcompat.widget.AppCompatImageView>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_view_payment_template"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/payment_template_recycler_view_height"
+        android:layout_marginVertical="@dimen/default_layout_margin"
+        app:layout_constraintBottom_toTopOf="@+id/layout_constraint_confirm_button"/>
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:layout_width="@dimen/payment_template_selected_image_circle_xy"
+        android:layout_height="@dimen/payment_template_selected_image_circle_xy"
+        android:src="@drawable/selected_template_circle"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="@+id/recycler_view_payment_template"
+        app:layout_constraintTop_toTopOf="@+id/recycler_view_payment_template"></androidx.appcompat.widget.AppCompatImageView>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_confirm_button"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/confirm_button_container_height"
+        android:paddingHorizontal="@dimen/container_horizontal_padding"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        tools:background="@drawable/background_detail_screen">
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/button_confirm"
+            android:layout_width="@dimen/confirm_button_width"
+            android:layout_height="@dimen/confirm_button_height"
+            android:fontFamily="@font/montserrat_semi_bold"
+            android:text="@string/confirm_button"
+            android:textSize="@dimen/confirm_button_text_size"
+            android:textColor="@android:color/white"
+            android:background="@drawable/button_background_white_rad_48"
+            android:backgroundTint="@color/primaryGreen"
+            android:gravity="center"
+            android:visibility="visible"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
+
+        <ProgressBar
+            android:id="@+id/progress_bar_confirm"
+            android:layout_width="@dimen/confirm_button_progress_bar_xy"
+            android:layout_height="@dimen/confirm_button_progress_bar_xy"
+            android:layout_marginLeft="@dimen/default_half_layout_margin"
+            style="?android:attr/progressBarStyle"
+            android:indeterminateTint="@color/mainBottomIcons"
+            app:layout_constraintStart_toEndOf="@+id/button_confirm"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:indeterminate="true"
+            android:visibility="gone" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_progress_bar_loading_templates"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="@+id/recycler_view_payment_template"
+        app:layout_constraintTop_toTopOf="@+id/image_view_selected_payment_template"
+        android:background="@drawable/background_detail_screen"
+        tools:visibility="gone">
+
+        <ProgressBar
+            android:layout_width="@dimen/payment_template_images_progress_bar_xy"
+            android:layout_height="@dimen/payment_template_images_progress_bar_xy"
+            android:layout_marginLeft="@dimen/default_half_layout_margin"
+            style="?android:attr/progressBarStyle"
+            android:indeterminateTint="@color/mainBottomIcons"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:indeterminate="true"
+            android:visibility="visible" />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
