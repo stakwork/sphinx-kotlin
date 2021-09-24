@@ -148,28 +148,33 @@ internal class PaymentTemplateFragment: SideEffectFragment<
         }
     }
 
+    private var templateImagesViewState: TemplateImagesViewState? = null
     override fun subscribeToViewStateFlow() {
         super.subscribeToViewStateFlow()
 
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.templateImagesViewStateContainer.collect { viewState ->
-                @Exhaustive
-                when (viewState) {
-                    is TemplateImagesViewState.LoadingTemplateImages -> {
-                        binding.layoutConstraintProgressBarLoadingTemplates.visible
-                    }
-                    is TemplateImagesViewState.TemplateImages -> {
-                        binding.layoutConstraintProgressBarLoadingTemplates.gone
+                if (templateImagesViewState != viewState) {
+                    templateImagesViewState = viewState
 
-                        binding.recyclerViewPaymentTemplate.apply {
+                    @Exhaustive
+                    when (viewState) {
+                        is TemplateImagesViewState.LoadingTemplateImages -> {
+                            binding.layoutConstraintProgressBarLoadingTemplates.visible
+                        }
+                        is TemplateImagesViewState.TemplateImages -> {
+                            binding.layoutConstraintProgressBarLoadingTemplates.gone
 
-                            (adapter as PaymentTemplateAdapter).setItems(viewState.templates)
+                            binding.recyclerViewPaymentTemplate.apply {
 
-                            //scrolling to first template item
-                            scrollBy(
-                                context.resources.getDimension(R.dimen.payment_template_recycler_view_item_width).toInt(),
-                                0
-                            )
+                                (adapter as PaymentTemplateAdapter).setItems(viewState.templates)
+
+                                //scrolling to first template item
+                                scrollBy(
+                                    context.resources.getDimension(R.dimen.payment_template_recycler_view_item_width).toInt(),
+                                    0
+                                )
+                            }
                         }
                     }
                 }
@@ -203,5 +208,11 @@ internal class PaymentTemplateFragment: SideEffectFragment<
                 }
             }
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+
+        templateImagesViewState = null
     }
 }
