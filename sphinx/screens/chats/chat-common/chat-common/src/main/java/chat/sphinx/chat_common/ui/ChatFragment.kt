@@ -708,15 +708,15 @@ abstract class ChatFragment<
                             replyingMessageBinding.apply {
 
                                 textViewReplyMessageLabel.apply {
-                                    textViewReplyMessageLabel.goneIfFalse(false)
-                                    textViewReplyTextOverlay.goneIfFalse(false)
+                                    textViewReplyMessageLabel.gone
+                                    textViewReplyTextOverlay.gone
 
                                     if (message.isAudioMessage) {
                                         textViewReplyMessageLabel.text = getString(R.string.media_type_label_audio)
-                                        textViewReplyMessageLabel.goneIfFalse(true)
+                                        textViewReplyMessageLabel.visible
 
                                         textViewReplyTextOverlay.text = getString(R.string.material_icon_name_volume_up)
-                                        textViewReplyTextOverlay.goneIfFalse(true)
+                                        textViewReplyTextOverlay.visible
                                     } else {
                                         message.retrieveTextToShow()?.let { messageText ->
                                             textViewReplyMessageLabel.text = messageText
