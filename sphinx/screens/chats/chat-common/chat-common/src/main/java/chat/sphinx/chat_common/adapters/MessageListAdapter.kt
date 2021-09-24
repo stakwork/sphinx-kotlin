@@ -314,6 +314,7 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                             currentViewState?.bubbleAudioAttachment
                         )
                     }
+                    seekBarAttachmentAudio.setOnTouchListener { _, _ -> true }
                 }
 
             }
