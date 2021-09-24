@@ -3935,6 +3935,6 @@ abstract class SphinxRepository(
             }
         } catch (e: Exception) {}
 
-        return response ?: Response.Error(ResponseError(("Failed to delete subscription")))
+        return response ?: Response.Error(ResponseError(("Failed to load payment templates")))
     }
 }
