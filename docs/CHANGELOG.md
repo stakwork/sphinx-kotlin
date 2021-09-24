@@ -1,5 +1,9 @@
 # ChangeLog
 
+## Version 1.0.0-alpha25 (2021-09-24)
+ - Adds ability to receive Audio Messages
+ - Adds Payment Template functionality
+
 ## Version 1.0.0-alpha24 (2021-09-17)
  - Adds ability to reply to Bot responses
  - Selected message menu improvements
