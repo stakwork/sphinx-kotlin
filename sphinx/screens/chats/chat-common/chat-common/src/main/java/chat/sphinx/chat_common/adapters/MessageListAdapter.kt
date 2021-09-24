@@ -128,11 +128,11 @@ internal class MessageListAdapter<ARGS : NavArgs>(
         replyingToMessage: Boolean = false
     ) {
         val lastVisibleItemPositionBeforeDispatch = layoutManager.findLastVisibleItemPosition()
-        val listSizeBeforeDispatch = messages.size - 1
+        val listSizeBeforeDispatch = messages.size
 
         callback()
 
-        val listSizeAfterDispatch = messages.size - 1
+        val listSizeAfterDispatch = messages.size
 
         if (
             (!viewModel.isMessageSelected() || replyingToMessage)           &&
