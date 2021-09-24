@@ -114,7 +114,6 @@ abstract class ChatFragment<
     protected abstract val userColorsHelper: UserColorsHelper
     protected abstract val imageLoader: ImageLoader<ImageView>
 
-    private val mediaPlayerViewModel: MediaPlayerViewModel by viewModels()
     private val audioPlayerViewModel: AudioPlayerViewModel by viewModels()
 
     private val sendMessageBuilder = SendMessage.Builder()
@@ -614,7 +613,7 @@ abstract class ChatFragment<
             onStopSupervisor,
             viewModel,
             audioPlayerViewModel,
-            mediaPlayerViewModel,
+//            mediaPlayerViewModel,
             imageLoader,
             userColorsHelper
         )
@@ -1250,10 +1249,7 @@ abstract class ChatFragment<
 
     override fun onStop() {
         super.onStop()
-
-        if (viewModel.messageMediaPlayer.isPlaying) {
-            viewModel.messageMediaPlayer.stop()
-        }
+        audioPlayerViewModel.pauseMediaIfPlaying()
     }
 
     override suspend fun onSideEffectCollect(sideEffect: ChatSideEffect) {

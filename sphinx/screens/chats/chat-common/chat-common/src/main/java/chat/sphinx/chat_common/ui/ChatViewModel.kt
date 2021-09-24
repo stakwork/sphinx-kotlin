@@ -135,8 +135,6 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     protected abstract val chatId: ChatId?
     protected abstract val contactId: ContactId?
 
-    internal val messageMediaPlayer: MessageMediaPlayer = MessageMediaPlayer(app)
-
     val imageLoaderDefaults by lazy {
         ImageLoaderOptions.Builder()
             .placeholderResId(R.drawable.ic_profile_avatar_circle)
@@ -1258,9 +1256,6 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     }
 
     fun goToChatDetailScreen() {
-        if (messageMediaPlayer.isPlaying) {
-            messageMediaPlayer.pause()
-        }
         navigateToChatDetailScreen()
     }
 
@@ -1412,11 +1407,6 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         viewModelScope.launch(mainImmediate) {
             submitSideEffect(sideEffect)
         }
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        messageMediaPlayer.release()
     }
 }
 

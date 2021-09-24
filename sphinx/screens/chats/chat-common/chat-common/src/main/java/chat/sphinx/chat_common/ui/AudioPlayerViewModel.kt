@@ -288,7 +288,7 @@ internal class AudioPlayerViewModel @Inject constructor(
                     if (!mediaPlayer.isPlaying) {
                         break
                     } else {
-                        delay(500L)
+                        delay(250L)
                     }
                 }
             }
