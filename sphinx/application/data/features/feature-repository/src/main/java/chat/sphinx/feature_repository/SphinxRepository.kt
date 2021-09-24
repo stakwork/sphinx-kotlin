@@ -3903,18 +3903,16 @@ abstract class SphinxRepository(
 
         val memeServerHost = MediaHost.DEFAULT
 
-        val token = memeServerTokenHandler.retrieveAuthenticationToken(memeServerHost)
-            ?: throw RuntimeException("MemeServerAuthenticationToken retrieval failure")
-
-        try {
+        memeServerTokenHandler.retrieveAuthenticationToken(memeServerHost)?.let { token ->
             networkQueryMemeServer.getPaymentTemplates(token, moshi = moshi).collect { loadResponse ->
                 @Exhaustive
                 when (loadResponse) {
-                    is LoadResponse.Loading -> {
-                    }
+                    is LoadResponse.Loading -> { }
+
                     is Response.Error -> {
                         response = loadResponse
                     }
+
                     is Response.Success -> {
                         var templates = ArrayList<PaymentTemplate>()
 
@@ -3933,7 +3931,7 @@ abstract class SphinxRepository(
                     }
                 }
             }
-        } catch (e: Exception) {}
+        }
 
         return response ?: Response.Error(ResponseError(("Failed to load payment templates")))
     }
