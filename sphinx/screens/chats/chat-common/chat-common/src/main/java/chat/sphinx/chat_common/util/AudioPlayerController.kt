@@ -46,14 +46,14 @@ internal class AudioPlayerControllerImpl(
 {
 
     companion object {
-        const val TAG = "AudioPlayerViewModel"
+        private const val TAG = "AudioPlayerControllerImpl"
     }
 
     private inner class AudioStateCache {
         private val lock = Mutex()
         private val map = mutableMapOf<File, MutableStateFlow<AudioMessageState>>()
-
         private val metaDataRetriever = MediaMetadataRetriever()
+
         fun releaseMetaDataRetriever() {
             metaDataRetriever.release()
         }

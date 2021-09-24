@@ -6,7 +6,6 @@ import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_podcast.PodcastDestination
 import kotlinx.coroutines.flow.Flow
-import java.io.File
 
 interface RepositoryMedia {
     fun getChatById(chatId: ChatId): Flow<Chat?>

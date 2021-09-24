@@ -433,20 +433,3 @@ inline fun TransactionCallbacks.deleteSubscriptionById(
 ) {
     queries.subscriptionDeleteById(subscriptionId)
 }
-
-@Suppress("NOTHING_TO_INLINE")
-inline fun TransactionCallbacks.updateMessageMediaLocalFile(
-    localFile: File,
-    messageId: MessageId,
-    queries: SphinxDatabaseQueries
-): Boolean {
-    return if (localFile.exists()) {
-        queries.messageMediaUpdateFile(
-            local_file = localFile,
-            messageId
-        )
-        true
-    } else {
-        false
-    }
-}
