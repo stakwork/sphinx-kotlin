@@ -23,6 +23,7 @@ import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import io.matthewnelson.concept_views.viewstate.value
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -72,19 +73,26 @@ internal class PaymentTemplateViewModel @Inject constructor(
         ViewStateContainer(SelectedTemplateViewState.Idle)
     }
 
-    suspend fun loadTemplateImages() {
-        templateImagesViewStateContainer.updateViewState(TemplateImagesViewState.LoadingTemplateImages)
+    private var loadTemplateImagesJob: Job? = null
+    fun loadTemplateImages() {
+        if (loadTemplateImagesJob?.isActive == true) {
+            return
+        }
 
-        when (val response = messageRepository.getPaymentTemplates()) {
-            is Response.Error -> {
-                templateImagesViewStateContainer.updateViewState(
-                    TemplateImagesViewState.TemplateImages(listOf())
-                )
-            }
-            is Response.Success -> {
-                templateImagesViewStateContainer.updateViewState(
-                    TemplateImagesViewState.TemplateImages(response.value)
-                )
+        loadTemplateImagesJob = viewModelScope.launch(mainImmediate) {
+            templateImagesViewStateContainer.updateViewState(TemplateImagesViewState.LoadingTemplateImages)
+
+            when (val response = messageRepository.getPaymentTemplates()) {
+                is Response.Error -> {
+                    templateImagesViewStateContainer.updateViewState(
+                        TemplateImagesViewState.TemplateImages(listOf())
+                    )
+                }
+                is Response.Success -> {
+                    templateImagesViewStateContainer.updateViewState(
+                        TemplateImagesViewState.TemplateImages(response.value)
+                    )
+                }
             }
         }
     }
