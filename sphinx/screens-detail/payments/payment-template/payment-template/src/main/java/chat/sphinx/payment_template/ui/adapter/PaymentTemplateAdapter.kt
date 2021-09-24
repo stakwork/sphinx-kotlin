@@ -7,6 +7,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.*
 import androidx.recyclerview.widget.RecyclerView
+import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
@@ -22,13 +23,14 @@ import chat.sphinx.wrapper_message_media.token.MediaHost
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlin.collections.ArrayList
 
 internal class PaymentTemplateAdapter(
     private val recyclerView: RecyclerView,
     private val imageLoader: ImageLoader<ImageView>,
-    private val onStopSupervisor: OnStopSupervisor,
+    private val lifecycleOwner: LifecycleOwner,
     private val viewModel: PaymentTemplateViewModel,
 ): RecyclerView.Adapter<PaymentTemplateAdapter.PaymentTemplateViewHolder>(), DefaultLifecycleObserver {
 
@@ -66,7 +68,14 @@ internal class PaymentTemplateAdapter(
         private val binding: LayoutPaymentTemplateHolderBinding
     ): RecyclerView.ViewHolder(binding.root), DefaultLifecycleObserver {
 
+        private var holderJob: Job? = null
+        private var holderDisposable: Disposable? = null
+
         fun bind(position: Int) {
+
+            holderJob?.cancel()
+            holderDisposable?.dispose()
+
             binding.apply {
 
                 val itemWidth = recyclerView.context.resources.getDimension(R.dimen.payment_template_recycler_view_item_width).toInt()
@@ -89,7 +98,7 @@ internal class PaymentTemplateAdapter(
 
                             val token = AuthenticationToken(paymentTemplate.token)
 
-                            onStopSupervisor.scope.launch(viewModel.dispatchers.mainImmediate) {
+                            lifecycleOwner.lifecycleScope.launch(viewModel.dispatchers.mainImmediate) {
                                 imageLoader.load(
                                     imageViewTemplate,
                                     url,
@@ -97,16 +106,20 @@ internal class PaymentTemplateAdapter(
                                         .transformation(Transformation.CircleCrop)
                                         .addHeader(token.headerKey, token.headerValue)
                                         .build()
-                                )
+                                ).also {  holderDisposable = it }
+                            }.let { job ->
+                                holderJob = job
                             }
                         }
                     } ?: run {
-                        onStopSupervisor.scope.launch(viewModel.dispatchers.mainImmediate) {
+                        lifecycleOwner.lifecycleScope.launch(viewModel.dispatchers.mainImmediate) {
                             imageLoader.load(
                                 imageViewTemplate,
                                 -1,
                                 ImageLoaderOptions.Builder().build()
-                            )
+                            ).also {  holderDisposable = it }
+                        }.let { job ->
+                            holderJob = job
                         }
                     }
                 }
