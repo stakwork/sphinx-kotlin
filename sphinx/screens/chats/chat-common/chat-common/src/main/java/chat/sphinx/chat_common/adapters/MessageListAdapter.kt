@@ -216,7 +216,6 @@ internal class MessageListAdapter<ARGS : NavArgs>(
         private var currentViewState: MessageHolderViewState? = null
 
         private val onSphinxInteractionListener: SphinxUrlSpan.OnInteractionListener
-//        private val onPlayProgressInfoUpdateListener: MessageMediaPlayer.OnPlayProgressInfoUpdateListener
         init {
             binding.includeMessageHolderBubble.apply {
 
@@ -317,52 +316,6 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                             currentViewState?.bubbleAudioAttachment
                         )
                     }
-//                    onPlayProgressInfoUpdateListener = object: MessageMediaPlayer.OnPlayProgressInfoUpdateListener {
-//                        override fun onPlayProgressUpdate(millisUntilFinished: Long) {
-//                            onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-//                                textViewAttachmentAudioRemainingDuration.text = millisUntilFinished.toTimestamp()
-//                                textViewAttachmentPlayPauseButton.text = getString(R.string.material_icon_name_pause_button)
-//                                seekBarAttachmentAudio.progress = viewModel.messageMediaPlayer.currentPosition
-//                                viewModel.messageMediaPlayer.filePath?.let { filePath ->
-//                                    mediaPlayerViewModel.updateCurrentPosition(
-//                                        filePath,
-//                                        viewModel.messageMediaPlayer.currentPosition
-//                                    )
-//                                }
-//
-//                            }
-//                        }
-//
-//                        override fun onFinish() {
-//                            onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-//                                textViewAttachmentAudioRemainingDuration.text = viewModel.messageMediaPlayer.duration.toLong().toTimestamp()
-//                                textViewAttachmentPlayPauseButton.text = getString(R.string.material_icon_name_play_button)
-//                                seekBarAttachmentAudio.progress = 0
-//
-//                                viewModel.messageMediaPlayer.pause()
-//                                viewModel.messageMediaPlayer.seekTo(0)
-//                                viewModel.messageMediaPlayer.filePath?.let { filePath ->
-//                                    mediaPlayerViewModel.updateCurrentPosition(filePath, 0)
-//                                }
-//                            }
-//                        }
-//
-//                        override fun onPause() {
-//                            onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-//                                textViewAttachmentPlayPauseButton.text = getString(R.string.material_icon_name_play_button)
-//                            }
-//                        }
-//
-//                        override fun onPlay() {
-//                            onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-//                                textViewAttachmentPlayPauseButton.text = getString(R.string.material_icon_name_pause_button)
-//                                viewModel.messageMediaPlayer.initPlayProgressInfoUpdateWithTimer(
-//                                    seekBarAttachmentAudio.progress
-//                                )
-//                            }
-//                        }
-//                    }
-
                 }
 
             }
@@ -450,18 +403,12 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                 disposables,
                 viewModel.dispatchers,
                 audioPlayerController,
-//                mediaPlayerViewModel,
                 imageLoader,
                 viewModel.imageLoaderDefaults,
                 viewModel.memeServerTokenHandler,
-//                viewModel.memeInputStreamHandler,
-//                viewModel.mediaCacheHandler,
-//                viewModel.messageMediaPlayer,
-//                viewModel.repositoryMedia,
                 recyclerViewWidth,
                 viewState,
                 userColorsHelper,
-//                onPlayProgressInfoUpdateListener,
                 onSphinxInteractionListener
             )
 

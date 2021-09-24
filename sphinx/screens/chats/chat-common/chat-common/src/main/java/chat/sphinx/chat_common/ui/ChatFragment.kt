@@ -613,7 +613,6 @@ abstract class ChatFragment<
             onStopSupervisor,
             viewModel,
             audioPlayerViewModel,
-//            mediaPlayerViewModel,
             imageLoader,
             userColorsHelper
         )
@@ -951,14 +950,9 @@ abstract class ChatFragment<
                                 disposables,
                                 viewModel.dispatchers,
                                 audioPlayerViewModel,
-//                                mediaPlayerViewModel,
                                 imageLoader,
                                 viewModel.imageLoaderDefaults,
                                 viewModel.memeServerTokenHandler,
-//                                viewModel.memeInputStreamHandler,
-//                                viewModel.mediaCacheHandler,
-//                                viewModel.messageMediaPlayer,
-//                                viewModel.repositoryMedia,
                                 viewState.recyclerViewWidth,
                                 viewState.messageHolderViewState,
                                 userColorsHelper,

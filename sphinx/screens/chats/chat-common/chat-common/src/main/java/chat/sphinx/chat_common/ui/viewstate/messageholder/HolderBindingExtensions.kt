@@ -61,18 +61,12 @@ internal fun LayoutMessageHolderBinding.setView(
     disposables: ArrayList<Disposable>,
     dispatchers: CoroutineDispatchers,
     audioPlayerController: AudioPlayerController,
-//    mediaPlayerViewModel: MediaPlayerViewModel,
     imageLoader: ImageLoader<ImageView>,
     imageLoaderDefaults: ImageLoaderOptions,
     memeServerTokenHandler: MemeServerTokenHandler,
-//    memeInputStreamHandler: MemeInputStreamHandler,
-//    mediaCacheHandler: MediaCacheHandler,
-//    messageMediaPlayer: MessageMediaPlayer,
-//    repositoryMedia: RepositoryMedia,
     recyclerViewWidth: Px,
     viewState: MessageHolderViewState,
     userColorsHelper: UserColorsHelper,
-//    onPlayProgressInfoUpdateListener: MessageMediaPlayer.OnPlayProgressInfoUpdateListener? = null,
     onSphinxInteractionListener: SphinxUrlSpan.OnInteractionListener? = null,
 ) {
     for (job in holderJobs) {
@@ -176,104 +170,6 @@ internal fun LayoutMessageHolderBinding.setView(
                 holderJobs,
                 lifecycleScope
             )
-//            setBubbleAudioAttachment(viewState.bubbleAudioAttachment) { layoutMessageAudioAttachment, url, media ->
-//                lifecycleScope.launch(dispatchers.mainImmediate) {
-//                    layoutMessageAudioAttachment.apply {
-//
-//                        val filePath: String? = media?.localFile?.absolutePath ?: media?.retrieveRemoteMediaInputStream(
-//                                url,
-//                                memeServerTokenHandler,
-//                                memeInputStreamHandler
-//                            )?.let { inputStream ->
-//                                // TODO: Determine extension from media.mediaType
-//                                val localAudioFile = mediaCacheHandler.createAudioFile(".m4a")
-//                                mediaCacheHandler.copyTo(inputStream, localAudioFile)
-//                                repositoryMedia.updateLocalFile(
-//                                    localAudioFile,
-//                                    viewState.message.id
-//                                )
-//                                localAudioFile.absolutePath
-//                            }
-//
-//                        if (filePath == null) {
-//                            // Filed to load a file
-//                            progressBarAttachmentAudioFileLoading.gone
-//                            textViewAttachmentAudioFailure.visible
-//                        } else {
-//                            if (messageMediaPlayer.filePath == filePath) {
-//                                // The messageMediaPlayer has loaded this specific file already
-//                                seekBarAttachmentAudio.max = messageMediaPlayer.duration
-//                                seekBarAttachmentAudio.progress = messageMediaPlayer.currentPosition
-//                                textViewAttachmentAudioRemainingDuration.text = messageMediaPlayer.duration.toLong().toTimestamp()
-//                                progressBarAttachmentAudioFileLoading.gone
-//                                textViewAttachmentPlayPauseButton.visible
-//
-//                                messageMediaPlayer.onPlayProgressInfoUpdateListener = onPlayProgressInfoUpdateListener
-//                                if (messageMediaPlayer.isPlaying) {
-//                                    onPlayProgressInfoUpdateListener?.onPlay()
-//                                } else {
-//                                    textViewAttachmentPlayPauseButton.text = getString(R.string.material_icon_name_play_button)
-//                                }
-//
-//                            } else {
-//                               mediaPlayerViewModel.loadMedia(filePath, layoutMessageAudioAttachment)
-//                            }
-//
-//                            textViewAttachmentPlayPauseButton.setOnClickListener {
-//                                if (messageMediaPlayer.filePath != filePath) {
-//
-//                                    progressBarAttachmentAudioFileLoading.visible
-//                                    textViewAttachmentAudioFailure.gone
-//                                    messageMediaPlayer.reset()
-//
-//                                    messageMediaPlayer.apply {
-//                                        try {
-//                                            setOnPreparedListener {
-//                                                mediaPlayerViewModel.getCurrentPosition(filePath)?.let { currentPosition ->
-//                                                    messageMediaPlayer.seekTo(currentPosition)
-//                                                    seekBarAttachmentAudio.progress = currentPosition
-//                                                }
-//
-//                                                messageMediaPlayer.onPlayProgressInfoUpdateListener = onPlayProgressInfoUpdateListener
-//                                                seekBarAttachmentAudio.max = duration
-//                                                textViewAttachmentAudioRemainingDuration.text = duration.toLong().toTimestamp()
-//                                                progressBarAttachmentAudioFileLoading.gone
-//                                                textViewAttachmentPlayPauseButton.visible
-//
-//                                                start()
-//                                            }
-//
-//                                            setOnErrorListener { mp, what, extra ->
-//                                                progressBarAttachmentAudioFileLoading.gone
-//                                                textViewAttachmentAudioFailure.visible
-//
-//                                                return@setOnErrorListener true
-//                                            }
-//                                            load(filePath)
-//
-//
-//                                        } catch (e: IOException) {
-//                                            progressBarAttachmentAudioFileLoading.gone
-//                                            textViewAttachmentAudioFailure.visible
-//                                        }
-//
-//                                    }
-//                                }
-//
-//
-//                                if (messageMediaPlayer.isPlaying) {
-//                                    messageMediaPlayer.pause()
-//                                } else {
-//                                    messageMediaPlayer.start()
-//                                }
-//                            }
-//                        }
-//
-//                    }
-//                }.let { job ->
-//                    holderJobs.add(job)
-//                }
-//            }
             setUnsupportedMessageTypeLayout(viewState.unsupportedMessageType)
             setBubbleMessageLayout(viewState.bubbleMessage, onSphinxInteractionListener)
             setBubblePaidMessageLayout(
@@ -1257,32 +1153,6 @@ internal inline fun LayoutMessageTypeAttachmentAudioBinding.setAudioAttachmentLa
         }
     }
 }
-
-//@MainThread
-//@Suppress("NOTHING_TO_INLINE")
-//internal inline fun LayoutMessageHolderBinding.setBubbleAudioAttachment(
-//    audioAttachment: LayoutState.Bubble.ContainerSecond.AudioAttachment?,
-//    loadAudio: (LayoutMessageTypeAttachmentAudioBinding, String, MessageMedia?) -> Unit,
-//) {
-//    includeMessageHolderBubble.includeMessageTypeAudioAttachment.apply {
-//        if (audioAttachment == null) {
-//            root.gone
-//        } else {
-//            root.visible
-//
-//            seekBarAttachmentAudio.progress = 0
-//            progressBarAttachmentAudioFileLoading.visible
-//            textViewAttachmentPlayPauseButton.gone
-//            textViewAttachmentAudioFailure.gone
-//
-//            loadAudio(
-//                this,
-//                audioAttachment.url,
-//                audioAttachment.media
-//            )
-//        }
-//    }
-//}
 
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
