@@ -2,6 +2,7 @@ package chat.sphinx.chat_common.ui.viewstate.messageholder
 
 import chat.sphinx.concept_link_preview.model.*
 import chat.sphinx.wrapper_chat.ChatType
+import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.lightning.LightningNodeDescriptor
 import chat.sphinx.wrapper_common.lightning.Sat
@@ -25,6 +26,16 @@ internal sealed class LayoutState private constructor() {
         val showFailedContainer: Boolean,
         val showLockIcon: Boolean,
         val timestamp: String,
+    ): LayoutState() {
+        val showReceived: Boolean
+            get() = !showSent
+    }
+
+    data class InvoiceExpirationHeader(
+        val isExpired: Boolean,
+        val isPaid: Boolean,
+        val expirationTimestamp: String?,
+        val showSent: Boolean,
     ): LayoutState() {
         val showReceived: Boolean
             get() = !showSent
@@ -74,6 +85,20 @@ internal sealed class LayoutState private constructor() {
             data class DirectPayment(
                 val showSent: Boolean,
                 val amount: Sat
+            ): ContainerSecond() {
+                val showReceived: Boolean
+                    get() = !showSent
+
+                val unitLabel: String
+                    get() = amount.unit
+            }
+
+            data class Invoice(
+                val showSent: Boolean,
+                val amount: Sat,
+                val text: String,
+                val isExpired: Boolean,
+                val isPaid: Boolean,
             ): ContainerSecond() {
                 val showReceived: Boolean
                     get() = !showSent

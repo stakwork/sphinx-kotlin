@@ -74,7 +74,6 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-
     <!-- Header for Sent messages -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/layout_constraint_message_status_sent_container"

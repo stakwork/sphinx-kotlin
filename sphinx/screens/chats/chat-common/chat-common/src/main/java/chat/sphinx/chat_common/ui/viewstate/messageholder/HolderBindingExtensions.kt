@@ -2,6 +2,7 @@ package chat.sphinx.chat_common.ui.viewstate.messageholder
 
 import android.graphics.Color
 import android.view.Gravity
+import android.view.View
 import android.widget.ImageView
 import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
@@ -33,6 +34,7 @@ import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.resources.*
 import chat.sphinx.resources.databinding.LayoutChatImageSmallInitialHolderBinding
 import chat.sphinx.wrapper_chat.ChatType
+import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_common.lightning.*
 import chat.sphinx.wrapper_common.thumbnailUrl
 import chat.sphinx.wrapper_common.util.getInitials
@@ -107,6 +109,8 @@ internal fun LayoutMessageHolderBinding.setView(
             lifecycleScope,
             userColorsHelper,
         )
+        setInvoiceExpirationHeader(viewState.invoiceExpirationHeader)
+
         setBubbleBackground(viewState, recyclerViewWidth)
         setDeletedMessageLayout(viewState.deletedMessage)
         setGroupActionIndicatorLayout(viewState.groupActionIndicator)
@@ -189,7 +193,7 @@ internal fun LayoutMessageHolderBinding.setView(
             setBubbleCallInvite(viewState.bubbleCallInvite)
             setBubbleBotResponse(viewState.bubbleBotResponse)
             setBubbleDirectPaymentLayout(viewState.bubbleDirectPayment)
-            setBubbleDirectPaymentLayout(viewState.bubbleDirectPayment)
+            setBubbleInvoiceLayout(viewState.bubbleInvoice)
             setBubblePodcastBoost(viewState.bubblePodcastBoost)
             setBubblePaidMessageReceivedDetailsLayout(
                 viewState.bubblePaidMessageReceivedDetails,
@@ -375,6 +379,58 @@ internal inline fun LayoutMessageHolderBinding.setBubbleDirectPaymentLayout(
     }
 }
 
+@MainThread
+@Suppress("NOTHING_TO_INLINE")
+internal inline fun LayoutMessageHolderBinding.setBubbleInvoiceLayout(
+    invoice: LayoutState.Bubble.ContainerSecond.Invoice?
+) {
+    includeMessageHolderBubble.includeMessageTypeInvoice.apply {
+        if (invoice == null) {
+            root.gone
+        } else {
+            root.visible
+
+            layoutConstraintPayButtonContainer.goneIfFalse(!invoice.isExpired && !invoice.isPaid && invoice.showReceived)
+            layoutConstraintInvoiceDashedBorder.goneIfFalse(!invoice.isExpired && !invoice.isPaid)
+
+            receivedBubbleArrow.visibility = View.INVISIBLE
+            sentBubbleArrow.visibility = View.INVISIBLE
+
+            viewInvoiceDashedBorder.background = AppCompatResources.getDrawable(
+                root.context,
+                if (invoice.showReceived) R.drawable.background_received_pending_invoice else R.drawable.background_sent_pending_invoice
+            )
+
+            imageViewQrIconLeading.setImageDrawable(
+                AppCompatResources.getDrawable(root.context,
+                    if (invoice.isExpired) {
+                        R.drawable.qr_code_error
+                    } else {
+                        R.drawable.ic_qr_code
+                    }
+                )
+            )
+
+            textViewInvoiceAmountNumber.text = invoice.amount.asFormattedString()
+            textViewInvoiceAmountUnit.text = invoice.unitLabel
+
+            textViewInvoiceMessage.text = invoice.text
+            textViewInvoiceMessage.goneIfFalse(invoice.text.isNotEmpty())
+
+            val amountAndUnitColor = ContextCompat.getColor(root.context,
+                if (invoice.isExpired) {
+                    if (invoice.showReceived) R.color.washedOutReceivedText else R.color.washedOutSentText
+                } else {
+                    R.color.text
+                }
+            )
+
+            textViewInvoiceAmountNumber.setTextColor(amountAndUnitColor)
+            textViewInvoiceAmountUnit.setTextColor(amountAndUnitColor)
+        }
+    }
+}
+
 // TODO: Refactor setting of spaces out of this extension function
 @MainThread
 internal fun LayoutMessageHolderBinding.setBubbleBackground(
@@ -448,20 +504,26 @@ internal fun LayoutMessageHolderBinding.setBubbleBackground(
             root.context.resources.getDimensionPixelSize(R.dimen.message_type_boost_width)
         } ?: 0
 
-        var bubbleWidth: Int = (viewState.bubbleMessage?.text?.let { text ->
-            if (viewState.message.shouldAdaptBubbleWidth) {
-                (includeMessageHolderBubble.textViewMessageText.paint.measureText(text) + (defaultMargins * 2)).toInt()
-            } else {
+        var bubbleWidth: Int = when {
+            viewState.message.shouldAdaptBubbleWidth -> {
+                viewState.bubbleMessage?.text?.let { text ->
+                    (includeMessageHolderBubble.textViewMessageText.paint.measureText(text) + (defaultMargins * 2)).toInt()
+                } ?: bubbleFixedWidth
+            }
+            viewState.message.isPodcastBoost -> {
+                root.context.resources.getDimensionPixelSize(R.dimen.message_type_podcast_boost_width)
+            }
+            viewState.message.isExpiredInvoice -> {
+                root.context.resources.getDimensionPixelSize(R.dimen.message_type_expired_invoice_width)
+            }
+            else -> {
                 bubbleFixedWidth
             }
-        } ?: viewState.bubblePodcastBoost?.let {
-            root.context.resources.getDimensionPixelSize(R.dimen.message_type_podcast_boost_width)
-        } ?: bubbleFixedWidth)
+        }
 
         bubbleWidth = bubbleWidth
             .coerceAtLeast(messageReactionsWidth)
             .coerceAtMost(bubbleFixedWidth)
-
 
         @Exhaustive
         when (viewState) {
@@ -540,6 +602,37 @@ internal inline fun LayoutMessageHolderBinding.setStatusHeader(
                 textViewMessageStatusReceivedTimestamp.text = statusHeader.timestamp
                 textViewMessageStatusReceivedLockIcon.goneIfFalse(statusHeader.showLockIcon)
             }
+        }
+    }
+}
+
+@MainThread
+@Suppress("NOTHING_TO_INLINE")
+internal inline fun LayoutMessageHolderBinding.setInvoiceExpirationHeader(
+    invoiceExpirationHeader: LayoutState.InvoiceExpirationHeader?
+) {
+    includeInvoiceExpirationHeader.apply {
+        if (invoiceExpirationHeader == null) {
+            root.gone
+        } else {
+            root.visible
+
+            layoutConstraintInvoiceExpirationReceivedContainer.goneIfFalse(!invoiceExpirationHeader.isPaid && invoiceExpirationHeader.showReceived)
+            layoutConstraintInvoiceExpirationSentContainer.goneIfFalse(!invoiceExpirationHeader.isPaid && invoiceExpirationHeader.showSent)
+
+            val expirationText = if (invoiceExpirationHeader.isExpired) {
+                getString(R.string.request_expired)
+            } else if (!invoiceExpirationHeader.isPaid) {
+                root.context.getString(
+                    R.string.request_expiration,
+                    invoiceExpirationHeader.expirationTimestamp ?: "-"
+                )
+            } else {
+                ""
+            }
+
+            textViewInvoiceExpirationReceivedText.text = expirationText
+            textViewInvoiceExpirationSentText.text = expirationText
         }
     }
 }

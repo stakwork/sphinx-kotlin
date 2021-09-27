@@ -41,6 +41,17 @@
         app:layout_constraintTop_toTopOf="parent"
         tools:visibility="visible" />
 
+    <include
+        android:id="@+id/include_invoice_expiration_header"
+        layout="@layout/layout_invoice_expiration_header"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/default_half_layout_margin"
+        app:layout_constraintEnd_toStartOf="@+id/space_message_holder_right"
+        app:layout_constraintStart_toEndOf="@+id/space_message_holder_left"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:visibility="visible" />
+
     <!-- width is programmatically set depending on sender -->
     <Space
         android:id="@+id/space_message_holder_left"

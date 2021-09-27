@@ -9,6 +9,7 @@ import chat.sphinx.wrapper_chat.isConversation
 import chat.sphinx.wrapper_chat.isTribeOwnedByAccount
 import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.chatTimeFormat
+import chat.sphinx.wrapper_common.invoiceExpirationTimeFormat
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.isProvisionalMessage
 import chat.sphinx.wrapper_contact.Contact
@@ -60,7 +61,6 @@ internal sealed class MessageHolderViewState(
         val unsupportedMessageTypes: List<MessageType> by lazy {
             listOf(
                 MessageType.Attachment,
-                MessageType.Invoice,
                 MessageType.Payment,
                 MessageType.GroupAction.TribeDelete,
             )
@@ -98,6 +98,19 @@ internal sealed class MessageHolderViewState(
         }
     }
 
+    val invoiceExpirationHeader: LayoutState.InvoiceExpirationHeader? by lazy(LazyThreadSafetyMode.NONE) {
+        if (message.type.isInvoice()) {
+            LayoutState.InvoiceExpirationHeader(
+                message.isExpiredInvoice,
+                message.status.isConfirmed(),
+                message.expirationDate?.invoiceExpirationTimeFormat(),
+                this is Sent,
+            )
+        } else {
+            null
+        }
+    }
+
     val deletedMessage: LayoutState.DeletedMessage? by lazy(LazyThreadSafetyMode.NONE) {
         if (message.status.isDeleted()) {
             LayoutState.DeletedMessage(
@@ -112,6 +125,20 @@ internal sealed class MessageHolderViewState(
     val bubbleDirectPayment: LayoutState.Bubble.ContainerSecond.DirectPayment? by lazy(LazyThreadSafetyMode.NONE) {
         if (message.type.isDirectPayment()) {
             LayoutState.Bubble.ContainerSecond.DirectPayment(showSent = this is Sent, amount = message.amount)
+        } else {
+            null
+        }
+    }
+
+    val bubbleInvoice: LayoutState.Bubble.ContainerSecond.Invoice? by lazy(LazyThreadSafetyMode.NONE) {
+        if (message.type.isInvoice()) {
+            LayoutState.Bubble.ContainerSecond.Invoice(
+                showSent = this is Sent,
+                amount = message.amount,
+                text = message.retrieveInvoiceTextToShow() ?: "",
+                isExpired = message.isExpiredInvoice,
+                isPaid = message.status.isConfirmed(),
+            )
         } else {
             null
         }

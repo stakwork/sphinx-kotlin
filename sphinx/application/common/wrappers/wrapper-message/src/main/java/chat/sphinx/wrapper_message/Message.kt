@@ -1,8 +1,6 @@
 package chat.sphinx.wrapper_message
 
-import chat.sphinx.wrapper_common.DateTime
-import chat.sphinx.wrapper_common.PhotoUrl
-import chat.sphinx.wrapper_common.Seen
+import chat.sphinx.wrapper_common.*
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.LightningPaymentHash
@@ -31,7 +29,19 @@ inline fun Message.retrieveTextToShow(): String? =
         if (type.isBotRes()) {
             return null
         }
+        if (type.isInvoice()) {
+            return null
+        }
         decrypted.value
+    }
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun Message.retrieveInvoiceTextToShow(): String? =
+    messageContentDecrypted?.let { decrypted ->
+        if (type.isInvoice() && !isExpiredInvoice) {
+            return decrypted.value
+        }
+        return null
     }
 
 @Suppress("NOTHING_TO_INLINE")
@@ -228,6 +238,12 @@ inline val Message.isSphinxCallLink: Boolean
 
 inline val Message.isAudioMessage: Boolean
     get() = type.isAttachment() && messageMedia?.mediaType?.isAudio == true
+
+inline val Message.isPodcastBoost: Boolean
+    get() = type.isBoost() && podBoost != null
+
+inline val Message.isExpiredInvoice: Boolean
+    get() = type.isInvoice() && !status.isConfirmed() && expirationDate != null && expirationDate!!.time < System.currentTimeMillis()
 
 abstract class Message {
     abstract val id: MessageId

@@ -67,6 +67,10 @@ inline fun DateTime.chatTimeFormat(
     }
 
 @Suppress("NOTHING_TO_INLINE", "SpellCheckingInspection")
+inline fun DateTime.invoiceExpirationTimeFormat(): String =
+    DateTime.getFormathmma().format(value)
+
+@Suppress("NOTHING_TO_INLINE", "SpellCheckingInspection")
 inline fun DateTime.eeemmddhmma(): String =
     DateTime.getFormateeemmddhmma().format(value)
 

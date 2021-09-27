@@ -14,6 +14,8 @@
     <string name="join_call_header_label_text">Unirse mediante…</string>
 
     <string name="failed_message">Mensaje Fallido</string>
+    <string name="request_expired">Solicitud caducada</string>
+    <string name="request_expiration">Expira: %s</string>
 
     <string name="send_message_empty_destination_error">Contacto o Chat requeridos</string>
     <string name="send_message_empty_content_error">Mensaje o Archivo adjunto requeridos</string>
