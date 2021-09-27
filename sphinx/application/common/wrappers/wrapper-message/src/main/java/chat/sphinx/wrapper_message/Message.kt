@@ -197,7 +197,7 @@ inline fun Message.hasSameSenderThanMessage(message: Message): Boolean {
 @Suppress("NOTHING_TO_INLINE")
 inline fun Message.shouldAvoidGrouping(): Boolean {
     return status.isPending() || status.isFailed() || status.isDeleted() ||
-            type.isInvoice() || type.isPayment() || type.isGroupAction()
+            type.isInvoice() || type.isInvoicePayment() || type.isGroupAction()
 }
 
 //Message Actions

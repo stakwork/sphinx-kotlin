@@ -14,12 +14,15 @@
     <string name="join_call_header_label_text">...でコールに参加</string>
 
     <string name="failed_message">送信に失敗したメッセージ</string>
-    <string name="request_expired">REQUEST EXPIRED</string>
-    <string name="request_expiration">EXPIRES AT: %s</string>
 
     <string name="send_message_empty_destination_error">Contact or Chat is required</string>
     <string name="send_message_empty_content_error">Message or Attachment is required</string>
     <string name="send_message_empty_price_error">Price is required</string>
+
+    <!--  Message type invoices  -->
+    <string name="request_expired">REQUEST EXPIRED</string>
+    <string name="request_expiration">EXPIRES AT: %s</string>
+    <string name="invoice_paid_on">Invoice paid on %s</string>
 
     <!--  Message type placeholder display names  -->
     <string name="placeholder_display_name_message_type_attachment">添付メッセージ</string>

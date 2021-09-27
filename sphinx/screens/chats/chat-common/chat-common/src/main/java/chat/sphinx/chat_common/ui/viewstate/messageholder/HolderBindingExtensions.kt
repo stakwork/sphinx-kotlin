@@ -113,6 +113,7 @@ internal fun LayoutMessageHolderBinding.setView(
 
         setBubbleBackground(viewState, recyclerViewWidth)
         setDeletedMessageLayout(viewState.deletedMessage)
+        setInvoicePaymentLayout(viewState.invoicePayment)
         setGroupActionIndicatorLayout(viewState.groupActionIndicator)
 
         if (viewState.background !is BubbleBackground.Gone) {
@@ -390,11 +391,13 @@ internal inline fun LayoutMessageHolderBinding.setBubbleInvoiceLayout(
         } else {
             root.visible
 
+            if (!invoice.isExpired && !invoice.isPaid) {
+                receivedBubbleArrow.visibility = View.INVISIBLE
+                sentBubbleArrow.visibility = View.INVISIBLE
+            }
+
             layoutConstraintPayButtonContainer.goneIfFalse(!invoice.isExpired && !invoice.isPaid && invoice.showReceived)
             layoutConstraintInvoiceDashedBorder.goneIfFalse(!invoice.isExpired && !invoice.isPaid)
-
-            receivedBubbleArrow.visibility = View.INVISIBLE
-            sentBubbleArrow.visibility = View.INVISIBLE
 
             viewInvoiceDashedBorder.background = AppCompatResources.getDrawable(
                 root.context,
@@ -657,6 +660,29 @@ internal inline fun LayoutMessageHolderBinding.setDeletedMessageLayout(
             textViewDeletedMessageTimestamp.text = deletedMessage.timestamp
             textViewDeletedMessageTimestamp.gravity = gravity
             textViewDeleteMessageLabel.gravity = gravity
+        }
+    }
+}
+
+@MainThread
+@Suppress("NOTHING_TO_INLINE")
+internal inline fun LayoutMessageHolderBinding.setInvoicePaymentLayout(
+    invoicePayment: LayoutState.InvoicePayment?
+) {
+    includeMessageTypeInvoicePayment.apply {
+        if (invoicePayment == null) {
+            root.gone
+        } else {
+            root.visible
+
+            val gravity = if (invoicePayment.gravityStart) {
+                Gravity.START
+            } else {
+                Gravity.END
+            }
+
+            textViewInvoicePaymentDate.text = root.context.getString(R.string.invoice_paid_on, invoicePayment.paymentDateString)
+            textViewInvoicePaymentDate.gravity = gravity
         }
     }
 }

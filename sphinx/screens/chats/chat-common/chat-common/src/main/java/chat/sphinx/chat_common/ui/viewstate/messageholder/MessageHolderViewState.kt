@@ -10,6 +10,7 @@ import chat.sphinx.wrapper_chat.isTribeOwnedByAccount
 import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.chatTimeFormat
 import chat.sphinx.wrapper_common.invoiceExpirationTimeFormat
+import chat.sphinx.wrapper_common.invoicePaymentDateFormat
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.isProvisionalMessage
 import chat.sphinx.wrapper_contact.Contact
@@ -82,7 +83,10 @@ internal sealed class MessageHolderViewState(
     }
 
     val statusHeader: LayoutState.MessageStatusHeader? by lazy(LazyThreadSafetyMode.NONE) {
-        if (background is BubbleBackground.First) {
+        val isFirstBubble = (background is BubbleBackground.First)
+        val isInvoicePayment = (message.type.isInvoicePayment() && message.status.isConfirmed())
+
+        if (isFirstBubble || isInvoicePayment) {
             LayoutState.MessageStatusHeader(
                 if (chat.type.isConversation()) null else message.senderAlias?.value,
                 if (initialHolder is InitialHolderViewState.Initials) initialHolder.colorKey else message.getColorKey(),
@@ -116,6 +120,17 @@ internal sealed class MessageHolderViewState(
             LayoutState.DeletedMessage(
                 gravityStart = this is Received,
                 timestamp = message.date.chatTimeFormat()
+            )
+        } else {
+            null
+        }
+    }
+
+    val invoicePayment: LayoutState.InvoicePayment? by lazy(LazyThreadSafetyMode.NONE) {
+        if (message.type.isInvoicePayment()) {
+            LayoutState.InvoicePayment(
+                gravityStart = this is Received,
+                paymentDateString = message.date.invoicePaymentDateFormat()
             )
         } else {
             null

@@ -141,7 +141,7 @@ sealed class DashboardChat {
                     }
 
                 }
-                message.type.isPayment() || message.type.isDirectPayment() -> {
+                message.type.isInvoicePayment() || message.type.isDirectPayment() -> {
                     val amount: String = message.amount
                         .asFormattedString(separator = ',', appendUnit = true)
 

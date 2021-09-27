@@ -12,6 +12,7 @@
     <dimen name="chat_header_exit_tribe_width">28sp</dimen>
     <dimen name="chat_header_mute_padding_horizontal">4dp</dimen>
     <dimen name="chat_message_inner_padding">8dp</dimen>
+    <dimen name="chat_message_half_inner_padding">4dp</dimen>
     <dimen name="chat_message_rounded_corner_radius">9dp</dimen>
 
     <dimen name="chat_message_attachment_price_text_size">12sp</dimen>

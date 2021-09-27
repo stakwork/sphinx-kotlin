@@ -370,6 +370,9 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                                     message.status.isDeleted() -> {
                                         BubbleBackground.Gone(setSpacingEqual = false)
                                     }
+                                    message.type.isInvoicePayment() -> {
+                                        BubbleBackground.Gone(setSpacingEqual = false)
+                                    }
                                     message.type.isGroupAction() -> {
                                         BubbleBackground.Gone(setSpacingEqual = true)
                                     }
@@ -426,6 +429,9 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                                     isDeleted -> {
                                         BubbleBackground.Gone(setSpacingEqual = false)
                                     }
+                                    message.type.isInvoicePayment() -> {
+                                        BubbleBackground.Gone(setSpacingEqual = false)
+                                    }
                                     message.type.isGroupAction() -> {
                                         BubbleBackground.Gone(setSpacingEqual = true)
                                     }
@@ -434,8 +440,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                                     }
                                 },
                                 initialHolder = when {
-                                    isDeleted ||
-                                            message.type.isGroupAction() -> {
+                                    isDeleted || message.type.isGroupAction() -> {
                                         InitialHolderViewState.None
                                     }
                                     else -> {

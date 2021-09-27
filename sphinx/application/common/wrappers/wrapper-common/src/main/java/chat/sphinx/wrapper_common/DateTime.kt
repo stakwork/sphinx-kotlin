@@ -71,6 +71,10 @@ inline fun DateTime.invoiceExpirationTimeFormat(): String =
     DateTime.getFormathmma().format(value)
 
 @Suppress("NOTHING_TO_INLINE", "SpellCheckingInspection")
+inline fun DateTime.invoicePaymentDateFormat(): String =
+    DateTime.getFormatMMMEEEdd().format(value)
+
+@Suppress("NOTHING_TO_INLINE", "SpellCheckingInspection")
 inline fun DateTime.eeemmddhmma(): String =
     DateTime.getFormateeemmddhmma().format(value)
 
@@ -109,6 +113,7 @@ value class DateTime(val value: Date) {
         private const val FORMAT_EEE_H_MM_A = "EEE h:mm a"
         private const val FORMAT_MMM = "MMM"
         private const val FORMAT_EEE_DD = "EEE dd"
+        private const val FORMAT_MMM_EEE_DD = "EEE, MMM dd"
         private const val FORMAT_EEE_MM_DD_H_MM_A = "EEE MMM dd, h:mm a"
         private const val FORMAT_DD_MMM_HH_MM = "dd MMM, HH:mm"
         private const val FORMAT_MMM_DD_YYYY = "MMM dd, yyyy"
@@ -256,6 +261,21 @@ value class DateTime(val value: Date) {
                     .also {
                         it.timeZone = TimeZone.getDefault()
                         formatEEEdd = it
+                    }
+            }
+
+        @Volatile
+        private var formatMMMEEEdd: SimpleDateFormat? = null
+        fun getFormatMMMEEEdd(): SimpleDateFormat =
+            formatMMMEEEdd?.also {
+                it.timeZone = TimeZone.getDefault()
+            } ?: synchronized(this) {
+                formatMMMEEEdd?.also {
+                    it.timeZone = TimeZone.getDefault()
+                } ?: SimpleDateFormat(FORMAT_MMM_EEE_DD, Locale.getDefault())
+                    .also {
+                        it.timeZone = TimeZone.getDefault()
+                        formatMMMEEEdd = it
                     }
             }
 

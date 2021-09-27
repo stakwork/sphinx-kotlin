@@ -53,6 +53,11 @@ internal sealed class LayoutState private constructor() {
         val timestamp: String,
     ): LayoutState()
 
+    data class InvoicePayment(
+        val gravityStart: Boolean,
+        val paymentDateString: String,
+    ): LayoutState()
+
     sealed class Bubble private constructor(): LayoutState() {
 
         sealed class ContainerFirst private constructor(): Bubble() {

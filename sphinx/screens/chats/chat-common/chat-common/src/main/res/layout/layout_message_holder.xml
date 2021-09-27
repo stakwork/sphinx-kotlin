@@ -26,6 +26,7 @@
         android:layout_width="@dimen/message_holder_in_photo_holder_xy"
         android:layout_height="@dimen/message_holder_in_photo_holder_xy"
         app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         tools:visibility="visible" />
 
 
@@ -36,8 +37,10 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/default_half_layout_margin"
-        app:layout_constraintEnd_toStartOf="@+id/sent_bubble_arrow"
-        app:layout_constraintStart_toEndOf="@+id/received_bubble_arrow"
+        android:layout_marginStart="44dp"
+        android:layout_marginEnd="6dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:visibility="visible" />
 
@@ -83,6 +86,16 @@
         app:layout_constraintEnd_toStartOf="@+id/space_message_holder_right"
         app:layout_constraintStart_toEndOf="@+id/space_message_holder_left"
         app:layout_constraintTop_toTopOf="parent"
+        tools:visibility="gone" />
+
+    <include
+        android:id="@+id/include_message_type_invoice_payment"
+        layout="@layout/layout_message_type_invoice_payment"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toStartOf="@+id/space_message_holder_right"
+        app:layout_constraintStart_toEndOf="@+id/space_message_holder_left"
+        app:layout_constraintTop_toBottomOf="@+id/include_message_status_header"
         tools:visibility="gone" />
 
     <include
