@@ -34,6 +34,7 @@ import chat.sphinx.chat_common.ui.viewstate.footer.FooterViewState
 import chat.sphinx.chat_common.ui.viewstate.header.ChatHeaderViewState
 import chat.sphinx.chat_common.ui.viewstate.menu.ChatMenuViewState
 import chat.sphinx.chat_common.ui.viewstate.messageholder.BubbleBackground
+import chat.sphinx.chat_common.ui.viewstate.messageholder.InvoiceLinesHolderViewState
 import chat.sphinx.chat_common.ui.viewstate.messageholder.LayoutState
 import chat.sphinx.chat_common.ui.viewstate.messageholder.MessageHolderViewState
 import chat.sphinx.chat_common.ui.viewstate.messagereply.MessageReplyViewState
@@ -347,6 +348,8 @@ abstract class ChatViewModel<ARGS: NavArgs>(
             withContext(default) {
 
                 var groupingDate: DateTime? = null
+                var sentPaidInvoicesCount = 0
+                var receivedPaidInvoicesCount = 0
 
                 for ((index, message) in messages.withIndex()) {
 
@@ -362,11 +365,24 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 
                     groupingDate = groupingDateAndBubbleBackground.first
 
-                    val isOutgoing = message.sender == chat.contactIds.firstOrNull()
+                    val sent = message.sender == chat.contactIds.firstOrNull()
+
+                    if (message.type.isInvoicePayment()) {
+                        if (sent) {
+                            receivedPaidInvoicesCount -= 1
+                        } else {
+                            sentPaidInvoicesCount -= 1
+                        }
+                    }
+
+                    val invoiceLinesHolderViewState = InvoiceLinesHolderViewState(
+                        sentPaidInvoicesCount > 0,
+                        receivedPaidInvoicesCount > 0
+                    )
 
                     if (
-                        (isOutgoing && !message.isPaidInvoice) ||
-                        (!isOutgoing && message.isPaidInvoice)
+                        (sent && !message.isPaidInvoice) ||
+                        (!sent && message.isPaidInvoice)
                     ) {
 
                         newList.add(
@@ -387,6 +403,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                                         groupingDateAndBubbleBackground.second
                                     }
                                 },
+                                invoiceLinesHolderViewState = invoiceLinesHolderViewState,
                                 messageSenderInfo = { messageCallback ->
                                     when {
                                         messageCallback.sender == chat.contactIds.firstOrNull() -> {
@@ -446,6 +463,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                                         groupingDateAndBubbleBackground.second
                                     }
                                 },
+                                invoiceLinesHolderViewState = invoiceLinesHolderViewState,
                                 initialHolder = when {
                                     isDeleted || message.type.isGroupAction() -> {
                                         InitialHolderViewState.None
@@ -491,6 +509,14 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                                 }
                             )
                         )
+                    }
+
+                    if (message.isPaidInvoice) {
+                        if (sent) {
+                            sentPaidInvoicesCount += 1
+                        } else {
+                            receivedPaidInvoicesCount += 1
+                        }
                     }
                 }
             }

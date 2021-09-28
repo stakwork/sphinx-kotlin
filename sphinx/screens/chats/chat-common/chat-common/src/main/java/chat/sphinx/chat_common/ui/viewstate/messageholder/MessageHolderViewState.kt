@@ -50,6 +50,7 @@ internal sealed class MessageHolderViewState(
     val message: Message,
     chat: Chat,
     val background: BubbleBackground,
+    val invoiceLinesHolderViewState: InvoiceLinesHolderViewState,
     val initialHolder: InitialHolderViewState,
     private val messageSenderInfo: (Message) -> Triple<PhotoUrl?, ContactAlias?, String>,
     private val accountOwner: () -> Contact,
@@ -263,13 +264,6 @@ internal sealed class MessageHolderViewState(
                 null
             }
         }
-//        message.retrieveAudioUrlAndMessageMedia()?.let { mediaData ->
-//            LayoutState.Bubble.ContainerSecond.AudioAttachment(
-//                mediaData.first,
-//                mediaData.second,
-//                (this is Received && message.isPaidPendingMessage)
-//            )
-//        }
     }
 
     val bubbleImageAttachment: LayoutState.Bubble.ContainerSecond.ImageAttachment? by lazy(LazyThreadSafetyMode.NONE) {
@@ -456,6 +450,7 @@ internal sealed class MessageHolderViewState(
         message: Message,
         chat: Chat,
         background: BubbleBackground,
+        invoiceLinesHolderViewState: InvoiceLinesHolderViewState,
         messageSenderInfo: (Message) -> Triple<PhotoUrl?, ContactAlias?, String>,
         accountOwner: () -> Contact,
         previewProvider: suspend (link: MessageLinkPreview) -> LayoutState.Bubble.ContainerThird.LinkPreview?,
@@ -465,6 +460,7 @@ internal sealed class MessageHolderViewState(
         message,
         chat,
         background,
+        invoiceLinesHolderViewState,
         InitialHolderViewState.None,
         messageSenderInfo,
         accountOwner,
@@ -477,6 +473,7 @@ internal sealed class MessageHolderViewState(
         message: Message,
         chat: Chat,
         background: BubbleBackground,
+        invoiceLinesHolderViewState: InvoiceLinesHolderViewState,
         initialHolder: InitialHolderViewState,
         messageSenderInfo: (Message) -> Triple<PhotoUrl?, ContactAlias?, String>,
         accountOwner: () -> Contact,
@@ -487,6 +484,7 @@ internal sealed class MessageHolderViewState(
         message,
         chat,
         background,
+        invoiceLinesHolderViewState,
         initialHolder,
         messageSenderInfo,
         accountOwner,

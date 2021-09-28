@@ -114,6 +114,11 @@ internal fun LayoutMessageHolderBinding.setView(
         setBubbleBackground(viewState, recyclerViewWidth)
         setDeletedMessageLayout(viewState.deletedMessage)
         setInvoicePaymentLayout(viewState.invoicePayment)
+        setInvoiceDottedLinesLayout(
+            viewState.invoiceLinesHolderViewState,
+            viewState.invoicePayment,
+            viewState.bubbleInvoice
+        )
         setGroupActionIndicatorLayout(viewState.groupActionIndicator)
 
         if (viewState.background !is BubbleBackground.Gone) {
@@ -401,6 +406,8 @@ internal inline fun LayoutMessageHolderBinding.setBubbleInvoiceLayout(
                 viewInvoiceBottomRightLine.goneIfFalse(invoice.showSent && invoice.isPaid)
             }
 
+            //Pending invoices shows with no bubble but dashed border line. Arrows can't be hide
+            //since status header is visible and they are needed for constarints
             if (!invoice.isExpired && !invoice.isPaid) {
                 receivedBubbleArrow.visibility = View.INVISIBLE
                 sentBubbleArrow.visibility = View.INVISIBLE
@@ -675,6 +682,38 @@ internal inline fun LayoutMessageHolderBinding.setDeletedMessageLayout(
 }
 
 @MainThread
+internal fun LayoutMessageHolderBinding.setInvoiceDottedLinesLayout(
+    linesHolderViewState: InvoiceLinesHolderViewState,
+    invoicePayment: LayoutState.InvoicePayment?,
+    invoice: LayoutState.Bubble.ContainerSecond.Invoice?
+) {
+    includeMessageInvoiceDottedLinesHolder.apply {
+        if (invoicePayment == null) {
+            layoutConstraintInvoicePaymentLeftLine.gone
+            layoutConstraintInvoicePaymentRightLine.gone
+        } else {
+            layoutConstraintInvoicePaymentLeftLine.goneIfFalse(invoicePayment.showReceived)
+            layoutConstraintInvoicePaymentRightLine.goneIfFalse(invoicePayment.showSent)
+        }
+    }
+
+    includeMessageInvoiceDottedLinesHolder.apply {
+        if (invoice == null) {
+            viewInvoiceBottomLeftLine.gone
+            viewInvoiceBottomRightLine.gone
+        } else {
+            viewInvoiceBottomLeftLine.goneIfFalse(invoice.showReceived && invoice.isPaid)
+            viewInvoiceBottomRightLine.goneIfFalse(invoice.showSent && invoice.isPaid)
+        }
+    }
+
+    includeMessageInvoiceDottedLinesHolder.apply {
+        viewInvoiceLeftLine.goneIfFalse(linesHolderViewState.left)
+        viewInvoiceRightLine.goneIfFalse(linesHolderViewState.right)
+    }
+}
+
+@MainThread
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun LayoutMessageHolderBinding.setInvoicePaymentLayout(
     invoicePayment: LayoutState.InvoicePayment?
@@ -682,18 +721,8 @@ internal inline fun LayoutMessageHolderBinding.setInvoicePaymentLayout(
     includeMessageTypeInvoicePayment.apply {
         if (invoicePayment == null) {
             root.gone
-
-            includeMessageInvoiceDottedLinesHolder.apply {
-                layoutConstraintInvoicePaymentLeftLine.gone
-                layoutConstraintInvoicePaymentRightLine.gone
-            }
         } else {
             root.visible
-
-            includeMessageInvoiceDottedLinesHolder.apply {
-                layoutConstraintInvoicePaymentLeftLine.goneIfFalse(invoicePayment.showReceived)
-                layoutConstraintInvoicePaymentRightLine.goneIfFalse(invoicePayment.showSent)
-            }
 
             val gravity = if (invoicePayment.showReceived) {
                 Gravity.START
